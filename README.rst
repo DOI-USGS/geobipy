@@ -119,6 +119,8 @@ Ross Brodie at Geoscience Australia has written a great forward modeller, gatdae
 
 So go ahead and "git clone" that repository.
 
+These instructions only describe how to install Ross' forward modeller, but it is part of a larger code base for deterministic inversion. If you wish to install his entire package, please follow his instructions.
+
 Prerequisites
 -------------
 
