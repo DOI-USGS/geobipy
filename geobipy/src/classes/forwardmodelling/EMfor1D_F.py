@@ -33,7 +33,7 @@ def fdem1dfwd(S, mod, z0):
 
     prd = np.zeros(S.nFreq, dtype=np.complex128)
 
-    fdemforward1d.forward1d(tid, S.freq, tHeight, rHeight, tMom, rx, S.dist, scl, mod.par, mod.thk, mod.chim, prd, S.nFreq,  mod.nCells[0])
+    fdemforward1d.forward1d(tid, S.freq, tHeight, rHeight, tMom, rx, S.dist, scl, mod.par, mod.thk, prd, S.nFreq,  mod.nCells[0])
 
     return prd
 
@@ -66,6 +66,6 @@ def fdem1dsen(S, mod, z0):
 
     J = np.zeros([S.nFreq, nLayers], dtype=np.complex128, order='F')
 
-    fdemforward1d.sensitivity1d(tid, S.freq, tHeight, rHeight, tMom, rx, S.dist, scl, mod.par, mod.thk, mod.chim, J, S.nFreq,  mod.nCells[0])
+    fdemforward1d.sensitivity1d(tid, S.freq, tHeight, rHeight, tMom, rx, S.dist, scl, mod.par, mod.thk, J, S.nFreq,  mod.nCells[0])
 
     return J

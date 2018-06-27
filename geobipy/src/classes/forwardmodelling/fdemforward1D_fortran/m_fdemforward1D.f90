@@ -10,6 +10,8 @@ real(kind=8),parameter :: pi4 = 4.d0*pi
 real(kind=8),parameter :: mu0 = 4.d-7*pi ! H/m
 real(kind=8),parameter :: c = 299792458.d0 ! m/s
 real(kind=8),parameter :: eps0 = 1.d0/(mu0*(c**2.d0)) ! F/m
+integer, parameter :: nCJ0 = 120
+integer, parameter :: nCJ1 = 140
 
 ! Using a class allows to create coefficients once when the forward modeller is first used.
 type t_lambdas
@@ -22,7 +24,7 @@ type(t_lambdas), private :: lam
 
 contains
 
-subroutine forward1D(nFreq, nLayers, tid, freqs, tHeight, rHeight, moments, rx, separation, scale, parIn, thkIn, chimIn, predicted)
+subroutine forward1D(nFreq, nLayers, tid, freqs, tHeight, rHeight, moments, rx, separation, scale, parIn, thkIn, predicted)
     !! Computes the forward frequency domain electromagnetic response of a 1D layered earth.
     !! This function is callable from python.
 !====================================================================!
@@ -48,19 +50,15 @@ subroutine forward1D(nFreq, nLayers, tid, freqs, tHeight, rHeight, moments, rx, 
     !f2py intent(in) ::  parIn
     real(kind=8), intent(in) :: thkIn(nLayers)
     !f2py intent(in) :: thkIn
-    real(kind=8), intent(in) :: chimIn(nLayers)
-    !f2py intent(in) :: chimIn
     complex(kind=8), intent(inout) :: predicted(nFreq)
     !f2py intent(in, out) :: predicted
 
-    integer, parameter :: nC0 = 120
-    integer, parameter :: nC1 = 140
     integer :: i
     logical :: useJ0
     complex(kind=8) :: H(nFreq), H0(nFreq)
-    complex(kind=8) :: rTEj0(nFreq, nC0), rTEj1(nFreq, nC1)
-    complex(kind=8) :: u0j0(nFreq, nC0), u0j1(nFreq, nC1)
-    real(kind=8) :: par(nLayers+1), thk(nLayers+1), chim(nLayers+1)
+    complex(kind=8) :: rTEj0(nCJ0, nFreq), rTEj1(nCJ1, nFreq)
+    complex(kind=8) :: u0j0(nCJ0, nFreq), u0j1(nCJ1, nFreq)
+    real(kind=8) :: par(nLayers+1), thk(nLayers+1)
 
     call setLambdas(lam, nFreq, separation)
 
@@ -82,21 +80,21 @@ subroutine forward1D(nFreq, nLayers, tid, freqs, tHeight, rHeight, moments, rx, 
         i = i + 1
     enddo
 
-    call initModel(parIn, thkIn, chimIn, nLayers, par, thk, chim)
+    call initModel(parIn, thkIn, nLayers, par, thk)
 
-    call calcFdemforward1D(nFreq, nC1, nLayers, freqs, lam%lam1, par, thk, chim, rTEj1, u0j1)
-    if (useJ0) call calcFdemforward1D(nFreq, nC0, nLayers, freqs, lam%lam0, par, thk, chim, rTEj0, u0j0)
+    call calcFdemforward1D(nFreq, nCJ1, nLayers, freqs, lam%lam1, par, thk, rTEj1, u0j1)
+    if (useJ0) call calcFdemforward1D(nFreq, nCJ0, nLayers, freqs, lam%lam0, par, thk, rTEj0, u0j0)
 
     do i = 1, nFreq
         select case (tid(i))
         case(1)
-            call calcHxx(nFreq, nC0, nC1, i, tHeight, rHeight, moments, rx, separation, rTEj0, lam%w0, lam%lam0, rTEj1, lam%w1, lam%lam1, H, H0)
+            call calcHxx(nFreq, nCJ0, nCJ1, i, tHeight, rHeight, moments, rx, separation, rTEj0, lam%w0, lam%lam0, rTEj1, lam%w1, lam%lam1, H, H0)
         case(3)
-            call calcHxz(nFreq, nC1, i, tHeight, rHeight, moments, rx, separation, rTEj1, lam%w1, lam%lam1, H, H0)
+            call calcHxz(nFreq, nCJ1, i, tHeight, rHeight, moments, rx, separation, rTEj1, lam%w1, lam%lam1, H, H0)
         case(7)
-            call calcHzx(nFreq, nC1, i, tHeight, rHeight, moments, rx, separation, rTEj1, u0j1, lam%w1, lam%lam1, H, H0)
+            call calcHzx(nFreq, nCJ1, i, tHeight, rHeight, moments, rx, separation, rTEj1, u0j1, lam%w1, lam%lam1, H, H0)
         case(9)
-            call calcHzz(nFreq, nC0, i, tHeight, rHeight, moments, separation, rTEj0, u0j0, lam%w0, lam%lam0, H, H0)
+            call calcHzz(nFreq, nCJ0, i, tHeight, rHeight, moments, separation, rTEj0, u0j0, lam%w0, lam%lam0, H, H0)
         end select
     enddo
 
@@ -104,7 +102,7 @@ subroutine forward1D(nFreq, nLayers, tid, freqs, tHeight, rHeight, moments, rx, 
 
 end subroutine
 !====================================================================!
-subroutine sensitivity1D(nFreq, nLayers, tid, freqs, tHeight, rHeight, moments, rx, separation, scale, parIn, thkIn, chimIn, sens)
+subroutine sensitivity1D(nFreq, nLayers, tid, freqs, tHeight, rHeight, moments, rx, separation, scale, parIn, thkIn, sens)
     !! Computes the sensitivity of the frequency domain electromagnetic response of a 1D layered earth.
     !! This function is callable from python.
 !====================================================================!
@@ -130,22 +128,16 @@ subroutine sensitivity1D(nFreq, nLayers, tid, freqs, tHeight, rHeight, moments, 
     !f2py intent(in) ::  parIn
     real(kind=8), intent(in) :: thkIn(nLayers)
     !f2py intent(in) :: thkIn
-    real(kind=8), intent(in) :: chimIn(nLayers)
-    !f2py intent(in) :: chimIn
     complex(kind=8), intent(inout) :: sens(nFreq, nLayers)
     !f2py intent(in, out) :: sens
 
-    integer, parameter :: nC0 = 120
-    integer, parameter :: nC1 = 140
     integer :: i, j
     logical :: useJ0
     complex(kind=8) :: dH(nFreq, nLayers), dH0(nFreq, nLayers)
-    complex(kind=8) :: rTEj0(nFreq, nC0), rTEj1(nFreq, nC1)
-    complex(kind=8) :: u0j0(nFreq, nC0), u0j1(nFreq, nC1)
-    complex(kind=8) :: sens0(nFreq, nC0, nLayers), sens1(nFreq, nC1, nLayers)
-    real(kind=8) :: par(nLayers+1), thk(nLayers+1), chim(nLayers+1)
-
-    integer :: b(2), c(2)
+    complex(kind=8) :: rTEj0(nCJ0, nFreq), rTEj1(nCJ1, nFreq)
+    complex(kind=8) :: u0j0(nCJ0, nFreq), u0j1(nCJ1, nFreq)
+    complex(kind=8) :: sens0(nCJ0, nFreq, nLayers), sens1(nCJ1, nFreq, nLayers)
+    real(kind=8) :: par(nLayers+1), thk(nLayers+1)
 
     call setLambdas(lam, nFreq, separation)
 
@@ -169,28 +161,28 @@ subroutine sensitivity1D(nFreq, nLayers, tid, freqs, tHeight, rHeight, moments, 
         i = i + 1
     enddo
 
-    call initModel(parIn, thkIn, chimIn, nLayers, par, thk, chim)
+    call initModel(parIn, thkIn, nLayers, par, thk)
 
-    call calcFdemSensitivity1D(nFreq, nC1, nLayers, freqs, lam%lam1, par, thk, chim, rTEj1, u0j1, sens1)
-    if (useJ0) call calcFdemSensitivity1D(nFreq, nC0, nLayers, freqs, lam%lam0, par, thk, chim, rTEj0, u0j0, sens0)
+    call calcFdemSensitivity1D(nFreq, nCJ1, nLayers, freqs, lam%lam1, par, thk, rTEj1, u0j1, sens1)
+    if (useJ0) call calcFdemSensitivity1D(nFreq, nCJ0, nLayers, freqs, lam%lam0, par, thk, rTEj0, u0j0, sens0)
 
     do i = 1, nFreq
         select case (tid(i))
         case(1)
             do j = 1, nLayers
-                call calcHxx(nFreq, nC0, nC1, i, tHeight, rHeight, moments, rx, separation, sens0(:, :, j), lam%w0, lam%lam0, sens1(:, :, j), lam%w1, lam%lam1, dH(:, j), dH0(:, j))
+                call calcHxx(nFreq, nCJ0, nCJ1, i, tHeight, rHeight, moments, rx, separation, sens0(:, :, j), lam%w0, lam%lam0, sens1(:, :, j), lam%w1, lam%lam1, dH(:, j), dH0(:, j))
             enddo
         case(3)
             do j = 1, nLayers
-                call calcHxz(nFreq, nC1, i, tHeight, rHeight, moments, rx, separation, sens1(:, :, j), lam%w1, lam%lam1, dH(:, j), dH0(:, j))
+                call calcHxz(nFreq, nCJ1, i, tHeight, rHeight, moments, rx, separation, sens1(:, :, j), lam%w1, lam%lam1, dH(:, j), dH0(:, j))
             enddo
         case(7)
             do j = 1, nLayers
-                call calcHzx(nFreq, nC1, i, tHeight, rHeight, moments, rx, separation, sens1(:, :, j), u0j1, lam%w1, lam%lam1, dH(:, j), dH0(:, j))
+                call calcHzx(nFreq, nCJ1, i, tHeight, rHeight, moments, rx, separation, sens1(:, :, j), u0j1, lam%w1, lam%lam1, dH(:, j), dH0(:, j))
             enddo
         case(9)
             do j = 1, nLayers
-                call calcHzz(nFreq, nC0, i, tHeight, rHeight, moments, separation, sens0(:, :, j), u0j0, lam%w0, lam%lam0, dH(:, j), dH0(:, j))
+                call calcHzz(nFreq, nCJ0, i, tHeight, rHeight, moments, separation, sens0(:, :, j), u0j0, lam%w0, lam%lam0, dH(:, j), dH0(:, j))
             enddo
         end select
         sens(i, :) = 1.d6 * scale(i) * (dH(i, :) - dH0(i, :)) / dH0(i, :)
@@ -200,7 +192,7 @@ end subroutine
 !====================================================================!
 
 !====================================================================!
-subroutine calcFdemforward1D(nFreq, nC, nLayers, freqs, fCoeffs, par, thk, chim, rTE, u0)
+subroutine calcFdemforward1D(nFreq, nC, nLayers, freqs, fCoeffs, par, thk, rTE, u0)
     !! Computes the forward frequency domain electromagnetic response of a 1D layered earth.
     !! This function is callable from python.
 !====================================================================!
@@ -208,59 +200,30 @@ subroutine calcFdemforward1D(nFreq, nC, nLayers, freqs, fCoeffs, par, thk, chim,
     integer, intent(in) :: nC
     integer, intent(in) :: nLayers
     real(kind=8), intent(in) :: freqs(nFreq)
-    !f2py intent(in) :: freqs
-    real(kind=8), intent(in) :: fCoeffs(nFreq, nC)
-    !f2py intent(in) :: fCoeffs
+    real(kind=8), intent(in) :: fCoeffs(nC, nFreq)
     real(kind=8), intent(in) :: par(nLayers+1)
-    !f2py intent(in) ::  parIn
     real(kind=8), intent(in) :: thk(nLayers+1)
-    !f2py intent(in) :: thkIn
-    real(kind=8), intent(in) :: chim(nLayers+1)
-    !f2py intent(in) :: chimIn
-    complex(kind=8), intent(inout) :: rTE(nFreq, nC)
-    !f2py intent(in,out) :: rTE
-    complex(kind=8), intent(inout) :: u0(nFreq, nC)
-    !f2py intent(in,out) :: u0
+    complex(kind=8), intent(inout) :: rTE(nC, nFreq)
+    complex(kind=8), intent(inout) :: u0(nC, nFreq)
 
-    complex(kind=8), allocatable :: omega(:)
-    complex(kind=8), allocatable :: un(:, :, :)
-    complex(kind=8), allocatable :: Y(:, :, :)
-    complex(kind=8), allocatable :: Yn(:, :, :)
+    complex(kind=8) :: omega(nFreq)
+    complex(kind=8) :: un(nC, nFreq, nLayers+1)
+    complex(kind=8) :: Y(nC, nFreq, nLayers+1)
+    complex(kind=8) :: Yn(nC, nFreq, nLayers+1)
 
     integer :: nL1
-    integer :: istat
 
     nL1 = nLayers+1
-
-    ! Allocate memory (for some reason f2py won't let me do this inside subroutines)
-    allocate(omega(nFreq), stat=istat)
-    if (istat /= 0) stop "Could not allocate omega"
-    allocate(un(nFreq, nC, nL1), stat=istat)
-    if (istat /= 0) stop "Could not allocate un"
-    un = 0.d0
-    allocate(Yn(nFreq, nC, nL1), stat=istat)
-    if (istat /= 0) stop "Could not allocate Yn"
-    Yn = 0.d0
-    allocate(Y(nFreq, nC, nL1), stat=istat)
-    if (istat /= 0) stop "Could not allocate Y"
 
     ! Setup the coefficients?
     call initCoefficients2(freqs, fCoeffs, nFreq, nC, nLayers, par, omega, un, Y, Yn)
 
-    call M1_0(Yn, Y, un, thk, nL1, rTE, u0)
+    call M1_0(nFreq, nC, nL1, Yn, Y, un, thk, rTE, u0)
 
-    deallocate(omega, stat=istat)
-    if (istat /= 0) stop "Could not deallocate omega"
-    deallocate(un, stat=istat)
-    if (istat /= 0) stop "Could not deallocate un"
-    deallocate(Yn, stat=istat)
-    if (istat /= 0) stop "Could not deallocate Yn"
-    deallocate(Y, stat=istat)
-    if (istat /= 0) stop "Could not deallocate Y"
 end subroutine
 !====================================================================!
 !====================================================================!
-subroutine calcFdemSensitivity1D(nFreq, nC, nLayers, freqs, fCoeffs, par, thk, chim, rTE, u0, sens)
+subroutine calcFdemSensitivity1D(nFreq, nC, nLayers, freqs, fCoeffs, par, thk, rTE, u0, sens)
     !! Computes the sensitivity for the frequency domain electromagnetic response of a 1D layered earth.
     !! This function is callable from python.
 !====================================================================!
@@ -271,57 +234,47 @@ subroutine calcFdemSensitivity1D(nFreq, nC, nLayers, freqs, fCoeffs, par, thk, c
     real(kind=8), intent(in) :: fCoeffs(nFreq, nC)
     real(kind=8), intent(in) :: par(nLayers+1)
     real(kind=8), intent(in) :: thk(nLayers+1)
-    real(kind=8), intent(in) :: chim(nLayers+1)
-    complex(kind=8), intent(inout) :: rTE(nFreq, nC)
-    complex(kind=8), intent(inout) :: u0(nFreq, nC)
-    complex(kind=8), intent(inout) :: sens(nFreq, nC, nLayers)
+    complex(kind=8), intent(inout) :: rTE(nC, nFreq)
+    complex(kind=8), intent(inout) :: u0(nC, nFreq)
+    complex(kind=8), intent(inout) :: sens(nC, nFreq, nLayers)
 
-    complex(kind=8), allocatable :: omega(:)
-    complex(kind=8), allocatable :: un(:,:,:)
-    complex(kind=8), allocatable :: Y(:,:,:)
-    complex(kind=8), allocatable :: Yn(:,:,:)
+    complex(kind=8) :: a0, a1, a2
+    complex(kind=8) :: omega(nFreq)
+    complex(kind=8) :: un(nC, nFreq, nLayers+1)
+    complex(kind=8) :: Y(nC, nFreq, nLayers+1)
+    complex(kind=8) :: Yn(nC, nFreq, nLayers+1)
 
     integer :: nL1
-    integer :: istat
+    integer :: j
+    integer :: k
 
     nL1 = nLayers+1
-
-    ! Allocate memory (for some reason f2py won't let me do this inside subroutines)
-    allocate(omega(nFreq), stat=istat)
-    if (istat /= 0) stop "Could not allocate omega"
-    allocate(un(nFreq,nC,nL1), stat=istat)
-    if (istat /= 0) stop "Could not allocate un"
-    un = 0.d0
-    allocate(Yn(nFreq,nC,nL1), stat=istat)
-    if (istat /= 0) stop "Could not allocate Yn"
-    Yn = 0.d0
-    allocate(Y(nFreq,nC,nL1), stat=istat)
-    if (istat /= 0) stop "Could not allocate Y"
 
     ! Setup the coefficients?
     call initCoefficients2(freqs, fCoeffs, nFreq, nC, nLayers, par, omega, un, Y, Yn)
 
-    sens(:,:,nLayers) = par(nL1) / (2.d0 * un(:,:,nL1))
+    do k = 1, nFreq
+        do j = 1, nC
+            sens(j, k, nLayers) = par(nL1) / (2.d0 * un(j, k, nL1))
+        enddo
+    enddo
+    
 
     if (nLayers == 1) then
-        !call M0_0(Yn, Y, un, rTE, u0)
-        u0 = un(:,:,1)
-        rTE = Yn(:,:,1) - Y(:,:,2)
-        rTE = rTE / (Yn(:,:,1) + Y(:,:,2))
-        sens = -2.d0 * Yn(:,:,1:1) * sens(:,:,1:1)
-        sens = sens(:,:,1:1) / (Yn(:,:,1:1) + Y(:,:,2:2))**2.d0
+        do k = 1, nFreq
+            do j = 1, nC
+                u0(j, k) = un(j, k, 1)
+                a0 = Yn(j, k, 1)
+                a1 = Y(j, k, 2)
+                a2 = 1.d0 / a0 + a1
+                rTE(j, k) = (a0 - a1) *  a2
+                sens(j, k, 1) = -2.d0 * a0 * sens(j, k, 1) * a2**2.d0
+            enddo
+        enddo
     else
         call M1_1(Yn, Y, un, omega, thk, par, nFreq, nC, nL1, rTE, u0, sens)
     endif
 
-    deallocate(omega, stat=istat)
-    if (istat /= 0) stop "Could not deallocate omega"
-    deallocate(un, stat=istat)
-    if (istat /= 0) stop "Could not deallocate un"
-    deallocate(Yn, stat=istat)
-    if (istat /= 0) stop "Could not deallocate Yn"
-    deallocate(Y, stat=istat)
-    if (istat /= 0) stop "Could not deallocate Y"
 end subroutine
 !====================================================================!
 !====================================================================!
@@ -330,27 +283,25 @@ subroutine M1_1(Yn, Y, un, omega, thk, par, nFreq, nC, nL1, rTE, u0, sens)
     integer :: nFreq
     integer :: nC
     integer :: nL1
-    complex(kind=8), intent(inout), target :: Yn(:,:,:)
-    complex(kind=8), intent(inout), target :: Y(:,:,:)
-    complex(kind=8), intent(in), target :: un(:,:,:)
-    complex(kind=8), intent(inout), target :: omega(:)
-    real(kind=8), intent(in) :: thk(:)
-    real(kind=8), intent(in) :: par(:)
-    complex(kind=8), intent(inout) :: rTE(:,:)
-    complex(kind=8), intent(inout) :: u0(:,:)
-    complex(kind=8), intent(inout) :: sens(:,:,:)
+    complex(kind=8), intent(inout) :: Yn(nC, nFreq, nL1)
+    complex(kind=8), intent(inout) :: Y(nC, nFreq, nL1)
+    complex(kind=8), intent(in) :: un(nC, nFreq, nL1)
+    complex(kind=8), intent(inout) :: omega(nFreq)
+    real(kind=8), intent(in) :: thk(nL1)
+    real(kind=8), intent(in) :: par(nL1)
+    complex(kind=8), intent(inout) :: rTE(nC, nFreq)
+    complex(kind=8), intent(inout) :: u0(nC, nFreq)
+    complex(kind=8), intent(inout) :: sens(nC, nFreq, nL1-1)
 
     real(kind=8) :: p
     real(kind=8) :: t
 
-    complex(kind=8), dimension(nFreq,nC) :: b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,b10 ! On the stack, does this matter at large scale?
-    complex(kind=8) :: oMu0
-    complex(kind=8) :: t1, t2, t3, t4, t5, t6, tanuht
+    complex(kind=8) :: a0, a1, a2
+    complex(kind=8) :: b1, b2, b4, b5, b6, b7, b8, b9 ! On the stack, does this matter at large scale?
     complex(kind=8) :: un_, Y_, Yn_
-    complex(kind=8) :: z0,z1,z2,z3,z4
-    complex(kind=8) :: accumulate(nFreq, nC, nL1-1)
+    complex(kind=8) :: accumulate(nC, nFreq, nL1-1)
 
-    integer :: i, i1, istat
+    integer :: i, i1, i2
     integer :: j
     integer :: k
     integer :: nLayers
@@ -360,92 +311,128 @@ subroutine M1_1(Yn, Y, un, omega, thk, par, nFreq, nC, nL1, rTE, u0, sens)
     ! Initialize cumprod array
     accumulate = 1.d0
 
-    omega = omega * mu0
-
-    do j = 1, nC
-        b10(:,j) = omega
-    enddo
-
-    do i = nLayers,2,-1
+    do i = nLayers, 2, -1
         i1 = i + 1
+        i2 = i - 1
         p = par(i)
         t = thk(i)
-        b1 = Yn(:,:,i)
-        b2 = Y(:,:,i1)
-        b3 = un(:,:,i)
-        b4 = tanh(b3*t)
-        b5 = b4**2.d0
-        b8 = (2.d0 * b1 * b2 * b5)
-        b6 = b2 + (b1 * b4)
-        b7 = b1 + (b2 * b4)
-        b2 = b2**2.d0
 
-        Y(:,:,i) = b1 * (b6 / b7)
+        do k = 1, nFreq
+            do j = 1, nC
+                Yn_ = Yn(j, k, i)
+                Y_ = Y(j, k, i1)
+                un_ = un(j, k, i)
+                b4 = tanh(un_ * t)
+                b5 = b4**2.d0
+                b8 = (2.d0 * Yn_ * Y_ * b5)
+                b6 = Y_ + (Yn_ * b4)
+                b7 = Yn_ + (Y_ * b4)
+                b2 = Y_**2.d0
 
-        b6 = b1**2.d0
+                Y(j, k, i) = Yn_ * (b6 / b7)
 
-        b9 = (p / (2.d0 * b3 * (b7**2.d0)))
+                b6 = Yn_**2.d0
 
-        b7 = b7**-2.d0
-        b8 = b8 + ((b2 - b6) * b4) + 2.d0 * b6
-        b4 = b6 * (1.d0 - b5)
-        b6 = b1**3.d0
-        accumulate(:,:,i) = b4 * b7
-        b4 = b2 * b1
-        b7 = b4 - b6
-        b1 = b10 * t * b7
-        b8 = b8 + (b1 * b5) - b1
+                b9 = (p / (2.d0 * un_ * (b7**2.d0)))
 
-        sens(:,:,i-1) = b8 * b9
+                b7 = b7**(-2.d0)
+                b8 = b8 + ((b2 - b6) * b4) + 2.d0 * b6
+                b4 = b6 * (1.d0 - b5)
+                b6 = Yn_**3.d0
+                accumulate(j, k, i) = b4 * b7
+                b4 = b2 * Yn_
+                b7 = b4 - b6
+                b1 = omega(k) * t * b7
+                b8 = b8 + (b1 * b5) - b1
+
+                sens(j, k, i2) = b8 * b9
+            enddo
+        enddo
     enddo
 
 
     ! Cumulative product over third dimension
     do i = 2, nLayers
-        accumulate(:,:,i) = accumulate(:,:,i)*accumulate(:,:,i-1)
+        i1 = i - 1
+        do k = 1, nFreq
+            do j = 1, nC
+                accumulate(j, k, i) = accumulate(j, k, i) * accumulate(j, k, i1)
+            enddo
+        enddo
     enddo
 
-    u0 = un(:,:,1)
-    rTE = Yn(:,:,1) - Y(:,:,2)
-    rTE = rTE / (Yn(:,:,1) + Y(:,:,2))
+    do k = 1, nFreq
+        do j = 1, nC
+            u0(j, k) = un(j, k, 1)
 
-    Y(:,:,2) = (Yn(:,:,1) + Y(:,:,2))**-2.d0
-    Yn(:,:,1) = -2.d0*Yn(:,:,1) * Y(:,:,2)
+            a0 = Yn(j, k, 1)
+            a1 = Y(j, k, 2)
+            a2 = 1.d0 / (a0 + a1)
 
-    sens = sens * accumulate
+            rTE(j, k) = (a0 - a1) * a2
+
+            Y(j, k, 2) = a2**2.d0
+            Yn(j, k, 1) = -2.d0 * a0 * Y(j, k, 2)
+        enddo
+    enddo
+
     do i = 1, nLayers
-        sens(:,:,i) = sens(:,:,i) * Yn(:,:,1)
+        do k = 1, nFreq
+            do j = 1, nC
+                sens(j, k, i) = sens(j, k, i) * Yn(j, k, 1) * accumulate(j, k, i)
+            enddo
+        enddo
     enddo
 
 end subroutine
 !====================================================================!
 !====================================================================!
-subroutine M1_0(Yn, Y, un, thk, nL1, rTE, u0)
+subroutine M1_0(nFreq, nC, nL1, Yn, Y, un, thk, rTE, u0)
 !====================================================================!
-    complex(kind=8), intent(in) :: Yn(:,:,:)
-    complex(kind=8), intent(inout) :: Y(:,:,:)
-    complex(kind=8), intent(in) :: un(:,:,:)
-    real(kind=8), intent(in) :: thk(:)
-    integer :: nL1
-    complex(kind=8), intent(inout) :: rTE(:,:)
-    complex(kind=8), intent(inout) :: u0(:,:)
+    integer, intent(in) :: nFreq
+    integer, intent(in) :: nC
+    integer, intent(in) :: nL1
+    complex(kind=8), intent(in) :: Yn(nC, nFreq, nL1)
+    complex(kind=8), intent(inout) :: Y(nC, nFreq, nL1)
+    complex(kind=8), intent(in) :: un(nC, nFreq, nL1)
+    real(kind=8), intent(in) :: thk(nL1)
+    complex(kind=8), intent(inout) :: rTE(nC, nFreq)
+    complex(kind=8), intent(inout) :: u0(nC, nFreq)
 
     integer :: i, i1
+    integer :: j
+    integer :: k
     integer :: nLayers
+
+    real(kind=8) :: t
+    complex(kind=8) :: a0, a1, a2, a3, a4
 
     nLayers = nL1 - 1
     i=nLayers
-    do i = nLayers,2,-1
-      i1 = i + 1
-      u0 = tanh(un(:,:,i) * thk(i)) ! Use existing memory to save space
-      rTE = Y(:,:,i1) + (Yn(:,:,i)*u0) ! Numerator
-      u0 = 1.d0 / (Yn(:,:,i) + (Y(:,:,i1)*u0)) ! Denominator
-      Y(:,:,i) = Yn(:,:,i) * rTE * u0
+    do i = nLayers, 2, -1
+        i1 = i + 1
+        t = thk(i)
+        do k = 1, nFreq
+            do j = 1, nC
+                a3 = Yn(j, k, i)
+                a4 = Y(j, k, i1)
+                a0 = tanh(un(j, k, i) * t) ! Use existing memory to save space
+                a1 = a4 + (a3 * a0) ! Numerator
+                a2 = 1.d0 / (a3 + (a4 * a0)) ! Denominator
+                Y(j, k, i) = a3 * a1 * a2
+            enddo
+        enddo
     enddo
 
-    u0 = un(:,:,1)
-    rTE = Yn(:,:,1) - Y(:,:,2)
-    rTE = rTE / (Yn(:,:,1) + Y(:,:,2))
+    
+    do k = 1, nFreq
+        do j = 1, nC
+            u0(j, k) = un(j, k, 1)
+            a0 = Yn(j, k, 1)
+            a1 = Y(j, k, 2)
+            rTE(j, k) = (a0 - a1) / (a0 + a1)
+        enddo
+    enddo
 
     ! call M0_0(Yn, Y, un, rTE, u0)
 end subroutine
@@ -476,19 +463,19 @@ subroutine calcHxx(nFreq, nC0, nC1, i, tHeight, rHeight, moments, rx, separation
     real(kind=8), intent(in) :: moments(nFreq)
     real(kind=8), intent(in) :: rx(nFreq)
     real(kind=8), intent(in) :: separation(nFreq)
-    complex(kind=8), intent(in) :: rTE0(nFreq, nC0)
-    real(kind=8), intent(in) :: Jw0(nFreq)
-    real(kind=8), intent(in) :: J0(nFreq, nC0)
-    complex(kind=8), intent(in) :: rTE1(nFreq, nC1)
-    real(kind=8), intent(in) :: Jw1(nFreq)
-    real(kind=8), intent(in) :: J1(nFreq, nC1)
+    complex(kind=8), intent(in) :: rTE0(nC0, nFreq)
+    real(kind=8), intent(in) :: Jw0(nC0)
+    real(kind=8), intent(in) :: J0(nC0, nFreq)
+    complex(kind=8), intent(in) :: rTE1(nC1, nFreq)
+    real(kind=8), intent(in) :: Jw1(nC1)
+    real(kind=8), intent(in) :: J1(nC1, nFreq)
     complex(kind=8), intent(inout) :: H(nFreq)
     complex(kind=8), intent(inout) :: H0(nFreq)
 
     integer :: j
 
-    complex(kind=8) :: tmp, k, k0, rTE0_, rTE1_
-    real(kind=8) :: a0, a1, a2, b0, c0, d0, d1, hDiff, hSum, r, J0_, J1_
+    complex(kind=8) :: k, rTE0_, rTE1_
+    real(kind=8) :: a0, a1, b0, c0, d0, d1, hDiff, hSum, r, J0_, J1_
     real(kind=8) :: w0, w1
 
 
@@ -503,11 +490,11 @@ subroutine calcHxx(nFreq, nC0, nC1, i, tHeight, rHeight, moments, rx, separation
     do j = 1, nC0
 
         w0 = d0 * Jw0(j)
-        J0_ = J0(i, j)
-        rTE0_ = rTE0(i, j)
+        J0_ = J0(j, i)
+        rTE0_ = rTE0(j, i)
         w1 = d1 * Jw1(j)
-        J1_ = J1(i, j)
-        rTE1_ = rTE1(i, j)
+        J1_ = J1(j, i)
+        rTE1_ = rTE1(j, i)
 
         ! Temporary variables
         a0 = exp(-J0_ * (hSum))
@@ -529,8 +516,8 @@ subroutine calcHxx(nFreq, nC0, nC1, i, tHeight, rHeight, moments, rx, separation
     do j = nC0+1, nC1
 
         w1 = d1 * Jw1(j)
-        J1_ = J1(i, j)
-        rTE1_ = rTE1(i, j)
+        J1_ = J1(j, i)
+        rTE1_ = rTE1(j, i)
 
         ! Add the last 20 entries of the second bessel in this loop.
         b0 = exp(-J1_ * (hSum))
@@ -552,9 +539,9 @@ subroutine calcHxz(nFreq, nC1, i, tHeight, rHeight, moments, rx, separation, rTE
     real(kind=8), intent(in) :: moments(nFreq)
     real(kind=8), intent(in) :: rx(nFreq)
     real(kind=8), intent(in) :: separation(nFreq)
-    complex(kind=8), intent(in) :: rTE1(nFreq, nC1)
-    real(kind=8), intent(in) :: Jw1(nFreq)
-    real(kind=8), intent(in) :: J1(nFreq, nC1)
+    complex(kind=8), intent(in) :: rTE1(nC1, nFreq)
+    real(kind=8), intent(in) :: Jw1(nC1)
+    real(kind=8), intent(in) :: J1(nC1, nFreq)
     complex(kind=8), intent(inout) :: H(nFreq)
     complex(kind=8), intent(inout) :: H0(nFreq)
 
@@ -572,8 +559,8 @@ subroutine calcHxz(nFreq, nC1, i, tHeight, rHeight, moments, rx, separation, rTE
     do j = 1, nC1
 
         w1 = d1 * Jw1(j)
-        J1_ = J1(i, j)
-        rTE1_ = rTE1(i, j)
+        J1_ = J1(j, i)
+        rTE1_ = rTE1(j, i)
 
         b0 = exp(-J1_ * hSum)
         a1 = J1_**2.d0
@@ -595,17 +582,17 @@ subroutine calcHzx(nFreq, nC1, i, tHeight, rHeight, moments, rx, separation, rTE
     real(kind=8), intent(in) :: moments(nFreq)
     real(kind=8), intent(in) :: rx(nFreq)
     real(kind=8), intent(in) :: separation(nFreq)
-    complex(kind=8), intent(in) :: rTE1(nFreq, nC1)
-    complex(kind=8), intent(in) :: u1(nFreq, nC1)
-    real(kind=8), intent(in) :: Jw1(nFreq)
-    real(kind=8), intent(in) :: J1(nFreq, nC1)
+    complex(kind=8), intent(in) :: rTE1(nC1, nFreq)
+    complex(kind=8), intent(in) :: u1(nC1, nFreq)
+    real(kind=8), intent(in) :: Jw1(nC1)
+    real(kind=8), intent(in) :: J1(nC1, nFreq)
     complex(kind=8), intent(inout) :: H(nFreq)
     complex(kind=8), intent(inout) :: H0(nFreq)
 
     integer :: j
 
-    complex(kind=8) :: k, rTE1_, u1_
-    real(kind=8) :: a1, b0, d1, hDiff, hSum, J1_
+    complex(kind=8) :: b0, k, rTE1_, u1_
+    real(kind=8) :: a1, d1, hDiff, hSum, J1_
     real(kind=8) :: w1
 
     hSum = rHeight(i) + tHeight(i)
@@ -616,9 +603,9 @@ subroutine calcHzx(nFreq, nC1, i, tHeight, rHeight, moments, rx, separation, rTE
     do j = 1, nC1
 
         w1 = d1 * Jw1(j)
-        u1_ = u1(i, j)
-        J1_ = J1(i, j)
-        rTE1_ = rTE1(i, j)
+        u1_ = u1(j, i)
+        J1_ = J1(j, i)
+        rTE1_ = rTE1(j, i)
 
         b0 = exp(-u1_ * hSum)
         a1 = J1_**2.d0
@@ -639,16 +626,16 @@ subroutine calcHzz(nFreq, nC0, i, tHeight, rHeight, moments, separation, rTE, u0
     real(kind=8), intent(in) :: rHeight(nFreq)
     real(kind=8), intent(in) :: moments(nFreq)
     real(kind=8), intent(in) :: separation(nFreq)
-    complex(kind=8), intent(in) :: rTE(nFreq, nC0)
-    complex(kind=8), intent(in) :: u0(nFreq, nC0)
-    real(kind=8), intent(in) :: Jw0(nFreq)
-    real(kind=8), intent(in) :: J0(nFreq, nC0)
+    complex(kind=8), intent(in) :: rTE(nC0, nFreq)
+    complex(kind=8), intent(in) :: u0(nC0, nFreq)
+    real(kind=8), intent(in) :: Jw0(nC0)
+    real(kind=8), intent(in) :: J0(nC0, nFreq)
     complex(kind=8), intent(inout) :: H(nFreq)
     complex(kind=8), intent(inout) :: H0(nFreq)
 
     integer :: j
 
-    complex(kind=8) :: a0, a1, tmp, k, u0_, rTE_
+    complex(kind=8) :: a0, a1, k, u0_, rTE_
     real(kind=8) :: a2, hDiff, hSum, J0_
     real(kind=8) :: w0_
 
@@ -660,9 +647,9 @@ subroutine calcHzz(nFreq, nC0, i, tHeight, rHeight, moments, separation, rTE, u0
     do j = 1, nC0
 
         w0_ = a2 * Jw0(j)
-        u0_ = u0(i, j)
-        J0_ = J0(i, j)
-        rTE_ = rTE(i, j)
+        u0_ = u0(j, i)
+        J0_ = J0(j, i)
+        rTE_ = rTE(j, i)
 
         ! Temporary variables
         a0 = exp(-u0_ * hSum)
@@ -680,22 +667,22 @@ subroutine calcHzz(nFreq, nC0, i, tHeight, rHeight, moments, separation, rTE, u0
 end subroutine
 !====================================================================!
 !====================================================================!
-subroutine initModel(parIn, thkIn, chimIn, nLayers, par, thk, chim)
+subroutine initModel(parIn, thkIn, nLayers, par, thk)
 !====================================================================!
     integer :: nLayers ! Number of layers
     real(kind=8), intent(in) :: parIn(nLayers) ! Parameter values
     real(kind=8), intent(in) :: thkIn(nLayers) ! Thicknesses
-    real(kind=8), intent(in) :: chimIn(nLayers) ! Magnetic susceptibility
+    ! real(kind=8), intent(in) :: chimIn(nLayers) ! Magnetic susceptibility
     real(kind=8), intent(inout) :: par(nLayers+1)
     real(kind=8), intent(inout) :: thk(nLayers+1)
-    real(kind=8), intent(inout) :: chim(nLayers+1)
+    ! real(kind=8), intent(inout) :: chim(nLayers+1)
 
     integer :: nL1
 
     nL1 = nLayers + 1
 
     par(1) = 0.d0 ; par(2:nL1) = parIn
-    chim(1) = 0.d0 ; chim(2:nL1) = chimIn
+    ! chim(1) = 0.d0 ; chim(2:nL1) = chimIn
     thk(1) = NaN ; thk(2:nL1) = thkIn
 
 end subroutine
@@ -707,15 +694,14 @@ subroutine initCoefficients2(freqs, fCoeffs, nFreq, nC, nLayers, par, omega, un,
     integer :: nC ! Number of filter coefficients
     integer :: nLayers ! Number of layers
     real(kind=8), intent(in) :: freqs(nFreq) ! Frequencies
-    real(kind=8), intent(in) :: fCoeffs(nFreq, nC) ! Hankel Filter Coefficients
+    real(kind=8), intent(in) :: fCoeffs(nC, nFreq) ! Hankel Filter Coefficients
     real(kind=8), intent(in) :: par(nLayers+1)
     complex(kind=8), intent(inout) :: omega(nFreq)
-    complex(kind=8), intent(inout) :: un(nFreq, nC, nLayers)
-    complex(kind=8), intent(inout) :: Y(nFreq, nC, nLayers)
-    complex(kind=8), intent(inout) :: Yn(nFreq, nC, nLayers)
+    complex(kind=8), intent(inout) :: un(nC, nFreq, nLayers+1)
+    complex(kind=8), intent(inout) :: Y(nC, nFreq, nLayers+1)
+    complex(kind=8), intent(inout) :: Yn(nC, nFreq, nLayers+1)
 
-    complex(kind=8), dimension(nFreq,nC) :: b1,b2
-    complex(kind=8) :: unTmp
+    complex(kind=8) :: b0, b2(nC, nFreq)
     real(kind=8) :: p
 
     integer :: nL1
@@ -727,84 +713,105 @@ subroutine initCoefficients2(freqs, fCoeffs, nFreq, nC, nLayers, par, omega, un,
 
     ! Compute the angular frequencies from the system frequencies
     do i = 1, nFreq
-        omega(i) = complex(0.d0,2.d0 * pi * freqs(i))
+        omega(i) = complex(0.d0, pi2 * freqs(i)) * mu0
     enddo
 
     ! Compute the Admitivity, yn=j*omega*eps+sigma
-    do j = 1, nC
-        b1(:, j) = omega * mu0
-    enddo
-    Y(:, :, 1) = 1.d0 / b1
-
-    b2 = fCoeffs**2.d0
-
-    do i = 1, nL1
-      p = par(i)
-      un(:, :, i) = sqrt(((b1 * eps0 + p) * b1) + b2)
-      Yn(:, :, i) = un(:, :, i) * Y(:, :, 1)
+    do k = 1, nFreq
+        b0 = 1.d0 / omega(k)
+        do j = 1, nC
+            Y(j, k, 1) = b0
+        enddo
     enddo
 
+    p = par(1)
+    do k = 1, nFreq
+        do j = 1, nC
+            b2(j, k) = fCoeffs(j, k)**2.d0
+            un(j, k, 1) = sqrt(((omega(k) * eps0 + p) * omega(k)) + b2(j, k))
+            Yn(j, k, 1) = un(j, k, 1) * Y(j, k, 1)
+        enddo
+    enddo
+
+    do i = 2, nL1
+        p = par(i)
+        do k = 1, nFreq
+            do j = 1, nC
+                un(j, k, i) = sqrt(((omega(k) * eps0 + p) * omega(k)) + b2(j, k))
+                Yn(j, k, i) = un(j, k, i) * Y(j, k, 1)
+            enddo
+        enddo
+    enddo
+
+    
     Y(:, :, 1) = cNaN
     Y(:, :, 2:nLayers) = 0.d0
     Y(:, :, nL1) = Yn(:, :, nL1)
 
 end subroutine
 !====================================================================!
-
-
+!====================================================================!
 subroutine setLambdas(this, nFreq, separation)
+!====================================================================!
     class(t_lambdas) :: this
     integer, intent(in) :: nFreq
     real(kind=8), intent(in) :: separation(nFreq)
 
     if (allocated(this%w0)) then
-        if (size(this%lam0, 1) /= nFreq) then
+        if (size(this%lam0, 2) /= nFreq) then
             deallocate(this%lam0, this%lam1)
-            allocate(this%lam0(nFreq, 120))
-            allocate(this%lam1(nFreq, 140))
+            allocate(this%lam0(nCJ0, nFreq))
+            allocate(this%lam1(nCJ1, nFreq))
             call set_lambda(this, nFreq, separation)
         endif
         return
     endif    
 
-    allocate(this%w0(120), this%w1(140))
+    allocate(this%w0(nCJ0), this%w1(nCJ1))
     call set_w0(this)
     call set_w1(this)
 
-    allocate(this%lam0(nFreq, 120))
-    allocate(this%lam1(nFreq, 140))
+    allocate(this%lam0(nCJ0, nFreq))
+    allocate(this%lam1(nCJ1, nFreq))
     call set_lambda(this, nFreq, separation)
 
 end subroutine
-
-
+!====================================================================!
+!====================================================================!
 subroutine set_lambda(this, nFreq, separation)
+!====================================================================!
     class(t_lambdas) :: this
     integer, intent(in) :: nFreq
     real(kind=8), intent(in) :: separation(nFreq)
 
-    real(kind=8) :: r(nFreq)
+    real(kind=8) :: r
     real(kind=8), parameter :: a0 = -8.3885d0
     real(kind=8), parameter :: s0 = 9.04226468670d-02
     real(kind=8), parameter :: a1 = -7.91001919d0
     real(kind=8), parameter :: s1 = 8.7967143957d-02
+    real(kind=8) :: tmp(nCJ1)
 
-    integer :: j
+    integer :: j, k
 
-    r = 1.d0 / separation
-
-    do j = 1, 120
-        this%lam0(:, j) = 10.d0**((real(j-1, kind=8) * s0) + a0) * r
-        this%lam1(:, j) = 10.d0**((real(j-1, kind=8) * s1) + a1) * r
+    do j = 1, nCJ1
+        tmp(j) = real(j-1, kind=8)
     enddo
 
-    do j = 121, 140
-        this%lam1(:, j) = 10.d0**((real(j-1, kind=8) * s1) + a1) * r
+    do k = 1, nFreq
+        r = 1.d0 / separation(k)
+        do j = 1, nCJ0
+            this%lam0(j, k) = 10.d0**((tmp(j) * s0) + a0) * r
+            this%lam1(j, k) = 10.d0**((tmp(j) * s1) + a1) * r
+        enddo
+        do j = 121, nCJ1
+            this%lam1(j, k) = 10.d0**((tmp(j) * s1) + a1) * r
+        enddo
     enddo
 end subroutine
-
-
+!====================================================================!
+!====================================================================!
 subroutine set_w0(this)
+!====================================================================!
     class(t_lambdas) :: this
     this%w0 = [&
         9.62801364263e-07, -5.02069203805e-06, 1.25268783953e-05, -1.99324417376e-05, 2.29149033546e-05,&
@@ -832,8 +839,10 @@ subroutine set_w0(this)
         -4.69798719697e-03, 2.12587632706e-03, -9.81986734159e-04, 4.44992546836e-04, -1.89983519162e-04,&
         7.31024164292e-05, -2.40057837293e-05, 6.23096824846e-06, -1.12363896552e-06, 1.04470606055e-07]
 end subroutine
-
+!====================================================================!
+!====================================================================!
 subroutine set_w1(this)
+!====================================================================!
     class(t_lambdas) :: this
     this%w1 = [&
         -6.76671159511e-14, 3.39808396836e-13, -7.43411889153e-13, 8.93613024469e-13, -5.47341591896e-13,&
@@ -865,8 +874,7 @@ subroutine set_w1(this)
         4.32436265303e-08, -3.37262648712e-08, 2.53558687098e-08, -1.81287021528e-08, 1.20228328586e-08,&
         -7.10898040664e-09, 3.53667004588e-09, -1.36030600198e-09, 3.52544249042e-10, -4.53719284366e-11]
 end subroutine
-
-
+!====================================================================!
 end module
 
 

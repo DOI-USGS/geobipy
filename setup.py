@@ -44,7 +44,7 @@ setup(name='geobipy',
         'progressbar2'
     ],
     ext_modules=[Extension(name='geobipy.src.classes.forwardmodelling.fdemforward1d_fortran',
-                           extra_f90_compile_args = ['-ffree-line-length-none'],
+                           extra_f90_compile_args = ['-ffree-line-length-none','-fbounds-check', '-O3', '-finline-functions', '-funroll-all-loops'],
                            sources=['geobipy/src/classes/forwardmodelling/fdemforward1D_fortran/m_fdemforward1D.f90'],
 		 )],
     entry_points = {
