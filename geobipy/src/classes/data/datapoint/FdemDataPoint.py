@@ -502,11 +502,13 @@ class FdemDataPoint(EmDataPoint):
     def _sensitivity1D(self, mod, scale=False):
         """ Compute the sensitivty matrix for a 1D layered earth model """
         Jtmp = fdem1dsen(self.sys, mod, -self.z[0])
+
         # Re-arrange the sensitivity matrix to Real:Imaginary vertical
         # concatenation
         J = np.zeros([2 * self.sys.nFreq, mod.nCells[0]])
         J[:self.sys.nFreq, :] = Jtmp.real
         J[self.sys.nFreq:, :] = Jtmp.imag
+
         # Scale the sensitivity matrix rows by the data weights if required
         if scale:
             J *= (np.repeat(self.s[:, np.newaxis]**-1.0, np.size(J, 1), 1))

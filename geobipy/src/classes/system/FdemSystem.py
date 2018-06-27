@@ -5,7 +5,6 @@ from ...classes.core.myObject import myObject
 import numpy as np
 from ...classes.core.StatArray import StatArray
 from .EmLoop import EmLoop
-from .HankelFilter import HankelFilter as HF
 from ...base import fileIO as fIO
 from ...base import MPI as myMPI
 #from ...base import Error as Err
@@ -30,8 +29,7 @@ class FdemSystem(myObject):
         for i in range(self.nFreq):
             self.T[i] = EmLoop()
             self.R[i] = EmLoop()
-        # Initialize the HankelFilter
-        self.H = None
+
 
     def read(self, fname):
         """ Read in a file containing the system information
@@ -68,8 +66,6 @@ class FdemSystem(myObject):
                     raise SystemExit(
                         "Could not read from system file:" + fname + " Line:" + str(j + 2))
 
-        # HankelFilter of Transform Coefficients
-        self.H = HF(self.dist)
 
     def getTensorID(self):
         """ For each coil orientation pair, adds the index of the frequency to the appropriate list
@@ -177,9 +173,3 @@ class FdemSystem(myObject):
             this.R[i] = self.R[i].Bcast(world)
         this.H = HF(this.dist)
         return this
-
-if __name__ == "__main__":
-    """ Define the function for running as MAIN """
-    S = FdemSystem()
-    S.read("hemSystem.txt")
-    S.H.summary()
