@@ -1,0 +1,209 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PointCloud3D &mdash; GeoBIPy 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="GeoBIPy 1.0.0 documentation" href="../../../../index.html" />
+    <link rel="up" title="Pointcloud classes" href="pointcloud.html" />
+    <link rel="next" title="Statistics classes" href="../statistics/statistics.html" />
+    <link rel="prev" title="Pointcloud classes" href="pointcloud.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../statistics/statistics.html" title="Statistics classes"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="pointcloud.html" title="Pointcloud classes"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">GeoBIPy 1.0.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../api.html" >API</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../classes.html" >Classes used in GeoBIPy</a> &raquo;</li>
+          <li class="nav-item nav-item-3"><a href="pointcloud.html" accesskey="U">Pointcloud classes</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-geobipy.src.classes.pointcloud.PointCloud3D">
+<span id="pointcloud3d"></span><h1>PointCloud3D<a class="headerlink" href="#module-geobipy.src.classes.pointcloud.PointCloud3D" title="Permalink to this headline">¶</a></h1>
+<p>&#64;PointCloud3D
+Module describing a 3D point cloud</p>
+<dl class="class">
+<dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D">
+<em class="property">class </em><code class="descclassname">geobipy.src.classes.pointcloud.PointCloud3D.</code><code class="descname">PointCloud3D</code><span class="sig-paren">(</span><em>N=0</em>, <em>x=None</em>, <em>y=None</em>, <em>z=None</em>, <em>units='m'</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D" title="Permalink to this definition">¶</a></dt>
+<dd><p>3D Point Cloud with x,y,z co-ordinates</p>
+<dl class="method">
+<dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.Bcast">
+<code class="descname">Bcast</code><span class="sig-paren">(</span><em>world</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.Bcast" title="Permalink to this definition">¶</a></dt>
+<dd><p>Braodcase a PointCloud3D using MPI</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.Scatterv">
+<code class="descname">Scatterv</code><span class="sig-paren">(</span><em>myStart</em>, <em>myChunk</em>, <em>world</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.Scatterv" title="Permalink to this definition">¶</a></dt>
+<dd><p>ScatterV a PointCloud3D using MPI</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.__getitem__">
+<code class="descname">__getitem__</code><span class="sig-paren">(</span><em>i</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.__getitem__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define item getter</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.getBounds">
+<code class="descname">getBounds</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.getBounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the bounding box of the data set</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.getPoint">
+<code class="descname">getPoint</code><span class="sig-paren">(</span><em>i</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.getPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a point from the 3D Point Cloud
+Returns a point P</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.interpCloughTocher">
+<code class="descname">interpCloughTocher</code><span class="sig-paren">(</span><em>values</em>, <em>dx=None</em>, <em>dy=None</em>, <em>mask=False</em>, <em>clip=None</em>, <em>extrapolate=None</em>, <em>i=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.interpCloughTocher" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate values at the points to a grid</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.maketest">
+<code class="descname">maketest</code><span class="sig-paren">(</span><em>nPoints</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.maketest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a small test of random points</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.mapPlot">
+<code class="descname">mapPlot</code><span class="sig-paren">(</span><em>dx=None</em>, <em>dy=None</em>, <em>extrapolate=None</em>, <em>i=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.mapPlot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a map of a parameter</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.read">
+<code class="descname">read</code><span class="sig-paren">(</span><em>fname</em>, <em>nHeaders=0</em>, <em>cols=range(0</em>, <em>3)</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads x y z co-ordinates from an ascii file
+if cols is not given, the first three columns are read.
+Otherwise specify with cols=[2,3,4]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.scatter2D">
+<code class="descname">scatter2D</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.scatter2D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the x y locations of the point cloud with the height for colour</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.setKdTree">
+<code class="descname">setKdTree</code><span class="sig-paren">(</span><em>nDims=3</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.setKdTree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the kdtree mapping the point locations</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.summary">
+<code class="descname">summary</code><span class="sig-paren">(</span><em>out=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display a summary of the 3D Point Cloud</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="pointcloud.html"
+                        title="previous chapter">Pointcloud classes</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../statistics/statistics.html"
+                        title="next chapter">Statistics classes</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../../_sources/content/api/classes/pointcloud/PointCloud3D.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../statistics/statistics.html" title="Statistics classes"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="pointcloud.html" title="Pointcloud classes"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">GeoBIPy 1.0.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../api.html" >API</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../classes.html" >Classes used in GeoBIPy</a> &raquo;</li>
+          <li class="nav-item nav-item-3"><a href="pointcloud.html" >Pointcloud classes</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright None.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>
