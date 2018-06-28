@@ -6,4 +6,3 @@ System classes
 
    EmLoop
    FdemSystem
-   HankelFilter
