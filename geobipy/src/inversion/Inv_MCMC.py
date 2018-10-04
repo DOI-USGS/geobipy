@@ -129,7 +129,7 @@ def Initialize(paras, D, prng):
     D.addErr.setPrior('Uniform',paras.aErrMinimum[:],paras.aErrMaximum[:], prng=prng,isLogged=True)
 
     # Update the data errors based on user given parameters
-    D.updateErrors(paras.errorModel, D.s, paras.relErr, paras.addErr)
+    D.updateErrors(paras.relErr, paras.addErr)
 
     # Save a copy of the original errors
     paras.Err = D.s.deepcopy()
@@ -154,7 +154,7 @@ def Initialize(paras, D, prng):
     # Initialize a 1D model with the half space conductivity
     parameter = StatArray(np.asarray([HScond, HScond]), name='Conductivity', units=r'$\frac{S}{m}$')
     # Assign the depth to the interface as half the bounds
-    thk = np.asarray([0.5 * (paras.maxDepth + paras.minDepth), 0.0])
+    thk = np.asarray([0.5 * (paras.maxDepth + paras.minDepth)])
     Mod = Model1D(2, parameters = parameter, thickness=thk)
 
     # Setup the model for perturbation
@@ -275,7 +275,7 @@ def AcceptReject(paras,Mod,D,prior,posterior,PhiD,Res, prng):# ,oF, oD, oRel, oA
     D1.forward(Mod1)
 
     # Update the data errors using the updated relative errors
-    D1.updateErrors(paras.errorModel, D1.s, D1.relErr, D1.addErr)
+    D1.updateErrors(D1.relErr, D1.addErr)
 
     # Calibrate the response if it is being solved for
     if (paras.solveCalibration):

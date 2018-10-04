@@ -31,8 +31,8 @@ class _userParameters(myObject):
             assert False, TypeError('Invalid DataPoint type used')
 
         # Check the number of Markov chains
-        self.nMC = np.int32(self.nMC)
-        assert isdt(self.nMC, int), 'nMC must be a numpy integer'
+        self.nMC = np.int(self.nMC)
+        assert isinstance(self.nMC, np.int), 'nMC must be a numpy integer'
         assert self.nMC > 1000, 'Number of Markov Chain iterations nMC must be > 1000'
 
         # Check the minumum layer depth
@@ -47,7 +47,7 @@ class _userParameters(myObject):
 
         # Check the maximum number of layers
         self.maxLayers = np.int32(self.maxLayers)
-        assert isdt(self.maxLayers, int), 'maxLayers must be an int'
+        assert isinstance(self.maxLayers, np.int32), 'maxLayers must be an int'
 
         # Check the standard deviation of log(rhoa)=log(1+fac)
         assert isinstance(self.factor, float), 'factor must be a float (preferably np.float64)'
