@@ -14,37 +14,99 @@ import matplotlib.pyplot as plt
 
 
 class FdemData(Data):
-    """ Class defining a Fourier domain electro magnetic data set"""
+    """Class extension to geobipy.Data defining a Fourier domain electro magnetic data set
+    
+    FdemData(nPoints, nFrequencies, system)
 
-    def __init__(self, nPoints=1, nChannels=1, systemFname=None):
-        """ Initialize the FDEM data """
-        # EMSystem Class
-#    self.sys=EmSystem()
+    Parameters
+    ----------
+    nPoints : int, optional
+        Number of observations in the data set
+    nFrequencies : int, optional
+        Number of measurement frequencies
+    system : str or geobipy.FdemSystem, optional
+        * If str: Must be a file name from which to read FD system information from
+        * If FdemSystem: A deepcopy is made
+
+    Returns
+    -------
+    out : FdemData
+        Contains x, y, z, elevation, and data values for a frequency domain dataset.
+
+    Notes
+    -----
+    FdemData.read() requires a data filename and a system class or system filename to be specified.
+    The data file is structured using columns with the first line containing header information.
+    The header should contain the following entries
+    Line [ID or FID] [X or N or northing] [Y or E or easting] [Z or DTM or dem_elev] [Alt or Laser or bheight] [I Q] ... [I Q] 
+    Do not include brackets []
+    [I Q] are the in-phase and quadrature values for each measurement frequency.
+
+    If a system filename is given, it too is structured using columns with the first line containing header information
+    Each subsequent row contains the information for each measurement frequency
+
+    freq  tor  tmom  tx ty tz ror rmom  rx   ry rz
+    378   z    1     0  0  0  z   1     7.93 0  0
+    1776  z    1     0  0  0  z   1     7.91 0  0
+    ...
+
+    where tor and ror are the orientations of the transmitter/reciever loops [x or z].
+    tmom and rmom are the moments of the loops.
+    t/rx,y,z are the loop offsets from the observation locations in the data file.
+
+    """
+
+    def __init__(self, nPoints=1, nFrequencies=1, system=None):
+        """Instantiate the FdemData class. """
         # Data Class containing xyz and channel values
-        Data.__init__(self, nPoints, nChannels, "ppm")
+        Data.__init__(self, nPoints, 2*nFrequencies, "ppm")
         # StatArray of the line number for flight line data
         self.line = StatArray(nPoints, 'Line Number')
         # StatArray of the id number
         self.id = StatArray(nPoints, 'ID Number')
         # StatArray of the elevation
         self.e = StatArray(nPoints, 'Elevation', 'm')
-        # Instantiate the system
-        self.sys = FdemSystem()
         # Assign data names
         self.D.name='Fdem Data'
-        # Assign channel names
-        self.names = [None]*nChannels
 
-        if (not systemFname is None):
-            self.sys.read(systemFname)
+        self.sys = None
+
+        if (not system is None):
+            if isinstance(system, FdemSystem):
+                self.sys = system.deepcopy()
+            else:
+                # Instantiate the system
+                self.sys = FdemSystem()
+                self.sys.read(system)
+
+        if (not self.sys is None):
             # Set the channel names
+            self.names = [None]*self.nChannels
             for i in range(2 * self.sys.nFreq):
                 self.names[i] = self.getMeasurementType(i) + str(self.getFrequency(i))+' (Hz)'
 
 
     def read(self, dataFname, systemFname):
-        """ Read in both the FDEM data and FDEM system files
-        The data are read in according to the header names.
+        """Read in both the Fdem data and FDEM system files
+        
+        The data file is structured using columns with the first line containing header information.
+        The header should contain the following entries
+        Line [ID or FID] [X or N or northing] [Y or E or easting] [Z or DTM or dem_elev] [Alt or Laser or bheight] [I Q] ... [I Q] 
+        Do not include brackets []
+        [I Q] are the in-phase and quadrature values for each measurement frequency.
+
+        If a system filename is given, it too is structured using columns with the first line containing header information
+        Each subsequent row contains the information for each measurement frequency
+
+        freq  tor  tmom  tx ty tz ror rmom  rx   ry rz
+        378   z    1     0  0  0  z   1     7.93 0  0
+        1776  z    1     0  0  0  z   1     7.91 0  0
+        ...
+
+        where tor and ror are the orientations of the transmitter/reciever loops [x or z].
+        tmom and rmom are the moments of the loops.
+        t/rx,y,z are the loop offsets from the observation locations in the data file.
+
         """
         # Read in the EM System file
         sys = FdemSystem()
@@ -79,10 +141,7 @@ class FdemData(Data):
             elif(line in ['id', 'fid']):
                 i += 1
                 iID = i
-        assert i == 5, ('Cannot determine data columns. \n'
-                        'Please use a header line and specify the following case insensitive header names \n'
-                        'Line [ID or FID] [X or N or northing] [Y or E or easting] [Z or DTM or dem_elev] '
-                              '[Alt or Laser or bheight] [I Q] ... [I Q] \n Do not include brackets []')
+        assert i == 5, ('Cannot determine data columns. \n' + self.dataFileStructure())
         # Initialize column identifiers
         cols = np.zeros(nChannels - i + 2, dtype=int)
         for j, k in enumerate(tmp):
@@ -104,7 +163,7 @@ class FdemData(Data):
             assert (nData == 4 * sys.nFreq), "Number of error columns must 2 times # of Frequencies"
 
         # Initialize the EMData Class
-        self.__init__(nPoints, 2 * sys.nFreq)
+        self.__init__(nPoints, sys.nFreq)
         self.sys = sys
         # Read in the data, extract the appropriate columns
         tmp = fIO.read_columns(dataFname, cols, 1, nPoints)
@@ -139,25 +198,61 @@ class FdemData(Data):
         # Set the channel names
         for i in range(2 * self.sys.nFreq):
             self.names[i] = self.getMeasurementType(i) + str(self.getFrequency(i))+' (Hz)'
+
+
+    def fileInformation(self):
+        """Description of the data file."""
+        tmp = 'The data file is structured using columns with the first line containing a header line.\n'\
+              'The header should contain the following entries \n'\
+              'Line [ID or FID] [X or N or northing] [Y or E or easting] [Z or DTM or dem_elev] '\
+              '[Alt or Laser or bheight] [I Q] ... [I Q] \n'\
+              'Do not include brackets [], [I Q] are the in-phase and quadrature values for each measurement frequency.\n'
+        return tmp
             
-    def getNumberActiveData(self):
+
+    @property
+    def nActiveData(self):
         """Get the number of active data per data point.
 
         For each data point, counts the number of channels that are NOT nan.
 
         Returns
         -------
-        out
-            StatArray
+        out : int
+            Number of active data
 
         """
         
-        tmp = StatArray(np.sum(~np.isnan(self.D), 1), name='Number of active channels')
+        return np.sum(~np.isnan(self.D), 1)
 
-        return tmp
+
+    @property
+    def nFrequencies(self):
+        """Return the number of frequencies
+
+        Returns
+        -------
+        nFrequencies : int
+            Number of frequencies
+
+        """
+        return self.sys.nFreq
+
 
     def getChannel(self, channel):
-        """ Gets the data in the specified channel """
+        """Gets the data in the specified channel 
+        
+        Parameters
+        ----------
+        channel : int
+            A channel number less than 2 * number of frequencies
+
+        Returns
+        -------
+        out : StatArray
+            Contains the values of the requested channel
+
+        """
         assert channel < 2*self.sys.nFreq, 'Requested channel must be less than '+str(2*self.sys.nFreq)
 
         if (channel < self.sys.nFreq):
@@ -170,22 +265,67 @@ class FdemData(Data):
 
         return tmp
 
+
     def getMeasurementType(self, channel):
+        """Returns the measurement type of the channel
+
+        Parameters
+        ----------
+        channel : int
+            Channel number
+
+        Returns
+        -------
+        out : str
+            Either "In-Phase " or "Quadrature "
+        
+        """
         return 'In-Phase ' if channel <self.sys.nFreq else 'Quadrature '
 
+
     def getFrequency(self, channel):
+        """Return the measurement frequency of the channel
+
+        Parameters
+        ----------
+        channel : int
+            Channel number
+
+        Returns
+        -------
+        out : float
+            The measurement frequency of the channel
+
+        """
         return self.sys.freq[channel%self.sys.nFreq]
 
+
     def getLine(self, line):
-        """ Gets the data in the given line number """
+        """Gets the data in the given line number 
+        
+        Parameters
+        ----------
+        line : float
+            A line number from the data file
+
+        Returns
+        -------
+        out : geobipy.FdemData
+            A data class containing only the data in the line
+        
+        """
         i = np.where(self.line == line)[0]
         assert (i.size > 0), 'Could not get line with number '+str(line)
         return self[i]
 
 
     def __getitem__(self, i):
-        """ Define item getter for Data """
-        tmp = FdemData(np.size(i), self.nChannels)
+        """Define item getter for Data 
+
+        Allows slicing into the data FdemData[i]        
+        
+        """
+        tmp = FdemData(np.size(i), self.nFrequencies)
         tmp.x[:] = self.x[i]
         tmp.y[:] = self.y[i]
         tmp.z[:] = self.z[i]
@@ -200,7 +340,19 @@ class FdemData(Data):
 
 
     def getDataPoint(self, i):
-        """ Get the ith data point from the data set """
+        """Get the ith data point from the data set 
+        
+        Parameters
+        ----------
+        i : int
+            The data point to get
+            
+        Returns
+        -------
+        out : geobipy.FdemDataPoints
+            The data point
+            
+        """
         return FdemDataPoint(self.x[i], self.y[i], self.z[i], self.e[i], self.D[i, :], self.Std[i, :], self.sys)
 
 
@@ -290,44 +442,101 @@ class FdemData(Data):
         plt.yscale(yscale)
         return ax
 
+    def Bcast(self, world, root=0):
+        """Broadcast the FdemData using MPI 
+        
+        Parameters
+        ----------
+        world : mpi4py.MPI.COMM_WORLD
+            MPI communicator
 
-    def scatter2D(self, **kwargs):
-        """ Override scatter2D to be default log """
+        Returns
+        -------
+        out : geobipy.FdemData
+            A copy of the data on each core
 
-        return Data.scatter2D(self, **kwargs)
+        Examples
+        --------
+        >>> from mpi4py import MPI
+        >>> from geobipy import FdemData
 
+        >>> world = MPI.COMM_WORLD
 
-    def Bcast(self, world):
-        """ Broadcast the FdemData using MPI """
+        >>> rank = world.rank
+
+        >>> if (rank == 0): # Only the master reads in the data
+        >>>     D = FdemData()
+        >>>     D.read(dataFile, systemFile)
+        >>> else:
+        >>>     D = FdemData() # Must instantiate an empty object to Bcast
+
+        >>> D2 = D.Bcast(world)
+        
+        """
         dat = None
-        dat = Data.Bcast(self, world)
-        this = FdemData(dat.N, dat.nChannels)
+        dat = Data.Bcast(self, world, root=root)
+        this = FdemData(dat.N, dat.nFrequencies)
         this.x = dat.x
         this.y = dat.y
         this.z = dat.z
         this.D = dat.D
         this.Std = dat.Std
-        this.id = self.id.Bcast(world)
-        this.line = self.line.Bcast(world)
-        this.e = self.e.Bcast(world)
-        this.sys = self.sys.Bcast(world)
+        this.id = self.id.Bcast(world, root=root)
+        this.line = self.line.Bcast(world, root=root)
+        this.e = self.e.Bcast(world, root=root)
+        this.sys = self.sys.Bcast(world, root=root)
         return this
 
-    def Scatterv(self, myStart, myChunk, world):
-        """ Scatterv the FdemData using MPI """
-#    print(world.rank,' FdemData.Scatterv')
+    def Scatterv(self, starts, chunks, world, root=0):
+        """Distributes the FdemData between all cores using MPI 
+        
+        Parameters
+        ----------
+        starts : array of ints
+            1D array of ints with size equal to the number of MPI ranks. Each element gives the starting index for a chunk to be sent to that core. e.g. starts[0] is the starting index for rank = 0.
+        chunks : array of ints
+            1D array of ints with size equal to the number of MPI ranks. Each element gives the size of a chunk to be sent to that core. e.g. chunks[0] is the chunk size for rank = 0.
+        world : mpi4py.MPI.COMM_WORLD
+            The MPI communicator
+
+        Returns
+        -------
+        out : geobipy.FdemData
+            The data distributed amongst cores
+
+        Examples
+        --------
+        >>> from mpi4py import MPI
+        >>> from geobipy import FdemData
+        >>> import numpy as np
+
+        >>> world = MPI.COMM_WORLD
+
+        >>> rank = world.rank
+
+        >>> if (rank == 0): # Only the master reads in the data
+        >>>     D = FdemData()
+        >>>     D.read(dataFile, systemFile)
+        >>> else:
+        >>>     D = FdemData() # Must instantiate an empty object to Bcast
+
+        >>> # In this example, assume there are 10 data and 4 cores
+        >>> start = np.asarray([0, 2, 4, 6])
+        >>> chunks = np.asarray([2, 2, 2, 4])
+
+        >>> D2 = D.Scatterv(start, chunks, world)
+
+        """
         dat = None
-        dat = Data.Scatterv(self, myStart, myChunk, world)
-#    print(world.rank,' After Data.Scatterv')
-#    print(world.rank,dat.D)
-        this = FdemData(dat.N, dat.nChannels)
+        dat = Data.Scatterv(self, starts, chunks, world, root=root)
+        this = FdemData(dat.N, dat.nFrequencies)
         this.x = dat.x
         this.y = dat.y
         this.z = dat.z
         this.D = dat.D
         this.Std = dat.Std
-        this.id = self.id.Scatterv(myStart, myChunk, world)
-        this.line = self.line.Scatterv(myStart, myChunk, world)
-        this.e = self.e.Scatterv(myStart, myChunk, world)
-        this.sys = self.sys.Bcast(world)
+        this.id = self.id.Scatterv(starts, chunks, world, root=root)
+        this.line = self.line.Scatterv(starts, chunks, world, root=root)
+        this.e = self.e.Scatterv(starts, chunks, world, root=root)
+        this.sys = self.sys.Bcast(world, root=root)
         return this

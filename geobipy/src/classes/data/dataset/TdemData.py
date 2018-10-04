@@ -11,16 +11,10 @@ from .Data import DataSet
 from .Data import Data
 from ..datapoint.TdemDataPoint import TdemDataPoint
 from ....classes.core.StatArray import StatArray
-from ...system.EmLoop import EmLoop
-from....base.customFunctions import safeEval
+from ...system.CircularLoop import CircularLoop
+from ....base.customFunctions import safeEval
+from ...system.TdemSystem import TdemSystem
 
-try:
-    from gatdaem1d import TDAEMSystem
-except:
-    h=("Could not find a Time Domain forward modeller. \n"
-       "Please see the package's README for instructions on how to install one \n"
-       "Check that you have loaded the compiler that was used to compile the forward modeller")
-    print(Warning(h))
 import numpy as np
 from ....base import fileIO as fIO
 #from ....base import Error as Err
@@ -57,7 +51,7 @@ class TdemData(PointCloud3D):
 
     """
 
-    def __init__(self, nPoints=1, nTimes=[1], nSystems=1):
+    def __init__(self, nPoints=1, nTimes=[1], nSystems=1, systemFnames=None):
         """ Initialize the TDEM data """
         nt = np.asarray(nTimes)
         assert nt.size == nSystems, "length of nTimes must equal nSys"
@@ -65,6 +59,13 @@ class TdemData(PointCloud3D):
         PointCloud3D.__init__(self, nPoints)
         # Number of systems
         self.nSystems = np.int32(nSystems)
+        if (not systemFnames is None):
+            assert isinstance(systemFnames, (str, list)), TypeError("systemFnames must be str or list of str")
+            if (isinstance(systemFnames, str)):
+                self.nSystems = 1
+            else:
+                self.nSystems = len(systemFnames)
+
         # Number of channels
         self.nTimes = np.int32(nTimes)
         # ndarray for the number of system types
@@ -76,17 +77,14 @@ class TdemData(PointCloud3D):
         # StatArray of the line number for flight line data
         self.line = StatArray(self.N, 'Line Number', 'N/A')
         # StatArray of the id number
-        self.id = StatArray(self.N, 'ID Number')
+        self.id = np.zeros(self.N, dtype=np.int32)
         # StatArray of the elevation
         self.elevation = StatArray(self.N, 'Elevation', 'm')
         # StatArray of Transmitter loops
-        self.T = StatArray(self.N, 'Transmitter Loops', dtype=EmLoop)
+        self.T = StatArray(self.N, 'Transmitter Loops', dtype=CircularLoop)
         # StatArray of Receiever loops
-        self.R = StatArray(self.N, 'Receiver Loops', dtype=EmLoop)
-#     np.ndarray of Tdaem Systems
-#    self.sys=np.ndarray(self.nSystems,dtype=TDAEMSystem)
-#    for i in range(self.nSystems):
-#      self.sys[i]=TDAEMSystem()
+        self.R = StatArray(self.N, 'Receiver Loops', dtype=CircularLoop)
+
 
     def read(self, dataFname, systemFname):
         """Reads the data and system parameters from file
@@ -221,19 +219,19 @@ class TdemData(PointCloud3D):
         # Assign the orientations of the acquisistion loops
         if (not rLoop is None):
             for i in range(nPoints):
-                self.R[i] = EmLoop(zoff=self.z[i], pitch=tmp[i, i0], roll=tmp[i, i0+1], yaw=tmp[i, i0+2])
+                self.R[i] = CircularLoop(z=self.z[i], pitch=tmp[i, i0], roll=tmp[i, i0+1], yaw=tmp[i, i0+2], radius=self.sys[0].loopRadius())
             i0 += 3
         else:
             for i in range(nPoints):
-                self.R[i] = EmLoop(zoff=self.z[i])
+                self.R[i] = CircularLoop(z=self.z[i], radius=self.sys[0].loopRadius())
 
         if (not tLoop is None):
             for i in range(nPoints):
-                self.T[i] = EmLoop(zoff=self.z[i], pitch=tmp[i, i0], roll=tmp[i, i0+1], yaw=tmp[i, i0+2])
+                self.T[i] = CircularLoop(z=self.z[i], pitch=tmp[i, i0], roll=tmp[i, i0+1], yaw=tmp[i, i0+2], radius=self.sys[0].loopRadius())
             i0 += 3
         else:
             for i in range(nPoints):
-                self.T[i] = EmLoop(zoff=self.z[i])
+                self.T[i] = CircularLoop(z=self.z[i], radius=self.sys[0].loopRadius())
 
         # Create column indexers for the data and errors
         i1 = i0 + nTimes[0]
@@ -242,10 +240,13 @@ class TdemData(PointCloud3D):
         # Get the data values
         self.set[0].D[:, :] = tmp[:, iData]
         # If the data error columns are given, read them in
-        if (not offErr[0] is None):
+        if (offErr[0] is None):
+            self.set[0].Std = None
+        else:
             i2 = i1 + nTimes[0]
             iStd = np.arange(i1, i2)
             self.set[0].Std[:, :] = tmp[:, iStd]
+        
 
 
         # Read in the data for the other systems.  Only read in the data and, if available, the errors
@@ -258,24 +259,21 @@ class TdemData(PointCloud3D):
             tmp = fIO.read_columns(dataFname[i], readColumns, 1, nPoints)
             # Assign the data
             self.set[i].D[:, :] = tmp[:, :nTimes[i]]
-            if (not offErr[i] is None):
+            if (offErr[i] is None):
+                self.set[i].Std = None
+            else:
                 self.set[i].Std[:, :] = tmp[:, nTimes[i]:]
+                
 
     def readSystemFile(self, systemFname):
         """ Reads in the C++ system handler using the system file name """
 
         nSys = len(systemFname)
-        self.sys = np.ndarray(nSys, dtype=TDAEMSystem)
+        self.sys = np.ndarray(nSys, dtype=TdemSystem)
 
         for i in range(nSys):
-            # Check that the file exists, rBodies class does not handle errors
-            assert fIO.fileExists(systemFname[i]),'Could not open file: ' + systemFname[i]
-
-            # Read in the System file
-            self.sys[i] = TDAEMSystem(systemFname[i])
-            self.sys[i].sysFname = systemFname[i]
-            assert np.min(np.diff(self.sys[i].windows.centre)) > 0.0, ValueError("Receiver window times must monotonically increase for system "+systemFname[i])
-
+            self.sys[i] = TdemSystem()
+            self.sys[i].read(systemFname[i])
 
 
     def getColumnIDs(self,dataFname):
@@ -416,7 +414,13 @@ class TdemData(PointCloud3D):
         """ Get the ith data point from the data set """
         assert 0 <= i < self.N, ValueError("Requested data point must have index (0, "+str(self.N) + ']')
         D = [self.set[j].D[i, :] for j in range(self.nSystems)]
-        S = [self.set[j].Std[i, :] for j in range(self.nSystems)]
+        S = []
+        for j in range(self.nSystems):
+            if (self.set[j].Std is None):
+                S.append(None)
+            else:
+                S.append(self.set[j].Std[i, :])   
+        # S = [self.set[j].Std[i, :] for j in range(self.nSystems)]
         this = TdemDataPoint(self.x[i], self.y[i], self.z[i], self.elevation[i], D, S, self.sys, self.T[i],self.R[i])
         return this
 
@@ -531,23 +535,36 @@ class TdemData(PointCloud3D):
             return msg
         print(msg)
 
-    def scatter2D(self, log=None, **kwargs):
-        """ Override scatter2D to be default log """
-        if (log is None):
-            if (not 'c' in kwargs):
-                log=None
-            else:
-                log=10
-        return Data.scatter2D(self, log=log, **kwargs)
+    def scatter2D(self, **kwargs):
+        """Create a 2D scatter plot using the x, y coordinates.
+
+        Can take any other matplotlib arguments and keyword arguments e.g. markersize etc.
+
+        Parameters
+        ----------
+        c : 1D array_like or StatArray, optional
+            Colour values of the points, default is the height of the points
+        i : sequence of ints, optional
+            Plot a subset of x, y, c, using the indices in i
+            
+        See Also
+        --------
+        geobipy.customPlots.Scatter2D : For additional keyword arguments you may use.
+
+        """
+
+        if (not "log" in kwargs):
+            kwargs["log"] = 10.0
+        return Data.scatter2D(self, **kwargs)
 
     def Bcast(self, world):
         """ Broadcast the TdemData using MPI """
         pc3d = None
         pc3d = PointCloud3D.Bcast(self, world)
         nTimes = myMPI.Bcast(self.nTimes, world)
-        nSys = myMPI.Bcast(self.nSystems, world)
+        nSystems = myMPI.Bcast(self.nSystems, world)
         # Instantiate a new Time Domain Data set on each worker
-        this = TdemData(pc3d.N, nTimes, nSys)
+        this = TdemData(pc3d.N, nTimes, nSystems)
 
         # Assign the PointCloud Variables
         this.x = pc3d.x
