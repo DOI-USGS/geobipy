@@ -2,18 +2,18 @@ module fdemforward1D
 implicit none
 
 ! Define some fixed parameters
-real(kind=8),parameter :: NaN = transfer((/ Z'00000000', Z'7FF80000' /),1.0_8)
-complex(kind=8),parameter :: cNaN = complex(NaN,NaN)
-real(kind=8),parameter :: pi = dacos(-1.d0)
-real(kind=8),parameter :: pi2 = 2.d0*pi
-real(kind=8),parameter :: pi4 = 4.d0*pi
-real(kind=8),parameter :: mu0 = 4.d-7*pi ! H/m
-real(kind=8),parameter :: c = 299792458.d0 ! m/s
-real(kind=8),parameter :: eps0 = 1.d0/(mu0*(c**2.d0)) ! F/m
+real(kind=8), parameter :: NaN = transfer((/ Z'00000000', Z'7FF80000' /), 1.0_8)
+complex(kind=8), parameter :: cNaN = complex(NaN, NaN)
+real(kind=8), parameter :: pi = dacos(-1.d0)
+real(kind=8), parameter :: pi2 = 2.d0 * pi
+real(kind=8), parameter :: pi4 = 4.d0 * pi
+real(kind=8), parameter :: mu0 = 4.d-7 * pi ! H/m
+real(kind=8), parameter :: c = 299792458.d0 ! m/s
+real(kind=8), parameter :: eps0 = 1.d0 / (mu0 * (c**2.d0)) ! F/m
 integer, parameter :: nCJ0 = 120
 integer, parameter :: nCJ1 = 140
 
-! Using a class allows to create coefficients once when the forward modeller is first used.
+! Using a class allows us to create coefficients once when the forward modeller is first used.
 type t_lambdas
     real(kind=8), allocatable :: w0(:), w1(:)
     real(kind=8), allocatable :: lam0(:, :), lam1(:, :)
@@ -24,6 +24,7 @@ type(t_lambdas), private :: lam
 
 contains
 
+!====================================================================!
 subroutine forward1D(nFreq, nLayers, tid, freqs, tHeight, rHeight, moments, rx, separation, scale, parIn, thkIn, predicted)
     !! Computes the forward frequency domain electromagnetic response of a 1D layered earth.
     !! This function is callable from python.
@@ -101,6 +102,7 @@ subroutine forward1D(nFreq, nLayers, tid, freqs, tHeight, rHeight, moments, rx, 
     predicted = 1.d6 * scale * ((H - H0) / H0)
 
 end subroutine
+!====================================================================!
 !====================================================================!
 subroutine sensitivity1D(nFreq, nLayers, tid, freqs, tHeight, rHeight, moments, rx, separation, scale, parIn, thkIn, sens)
     !! Computes the sensitivity of the frequency domain electromagnetic response of a 1D layered earth.
