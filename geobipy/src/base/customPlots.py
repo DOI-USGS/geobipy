@@ -132,7 +132,7 @@ def pretty(ax):
     ax.get_yaxis().tick_left()
 
 
-def xlabel(label):
+def xlabel(label, **kwargs):
     """Create an x label with default fontsizes
 
     Parameters
@@ -141,10 +141,10 @@ def xlabel(label):
         The x label.    
 
     """
-    mpl.pyplot.xlabel(label, **myFonts)
+    mpl.pyplot.xlabel(label, **myFonts, **kwargs)
 
 
-def ylabel(label):
+def ylabel(label, **kwargs):
     """Create a y label with default fontsizes
 
     Parameters
@@ -153,10 +153,10 @@ def ylabel(label):
         The y label.
 
     """
-    mpl.pyplot.ylabel(label, **myFonts)
+    mpl.pyplot.ylabel(label, **myFonts, **kwargs)
 
 
-def clabel(cb, label):
+def clabel(cb, label, **kwargs):
     """Create a colourbar label with default fontsizes
 
     Parameters
@@ -167,10 +167,10 @@ def clabel(cb, label):
         The colourbar label
 
     """
-    cb.ax.set_ylabel(label, **myFonts)
+    cb.ax.set_ylabel(label, **myFonts, **kwargs)
 
 
-def title(label):
+def title(label, **kwargs):
     """Create a title with default fontsizes
 
     Parameters
@@ -179,10 +179,10 @@ def title(label):
         The title.
 
     """
-    mpl.pyplot.title(label, **myFonts)
+    mpl.pyplot.title(label, **myFonts, **kwargs)
 
 
-def suptitle(label):
+def suptitle(label, **kwargs):
     """Create a super title above all subplots with default font sizes
 
     Parameters
@@ -191,7 +191,7 @@ def suptitle(label):
         The suptitle.
 
     """
-    mpl.pyplot.suptitle(label, **myFonts)
+    mpl.pyplot.suptitle(label, **myFonts, **kwargs)
 
 
 def bar(values, x=None, i=None, **kwargs):
@@ -365,7 +365,7 @@ def pcolor(values, x=None, y=None, **kwargs):
     flipY : bool, optional
         Flip the Y axis
     grid : bool, optional
-        Plot the pixel grid
+        Plot the grid
     noColorbar : bool, optional
         Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.        
 
@@ -407,13 +407,20 @@ def pcolor(values, x=None, y=None, **kwargs):
     if (x is None):
         mx = np.arange(np.size(values,1)+1)
     else:
-        assert x.size == values.shape[1]+1, ValueError('x must be size '+str(values.shape[1]+1)+'. Not '+str(x.size))
-        mx = np.asarray(x)
+        mx = mx = np.asarray(x)
+        if (x.size == values.shape[1]):
+            mx = x.edges()
+        else:
+            assert x.size == values.shape[1]+1, ValueError('x must be size '+str(values.shape[1]+1)+'. Not '+str(x.size))
+            
     if (y is None):
         my = np.arange(np.size(values,0)+1)
     else:
-        assert y.size == values.shape[0]+1, ValueError('y must be size '+str(values.shape[0]+1)+'. Not '+str(y.size))
         my = np.asarray(y)
+        if (y.size == values.shape[0]):
+            my = y.edges()
+        else:
+            assert y.size == values.shape[0]+1, ValueError('y must be size '+str(values.shape[0]+1)+'. Not '+str(y.size))
 
     v = ma.masked_invalid(np.atleast_2d(np.asarray(values)))
 
@@ -644,6 +651,7 @@ def plot(x, y, **kwargs):
 
     """
 
+    ax = kwargs.pop('ax', None)
     xscale = kwargs.pop('xscale','linear')
     yscale = kwargs.pop('yscale','linear')
     flipX = kwargs.pop('flipX',False)
@@ -660,8 +668,9 @@ def plot(x, y, **kwargs):
         tmp, logLabel = _logSomething(y, log)
         yl = logLabel + yl
 
-    ax = plt.gca()
-    pretty(ax)
+    if (ax is None):
+        ax = plt.gca()
+        pretty(ax)
     
     try:
         plt.plot(x, tmp, **kwargs)
@@ -716,6 +725,10 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
         Scale the x axis? e.g. xscale = 'linear' or 'log'
     yscale : str, optional
         Scale the y axis? e.g. yscale = 'linear' or 'log'.
+    flipX : bool, optional
+            Flip the X axis
+    flipY : bool, optional
+        Flip the Y axis
     noColorBar : bool, optional
         Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
     
@@ -740,22 +753,21 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
     yscale = kwargs.pop('yscale','linear')
     sl = kwargs.pop('sizeLegend', None)
     it = kwargs.pop('intervals', None)
+    noColorBar = kwargs.pop('noColorBar', False)
     
     kwargs.pop('color',None) # Remove color which could conflict with c
 
     #c = kwargs.pop('c',None)
-    assert (not c is None), ValueError('argument c must not be None')
+    assert (not c is None), ValueError('Must specify colour with argument "c"')
 
     _cLabel = kwargs.pop('clabel',getNameUnits(c))
     
     c = c[i]
     xt = x[i]
     
-    iNaN=np.where(~np.isnan(c))[0]
+    iNaN = np.where(~np.isnan(c))[0]
     c = c[iNaN]
     xt = xt[iNaN]
-
-    assert (np.nanmin(c) != np.nanmax(c)), 'The minimum and maximum values are the same'
 
     # Did the user ask for a log colour plot?
     if (log):
@@ -772,8 +784,6 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
     else:
         yt = y[i]
         yt = yt[iNaN]
-
-    noColorBar = kwargs.pop('noColorBar', False)
 
     ax = plt.gca()
     pretty(ax)
