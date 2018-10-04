@@ -14,48 +14,48 @@ from numpy.random import randint
 
 # Set up shorter aliases for classes within geobipy
 # Base routines
-from src.base import customFunctions
-from src.base import customPlots
-from geobipy.src.base import fileIO
-from geobipy.src.base import interpolation
-from geobipy.src.base import MPI
-from geobipy.src.base.HDF import hdfRead
-from geobipy.src.base.HDF import hdfWrite
+from .src.base import customFunctions
+from .src.base import customPlots
+from .src.base import fileIO
+from .src.base import interpolation
+from .src.base import MPI
+from .src.base.HDF import hdfRead
+from .src.base.HDF import hdfWrite
 # Classes within geobipy
 # Core
-from geobipy.src.classes.core.StatArray import StatArray
-from geobipy.src.classes.core.Stopwatch import Stopwatch
+from .src.classes.core.StatArray import StatArray
+from .src.classes.core.Stopwatch import Stopwatch
 # Data points
-from geobipy.src.classes.data.datapoint.EmDataPoint import EmDataPoint
-from geobipy.src.classes.data.datapoint.FdemDataPoint import FdemDataPoint
-from geobipy.src.classes.data.datapoint.TdemDataPoint import TdemDataPoint
-from geobipy.src.classes.data.datapoint.MTDataPoint import MTDataPoint
+from .src.classes.data.datapoint.EmDataPoint import EmDataPoint
+from .src.classes.data.datapoint.FdemDataPoint import FdemDataPoint
+from .src.classes.data.datapoint.TdemDataPoint import TdemDataPoint
+from .src.classes.data.datapoint.MTDataPoint import MTDataPoint
 # Datasets
-from geobipy.src.classes.data.dataset.Data import Data
-from geobipy.src.classes.data.dataset.FdemData import FdemData
-from geobipy.src.classes.data.dataset.TdemData import TdemData
-from geobipy.src.classes.data.dataset.MTData import MTData
+from .src.classes.data.dataset.Data import Data
+from .src.classes.data.dataset.FdemData import FdemData
+from .src.classes.data.dataset.TdemData import TdemData
+from .src.classes.data.dataset.MTData import MTData
 # Systems
-from geobipy.src.classes.system.FdemSystem import FdemSystem
-from geobipy.src.classes.system.MTSystem import MTSystem
+from .src.classes.system.FdemSystem import FdemSystem
+from .src.classes.system.MTSystem import MTSystem
 # Meshes
-from geobipy.src.classes.mesh.RectilinearMesh1D import RectilinearMesh1D
-from geobipy.src.classes.mesh.RectilinearMesh2D import RectilinearMesh2D
+from .src.classes.mesh.RectilinearMesh1D import RectilinearMesh1D
+from .src.classes.mesh.RectilinearMesh2D import RectilinearMesh2D
 # Models
-from geobipy.src.classes.model.Model1D import Model1D
+from .src.classes.model.Model1D import Model1D
 # Pointclouds
-from geobipy.src.classes.pointcloud.PointCloud3D import PointCloud3D
+from .src.classes.pointcloud.PointCloud3D import PointCloud3D
 # Statistics
-from geobipy.src.classes.statistics.Distribution import Distribution
-from geobipy.src.classes.statistics.Histogram1D import Histogram1D
-from geobipy.src.classes.statistics.Histogram2D import Histogram2D
-from geobipy.src.classes.statistics.Hitmap2D import Hitmap2D
+from .src.classes.statistics.Distribution import Distribution
+from .src.classes.statistics.Histogram1D import Histogram1D
+from .src.classes.statistics.Histogram2D import Histogram2D
+from .src.classes.statistics.Hitmap2D import Hitmap2D
 # McMC Inersion
-from geobipy.src.inversion.Results import Results
-from geobipy.src.inversion.LineResults import LineResults
-from geobipy.src.inversion.DataSetResults import DataSetResults
+from .src.inversion.Results import Results
+from .src.inversion.LineResults import LineResults
+from .src.inversion.DataSetResults import DataSetResults
 
-from geobipy.src.inversion.Inv_MCMC import Initialize, Inv_MCMC
+from .src.inversion.Inv_MCMC import Initialize, Inv_MCMC
 
 # Set an MPI failed tag
 dpFailed = 0
