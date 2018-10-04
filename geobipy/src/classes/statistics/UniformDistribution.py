@@ -4,6 +4,7 @@ Module defining a uniform distribution with statistical procedures
 from copy import deepcopy
 from .baseDistribution import baseDistribution
 from ...base.HDF.hdfWrite import writeNumpy
+from ...base import customPlots as cP
 import numpy as np
 
 
@@ -51,6 +52,13 @@ class Uniform(baseDistribution):
         if (x >= self.max):
             return 1.0
         return self.pdf * (x - self.min)
+
+
+    def plotPDF(self, **kwargs):
+
+        bins = self.getBins()
+        t = r"$\tilde{U}("+str(self.min)+","+str(self.max)+")$"
+        cP.plot(bins, np.repeat(self.pdf, np.size(bins)), label=t, **kwargs)
 
 
     def probability(self, x):

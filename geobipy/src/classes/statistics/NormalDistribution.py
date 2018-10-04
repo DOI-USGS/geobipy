@@ -8,6 +8,7 @@ from .baseDistribution import baseDistribution
 from ...base.HDF.hdfWrite import writeNumpy
 #from .MvNormalDistribution import MvNormal
 from scipy.stats import norm
+from ...base import customPlots as cP
 
 class Normal(baseDistribution):
     """Univariate normal distribution
@@ -59,6 +60,16 @@ class Normal(baseDistribution):
 
         """
         return self.prng.normal(size=size, loc=self.mean, scale=self.variance)
+
+    
+    def plotPDF(self, **kwargs):
+
+        
+        bins = self.getBins()
+        t = r"$\tilde{N}(\mu="+str(self.mean)+", \sigma^{2}="+str(self.variance)+")$"
+
+        cP.plot(bins, self.probability(bins), label=t, **kwargs)
+
 
     def probability(self, x):
         """ For a realization x, compute the probability """
