@@ -183,8 +183,8 @@ class StatArray(np.ndarray, myObject):
         return out
 
 
-    def copy(self):
-        return copy(self)
+    def copy( self, order='F'):       
+        return StatArray(self)
 
 
     def deepcopy(self):
@@ -208,6 +208,11 @@ class StatArray(np.ndarray, myObject):
 
         other.name = self.name
         other.units = self.units
+
+        if (self.hasPrior()):
+            other._prior = self.prior.deepcopy()
+        if (self.hasProposal()):
+            other._proposal = self.proposal.deepcopy()
         
         return other
 
