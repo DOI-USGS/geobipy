@@ -1,10 +1,11 @@
 """ @FdemSystem_Class
 Module describing a frequency domain EM acquisition system
 """
+from copy import deepcopy
 from ...classes.core.myObject import myObject
 import numpy as np
 from ...classes.core.StatArray import StatArray
-from .EmLoop import EmLoop
+from .CircularLoop import CircularLoop
 from ...base import fileIO as fIO
 from ...base import MPI as myMPI
 #from ...base import Error as Err
@@ -13,32 +14,58 @@ from ...base import MPI as myMPI
 class FdemSystem(myObject):
     """ Defines a Frequency Domain ElectroMagnetic acquisition system """
 
-    def __init__(self, nFreq=0):
+    def __init__(self, nFreq=0, system=None):
         """ Initialize an FdemSystem """
         # Number of Frequencies
         self.nFreq = np.int64(nFreq)
         # StatArray of frequencies
         self.freq = StatArray(self.nFreq, "Frequencies", "Hz")
         # StatArray of Transmitter loops
-        self.T = StatArray(self.nFreq, "Transmitter Loops", "null", dtype=EmLoop)
+        self.T = StatArray(self.nFreq, "Transmitter Loops", dtype=CircularLoop)
         # StatArray of Reciever loops
-        self.R = StatArray(self.nFreq, "Reciever Loops", "null", dtype=EmLoop)
+        self.R = StatArray(self.nFreq, "Reciever Loops", dtype=CircularLoop)
         # StatArray of Loop Separations
         self.dist = StatArray(self.nFreq, "Loop Separations", "m")
-        # Instantiate the EmLoops
+        # Instantiate the circularLoops
         for i in range(self.nFreq):
-            self.T[i] = EmLoop()
-            self.R[i] = EmLoop()
+            self.T[i] = CircularLoop()
+            self.R[i] = CircularLoop()
+
+        if (not system is None):
+            assert (isinstance(system, str)), TypeError("system must a file to read the Fdem system information from")
+            self.read(system)
+
+
+    def deepcopy(self):
+        return deepcopy(self)
+
+
+    def __deepcopy__(self, memo):
+        tmp = FdemSystem(nFreq = self.nFreq)
+        tmp.freq[:] = self.freq
+        tmp.dist[:] = self.dist
+        for i in range(self.nFreq):
+            tmp.T[i] = self.T[i].deepcopy()
+            tmp.R[i] = self.R[i].deepcopy()
+        return tmp
 
 
     def read(self, fname):
         """ Read in a file containing the system information
-        The file contains a line with the header names, and a row for each frequency
-        freq tor tmom  tx ty tzoff ror rmom  rx   ry rzoff
-        378   z    1   0  0	 0      z   1    7.93 0  0
-        1776  z    1   0  0	 0      z   1    7.91 0  0
+        
+        The system file is structured using columns with the first line containing header information
+        Each subsequent row contains the information for each measurement frequency
+        freq  tor  tmom  tx ty tz ror rmom  rx   ry rz
+        378   z    1     0  0  0  z   1     7.93 0  0
+        1776  z    1     0  0  0  z   1     7.91 0  0
         ...
+
+        where tor and ror are the orientations of the transmitter/reciever loops [x or z].
+        tmom and rmom are the moments of the loops.
+        t/rx,y,z are the loop offsets from the observation locations in the data file.
+
         """
+
         self.__init__(fIO.getNlines(fname, 1))
         with open(fname) as f:
             tmp = f.readline().lower().split()
@@ -47,24 +74,38 @@ class FdemSystem(myObject):
                                    '\nFirst line of system file should contain\nfreq tor tmom  tx ty tzoff ror rmom  rx   ry rzoff')
             for j, line in enumerate(f):  # For each line in the file
                 line = fIO.parseString(line)
-                try:
-                    self.freq[j] = np.float64(line[0])
-                    self.T[j] = EmLoop(
-                            line[1], np.int(
-                            line[2]), np.int(
-                            line[3]), np.float64(
-                            line[4]), np.float64(
-                            line[5]))
-                    self.R[j] = EmLoop(
-                            line[6], np.int(
-                            line[7]), np.float64(
-                            line[8]), np.float64(
-                            line[9]), np.float64(
-                            line[10]))
-                    self.dist[j] = np.sqrt(np.power((self.T[j].tx - self.R[j].tx), 2.0) + np.power((self.T[j].ty - self.R[j].ty), 2.0))
-                except Exception:
-                    raise SystemExit(
-                        "Could not read from system file:" + fname + " Line:" + str(j + 2))
+                self.freq[j] = np.float64(line[0])
+                self.T[j] = CircularLoop(
+                        line[1], np.int(
+                        line[2]), np.int(
+                        line[3]), np.float64(
+                        line[4]), np.float64(
+                        line[5]))
+                self.R[j] = CircularLoop(
+                        line[6], np.int(
+                        line[7]), np.float64(
+                        line[8]), np.float64(
+                        line[9]), np.float64(
+                        line[10]))
+                self.dist[j] = np.sqrt(np.power((self.T[j].x - self.R[j].x), 2.0) + np.power((self.T[j].y - self.R[j].y), 2.0))
+                # except Exception:
+                #     raise SystemExit(
+                #         "Could not read from system file:" + fname + " Line:" + str(j + 2))
+
+
+    def fileInformation(self):
+        """Description of the system file."""
+        tmp = "The system file is structured using columns with the first line containing header information \n"
+        "Each subsequent row contains the information for each measurement frequency \n"
+        "freq  tor  tmom  tx ty tz ror rmom  rx   ry rz \n"
+        "378   z    1     0  0  0  z   1     7.93 0  0 \n"
+        "1776  z    1     0  0  0  z   1     7.91 0  0 \n"
+        "... \n"
+        "\n"
+        "where tor and ror are the orientations of the transmitter/reciever loops [x or z]. \n"
+        "tmom and rmom are the moments of the loops. \n"
+        "t/rx,y,z are the loop offsets from the observation locations in the data file. \n"
+        return tmp
 
 
     def getTensorID(self):
