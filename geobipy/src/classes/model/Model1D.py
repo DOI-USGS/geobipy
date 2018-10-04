@@ -33,9 +33,9 @@ class Model1D(Model):
     parameters : geobipy.StatArray, optional
         Describes the variable within each layer of the model.
     depth : geobipy.StatArray, optional
-        Depths to the lower interface of each layer. Do not provide if thickness is given.
+        Depths to the lower interface of each layer above the halfspace. Do not provide if thickness is given.
     thickness : geobipy.StatArray, optional
-        Thickness of each layer of size nCells - 1. Do not provide if depths are given.
+        Thickness of each layer above the halfspace. Do not provide if depths are given.
         
     Returns
     -------
@@ -49,9 +49,9 @@ class Model1D(Model):
     ValueError
         If size(parameters) != nCells
     ValueError
-        If size(depth) != nCells
+        If size(depth) != nCells - 1
     ValueError
-        If size(thickness) != nCells
+        If size(thickness) != nCells - 1
     TypeError
         If both depth and thickness are provided
 
@@ -73,17 +73,19 @@ class Model1D(Model):
         self.thk = StatArray(nCells, 'Thickness', 'm')
 
         if (not depth is None):
-            assert depth.size == nCells, ValueError('Size of depth must equal nCells')
-            assert np.all(np.diff(depth[:-1]) >= 0.0), ValueError('Depths must monotonically increase')
-            self.depth[:] = depth
+            if (nCells > 1):
+                assert depth.size == nCells-1, ValueError('Size of depth must equal {}'.format(nCells-1))
+                assert np.all(np.diff(depth) > 0.0), ValueError('Depths must monotonically increase')
+            self.depth[:-1] = depth
             self.depth[-1] = np.inf
             self.getThickness()
 
         if (not thickness is None):
-            assert thickness.size == nCells, ValueError('Size of thickness must equal nCells')
-            assert np.all(thickness[:-1] > 0.0), ValueError('Thicknesses must be positive')
-            self.thk[:] = thickness
-            self.thk[-1] = np.nan
+            if (nCells > 1):
+                assert thickness.size == nCells-1, ValueError('Size of thickness must equal {}'.format(nCells-1))
+                assert np.all(thickness > 0.0), ValueError('Thicknesses must be positive')
+            self.thk[:-1] = thickness
+            self.thk[-1] = np.inf
             self.getDepths()
 
         # StatArray of the physical parameters
@@ -100,13 +102,13 @@ class Model1D(Model):
         self.chim = StatArray(nCells, "Magnetic Permeability", "$\frac{H}{m}$")
 
         # Initialize Minimum cell thickness
-        self.hmin = None
+        self.minThickness = None
         # Initialize a minimum depth
-        self.zmin = None
+        self.minDepth = None
         # Initialize a maximum depth
-        self.zmax = None
+        self.maxDepth = None
         # Initialize a maximum number of layers
-        self.kmax = None
+        self.maxLayers = None
         # Initialize a probability wheel
         self.pWheel = None
         # Set an index that keeps track of the last layer to be perturbed
@@ -129,10 +131,10 @@ class Model1D(Model):
         other.top = self.top
         other.depth = self.depth.deepcopy()
         other.thk = self.thk.deepcopy()
-        other.hmin = self.hmin
-        other.zmin = self.zmin
-        other.zmax = self.zmax
-        other.kmax = self.kmax
+        other.minThickness = self.minThickness
+        other.minDepth = self.minDepth
+        other.maxDepth = self.maxDepth
+        other.maxLayers = self.maxLayers
         other.par = self.par.deepcopy()
         other.dpar = self.dpar.deepcopy()
         other.chie = self.chie.deepcopy() #StatArray(other.nCells[0], "Magnetic Susceptibility", r"$\kappa$")
@@ -166,12 +168,12 @@ class Model1D(Model):
         tmp.chim = self.chim.pad(size)
         tmp.iLayer = self.iLayer
         tmp.dpar=self.dpar.pad(size-1)
-        if (not self.zmin is None): tmp.zmin=self.zmin
-        if (not self.zmax is None): tmp.zmin=self.zmax
-        if (not self.kmax is None): tmp.zmin=self.kmax
-        if (not self.hmin is None): tmp.zmin=self.hmin
-        if (not self.pWheel is None): tmp.zmin=self.pWheel
-        if (not self.Hitmap is None): tmp.zmin=self.Hitmap
+        if (not self.minDepth is None): tmp.minDepth=self.minDepth
+        if (not self.maxDepth is None): tmp.maxDepth=self.maxDepth
+        if (not self.maxLayers is None): tmp.maxLayers=self.maxLayers
+        if (not self.minThickness is None): tmp.minThickness=self.minThickness
+        if (not self.pWheel is None): tmp.pWheel=self.pWheel
+        if (not self.Hitmap is None): tmp.Hitmap=self.Hitmap
         return tmp
 
 
@@ -179,7 +181,7 @@ class Model1D(Model):
         """Given the thicknesses of each layer, create the depths to each interface. The last depth is inf for the halfspace."""
         self.depth[0] = self.thk[0]
         for i in range(1, self.nCells[0] - 1):
-            self.depth[i] = self.depth[i - 1] + self.thk[i - 1]
+            self.depth[i] = self.depth[i - 1] + self.thk[i]
         self.depth[-1] = np.infty
 
 
@@ -311,7 +313,7 @@ class Model1D(Model):
 
         # Probability of model gradient
         if sGradient:  
-            P_gradient = self.smoothModelPrior(self.hmin)
+            P_gradient = self.smoothModelPrior(self.minThickness)
             probability += P_gradient
 
         # probability=np.float64(probability)
@@ -447,7 +449,7 @@ class Model1D(Model):
         return self.dpar.probability()
 
 
-    def makePerturbable(self, pWheel, zmin, zmax, kmax, prng=None, hmin=None):
+    def makePerturbable(self, pWheel, minDepth, maxDepth, maxLayers, prng=None, minThickness=None):
         """Setup a model such that it can be randomly perturbed.
 
         Parameters
@@ -455,16 +457,16 @@ class Model1D(Model):
         pWheel : array_like
             Probability of birth, death, perturb, and no change for the model
             e.g. pWheel = [0.5, 0.25, 0.15, 0.1]
-        zmin : float64
+        minDepth : float64
             Minimum depth possible for the model
-        zmax : float64
+        maxDepth : float64
             Maximum depth possible for the model
-        kmax : int
+        maxLayers : int
             Maximum number of layers allowable in the model
         prng : numpy.random.RandomState(), optional
             Random number generator, if none is given, will use numpy's global generator.
-        hmin : float64, optional
-            Minimum thickness of any layer. If hmin = None, hmin is computed from zmin, zmax, and kmax (recommended).
+        minThickness : float64, optional
+            Minimum thickness of any layer. If minThickness = None, minThickness is computed from minDepth, maxDepth, and maxLayers (recommended).
                
         See Also
         --------
@@ -472,17 +474,20 @@ class Model1D(Model):
         """
 
         assert np.size(pWheel) == 4, ValueError('pWheel must have size 4')
+        assert minDepth > 0.0, ValueError("minDepth must be > 0.0")
+        assert maxDepth > 0.0, ValueError("maxDepth must be > 0.0")
+        assert maxLayers > 0.0, ValueError("maxLayers must be > 0.0")
         self.pWheel = np.cumsum(pWheel/np.sum(pWheel))  # Assign the probability Wheel
-        if (hmin is None):
+        if (minThickness is None):
             # Assign a minimum possible thickness
-            self.hmin = np.log((zmax - zmin) / (2 * kmax))
+            self.minThickness = np.log((maxDepth - minDepth) / (2 * maxLayers))
         else:
-            self.hmin = hmin
-        self.zmin = np.log(zmin)  # Assign the log of the min depth
-        self.zmax = np.log(zmax)  # Assign the log of the max depth
-        self.kmax = np.int32(kmax)
+            self.minThickness = minThickness
+        self.minDepth = np.log(minDepth)  # Assign the log of the min depth
+        self.maxDepth = np.log(maxDepth)  # Assign the log of the max depth
+        self.maxLayers = np.int32(maxLayers)
         # Assign a uniform distribution to the number of layers
-        self.nCells.setPrior('Uniform', 1, kmax, prng=prng, isLogged=True)
+        self.nCells.setPrior('Uniform', 1, maxLayers, prng=prng, isLogged=True)
 
 
     def perturb(self):
@@ -522,9 +527,9 @@ class Model1D(Model):
         assert (not other.pWheel is None), ValueError('Please assign a probability wheel to the model with model1D.setProbabilityWheel()')
         prng = self.nCells.prior.prng
         # Pre-compute exponential values (Take them out of log space)
-        hmin = np.exp(other.hmin)
-        zmin = np.exp(other.zmin)
-        zmax = np.exp(other.zmax)
+        hmin = np.exp(other.minThickness)
+        zmin = np.exp(other.minDepth)
+        zmax = np.exp(other.maxDepth)
         nTries = 10
         # This outer loop will allow the perturbation to change types. e.g. if the loop is stuck in a birthing
         # cycle, the number of tries will exceed 10, and we can try a different perturbation type.
@@ -558,7 +563,7 @@ class Model1D(Model):
                 tries = 0
                 while (not success):  # Continue while the new layer is smaller than the minimum
                     # Get the new depth
-                    tmp = np.float64(prng.uniform(other.zmin, other.zmax, 1))
+                    tmp = np.float64(prng.uniform(other.minDepth, other.maxDepth, 1))
                     newDepth = np.exp(tmp)
                     z = other.depth[:-1]
                     # Insert the new depth
@@ -664,10 +669,10 @@ class Model1D(Model):
             par = 1.0 / par
         z = np.zeros(self.nCells[0] + 1)
         z[1:] = self.depth[:]
-        if (self.zmax is None):
+        if (self.maxDepth is None):
             z[-1] = 1.1 * self.depth[-2]
         else:
-            z[-1] = 1.1 * np.exp(self.zmax)
+            z[-1] = 1.1 * np.exp(self.maxDepth)
 
         if (not 'color' in kwargs):
             kwargs['color']=cP.wellSeparated[3]
@@ -722,15 +727,20 @@ class Model1D(Model):
 
         """
         d = StatArray(self.depth.size+1, self.depth.getName(), self.depth.getUnits())
-        d[1:] = self.depth[:]
+        
         if (self.nCells > 1):
+            d[1:] = self.depth[:]
             d[-1] = d[-2] * 1.25
         else:
             d[0] = 1.0
 
         ax = self.par.pcolor(*args, y = d + self.top, **kwargs)
         
-        plt.text(0, 0.99*d[-1], s=r'$\downarrow \infty$', fontsize=12)
+        h = 0.99*d[-1]
+        if (self.nCells == 1):
+            h = 0.99
+
+        plt.text(0, h, s=r'$\downarrow \infty$', fontsize=12)
 
         return ax
 
@@ -952,8 +962,8 @@ class Model1D(Model):
 #     # Assign the depth to the interface as half the bounds
 #     Mod.maketest(10)
 # #  Mod.par[:]=0.0036
-#     Mod.zmin = np.log(1.0)
-#     Mod.zmax = np.log(150.0)
+#     Mod.minDepth = np.log(1.0)
+#     Mod.maxDepth = np.log(150.0)
 #     # Compute the probability wheel for birth, death, perturbation, and No
 #     # change in the number of layers and depths
 #     Mod.setPerturbation([0.16666667, 0.333333, 0.5, 1.0], 1.0, 150.0, 30)
@@ -968,8 +978,8 @@ class Model1D(Model):
 #     # Set priors on the depth interfaces, given a number of layers
 #     Mod.depth.setPrior(
 #         'Order',
-#         Mod.zmin,
-#         Mod.zmax,
+#         Mod.minDepth,
+#         Mod.maxDepth,
 #         Mod.minThk,
 #         layerID)  # priZ
 
@@ -985,7 +995,7 @@ class Model1D(Model):
 
 #     priMu = np.log(0.01)
 #     priStd = np.log(11.0)
-#     zGrd = np.arange(0.5 * np.exp(Mod.zmin), 1.1 * np.exp(Mod.zmax), 0.5 * np.exp(Mod.minThk))
+#     zGrd = np.arange(0.5 * np.exp(Mod.minDepth), 1.1 * np.exp(Mod.maxDepth), 0.5 * np.exp(Mod.minThk))
 #     mGrd = np.logspace(np.log10(np.exp(priMu - 4.0 * priStd)), np.log10(np.exp(priMu + 4.0 * priStd)), 250)
 
 #     aMap = Hitmap2D([zGrd.size, mGrd.size], '', '', dtype=np.int32)
@@ -1110,19 +1120,19 @@ class Model1D(Model):
         except:
             pass
         try:
-            grp.create_dataset('zmin', data=self.zmin)
+            grp.create_dataset('zmin', data=self.minDepth)
         except:
             pass
         try:
-            grp.create_dataset('zmax', data=self.zmax)
+            grp.create_dataset('zmax', data=self.maxDepth)
         except:
             pass
         try:
-            grp.create_dataset('kmax', data=self.kmax)
+            grp.create_dataset('kmax', data=self.maxLayers)
         except:
             pass
         try:
-            grp.create_dataset('hmin', data=self.hmin)
+            grp.create_dataset('hmin', data=self.minThickness)
         except:
             pass
 
@@ -1237,19 +1247,19 @@ class Model1D(Model):
         except:
             pass
         try:
-            grp.create_dataset('zmin', data=self.zmin)
+            grp.create_dataset('zmin', data=self.minDepth)
         except:
             pass
         try:
-            grp.create_dataset('zmax', data=self.zmax)
+            grp.create_dataset('zmax', data=self.maxDepth)
         except:
             pass
         try:
-            grp.create_dataset('kmax', data=self.kmax)
+            grp.create_dataset('kmax', data=self.maxLayers)
         except:
             pass
         try:
-            grp.create_dataset('hmin', data=self.hmin)
+            grp.create_dataset('hmin', data=self.minThickness)
         except:
             pass
 
@@ -1276,18 +1286,18 @@ class Model1D(Model):
 
         item = grp.get('minThk')
         if (not item is None):
-            tmp.hmin = np.array(item)
+            tmp.minThickness = np.array(item)
         item = grp.get('hmin')
         if (not item is None):
-            tmp.hmin = np.array(item)
+            tmp.minThickness = np.array(item)
 
         item = grp.get('zmin')
         if (not item is None):
-            tmp.zmin = np.array(item)
+            tmp.minDepth = np.array(item)
 
         item = grp.get('zmax')
         if (not item is None):
-            tmp.zmax = np.array(item)
+            tmp.maxDepth = np.array(item)
 
         item = grp.get('pWheel')
         if (not item is None):
