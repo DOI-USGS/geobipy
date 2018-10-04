@@ -75,7 +75,7 @@ def checkCommandArguments():
     print(sys.argv)
 
     try:
-        opts, rem = getopt.getopt(sys.argv[1:], "hi:v", ["help", "input=","output="])
+        opts, rem = getopt.getopt(sys.argv[1:], "hi:ov", ["help", "input=","output="])
     except getopt.GetoptError as err:
         # print help information and exit:
         print(err) # will print something like "option -a not recognized"

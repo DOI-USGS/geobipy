@@ -475,7 +475,7 @@ class FdemData(Data):
         """
         dat = None
         dat = Data.Bcast(self, world, root=root)
-        this = FdemData(dat.N, dat.nFrequencies)
+        this = FdemData(dat.N, dat.nChannels/2)
         this.x = dat.x
         this.y = dat.y
         this.z = dat.z
