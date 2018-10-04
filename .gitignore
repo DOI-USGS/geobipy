@@ -8,3 +8,5 @@
 MANIFEST.in
 build
 *.so
+*.swp
+*.swo

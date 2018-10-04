@@ -29,12 +29,15 @@ from geobipy.src.classes.core.Stopwatch import Stopwatch
 from geobipy.src.classes.data.datapoint.EmDataPoint import EmDataPoint
 from geobipy.src.classes.data.datapoint.FdemDataPoint import FdemDataPoint
 from geobipy.src.classes.data.datapoint.TdemDataPoint import TdemDataPoint
+from geobipy.src.classes.data.datapoint.MTDataPoint import MTDataPoint
 # Datasets
 from geobipy.src.classes.data.dataset.Data import Data
 from geobipy.src.classes.data.dataset.FdemData import FdemData
 from geobipy.src.classes.data.dataset.TdemData import TdemData
+from geobipy.src.classes.data.dataset.MTData import MTData
 # Systems
 from geobipy.src.classes.system.FdemSystem import FdemSystem
+from geobipy.src.classes.system.MTSystem import MTSystem
 # Meshes
 from geobipy.src.classes.mesh.RectilinearMesh1D import RectilinearMesh1D
 from geobipy.src.classes.mesh.RectilinearMesh2D import RectilinearMesh2D
@@ -232,17 +235,17 @@ def multipleCore(inputFile, outputDir):
     from mpi4py import MPI
     from geobipy.src.base import MPI as myMPI
     
-    world=MPI.COMM_WORLD
+    world = MPI.COMM_WORLD
     myMPI.rankPrint(world,'Running EMinv1D_MCMC')
 
-    UP=import_module(inputFile,package=None)
+    UP = import_module(inputFile, package=None)
 
-    AllData=eval(UP.dataInit)
+    AllData = eval(UP.dataInit)
     # Initialize the data object on master
     if (world.rank == 0):
-        AllData.read(UP.dataFname,UP.sysFname)
+        AllData.read(UP.dataFname, UP.sysFname)
 
-    myData=AllData.Bcast(world)
+    myData = AllData.Bcast(world)
     if (world.rank == 0): myData = AllData
 
     myMPI.rankPrint(world,'Data Broadcast!')
@@ -359,10 +362,7 @@ def singleCore(inputFile, outputDir):
     LR = [None]*nLines
     H5Files = [None]*nLines
     for i in range(nLines):
-        H5Files[i] = h5py.File(
-                                join(outputDir, str(lines[i])+'.h5'),
-                                'w'
-                                )
+        H5Files[i] = h5py.File(join(outputDir, str(lines[i])+'.h5'), 'w')
         j = np.where(AllData.line == lines[i])[0]
         LR[i] = LineResults()
         LR[i].createHdf(H5Files[i], AllData.id[j], Res)
