@@ -162,7 +162,7 @@ def loadBalance_shrinkingArrays(N, nChunks):
     return starts, chunks
 
 
-def bcastType(self, world, source=0):
+def bcastType(self, world, root=0):
     """Gets the type of an object and broadcasts it to every rank in an MPI communicator.
 
     Adaptively broadcasts the type of an object. Must be called collectively.
@@ -175,7 +175,7 @@ def bcastType(self, world, source=0):
         For lists, the data type will be list
     world : mpi4py.MPI.Comm
         MPI parallel communicator.
-    source : int, optional
+    root : int, optional
         The MPI rank to broadcast from. Default is 0.
 
     Returns
@@ -184,7 +184,7 @@ def bcastType(self, world, source=0):
         The data type broadcast to every rank including the rank broadcast from.
 
     """
-    if (world.rank == source):
+    if (world.rank == root):
         try:
             tmp = self.dtype  # Try to get the dtype attribute
         except:
@@ -192,7 +192,7 @@ def bcastType(self, world, source=0):
     else:
         tmp = None  # Initialize tmp on all workers
 
-    tmp = world.bcast(tmp, root=source)  # Bcast out to all
+    tmp = world.bcast(tmp, root=root)  # Bcast out to all
     if (str(tmp) == 'list'):
         return 'list'
     tmp = 'np.' + str(tmp)  # Prepend np. to create the numpy type
@@ -218,19 +218,19 @@ def bcastType(self, world, source=0):
 #            return this[0]
 
 
-def Bcast(self, world, source=0):
+def Bcast(self, world, root=0):
     """Broadcast a string or a numpy array
 
-    Broadcast a string or a numpy array from a source rank to all ranks in an MPI communicator. Must be called collectively.
+    Broadcast a string or a numpy array from a root rank to all ranks in an MPI communicator. Must be called collectively.
     In order to call this function collectively, the variable 'self' must be instantiated on every rank. See the example section for more details.
 
     Parameters
     ----------
     self : str or numpy.ndarray
-        A string or numpy array to broadcast from source.
+        A string or numpy array to broadcast from root.
     world : mpi4py.MPI.Comm
         MPI parallel communicator.
-    source : int, optional
+    root : int, optional
         The MPI rank to broadcast from. Default is 0.
 
     Returns
@@ -268,47 +268,47 @@ def Bcast(self, world, source=0):
     """
     if (type(self) == str):
         this = None
-        if (world.rank == source):
+        if (world.rank == root):
             this = self
-        this = world.bcast(this, root=source)
+        this = world.bcast(this, root=root)
         return this
 
     # Broadcast the data type
-    myType = bcastType(self, world, source=source)
+    myType = bcastType(self, world, root=root)
 
     assert myType != 'list', TypeError("Use MPI.Bcast_list for lists")
 
     # Broadcast the number of dimensions
-    nDim = Bcast_1int(np.ndim(self), world, source=source)
+    nDim = Bcast_1int(np.ndim(self), world, root=root)
     if (nDim == 0):  # For a single number
         this = np.zeros(1, dtype=myType)  # Initialize on each worker
-        if (world.rank == source):
+        if (world.rank == root):
             this[0] = self  # Assign on the master
         world.Bcast(this)  # Broadcast
         return this[0]
 
     if (nDim == 1):  # For a 1D array
-        N = Bcast_1int(np.size(self), world, source=source)  # Broadcast the array size
-        if (world.rank == source):  # Assign on the source
+        N = Bcast_1int(np.size(self), world, root=root)  # Broadcast the array size
+        if (world.rank == root):  # Assign on the root
             this = np.zeros(N, dtype=myType)
             this[:] = self
         else:  # Initialize on each worker
             this = np.empty(N, dtype=myType)
-        world.Bcast(this, root=source)  # Broadcast
+        world.Bcast(this, root=root)  # Broadcast
         return this
 
     if (nDim > 1):  # nD Array
-        shape = Bcast(np.asarray(self.shape), world, source=source)  # Broadcast the shape
-        if (world.rank == source):  # Assign on the source
+        shape = Bcast(np.asarray(self.shape), world, root=root)  # Broadcast the shape
+        if (world.rank == root):  # Assign on the root
             this = np.zeros(shape, dtype=myType)
             this[:] = self
         else:  # Initialize on each worker
             this = np.empty(shape, dtype=myType)
-        world.Bcast(this, root=source)  # Broadcast
+        world.Bcast(this, root=root)  # Broadcast
         return this
 
 
-def Bcast_1int(self, world, source=0):
+def Bcast_1int(self, world, root=0):
     """Broadcast a single integer
 
     In order to broadcast scalar values using the faster numpy approach, the value must cast into a 1D ndarray. Must be called collectively.
@@ -319,7 +319,7 @@ def Bcast_1int(self, world, source=0):
         The integer to broadcast.
     world : mpi4py.MPI.Comm
         MPI parallel communicator.
-    source : int, optional
+    root : int, optional
         The MPI rank to broadcast from. Default is 0.
 
     Returns
@@ -343,15 +343,15 @@ def Bcast_1int(self, world, source=0):
     >>> i = myMPI.Bcast(i, world)
 
     """
-    if (world.rank == source):
+    if (world.rank == root):
         this = np.zeros(1, np.int64) + self
     else:
         this = np.empty(1, np.int64)
-    world.Bcast(this, root=source)
+    world.Bcast(this, root=root)
     return this[0]
 
 
-def Bcast_list(self, world, source=0):
+def Bcast_list(self, world, root=0):
     """Broadcast a list by pickling, sending, and unpickling.  This is slower than using numpy arrays and uppercase (Bcast) mpi4py routines. Must be called collectively.
 
     Parameters
@@ -360,7 +360,7 @@ def Bcast_list(self, world, source=0):
         A list to broadcast.
     world : mpi4py.MPI.Comm
         MPI parallel communicator.
-    source : int, optional
+    root : int, optional
         The MPI rank to broadcast from. Default is 0.
 
     Returns
@@ -369,11 +369,11 @@ def Bcast_list(self, world, source=0):
         The broadcast list on every MPI rank.
 
     """
-    this = world.bcast(self, root=source)
+    this = world.bcast(self, root=root)
     return this
 
 
-def Scatterv(self, starts, chunks, world, axis=0, source=0):
+def Scatterv(self, starts, chunks, world, axis=0, root=0):
     """ScatterV an array to all ranks in an MPI communicator.
 
     Each rank gets a chunk defined by a starting index and chunk size. Must be called collectively. The 'starts' and 'chunks' must be available on every MPI rank. Must be called collectively. See the example for more details.
@@ -381,7 +381,7 @@ def Scatterv(self, starts, chunks, world, axis=0, source=0):
     Parameters
     ----------
     self : numpy.ndarray
-        A numpy array to broadcast from source.
+        A numpy array to broadcast from root.
     starts : array of ints
         1D array of ints with size equal to the number of MPI ranks. Each element gives the starting index for a chunk to be sent to that core. e.g. starts[0] is the starting index for rank = 0.
     chunks : array of ints
@@ -390,7 +390,7 @@ def Scatterv(self, starts, chunks, world, axis=0, source=0):
         MPI parallel communicator.
     axis : int, optional
         Axis along which to Scatterv to the ranks if self is a 2D numpy array. Default is 0
-    source : int, optional
+    root : int, optional
         The MPI rank to broadcast from. Default is 0.
 
     Returns
@@ -414,18 +414,18 @@ def Scatterv(self, starts, chunks, world, axis=0, source=0):
     >>> else:
     >>>     x = None
     >>> # Scatter the array x among ranks.
-    >>> myChunk = myMPI.Scatterv(x, starts, chunks, world, source=0)
+    >>> myChunk = myMPI.Scatterv(x, starts, chunks, world, root=0)
 
     """
     # Brodacast the type
-    myType = bcastType(self, world, source=source)
+    myType = bcastType(self, world, root=root)
 
     assert myType != 'list', "Use Scatterv_list for lists!"
 
-    return Scatterv_numpy(self, starts, chunks, myType, world, axis, source)
+    return Scatterv_numpy(self, starts, chunks, myType, world, axis, root)
 
 
-def Scatterv_list(self, starts, chunks, world, source=0):
+def Scatterv_list(self, starts, chunks, world, root=0):
     """Scatterv a list by pickling, sending, receiving, and unpickling.  This is slower than using numpy arrays and uppercase (Scatterv) mpi4py routines. Must be called collectively.
 
     Parameters
@@ -438,7 +438,7 @@ def Scatterv_list(self, starts, chunks, world, source=0):
         1D array of ints with size equal to the number of MPI ranks. Each element gives the size of a chunk to be sent to that core. e.g. chunks[0] is the chunk size for rank = 0.
     world : mpi4py.MPI.Comm
         MPI parallel communicator.
-    source : int, optional
+    root : int, optional
         The MPI rank to broadcast from. Default is 0.
 
     Returns
@@ -448,18 +448,18 @@ def Scatterv_list(self, starts, chunks, world, source=0):
 
     """
     for i in range(world.size):
-        if (i != source):
-            if (world.rank == source):
+        if (i != root):
+            if (world.rank == root):
                 this = self[starts[i]:starts[i] + chunks[i]]
                 world.send(this, dest=i)
             if (world.rank == i):
-                this = world.recv(source=source)
+                this = world.recv(source=root)
                 return this
-    if (world.rank == source):
-        return self[:chunks[source]]
+    if (world.rank == root):
+        return self[:chunks[root]]
 
 
-def Scatterv_numpy(self, starts, chunks, myType, world, axis=0, source=0):
+def Scatterv_numpy(self, starts, chunks, dType, world, axis=0, root=0):
     """ScatterV a numpy array to all ranks in an MPI communicator.
 
     Each rank gets a chunk defined by a starting index and chunk size. Must be called collectively. The 'starts' and 'chunks' must be available on every MPI rank. See the example for more details. Must be called collectively.
@@ -467,18 +467,18 @@ def Scatterv_numpy(self, starts, chunks, myType, world, axis=0, source=0):
     Parameters
     ----------
     self : numpy.ndarray
-        A numpy array to broadcast from source.
+        A numpy array to broadcast from root.
     starts : array of ints
         1D array of ints with size equal to the number of MPI ranks. Each element gives the starting index for a chunk to be sent to that core. e.g. starts[0] is the starting index for rank = 0.
     chunks : array of ints
         1D array of ints with size equal to the number of MPI ranks. Each element gives the size of a chunk to be sent to that core. e.g. chunks[0] is the chunk size for rank = 0.
-    myType : type
+    dType : type
         The type of the numpy array being scattered. Must exist on all ranks.
     world : mpi4py.MPI.Comm
         MPI parallel communicator.
     axis : int, optional
         Axis along which to Scatterv to the ranks if self is a 2D numpy array. Default is 0
-    source : int, optional
+    root : int, optional
         The MPI rank to broadcast from. Default is 0.
 
     Returns
@@ -488,27 +488,27 @@ def Scatterv_numpy(self, starts, chunks, myType, world, axis=0, source=0):
 
     """
     # Broadcast the number of dimensions
-    nDim = Bcast_1int(np.ndim(self), world, source=source)
+    nDim = Bcast_1int(np.ndim(self), world, root=root)
     if (nDim == 1):  # For a 1D Array
-        this = np.zeros(chunks[world.rank], dtype=myType)
-        world.Scatterv([self, chunks, starts, None], this[:], root=source)
+        this = np.zeros(chunks[world.rank], dtype=dType)
+        world.Scatterv([self, chunks, starts, None], this[:], root=root)
         return this
 
     # For a 2D Array
     # MPI cannot send and receive arrays of more than one dimension.  Therefore higher dimensional arrays must be unpacked to 1D, and then repacked on the other side.
     if (nDim == 2):
-        s = Bcast_1int(np.size(self, 1 - axis), world, source=source)
+        s = Bcast_1int(np.size(self, 1 - axis), world, root=root)
         tmpChunks = chunks * s
         tmpStarts = starts * s
         self_unpk = None
-        if (world.rank == source):
+        if (world.rank == root):
             if (axis == 0):
                 self_unpk = np.reshape(self, np.size(self))
             else:
                 self_unpk = np.reshape(self.T, np.size(self))
-        this_unpk = np.zeros(tmpChunks[world.rank], dtype=myType)
+        this_unpk = np.zeros(tmpChunks[world.rank], dtype=dType)
         world.Scatterv([self_unpk, tmpChunks, tmpStarts, None],
-                       this_unpk, root=source)
+                       this_unpk, root=root)
         this = np.reshape(this_unpk, [chunks[world.rank], s])
         if (axis == 1):
             this = this.T
