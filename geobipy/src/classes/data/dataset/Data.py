@@ -235,8 +235,9 @@ class Data(PointCloud3D):
         this.x = pc3d.x
         this.y = pc3d.y
         this.z = pc3d.z
-        this.D = self.D.Bcast(world, root=root)
-        this.Std = self.Std.Bcast(world, root=root)
+        this.set = self.set.Bcast(world, root=root)
+        # this.D = self.D.Bcast(world, root=root)
+        # this.Std = self.Std.Bcast(world, root=root)
         return this
 
 
@@ -267,6 +268,7 @@ class Data(PointCloud3D):
         this.x = pc3d.x
         this.y = pc3d.y
         this.z = pc3d.z
-        this.D = self.D.Scatterv(starts, chunks, world, root=root)
-        this.Std = self.Std.Scatterv(starts, chunks, world, root=root)
+        this.set = self.set.Scatterv(starts, chunks, world, root=root)
+        # this.D = self.D.Scatterv(starts, chunks, world, root=root)
+        # this.Std = self.Std.Scatterv(starts, chunks, world, root=root)
         return this
