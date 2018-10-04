@@ -92,7 +92,7 @@ class Results(myObject):
         self.iBestV = StatArray(2*self.nMC, name='Iteration of best model')
 
         # Initialize the number of layers for the histogram
-        self.kHist = Histogram1D(bins=np.arange(0.0,paras.kmax + 1.5),name="# of Layers")
+        self.kHist = Histogram1D(bins=np.arange(0.0,paras.maxLayers + 1.5),name="# of Layers")
         # Initialize the histograms for the relative and Additive Errors
         rBins = D.relErr.prior.getBins()
         aBins = D.addErr.prior.getBins()
@@ -108,7 +108,7 @@ class Results(myObject):
             self.addErr.append(Histogram1D(bins=aBins,name='$log_{10} \epsilon_{Additive}$',units=D.d.units))
 
         # Initialize the hit map of layers and conductivities
-        zGrd = StatArray(np.arange(0.5 * np.exp(M.zmin), 1.1 * np.exp(M.zmax), 0.5 * np.exp(M.hmin)), M.depth.name, M.depth.units)
+        zGrd = StatArray(np.arange(0.5 * np.exp(M.minDepth), 1.1 * np.exp(M.maxDepth), 0.5 * np.exp(M.minThickness)), M.depth.name, M.depth.units)
 
         mGrd = StatArray(np.logspace(np.log10(np.exp(paras.priMu -3.0 * paras.priStd)),
                            np.log10(np.exp(paras.priMu + 3.0 * paras.priStd)),250), 'Conductivity','$Sm^{-1}$')
@@ -369,8 +369,8 @@ class Results(myObject):
                 # Plot the DOI cutoff based on percentage variance
                 self.doi = self.Hitmap.getOpacityLevel(67.0)
                 plt.axhline(self.doi, color='#5046C8', linestyle='dashed', linewidth=3)
-                # Plot the best model
 
+                # Plot the best model
                 self.bestModel.plot(flipY=False, invX=True, noLabels=True)
                 plt.axis([self.limits[0], self.limits[1], self.Hitmap.y[0], self.Hitmap.y[-1]])
                 ax = plt.gca()
@@ -511,7 +511,7 @@ class Results(myObject):
         self.currentD.createHdf(grp, 'currentd')
         self.bestD.createHdf(grp, 'bestd')
 
-        tmp=self.bestModel.pad(self.bestModel.kmax)
+        tmp=self.bestModel.pad(self.bestModel.maxLayers)
         tmp.createHdf(grp, 'bestmodel')
 
     def writeHdf(self, parent, myName, create=True, index=None):
@@ -736,7 +736,7 @@ class Results(myObject):
             item = grp.get('bestModel')
         obj = eval(safeEval(item.attrs.get('repr')))
         self.bestModel = obj.fromHdf(item)
-        self.bestModel.zmax = np.log(self.Hitmap.y[-1])
+        self.bestModel.maxDepth = np.log(self.Hitmap.y[-1])
 
         item = grp.get('currentd')
         if (item is None):

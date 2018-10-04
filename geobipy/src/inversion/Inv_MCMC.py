@@ -154,15 +154,15 @@ def Initialize(paras, D, prng):
     # Initialize a 1D model with the half space conductivity
     parameter = StatArray(np.asarray([HScond, HScond]), name='Conductivity', units=r'$\frac{S}{m}$')
     # Assign the depth to the interface as half the bounds
-    thk = np.asarray([0.5 * (paras.zmax + paras.zmin), 0.0])
+    thk = np.asarray([0.5 * (paras.maxDepth + paras.minDepth), 0.0])
     Mod = Model1D(2, parameters = parameter, thickness=thk)
 
     # Setup the model for perturbation
     pWheel = [paras.pBirth, paras.pDeath, paras.pPerturb, paras.pNochange]
-    Mod.makePerturbable(pWheel, paras.zmin, paras.zmax, paras.kmax, prng=prng, hmin=paras.hmin)
+    Mod.makePerturbable(pWheel, paras.minDepth, paras.maxDepth, paras.maxLayers, prng=prng, minThickness=paras.minThickness)
 
     # Set priors on the depth interfaces, given a number of layers
-    Mod.depth.setPrior('Order',Mod.zmin,Mod.zmax,Mod.hmin,paras.kmax)  # priZ
+    Mod.depth.setPrior('Order',Mod.minDepth,Mod.maxDepth,Mod.minThickness,paras.maxLayers)  # priZ
 
     # Compute the mean and std for the parameter
     paras.priMu = np.log(HScond)

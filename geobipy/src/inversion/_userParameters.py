@@ -36,18 +36,18 @@ class _userParameters(myObject):
         assert self.nMC > 1000, 'Number of Markov Chain iterations nMC must be > 1000'
 
         # Check the minumum layer depth
-        assert isinstance(self.zmin, float), 'zmin must be a float (preferably np.float64)'
+        assert isinstance(self.minDepth, float), 'minDepth must be a float (preferably np.float64)'
 
         # Check the maximum layer depth
-        assert isinstance(self.zmax, float), 'zmax must be a float (preferably np.float64)'
+        assert isinstance(self.maxDepth, float), 'maxDepth must be a float (preferably np.float64)'
 
         # Check the minimum layer thickness
-        if (not self.hmin is None):
-            assert isinstance(self.hmin, float), 'hmin must be a float (preferably np.float64)'
+        if (not self.minThickness is None):
+            assert isinstance(self.minThickness, float), 'minThickness must be a float (preferably np.float64)'
 
         # Check the maximum number of layers
-        self.kmax = np.int32(self.kmax)
-        assert isdt(self.kmax, int), 'kmax must be an int'
+        self.maxLayers = np.int32(self.maxLayers)
+        assert isdt(self.maxLayers, int), 'maxLayers must be an int'
 
         # Check the standard deviation of log(rhoa)=log(1+fac)
         assert isinstance(self.factor, float), 'factor must be a float (preferably np.float64)'

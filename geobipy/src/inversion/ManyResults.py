@@ -45,7 +45,7 @@ class ManyResults(myObject):
         elif isinstance(i0, (int, np.int)):
             if i1 is None:
                 Err.Emsg(__name__ + ':if i0 is an integer, so must i1')
-            for i in np.arange(i0, i1 + 1):
+            for i in range(i0, i1 + 1):
                 self.fileList.append(join(self.root,base,str(i)) + '.h5')
         # Get the First identifier in each file
         self.grpName=[]
