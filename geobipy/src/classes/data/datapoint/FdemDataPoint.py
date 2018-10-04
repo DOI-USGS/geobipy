@@ -22,7 +22,7 @@ from ....base import customPlots as cp
 class FdemDataPoint(EmDataPoint):
     """Class extension to geobipy.EmDataPoint
 
-    Class describes a frequency domain electro magnetic data point with 3D coordinates, observed data, 
+    Class describes a frequency domain electro-magnetic data point with 3D coordinates, observed data, 
     error estimates, predicted data, and a system that describes the aquisition parameters.
 
     FdemDataPoint(x, y, z)
@@ -85,6 +85,10 @@ class FdemDataPoint(EmDataPoint):
 
 
     def deepcopy(self):
+        return self.__deepcopy__()
+
+    
+    def __deepcopy__(self):
         """ Define a deepcopy routine """
         tmp = FdemDataPoint(self.x, self.y, self.z, self.e)
         tmp.z = self.z.deepcopy()
@@ -286,7 +290,7 @@ class FdemDataPoint(EmDataPoint):
 #    self.sys.summary()
 #    print('')
 
-    def plot(self, title='', **kwargs):
+    def plot(self, title='Frequency Domain EM Data', **kwargs):
         """ Plot the Inphase and Quadrature Data for an EM measurement
         if plotPredicted then the predicted data are plotted as a line, with points for the observed data
         else the observed data with error bars and linear interpolation are shown.
@@ -349,14 +353,17 @@ class FdemDataPoint(EmDataPoint):
         return ax
 
 
-    def plotPredicted(self, title='',**kwargs):
+    def plotPredicted(self, title='Frequency Domain EM Data',**kwargs):
 
         ax = plt.gca()
         cp.pretty(ax)
 
-        cp.xlabel('Frequency (Hz)')
-        cp.ylabel('Data (ppm)')
-        cp.title(title)
+        noLabels = kwargs.pop('nolabels', False)
+
+        if (not noLabels):
+            cp.xlabel('Frequency (Hz)')
+            cp.ylabel('Data (ppm)')
+            cp.title(title)
 
         c = kwargs.pop('color',cp.wellSeparated[3])
         lw = kwargs.pop('linewidth',2)
@@ -374,60 +381,13 @@ class FdemDataPoint(EmDataPoint):
         return ax
 
 
-    def scaleJ(self, Jin, power=1.0):
-        """ Scales a matrix by the errors in the given data
-        Useful if a sensitivity matrix is generated using one data point, but must be scaled by the errors in another """
-        J1 = np.zeros(Jin.shape)
-        J1[:, :] = Jin * (np.repeat(self.s[self.iActive, np.newaxis] ** -power, np.size(J1, 1), 1))
-        return J1
+    # def scaleJ(self, Jin, power=1.0):
+    #     """ Scales a matrix by the errors in the given data
+    #     Useful if a sensitivity matrix is generated using one data point, but must be scaled by the errors in another """
+    #     J1 = np.zeros(Jin.shape)
+    #     J1[:, :] = Jin * (np.repeat(self.s[self.iActive, np.newaxis] ** -power, np.size(J1, 1), 1))
+    #     return J1
 
-
-    def updateErrors(self, option, err=None, relativeErr=None, addError=None):
-        """ Updates the data errors
-        option:      :[0,1,2]
-                   0 :Assign err to the data errors
-                   1 :Use a percentage of the data with a minimum floor
-                   2 :Norm of the percentage and minimum floor
-        err:         :Specified Errors (only used with option 1)
-        relativeErr: :Percentage of the data
-        addError:    :StatArray of Minimum error floors
-        """
-        assert 0 <= option <= 2, ValueError("Use an option [0,1,2]")
-
-        if (not relativeErr is None):
-            assert 0.0 <= relativeErr <= 1.0, ValueError("0.0 <= relativeErr <= 1.0")
-
-        if (option == 0):
-            self.s[:] = err
-        elif (option == 1):
-            self.s[:] = np.maximum(relativeErr * self.d, addError)
-        elif (option == 2):
-            tmp = (relativeErr * self.d)**2.0
-            self.s[:] = np.sqrt(tmp + addError**2.0)
-
-        assert not self.p.prior is None, "No prior has been assigned to the predicted data"
-
-        self.p.prior.variance[:] = self.s[self.iActive]**2.0
-
-    def addErrors(self):
-            """ Add errors using stuff
-            """
-            assert 0 <= option <= 2, ValueError("Use an option [0,1,2]")
-
-            if (not relativeErr is None):
-                assert 0.0 <= relativeErr <= 1.0, ValueError("0.0 <= relativeErr <= 1.0")
-
-            if (option == 0):
-                self.s[:] = err
-            elif (option == 1):
-                self.s[:] = np.maximum(relativeErr * self.d, addError)
-            elif (option == 2):
-                tmp = (relativeErr * self.d)**2.0
-                self.s[:] = np.sqrt(tmp + addError**2.0)
-
-            assert not self.p.prior is None, "No prior has been assigned to the predicted data"
-
-            self.p.prior.variance[:] = self.s[self.iActive]**2.0
 
     def updateSensitivity(self, J, mod, option, scale=False):
         """ Compute an updated sensitivity matrix based on the one already containined in the TdemDataPoint object  """

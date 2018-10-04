@@ -103,9 +103,15 @@ class TdemDataPoint(EmDataPoint):
             for i in range(self.nSystems):
                 i1 = i0 + self.sys[i].nwindows()
                 self.d[i0:i1] = d[i]
-                self.s[i0:i1] = s[i]
+                if (s[i] is None):
+                    self.s[i0:i1] = 0.1 * d[i] 
+                else:
+                    self.s[i0:i1] = s[i]
+
                 i0 = i1
                 self.iplotActive.append(findNotNans(d[i]))
+                    
+
 #        else:
 #            self.nSystems = 0
 #            self.nWindows = 0
@@ -144,9 +150,8 @@ class TdemDataPoint(EmDataPoint):
         result.sys = self.sys
         return result
     
-    
-    def getChannels(self, system=0):
-        """ Return the frequencies in an StatArray """
+    def times(self, system=0):
+        """ Return the window times in an StatArray """
         return StatArray(self.sys[system].windows.centre, name='Time', units='s')
 
 
@@ -158,6 +163,10 @@ class TdemDataPoint(EmDataPoint):
             i1 = i0 + self.sys[i].nwindows()
             self.iplotActive.append(findNotNans(self.d[i0:i1]))
             i0 = i1
+
+    def dualMoment(self):
+        """ Returns True if the number of systems is > 1 """
+        return len(self.sys) > 1
 
 
     def hdfName(self):
@@ -327,6 +336,7 @@ class TdemDataPoint(EmDataPoint):
             cp.ylabel('Normalized Current (A)')
             plt.margins(0.1, 0.1)
 
+
     def plot(self, title='Time Domain EM Data', withErr=True, **kwargs):
         """ Plot the Inphase and Quadrature Data for an EM measurement
         """
@@ -388,10 +398,15 @@ class TdemDataPoint(EmDataPoint):
 
         return ax
 
-    def plotPredicted(self,title='',**kwargs):
-        cp.xlabel('Time (s)')
-        cp.ylabel(cf.getNameUnits(self.p))
-        cp.title(title)
+    def plotPredicted(self,title='Time Domain EM Data',**kwargs):
+
+        noLabels = kwargs.pop('nolabels', False)
+
+        if (not noLabels):
+            cp.xlabel('Time (s)')
+            cp.ylabel(cf.getNameUnits(self.p))
+            cp.title(title)
+        
         c = kwargs.pop('color', cp.wellSeparated[3])
         lw = kwargs.pop('linewidth', 2)
         a = kwargs.pop('alpha', 0.7)
@@ -431,86 +446,73 @@ class TdemDataPoint(EmDataPoint):
 
 
 
-    def scaleJ(self, Jin, power=1.0):
-        """ Scales a matrix by the errors in the given data
-        Useful if a sensitivity matrix is generated using one data point, but must be scaled by the errors in another """
-        J1 = np.zeros(Jin.shape)
-        J1[:, :] = Jin * (np.repeat(self.s[self.iActive, np.newaxis]**-power, np.size(J1, 1), 1))
-        return J1
+    # def scaleJ(self, Jin, power=1.0):
+    #     """ Scales a matrix by the errors in the given data
+    #     Useful if a sensitivity matrix is generated using one data point, but must be scaled by the errors in another """
+    #     J1 = np.zeros(Jin.shape)
+    #     J1[:, :] = Jin * (np.repeat(self.s[self.iActive, np.newaxis]**-power, np.size(J1, 1), 1))
+    #     return J1
 
-    def updateErrors(self, option, err=None, relativeErr=None, additiveErr=None):
+
+    def updateErrors(self, relativeErr, additiveErr):
         """ Updates the data errors
+
         Assumes a t^-0.5 behaviour e.g. logarithmic gate averaging
         V0 is assumed to be ln(Error @ 1ms)
-        option:      :[0,1,2,3]
-                   0 :Assign err to the data errors
-                   1 :Use a percentage of the data with a minimum floor
-                   2 :Norm of the percentage and minimum floor
-                   3 :Additive Error only
-        err:         :Specified Errors (only used with option=0)
-        relativeErr: :Percentage of the data for error level assignment for each system [r0,r1,...]
-        additiveErr:    :Noise floor minimum per system [emin1,emin2,...] !Assumes this is in log10 space!
-        """
-        ####lg.myLogger("Global"); ####lg.indent()
-        ####lg.info('Updating Errors:')
-        assert option >= 0 and option <= 3, "Use an option [0,1,2,3]"
-        if (option == 0):
-            assert (not err is None), "err must be specified with option = 0"
-        if (option > 0):
-            # Check the relative and add error inputs
-            assert (not relativeErr is None), "relativeError must be specified"
-            assert (not additiveErr is None), "additiveErr must be specified"
-            assert (not isinstance(relativeErr, float)), "Please enter the relative Error as a list [#1,#2,...], the length must match the number of systems "+str(self.nSystems)
-            assert (len(relativeErr) == self.nSystems), "len(relativeError) must equal # of systems"
-            assert (len(additiveErr) == self.nSystems), "len(additiveErr) must equal # of systems"
-        assert (not self.p.prior is None), 'Please assign a distribution to the predicted data using self.p.setPrior()'
 
-        ####lg.debug('option: '+str(option))
+        Parameters
+        ----------  
+        relativeErr : list of scalars or list of array_like
+            A fraction percentage that is multiplied by the observed data. The list should have length equal to the number of systems. The entries in each item can be scalar or array_like.
+        additiveErr : list of scalars or list of array_like
+            An absolute value of additive error. The list should have length equal to the number of systems. The entries in each item can be scalar or array_like.
+
+        Raises
+        ------
+        TypeError
+            If relativeErr or additiveErr is not a list
+        TypeError
+            If the length of relativeErr or additiveErr is not equal to the number of systems
+        TypeError
+            If any item in the relativeErr or additiveErr lists is not a scalar or array_like of length equal to the number of time channels
+        ValueError
+            If any relative or additive errors are <= 0.0
+        """    
+
+        assert (isinstance(relativeErr, list)), TypeError("relativeErr must be a list of size equal to the number of systems {}".format(self.nSystems))
+        assert (len(relativeErr) == self.nSystems), TypeError("relativeErr must be a list of size equal to the number of systems {}".format(self.nSystems))
+
+        assert (isinstance(additiveErr, list)), TypeError("additiveErr must be a list of size equal to the number of systems {}".format(self.nSystems))
+        assert (len(relativeErr) == self.nSystems), TypeError("additiveErr must be a list of size equal to the number of systems {}".format(self.nSystems))
+
         t0 = 0.5 * np.log(1e-3)  # Assign fixed t0 at 1ms
         i0 = 0
         # For each system assign error levels using the user inputs
         for i in range(self.nSystems):
-            #      ####lg.debug('System: '+str(i))
-            #      ####lg.debug('Option: '+str(option))
+            assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], np.ndarray)), TypeError("relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.sys[i].nwindows()))
+            assert (isinstance(additiveErr[i], float) or isinstance(additiveErr[i], np.ndarray)), TypeError("additiveErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.sys[i].nwindows()))
+            assert (np.all(relativeErr[i] > 0.0)), ValueError("relativeErr for system {} cannot contain values <= 0.0.".format(self.nSystems))
+            assert (np.all(additiveErr[i] > 0.0)), ValueError("additiveErr for system {} cannot contain values <= 0.0.".format(self.nSystems))
             i1 = i0 + self.sys[i].nwindows()
-            if (option > 0):
-                # Compute the relative error
-                rErr = relativeErr[i] * self.d[i0:i1]
-                aErr = np.exp(additiveErr[i]*np.log(10.0) - 0.5 * np.log(self.sys[i].windows.centre) + t0)
-#        ####lg.debug('rErr: '+str(rErr))
-#        ####lg.debug('aErr: '+str(aErr))
+            
+            # Compute the relative error
+            rErr = relativeErr[i] * self.d[i0:i1]
+            aErr = np.exp(additiveErr[i]*np.log(10.0) - 0.5 * np.log(self.sys[i].windows.centre) + t0)
 
-            if (option == 0):
-                self.s[i0:i1] = err
-            elif (option == 1):
-                self.s[i0:i1] = np.maximum(rErr, aErr)
-            elif (option == 2):
-                self.s[i0:i1] = np.sqrt((rErr**2.0) + (aErr**2.0))
-            elif (option == 3):
-                self.s[i0:i1] = aErr
-#      ####lg.debug('Updated Errors for system: '+str(self.s[i0:i1]))
+            self.s[i0:i1] = np.sqrt((rErr**2.0) + (aErr**2.0))
             i0 = i1
 
         # Update the variance of the predicted data prior
-        self.p.prior.variance[:] = self.s[self.iActive]**2.0
-#    ####lg.debug('P Variance: '+str(self.p.prior.variance))
-        ####lg.debug(' ')
-        ####lg.dedent()
+        if self.p.hasPrior():
+            self.p.prior.variance[:] = self.s[self.iActive]**2.0
+
 
     def updateSensitivity(self, J, mod, option, scale=False):
         """ Compute an updated sensitivity matrix using a new model based on an existing matrix """
-        # If there is no matrix saved in the data object, compute the entire thing
-        # if (self.J is None):
-#    return self.sensitivity(mod,scale=scale,modelChanged=True)
-
-        ####lg.myLogger('Global');####lg.indent()
-        ####lg.info('Updating the Sensitivity Matrix')
-        ####lg.debug('nWindows: '+str(self.nWindows))
         J1 = np.zeros([np.size(self.iActive), mod.nCells[0]])
 
         if(option == 3):  # Do Nothing!
             J1[:, :] = J[:, :]
-            ####lg.dedent()
             return J1
 
         if (option == 0):  # Created a layer
@@ -518,7 +520,6 @@ class TdemDataPoint(EmDataPoint):
             J1[:, mod.iLayer + 2:] = J[:, mod.iLayer + 1:]
             tmp = self.sensitivity(mod, ix=[mod.iLayer, mod.iLayer + 1], scale=scale, modelChanged=True)
             J1[:, mod.iLayer:mod.iLayer + 2] = tmp
-            ####lg.dedent()
             return J1
 
         if(option == 1):  # Deleted a layer
@@ -526,7 +527,6 @@ class TdemDataPoint(EmDataPoint):
             J1[:, mod.iLayer + 1:] = J[:, mod.iLayer + 2:]
             tmp = self.sensitivity(mod, ix=[mod.iLayer], scale=scale, modelChanged=True)
             J1[:, mod.iLayer] = tmp[:, 0]
-            ####lg.dedent()
             return J1
 
         if(option == 2):  # Perturbed a layer
@@ -534,7 +534,6 @@ class TdemDataPoint(EmDataPoint):
             J1[:, mod.iLayer + 1:] = J[:, mod.iLayer + 1:]
             tmp = self.sensitivity(mod, ix=[mod.iLayer], scale=scale, modelChanged=True)
             J1[:, mod.iLayer] = tmp[:, 0]
-            ####lg.dedent()
             return J1
 
         assert False, __name__ + '.updateSensitivity: Invalid option [0,1,2]'
@@ -555,11 +554,18 @@ class TdemDataPoint(EmDataPoint):
 
     def _forward1D(self, mod):
         """ Forward model the data from a 1D layered earth model """
+        heightTolerance = 0.0
+        if (self.z > heightTolerance):
+            self._BrodieForward(mod)
+        else:
+            self._simPEGForward(mod)
+
+    def _BrodieForward(self, mod):
         # Generate the Brodie Earth class
         E = Earth(mod.par[:], mod.thk[:-1])
         # Generate the Brodie Geometry class
         G = Geometry(self.z[0], self.T.roll, self.T.pitch, self.T.yaw, -
-                     12.64, 0.0, 2.11, self.R.roll, self.R.pitch, self.R.yaw)
+                    12.64, 0.0, 2.11, self.R.roll, self.R.pitch, self.R.yaw)
         # Forward model the data for each system
         iJ0 = 0
         for i in range(self.nSystems):
@@ -567,6 +573,70 @@ class TdemDataPoint(EmDataPoint):
             fm = self.sys[i].forwardmodel(G, E)
             self.p[iJ0:iJ1] = -fm.SZ[:]  # Store the necessary component
             iJ0 = iJ1
+
+    def _simPEGForward(self, mod):
+        
+        from SimPEG import Maps
+        from simpegEM1D import (EM1DSurveyTD, EM1D, set_mesh_1d)
+
+        mesh1D = set_mesh_1d(mod.depth)
+        expmap = Maps.ExpMap(mesh1D)
+        prob = EM1D(mesh1D, sigmaMap = expmap, chi = mod.chim)
+
+        if (self.dualMoment()):
+
+            print(self.sys[0].loopRadius(), self.sys[0].peakCurrent())
+
+            simPEG_survey = EM1DSurveyTD(
+                rx_location=np.array([0., 0., 0.]),
+                src_location=np.array([0., 0., 0.]),
+                topo=np.r_[0., 0., 0.],
+                depth=-mod.depth,
+                rx_type='dBzdt',
+                wave_type='general',
+                src_type='CircularLoop',
+                a=self.sys[0].loopRadius(),
+                I=self.sys[0].peakCurrent(),
+                time=self.sys[0].windows.centre,
+                time_input_currents=self.sys[0].waveform.transmitterTime,
+                input_currents=self.sys[0].waveform.transmitterCurrent,
+                n_pulse=2,
+                base_frequency=self.sys[0].baseFrequency(),
+                use_lowpass_filter=True,
+                high_cut_frequency=450000,
+                moment_type='dual',
+                time_dual_moment=self.sys[1].windows.centre,
+                time_input_currents_dual_moment=self.sys[1].waveform.transmitterTime,
+                input_currents_dual_moment=self.sys[1].waveform.transmitterCurrent,
+                base_frequency_dual_moment=self.sys[1].baseFrequency(),
+            )
+        else:
+
+            simPEG_survey = EM1DSurveyTD(
+                rx_location=np.array([0., 0., 0.]),
+                src_location=np.array([0., 0., 0.]),
+                topo=np.r_[0., 0., 0.],
+                depth=-mod.depth,
+                rx_type='dBzdt',
+                wave_type='general',
+                src_type='CircularLoop',
+                a=self.sys[0].loopRadius(),
+                I=self.sys[0].peakCurrent(),
+                time=self.sys[0].windows.centre,
+                time_input_currents=self.sys[0].waveform.transmitterTime,
+                input_currents=self.sys[0].waveform.transmitterCurrent,
+                n_pulse=1,
+                base_frequency=self.sys[0].baseFrequency(),
+                use_lowpass_filter=True,
+                high_cut_frequency=7e4,
+                moment_type='single',
+            )
+
+        prob.pair(simPEG_survey)
+            
+        self.p[:] = -simPEG_survey.dpred(mod.par)
+
+
 
     def _sensitivity1D(self, mod, ix=None, scale=False, modelChanged=True):
         """ Compute the sensitivty matrix for a 1D layered earth model, optionally compute the responses for only the layers in ix """
@@ -607,22 +677,22 @@ class TdemDataPoint(EmDataPoint):
         J = J[self.iActive, :]
         return J
 
-    def fm_dlogc(self, mod):
-            # Generate the Brodie Earth class
-        E = Earth(mod.par[:], mod.thk[:-1])
-#    ####lg.debug('Parameters: '+str(mod.par))
-#    ####lg.debug('Thickness: '+str(mod.thk[:-1]))
-        # Generate the Brodie Geometry class
-#    ####lg.debug('Geometry: '+str([self.z[0],self.T.roll,self.T.pitch,self.T.yaw,-12.64,0.0,2.11,self.R.roll,self.R.pitch,self.R.yaw]))
-        G = Geometry(self.z[0], self.T.roll, self.T.pitch, self.T.yaw, -
-                     12.615, 0.0, 2.16, self.R.roll, self.R.pitch, self.R.yaw)
-        # Forward model the data for each system
-        iJ0 = 0
-        for i in range(self.nSystems):
-            iJ1 = iJ0 + self.sys[i].nwindows()
-            dummy = self.sys[i].forward(G, E)
+#     def fm_dlogc(self, mod):
+#             # Generate the Brodie Earth class
+#         E = Earth(mod.par[:], mod.thk[:-1])
+# #    ####lg.debug('Parameters: '+str(mod.par))
+# #    ####lg.debug('Thickness: '+str(mod.thk[:-1]))
+#         # Generate the Brodie Geometry class
+# #    ####lg.debug('Geometry: '+str([self.z[0],self.T.roll,self.T.pitch,self.T.yaw,-12.64,0.0,2.11,self.R.roll,self.R.pitch,self.R.yaw]))
+#         G = Geometry(self.z[0], self.T.roll, self.T.pitch, self.T.yaw, -
+#                      12.615, 0.0, 2.16, self.R.roll, self.R.pitch, self.R.yaw)
+#         # Forward model the data for each system
+#         iJ0 = 0
+#         for i in range(self.nSystems):
+#             iJ1 = iJ0 + self.sys[i].nwindows()
+#             dummy = self.sys[i].forward(G, E)
 
-#      self.p[iJ0:iJ1]=-fm.SZ[:]
-#      iJ0=iJ1
-        return fm
+# #      self.p[iJ0:iJ1]=-fm.SZ[:]
+# #      iJ0=iJ1
+#         return fm
 
