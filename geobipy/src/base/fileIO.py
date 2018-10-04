@@ -104,8 +104,8 @@ def getFileExtension(fname):
         The extension of the filename
 
     """
-    tmp, ext = os.path.splittext(fname)
-    return (ext[1:])
+    tmp, ext = os.path.splitext(fname)
+    return ext[1:]
 
 def bytes2readable(nBytes):
     """Convert bytes to KB, MB, ..., PB
