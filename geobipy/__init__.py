@@ -14,8 +14,8 @@ from numpy.random import randint
 
 # Set up shorter aliases for classes within geobipy
 # Base routines
-from geobipy.src.base import customFunctions
-from geobipy.src.base import customPlots
+from src.base import customFunctions
+from src.base import customPlots
 from geobipy.src.base import fileIO
 from geobipy.src.base import interpolation
 from geobipy.src.base import MPI
@@ -72,8 +72,10 @@ def checkCommandArguments():
     import warnings
     warnings.filterwarnings('error')
 
+    print(sys.argv)
+
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hi:o:v", ["help", "input=","output="])
+        opts, rem = getopt.getopt(sys.argv[1:], "hi:v", ["help", "input=","output="])
     except getopt.GetoptError as err:
         # print help information and exit:
         print(err) # will print something like "option -a not recognized"
