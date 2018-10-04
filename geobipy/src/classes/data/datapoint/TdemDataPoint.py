@@ -479,10 +479,10 @@ class TdemDataPoint(EmDataPoint):
             If any relative or additive errors are <= 0.0
         """    
 
-        assert (isinstance(relativeErr, list)), TypeError("relativeErr must be a list of size equal to the number of systems {}".format(self.nSystems))
+        #assert (isinstance(relativeErr, list)), TypeError("relativeErr must be a list of size equal to the number of systems {}".format(self.nSystems))
         assert (len(relativeErr) == self.nSystems), TypeError("relativeErr must be a list of size equal to the number of systems {}".format(self.nSystems))
 
-        assert (isinstance(additiveErr, list)), TypeError("additiveErr must be a list of size equal to the number of systems {}".format(self.nSystems))
+        #assert (isinstance(additiveErr, list)), TypeError("additiveErr must be a list of size equal to the number of systems {}".format(self.nSystems))
         assert (len(relativeErr) == self.nSystems), TypeError("additiveErr must be a list of size equal to the number of systems {}".format(self.nSystems))
 
         t0 = 0.5 * np.log(1e-3)  # Assign fixed t0 at 1ms
@@ -492,7 +492,7 @@ class TdemDataPoint(EmDataPoint):
             assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], np.ndarray)), TypeError("relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.sys[i].nwindows()))
             assert (isinstance(additiveErr[i], float) or isinstance(additiveErr[i], np.ndarray)), TypeError("additiveErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.sys[i].nwindows()))
             assert (np.all(relativeErr[i] > 0.0)), ValueError("relativeErr for system {} cannot contain values <= 0.0.".format(self.nSystems))
-            assert (np.all(additiveErr[i] > 0.0)), ValueError("additiveErr for system {} cannot contain values <= 0.0.".format(self.nSystems))
+            #assert (np.all(additiveErr[i] > 0.0)), ValueError("additiveErr for system {} cannot contain values <= 0.0.".format(self.nSystems))
             i1 = i0 + self.sys[i].nwindows()
             
             # Compute the relative error
