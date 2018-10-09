@@ -8,7 +8,8 @@ from ..classes.data.datapoint.FdemDataPoint import FdemDataPoint
 from ..classes.data.datapoint.TdemDataPoint import TdemDataPoint
 from ..classes.statistics.Hitmap2D import Hitmap2D
 import numpy as np
-from numpy import issubdtype as isdt
+from ..base.customFunctions import isInt
+
 
 class _userParameters(myObject):
     """ Handler class to user defined parameters. Allows us to check a users input parameters in the backend """
@@ -32,7 +33,7 @@ class _userParameters(myObject):
 
         # Check the number of Markov chains
         self.nMC = np.int(self.nMC)
-        assert isinstance(self.nMC, np.int), 'nMC must be a numpy integer'
+        assert isInt(self.nMC), 'nMC must be a numpy integer'
         assert self.nMC > 1000, 'Number of Markov Chain iterations nMC must be > 1000'
 
         # Check the minumum layer depth
@@ -46,8 +47,7 @@ class _userParameters(myObject):
             assert isinstance(self.minThickness, float), 'minThickness must be a float (preferably np.float64)'
 
         # Check the maximum number of layers
-        self.maxLayers = np.int32(self.maxLayers)
-        assert isinstance(self.maxLayers, np.int32), 'maxLayers must be an int'
+        assert isInt(self.maxLayers), 'maxLayers must be an int'
 
         # Check the standard deviation of log(rhoa)=log(1+fac)
         assert isinstance(self.factor, float), 'factor must be a float (preferably np.float64)'
