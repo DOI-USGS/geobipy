@@ -198,19 +198,18 @@ class FdemSystem(myObject):
             tmp.R[i] = eval(safeEval(item.attrs.get('repr')))
         return tmp
 
-    def Bcast(self, world):
+    def Bcast(self, world, root=0):
         """ Broadcast the FdemSystem using MPI """
 #      print(world.rank," FdemSystem.Bcast")
-        nFreq = myMPI.Bcast(self.nFreq, world)
+        nFreq = myMPI.Bcast(self.nFreq, world, root=root)
         if (world.rank > 0):
             self = FdemSystem(nFreq)
         this = FdemSystem(nFreq)
-        this.freq = self.freq.Bcast(world)
-        this.dist = self.dist.Bcast(world)
+        this.freq = self.freq.Bcast(world, root=root)
+        this.dist = self.dist.Bcast(world, root=root)
 #      print(world.rank," Size of T",np.size(self.T))
         for i in range(self.nFreq):
             #        print("i: ",i)
-            this.T[i] = self.T[i].Bcast(world)
-            this.R[i] = self.R[i].Bcast(world)
-        this.H = HF(this.dist)
+            this.T[i] = self.T[i].Bcast(world, root=root)
+            this.R[i] = self.R[i].Bcast(world, root=root)
         return this
