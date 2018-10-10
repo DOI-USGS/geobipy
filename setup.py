@@ -35,7 +35,7 @@ setup(name='geobipy',
     install_requires=[
         'numpy >= 1.11',
         'scipy >= 0.18.1',
-        'h5py == 2.6.0',
+        'h5py >= 2.6.0',
         'sklearn',
         'matplotlib',
         'pyvtk',
