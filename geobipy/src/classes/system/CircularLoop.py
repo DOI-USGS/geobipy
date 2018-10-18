@@ -138,14 +138,20 @@ class CircularLoop(EmLoop):
                 o = np.array(h5grp.get('orientation'))
                 m = np.array(h5grp.get('moment'))
                 d = np.array(h5grp.get('data'))
-                r = np.array(h5grp.get('radius'))
+                try:
+                    r = np.array(h5grp.get('radius')[index])
+                except:
+                    r = 1.0
             except:
                 assert False, ValueError("HDF data was created as a larger array, specify the row index to read from")
         else:
             o = np.array(h5grp.get('orientation')[index])
             m = np.array(h5grp.get('moment')[index])
             d = np.array(h5grp.get('data')[index])
-            r = np.array(h5grp.get('radius')[index])
+            try:
+                r = np.array(h5grp.get('radius')[index])
+            except:
+                r = 1.0
 
         return CircularLoop(o, m, d[0], d[1], d[2], d[3], d[4], d[5], r)
 

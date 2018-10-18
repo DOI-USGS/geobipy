@@ -30,7 +30,7 @@ def fdem1dfwd(S, mod, z0):
         rMom[i] = S.R[i].moment
         rx[i] = S.R[i].x
     scl = tMom * rMom
-
+       
     prd = np.zeros(S.nFreq, dtype=np.complex128)
 
     fdemforward1d.forward1d(tid, S.freq, tHeight, rHeight, tMom, rx, S.dist, scl, mod.par, mod.thk, prd, S.nFreq,  mod.nCells[0])

@@ -65,3 +65,5 @@ except:
        "Please see the package's README for instructions on how to install one \n"
        "Check that you have loaded the compiler that was used to compile the forward modeller")
     print(Warning(h))
+    class TdemSystem(object):
+        "nothing in here"

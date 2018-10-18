@@ -296,7 +296,7 @@ class LineResults(myObject):
         """ Get the best data """
 
         if (not self.bestData is None): return
-        self.bestData = self.getAttribute('best data', sysPath = self.sysPath, **kwargs)
+        self.bestData = self.getAttribute('best data', **kwargs)
 
 
     def getBestParameters(self):

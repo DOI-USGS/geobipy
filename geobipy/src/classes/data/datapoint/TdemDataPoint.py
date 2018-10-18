@@ -2,7 +2,7 @@ from copy import deepcopy
 from ....classes.core.StatArray import StatArray
 from ...model.Model import Model
 from .EmDataPoint import EmDataPoint
-from ...system.EmLoop import EmLoop
+from ...system.CircularLoop import CircularLoop
 from ....base.logging import myLogger
 
 try:

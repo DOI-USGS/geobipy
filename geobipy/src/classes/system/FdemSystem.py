@@ -8,6 +8,7 @@ from ...classes.core.StatArray import StatArray
 from .CircularLoop import CircularLoop
 from ...base import fileIO as fIO
 from ...base import MPI as myMPI
+from ...base.customFunctions import safeEval
 #from ...base import Error as Err
 
 
