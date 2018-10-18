@@ -1438,7 +1438,7 @@ class LineResults(myObject):
         results.bestInterp[:] = results.bestModel.interpPar2Mesh(results.bestModel.par, results.Hitmap)
 #        results.opacityInterp[:] = results.Hitmap.getOpacity()
 
-        slic=np.s_[i,:]
+        slic = np.s_[i, :]
         # Add the interpolated mean model
         results.meanInterp.writeHdf(aFile, 'meaninterp',  index=slic)
         # Add the interpolated best

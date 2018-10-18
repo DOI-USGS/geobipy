@@ -16,12 +16,7 @@ def isInt(this):
         Is or is not an int
 
     """
-    if (isinstance(this,int)):
-        return True
-    try:
-        return issubdtype(this, int)
-    except:
-        return False
+    return isinstance(this, (int, np.integer))
 
 def isIntorSlice(this):
     """Check whether an entry is a subtype of an int or a slice

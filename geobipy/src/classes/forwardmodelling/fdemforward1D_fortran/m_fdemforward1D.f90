@@ -886,8 +886,14 @@ function cTanh(z) result(res)
     complex(kind=8), intent(in) :: z
     complex(kind=8) :: res
     complex(kind=8) :: tmp
-    tmp = exp(-2.d0 * z)
-    res = (1.d0 - tmp) / (1.d0 + tmp)
+    
+    if (z > 0.d0) then
+        tmp = exp(-2.d0 * z)
+        res = (1.d0 - tmp) / (1.d0 + tmp)
+    else
+        tmp = exp(2.d0 * z)
+        res = (tmp - 1.d0) / (tmp + 1.d0)
+    endif
 end function
 !====================================================================!
 end module

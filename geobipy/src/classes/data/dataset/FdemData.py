@@ -69,8 +69,6 @@ class FdemData(Data):
         # Assign data names
         self.D.name='Fdem Data'
 
-        self.sys = None
-
         if (not system is None):
             if isinstance(system, FdemSystem):
                 self.sys = system.deepcopy()
@@ -78,6 +76,8 @@ class FdemData(Data):
                 # Instantiate the system
                 self.sys = FdemSystem()
                 self.sys.read(system)
+        else:
+            self.sys = FdemSystem()
 
         if (not self.sys is None):
             # Set the channel names
@@ -475,12 +475,12 @@ class FdemData(Data):
         """
         dat = None
         dat = Data.Bcast(self, world, root=root)
-        this = FdemData(dat.N, dat.nChannels/2)
+        this = FdemData(dat.N, int(dat.nChannels/2))
         this.x = dat.x
         this.y = dat.y
         this.z = dat.z
-        this.D = dat.D
-        this.Std = dat.Std
+#        this.D = dat.D
+#        this.Std = dat.Std
         this.id = self.id.Bcast(world, root=root)
         this.line = self.line.Bcast(world, root=root)
         this.e = self.e.Bcast(world, root=root)
@@ -533,8 +533,8 @@ class FdemData(Data):
         this.x = dat.x
         this.y = dat.y
         this.z = dat.z
-        this.D = dat.D
-        this.Std = dat.Std
+#        this.D = dat.D
+#        this.Std = dat.Std
         this.id = self.id.Scatterv(starts, chunks, world, root=root)
         this.line = self.line.Scatterv(starts, chunks, world, root=root)
         this.e = self.e.Scatterv(starts, chunks, world, root=root)

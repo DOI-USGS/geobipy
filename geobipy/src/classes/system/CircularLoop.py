@@ -156,7 +156,7 @@ class CircularLoop(EmLoop):
         return CircularLoop(o, m, d[0], d[1], d[2], d[3], d[4], d[5], r)
 
 
-    def Bcast(self, world):
+    def Bcast(self, world, root=0):
         """Broadcast using MPI
         
         Parameters
@@ -170,15 +170,15 @@ class CircularLoop(EmLoop):
             A CircularLoop on each core
         
         """
-        o = myMPI.Bcast(self.orient, world)
-        m = myMPI.Bcast(self.moment, world)
-        x = myMPI.Bcast(self.x, world)
-        y = myMPI.Bcast(self.y, world)
-        z = myMPI.Bcast(self.z, world)
-        pitch = myMPI.Bcast(self.pitch, world)
-        roll = myMPI.Bcast(self.roll, world)
-        yaw = myMPI.Bcast(self.yaw, world)
-        radius = myMPI.Bcast(self.radius, world)
+        o = myMPI.Bcast(self.orient, world, root=root)
+        m = myMPI.Bcast(self.moment, world, root=root)
+        x = myMPI.Bcast(self.x, world, root=root)
+        y = myMPI.Bcast(self.y, world, root=root)
+        z = myMPI.Bcast(self.z, world, root=root)
+        pitch = myMPI.Bcast(self.pitch, world, root=root)
+        roll = myMPI.Bcast(self.roll, world, root=root)
+        yaw = myMPI.Bcast(self.yaw, world, root=root)
+        radius = myMPI.Bcast(self.radius, world, root=root)
         return CircularLoop(o, m, x, y, z, pitch, roll, yaw, radius)
 
     def __str__(self):
