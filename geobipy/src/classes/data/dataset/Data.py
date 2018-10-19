@@ -269,6 +269,5 @@ class Data(PointCloud3D):
         this.y = pc3d.y
         this.z = pc3d.z
         this.set = self.set.Scatterv(starts, chunks, world, root=root)
-        # this.D = self.D.Scatterv(starts, chunks, world, root=root)
-        # this.Std = self.Std.Scatterv(starts, chunks, world, root=root)
+
         return this

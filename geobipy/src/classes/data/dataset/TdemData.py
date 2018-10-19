@@ -240,14 +240,10 @@ class TdemData(PointCloud3D):
         # Get the data values
         self.set[0].D[:, :] = tmp[:, iData]
         # If the data error columns are given, read them in
-        if (offErr[0] is None):
-            self.set[0].Std = None
-        else:
+        if (not offErr[0] is None):
             i2 = i1 + nTimes[0]
             iStd = np.arange(i1, i2)
             self.set[0].Std[:, :] = tmp[:, iStd]
-        
-
 
         # Read in the data for the other systems.  Only read in the data and, if available, the errors
         for i in range(1, self.nSystems):
@@ -259,11 +255,9 @@ class TdemData(PointCloud3D):
             tmp = fIO.read_columns(dataFname[i], readColumns, 1, nPoints)
             # Assign the data
             self.set[i].D[:, :] = tmp[:, :nTimes[i]]
-            if (offErr[i] is None):
-                self.set[i].Std = None
-            else:
+            if (not offErr[i] is None):
                 self.set[i].Std[:, :] = tmp[:, nTimes[i]:]
-                
+                                
 
     def readSystemFile(self, systemFname):
         """ Reads in the C++ system handler using the system file name """
@@ -414,13 +408,7 @@ class TdemData(PointCloud3D):
         """ Get the ith data point from the data set """
         assert 0 <= i < self.N, ValueError("Requested data point must have index (0, "+str(self.N) + ']')
         D = [self.set[j].D[i, :] for j in range(self.nSystems)]
-        S = []
-        for j in range(self.nSystems):
-            if (self.set[j].Std is None):
-                S.append(None)
-            else:
-                S.append(self.set[j].Std[i, :])   
-        # S = [self.set[j].Std[i, :] for j in range(self.nSystems)]
+        S = [self.set[j].Std[i, :] for j in range(self.nSystems)]
         this = TdemDataPoint(self.x[i], self.y[i], self.z[i], self.elevation[i], D, S, self.sys, self.T[i],self.R[i])
         return this
 
@@ -563,6 +551,7 @@ class TdemData(PointCloud3D):
         pc3d = PointCloud3D.Bcast(self, world)
         nTimes = myMPI.Bcast(self.nTimes, world)
         nSystems = myMPI.Bcast(self.nSystems, world)
+        
         # Instantiate a new Time Domain Data set on each worker
         this = TdemData(pc3d.N, nTimes, nSystems)
 
@@ -587,7 +576,7 @@ class TdemData(PointCloud3D):
             this.set[i] = tmp[i].Bcast(world)
 
         # Broadcast the Data point id, line numbers and elevations
-        this.id = self.id.Bcast(world)
+        this.id = myMPI.Bcast(self.id, world)
         this.line = self.line.Bcast(world)
         this.elevation = self.elevation.Bcast(world)
 

@@ -473,14 +473,14 @@ class FdemData(Data):
         >>> D2 = D.Bcast(world)
         
         """
+
         dat = None
         dat = Data.Bcast(self, world, root=root)
         this = FdemData(dat.N, int(dat.nChannels/2))
         this.x = dat.x
         this.y = dat.y
         this.z = dat.z
-#        this.D = dat.D
-#        this.Std = dat.Std
+        this.set = dat.set
         this.id = self.id.Bcast(world, root=root)
         this.line = self.line.Bcast(world, root=root)
         this.e = self.e.Bcast(world, root=root)
@@ -527,14 +527,14 @@ class FdemData(Data):
         >>> D2 = D.Scatterv(start, chunks, world)
 
         """
+
         dat = None
         dat = Data.Scatterv(self, starts, chunks, world, root=root)
         this = FdemData(dat.N, dat.nFrequencies)
         this.x = dat.x
         this.y = dat.y
         this.z = dat.z
-#        this.D = dat.D
-#        this.Std = dat.Std
+        this.set = dat.set
         this.id = self.id.Scatterv(starts, chunks, world, root=root)
         this.line = self.line.Scatterv(starts, chunks, world, root=root)
         this.e = self.e.Scatterv(starts, chunks, world, root=root)
