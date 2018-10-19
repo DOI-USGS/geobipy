@@ -113,8 +113,8 @@ def Initialize(paras, D, prng):
     D.p.setPrior('MvNormalLog', D.d[D.iActive], D.s[D.iActive]**2.0, prng=prng)
 
     # Set the prior on the elevation height
-    #D.z.setPrior('Uniform', np.float64(D.z) - paras.zRange, np.float64(D.z) + paras.zRange, isLogged=True)
-    D.z.setPrior('NormalLog', D.z, 1.0, prng=prng)
+    D.z.setPrior('UniformLog', np.float64(D.z) - paras.zRange, np.float64(D.z) + paras.zRange)
+    # D.z.setPrior('NormalLog', D.z, 1.0, prng=prng)
     # D.z.setPrior('Normal',D.z,paras.zRange)
 
     D.z.setProposal('Normal', D.z, (paras.propEl), prng=prng)
@@ -122,11 +122,11 @@ def Initialize(paras, D, prng):
     # Set the prior on the relative Errors
     D.relErr[:] = paras.relErr.deepcopy()
 
-    D.relErr.setPrior('Uniform',paras.rErrMinimum[:],paras.rErrMaximum[:], prng=prng,isLogged=True)
+    D.relErr.setPrior('UniformLog', paras.rErrMinimum[:], paras.rErrMaximum[:], prng=prng)
 
     # Set the prior on the additive Errors
     D.addErr[:] = paras.addErr.deepcopy()
-    D.addErr.setPrior('Uniform',paras.aErrMinimum[:],paras.aErrMaximum[:], prng=prng,isLogged=True)
+    D.addErr.setPrior('UniformLog', paras.aErrMinimum[:], paras.aErrMaximum[:], prng=prng)
 
     # Update the data errors based on user given parameters
     D.updateErrors(paras.relErr, paras.addErr)

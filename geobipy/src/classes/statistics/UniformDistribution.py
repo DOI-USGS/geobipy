@@ -11,11 +11,13 @@ import numpy as np
 class Uniform(baseDistribution):
     """ Class defining a uniform distribution """
 
-    def __init__(self, min, max, prng=None, isLogged=False):
+    def __init__(self, min, max, prng=None):
         """ Initialize a uniform distribution
         xmin:  :Minimum value
         xmax:  :Maximum value
         """
+
+        assert max > min, ValueError("Maximum must be > minimum")
         baseDistribution.__init__(self, prng)
         # Minimum
         self.min = deepcopy(min)
@@ -26,18 +28,13 @@ class Uniform(baseDistribution):
         tmp = max - min
         # Variance
         self.variance = (1.0 / 12.0) * tmp**2.0
-        # Add a logical for logged uniform distributions
-        self.logged = isLogged
         # Set the pdf
-        if (isLogged):
-            self.pdf = np.log(np.float64(1.0 / tmp))
-        else:
-            self.pdf = np.float64(1.0 / tmp)
+        self.pdf = np.float64(1.0 / tmp)
 
 
     def deepcopy(self):
         """ Define a deepcopy routine """
-        return Uniform(self.min, self.max, self.prng, self.logged)
+        return Uniform(self.min, self.max, self.prng)
 
 
     def getPdf(self, x=0):
@@ -55,7 +52,6 @@ class Uniform(baseDistribution):
 
 
     def plotPDF(self, **kwargs):
-
         bins = self.getBins()
         t = r"$\tilde{U}("+str(self.min)+","+str(self.max)+")$"
         cP.plot(bins, np.repeat(self.pdf, np.size(bins)), label=t, **kwargs)
@@ -63,9 +59,9 @@ class Uniform(baseDistribution):
 
     def probability(self, x):
         if np.any(x < self.min):
-            return -np.infty if self.logged else 0.0
+            return 0.0
         if np.any(x > self.max):
-            return -np.infty if self.logged else 0.0
+            return 0.0
         return np.sum(self.pdf)
 
     def rng(self, size=1):

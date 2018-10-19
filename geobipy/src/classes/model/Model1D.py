@@ -487,7 +487,7 @@ class Model1D(Model):
         self.maxDepth = np.log(maxDepth)  # Assign the log of the max depth
         self.maxLayers = np.int32(maxLayers)
         # Assign a uniform distribution to the number of layers
-        self.nCells.setPrior('Uniform', 1, maxLayers, prng=prng, isLogged=True)
+        self.nCells.setPrior('UniformLog', 1, maxLayers, prng=prng)
 
 
     def perturb(self):

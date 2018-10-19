@@ -68,9 +68,9 @@ class CircularLoop(EmLoop):
         print("EmLoop:")
         print("Orientation: :" + str(self.orient))
         print("Moment:      :" + str(self.moment))
-        print("X:          :" + str(self.x))
-        print("Y:          :" + str(self.y))
-        print("Z:         :" + str(self.z))
+        print("X:          :"  + str(self.x))
+        print("Y:          :"  + str(self.y))
+        print("Z:          :"  + str(self.z))
         print("Pitch:       :" + str(self.pitch))
         print("Roll:        :" + str(self.roll))
         print("Yaw:         :" + str(self.yaw))
@@ -90,33 +90,29 @@ class CircularLoop(EmLoop):
         grp.attrs["repr"] = self.hdfName()
 
         if (not nRepeats is None):
-            grp.create_dataset('orientation', [nRepeats], dtype="S1")
-            grp.create_dataset('moment', [nRepeats], dtype=np.int32, fillvalue=fillvalue)
-            grp.create_dataset('data', [nRepeats, 6], dtype=np.float64, fillvalue=fillvalue)
-            grp.create_dataset('radius', [nRepeats], dtype=np.float64, fillvalue=fillvalue)
+            grp.create_dataset('orientation', [nRepeats],    dtype="S1")
+            grp.create_dataset('moment',      [nRepeats],    dtype=np.int32,   fillvalue=fillvalue)
+            grp.create_dataset('data',        [nRepeats, 6], dtype=np.float64, fillvalue=fillvalue)
+            grp.create_dataset('radius',      [nRepeats],    dtype=np.float64, fillvalue=fillvalue)
         else:
             grp.create_dataset('orientation', [1], dtype="S1")
-            grp.create_dataset('moment', [1], dtype=np.int32, fillvalue=fillvalue)
-            grp.create_dataset('data', [6], dtype=np.float64, fillvalue=fillvalue)
-            grp.create_dataset('radius', [1], dtype=np.float64, fillvalue=fillvalue)
+            grp.create_dataset('moment',      [1], dtype=np.int32,   fillvalue=fillvalue)
+            grp.create_dataset('data',        [6], dtype=np.float64, fillvalue=fillvalue)
+            grp.create_dataset('radius',      [1], dtype=np.float64, fillvalue=fillvalue)
 
 
-    def writeHdf(self, parent, myName, create=True, index=None):
+    def writeHdf(self, parent, myName, index=None):
         """ Write the StatArray to an HDF object
         parent: Upper hdf file or group
         myName: object hdf name. Assumes createHdf has already been called
         create: optionally create the data set as well before writing
         """
-        # create a new group inside h5obj
-        if (create):
-            self.createHdf(parent, myName)
-
         if (index is None):
-            parent[myName+'/orientation'][0]=np.string_(self.orient)
+            parent[myName+'/orientation'][0] = np.string_(self.orient)
         else:
-            parent[myName+'/orientation'][index]=np.string_(self.orient)
+            parent[myName+'/orientation'][index] = np.string_(self.orient)
         writeNumpy(self.moment, parent, myName+'/moment', index=index)
-        writeNumpy(self.data, parent, myName+'/data', index=index)
+        writeNumpy(self.data,   parent, myName+'/data',   index=index)
         writeNumpy(self.radius, parent, myName+'/radius', index=index)
 
     def toHdf(self, parent, myName):
@@ -126,9 +122,9 @@ class CircularLoop(EmLoop):
         grp.attrs["repr"] = self.hdfName()
 
         grp.create_dataset('orientation', data = np.string_(self.orient))
-        grp.create_dataset('moment', data = self.moment)
-        grp.create_dataset('data', data=self.data)
-        grp.create_dataset('radius', data=self.radius)
+        grp.create_dataset('moment',      data = self.moment)
+        grp.create_dataset('data',        data = self.data)
+        grp.create_dataset('radius',      data = self.radius)
 
 
     def fromHdf(self, h5grp, index=None):
@@ -170,18 +166,22 @@ class CircularLoop(EmLoop):
             A CircularLoop on each core
         
         """
-        o = myMPI.Bcast(self.orient, world, root=root)
-        m = myMPI.Bcast(self.moment, world, root=root)
-        x = myMPI.Bcast(self.x, world, root=root)
-        y = myMPI.Bcast(self.y, world, root=root)
-        z = myMPI.Bcast(self.z, world, root=root)
-        pitch = myMPI.Bcast(self.pitch, world, root=root)
-        roll = myMPI.Bcast(self.roll, world, root=root)
-        yaw = myMPI.Bcast(self.yaw, world, root=root)
+
+        o = myMPI.Bcast(self.orient,      world, root=root)
+        m = myMPI.Bcast(self.moment,      world, root=root)
+        x = myMPI.Bcast(self.x,           world, root=root)
+        y = myMPI.Bcast(self.y,           world, root=root)
+        z = myMPI.Bcast(self.z,           world, root=root)
+        pitch = myMPI.Bcast(self.pitch,   world, root=root)
+        roll = myMPI.Bcast(self.roll,     world, root=root)
+        yaw = myMPI.Bcast(self.yaw,       world, root=root)
         radius = myMPI.Bcast(self.radius, world, root=root)
+
         return CircularLoop(o, m, x, y, z, pitch, roll, yaw, radius)
 
     def __str__(self):
         """ Define print(self) """
         return 'CircularLoop("{0}",{1},{2},{3},{4},{5},{6},{7},{8})'.format(
-            self.orient,self.moment,self.x,self.y,self.z,self.pitch,self.roll,self.yaw,self.radius)
+            self.orient, self.moment, 
+            self.x,      self.y,    self.z, 
+            self.pitch,  self.roll, self.yaw, self.radius)

@@ -514,7 +514,8 @@ class Results(myObject):
         tmp=self.bestModel.pad(self.bestModel.maxLayers)
         tmp.createHdf(grp, 'bestmodel')
 
-    def writeHdf(self, parent, myName, create=True, index=None):
+
+    def writeHdf(self, parent, myName, index=None):
         """ Write the StatArray to an HDF object
         parent: Upper hdf file or group
         myName: object hdf name. Assumes createHdf has already been called
@@ -522,9 +523,6 @@ class Results(myObject):
         index: optional numpy slice of where to place the arr in the hdf data object
         """
         assert isinstance(myName,str), 'myName must be a string'
-        # create a new group inside h5obj
-        if (create):
-            self.createHdf(parent, myName)
 
         grp = parent.get(myName)
         writeNumpy(self.i, grp, 'i')
@@ -543,19 +541,19 @@ class Results(myObject):
         writeNumpy(self.multiplier, grp, 'multiplier')
         writeNumpy(self.invTime, grp, 'invtime')
 
-        self.rate.writeHdf(grp, 'rate', create=False)
-        self.ratex.writeHdf(grp, 'ratex', create=False)
-        self.PhiDs.writeHdf(grp, 'phids', create=False)
-        self.kHist.writeHdf(grp, 'khist', create=False)
-        self.DzHist.writeHdf(grp, 'dzhist', create=False)
-        self.MzHist.writeHdf(grp, 'mzhist', create=False)
+        self.rate.writeHdf(grp, 'rate')
+        self.ratex.writeHdf(grp, 'ratex')
+        self.PhiDs.writeHdf(grp, 'phids')
+        self.kHist.writeHdf(grp, 'khist')
+        self.DzHist.writeHdf(grp, 'dzhist')
+        self.MzHist.writeHdf(grp, 'mzhist')
          # Histograms for each system
         for i in range(self.nSystems):
-            self.relErr[i].writeHdf(grp, 'relerr' + str(i), create=False)
+            self.relErr[i].writeHdf(grp, 'relerr' + str(i))
         for i in range(self.nSystems):
-            self.addErr[i].writeHdf(grp, 'adderr' + str(i), create=False)
+            self.addErr[i].writeHdf(grp, 'adderr' + str(i))
 
-        self.Hitmap.writeHdf(grp,'hitmap', create=False)
+        self.Hitmap.writeHdf(grp,'hitmap')
 
         mean = self.Hitmap.getMeanInterval()
         best = self.bestModel.interp2depth(self.bestModel.par, self.Hitmap)
@@ -567,9 +565,9 @@ class Results(myObject):
         self.clk.stop()
         self.saveTime = np.float64(self.clk.timeinSeconds())
         writeNumpy(self.saveTime, grp, 'savetime')
-        self.bestD.writeHdf(grp, 'bestd', create=False)
-        self.currentD.writeHdf(grp, 'currentd', create=False)
-        self.bestModel.writeHdf(grp, 'bestmodel', create=False)
+        self.bestD.writeHdf(grp, 'bestd')
+        self.currentD.writeHdf(grp, 'currentd')
+        self.bestModel.writeHdf(grp, 'bestmodel')
 
     def toHdf(self, h5obj, myName):
         """ Write the object to a HDF file """

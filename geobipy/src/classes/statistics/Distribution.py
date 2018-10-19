@@ -9,6 +9,7 @@ from .MvNormalDistribution import MvNormal
 from .NormalLoggedDistribution import NormalLog
 from .MvNormalLoggedDistribution import MvNormalLog
 from .UniformDistribution import Uniform
+from .UniformLoggedDistribution import UniformLog
 from .GammaDistribution import Gamma
 from .OrderStatistics import Order
 
@@ -51,6 +52,7 @@ def Distribution(distributionType, *args, **kwargs):
     geobipy.src.classes.statistics.NormalLoggedDistribution
     geobipy.src.classes.statistics.MvNormalLoggedDistribution
     geobipy.src.classes.statistics.UniformDistribution
+    geobipy.src.classes.statistics.UniformLoggedDistribution
     geobipy.src.classes.statistics.GammaDistribution
     geobipy.src.classes.statistics.OrderStatistics
 
@@ -63,8 +65,12 @@ def Distribution(distributionType, *args, **kwargs):
         return distributionType.deepcopy()
     tName = distributionType.lower()
     if (tName == 'uniform'):
-        assert (len(args)+len(kwargs) >= 2), 'Please enter a minimum and maximum for the uniform distribtion'
+        assert (len(args)+len(kwargs) >= 2), 'Please enter a minimum and maximum for the Uniform distribtion'
         out = Uniform(*args, **kwargs)
+        return out
+    elif (tName == 'uniformlog'):
+        assert (len(args)+len(kwargs) >= 2), 'Please enter a minimum and maximum for the UniformLog distribtion'
+        out = UniformLog(*args, **kwargs)
         return out
     elif (tName == 'normal' or tName == 'gaussian'):
         assert (len(args)+len(kwargs) >= 2), 'Please enter a mean and variance for the Normal distribtion'

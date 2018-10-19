@@ -1018,7 +1018,7 @@ class StatArray(np.ndarray, myObject):
         >>> # Fake a non collective region
         >>> def noncollectivewrite(x, file, world):
         >>>     # Each rank carries out this code, but it's not collective.
-        >>>     x.writeHdf(file, 'x', create=False, index=world.rank)
+        >>>     x.writeHdf(file, 'x', index=world.rank)
         >>> noncollectivewrite(x, f, world)
 
         >>> world.barrier()
