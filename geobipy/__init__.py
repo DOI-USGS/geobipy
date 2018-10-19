@@ -72,8 +72,6 @@ def checkCommandArguments():
     import warnings
     warnings.filterwarnings('error')
 
-    print(sys.argv)
-
     try:
         opts, rem = getopt.getopt(sys.argv[1:], "hi:ov", ["help", "input=","output="])
     except getopt.GetoptError as err:
