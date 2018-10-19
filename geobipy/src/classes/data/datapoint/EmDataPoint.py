@@ -178,16 +178,33 @@ class EmDataPoint(myObject):
         if (height):  # Update the candidate data elevation (if required)
             # Generate a new elevation
             other.z[:] = self.z.proposal.rng(1)
+            if other.z.hasPrior():
+                p = other.z.probability()
+                while p == 0.0 or p == -np.inf:
+                    other.z[:] = self.z.proposal.rng(1)
+                    p = other.z.probability()
             # Update the mean of the proposed elevation
             other.z.proposal.mean[:] = other.z
-        if (rErr):
+            
+        if (rErr):    
             # Generate a new error
             other.relErr[:] = self.relErr.proposal.rng(1)
+            if other.relErr.hasPrior():
+                p = other.relErr.probability()
+                while p == 0.0 or p == -np.inf:
+                    other.relErr[:] = self.relErr.proposal.rng(1)
+                    p = other.relErr.probability()
             # Update the mean of the proposed errors
             other.relErr.proposal.mean[:] = other.relErr
+            
         if (aErr):
             # Generate a new error
             other.addErr[:] = self.addErr.proposal.rng(1)
+            if other.addErr.hasPrior():
+                p = other.addErr.probability()
+                while p == 0.0 or p == -np.inf:
+                    other.addErr[:] = self.addErr.proposal.rng(1)
+                    p = other.addErr.probability()
             # Update the mean of the proposed errors
             other.addErr.proposal.mean[:] = other.addErr
 
