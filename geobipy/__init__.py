@@ -4,7 +4,7 @@
 from os import getcwd
 from os import makedirs
 from os.path import join
-import getopt
+import argparse
 from importlib import import_module
 import sys
 
@@ -18,7 +18,7 @@ from .src.base import customFunctions
 from .src.base import customPlots
 from .src.base import fileIO
 from .src.base import interpolation
-from .src.base import MPI
+
 from .src.base.HDF import hdfRead
 from .src.base.HDF import hdfWrite
 # Classes within geobipy
@@ -72,38 +72,19 @@ def checkCommandArguments():
     import warnings
     warnings.filterwarnings('error')
 
-    try:
-        opts, rem = getopt.getopt(sys.argv[1:], "hi:ov", ["help", "input=","output="])
-    except getopt.GetoptError as err:
-        # print help information and exit:
-        print(err) # will print something like "option -a not recognized"
-#        usage()
-        sys.exit(2)
-
-    inputFile = None
-    outputDir = None
-    verbose = False
-    for o, a in opts:
-        if o == "-v":
-            verbose = True
-        elif o in ("-h", "--help"):
-#            usage()
-            print('stuff')
-            sys.exit()
-        elif o in ("-i", "--input"):
-            inputFile = a
-        elif o in ("-o", "--output"):
-            outputDir = a
-        else:
-            assert False, "unhandled option"
-
-    assert(not inputFile is None), 'Need to specify input file with -i <python input file name>'
-    assert(not outputDir is None), 'Need to specify directory with -o <output Directory>'
+    Parser = argparse.ArgumentParser(description="GeoBIPy",
+                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    Parser.add_argument('inputFile', help='User input file')
+    Parser.add_argument('outputDir', help='Output directory for results')
+    
+    args = Parser.parse_args()
 
     # Strip .py from the input file name
-    inputFile=inputFile.replace('.py','')
+    inputFile = args.inputFile.replace('.py','')
+    
+    print(inputFile, args.outputDir)
 
-    return inputFile, outputDir
+    return inputFile, args.outputDir
 
 
 def masterTask(myData, world):
