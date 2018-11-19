@@ -81,8 +81,6 @@ def checkCommandArguments():
 
     # Strip .py from the input file name
     inputFile = args.inputFile.replace('.py','')
-    
-    print(inputFile, args.outputDir)
 
     return inputFile, args.outputDir
 
@@ -93,7 +91,6 @@ def masterTask(myData, world):
   from mpi4py import MPI
   from geobipy.src.base import MPI as myMPI
   
-
   mpi_status=MPI.Status()
   # Set the total number of data points
 
