@@ -2,18 +2,18 @@ module fdemforward1D
 implicit none
 
 ! Define some fixed parameters
-real(kind=8),parameter :: NaN = transfer((/ Z'00000000', Z'7FF80000' /),1.0_8)
-complex(kind=8),parameter :: cNaN = complex(NaN,NaN)
-real(kind=8),parameter :: pi = dacos(-1.d0)
-real(kind=8),parameter :: pi2 = 2.d0*pi
-real(kind=8),parameter :: pi4 = 4.d0*pi
-real(kind=8),parameter :: mu0 = 4.d-7*pi ! H/m
-real(kind=8),parameter :: c = 299792458.d0 ! m/s
-real(kind=8),parameter :: eps0 = 1.d0/(mu0*(c**2.d0)) ! F/m
+real(kind=8), parameter :: NaN = transfer((/ Z'00000000', Z'7FF80000' /), 1.0_8)
+complex(kind=8), parameter :: cNaN = complex(NaN, NaN)
+real(kind=8), parameter :: pi = dacos(-1.d0)
+real(kind=8), parameter :: pi2 = 2.d0 * pi
+real(kind=8), parameter :: pi4 = 4.d0 * pi
+real(kind=8), parameter :: mu0 = 4.d-7 * pi ! H/m
+real(kind=8), parameter :: c = 299792458.d0 ! m/s
+real(kind=8), parameter :: eps0 = 1.d0 / (mu0 * (c**2.d0)) ! F/m
 integer, parameter :: nCJ0 = 120
 integer, parameter :: nCJ1 = 140
 
-! Using a class allows to create coefficients once when the forward modeller is first used.
+! Using a class allows us to create coefficients once when the forward modeller is first used.
 type t_lambdas
     real(kind=8), allocatable :: w0(:), w1(:)
     real(kind=8), allocatable :: lam0(:, :), lam1(:, :)
@@ -24,6 +24,7 @@ type(t_lambdas), private :: lam
 
 contains
 
+!====================================================================!
 subroutine forward1D(nFreq, nLayers, tid, freqs, tHeight, rHeight, moments, rx, separation, scale, parIn, thkIn, predicted)
     !! Computes the forward frequency domain electromagnetic response of a 1D layered earth.
     !! This function is callable from python.
@@ -101,6 +102,7 @@ subroutine forward1D(nFreq, nLayers, tid, freqs, tHeight, rHeight, moments, rx, 
     predicted = 1.d6 * scale * ((H - H0) / H0)
 
 end subroutine
+!====================================================================!
 !====================================================================!
 subroutine sensitivity1D(nFreq, nLayers, tid, freqs, tHeight, rHeight, moments, rx, separation, scale, parIn, thkIn, sens)
     !! Computes the sensitivity of the frequency domain electromagnetic response of a 1D layered earth.
@@ -296,7 +298,7 @@ subroutine M1_1(Yn, Y, un, omega, thk, par, nFreq, nC, nL1, rTE, u0, sens)
     real(kind=8) :: p
     real(kind=8) :: t
 
-    complex(kind=8) :: a0, a1, a2
+    complex(kind=8) :: a0, a1, a2, z
     complex(kind=8) :: b1, b2, b4, b5, b6, b7, b8, b9 ! On the stack, does this matter at large scale?
     complex(kind=8) :: un_, Y_, Yn_
     complex(kind=8) :: accumulate(nC, nFreq, nL1-1)
@@ -322,7 +324,8 @@ subroutine M1_1(Yn, Y, un, omega, thk, par, nFreq, nC, nL1, rTE, u0, sens)
                 Yn_ = Yn(j, k, i)
                 Y_ = Y(j, k, i1)
                 un_ = un(j, k, i)
-                b4 = tanh(un_ * t)
+                z = un_ * t
+                b4 = cTanh(z)
                 b5 = b4**2.d0
                 b8 = (2.d0 * Yn_ * Y_ * b5)
                 b6 = Y_ + (Yn_ * b4)
@@ -405,7 +408,7 @@ subroutine M1_0(nFreq, nC, nL1, Yn, Y, un, thk, rTE, u0)
     integer :: nLayers
 
     real(kind=8) :: t
-    complex(kind=8) :: a0, a1, a2, a3, a4
+    complex(kind=8) :: a0, a1, a2, a3, a4, z
 
     nLayers = nL1 - 1
     i=nLayers
@@ -416,7 +419,8 @@ subroutine M1_0(nFreq, nC, nL1, Yn, Y, un, thk, rTE, u0)
             do j = 1, nC
                 a3 = Yn(j, k, i)
                 a4 = Y(j, k, i1)
-                a0 = tanh(un(j, k, i) * t) ! Use existing memory to save space
+                z = un(j, k, i) * t
+                a0 = cTanh(z) ! Use existing memory to save space
                 a1 = a4 + (a3 * a0) ! Numerator
                 a2 = 1.d0 / (a3 + (a4 * a0)) ! Denominator
                 Y(j, k, i) = a3 * a1 * a2
@@ -874,6 +878,23 @@ subroutine set_w1(this)
         4.32436265303e-08, -3.37262648712e-08, 2.53558687098e-08, -1.81287021528e-08, 1.20228328586e-08,&
         -7.10898040664e-09, 3.53667004588e-09, -1.36030600198e-09, 3.52544249042e-10, -4.53719284366e-11]
 end subroutine
+!====================================================================!
+!====================================================================!
+function cTanh(z) result(res)
+  !! Evaluate tanh(z) for complex numbers. Prevents NaN overflow on some systems
+!====================================================================!
+    complex(kind=8), intent(in) :: z
+    complex(kind=8) :: res
+    complex(kind=8) :: tmp
+    
+    if (real(z) > 0.d0) then
+        tmp = exp(-2.d0 * z)
+        res = (1.d0 - tmp) / (1.d0 + tmp)
+    else
+        tmp = exp(2.d0 * z)
+        res = (tmp - 1.d0) / (tmp + 1.d0)
+    endif
+end function
 !====================================================================!
 end module
 
