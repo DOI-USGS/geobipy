@@ -1,6 +1,4 @@
-""" @PointCloud3D
-Module describing a 3D point cloud
-"""
+from copy import deepcopy
 from ...classes.core.myObject import myObject
 import numpy as np
 from ...classes.core.StatArray import StatArray
@@ -14,46 +12,111 @@ from scipy.spatial import cKDTree
 
 
 class PointCloud3D(myObject):
-    """ 3D Point Cloud with x,y,z co-ordinates """
+    """3D Point Cloud with x,y,z co-ordinates
+    
+    PointCloud3D(N, x, y, z)
 
-    def __init__(self, N=0, x=None, y=None, z=None, units="m"):
+    Parameters
+    ----------
+    N : int
+        Number of points
+    x : array_like or geobipy.StatArray, optional
+        The x co-ordinates. Default is zeros of size N
+    y : array_like or geobipy.StatArray, optional
+        The y co-ordinates. Default is zeros of size N
+    z : array_like or geobipy.StatArray, optional
+        The z co-ordinates. Default is zeros of size N
+
+    Returns
+    -------
+    out : geobipy.PointCloud3D
+        The 3D point cloud    
+    
+    """
+
+    def __init__(self, N=0, x=None, y=None, z=None):
         """ Initialize the class """
-
-
-
 
         # Number of points in the cloud
         self.N = N
         # StatArray of the x co-ordinates
-        self.x = StatArray(self.N, "Easting", units)
+        if (x is None):
+            self.x = StatArray(self.N, "Easting", "m")
+        else:
+            assert x.size == N, ValueError("x must have size {}".format(N))
+            if (isinstance(x, StatArray)):
+                self.x = x.deepopy()
+            else:
+                self.x = StatArray(x, "Easting", "m")
+
         # StatArray of the y co-ordinates
-        self.y = StatArray(self.N, "Northing", units)
+        if (y is None):
+            self.y = StatArray(self.N, "Northing", "m")
+        else:
+            assert y.size == N, ValueError("y must have size {}".format(N))
+            if isinstance(y, StatArray):
+                self.y = y.deepcopy()
+            else:
+                self.y = StatArray(y, "Northing", "m")
+                
         # StatArray of the z co-ordinates
-        self.z = StatArray(self.N, "Height", units)
+        if (z is None):
+            self.z = StatArray(self.N, "Height", "m")
+        else:
+            assert z.size == N, ValueError("z must have size {}".format(N))
+            if isinstance(z, StatArray):
+                self.z = z.deepcopy()
+            else:
+                self.z = StatArray(z, "Height", "m")
+
         # KdTree
         self.kdtree = None
         # Bounding Box
         self.bounds = None
 
+        self.getBounds()
+
+
     def __getitem__(self, i):
-        """ Define item getter """
-        n = np.size(i)
-        tmp = PointCloud3D(n, self.x.units)
-        tmp.x[:] = self.x[i]
-        tmp.y[:] = self.y[i]
-        tmp.z[:] = self.z[i]
-        return tmp
+        """Define item getter
+        
+        Parameters
+        ----------
+        i : ints or slice
+            The indices of the points in the pointcloud to return
+
+        out : geobipy.PointCloud3D
+            The potentially smaller point cloud
+        """
+        return PointCloud3D(np.size(i), x=self.x[i], y=self.y[i], z=self.z[i])
+
 
     def getBounds(self):
-        """ Gets the bounding box of the data set """
-        self.bounds = np.zeros(4)
-        self.bounds[:]=(np.min(self.x),np.max(self.x),np.min(self.y),np.max(self.y))
+        """Gets the bounding box of the data set """
+        self.bounds = np.asarray([np.min(self.x), np.max(self.x), np.min(self.y), np.max(self.y)])
+
 
     def getPoint(self, i):
-        """ Get a point from the 3D Point Cloud
-        Returns a point P """
-        P = Point(self.x[i], self.y[i], self.z[i])
-        return P
+        """Get a point from the 3D Point Cloud
+
+        Parameters
+        ----------
+        i : int
+            The index of the point to return
+
+        Returns
+        -------
+        out : geobipy.Point
+            A point 
+
+        Raises
+        ------
+        ValueError : If i is not a single int
+            
+        """
+        assert isinstance(i, int), ValueError("i must be a single integer")
+        return Point(self.x[i], self.y[i], self.z[i])
+
 
     def summary(self, out=False):
         """ Display a summary of the 3D Point Cloud """
@@ -66,12 +129,14 @@ class PointCloud3D(myObject):
             return msg
         print(msg)
 
+
     def maketest(self, nPoints):
         """ Creates a small test of random points """
         PointCloud3D.__init__(self, nPoints)
         self.x[:] = (2.0 * np.random.rand(nPoints)) - 1.0
         self.y[:] = (2.0 * np.random.rand(nPoints)) - 1.0
         self.z[:] = cf.cosSin1(self.x, self.y, 1.0, 1.0)
+
 
     def read(self, fname, nHeaders=0, cols=range(3)):
         """ Reads x y z co-ordinates from an ascii file
@@ -95,8 +160,25 @@ class PointCloud3D(myObject):
                 self.y[j] = values[1]
                 self.z[j] = values[2]
 
+
     def scatter2D(self, **kwargs):
-        """ Plots the x y locations of the point cloud with the height for colour"""
+        """Create a 2D scatter plot using the x, y coordinates of the point cloud.
+
+        Can take any other matplotlib arguments and keyword arguments e.g. markersize etc.
+
+        Parameters
+        ----------
+        c : 1D array_like or StatArray, optional
+            Colour values of the points, default is the height of the points
+        i : sequence of ints, optional
+            Plot a subset of x, y, c, using the indices in i.
+        
+        See Also
+        --------
+        geobipy.customPlots.Scatter2D : For additional keyword arguments you may use.
+
+        """
+
         if (not 'linewidth' in kwargs):
             kwargs['linewidth'] = 0.1
         if (not 'c' in kwargs):
@@ -106,7 +188,14 @@ class PointCloud3D(myObject):
 
 
     def setKdTree(self, nDims=3):
-        """ Creates the kdtree mapping the point locations """
+        """Creates a k-d tree of the point co-ordinates
+        
+        Parameters
+        ----------
+        nDims : int
+            Either 2 or 3 to exclude or include the vertical co-ordinate
+        
+        """
         if (nDims == 2):
             tmp = np.column_stack((self.x, self.y))
         elif (nDims == 3):
@@ -115,6 +204,13 @@ class PointCloud3D(myObject):
 
 
     def nearest(self, x, k=1, eps=0, p=2, radius=np.inf):
+        """Obtain the k nearest neighbours
+
+        See Also
+        --------
+        See scipy.spatial.cKDTree.query for argument descriptions and return types
+
+        """
 
         assert (not self.kdtree is None), TypeError('kdtree has not been set, use self.setKdTree()')
         return self.kdtree.query(x, k, eps, p, distance_upper_bound=radius)
@@ -227,27 +323,57 @@ class PointCloud3D(myObject):
         return x, y, vals        
 
 
-    def Bcast(self, world):
-        """ Braodcase a PointCloud3D using MPI """
-        N = MPI.Bcast(self.N, world)
+    def Bcast(self, world, root=0):
+        """Broadcast a PointCloud3D using MPI 
+        
+        Parameters
+        ----------
+        world : mpi4py.MPI.COMM_WORLD
+            MPI communicator
+        root : int, optional
+            The MPI rank to broadcast from. Default is 0.
+
+        Returns
+        -------
+        out : geobipy.PointCloud3D
+            PointCloud3D broadcast to each rank
+
+        """
+        N = MPI.Bcast(self.N, world, root=root)
         this = PointCloud3D(N)
-        this.x = self.x.Bcast(world)
-        this.y = self.y.Bcast(world)
-        this.z = self.z.Bcast(world)
+        this.x = self.x.Bcast(world, root=root)
+        this.y = self.y.Bcast(world, root=root)
+        this.z = self.z.Bcast(world, root=root)
         return this
 
-    def Scatterv(self, myStart, myChunk, world):
-        """ ScatterV a PointCloud3D using MPI """
+
+    def Scatterv(self, myStart, myChunk, world, root=0):
+        """ScatterV a PointCloud3D using MPI 
+        
+        Parameters
+        ----------
+        myStart : sequence of ints
+            Indices into self that define the starting locations of the chunks to be sent to each rank.
+        myChunk : sequence of ints
+            The size of each chunk that each rank will receive.
+        world : mpi4py.MPI.Comm
+            The MPI communicator over which to Scatterv.
+        root : int, optional
+            The MPI rank to broadcast from. Default is 0.
+
+        Returns
+        -------
+        out : geobipy.PointCloud3D
+            The PointCloud3D distributed amongst ranks.
+            
+        """
+
         #print(world.rank," PointCloud3D.Scatterv")
         N = myChunk[world.rank]
         #print(world.rank," mySize "+str(N))
         this = PointCloud3D(N)
         #print(world.rank,' PointCloud3D initialized')
-        this.x = self.x.Scatterv(myStart, myChunk, world)
-        this.y = self.y.Scatterv(myStart, myChunk, world)
-        this.z = self.z.Scatterv(myStart, myChunk, world)
+        this.x = self.x.Scatterv(myStart, myChunk, world, root=root)
+        this.y = self.y.Scatterv(myStart, myChunk, world, root=root)
+        this.z = self.z.Scatterv(myStart, myChunk, world, root=root)
         return this
-
-if __name__ == "__main__":
-    P = PointCloud3D()
-    P.read('EMdata.csv', 1, [3, 2, 4])
