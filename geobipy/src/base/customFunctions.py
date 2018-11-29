@@ -16,12 +16,7 @@ def isInt(this):
         Is or is not an int
 
     """
-    if (isinstance(this,int)):
-        return True
-    try:
-        return issubdtype(this, int)
-    except:
-        return False
+    return isinstance(this, (int, np.integer))
 
 def isIntorSlice(this):
     """Check whether an entry is a subtype of an int or a slice
@@ -536,21 +531,17 @@ def histogramEqualize(values, nBins=256):
 
 
 def safeEval(string):
-
+    
     if ('NdArray' in string):
         string = string.replace('NdArray', 'StatArray')
         return string
-    if ('StatArray' in string):
-        return string
-    if ('Histogram' in string):
-        return string
-    if ('Model1D' in string):
-        return string
-    if ('Hitmap' in string):
-        return string
-    if ('TdemDataPoint' in string):
-        return string
     if ('EmLoop' in string):
+        string = string.replace('EmLoop', 'CircularLoop')
+        return string
+    
+    allowed = ('StatArray', 'Histogram', 'Model1D', 'Hitmap', 'TdemDataPoint', 'FdemDataPoint', 'TdemSystem', 'FdemSystem', 'CircularLoop')  
+
+    if (any(x in string for x in allowed)):
         return string
 
     raise  ValueError("Problem evaluating string "+string)
