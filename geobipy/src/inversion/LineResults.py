@@ -2,7 +2,6 @@
 Class to handle the HDF5 result files for a line of data.
  """
 #from ..base import Error as Err
-from pandas import rolling_mean as rmean
 import numpy as np
 import numpy.ma as ma
 import h5py
@@ -297,7 +296,7 @@ class LineResults(myObject):
         """ Get the best data """
 
         if (not self.bestData is None): return
-        self.bestData = self.getAttribute('best data', sysPath = self.sysPath, **kwargs)
+        self.bestData = self.getAttribute('best data', **kwargs)
 
 
     def getBestParameters(self):
@@ -376,7 +375,7 @@ class LineResults(myObject):
         R.bestD = hdfRead.readKeyFromFile(aFile,'','/','bestd', index=i, sysPath=self.sysPath)
         R.currentD = hdfRead.readKeyFromFile(aFile,'','/','currentd', index=i, sysPath=self.sysPath)
         R.bestModel = hdfRead.readKeyFromFile(aFile,'','/','bestmodel', index=i)
-        R.bestModel.zmax = np.log(R.Hitmap.y[-1])
+        R.bestModel.maxDepth = np.log(R.Hitmap.y[-1])
         R.kHist = hdfRead.readKeyFromFile(aFile,'','/','khist', index=i)
         R.DzHist = hdfRead.readKeyFromFile(aFile,'','/','dzhist', index=i)
         R.MzHist = hdfRead.readKeyFromFile(aFile,'','/','mzhist', index=i)
@@ -1099,16 +1098,16 @@ class LineResults(myObject):
 
         # Generate the quad node locations in x
         x = np.zeros(self.nPoints + 1)
-        x[:-1] = rmean(self.x, 2)
+        x[:-1] = self.x.rolling(2).mean()
         x[0] = x[1] - 2 * abs(x[1] - self.x[0])
         x[-1] = x[-2] + 2 * abs(self.x[-1] - x[-2])
 
         y = np.zeros(self.nPoints + 1)
-        y[:-1] = rmean(self.y, 2)
+        y[:-1] = self.y.rolling(2).mean()
         y[0] = y[1] - 2 * abs(y[1] - self.y[0])
         y[-1] = y[-2] + 2 * abs(self.y[-1] - y[-2])
         e = np.zeros(self.nPoints + 1)
-        e[:-1] = rmean(self.elevation, 2)
+        e[:-1] = self.elevation.rolling(2).mean()
         e[0] = e[1] - 2 * (e[1] - self.elevation[0])
         e[-1] = e[-2] + 2 * (self.elevation[-1] - e[-2])
 
@@ -1318,7 +1317,7 @@ class LineResults(myObject):
         self.hdfFile = aFile
 
         nPoints = iDs.size
-        self.iDs = iDs
+        self.iDs = np.sort(iDs)
 
         # Initialize and write the attributes that won't change
         aFile.create_dataset('ids',data=self.iDs)
@@ -1375,7 +1374,7 @@ class LineResults(myObject):
         results.bestD.createHdf(aFile,'bestd', nRepeats=nPoints, fillvalue=np.nan)
 
         # Since the 1D models change size adaptively during the inversion, we need to pad the HDF creation to the maximum allowable number of layers.
-        tmp = results.bestModel.pad(results.bestModel.kmax)
+        tmp = results.bestModel.pad(results.bestModel.maxLayers)
 
         tmp.createHdf(aFile,'bestmodel',nRepeats=nPoints, fillvalue=np.nan)
 
@@ -1400,7 +1399,7 @@ class LineResults(myObject):
 #        self.currentD.createHdf(grp, 'currentd')
 #        self.bestD.createHdf(grp, 'bestd')
 #
-#        tmp=self.bestModel.pad(self.bestModel.kmax)
+#        tmp=self.bestModel.pad(self.bestModel.maxLayers)
 #        tmp.createHdf(grp, 'bestmodel')
 
     def results2Hdf(self, results):
@@ -1439,7 +1438,7 @@ class LineResults(myObject):
         results.bestInterp[:] = results.bestModel.interpPar2Mesh(results.bestModel.par, results.Hitmap)
 #        results.opacityInterp[:] = results.Hitmap.getOpacity()
 
-        slic=np.s_[i,:]
+        slic = np.s_[i, :]
         # Add the interpolated mean model
         results.meanInterp.writeHdf(aFile, 'meaninterp',  index=slic)
         # Add the interpolated best
@@ -1475,8 +1474,8 @@ class LineResults(myObject):
 
         results.bestModel.writeHdf(aFile,'bestmodel', index=i)
 
-        if results.verbose:
-            results.posteriorComponents.writeHdf(aFile, 'posteriorcomponents',  index=np.s_[i,:,:])
+#        if results.verbose:
+#            results.posteriorComponents.writeHdf(aFile, 'posteriorcomponents',  index=np.s_[i,:,:])
 
 
 
