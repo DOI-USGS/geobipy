@@ -93,9 +93,9 @@ class MvNormal(baseDistribution):
         msg = 'MV Normal Distribution: \n'
         msg += '    Mean: :' + str(self.mean) + '\n'
         msg += 'Variance: :' + str(self.variance) + '\n'
-        if (out):
-            return msg
-        print(msg)
+        
+        return msg if out else print(msg)
+    
 
     def pad(self, N):
         """ Pads the mean and variance to the given size
