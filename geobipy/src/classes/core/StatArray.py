@@ -23,15 +23,15 @@ class StatArray(np.ndarray, myObject):
     This subclass to a numpy array contains extra attributes that can describe the parameters it represents.  
     One can also attach prior and proposal distributions so that it may be used in an MCMC algorithm easily. 
     Because this is a subclass to numpy, the StatArray contains all numpy array methods and when passed to an 
-    in-place numpy function will return an StatArray.  See the example section for more information.
+    in-place numpy function will return a StatArray.  See the example section for more information.
 
     StatArray(shape, name=None, units=None, \*\*kwargs)
 
     Parameters
     ----------
-    shape : int or sequence of ints or array_like or StatArray, optional
-        * If shape is int or sequence of ints : give the shape of the new StatArray e.g., ``2`` or ``(2, 3)``. All other parameters that can be passed to functions like numpy.zeros or numpy.arange can be used, see Other Parameters.
-        * If shape is array_like : any object exposing the array interface, an object whose __array__ method returns an array, or any (nested) sequence. e.g., ``StatArray(numpy.arange(10))`` will cast the result of Numpy's arange into an StatArray and will maintain the properies passed through arange. One could then attach the name, units, prior, and/or proposal through this interface too. e.g., ``x = StatArray(numpy.arange(10,dtype=numpy.int), name='aTest', units='someUnits')``
+    shape : int or sequence of ints or array_like or StatArray
+        * If shape is int or sequence of ints : give the shape of the new StatArray e.g., ``2`` or ``(2, 3)``. All other arguments that can be passed to functions like numpy.zeros or numpy.arange can be used, see Other Parameters.
+        * If shape is array_like : any object exposing the array interface, an object whose __array__ method returns an array, or any (nested) sequence. e.g., ``StatArray(numpy.arange(10))`` will cast the result into a StatArray and will maintain the properies passed through to that function. One could then attach the name, units, prior, and/or proposal through this interface too. e.g., ``x = StatArray(numpy.arange(10,dtype=numpy.int), name='aTest', units='someUnits')``
         * If shape is StatArray : the returned object is a deepcopy of the input. If name and units are specified with this option they will replace those parameters in the copy. e.g., ``y = StatArray(x, name='anotherTest')`` will be a deepcopy copy of x, but with a different name.
     name : str, optional
         The name of the StatArray.
@@ -41,7 +41,7 @@ class StatArray(np.ndarray, myObject):
     Other Parameters
     ----------------
     dtype : data-type, optional
-        The desired data-type for the array, e.g., `numpy.int8`.  Default is
+        The desired data-type for the array.  Default is
         `numpy.float64`. Only used when shape is int or sequence of ints.
         The data type could also be a class.
     buffer : object exposing buffer interface, optional
@@ -52,9 +52,9 @@ class StatArray(np.ndarray, myObject):
         Strides of data in memory. Only used when shape is int or sequence of ints.
     order : {'C', 'F', 'A'}, optional
         Specify the order of the array.  If order is 'C', then the array
-        will be in C-contiguous order (last-index varies the fastest).
+        will be in C-contiguous order (rightmost-index varies the fastest).
         If order is 'F', then the returned array will be in
-        Fortran-contiguous order (first-index varies the fastest).
+        Fortran-contiguous order (leftmost-index varies the fastest).
         If order is 'A' (default), then the returned array may be in any order (either C-, Fortran-contiguous, or even discontiguous), 
         unless a copy is required, in which case it will be C-contiguous. Only used when shape is int or sequence of ints.
 
@@ -84,12 +84,12 @@ class StatArray(np.ndarray, myObject):
     >>> print(x.mean())
     4.5
 
-    If the StatArray is passed to a numpy function that does not return a new instantiation, an StatArray will be returned (as opposed to a numpy array)
+    If the StatArray is passed to a numpy function that does not return a new instantiation, a StatArray will be returned (as opposed to a numpy array)
 
     >>> np.delete(x, 5)
     StatArray([0, 1, 2, 3, 4, 6, 7, 8, 9])
 
-    However, if you pass an StatArray to a numpy function that is not in-place, i.e. creates new memory, the return type will be a numpy array and NOT an StatArray subclass
+    However, if you pass a StatArray to a numpy function that is not in-place, i.e. creates new memory, the return type will be a numpy array and NOT a StatArray subclass
 
     >>> np.append(x,[3,4,5])
     array([0, 1, 2, ..., 3, 4, 5])
@@ -101,7 +101,7 @@ class StatArray(np.ndarray, myObject):
     """
 
 
-    def __new__(subtype, shape=0, name=None, units=None, **kwargs):
+    def __new__(subtype, shape, name=None, units=None, **kwargs):
         """Instantiate a new StatArray """
         # Create the ndarray instance of our type, given the usual
         # ndarray input arguments.  This will call the standard
@@ -116,23 +116,22 @@ class StatArray(np.ndarray, myObject):
             assert (isinstance(units,str)), TypeError('units must be a string')
             units=str_to_raw(units) # Do some possible LateX checking. some Backslash operatores in LateX do not pass correctly as strings
 
-        # Copies an StatArray but can reassign the name and units
+        # Copies a StatArray but can reassign the name and units
         if isinstance(shape, StatArray):
-            tmp = shape.deepcopy()
+            shp = np.shape(shape)
+            tmp = StatArray(shp, name=shape.name, units=shape.units) + shape
+
             if not name is None:
                 tmp.name = name
             if not units is None:
                 tmp.units = units
+
             return tmp
         # Can pass in a numpy function call like arange(10) as the first argument
         elif isinstance(shape, np.ndarray):
             self = shape.view(StatArray)
 
-        # Can pass a list, if it does not conform to numpy, numpy will throw the error.
-        #elif isinstance(shape, list):
-        #    tmp = np.asarray(shape)
-        #    self = tmp.view(StatArray)
-
+        # Convert the entry to a numpy array
         else:
             self = np.ndarray.__new__(subtype, np.asarray(shape), **kwargs)
             self[:] = 0
@@ -162,9 +161,9 @@ class StatArray(np.ndarray, myObject):
 
 
     def append(self, values):
-        """Append to an StatArray
+        """Append to a StatArray
 
-        Appends values the end of an StatArray. Be careful with repeated calls to this method as it can be slow due to reallocating memory.
+        Appends values the end of a StatArray. Be careful with repeated calls to this method as it can be slow due to reallocating memory.
 
         Parameters
         ----------
@@ -184,8 +183,8 @@ class StatArray(np.ndarray, myObject):
         return out
 
 
-    def copy(self):
-        return copy(self)
+    def copy( self, order='F'):       
+        return StatArray(self)
 
 
     def deepcopy(self):
@@ -210,13 +209,13 @@ class StatArray(np.ndarray, myObject):
         other.name = self.name
         other.units = self.units
 
-        if self.hasPrior():
-            other.prior = self.prior.deepcopy()
-
-        if self.hasProposal():
-            other.proposal = self.proposal.deepcopy()
+        if (self.hasPrior()):
+            other._prior = self.prior.deepcopy()
+        if (self.hasProposal()):
+            other._proposal = self.proposal.deepcopy()
         
         return other
+
 
     def delete(self, i, axis=None):
         """Delete elements
@@ -232,7 +231,7 @@ class StatArray(np.ndarray, myObject):
         Returns
         -------
         out : StatArray
-            Deepcopy of StatArray with deleted entry.
+            Deepcopy of StatArray with deleted entry(ies).
 
         """
         tmp = np.delete(self, i, axis=axis)
@@ -243,7 +242,7 @@ class StatArray(np.ndarray, myObject):
 
     def edges(self):
         """Get the midpoint values between elements in the StatArray
-``
+
         Returns an size(self) + 1 length StatArray of the midpoints between each element. The first and last element are projected edges based on the difference between first two and last two elements in self.
         edges[0] = self[0] - (self[1]-self[0])
         edges[-1] = self[-1] + (self[-1] - self[-2])
@@ -266,7 +265,7 @@ class StatArray(np.ndarray, myObject):
     def getNameUnits(self):
         """Get the name and units
 
-        Gets the name and units attached to the StatArray, units, if present are surrounded by parentheses
+        Gets the name and units attached to the StatArray. Units, if present are surrounded by parentheses
 
         Returns
         -------
@@ -278,7 +277,8 @@ class StatArray(np.ndarray, myObject):
         u = self.getUnits()
         if (not u == ""):
             out += "(" + u + ")"
-        return (out)
+        return out
+
 
     def getName(self):
         """Get the name of the StatArray
@@ -291,7 +291,9 @@ class StatArray(np.ndarray, myObject):
             The name of the StatArray.
 
         """
+
         return "" if self.name is None else self.name
+
 
     def getUnits(self):
         """Get the units of the StatArray
@@ -304,6 +306,7 @@ class StatArray(np.ndarray, myObject):
             The unist of the StatArray
 
         """
+
         return "" if self.units is None else self.units
 
 
@@ -325,6 +328,7 @@ class StatArray(np.ndarray, myObject):
             StatArray after inserting a value.
 
         """
+
         tmp = np.insert(self, i, values, axis)
         out = self.resize(tmp.shape)
         out[:] = tmp[:]
@@ -340,6 +344,7 @@ class StatArray(np.ndarray, myObject):
             Has an attached prior.
 
         """
+
         try:
             return not self.prior is None
         except:
@@ -355,6 +360,7 @@ class StatArray(np.ndarray, myObject):
             Has an attached proposal.
 
         """
+
         try:
             return not self.proposal is None
         except:
@@ -362,9 +368,9 @@ class StatArray(np.ndarray, myObject):
 
 
     def prepend(self, values):
-        """Prepend to an StatArray
+        """Prepend to a StatArray
 
-        Incrementally adds to an StatArray, Do not use this too often as it is quite slow
+        Incrementally adds to a StatArray, Do not use this too often as it is quite slow
 
         Parameters
         ----------
@@ -377,6 +383,7 @@ class StatArray(np.ndarray, myObject):
             StatArray with prepended values.
 
         """
+
         try:
             i = np.arange(values.size)
         except:
@@ -385,9 +392,9 @@ class StatArray(np.ndarray, myObject):
 
 
     def resize(self, N):
-        """Resize an StatArray
+        """Resize a StatArray
 
-        Resize an StatArray but copy over any attached attributes
+        Resize a StatArray but copy over any attached attributes
 
         Parameters
         ----------
@@ -400,15 +407,16 @@ class StatArray(np.ndarray, myObject):
             Resized array.
 
         """
+        
         if (np.size(self) == N):
             return self.deepcopy()
         out = StatArray(np.resize(self, N), self.name, self.units)
         try:
-            out.prior = self.prior
+            out._prior = self.prior
         except:
             pass
         try:
-            out.proposal = self.proposal
+            out._proposal = self.proposal
         except:
             pass
         return out
@@ -498,7 +506,7 @@ class StatArray(np.ndarray, myObject):
 
 
     def pad(self, N):
-        """ Copies the properties of an StatArray including all priors or proposals, but pads everything to the given size
+        """ Copies the properties of a StatArray including all priors or proposals, but pads everything to the given size
         
         Parameters
         ----------
@@ -514,12 +522,12 @@ class StatArray(np.ndarray, myObject):
         tmp = StatArray(N,name=self.name,units=self.units)
         try:
             pTmp = self.prior.pad(N)
-            tmp.prior = pTmp
+            tmp._prior = pTmp
         except:
             pass
         try:
             pTmp = self.proposal.pad(N)
-            tmp.proposal = pTmp
+            tmp._proposal = pTmp
         except:
             pass
         return tmp
@@ -587,6 +595,15 @@ class StatArray(np.ndarray, myObject):
 
         return self.prior.probability(self[i])
 
+    @property
+    def prior(self):
+        """Returns the prior if available. """
+
+        try:
+            return self._prior
+        except:
+            return None
+
 
     def setPrior(self, distributionType, *args, **kwargs):
         """Set a prior distribution
@@ -596,19 +613,28 @@ class StatArray(np.ndarray, myObject):
         Parameters
         ----------
         distributionType : str
-            The name of the distribution to set
-        *args
+            The name of the distribution to set.
+        \*args
             Variable length argument list.
-        **kwargs
+        \*\*kwargs
             Arbitrary keyword arguments.
 
         See Also
         --------
-        geobipy.src.classes.statistics.Distribution : For available distributions to instantiate
+        geobipy.src.classes.statistics.Distribution : For available distributions to instantiate.
 
         """
-        self.prior = Distribution(distributionType, *args, **kwargs)
+        self._prior = Distribution(distributionType, *args, **kwargs)
 
+
+    @property
+    def proposal(self):
+        """Returns the prior if available. """
+
+        try:
+            return self._proposal
+        except:
+            return None
 
     def setProposal(self, distributionType, *args, **kwargs):
         """Set a proposal distribution
@@ -619,9 +645,9 @@ class StatArray(np.ndarray, myObject):
         ----------
         distributionType : str
             The name of the distribution to set
-        *args
+        \*args
             Variable length argument list.
-        **kwargs
+        \*\*kwargs
             Arbitrary keyword arguments.
 
         See Also
@@ -629,7 +655,7 @@ class StatArray(np.ndarray, myObject):
         geobipy.src.classes.statistics.Distribution : For available distributions to instantiate
 
         """
-        self.proposal = Distribution(distributionType, *args, **kwargs)
+        self._proposal = Distribution(distributionType, *args, **kwargs)
 
 
     ### Plotting Routines
@@ -686,6 +712,8 @@ class StatArray(np.ndarray, myObject):
             Flip the X axis
         flipY : bool, optional
             Flip the Y axis
+        grid : bool, optional
+            Plot the grid
         noColorBar : bool, optional
             Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
 
@@ -699,10 +727,29 @@ class StatArray(np.ndarray, myObject):
         matplotlib.pyplot.pcolormesh : For additional keyword arguments you may use.
 
         """
+
+        my = y
+        if (not y is None):
+            assert (isinstance(y, StatArray)), TypeError("y must be a StatArray")
+            if y.size == self.size:
+                try:
+                    my = y.edges()
+                except:
+                    pass
+
         if (self.ndim == 1):
-            ax = cP.pcolor_1D(self, y=y, **kwargs)
+            ax = cP.pcolor_1D(self, y=my, **kwargs)
         else:
-            ax = cP.pcolor(self, x=x, y=y, **kwargs)
+            mx = x
+            if (not x is None):
+                assert (isinstance(x, StatArray)), TypeError("x must be a StatArray")
+                if x.size == self.size:
+                    try:
+                        mx = x.edges()
+                    except:
+                        pass
+
+            ax = cP.pcolor(self, x=mx, y=my, **kwargs)
         return ax
 
 
@@ -762,7 +809,7 @@ class StatArray(np.ndarray, myObject):
         """Create a 2D scatter plot.
 
         Create a 2D scatter plot, if the y values are not given, the colours are used instead.
-        If the arrays x, y, and c are geobipy.StatArray classes, the axes can be automatically labelled.
+        If the arrays x, y, and c are geobipy.StatArray classes, the axes are automatically labelled.
         Can take any other matplotlib arguments and keyword arguments e.g. markersize etc.
 
         Parameters
@@ -775,34 +822,13 @@ class StatArray(np.ndarray, myObject):
             Vertical locations of the points to plot, if y = None, then y = c.
         i : sequence of ints, optional
             Plot a subset of x, y, c, using the indices in i.
-        log : 'e' or float, optional
-            Take the log of the colour to base 'e' if log = 'e', and a number e.g. log = 10.
-            Values in c that are <= 0 are masked.
-        equalize : bool, optional
-            Equalize the histogram of the colourmap so that all colours have an equal amount.
-        nbins : int, optional
-            Number of bins to use for histogram equalization.
-        xscale : str, optional
-            Scale the x axis? e.g. xscale = 'linear' or 'log'
-        yscale : str, optional
-            Scale the y axis? e.g. yscale = 'linear' or 'log'.
-        flipX : bool, optional
-            Flip the X axis
-        flipY : bool, optional
-            Flip the Y axis
-        noColorBar : bool, optional
-            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
-        
-        Returns
-        -------
-        ax : matplotlib .Axes
-            Axis handle
             
         See Also
         --------
-        matplotlib.pyplot.scatter : For additional keyword arguments you may use.
+        geobipy.customPlots.Scatter2D : For additional keyword arguments you may use.
 
         """
+
         assert np.ndim(self) == 1, TypeError('scatter only works with a 1D array')
 
         if (x is None):
@@ -942,7 +968,7 @@ class StatArray(np.ndarray, myObject):
 
 
     def createHdf(self, h5obj, myName, nRepeats=None, fillvalue=None):
-        """Create the Metadata for an StatArray in a HDF file
+        """Create the Metadata for a StatArray in a HDF file
 
         Creates a new group in a HDF file under h5obj. 
         A nested heirarchy will be created e.g., myName\data, myName\prior, and myName\proposal. 
@@ -992,7 +1018,7 @@ class StatArray(np.ndarray, myObject):
         >>> # Fake a non collective region
         >>> def noncollectivewrite(x, file, world):
         >>>     # Each rank carries out this code, but it's not collective.
-        >>>     x.writeHdf(file, 'x', create=False, index=world.rank)
+        >>>     x.writeHdf(file, 'x', index=world.rank)
         >>> noncollectivewrite(x, f, world)
 
         >>> world.barrier()
@@ -1012,7 +1038,7 @@ class StatArray(np.ndarray, myObject):
 
 
     def writeHdf(self, h5obj, myName, index=None):
-        """Write the values of an StatArray to a HDF file
+        """Write the values of a StatArray to a HDF file
 
         Writes the contents of the StatArray to an already created group in a HDF file under h5obj. 
         This method can be used in an MPI parallel environment, if so however, the hdf file must have been opened with the mpio driver. 
@@ -1071,7 +1097,7 @@ class StatArray(np.ndarray, myObject):
     def fromHdf(self, h5grp, index=None):
         """Read the StatArray from a HDF group
 
-        Given the HDF group object, read the contents into an StatArray.
+        Given the HDF group object, read the contents into a StatArray.
 
         Parameters
         ----------
@@ -1208,14 +1234,14 @@ class StatArray(np.ndarray, myObject):
 
     ### MPI Routines
 
-    def Bcast(self, world, source=0):
+    def Bcast(self, world, root=0):
         """Broadcast the StatArray to every rank in the MPI communicator.
 
         Parameters
         ----------
         world : mpi4py.MPI.Comm
             The MPI communicator over which to broadcast.
-        source : int, optional
+        root : int, optional
             The rank from which to broadcast.  Default is 0 for the master rank.
 
         Returns
@@ -1224,32 +1250,41 @@ class StatArray(np.ndarray, myObject):
             The broadcast StatArray on every rank in the MPI communicator.
 
         """
-        name = world.bcast(self.name, root=source)
-        units = world.bcast(self.units, root=source)
-        tmp = MPI.Bcast(self, world, source=source)
+        name = world.bcast(self.name, root=root)
+        units = world.bcast(self.units, root=root)
+        tmp = MPI.Bcast(self, world, root=root)
         this = StatArray(tmp, name, units, dtype=tmp.dtype)
         return this
 
-    def Scatterv(self, myStart, myChunk, world, axis=0):
+
+    def Scatterv(self, starts, chunks, world, axis=0, root=0):
         """Scatter variable lengths of the StatArray using MPI
 
         Takes the StatArray and gives each core in the world a chunk of the array.
 
         Parameters
         ----------
-        myStart : sequence of ints
-            Indices into self that define the starting locations of the chunks to be sent to each rank.
-        myChunk : sequence of ints
-            The size of each chunk that each rank will receive.
+        starts : array of ints
+            1D array of ints with size equal to the number of MPI ranks. Each element gives the starting index for a chunk to be sent to that core. e.g. starts[0] is the starting index for rank = 0.
+        chunks : array of ints
+            1D array of ints with size equal to the number of MPI ranks. Each element gives the size of a chunk to be sent to that core. e.g. chunks[0] is the chunk size for rank = 0.
         world : mpi4py.MPI.Comm
             The MPI communicator over which to Scatterv.
-        axis : int
+        axis : int, optional
             This axis is distributed amongst ranks.
+        root : int, optional
+            The MPI rank to ScatterV from. Default is 0.
+
+        Returns
+        -------
+        out : StatArray
+            The StatArray distributed amongst ranks.
 
         """
+
         name = world.bcast(self.name)
         units = world.bcast(self.units)
-        tmp = MPI.Scatterv(self, myStart, myChunk, world, axis)
+        tmp = MPI.Scatterv(self, starts, chunks, world, axis, root)
         this = StatArray(tmp, name, units, dtype=tmp.dtype)
         return this
 
