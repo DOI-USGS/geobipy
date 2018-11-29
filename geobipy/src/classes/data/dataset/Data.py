@@ -8,53 +8,57 @@ from ....base import customFunctions as cf
 from ....base import customPlots as cP
 from ...pointcloud.PointCloud3D import PointCloud3D
 from ....classes.core.myObject import myObject
+from .DataSet import DataSet
 from ....base import MPI as myMPI
 import matplotlib.pyplot as plt
 
-
-class DataSet(myObject):
-
-    def __init__(self, nPoints=1, nChannels=1, units=None):
-        """ Initialize the DataSet """
-        # StatArray of data
-        self.D = StatArray([nPoints, nChannels], "Data", units, order='F')
-        # StatArray of Standard Deviations
-        self.Std = StatArray(np.ones([nPoints, nChannels]), "Standard Deviation", units, order='F')
-        self.nPoints = nPoints
-        self.nChannels = nChannels
-
-    def Bcast(self, world):
-        """ Broadcast the DataSet using MPI """
-        nPoints = myMPI.Bcast(self.nPoints, world)
-        nChannels = myMPI.Bcast(self.nChannels, world)
-        this = DataSet(nPoints, nChannels)
-        this.D = self.D.Bcast(world)
-        this.Std = self.Std.Bcast(world)
-        return this
-
-    def Scatterv(self, myStart, myChunk, world):
-        """ Scatterv the DataSet using MPI """
-        nPoints = myChunk[world.rank]
-        nChannels = myMPI.Bcast(self.nChannels, world)
-        this = DataSet(nPoints, nChannels)
-        this.D = self.D.Scatterv(myStart, myChunk, world)
-        this.Std = self.Std.Scatterv(myStart, myChunk, world)
-        return this
-
-
 class Data(PointCloud3D):
-    """ Class defining a set of Data """
+    """Class defining a set of Data 
+    
+    Data(nPoints, nChannel, units)
+
+    Parameters
+    ----------
+    nPoints : int
+        Number of points in the data
+    nChannels : int
+        Number of data channels in the data
+    units : str
+        Units of the data
+
+    Returns
+    -------
+    out : Data
+        Data class
+
+    """
 
     def __init__(self, nPoints=1, nChannels=1, units=None):
         """ Initialize the Data class """
         # Number of Channels
         self.nChannels = np.int64(nChannels)
         PointCloud3D.__init__(self, nPoints)
-        # StatArray of data
-        self.D = StatArray([self.N, self.nChannels], "Data", units)
-        # StatArray of Standard Deviations
-        self.Std = StatArray([self.N, self.nChannels], "Standard Deviation", units)
+        self.set = DataSet(self.N, nChannels, units)
         self.names = ['Channel '+str(i) for i in range(nChannels)]
+
+
+    @property
+    def D(self):
+        """The data"""
+        return self.set.D
+
+    
+    @property
+    def P(self):
+        """The predicted data"""
+        return self.set.P
+
+
+    @property
+    def Std(self):
+        """The standard deviation"""
+        return self.set.Std
+
 
     def maketest(self, nPoints, nChannels):
         """ Create a test example """
@@ -70,6 +74,7 @@ class Data(PointCloud3D):
             self.D[:, i] = tmp[:]
             b *= 2.0
 
+
     def read(self, fname, cols, nHeaders=0, nChannels=0):
         """ Read the specified columns from an ascii file
         cols[0,1,2,...] should be the indices of the x,y,z co-ordinates """
@@ -84,7 +89,6 @@ class Data(PointCloud3D):
         Data.__init__(self, nLines, nChannels)
         # Get the names of the headers
         names = fIO.getHeaderNames(fname, cols)
-        print(names)
         self.x.name=names[0]
         self.y.name=names[1]
         self.z.name=names[2]
@@ -100,6 +104,7 @@ class Data(PointCloud3D):
                 self.z[j] = values[2]
                 self.D[j, ] = values[3:]
 
+
     def getChannel(self, channel):
         """ Gets the data in the specified channel """
         assert channel >= 0 and channel < self.nChannels, 'Requested channel must be less than '+str(self.nChannels)
@@ -107,6 +112,7 @@ class Data(PointCloud3D):
         tmp = StatArray(self.D[:, channel], self.names[channel])
 
         return tmp
+
 
     def __getitem__(self, i):
         """ Define item getter for Data """
@@ -118,11 +124,13 @@ class Data(PointCloud3D):
         tmp.Std[:, :] = self.Std[i, :]
         tmp.names[:] = self.names[i]
         return tmp
+        
 
     def getLine(self, line):
         """ Get the data from the given line number """
         i = np.where(self.line == line)[0]
         return self[i]
+
 
     def summary(self):
         """ Display a summary of the Data """
@@ -133,19 +141,21 @@ class Data(PointCloud3D):
         print("Channel Names:  ", self.names)
         print('')
 
+
     def plot(self, channels=None, *args, **kwargs):
         """ Plots the specifed columns as a line plot, if cols is not given, all the columns are plotted """
-        x = StatArray(np.arange(0, len(self.D), 1), name="index")
+        x = kwargs.pop('x', None)
+        if (x is None):
+            x = StatArray(np.arange(0, len(self.D), 1), name="index")
 
         ax = plt.gca()
         if channels is None:
             nCols = np.size(self.D, 1)
             for i in range(nCols):
                 cP.plot(x, self.D[:,i],label=self.names[i],*args, **kwargs)
-                #plt.plot(x,self.D[:,i],label=self.names[i],*args, **kwargs)
         else:
             for j, i in enumerate(channels):
-                cP.plot(x,self.D[:,j],label=self.names[i],*args, **kwargs)
+                cP.plot(x,self.D[:,i],label=self.names[i],*args, **kwargs)
     
         plt.title("Data")
 
@@ -171,31 +181,93 @@ class Data(PointCloud3D):
 
         cP.title(self.names[channel])
 
-    def Bcast(self, world):
-        """ Broadcast a Data object using MPI """
+
+    def updateErrors(self, relativeErr, additiveErr):
+        """Updates the data errors
+
+        Updates the standard deviation of the data errors using the following model
+
+        .. math::
+            \sqrt{(\mathbf{\epsilon}_{rel} \mathbf{d}^{obs})^{2} + \mathbf{\epsilon}^{2}_{add}},
+        where :math:`\mathbf{\epsilon}_{rel}` is the relative error, a percentage fraction and :math:`\mathbf{\epsilon}_{add}` is the additive error.
+        
+        Parameters
+        ----------  
+        relativeErr : float
+            A fraction percentage that is multiplied by the observed data.
+        additiveErr : float
+            An absolute value of additive error.
+
+        Raises
+        ------
+        ValueError
+            If any relative or additive errors are <= 0.0
+        """    
+
+        # For each system assign error levels using the user inputs
+        assert relativeErr > 0.0, ValueError("relativeErr must be > 0.0")
+        assert additiveErr > 0.0, ValueError("additiveErr must be > 0.0")
+
+        self.s[:] = np.sqrt((relativeErr * self.d)**2.0 + additiveErr**2.0)
+
+
+    def Bcast(self, world, root=0):
+        """Broadcast a Data object using MPI
+
+        Parameters
+        ----------
+        world : mpi4py.MPI.COMM_WORLD
+            MPI communicator
+        root : int, optional
+            The MPI rank to broadcast from. Default is 0.
+
+        Returns
+        -------
+        out : geobipy.Data
+            Data broadcast to each core in the communicator
+        
+        """
+
         pc3d = None
-        pc3d = PointCloud3D.Bcast(self, world)
-#      print(world.rank,' After PointCloud3D.Scatterv')
-        nChannels = myMPI.Bcast(self.nChannels, world)
+        pc3d = PointCloud3D.Bcast(self, world, root=root)
+        nChannels = myMPI.Bcast(self.nChannels, world, root=root)
         this = Data(pc3d.N, nChannels)
         this.x = pc3d.x
         this.y = pc3d.y
         this.z = pc3d.z
-        this.D = self.D.Bcast(world)
-        this.Std = self.Std.Bcast(world)
+        this.set = self.set.Bcast(world, root=root)
+        # this.D = self.D.Bcast(world, root=root)
+        # this.Std = self.Std.Bcast(world, root=root)
         return this
 
-    def Scatterv(self, myStart, myChunk, world):
-        """ Scatterv a Data object using MPI """
-#      print(world.rank,' Data.Scatterv')
+
+    def Scatterv(self, starts, chunks, world, root=0):
+        """Scatterv a Data object using MPI 
+        
+        Parameters
+        ----------
+        starts : array of ints
+            1D array of ints with size equal to the number of MPI ranks. Each element gives the starting index for a chunk to be sent to that core. e.g. starts[0] is the starting index for rank = 0.
+        chunks : array of ints
+            1D array of ints with size equal to the number of MPI ranks. Each element gives the size of a chunk to be sent to that core. e.g. chunks[0] is the chunk size for rank = 0.
+        world : mpi4py.MPI.Comm
+            The MPI communicator over which to Scatterv.
+        root : int, optional
+            The MPI rank to broadcast from. Default is 0.
+
+        Returns
+        -------
+        out : geobipy.Data
+            The Data distributed amongst ranks.
+            
+        """
         pc3d = None
-        pc3d = PointCloud3D.Scatterv(self, myStart, myChunk, world)
-#      print(world.rank,' After PointCloud3D.Scatterv')
-        nChannels = myMPI.Bcast(self.nChannels, world)
+        pc3d = PointCloud3D.Scatterv(self, starts, chunks, world, root=root)
+        nChannels = myMPI.Bcast(self.nChannels, world, root=root)
         this = Data(pc3d.N, nChannels)
         this.x = pc3d.x
         this.y = pc3d.y
         this.z = pc3d.z
-        this.D = self.D.Scatterv(myStart, myChunk, world)
-        this.Std = self.Std.Scatterv(myStart, myChunk, world)
+        this.set = self.set.Scatterv(starts, chunks, world, root=root)
+
         return this
