@@ -24,13 +24,13 @@ def fdem1dfwd(S, mod, z0):
     rMom = np.zeros(S.nFreq)
     rx = np.zeros(S.nFreq)
     for i in range(S.nFreq):
-        tHeight[i] = -z0 + S.T[i].off
-        rHeight[i] = z0 + S.R[i].off
+        tHeight[i] = -z0 + S.T[i].z
+        rHeight[i] = z0 + S.R[i].z
         tMom[i] = S.T[i].moment
         rMom[i] = S.R[i].moment
-        rx[i] = S.R[i].tx
+        rx[i] = S.R[i].x
     scl = tMom * rMom
-
+       
     prd = np.zeros(S.nFreq, dtype=np.complex128)
 
     fdemforward1d.forward1d(tid, S.freq, tHeight, rHeight, tMom, rx, S.dist, scl, mod.par, mod.thk, prd, S.nFreq,  mod.nCells[0])
@@ -57,11 +57,11 @@ def fdem1dsen(S, mod, z0):
     rMom = np.zeros(S.nFreq)
     rx = np.zeros(S.nFreq)
     for i in range(S.nFreq):
-        tHeight[i] = -z0 + S.T[i].off
-        rHeight[i] = z0 + S.R[i].off
+        tHeight[i] = -z0 + S.T[i].z
+        rHeight[i] = z0 + S.R[i].z
         tMom[i] = S.T[i].moment
         rMom[i] = S.R[i].moment
-        rx[i] = S.R[i].tx
+        rx[i] = S.R[i].x
     scl = tMom * rMom
 
     J = np.zeros([S.nFreq, nLayers], dtype=np.complex128, order='F')
