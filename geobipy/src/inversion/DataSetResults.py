@@ -2,7 +2,6 @@
 Class to handle the HDF5 result files for a full data set.
  """
 from ..base import Error as Err
-#from pandas import rolling_mean as rmean
 import numpy as np
 import h5py
 #import numpy.ma as ma
