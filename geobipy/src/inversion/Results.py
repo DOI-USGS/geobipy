@@ -5,6 +5,7 @@ from os.path import join
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+from matplotlib.pyplot import pause
 from ..base import customPlots as cP
 from ..base.customFunctions import safeEval
 import numpy as np
@@ -92,7 +93,7 @@ class Results(myObject):
         self.iBestV = StatArray(2*self.nMC, name='Iteration of best model')
 
         # Initialize the number of layers for the histogram
-        self.kHist = Histogram1D(bins=np.arange(0.0,paras.kmax + 1.5),name="# of Layers")
+        self.kHist = Histogram1D(bins=np.arange(0.0,paras.maxLayers + 1.5),name="# of Layers")
         # Initialize the histograms for the relative and Additive Errors
         rBins = D.relErr.prior.getBins()
         aBins = D.addErr.prior.getBins()
@@ -108,7 +109,7 @@ class Results(myObject):
             self.addErr.append(Histogram1D(bins=aBins,name='$log_{10} \epsilon_{Additive}$',units=D.d.units))
 
         # Initialize the hit map of layers and conductivities
-        zGrd = StatArray(np.arange(0.5 * np.exp(M.zmin), 1.1 * np.exp(M.zmax), 0.5 * np.exp(M.hmin)), M.depth.name, M.depth.units)
+        zGrd = StatArray(np.arange(0.5 * np.exp(M.minDepth), 1.1 * np.exp(M.maxDepth), 0.5 * np.exp(M.minThickness)), M.depth.name, M.depth.units)
 
         mGrd = StatArray(np.logspace(np.log10(np.exp(paras.priMu -3.0 * paras.priStd)),
                            np.log10(np.exp(paras.priMu + 3.0 * paras.priStd)),250), 'Conductivity','$Sm^{-1}$')
@@ -216,9 +217,6 @@ class Results(myObject):
         self.currentD = D
         self.bestModel = bestModel
 
-        failed = self.zeroCount == 999999
-
-        return failed
 
     def initFigure(self, iFig=0, forcePlot=False):
         """ Initialize the plotting region """
@@ -369,8 +367,8 @@ class Results(myObject):
                 # Plot the DOI cutoff based on percentage variance
                 self.doi = self.Hitmap.getOpacityLevel(67.0)
                 plt.axhline(self.doi, color='#5046C8', linestyle='dashed', linewidth=3)
-                # Plot the best model
 
+                # Plot the best model
                 self.bestModel.plot(flipY=False, invX=True, noLabels=True)
                 plt.axis([self.limits[0], self.limits[1], self.Hitmap.y[0], self.Hitmap.y[-1]])
                 ax = plt.gca()
@@ -419,7 +417,7 @@ class Results(myObject):
                 cP.plot(self.iRange[iTmp], self.posteriorComponents[-1,iTmp])
                 plt.grid(b=True, which ='major', color='k', linestyle='--', linewidth=2)
 
-
+        pause(1e-10)
 
 
 
@@ -511,10 +509,11 @@ class Results(myObject):
         self.currentD.createHdf(grp, 'currentd')
         self.bestD.createHdf(grp, 'bestd')
 
-        tmp=self.bestModel.pad(self.bestModel.kmax)
+        tmp=self.bestModel.pad(self.bestModel.maxLayers)
         tmp.createHdf(grp, 'bestmodel')
 
-    def writeHdf(self, parent, myName, create=True, index=None):
+
+    def writeHdf(self, parent, myName, index=None):
         """ Write the StatArray to an HDF object
         parent: Upper hdf file or group
         myName: object hdf name. Assumes createHdf has already been called
@@ -522,9 +521,6 @@ class Results(myObject):
         index: optional numpy slice of where to place the arr in the hdf data object
         """
         assert isinstance(myName,str), 'myName must be a string'
-        # create a new group inside h5obj
-        if (create):
-            self.createHdf(parent, myName)
 
         grp = parent.get(myName)
         writeNumpy(self.i, grp, 'i')
@@ -543,19 +539,19 @@ class Results(myObject):
         writeNumpy(self.multiplier, grp, 'multiplier')
         writeNumpy(self.invTime, grp, 'invtime')
 
-        self.rate.writeHdf(grp, 'rate', create=False)
-        self.ratex.writeHdf(grp, 'ratex', create=False)
-        self.PhiDs.writeHdf(grp, 'phids', create=False)
-        self.kHist.writeHdf(grp, 'khist', create=False)
-        self.DzHist.writeHdf(grp, 'dzhist', create=False)
-        self.MzHist.writeHdf(grp, 'mzhist', create=False)
+        self.rate.writeHdf(grp, 'rate')
+        self.ratex.writeHdf(grp, 'ratex')
+        self.PhiDs.writeHdf(grp, 'phids')
+        self.kHist.writeHdf(grp, 'khist')
+        self.DzHist.writeHdf(grp, 'dzhist')
+        self.MzHist.writeHdf(grp, 'mzhist')
          # Histograms for each system
         for i in range(self.nSystems):
-            self.relErr[i].writeHdf(grp, 'relerr' + str(i), create=False)
+            self.relErr[i].writeHdf(grp, 'relerr' + str(i))
         for i in range(self.nSystems):
-            self.addErr[i].writeHdf(grp, 'adderr' + str(i), create=False)
+            self.addErr[i].writeHdf(grp, 'adderr' + str(i))
 
-        self.Hitmap.writeHdf(grp,'hitmap', create=False)
+        self.Hitmap.writeHdf(grp,'hitmap')
 
         mean = self.Hitmap.getMeanInterval()
         best = self.bestModel.interp2depth(self.bestModel.par, self.Hitmap)
@@ -567,9 +563,9 @@ class Results(myObject):
         self.clk.stop()
         self.saveTime = np.float64(self.clk.timeinSeconds())
         writeNumpy(self.saveTime, grp, 'savetime')
-        self.bestD.writeHdf(grp, 'bestd', create=False)
-        self.currentD.writeHdf(grp, 'currentd', create=False)
-        self.bestModel.writeHdf(grp, 'bestmodel', create=False)
+        self.bestD.writeHdf(grp, 'bestd')
+        self.currentD.writeHdf(grp, 'currentd')
+        self.bestModel.writeHdf(grp, 'bestmodel')
 
     def toHdf(self, h5obj, myName):
         """ Write the object to a HDF file """
@@ -736,7 +732,7 @@ class Results(myObject):
             item = grp.get('bestModel')
         obj = eval(safeEval(item.attrs.get('repr')))
         self.bestModel = obj.fromHdf(item)
-        self.bestModel.zmax = np.log(self.Hitmap.y[-1])
+        self.bestModel.maxDepth = np.log(self.Hitmap.y[-1])
 
         item = grp.get('currentd')
         if (item is None):
