@@ -5,6 +5,7 @@ from os.path import join
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+from matplotlib.pyplot import pause
 from ..base import customPlots as cP
 from ..base.customFunctions import safeEval
 import numpy as np
@@ -216,9 +217,6 @@ class Results(myObject):
         self.currentD = D
         self.bestModel = bestModel
 
-        failed = self.zeroCount == 999999
-
-        return failed
 
     def initFigure(self, iFig=0, forcePlot=False):
         """ Initialize the plotting region """
@@ -419,7 +417,7 @@ class Results(myObject):
                 cP.plot(self.iRange[iTmp], self.posteriorComponents[-1,iTmp])
                 plt.grid(b=True, which ='major', color='k', linestyle='--', linewidth=2)
 
-
+        pause(1e-10)
 
 
 
