@@ -12,7 +12,6 @@ from ..base.customFunctions import expReal as mExp
 from scipy import sparse
 import numpy as np
 from .Results import Results
-from matplotlib.pyplot import pause
 from ..base.MPI import print
 
 def Inv_MCMC(paras, D, ID, prng, LineResults=None, rank=1):
@@ -44,8 +43,8 @@ def Inv_MCMC(paras, D, ID, prng, LineResults=None, rank=1):
 
     Res.clk.start()
 
-    Go = True
-    while (i <= paras.nMC + iBurn - 1 and Go):
+    Go = i <= paras.nMC + iBurn -1
+    while (Go):
 
         # Accept or reject the new model
         [Mod, D, prior, posterior, PhiD, posteriorComponents, time] = AcceptReject(paras, Mod, D, prior, posterior, PhiD, Res, prng)# ,oF, oD, oRel, oAdd, oP, oA, i)
@@ -74,11 +73,11 @@ def Inv_MCMC(paras, D, ID, prng, LineResults=None, rank=1):
             if (not Res.burnedIn and not paras.solveRelativeError):
                 multiplier *= paras.multiplier
 
-        failed = Res.update(i, iBest, bestData, bestModel, D, multiplier, PhiD, Mod, posterior, posteriorComponents, paras.clipRatio)
-        Go = not failed
-        Res.plot()
-        pause(0.0000000001)
+        Res.update(i, iBest, bestData, bestModel, D, multiplier, PhiD, Mod, posterior, posteriorComponents, paras.clipRatio)
+        Res.plot()        
         i += 1
+        
+        Go = i <= paras.nMC + iBurn -1
 
     Res.clk.stop()
     Res.invTime = np.float64(Res.clk.timeinSeconds())
@@ -97,8 +96,6 @@ def Inv_MCMC(paras, D, ID, prng, LineResults=None, rank=1):
         # To save any thing the Results must be plot
         Res.plot(forcePlot=True)
         Res.toPNG('.',ID)
-
-    return failed
     #%%
 
 
