@@ -12,7 +12,6 @@ from ..base.customFunctions import expReal as mExp
 from scipy import sparse
 import numpy as np
 from .Results import Results
-from matplotlib.pyplot import pause
 from ..base.MPI import print
 
 def Inv_MCMC(paras, D, ID, prng, LineResults=None, rank=1):
@@ -44,8 +43,8 @@ def Inv_MCMC(paras, D, ID, prng, LineResults=None, rank=1):
 
     Res.clk.start()
 
-    Go = True
-    while (i <= paras.nMC + iBurn - 1 and Go):
+    Go = i <= paras.nMC + iBurn -1
+    while (Go):
 
         # Accept or reject the new model
         [Mod, D, prior, posterior, PhiD, posteriorComponents, time] = AcceptReject(paras, Mod, D, prior, posterior, PhiD, Res, prng)# ,oF, oD, oRel, oAdd, oP, oA, i)
@@ -74,11 +73,11 @@ def Inv_MCMC(paras, D, ID, prng, LineResults=None, rank=1):
             if (not Res.burnedIn and not paras.solveRelativeError):
                 multiplier *= paras.multiplier
 
-        failed = Res.update(i, iBest, bestData, bestModel, D, multiplier, PhiD, Mod, posterior, posteriorComponents, paras.clipRatio)
-        Go = not failed
-        Res.plot()
-        pause(0.0000000001)
+        Res.update(i, iBest, bestData, bestModel, D, multiplier, PhiD, Mod, posterior, posteriorComponents, paras.clipRatio)
+        Res.plot()        
         i += 1
+        
+        Go = i <= paras.nMC + iBurn -1
 
     Res.clk.stop()
     Res.invTime = np.float64(Res.clk.timeinSeconds())
@@ -97,8 +96,6 @@ def Inv_MCMC(paras, D, ID, prng, LineResults=None, rank=1):
         # To save any thing the Results must be plot
         Res.plot(forcePlot=True)
         Res.toPNG('.',ID)
-
-    return failed
     #%%
 
 
@@ -113,8 +110,8 @@ def Initialize(paras, D, prng):
     D.p.setPrior('MvNormalLog', D.d[D.iActive], D.s[D.iActive]**2.0, prng=prng)
 
     # Set the prior on the elevation height
-    #D.z.setPrior('Uniform', np.float64(D.z) - paras.zRange, np.float64(D.z) + paras.zRange, isLogged=True)
-    D.z.setPrior('NormalLog', D.z, 1.0, prng=prng)
+    D.z.setPrior('UniformLog', np.float64(D.z) - paras.zRange, np.float64(D.z) + paras.zRange)
+    # D.z.setPrior('NormalLog', D.z, 1.0, prng=prng)
     # D.z.setPrior('Normal',D.z,paras.zRange)
 
     D.z.setProposal('Normal', D.z, (paras.propEl), prng=prng)
@@ -122,14 +119,14 @@ def Initialize(paras, D, prng):
     # Set the prior on the relative Errors
     D.relErr[:] = paras.relErr.deepcopy()
 
-    D.relErr.setPrior('Uniform',paras.rErrMinimum[:],paras.rErrMaximum[:], prng=prng,isLogged=True)
+    D.relErr.setPrior('UniformLog', paras.rErrMinimum[:], paras.rErrMaximum[:], prng=prng)
 
     # Set the prior on the additive Errors
     D.addErr[:] = paras.addErr.deepcopy()
-    D.addErr.setPrior('Uniform',paras.aErrMinimum[:],paras.aErrMaximum[:], prng=prng,isLogged=True)
+    D.addErr.setPrior('UniformLog', paras.aErrMinimum[:], paras.aErrMaximum[:], prng=prng)
 
     # Update the data errors based on user given parameters
-    D.updateErrors(paras.errorModel, D.s, paras.relErr, paras.addErr)
+    D.updateErrors(paras.relErr, paras.addErr)
 
     # Save a copy of the original errors
     paras.Err = D.s.deepcopy()
@@ -154,15 +151,15 @@ def Initialize(paras, D, prng):
     # Initialize a 1D model with the half space conductivity
     parameter = StatArray(np.asarray([HScond, HScond]), name='Conductivity', units=r'$\frac{S}{m}$')
     # Assign the depth to the interface as half the bounds
-    thk = np.asarray([0.5 * (paras.zmax + paras.zmin), 0.0])
+    thk = np.asarray([0.5 * (paras.maxDepth + paras.minDepth)])
     Mod = Model1D(2, parameters = parameter, thickness=thk)
 
     # Setup the model for perturbation
     pWheel = [paras.pBirth, paras.pDeath, paras.pPerturb, paras.pNochange]
-    Mod.makePerturbable(pWheel, paras.zmin, paras.zmax, paras.kmax, prng=prng, hmin=paras.hmin)
+    Mod.makePerturbable(pWheel, paras.minDepth, paras.maxDepth, paras.maxLayers, prng=prng, minThickness=paras.minThickness)
 
     # Set priors on the depth interfaces, given a number of layers
-    Mod.depth.setPrior('Order',Mod.zmin,Mod.zmax,Mod.hmin,paras.kmax)  # priZ
+    Mod.depth.setPrior('Order',Mod.minDepth,Mod.maxDepth,Mod.minThickness,paras.maxLayers)  # priZ
 
     # Compute the mean and std for the parameter
     paras.priMu = np.log(HScond)
@@ -275,7 +272,7 @@ def AcceptReject(paras,Mod,D,prior,posterior,PhiD,Res, prng):# ,oF, oD, oRel, oA
     D1.forward(Mod1)
 
     # Update the data errors using the updated relative errors
-    D1.updateErrors(paras.errorModel, D1.s, D1.relErr, D1.addErr)
+    D1.updateErrors(D1.relErr, D1.addErr)
 
     # Calibrate the response if it is being solved for
     if (paras.solveCalibration):
