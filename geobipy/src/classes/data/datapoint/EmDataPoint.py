@@ -178,16 +178,33 @@ class EmDataPoint(myObject):
         if (height):  # Update the candidate data elevation (if required)
             # Generate a new elevation
             other.z[:] = self.z.proposal.rng(1)
+            if other.z.hasPrior():
+                p = other.z.probability()
+                while p == 0.0 or p == -np.inf:
+                    other.z[:] = self.z.proposal.rng(1)
+                    p = other.z.probability()
             # Update the mean of the proposed elevation
             other.z.proposal.mean[:] = other.z
-        if (rErr):
+            
+        if (rErr):    
             # Generate a new error
             other.relErr[:] = self.relErr.proposal.rng(1)
+            if other.relErr.hasPrior():
+                p = other.relErr.probability()
+                while p == 0.0 or p == -np.inf:
+                    other.relErr[:] = self.relErr.proposal.rng(1)
+                    p = other.relErr.probability()
             # Update the mean of the proposed errors
             other.relErr.proposal.mean[:] = other.relErr
+            
         if (aErr):
             # Generate a new error
             other.addErr[:] = self.addErr.proposal.rng(1)
+            if other.addErr.hasPrior():
+                p = other.addErr.probability()
+                while p == 0.0 or p == -np.inf:
+                    other.addErr[:] = self.addErr.proposal.rng(1)
+                    p = other.addErr.probability()
             # Update the mean of the proposed errors
             other.addErr.proposal.mean[:] = other.addErr
 
@@ -264,6 +281,36 @@ class EmDataPoint(myObject):
         PhiD = np.float64(np.sum((cf.Ax(tmp2, self.deltaD()))**2.0, dtype=np.float64))
         return PhiD if squared else np.sqrt(PhiD)
 
+    
+    def scaleJ(self, Jin, power=1.0):
+        """ Scales a matrix by the errors in the given data
+
+        Useful if a sensitivity matrix is generated using one data point, but must be scaled by the errors in another.
+
+        Parameters
+        ----------
+        Jin : array_like
+            2D array representing a sensitivity matrix
+        power : float
+            Power to raise the error level too. Default is simply reciprocal
+
+        Returns
+        -------
+        Jout : array_like
+            Sensitivity matrix divided by the data errors
+
+        Raises
+        ------
+        ValueError
+            If the number of rows in Jin do not match the number of active channels in the datapoint
+
+        """
+        assert Jin.shape[0] == self.iActive.size, ValueError("Number of rows of Jin must match the number of active channels in the datapoint {}".format(self.iActive.size))
+
+        Jout = np.zeros(Jin.shape)
+        Jout[:, :] = Jin * (np.repeat(self.s[self.iActive, np.newaxis] ** -power, Jout.shape[1], 1))
+        return Jout
+
 
     def summary(self, out=False):
         """ Print a summary of the EMdataPoint """
@@ -278,3 +325,40 @@ class EmDataPoint(myObject):
         if (out):
             return msg
         print(msg)
+
+
+    def updateErrors(self, relativeErr, additiveErr):
+        """Updates the data errors
+
+        Updates the standard deviation of the data errors using the following model
+
+        .. math::
+            \sqrt{(\mathbf{\epsilon}_{rel} \mathbf{d}^{obs})^{2} + \mathbf{\epsilon}^{2}_{add}},
+        where :math:`\mathbf{\epsilon}_{rel}` is the relative error, a percentage fraction and :math:`\mathbf{\epsilon}_{add}` is the additive error.
+
+        If the predicted data have been assigned a multivariate normal distribution, the variance of that distribution is also updated as the squared standard deviations.
+
+        Parameters
+        ----------
+        relativeErr : float or array_like
+            A fraction percentage that is multiplied by the observed data.
+        additiveErr : float or array_like
+            An absolute value of additive error.
+
+        Raises
+        ------
+        ValueError
+            If relativeError is <= 0.0
+        ValueError
+            If additiveError is <= 0.0
+
+        """
+        assert relativeErr > 0.0, ValueError("relativeErr must be > 0.0")
+        assert additiveErr > 0.0, ValueError("additiveErr must be > 0.0")
+
+        tmp = (relativeErr * self.d)**2.0 + additiveErr**2.0
+
+        if self.p.hasPrior():
+            self.p.prior.variance[:] = tmp[self.iActive]
+
+        self.s[:] = np.sqrt(tmp)
