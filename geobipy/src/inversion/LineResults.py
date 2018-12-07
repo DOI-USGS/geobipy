@@ -373,7 +373,7 @@ class LineResults(myObject):
         R.PhiDs = hdfRead.readKeyFromFile(aFile,'','/','phids', index=s)
         R.Hitmap = hdfRead.readKeyFromFile(aFile,'','/','hitmap', index=i)
         R.bestD = hdfRead.readKeyFromFile(aFile,'','/','bestd', index=i, sysPath=self.sysPath)
-        R.currentD = hdfRead.readKeyFromFile(aFile,'','/','currentd', index=i, sysPath=self.sysPath)
+        #R.currentD = hdfRead.readKeyFromFile(aFile,'','/','currentd', index=i, sysPath=self.sysPath)
         R.bestModel = hdfRead.readKeyFromFile(aFile,'','/','bestmodel', index=i)
         R.bestModel.maxDepth = np.log(R.Hitmap.y[-1])
         R.kHist = hdfRead.readKeyFromFile(aFile,'','/','khist', index=i)
@@ -1246,8 +1246,8 @@ class LineResults(myObject):
                 res.append('opacityinterp')
             elif (low == '# layers'):
                 res.append('bestmodel/nCells')
-            elif (low == 'current data'):
-                res.append('currentd')
+#            elif (low == 'current data'):
+#                res.append('currentd')
             elif (low == 'hit map'):
                 res.append('hitmap')
             elif (low == 'zgrid'):

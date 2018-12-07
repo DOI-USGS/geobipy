@@ -256,6 +256,123 @@ class Results(myObject):
 #        plt.show()
 #        plt.draw()
 
+    def _plotAcceptanceVsIteration(self, **kwargs):
+        """ Plots the acceptance percentage against iteration. """
+
+
+        m = kwargs.pop('marker', 'o')
+        a = kwargs.pop('alpha', 0.7)
+        ls = kwargs.pop('linestyle', 'none')
+        mec = kwargs.pop('markeredgecolor', 'k')
+
+        self.rate.plot(self.ratex, i=np.s_[:np.int64(self.i / 1000)], marker=m, markeredgecolor=mec, linestyle=ls, **kwargs)
+        cP.xlabel('Iteration #')
+        cP.ylabel('% Acceptance')
+        cP.title('Rate of model acceptance per 1000 iterations')
+
+
+    def _plotMisfitVsIteration(self, **kwargs):
+        """ Plot the data misfit against iteration. """
+
+        m = kwargs.pop('marker', '.')
+        ms = kwargs.pop('markersize', 2)
+        a = kwargs.pop('alpha', 0.7)
+        ls = kwargs.pop('linestyle', 'none')
+        c = kwargs.pop('color', 'k')
+        lw = kwargs.pop('linewidth', 3)
+        
+        self.PhiDs.plot(self.iRange, i=np.s_[:self.i], marker=m, alpha=a, markersize=ms, linestyle=ls, color=c, **kwargs)
+        plt.ylabel('Data Misfit')
+        dum = self.multiplier * len(self.currentD.iActive)
+        plt.axhline(dum, color='#C92641', linestyle='dashed', linewidth=lw)
+        if (self.burnedIn):
+            plt.axvline(self.iBurn, color='#C92641', linestyle='dashed', linewidth=lw)
+        plt.yscale('log')
+
+
+    def _plotObservedPredictedData(self, **kwargs):
+        """ Plot the observed and predicted data """
+
+        self.bestD.plot(**kwargs)
+
+        c = kwargs.pop('color', cP.wellSeparated[3])
+        self.bestD.plotPredicted(color=c, **kwargs)
+
+
+    def _plotNumberOfLayersPosterior(self, **kwargs):
+        """ Plot the histogram of the number of layers """
+
+        self.kHist.plot(**kwargs)
+        plt.axvline(self.bestModel.nCells, color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
+
+
+    def _plotElevationPosterior(self, **kwargs):
+        """ Plot the histogram of the elevation """
+        self.DzHist.plot(**kwargs)
+        plt.axvline(self.bestD.z, color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
+
+    
+    def _plotRelativeErrorPosterior(self, system=0, **kwargs):
+        """ Plots the histogram of the relative errors """
+
+        self.relErr[system].plot(**kwargs)
+        plt.locator_params(axis='x', nbins=4)
+        plt.axvline(self.bestD.relErr[system], color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
+
+    
+    def _plotAdditiveErrorPosterior(self, system=0, **kwargs):
+        """ Plot the histogram of the additive errors """
+        
+        self.addErr[system].plot(**kwargs)
+        plt.locator_params(axis='x', nbins=4)
+        plt.axvline(self.bestD.addErr[system], color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
+
+
+    def _plotLayerDepthPosterior(self, **kwargs):
+        """ Plot the histogram of layer interface depths """
+
+        r = kwargs.pop('rotate', True)
+        fY = kwargs.pop('flipY', True)
+        tr = kwargs.pop('trim', False)
+
+        self.MzHist.plot(rotate=r, flipY=fY, trim=tr, **kwargs)
+
+    
+    def _plotHitmapPosterior(self, confidenceInterval = 95.0, opacityPercentage = 67.0, **kwargs):
+        """ Plot the hitmap posterior of conductivity with depth """
+
+        # Get the mean and 95% confidence intervals
+        (sigMed, sigLow, sigHigh) = self.Hitmap.getConfidenceIntervals(confidenceInterval)
+
+        if (self.invertPar):
+            x = 1.0 / self.Hitmap.x
+            sl = 1.0 / sigLow
+            sh = 1.0 / sigHigh
+            xlabel = 'Resistivity ($\Omega m$)'
+        else:
+            x = self.Hitmap.x
+            sl = sigLow
+            sh = sigHigh
+            xlabel = 'Conductivity ($Sm^{-1}$)'
+
+        plt.pcolor(x, self.Hitmap.y, self.Hitmap.arr, cmap=mpl.cm.Greys)
+        plt.plot(sl, self.Hitmap.y, color='#5046C8', linestyle='dashed', linewidth=2, alpha=0.6)
+        plt.plot(sh, self.Hitmap.y, color='#5046C8', linestyle='dashed', linewidth=2, alpha=0.6)
+        cP.xlabel(xlabel)
+
+        # Plot the DOI cutoff based on percentage variance
+        self.doi = self.Hitmap.getOpacityLevel(opacityPercentage)
+        plt.axhline(self.doi, color='#5046C8', linestyle='dashed', linewidth=3)
+
+        # Plot the best model
+        self.bestModel.plot(flipY=False, invX=True, noLabels=True)
+        plt.axis([self.limits[0], self.limits[1], self.Hitmap.y[0], self.Hitmap.y[-1]])
+        ax = plt.gca()
+        lim = ax.get_ylim()
+        if (lim[1] > lim[0]):
+            ax.set_ylim(lim[::-1])
+        cP.ylabel(self.MzHist.bins.getNameUnits())
+        plt.xscale('log')
 
 
     def plot(self, title="", iFig=0, forcePlot=False):
@@ -268,7 +385,7 @@ class Results(myObject):
             self.initFigure(iFig, forcePlot=forcePlot)
 
 
-        plt.figure(iFig)
+        fig = plt.figure(iFig)
 
 #        if (np.mod(self.i, 1000) == 0 or forcePlot):
 
@@ -277,44 +394,31 @@ class Results(myObject):
             # Update the acceptance plot
             plt.sca(self.ax[0])
             plt.cla()
-            self.rate.plot(self.ratex, i=np.s_[:np.int64(self.i / 1000)], marker='o',markeredgecolor='k', linestyle='none')
-            cP.xlabel('Iteration #')
-            cP.ylabel('% Acceptance')
-            cP.title('Rate of model acceptance per ' + str(1000) + ' iterations')
-
-
+            self._plotAcceptanceVsIteration()
+            
             # Update the data misfit vs iteration
             plt.sca(self.ax[1])
             plt.cla()
-            self.PhiDs.plot(self.iRange,i=np.s_[:self.i],marker='.',alpha=0.7,markersize=2,linestyle='none',color='k')
-            plt.ylabel('Data Misfit')
-            dum = self.multiplier * len(self.currentD.iActive)
-            plt.axhline(dum, color='#C92641', linestyle='dashed', linewidth=3)
-            if (self.burnedIn):
-                plt.axvline(self.iBurn,color='#C92641',linestyle='dashed',linewidth=3)
-            plt.yscale('log')
+            self._plotMisfitVsIteration()
 
             # If the Best Data have changed, update the plot
             plt.sca(self.ax[4])
             # ax = plt.subplot(self.gs[:6, self.nSystems:2 * self.nSystems])
             plt.cla()
-            self.bestD.plot()
-            self.bestD.plotPredicted(color=cP.wellSeparated[3])
+            self._plotObservedPredictedData()
 
             if (self.burnedIn):
                 # Update the histogram of the number of layers
                 plt.sca(self.ax[3])
                 # plt.subplot(self.gs[9:, :self.nSystems])
                 plt.cla()
-                self.kHist.plot()
-                plt.axvline(self.bestModel.nCells,color=cP.wellSeparated[3],linestyle='dashed',linewidth=3)
+                self._plotNumberOfLayersPosterior()
 
                 # Histogram of the data point elevation
                 plt.sca(self.ax[2])
                 # plt.subplot(self.gs[6:9, :self.nSystems])
                 plt.cla()
-                self.DzHist.plot()  # cP.title('Histogram of the measurement height')
-                plt.axvline(self.bestD.z,color=cP.wellSeparated[3],linestyle='dashed',linewidth=3)
+                self._plotElevationPosterior()
 
                 j = 5
                 for i in range(self.nSystems):
@@ -322,62 +426,28 @@ class Results(myObject):
                     # plt.subplot(self.gs[:3, 2 * self.nSystems + j])
                     plt.sca(self.ax[j+1])
                     plt.cla()
-                    self.relErr[i].plot()
-                    # Add a line for the relative error in the best data
-                    plt.locator_params(axis='x', nbins=4)
-                    cP.ylabel('Frequency')
-                    cP.title('System ' + str(i + 1))
-                    plt.axvline(self.bestD.relErr[i],color=cP.wellSeparated[3],linestyle='dashed',linewidth=3)
+                    self._plotRelativeErrorPosterior()
+                    cP.title('System ' + str(system + 1))
 
                     # Update the histogram of additive data errors
                     plt.sca(self.ax[j+2])
                     # ax= plt.subplot(self.gs[3:6, 2 * self.nSystems + j])
                     plt.cla()
-                    self.addErr[i].plot()
-#                    ax.set_xlim(-15.0, -12.0)
-
-                    plt.locator_params(axis='x', nbins=4)
-                    cP.ylabel('Frequency')
-                    plt.axvline(self.bestD.addErr[i],color=cP.wellSeparated[3],linestyle='dashed',linewidth=3)
+                    self._plotAdditiveErrorPosterior()
                     j += 2
 
                 # Update the layer depth histogram
                 plt.sca(self.ax[(2*self.nSystems)+6])
                 # plt.subplot(self.gs[6:, 2 * self.nSystems:])
                 plt.cla()
-                self.MzHist.plot(rotate=True, flipY=True, trim=False)
+                self._plotLayerDepthPosterior()
 
                 # Update the model plot
-                # Get the mean and 95% confidence intervals
-                (sigMed, sigLow, sigHigh) = self.Hitmap.getConfidenceIntervals(95.0)
-
                 plt.sca(self.ax[5])
                 # plt.subplot(self.gs[6:, self.nSystems:2 * self.nSystems])
                 plt.cla()
-                if (self.invertPar):
-                    plt.pcolor(1.0 / (self.Hitmap.x), self.Hitmap.y, self.Hitmap.arr, cmap=mpl.cm.Greys)
-                    plt.plot(1.0 / sigLow, self.Hitmap.y, color='#5046C8', linestyle='dashed', linewidth=2, alpha=0.6)
-                    plt.plot(1.0 / sigHigh, self.Hitmap.y, color='#5046C8', linestyle='dashed', linewidth=2, alpha=0.6)
-                    cP.xlabel('Resistivity ($\Omega m$)')
-                else:
-                    plt.pcolor((self.Hitmap.x), self.Hitmap.y, self.Hitmap.arr)
-                    plt.plot(sigLow, self.Hitmap.y, color='#5046C8', linestyle='dashed', linewidth=2, alpha=0.6)
-                    plt.plot(sigHigh, self.Hitmap.y, color='#5046C8', linestyle='dashed', linewidth=2, alpha=0.6)
-                    cP.xlabel('Conductivity ($Sm^{-1}$)')
-                # Plot the DOI cutoff based on percentage variance
-                self.doi = self.Hitmap.getOpacityLevel(67.0)
-                plt.axhline(self.doi, color='#5046C8', linestyle='dashed', linewidth=3)
+                self._plotHitmapPosterior()
 
-                # Plot the best model
-                self.bestModel.plot(flipY=False, invX=True, noLabels=True)
-                plt.axis([self.limits[0], self.limits[1], self.Hitmap.y[0], self.Hitmap.y[-1]])
-                ax = plt.gca()
-                lim = ax.get_ylim()
-                if (lim[1] > lim[0]):
-                    ax.set_ylim(lim[::-1])
-                cP.ylabel(self.MzHist.bins.getNameUnits())
-#        cP.title('Hit map of layers')
-                plt.xscale('log')
 
             cP.suptitle(title)
 
@@ -417,7 +487,8 @@ class Results(myObject):
                 cP.plot(self.iRange[iTmp], self.posteriorComponents[-1,iTmp])
                 plt.grid(b=True, which ='major', color='k', linestyle='--', linewidth=2)
 
-        pause(1e-10)
+
+        pause(1e-9)
 
 
 
@@ -734,11 +805,11 @@ class Results(myObject):
         self.bestModel = obj.fromHdf(item)
         self.bestModel.maxDepth = np.log(self.Hitmap.y[-1])
 
-        item = grp.get('currentd')
-        if (item is None):
-            item = grp.get('currentD')
-        obj = eval(safeEval(item.attrs.get('repr')))
-        self.currentD = obj.fromHdf(item, sysPath=sysPath)
+#        item = grp.get('currentd')
+#        if (item is None):
+#            item = grp.get('currentD')
+#        obj = eval(safeEval(item.attrs.get('repr')))
+#        self.currentD = obj.fromHdf(item, sysPath=sysPath)
         self.relErr = []
         self.addErr = []
         for i in range(self.nSystems):

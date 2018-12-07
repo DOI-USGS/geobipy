@@ -13,10 +13,14 @@
           "name": "Public Domain, CC0-1.0",
           "URL": "https://github.com/usgs/geobipy/blob/master/LICENSE.md"
         },
-	{
-	  "name": "GPL v2",
+	      {
+	        "name": "GPL v2",
           "URL": "https://github.com/usgs/geobipy/blob/master/LICENSE-GPLv2.md"
-	}
+        },
+        {
+	        "name": "BSD",
+          "URL": "https://github.com/usgs/geobipy/blob/master/LICENSE-BSD.md"
+        }
       ]
     },
 
