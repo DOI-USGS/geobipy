@@ -677,7 +677,7 @@ class Model1D(Model):
         if (not 'color' in kwargs):
             kwargs['color']=cP.wellSeparated[3]
 
-        plt.step(par, z, 'k', **kwargs)
+        plt.step(x=par, y=z, **kwargs)
 
         if (flipX):
             ax.set_xlim(ax.get_xlim()[::-1])
