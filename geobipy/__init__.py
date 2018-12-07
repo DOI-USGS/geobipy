@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -- coding: utf-8 --
 
+
 from os import getcwd
 from os import makedirs
 from os.path import join
@@ -351,7 +352,7 @@ def singleCore(inputFile, outputDir):
 def runSerial():
     """Run the serial implementation of GeoBIPy. """
         
-    inputFile, outputDir = checkCommandArguments()    
+    inputFile, outputDir, skipHDF5 = checkCommandArguments()    
     sys.path.append(getcwd())
 
     R = singleCore(inputFile, outputDir)
