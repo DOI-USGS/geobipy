@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -- coding: utf-8 --
 
+
 from os import getcwd
 from os import makedirs
 from os.path import join
@@ -97,9 +98,8 @@ def masterTask(myData, world):
   N = myData.N
 
   # Create and shuffle and integer list for the number of data points
-  iTmp=np.arange(N)
-  np.random.shuffle(iTmp)
-  iList = list(iTmp)
+  randomizedPointIndices = np.arange(N)
+  np.random.shuffle(randomizedPointIndices)
 
   nFinished = 0
   nSent = 0
@@ -108,36 +108,36 @@ def masterTask(myData, world):
 
   # Send out the first indices to the workers
   for iWorker in range(1,world.size):
-    dataSend[:] = iList.pop(randint(len(iList)))
+    dataSend[:] = randomizedPointIndices[nSent]
     world.Send(dataSend, dest = iWorker, tag = run)
     nSent += 1
-    myMPI.print("Initial sent to {}".format(iWorker))
 
   # Start a timer
   t0 = MPI.Wtime()
 
+  myMPI.print("Initial data points sent. Master is now waiting for requests")
+
   # Now wait to send indices out to the workers as they finish until the entire data set is finished
   while nFinished < N:
     # Wait for a worker to ping you
+    
     world.Recv(rankRecv, source = MPI.ANY_SOURCE, tag = MPI.ANY_TAG, status = MPI.Status())
     workerRank = np.int(rankRecv[0])
     dataPointProcessed = np.int(rankRecv[1])
-#    myMPI.print("Master recived a request {}".format(rankRecv))
 
     nFinished += 1
 
     # Send out the next point if the list is not empty
-#    myMPI.print("Master is sending to rank {}".format(workerRank))
-    if (len(iList) > 0):
-      dataSend[:] = iList.pop(randint(len(iList)))
+    if (nSent < N):
+      dataSend[:] = randomizedPointIndices[nSent]
       world.Send(dataSend, dest = workerRank, tag = run)
       nSent += 1
     else:
-      dataSend[0]=-1
+      dataSend[0] = -1
       world.Send(dataSend, dest = workerRank, tag = killSwitch)
-
-    elapsed = MPI.Wtime()-t0
-    eta = (N/nFinished-1)*elapsed
+     
+    elapsed = MPI.Wtime() - t0
+    eta = (N/nFinished-1) * elapsed
     myMPI.print('Inverted data point {} in {:.3f}s  ||  Time: {:.3f}s  ||  QueueLength: {}/{}  ||  ETA: {:.3f}s'.format(dataPointProcessed, rankRecv[2], elapsed, N-nFinished, N, eta))
 
 
@@ -172,16 +172,18 @@ def workerTask(myData, UP, prng, world, LineResults):
 
     # Pass through the line results file object if a parallel file system is in use.
     iLine = lines.searchsorted(myData.line[iDataPoint])
-    Inv_MCMC(paras, DataPoint, myData.id[iDataPoint], prng=prng, LineResults=LineResults[iLine], rank=world.rank)
-
+    Inv_MCMC(paras, DataPoint, myData.id[iDataPoint], prng=prng, rank=world.rank, LineResults=LineResults[iLine])
+    
     # Send the current rank number to the master
     myRank[:] = (world.rank, iDataPoint, MPI.Wtime() - t0)
+
     # With the Data Point inverted, Ping the Master to request a new index
     world.Send(myRank, dest = 0)
 
     # Wait till you are told what to process next
     mpi_status = MPI.Status()
     world.Recv(i, source = 0, tag = MPI.ANY_TAG, status = mpi_status)
+    iDataPoint = i[0]
 
     # Check if a killSwitch for this worker was thrown
     if mpi_status.Get_tag() == killSwitch:
@@ -244,19 +246,19 @@ def multipleCore(inputFile, outputDir, skipHDF5):
     lines.sort()
     nLines = lines.size
 
+    world.barrier()
     
-    if not skipHDF5:
-        myMPI.rankPrint(world,'Creating HDF5 files, this may take a few minutes...')
-        ### Only do this using the subcommunicator!
-        if (masterComm != MPI.COMM_NULL):
-            for i in range(nLines):
-                j = np.where(myData.line == lines[i])[0]
-                fName = join(outputDir,str(lines[i])+'.h5')
-                with h5py.File(fName,'w', driver='mpio',comm=masterComm) as f:
-                    LR = LineResults()
-                    LR.createHdf(f,myData.id[j],Res)
-                myMPI.rankPrint(world,'Time to create the line with {} data points: {:.3f} s'.format(j.size, MPI.Wtime()-t0))
-                t0 = MPI.Wtime()
+    myMPI.rankPrint(world,'Creating HDF5 files, this may take a few minutes...')
+    ### Only do this using the subcommunicator!
+    if (masterComm != MPI.COMM_NULL):
+        for i in range(nLines):
+            j = np.where(myData.line == lines[i])[0]
+            fName = join(outputDir, str(lines[i])+'.h5')
+            with h5py.File(fName, 'w', driver='mpio', comm=masterComm) as f:
+                LR = LineResults()
+                LR.createHdf(f, myData.id[j], Res)
+            myMPI.rankPrint(world,'Time to create the line with {} data points: {:.3f} s'.format(j.size, MPI.Wtime()-t0))
+            t0 = MPI.Wtime()
 
     world.barrier()
     
@@ -265,6 +267,7 @@ def multipleCore(inputFile, outputDir, skipHDF5):
     for i in range(nLines):
         fName = join(outputDir,str(lines[i])+'.h5')
         LR[i] = LineResults(fName, hdfFile = h5py.File(fName,'a', driver='mpio',comm=world))
+        # myMPI.print("rank {} line {} iDs {}".format(world.rank, i, LR[i].iDs))
 
 
     world.barrier()
@@ -339,10 +342,10 @@ def singleCore(inputFile, outputDir):
 def runSerial():
     """Run the serial implementation of GeoBIPy. """
         
-    inputFile, outputDir = checkCommandArguments()    
+    inputFile, outputDir, skipHDF5 = checkCommandArguments()    
     sys.path.append(getcwd())
 
-    singleCore(inputFile, outputDir)
+    R = singleCore(inputFile, outputDir)
 
 
 def runParallel():
@@ -351,4 +354,4 @@ def runParallel():
     inputFile, outputDir, skipHDF5 = checkCommandArguments()    
     sys.path.append(getcwd())
 
-    multipleCore(inputFile, outputDir, skipHDF5)
+    R = multipleCore(inputFile, outputDir, skipHDF5)
