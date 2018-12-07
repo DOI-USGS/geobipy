@@ -9,7 +9,7 @@ from ..statistics.baseDistribution import baseDistribution
 from ...base.customFunctions import str_to_raw, isIntorSlice
 from .myObject import myObject
 from ...base.HDF.hdfWrite import writeNumpy
-from ...base import MPI
+from ...base import MPI as myMPI
 
 from sklearn.mixture import GaussianMixture
 from sklearn.cluster import KMeans
@@ -1083,6 +1083,7 @@ class StatArray(np.ndarray, myObject):
         >>> f.close()
 
         """
+        
         writeNumpy(self,h5obj,myName+'/data',index=index)
 #        try:
 #            self.prior.writeHdf(h5obj,myName+'/prior',create=False)
@@ -1252,7 +1253,7 @@ class StatArray(np.ndarray, myObject):
         """
         name = world.bcast(self.name, root=root)
         units = world.bcast(self.units, root=root)
-        tmp = MPI.Bcast(self, world, root=root)
+        tmp = myMPI.Bcast(self, world, root=root)
         this = StatArray(tmp, name, units, dtype=tmp.dtype)
         return this
 
@@ -1284,7 +1285,7 @@ class StatArray(np.ndarray, myObject):
 
         name = world.bcast(self.name)
         units = world.bcast(self.units)
-        tmp = MPI.Scatterv(self, starts, chunks, world, axis, root)
+        tmp = myMPI.Scatterv(self, starts, chunks, world, axis, root)
         this = StatArray(tmp, name, units, dtype=tmp.dtype)
         return this
 
