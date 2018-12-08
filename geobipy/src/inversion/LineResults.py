@@ -373,7 +373,6 @@ class LineResults(myObject):
         R.PhiDs = hdfRead.readKeyFromFile(aFile,'','/','phids', index=s)
         R.Hitmap = hdfRead.readKeyFromFile(aFile,'','/','hitmap', index=i)
         R.bestD = hdfRead.readKeyFromFile(aFile,'','/','bestd', index=i, sysPath=self.sysPath)
-        R.currentD = hdfRead.readKeyFromFile(aFile,'','/','currentd', index=i, sysPath=self.sysPath)
         R.bestModel = hdfRead.readKeyFromFile(aFile,'','/','bestmodel', index=i)
         R.bestModel.maxDepth = np.log(R.Hitmap.y[-1])
         R.kHist = hdfRead.readKeyFromFile(aFile,'','/','khist', index=i)
@@ -1246,8 +1245,8 @@ class LineResults(myObject):
                 res.append('opacityinterp')
             elif (low == '# layers'):
                 res.append('bestmodel/nCells')
-            elif (low == 'current data'):
-                res.append('currentd')
+#            elif (low == 'current data'):
+#                res.append('currentd')
             elif (low == 'hit map'):
                 res.append('hitmap')
             elif (low == 'zgrid'):
@@ -1370,7 +1369,6 @@ class LineResults(myObject):
         # Add the Hitmap
         results.Hitmap.createHdf(aFile,'hitmap', nRepeats=nPoints, fillvalue=np.nan)
 
-        results.currentD.createHdf(aFile,'currentd', nRepeats=nPoints, fillvalue=np.nan)
         results.bestD.createHdf(aFile,'bestd', nRepeats=nPoints, fillvalue=np.nan)
 
         # Since the 1D models change size adaptively during the inversion, we need to pad the HDF creation to the maximum allowable number of layers.
@@ -1396,7 +1394,6 @@ class LineResults(myObject):
 #        aFile.create_dataset('bestmodel.chie', [nPoints,*results.bestModel.chie.shape], dtype=results.bestModel.chie.dtype)
 #        aFile.create_dataset('bestmodel.chim', [nPoints,*results.bestModel.chim.shape], dtype=results.bestModel.chim.dtype)
 
-#        self.currentD.createHdf(grp, 'currentd')
 #        self.bestD.createHdf(grp, 'bestd')
 #
 #        tmp=self.bestModel.pad(self.bestModel.maxLayers)
@@ -1405,7 +1402,7 @@ class LineResults(myObject):
     def results2Hdf(self, results):
         """ Given a HDF file initialized as line results, write the contents of results to the appropriate arrays """
 
-        assert results.ID in self.iDs, "The HDF file was not initialized to contain the results for this datapoints results "
+        assert results.ID in self.iDs, Exception("The HDF file does not have ID number {}. Available ids are between {} and {}".format(results.ID, np.min(self.iDs), np.max(self.iDs)))
 
         aFile = self.hdfFile
 
@@ -1470,7 +1467,6 @@ class LineResults(myObject):
         results.Hitmap.writeHdf(aFile,'hitmap',  index=i)
 
         results.bestD.writeHdf(aFile,'bestd',  index=i)
-        results.currentD.writeHdf(aFile,'currentd',  index=i)
 
         results.bestModel.writeHdf(aFile,'bestmodel', index=i)
 
