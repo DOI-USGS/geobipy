@@ -144,7 +144,6 @@ class Results(myObject):
 
         # Initialize the best data, current data and best model
         self.bestD = D
-        self.currentD = D
         self.bestModel = M
 
 
@@ -214,7 +213,6 @@ class Results(myObject):
                 self.zeroCount = 0
 
         self.bestD = bestD
-        self.currentD = D
         self.bestModel = bestModel
 
 
@@ -283,7 +281,7 @@ class Results(myObject):
         
         self.PhiDs.plot(self.iRange, i=np.s_[:self.i], marker=m, alpha=a, markersize=ms, linestyle=ls, color=c, **kwargs)
         plt.ylabel('Data Misfit')
-        dum = self.multiplier * len(self.currentD.iActive)
+        dum = self.multiplier * len(self.bestD.iActive)
         plt.axhline(dum, color='#C92641', linestyle='dashed', linewidth=lw)
         if (self.burnedIn):
             plt.axvline(self.iBurn, color='#C92641', linestyle='dashed', linewidth=lw)
@@ -385,7 +383,7 @@ class Results(myObject):
             self.initFigure(iFig, forcePlot=forcePlot)
 
 
-        plt.figure(iFig)
+        fig = plt.figure(iFig)
 
 #        if (np.mod(self.i, 1000) == 0 or forcePlot):
 
@@ -427,7 +425,7 @@ class Results(myObject):
                     plt.sca(self.ax[j+1])
                     plt.cla()
                     self._plotRelativeErrorPosterior()
-                    cP.title('System ' + str(system + 1))
+                    cP.title('System ' + str(i + 1))
 
                     # Update the histogram of additive data errors
                     plt.sca(self.ax[j+2])
@@ -487,7 +485,8 @@ class Results(myObject):
                 cP.plot(self.iRange[iTmp], self.posteriorComponents[-1,iTmp])
                 plt.grid(b=True, which ='major', color='k', linestyle='--', linewidth=2)
 
-        pause(1e-10)
+
+        pause(1e-9)
 
 
 
@@ -576,7 +575,6 @@ class Results(myObject):
             self.addErr[i].createHdf(grp, 'adderr' + str(i))
 
         self.Hitmap.createHdf(grp,'hitmap')
-        self.currentD.createHdf(grp, 'currentd')
         self.bestD.createHdf(grp, 'bestd')
 
         tmp=self.bestModel.pad(self.bestModel.maxLayers)
@@ -634,7 +632,6 @@ class Results(myObject):
         self.saveTime = np.float64(self.clk.timeinSeconds())
         writeNumpy(self.saveTime, grp, 'savetime')
         self.bestD.writeHdf(grp, 'bestd')
-        self.currentD.writeHdf(grp, 'currentd')
         self.bestModel.writeHdf(grp, 'bestmodel')
 
     def toHdf(self, h5obj, myName):
@@ -679,8 +676,6 @@ class Results(myObject):
         self.Hitmap.writeHdf(grp, 'hitmap')
         # Write the Best Data
         self.bestD.writeHdf(grp, 'bestd')
-        # Write the current Data
-        self.currentD.writeHdf(grp, 'currentd')
         # Write the Best Model
         self.bestModel.writeHdf(grp, 'bestmodel')
         # Interpolate the mean and best model to the discretized hitmap
@@ -804,11 +799,6 @@ class Results(myObject):
         self.bestModel = obj.fromHdf(item)
         self.bestModel.maxDepth = np.log(self.Hitmap.y[-1])
 
-        item = grp.get('currentd')
-        if (item is None):
-            item = grp.get('currentD')
-        obj = eval(safeEval(item.attrs.get('repr')))
-        self.currentD = obj.fromHdf(item, sysPath=sysPath)
         self.relErr = []
         self.addErr = []
         for i in range(self.nSystems):
