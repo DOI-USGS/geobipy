@@ -25,6 +25,25 @@ class EmDataPoint(myObject):
         raise NotImplementedError("Cannot instantiate this class, use a subclass")
 
 
+    def _systemIndices(self, system=0):
+        """The slice indices for the requested system.
+        
+        Parameters
+        ----------
+        system : int
+            Requested system index.
+            
+        Returns
+        -------
+        out : numpy.slice
+            The slice pertaining to the requested system.
+            
+        """
+
+        assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+        return np.s_[self.__systemOffset[system]:self.__systemOffset[system+1]]
+
+
     def FindBestHalfSpace(self, minConductivity=-4.0, maxConductivity=2.0, nSamples=100):
         """Computes the best value of a half space that fits the data.
 
@@ -69,7 +88,7 @@ class EmDataPoint(myObject):
             Indices into the observed data that are not NaN
 
         """
-        return cf.findNotNans(self.d)
+        return cf.findNotNans(self._data)
 
 
     def likelihood(self):
@@ -81,7 +100,7 @@ class EmDataPoint(myObject):
             Likelihood of the data point
 
         """
-        return self.p.probability(i=self.iActive)
+        return self._predictedData.probability(i=self.iActive)
 
 
     def priorProbability(self, rErr, aErr, height, calibration, verbose=False):
@@ -236,17 +255,18 @@ class EmDataPoint(myObject):
         for i in range(c.size):
             mod.par[0] = c[i]
             self.forward(mod)
-            PhiD[i] = self.dataMisfit(squared=True)
+            PhiD[i] = self.dataMisfit()
         plt.loglog(c, PhiD, **kwargs)
         cP.xlabel(c.getNameUnits())
         cP.ylabel('Data misfit')
 
 
+    @property
     def deltaD(self):
         """Get the difference between the predicted and observed data,
 
         .. math::
-            \delta \mathbf{d} = \mathbf{d}^{obs} - \mathbf{d}^{pre}.
+            \delta \mathbf{d} = \mathbf{d}^{pre} - \mathbf{d}^{obs}.
 
         Returns
         -------
@@ -255,7 +275,7 @@ class EmDataPoint(myObject):
             with size equal to the number of active channels.
 
         """
-        return self.p[self.iActive] - self.d[self.iActive]
+        return self._predictedData - self._data
 
 
     def dataMisfit(self, squared=False):
@@ -276,9 +296,9 @@ class EmDataPoint(myObject):
             The misfit value.
 
         """
-        assert not any(self.s[self.iActive] == 0.0), ValueError('Cannot compute the misfit when the data standard deviations are zero.')
-        tmp2 = self.s[self.iActive]**-1.0
-        PhiD = np.float64(np.sum((cf.Ax(tmp2, self.deltaD()))**2.0, dtype=np.float64))
+        assert not any(self._std[self.iActive] == 0.0), ValueError('Cannot compute the misfit when the data standard deviations are zero.')
+        tmp2 = self._std[self.iActive]**-1.0
+        PhiD = np.float64(np.sum((cf.Ax(tmp2, self.deltaD[self.iActive]))**2.0, dtype=np.float64))
         return PhiD if squared else np.sqrt(PhiD)
 
     
@@ -308,7 +328,7 @@ class EmDataPoint(myObject):
         assert Jin.shape[0] == self.iActive.size, ValueError("Number of rows of Jin must match the number of active channels in the datapoint {}".format(self.iActive.size))
 
         Jout = np.zeros(Jin.shape)
-        Jout[:, :] = Jin * (np.repeat(self.s[self.iActive, np.newaxis] ** -power, Jout.shape[1], 1))
+        Jout[:, :] = Jin * (np.repeat(self._std[self.iActive, np.newaxis]**-power, Jout.shape[1], 1))
         return Jout
 
 
@@ -318,10 +338,10 @@ class EmDataPoint(myObject):
         msg += 'x: :' + str(self.x) + '\n'
         msg += 'y: :' + str(self.y) + '\n'
         msg += 'z: :' + str(self.z) + '\n'
-        msg += 'e: :' + str(self.e) + '\n'
-        msg += self.d.summary(True)
-        msg += self.p.summary(True)
-        msg += self.s.summary(True)
+        msg += 'elevation: :' + str(self.elevation) + '\n'
+        msg += self._data.summary(True)
+        msg += self._predictedData.summary(True)
+        msg += self._std.summary(True)
         if (out):
             return msg
         print(msg)
@@ -353,12 +373,14 @@ class EmDataPoint(myObject):
             If additiveError is <= 0.0
 
         """
-        assert relativeErr > 0.0, ValueError("relativeErr must be > 0.0")
-        assert additiveErr > 0.0, ValueError("additiveErr must be > 0.0")
+        relativeErr = np.atleast_1d(relativeErr)
+        additiveErr = np.atleast_1d(additiveErr)
+        assert all(relativeErr > 0.0), ValueError("relativeErr must be > 0.0")
+        assert all(additiveErr > 0.0), ValueError("additiveErr must be > 0.0")
 
-        tmp = (relativeErr * self.d)**2.0 + additiveErr**2.0
+        tmp = (relativeErr * self._data)**2.0 + additiveErr**2.0
 
-        if self.p.hasPrior():
-            self.p.prior.variance[:] = tmp[self.iActive]
+        if self._predictedData.hasPrior():
+            self._predictedData.prior.variance[:] = tmp[self.iActive]
 
-        self.s[:] = np.sqrt(tmp)
+        self._std[:] = np.sqrt(tmp)

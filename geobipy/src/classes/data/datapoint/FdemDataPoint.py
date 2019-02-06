@@ -20,68 +20,211 @@ from ....base import customPlots as cp
 
 
 class FdemDataPoint(EmDataPoint):
-    """Class extension to geobipy.EmDataPoint
+    """Class defines a Frequency domain electromagnetic data point.
 
-    Class describes a frequency domain electro-magnetic data point with 3D coordinates, observed data, 
-    error estimates, predicted data, and a system that describes the aquisition parameters.
+    Contains an easting, northing, height, elevation, observed and predicted data, and uncertainty estimates for the data.
 
-    FdemDataPoint(x, y, z)
+    FdemDataPoint(x, y, z, elevation, data, std, system, dataUnits)
+
+    Parameters
+    ----------
+    x : float
+        Easting co-ordinate of the data point
+    y : float
+        Northing co-ordinate of the data point
+    z : float
+        Height above ground of the data point
+    elevation : float, optional
+        Elevation from sea level of the data point
+    data : geobipy.StatArray or array_like, optional
+        Data values to assign the data of length 2*number of frequencies.
+        * If None, initialized with zeros.
+    std : geobipy.StatArray or array_like, optional
+        Estimated uncertainty standard deviation of the data of length 2*number of frequencies.
+        * If None, initialized with ones if data is None, else 0.1*data values.
+
+    system : str or geobipy.FdemSystem, optional
+        Describes the acquisition system with loop orientation and frequencies.
+        * If str should be the path to a system file to read in.
+        * If geobipy.FdemSystem, will be deepcopied.
+    dataUnits : str, optional
+        Units of the data.  Default is "ppm".
 
     """
 
-    def __init__(self, x, y, z, e=0.0, d=None, s=None, sys=None, dataUnits='ppm'):
-        # x coordinate
-        self.x = StatArray(1)+x
-        # y coordinate
-        self.y = StatArray(1)+y
-        # z coordinate
-        self.z = StatArray(1, 'Height above ground', 'm') + z
-        # Elevation of data point
-        self.e = StatArray(1) + e
-        # Assign the number of systems as 1
-        self.nSystems = 1
-        if (sys is None):
-            return
+    def __init__(self, x, y, z, elevation=0.0, data=None, std=None, system=None, dataUnits='ppm'):
+        """Define initializer. """
 
-        # EMSystem Class
-        if (isinstance(sys, str)):
-            tmpsys = FdemSystem()
-            tmpsys.read(sys)
-            self.sys = deepcopy(tmpsys)
-        elif (isinstance(sys, FdemSystem)):
-            self.sys = deepcopy(sys)
+        # x coordinate
+        self.x = StatArray(1) + x
+        # y coordinate
+        self.y = StatArray(1) + y
+        # z coordinate
+        self.z = StatArray(z, 'Height above ground', 'm')
+        # Elevation of data point
+        self.elevation = StatArray(1) + elevation
+        if (system is None):
+            return
         else:
-            assert False, TypeError("Sys must be a path to the system file or an FdemSystem class")
+            if isinstance(system, (str, FdemSystem)):
+                system = [system]
+            assert all((isinstance(sys, (str, FdemSystem)) for sys in system)), TypeError("System must have items of type str or FdemSystem")
+        
+        # Assign the number of systems as 1
+        self.nSystems = len(system)
+        self.nFrequencies = np.empty(self.nSystems, dtype=np.int32)
+
+        self.system = []
+
+        for j, sys in enumerate(system):
+            # EMSystem Class
+            if (isinstance(sys, str)):
+                tmpsys = FdemSystem()
+                tmpsys.read(sys)
+                self.system.append(tmpsys)
+            elif (isinstance(sys, FdemSystem)):
+                self.system.append(sys)
+            else:
+                assert False, TypeError("Sys must be a path to the system file or an FdemSystem class")
+            self.nFrequencies[j] = self.system[j].nFrequencies
+
 
         # StatArray of InPhase and Quadrature Data
-        if (not d is None):
-            assert d.size == 2 * self.sys.nFreq, ValueError("Number of data do not match the number of frequencies in the system file "+str(2*self.sys.nFreq))
-            self.d = deepcopy(d)
+        if (data is None):
+            self._data = StatArray(np.zeros(self.nChannels), name='Frequency domain data', units=dataUnits)
         else:
-            self.d = StatArray(np.zeros(2 * self.sys.nFreq), name='Frequency domain data', units=dataUnits)
-        #StatArray(2*sys.nFreq,'Observed Data',d.units);self.d+=d
+            assert data.size == self.nChannels, ValueError("Size of data must equal 2 * total number of frequencies {}".format(self.nChannels))
+            self._data = StatArray(data)
+            
 
         # StatArray of Standard Deviations
-
-        if (not s is None):
-            assert s.size == 2 * self.sys.nFreq, ValueError("Number of standard deviations do not match the number of frequencies in the system file "+str(2*self.sys.nFreq))
-            self.s = StatArray(s, 'Standard Deviation', self.d.units)
+        if (not std is None):
+            assert std.size == self.nChannels, ValueError("Size of std must equal 2 * number of frequencies {}".format(2*self.nFrequencies))
+            self._std = StatArray(std, 'Standard Deviation', self._data.units)
         else:
-            self.s = StatArray(np.ones(2 * self.sys.nFreq), 'Standard Deviation', self.d.units)
+            self._std = StatArray(0.1 * self._data, 'Standard Deviation', self._data.units)
 
         # StatArray of Predicted Data
-        self.p = StatArray(2 * self.sys.nFreq, 'Predicted Data', self.d.units)
+        self._predictedData = StatArray(self.nChannels, 'Predicted Data', self._data.units)
         # StatArray of Relative Errors
         self.relErr = StatArray(self.nSystems, '$\epsilon_{Relative}x10^{2}$','%')
         # StatArray of Additive Errors
-        self.addErr = StatArray(self.nSystems, '$\epsilon_{Additive}$',self.d.units)
+        self.addErr = StatArray(self.nSystems, '$\epsilon_{Additive}$',self._data.units)
         # StatArray of calibration parameters
         # The four columns are Bias,Variance,InphaseBias,QuadratureBias.
-        self.calibration = StatArray([self.sys.nFreq * 4], 'Calibration Parameters')
+        self.calibration = StatArray([self.nChannels * 2], 'Calibration Parameters')
         # Initialize the sensitivity matrix
         self.J = None
         # Index to non NaN values
         self.iActive = self.getActiveData()
+
+        self._systemOffset = np.append(0, np.cumsum(2*self.nFrequencies))
+
+
+    def _systemIndices(self, system=0):
+        """The slice indices for the requested system.
+        
+        Parameters
+        ----------
+        system : int
+            Requested system index.
+            
+        Returns
+        -------
+        out : numpy.slice
+            The slice pertaining to the requested system.
+            
+        """
+
+        assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+
+        return np.s_[self._systemOffset[system]:self._systemOffset[system+1]]
+
+
+    def _inphaseIndices(self, system=0):
+        """The slice indices for the requested in-phase data.
+        
+        Parameters
+        ----------
+        system : int
+            Requested system index.
+            
+        Returns
+        -------
+        out : numpy.slice
+            The slice pertaining to the requested system.
+            
+        """
+
+        assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+
+        return np.s_[self._systemOffset[system]:self._systemOffset[system] + self.nFrequencies[system]]
+
+
+    def _quadratureIndices(self, system=0):
+        """The slice indices for the requested in-phase data.
+        
+        Parameters
+        ----------
+        system : int
+            Requested system index.
+            
+        Returns
+        -------
+        out : numpy.slice
+            The slice pertaining to the requested system.
+            
+        """
+
+        assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+
+        return np.s_[self._systemOffset[system] + self.nFrequencies[system]: self._systemOffset[system+1]]
+
+
+    @property
+    def data(self):
+        return self._data
+
+
+    def frequencies(self, system=0):
+        """ Return the frequencies in an StatArray """
+        return StatArray(self.system[system].frequencies, name='Frequency', units='Hz')
+
+    
+    def inphase(self, system=0):
+        return self._data[self._inphaseIndices(system)]
+
+    
+    def inphaseStd(self, system=0):
+        return self._std[self._inphaseIndices(system)]
+
+    @property
+    def nChannels(self):
+        return np.sum(2*self.nFrequencies)
+
+    @property
+    def predictedData(self):
+        return self._predictedData
+
+    
+    def predictedInphase(self, system=0):
+        return self._predictedData[self._inphaseIndices(system)]
+
+    
+    def predictedQuadrature(self, system=0):
+        return self._predictedData[self._quadratureIndices(system)]
+
+    
+    def quadrature(self, system=0):
+        return self._data[self._quadratureIndices(system)]
+
+    
+    def quadratureStd(self, system=0):
+        return self._std[self._quadratureIndices(system)]
+
+    @property
+    def std(self):
+        return self._std
 
 
     def deepcopy(self):
@@ -90,37 +233,34 @@ class FdemDataPoint(EmDataPoint):
     
     def __deepcopy__(self):
         """ Define a deepcopy routine """
-        tmp = FdemDataPoint(self.x, self.y, self.z, self.e)
-        tmp.z = self.z.deepcopy()
-        # Assign the number of systems as 1
-        tmp.nSystems = 1
-        # Initialize the sensitivity matrix
-        tmp.J = deepcopy(self.J)
-        # EMSystem Class
-        tmp.sys = self.sys
-        # StatArray of Data
-        tmp.d = self.d.deepcopy()
-        # StatArray of Standard Deviations
-        tmp.s = self.s.deepcopy()
+        tmp = FdemDataPoint(self.x, self.y, self.z, self.elevation, self._data, self._std, self.system, self._data.units)
+        # tmp.z = self.z.deepcopy()
+        # # Number of frequencies
+        # tmp.nFrequencies = self.nFrequencies
+        # # Number of systems
+        # tmp.nSystems = self.nSystems
+        # # EMSystem Class
+        # tmp.system = self.system
+        # # StatArray of Data
+        # tmp._data = self._data.deepcopy()
+        # # StatArray of Standard Deviations
+        # tmp._std = self._std.deepcopy()
         # StatArray of Predicted Data
-        tmp.p = self.p.deepcopy()
+        tmp._predictedData = self._predictedData.deepcopy()
         # StatArray of Relative Errors
         tmp.relErr = self.relErr.deepcopy()
-#    tmp.relErr.name='Relative Errors';tmp.relErr.units='ppm'
         # StatArray of Additive Errors
         tmp.addErr = self.addErr.deepcopy()
 #    tmp.name='Relative Errors';tmp.units='ppm'
         # StatArray of calibration parameters
         # The four columns are Bias,Variance,InphaseBias,QuadratureBias.
         tmp.calibration = self.calibration.deepcopy()
+        # Initialize the sensitivity matrix
+        tmp.J = deepcopy(self.J)
         # Index to non NaN values
-        tmp.iActive = tmp.getActiveData()
+        # tmp.iActive = tmp.getActiveData()
+
         return tmp
-
-
-    def getChannels(self, system=0):
-        """ Return the frequencies in an StatArray """
-        return StatArray(self.sys.freq, name='Frequency', units='Hz')
 
 
     def hdfName(self):
@@ -139,14 +279,14 @@ class FdemDataPoint(EmDataPoint):
         self.x.createHdf(grp, 'x', nRepeats=nRepeats, fillvalue=fillvalue)
         self.y.createHdf(grp, 'y', nRepeats=nRepeats, fillvalue=fillvalue)
         self.z.createHdf(grp, 'z', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.e.createHdf(grp, 'e', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.d.createHdf(grp, 'd', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.s.createHdf(grp, 's', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.p.createHdf(grp, 'p', nRepeats=nRepeats, fillvalue=fillvalue)
+        self.elevation.createHdf(grp, 'e', nRepeats=nRepeats, fillvalue=fillvalue)
+        self._data.createHdf(grp, 'd', nRepeats=nRepeats, fillvalue=fillvalue)
+        self._std.createHdf(grp, 's', nRepeats=nRepeats, fillvalue=fillvalue)
+        self._predictedData.createHdf(grp, 'p', nRepeats=nRepeats, fillvalue=fillvalue)
         self.relErr.createHdf(grp, 'relErr', nRepeats=nRepeats, fillvalue=fillvalue)
         self.addErr.createHdf(grp, 'addErr', nRepeats=nRepeats, fillvalue=fillvalue)
         self.calibration.createHdf(grp, 'calibration', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.sys.toHdf(grp, 'sys')
+        self.system[0].toHdf(grp, 'sys')
 
 
     def writeHdf(self, parent, myName, index=None):
@@ -160,11 +300,11 @@ class FdemDataPoint(EmDataPoint):
         self.x.writeHdf(grp, 'x',  index=index)
         self.y.writeHdf(grp, 'y',  index=index)
         self.z.writeHdf(grp, 'z',  index=index)
-        self.e.writeHdf(grp, 'e',  index=index)
+        self.elevation.writeHdf(grp, 'e',  index=index)
 
-        self.d.writeHdf(grp, 'd',  index=index)
-        self.s.writeHdf(grp, 's',  index=index)
-        self.p.writeHdf(grp, 'p',  index=index)
+        self._data.writeHdf(grp, 'd',  index=index)
+        self._std.writeHdf(grp, 's',  index=index)
+        self._predictedData.writeHdf(grp, 'p',  index=index)
         self.relErr.writeHdf(grp, 'relErr',  index=index)
         self.addErr.writeHdf(grp, 'addErr',  index=index)
         self.calibration.writeHdf(grp, 'calibration',  index=index)
@@ -193,22 +333,22 @@ class FdemDataPoint(EmDataPoint):
 
         item = grp.get('sys')
         obj = eval(safeEval(item.attrs.get('repr')))
-        _aPoint.sys = obj.fromHdf(item)
+        _aPoint.system = obj.fromHdf(item)
 
         slic = None
         if not index is None:
             slic=np.s_[index,:]
         item = grp.get('d')
         obj = eval(safeEval(item.attrs.get('repr')))
-        _aPoint.d = obj.fromHdf(item, index=slic)
+        _aPoint._data = obj.fromHdf(item, index=slic)
 
         item = grp.get('s')
         obj = eval(safeEval(item.attrs.get('repr')))
-        _aPoint.s = obj.fromHdf(item, index=slic)
+        _aPoint._std = obj.fromHdf(item, index=slic)
 
         item = grp.get('p')
         obj = eval(safeEval(item.attrs.get('repr')))
-        _aPoint.p = obj.fromHdf(item, index=slic)
+        _aPoint._predictedData = obj.fromHdf(item, index=slic)
 
         item = grp.get('relErr')
         obj = eval(safeEval(item.attrs.get('repr')))
@@ -230,22 +370,22 @@ class FdemDataPoint(EmDataPoint):
         """ Apply calibration factors to the data point """
         # Make complex numbers from the data
         if (Predicted):
-            tmp = cf.mergeComplex(self.p)
+            tmp = cf.mergeComplex(self._predictedData)
         else:
-            tmp = cf.mergeComplex(self.d)
+            tmp = cf.mergeComplex(self._data)
 
         # Get the calibration factors for each frequency
         i1 = 0
-        i2 = self.sys.nFreq
+        i2 = self.nFrequencies
         G = self.calibration[i1:i2]
-        i1 += self.sys.nFreq
-        i2 += self.sys.nFreq
+        i1 += self.nFrequencies
+        i2 += self.nFrequencies
         Phi = self.calibration[i1:i2]
-        i1 += self.sys.nFreq
-        i2 += self.sys.nFreq
+        i1 += self.nFrequencies
+        i2 += self.nFrequencies
         Bi = self.calibration[i1:i2]
-        i1 += self.sys.nFreq
-        i2 += self.sys.nFreq
+        i1 += self.nFrequencies
+        i2 += self.nFrequencies
         Bq = self.calibration[i1:i2]
 
         # Calibrate the data
@@ -253,44 +393,12 @@ class FdemDataPoint(EmDataPoint):
 
         # Split the complex numbers back out
         if (Predicted):
-            self.p[:] = cf.splitComplex(tmp)
+            self._predictedData[:] = cf.splitComplex(tmp)
         else:
-            self.d[:] = cf.splitComplex(tmp)
+            self._data[:] = cf.splitComplex(tmp)
 
-#  def evaluatePrior(self,sErr,sZ,sCal):
-#    """ Evaluate the prior for the EM data point
-#    sErr: :Include the prior for the relative error
-#    sZ:   :Include the prior for elevation
-#    sCal: :Include the prior for calibration parameters
-#    """
-#    prior=0.0
-#    if sErr: # Relative Errors
-#      tmp=np.log(self.relErr.probability())
-#      prior+=tmp
-##      print('Errors: ',tmp)
-#    if sZ:# Elevation
-#      tmp=np.log(self.z.probability())
-#      prior+=tmp
-##      print('Elevation: ',tmp)
-#    if sCal: # Calibration parameters
-#      tmp=self.calibration.probability()
-#      prior+=tmp
-##      print('Calibration: ',tmp)
-#    return np.float64(prior)
 
-#  def summary(self,out=False):
-#    """ Print a summary of the EMdataPoint """
-#    msg='EM Data Point: \n'
-#    msg+='x: :'+str(self.x)+'\n'
-#    print('y: :'+str(self.y)+'\n'
-#    print('z: :'+str(self.z)+'\n'
-#    self.d.summary()
-#    self.p.summary()
-#    self.s.summary()
-#    self.sys.summary()
-#    print('')
-
-    def plot(self, title='Frequency Domain EM Data', **kwargs):
+    def plot(self, title='Frequency Domain EM Data', system=0,  **kwargs):
         """ Plot the Inphase and Quadrature Data for an EM measurement
         if plotPredicted then the predicted data are plotted as a line, with points for the observed data
         else the observed data with error bars and linear interpolation are shown.
@@ -322,7 +430,7 @@ class FdemDataPoint(EmDataPoint):
         xscale = kwargs.pop('xscale','log')
         yscale = kwargs.pop('yscale','log')
 
-        plt.errorbar(self.sys.freq, self.d[:self.sys.nFreq], yerr=self.s[:self.sys.nFreq],
+        plt.errorbar(self.frequencies(system), self.inphase(system), yerr=self.inphaseStd(system),
             marker=im,
             markersize=ms,
             color=inColor,
@@ -334,7 +442,7 @@ class FdemDataPoint(EmDataPoint):
             linewidth=lw,
             label='In-Phase', **kwargs)
 
-        plt.errorbar(self.sys.freq, self.d[self.sys.nFreq:], yerr=self.s[self.sys.nFreq:],
+        plt.errorbar(self.frequencies(system), self.quadrature(system), yerr=self.quadratureStd(system),
             marker=qm,
             markersize=ms,
             color=quadColor,
@@ -353,7 +461,7 @@ class FdemDataPoint(EmDataPoint):
         return ax
 
 
-    def plotPredicted(self, title='Frequency Domain EM Data',**kwargs):
+    def plotPredicted(self, title='Frequency Domain EM Data', system=0, **kwargs):
 
         ax = plt.gca()
         cp.pretty(ax)
@@ -372,8 +480,8 @@ class FdemDataPoint(EmDataPoint):
         xscale = kwargs.pop('xscale','log')
         yscale = kwargs.pop('yscale','log')
 
-        plt.semilogx(self.sys.freq, self.p[:self.sys.nFreq], color=c, linewidth=lw, alpha=a, **kwargs)
-        plt.semilogx(self.sys.freq, self.p[self.sys.nFreq:], color=c, linewidth=lw, alpha=a, **kwargs)
+        plt.semilogx(self.frequencies(system), self.predictedInphase(system), color=c, linewidth=lw, alpha=a, **kwargs)
+        plt.semilogx(self.frequencies(system), self.predictedQuadrature(system), color=c, linewidth=lw, alpha=a, **kwargs)
 
         plt.xscale(xscale)
         plt.yscale(yscale)
@@ -454,24 +562,26 @@ class FdemDataPoint(EmDataPoint):
 
     def _forward1D(self, mod):
         """ Forward model the data from a 1D layered earth model """
-        tmp = fdem1dfwd(self.sys, mod, -self.z[0])
-        self.p[:self.sys.nFreq] = tmp.real
-        self.p[self.sys.nFreq:] = tmp.imag
+        for i, s in enumerate(self.system):
+            tmp = fdem1dfwd(s, mod, -self.z[0])
+            self._predictedData[:self.nFrequencies[i]] = tmp.real
+            self._predictedData[self.nFrequencies[i]:] = tmp.imag
 
 
     def _sensitivity1D(self, mod, scale=False):
         """ Compute the sensitivty matrix for a 1D layered earth model """
-        Jtmp = fdem1dsen(self.sys, mod, -self.z[0])
-
         # Re-arrange the sensitivity matrix to Real:Imaginary vertical
         # concatenation
-        J = np.zeros([2 * self.sys.nFreq, mod.nCells[0]])
-        J[:self.sys.nFreq, :] = Jtmp.real
-        J[self.sys.nFreq:, :] = Jtmp.imag
+        J = np.zeros([self.nChannels, mod.nCells[0]])
+
+        for j, s in enumerate(self.system):
+            Jtmp = fdem1dsen(s, mod, -self.z[0])
+            J[:self.nFrequencies[j], :] = Jtmp.real
+            J[self.nFrequencies[j]:, :] = Jtmp.imag
 
         # Scale the sensitivity matrix rows by the data weights if required
         if scale:
-            J *= (np.repeat(self.s[:, np.newaxis]**-1.0, np.size(J, 1), 1))
+            J *= (np.repeat(self._std[:, np.newaxis]**-1.0, np.size(J, 1), 1))
 
         J = J[self.iActive, :]
         return J

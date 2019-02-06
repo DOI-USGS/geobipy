@@ -8,23 +8,48 @@ from ....base import customFunctions as cf
 from ....base import customPlots as cP
 from ...pointcloud.PointCloud3D import PointCloud3D
 from ....classes.core.myObject import myObject
-from .DataSet import DataSet
 from ....base import MPI as myMPI
 import matplotlib.pyplot as plt
 
+try:
+    from pyvtk import Scalars
+except:
+    pass
+
+
 class Data(PointCloud3D):
-    """Class defining a set of Data 
+    """Class defining a set of Data.
+
     
     Data(nPoints, nChannel, units)
 
     Parameters
     ----------
     nPoints : int
-        Number of points in the data
-    nChannels : int
+        Number of points in the data.
+    nChannelsPerSystem : int or array_like
         Number of data channels in the data
-    units : str
-        Units of the data
+        * If int, a single acquisition system is assumed.
+        * If array_like, each item describes the number of points per acquisition system.
+    x : geobipy.StatArray or array_like, optional
+        The x co-ordinates. Default is zeros of size nPoints.
+    y : geobipy.StatArray or array_like, optional
+        The y co-ordinates. Default is zeros of size nPoints.
+    z : geobipy.StatArrayor array_like, optional
+        The z co-ordinates. Default is zeros of size nPoints.
+    data : geobipy.StatArrayor array_like, optional
+        The values of the data.
+        * If None, zeroes are assigned
+    std : geobipy.StatArrayor array_like, optional
+        The uncertainty estimates of the data.
+        * If None, ones are assigned if data is None, else 0.1*data
+    predictedData : geobipy.StatArrayor array_like, optional
+        The predicted data.
+        * If None, zeros are assigned.
+    dataUnits : str
+        Units of the data.
+    channelNames : list of str, optional
+        Names of each channel of length sum(nChannelsPerSystem)
 
     Returns
     -------
@@ -33,32 +58,269 @@ class Data(PointCloud3D):
 
     """
 
-    def __init__(self, nPoints=1, nChannels=1, units=None):
+    def __init__(self, nPoints=1, nChannelsPerSystem=1, x=None, y=None, z=None, data=None, std=None, predictedData=None, dataUnits=None, channelNames=None):
         """ Initialize the Data class """
-        # Number of Channels
-        self.nChannels = np.int64(nChannels)
-        PointCloud3D.__init__(self, nPoints)
-        self.set = DataSet(self.N, nChannels, units)
-        self.names = ['Channel '+str(i) for i in range(nChannels)]
 
+        self.nSystems = np.size(nChannelsPerSystem)
+
+        # Number of Channels
+        self.nChannelsPerSystem = nChannelsPerSystem
+        self._systemOffset = np.append(0, np.cumsum(self.nChannelsPerSystem))
+        PointCloud3D.__init__(self, nPoints, x, y, z)
+
+
+        dataShape = [nPoints, self.nChannels]
+        # StatArray of data
+        if not data is None:
+            assert all(np.shape(data) == dataShape), ValueError("data must have shape {}".format(dataShape))
+            self._data = StatArray(data, order='F')
+        else:
+            self._data = StatArray([nPoints, self.nChannels], "Data", dataUnits, order='F')
+
+        # StatArray of Standard Deviations
+        if not std is None:
+            assert all(np.shape(std) == dataShape), ValueError("std must have shape {}".format(dataShape))
+            assert all(std > 0.0), ValueError("Cannot assign standard deviations that are <= 0.0.")
+            self._std = StatArray(std, order='F')
+        else:
+            self._std = StatArray(np.ones([nPoints, self.nChannels]), "Standard Deviation", dataUnits, order='F')
+        
+        
+        # Create predicted data
+        if not predictedData is None:
+            assert all(np.shape(predictedData) == dataShape), ValueError("predictedData must have shape {}".format(dataShape))
+            self._predictedData = StatArray(predictedData, order='F')
+        else:
+            self._predictedData = StatArray([nPoints, self.nChannels], "Predicted Data", dataUnits, order='F')
+        
+        # Assign the channel names
+        if channelNames is None:
+            self._channelNames = ['Channel {}'.format(i) for i in range(self.nChannels)]
+        else:
+            assert len(channelNames) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
+            self._channelNames = channelNames
+
+        self.line = None
+    
+    
+    def _systemIndices(self, system=0):
+        """The slice indices for the requested system.
+        
+        Parameters
+        ----------
+        system : int
+            Requested system index.
+            
+        Returns
+        -------
+        out : numpy.slice
+            The slice pertaining to the requested system.
+            
+        """
+
+        assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+
+        return np.s_[self._systemOffset[system]:self._systemOffset[system+1]]
+
+    @property    
+    def data(self):
+        """The data. """
+        return self._data
 
     @property
-    def D(self):
-        """The data"""
-        return self.set.D
+    def nChannels(self):
+        return np.sum(self.nChannelsPerSystem)
+
+    @property
+    def predictedData(self):
+        """The predicted data. """
+        return self._predictedData
+
+    @property
+    def std(self):
+        """The standard deviation. """
+        return self._std
+
+    @property
+    def channelNames(self):
+        return self._channelNames
+
+
+    def addToVTK(self, vtk, prop=['data', 'predicted', 'std'], system=None):
+        """Adds a member to a VTK handle.
+
+        Parameters
+        ----------
+        vtk : pyvtk.VtkData
+            vtk handle returned from self.vtkStructure()
+        prop : str or list of str, optional
+            List of the member to add to a VTK handle, either "data", "predicted", or "std".
+        system : int, optional
+            The system for which to add the data
+
+        """
+
+
+        if isinstance(prop, str):
+            prop = [prop]
+
+        for p in prop:
+            assert p in ['data', 'predicted', 'std'], ValueError("prop must be either 'data', 'predicted' or 'std'.")
+            if p == "data":
+                tmp = self.data
+            elif p == "predicted":
+                tmp = self.predictedData
+            elif p == "std":
+                tmp = self.std
+
+            if system is None:
+                r = range(self.nChannels)
+            else:
+                assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+                r = range(self._systemOffset[system], self._systemOffset[system+1])
+
+            for i in r:
+                vtk.point_data.append(Scalars(tmp[:, i], "{} {}".format(self.channelNames[i], tmp.getNameUnits())))
+                    
+
+    @property
+    def deltaD(self):
+        """Get the difference between the predicted and observed data,
+
+        .. math::
+            \delta \mathbf{d} = \mathbf{d}^{pre} - \mathbf{d}^{obs}.
+
+        Returns
+        -------
+        out : StatArray
+            The residual between the active observed and predicted data.
+
+        """
+        return self._predictedData - self._data
+
+
+    def dataMisfit(self, squared=False):
+        """Compute the :math:`L_{2}` norm squared misfit between the observed and predicted data
+
+        .. math::
+            \| \mathbf{W}_{d} (\mathbf{d}^{obs}-\mathbf{d}^{pre})\|_{2}^{2},
+        where :math:`\mathbf{W}_{d}` are the reciprocal data errors.
+
+        Parameters
+        ----------
+        squared : bool
+            Return the squared misfit.
+
+        Returns
+        -------
+        out : np.float64
+            The misfit value.
+
+        """
+        PhiD = np.float64(np.sum((self.deltaD / self.std)**2.0, dtype=np.float64))
+        return PhiD if squared else np.sqrt(PhiD)
+
+
+    def __getitem__(self, i):
+        """ Define item getter for Data """
+        out = Data(np.size(i), nChannelsPerSystem=1, x=self.x[i], y=self.y[i], z=self.z[i], data=self._data[i, :], std=self._std[i, :], predictedData=self._predictedData[i, :], channelNames=self._channelNames)
+        return out
+
+
+    def getActiveChannels(self):
+        """Logical array whether the channel is active or not.
+
+        An inactive channel is one where channel values are NaN for all points.
+
+        Returns
+        -------
+        out : bools
+            Indices of non-NaN columns.
+
+        """
+        return np.where(np.sum(np.isnan(self._data), 0) != self.nPoints)[0]
+
+
+    def getDataChannel(self, channel, system=None):
+        """Gets the data in the specified channel
+        
+        Parameters
+        ----------
+        channel : int
+            Index of the channel to return
+            * If system is None, 0 <= channel < self.nChannels else 0 <= channel < self.nChannelsPerSystem[system]
+        system : int, optional
+            The system to obtain the channel from.
+
+        Returns
+        -------
+        out : geobipy.StatArray
+            The data channel
+            
+        """
+
+        if system is None:
+            return StatArray(self._data[:, channel], self._channelNames[channel], self._data.units)
+        else:
+            assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+            return StatArray(self._data[:, self._systemOffset[system] + channel], self._channelNames[self._systemOffset[system] + channel], self._data.units)
+
+
+    def getLine(self, line):
+        """ Get the data from the given line number """
+        i = np.where(self.line == line)[0]
+        return self[i]
+
+
+    def getPredictedDataChannel(self, channel, system=None):
+        """Gets the predicted data in the specified channel
+        
+        Parameters
+        ----------
+        channel : int
+            Index of the channel to return
+            * If system is None, 0 <= channel < self.nChannels else 0 <= channel < self.nChannelsPerSystem[system]
+        system : int, optional
+            The system to obtain the channel from.
+
+        Returns
+        -------
+        out : geobipy.StatArray
+            The predicted data channel
+            
+        """
+
+        if system is None:
+            return StatArray(self._predictedData[:, channel], "Predicted data {}".format(self._channelNames[channel]), self._predictedData.units)
+        else:
+            assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+            return StatArray(self._predictedData[:, self._systemOffset[system] + channel], "Predicted data {}".format(self._channelNames[self._systemOffset[system] + channel]), self._predictedData.units)
 
     
-    @property
-    def P(self):
-        """The predicted data"""
-        return self.set.P
+    def getStdChannel(self, channel, system=None):
+        """Gets the uncertainty in the specified channel
+        
+        Parameters
+        ----------
+        channel : int
+            Index of the channel to return
+            * If system is None, 0 <= channel < self.nChannels else 0 <= channel < self.nChannelsPerSystem[system]
+        system : int, optional
+            The system to obtain the channel from.
 
+        Returns
+        -------
+        out : geobipy.StatArray
+            The uncertainty channel
+            
+        """
 
-    @property
-    def Std(self):
-        """The standard deviation"""
-        return self.set.Std
-
+        if system is None:
+            return StatArray(self._std[:, channel], "Std {}".format(self._channelNames[channel]), self._std.units)
+        else:
+            assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+            return StatArray(self._std[:, self._systemOffset[system] + channel], "Std {}".format(self._channelNames[self._systemOffset[system] + channel]), self._std.units)
+        
 
     def maketest(self, nPoints, nChannels):
         """ Create a test example """
@@ -71,118 +333,226 @@ class Data(PointCloud3D):
         for i in range(nChannels):
             tmp = cf.rosenbrock(self.x, self.y, a, b)
             # Put the tmp array into the data column
-            self.D[:, i] = tmp[:]
+            self._data[:, i] = tmp[:]
             b *= 2.0
 
 
-    def read(self, fname, cols, nHeaders=0, nChannels=0):
+    def mapData(self, channel, system=None, *args, **kwargs):
+        """Interpolate the data channel between the x, y co-ordinates.
+        
+        Parameters
+        ----------
+        channel : int
+            Index of the channel to return
+            * If system is None, 0 <= channel < self.nChannels else 0 <= channel < self.nChannelsPerSystem[system]
+        system : int, optional
+            The system to obtain the channel from.
+
+        """
+
+        if system is None:
+            assert 0 <= channel < self.nChannels, ValueError('Requested channel must be 0 <= channel < {}'.format(self.nChannels))
+        else:
+            assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+            assert 0 <= channel < self.nChannelsPerSystem[system], ValueError('Requested channel must be 0 <= channel {}'.format(self.nChannelsPerSystem[system]))
+            channel = self._systemOffset[system] + channel
+
+        kwargs['c'] = self.getDataChannel(channel)
+
+        self.mapPlot(*args, **kwargs)
+
+        cP.title(self.channelNames[channel])
+
+    
+    def mapPredictedData(self, channel, system=None, *args, **kwargs):
+        """Interpolate the predicted data channel between the x, y co-ordinates.
+        
+        Parameters
+        ----------
+        channel : int
+            Index of the channel to return
+            * If system is None, 0 <= channel < self.nChannels else 0 <= channel < self.nChannelsPerSystem[system]
+        system : int, optional
+            The system to obtain the channel from.
+
+        """
+
+        if system is None:
+            assert 0 >= channel < self.nChannels, ValueError('Requested channel must be 0 <= channel < {}'.format(self.nChannels))
+        else:
+            assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+            assert 0 >= channel < self.nChannelsPerSystem[system], ValueError('Requested channel must be 0 <= channel {}'.format(self.nChannelsPerSystem[system]))
+            channel = self._systemOffset[system] + channel
+
+        kwargs['c'] = self.getPredictedDataChannel(channel)
+
+        self.mapPlot(*args, **kwargs)
+
+        cP.title(self.channelNames[channel])
+
+
+    def plot(self, xAxis='index', channels=None, system=None, **kwargs):
+        """Plots the specifed channels as a line plot.
+
+        Plots the channels along a specified co-ordinate e.g. 'x'. A legend is auto generated.
+        
+        Parameters
+        ----------
+        xAxis : str
+            If xAxis is 'index', returns numpy.arange(self.nPoints)
+            If xAxis is 'x', returns self.x
+            If xAxis is 'y', returns self.y
+            If xAxis is 'z', returns self.z
+            If xAxis is 'r2d', returns cumulative distance along the line in 2D using x and y.
+            If xAxis is 'r3d', returns cumulative distance along the line in 3D using x, y, and z.
+        channels : ints, optional
+            Indices of the channels to plot.  All are plotted if None
+            * If system is None, 0 <= channel < self.nChannels else 0 <= channel < self.nChannelsPerSystem[system]
+        system : int, optional
+            The system to obtain the channel from.
+        noLegend : bool
+            Do not attach a legend to the plot.  Default is False, a legend is attached.
+
+        Returns
+        -------
+        ax : matplotlib.axes
+            Plot axes handle
+        legend : matplotlib.legend.Legend
+            The attached legend.
+
+        See Also
+        --------
+        geobipy.customPlots.plot : For additional keyword arguments
+
+        """
+
+        noLegend = kwargs.pop('noLegend', False)
+
+        if system is None:
+            rTmp = range(self.nChannels) if channels is None else channels
+        else:
+            assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+            rTmp = self._systemOffset[system] + channels
+
+        ax = plt.gca()
+        
+        for i in rTmp:
+            super().plot(values=self.data[:, i], xAxis=xAxis, label=self.channelNames[i], **kwargs)
+    
+        legend = None
+        if not noLegend:
+            box = ax.get_position()
+            ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+
+            # Put a legend to the right of the current axis
+            legend = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5),fancybox=True)
+            legend.set_title(self._data.getNameUnits())
+
+        return ax, legend
+
+
+    def plotPredicted(self, xAxis='index', channels=None, system=None, **kwargs):
+        """Plots the specifed predicted data channels as a line plot.
+
+        Plots the channels along a specified co-ordinate e.g. 'x'. A legend is auto generated.
+        
+        Parameters
+        ----------
+        xAxis : str
+            If xAxis is 'index', returns numpy.arange(self.nPoints)
+            If xAxis is 'x', returns self.x
+            If xAxis is 'y', returns self.y
+            If xAxis is 'z', returns self.z
+            If xAxis is 'r2d', returns cumulative distance along the line in 2D using x and y.
+            If xAxis is 'r3d', returns cumulative distance along the line in 3D using x, y, and z.
+        channels : ints, optional
+            Indices of the channels to plot.  All are plotted if None
+            * If system is None, 0 <= channel < self.nChannels else 0 <= channel < self.nChannelsPerSystem[system]
+        system : int, optional
+            The system to obtain the channel from.
+        noLegend : bool
+            Do not attach a legend to the plot.  Default is False, a legend is attached.
+
+        Returns
+        -------
+        ax : matplotlib.axes
+            Plot axes handle
+        legend : matplotlib.legend.Legend
+            The attached legend.
+
+        See Also
+        --------
+        geobipy.customPlots.plot : For additional keyword arguments
+
+        """
+
+        noLegend = kwargs.pop('noLegend', False)
+
+        if system is None:
+            rTmp = range(self.nChannels) if channels is None else channels
+        else:
+            assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+            rTmp = self._systemOffset[system] + channels
+
+        ax = plt.gca()
+        
+        for i in rTmp:
+            super().plot(values=self._predictedData[:, i], xAxis=xAxis, label=self.channelNames[i], **kwargs)
+    
+        legend = None
+        if not noLegend:
+            box = ax.get_position()
+            ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+
+            # Put a legend to the right of the current axis
+            legend = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5),fancybox=True)
+            legend.set_title(self._predictedData.getNameUnits())
+
+        return ax, legend
+
+    
+    def read(self, fname, columnIndex, nHeaders=0, nChannels=0):
         """ Read the specified columns from an ascii file
         cols[0,1,2,...] should be the indices of the x,y,z co-ordinates """
-        nCols = len(cols)
+        nCols = len(columnIndex)
         #if any([cols < 0]): err.Emsg("Please specify the columns to read the first three indices should be xyz")
         # Get the number of points
         nLines = fIO.getNlines(fname, nHeaders)
+
+        # Get the names of the headers
+        names = fIO.getHeaderNames(fname, columnIndex)
+
         # Get the number of Data if none was specified
         if (nChannels == 0):
             nChannels = nCols - 3
         # Initialize the Data
-        Data.__init__(self, nLines, nChannels)
-        # Get the names of the headers
-        names = fIO.getHeaderNames(fname, cols)
-        self.x.name=names[0]
-        self.y.name=names[1]
-        self.z.name=names[2]
-        self.names=names[3:]
+        Data.__init__(self, nLines, nChannels, channelNames=names[3:])
+
+        self.x.name = names[0]
+        self.y.name = names[1]
+        self.z.name = names[2]
         # Read each line assign the values to the class
         with open(fname) as f:
             fIO.skipLines(f, nHeaders)  # Skip header lines
             for j, line in enumerate(f):  # For each line in the file
-                values = fIO.getRealNumbersfromLine(line, cols)  # grab the requested entries
+                values = fIO.getRealNumbersfromLine(line, columnIndex)  # grab the requested entries
                 # Assign values into object
                 self.x[j] = values[0]
                 self.y[j] = values[1]
                 self.z[j] = values[2]
-                self.D[j, ] = values[3:]
-
-
-    def getChannel(self, channel):
-        """ Gets the data in the specified channel """
-        assert channel >= 0 and channel < self.nChannels, 'Requested channel must be less than '+str(self.nChannels)
-
-        tmp = StatArray(self.D[:, channel], self.names[channel])
-
-        return tmp
-
-
-    def __getitem__(self, i):
-        """ Define item getter for Data """
-        tmp = Data(np.size(i), self.nChannels, self.D.units)
-        tmp.x[:] = self.x[i]
-        tmp.y[:] = self.y[i]
-        tmp.z[:] = self.z[i]
-        tmp.D[:, :] = self.D[i, :]
-        tmp.Std[:, :] = self.Std[i, :]
-        tmp.names[:] = self.names[i]
-        return tmp
-        
-
-    def getLine(self, line):
-        """ Get the data from the given line number """
-        i = np.where(self.line == line)[0]
-        return self[i]
+                self._data[j, ] = values[3:]
 
 
     def summary(self):
         """ Display a summary of the Data """
         PointCloud3D.summary(self)
-        print("Data:          :")
-        print("# of Channels: :" + str(self.nChannels))
-        print("# of Total Data:" + str(self.N * self.nChannels))
-        print("Channel Names:  ", self.names)
-        print('')
+        out = ("Data:          : \n"
+        "# of Channels: {} \n"
+        "# of Total Data: {} \n").format(self.nChannels, self.nPoints * self.nChannels)
+        print(out)
 
 
-    def plot(self, channels=None, *args, **kwargs):
-        """ Plots the specifed columns as a line plot, if cols is not given, all the columns are plotted """
-        x = kwargs.pop('x', None)
-        if (x is None):
-            x = StatArray(np.arange(0, len(self.D), 1), name="index")
-
-        ax = plt.gca()
-        if channels is None:
-            nCols = np.size(self.D, 1)
-            for i in range(nCols):
-                cP.plot(x, self.D[:,i],label=self.names[i],*args, **kwargs)
-        else:
-            for j, i in enumerate(channels):
-                cP.plot(x,self.D[:,i],label=self.names[i],*args, **kwargs)
-    
-        plt.title("Data")
-
-        box = ax.get_position()
-        ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
-
-        # Put a legend to the right of the current axis
-        leg=ax.legend(loc='center left', bbox_to_anchor=(1, 0.5),fancybox=True)
-        leg.set_title(self.D.getNameUnits())
-
-        plt.xlabel(cf.getNameUnits(x))
-
-
-
-    def mapChannel(self, channel, *args, **kwargs):
-        """ Create a map of the specified data channel """
-
-        assert channel >= 0 and channel < self.nChannels, ValueError('Requested channel must be less than '+str(self.nChannels))
-
-        kwargs['c'] = self.getChannel(channel)
-
-        self.mapPlot(*args, **kwargs)
-
-        cP.title(self.names[channel])
-
-
-    def updateErrors(self, relativeErr, additiveErr):
+    def updateErrors(self, relativeErr, additiveErr, system=None):
         """Updates the data errors
 
         Updates the standard deviation of the data errors using the following model
@@ -204,11 +574,54 @@ class Data(PointCloud3D):
             If any relative or additive errors are <= 0.0
         """    
 
+        relativeErr = np.atleast_1d(relativeErr)
+        additiveErr = np.atleast_1d(additiveErr)
         # For each system assign error levels using the user inputs
-        assert relativeErr > 0.0, ValueError("relativeErr must be > 0.0")
-        assert additiveErr > 0.0, ValueError("additiveErr must be > 0.0")
+        assert all(relativeErr > 0.0), ValueError("relativeErr must be > 0.0")
+        assert all(additiveErr > 0.0), ValueError("additiveErr must be > 0.0")
 
-        self.s[:] = np.sqrt((relativeErr * self.d)**2.0 + additiveErr**2.0)
+        if system is None:
+            if np.size(relativeErr) == 1:
+                self._std[:, :] = np.sqrt((relativeErr * self._data[:, :])**2.0 + additiveErr**2.0)
+            else:
+                assert np.size(relativeErr) == self.nSystems, ValueError("Size of relative error must equal nSystems {}".format(self.nSystems))
+                assert np.size(additiveErr) == self.nSystems, ValueError("Size of additive error must equal nSystems {}".format(self.nSystems))
+
+                for i in range(self.nSystems):
+                    iSys = self._systemIndices(system)
+                    self._std[:, iSys] = np.sqrt((relativeErr[i] * self._data[:, iSys])**2.0 + additiveErr[i]**2.0)
+
+        else:
+            assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+            iSys = self._systemIndices(system)
+
+            self._std[:, iSys] = np.sqrt((relativeErr * self._data[:, iSys])**2.0 + additiveErr**2.0)
+
+
+    def toVTK(self, fileName, prop=['data', 'predicted', 'std'], system=None, format='binary'):
+        """Save to a VTK file.
+
+        Parameters
+        ----------
+        fileName : str
+            Filename to save to.
+        prop : str or list of str, optional
+            List of the members to add to a VTK handle, either "data", "predicted", or "std".
+        # channels : ints, optional
+        #     Indices of the channels to plot.  All are plotted if None
+        #     * If system is None, 0 <= channel < self.nChannels else 0 <= channel < self.nChannelsPerSystem[system]
+        system : int, optional
+            The system to obtain the channel from.
+        format : str, optional
+            "ascii" or "binary" format. Ascii is readable, binary is not but results in smaller files.
+            
+        """
+
+        vtk = super().vtkStructure()
+
+        self.addToVTK(vtk, prop, system=system)
+        
+        vtk.tofile(fileName, format=format)
 
 
     def Bcast(self, world, root=0):
@@ -231,13 +644,14 @@ class Data(PointCloud3D):
         pc3d = None
         pc3d = PointCloud3D.Bcast(self, world, root=root)
         nChannels = myMPI.Bcast(self.nChannels, world, root=root)
-        this = Data(pc3d.N, nChannels)
+        this = Data(pc3d.nPoints, nChannels)
         this.x = pc3d.x
         this.y = pc3d.y
         this.z = pc3d.z
-        this.set = self.set.Bcast(world, root=root)
-        # this.D = self.D.Bcast(world, root=root)
-        # this.Std = self.Std.Bcast(world, root=root)
+
+        # this.set = self.set.Bcast(world, root=root)
+        this._data = self._data.Bcast(world, root=root)
+        this._std = self._std.Bcast(world, root=root)
         return this
 
 
@@ -263,11 +677,11 @@ class Data(PointCloud3D):
         """
         pc3d = None
         pc3d = PointCloud3D.Scatterv(self, starts, chunks, world, root=root)
-        nChannels = myMPI.Bcast(self.nChannels, world, root=root)
-        this = Data(pc3d.N, nChannels)
+        nChannelsPerSystem = myMPI.Bcast(self.nChannelsPerSystem, world, root=root)
+        this = Data(pc3d.nPoints, nChannelsPerSystem)
         this.x = pc3d.x
         this.y = pc3d.y
         this.z = pc3d.z
-        this.set = self.set.Scatterv(starts, chunks, world, root=root)
-
+        this._data = self._data.Scatterv(starts, chunks, world, root=root)
+        this._std = self._std.Scatterv(starts, chunks, world, root=root)
         return this

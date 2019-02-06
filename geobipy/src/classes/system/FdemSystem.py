@@ -15,26 +15,36 @@ from ...base.customFunctions import safeEval
 class FdemSystem(myObject):
     """ Defines a Frequency Domain ElectroMagnetic acquisition system """
 
-    def __init__(self, nFreq=0, system=None):
+    def __init__(self, nFrequencies=0, systemFilename=None):
         """ Initialize an FdemSystem """
+
+        if (not systemFilename is None):
+            assert (isinstance(systemFilename, str)), TypeError("systemFilename must a file to read the Fdem system information from")
+            self.read(systemFilename)
+
         # Number of Frequencies
-        self.nFreq = np.int64(nFreq)
+        self._nFrequencies = np.int64(nFrequencies)
         # StatArray of frequencies
-        self.freq = StatArray(self.nFreq, "Frequencies", "Hz")
+        self._frequencies = StatArray(self.nFrequencies, "Frequencies", "Hz")
         # StatArray of Transmitter loops
-        self.T = StatArray(self.nFreq, "Transmitter Loops", dtype=CircularLoop)
+        self.T = StatArray(self.nFrequencies, "Transmitter Loops", dtype=CircularLoop)
         # StatArray of Reciever loops
-        self.R = StatArray(self.nFreq, "Reciever Loops", dtype=CircularLoop)
+        self.R = StatArray(self.nFrequencies, "Reciever Loops", dtype=CircularLoop)
         # StatArray of Loop Separations
-        self.dist = StatArray(self.nFreq, "Loop Separations", "m")
+        self.dist = StatArray(self.nFrequencies, "Loop Separations", "m")
         # Instantiate the circularLoops
-        for i in range(self.nFreq):
+        for i in range(self.nFrequencies):
             self.T[i] = CircularLoop()
             self.R[i] = CircularLoop()
 
-        if (not system is None):
-            assert (isinstance(system, str)), TypeError("system must a file to read the Fdem system information from")
-            self.read(system)
+
+    @property
+    def frequencies(self):
+        return self._frequencies
+
+    @property
+    def  nFrequencies(self):
+        return self._nFrequencies
 
 
     def deepcopy(self):
@@ -42,10 +52,10 @@ class FdemSystem(myObject):
 
 
     def __deepcopy__(self, memo):
-        tmp = FdemSystem(nFreq = self.nFreq)
-        tmp.freq[:] = self.freq
+        tmp = FdemSystem(nFrequencies = self._nFrequencies)
+        tmp._frequencies[:] = self._frequencies
         tmp.dist[:] = self.dist
-        for i in range(self.nFreq):
+        for i in range(self._nFrequencies):
             tmp.T[i] = self.T[i].deepcopy()
             tmp.R[i] = self.R[i].deepcopy()
         return tmp
@@ -75,7 +85,7 @@ class FdemSystem(myObject):
                                    '\nFirst line of system file should contain\nfreq tor tmom  tx ty tzoff ror rmom  rx   ry rzoff')
             for j, line in enumerate(f):  # For each line in the file
                 line = fIO.parseString(line)
-                self.freq[j] = np.float64(line[0])
+                self._frequencies[j] = np.float64(line[0])
                 self.T[j] = CircularLoop(
                         line[1], np.int(
                         line[2]), np.int(
@@ -112,8 +122,8 @@ class FdemSystem(myObject):
     def getTensorID(self):
         """ For each coil orientation pair, adds the index of the frequency to the appropriate list
         e.g. two coils at the i$^{th}$ frequency with 'x' as their orientation cause i to be added to the 'xx' list."""
-        tid = np.zeros(self.nFreq, dtype=np.int32)
-        for i in range(self.nFreq):
+        tid = np.zeros(self._nFrequencies, dtype=np.int32)
+        for i in range(self._nFrequencies):
             if ((self.T[i].orient == 'x') and self.R[i].orient == 'x'):
                 tid[i] = 1
             if ((self.T[i].orient == 'x') and self.R[i].orient == 'y'):
@@ -138,7 +148,7 @@ class FdemSystem(myObject):
         """ For each coil orientation pair, adds the index of the frequency to the appropriate list
         e.g. two coils at the i$^{th}$ frequency with 'x' as their orientation cause i to be added to the 'xx' list."""
         xx, xy, xz, yx, yy, yz, zx, zy, zz = ([] for i in range(9))
-        for i in range(self.nFreq):
+        for i in range(self._nFrequencies):
             if ((self.T[i].orient == 'x') and self.R[i].orient == 'x'):
                 xx.append(i)
             if ((self.T[i].orient == 'x') and self.R[i].orient == 'y'):
@@ -162,7 +172,7 @@ class FdemSystem(myObject):
     def summary(self):
         """ print a summary of the FdemSystem """
         print("FdemSystem:")
-        self.freq.summary()
+        self._frequencies.summary()
         print('')
 
     def hdfName(self):
@@ -173,12 +183,12 @@ class FdemSystem(myObject):
         # Create a new group inside h5obj
         grp = h5obj.create_group(myName)
         grp.attrs["repr"] = self.hdfName()
-        grp.create_dataset('nFreq', data=self.nFreq)
-        self.freq.toHdf(grp, 'freq')
+        grp.create_dataset('nFreq', data=self._nFrequencies)
+        self._frequencies.toHdf(grp, 'freq')
         self.dist.toHdf(grp, 'dist')
         T = grp.create_group('T')
         R = grp.create_group('R')
-        for i in range(self.nFreq):
+        for i in range(self._nFrequencies):
             self.T[i].toHdf(T, 'T' + str(i))
             self.R[i].toHdf(R, 'R' + str(i))
 
@@ -188,7 +198,7 @@ class FdemSystem(myObject):
         tmp = FdemSystem(nFreq)
         item = grp.get('freq')
         obj = eval(safeEval(item.attrs.get('repr')))
-        tmp.freq = obj.fromHdf(item)
+        tmp._frequencies = obj.fromHdf(item)
         item = grp.get('dist')
         obj = eval(safeEval(item.attrs.get('repr')))
         tmp.dist = obj.fromHdf(item)
@@ -202,14 +212,14 @@ class FdemSystem(myObject):
     def Bcast(self, world, root=0):
         """ Broadcast the FdemSystem using MPI """
 #      print(world.rank," FdemSystem.Bcast")
-        nFreq = myMPI.Bcast(self.nFreq, world, root=root)
+        nFreq = myMPI.Bcast(self._nFrequencies, world, root=root)
         if (world.rank > 0):
             self = FdemSystem(nFreq)
         this = FdemSystem(nFreq)
-        this.freq = self.freq.Bcast(world, root=root)
+        this._frequencies = self._frequencies.Bcast(world, root=root)
         this.dist = self.dist.Bcast(world, root=root)
 #      print(world.rank," Size of T",np.size(self.T))
-        for i in range(self.nFreq):
+        for i in range(self._nFrequencies):
             #        print("i: ",i)
             this.T[i] = self.T[i].Bcast(world, root=root)
             this.R[i] = self.R[i].Bcast(world, root=root)
