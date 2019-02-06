@@ -1175,8 +1175,7 @@ class StatArray(np.ndarray, myObject):
         >>> f.close()
 
         """
-        
-        writeNumpy(self,h5obj,myName+'/data',index=index)
+        writeNumpy(self, h5obj, myName+'/data', index=index)
 #        try:
 #            self.prior.writeHdf(h5obj,myName+'/prior',create=False)
 #        except:
