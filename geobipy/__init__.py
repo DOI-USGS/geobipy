@@ -42,8 +42,10 @@ from .src.classes.system.MTSystem import MTSystem
 # Meshes
 from .src.classes.mesh.RectilinearMesh1D import RectilinearMesh1D
 from .src.classes.mesh.RectilinearMesh2D import RectilinearMesh2D
+from .src.classes.mesh.TopoRectilinearMesh2D import TopoRectilinearMesh2D
 # Models
 from .src.classes.model.Model1D import Model1D
+from .src.classes.model.AarhusModel import AarhusModel
 # Pointclouds
 from .src.classes.pointcloud.PointCloud3D import PointCloud3D
 # Statistics
@@ -312,7 +314,14 @@ def singleCore(inputFile, outputDir):
     # Initialize the inversion to obtain the sizes of everything
     [paras, Mod, D, prior, posterior, PhiD] = Initialize(paras, DataPoint, prng=prng)
     # Create the results template
-    Res = Results(paras.save, paras.plot, paras.savePNG, paras, D, Mod)
+    Res = Results(paras.save, paras.plot, paras.savePNG, D, Mod,
+                  nMarkovChains = paras.nMC,
+                  plotEvery = paras.iPlot,
+                  parameterDisplayLimits = paras.dispLimits,
+                  reciprocateParameters = paras.invertPar,
+                  priMu = paras.priMu,
+                  priStd = paras.priStd,
+                  verbose=paras.verbose)
 
  
     # Get the line numbers in the data
@@ -328,7 +337,7 @@ def singleCore(inputFile, outputDir):
         LR[i].createHdf(H5Files[i], AllData.id[j], Res)
 
 
-    for i in range(AllData.N):
+    for i in range(AllData.nPoints):
         DataPoint = AllData.getDataPoint(i)
         paras = UP.userParameters(DataPoint)
 
