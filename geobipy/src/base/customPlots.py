@@ -8,10 +8,9 @@ from matplotlib.patches import Circle
 from matplotlib.collections import PatchCollection
 import numpy as np
 import numpy.ma as ma
+from .fileIO import deleteFile
 from ..base import Error as Err
-from ..base.customFunctions import getName, getUnits, getNameUnits
-from ..base.customFunctions import histogramEqualize
-from ..base.customFunctions import _logSomething
+from ..base.customFunctions import (getName, getUnits, getNameUnits, histogramEqualize, _logSomething, findFirstLastNonZeros)
 from cycler import cycler
 import scipy as sp
 
@@ -86,30 +85,31 @@ armytage = [
 # Generate default properties for GeoBIPy
 #==============================================
 
-label_size = 16
+label_size = 12
 
 try:
     mpl.axes.rcParams['ytick.labelsize'] = label_size
 except:
     assert not Err.isIpython(), 'Please use %matplotlib inline for ipython notebook on the very first line'
 
-myFonts = {'fontsize': 16}
-#mpl.rcParams['title.labelsize'] = 16
+myFonts = {'fontsize': 12}
+# mpl.rcParams['title.labelsize'] = 14
 #mpl.rcParams['xtick.labelsize'] = label_size
 #mpl.rcParams['ytick.labelsize'] = label_size
 mpl.rc('axes', labelsize=label_size)
 mpl.rc('xtick', labelsize=label_size)
 mpl.rc('ytick', labelsize=label_size)
-mpl.rc('axes', labelsize='small')
+# mpl.rc('axes', labelsize='small')
 
-mpl.rc('lines',    linewidth=2,    markersize=10,    markeredgewidth=2,    color=wellSeparated[0])
+mpl.rc('lines', linewidth=2, markersize=5, markeredgewidth=2, color=wellSeparated[0])
 mpl.rcParams['boxplot.flierprops.markerfacecolor'] = wellSeparated[0]
 mpl.rcParams['grid.alpha'] = 0.1
 mpl.rcParams['axes.prop_cycle'] = cycler('color', wellSeparated)
 mpl.rcParams['image.cmap'] = 'viridis'
-plt.rcParams['figure.facecolor']='white'
-plt.rcParams['axes.facecolor']='white'
-plt.rcParams['savefig.facecolor']='white'
+plt.rcParams['figure.facecolor'] = 'white'
+mpl.rcParams['figure.titlesize'] = 'small'
+plt.rcParams['axes.facecolor'] = 'white'
+plt.rcParams['savefig.facecolor'] = 'white'
 #plt.rcParams.update({'figure.autolayout': True})
 
 def pretty(ax):
@@ -234,7 +234,7 @@ def bar(values, x=None, i=None, **kwargs):
     return ax
 
 
-def hist(values, *args, bins='auto', **kwargs):
+def hist(counts, bins, rotate=False, flipX=False, flipY=False, trim=True, normalize=False, **kwargs):
     """Plot a histogram.
 
     Plot of histogram of values, if density is 1, a normal is fit to the values.
@@ -242,30 +242,10 @@ def hist(values, *args, bins='auto', **kwargs):
 
     Parameters
     ----------
-    values : array_like or StatArray
+    counts : array_like or StatArray
         Compute the histogram of these values
-    bins : integer or sequence or 'auto', optional
-        If an integer is given, ``bins + 1`` bin edges are calculated and
-        returned, consistent with :func:`numpy.histogram`.
-
-        If `bins` is a sequence, gives bin edges, including left edge of
-        first bin and right edge of last bin.  In this case, `bins` is
-        returned unmodified.
-
-        All but the last (righthand-most) bin is half-open.  In other
-        words, if `bins` is::
-
-            [1, 2, 3, 4]
-
-        then the first bin is ``[1, 2)`` (including 1, but excluding 2) and
-        the second ``[2, 3)``.  The last bin, however, is ``[3, 4]``, which
-        *includes* 4.
-
-        Unequally spaced bins are supported if *bins* is a sequence.
-
-        If Numpy 1.11 is installed, may also be ``'auto'``.
-
-        Default is taken from the rcParam ``hist.bins``.
+    bins : array_like or StatArray
+        Bins of the histogram
 
     Other Parameters
     ----------------
@@ -287,48 +267,93 @@ def hist(values, *args, bins='auto', **kwargs):
         matplotlib.pyplot.hist : For additional keyword arguments you may use.
 
     """
-    xscale = kwargs.pop('xscale','linear')
-    yscale = kwargs.pop('yscale','linear')
 
-    log = kwargs.pop('log',False)
+    c = kwargs.pop('color', wellSeparated[0])
+    lw = kwargs.pop('linewidth', 0.5)
+    ec = kwargs.pop('edgecolor', 'k')
 
-    tmp = values.flatten()
-    logLabel = ''
-    if (log):
-        tmp, logLabel = _logSomething(tmp,log)
-
-    # Mean of the data
-    mu = np.nanmean(tmp)
-    # STD of the data
-    sigma = np.nanstd(tmp)
     ax = plt.gca()
     pretty(ax)
 
-    range = kwargs.pop('range', (np.nanmin(tmp), np.nanmax(tmp)))
-    ec = kwargs.pop('edgecolor', 'k')
-    c = kwargs.pop('color', wellSeparated[0])
+    if normalize:
+        cnts = counts / np.trapz(counts, x = bins)
+    else:
+        cnts = counts
 
+    width = np.abs(np.diff(bins))
+    centres = bins[:-1] + 0.5 * (np.diff(bins))
 
-    # the histogram of the data
-    [n, bins, patches] = plt.hist(tmp, *args, range=range, edgecolor=ec,  **kwargs)
+    if (rotate):
+        plt.barh(centres, cnts, height=width, align='center', color = c, linewidth = lw, edgecolor = ec, **kwargs)
+        ylabel(centres.getNameUnits())
+        xlabel('Frequency')
+    else:
+        plt.bar(centres, cnts, width=width, align='center', color = c, linewidth = lw, edgecolor = ec, **kwargs)
+        xlabel(centres.getNameUnits())
+        ylabel('Frequency')
 
-    ylabel('Frequency')
-    if ('density' in kwargs):
-        kwargs.pop('density')
-        # add a 'best fit' line
-        y = sp.stats.norm.pdf(bins, mu, sigma)
-        plt.plot(bins, y, 'k--', **kwargs)
-        ylabel('Density')
-    
-    plt.margins(0.1, 0.1)
-    xlabel(logLabel + getNameUnits(values))
+    if all(counts == 0):
+        trim = False
+    i0 = 0
+    i1 = np.size(centres) - 1
+    if (trim):
+        while counts[i0] == 0:
+            i0 += 1
+        while counts[i1] == 0:
+            i1 -= 1
+    if (i1 > i0):
+        if (rotate):
+            plt.ylim(bins[i0], bins[i1+1])
+        else:
+            plt.xlim(bins[i0], bins[i1+1])
 
-    title('Histogram: $\mu=$' + str(mu) + ', $\sigma=$' + str(sigma))
-    plt.xscale(xscale)
-    plt.yscale(yscale)
-    plt.tight_layout()
+    if flipX:
+        ax.invert_xaxis()
+        # ax.set_xlim(ax.get_xlim()[::-1])
+
+    if flipY:
+        ax.invert_yaxis()
+        # ax.set_ylim(ax.get_ylim()[::-1])
 
     return ax
+
+
+    def plotGrid(self, **kwargs):
+        """Plot a set of lines contained in a line collection. """
+
+        xscale = kwargs.pop('xscale','linear')
+        yscale = kwargs.pop('yscale','linear')
+        flipX = kwargs.pop('flipX',False)
+        flipY = kwargs.pop('flipY',False)
+        c = kwargs.pop('color', 'k')
+
+        ax = plt.gca()
+        cP.pretty(ax)
+        ax.vlines(x = self.x.cellEdges, ymin=self._zMesh[0, :], ymax=self._zMesh[-1, :], **kwargs)
+        segs = np.zeros([self.y.nEdges, self.x.nEdges, 2])
+        segs[:, :, 0] = np.repeat(self.x.cellEdges[np.newaxis, :], self.y.nEdges, 0)
+        segs[:, :, 1] = np.repeat(self.y.cellEdges[:, np.newaxis], self.x.nEdges, 1) + self.z.cellEdges
+
+        ls = LineCollection(segs, color='k', linestyle='solid', **kwargs)
+        ax.add_collection(ls)
+
+        ax.set_xlim(self.x.displayLimits)
+        dz = 0.02 * np.abs(self._zMesh.max() - self._zMesh.min())
+        ax.set_ylim(self._zMesh.min() - dz, self._zMesh.max() + dz)
+
+
+        plt.xscale(xscale)
+        plt.yscale(yscale)
+        cP.xlabel(self.x._cellCentres.getNameUnits())
+        cP.ylabel(self.y._cellCentres.getNameUnits())
+        
+        if flipX:
+            ax.invert_xaxis()
+            # ax.set_xlim(ax.get_xlim()[::-1])
+
+        if flipY:
+            ax.invert_yaxis()
+            # ax.set_ylim(ax.get_ylim()[::-1])
 
 
 def pcolor(values, x=None, y=None, **kwargs):
@@ -349,6 +374,9 @@ def pcolor(values, x=None, y=None, **kwargs):
 
     Other Parameters
     ----------------
+    alpha : scalar or array_like, optional
+        If alpha is scalar, behaves like standard matplotlib alpha and opacity is applied to entire plot
+        If array_like, each pixel is given an individual alpha value.
     log : 'e' or float, optional
         Take the log of the colour to a base. 'e' if log = 'e', and a number e.g. log = 10.
         Values in c that are <= 0 are masked.
@@ -367,7 +395,96 @@ def pcolor(values, x=None, y=None, **kwargs):
     grid : bool, optional
         Plot the grid
     noColorbar : bool, optional
-        Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.        
+        Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.   
+        trim : bool, optional
+        Set the x and y limits to the first and last non zero values along each axis. 
+    trim : bool, optional
+        Set the x and y limits to the first and last non zero values along each axis.
+
+    Returns
+    -------
+    ax
+        matplotlib .Axes
+
+    See Also
+    --------
+    matplotlib.pyplot.pcolormesh : For additional keyword arguments you may use.
+
+    """
+
+    # Set the grid colour if specified.
+
+
+    if (x is None):
+        mx = np.arange(np.size(values,1)+1)
+    else:
+        mx = np.asarray(x)
+        if (x.size == values.shape[1]):
+            mx = x.edges()
+        else:
+            assert x.size == values.shape[1]+1, ValueError('x must be size {}. Not {}'.format(values.shape[1]+1, x.size))
+            
+    if (y is None):
+        my = np.arange(np.size(values,0)+1)
+    else:
+        my = np.asarray(y)
+        if (y.size == values.shape[0]):
+            my = y.edges()
+        else:
+            assert y.size == values.shape[0]+1, ValueError('y must be size {}. Not {}'.format(values.shape[0]+1, y.size))
+
+    X, Y = np.meshgrid(mx, my)
+
+    ax = pcolormesh(X, Y, values, **kwargs)
+
+    xlabel(getNameUnits(x))
+    ylabel(getNameUnits(y))
+
+    return ax
+
+
+def pcolormesh(X, Y, values, **kwargs):
+    """Create a pseudocolour plot of a 2D array, Actually uses pcolormesh for speed.
+
+    Create a colour plot of a 2D array.
+    If the arrays x, y, and values are geobipy.StatArray classes, the axes can be automatically labelled.
+    Can take any other matplotlib arguments and keyword arguments e.g. cmap etc.
+
+    Parameters
+    ----------
+    values : array_like or StatArray
+        A 2D array of colour values.
+    X : 1D array_like or StatArray, optional
+        Horizontal coordinates of the values edges.
+    Y : 1D array_like or StatArray, optional
+        Vertical coordinates of the values edges.
+
+    Other Parameters
+    ----------------
+    alpha : scalar or array_like, optional
+        If alpha is scalar, behaves like standard matplotlib alpha and opacity is applied to entire plot
+        If array_like, each pixel is given an individual alpha value.
+    log : 'e' or float, optional
+        Take the log of the colour to a base. 'e' if log = 'e', and a number e.g. log = 10.
+        Values in c that are <= 0 are masked.
+    equalize : bool, optional
+        Equalize the histogram of the colourmap so that all colours have an equal amount.
+    nbins : int, optional
+        Number of bins to use for histogram equalization.
+    xscale : str, optional
+        Scale the x axis? e.g. xscale = 'linear' or 'log'
+    yscale : str, optional
+        Scale the y axis? e.g. yscale = 'linear' or 'log'.
+    flipX : bool, optional
+        Flip the X axis
+    flipY : bool, optional
+        Flip the Y axis
+    grid : bool, optional
+        Plot the grid
+    noColorbar : bool, optional
+        Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
+    trim : bool, optional
+        Set the x and y limits to the first and last non zero values along each axis.
 
     Returns
     -------
@@ -382,67 +499,57 @@ def pcolor(values, x=None, y=None, **kwargs):
 
     assert np.ndim(values) == 2, ValueError('Number of dimensions must be 2')
 
-    equalize = kwargs.pop('equalize',False)
+    ax = plt.gca()
+    pretty(ax)
 
-    log = kwargs.pop('log',False)
+    equalize = kwargs.pop('equalize', False)
 
-    xscale = kwargs.pop('xscale','linear')
-    yscale = kwargs.pop('yscale','linear')
-    flipX = kwargs.pop('flipX',False)
-    flipY = kwargs.pop('flipY',False)
+    log = kwargs.pop('log', False)
+
+    xscale = kwargs.pop('xscale', 'linear')
+    yscale = kwargs.pop('yscale', 'linear')
+    flipX = kwargs.pop('flipX', False)
+    flipY = kwargs.pop('flipY', False)
     
     cl = kwargs.pop('clabel', None)
     grid = kwargs.pop('grid', False)
 
     noColorBar = kwargs.pop('noColorbar', False)
+    trim = kwargs.pop('trim', False)
 
-    # Set the grid colour if specified
-    c = None
+    alpha = kwargs.pop('alpha', 1.0)
+
+    if 'edgecolor' in kwargs:
+        grid = True
     if grid:
-        c = kwargs.pop('color', 'k')
+        kwargs['edgecolor'] = kwargs.pop('edgecolor', 'k')
+        kwargs['linewidth'] = kwargs.pop('linewidth', 2)
 
-    ax = plt.gca()
-    pretty(ax)
-
-    if (x is None):
-        mx = np.arange(np.size(values,1)+1)
-    else:
-        mx = mx = np.asarray(x)
-        if (x.size == values.shape[1]):
-            mx = x.edges()
-        else:
-            assert x.size == values.shape[1]+1, ValueError('x must be size '+str(values.shape[1]+1)+'. Not '+str(x.size))
-            
-    if (y is None):
-        my = np.arange(np.size(values,0)+1)
-    else:
-        my = np.asarray(y)
-        if (y.size == values.shape[0]):
-            my = y.edges()
-        else:
-            assert y.size == values.shape[0]+1, ValueError('y must be size '+str(values.shape[0]+1)+'. Not '+str(y.size))
-
-    v = ma.masked_invalid(np.atleast_2d(np.asarray(values)))
+    values = ma.masked_invalid(values)
 
     if (log):
-        v,logLabel=_logSomething(v,log)
+        values, logLabel = _logSomething(values, log)
 
     if equalize:
-        nBins = kwargs.pop('nbins',256)
+        nBins = kwargs.pop('nbins', 256)
         assert nBins > 0, ValueError('nBins must be greater than zero')
-        v,dummy = histogramEqualize(v, nBins=nBins)
+        values, dummy = histogramEqualize(values, nBins=nBins)
 
-    Zm = ma.masked_invalid(v, copy=False)
+    Zm = ma.masked_invalid(values, copy=False)
 
-    X,Y = np.meshgrid(mx, my)
-
-    pm=plt.pcolormesh(X,Y,Zm, **kwargs)
+    if np.size(alpha) == 1:
+        pm = ax.pcolormesh(X, Y, Zm, alpha = alpha, **kwargs)
+    else:
+        pm = ax.pcolormesh(X, Y, Zm, **kwargs)
 
     plt.xscale(xscale)
     plt.yscale(yscale)
-    xlabel(getNameUnits(x))
-    ylabel(getNameUnits(y))
-    
+
+    if trim:
+        bounds = findFirstLastNonZeros(Zm)
+        ax.set_xlim(X[0, bounds[1, 0]], X[0, bounds[1, 1]])
+        ax.set_ylim(Y[bounds[0, 0], 0], Y[bounds[0, 1], 0])
+
     if (not noColorBar):
         if (equalize):
             cbar = plt.colorbar(pm,extend='both')
@@ -457,28 +564,24 @@ def pcolor(values, x=None, y=None, **kwargs):
         else:
             clabel(cbar, cl)
 
+    if grid:
+        xlim = ax.get_xlim()
+        dz = 0.02 * np.abs(xlim[1] - xlim[0])
+        ax.set_xlim(xlim[0] - dz, xlim[1] + dz)
+        ylim = ax.get_ylim()
+        dz = 0.02 * np.abs(ylim[1] - ylim[0])
+        ax.set_ylim(ylim[0] - dz, ylim[1] + dz)
+
     if flipX:
-        ax.set_xlim(ax.get_xlim()[::-1])
+        ax.invert_xaxis()
+        # ax.set_xlim(ax.get_xlim()[::-1])
 
     if flipY:
-        ax.set_ylim(ax.get_ylim()[::-1])
+        ax.invert_yaxis()
+        # ax.set_ylim(ax.get_ylim()[::-1])
 
-    if grid:
-        ax.minorticks_on()
-        for i, xmin in enumerate(ax.xaxis.get_majorticklocs()):
-            if (xmin == np.round(xmin) and xmin > mx[0] and xmin < mx[-1]):
-                ax.axvline(x=xmin, c='k', **kwargs)
-        for i, xmin in enumerate(ax.xaxis.get_minorticklocs()):
-            if (xmin == np.round(xmin) and xmin > mx[0] and xmin < mx[-1]):
-                ax.axvline(x=xmin, c='k', **kwargs)
-
-        for i, ymin in enumerate(ax.yaxis.get_majorticklocs()):
-            if (ymin == np.round(ymin) and ymin > my[0] and ymin < my[-1]):
-                ax.axhline(y=ymin, c='k', **kwargs)
-        for i, ymin in enumerate(ax.yaxis.get_minorticklocs()):
-            if (ymin == np.round(ymin) and ymin > my[0] and ymin < my[-1]):
-                ax.axhline(y=ymin, c='k', **kwargs)
-
+    if np.size(alpha) > 1:
+        setAlphaPerPcolormeshPixel(pm, alpha)
 
     return ax
 
@@ -534,18 +637,22 @@ def pcolor_1D(values, y=None, **kwargs):
 
 #    assert np.ndim(values) == 2, ValueError('Number of dimensions must be 2')
 
-    equalize = kwargs.pop('equalize',False)
+    equalize = kwargs.pop('equalize', False)
 
-    log = kwargs.pop('log',False)
-    xscale = kwargs.pop('xscale','linear')
-    yscale = kwargs.pop('yscale','linear')
+    log = kwargs.pop('log', False)
+    xscale = kwargs.pop('xscale', 'linear')
+    yscale = kwargs.pop('yscale', 'linear')
     
     cl = kwargs.pop('clabel', None)
     grid = kwargs.pop('grid', False)
 
     flipY = kwargs.pop('flipY', False)
 
-    noColorBar = kwargs.pop('noColorBar', False)
+    noColorBar = kwargs.pop('noColorbar', False)
+
+    alpha = kwargs.pop('alpha', 1.0)
+
+    width = kwargs.pop('width', None)
 
 
     # Set the grid colour if specified
@@ -554,7 +661,7 @@ def pcolor_1D(values, y=None, **kwargs):
         c = kwargs.pop('color', 'k')
 
     # Get the figure axis
-    ax = plt.gca(); plt.cla()
+    ax = plt.gca()
     pretty(ax)
 
     # Set the x and y axes before meshgridding them
@@ -567,10 +674,13 @@ def pcolor_1D(values, y=None, **kwargs):
         my = y
         mx = np.asarray([0.0, 0.1*(np.nanmax(y)-np.nanmin(y))])
 
+    if not width is None:
+        assert width > 0.0, ValueError("width must be positive")
+        mx[1] = width
+
     v = ma.masked_invalid(values)
     if (log):
         v,logLabel=_logSomething(v,log)
-
 
     # Append with null values to correctly use pcolormesh
     v = np.concatenate([np.atleast_2d(np.hstack([np.asarray(v),0])), np.atleast_2d(np.zeros(v.size+1))], axis=0)
@@ -584,11 +694,11 @@ def pcolor_1D(values, y=None, **kwargs):
 
     Y, X = np.meshgrid(my, mx)
 
-    pm = plt.pcolormesh(X, Y, v, color=c, **kwargs)
+    pm = ax.pcolormesh(X, Y, v, color=c, **kwargs)
 
     ax.set_aspect('equal')
 
-    if (not flipY):
+    if flipY:
         ax.invert_yaxis()
 
     plt.yscale(yscale)
@@ -609,6 +719,9 @@ def pcolor_1D(values, y=None, **kwargs):
         else:
             clabel(cbar, cl)
     
+    if np.size(alpha) > 1:
+        setAlphaPerPcolormeshPixel(pm, alpha)
+
     return ax
 
 
@@ -643,7 +756,7 @@ def plot(x, y, **kwargs):
     Returns
     -------
     ax
-        matplotlib .Axes
+        matplotlib.Axes
 
     See Also
     --------
@@ -686,10 +799,10 @@ def plot(x, y, **kwargs):
     plt.margins(0.1, 0.1)
 
     if flipX:
-        ax.set_xlim(ax.get_xlim()[::-1])
+        ax.invert_xaxis()
 
     if flipY:
-        ax.set_ylim(ax.get_ylim()[::-1])
+        ax.invert_yaxis()
 
     return ax
 
@@ -752,7 +865,6 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
     xscale = kwargs.pop('xscale','linear')
     yscale = kwargs.pop('yscale','linear')
     sl = kwargs.pop('sizeLegend', None)
-    it = kwargs.pop('intervals', None)
     noColorBar = kwargs.pop('noColorBar', False)
     
     kwargs.pop('color',None) # Remove color which could conflict with c
@@ -819,6 +931,25 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
     plt.margins(0.1,0.1)
     plt.grid(True)
     return ax
+
+
+def setAlphaPerPcolormeshPixel(pcmesh, alphaArray):
+    """Set the opacity of each pixel in a pcolormesh
+
+    Parameters
+    ----------
+    pcmesh : matplotlib.collections.QuadMesh
+        pcolormesh object
+    alphaArray : array_like
+        Values per pixel each between 0 and 1.
+
+    """    
+    plt.savefig('tmp.png')
+    for i, j in zip(pcmesh.get_facecolors(), alphaArray.flatten()):
+        if i[3] > 0.0:
+            i[3] = j  # Set the alpha value of the RGBA tuple using a
+
+    return pcmesh
 
 
 def sizeLegend(values, intervals=None, **kwargs):
@@ -900,3 +1031,79 @@ def stackplot2D(x, y, labels=[], colors=tatarize, **kwargs):
     plt.margins(0.1, 0.1)
 
     return ax
+
+
+def step(x, y, **kwargs):
+    """Plots y against x as a piecewise constant (step like) function.
+
+    Parameters
+    ----------
+    x : array_like
+
+    y : array_like
+
+    flipY : bool, optional
+        Flip the y axis
+    xscale : str, optional
+        Scale the x axis? e.g. xscale = 'linear' or 'log'
+    yscale : str, optional
+        Scale the y axis? e.g. yscale = 'linear' or 'log'
+    flipX : bool, optional
+        Flip the X axis
+    flipY : bool, optional
+        Flip the Y axis
+    noLabels : bool, optional
+        Do not plot the labels
+
+    """
+    # Must create a new parameter, so that the last layer is plotted
+    ax = plt.gca()
+    pretty(ax)
+
+    
+    flipX = kwargs.pop('flipX', False)
+    flipY = kwargs.pop('flipY', False)
+    noLabels = kwargs.pop('noLabels', False)
+    xscale = kwargs.pop('xscale', 'linear')
+    yscale = kwargs.pop('yscale', 'linear')
+
+    kwargs['color'] = kwargs.pop('color', wellSeparated[3])
+
+    plt.step(x=x, y=y, **kwargs)
+
+    if (flipX):
+        ax.invert_xaxis()
+        # ax.set_xlim(ax.get_xlim()[::-1])
+
+    if (flipY):
+        ax.invert_yaxis()
+        # ax.set_ylim(ax.get_ylim()[::-1])
+
+    if (not noLabels):
+        xlabel(getNameUnits(x))
+        ylabel(getNameUnits(y))
+
+    plt.xscale(xscale)
+    plt.yscale(yscale)
+
+
+def pause(interval):
+    """Custom pause command to override matplotlib.pyplot.pause 
+    which keeps the figure on top of all others when using interactve mode.
+
+    Parameters
+    ----------
+    interval : float
+        Pause for *interval* seconds.
+
+    """
+    
+    backend = plt.rcParams['backend']
+    if backend in mpl.rcsetup.interactive_bk:
+        figManager = mpl._pylab_helpers.Gcf.get_active()
+        if figManager is not None:
+            canvas = figManager.canvas
+            if canvas.figure.stale:
+                canvas.draw()
+            canvas.start_event_loop(interval)
+            return
