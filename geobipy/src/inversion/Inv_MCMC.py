@@ -28,7 +28,15 @@ def Inv_MCMC(paras, D, ID, prng, LineResults=None, rank=1):
     # Initialize the MCMC parameters and perform the initial iteration
     [paras, Mod, D, prior, posterior, PhiD] = Initialize(paras, D, prng=prng)
 
-    Res = Results(paras.save, paras.plot, paras.savePNG, paras, D, Mod, ID=ID, verbose=paras.verbose)
+    Res = Results(paras.save, paras.plot, paras.savePNG, D, Mod,
+                  ID = ID,
+                  nMarkovChains = paras.nMC,
+                  plotEvery = paras.iPlot,
+                  parameterDisplayLimits = paras.dispLimits,
+                  reciprocateParameters = paras.invertPar,
+                  priMu = paras.priMu,
+                  priStd = paras.priStd,
+                  verbose=paras.verbose)
 
     # Set the saved best models and data
     bestModel = Mod  # .deepcopy()
@@ -51,7 +59,7 @@ def Inv_MCMC(paras, D, ID, prng, LineResults=None, rank=1):
 
         # Determine if we are burning in
         if (not Res.burnedIn):
-            if (PhiD <= multiplier * np.size(D.d)):
+            if (PhiD <= multiplier * D.data.size):
                 Res.burnedIn = True  # Let the results know they are burned in
                 Res.iBurn = i         # Save the burn in iteration to the results
 
@@ -107,7 +115,7 @@ def Initialize(paras, D, prng):
     # Set the distribution of the data misfit
     # Incoming standard deviations may be zero. The variance of the prior is updated
     # later with D.updateErrors.
-    D.p.setPrior('MvNormalLog', D.d[D.iActive], D.s[D.iActive]**2.0, prng=prng)
+    D._predictedData.setPrior('MvNormalLog', D._data[D.iActive], D._std[D.iActive]**2.0, prng=prng)
 
     # Set the prior on the elevation height
     D.z.setPrior('UniformLog', np.float64(D.z) - paras.zRange, np.float64(D.z) + paras.zRange)
@@ -129,7 +137,7 @@ def Initialize(paras, D, prng):
     D.updateErrors(paras.relErr, paras.addErr)
 
     # Save a copy of the original errors
-    paras.Err = D.s.deepcopy()
+    paras.Err = D._std.deepcopy()
     # Set the proposal distribution for the relative errors
     D.relErr.setProposal('MvNormal', D.relErr, (paras.propRerr), prng=prng)
     # Set the proposal distribution for the relative errors
@@ -250,7 +258,7 @@ def AcceptReject(paras,Mod,D,prior,posterior,PhiD,Res, prng):# ,oF, oD, oRel, oA
     # objective function
     if (paras.stochasticNewton):
         # Compute the gradient
-        gradient = np.dot(J.T, D.p[D.iActive] - D.d[D.iActive]) + \
+        gradient = np.dot(J.T, D.deltaD[D.iActive]) + \
             ((paras.priStd**-1.0) * (np.log(Mod1.par) - paras.priMu))
 
         scaling = paras.covScaling * \
@@ -318,7 +326,7 @@ def AcceptReject(paras,Mod,D,prior,posterior,PhiD,Res, prng):# ,oF, oD, oRel, oA
 
         J = D1.scaleJ(D1.J, power=2.0)
         # Compute the gradient "uphill" back towards the previous model
-        gradient = np.dot(J.T, D1.p[D1.iActive] - D1.d[D1.iActive]) + \
+        gradient = np.dot(J.T, D1.deltaD[D1.iActive]) + \
             paras.priStd**-1.0 * (np.log(Mod1.par) - paras.priMu)
 
         # Compute the Model perturbation
