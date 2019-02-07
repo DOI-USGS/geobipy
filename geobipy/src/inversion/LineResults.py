@@ -11,6 +11,8 @@ from ..classes.statistics.Distribution import Distribution
 from ..classes.statistics.Histogram1D import Histogram1D
 from ..classes.statistics.Histogram2D import Histogram2D
 from ..classes.statistics.Hitmap2D import Hitmap2D
+from ..classes.mesh.RectilinearMesh1D import RectilinearMesh1D
+from ..classes.mesh.TopoRectilinearMesh2D import TopoRectilinearMesh2D
 from ..base.HDF import hdfRead
 from ..base import customPlots as cP
 import matplotlib.pyplot as plt
@@ -25,7 +27,7 @@ except:
 
 class LineResults(myObject):
     """ Class to define results from EMinv1D_MCMC for a line of data """
-    def __init__(self, fName=None, sysPath=None, hdfFile=None, plotAgainst='easting'):
+    def __init__(self, fName=None, sysPath=None, hdfFile=None):
         """ Initialize the lineResults """
         if (fName is None): return
 
@@ -45,20 +47,16 @@ class LineResults(myObject):
         self.nPoints = None
         self.nSys = None
         self.opacity = None
-        self.plotAgainst = plotAgainst
-        self.r = None
         self.range = None
         self.relErr = None
         self.sysPath=sysPath
         self.totErr = None
         self.x = None
-        self.xPlot = None
         self.y = None
         self.z = None
-        self.zGrid = None
+        self.depthGrid = None
 
-        self._xMesh = None
-        self._zMesh = None
+        self.mesh = None
 
         self.fName = fName
         self.line = split(fName)[1]
@@ -70,6 +68,8 @@ class LineResults(myObject):
             self.hdfFile = hdfFile
             self.getIDs()
 
+        self.getDataLocations()
+
 
     def open(self):
         """ Check whether the file is open """
@@ -77,6 +77,7 @@ class LineResults(myObject):
             self.hdfFile.attrs
         except:
             self.hdfFile = h5py.File(self.fName,'r+')
+
 
     def close(self):
         """ Check whether the file is open """
@@ -93,203 +94,51 @@ class LineResults(myObject):
         self.getRelativeError()
 
         self.getNsys()
-        m = kwargs.pop('marker','o')
-        ms = kwargs.pop('markersize',5)
-        mfc = kwargs.pop('markerfacecolor',None)
-        mec = kwargs.pop('markeredgecolor','k')
-        mew = kwargs.pop('markeredgewidth',1.0)
-        ls = kwargs.pop('linestyle','none')
-        lw = kwargs.pop('linewidth',0.0)
-
+        kwargs['marker'] = kwargs.pop('marker','o')
+        kwargs['markersize'] = kwargs.pop('markersize',5)
+        kwargs['markerfacecolor'] = kwargs.pop('markerfacecolor',None)
+        kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor','k')
+        kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth',1.0)
+        kwargs['linestyle'] = kwargs.pop('linestyle','none')
+        kwargs['linewidth'] = kwargs.pop('linewidth',0.0)
 
         if (self.nSys > 1):
             r = range(self.nSys)
             for i in r:
                 fc = cP.wellSeparated[i+2]
-                cP.plot(x=self.relErr[:,i], y=self.addErr[:,i],
-                    marker=m,markersize=ms,markerfacecolor=mfc,markeredgecolor=mec,markeredgewidth=mew,
-                    linestyle=ls,linewidth=lw,c=fc,
+                cP.plot(x=self.relErr[:,i], y=self.addErr[:,i], c=fc,
                     alpha = 0.7,label='System ' + str(i + 1), **kwargs)
+
+            plt.legend()
 
         else:
             fc = cP.wellSeparated[2]
-            cP.plot(x=self.relErr, y=self.addErr,
-                    marker=m,markersize=ms,markerfacecolor=mfc,markeredgecolor=mec,markeredgewidth=mew,
-                    linestyle=ls,linewidth=lw,c=fc,
+            cP.plot(x=self.relErr, y=self.addErr, c=fc,
                     alpha = 0.7,label='System ' + str(1), **kwargs)
 
         cP.xlabel(self.relErr.getNameUnits())
         cP.ylabel(self.addErr.getNameUnits())
-        plt.legend()
+        
 
 
-    def setAlonglineAxis(self, axis):
-        """ Define what to plot the data against on the x axis """
-        if (not self.xPlot is None): return
-
-        ax = axis.lower()
-        if (ax == 'easting'):
-            self.getX()
-            self.xPlot = StatArray(self.nPoints, 'Easting', 'm') + self.x
+    def getMesh(self):
+        """Get the 2D topo fitting rectilinear mesh. """
+        
+        if (not self.mesh is None):
             return
-        if (ax == 'northing'):
-            self.getY()
-            self.xPlot = StatArray(self.nPoints, 'Northing', 'm') + self.y
-            return
-        if (ax == 'distance'):
-            self.getDistanceAlongLine()
-            self.xPlot = StatArray(
-                self.nPoints,
-                'Distance Along Line',
-                'm') + self.r
-            return
-        if (ax == 'id'):
-            self.getIDs()
-            self.xPlot = StatArray(self.nPoints, 'Point ID') + self.iDs
-            return
-        if (ax == 'index'):
-            tmp = np.arange(self.nPoints)
-            self.xPlot = StatArray(self.nPoints, 'Index') + tmp
-            return
-
-    def _getX_pmesh(self, nV):
-        """ Creates an array suitable for plt.pcolormesh for the abscissa """
-        if (not self._xMesh is None):
-            return
-        pr = np.min(np.diff(self.xPlot))
-        self._xMesh = np.zeros([nV + 1, self.nPoints + 2],order = 'F')
-        self._xMesh[:-1, 1:-1] = np.repeat(self.xPlot[np.newaxis, :], nV, 0)
-        self._xMesh[:, 0] = self._xMesh[:, 1] - pr
-        self._xMesh[:, -1] = self._xMesh[:, -2] + pr
-        self._xMesh[-1, :] = self._xMesh[-2, :]
-
-    def _getZ_pmesh(self, z):
-        """ Creates an array suitable for plt.pcolormesh for the abscissa """
-        if (not self._zMesh is None):
-            return
-        self.getDistanceAlongLine()
-        self.getElevation()
-        pz = 2.0 * np.max(np.abs(np.diff(z)))
-        self._zMesh = np.zeros([np.size(z) + 1, self.r.size + 2],order = 'F')
-        self._zMesh[0, 1:-1] = self.elevation
-        r = range(self.r.size)
-        for i in r:
-            self._zMesh[1:-1, i + 1] = self.elevation[i] - z[:-1]
-        self._zMesh[:, 0] = self._zMesh[:, 1]
-        self._zMesh[:, -1] = self._zMesh[:, -2]
-        self._zMesh[-1, :] = self._zMesh[-2, :] - pz
-
-    def getIDs(self):
-        """ Get the id numbers of the data points in the line results file """
-        if (not self.iDs is None): return
-
-        self.iDs = np.asarray(self.hdfFile.get('ids'))
-        self.nPoints = self.iDs.size
-
-    def getDistanceAlongLine(self):
-        """ Computes the distance along the line """
-        if (not self.r is None): return
-        self.getX()
-        self.getY()
-        x1 = self.x[0]
-        y1 = self.y[0]
-        self.r = (self.x - x1)**2.0 + (self.y - y1)**2.0
-
-    def sortLocations(self):
-        """ Makes sure that files are consecutive along the line """
-        self.getDistanceAlongLine()
-        i = np.argsort(self.r)
-        self.iDs = self.iDs[i]
-        self.x = self.x[i]
-        self.y = self.y[i]
-        self.r = self.r[i]
-
-    def getX(self):
-        """ Get the X co-ordinates (Easting) """
-        if (not self.x is None):
-            return
-        self.x = self.getAttribute('x')
-
-    def getY(self):
-        """ Get the Y co-ordinates (Easting) """
-        if (not self.y is None):
-            return
-        self.y = self.getAttribute('y')
-
-    def getZgrid(self):
-        """ Get the gridded depth intervals """
-        if (not self.zGrid is None):
-            return
+        self.getDataLocations()
         if (self.hitMap is None):
-            z = self.getAttribute('zgrid', index=0)
+            tmp = self.getAttribute('hitmap/y', index=0)
         else:
-            z= self.hitMap.y
+            tmp = self.hitMap.y
 
-        self.zGrid = z
-
-    def getElevation(self):
-        """ Get the elevation of the data points """
-        if (not self.elevation is None): return
-        self.elevation = np.asarray(self.getAttribute('elevation'))
+        self.mesh = TopoRectilinearMesh2D(xCentres=self.x, yCentres=self.y, zEdges=tmp.edges(min=0.0), heightCentres=self.elevation)
 
 
     def getAdditiveError(self):
         """ Get the Additive error of the best data points """
         if (not self.addErr is None): return
         self.addErr = self.getAttribute('Additive Error')
-
-
-    def getRelativeError(self):
-        """ Get the Relative error of the best data points """
-        if (not self.relErr is None): return
-        self.relErr = self.getAttribute('Relative Error')
-
-    def getTotalError(self):
-        """ Get the total error of the best data points """
-        if (not self.totErr is None): return
-        self.totErr = self.getAttribute('Total Error')
-
-    def getKlayers(self):
-        """ Get the number of layers in the best model for each data point """
-        if (not self.k is None): return
-        self.k = self.getAttribute('# Layers')
-
-
-    def getHitMap(self):
-        """ Get the hitmaps for each data point """
-        print('Be careful with .getHitMap(),  it could require a lot of memory.')
-        if (not self.hitMap is None): return
-        self.hitMap = self.getAttribute('Hit Map', index=0)
-
-
-    def getDOI(self,percent=67.0):
-        """ Get the DOI of the line depending on a percentage variance cutoff for each data point """
-        #if (not self.doi is None): return
-        self.getOpacity()
-        self.getZgrid()
-        p = 0.01*(100.0 - percent)
-
-        self.doi = np.zeros(self.nPoints)
-        zSize = self.opacity.shape[1]-1
-        r = range(self.nPoints)
-        for i in r:
-            op = self.opacity[i,:][::-1]
-            iC = 0
-            while op[iC] < p and iC < zSize:
-                iC +=1
-            self.doi[i]=self.zGrid[zSize - iC]
-
-
-    def getNsys(self):
-        """ Get the number of systems """
-        if (not self.nSys is None): return
-        self.nSys = self.getAttribute('# of systems')
-
-
-    def getMeanParameters(self):
-        """ Get the mean model of the parameters """
-        if (not self.mean is None): return
-        self.mean = self.getAttribute('meaninterp')
 
 
     def getBestData(self, **kwargs):
@@ -302,7 +151,62 @@ class LineResults(myObject):
     def getBestParameters(self):
         """ Get the best model of the parameters """
         if (not self.best is None): return
-        self.best = self.getAttribute('bestinterp')
+        self.best = StatArray(self.getAttribute('bestinterp'), dtype=np.float64)
+        self.best.name = "Best resistivity"
+        self.best.units = "$\Omega m$"
+
+
+    def getDataLocations(self):
+        """Get the co-ordinates of the observation locations. """
+        self.getX()
+        self.getY()
+        self.getHeight()
+        self.getElevation()
+
+
+    def getDOI(self,percent=67.0):
+        """ Get the DOI of the line depending on a percentage variance cutoff for each data point """
+        #if (not self.doi is None): return
+        self.getOpacity()
+        self.getMesh()
+        p = 0.01*(100.0 - percent)
+
+        self.doi = np.zeros(self.nPoints)
+        zSize = self.opacity.shape[1]-1
+        r = range(self.nPoints)
+        for i in r:
+            op = self.opacity[i,:][::-1]
+            iC = 0
+            while op[iC] < p and iC < zSize:
+                iC +=1
+            self.doi[i]=self.depthGrid.cellCentres[zSize - iC]
+
+
+    def getElevation(self):
+        """ Get the elevation of the data points """
+        if (not self.elevation is None): return
+        self.elevation = StatArray(np.asarray(self.getAttribute('elevation')), 'Elevation', 'm')
+
+
+    def getHeight(self):
+        """Get the height of the observations. """
+        if (not self.z is None): return
+        self.z = self.getAttribute('z')
+
+
+    def getHitMap(self):
+        """ Get the hitmaps for each data point """
+        print('Be careful with .getHitMap(),  it could require a lot of memory.')
+        if (not self.hitMap is None): return
+        self.hitMap = self.getAttribute('Hit Map', index=0)
+
+
+    def getIDs(self):
+        """ Get the id numbers of the data points in the line results file """
+        if (not self.iDs is None): return
+
+        self.iDs = np.asarray(self.hdfFile.get('ids'))
+        self.nPoints = self.iDs.size
 
 
     def getInterfaces(self, cut=0.0):
@@ -312,47 +216,92 @@ class LineResults(myObject):
         tmp = self.getAttribute('layer depth histogram')
 
         maxCount = tmp.counts.max()
-        self.interfaces = tmp.counts/np.float64(maxCount)
+        self.interfaces = tmp.counts / np.float64(maxCount)
         self.interfaces[self.interfaces < cut] = np.nan
+        self.interfaces.name = "Interfaces"
 
 
-    def getOpacity(self, percent=95.0, low=1.0, high=3.0, log=10):
+    def getKlayers(self):
+        """ Get the number of layers in the best model for each data point """
+        if (not self.k is None): return
+        self.k = StatArray(self.getAttribute('# Layers'), '# of Cells')
+
+
+    def getMeanParameters(self):
+        """ Get the mean model of the parameters """
+        if (not self.mean is None): return
+        self.mean = StatArray(self.getAttribute('meaninterp'), dtype=np.float64)
+        self.mean.name = "Mean resistivity"
+        self.mean.units = "$\Omega m$"
+
+
+    def getNsys(self):
+        """ Get the number of systems """
+        if (not self.nSys is None): return
+        self.nSys = self.getAttribute('# of systems')
+
+
+    def getOpacity(self, percent=95.0, multiplier=0.5, log='e'):
         """ Get the model parameter opacity using the confidence intervals """
         if (not self.opacity is None): return
 
-        self.getZgrid()
-        self.opacity = np.zeros([self.nPoints,self.zGrid.size]) #
+        self.getMesh()
+        self.opacity = StatArray(np.zeros([self.mesh.dims[1], self.mesh.dims[0]]), 'Opacity')
 
         a = np.asarray(self.hdfFile['hitmap/arr/data'])
-        b = np.asarray(self.hdfFile['hitmap/x/data'])
-        c = np.asarray(self.hdfFile['hitmap/y/data'])
+        try:
+            b = np.asarray(self.hdfFile['hitmap/x/data'])
+        except:
+            b = np.asarray(self.hdfFile['hitmap/x/x/data'])
 
-        h = Hitmap2D(x = StatArray(b[0,:]), y = StatArray(c[0,:]))
+        try:
+            c = np.asarray(self.hdfFile['hitmap/y/data'])
+        except:
+            c = np.asarray(self.hdfFile['hitmap/y/y/data'])
 
-        for i in range(self.nPoints):
-            h.arr[:,:] = a[i,:,:]
-            h.x[:] = b[i,:]
-            self.opacity[i,:] = h.getConfidenceRange(percent=percent, log=log)
+        yTmp = StatArray(c[0, :])
+        h = Hitmap2D(xBinCentres = StatArray(b[0, :]), yBinCentres = yTmp)
+        h._counts[:, :] = a[0, :, :]
+        self.opacity[0, :] = h.confidenceRange(percent=percent, log=log)
 
-#        self.opacity[self.opacity < low] = low
+        for i in range(1, self.nPoints):
+            h.x.xBinCentres = b[i, :]
+            h._counts[:, :] = a[i, :, :]
+            self.opacity[i, :] = h.confidenceRange(percent=percent, log=log)
+
+        self.opacity = self.opacity.T
+
+        high = multiplier * (self.opacity.max() - self.opacity.min())
+
         self.opacity[self.opacity > high] = high
 
-        tmp=np.max(np.max(self.opacity, axis=0))
-
-        self.opacity /= tmp
+        self.opacity /= high
 
         self.opacity = 1.0 - self.opacity
 
-    def getResults(self, iD):
+
+    def getRelativeError(self):
+        """ Get the Relative error of the best data points """
+        if (not self.relErr is None): return
+        self.relErr = self.getAttribute('Relative Error')
+
+
+    def getResults(self, index=None, fid=None):
         """ Obtain the results for the given iD number """
 
-        assert iD in self.iDs, "The HDF file was not initialized to contain the results for this datapoints results "
+        assert not (index is None and fid is None), Exception("Please specify either an integer index or a fiducial.")
+        assert index is None or fid is None, Exception("Only specify either an integer index or a fiducial.")
+
+        if not fid is None:
+            assert fid in self.iDs, "The HDF file was not initialized to contain the results for this datapoints results "
+            # Get the point index
+            i = self.iDs.searchsorted(fid)
+        else:
+            i = index
 
         aFile = self.hdfFile
 
-        # Get the point index
-        i = self.iDs.searchsorted(iD)
-        s=np.s_[i,:]
+        s = np.s_[i, :]
 
         R = Results()
 
@@ -375,13 +324,13 @@ class LineResults(myObject):
         R.bestD = hdfRead.readKeyFromFile(aFile,'','/','bestd', index=i, sysPath=self.sysPath)
         #R.currentD = hdfRead.readKeyFromFile(aFile,'','/','currentd', index=i, sysPath=self.sysPath)
         R.bestModel = hdfRead.readKeyFromFile(aFile,'','/','bestmodel', index=i)
-        R.bestModel.maxDepth = np.log(R.Hitmap.y[-1])
+        R.bestModel.maxDepth = np.log(R.Hitmap.y.cellCentres[-1])
         R.kHist = hdfRead.readKeyFromFile(aFile,'','/','khist', index=i)
         R.DzHist = hdfRead.readKeyFromFile(aFile,'','/','dzhist', index=i)
         R.MzHist = hdfRead.readKeyFromFile(aFile,'','/','mzhist', index=i)
 
 
-        R.DzHist.bins -= (R.DzHist.bins[int(R.DzHist.bins.size/2)] - R.bestD.z[0])
+        # R.DzHist.bins -= (R.DzHist.bins[int(R.DzHist.bins.size/2)] - R.bestD.z[0])
 
         R.relErr = []
         R.addErr = []
@@ -401,16 +350,34 @@ class LineResults(myObject):
         return R
 
 
-    def opacity2alpha(self, Quadmesh):
-        """ Map the opacity of the parameters to the alpha channel of a QuadMesh. """
-        plt.savefig('myfig.png')
-        self.getOpacity()
-        a = np.zeros([self.opacity.shape[1], self.nPoints + 1],order='F')  # Transparency amounts
-        a[:, 1:] = self.opacity.T
+    def getTotalError(self):
+        """ Get the total error of the best data points """
+        if (not self.totErr is None): return
 
-        for i, j in zip(Quadmesh.get_facecolors(), a.flatten()):
-            i[3] = j  # Set the alpha value of the RGBA tuple using a
-        fIO.deleteFile('myfig.png')
+        self.totErr = self.getAttribute('Total Error')
+
+
+    def getX(self):
+        """ Get the X co-ordinates (Easting) """
+        if (not self.x is None):
+            return
+        self.x = self.getAttribute('x')
+        if self.x.name in [None, '']:
+            self.x.name = 'Easting'
+        if self.x.units in [None, '']:
+            self.x.units = 'm'
+
+
+    def getY(self):
+        """ Get the Y co-ordinates (Easting) """
+        if (not self.y is None):
+            return
+        self.y = self.getAttribute('y')
+
+        if self.y.name in [None, '']:
+            self.y.name = 'Northing'
+        if self.y.units in [None, '']:
+            self.y.units = 'm'
 
 
     def plotAllBestData(self, **kwargs):
@@ -439,20 +406,19 @@ class LineResults(myObject):
     def plotDataElevation(self, **kwargs):
         """ Adds the data elevations to a plot """
 
-        self.setAlonglineAxis(self.plotAgainst)
-        # Get the data heights
-        if (self.z is None):
-            self.z = self.getAttribute('z')
-        self.getElevation()
+        self.getDataLocations()
 
+        axis = kwargs.pop('axis', 'x')
         labels = kwargs.pop('labels', True)
-        c = kwargs.pop('color','k')
-        lw = kwargs.pop('linewidth',0.5)
+        kwargs['color'] = kwargs.pop('color','k')
+        kwargs['linewidth'] = kwargs.pop('linewidth',0.5)
 
-        plt.plot(self.xPlot, self.z.reshape(self.z.size) + self.elevation, color=c, linewidth=lw, **kwargs)
+        xtmp = self.mesh.getXAxis(axis, centres=False)
+
+        cP.plot(xtmp, self.z.edges() + self.elevation.edges(), **kwargs)
 
         if (labels):
-            cP.xlabel(self.xPlot.getNameUnits())
+            cP.xlabel(xtmp.getNameUnits())
             cP.ylabel('Elevation (m)')
 
 
@@ -466,7 +432,7 @@ class LineResults(myObject):
         c = kwargs.pop('color','k')
         lw = kwargs.pop('linewidth',0.5)
 
-        plt.plot(self.xPlot, self.elevation - self.doi, color=c, linewidth=lw, **kwargs)
+        cP.plot(self.xPlot, self.elevation - self.doi, color=c, linewidth=lw, **kwargs)
 
         if (labels):
             cP.xlabel(self.xPlot.getNameUnits())
@@ -475,31 +441,35 @@ class LineResults(myObject):
 
     def plotElevation(self, **kwargs):
 
-        self.setAlonglineAxis(self.plotAgainst)
-        self.getElevation()
+        self.getMesh()
 
+        axis = kwargs.pop('axis', 'x')
         labels = kwargs.pop('labels', True)
-        c = kwargs.pop('color','k')
-        lw = kwargs.pop('linewidth',0.5)
+        kwargs['color'] = kwargs.pop('color','k')
+        kwargs['linewidth'] = kwargs.pop('linewidth',0.5)
 
-        plt.plot(self.xPlot, self.elevation, color=c, linewidth=lw, **kwargs)
+        self.mesh.plotHeight(axis=axis, **kwargs)
 
-        if (labels):
-            cP.xlabel(self.xPlot.getNameUnits())
-            cP.ylabel('Elevation (m)')
+        # if (labels):
+        #     cP.xlabel(xtmp.getNameUnits())
+        #     cP.ylabel('Elevation (m)')
 
 
     def plotElevationDistributions(self, **kwargs):
         """ Plot the horizontally stacked elevation histograms for each data point along the line """
 
-        self.setAlonglineAxis(self.plotAgainst)
+        self.getMesh()
         tmp = self.getAttribute('elevation histogram')
+
+        axis = kwargs.pop('axis', 'x')
+
+        xtmp = self.mesh.getXAxis(axis)
 
         c = tmp.counts.T
         c = np.divide(c, np.max(c,0), casting='unsafe')
-        x = np.zeros(self.xPlot.size+1)
-        d = np.diff(self.xPlot)       
-        c.pcolor(x=self.xPlot.edges(), y=tmp.bins.edges(), **kwargs)
+        x = np.zeros(xtmp.size+1)
+        d = np.diff(xtmp)
+        c.pcolor(xtmp, y=tmp.bins, **kwargs)
         cP.title('Data Elevation posterior distributions')
 
 
@@ -531,44 +501,43 @@ class LineResults(myObject):
 
     def plotKlayers(self, **kwargs):
         """ Plot the number of layers in the best model for each data point """
+        self.getMesh()
         self.getKlayers()
-        self.setAlonglineAxis(self.plotAgainst)
-        m = kwargs.pop('marker','o')
-        mec = kwargs.pop('markeredgecolor','k')
-        ls = kwargs.pop('linestyle','none')
-        cP.plot(x=self.xPlot, y=self.k, marker=m, markeredgecolor=mec, linestyle=ls, **kwargs)
-        cP.xlabel(self.xPlot.getNameUnits())
-        cP.ylabel(self.k.getNameUnits())
+        
+        axis = kwargs.pop('axis', 'x')
+        kwargs['marker'] = kwargs.pop('marker','o')
+        kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor','k')
+        kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth', 1.0)
+        kwargs['linestyle'] = kwargs.pop('linestyle','none')
+
+        xtmp = self.mesh.getXAxis(axis)
+        self.k.plot(xtmp, **kwargs)
+        # cP.ylabel(self.k.getNameUnits())
         cP.title('# of Layers in Best Model')
 
 
     def plotKlayersDistributions(self, **kwargs):
         """ Plot the horizontally stacked elevation histograms for each data point along the line """
 
-        self.setAlonglineAxis(self.plotAgainst)
+        self.getMesh()
         tmp = self.getAttribute('layer histogram')
+
+        axis = kwargs.pop('axis', 'x')
+
+        xtmp = self.mesh.getXAxis(axis)
 
         c = tmp.counts.T
         c = np.divide(c, np.max(c,0), casting='unsafe')
-        c.pcolor(x=self.xPlot.edges(), y=tmp.bins.edges(), **kwargs)
+        ax = c.pcolor(xtmp, y=tmp.bins, **kwargs)
         cP.title('# of Layers posterior distributions')
-
-
-    def plotSuccessFail(self, **kwargs):
-        """ Plot whether the data points failed or succeeded """
-        if (self.burnedIn is None):
-            self.burnedIn = self.getAttribute('Burned In')
-        self.setAlonglineAxis(self.plotAgainst)
-        cP.plot(x=self.xPlot, y=self.burnedIn, **kwargs)
-        cP.xlabel(self.xPlot.getNameUnits())
-        cP.ylabel('Inversion Burned In')
 
 
     def plotAdditiveError(self, **kwargs):
         """ Plot the relative errors of the data """
         self.getAdditiveError()
-        self.setAlonglineAxis(self.plotAgainst)
         self.getNsys()
+
+        axis = kwargs.pop('axis', 'x')
         m = kwargs.pop('marker','o')
         ms = kwargs.pop('markersize',5)
         mfc = kwargs.pop('markerfacecolor',None)
@@ -577,41 +546,48 @@ class LineResults(myObject):
         ls = kwargs.pop('linestyle','-')
         lw = kwargs.pop('linewidth',1.0)
 
+        xtmp = self.mesh.getXAxis(axis, centres=True)
 
         if (self.nSys > 1):
             r = range(self.nSys)
             for i in r:
                 fc = cP.wellSeparated[i+2]
-                cP.plot(x=self.xPlot, y=self.addErr[:,i],
+                cP.plot(xtmp, y=self.addErr[:,i],
                     marker=m,markersize=ms,markerfacecolor=mfc,markeredgecolor=mec,markeredgewidth=mew,
                     linestyle=ls,linewidth=lw,c=fc,
                     alpha = 0.7,label='System ' + str(i + 1), **kwargs)
+            plt.legend()
         else:
             fc = cP.wellSeparated[2]
-            cP.plot(x=self.xPlot, y=self.addErr,
+            cP.plot(xtmp, y=self.addErr,
                     marker=m,markersize=ms,markerfacecolor=mfc,markeredgecolor=mec,markeredgewidth=mew,
                     linestyle=ls,linewidth=lw,c=fc,
                     alpha = 0.7,label='System ' + str(1), **kwargs)
 
-        cP.xlabel(self.xPlot.getNameUnits())
-        cP.ylabel(self.addErr.getNameUnits())
-        plt.legend()
+        # cP.xlabel(xtmp.getNameUnits())
+        # cP.ylabel(self.addErr.getNameUnits())
+        
 
 
     def plotAdditiveErrorDistributions(self, system=0, **kwargs):
         """ Plot the distributions of additive errors as an image for all data points in the line """
+        self.getMesh()
         self.getNsys()
         tmp=self.getAttribute('Additive error histogram')
-        self.setAlonglineAxis(self.plotAgainst)
+
+        axis = kwargs.pop('axis', 'x')
+
+        xtmp = self.mesh.getXAxis(axis)
+
         if self.nSys > 1:
             c = tmp[system].counts.T
             c = np.divide(c, np.max(c,0), casting='unsafe')
-            c.pcolor(x=self.xPlot.edges(), y=tmp[system].bins.edges(), **kwargs)
-            cP.title('Additive error posterior distributions for system '+str(system))
+            c.pcolor(xtmp, y=tmp[system].bins, **kwargs)
+            cP.title('Additive error posterior distributions for system {}'.format(system))
         else:
             c = tmp.counts.T
             c = np.divide(c, np.max(c,0), casting='unsafe')
-            c.pcolor(x=self.xPlot.edges(), y=tmp.bins.edges(), **kwargs)
+            c.pcolor(xtmp, y=tmp.bins, **kwargs)
             cP.title('Additive error posterior distributions')
 
 
@@ -632,43 +608,16 @@ class LineResults(myObject):
     def plotInterfaces(self, cut=0.0, useVariance=True, **kwargs):
         """ Plot a cross section of the layer depth histograms. Truncation is optional. """
 
-        self.getZgrid()
-
-        self.setAlonglineAxis(self.plotAgainst)
-
-        self.getElevation()
-
-        zGrd = self.zGrid
-
+        self.getMesh()
         self.getInterfaces(cut=cut)
 
-        self._getX_pmesh(zGrd.size)
-        self._getZ_pmesh(zGrd)
+        kwargs['noColorbar'] = kwargs.pop('noColorbar', True)
 
-        c = np.zeros(self._xMesh.shape, order = 'F')
-        c[:-1, 0] = np.nan
-        c[:-1, -1] = np.nan
-        c[-1, :] = np.nan
+        if useVariance:
+            self.getOpacity()
+            kwargs['alpha'] = self.opacity
 
-        c[:-1, 1:-1] = self.interfaces.T
-
-        equalize = kwargs.pop('equalize',False)
-        nBins = kwargs.pop('nbins',256)
-        if equalize:
-             c,dummy=cP.HistogramEqualize(c, nBins=nBins)
-
-        # Mask the Nans in the colorMap
-        cm = ma.masked_invalid(c)
-
-        ax = plt.gca()
-        cP.pretty(ax)
-        pm = ax.pcolormesh(self._xMesh, self._zMesh, cm, **kwargs)
-
-        if (useVariance):
-            self.opacity2alpha(pm)
-
-        cP.xlabel(self.xPlot.getNameUnits())
-        cP.ylabel('Elevation (m)')
+        pm = self.mesh.pcolor(self.interfaces.T, **kwargs)
 
 
     def plotObservedDataChannel(self, channel=None, **kwargs):
@@ -681,66 +630,108 @@ class LineResults(myObject):
         if channel is None:
             channel = np.s_[:]
 
-        print(np.min(self.bestData.d[:, channel]))
+        # print(np.min(self.bestData.d[:, channel]))
 
         cP.plot(self.xPlot, self.bestData.d[:, channel], **kwargs)
 
 
-    def plotOpacity(self, low=1.0, high=3.0, log=10, **kwargs):
+    def plotOpacity(self, log='e', **kwargs):
         """ Plot the opacity """
 
-        self.getZgrid()
+        self.getMesh()
+        self.getOpacity(log=log)
+        kwargs.pop('log', None)
 
-        self.setAlonglineAxis(self.plotAgainst)
-
-        zGrd = self.zGrid
-
-        self._getX_pmesh(zGrd.size)
-        self._getZ_pmesh(zGrd)
-
-        c = np.zeros(self._xMesh.shape, order = 'F')
-        c[:-1, 0] = np.nan
-        c[:-1, -1] = np.nan
-        c[-1, :] = np.nan
-
-        self.getOpacity(low=low, high=high, log=log)
-
-        c[:-1, 1:-1] = self.opacity.T
-
-        equalize = kwargs.pop('equalize',False)
-        nBins = kwargs.pop('nbins',256)
-        if equalize:
-             c,dummy=cP.HistogramEqualize(c, nBins=nBins)
-
-        # Mask the Nans in the colorMap
-        cm = ma.masked_invalid(c)
-
-        ax = plt.gca()
-        cP.pretty(ax)
-        qm = ax.pcolormesh(self._xMesh, self._zMesh, cm, **kwargs)
-
-        cb = plt.colorbar(qm)
-
-        cP.xlabel(self.xPlot.getNameUnits())
-        cP.ylabel('Elevation (m)')
-        cP.clabel(cb,'Opacity')
+        self.mesh.pcolor(values = self.opacity, **kwargs)
 
 
     def plotRelativeErrorDistributions(self, system=0, **kwargs):
         """ Plot the distributions of relative errors as an image for all data points in the line """
+        self.getMesh()
         self.getNsys()
+
         tmp=self.getAttribute('Relative error histogram')
-        self.setAlonglineAxis(self.plotAgainst)
+
+        axis = kwargs.pop('axis', 'x')
+
+        xtmp = self.mesh.getXAxis(axis)
+
         if self.nSys > 1:
             c = tmp[system].counts.T
             c = np.divide(c, np.max(c,0), casting='unsafe')
-            c.pcolor(x=self.xPlot.edges(), y=tmp[system].bins.edges(), **kwargs)
-            cP.title('Relative error posterior distributions for system '+str(system))
+            c.pcolor(xtmp, y=tmp[system].bins, **kwargs)
+            cP.title('Relative error posterior distributions for system {}'.format(system))
         else:
             c = tmp.counts.T
             c = np.divide(c, np.max(c,0), casting='unsafe')
-            c.pcolor(x=self.xPlot.edges(), y=tmp.bins.edges(), **kwargs)
+            c.pcolor(xtmp, y=tmp.bins, **kwargs)
             cP.title('Relative error posterior distributions')
+
+
+    def plotRelativeError(self, **kwargs):
+        """ Plot the relative errors of the data """
+        self.getMesh()
+        self.getRelativeError()
+        self.getNsys()
+
+        axis = kwargs.pop('axis', 'x')
+        kwargs['marker'] = kwargs.pop('marker','o')
+        kwargs['markersize'] = kwargs.pop('markersize',5)
+        kwargs['markerfacecolor'] = kwargs.pop('markerfacecolor',None)
+        kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor','k')
+        kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth',1.0)
+        kwargs['linestyle'] = kwargs.pop('linestyle','-')
+        kwargs['linewidth'] = kwargs.pop('linewidth',1.0)
+
+        xtmp = self.mesh.getXAxis(axis)
+
+        if (self.nSys > 1):
+            r = range(self.nSys)
+            for i in r:
+                kwargs['c'] = cP.wellSeparated[i+2]
+                self.relErr[:, i].plot(xtmp,
+                    alpha = 0.7, label='System {}'.format(i + 1), **kwargs)
+            plt.legend()
+        else:
+            kwargs['c'] = cP.wellSeparated[2]
+            self.relErr.plot(xtmp,
+                    alpha = 0.7, label='System {}'.format(1), **kwargs)
+
+
+    def plotTotalError(self, channel, **kwargs):
+        """ Plot the relative errors of the data """
+
+        self.getMesh()
+        self.getTotalError()
+
+        axis = kwargs.pop('axis', 'x')
+
+        kwargs['marker'] = kwargs.pop('marker','o')
+        kwargs['markersize'] = kwargs.pop('markersize',5)
+        kwargs['markerfacecolor'] = kwargs.pop('markerfacecolor',None)
+        kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor','k')
+        kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth',1.0)
+        kwargs['linestyle'] = kwargs.pop('linestyle','-')
+        kwargs['linewidth'] = kwargs.pop('linewidth',1.0)
+
+        xtmp = self.mesh.getXAxis(axis)
+
+#        if (self.nSys > 1):
+#            r = range(self.nSys)
+#            for i in r:
+#                fc = cP.wellSeparated[i+2]
+#                cP.plot(x=self.xPlot, y=self.addErr[:,i],
+#                    marker=m,markersize=ms,markerfacecolor=mfc,markeredgecolor=mec,markeredgewidth=mew,
+#                    linestyle=ls,linewidth=lw,c=fc,
+#                    alpha = 0.7,label='System ' + str(i + 1), **kwargs)
+#        else:
+        fc = cP.wellSeparated[2]
+        self.totErr[:,channel].plot(xtmp,
+                alpha = 0.7, label='Channel ' + str(channel), **kwargs)
+
+#        cP.xlabel(self.xPlot.getNameUnits())
+#        cP.ylabel(self.addErr.getNameUnits())
+#        plt.legend()
 
 
     def plotTotalErrorDistributions(self, channel=0, nBins=100, **kwargs):
@@ -763,150 +754,47 @@ class LineResults(myObject):
 #            c.pcolor(x=self.xPlot, y=tmp.bins, **kwargs)
 #            cP.title('Relative error posterior distributions')
 
-
-    def plotTransparancy(self, low=1.0, high=3.0, log=10, **kwargs):
-        """ Plot the opacity """
-
-        self.getZgrid()
-
-        self.setAlonglineAxis(self.plotAgainst)
-
-        zGrd = self.zGrid
-
-        self._getX_pmesh(zGrd.size)
-        self._getZ_pmesh(zGrd)
-
-        c = np.zeros(self._xMesh.shape, order = 'F')
-        c[:-1, 0] = np.nan
-        c[:-1, -1] = np.nan
-        c[-1, :] = np.nan
-
-        self.getOpacity(low=low, high=high, log=log)
-
-        c[:-1, 1:-1] = 1.0-self.opacity.T
-
-        equalize = kwargs.pop('equalize',False)
-        nBins = kwargs.pop('nbins',256)
-        if equalize:
-             c,dummy=cP.HistogramEqualize(c, nBins=nBins)
-
-        # Mask the Nans in the colorMap
-        cm = ma.masked_invalid(c)
-
-        ax = plt.gca()
-        cP.pretty(ax)
-        qm = ax.pcolormesh(self._xMesh, self._zMesh, cm, **kwargs)
-
-        cb = plt.colorbar(qm)
-
-        cP.xlabel(self.xPlot.getNameUnits())
-        cP.ylabel('Elevation (m)')
-        cP.clabel(cb,'Transparancy')
-
-
-    def plotRelativeError(self, **kwargs):
-        """ Plot the relative errors of the data """
-        self.getRelativeError()
-        self.setAlonglineAxis(self.plotAgainst)
-        self.getNsys()
-        m = kwargs.pop('marker','o')
-        ms = kwargs.pop('markersize',5)
-        mfc = kwargs.pop('markerfacecolor',None)
-        mec = kwargs.pop('markeredgecolor','k')
-        mew = kwargs.pop('markeredgewidth',1.0)
-        ls = kwargs.pop('linestyle','-')
-        lw = kwargs.pop('linewidth',1.0)
-
-
-        if (self.nSys > 1):
-            r = range(self.nSys)
-            for i in r:
-                fc = cP.wellSeparated[i+2]
-                cP.plot(x=self.xPlot, y=self.relErr[:,i],
-                    marker=m,markersize=ms,markerfacecolor=mfc,markeredgecolor=mec,markeredgewidth=mew,
-                    linestyle=ls,linewidth=lw,c=fc,
-                    alpha = 0.7,label='System ' + str(i + 1), **kwargs)
-        else:
-            fc = cP.wellSeparated[2]
-            cP.plot(x=self.xPlot, y=self.relErr,
-                    marker=m,markersize=ms,markerfacecolor=mfc,markeredgecolor=mec,markeredgewidth=mew,
-                    linestyle=ls,linewidth=lw,c=fc,
-                    alpha = 0.7,label='System ' + str(1), **kwargs)
-
-        cP.xlabel(self.xPlot.getNameUnits())
-        cP.ylabel(self.relErr.getNameUnits())
-        plt.legend()
-
-
-    def plotTotalError(self, channel, **kwargs):
-        """ Plot the relative errors of the data """
-        self.getTotalError()
-        self.setAlonglineAxis(self.plotAgainst)
-        m = kwargs.pop('marker','o')
-        ms = kwargs.pop('markersize',5)
-        mfc = kwargs.pop('markerfacecolor',None)
-        mec = kwargs.pop('markeredgecolor','k')
-        mew = kwargs.pop('markeredgewidth',1.0)
-        ls = kwargs.pop('linestyle','-')
-        lw = kwargs.pop('linewidth',1.0)
-
-#        if (self.nSys > 1):
-#            r = range(self.nSys)
-#            for i in r:
-#                fc = cP.wellSeparated[i+2]
-#                cP.plot(x=self.xPlot, y=self.addErr[:,i],
-#                    marker=m,markersize=ms,markerfacecolor=mfc,markeredgecolor=mec,markeredgewidth=mew,
-#                    linestyle=ls,linewidth=lw,c=fc,
-#                    alpha = 0.7,label='System ' + str(i + 1), **kwargs)
-#        else:
-        fc = cP.wellSeparated[2]
-        cP.plot(x=self.xPlot, y=self.totErr[:,channel],
-                marker=m,markersize=ms,markerfacecolor=mfc,markeredgecolor=mec,markeredgewidth=mew,
-                linestyle=ls,linewidth=lw,c=fc,
-                alpha = 0.7,label='Channel ' + str(channel), **kwargs)
-
-#        cP.xlabel(self.xPlot.getNameUnits())
-#        cP.ylabel(self.addErr.getNameUnits())
-#        plt.legend()
-
-
-    def histogram(self,nBins, depth1 = None, depth2 = None, invertPar = True, bestModel = False, **kwargs):
+    def histogram(self, nBins, depth1 = None, depth2 = None, invertPar = False, bestModel = False, **kwargs):
         """ Compute a histogram of the model, optionally show the histogram for given depth ranges instead """
+
+        self.getMesh()
+
+        if (depth1 is None):
+            depth1 = self.mesh.z.cellEdges[0]
+        if (depth2 is None):
+            depth2 = self.mesh.z.cellEdges[-1]
+
+        maxDepth = self.mesh.z.cellEdges[-1]
+
+        # Ensure order in depth values
+        if (depth1 > depth2):
+            tmp = depth2
+            depth2 = depth1
+            depth1 = tmp
+
+        # Don't need to check for depth being shallower than self.mesh.y.cellEdges[0] since the sortedsearch will return 0
+        assert depth1 <= maxDepth, ValueError('Depth1 is greater than max depth {}'.format(maxDepth))
+        assert depth2 <= maxDepth, ValueError('Depth2 is greater than max depth {}'.format(maxDepth))
+
+        cell1 = self.mesh.z.cellIndex(depth1, clip=True)
+        cell2 = self.mesh.z.cellIndex(depth2, clip=True)
 
         if (bestModel):
             self.getBestParameters()
             model = self.best
+            title = 'Best model values between {:.3f} m and {:.3f} m depth'.format(depth1, depth2)
         else:
             self.getMeanParameters()
             model = self.mean
+            title = 'Mean model values between {:.3f} m and {:.3f} m depth'.format(depth1, depth2)
 
-        self.getZgrid()
-        z=self.zGrid
-
-        if (depth1 is None):
-            depth1 = z[0]
-        if (depth2 is None):
-            depth2 = z[-1]
-
-        # Ensure order in depth values
-        if (depth1 > depth2):
-            tmp=depth2
-            depth2 = depth1
-            depth1 = tmp
-
-        # Don't need to check for depth being shallower than zGrid[0] since the sortedsearch with return 0
-        assert depth1 <= z[-1], ValueError('Depth1 is greater than max depth - '+str(z[-1]))
-        assert depth2 <= z[-1], ValueError('Depth2 is greater than max depth - '+str(z[-1]))
-
-        cell1 = z.searchsorted(depth1)
-        cell2 = z.searchsorted(depth2)
-        vals = model[:,cell1:cell2+1].copy()
+        vals = model[:, cell1:cell2+1].deepcopy()
 
         log = kwargs.pop('log',False)
 
         if (invertPar):
             i = np.where(vals > 0.0)[0]
-            vals[i] = 1.0/vals[i]
+            vals[i] = 1.0 / vals[i]
             name = 'Resistivity'
             units = '$\Omega m$'
         else:
@@ -914,80 +802,41 @@ class LineResults(myObject):
             units = '$Sm^{-1}$'
 
         if (log):
-            vals,logLabel=cP._logSomething(vals,log)
-            name = logLabel+name
-        vals = StatArray(vals, name, units)
+            vals, logLabel = cP._logSomething(vals,log)
+            name = logLabel + name
+        binEdges = StatArray(np.linspace(np.nanmin(vals),np.nanmax(vals),nBins+1), name, units)
 
-        h = Histogram1D(values = vals, bins=np.linspace(np.nanmin(vals),np.nanmax(vals),nBins))
+        h = Histogram1D(bins = binEdges)
+        h.update(vals)
         h.plot(**kwargs)
+        cP.title(title)
 
 
     def plotXsection(self, invertPar = True, bestModel=False, percent = 67.0, useVariance=True, **kwargs):
         """ Plot a cross-section of the parameters """
 
-        #if (bestModel):
-        #    self.getBestParameters()
-        self.getZgrid()
-
-        self.setAlonglineAxis(self.plotAgainst)
-
-        zGrd = self.zGrid
-
-        self._getX_pmesh(zGrd.size)
-
-        self._getZ_pmesh(zGrd)
-
-        c = np.zeros(self._xMesh.shape, order = 'F')  # Colour value of each cell
-        c[:-1, 0] = np.nan
-        c[:-1, -1] = np.nan
-        c[-1, :] = np.nan
+        self.getMesh()
 
         if (bestModel):
             self.getBestParameters()
-            c[:-1, 1:-1] = self.best.T
+            tmp = self.best.T
         else:
             self.getMeanParameters()
-            c[:-1, 1:-1] = self.mean.T
+            tmp = self.mean.T
 
         if (invertPar):
-            c=1.0/c
-#            tmp=np.where(c < 10.0)
-#            c[tmp] = 10.0
-            name = 'Resistivity'
-            units = '$\Omega m$'
+            tmp = 1.0 / tmp
+            tmp.name = 'Resistivity'
+            tmp.units = '$\Omega m$'
         else:
-            name = 'Conductivity'
-            units = '$Sm^{-1}$'
+            tmp.name = 'Conductivity'
+            tmp.units = '$Sm^{-1}$'
 
-        log = kwargs.pop('log',False)
-        if (log):
-            c,logLabel=cP._logSomething(c,log)
-            name = logLabel+name
+        if useVariance:
+            self.getOpacity()
+            kwargs['alpha'] = self.opacity
 
-        equalize = kwargs.pop('equalize',False)
-        nBins = kwargs.pop('nbins',256)
-        if equalize:
-             c,dummy=cP.HistogramEqualize(c, nBins=nBins)
-
-        # Mask the Nans in the colorMap
-        cm = ma.masked_invalid(c)
-
-        ax = plt.gca()
-        cP.pretty(ax)
-
-        pm = ax.pcolormesh(self._xMesh, self._zMesh, cm, **kwargs)
-
-        if (equalize):
-            cb = plt.colorbar(pm, ax=ax, extend='both')
-        else:
-            cb = plt.colorbar(pm)
-
-        if (useVariance):
-            self.opacity2alpha(pm)
-
-        cP.xlabel(self.xPlot.getNameUnits())
-        cP.ylabel('Elevation (m)')
-        cP.clabel(cb,name + '('+units+')')
+        self.mesh.pcolor(values = tmp, **kwargs)
 
 
     def plotFacies(self, mean, var, volFrac, percent=67.0, ylim=None):
@@ -999,7 +848,7 @@ class LineResults(myObject):
             self.hitMap = self.getAttribute('Hit Map')
         self.setAlonglineAxis(self.plotAgainst)
         self.getElevation()
-        self.getZgrid()
+        self.getMesh()
         zGrd = self.zGrid
 
         self.getOpacity()
@@ -1078,101 +927,42 @@ class LineResults(myObject):
         for i in range(self.nPoints):
             for j in range(nFacies):
                 fTmp = faciesPDF[j, :]
-                faciesWithDepth[:, j] = np.sum(self.hitMap[i].arr * np.repeat(fTmp[np.newaxis, :], hitMap.y.size, axis=0), 1) * denominator
+                faciesWithDepth[:, j] = np.sum(self.hitMap[i]._counts * np.repeat(fTmp[np.newaxis, :], hitMap.y.size, axis=0), 1) * denominator
             self.facies[:, i] = np.argmax(faciesWithDepth, 1)
 
 
-    def plotDataPointResults(self,iDnumber):
+    def plotDataPointResults(self, fid, sysPath=None):
         """ Plot the geobipy results for the given data point """
+        R = self.getResults(fid=fid)
+        R.initFigure(forcePlot=True)
+        R.plot(forcePlot=True)
 
 
-    def toVtk(self, fName):
-        """ Write the parameter cross-section to an unstructured grid vtk file """
-        self.sortLocations()
-        self.getX()
-        self.getY()
-        self.getZgrid()
-        self.getElevation()
+    def toVtk(self, fileName, format='binary'):
+        """Write the parameter cross-section to an unstructured grid vtk file 
+        
+        Parameters
+        ----------
+        fileName : str
+            Filename to save to.
+        format : str, optional
+            "ascii" or "binary" format. Ascii is readable, binary is not but results in smaller files.
+
+        """
+        self.getMesh()
         self.getBestParameters()
         self.getMeanParameters()
+        self.getInterfaces()
 
-        # Generate the quad node locations in x
-        x = np.zeros(self.nPoints + 1)
-        x[:-1] = self.x.rolling(2).mean()
-        x[0] = x[1] - 2 * abs(x[1] - self.x[0])
-        x[-1] = x[-2] + 2 * abs(self.x[-1] - x[-2])
+        a = self.best.T
+        b = self.mean.T
+        c = self.interfaces.T
 
-        y = np.zeros(self.nPoints + 1)
-        y[:-1] = self.y.rolling(2).mean()
-        y[0] = y[1] - 2 * abs(y[1] - self.y[0])
-        y[-1] = y[-2] + 2 * abs(self.y[-1] - y[-2])
-        e = np.zeros(self.nPoints + 1)
-        e[:-1] = self.elevation.rolling(2).mean()
-        e[0] = e[1] - 2 * (e[1] - self.elevation[0])
-        e[-1] = e[-2] + 2 * (self.elevation[-1] - e[-2])
+        d = StatArray(1.0 / a, "Best Conductivity", "$\fraq{S}{m}$")
+        e = StatArray(1.0 / b, "Mean Conductivity", "$\fraq{S}{m}$")
 
-        z = self.zGrid
-        nz = z.size
-        nz1 = nz + 1
-        nNodes = (self.nPoints + 1) * nz1
-
-        # Constuct the node locations for the vtk file
-        xNodes = np.repeat(x, nz1)
-        yNodes = np.repeat(y, nz1)
-        zNodes = np.zeros(nNodes)
-        j0 = 0
-        j1 = nz1
-        N = self.nPoints + 1
-        r = range(N)
-        for i in r:
-            zNodes[j0] = e[i]
-            zNodes[j0 + 1:j1] = e[i] - z
-            j0 = j1
-            j1 += nz1
-
-        # Get the number of cells
-        nCells = self.nPoints * nz
-
-
-#        self.getConfidenceRange()
-
-        #TODO: MAKE SURE UNITS ARE CORRECT!
-        bestA = Scalars(self.best.reshape(nCells),name='Best Model Conductivity (S/m)')
-        bestB = Scalars(1.0/(self.best.reshape(nCells)),name='Best Model Resistivity (Ohm.m)')
-        bestC = Scalars(np.log10(self.best.reshape(nCells)),name='Log10 Best Model Conductivity (S/m)')
-        bestD = Scalars(np.log10(1.0/(self.best.reshape(nCells))),name='Log10 Best Model Resistivity (Ohm.m)')
-
-        meanA = Scalars(self.mean.reshape(nCells),name='Mean Model Conductivity (S/m)')
-        meanB = Scalars(1.0/(self.mean.reshape(nCells)),name='Mean Model Resistivity (Ohm.m)')
-        meanC = Scalars(np.log10(self.mean.reshape(nCells)),name='Log10 Mean Model Conductivity (S/m)')
-        meanD = Scalars(np.log10(1.0/(self.mean.reshape(nCells))),name='Log10 Mean Model Resistivity (Ohm.m)')
-#        variance = Scalars(self.range.reshape(nCells,order='F'),name='Confidence Range (Ohm.m)')
-
-        if (self.facies is None):
-            CD = CellData(bestA,bestB,bestC, bestD, meanA,meanB,meanC,meanD)#, variance)
-        else:
-            facies = Scalars(self.facies.reshape(nCells, order='F'), 'Facies')
-            CD = CellData(bestA,bestB,bestC, bestD, meanA,meanB,meanC,meanD, facies)#, variance)
-
-        # Create the cell index into the nodes
-        tmp = np.int32([1, nz1 + 1, nz1, 0])
-        index = np.zeros([nCells, 4], dtype=np.int32)
-        r = range(nCells)
-        iCol = 0
-        iTmp = 0
-        for i in r:
-            index[i, :] = tmp + iCol + i
-            iTmp += 1
-            if iTmp == nz:
-                iTmp = 0
-                iCol += 1
-
-        # Zip the point co-ordinates for the VtkData input
-        points = list(zip(xNodes, yNodes, zNodes))
-
-        vtk = VtkData(UnstructuredGrid(points,quad=index), CD, fName)
-        vtk.tofile(fName, 'binary')
-
+        self.mesh.toVTK(fileName, format=format, cellData=[a, b, c, d, e])
+        
 
     def getAttribute(self, attribute, iDs = None, index=None, **kwargs):
         """ Gets an attribute from the line results file """
@@ -1250,7 +1040,7 @@ class LineResults(myObject):
 #                res.append('currentd')
             elif (low == 'hit map'):
                 res.append('hitmap')
-            elif (low == 'zgrid'):
+            elif (low == 'hitmap/y'):
                 res.append('hitmap/y')
             elif (low == 'doi'):
                 res.append('doi')
@@ -1434,7 +1224,7 @@ class LineResults(myObject):
 #        aFile['savetime'][i] = results.saveTime
 
         # Interpolate the mean and best model to the discretized hitmap
-        results.meanInterp[:] = results.Hitmap.getMeanInterval()
+        results.meanInterp[:] = results.Hitmap.axisMean()
         results.bestInterp[:] = results.bestModel.interpPar2Mesh(results.bestModel.par, results.Hitmap)
 #        results.opacityInterp[:] = results.Hitmap.getOpacity()
 
@@ -1463,8 +1253,8 @@ class LineResults(myObject):
 
         # Add the relative and additive errors
         for j in range(results.nSystems):
-            results.relErr[j].writeHdf(aFile,"relerr"+str(j),index=slic)
-            results.addErr[j].writeHdf(aFile,"adderr"+str(j),index=slic)
+            results.relErr[j].writeHdf(aFile, "relerr" + str(j), index=slic)
+            results.addErr[j].writeHdf(aFile, "adderr" + str(j), index=slic)
 
         # Add the hitmap
         results.Hitmap.writeHdf(aFile,'hitmap',  index=i)
