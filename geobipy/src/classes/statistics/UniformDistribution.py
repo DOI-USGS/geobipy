@@ -118,12 +118,12 @@ class Uniform(baseDistribution):
 #        return Uniform(minT, maxT, ilT)
 
 
-    def getBins(self, N=100):
+    def getBins(self, nBins=100):
         """ Discretizes the min max of the uniform distribution """
         nD = np.size(self.min)
         if (nD > 1):
-            tmp = np.zeros([nD, N])
+            tmp = np.zeros([nD, nBins])
             for i in range(nD):
-                tmp[i, :] = np.linspace(self.min[i], self.max[i], N)
+                tmp[i, :] = np.linspace(self.min[i], self.max[i], nBins)
             return tmp
-        return np.linspace(self.min, self.max, N)
+        return np.linspace(self.min, self.max, nBins)
