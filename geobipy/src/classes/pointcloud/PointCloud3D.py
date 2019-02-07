@@ -10,6 +10,11 @@ from .Point import Point
 from ...base import MPI
 from scipy.spatial import cKDTree
 
+try:
+    from pyvtk import VtkData, Scalars, PolyData, PointData, UnstructuredGrid
+except:
+    pass
+
 
 class PointCloud3D(myObject):
     """3D Point Cloud with x,y,z co-ordinates
@@ -26,6 +31,8 @@ class PointCloud3D(myObject):
         The y co-ordinates. Default is zeros of size N
     z : array_like or geobipy.StatArray, optional
         The z co-ordinates. Default is zeros of size N
+    units : str, optional
+        The units of the co-ordinates.  Default is "m"
 
     Returns
     -------
@@ -34,40 +41,40 @@ class PointCloud3D(myObject):
     
     """
 
-    def __init__(self, N=0, x=None, y=None, z=None):
+    def __init__(self, nPoints=0, x=None, y=None, z=None, units="m"):
         """ Initialize the class """
 
         # Number of points in the cloud
-        self.N = N
+        self._nPoints = nPoints
         # StatArray of the x co-ordinates
         if (x is None):
-            self.x = StatArray(self.N, "Easting", "m")
+            self.x = StatArray(self._nPoints, "Easting", units)
         else:
-            assert x.size == N, ValueError("x must have size {}".format(N))
+            assert x.size == nPoints, ValueError("x must have size {}".format(nPoints))
             if (isinstance(x, StatArray)):
-                self.x = x.deepopy()
+                self.x = x.deepcopy()
             else:
-                self.x = StatArray(x, "Easting", "m")
+                self.x = StatArray(x, "Easting", units)
 
         # StatArray of the y co-ordinates
         if (y is None):
-            self.y = StatArray(self.N, "Northing", "m")
+            self.y = StatArray(self._nPoints, "Northing", units)
         else:
-            assert y.size == N, ValueError("y must have size {}".format(N))
+            assert y.size == nPoints, ValueError("y must have size {}".format(nPoints))
             if isinstance(y, StatArray):
                 self.y = y.deepcopy()
             else:
-                self.y = StatArray(y, "Northing", "m")
+                self.y = StatArray(y, "Northing", units)
                 
         # StatArray of the z co-ordinates
         if (z is None):
-            self.z = StatArray(self.N, "Height", "m")
+            self.z = StatArray(self._nPoints, "Height", units)
         else:
-            assert z.size == N, ValueError("z must have size {}".format(N))
+            assert z.size == nPoints, ValueError("z must have size {}".format(nPoints))
             if isinstance(z, StatArray):
                 self.z = z.deepcopy()
             else:
-                self.z = StatArray(z, "Height", "m")
+                self.z = StatArray(z, "Height", units)
 
         # KdTree
         self.kdtree = None
@@ -78,7 +85,7 @@ class PointCloud3D(myObject):
 
 
     def __getitem__(self, i):
-        """Define item getter
+        """Define get item
         
         Parameters
         ----------
@@ -87,8 +94,15 @@ class PointCloud3D(myObject):
 
         out : geobipy.PointCloud3D
             The potentially smaller point cloud
+
         """
         return PointCloud3D(np.size(i), x=self.x[i], y=self.y[i], z=self.z[i])
+
+    
+    @property
+    def nPoints(self):
+        """Get the number of points"""
+        return self._nPoints
 
 
     def getBounds(self):
@@ -118,148 +132,48 @@ class PointCloud3D(myObject):
         return Point(self.x[i], self.y[i], self.z[i])
 
 
-    def summary(self, out=False):
-        """ Display a summary of the 3D Point Cloud """
-        msg = "3D Point Cloud: \n"
-        msg += "Number of Points: :" + str(self.N) + '\n'
-        msg += self.x.summary(True)
-        msg += self.y.summary(True)
-        msg += self.z.summary(True)
-        if (out):
-            return msg
-        print(msg)
-
-
-    def maketest(self, nPoints):
-        """ Creates a small test of random points """
-        PointCloud3D.__init__(self, nPoints)
-        self.x[:] = (2.0 * np.random.rand(nPoints)) - 1.0
-        self.y[:] = (2.0 * np.random.rand(nPoints)) - 1.0
-        self.z[:] = cf.cosSin1(self.x, self.y, 1.0, 1.0)
-
-
-    def read(self, fname, nHeaders=0, cols=range(3)):
-        """ Reads x y z co-ordinates from an ascii file
-        if cols is not given, the first three columns are read.
-        Otherwise specify with cols=[2,3,4] """
-        assert np.size(cols) == 3, 'size(cols) must equal 3'
-        nLines = fIO.getNlines(fname, nHeaders)
-        # Initialize the Data
-        self.__init__(nLines)
-        # Read each line assign the values to the class
-        tmp = fIO.getHeaderNames(fname, cols)
-        with open(fname) as f:
-            self.x.name = tmp[0]
-            self.y.name = tmp[1]
-            self.z.name = tmp[2]
-            fIO.skipLines(f, nHeaders)  # Skip header lines
-            for j, line in enumerate(f):  # For each line in the file
-                values = fIO.getRealNumbersfromLine(line, cols)  # grab the requested entries
-                # Assign values into object
-                self.x[j] = values[0]
-                self.y[j] = values[1]
-                self.z[j] = values[2]
-
-
-    def scatter2D(self, **kwargs):
-        """Create a 2D scatter plot using the x, y coordinates of the point cloud.
-
-        Can take any other matplotlib arguments and keyword arguments e.g. markersize etc.
+    def getXAxis(self, xAxis='x'):
+        """Obtain the xAxis against which to plot values.
 
         Parameters
         ----------
-        c : 1D array_like or StatArray, optional
-            Colour values of the points, default is the height of the points
-        i : sequence of ints, optional
-            Plot a subset of x, y, c, using the indices in i.
-        
-        See Also
-        --------
-        geobipy.customPlots.Scatter2D : For additional keyword arguments you may use.
+        xAxis : str
+            If xAxis is 'index', returns numpy.arange(self.nPoints)
+            If xAxis is 'x', returns self.x
+            If xAxis is 'y', returns self.y
+            If xAxis is 'z', returns self.z
+            If xAxis is 'r2d', returns cumulative distance along the line in 2D using x and y.
+            If xAxis is 'r3d', returns cumulative distance along the line in 3D using x, y, and z.
+
+        Returns
+        -------
+        out : array_like
+            The requested xAxis.
 
         """
+        assert xAxis in ['index', 'x', 'y', 'z', 'r2d', 'r3d'], Exception("xAxis must be either 'index', x', 'y', 'z', 'r2d', or 'r3d'")
+        if xAxis == 'index':
+            return StatArray(np.arange(self.x.size), name="Index")
+        elif xAxis == 'x':
+            return self.x
+        elif xAxis == 'y':
+            return self.y
+        elif xAxis == 'z':
+            return self.z
+        elif xAxis == 'r2d':
+            r = np.diff(self.x)**2.0
+            r += np.diff(self.y)**2.0
+            distance = StatArray(np.zeros(self.x.size), 'Distance', self.x.units)
+            distance[1:] = np.cumsum(np.sqrt(r))
+            return distance
+        elif xAxis == 'r3d':
+            r = np.diff(self.x)**2.0
+            r += np.diff(self.y)**2.0
+            r += np.diff(self.z)**2.0
+            distance = StatArray(np.zeros(self.x.size), 'Distance', self.x.units)
+            distance[1:] = np.cumsum(np.sqrt(r))
+            return distance
 
-        if (not 'linewidth' in kwargs):
-            kwargs['linewidth'] = 0.1
-        if (not 'c' in kwargs):
-            kwargs['c'] = self.z
-        ax = cP.scatter2D(self.x, y=self.y, **kwargs)
-        return ax
-
-
-    def setKdTree(self, nDims=3):
-        """Creates a k-d tree of the point co-ordinates
-        
-        Parameters
-        ----------
-        nDims : int
-            Either 2 or 3 to exclude or include the vertical co-ordinate
-        
-        """
-        if (nDims == 2):
-            tmp = np.column_stack((self.x, self.y))
-        elif (nDims == 3):
-            tmp = np.column_stack((self.x, self.y, self.z))
-        self.kdtree = cKDTree(tmp)
-
-
-    def nearest(self, x, k=1, eps=0, p=2, radius=np.inf):
-        """Obtain the k nearest neighbours
-
-        See Also
-        --------
-        See scipy.spatial.cKDTree.query for argument descriptions and return types
-
-        """
-
-        assert (not self.kdtree is None), TypeError('kdtree has not been set, use self.setKdTree()')
-        return self.kdtree.query(x, k, eps, p, distance_upper_bound=radius)
-
-
-    def mapPlot(self, dx=None, dy=None, extrapolate=None, i=None, **kwargs):
-        """ Create a map of a parameter """
-
-        cTmp = kwargs.pop('c',self.z)
-        
-        mask = kwargs.pop('mask',False)
-        
-        clip = kwargs.pop('clip',True)
-        
-        method = kwargs.pop('method', "ct")
-        method = method.lower()
-              
-        
-        if method == 'ct':
-            x,y,vals = self.interpCloughTocher(cTmp, dx=dx, dy=dy, mask=mask, clip=clip, extrapolate=extrapolate, i=i)
-        elif method == 'mc':
-            x,y,vals = self.interpMinimumCurvature(cTmp, dx, dy, mask=mask, clip=clip, i=i)
-        else:
-            assert False, ValueError("method must be either 'ct' or 'mc' ")  
-                        
-        ax = cP.pcolor(vals,x,y, **kwargs)
-        cP.xlabel(cf.getNameUnits(self.x))
-        cP.ylabel(cf.getNameUnits(self.y))
-        return ax
-
-
-#    def interpRBF(self, values, nDims, dx = None, function = None, epsilon = None, smooth = None, norm = None, **kwargs):
-#        """ Interpolate values to a grid using radial basis functions """
-#        # Get the bounding box
-#        self.getBounds()
-#        print(self.bounds)
-#        # Get the discretization
-#        if (dx is None):
-#            tmp = np.min((self.bounds[1]-self.bounds[0], self.bounds[3]-self.bounds[2]))
-#            dx = 0.01 * tmp
-#        assert dx > 0.0, ValueError("Interpolation cell size must be positive!")
-#
-#        if (nDims == 2):
-#            z = np.ones(self.N)
-#        elif (nDims == 3):
-#            z = self.z
-#
-#        x,y,vals = interpolation.RBF(dx, self.bounds, self.x, self.y, z, values)
-#        return x, y, vals
 
     def interpCloughTocher(self, values, dx = None, dy=None, mask = False, clip = None, extrapolate=None, i=None):
         """ Interpolate values at the points to a grid """
@@ -320,7 +234,267 @@ class PointCloud3D(myObject):
         assert dy > 0.0, ValueError("dy must be positive!")
                 
         x,y,vals = interpolation.minimumCurvature(self.x, self.y, values, self.bounds, dx, dy, mask=mask, iterations=2000, tension=0.25, accuracy=0.01)
-        return x, y, vals        
+        return x, y, vals
+
+
+    def mapPlot(self, dx=None, dy=None, extrapolate=None, i=None, **kwargs):
+        """ Create a map of a parameter """
+
+        cTmp = kwargs.pop('c',self.z)
+        
+        mask = kwargs.pop('mask',False)
+        
+        clip = kwargs.pop('clip',True)
+        
+        method = kwargs.pop('method', "ct")
+        method = method.lower()
+              
+        
+        if method == 'ct':
+            x,y,vals = self.interpCloughTocher(cTmp, dx=dx, dy=dy, mask=mask, clip=clip, extrapolate=extrapolate, i=i)
+        elif method == 'mc':
+            x,y,vals = self.interpMinimumCurvature(cTmp, dx, dy, mask=mask, clip=clip, i=i)
+        else:
+            assert False, ValueError("method must be either 'ct' or 'mc' ")  
+                        
+        ax = cP.pcolor(vals,x,y, **kwargs)
+        cP.xlabel(cf.getNameUnits(self.x))
+        cP.ylabel(cf.getNameUnits(self.y))
+        return ax
+
+
+    def maketest(self, nPoints):
+        """ Creates a small test of random points """
+        PointCloud3D.__init__(self, nPoints)
+        self.x[:] = (2.0 * np.random.rand(nPoints)) - 1.0
+        self.y[:] = (2.0 * np.random.rand(nPoints)) - 1.0
+        self.z[:] = cf.cosSin1(self.x, self.y, 1.0, 1.0)
+
+
+    def nearest(self, x, k=1, eps=0, p=2, radius=np.inf):
+        """Obtain the k nearest neighbours
+
+        See Also
+        --------
+        See scipy.spatial.cKDTree.query for argument descriptions and return types
+
+        """
+
+        assert (not self.kdtree is None), TypeError('kdtree has not been set, use self.setKdTree()')
+        return self.kdtree.query(x, k, eps, p, distance_upper_bound=radius)
+
+
+    def plot(self, values, xAxis='index', **kwargs):
+        """Line plot of values against a co-ordinate.
+
+        Parameters
+        ----------
+        values : array_like
+            Values to plot against a co-ordinate
+        xAxis : str
+            If xAxis is 'index', returns numpy.arange(self.nPoints)
+            If xAxis is 'x', returns self.x
+            If xAxis is 'y', returns self.y
+            If xAxis is 'z', returns self.z
+            If xAxis is 'r2d', returns cumulative distance along the line in 2D using x and y.
+            If xAxis is 'r3d', returns cumulative distance along the line in 3D using x, y, and z.
+
+        Returns
+        -------
+        ax : matplotlib.axes
+            Plot axes handle
+
+        See Also
+        --------
+        geobipy.customPlots.plot : For additional keyword arguments
+
+        """
+        x = self.getXAxis(xAxis)
+        ax = cP.plot(x, values, **kwargs)
+        return ax
+
+
+    def read(self, fileName, nHeaderLines=0, columnIndices=range(3)):
+        """Reads x y z co-ordinates from an ascii csv file.
+
+        Parameters
+        ----------
+        fileName : str
+            Path to the file to read from.
+        nHeaderLines : int, optional
+            Number of header line to skips at the top.
+        columnIndices : ints, optional
+            Size of 3, each int corresponds to the column containing x, y, z.
+        
+        """
+
+        assert np.size(columnIndices) == 3, ValueError('size of columnIndices must equal 3')
+
+        nLines = fIO.getNlines(fileName, nHeaderLines)
+        # Initialize the Data
+        self.__init__(nLines)
+        # Read each line assign the values to the class
+        tmp = fIO.getHeaderNames(fileName, columnIndices)
+        self.x.name = tmp[0]
+        self.y.name = tmp[1]
+        self.z.name = tmp[2]
+        with open(fileName) as f:
+            fIO.skipLines(f, nHeaderLines)  # Skip header lines
+            for j, line in enumerate(f):
+                values = fIO.getRealNumbersfromLine(line, columnIndices)  # grab the requested entries
+                # Assign values into object
+                self.x[j] = values[0]
+                self.y[j] = values[1]
+                self.z[j] = values[2]
+
+
+    def fileInformation(self):
+        """Description of PointCloud3D file.
+        
+        Returns
+        -------
+        out : str
+            File description.
+            
+        """
+
+        tmp = ("The file is structured using columns with the first line containing a header line.\n"
+                "When reading, the columnIndices are used to read the x, y, z co-ordinates.\n"
+                "The corresponding entries in the header are used to give the co-ordinates their label. ")
+              
+        return tmp
+
+
+    def scatter2D(self, **kwargs):
+        """Create a 2D scatter plot using the x, y coordinates of the point cloud.
+
+        Can take any other matplotlib arguments and keyword arguments e.g. markersize etc.
+
+        Parameters
+        ----------
+        c : 1D array_like or StatArray, optional
+            Colour values of the points, default is the height of the points
+        i : sequence of ints, optional
+            Plot a subset of x, y, c, using the indices in i.
+        
+        See Also
+        --------
+        geobipy.customPlots.Scatter2D : For additional keyword arguments you may use.
+
+        """
+
+        kwargs['linewidth'] = kwargs.pop('linewidth', 0.1)
+        kwargs['c'] = kwargs.pop('c', self.z)
+        ax = cP.scatter2D(self.x, y=self.y, **kwargs)
+        return ax
+
+
+    def setKdTree(self, nDims=3):
+        """Creates a k-d tree of the point co-ordinates
+        
+        Parameters
+        ----------
+        nDims : int
+            Either 2 or 3 to exclude or include the vertical co-ordinate
+        
+        """
+        self.kdtree = None
+        if (nDims == 2):
+            tmp = np.column_stack((self.x, self.y))
+        elif (nDims == 3):
+            tmp = np.column_stack((self.x, self.y, self.z))
+        self.kdtree = cKDTree(tmp)
+
+
+    def summary(self, out=False):
+        """ Display a summary of the 3D Point Cloud """
+        msg = ("3D Point Cloud: \n"
+              "Number of Points: : {} \n {} {} {}").format(self._nPoints, self.x.summary(True), self.y.summary(True), self.z.summary(True))
+        if (out):
+            return msg
+        print(msg)
+
+
+#    def interpRBF(self, values, nDims, dx = None, function = None, epsilon = None, smooth = None, norm = None, **kwargs):
+#        """ Interpolate values to a grid using radial basis functions """
+#        # Get the bounding box
+#        self.getBounds()
+#        print(self.bounds)
+#        # Get the discretization
+#        if (dx is None):
+#            tmp = np.min((self.bounds[1]-self.bounds[0], self.bounds[3]-self.bounds[2]))
+#            dx = 0.01 * tmp
+#        assert dx > 0.0, ValueError("Interpolation cell size must be positive!")
+#
+#        if (nDims == 2):
+#            z = np.ones(self.N)
+#        elif (nDims == 3):
+#            z = self.z
+#
+#        x,y,vals = interpolation.RBF(dx, self.bounds, self.x, self.y, z, values)
+#        return x, y, vals
+
+
+
+
+    def vtkStructure(self):
+        """Generates a vtk mesh structure that can be used in a vtk file.
+
+        Returns
+        -------
+        out : pyvtk.VtkData
+            Vtk data structure
+
+        """
+
+        nodes = np.vstack([self.x, self.y, self.z]).T
+
+        vtk = VtkData(UnstructuredGrid(nodes, vertex=np.arange(self._nPoints)))
+        vtk.point_data.append(Scalars(self.z, self.z.getNameUnits()))
+        return vtk
+
+
+    def toVTK(self, fileName, pointData=None, format='binary'):
+        """Save the PointCloud3D to a VTK file.
+
+        Parameters
+        ----------
+        fileName : str
+            Filename to save to.
+        pointData : geobipy.StatArray or list of geobipy.StatArray, optional
+            Data at each point in the point cloud. Each entry is saved as a separate 
+            vtk attribute.
+        format : str, optional
+            "ascii" or "binary" format. Ascii is readable, binary is not but results in smaller files.
+
+        Raises
+        ------
+        TypeError
+            If pointData is not a geobipy.StatArray or list of them.
+        ValueError
+            If any pointData entry does not have size equal to the number of points.
+        ValueError
+            If any StatArray does not have a name or units. This is needed for the vtk attribute.
+
+        """
+
+        vtk = self.vtkStructure()
+
+        if not pointData is None:
+            assert isinstance(pointData, (StatArray, list)), TypeError("pointData must a geobipy.StatArray or a list of them.")
+            if isinstance(pointData, list):
+                for p in pointData:
+                    assert isinstance(p, StatArray), TypeError("pointData entries must be a geobipy.StatArray")
+                    assert p.size == self.nPoints, ValueError("pointData entries must have size {}".format(self.nPoints))
+                    assert p.hasLabels(), ValueError("StatArray needs a name")
+                    vtk.point_data.append(Scalars(p, p.getNameUnits()))
+            else:
+                assert pointData.size == self.nPoints, ValueError("pointData entries must have sizd {}".format(self.nPoints))
+                assert pointData.hasLabels(), ValueError("StatArray needs a name")
+                vtk.point_data.append(Scalars(pointData, pointData.getNameUnits()))
+
+        vtk.tofile(fileName, format=format)
+        
 
 
     def Bcast(self, world, root=0):
@@ -339,7 +513,7 @@ class PointCloud3D(myObject):
             PointCloud3D broadcast to each rank
 
         """
-        N = MPI.Bcast(self.N, world, root=root)
+        N = MPI.Bcast(self._nPoints, world, root=root)
         this = PointCloud3D(N)
         this.x = self.x.Bcast(world, root=root)
         this.y = self.y.Bcast(world, root=root)
