@@ -81,13 +81,13 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
         Parameters
         ----------
         xAxis : str
-            If axis is 'x', the horizontal axis uses self.x
-            If axis is 'y', the horizontal axis uses self.y
-            If axis is 'r', the horizontal axis uses cumulative distance along the line.
+            If xAxis is 'x', the horizontal xAxis uses self.x
+            If xAxis is 'y', the horizontal xAxis uses self.y
+            If xAxis is 'r', the horizontal xAxis uses cumulative distance along the line.
 
         """
 
-        assert xAxis in ['x', 'y', 'r'], Exception("axis must be either 'x', 'y' or 'r'")
+        assert xAxis in ['x', 'y', 'r'], Exception("xAxis must be either 'x', 'y' or 'r'")
         if xAxis == 'x':
             xMesh = np.repeat(self.x.cellEdges[np.newaxis, :], self.z.nCells+1, 0)
         elif xAxis == 'y':
@@ -121,10 +121,10 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
         ----------
         values : array_like or StatArray
             A 2D array of colour values.
-        axis : str
-            If axis is 'x', the horizontal axis uses self.x
-            If axis is 'y', the horizontal axis uses self.y
-            If axis is 'r', the horizontal axis uses cumulative distance along the line
+        xAxis : str
+            If xAxis is 'x', the horizontal xAxis uses self.x
+            If xAxis is 'y', the horizontal xAxis uses self.y
+            If xAxis is 'r', the horizontal xAxis uses cumulative distance along the line
 
         Other Parameters
         ----------------

@@ -408,12 +408,12 @@ class LineResults(myObject):
 
         self.getDataLocations()
 
-        axis = kwargs.pop('axis', 'x')
+        xAxis = kwargs.pop('xAxis', 'x')
         labels = kwargs.pop('labels', True)
         kwargs['color'] = kwargs.pop('color','k')
         kwargs['linewidth'] = kwargs.pop('linewidth',0.5)
 
-        xtmp = self.mesh.getXAxis(axis, centres=False)
+        xtmp = self.mesh.getXAxis(xAxis, centres=False)
 
         cP.plot(xtmp, self.z.edges() + self.elevation.edges(), **kwargs)
 
@@ -443,12 +443,12 @@ class LineResults(myObject):
 
         self.getMesh()
 
-        axis = kwargs.pop('axis', 'x')
+        xAxis = kwargs.pop('xAxis', 'x')
         labels = kwargs.pop('labels', True)
         kwargs['color'] = kwargs.pop('color','k')
         kwargs['linewidth'] = kwargs.pop('linewidth',0.5)
 
-        self.mesh.plotHeight(axis=axis, **kwargs)
+        self.mesh.plotHeight(xAxis=xAxis, **kwargs)
 
         # if (labels):
         #     cP.xlabel(xtmp.getNameUnits())
@@ -461,9 +461,9 @@ class LineResults(myObject):
         self.getMesh()
         tmp = self.getAttribute('elevation histogram')
 
-        axis = kwargs.pop('axis', 'x')
+        xAxis = kwargs.pop('xAxis', 'x')
 
-        xtmp = self.mesh.getXAxis(axis)
+        xtmp = self.mesh.getXAxis(xAxis)
 
         c = tmp.counts.T
         c = np.divide(c, np.max(c,0), casting='unsafe')
@@ -504,13 +504,13 @@ class LineResults(myObject):
         self.getMesh()
         self.getKlayers()
         
-        axis = kwargs.pop('axis', 'x')
+        xAxis = kwargs.pop('xAxis', 'x')
         kwargs['marker'] = kwargs.pop('marker','o')
         kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor','k')
         kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth', 1.0)
         kwargs['linestyle'] = kwargs.pop('linestyle','none')
 
-        xtmp = self.mesh.getXAxis(axis)
+        xtmp = self.mesh.getXAxis(xAxis)
         self.k.plot(xtmp, **kwargs)
         # cP.ylabel(self.k.getNameUnits())
         cP.title('# of Layers in Best Model')
@@ -522,9 +522,9 @@ class LineResults(myObject):
         self.getMesh()
         tmp = self.getAttribute('layer histogram')
 
-        axis = kwargs.pop('axis', 'x')
+        xAxis = kwargs.pop('xAxis', 'x')
 
-        xtmp = self.mesh.getXAxis(axis)
+        xtmp = self.mesh.getXAxis(xAxis)
 
         c = tmp.counts.T
         c = np.divide(c, np.max(c,0), casting='unsafe')
@@ -537,7 +537,7 @@ class LineResults(myObject):
         self.getAdditiveError()
         self.getNsys()
 
-        axis = kwargs.pop('axis', 'x')
+        xAxis = kwargs.pop('xAxis', 'x')
         m = kwargs.pop('marker','o')
         ms = kwargs.pop('markersize',5)
         mfc = kwargs.pop('markerfacecolor',None)
@@ -546,7 +546,7 @@ class LineResults(myObject):
         ls = kwargs.pop('linestyle','-')
         lw = kwargs.pop('linewidth',1.0)
 
-        xtmp = self.mesh.getXAxis(axis, centres=True)
+        xtmp = self.mesh.getXAxis(xAxis, centres=True)
 
         if (self.nSys > 1):
             r = range(self.nSys)
@@ -575,9 +575,9 @@ class LineResults(myObject):
         self.getNsys()
         tmp=self.getAttribute('Additive error histogram')
 
-        axis = kwargs.pop('axis', 'x')
+        xAxis = kwargs.pop('xAxis', 'x')
 
-        xtmp = self.mesh.getXAxis(axis)
+        xtmp = self.mesh.getXAxis(xAxis)
 
         if self.nSys > 1:
             c = tmp[system].counts.T
@@ -652,9 +652,9 @@ class LineResults(myObject):
 
         tmp=self.getAttribute('Relative error histogram')
 
-        axis = kwargs.pop('axis', 'x')
+        xAxis = kwargs.pop('xAxis', 'x')
 
-        xtmp = self.mesh.getXAxis(axis)
+        xtmp = self.mesh.getXAxis(xAxis)
 
         if self.nSys > 1:
             c = tmp[system].counts.T
@@ -674,7 +674,7 @@ class LineResults(myObject):
         self.getRelativeError()
         self.getNsys()
 
-        axis = kwargs.pop('axis', 'x')
+        xAxis = kwargs.pop('xAxis', 'x')
         kwargs['marker'] = kwargs.pop('marker','o')
         kwargs['markersize'] = kwargs.pop('markersize',5)
         kwargs['markerfacecolor'] = kwargs.pop('markerfacecolor',None)
@@ -683,7 +683,7 @@ class LineResults(myObject):
         kwargs['linestyle'] = kwargs.pop('linestyle','-')
         kwargs['linewidth'] = kwargs.pop('linewidth',1.0)
 
-        xtmp = self.mesh.getXAxis(axis)
+        xtmp = self.mesh.getXAxis(xAxis)
 
         if (self.nSys > 1):
             r = range(self.nSys)
@@ -704,7 +704,7 @@ class LineResults(myObject):
         self.getMesh()
         self.getTotalError()
 
-        axis = kwargs.pop('axis', 'x')
+        xAxis = kwargs.pop('xAxis', 'x')
 
         kwargs['marker'] = kwargs.pop('marker','o')
         kwargs['markersize'] = kwargs.pop('markersize',5)
@@ -714,7 +714,7 @@ class LineResults(myObject):
         kwargs['linestyle'] = kwargs.pop('linestyle','-')
         kwargs['linewidth'] = kwargs.pop('linewidth',1.0)
 
-        xtmp = self.mesh.getXAxis(axis)
+        xtmp = self.mesh.getXAxis(xAxis)
 
 #        if (self.nSys > 1):
 #            r = range(self.nSys)
