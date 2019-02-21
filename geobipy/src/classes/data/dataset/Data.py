@@ -7,6 +7,7 @@ from ....base import fileIO as fIO
 from ....base import customFunctions as cf
 from ....base import customPlots as cP
 from ...pointcloud.PointCloud3D import PointCloud3D
+from ..datapoint.DataPoint import DataPoint
 from ....classes.core.myObject import myObject
 from ....base import MPI as myMPI
 import matplotlib.pyplot as plt
@@ -21,7 +22,7 @@ class Data(PointCloud3D):
     """Class defining a set of Data.
 
     
-    Data(nPoints, nChannel, units)
+    Data(nPoints, nChannelsPerSystem, x, y, z, data, std, predictedData, dataUnits, channelNames)
 
     Parameters
     ----------
@@ -58,7 +59,7 @@ class Data(PointCloud3D):
 
     """
 
-    def __init__(self, nPoints=1, nChannelsPerSystem=1, x=None, y=None, z=None, data=None, std=None, predictedData=None, dataUnits=None, channelNames=None):
+    def __init__(self, nPoints=1, nChannelsPerSystem=1, x=None, y=None, z=None, elevation=None, data=None, std=None, predictedData=None, dataUnits=None, channelNames=None):
         """ Initialize the Data class """
 
         self.nSystems = np.size(nChannelsPerSystem)
@@ -68,19 +69,26 @@ class Data(PointCloud3D):
         self._systemOffset = np.append(0, np.cumsum(self.nChannelsPerSystem))
         PointCloud3D.__init__(self, nPoints, x, y, z)
 
+        # StatArray of data
+        if not elevation is None:
+            assert np.size(elevation) == nPoints, ValueError("elevation must have size {}".format(nPoints))
+            self._elevation = StatArray(elevation, order='F')
+        else:
+            self._elevation = StatArray(nPoints, "Elevation", "m")
+
 
         dataShape = [nPoints, self.nChannels]
         # StatArray of data
         if not data is None:
-            assert all(np.shape(data) == dataShape), ValueError("data must have shape {}".format(dataShape))
+            assert np.allclose(np.shape(data), dataShape), ValueError("data must have shape {}".format(dataShape))
             self._data = StatArray(data, order='F')
         else:
             self._data = StatArray([nPoints, self.nChannels], "Data", dataUnits, order='F')
 
         # StatArray of Standard Deviations
         if not std is None:
-            assert all(np.shape(std) == dataShape), ValueError("std must have shape {}".format(dataShape))
-            assert all(std > 0.0), ValueError("Cannot assign standard deviations that are <= 0.0.")
+            assert np.allclose(np.shape(std), dataShape), ValueError("std must have shape {}".format(dataShape))
+            assert np.all(std > 0.0), ValueError("Cannot assign standard deviations that are <= 0.0.")
             self._std = StatArray(std, order='F')
         else:
             self._std = StatArray(np.ones([nPoints, self.nChannels]), "Standard Deviation", dataUnits, order='F')
@@ -88,7 +96,7 @@ class Data(PointCloud3D):
         
         # Create predicted data
         if not predictedData is None:
-            assert all(np.shape(predictedData) == dataShape), ValueError("predictedData must have shape {}".format(dataShape))
+            assert np.allclose(np.shape(predictedData), dataShape), ValueError("predictedData must have shape {}".format(dataShape))
             self._predictedData = StatArray(predictedData, order='F')
         else:
             self._predictedData = StatArray([nPoints, self.nChannels], "Predicted Data", dataUnits, order='F')
@@ -126,6 +134,26 @@ class Data(PointCloud3D):
     def data(self):
         """The data. """
         return self._data
+
+    @property
+    def deltaD(self):
+        """Get the difference between the predicted and observed data,
+
+        .. math::
+            \delta \mathbf{d} = \mathbf{d}^{pre} - \mathbf{d}^{obs}.
+
+        Returns
+        -------
+        out : StatArray
+            The residual between the active observed and predicted data.
+
+        """
+        return self._predictedData - self._data
+
+    @property
+    def elevation(self):
+        """The elevation. """
+        return self._elevation
 
     @property
     def nChannels(self):
@@ -183,22 +211,6 @@ class Data(PointCloud3D):
                 vtk.point_data.append(Scalars(tmp[:, i], "{} {}".format(self.channelNames[i], tmp.getNameUnits())))
                     
 
-    @property
-    def deltaD(self):
-        """Get the difference between the predicted and observed data,
-
-        .. math::
-            \delta \mathbf{d} = \mathbf{d}^{pre} - \mathbf{d}^{obs}.
-
-        Returns
-        -------
-        out : StatArray
-            The residual between the active observed and predicted data.
-
-        """
-        return self._predictedData - self._data
-
-
     def dataMisfit(self, squared=False):
         """Compute the :math:`L_{2}` norm squared misfit between the observed and predicted data
 
@@ -223,7 +235,7 @@ class Data(PointCloud3D):
 
     def __getitem__(self, i):
         """ Define item getter for Data """
-        out = Data(np.size(i), nChannelsPerSystem=1, x=self.x[i], y=self.y[i], z=self.z[i], data=self._data[i, :], std=self._std[i, :], predictedData=self._predictedData[i, :], channelNames=self._channelNames)
+        out = Data(np.size(i), nChannelsPerSystem=1, x=self.x[i], y=self.y[i], z=self.z[i], elevation=self.elevation[i], data=self._data[i, :], std=self._std[i, :], predictedData=self._predictedData[i, :], channelNames=self._channelNames)
         return out
 
 
@@ -264,6 +276,25 @@ class Data(PointCloud3D):
         else:
             assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
             return StatArray(self._data[:, self._systemOffset[system] + channel], self._channelNames[self._systemOffset[system] + channel], self._data.units)
+
+
+    def getDataPoint(self, i):
+        """Get the ith data point from the data set 
+        
+        Parameters
+        ----------
+        i : int
+            The data point to get
+            
+        Returns
+        -------
+        out : geobipy.DataPoint
+            The data point
+            
+        """
+        assert np.size(i) == 1, ValueError("i must be a single integer")
+        assert 0 <= i <= self.nPoints, ValueError("Must have 0 <= i <= {}".format(self.nPoints))
+        return DataPoint(self.nChannelsPerSystem, self.x[i], self.y[i], self.z[i], self.elevation[i], self._data[i, :], self._std[i, :], self._predictedData[i, :], channelNames=self.channelNames)
 
 
     def getLine(self, line):
@@ -543,13 +574,13 @@ class Data(PointCloud3D):
                 self._data[j, ] = values[3:]
 
 
-    def summary(self):
+    def summary(self, out=False):
         """ Display a summary of the Data """
-        PointCloud3D.summary(self)
-        out = ("Data:          : \n"
-        "# of Channels: {} \n"
-        "# of Total Data: {} \n").format(self.nChannels, self.nPoints * self.nChannels)
-        print(out)
+        msg = ("{}"
+              "Data:          : \n"
+              "# of Channels: {} \n"
+              "# of Total Data: {} \n").format(super().summary(True), self.nChannels, self.nPoints * self.nChannels)
+        return msg if out else print(out)
 
 
     def updateErrors(self, relativeErr, additiveErr, system=None):
@@ -641,18 +672,18 @@ class Data(PointCloud3D):
         
         """
 
-        pc3d = None
         pc3d = PointCloud3D.Bcast(self, world, root=root)
-        nChannels = myMPI.Bcast(self.nChannels, world, root=root)
-        this = Data(pc3d.nPoints, nChannels)
-        this.x = pc3d.x
-        this.y = pc3d.y
-        this.z = pc3d.z
+        nPoints = myMPI.Bcast(self.nPoints, world, root=root)
+        ncps = myMPI.Bcast(self.nChannelsPerSystem, world, root=root)
+        x = self.x.Bcast(world)
+        y = self.y.Bcast(world)
+        z = self.z.Bcast(world)
+        e = self.elevation.Bcast(world)
+        d = self._data.Bcast(world)
+        s = self._std.Bcast(world)
+        p = self._predictedData.Bcast(world)
 
-        # this.set = self.set.Bcast(world, root=root)
-        this._data = self._data.Bcast(world, root=root)
-        this._std = self._std.Bcast(world, root=root)
-        return this
+        return Data(nPoints, ncps, x=x, y=y, z=z,elevation=e, data=d, std=s, predictedData=p)
 
 
     def Scatterv(self, starts, chunks, world, root=0):
@@ -675,13 +706,12 @@ class Data(PointCloud3D):
             The Data distributed amongst ranks.
             
         """
-        pc3d = None
-        pc3d = PointCloud3D.Scatterv(self, starts, chunks, world, root=root)
-        nChannelsPerSystem = myMPI.Bcast(self.nChannelsPerSystem, world, root=root)
-        this = Data(pc3d.nPoints, nChannelsPerSystem)
-        this.x = pc3d.x
-        this.y = pc3d.y
-        this.z = pc3d.z
-        this._data = self._data.Scatterv(starts, chunks, world, root=root)
-        this._std = self._std.Scatterv(starts, chunks, world, root=root)
-        return this
+        ncps = myMPI.Bcast(self.nChannelsPerSystem, world, root=root)
+        x = self.x.Scatterv(starts, chunks, world, root=root)
+        y = self.y.Scatterv(starts, chunks, world, root=root)
+        z = self.z.Scatterv(starts, chunks, world, root=root)
+        e = self.elevation.Scatterv(starts, chunks, world, root=root)
+        d = self._data.Scatterv(starts, chunks, world, root=root)
+        s = self._std.Scatterv(starts, chunks, world, root=root)
+        p = self._predictedData.Scatterv(starts, chunks, world, root=root)
+        return Data(chunks[world.rank], ncps, x=x, y=y, z=z, elevation=e, data=d, std=s, predictedData=p)
