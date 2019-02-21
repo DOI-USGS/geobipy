@@ -86,7 +86,7 @@ class TdemData(Data):
         # StatArray of the id number
         self.id = StatArray(self.nPoints, 'ID Number')
         # StatArray of the elevation
-        self.elevation = StatArray(self.nPoints, 'Elevation', 'm')
+        self._elevation = StatArray(self.nPoints, 'Elevation', 'm')
 
         # StatArray of Transmitter loops
         self.T = StatArray(self.nPoints, 'Transmitter Loops', dtype=CircularLoop)
@@ -244,7 +244,6 @@ class TdemData(Data):
         iSys = self._systemIndices(0)
         self._data[:, iSys] = values[:, iData]
         # If the data error columns are given, assign them
-        print(iS)
         if (iS[0] is None):
             self._std[:, iSys] = 0.1 * self._data[:, iSys]
         else:
@@ -282,8 +281,7 @@ class TdemData(Data):
         self.system = np.ndarray(nSys, dtype=TdemSystem)
 
         for i in range(nSys):
-            self.system[i] = TdemSystem()
-            self.system[i].read(systemFilename[i])
+            self.system[i] = TdemSystem(systemFilename[i])
         
         self.nSystems = nSys
         self.nChannelsPerSystem = np.asarray([np.int32(x.nwindows()) for x in self.system])
@@ -329,12 +327,8 @@ class TdemData(Data):
         assert all(isinstance(s, TdemSystem) for s in system), TypeError("system must contain geobipy.TdemSystem classes.")
 
         # First get the number of points in each data file. They should be equal.
-        nPoints = np.empty(nSystems, dtype=np.int64)
-        for i in range(nSystems):
-            nPoints[i] = fIO.getNlines(dataFilename[i], 1)
-        for i in range(1, nSystems):
-            assert nPoints[i] == nPoints[0], Exception('Number of data points {} in file {} does not match {} in file {}'.format(nPoints[i], dataFilename[i], nPoints[0], dataFilename[0]))
-        nPoints = nPoints[0]
+        nPoints = self._readNpoints(dataFilename)
+        
 
         for k, f in enumerate(dataFilename):
 
@@ -443,6 +437,29 @@ class TdemData(Data):
 
         return nPoints, indices, rLoopIndices, tLoopIndices, offdataIndices, offerrIndices
 
+    
+    def _readNpoints(self, dataFilename):
+        """Read the number of points in a data file
+
+        Parameters
+        ----------
+        dataFilename : list of str.
+            Path to the data files.
+
+        Returns
+        -------
+        nPoints : int
+            Number of observations.
+
+        """
+        nSystems = len(dataFilename)
+        nPoints = np.empty(nSystems, dtype=np.int64)
+        for i in range(nSystems):
+            nPoints[i] = fIO.getNlines(dataFilename[i], 1)
+        for i in range(1, nSystems):
+            assert nPoints[i] == nPoints[0], Exception('Number of data points {} in file {} does not match {} in file {}'.format(nPoints[i], dataFilename[i], nPoints[0], dataFilename[0]))
+        return nPoints[0]
+
 
     def _initLineByLineRead(self, dataFileName, systemFilename):
         """Special function to initialize a file for reading data points one at a time.
@@ -459,7 +476,7 @@ class TdemData(Data):
         # Read in the EM System file
         self.readSystemFile(systemFilename)
         
-        nPoints, self._iC, self._iR, self._iT, self._iD, self._iS = self.__readColumnIndices(dataFileName, self.system)
+        self._nPoints, self._iC, self._iR, self._iT, self._iD, self._iS = self.__readColumnIndices(dataFileName, self.system)
 
         if isinstance(dataFileName, str):
             dataFileName = [dataFileName]
@@ -472,6 +489,7 @@ class TdemData(Data):
 
         # Get all readable column indices for the first file.
         self._indicesForFile = []
+        
         for i in range(self.nSystems):
             tmp = [self._iC[i]]
             if not self._iR[i] is None:
@@ -482,6 +500,25 @@ class TdemData(Data):
             if not self._iS[i] is None:
                 tmp.append(self._iS[i])
             self._indicesForFile.append(np.hstack(tmp))
+
+        # Remap the indices for the different components of the file to make reading easier.
+        for i in range(self.nSystems):
+            offset = self._iC[i].size
+            self._iC[i] = np.arange(offset)
+            if not self._iR[i] is None:
+                nTmp = self._iR[i].size
+                self._iR[i] = np.arange(nTmp) + offset
+                offset += nTmp
+            if not self._iT[i] is None:
+                nTmp = self._iT[i].size
+                self._iT[i] = np.arange(nTmp) + offset
+                offset += nTmp
+            nTmp = self._iD[i].size
+            self._iD[i] = np.arange(nTmp) + offset
+            offset += nTmp
+            if not self._iS[i] is None:
+                nTmp = self._iS[i].size
+                self._iS[i] = np.arange(nTmp) + offset
 
         self._systemOffset = np.append(0, np.cumsum(self.nChannelsPerSystem))
 
@@ -516,7 +553,7 @@ class TdemData(Data):
             if self._iS[j] is None:
                 S[iSys] = 0.1 * D[iSys]
             else:
-                S[iSys] = values[self._iS[j]]
+               S[iSys] = values[self._iS[j]]
 
         values = values[0]
 
@@ -533,9 +570,22 @@ class TdemData(Data):
         else:
             T = CircularLoop(z=values[4], radius=self.system[0].loopRadius())
 
-        out = TdemDataPoint(x=values[2], y=values[3], z=values[4], elevation=values[5], data=D, std=S, system=self.system, T=T, R=R)
+        out = TdemDataPoint(x=values[2], y=values[3], z=values[4], elevation=values[5], data=D, std=S, system=self.system, T=T, R=R, lineNumber=values[0], fiducial=values[1])
 
         return out
+
+
+    def _openDatafiles(self, dataFilename):
+        self._file = []
+        for i, f in enumerate(dataFilename):
+            self._file.append(open(f, 'r'))
+            fIO.skipLines(self._file[i], nLines=1)
+
+
+    def _closeDatafiles(self):
+        for f in self._file:
+            if not f.closed:
+                f.close()
 
 
     def estimateAdditiveError(self):
@@ -569,7 +619,7 @@ class TdemData(Data):
 
         assert 0 <= i < self.nPoints, ValueError("Requested data point must have index (0, "+str(self.nPoints) + ']')
 
-        return TdemDataPoint(self.x[i], self.y[i], self.z[i], self.elevation[i], self._data[i, :], self.std[i, :], self.system, self.T[i], self.R[i])
+        return TdemDataPoint(self.x[i], self.y[i], self.z[i], self.elevation[i], self._data[i, :], self.std[i, :], self._predictedData[i, :], self.system, self.T[i], self.R[i], self.line[i], self.id[i])
 
 
     def getLine(self, line):
@@ -753,57 +803,67 @@ class TdemData(Data):
         return Data.scatter2D(self, **kwargs)
         
 
-    def Bcast(self, world):
-        """ Broadcast the TdemData using MPI """
-        pc3d = None
-        pc3d = PointCloud3D.Bcast(self, world)
-        nTimes = myMPI.Bcast(self.nTimes, world)
-        nSystems = myMPI.Bcast(self.nSystems, world)
-        
-        # Instantiate a new Time Domain Data set on each worker
-        this = TdemData(pc3d.nPoints, nTimes, nSystems)
+    def _BcastSystem(self, world, root=0, system=None):
+        """Broadcast the TdemSystems.
 
-        # Assign the PointCloud Variables
-        this.x = pc3d.x
-        this.y = pc3d.y
-        this.z = pc3d.z
+        The TD systems have a c++ backend.  The only way currently to instantiate a TdemSystem class is with a file that is read in.
+        Therefore, to broadcast the systems, I have to broadcast the file names of the systems and have each worker read in the system file.
+        However, if not system is None, I assume that system is a list of TdemSystem classes that already exists on each worker.
+        If system is provided, simply assign them when broadcasting the TdemData.
 
-        # On each worker, create a small instantiation of the ndarray of data sets in the TdemData class
-        # This allows the broadcast to each worker. Without this setup, each
-        # worker cannot see tmp[i].Bcast because it doesn't exist.
-        if (world.rank == 0):
-            tmp = self.set
-        else:
-            tmp = np.zeros(this.nSystems, dtype=DataSet)
-            for i in range(this.nSystems):
-                tmp[i] = DataSet()
-
-        # Each DataSet has been instantiated within this. Broadcast the
-        # contents of the Masters self.set[0:nSystems]
-        for i in range(this.nSystems):
-            this.set[i] = tmp[i].Bcast(world)
-
-        # Broadcast the Data point id, line numbers and elevations
-        this.id = myMPI.Bcast(self.id, world)
-        this.line = self.line.Bcast(world)
-        this.elevation = self.elevation.Bcast(world)
+        """
 
         # Since the Time Domain EM Systems are C++ objects on the back end, I can't Broadcast them through C++ (Currently a C++ Noob)
         # So instead, Broadcast the list of system file names saved in the TdemData Class and read the system files in on each worker.
         # This is cumbersome, but only done once at the beginning of the MPI
         # code.
-        strTmp = []
-        for i in range(this.nSystems):
-            if (world.rank == 0):
-                strTmp.append(self.sysFilename[i])
+ 
+        if system is None:
+            if world.rank == root:
+                sfnTmp = []
+                for s in self.system:
+                    sfnTmp.append(s.fileName)
             else:
-                strTmp.append('')
+                sfnTmp = None
+            systemFilename = world.bcast(sfnTmp, root=root)
+     
+            nSystems = len(systemFilename)
 
-        systemFilename = []
-        for i in range(this.nSystems):
-            systemFilename.append(myMPI.Bcast(strTmp[i], world))
-        # Read the same system files on each worker
-        this.readSystemFile(systemFilename)
+            system = np.ndarray(nSystems, dtype=TdemSystem)
+            for i in range(nSystems):
+                    system[i] = TdemSystem()
+                    system[i].read(systemFilename[i])
+
+        return system
+        
+
+
+    def Bcast(self, world, root=0, system=None):
+        """Broadcast the TdemData using MPI
+        
+        Parameters
+        ----------
+
+        """
+
+        nPoints = myMPI.Bcast(self.nPoints, world, root=root)
+        nTimes = myMPI.Bcast(self.nTimes, world, root=root)
+
+        systems = self._BcastSystem(world, root=root, system=system)
+        
+        # Instantiate a new Time Domain Data set on each worker
+        this = TdemData(nPoints, nTimes, systems)
+
+        # Broadcast the Data point id, line numbers and elevations
+        this.id = self.id.Bcast(world, root=root)
+        this.line = self.line.Bcast(world, root=root)
+        this._x = self.x.Bcast(world, root=root)
+        this._y = self.y.Bcast(world, root=root)
+        this._z = self.z.Bcast(world, root=root)
+        this._elevation = self.elevation.Bcast(world, root=root)
+        this._data = self._data.Bcast(world, root=root)
+        this._std = self._std.Bcast(world, root=root)
+        this._predictedData = self._predictedData.Bcast(world, root=root)
 
         # Broadcast the Transmitter Loops.
         if (world.rank == 0):
@@ -833,58 +893,31 @@ class TdemData(Data):
             for i in range(this.nPoints):
                 this.R[i] = eval(safeEval(lTmp[i]))
 
+        this.iActive = this.getActiveChannels()
+
         return this
 
-    def Scatterv(self, myStart, myChunk, world):
+
+    def Scatterv(self, starts, chunks, world, root=0, system=None):
         """ Scatterv the TdemData using MPI """
-#    myMPI.print("Inside TdemData.Scatterv")
-        pc3d = None
-        pc3d = PointCloud3D.Scatterv(self, myStart, myChunk, world)
-        nTimes = myMPI.Bcast(self.nTimes, world)
-        nSys = myMPI.Bcast(self.nSystems, world)
-        # Instantiate a new reduced size Time Domain Data set on each worker
-        this = TdemData(pc3d.nPoints, nTimes, nSys[0])
-        # Assign the PointCloud Variables
-        this.x = pc3d.x
-        this.y = pc3d.y
-        this.z = pc3d.z
 
-        # On each worker, create a small instantiation of the ndarray of data sets in the TdemData class
-        # This allows the scatter to each worker. Without this setup, each
-        # worker cannot see tmp[i].Scatterv because it doesn't exist.
-        if (world.rank == 0):
-            tmp = self.set
-        else:
-            tmp = np.zeros(this.nSystems, dtype=DataSet)
-            for i in range(this.nSystems):
-                tmp[i] = DataSet()
+        nTimes = myMPI.Bcast(self.nTimes, world, root=root)
 
-        # Each DataSet has been instantiated within this. Scatterv the contents
-        # of the Masters self.set[0:nSystems]
-        for i in range(this.nSystems):
-            this.set[i] = tmp[i].Scatterv(myStart, myChunk, world)
+        systems = self._BcastSystem(world, root=root, system=system)
 
-        # Scatterv the Data point id, line numbers and elevations
-        this.id = self.id.Scatterv(myStart, myChunk, world)
-        this.line = self.line.Scatterv(myStart, myChunk, world)
-        this.elevation = self.elevation.Scatterv(myStart, myChunk, world)
+        # Instantiate a new Time Domain Data set on each worker
+        this = TdemData(chunks[world.rank], nTimes, systems)
 
-        # Since the Time Domain EM Systems are C++ objects on the back end, I can't Broadcast them through C++ (Currently a C++ Noob)
-        # So instead, Broadcast the list of system file names saved in the TdemData Class and read the system files in on each worker.
-        # This is cumbersome, but only done once at the beginning of the MPI
-        # code.
-        strTmp = []
-        for i in range(this.nSystems):
-            if (world.rank == 0):
-                strTmp.append(self.sysFilename[i])
-            else:
-                strTmp.append('')
-
-        systemFilename = []
-        for i in range(this.nSystems):
-            systemFilename.append(myMPI.Bcast(strTmp[i], world))
-        # Read the same system files on each worker
-        this.readSystemFile(systemFilename)
+        # Broadcast the Data point id, line numbers and elevations
+        this.id = self.id.Scatterv(starts, chunks, world, root=root)
+        this.line = self.line.Scatterv(starts, chunks, world, root=root)
+        this._x = self.x.Scatterv(starts, chunks, world, root=root)
+        this._y = self.y.Scatterv(starts, chunks, world, root=root)
+        this._z = self.z.Scatterv(starts, chunks, world, root=root)
+        this._elevation = self.elevation.Scatterv(starts, chunks, world, root=root)
+        this._data = self._data.Scatterv(starts, chunks, world, root=root)
+        this._std = self._std.Scatterv(starts, chunks, world, root=root)
+        this._predictedData = self._predictedData.Scatterv(starts, chunks, world, root=root)
 
         # Scatterv the Transmitter Loops.
         if (world.rank == 0):
@@ -893,9 +926,9 @@ class TdemData(Data):
                 lTmp[i] = str(self.T[i])
         else:
             lTmp = []
-        lTmp = myMPI.Scatterv_list(lTmp, myStart, myChunk, world)
+        lTmp = myMPI.Scatterv_list(lTmp, starts, chunks, world)
         if (world.rank == 0):
-            this.T[:] = self.T[:myChunk[0]]
+            this.T[:] = self.T[:chunks[0]]
         else:
             for i in range(this.nPoints):
                 this.T[i] = eval(lTmp[i])
@@ -907,11 +940,13 @@ class TdemData(Data):
                 lTmp[i] = str(self.R[i])
         else:
             lTmp = []
-        lTmp = myMPI.Scatterv_list(lTmp, myStart, myChunk, world)
+        lTmp = myMPI.Scatterv_list(lTmp, starts, chunks, world)
         if (world.rank == 0):
-            this.R[:] = self.R[:myChunk[0]]
+            this.R[:] = self.R[:chunks[0]]
         else:
             for i in range(this.nPoints):
                 this.R[i] = eval(lTmp[i])
+
+        this.iActive = this.getActiveChannels()
 
         return this
