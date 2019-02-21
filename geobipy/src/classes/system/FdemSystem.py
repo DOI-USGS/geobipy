@@ -21,6 +21,7 @@ class FdemSystem(myObject):
         if (not systemFilename is None):
             assert (isinstance(systemFilename, str)), TypeError("systemFilename must a file to read the Fdem system information from")
             self.read(systemFilename)
+            return
 
         # Number of Frequencies
         self._nFrequencies = np.int64(nFrequencies)
@@ -61,7 +62,7 @@ class FdemSystem(myObject):
         return tmp
 
 
-    def read(self, fname):
+    def read(self, fileName):
         """ Read in a file containing the system information
         
         The system file is structured using columns with the first line containing header information
@@ -77,11 +78,11 @@ class FdemSystem(myObject):
 
         """
 
-        self.__init__(fIO.getNlines(fname, 1))
-        with open(fname) as f:
+        self.__init__(fIO.getNlines(fileName, 1))
+        with open(fileName) as f:
             tmp = f.readline().lower().split()
 
-            assert 'freq' in tmp, ('Cannot read headers from FdemSystem File ' + fname +
+            assert 'freq' in tmp, ('Cannot read headers from FdemSystem File ' + fileName +
                                    '\nFirst line of system file should contain\nfreq tor tmom  tx ty tzoff ror rmom  rx   ry rzoff')
             for j, line in enumerate(f):  # For each line in the file
                 line = fIO.parseString(line)
@@ -101,7 +102,8 @@ class FdemSystem(myObject):
                 self.dist[j] = np.sqrt(np.power((self.T[j].x - self.R[j].x), 2.0) + np.power((self.T[j].y - self.R[j].y), 2.0))
                 # except Exception:
                 #     raise SystemExit(
-                #         "Could not read from system file:" + fname + " Line:" + str(j + 2))
+                #         "Could not read from system file:" + fileName + " Line:" + str(j + 2))
+        self.fileName = fileName
 
 
     def fileInformation(self):
@@ -169,11 +171,12 @@ class FdemSystem(myObject):
                 zz.append(i)
         return np.asarray(xx), np.asarray(xy), np.asarray(xz), np.asarray(yx), np.asarray(yy), np.asarray(yz), np.asarray(zx), np.asarray(zy), np.asarray(zz)
 
-    def summary(self):
+    def summary(self, out=False):
         """ print a summary of the FdemSystem """
-        print("FdemSystem:")
-        self._frequencies.summary()
-        print('')
+        msg = ("FdemSystem: \n"
+               "{} \n"
+               "{} \n").format(self.fileName, self._frequencies.summary(True))
+        return msg if out else print(msg)
 
     def hdfName(self):
         return('FdemSystem(0)')
@@ -211,16 +214,46 @@ class FdemSystem(myObject):
 
     def Bcast(self, world, root=0):
         """ Broadcast the FdemSystem using MPI """
-#      print(world.rank," FdemSystem.Bcast")
         nFreq = myMPI.Bcast(self._nFrequencies, world, root=root)
         if (world.rank > 0):
             self = FdemSystem(nFreq)
         this = FdemSystem(nFreq)
         this._frequencies = self._frequencies.Bcast(world, root=root)
         this.dist = self.dist.Bcast(world, root=root)
-#      print(world.rank," Size of T",np.size(self.T))
         for i in range(self._nFrequencies):
-            #        print("i: ",i)
             this.T[i] = self.T[i].Bcast(world, root=root)
             this.R[i] = self.R[i].Bcast(world, root=root)
         return this
+
+
+    def Isend(self, dest, world):
+        myMPI.Isend(self._nFrequencies, dest=dest, world=world)
+        self._frequencies.Isend(dest=dest, world=world)
+        self.dist.Isend(dest=dest, world=world)
+        for i in range(self._nFrequencies):
+            self.T[i].Isend(dest=dest, world=world)
+            self.R[i].Isend(dest=dest, world=world)
+
+
+    def Irecv(self, source, world):
+        nFreq = myMPI.Irecv(source=source, world=world)
+        out = FdemSystem(nFreq)
+        out._frequencies = out._frequencies.Irecv(source=source, world=world)
+        out.dist = out.dist.Irecv(source=source, world=world)
+        for i in range(nFreq):
+            out.T[i] = out.T[i].Irecv(source=source, world=world)
+            out.R[i] = out.R[i].Irecv(source=source, world=world)
+        return out
+
+
+
+
+
+
+
+
+
+
+
+
+

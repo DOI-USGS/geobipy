@@ -23,11 +23,8 @@ try:
 
         """
 
-        def __init__(self, systemFilename=None):
-            """ Nothing needed """
-
-            if systemFilename is None:
-                return
+        def __init__(self, systemFilename):
+            """ Nothing needed """            
 
             # Check that the file exists, rBodies class does not handle errors
             assert fIO.fileExists(systemFilename),'Could not open file: ' + systemFilename
@@ -68,7 +65,13 @@ try:
                         current.append(x[1])
                         
                     if ('WaveFormCurrent Begin' in line):
-                        get = True  
+                        get = True
+
+        def summary(self, out=False):
+            msg = ("TdemSystem: \n"
+                   "{}\n"
+                   "{}\n").format(self.fileName, self.times.summary(True))
+            return msg if out else print(msg)
     
 
 
