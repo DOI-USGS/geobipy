@@ -10,6 +10,7 @@ from ...system.FdemSystem import FdemSystem
 import numpy as np
 from ....base import fileIO as fIO
 #from ....base import Error as Err
+from ....base import MPI as myMPI
 import matplotlib.pyplot as plt
 
 try:
@@ -84,7 +85,7 @@ class FdemData(Data):
         else:
             nFrequencies = np.int32(np.atleast_1d(nFrequencies))
             nSystems = nFrequencies.size
-            system = None
+            system = np.ndarray(nSystems, dtype=FdemSystem)
 
         # Data Class containing xyz and channel values
         Data.__init__(self, nPoints=nPoints, nChannelsPerSystem=2*nFrequencies, dataUnits="ppm")
@@ -93,7 +94,6 @@ class FdemData(Data):
         # StatArray of the id number
         self.id = StatArray(nPoints, 'ID Number')
         # StatArray of the elevation
-        self.elevation = StatArray(nPoints, 'Elevation', 'm')
         # Assign data names
         self._data.name = 'Fdem Data'
 
@@ -103,9 +103,9 @@ class FdemData(Data):
         k = 0
         for i in range(self.nSystems):
             # Set the channel names
-            if not self.system is None:
+            if not self.system[i] is None:
                 for iFrequency in range(2*self.nFrequencies[i]):
-                    self.channelNames[k] = '{} {} (Hz)'.format(self.getMeasurementType(iFrequency), self.getFrequency(iFrequency))
+                    self.channelNames[k] = '{} {} (Hz)'.format(self.getMeasurementType(iFrequency, i), self.getFrequency(iFrequency, i))
                     k += 1
 
         self.iActive = self.getActiveChannels()
@@ -279,7 +279,7 @@ class FdemData(Data):
             The data point
             
         """
-        return FdemDataPoint(self.x[i], self.y[i], self.z[i], self.elevation[i], self._data[i, :], self._std[i, :], self.system)
+        return FdemDataPoint(self.x[i], self.y[i], self.z[i], self.elevation[i], self._data[i, :], self._std[i, :], system=self.system, lineNumber=self.line[i], fiducial=self.id[i])
 
 
     # def mapChannel(self, channel, *args, system=0, **kwargs):
@@ -478,6 +478,7 @@ class FdemData(Data):
 
         self.iActive = self.getActiveChannels()
 
+
     def readSystemFile(self, systemFilename):
         """ Reads in the system handler using the system file name """
 
@@ -496,9 +497,27 @@ class FdemData(Data):
         self._systemOffset = np.append(0, np.cumsum(self.nChannelsPerSystem))
 
 
-    # def toVTK(self, fileName, prop=['data', 'predicted', 'std'], format='binary'):
+    def _readNpoints(self, dataFilename):
+        """Read the number of points in a data file
 
-    #     super().toVTK(fileName, prop=prop, format=format)
+        Parameters
+        ----------
+        dataFilename : list of str.
+            Path to the data files.
+
+        Returns
+        -------
+        nPoints : int
+            Number of observations.
+
+        """
+        nSystems = len(dataFilename)
+        nPoints = np.empty(nSystems, dtype=np.int64)
+        for i in range(nSystems):
+            nPoints[i] = fIO.getNlines(dataFilename[i], 1)
+        for i in range(1, nSystems):
+            assert nPoints[i] == nPoints[0], Exception('Number of data points {} in file {} does not match {} in file {}'.format(nPoints[i], dataFilename[i], nPoints[0], dataFilename[0]))
+        return nPoints[0]
 
 
     # Section contains routines for opening a data file, and reading data points one at a time
@@ -533,17 +552,9 @@ class FdemData(Data):
         if isinstance(system, FdemSystem):
             system = [system]
         
-        nSystems = len(system) if isinstance(system, list) else 1
         assert all(isinstance(s, FdemSystem) for s in system), TypeError("system must contain geobipy.FdemSystem classes.")
 
-        # First get the number of points in each data file. They should be equal.
-        nPoints = np.empty(nSystems, dtype=np.int64)
-        for i in range(nSystems):
-            nPoints[i] = fIO.getNlines(dataFilename[i], 1)
-        for i in range(1, nSystems):
-            assert nPoints[i] == nPoints[0], Exception('Number of data points {} in file {} does not match {} in file {}'.format(nPoints[i], dataFilename[i], nPoints[0], dataFilename[0]))
-        nPoints = nPoints[0]
-
+        nPoints = self._readNpoints(dataFilename)
 
         for k, f in enumerate(dataFilename):
 
@@ -627,18 +638,12 @@ class FdemData(Data):
 
         # Read in the EM System file
         self.readSystemFile(systemFilename)
-                
-
         self._nPoints, self._iC, self._iD, self._iS = self.__readColumnIndices(dataFilename, self.system)
 
         if isinstance(dataFilename, str):
             dataFilename = [dataFilename]
 
-        self._file = []
-        for f in dataFilename:
-            self._file.append(open(f, 'r'))
-        for f in self._file:
-            fIO.skipLines(f, nLines=1)
+        self._openDatafiles(dataFilename)
 
         # Get all readable column indices for the first file.
         self._indicesForFile = []
@@ -648,6 +653,30 @@ class FdemData(Data):
             if not self._iS[i] is None:
                 tmp.append(self._iS[i])
             self._indicesForFile.append(np.hstack(tmp))
+
+        # Remap the indices for the different components of the file to make reading easier.
+        for i in range(self.nSystems):
+            offset = self._iC[i].size
+            self._iC[i] = np.arange(offset)
+            nTmp = self._iD[i].size
+            self._iD[i] = np.arange(nTmp) + offset
+            offset += nTmp
+            if not self._iS[i] is None:
+                nTmp = self._iS[i].size
+                self._iS[i] = np.arange(nTmp) + offset
+
+
+    def _openDatafiles(self, dataFilename):
+        self._file = []
+        for i, f in enumerate(dataFilename):
+            self._file.append(open(f, 'r'))
+            fIO.skipLines(self._file[i], nLines=1)
+
+
+    def _closeDatafiles(self):
+        for f in self._file:
+            if not f.closed:
+                f.close()
 
 
     def _readSingleDatapoint(self):
@@ -684,7 +713,7 @@ class FdemData(Data):
 
         values = values[0]
 
-        return FdemDataPoint(x=values[2], y=values[3], z=values[4], elevation=values[5], data=D, std=S, system=self.system)
+        return FdemDataPoint(x=values[2], y=values[3], z=values[4], elevation=values[5], data=D, std=S, system=self.system, lineNumber=values[0], fiducial=values[1])
         
 
     def Bcast(self, world, root=0):
@@ -719,18 +748,31 @@ class FdemData(Data):
         
         """
 
-        dat = None
-        dat = Data.Bcast(self, world, root=root)
-        this = FdemData(dat.nPoints, int(dat.nChannels/2))
-        this.x = dat.x
-        this.y = dat.y
-        this.z = dat.z
-        this.set[0] = dat.set[0]
-        this.id = self.id.Bcast(world, root=root)
-        this.line = self.line.Bcast(world, root=root)
-        this.elevation = self.elevation.Bcast(world, root=root)
-        this.system = self.system.Bcast(world, root=root)
-        return this
+        npoints = myMPI.Bcast(self.nPoints, world, root=root)
+        nf = myMPI.Bcast(self.nFrequencies, world, root=root)
+        ns = myMPI.Bcast(self.nSystems, world, root=root)
+        if world.rank != root:
+            sys = np.ndarray(ns, dtype=FdemSystem)
+            for i in range(ns):
+                sys[i] = FdemSystem() 
+        else:
+            sys = self.system
+
+        sysTmp = []
+        for i in range(ns):
+            sysTmp.append(sys[i].Bcast(world, root=root))           
+            
+        out = FdemData(npoints, nf, sysTmp)
+        out._x = self.x.Bcast(world, root=root)
+        out._y = self.y.Bcast(world, root=root)
+        out._z = self.z.Bcast(world, root=root)
+        out._elevation = self.elevation.Bcast(world, root=root)
+        out._data = self._data.Bcast(world, root=root)
+        out._std = self._std.Bcast(world, root=root)
+        out._predictedData = self._predictedData.Bcast(world, root=root)
+        out.id = self.id.Bcast(world, root=root)
+        out.line = self.line.Bcast(world, root=root)
+        return out
 
 
     def Scatterv(self, starts, chunks, world, root=0):
@@ -774,15 +816,28 @@ class FdemData(Data):
 
         """
 
-        dat = None
-        dat = Data.Scatterv(self, starts, chunks, world, root=root)
-        this = FdemData(dat.nPoints, dat.nFrequencies)
-        this.x = dat.x
-        this.y = dat.y
-        this.z = dat.z
-        this.set = dat.set
-        this.id = self.id.Scatterv(starts, chunks, world, root=root)
-        this.line = self.line.Scatterv(starts, chunks, world, root=root)
-        this.elevation = self.elevation.Scatterv(starts, chunks, world, root=root)
-        this.system = self.system.Bcast(world, root=root)
-        return this
+        nf = myMPI.Bcast(self.nFrequencies, world, root=root)
+        ns = myMPI.Bcast(self.nSystems, world, root=root)
+        if world.rank != root:
+            sys = np.ndarray(ns, dtype=FdemSystem)
+            for i in range(ns):
+                sys[i] = FdemSystem()
+        else:
+            sys = self.system
+
+        sysTmp = []
+        for i in range(ns):
+            sysTmp.append(sys[i].Bcast(world, root=root))
+
+        out = FdemData(chunks[world.rank], nf, sysTmp)
+        out._x = self.x.Scatterv(starts, chunks, world, root=root)
+        out._y = self.y.Scatterv(starts, chunks, world, root=root)
+        out._z = self.z.Scatterv(starts, chunks, world, root=root)
+        out._elevation = self.elevation.Scatterv(starts, chunks, world, root=root)
+        out._data = self._data.Scatterv(starts, chunks, world, root=root)
+        out._std = self._std.Scatterv(starts, chunks, world, root=root)
+        out._predictedData = self._predictedData.Scatterv(starts, chunks, world, root=root)
+        out.id = self.id.Scatterv(starts, chunks, world, root=root)
+        out.line = self.line.Scatterv(starts, chunks, world, root=root)
+        
+        return out
