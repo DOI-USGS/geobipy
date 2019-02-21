@@ -15,7 +15,7 @@ import numpy as np
 #from ....base import Error as Err
 from ....base.customFunctions import safeEval
 from ....base import customFunctions as cf
-
+from ....base import MPI as myMPI
 from ....base import customPlots as cp
 
 
@@ -24,7 +24,7 @@ class FdemDataPoint(EmDataPoint):
 
     Contains an easting, northing, height, elevation, observed and predicted data, and uncertainty estimates for the data.
 
-    FdemDataPoint(x, y, z, elevation, data, std, system, dataUnits)
+    FdemDataPoint(x, y, z, elevation, data, std, system, lineNumber, fiducial)
 
     Parameters
     ----------
@@ -42,103 +42,67 @@ class FdemDataPoint(EmDataPoint):
     std : geobipy.StatArray or array_like, optional
         Estimated uncertainty standard deviation of the data of length 2*number of frequencies.
         * If None, initialized with ones if data is None, else 0.1*data values.
-
     system : str or geobipy.FdemSystem, optional
         Describes the acquisition system with loop orientation and frequencies.
         * If str should be the path to a system file to read in.
         * If geobipy.FdemSystem, will be deepcopied.
-    dataUnits : str, optional
-        Units of the data.  Default is "ppm".
+    lineNumber : float, optional
+        The line number associated with the datapoint
+    fiducial : float, optional
+        The fiducial associated with the datapoint
 
     """
 
-    def __init__(self, x, y, z, elevation=0.0, data=None, std=None, system=None, dataUnits='ppm'):
+    def __init__(self, x=0.0, y=0.0, z=0.0, elevation=0.0, data=None, std=None, predictedData=None, system=None, lineNumber=0.0, fiducial=0.0):
         """Define initializer. """
-
-        # x coordinate
-        self.x = StatArray(1) + x
-        # y coordinate
-        self.y = StatArray(1) + y
-        # z coordinate
-        self.z = StatArray(z, 'Height above ground', 'm')
-        # Elevation of data point
-        self.elevation = StatArray(1) + elevation
         if (system is None):
             return
         else:
             if isinstance(system, (str, FdemSystem)):
                 system = [system]
             assert all((isinstance(sys, (str, FdemSystem)) for sys in system)), TypeError("System must have items of type str or FdemSystem")
-        
+
         # Assign the number of systems as 1
-        self.nSystems = len(system)
-        self.nFrequencies = np.empty(self.nSystems, dtype=np.int32)
+        nSystems = len(system)
+        nFrequencies = np.empty(nSystems, dtype=np.int32)
 
-        self.system = []
-
+        systems = []
         for j, sys in enumerate(system):
             # EMSystem Class
             if (isinstance(sys, str)):
                 tmpsys = FdemSystem()
                 tmpsys.read(sys)
-                self.system.append(tmpsys)
+                systems.append(tmpsys)
             elif (isinstance(sys, FdemSystem)):
-                self.system.append(sys)
-            else:
-                assert False, TypeError("Sys must be a path to the system file or an FdemSystem class")
-            self.nFrequencies[j] = self.system[j].nFrequencies
+                systems.append(sys)
+            nFrequencies[j] = systems[j].nFrequencies
 
+        nChannels = np.sum(2*nFrequencies)
 
-        # StatArray of InPhase and Quadrature Data
-        if (data is None):
-            self._data = StatArray(np.zeros(self.nChannels), name='Frequency domain data', units=dataUnits)
-        else:
-            assert data.size == self.nChannels, ValueError("Size of data must equal 2 * total number of frequencies {}".format(self.nChannels))
-            self._data = StatArray(data)
-            
+        if not data is None:
+            assert np.size(data) == nChannels, ValueError("Size of data {}, must equal 2 * total number of frequencies {}".format(np.size(data), nChannels))
+        if not std is None:
+            assert np.size(std) == nChannels, ValueError("Size of std {}, must equal 2 * total number of frequencies {}".format(np.size(std), nChannels))
+        if not predictedData is None:
+            assert np.size(predictedData) == nChannels, ValueError("Size of predictedData {}, must equal 2 * total number of frequencies {}".format(np.size(predictedData), nChannels))
+    
+        EmDataPoint.__init__(self, nChannelsPerSystem=2*nFrequencies, x=x, y=y, z=z, elevation=elevation, data=data, std=std, predictedData=predictedData, dataUnits="ppm", lineNumber=lineNumber, fiducial=fiducial)
 
-        # StatArray of Standard Deviations
-        if (not std is None):
-            assert std.size == self.nChannels, ValueError("Size of std must equal 2 * number of frequencies {}".format(2*self.nFrequencies))
-            self._std = StatArray(std, 'Standard Deviation', self._data.units)
-        else:
-            self._std = StatArray(0.1 * self._data, 'Standard Deviation', self._data.units)
+        self._data.name = 'Frequency domain data'
 
-        # StatArray of Predicted Data
-        self._predictedData = StatArray(self.nChannels, 'Predicted Data', self._data.units)
-        # StatArray of Relative Errors
-        self.relErr = StatArray(self.nSystems, '$\epsilon_{Relative}x10^{2}$','%')
-        # StatArray of Additive Errors
-        self.addErr = StatArray(self.nSystems, '$\epsilon_{Additive}$',self._data.units)
+        self.nSystems = nSystems
+        self.system = systems
+
         # StatArray of calibration parameters
         # The four columns are Bias,Variance,InphaseBias,QuadratureBias.
         self.calibration = StatArray([self.nChannels * 2], 'Calibration Parameters')
-        # Initialize the sensitivity matrix
-        self.J = None
-        # Index to non NaN values
-        self.iActive = self.getActiveData()
 
-        self._systemOffset = np.append(0, np.cumsum(2*self.nFrequencies))
-
-
-    def _systemIndices(self, system=0):
-        """The slice indices for the requested system.
-        
-        Parameters
-        ----------
-        system : int
-            Requested system index.
-            
-        Returns
-        -------
-        out : numpy.slice
-            The slice pertaining to the requested system.
-            
-        """
-
-        assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-
-        return np.s_[self._systemOffset[system]:self._systemOffset[system+1]]
+        k = 0
+        for i in range(self.nSystems):
+            # Set the channel names
+            for iFrequency in range(self.nChannelsPerSystem[i]):
+                self._channelNames[k] = '{} {} (Hz)'.format(self.getMeasurementType(iFrequency, i), self.getFrequency(iFrequency, i))
+                k += 1
 
 
     def _inphaseIndices(self, system=0):
@@ -198,9 +162,13 @@ class FdemDataPoint(EmDataPoint):
     def inphaseStd(self, system=0):
         return self._std[self._inphaseIndices(system)]
 
+    # @property
+    # def nChannels(self):
+    #     return np.sum(2*self.nFrequencies)
+
     @property
-    def nChannels(self):
-        return np.sum(2*self.nFrequencies)
+    def nFrequencies(self):
+        return np.int32(0.5*self.nChannelsPerSystem)
 
     @property
     def predictedData(self):
@@ -233,39 +201,61 @@ class FdemDataPoint(EmDataPoint):
     
     def __deepcopy__(self):
         """ Define a deepcopy routine """
-        tmp = FdemDataPoint(self.x, self.y, self.z, self.elevation, self._data, self._std, self.system, self._data.units)
-        # tmp.z = self.z.deepcopy()
-        # # Number of frequencies
-        # tmp.nFrequencies = self.nFrequencies
-        # # Number of systems
-        # tmp.nSystems = self.nSystems
-        # # EMSystem Class
-        # tmp.system = self.system
-        # # StatArray of Data
-        # tmp._data = self._data.deepcopy()
-        # # StatArray of Standard Deviations
-        # tmp._std = self._std.deepcopy()
-        # StatArray of Predicted Data
-        tmp._predictedData = self._predictedData.deepcopy()
+        tmp = FdemDataPoint(self.x, self.y, self.z, self.elevation, self._data, self._std, self._predictedData, self.system, self.lineNumber, self.fiducial)
         # StatArray of Relative Errors
         tmp.relErr = self.relErr.deepcopy()
         # StatArray of Additive Errors
         tmp.addErr = self.addErr.deepcopy()
-#    tmp.name='Relative Errors';tmp.units='ppm'
         # StatArray of calibration parameters
         # The four columns are Bias,Variance,InphaseBias,QuadratureBias.
         tmp.calibration = self.calibration.deepcopy()
         # Initialize the sensitivity matrix
         tmp.J = deepcopy(self.J)
-        # Index to non NaN values
-        # tmp.iActive = tmp.getActiveData()
 
         return tmp
 
+    
+    def getMeasurementType(self, channel, system=0):
+        """Returns the measurement type of the channel
+
+        Parameters
+        ----------
+        channel : int
+            Channel number
+        system : int, optional
+            System number
+
+        Returns
+        -------
+        out : str
+            Either "In-Phase " or "Quadrature "
+        
+        """
+        return 'In-Phase' if channel < self.nFrequencies[system] else 'Quadrature'
+
+
+    def getFrequency(self, channel, system=0):
+        """Return the measurement frequency of the channel
+
+        Parameters
+        ----------
+        channel : int
+            Channel number
+        system : int, optional
+            System number
+
+        Returns
+        -------
+        out : float
+            The measurement frequency of the channel
+
+        """
+        return self.system[system].frequencies[channel%self.nFrequencies[system]]
+
 
     def hdfName(self):
-        """ Reprodicibility procedure """
-        return('FdemDataPoint(0.0,0.0,0.0,0.0)')
+        """ Reproducibility procedure """
+        return('FdemDataPoint()')
 
 
     def createHdf(self, parent, myName, nRepeats=None, fillvalue=None):
@@ -498,7 +488,7 @@ class FdemDataPoint(EmDataPoint):
 
 
     def updateSensitivity(self, J, mod, option, scale=False):
-        """ Compute an updated sensitivity matrix based on the one already containined in the TdemDataPoint object  """
+        """ Compute an updated sensitivity matrix based on the one already containined in the FdemDataPoint object  """
         # If there is no matrix saved in the data object, compute the entire
         # thing
         return self.sensitivity(mod, scale=scale)
@@ -585,3 +575,38 @@ class FdemDataPoint(EmDataPoint):
 
         J = J[self.iActive, :]
         return J
+
+    
+    def Isend(self, dest, world, systems=None):
+        tmp = np.empty(7, dtype=np.float64)
+        tmp[:] = np.asarray([self.x, self.y, self.z, self.elevation, self.nSystems, self.lineNumber, self.fiducial])
+        myMPI.Isend(tmp, dest=dest, world=world)
+
+        if systems is None:
+            for i in range(self.nSystems):
+                self.system[i].Isend(dest=dest, world=world)
+        self._data.Isend(dest, world)
+        self._std.Isend(dest, world)
+        self._predictedData.Isend(dest, world)
+
+
+    def Irecv(self, source, world, systems=None):
+
+        tmp = myMPI.Irecv(source=source, world=world)
+
+        if systems is None:
+            nSystems = np.int32(tmp[4])
+
+            systems = []
+            fs = FdemSystem()
+            for i in range(nSystems):
+                systems.append(fs.Irecv(source=source, world=world))
+
+        s = StatArray(0)
+        d = s.Irecv(source, world)
+        s = s.Irecv(source, world)
+        p = s.Irecv(source, world)
+
+        return FdemDataPoint(tmp[0], tmp[1], tmp[2], tmp[3], data=d, std=s, predictedData=p, system=systems, lineNumber=tmp[5], fiducial=tmp[6])
+       
+
