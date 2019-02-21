@@ -1,4 +1,4 @@
-from ....classes.core.myObject import myObject
+from .DataPoint import DataPoint
 from ...model.Model1D import Model1D
 from ....classes.core.StatArray import StatArray
 from ....base import customFunctions as cf
@@ -8,7 +8,7 @@ from ....base.logging import myLogger
 import matplotlib.pyplot as plt
 
 
-class EmDataPoint(myObject):
+class EmDataPoint(DataPoint):
     """Abstract EmDataPoint Class
 
     This is an abstract base class for TdemDataPoint and FdemDataPoint classes
@@ -20,28 +20,19 @@ class EmDataPoint(myObject):
 
     """
 
-    def __init__(self):
-        """Abstract base class """
-        raise NotImplementedError("Cannot instantiate this class, use a subclass")
+    def __init__(self, nChannelsPerSystem=1, x=0.0, y=0.0, z=0.0, elevation=None, data=None, std=None, predictedData=None, dataUnits=None, channelNames=None, lineNumber=0.0, fiducial=0.0):
 
+        DataPoint.__init__(self, nChannelsPerSystem, x, y, z, elevation, data, std, predictedData, dataUnits, channelNames)
 
-    def _systemIndices(self, system=0):
-        """The slice indices for the requested system.
-        
-        Parameters
-        ----------
-        system : int
-            Requested system index.
-            
-        Returns
-        -------
-        out : numpy.slice
-            The slice pertaining to the requested system.
-            
-        """
+        # StatArray of Relative Errors
+        self.relErr = StatArray(self.nSystems, '$\epsilon_{Relative}x10^{2}$', '%')
+        # StatArray of Additive Errors
+        self.addErr = StatArray(self.nSystems, '$\epsilon_{Additive}$', self._data.units)
+        # Initialize the sensitivity matrix
+        self.J = None
 
-        assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-        return np.s_[self.__systemOffset[system]:self.__systemOffset[system+1]]
+        self.fiducial = fiducial
+        self.lineNumber = lineNumber
 
 
     def FindBestHalfSpace(self, minConductivity=-4.0, maxConductivity=2.0, nSamples=100):
@@ -77,30 +68,6 @@ class EmDataPoint(myObject):
         i = np.argmin(PhiD)
         # ####lg.dedent()
         return c[i]
-
-
-    def getActiveData(self):
-        """Gets the indices to the observed data values that are not NaN
-
-        Returns
-        -------
-        out : array of ints
-            Indices into the observed data that are not NaN
-
-        """
-        return cf.findNotNans(self._data)
-
-
-    def likelihood(self):
-        """Compute the likelihood of the current predicted data given the observed data and assigned errors
-
-        Returns
-        -------
-        out : np.float64
-            Likelihood of the data point
-
-        """
-        return self._predictedData.probability(i=self.iActive)
 
 
     def priorProbability(self, rErr, aErr, height, calibration, verbose=False):
@@ -261,126 +228,14 @@ class EmDataPoint(myObject):
         cP.ylabel('Data misfit')
 
 
-    @property
-    def deltaD(self):
-        """Get the difference between the predicted and observed data,
-
-        .. math::
-            \delta \mathbf{d} = \mathbf{d}^{pre} - \mathbf{d}^{obs}.
-
-        Returns
-        -------
-        out : StatArray
-            The residual between the active observed and predicted data 
-            with size equal to the number of active channels.
-
-        """
-        return self._predictedData - self._data
-
-
-    def dataMisfit(self, squared=False):
-        """Compute the :math:`L_{2}` norm squared misfit between the observed and predicted data
-
-        .. math::
-            \| \mathbf{W}_{d} (\mathbf{d}^{obs}-\mathbf{d}^{pre})\|_{2}^{2},
-        where :math:`\mathbf{W}_{d}` are the reciprocal data errors.
-
-        Parameters
-        ----------
-        squared : bool
-            Return the squared misfit.
-
-        Returns
-        -------
-        out : np.float64
-            The misfit value.
-
-        """
-        assert not any(self._std[self.iActive] == 0.0), ValueError('Cannot compute the misfit when the data standard deviations are zero.')
-        tmp2 = self._std[self.iActive]**-1.0
-        PhiD = np.float64(np.sum((cf.Ax(tmp2, self.deltaD[self.iActive]))**2.0, dtype=np.float64))
-        return PhiD if squared else np.sqrt(PhiD)
-
-    
-    def scaleJ(self, Jin, power=1.0):
-        """ Scales a matrix by the errors in the given data
-
-        Useful if a sensitivity matrix is generated using one data point, but must be scaled by the errors in another.
-
-        Parameters
-        ----------
-        Jin : array_like
-            2D array representing a sensitivity matrix
-        power : float
-            Power to raise the error level too. Default is simply reciprocal
-
-        Returns
-        -------
-        Jout : array_like
-            Sensitivity matrix divided by the data errors
-
-        Raises
-        ------
-        ValueError
-            If the number of rows in Jin do not match the number of active channels in the datapoint
-
-        """
-        assert Jin.shape[0] == self.iActive.size, ValueError("Number of rows of Jin must match the number of active channels in the datapoint {}".format(self.iActive.size))
-
-        Jout = np.zeros(Jin.shape)
-        Jout[:, :] = Jin * (np.repeat(self._std[self.iActive, np.newaxis]**-power, Jout.shape[1], 1))
-        return Jout
-
-
     def summary(self, out=False):
-        """ Print a summary of the EMdataPoint """
-        msg = 'EM Data Point: \n'
-        msg += 'x: :' + str(self.x) + '\n'
-        msg += 'y: :' + str(self.y) + '\n'
-        msg += 'z: :' + str(self.z) + '\n'
-        msg += 'elevation: :' + str(self.elevation) + '\n'
-        msg += self._data.summary(True)
-        msg += self._predictedData.summary(True)
-        msg += self._std.summary(True)
-        if (out):
-            return msg
-        print(msg)
+        msg = ("{} \n"
+                "Line number: {} \n"
+                "Fiducial: {}\n").format(super().summary(True), self.lineNumber, self.fiducial)
+        for s in self.system:
+            msg += s.summary(True)
+
+        return msg if out else print(msg)
 
 
-    def updateErrors(self, relativeErr, additiveErr):
-        """Updates the data errors
 
-        Updates the standard deviation of the data errors using the following model
-
-        .. math::
-            \sqrt{(\mathbf{\epsilon}_{rel} \mathbf{d}^{obs})^{2} + \mathbf{\epsilon}^{2}_{add}},
-        where :math:`\mathbf{\epsilon}_{rel}` is the relative error, a percentage fraction and :math:`\mathbf{\epsilon}_{add}` is the additive error.
-
-        If the predicted data have been assigned a multivariate normal distribution, the variance of that distribution is also updated as the squared standard deviations.
-
-        Parameters
-        ----------
-        relativeErr : float or array_like
-            A fraction percentage that is multiplied by the observed data.
-        additiveErr : float or array_like
-            An absolute value of additive error.
-
-        Raises
-        ------
-        ValueError
-            If relativeError is <= 0.0
-        ValueError
-            If additiveError is <= 0.0
-
-        """
-        relativeErr = np.atleast_1d(relativeErr)
-        additiveErr = np.atleast_1d(additiveErr)
-        assert all(relativeErr > 0.0), ValueError("relativeErr must be > 0.0")
-        assert all(additiveErr > 0.0), ValueError("additiveErr must be > 0.0")
-
-        tmp = (relativeErr * self._data)**2.0 + additiveErr**2.0
-
-        if self._predictedData.hasPrior():
-            self._predictedData.prior.variance[:] = tmp[self.iActive]
-
-        self._std[:] = np.sqrt(tmp)
