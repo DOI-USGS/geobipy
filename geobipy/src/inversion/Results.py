@@ -68,7 +68,7 @@ class Results(myObject):
     
     """
 
-    def __init__(self, saveMe=False, plotMe=True, savePNG=False, dataPoint=None, model=None, ID=0, **kwargs):
+    def __init__(self, dataPoint=None, model=None, ID=0.0, **kwargs):
         """ Initialize the results of the inversion """
 
         # Initialize a stopwatch to keep track of time
@@ -77,15 +77,14 @@ class Results(myObject):
         self.saveTime = np.float64(0.0)
 
         # Logicals of whether to plot or save
-        self.saveMe = saveMe
-        self.plotMe = plotMe
-        self.savePNG = savePNG
+        self.saveMe = kwargs.pop('save', True)
+        self.plotMe = kwargs.pop('plot', False)
+        self.savePNG = kwargs.pop('savePNG', False)
         # Return none if important parameters are not used (used for hdf 5)
         if all(x1 is None for x1 in [dataPoint, model]):
             return
 
-        assert self.plotMe or self.saveMe, Exception('You chosen to neither view or save the inversion results!')
-
+        assert self.plotMe or self.saveMe, Exception('You have chosen to neither view or save the inversion results!')
 
         nMarkovChains = kwargs.pop('nMarkovChains', 100000)
         plotEvery = kwargs.pop('plotEvery', nMarkovChains / 20)
@@ -96,8 +95,6 @@ class Results(myObject):
 
         verbose = kwargs.pop('verbose', False)
 
-        
-            
         # Set the ID for the data point the results pertain to
         # Data Point identifier
         self.ID = np.float64(ID)
@@ -106,7 +103,7 @@ class Results(myObject):
         self.iPlot = np.int64(plotEvery)
         # Set the display limits of the parameter in the HitMap
         # Display limits for parameters
-        self.limits = np.zeros(2,dtype=np.float64) + parameterDisplayLimits
+        self.limits = np.zeros(2, dtype=np.float64) + parameterDisplayLimits
         # Should we plot resistivity or Conductivity?
         # Logical whether to take the reciprocal of the parameters
         self.invertPar = reciprocateParameters
@@ -138,6 +135,7 @@ class Results(myObject):
         n = 2 * np.int(self.nMC / 1000)
         self.rate = StatArray(n)
         self.ratex = StatArray(np.arange(1, n + 1) * 1000)
+
         # Initialize the burned in state
         self.iBurn = self.nMC
         self.burnedIn = False
