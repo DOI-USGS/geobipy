@@ -32,9 +32,9 @@ class _userParameters(myObject):
             assert False, TypeError('Invalid DataPoint type used')
 
         # Check the number of Markov chains
-        self.nMC = np.int(self.nMC)
-        assert isInt(self.nMC), TypeError('nMC must be a numpy integer')
-        assert self.nMC > 1000, ValueError('Number of Markov Chain iterations nMC must be > 1000')
+        self.nMarkovChains = np.int(self.nMarkovChains)
+        assert isInt(self.nMarkovChains), TypeError('nMC must be a numpy integer')
+        assert self.nMarkovChains >= 1000, ValueError('Number of Markov Chain iterations nMC must be >= 1000')
 
         # Check the minumum layer depth
         assert isinstance(self.minDepth, float), TypeError('minDepth must be a float (preferably np.float64)')
