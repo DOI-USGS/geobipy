@@ -164,14 +164,14 @@ class LineResults(myObject):
         self.getElevation()
 
 
-    def getDOI(self,percent=67.0):
+    def getDOI(self, percent=67.0):
         """ Get the DOI of the line depending on a percentage variance cutoff for each data point """
         #if (not self.doi is None): return
         self.getOpacity()
         self.getMesh()
         p = 0.01*(100.0 - percent)
 
-        self.doi = np.zeros(self.nPoints)
+        self.doi = StatArray(np.zeros(self.nPoints), 'Depth of investigation', self.z.units)
         zSize = self.opacity.shape[1]-1
         r = range(self.nPoints)
         for i in r:
@@ -179,7 +179,7 @@ class LineResults(myObject):
             iC = 0
             while op[iC] < p and iC < zSize:
                 iC +=1
-            self.doi[i]=self.depthGrid.cellCentres[zSize - iC]
+            self.doi[i] = self.depthGrid.cellCentres[zSize - iC]
 
 
     def getElevation(self):
@@ -424,19 +424,21 @@ class LineResults(myObject):
 
     def plotDoi(self, percent=67.0, **kwargs):
 
-        self.setAlonglineAxis(self.plotAgainst)
-        self.getElevation()
+        self.getMesh()
         self.getDOI(percent)
 
+        xAxis = kwargs.pop('xAxis', 'x')
         labels = kwargs.pop('labels', True)
-        c = kwargs.pop('color','k')
-        lw = kwargs.pop('linewidth',0.5)
+        kwargs['color'] = kwargs.pop('color','k')
+        kwargs['linewidth'] = kwargs.pop('linewidth',0.5)
 
-        cP.plot(self.xPlot, self.elevation - self.doi, color=c, linewidth=lw, **kwargs)
+        xtmp = self.mesh.getXAxis(xAxis, centres=False)
+        
+        cP.plot(xTmp, self.elevation.edges() - self.doi, **kwargs)
 
-        if (labels):
-            cP.xlabel(self.xPlot.getNameUnits())
-            cP.ylabel('Elevation (m)')
+        #if (labels):
+        #    cP.xlabel(self.xPlot.getNameUnits())
+        #    cP.ylabel('Elevation (m)')
 
 
     def plotElevation(self, **kwargs):
@@ -1137,7 +1139,7 @@ class LineResults(myObject):
 #        aFile.create_dataset('meaninterp', [nPoints,nz], dtype=np.float64)
 #        aFile.create_dataset('bestinterp', [nPoints,nz], dtype=np.float64)
 #        aFile.create_dataset('opacityinterp', [nPoints,nz], dtype=np.float64)
-
+        
         results.rate.createHdf(aFile,'rate',nRepeats=nPoints, fillvalue=np.nan)
 #        aFile.create_dataset('rate', [nPoints,results.rate.size], dtype=results.rate.dtype)
         results.PhiDs.createHdf(aFile,'phids',nRepeats=nPoints, fillvalue=np.nan)
@@ -1237,7 +1239,8 @@ class LineResults(myObject):
 #        results.opacityInterp.writeHdf(aFile, 'opacityinterp',  index=slic)
 
         # Add the acceptance rate
-        results.rate.writeHdf(aFile,'rate',index=slic)
+        results.rate.writeHdf(aFile, 'rate', index=slic)
+        
 
         # Add the data misfit
         results.PhiDs.writeHdf(aFile,'phids',index=slic)
