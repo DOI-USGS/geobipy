@@ -46,35 +46,39 @@ class PointCloud3D(myObject):
 
         # Number of points in the cloud
         self._nPoints = nPoints
+
         # StatArray of the x co-ordinates
         if (x is None):
-            self.x = StatArray(self._nPoints, "Easting", units)
+            self._x = StatArray(self._nPoints, "Easting", units)
         else:
-            assert x.size == nPoints, ValueError("x must have size {}".format(nPoints))
+            assert np.size(x) == nPoints, ValueError("x must have size {}".format(nPoints))
             if (isinstance(x, StatArray)):
-                self.x = x.deepcopy()
+                self._x = x.deepcopy()
             else:
-                self.x = StatArray(x, "Easting", units)
+                self._x = StatArray(x, "Easting", units)
 
         # StatArray of the y co-ordinates
         if (y is None):
-            self.y = StatArray(self._nPoints, "Northing", units)
+            self._y = StatArray(self._nPoints, "Northing", units)
         else:
-            assert y.size == nPoints, ValueError("y must have size {}".format(nPoints))
+            assert np.size(y) == nPoints, ValueError("y must have size {}".format(nPoints))
             if isinstance(y, StatArray):
-                self.y = y.deepcopy()
+                self._y = y.deepcopy()
             else:
-                self.y = StatArray(y, "Northing", units)
+                self._y = StatArray(y, "Northing", units)
                 
         # StatArray of the z co-ordinates
         if (z is None):
-            self.z = StatArray(self._nPoints, "Height", units)
+            self._z = StatArray(self._nPoints, "Height", units)
         else:
-            assert z.size == nPoints, ValueError("z must have size {}".format(nPoints))
+            assert np.size(z) == nPoints, ValueError("z must have size {}".format(nPoints))
             if isinstance(z, StatArray):
-                self.z = z.deepcopy()
+                self._z = z.deepcopy()
             else:
-                self.z = StatArray(z, "Height", units)
+                self._z = StatArray(z, "Height", units)
+
+        if nPoints == 0:
+            return
 
         # KdTree
         self.kdtree = None
@@ -97,6 +101,18 @@ class PointCloud3D(myObject):
 
         """
         return PointCloud3D(np.size(i), x=self.x[i], y=self.y[i], z=self.z[i])
+
+    @property
+    def x(self):
+        return self._x
+
+    @property
+    def y(self):
+        return self._y
+    
+    @property
+    def z(self):
+        return self._z
 
     
     @property
@@ -128,7 +144,8 @@ class PointCloud3D(myObject):
         ValueError : If i is not a single int
             
         """
-        assert isinstance(i, int), ValueError("i must be a single integer")
+        assert np.size(i) == 1, ValueError("i must be a single integer")
+        assert 0 <= i <= self.nPoints, ValueError("Must have 0 <= i <= {}".format(self.nPoints))
         return Point(self.x[i], self.y[i], self.z[i])
 
 
@@ -410,9 +427,7 @@ class PointCloud3D(myObject):
         """ Display a summary of the 3D Point Cloud """
         msg = ("3D Point Cloud: \n"
               "Number of Points: : {} \n {} {} {}").format(self._nPoints, self.x.summary(True), self.y.summary(True), self.z.summary(True))
-        if (out):
-            return msg
-        print(msg)
+        return msg if out else print(msg)
 
 
 #    def interpRBF(self, values, nDims, dx = None, function = None, epsilon = None, smooth = None, norm = None, **kwargs):
@@ -513,15 +528,15 @@ class PointCloud3D(myObject):
             PointCloud3D broadcast to each rank
 
         """
+        
+        x = self.x.Bcast(world, root=root)
+        y = self.y.Bcast(world, root=root)
+        z = self.z.Bcast(world, root=root)
         N = MPI.Bcast(self._nPoints, world, root=root)
-        this = PointCloud3D(N)
-        this.x = self.x.Bcast(world, root=root)
-        this.y = self.y.Bcast(world, root=root)
-        this.z = self.z.Bcast(world, root=root)
-        return this
+        return PointCloud3D(N, x=x, y=y, z=z)
 
 
-    def Scatterv(self, myStart, myChunk, world, root=0):
+    def Scatterv(self, starts, chunks, world, root=0):
         """ScatterV a PointCloud3D using MPI 
         
         Parameters
@@ -542,12 +557,8 @@ class PointCloud3D(myObject):
             
         """
 
-        #print(world.rank," PointCloud3D.Scatterv")
-        N = myChunk[world.rank]
-        #print(world.rank," mySize "+str(N))
-        this = PointCloud3D(N)
-        #print(world.rank,' PointCloud3D initialized')
-        this.x = self.x.Scatterv(myStart, myChunk, world, root=root)
-        this.y = self.y.Scatterv(myStart, myChunk, world, root=root)
-        this.z = self.z.Scatterv(myStart, myChunk, world, root=root)
-        return this
+        N = chunks[world.rank]
+        x = self.x.Scatterv(starts, chunks, world, root=root)
+        y = self.y.Scatterv(starts, chunks, world, root=root)
+        z = self.z.Scatterv(starts, chunks, world, root=root)
+        return PointCloud3D(N, x=x, y=y, z=z)
