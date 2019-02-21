@@ -641,6 +641,7 @@ def histogramEqualize(values, nBins=256):
 
 def safeEval(string):
     
+    # Backwards compatibility
     if ('NdArray' in string):
         string = string.replace('NdArray', 'StatArray')
         return string
@@ -648,7 +649,7 @@ def safeEval(string):
         string = string.replace('EmLoop', 'CircularLoop')
         return string
     
-    allowed = ('StatArray', 'Histogram', 'Model1D', 'Hitmap', 'TdemDataPoint', 'FdemDataPoint', 'TdemSystem', 'FdemSystem', 'CircularLoop', 'RectilinearMesh')  
+    allowed = ('StatArray', 'Histogram', 'Model1D', 'Hitmap', 'TdemData', 'FdemData', 'TdemDataPoint', 'FdemDataPoint', 'TdemSystem', 'FdemSystem', 'CircularLoop', 'RectilinearMesh')  
 
     if (any(x in string for x in allowed)):
         return string
