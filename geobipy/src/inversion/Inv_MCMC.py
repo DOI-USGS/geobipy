@@ -14,7 +14,7 @@ import numpy as np
 from .Results import Results
 from ..base.MPI import print
 
-def Inv_MCMC(paras, D, ID, prng, LineResults=None, rank=1):
+def Inv_MCMC(paras, D, prng, LineResults=None, rank=1):
     """ Markov Chain Monte Carlo approach for inversion of geophysical data
     paras: User input parameters object
     D: Datapoint to invert
@@ -28,15 +28,18 @@ def Inv_MCMC(paras, D, ID, prng, LineResults=None, rank=1):
     # Initialize the MCMC parameters and perform the initial iteration
     [paras, Mod, D, prior, posterior, PhiD] = Initialize(paras, D, prng=prng)
 
-    Res = Results(paras.save, paras.plot, paras.savePNG, D, Mod,
-                  ID = ID,
-                  nMarkovChains = paras.nMC,
-                  plotEvery = paras.iPlot,
-                  parameterDisplayLimits = paras.dispLimits,
-                  reciprocateParameters = paras.invertPar,
-                  priMu = paras.priMu,
-                  priStd = paras.priStd,
-                  verbose=paras.verbose)
+    Res = Results(D, Mod,
+                save = paras.save,
+                plot = paras.plot,
+                savePNG = paras.savePNG,
+                ID = D.fiducial,
+                nMarkovChains = paras.nMarkovChains,
+                plotEvery = paras.plotEvery,
+                parameterDisplayLimits = paras.parameterDisplayLimits,
+                reciprocateParameters = paras.reciprocateParameters,
+                priMu = paras.priMu,
+                priStd = paras.priStd,
+                verbose=paras.verbose)
 
     # Set the saved best models and data
     bestModel = Mod  # .deepcopy()
@@ -51,7 +54,7 @@ def Inv_MCMC(paras, D, ID, prng, LineResults=None, rank=1):
 
     Res.clk.start()
 
-    Go = i <= paras.nMC + iBurn -1
+    Go = i <= paras.nMarkovChains + iBurn -1
     while (Go):
 
         # Accept or reject the new model
@@ -72,8 +75,8 @@ def Inv_MCMC(paras, D, ID, prng, LineResults=None, rank=1):
 
         Res.iBestV[i] = iBest
 
-        if (np.mod(i, paras.iPlot) == 0):
-            tPerMod = Res.clk.lap() / paras.iPlot
+        if (np.mod(i, paras.plotEvery) == 0):
+            tPerMod = Res.clk.lap() / paras.plotEvery
             tmp = "i=%i, k=%i, %4.3f s/Model, %0.3f s Elapsed\n" % (i, np.float(Mod.nCells[0]), tPerMod, Res.clk.timeinSeconds())
             if (rank == 1):
                 print(tmp)
@@ -85,7 +88,7 @@ def Inv_MCMC(paras, D, ID, prng, LineResults=None, rank=1):
         Res.plot()        
         i += 1
         
-        Go = i <= paras.nMC + iBurn -1
+        Go = i <= paras.nMarkovChains + iBurn -1
 
     Res.clk.stop()
     Res.invTime = np.float64(Res.clk.timeinSeconds())
@@ -93,7 +96,7 @@ def Inv_MCMC(paras, D, ID, prng, LineResults=None, rank=1):
     if (paras.save):
         # No parallel write is being used, so write a single file for the data point
         if (LineResults is None):
-            Res.save(outdir=paras.dataPointResultsDir, ID=ID)
+            Res.save(outdir=paras.dataPointResultsDir, ID=D.fiducial)
         else: # Write the contents to the parallel HDF5 file
             LineResults.results2Hdf(Res)
 #            Res.writeHdf(pHDFfile, str(ID), create=False) # Assumes space has been created for the data point
@@ -103,11 +106,8 @@ def Inv_MCMC(paras, D, ID, prng, LineResults=None, rank=1):
     if (Res.savePNG):# and not failed):
         # To save any thing the Results must be plot
         Res.plot(forcePlot=True)
-        Res.toPNG('.',ID)
-    #%%
-
-
-#%%
+        Res.toPNG('.', D.fiducial)
+   
 def Initialize(paras, D, prng):
     np.set_printoptions(threshold=np.inf)
     """ Initialize variables and priors, and perform the first iteration """
