@@ -22,6 +22,7 @@ from ....base import customFunctions as cf
 from ....base.customFunctions import safeEval
 from ....base.customFunctions import findNotNans, isInt
 from ....base import customPlots as cp
+from ....base import MPI as myMPI
 from os.path import split as psplt
 from os.path import join
 
@@ -30,7 +31,7 @@ class TdemDataPoint(EmDataPoint):
     """ Initialize a Time domain EMData Point
 
 
-    TdemDataPoint(x, y, z, elevation=0.0, data=None, std=None, system=None, T=None, R=None)
+    TdemDataPoint(x, y, z, elevation, data, std, system, T, R, lineNumber, fiducial)
 
     Parameters
     ----------
@@ -54,6 +55,10 @@ class TdemDataPoint(EmDataPoint):
         Transmitter loop class
     R : EmLoop, optional
         Receiver loop class
+    lineNumber : float, optional
+        The line number associated with the datapoint
+    fiducial : float, optional
+        The fiducial associated with the datapoint
 
     Returns
     -------
@@ -69,7 +74,7 @@ class TdemDataPoint(EmDataPoint):
 
     """
 
-    def __init__(self, x, y, z, elevation=0.0, data=None, std=None, system=None, T=None, R=None):
+    def __init__(self, x=0.0, y=0.0, z=0.0, elevation=0.0, data=None, std=None, predictedData=None, system=None, T=None, R=None, lineNumber=0.0, fiducial=0.0):
         """Initializer. """
 
         if not T is None:
@@ -78,115 +83,64 @@ class TdemDataPoint(EmDataPoint):
         if not R is None:
             assert isinstance(R, EmLoop), TypeError("Receiver must be of type EmLoop")
 
-        # x coordinate
-        self.x = StatArray(1) + x
-        # y coordinate
-        self.y = StatArray(1) + y
-        # z coordinate
-        self.z = StatArray(z, 'Measurement height above ground', 'm')
-        # Elevation of data point
-        self.elevation = StatArray(1) + elevation
-
         if (system is None):
             return
         else:
-            self.system = []
             if isinstance(system, (str, TdemSystem)):
                 system = [system]
             assert all((isinstance(sys, (str, TdemSystem)) for sys in system)), TypeError("System must be list with items of type TdemSystem")
-            for sys in system:
-                if isinstance(sys, str):
-                    tmp = TdemSystem().read()
-                    self.system.append(tmp)
-                elif isinstance(sys, TdemSystem):
-                    self.system.append(sys)
-        # Number of systems
-        self.nSystems = np.int32(np.size(system))
 
-        # Number of time gates
-        self.nTimes = np.asarray([s.nwindows() for s in self.system])
-        # Total number of windows
-        self.nWindows = np.sum(self.nTimes)
-        self._systemOffset = np.append(0, np.cumsum(self.nTimes))
+        nSystems = len(system)
+        nTimes = np.empty(nSystems, dtype=np.int32)
+        systems = []
+        for j, sys in enumerate(system):
+            if isinstance(sys, str):
+                systems.append(TdemSystem(sys))
+            elif isinstance(sys, TdemSystem):
+                systems.append(sys)
+            # Number of time gates
+            nTimes[j] = systems[j].nwindows()
 
-        # StatArray of Data
-        if data is None:
-            self._data = StatArray(self.nWindows, 'Time Domain Data', r'$\frac{V}{Am^{4}}$')
-        else:
-            assert data.size == self.nWindows, ValueError("Size of data must equal total number of time channels {}".format(self.nWindows))
-            self._data = StatArray(data, 'Time Domain Data', r'$\frac{V}{Am^{4}}$')
+        nChannels = np.sum(nTimes)
 
-        # StatArray of Standard Deviations
-        if std is None:
-            self._std = StatArray(np.ones(self.nWindows), 'Standard Deviation', r'$\frac{V}{Am^{4}}$')
-        else:
-            assert std.size == self.nWindows, ValueError("Size of std must equal total number of time channels {}".format(self.nWindows))
-            self._std = StatArray(std, 'Standard Deviation', r'$\frac{V}{Am^{4}}$')
-        
+        if not data is None:
+            assert data.size == nChannels, ValueError("Size of data must equal total number of time channels {}".format(nChannels))
+        if not std is None:
+            assert std.size == nChannels, ValueError("Size of std must equal total number of time channels {}".format(nChannels))
+        if not predictedData is None:
+            assert predictedData.size == nChannels, ValueError("Size of predictedData must equal total number of time channels {}".format(nChannels))
+            
+        EmDataPoint.__init__(self, nChannelsPerSystem=nTimes, x=x, y=y, z=z, elevation=elevation, data=data, std=std, predictedData=predictedData, dataUnits=r'$\frac{V}{Am^{4}}$', lineNumber=lineNumber, fiducial=fiducial)
+
+        self._data.name = "Time domain data"
+
+        self.nSystems = nSystems
+        self.system = systems
+
         self.getIplotActive()
                 
         # EmLoop Transnmitter
         self.T = deepcopy(T)
         # EmLoop Reciever
         self.R = deepcopy(R)
-        # StatArray of Predicted Data
-        self._predictedData = StatArray(self.nWindows, 'Predicted Data', r'$\frac{V}{Am^{4}}$')
-        # StatArray of Relative Errors
-        self.relErr = StatArray(self.nSystems, '$\epsilon_{Relative}x10^{2}$', '%')
-        # StatArray of Additive Errors
-        self.addErr = StatArray(self.nSystems, '$\epsilon_{Additive}$', self._data.units)
-        # Sensitivity Matrix - Stored here so we can update only the necessary
-        # parts
-        self.J = None
-        # Index to non NaN values
-        self.iActive = self.getActiveData()
 
-        
-
-    
-    @property
-    def data(self):
-        """Get the data for the requested system."""
-        return self._data
-        
-    @property
-    def deltaD(self):
-        """Residual between predicted and observed data."""
-        return StatArray(self._predictedData - self._data, 'Data residual', self._data.units)    
-
-
-    def _systemIndices(self, system=0):
-        """The slice indices for the requested system.
-        
-        Parameters
-        ----------
-        system : int
-            Requested system index.
-            
-        Returns
-        -------
-        out : numpy.slice
-            The slice pertaining to the requested system.
-            
-        """
-
-        assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-
-        return np.s_[self._systemOffset[system]:self._systemOffset[system+1]]
+        k = 0
+        for i in range(self.nSystems):
+            # Set the channel names
+            for iTime in range(self.nTimes[i]):
+                self._channelNames[k] = 'Time {:.3e} s'.format(self.system[i].windows.centre[iTime])
+                k += 1
 
 
     @property
-    def predictedData(self):
-        """Predicted data."""
-        return self._predictedData
-        
+    def nTimes(self):
+        return self.nChannelsPerSystem
 
     @property
-    def std(self):
-        """Get the data for the requested system."""
-        return self._std
+    def nWindows(self):
+        return self.nChannels
 
-    
+
     def times(self, system=0):
         """ Return the window times in an StatArray """
         return self.system[system].times
@@ -198,9 +152,7 @@ class TdemDataPoint(EmDataPoint):
 
 
     def __deepcopy__(self, memo):
-        out = TdemDataPoint(self.x, self.y, self.z, self.elevation, self._data, self._std, self.system, self.T, self.R)
-
-        out._predictedData = self._predictedData.deepcopy()
+        out = TdemDataPoint(self.x, self.y, self.z, self.elevation, self._data, self._std, self._predictedData, self.system, self.T, self.R)
         # StatArray of Relative Errors
         out.relErr = self.relErr.deepcopy()
         # StatArray of Additive Errors
@@ -577,12 +529,14 @@ class TdemDataPoint(EmDataPoint):
 
         assert False, __name__ + '.updateSensitivity: Invalid option [0,1,2]'
 
+
     def forward(self, mod):
         """ Forward model the data from the given model """
 
         assert isinstance(mod, Model), TypeError("Invalid model class for forward modeling [1D]")
 
         self._forward1D(mod)
+
 
     def sensitivity(self, mod, ix=None, scale=False, modelChanged=True):
         """ Compute the sensitivty matrix for the given model """
@@ -591,6 +545,7 @@ class TdemDataPoint(EmDataPoint):
 
         return StatArray(self._sensitivity1D(mod, ix, scale, modelChanged), 'Sensitivity', '$\\frac{V}{ASm^{3}}$')
 
+
     def _forward1D(self, mod):
         """ Forward model the data from a 1D layered earth model """
         heightTolerance = 0.0
@@ -598,6 +553,7 @@ class TdemDataPoint(EmDataPoint):
             self._BrodieForward(mod)
         else:
             self._simPEGForward(mod)
+
 
     def _BrodieForward(self, mod):
         # Generate the Brodie Earth class
@@ -612,6 +568,7 @@ class TdemDataPoint(EmDataPoint):
             fm = self.system[i].forwardmodel(G, E)
             self._predictedData[iJ0:iJ1] = -fm.SZ[:]  # Store the necessary component
             iJ0 = iJ1
+
 
     def _simPEGForward(self, mod):
         
@@ -676,7 +633,6 @@ class TdemDataPoint(EmDataPoint):
         self._predictedData[:] = -simPEG_survey.dpred(mod.par)
 
 
-
     def _sensitivity1D(self, mod, ix=None, scale=False, modelChanged=True):
         """ Compute the sensitivty matrix for a 1D layered earth model, optionally compute the responses for only the layers in ix """
         # Unfortunately the code requires forward modelled data to compute the
@@ -716,22 +672,40 @@ class TdemDataPoint(EmDataPoint):
         J = J[self.iActive, :]
         return J
 
-#     def fm_dlogc(self, mod):
-#             # Generate the Brodie Earth class
-#         E = Earth(mod.par[:], mod.thk[:-1])
-# #    ####lg.debug('Parameters: '+str(mod.par))
-# #    ####lg.debug('Thickness: '+str(mod.thk[:-1]))
-#         # Generate the Brodie Geometry class
-# #    ####lg.debug('Geometry: '+str([self.z[0],self.T.roll,self.T.pitch,self.T.yaw,-12.64,0.0,2.11,self.R.roll,self.R.pitch,self.R.yaw]))
-#         G = Geometry(self.z[0], self.T.roll, self.T.pitch, self.T.yaw, -
-#                      12.615, 0.0, 2.16, self.R.roll, self.R.pitch, self.R.yaw)
-#         # Forward model the data for each system
-#         iJ0 = 0
-#         for i in range(self.nSystems):
-#             iJ1 = iJ0 + self.system[i].nwindows()
-#             dummy = self.system[i].forward(G, E)
 
-# #      self._predictedData[iJ0:iJ1]=-fm.SZ[:]
-# #      iJ0=iJ1
-#         return fm
+    def Isend(self, dest, world, systems=None):
+        tmp = np.empty(7, dtype=np.float64)
+        tmp[:] = np.asarray([self.x, self.y, self.z, self.elevation, self.nSystems, self.lineNumber, self.fiducial])
+        myMPI.Isend(tmp, dest=dest, world=world)
+        if systems is None:
+            for i in range(self.nSystems):
+                world.isend(self.system[i].fileName, dest=dest)
+        self._data.Isend(dest, world)
+        self._std.Isend(dest, world)
+        self._predictedData.Isend(dest, world)
+        self.T.Isend(dest, world)
+        self.R.Isend(dest, world)
 
+
+
+    def Irecv(self, source, world, systems=None):
+
+        tmp = np.empty(7, dtype=np.float64)
+        tmp = myMPI.Irecv(source=source, world=world)
+
+        if systems is None:
+            nSystems = np.int32(tmp[4])
+
+            systems = []
+            for i in range(nSystems):
+                systems.append(world.irecv(source=source).wait())
+
+        s = StatArray(0)
+        d = s.Irecv(source, world)
+        s = s.Irecv(source, world)
+        p = s.Irecv(source, world)
+        c = CircularLoop()
+        T = c.Irecv(source, world)
+        R = c.Irecv(source, world)
+
+        return TdemDataPoint(tmp[0], tmp[1], tmp[2], tmp[3], data=d, std=s, predictedData=p, system=systems, T=T, R=R, lineNumber=tmp[5], fiducial=tmp[6])
