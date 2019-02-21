@@ -1345,8 +1345,7 @@ class StatArray(np.ndarray, myObject):
         name = world.bcast(self.name, root=root)
         units = world.bcast(self.units, root=root)
         tmp = myMPI.Bcast(self, world, root=root)
-        this = StatArray(tmp, name, units, dtype=tmp.dtype)
-        return this
+        return StatArray(tmp, name, units, dtype=tmp.dtype)
 
 
     def Scatterv(self, starts, chunks, world, axis=0, root=0):
@@ -1377,8 +1376,66 @@ class StatArray(np.ndarray, myObject):
         name = world.bcast(self.name)
         units = world.bcast(self.units)
         tmp = myMPI.Scatterv(self, starts, chunks, world, axis, root)
-        this = StatArray(tmp, name, units, dtype=tmp.dtype)
-        return this
+        return StatArray(tmp, name, units, dtype=tmp.dtype)
 
 
-#
+    def Isend(self, dest, world):
+        
+        world.isend(self.name, dest=dest)
+        world.isend(self.units, dest=dest)
+        req = myMPI.Isend(self, dest=dest, world=world)
+        return req
+
+
+    def Irecv(self, source, world):
+        name = world.irecv(source=source).wait()
+        units = world.irecv(source=source).wait()
+        tmp = myMPI.Irecv(source=source, world=world)
+        return StatArray(tmp, name, units)
+
+
+    def IsendToLeft(self, world):
+        """ISend an array to the rank left of world.rank.
+
+        """
+        dest = world.size - 1 if world.rank == 0 else world.rank - 1
+        self.Isend(dest=dest, world=world)
+
+
+    def IsendToRight(self, world):
+        """ISend an array to the rank right of world.rank.
+
+        """
+        dest = 0 if world.rank == world.size - 1 else world.rank + 1
+        self.Isend(dest=dest, world=world)
+
+    
+    def IrecvFromRight(self, world, wrap=True):
+        """IRecv an array from the rank right of world.rank.
+
+        """
+        source = 0 if world.rank == world.size - 1 else world.rank + 1
+        return self.Irecv(source=source, world=world)
+
+
+    def IrecvFromLeft(self, world, wrap=True):
+        """Irecv an array from the rank left of world.rank.
+ 
+        """
+        source = world.size - 1 if world.rank == 0 else world.rank - 1
+        return self.Irecv(source=source, world=world)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
