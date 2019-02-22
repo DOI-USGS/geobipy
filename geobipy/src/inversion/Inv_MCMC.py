@@ -14,25 +14,25 @@ import numpy as np
 from .Results import Results
 from ..base.MPI import print
 
-def Inv_MCMC(paras, D, prng, LineResults=None, rank=1):
+def Inv_MCMC(paras, DataPoint, prng, LineResults=None, rank=1):
     """ Markov Chain Monte Carlo approach for inversion of geophysical data
     paras: User input parameters object
-    D: Datapoint to invert
+    DataPoint: Datapoint to invert
     ID: Datapoint label for saving results
     pHDFfile: Optional HDF5 file opened using h5py.File('name.h5','w',driver='mpio', comm=world) before calling Inv_MCMC
     """
     #%%
     # Check the user input parameters against the datapoint
-    paras.check(D)
+    paras.check(DataPoint)
 
     # Initialize the MCMC parameters and perform the initial iteration
-    [paras, Mod, D, prior, posterior, PhiD] = Initialize(paras, D, prng=prng)
+    [paras, Mod, DataPoint, prior, posterior, PhiD] = Initialize(paras, DataPoint, prng=prng)
 
-    Res = Results(D, Mod,
+    Res = Results(DataPoint, Mod,
                 save = paras.save,
                 plot = paras.plot,
                 savePNG = paras.savePNG,
-                ID = D.fiducial,
+                ID = DataPoint.fiducial,
                 nMarkovChains = paras.nMarkovChains,
                 plotEvery = paras.plotEvery,
                 parameterDisplayLimits = paras.parameterDisplayLimits,
@@ -43,7 +43,7 @@ def Inv_MCMC(paras, D, prng, LineResults=None, rank=1):
 
     # Set the saved best models and data
     bestModel = Mod  # .deepcopy()
-    bestData = D  # .deepcopy()
+    bestData = DataPoint  # .deepcopy()
     bestPosterior = posterior  # .copy()
 
     # Initialize the Chain
@@ -58,11 +58,11 @@ def Inv_MCMC(paras, D, prng, LineResults=None, rank=1):
     while (Go):
 
         # Accept or reject the new model
-        [Mod, D, prior, posterior, PhiD, posteriorComponents, time] = AcceptReject(paras, Mod, D, prior, posterior, PhiD, Res, prng)# ,oF, oD, oRel, oAdd, oP, oA, i)
+        [Mod, DataPoint, prior, posterior, PhiD, posteriorComponents, time] = AcceptReject(paras, Mod, DataPoint, prior, posterior, PhiD, Res, prng)# ,oF, oD, oRel, oAdd, oP, oA, i)
 
         # Determine if we are burning in
         if (not Res.burnedIn):
-            if (PhiD <= multiplier * D.data.size):
+            if (PhiD <= multiplier * DataPoint.data.size):
                 Res.burnedIn = True  # Let the results know they are burned in
                 Res.iBurn = i         # Save the burn in iteration to the results
 
@@ -70,7 +70,7 @@ def Inv_MCMC(paras, D, prng, LineResults=None, rank=1):
         if (posterior > bestPosterior):
             iBest = np.int64(i)
             bestModel = Mod  # .deepcopy()
-            bestData = D  # .deepcopy()
+            bestData = DataPoint  # .deepcopy()
             bestPosterior = posterior  # .copy()
 
         Res.iBestV[i] = iBest
@@ -84,7 +84,7 @@ def Inv_MCMC(paras, D, prng, LineResults=None, rank=1):
             if (not Res.burnedIn and not paras.solveRelativeError):
                 multiplier *= paras.multiplier
 
-        Res.update(i, iBest, bestData, bestModel, D, multiplier, PhiD, Mod, posterior, posteriorComponents, paras.clipRatio)
+        Res.update(i, iBest, bestData, bestModel, DataPoint, multiplier, PhiD, Mod, posterior, posteriorComponents, paras.clipRatio)
         Res.plot()        
         i += 1
         
@@ -96,7 +96,7 @@ def Inv_MCMC(paras, D, prng, LineResults=None, rank=1):
     if (paras.save):
         # No parallel write is being used, so write a single file for the data point
         if (LineResults is None):
-            Res.save(outdir=paras.dataPointResultsDir, ID=D.fiducial)
+            Res.save(outdir=paras.dataPointResultsDir, ID=DataPoint.fiducial)
         else: # Write the contents to the parallel HDF5 file
             LineResults.results2Hdf(Res)
 #            Res.writeHdf(pHDFfile, str(ID), create=False) # Assumes space has been created for the data point
@@ -106,54 +106,54 @@ def Inv_MCMC(paras, D, prng, LineResults=None, rank=1):
     if (Res.savePNG):# and not failed):
         # To save any thing the Results must be plot
         Res.plot(forcePlot=True)
-        Res.toPNG('.', D.fiducial)
+        Res.toPNG('.', DataPoint.fiducial)
+
    
-def Initialize(paras, D, prng):
+def Initialize(paras, DataPoint, prng):
     np.set_printoptions(threshold=np.inf)
     """ Initialize variables and priors, and perform the first iteration """
     # Initialize properties of the data
     # Set the distribution of the data misfit
     # Incoming standard deviations may be zero. The variance of the prior is updated
-    # later with D.updateErrors.
-    D._predictedData.setPrior('MvNormalLog', D._data[D.iActive], D._std[D.iActive]**2.0, prng=prng)
+    # later with DataPoint.updateErrors.
+    DataPoint._predictedData.setPrior('MvNormalLog', DataPoint._data[DataPoint.iActive], DataPoint._std[DataPoint.iActive]**2.0, prng=prng)
 
     # Set the prior on the elevation height
-    D.z.setPrior('UniformLog', np.float64(D.z) - paras.zRange, np.float64(D.z) + paras.zRange)
-    # D.z.setPrior('NormalLog', D.z, 1.0, prng=prng)
-    # D.z.setPrior('Normal',D.z,paras.zRange)
+    DataPoint.z.setPrior('UniformLog', np.float64(DataPoint.z) - paras.zRange, np.float64(DataPoint.z) + paras.zRange)
+    # DataPoint.z.setPrior('NormalLog', DataPoint.z, 1.0, prng=prng)
+    # DataPoint.z.setPrior('Normal',DataPoint.z,paras.zRange)
 
-    D.z.setProposal('Normal', D.z, (paras.propEl), prng=prng)
+    DataPoint.z.setProposal('Normal', DataPoint.z, (paras.propEl), prng=prng)
 
     # Set the prior on the relative Errors
-    D.relErr[:] = paras.relErr.deepcopy()
-
-    D.relErr.setPrior('UniformLog', paras.rErrMinimum[:], paras.rErrMaximum[:], prng=prng)
-
+    DataPoint.relErr[:] = paras.relErr.deepcopy()
+    DataPoint.setRelativeErrorPrior(paras.rErrMinimum[:], paras.rErrMaximum[:], prng=prng)
     # Set the prior on the additive Errors
-    D.addErr[:] = paras.addErr.deepcopy()
-    D.addErr.setPrior('UniformLog', paras.aErrMinimum[:], paras.aErrMaximum[:], prng=prng)
+    DataPoint.addErr[:] = paras.addErr.deepcopy()
+    DataPoint.setAdditiveErrorPrior(paras.aErrMinimum[:], paras.aErrMaximum[:], prng=prng)
 
     # Update the data errors based on user given parameters
-    D.updateErrors(paras.relErr, paras.addErr)
+    DataPoint.updateErrors(paras.relErr, paras.addErr)
 
     # Save a copy of the original errors
-    paras.Err = D._std.deepcopy()
+    paras.Err = DataPoint._std.deepcopy()
     # Set the proposal distribution for the relative errors
-    D.relErr.setProposal('MvNormal', D.relErr, (paras.propRerr), prng=prng)
+    DataPoint.setRelativeErrorProposal(paras.relErr, paras.propRerr, prng=prng)
+    
     # Set the proposal distribution for the relative errors
-    D.addErr.setProposal('MvNormal', D.addErr, (paras.propAerr), prng=prng)
+    DataPoint.setAdditiveErrorProposal(paras.addErr, paras.propAerr, prng=prng)
 
     # Initialize the calibration parameters
     if (paras.solveCalibration):
-        D.calibration.setPrior('NormalLog',
+        DataPoint.calibration.setPrior('NormalLog',
                                np.reshape(paras.calMean, np.size(paras.calMean), order='F'),
                                np.reshape(paras.calVar, np.size(paras.calVar), order='F'), prng=prng)
-        D.calibration[:] = D.calibration.prior.mean
+        DataPoint.calibration[:] = DataPoint.calibration.prior.mean
         # Initialize the calibration proposal
-        D.calibration.setProposal('Normal', D.calibration, np.reshape(paras.propCal, np.size(paras.propCal), order='F'), prng=prng)
+        DataPoint.calibration.setProposal('Normal', DataPoint.calibration, np.reshape(paras.propCal, np.size(paras.propCal), order='F'), prng=prng)
 
     # Find the conductivity of a half space model that best fits the data
-    HScond = D.FindBestHalfSpace()
+    HScond = DataPoint.FindBestHalfSpace()
 
     # Create an initial model for the first iteration of the inversion
     # Initialize a 1D model with the half space conductivity
@@ -185,13 +185,13 @@ def Initialize(paras, D, prng):
                          (np.exp(paras.priMu + 3.0 * paras.priStd))]
 
     # Compute the predicted data
-    D.forward(Mod)
+    DataPoint.forward(Mod)
     # Compute the sensitivity wrt parameter
-    D.J = D.sensitivity(Mod)
+    DataPoint.J = DataPoint.sensitivity(Mod)
 
     if (paras.stochasticNewton):
         # Scale the sensitivity matrix by the data errors.
-        J = D.scaleJ(D.J)
+        J = DataPoint.scaleJ(DataPoint.J)
         # Compute a quasi-Newton based variance update
         paras.unscaledVariance = np.linalg.inv(np.dot(J.T, J) + np.eye(Mod.nCells[0]) * paras.priStd**-1.0)
     else:
@@ -205,24 +205,24 @@ def Initialize(paras, D, prng):
     Mod.dpar.setPrior('MvNormalLog', 0.0, paras.GradientStd**2.0, prng=prng)
 
     # Compute the data misfit
-    PhiD = D.dataMisfit(squared=True)
+    PhiD = DataPoint.dataMisfit(squared=True)
 
     # Calibrate the response if it is being solved for
     if (paras.solveCalibration):
-        D.calibrate()
+        DataPoint.calibrate()
 
     # Evaluate the prior for the current model
     prior = Mod.priorProbability(paras.solveParameter,paras.solveGradient,paras.pLimits)
     # Evaluate the prior for the current data
-    prior += D.priorProbability(paras.solveRelativeError, paras.solveAdditiveError, paras.solveElevation, paras.solveCalibration)
+    prior += DataPoint.priorProbability(paras.solveRelativeError, paras.solveAdditiveError, paras.solveElevation, paras.solveCalibration)
 
     # Add the likelihood function to the prior
-    posterior = D.likelihood() + prior
+    posterior = DataPoint.likelihood() + prior
 
-    return (paras, Mod, D, prior, posterior, PhiD)
+    return (paras, Mod, DataPoint, prior, posterior, PhiD)
 
 
-def AcceptReject(paras,Mod,D,prior,posterior,PhiD,Res, prng):# ,oF, oD, oRel, oAdd, oP, oA ,curIter):
+def AcceptReject(paras, Mod, DataPoint, prior, posterior, PhiD, Res, prng):# ,oF, oD, oRel, oAdd, oP, oA ,curIter):
     """ Propose a new random model and accept or reject it """
     clk = Stopwatch()
     clk.start()
@@ -233,24 +233,24 @@ def AcceptReject(paras,Mod,D,prior,posterior,PhiD,Res, prng):# ,oF, oD, oRel, oA
     parSaved = Mod1.par.deepcopy()
 
     # Propose a new data point, using assigned proposal distributions
-    D1 = D.propose(paras.solveElevation,paras.solveRelativeError,paras.solveAdditiveError,paras.solveCalibration)
+    D1 = DataPoint.propose(paras.solveElevation,paras.solveRelativeError,paras.solveAdditiveError,paras.solveCalibration)
 
     if (option < 2):
         # Compute the sensitivity of the data to the perturbed model
         D1.J = D1.updateSensitivity(D1.J, Mod1, option, scale=False)
-        J = D.scaleJ(D1.J)
+        J = DataPoint.scaleJ(D1.J)
 
         # Propose new layer conductivities
         if paras.stochasticNewton:
             unscaledVariance = np.linalg.inv(np.dot(J.T,J) + np.eye(Mod1.nCells[0]) * paras.priStd**-1.0)
-            J = D.scaleJ(D1.J, 2.0)
+            J = DataPoint.scaleJ(D1.J, 2.0)
         else:
             unscaledVariance = np.diag((paras.covScaling / np.sqrt(Mod1.nCells)) / (
                 (np.dot(J.T, J)) + sparse.eye(Mod1.nCells[0]) * (paras.priStd**-1.0)))
     else:  # There was no change in the model
         # Normalize the saved sensitivity matrix by the previous data errors
         if (paras.stochasticNewton):
-            J = D.scaleJ(D1.J, 2.0)
+            J = DataPoint.scaleJ(D1.J, 2.0)
 
         unscaledVariance = paras.unscaledVariance
 
@@ -258,7 +258,7 @@ def AcceptReject(paras,Mod,D,prior,posterior,PhiD,Res, prng):# ,oF, oD, oRel, oA
     # objective function
     if (paras.stochasticNewton):
         # Compute the gradient
-        gradient = np.dot(J.T, D.deltaD[D.iActive]) + \
+        gradient = np.dot(J.T, DataPoint.deltaD[DataPoint.iActive]) + \
             ((paras.priStd**-1.0) * (np.log(Mod1.par) - paras.priMu))
 
         scaling = paras.covScaling * \
@@ -341,10 +341,8 @@ def AcceptReject(paras,Mod,D,prior,posterior,PhiD,Res, prng):# ,oF, oD, oRel, oA
         # Get the pdf for the perturbed parameters
         prop1 = Mod1.par.proposal.getPdf(np.log(Mod1.par))  # CAN.prop
 
-        par = StatArray(Mod1.par.size)
-        par[:] = np.log(Mod1.par)
-        cov = StatArray(Mod1.par.size)
-        cov[:] = (Mod1.par.proposal.variance)
+        par = StatArray(np.log(Mod1.par))
+        cov = StatArray(Mod1.par.proposal.variance)
   
         if (Mod1.nCells > Mod.nCells):  # Layer was inserted
             tmp = np.mean(par[Mod1.iLayer:Mod1.iLayer + 2])
@@ -397,7 +395,7 @@ def AcceptReject(paras,Mod,D,prior,posterior,PhiD,Res, prng):# ,oF, oD, oRel, oA
 #        accepted=False
         # Keep the unperturbed mdel
         Mod0 = Mod  # .deepcopy()
-        D0 = D  # .deepcopy()
+        D0 = DataPoint  # .deepcopy()
         prior0 = prior  # .copy()
         posterior0 = posterior  # .copy()
         PhiD0 = PhiD  # .copy()
