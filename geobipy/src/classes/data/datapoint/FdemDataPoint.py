@@ -319,11 +319,11 @@ class FdemDataPoint(EmDataPoint):
         obj = eval(safeEval(item.attrs.get('repr')))
         e = obj.fromHdf(item, index=index)
 
-        _aPoint = FdemDataPoint(x, y, z, e)
-
         item = grp.get('sys')
         obj = eval(safeEval(item.attrs.get('repr')))
-        _aPoint.system = obj.fromHdf(item)
+        system = obj.fromHdf(item)
+
+        _aPoint = FdemDataPoint(x, y, z, e, system=system)
 
         slic = None
         if not index is None:
