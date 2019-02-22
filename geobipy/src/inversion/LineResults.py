@@ -299,35 +299,35 @@ class LineResults(myObject):
         else:
             i = index
 
-        aFile = self.hdfFile
+        hdfFile = self.hdfFile
 
         s = np.s_[i, :]
 
         R = Results()
 
-        R.iPlot = np.array(aFile.get('iplot'))
-        R.plotMe = np.array(aFile.get('plotme'))
-        R.limits = np.array(aFile.get('limits'))
-        R.invertPar = np.array(aFile.get('invertPar'))
-        R.nMC = np.array(aFile.get('nmc'))
-        R.nSystems = np.array(aFile.get('nsystems'))
-        R.ratex = hdfRead.readKeyFromFile(aFile,'','/','ratex')
+        R.iPlot = np.array(hdfFile.get('iplot'))
+        R.plotMe = np.array(hdfFile.get('plotme'))
+        R.limits = np.array(hdfFile.get('limits'))
+        R.invertPar = np.array(hdfFile.get('invertPar'))
+        R.nMC = np.array(hdfFile.get('nmc'))
+        R.nSystems = np.array(hdfFile.get('nsystems'))
+        R.ratex = hdfRead.readKeyFromFile(hdfFile,'','/','ratex')
 
-        R.i = hdfRead.readKeyFromFile(aFile,'','/','i', index=i)
-        R.iBurn = hdfRead.readKeyFromFile(aFile,'','/','iburn', index=i)
-        R.burnedIn = hdfRead.readKeyFromFile(aFile,'','/','burnedin', index=i)
-        R.doi = hdfRead.readKeyFromFile(aFile,'','/','doi', index=i)
-        R.multiplier = hdfRead.readKeyFromFile(aFile,'','/','multiplier', index=i)
-        R.rate = hdfRead.readKeyFromFile(aFile,'','/','rate', index=s)
-        R.PhiDs = hdfRead.readKeyFromFile(aFile,'','/','phids', index=s)
-        R.Hitmap = hdfRead.readKeyFromFile(aFile,'','/','hitmap', index=i)
-        R.bestD = hdfRead.readKeyFromFile(aFile,'','/','bestd', index=i, sysPath=self.sysPath)
-        #R.currentD = hdfRead.readKeyFromFile(aFile,'','/','currentd', index=i, sysPath=self.sysPath)
-        R.bestModel = hdfRead.readKeyFromFile(aFile,'','/','bestmodel', index=i)
+        R.i = hdfRead.readKeyFromFile(hdfFile,'','/','i', index=i)
+        R.iBurn = hdfRead.readKeyFromFile(hdfFile,'','/','iburn', index=i)
+        R.burnedIn = hdfRead.readKeyFromFile(hdfFile,'','/','burnedin', index=i)
+        R.doi = hdfRead.readKeyFromFile(hdfFile,'','/','doi', index=i)
+        R.multiplier = hdfRead.readKeyFromFile(hdfFile,'','/','multiplier', index=i)
+        R.rate = hdfRead.readKeyFromFile(hdfFile,'','/','rate', index=s)
+        R.PhiDs = hdfRead.readKeyFromFile(hdfFile,'','/','phids', index=s)
+        R.Hitmap = hdfRead.readKeyFromFile(hdfFile,'','/','hitmap', index=i)
+        R.bestD = hdfRead.readKeyFromFile(hdfFile,'','/','bestd', index=i, sysPath=self.sysPath)
+        #R.currentD = hdfRead.readKeyFromFile(hdfFile,'','/','currentd', index=i, sysPath=self.sysPath)
+        R.bestModel = hdfRead.readKeyFromFile(hdfFile,'','/','bestmodel', index=i)
         R.bestModel.maxDepth = np.log(R.Hitmap.y.cellCentres[-1])
-        R.kHist = hdfRead.readKeyFromFile(aFile,'','/','khist', index=i)
-        R.DzHist = hdfRead.readKeyFromFile(aFile,'','/','dzhist', index=i)
-        R.MzHist = hdfRead.readKeyFromFile(aFile,'','/','mzhist', index=i)
+        R.kHist = hdfRead.readKeyFromFile(hdfFile,'','/','khist', index=i)
+        R.DzHist = hdfRead.readKeyFromFile(hdfFile,'','/','dzhist', index=i)
+        R.MzHist = hdfRead.readKeyFromFile(hdfFile,'','/','mzhist', index=i)
 
 
         # R.DzHist.bins -= (R.DzHist.bins[int(R.DzHist.bins.size/2)] - R.bestD.z[0])
@@ -335,12 +335,12 @@ class LineResults(myObject):
         R.relErr = []
         R.addErr = []
         for j in range(R.nSystems):
-            R.relErr.append(hdfRead.readKeyFromFile(aFile,'','/','relerr'+str(j), index=i))
-            R.addErr.append(hdfRead.readKeyFromFile(aFile,'','/','adderr'+str(j), index=i))
+            R.relErr.append(hdfRead.readKeyFromFile(hdfFile,'','/','relerr'+str(j), index=i))
+            R.addErr.append(hdfRead.readKeyFromFile(hdfFile,'','/','adderr'+str(j), index=i))
 
 
-        R.invTime=np.array(aFile.get('invtime')[i])
-        R.saveTime=np.array(aFile.get('savetime')[i])
+        R.invTime=np.array(hdfFile.get('invtime')[i])
+        R.saveTime=np.array(hdfFile.get('savetime')[i])
 
         # Initialize a list of iteration number
         R.iRange = StatArray(np.arange(2 * R.nMC), name="Iteration #", dtype=np.int64)
@@ -1100,93 +1100,93 @@ class LineResults(myObject):
               "saving time\n"+
               "====================================================\n")
 
-    def createHdf(self, aFile, iDs, results):
+    def createHdf(self, hdfFile, iDs, results):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
         """
 
-        self.hdfFile = aFile
+        self.hdfFile = hdfFile
 
         nPoints = iDs.size
         self.iDs = np.sort(iDs)
 
         # Initialize and write the attributes that won't change
-        aFile.create_dataset('ids',data=self.iDs)
-        aFile.create_dataset('iplot', data=results.iPlot)
-        aFile.create_dataset('plotme', data=results.plotMe)
-        aFile.create_dataset('invertPar', data=results.invertPar)
-        aFile.create_dataset('limits', data=results.limits)
-        aFile.create_dataset('nmc', data=results.nMC)
-        aFile.create_dataset('nsystems', data=results.nSystems)
-        results.ratex.toHdf(aFile,'ratex')
-#        aFile.create_dataset('ratex', [results.ratex.size], dtype=results.ratex.dtype)
-#        aFile['ratex'][:] = results.ratex
+        hdfFile.create_dataset('ids',data=self.iDs)
+        hdfFile.create_dataset('iplot', data=results.iPlot)
+        hdfFile.create_dataset('plotme', data=results.plotMe)
+        hdfFile.create_dataset('invertPar', data=results.invertPar)
+        hdfFile.create_dataset('limits', data=results.limits)
+        hdfFile.create_dataset('nmc', data=results.nMC)
+        hdfFile.create_dataset('nsystems', data=results.nSystems)
+        results.ratex.toHdf(hdfFile,'ratex')
+#        hdfFile.create_dataset('ratex', [results.ratex.size], dtype=results.ratex.dtype)
+#        hdfFile['ratex'][:] = results.ratex
 
 
         # Initialize the attributes that will be written later
-        aFile.create_dataset('i', shape=[nPoints], dtype=results.i.dtype, fillvalue=np.nan)
-        aFile.create_dataset('iburn', shape=[nPoints], dtype=results.iBurn.dtype, fillvalue=np.nan)
-        aFile.create_dataset('burnedin', shape=[nPoints], dtype=type(results.burnedIn))
-        aFile.create_dataset('doi',  shape=[nPoints], dtype=results.doi.dtype, fillvalue=np.nan)
-        aFile.create_dataset('multiplier',  shape=[nPoints], dtype=results.multiplier.dtype, fillvalue=np.nan)
-        aFile.create_dataset('invtime',  shape=[nPoints], dtype=float, fillvalue=np.nan)
-        aFile.create_dataset('savetime',  shape=[nPoints], dtype=float, fillvalue=np.nan)
+        hdfFile.create_dataset('i', shape=[nPoints], dtype=results.i.dtype, fillvalue=np.nan)
+        hdfFile.create_dataset('iburn', shape=[nPoints], dtype=results.iBurn.dtype, fillvalue=np.nan)
+        hdfFile.create_dataset('burnedin', shape=[nPoints], dtype=type(results.burnedIn))
+        hdfFile.create_dataset('doi',  shape=[nPoints], dtype=results.doi.dtype, fillvalue=np.nan)
+        hdfFile.create_dataset('multiplier',  shape=[nPoints], dtype=results.multiplier.dtype, fillvalue=np.nan)
+        hdfFile.create_dataset('invtime',  shape=[nPoints], dtype=float, fillvalue=np.nan)
+        hdfFile.create_dataset('savetime',  shape=[nPoints], dtype=float, fillvalue=np.nan)
 
-        results.meanInterp.createHdf(aFile,'meaninterp',nRepeats=nPoints, fillvalue=np.nan)
-        results.bestInterp.createHdf(aFile,'bestinterp',nRepeats=nPoints, fillvalue=np.nan)
-#        results.opacityInterp.createHdf(aFile,'opacityinterp',nRepeats=nPoints, fillvalue=np.nan)
-#        aFile.create_dataset('meaninterp', [nPoints,nz], dtype=np.float64)
-#        aFile.create_dataset('bestinterp', [nPoints,nz], dtype=np.float64)
-#        aFile.create_dataset('opacityinterp', [nPoints,nz], dtype=np.float64)
+        results.meanInterp.createHdf(hdfFile,'meaninterp',nRepeats=nPoints, fillvalue=np.nan)
+        results.bestInterp.createHdf(hdfFile,'bestinterp',nRepeats=nPoints, fillvalue=np.nan)
+#        results.opacityInterp.createHdf(hdfFile,'opacityinterp',nRepeats=nPoints, fillvalue=np.nan)
+#        hdfFile.create_dataset('meaninterp', [nPoints,nz], dtype=np.float64)
+#        hdfFile.create_dataset('bestinterp', [nPoints,nz], dtype=np.float64)
+#        hdfFile.create_dataset('opacityinterp', [nPoints,nz], dtype=np.float64)
         
-        results.rate.createHdf(aFile,'rate',nRepeats=nPoints, fillvalue=np.nan)
-#        aFile.create_dataset('rate', [nPoints,results.rate.size], dtype=results.rate.dtype)
-        results.PhiDs.createHdf(aFile,'phids',nRepeats=nPoints, fillvalue=np.nan)
-        #aFile.create_dataset('phids', [nPoints,results.PhiDs.size], dtype=results.PhiDs.dtype)
+        results.rate.createHdf(hdfFile,'rate',nRepeats=nPoints, fillvalue=np.nan)
+#        hdfFile.create_dataset('rate', [nPoints,results.rate.size], dtype=results.rate.dtype)
+        results.PhiDs.createHdf(hdfFile,'phids',nRepeats=nPoints, fillvalue=np.nan)
+        #hdfFile.create_dataset('phids', [nPoints,results.PhiDs.size], dtype=results.PhiDs.dtype)
 
         # Create the layer histogram
-        results.kHist.createHdf(aFile,'khist',nRepeats=nPoints, fillvalue=np.nan)
+        results.kHist.createHdf(hdfFile,'khist',nRepeats=nPoints, fillvalue=np.nan)
 
         # Create the Elevation histogram
-        results.DzHist.createHdf(aFile,'dzhist',nRepeats=nPoints, fillvalue=np.nan)
+        results.DzHist.createHdf(hdfFile,'dzhist',nRepeats=nPoints, fillvalue=np.nan)
 
         # Create the Interface histogram
-        results.MzHist.createHdf(aFile,'mzhist',nRepeats=nPoints, fillvalue=np.nan)
+        results.MzHist.createHdf(hdfFile,'mzhist',nRepeats=nPoints, fillvalue=np.nan)
 
         # Add the relative and additive errors
         for i in range(results.nSystems):
-            results.relErr[i].createHdf(aFile,"relerr"+str(i),nRepeats=nPoints, fillvalue=np.nan)
-            results.addErr[i].createHdf(aFile,"adderr"+str(i),nRepeats=nPoints, fillvalue=np.nan)
+            results.relErr[i].createHdf(hdfFile,"relerr"+str(i),nRepeats=nPoints, fillvalue=np.nan)
+            results.addErr[i].createHdf(hdfFile,"adderr"+str(i),nRepeats=nPoints, fillvalue=np.nan)
 
         # Add the Hitmap
-        results.Hitmap.createHdf(aFile,'hitmap', nRepeats=nPoints, fillvalue=np.nan)
+        results.Hitmap.createHdf(hdfFile,'hitmap', nRepeats=nPoints, fillvalue=np.nan)
 
-        # results.currentD.createHdf(aFile,'currentd', nRepeats=nPoints, fillvalue=np.nan)
-        results.bestD.createHdf(aFile,'bestd', nRepeats=nPoints, fillvalue=np.nan)
+        # results.currentD.createHdf(hdfFile,'currentd', nRepeats=nPoints, fillvalue=np.nan)
+        results.bestD.createHdf(hdfFile,'bestd', nRepeats=nPoints, fillvalue=np.nan)
 
         # Since the 1D models change size adaptively during the inversion, we need to pad the HDF creation to the maximum allowable number of layers.
         tmp = results.bestModel.pad(results.bestModel.maxLayers)
 
-        tmp.createHdf(aFile,'bestmodel',nRepeats=nPoints, fillvalue=np.nan)
+        tmp.createHdf(hdfFile,'bestmodel',nRepeats=nPoints, fillvalue=np.nan)
 
         if results.verbose:
 
-            results.posteriorComponents.createHdf(aFile,'posteriorcomponents',nRepeats=nPoints, fillvalue=np.nan)
+            results.posteriorComponents.createHdf(hdfFile,'posteriorcomponents',nRepeats=nPoints, fillvalue=np.nan)
 
         # Add the best data components
-#        aFile.create_dataset('bestdata.z', [nPoints], dtype=results.bestD.z.dtype)
-#        aFile.create_dataset('bestdata.p', [nPoints,*results.bestD.p.shape], dtype=results.bestD.p.dtype)
-#        aFile.create_dataset('bestdata.s', [nPoints,*results.bestD.s.shape], dtype=results.bestD.s.dtype)
+#        hdfFile.create_dataset('bestdata.z', [nPoints], dtype=results.bestD.z.dtype)
+#        hdfFile.create_dataset('bestdata.p', [nPoints,*results.bestD.p.shape], dtype=results.bestD.p.dtype)
+#        hdfFile.create_dataset('bestdata.s', [nPoints,*results.bestD.s.shape], dtype=results.bestD.s.dtype)
 
         # Add the best model components
-#        aFile.create_dataset('bestmodel.ncells', [nPoints], dtype=results.bestModel.nCells.dtype)
-#        aFile.create_dataset('bestmodel.top', [nPoints], dtype=results.bestModel.top.dtype)
-#        aFile.create_dataset('bestmodel.par', [nPoints,*results.bestModel.par.shape], dtype=results.bestModel.par.dtype)
-#        aFile.create_dataset('bestmodel.depth', [nPoints,*results.bestModel.depth.shape], dtype=results.bestModel.depth.dtype)
-#        aFile.create_dataset('bestmodel.thk', [nPoints,*results.bestModel.thk.shape], dtype=results.bestModel.thk.dtype)
-#        aFile.create_dataset('bestmodel.chie', [nPoints,*results.bestModel.chie.shape], dtype=results.bestModel.chie.dtype)
-#        aFile.create_dataset('bestmodel.chim', [nPoints,*results.bestModel.chim.shape], dtype=results.bestModel.chim.dtype)
+#        hdfFile.create_dataset('bestmodel.ncells', [nPoints], dtype=results.bestModel.nCells.dtype)
+#        hdfFile.create_dataset('bestmodel.top', [nPoints], dtype=results.bestModel.top.dtype)
+#        hdfFile.create_dataset('bestmodel.par', [nPoints,*results.bestModel.par.shape], dtype=results.bestModel.par.dtype)
+#        hdfFile.create_dataset('bestmodel.depth', [nPoints,*results.bestModel.depth.shape], dtype=results.bestModel.depth.dtype)
+#        hdfFile.create_dataset('bestmodel.thk', [nPoints,*results.bestModel.thk.shape], dtype=results.bestModel.thk.dtype)
+#        hdfFile.create_dataset('bestmodel.chie', [nPoints,*results.bestModel.chie.shape], dtype=results.bestModel.chie.dtype)
+#        hdfFile.create_dataset('bestmodel.chim', [nPoints,*results.bestModel.chim.shape], dtype=results.bestModel.chim.dtype)
 
 #        self.currentD.createHdf(grp, 'currentd')
 #        self.bestD.createHdf(grp, 'bestd')
@@ -1199,31 +1199,31 @@ class LineResults(myObject):
 
         assert results.ID in self.iDs, Exception("The HDF file does not have ID number {}. Available ids are between {} and {}".format(results.ID, np.min(self.iDs), np.max(self.iDs)))
 
-        aFile = self.hdfFile
+        hdfFile = self.hdfFile
 
         # Get the point index
         i = self.iDs.searchsorted(results.ID)
 
         # Add the iteration number
-        aFile['i'][i] = results.i
+        hdfFile['i'][i] = results.i
 
         # Add the burn in iteration
-        aFile['iburn'][i] = results.iBurn
+        hdfFile['iburn'][i] = results.iBurn
 
         # Add the burned in logical
-        aFile['burnedin'][i] = results.burnedIn
+        hdfFile['burnedin'][i] = results.burnedIn
 
         # Add the depth of investigation
-        aFile['doi'][i] = results.doi
+        hdfFile['doi'][i] = results.doi
 
         # Add the multiplier
-        aFile['multiplier'][i] = results.multiplier
+        hdfFile['multiplier'][i] = results.multiplier
 
         # Add the inversion time
-        aFile['invtime'][i] = results.invTime
+        hdfFile['invtime'][i] = results.invTime
 
         # Add the savetime
-#        aFile['savetime'][i] = results.saveTime
+#        hdfFile['savetime'][i] = results.saveTime
 
         # Interpolate the mean and best model to the discretized hitmap
         results.meanInterp[:] = results.Hitmap.axisMean()
@@ -1232,43 +1232,43 @@ class LineResults(myObject):
 
         slic = np.s_[i, :]
         # Add the interpolated mean model
-        results.meanInterp.writeHdf(aFile, 'meaninterp',  index=slic)
+        results.meanInterp.writeHdf(hdfFile, 'meaninterp',  index=slic)
         # Add the interpolated best
-        results.bestInterp.writeHdf(aFile, 'bestinterp',  index=slic)
+        results.bestInterp.writeHdf(hdfFile, 'bestinterp',  index=slic)
         # Add the interpolated opacity
-#        results.opacityInterp.writeHdf(aFile, 'opacityinterp',  index=slic)
+#        results.opacityInterp.writeHdf(hdfFile, 'opacityinterp',  index=slic)
 
         # Add the acceptance rate
-        results.rate.writeHdf(aFile, 'rate', index=slic)
+        results.rate.writeHdf(hdfFile, 'rate', index=slic)
         
 
         # Add the data misfit
-        results.PhiDs.writeHdf(aFile,'phids',index=slic)
+        results.PhiDs.writeHdf(hdfFile,'phids',index=slic)
 
         # Add the layer histogram counts
-        results.kHist.writeHdf(aFile,'khist',index=slic)
+        results.kHist.writeHdf(hdfFile,'khist',index=slic)
 
         # Add the elevation histogram counts
-        results.DzHist.writeHdf(aFile,'dzhist',index=slic)
+        results.DzHist.writeHdf(hdfFile,'dzhist',index=slic)
 
         # Add the interface histogram counts
-        results.MzHist.writeHdf(aFile,'mzhist',index=slic)
+        results.MzHist.writeHdf(hdfFile,'mzhist',index=slic)
 
         # Add the relative and additive errors
         for j in range(results.nSystems):
-            results.relErr[j].writeHdf(aFile, "relerr" + str(j), index=slic)
-            results.addErr[j].writeHdf(aFile, "adderr" + str(j), index=slic)
+            results.relErr[j].writeHdf(hdfFile, "relerr" + str(j), index=slic)
+            results.addErr[j].writeHdf(hdfFile, "adderr" + str(j), index=slic)
 
         # Add the hitmap
-        results.Hitmap.writeHdf(aFile,'hitmap',  index=i)
+        results.Hitmap.writeHdf(hdfFile,'hitmap',  index=i)
 
-        results.bestD.writeHdf(aFile,'bestd',  index=i)
-        # results.currentD.writeHdf(aFile,'currentd',  index=i)
+        results.bestD.writeHdf(hdfFile,'bestd',  index=i)
+        # results.currentD.writeHdf(hdfFile,'currentd',  index=i)
 
-        results.bestModel.writeHdf(aFile,'bestmodel', index=i)
+        results.bestModel.writeHdf(hdfFile,'bestmodel', index=i)
 
 #        if results.verbose:
-#            results.posteriorComponents.writeHdf(aFile, 'posteriorcomponents',  index=np.s_[i,:,:])
+#            results.posteriorComponents.writeHdf(hdfFile, 'posteriorcomponents',  index=np.s_[i,:,:])
 
 
 
