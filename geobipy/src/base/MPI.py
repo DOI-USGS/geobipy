@@ -17,6 +17,8 @@ def print(aStr='', end='\n'):
         string appended after the last value, default is a newline.
 
     """
+    if not isinstance(aStr, str):
+        aStr = str(aStr)
     sys.stdout.write(aStr + end)
     sys.stdout.flush()
 
