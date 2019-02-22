@@ -162,37 +162,13 @@ class EmDataPoint(DataPoint):
         """
         other = self.deepcopy()
         if (height):  # Update the candidate data elevation (if required)
-            # Generate a new elevation
-            other.z[:] = self.z.proposal.rng(1)
-            if other.z.hasPrior():
-                p = other.z.probability()
-                while p == 0.0 or p == -np.inf:
-                    other.z[:] = self.z.proposal.rng(1)
-                    p = other.z.probability()
-            # Update the mean of the proposed elevation
-            other.z.proposal.mean[:] = other.z
+            other.proposeHeight()
             
-        if (rErr):    
-            # Generate a new error
-            other.relErr[:] = self.relErr.proposal.rng(1)
-            if other.relErr.hasPrior():
-                p = other.relErr.probability()
-                while p == 0.0 or p == -np.inf:
-                    other.relErr[:] = self.relErr.proposal.rng(1)
-                    p = other.relErr.probability()
-            # Update the mean of the proposed errors
-            other.relErr.proposal.mean[:] = other.relErr
+        if (rErr):
+            other.proposeRelativeError()
             
         if (aErr):
-            # Generate a new error
-            other.addErr[:] = self.addErr.proposal.rng(1)
-            if other.addErr.hasPrior():
-                p = other.addErr.probability()
-                while p == 0.0 or p == -np.inf:
-                    other.addErr[:] = self.addErr.proposal.rng(1)
-                    p = other.addErr.probability()
-            # Update the mean of the proposed errors
-            other.addErr.proposal.mean[:] = other.addErr
+            other.proposeAdditiveError()
 
         if (calibration):  # Update the calibration parameters for the candidate data (if required)
             # Generate new calibration errors
@@ -200,6 +176,45 @@ class EmDataPoint(DataPoint):
             # Update the mean of the proposed calibration errors
             other.calibration.proposal.mean[:] = other.calibration
         return other
+
+
+    def proposeAdditiveError(self):
+
+        # Generate a new error
+        self.addErr[:] = self.addErr.proposal.rng(1)
+        if self.addErr.hasPrior():
+            p = self.addErr.probability()
+            i=0
+            while p == 0.0 or p == -np.inf and i < 10:
+                self.addErr[:] = self.addErr.proposal.rng(1)
+                p = self.addErr.probability()
+                i += 1
+        # Update the mean of the proposed errors
+        self.addErr.proposal.mean[:] = self.addErr
+
+    
+    def proposeHeight(self):
+        # Generate a new elevation
+        self.z[:] = self.z.proposal.rng(1)
+        if self.z.hasPrior():
+            p = self.z.probability()
+            while p == 0.0 or p == -np.inf:
+                self.z[:] = self.z.proposal.rng(1)
+                p = self.z.probability()
+        # Update the mean of the proposed elevation
+        self.z.proposal.mean[:] = self.z
+
+    
+    def proposeRelativeError(self):
+        # Generate a new error
+        self.relErr[:] = self.relErr.proposal.rng(1)
+        if self.relErr.hasPrior():
+            p = self.relErr.probability()
+            while p == 0.0 or p == -np.inf:
+                self.relErr[:] = self.relErr.proposal.rng(1)
+                p = self.relErr.probability()
+        # Update the mean of the proposed errors
+        self.relErr.proposal.mean[:] = self.relErr
 
 
     def plotHalfSpaceResponses(self, minConductivity=-4.0, maxConductivity=2.0, nSamples=100, **kwargs):
@@ -226,6 +241,44 @@ class EmDataPoint(DataPoint):
         plt.loglog(c, PhiD, **kwargs)
         cP.xlabel(c.getNameUnits())
         cP.ylabel('Data misfit')
+
+
+    def setAdditiveErrorPrior(self, minimum, maximum, prng=None):
+        minimum = np.atleast_1d(minimum)
+        assert minimum.size == self.nSystems, ValueError("minimum must have {} entries".format(self.nSystems))
+        assert np.all(minimum > 0.0), ValueError("minimum values must be > 0.0")
+        maximum = np.atleast_1d(maximum)
+        assert maximum.size == self.nSystems, ValueError("maximum must have {} entries".format(self.nSystems))
+        assert np.all(maximum > 0.0), ValueError("maximum values must be > 0.0")
+
+        self.addErr.setPrior('UniformLog', minimum, maximum, prng=prng)
+
+    
+    def setAdditiveErrorProposal(self, means, variances, prng=None):
+        means = np.atleast_1d(means)
+        assert means.size == self.nSystems, ValueError("means must have {} entries".format(self.nSystems))
+        variances = np.atleast_1d(variances)
+        assert variances.size == self.nSystems, ValueError("variances must have {} entries".format(self.nSystems))
+        self.addErr.setProposal('MvNormal', means, variances, prng=prng)
+
+
+    def setRelativeErrorPrior(self, minimum, maximum, prng=None):
+
+        minimum = np.atleast_1d(minimum)
+        assert minimum.size == self.nSystems, ValueError("minimum must have {} entries".format(self.nSystems))
+        assert np.all(minimum > 0.0), ValueError("minimum values must be > 0.0")
+        maximum = np.atleast_1d(maximum)
+        assert maximum.size == self.nSystems, ValueError("maximum must have {} entries".format(self.nSystems))
+        assert np.all(maximum > 0.0), ValueError("maximum values must be > 0.0")
+        self.relErr.setPrior('UniformLog', minimum, maximum, prng=prng)
+
+
+    def setRelativeErrorProposal(self, means, variances, prng=None):
+        means = np.atleast_1d(means)
+        assert means.size == self.nSystems, ValueError("means must have {} entries".format(self.nSystems))
+        variances = np.atleast_1d(variances)
+        assert variances.size == self.nSystems, ValueError("variances must have {} entries".format(self.nSystems))
+        self.relErr.setProposal('MvNormal', means, variances, prng=prng)
 
 
     def summary(self, out=False):

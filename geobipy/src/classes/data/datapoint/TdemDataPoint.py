@@ -434,6 +434,98 @@ class TdemDataPoint(EmDataPoint):
 
         cp.title(title)
 
+    
+    def priorProbability(self, rErr, aErr, height, calibration, verbose=False):
+        """Evaluate the probability for the EM data point given the specified attached priors
+
+        Parameters
+        ----------
+        rEerr : bool
+            Include the relative error when evaluating the prior
+        aEerr : bool
+            Include the additive error when evaluating the prior
+        height : bool
+            Include the elevation when evaluating the prior
+        calibration : bool
+            Include the calibration parameters when evaluating the prior
+        verbose : bool
+            Return the components of the probability, i.e. the individually evaluated priors
+
+        Returns
+        -------
+        out : np.float64
+            The evaluation of the probability using all assigned priors
+
+        Notes
+        -----
+        For each boolean, the associated prior must have been set.
+
+        Raises
+        ------
+        TypeError
+            If a prior has not been set on a requested parameter
+
+        """
+        probability = np.float64(0.0)
+        errProbability = np.float64(0.0)
+
+        P_relative = np.float64(0.0)
+        P_additive = np.float64(0.0)
+        P_height = np.float64(0.0)
+        P_calibration = np.float64(0.0)
+
+        if rErr:  # Relative Errors
+            P_relative = self.relErr.probability()
+            errProbability += P_relative
+        if aErr:  # Additive Errors
+            P_additive = self.addErr.probability(np.log(self.addErr))
+            errProbability += P_additive
+
+        probability += errProbability
+        if height:  # Elevation
+            P_height = (self.z.probability())
+            probability += P_height
+        if calibration:  # Calibration parameters
+            P_calibration = self.calibration.probability()
+            probability += P_calibration
+
+        probability = np.float64(probability)
+        
+        if verbose:
+            return probability, np.asarray([P_relative, P_additive, P_height, P_calibration])
+        return probability
+
+
+    def proposeAdditiveError(self):
+
+        # Generate a new error
+        tmp = self.addErr.proposal.rng(1)
+        if self.addErr.hasPrior():
+            p = self.addErr.probability(tmp)
+            while p == 0.0 or p == -np.inf:
+                tmp = self.addErr.proposal.rng(1)
+                p = self.addErr.probability(tmp)
+        # Update the mean of the proposed errors
+        self.addErr.proposal.mean[:] = tmp
+        self.addErr[:] = np.exp(tmp)
+
+
+    def setAdditiveErrorPrior(self, minimum, maximum, prng=None):
+        minimum = np.atleast_1d(minimum)
+        assert minimum.size == self.nSystems, ValueError("minimum must have {} entries".format(self.nSystems))
+        assert np.all(minimum > 0.0), ValueError("minimum values must be in linear space i.e. > 0.0")
+        maximum = np.atleast_1d(maximum)
+        assert maximum.size == self.nSystems, ValueError("maximum must have {} entries".format(self.nSystems))
+        assert np.all(maximum > 0.0), ValueError("maximum values must be in linear space i.e. > 0.0")
+        self.addErr.setPrior('UniformLog', np.log(minimum), np.log(maximum), prng=prng)
+
+    
+    def setAdditiveErrorProposal(self, means, variances, prng=None):
+        means = np.atleast_1d(means)
+        assert means.size == self.nSystems, ValueError("means must have {} entries".format(self.nSystems))
+        variances = np.atleast_1d(variances)
+        assert variances.size == self.nSystems, ValueError("variances must have {} entries".format(self.nSystems))
+        self.addErr.setProposal('MvNormal', np.log(means), variances, prng=prng)
 
 
 
@@ -468,30 +560,30 @@ class TdemDataPoint(EmDataPoint):
             If any item in the relativeErr or additiveErr lists is not a scalar or array_like of length equal to the number of time channels
         ValueError
             If any relative or additive errors are <= 0.0
-        """    
+        """
+        relativeErr = np.atleast_1d(relativeErr)
+        additiveErr = np.atleast_1d(additiveErr)
 
         #assert (isinstance(relativeErr, list)), TypeError("relativeErr must be a list of size equal to the number of systems {}".format(self.nSystems))
-        assert (len(relativeErr) == self.nSystems), TypeError("relativeErr must be a list of size equal to the number of systems {}".format(self.nSystems))
+        assert (relativeErr.size == self.nSystems), TypeError("relativeErr must be a list of size equal to the number of systems {}".format(self.nSystems))
 
         #assert (isinstance(additiveErr, list)), TypeError("additiveErr must be a list of size equal to the number of systems {}".format(self.nSystems))
-        assert (len(relativeErr) == self.nSystems), TypeError("additiveErr must be a list of size equal to the number of systems {}".format(self.nSystems))
+        assert (relativeErr.size == self.nSystems), TypeError("additiveErr must be a list of size equal to the number of systems {}".format(self.nSystems))
 
         t0 = 0.5 * np.log(1e-3)  # Assign fixed t0 at 1ms
-        i0 = 0
         # For each system assign error levels using the user inputs
         for i in range(self.nSystems):
-            assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], np.ndarray)), TypeError("relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.system[i].nwindows()))
-            assert (isinstance(additiveErr[i], float) or isinstance(additiveErr[i], np.ndarray)), TypeError("additiveErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.system[i].nwindows()))
-            assert (np.all(relativeErr[i] > 0.0)), ValueError("relativeErr for system {} cannot contain values <= 0.0.".format(self.nSystems))
-            #assert (np.all(additiveErr[i] > 0.0)), ValueError("additiveErr for system {} cannot contain values <= 0.0.".format(self.nSystems))
-            i1 = i0 + self.system[i].nwindows()
+            assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], np.ndarray)), TypeError("relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
+            assert (isinstance(additiveErr[i], float) or isinstance(additiveErr[i], np.ndarray)), TypeError("additiveErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
+            assert (np.all(relativeErr[i] > 0.0)), ValueError("relativeErr for system {} cannot contain values <= 0.0.".format(i+1))
+            assert (np.all(additiveErr[i] > 0.0)), ValueError("additiveErr for system {} should contain values > 0.0. Make sure the values are in linear space".format(i+1))
+            iSys = self._systemIndices(system=i)
             
             # Compute the relative error
-            rErr = relativeErr[i] * self._data[i0:i1]
-            aErr = np.exp(additiveErr[i]*np.log(10.0) - 0.5 * np.log(self.system[i].windows.centre) + t0)
+            rErr = relativeErr[i] * self._data[iSys]
+            aErr = np.exp(np.log(additiveErr[i]) - 0.5 * np.log(self.times(i)) + t0)
 
-            self._std[i0:i1] = np.sqrt((rErr**2.0) + (aErr**2.0))
-            i0 = i1
+            self._std[iSys] = np.sqrt((rErr**2.0) + (aErr**2.0))
 
         # Update the variance of the predicted data prior
         if self._predictedData.hasPrior():
@@ -561,13 +653,12 @@ class TdemDataPoint(EmDataPoint):
         # Generate the Brodie Geometry class
         G = Geometry(self.z[0], self.T.roll, self.T.pitch, self.T.yaw, -
                     12.64, 0.0, 2.11, self.R.roll, self.R.pitch, self.R.yaw)
+
         # Forward model the data for each system
-        iJ0 = 0
         for i in range(self.nSystems):
-            iJ1 = iJ0 + self.system[i].nwindows()
+            iSys = self._systemIndices(i)
             fm = self.system[i].forwardmodel(G, E)
-            self._predictedData[iJ0:iJ1] = -fm.SZ[:]  # Store the necessary component
-            iJ0 = iJ1
+            self._predictedData[iSys] = -fm.SZ[:]  # Store the necessary component
 
 
     def _simPEGForward(self, mod):
@@ -649,25 +740,21 @@ class TdemDataPoint(EmDataPoint):
         else:  # Partial matrix for specified layers
             J = np.zeros([self.nWindows, len(ix)])
 
-        iJ0 = 0
         for j in range(self.nSystems):  # For each system
-            iJ1 = iJ0 + self.system[j].nwindows()
+            iSys = self._systemIndices(j)
             for i in range(len(ix)):  # For the specified layers
                 tmp = self.system[j].derivative(
                     self.system[j].CONDUCTIVITYDERIVATIVE, ix[i] + 1)
                 # Store the necessary component
-                J[iJ0:iJ1, i] = -mod.par[ix[i]] * tmp.SZ[:]
-            iJ0 = iJ1
+                J[iSys, i] = -mod.par[ix[i]] * tmp.SZ[:]
 
         if scale:
-            iJ0 = 0
             for j in range(self.nSystems):  # For each system
-                iJ1 = iJ0 + self.system[j].nwindows()
+                iSys = self._systemIndices(j)
                 for i in range(len(ix)):  # For the specified layers
                     # Scale the sensitivity matix rows by the data weights if
                     # required
-                    J[iJ0:iJ1, i] /= self._std[iJ0:iJ1]
-                iJ0 = iJ1
+                    J[iSys, i] /= self._std[ISYS]
 
         J = J[self.iActive, :]
         return J
