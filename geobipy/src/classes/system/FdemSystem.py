@@ -38,6 +38,8 @@ class FdemSystem(myObject):
             self.T[i] = CircularLoop()
             self.R[i] = CircularLoop()
 
+        self._fileName = systemFilename
+
 
     @property
     def frequencies(self):
