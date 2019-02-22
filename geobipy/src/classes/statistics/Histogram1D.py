@@ -4,57 +4,59 @@ Module describing an efficient histogram class
 from .baseDistribution import baseDistribution
 from ...classes.mesh.RectilinearMesh1D import RectilinearMesh1D
 from ...classes.core.StatArray import StatArray
-from ...base.customFunctions import safeEval
+from ...base import customFunctions as cF
 from ...base import customPlots as cP
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
 
 class Histogram1D(RectilinearMesh1D):
-    """1D Histogram class that can update and plot efficiently.
+    """1D Histogram class that updates efficiently.
     
     Fast updating relies on knowing the bins ahead of time.
 
-    Histogram1D(values, nBins, bins, name, units)
+    Histogram1D(values, bins, binCentres, log)
 
     Parameters
     ----------
-    bins : array_like, optional
-        Specify the bins for the histogram. Can be regular or irregularly sized.
-    values : array_like, optional
-        Initial values to input into the histogram.
-    nBins : int, optional
-        Used if bins is not given. Used to divide the range of values.  
-    name : str, optional
-        Name of what the histogram characterizes.
-    units : str, optional
-        Units of what the histogram characterizes.
+    bins : geobipy.StatArray or array_like, optional
+        Specify the bin edges for the histogram. Can be regularly or irregularly increasing.
+    binCentres : geobipy.StatArray or array_like, optional
+        Specify the bin centres for the histogram. Can be regular or irregularly sized.
+    log : 'e' or float, optional
+        Entries are given in linear space, but internally bins and values are logged.
+        Plotting is in log space.
 
     Returns
     -------
     out : Histogram1D
         1D histogram
-
-    Raises
-    ------
-    ValueError
-        If bins is not given, values must be specified.
-    ValueError
-        If bins is not given, nbins must be specified.
     
     """
 
-    def __init__(self, bins=None, binCentres=None):
+    def __init__(self, bins=None, binCentres=None, log=None):
         """ Initialize a histogram """
 
         # Allow an null instantiation
         if (bins is None and binCentres is None):
             return
 
+        if not log is None:
+            if not bins is None:
+                assert isinstance(bins, StatArray), TypeError("bins must be a geobpiy.StatArray")
+                bins, label = cF._logSomething(bins, log=log)
+                bins.name = label + bins.getName()
+            if not binCentres is None:
+                assert isinstance(binCentres, StatArray), TypeError("binCentres must be a geobpiy.StatArray")
+                binCentres, label = cF._logSomething(binCentres, log=log)
+                binCentres.name = label + binCentres.getName()
+
         # Initialize the parent class
         RectilinearMesh1D.__init__(self, cellEdges=bins, cellCentres=binCentres)
 
         self._counts = StatArray(self.nCells, 'Frequency', dtype=np.int64)
+
+        self.log = log
 
 
     @property
@@ -87,7 +89,8 @@ class Histogram1D(RectilinearMesh1D):
         clip : bool
             A negative index which would normally wrap will clip to 0 and self.bins.size instead.
         """
-        iBin = np.atleast_1d(self.cellIndex(values.flatten(), clip=clip))
+        tmp, dum = cF._logSomething(values, self.log)
+        iBin = np.atleast_1d(self.cellIndex(tmp.flatten(), clip=clip))
         tmp = np.bincount(iBin, minlength = self.nBins)
         
         self._counts += tmp
@@ -177,11 +180,11 @@ class Histogram1D(RectilinearMesh1D):
     def fromHdf(self, grp, index=None):
         """ Reads in the object froma HDF file """
         item = grp.get('bins')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         bins = obj.fromHdf(item)
 
         item = grp.get('counts')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         if (index is None):
             counts = obj.fromHdf(item)
         else:
