@@ -8,6 +8,7 @@ from os.path import join
 import argparse
 from importlib import import_module
 import sys
+import time
 
 import h5py
 import numpy as np
@@ -96,60 +97,83 @@ def singleCore(inputFile, outputDir):
     # Import the script from the input file
     UP = import_module(inputFile, package=None)
 
-    
-    AllData = eval(UP.dataInit)
-    AllData.read(UP.dataFname, UP.sysFname)
+    t0 = time.time()
 
-    # Make sure both dataPoint and line results folders exist
+    # Make data and system filenames lists of str.
+    if isinstance(UP.dataFname, str):
+            UP.dataFname = [UP.dataFname]
+    if isinstance(UP.sysFname, str):
+            UP.sysFname = [UP.sysFname]
+
+    # Get the random number generator
+    prng = np.random.RandomState()
+
+    # Everyone needs the system classes read in early.
+    Dataset = eval(customFunctions.safeEval(UP.dataInit))
+    Dataset.readSystemFile(UP.sysFname)
+
+    # Make sure the results folders exist
     try:
         makedirs(outputDir)
     except:
         pass
 
-    # Get the random number generator
-    prng = np.random.RandomState()
+    # Prepare the dataset so that we can read a point at a time.
+    Dataset._initLineByLineRead(UP.dataFname, UP.sysFname)
+    # Get a datapoint from the file.
+    DataPoint = Dataset._readSingleDatapoint()
+    Dataset._closeDatafiles()
 
-    # Get a datapoint, it doesnt matter which one
-    DataPoint = AllData.getDataPoint(0)
+    # While preparing the file, we need access to the line numbers and fiducials in the data file
+    tmp = fileIO.read_columns(UP.dataFname[0], Dataset._indicesForFile[0][:2], 1, Dataset.nPoints)
+
+    Dataset._openDatafiles(UP.dataFname)
+
+    # Get the line numbers in the data
+    lineNumbers = np.unique(tmp[:, 0])
+    lineNumbers.sort()
+    nLines = lineNumbers.size
+    fiducials = tmp[:, 1]
+
     # Read in the user parameters
     paras = UP.userParameters(DataPoint)
+
     # Check the parameters
     paras.check(DataPoint)
+
     # Initialize the inversion to obtain the sizes of everything
-    [paras, Mod, D, prior, posterior, PhiD] = Initialize(paras, DataPoint, prng=prng)
+    [paras, Mod, D, prior, posterior, PhiD] = Initialize(paras, DataPoint, prng = prng)
+
     # Create the results template
-    Res = Results(paras.save, paras.plot, paras.savePNG, D, Mod,
-                  nMarkovChains = paras.nMC,
-                  plotEvery = paras.iPlot,
-                  parameterDisplayLimits = paras.dispLimits,
-                  reciprocateParameters = paras.invertPar,
-                  priMu = paras.priMu,
-                  priStd = paras.priStd,
-                  verbose=paras.verbose)
+    Res = Results(D, Mod,
+        save=paras.save, plot=paras.plot, savePNG=paras.savePNG,
+        nMarkovChains=paras.nMarkovChains, plotEvery=paras.plotEvery, parameterDisplayLimits=paras.parameterDisplayLimits,
+        reciprocateParameters=paras.reciprocateParameters)
 
- 
-    # Get the line numbers in the data
-    lines = np.unique(AllData.line)
-    lines.sort()
-    nLines = lines.size
-    LR = [None]*nLines
-    H5Files = [None]*nLines
-    for i in range(nLines):
-        H5Files[i] = h5py.File(join(outputDir, str(lines[i])+'.h5'), 'w')
-        j = np.where(AllData.line == lines[i])[0]
+    # No need to create and close the files like in parallel, so create and keep them open
+    LR = [None] * nLines
+    H5Files = [None] * nLines
+    for i, line in enumerate(lineNumbers):
+        fiducialsForLine = np.where(tmp[:, 0] == line)[0]
+        nFids = fiducialsForLine.size
+        H5Files[i] = h5py.File(join(outputDir, '{}.h5'.format(line)), 'w')
         LR[i] = LineResults()
-        LR[i].createHdf(H5Files[i], AllData.id[j], Res)
+        LR[i].createHdf(H5Files[i], fiducials[fiducialsForLine], Res)
+        print('Time to create line {} with {} data points: {:.3f} s'.format(line, nFids, time.time()-t0))
 
-
-    for i in range(AllData.nPoints):
-        DataPoint = AllData.getDataPoint(i)
+    # Loop through data points in the file.
+    for i in range(Dataset.nPoints):
+        DataPoint = Dataset._readSingleDatapoint()
         paras = UP.userParameters(DataPoint)
 
-        iLine = lines.searchsorted(AllData.line[i])
-        Inv_MCMC(paras, DataPoint, AllData.id[i], prng=prng, LineResults=LR[iLine])
+        iLine = lineNumbers.searchsorted(DataPoint.lineNumber)
+        Inv_MCMC(paras, DataPoint, prng=prng, LineResults=LR[iLine])
 
+    # Close all the files.
     for i in range(nLines):
-        H5Files[i].close()
+        LR[i].close()
+
+    Dataset._closeDatafiles()
 
 
 def multipleCore(inputFile, outputDir, skipHDF5):
@@ -207,6 +231,7 @@ def multipleCore(inputFile, outputDir, skipHDF5):
         Dataset._initLineByLineRead(UP.dataFname, UP.sysFname)
         # Get a datapoint from the file.
         DataPoint = Dataset._readSingleDatapoint()
+        
         Dataset._closeDatafiles()
 
         # While preparing the file, we need access to the line numbers and fiducials in the data file
@@ -216,6 +241,7 @@ def multipleCore(inputFile, outputDir, skipHDF5):
 
         # Get the line numbers in the data
         lineNumbers = np.unique(tmp[:, 0])
+        lineNumbers.sort()
         nLines = lineNumbers.size
         fiducials = tmp[:, 1]
 
