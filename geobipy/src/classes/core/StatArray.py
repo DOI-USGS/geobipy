@@ -667,10 +667,7 @@ class StatArray(np.ndarray, myObject):
         if (len(args) > 0):
             return self.prior.probability(*args)
 
-        if i is None:
-            return self.prior.probability(self[:])
-
-        return self.prior.probability(self[i])
+        return self.prior.probability(self[:]) if i is None else self.prior.probability(self[i])
 
     @property
     def prior(self):
