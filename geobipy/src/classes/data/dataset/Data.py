@@ -580,7 +580,7 @@ class Data(PointCloud3D):
               "Data:          : \n"
               "# of Channels: {} \n"
               "# of Total Data: {} \n").format(super().summary(True), self.nChannels, self.nPoints * self.nChannels)
-        return msg if out else print(out)
+        return msg if out else print(msg)
 
 
     def updateErrors(self, relativeErr, additiveErr, system=None):
