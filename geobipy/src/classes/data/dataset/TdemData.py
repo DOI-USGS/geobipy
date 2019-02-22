@@ -570,7 +570,7 @@ class TdemData(Data):
         else:
             T = CircularLoop(z=values[4], radius=self.system[0].loopRadius())
 
-        out = TdemDataPoint(x=values[2], y=values[3], z=values[4], elevation=values[5], data=D, std=S, system=self.system, T=T, R=R, lineNumber=values[0], fiducial=values[1])
+        out = TdemDataPoint(x=values[2], y=values[3], z=values[5], elevation=values[4], data=D, std=S, system=self.system, T=T, R=R, lineNumber=values[0], fiducial=values[1])
 
         return out
 
