@@ -8,7 +8,7 @@ import matplotlib.gridspec as gridspec
 from matplotlib.pyplot import pause
 from matplotlib.ticker import MaxNLocator
 from ..base import customPlots as cP
-from ..base.customFunctions import safeEval
+from ..base import customFunctions as cF
 import numpy as np
 from ..base import fileIO as fIO
 import h5py
@@ -150,15 +150,21 @@ class Results(myObject):
         rBins = dataPoint.relErr.prior.getBins()
         aBins = dataPoint.addErr.prior.getBins()
 
+        log = None
+        if isinstance(dataPoint, TdemDataPoint):
+            log = 10
+            aBins = np.exp(aBins)
+
         self.relErr = []
         self.addErr = []
         if (self.nSystems > 1):
             for i in range(self.nSystems):
                 self.relErr.append(Histogram1D(bins = StatArray(rBins[i, :], name='$\epsilon_{Relative}x10^{2}$', units='%')))
-                self.addErr.append(Histogram1D(bins = StatArray(aBins[i, :], name='$log_{10} \epsilon_{Additive}$', units=dataPoint._data.units)))
+                self.addErr.append(Histogram1D(bins = StatArray(aBins[i, :], name='$\epsilon_{Additive}$', units=dataPoint._data.units), log=log))
         else:
             self.relErr.append(Histogram1D(bins = StatArray(rBins, name='$\epsilon_{Relative}x10^{2}$', units='%')))
-            self.addErr.append(Histogram1D(bins = StatArray(aBins, name='$log_{10} \epsilon_{Additive}$', units=dataPoint._data.units)))
+            self.addErr.append(Histogram1D(bins = StatArray(aBins, name='$\epsilon_{Additive}$', units=dataPoint._data.units), log=log))
+
 
         # Initialize the hit map of layers and conductivities
         zGrd = StatArray(np.arange(0.5 * np.exp(model.minDepth), 1.1 * np.exp(model.maxDepth), 0.5 * np.exp(model.minThickness)), model.depth.name, model.depth.units)
@@ -174,11 +180,9 @@ class Results(myObject):
 
         # Initialize the doi
         self.doi = self.Hitmap.y.cellCentres[0]
-#    self.Hori=Rmesh2D([zGrd.size,mGrd.size],'','',dtype=np.int32)
 
         self.meanInterp = StatArray(zGrd.size)
         self.bestInterp = StatArray(zGrd.size)
-#        self.opacityInterp = StatArray(zGrd.size)
 
         # Initialize the Elevation Histogram
         self.DzHist = Histogram1D(bins = StatArray(dataPoint.z.prior.getBins(), name=dataPoint.z.name, units=dataPoint.z.units))
@@ -203,11 +207,11 @@ class Results(myObject):
 
         self.verbose = verbose
         if verbose:
-            self.allRelErr = StatArray([self.nSystems,self.nMC], name = '$\epsilon_{Relative}x10^{2}$',units='%')
-            self.allAddErr = StatArray([self.nSystems,self.nMC], name = '$log_{10} \epsilon_{Additive}$',units=dataPoint.d.units)
-            self.allZ = StatArray(self.nMC, name = 'Height', units='m')
-            self.posterior = StatArray(self.nMC, name = 'log(posterior)')
-            self.posteriorComponents = StatArray([9,self.nMC], 'Components of the posterior')
+            self.allRelErr = StatArray([self.nSystems, self.nMC], name='$\epsilon_{Relative}x10^{2}$', units='%')
+            self.allAddErr = StatArray([self.nSystems, self.nMC], name='$\epsilon_{Additive}$', units=dataPoint.d.units)
+            self.allZ = StatArray(self.nMC, name='Height', units='m')
+            self.posterior = StatArray(self.nMC, name='log(posterior)')
+            self.posteriorComponents = StatArray([9, self.nMC], 'Components of the posterior')
 
 
 #         Initialize and save the first figure
@@ -380,7 +384,8 @@ class Results(myObject):
         
         self.addErr[system].plot(**kwargs)
         plt.locator_params(axis='x', nbins=4)
-        plt.axvline(self.bestD.addErr[system], color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
+        loc, dum = cF._logSomething(self.bestD.addErr[system], log=self.addErr[system].log)
+        plt.axvline(loc, color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
 
 
     def _plotLayerDepthPosterior(self, **kwargs):
@@ -807,35 +812,35 @@ class Results(myObject):
         self.multiplier = np.array(grp.get('multiplier'))
 
         item = grp.get('rate')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         self.rate = obj.fromHdf(item)
 
         item = grp.get('ratex')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         self.ratex = obj.fromHdf(item)
 
         item = grp.get('phids')
         if (item is None):
             item = grp.get('PhiDs')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         self.PhiDs = obj.fromHdf(item)
 
         item = grp.get('khist')
         if (item is None):
             item = grp.get('kHist')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         self.kHist = obj.fromHdf(item)
 
         item = grp.get('dzhist')
         if (item is None):
             item = grp.get('DzHist')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         self.DzHist = obj.fromHdf(item)
 
         item = grp.get('mzhist')
         if (item is None):
             item = grp.get('MzHist')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         self.MzHist = obj.fromHdf(item)
 
         item = grp.get('hitmap')
@@ -848,13 +853,13 @@ class Results(myObject):
         item = grp.get('bestd')
         if (item is None):
             item = grp.get('bestD')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         self.bestD = obj.fromHdf(item, sysPath=sysPath)
 
         item = grp.get('bestmodel')
         if (item is None):
             item = grp.get('bestModel')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         self.bestModel = obj.fromHdf(item)
         self.bestModel.maxDepth = np.log(self.Hitmap.y.cellCentres[-1])
 
@@ -864,13 +869,13 @@ class Results(myObject):
             item = grp.get('relerr' + str(i))
             if (item is None):
                 item = grp.get('relErr'+str(i))
-            obj = eval(safeEval(item.attrs.get('repr')))
+            obj = eval(cF.safeEval(item.attrs.get('repr')))
             aHist = obj.fromHdf(item)
             self.relErr.append(aHist)
             item = grp.get('adderr' + str(i))
             if (item is None):
                 item = grp.get('addErr'+str(i))
-            obj = eval(safeEval(item.attrs.get('repr')))
+            obj = eval(cF.safeEval(item.attrs.get('repr')))
             aHist = obj.fromHdf(item)
             self.addErr.append(aHist)
 
