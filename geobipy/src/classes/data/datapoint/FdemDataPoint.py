@@ -170,6 +170,10 @@ class FdemDataPoint(EmDataPoint):
     def nFrequencies(self):
         return np.int32(0.5*self.nChannelsPerSystem)
 
+    # @property
+    # def nTotalFrequencies(self):
+    #     return np.int32(np.sum(self.nFrequencies))
+
     @property
     def predictedData(self):
         return self._predictedData

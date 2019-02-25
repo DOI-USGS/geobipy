@@ -80,7 +80,7 @@ class Data(PointCloud3D):
         dataShape = [nPoints, self.nChannels]
         # StatArray of data
         if not data is None:
-            assert np.allclose(np.shape(data), dataShape), ValueError("data must have shape {}".format(dataShape))
+            assert np.allclose(np.shape(data), dataShape) or np.size(data) == nPoints, ValueError("data must have shape {}".format(dataShape))
             self._data = StatArray(data, order='F')
         else:
             self._data = StatArray([nPoints, self.nChannels], "Data", dataUnits, order='F')
