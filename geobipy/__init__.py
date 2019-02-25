@@ -97,20 +97,20 @@ def singleCore(inputFile, outputDir):
     # Import the script from the input file
     UP = import_module(inputFile, package=None)
 
-    t0 = time.time()
-
     # Make data and system filenames lists of str.
-    if isinstance(UP.dataFname, str):
-            UP.dataFname = [UP.dataFname]
-    if isinstance(UP.sysFname, str):
-            UP.sysFname = [UP.sysFname]
+    if isinstance(UP.dataFilename, str):
+            UP.dataFilename = [UP.dataFilename]
+    if isinstance(UP.systemFilename, str):
+            UP.systemFilename = [UP.systemFilename]
+
+    t0 = time.time()
 
     # Get the random number generator
     prng = np.random.RandomState()
 
     # Everyone needs the system classes read in early.
     Dataset = eval(customFunctions.safeEval(UP.dataInit))
-    Dataset.readSystemFile(UP.sysFname)
+    Dataset.readSystemFile(UP.systemFilename)
 
     # Make sure the results folders exist
     try:
@@ -119,15 +119,15 @@ def singleCore(inputFile, outputDir):
         pass
 
     # Prepare the dataset so that we can read a point at a time.
-    Dataset._initLineByLineRead(UP.dataFname, UP.sysFname)
+    Dataset._initLineByLineRead(UP.dataFilename, UP.systemFilename)
     # Get a datapoint from the file.
     DataPoint = Dataset._readSingleDatapoint()
     Dataset._closeDatafiles()
 
     # While preparing the file, we need access to the line numbers and fiducials in the data file
-    tmp = fileIO.read_columns(UP.dataFname[0], Dataset._indicesForFile[0][:2], 1, Dataset.nPoints)
+    tmp = fileIO.read_columns(UP.dataFilename[0], Dataset._indicesForFile[0][:2], 1, Dataset.nPoints)
 
-    Dataset._openDatafiles(UP.dataFname)
+    Dataset._openDatafiles(UP.dataFilename)
 
     # Get the line numbers in the data
     lineNumbers = np.unique(tmp[:, 0])
@@ -194,18 +194,18 @@ def multipleCore(inputFile, outputDir, skipHDF5):
     UP = import_module(inputFile, package=None)
 
     # Make data and system filenames lists of str.
-    if isinstance(UP.dataFname, str):
-            UP.dataFname = [UP.dataFname]
-    if isinstance(UP.sysFname, str):
-            UP.sysFname = [UP.sysFname]
+    if isinstance(UP.dataFilename, str):
+            UP.dataFilename = [UP.dataFilename]
+    if isinstance(UP.systemFilename, str):
+            UP.systemFilename = [UP.systemFilename]
 
     # Everyone needs the system classes read in early.
     Dataset = eval(customFunctions.safeEval(UP.dataInit))
-    Dataset.readSystemFile(UP.sysFname)
+    Dataset.readSystemFile(UP.systemFilename)
 
     # Get the number of points in the file.
     if masterRank:
-        nPoints = Dataset._readNpoints(UP.dataFname)
+        nPoints = Dataset._readNpoints(UP.dataFilename)
         assert (nRanks-1 <= nPoints+1), Exception('Do not ask for more cores than you have data points! Cores:nData {}:{} '.format(nRanks, nPoints))
 
     # Create a communicator containing only the master rank.
@@ -228,16 +228,16 @@ def multipleCore(inputFile, outputDir, skipHDF5):
             pass
 
         # Prepare the dataset so that we can read a point at a time.
-        Dataset._initLineByLineRead(UP.dataFname, UP.sysFname)
+        Dataset._initLineByLineRead(UP.dataFilename, UP.systemFilename)
         # Get a datapoint from the file.
         DataPoint = Dataset._readSingleDatapoint()
         
         Dataset._closeDatafiles()
 
         # While preparing the file, we need access to the line numbers and fiducials in the data file
-        tmp = fileIO.read_columns(UP.dataFname[0], Dataset._indicesForFile[0][:2], 1, nPoints)
+        tmp = fileIO.read_columns(UP.dataFilename[0], Dataset._indicesForFile[0][:2], 1, nPoints)
 
-        Dataset._openDatafiles(UP.dataFname)
+        Dataset._openDatafiles(UP.dataFilename)
 
         # Get the line numbers in the data
         lineNumbers = np.unique(tmp[:, 0])
