@@ -119,29 +119,29 @@ def Initialize(paras, DataPoint, prng):
     DataPoint._predictedData.setPrior('MvNormalLog', DataPoint._data[DataPoint.iActive], DataPoint._std[DataPoint.iActive]**2.0, prng=prng)
 
     # Set the prior on the elevation height
-    DataPoint.z.setPrior('UniformLog', np.float64(DataPoint.z) - paras.zRange, np.float64(DataPoint.z) + paras.zRange)
+    DataPoint.z.setPrior('UniformLog', np.float64(DataPoint.z) - paras.maximumElevationChange, np.float64(DataPoint.z) + paras.maximumElevationChange)
     # DataPoint.z.setPrior('NormalLog', DataPoint.z, 1.0, prng=prng)
     # DataPoint.z.setPrior('Normal',DataPoint.z,paras.zRange)
 
-    DataPoint.z.setProposal('Normal', DataPoint.z, (paras.propEl), prng=prng)
+    DataPoint.z.setProposal('Normal', DataPoint.z, paras.elevationProposalVariance, prng=prng)
 
     # Set the prior on the relative Errors
-    DataPoint.relErr[:] = paras.relErr.deepcopy()
-    DataPoint.setRelativeErrorPrior(paras.rErrMinimum[:], paras.rErrMaximum[:], prng=prng)
+    DataPoint.relErr[:] = paras.initialRelativeError.deepcopy()
+    DataPoint.setRelativeErrorPrior(paras.minimumRelativeError[:], paras.maximumRelativeError[:], prng=prng)
     # Set the prior on the additive Errors
-    DataPoint.addErr[:] = paras.addErr.deepcopy()
-    DataPoint.setAdditiveErrorPrior(paras.aErrMinimum[:], paras.aErrMaximum[:], prng=prng)
+    DataPoint.addErr[:] = paras.initialAdditiveError.deepcopy()
+    DataPoint.setAdditiveErrorPrior(paras.minimumAdditiveError[:], paras.maximumAdditiveError[:], prng=prng)
 
     # Update the data errors based on user given parameters
-    DataPoint.updateErrors(paras.relErr, paras.addErr)
+    DataPoint.updateErrors(paras.initialRelativeError, paras.initialAdditiveError)
 
     # Save a copy of the original errors
     paras.Err = DataPoint._std.deepcopy()
     # Set the proposal distribution for the relative errors
-    DataPoint.setRelativeErrorProposal(paras.relErr, paras.propRerr, prng=prng)
+    DataPoint.setRelativeErrorProposal(paras.initialRelativeError, paras.relativeErrorProposalVariance, prng=prng)
     
     # Set the proposal distribution for the relative errors
-    DataPoint.setAdditiveErrorProposal(paras.addErr, paras.propAerr, prng=prng)
+    DataPoint.setAdditiveErrorProposal(paras.initialAdditiveError, paras.additiveErrorProposalVariance, prng=prng)
 
     # Initialize the calibration parameters
     if (paras.solveCalibration):
@@ -159,15 +159,15 @@ def Initialize(paras, DataPoint, prng):
     # Initialize a 1D model with the half space conductivity
     parameter = StatArray(np.asarray([HScond, HScond]), name='Conductivity', units=r'$\frac{S}{m}$')
     # Assign the depth to the interface as half the bounds
-    thk = np.asarray([0.5 * (paras.maxDepth + paras.minDepth)])
+    thk = np.asarray([0.5 * (paras.maximumDepth + paras.minimumDepth)])
     Mod = Model1D(2, parameters = parameter, thickness=thk)
 
     # Setup the model for perturbation
     pWheel = [paras.pBirth, paras.pDeath, paras.pPerturb, paras.pNochange]
-    Mod.makePerturbable(pWheel, paras.minDepth, paras.maxDepth, paras.maxLayers, prng=prng, minThickness=paras.minThickness)
+    Mod.makePerturbable(pWheel, paras.minimumDepth, paras.maximumDepth, paras.maximumNumberofLayers, prng=prng, minThickness=paras.minimumThickness)
 
     # Set priors on the depth interfaces, given a number of layers
-    Mod.depth.setPrior('Order',Mod.minDepth,Mod.maxDepth,Mod.minThickness,paras.maxLayers)  # priZ
+    Mod.depth.setPrior('Order', Mod.minDepth, Mod.maxDepth, Mod.minThickness, paras.maximumNumberofLayers)  # priZ
 
     # Compute the mean and std for the parameter
     paras.priMu = np.log(HScond)
@@ -202,7 +202,7 @@ def Initialize(paras, DataPoint, prng):
     Mod.par.setProposal('MvNormal', np.log(Mod.par), paras.unscaledVariance, prng=prng)
 
     # Assign a prior to the derivative of the model
-    Mod.dpar.setPrior('MvNormalLog', 0.0, paras.GradientStd**2.0, prng=prng)
+    Mod.dpar.setPrior('MvNormalLog', 0.0, paras.gradientStd**2.0, prng=prng)
 
     # Compute the data misfit
     PhiD = DataPoint.dataMisfit(squared=True)
