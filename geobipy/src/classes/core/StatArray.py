@@ -111,10 +111,10 @@ class StatArray(np.ndarray, myObject):
 
         if (not name is None):
             assert (isinstance(name,str)), TypeError('name must be a string')
-            name=str_to_raw(name) # Do some possible LateX checking. some Backslash operatores in LateX do not pass correctly as strings
+            name = str_to_raw(name) # Do some possible LateX checking. some Backslash operatores in LateX do not pass correctly as strings
         if (not units is None):
             assert (isinstance(units,str)), TypeError('units must be a string')
-            units=str_to_raw(units) # Do some possible LateX checking. some Backslash operatores in LateX do not pass correctly as strings
+            units = str_to_raw(units) # Do some possible LateX checking. some Backslash operatores in LateX do not pass correctly as strings
 
         # Copies a StatArray but can reassign the name and units
         if isinstance(shape, StatArray):
