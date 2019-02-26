@@ -225,18 +225,18 @@ class PointCloud3D(myObject):
         
         clip = kwargs.pop('clip',True)
         
-        method = kwargs.pop('method', "ct")
-        method = method.lower()
-              
+        method = kwargs.pop('method', "ct").lower()             
         
         if method == 'ct':
-            x,y,vals = self.interpCloughTocher(cTmp, dx=dx, dy=dy, mask=mask, clip=clip, extrapolate=extrapolate, i=i)
+            x, y, vals = self.interpCloughTocher(cTmp, dx=dx, dy=dy, mask=mask, clip=clip, extrapolate=extrapolate, i=i)
         elif method == 'mc':
-            x,y,vals = self.interpMinimumCurvature(cTmp, dx, dy, mask=mask, clip=clip, i=i)
+            x, y, vals = self.interpMinimumCurvature(cTmp, dx, dy, mask=mask, clip=clip, i=i)
         else:
-            assert False, ValueError("method must be either 'ct' or 'mc' ")  
-                        
-        ax = cP.pcolor(vals,x,y, **kwargs)
+            assert False, ValueError("method must be either 'ct' or 'mc' ")
+            
+        print(type(x), type(y))
+                                    
+        ax = cP.pcolor(vals, x, y, **kwargs)
         cP.xlabel(cf.getNameUnits(self.x))
         cP.ylabel(cf.getNameUnits(self.y))
         return ax
@@ -294,10 +294,10 @@ class PointCloud3D(myObject):
                 self.setKdTree(nDims = 2)
                 kdtree = self.kdtree
 
-        xc,yc,vals = interpolation.CT(dx, dy, self.bounds, tmp, vTmp , mask = mask, kdtree = kdtree, clip = clip, extrapolate=extrapolate)
+        xc, yc, vals = interpolation.CT(dx, dy, self.bounds, tmp, vTmp , mask = mask, kdtree = kdtree, clip = clip, extrapolate=extrapolate)
 
-        x = np.linspace(self.bounds[0], self.bounds[1], xc.size+1)
-        y = np.linspace(self.bounds[2], self.bounds[3], yc.size+1)
+        x = StatArray(np.linspace(self.bounds[0], self.bounds[1], xc.size+1))
+        y = StatArray(np.linspace(self.bounds[2], self.bounds[3], yc.size+1))
 
         return x, y, vals
     
@@ -319,7 +319,10 @@ class PointCloud3D(myObject):
             dy = 0.01 * tmp
         assert dy > 0.0, ValueError("dy must be positive!")
                 
-        x,y,vals = interpolation.minimumCurvature(self.x, self.y, values, self.bounds, dx, dy, mask=mask, iterations=2000, tension=0.25, accuracy=0.01)
+        xc,yc,vals = interpolation.minimumCurvature(self.x, self.y, values, self.bounds, dx, dy, mask=mask, iterations=2000, tension=0.25, accuracy=0.01)
+        
+        x = StatArray(np.linspace(self.bounds[0], self.bounds[1], xc.size+1))
+        y = StatArray(np.linspace(self.bounds[2], self.bounds[3], yc.size+1))
         return x, y, vals        
 
 
