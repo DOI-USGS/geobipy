@@ -368,6 +368,10 @@ def pcolor(values, x=None, y=None, **kwargs):
         Plot the grid
     noColorbar : bool, optional
         Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.        
+    reciprocateX : bool, optional
+        Take the reciprocal of the X axis before other transforms
+    reciprocateY : bool, optional
+        Take the reciprocal of the Y axis before other transforms    
 
     Returns
     -------
@@ -395,6 +399,9 @@ def pcolor(values, x=None, y=None, **kwargs):
     grid = kwargs.pop('grid', False)
 
     noColorBar = kwargs.pop('noColorbar', False)
+    
+    recX = kwargs.pop('reciprocateX', False)
+    recY = kwargs.pop('reciprocateY', False)
 
     # Set the grid colour if specified
     c = None
@@ -412,6 +419,8 @@ def pcolor(values, x=None, y=None, **kwargs):
             mx = x.edges()
         else:
             assert x.size == values.shape[1]+1, ValueError('x must be size '+str(values.shape[1]+1)+'. Not '+str(x.size))
+    if recX:
+        mx = 1.0 / mx
             
     if (y is None):
         my = np.arange(np.size(values,0)+1)
@@ -421,6 +430,8 @@ def pcolor(values, x=None, y=None, **kwargs):
             my = y.edges()
         else:
             assert y.size == values.shape[0]+1, ValueError('y must be size '+str(values.shape[0]+1)+'. Not '+str(y.size))
+    if recY:
+        my = 1.0 / my
 
     v = ma.masked_invalid(np.atleast_2d(np.asarray(values)))
 
