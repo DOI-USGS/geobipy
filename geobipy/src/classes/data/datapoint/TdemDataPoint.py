@@ -338,7 +338,7 @@ class TdemDataPoint(EmDataPoint):
             plt.margins(0.1, 0.1)
 
 
-    def plot(self, title='Time Domain EM Data', withErr=True, **kwargs):
+    def plot(self, title='Time domain data', withErr=True, **kwargs):
         """ Plot the Inphase and Quadrature Data for an EM measurement
         """
         ax=plt.gca()
@@ -395,11 +395,14 @@ class TdemDataPoint(EmDataPoint):
         cp.xlabel('Time (s)')
         cp.ylabel(cf.getNameUnits(self.d))
         cp.title(title)
-        plt.legend()
+        
+        if self.nSystems > 1:
+            plt.legend()
 
         return ax
+    
 
-    def plotPredicted(self,title='Time Domain EM Data',**kwargs):
+    def plotPredicted(self,title='Time domain data',**kwargs):
 
         noLabels = kwargs.pop('nolabels', False)
 
