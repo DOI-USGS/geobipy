@@ -630,7 +630,7 @@ class Model1D(Model):
         print(msg)
 
 
-    def plot(self, invX=False, **kwargs):
+    def plot(self, **kwargs):
         """Plots a 1D model parameters as a line against depth
 
         Parameters
@@ -662,10 +662,11 @@ class Model1D(Model):
         flipX = kwargs.pop('flipX',False)
         flipY = kwargs.pop('flipY',False)
         noLabels = kwargs.pop('noLabels', True)
+        recX = kwargs.pop('reciprocateX', False)
 
         # Repeat the last entry
         par[-1] = self.par[-1]
-        if (invX):
+        if (recX):
             par = 1.0 / par
         z = np.zeros(self.nCells[0] + 1)
         z[1:] = self.depth[:]
