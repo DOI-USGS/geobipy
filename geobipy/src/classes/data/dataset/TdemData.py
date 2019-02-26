@@ -434,7 +434,7 @@ class TdemData(PointCloud3D):
         tmp.elevation[:] = self.elevation[i]
         tmp.T[:] = self.T[i]
         tmp.R[:] = self.R[i]
-        tmp.sys = np.ndarray(self.nSystems, dtype=TDAEMSystem)
+        tmp.sys = np.ndarray(self.nSystems, dtype=TdemSystem)
         for j in range(self.nSystems):
             tmp.set[j].D[:, :] = self.set[j].D[i, :]
             tmp.set[j].D[:, :] = self.set[j].Std[i, :]
