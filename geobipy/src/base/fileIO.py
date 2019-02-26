@@ -212,33 +212,29 @@ def getNcolumns(fName, nHeaders=0):
         return len(line)
 
 
-def skipLines(f, N):
+def skipLines(f, nLines=0):
     """Skip N lines in an open file object
 
     Parameters
     ----------
     f : _io.TextIOWrapper
         A file handle generated with open(file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None).
-    N : int
+    nLines : int
         The number of lines to skip.
 
-    See Also
-    --------
-    open
-
     """
-    for i in range(N):
-        next(f)  # Read but do not do anything
+    for _ in range(nLines):
+        next(f)
 
 
-def read_columns(fName, i=[-1], nHeaders=0, nLines=0):
+def read_columns(fName, indices=None, nHeaders=0, nLines=0):
     """Reads specified columns from a file
 
     Parameters
     ----------
     fName : str
         A path and/or file name.
-    i : in or list of ints, optional
+    indices : in or list of ints, optional
         The indices of the columns to read in from the file.  By default, all columns are read in.
 
     nHeaders : int, optional
@@ -255,26 +251,26 @@ def read_columns(fName, i=[-1], nHeaders=0, nLines=0):
 
     assert fileExists(fName), 'Cannot find file '+fName
 
-    if (isinstance(i, int)):
-        i = [i]
+    indices = np.atleast_1d(indices)
     if (nLines == 0):
         # Get the number of lines in the file
         nLines = getNlines(fName, nHeaders)
-    if (i[0] <= -1):
-        i = np.arange(getNcolumns(fName, nHeaders))
-    nCols = len(i)
-    values = np.zeros([nLines, nCols], dtype='float64',order='F')  # Initialize output
+
+    nCols = getNcolumns(fName, nHeaders) if indices is None else indices.size
+
+    values = np.zeros([nLines, nCols], dtype='float64', order='F')  # Initialize output
+
     with open(fName) as f:  # Open the file
         skipLines(f, nHeaders)  # Skip header lines
         for j, line in enumerate(f):  # For each line in the file
             try:
-                values[j, ] = getRealNumbersfromLine(line, i)  # grab the requested entries
+                values[j, ] = getRealNumbersfromLine(line, indices)  # grab the requested entries
             except:
-                assert False, ValueError("Could not read numbers from line "+str(j)+ "in file "+fName)
+                assert False, Exception("Could not read numbers from line {} in file {} \n\n {}".format(j+nHeaders, fName, line))
     return values
 
 
-def getRealNumbersfromLine(line, i=[-1], delimiters=','):
+def getRealNumbersfromLine(line, indices=None, delimiters=','):
     """Reads strictly the numbers from a string
 
     Parameters
@@ -292,19 +288,13 @@ def getRealNumbersfromLine(line, i=[-1], delimiters=','):
         The values read in from the string.
 
     """
-    if (isinstance(i, int)):
-        i = [i]
+    
     line = parseString(line, delimiters)
-    if (i[0] == -1):
-        i = np.arange(len(line))
+    values = np.asfarray(line, np.float64)
 
-    values = np.zeros(len(i), dtype=np.float64)  # Initialize array
-    for k, j in enumerate(i):  # For each entry in the requested columns
-        try:
-            values[k] = line[j]  # Grab the entries
-        except:
-            values[k] = np.nan
-    return values
+    indices = np.atleast_1d(indices)
+
+    return values if indices[0] is None else values[indices]
 
 
 def parseString(this, delimiters=','):
@@ -324,8 +314,9 @@ def parseString(this, delimiters=','):
 
     """
 
+    line = this.replace("*", "NaN")
     # Replace multiple spaces with a single space
-    line = ' '.join(this.split())
+    line = ' '.join(line.split())
     delims = ' |, |,' + '|' + delimiters
     # Split the entries based on these delimiters
     line = re.split(delims, line)

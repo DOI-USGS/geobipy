@@ -5,8 +5,10 @@ from os.path import join
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+from matplotlib.pyplot import pause
+from matplotlib.ticker import MaxNLocator
 from ..base import customPlots as cP
-from ..base.customFunctions import safeEval
+from ..base import customFunctions as cF
 import numpy as np
 from ..base import fileIO as fIO
 import h5py
@@ -22,9 +24,51 @@ from ..classes.model.Model1D import Model1D
 from ..classes.core.Stopwatch import Stopwatch
 
 class Results(myObject):
-    """ Define the results handler for the MCMC Inversion """
+    """Define the results for the Bayesian MCMC Inversion.
+    
+    Contains histograms and inversion related variables that can be updated as the Bayesian inversion progresses.
 
-    def __init__(self, saveMe=False,plotMe=True,savePNG=False,paras=None,D=None,M=None,ID=0, verbose=False):
+    Results(saveMe, plotMe, savePNG, dataPoint, model, ID, \*\*kwargs)
+
+    Parameters
+    ----------
+    saveMe : bool, optional
+        Whether to save the results to HDF5 files.
+    plotMe : bool, optional
+        Whether to plot the results on the fly. Only use this in serial mode.
+    savePNG : bool, optional
+        Whether to save a png of each single data point results. Don't do this in parallel please.
+    dataPoint : geobipy.dataPoint
+        Datapoint to use in the inversion.
+        The relative error prior must have been set with dataPoint.relErr.setPrior()
+        The additive error prior must have been set with dataPoint.addErr.setPrior()
+        The height prior must have been set with dataPoint.z.setPrior()
+    model : geobipy.model
+        Model representing the subsurface.
+    ID : int, optional
+
+    OtherParameters
+    ---------------
+    nMarkovChains : int, optional
+        Number of markov chains that will be tested.
+    plotEvery : int, optional
+        When plotMe = True, update the plot when plotEvery iterations have progressed.
+    parameterDisplayLimits : sequence of ints, optional
+        Limits of the parameter axis in the hitmap plot.
+    reciprocateParameters : bool, optional
+        Take the reciprocal of the parameters when plotting the hitmap.
+    reciprocateName : str, optional
+        Name of the parameters if they are reciprocated.
+    reciprocateUnits : str, optional
+        Units of the parameters if they are reciprocated.
+    priMu : float, optional
+        Initial prior mean for the halfspace parameter.  Usually set to the numpy.log of the initial halfspace parameter value.
+    priStd : float, optional
+        Initial prior standard deviation for the halfspace parameter. Usually set to numpy.log(11)   
+    
+    """
+
+    def __init__(self, dataPoint=None, model=None, ID=0.0, **kwargs):
         """ Initialize the results of the inversion """
 
         # Initialize a stopwatch to keep track of time
@@ -33,39 +77,46 @@ class Results(myObject):
         self.saveTime = np.float64(0.0)
 
         # Logicals of whether to plot or save
-        self.saveMe = saveMe
-        self.plotMe = plotMe
-        self.savePNG = savePNG
+        self.saveMe = kwargs.pop('save', True)
+        self.plotMe = kwargs.pop('plot', False)
+        self.savePNG = kwargs.pop('savePNG', False)
         # Return none if important parameters are not used (used for hdf 5)
-        if all(x1 is None for x1 in [paras, D, M]):
+        if all(x1 is None for x1 in [dataPoint, model]):
             return
 
-        if (not self.plotMe and not self.saveMe):
-            print('Warning! You chosen to neither view or save the inversion results!')
-            return
+        assert self.plotMe or self.saveMe, Exception('You have chosen to neither view or save the inversion results!')
+
+        nMarkovChains = kwargs.pop('nMarkovChains', 100000)
+        plotEvery = kwargs.pop('plotEvery', nMarkovChains / 20)
+        parameterDisplayLimits = kwargs.pop('parameterDisplayLimits', [0.0, 1.0])
+        reciprocateParameters = kwargs.pop('reciprocateParameters', False)
+        priMu = kwargs.pop('priMu', 1.0)
+        priStd = kwargs.pop('priStd', np.log(11))
+
+        verbose = kwargs.pop('verbose', False)
+
         # Set the ID for the data point the results pertain to
         # Data Point identifier
         self.ID = np.float64(ID)
         # Set the increment at which to plot results
         # Increment at which to update the results
-        self.iPlot = np.int64(paras.iPlot)
+        self.iPlot = np.int64(plotEvery)
         # Set the display limits of the parameter in the HitMap
         # Display limits for parameters
-        self.limits = np.zeros(2,dtype=np.float64)+paras.dispLimits
+        self.limits = np.zeros(2, dtype=np.float64) + parameterDisplayLimits
         # Should we plot resistivity or Conductivity?
         # Logical whether to take the reciprocal of the parameters
-        self.invertPar = paras.invertPar
+        self.invertPar = reciprocateParameters
         # Set the screen resolution
-        # TODO: Need to make this automatic
         # Screen Size
         self.sx = np.int32(1920)
         self.sy = np.int32(1080)
         # Copy the number of systems
         # Number of systems in the DataPoint
-        self.nSystems = np.int32(D.nSystems)
+        self.nSystems = np.int32(dataPoint.nSystems)
         # Copy the number of Markov Chains
         # Number of Markov Chains to use
-        self.nMC = np.int64(paras.nMC)
+        self.nMC = np.int64(nMarkovChains)
         # Initialize a list of iteration number (This might seem like a waste of memory, but is faster than calling np.arange(nMC) every time)
         # StatArray of precomputed integers
         self.iRange = StatArray(np.arange(2 * self.nMC), name="Iteration #", dtype=np.int64)
@@ -92,44 +143,51 @@ class Results(myObject):
         self.iBestV = StatArray(2*self.nMC, name='Iteration of best model')
 
         # Initialize the number of layers for the histogram
-        self.kHist = Histogram1D(bins=np.arange(0.0,paras.maxLayers + 1.5),name="# of Layers")
+
+        self.kHist = Histogram1D(binCentres=StatArray(np.arange(0.0, model.maxLayers + 1.5), name="# of Layers"))
         # Initialize the histograms for the relative and Additive Errors
-        rBins = D.relErr.prior.getBins()
-        aBins = D.addErr.prior.getBins()
+        rBins = dataPoint.relErr.prior.getBins()
+        aBins = dataPoint.addErr.prior.getBins()
+
+        log = None
+        if isinstance(dataPoint, TdemDataPoint):
+            log = 10
+            aBins = np.exp(aBins)
 
         self.relErr = []
         self.addErr = []
         if (self.nSystems > 1):
             for i in range(self.nSystems):
-                self.relErr.append(Histogram1D(bins=rBins[i,:],name='$\epsilon_{Relative}x10^{2}$',units='%'))
-                self.addErr.append(Histogram1D(bins=aBins[i,:],name='$log_{10} \epsilon_{Additive}$',units=D.d.units))
+                self.relErr.append(Histogram1D(bins = StatArray(rBins[i, :], name='$\epsilon_{Relative}x10^{2}$', units='%')))
+                self.addErr.append(Histogram1D(bins = StatArray(aBins[i, :], name='$\epsilon_{Additive}$', units=dataPoint._data.units), log=log))
         else:
-            self.relErr.append(Histogram1D(bins=rBins,name='$\epsilon_{Relative}x10^{2}$',units='%'))
-            self.addErr.append(Histogram1D(bins=aBins,name='$log_{10} \epsilon_{Additive}$',units=D.d.units))
+            self.relErr.append(Histogram1D(bins = StatArray(rBins, name='$\epsilon_{Relative}x10^{2}$', units='%')))
+            self.addErr.append(Histogram1D(bins = StatArray(aBins, name='$\epsilon_{Additive}$', units=dataPoint._data.units), log=log))
+
 
         # Initialize the hit map of layers and conductivities
-        zGrd = StatArray(np.arange(0.5 * np.exp(M.minDepth), 1.1 * np.exp(M.maxDepth), 0.5 * np.exp(M.minThickness)), M.depth.name, M.depth.units)
+        zGrd = StatArray(np.arange(0.5 * np.exp(model.minDepth), 1.1 * np.exp(model.maxDepth), 0.5 * np.exp(model.minThickness)), model.depth.name, model.depth.units)
 
-        mGrd = StatArray(np.logspace(np.log10(np.exp(paras.priMu -3.0 * paras.priStd)),
-                           np.log10(np.exp(paras.priMu + 3.0 * paras.priStd)),250), 'Conductivity','$Sm^{-1}$')
+        tmp = 3.0 * priStd
+        mGrd = StatArray(
+                np.logspace(np.log10(np.exp(priMu - tmp)), np.log10(np.exp(priMu + tmp)), 250), 
+                'Conductivity', '$Sm^{-1}$')
 
         self.iz = np.arange(zGrd.size)
 
-        self.Hitmap = Hitmap2D(x=mGrd, y=zGrd)
+        self.Hitmap = Hitmap2D(xBinCentres = mGrd, yBinCentres = zGrd)
 
         # Initialize the doi
-        self.doi = self.Hitmap.y[0]
-#    self.Hori=Rmesh2D([zGrd.size,mGrd.size],'','',dtype=np.int32)
+        self.doi = self.Hitmap.y.cellCentres[0]
 
         self.meanInterp = StatArray(zGrd.size)
         self.bestInterp = StatArray(zGrd.size)
-#        self.opacityInterp = StatArray(zGrd.size)
 
         # Initialize the Elevation Histogram
-        self.DzHist = Histogram1D(bins=D.z.prior.getBins(), name=D.z.name, units=D.z.units)
+        self.DzHist = Histogram1D(bins = StatArray(dataPoint.z.prior.getBins(), name=dataPoint.z.name, units=dataPoint.z.units))
 
         # Initialize the Model Depth Histogram
-        self.MzHist = Histogram1D(bins=zGrd)
+        self.MzHist = Histogram1D(binCentres = zGrd)
 
         # Set a tag to catch data points that are not minimizing
         self.zeroCount = 0
@@ -142,18 +200,17 @@ class Results(myObject):
         self.saveTime = np.float64(0.0)
 
         # Initialize the best data, current data and best model
-        self.bestD = D
-        self.currentD = D
-        self.bestModel = M
+        self.bestD = dataPoint
+        self.bestModel = model
 
 
         self.verbose = verbose
         if verbose:
-            self.allRelErr = StatArray([self.nSystems,self.nMC], name = '$\epsilon_{Relative}x10^{2}$',units='%')
-            self.allAddErr = StatArray([self.nSystems,self.nMC], name = '$log_{10} \epsilon_{Additive}$',units=D.d.units)
-            self.allZ = StatArray(self.nMC, name = 'Height', units='m')
-            self.posterior = StatArray(self.nMC, name = 'log(posterior)')
-            self.posteriorComponents = StatArray([9,self.nMC], 'Components of the posterior')
+            self.allRelErr = StatArray([self.nSystems, self.nMC], name='$\epsilon_{Relative}x10^{2}$', units='%')
+            self.allAddErr = StatArray([self.nSystems, self.nMC], name='$\epsilon_{Additive}$', units=dataPoint.d.units)
+            self.allZ = StatArray(self.nMC, name='Height', units='m')
+            self.posterior = StatArray(self.nMC, name='log(posterior)')
+            self.posteriorComponents = StatArray([9, self.nMC], 'Components of the posterior')
 
 
 #         Initialize and save the first figure
@@ -162,7 +219,7 @@ class Results(myObject):
 #                fIO.getFileNameInteger(self.i, np.int(np.log10(self.nMC))) + '.png'
 #            plt.savefig(figName)
 
-    def update(self, i, iBest, bestD, bestModel, D, multiplier, PhiD, Mod, posterior, posteriorComponents, clipRatio):
+    def update(self, i, iBest, bestDataPoint, bestModel, dataPoint, multiplier, PhiD, model, posterior, posteriorComponents, clipRatio):
         """ Update the attributes of the plotter """
         if (not self.plotMe and not self.saveMe):
             return
@@ -174,32 +231,32 @@ class Results(myObject):
         if (self.burnedIn):  # We need to update some plotting options
             # Added the layer depths to a list, we histogram this list every
             # iPlot iterations
-            self.kHist.update(Mod.nCells[0])
-            self.DzHist.update(D.z[0])
+            self.kHist.update(model.nCells[0], clip=True)
+            self.DzHist.update(dataPoint.z[0], clip=True)
             for j in range(self.nSystems):
-                self.relErr[j].update(D.relErr[j])
-                self.addErr[j].update(D.addErr[j])
+                self.relErr[j].update(dataPoint.relErr[j], clip=True)
+                self.addErr[j].update(dataPoint.addErr[j], clip=True)
 
-            Mod.addToHitMap(self.Hitmap)
+            model.addToHitMap(self.Hitmap)
 
             # Update the layer interface histogram
-            if (Mod.nCells > 1):
-                ratio = np.exp(np.diff(np.log(Mod.par)))
+            if (model.nCells > 1):
+                ratio = np.exp(np.diff(np.log(model.par)))
                 m1 = ratio <= 1.0 - clipRatio
                 m2 = ratio >= 1.0 + clipRatio
                 #keep = np.ma.mask_or(m1, m2)
                 keep = np.logical_not(np.ma.masked_invalid(ratio).mask) & np.ma.mask_or(m1,m2)
-                tmp = Mod.depth[:-1]
+                tmp = model.depth[:-1]
                 if (len(tmp) > 0):
-                    self.MzHist.update(tmp[keep])
+                    self.MzHist.update(tmp[keep], clip=True)
 
             if (self.verbose):
                 iTmp = self.i - self.iBurn
                 for j in range(self.nSystems):
-                    self.allRelErr[j,iTmp]=D.relErr[j]
-                    self.allAddErr[j,iTmp]=D.addErr[j]
+                    self.allRelErr[j,iTmp]=dataPoint.relErr[j]
+                    self.allAddErr[j,iTmp]=dataPoint.addErr[j]
                 self.posterior[iTmp] = np.log(posterior)
-                self.allZ[iTmp] = D.z[0]
+                self.allZ[iTmp] = dataPoint.z[0]
                 self.posteriorComponents[:,iTmp] = posteriorComponents
 
 
@@ -212,13 +269,9 @@ class Results(myObject):
             else:
                 self.zeroCount = 0
 
-        self.bestD = bestD
-        self.currentD = D
+        self.bestD = bestDataPoint
         self.bestModel = bestModel
 
-        failed = self.zeroCount == 999999
-
-        return failed
 
     def initFigure(self, iFig=0, forcePlot=False):
         """ Initialize the plotting region """
@@ -226,7 +279,10 @@ class Results(myObject):
             return
         # Setup the figure region. The figure window is split into a 4x3
         # region. Columns are able to span multiple rows
-        #self.fig = plt.figure(iFig, facecolor='white', figsize=(10,7))
+
+        plt.ion()
+
+        self.fig = plt.figure(iFig, facecolor='white', figsize=(10,7))
         mngr = plt.get_current_fig_manager()
         try:
             mngr.window.setGeometry(0, 10, self.sx, self.sy)
@@ -255,20 +311,140 @@ class Results(myObject):
         self.ax[(2*self.nSystems)+6] = plt.subplot(self.gs[6:, 2 * self.nSystems:])
         for ax in self.ax:
             cP.pretty(ax)
-#        plt.show()
-#        plt.draw()
+        plt.show(block=False)
+        # plt.draw()
 
+    def _plotAcceptanceVsIteration(self, **kwargs):
+        """ Plots the acceptance percentage against iteration. """
+
+
+        m = kwargs.pop('marker', 'o')
+        a = kwargs.pop('alpha', 0.7)
+        ls = kwargs.pop('linestyle', 'none')
+        mec = kwargs.pop('markeredgecolor', 'k')
+
+        self.rate.plot(self.ratex, i=np.s_[:np.int64(self.i / 1000)], marker=m, markeredgecolor=mec, linestyle=ls, **kwargs)
+        cP.xlabel('Iteration #')
+        cP.ylabel('% Acceptance')
+        cP.title('Acceptance rate')
+
+
+    def _plotMisfitVsIteration(self, **kwargs):
+        """ Plot the data misfit against iteration. """
+
+        m = kwargs.pop('marker', '.')
+        ms = kwargs.pop('markersize', 2)
+        a = kwargs.pop('alpha', 0.7)
+        ls = kwargs.pop('linestyle', 'none')
+        c = kwargs.pop('color', 'k')
+        lw = kwargs.pop('linewidth', 3)
+        
+        self.PhiDs.plot(self.iRange, i=np.s_[:self.i], marker=m, alpha=a, markersize=ms, linestyle=ls, color=c, **kwargs)
+        plt.ylabel('Data Misfit')
+        dum = self.multiplier * len(self.bestD.iActive)
+        plt.axhline(dum, color='#C92641', linestyle='dashed', linewidth=lw)
+        if (self.burnedIn):
+            plt.axvline(self.iBurn, color='#C92641', linestyle='dashed', linewidth=lw)
+        plt.yscale('log')
+
+
+    def _plotObservedPredictedData(self, **kwargs):
+        """ Plot the observed and predicted data """
+
+        self.bestD.plot(**kwargs)
+
+        c = kwargs.pop('color', cP.wellSeparated[3])
+        self.bestD.plotPredicted(color=c, **kwargs)
+
+
+    def _plotNumberOfLayersPosterior(self, **kwargs):
+        """ Plot the histogram of the number of layers """
+
+        self.kHist.plot(**kwargs)
+        plt.axvline(self.bestModel.nCells, color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
+
+
+    def _plotElevationPosterior(self, **kwargs):
+        """ Plot the histogram of the elevation """
+        self.DzHist.plot(**kwargs)
+        plt.axvline(self.bestD.z, color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
+
+    
+    def _plotRelativeErrorPosterior(self, system=0, **kwargs):
+        """ Plots the histogram of the relative errors """
+
+        self.relErr[system].plot(**kwargs)
+        plt.locator_params(axis='x', nbins=4)
+        plt.axvline(self.bestD.relErr[system], color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
+
+    
+    def _plotAdditiveErrorPosterior(self, system=0, **kwargs):
+        """ Plot the histogram of the additive errors """
+        
+        self.addErr[system].plot(**kwargs)
+        plt.locator_params(axis='x', nbins=4)
+        loc, dum = cF._logSomething(self.bestD.addErr[system], log=self.addErr[system].log)
+        plt.axvline(loc, color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
+
+
+    def _plotLayerDepthPosterior(self, **kwargs):
+        """ Plot the histogram of layer interface depths """
+
+        r = kwargs.pop('rotate', True)
+        fY = kwargs.pop('flipY', True)
+        tr = kwargs.pop('trim', False)
+
+        self.MzHist.plot(rotate=r, flipY=fY, trim=tr, **kwargs)
+
+    
+    def _plotHitmapPosterior(self, confidenceInterval = 95.0, opacityPercentage = 67.0, **kwargs):
+        """ Plot the hitmap posterior of conductivity with depth """
+
+        # Get the mean and 95% confidence intervals
+        (sigMed, sigLow, sigHigh) = self.Hitmap.confidenceIntervals(confidenceInterval)
+
+        if (self.invertPar):
+            x = 1.0 / self.Hitmap.x.cellCentres
+            sl = 1.0 / sigLow
+            sh = 1.0 / sigHigh
+            xlabel = 'Resistivity ($\Omega m$)'
+        else:
+            x = self.Hitmap.x
+            sl = sigLow
+            sh = sigHigh
+            xlabel = 'Conductivity ($Sm^{-1}$)'
+
+        plt.pcolor(x, self.Hitmap.y.cellEdges, self.Hitmap.counts, cmap=mpl.cm.Greys)
+        plt.plot(sl, self.Hitmap.y.cellCentres, color='#5046C8', linestyle='dashed', linewidth=2, alpha=0.6)
+        plt.plot(sh, self.Hitmap.y.cellCentres, color='#5046C8', linestyle='dashed', linewidth=2, alpha=0.6)
+        cP.xlabel(xlabel)
+
+        # Plot the DOI cutoff based on percentage variance
+        self.doi = self.Hitmap.getOpacityLevel(opacityPercentage)
+        plt.axhline(self.doi, color='#5046C8', linestyle='dashed', linewidth=3)
+
+        # Plot the best model
+        self.bestModel.plot(flipY=False, invX=True, noLabels=True)
+        plt.axis([self.limits[0], self.limits[1], self.Hitmap.y.cellEdges[0], self.Hitmap.y.cellEdges[-1]])
+        ax = plt.gca()
+        lim = ax.get_ylim()
+        if (lim[1] > lim[0]):
+            ax.set_ylim(lim[::-1])
+        cP.ylabel(self.MzHist.bins.getNameUnits())
+        plt.xscale('log')
 
     def plot(self, title="", iFig=0, forcePlot=False):
         """ Updates the figures for MCMC Inversion """
         # Plots that change with every iteration
         if (not self.plotMe and not forcePlot):
             return
-        
-        print(self.gs)
-        
-        assert hasattr(self, 'gs'), Exception('Must initalize figure with self.initFigure()')           
-                        
+
+        if (not hasattr(self, 'gs')):
+            self.initFigure(iFig, forcePlot=forcePlot)
+
+
+        fig = plt.figure(iFig)
+
 #        if (np.mod(self.i, 1000) == 0 or forcePlot):
 
         if (np.mod(self.i, self.iPlot) == 0 or forcePlot):
@@ -276,44 +452,32 @@ class Results(myObject):
             # Update the acceptance plot
             plt.sca(self.ax[0])
             plt.cla()
-            self.rate.plot(x=self.ratex, i=np.s_[:np.int64(self.i / 1000)], marker='o',markeredgecolor='k', linestyle='none')
-            cP.xlabel('Iteration #')
-            cP.ylabel('% Acceptance')
-            cP.title('Rate of model acceptance per ' + str(1000) + ' iterations')
-
-
+            self._plotAcceptanceVsIteration()
+            
             # Update the data misfit vs iteration
             plt.sca(self.ax[1])
             plt.cla()
-            self.PhiDs.plot(self.iRange,i=np.s_[:self.i],marker='.',alpha=0.7,markersize=2,linestyle='none',color='k')
-            plt.ylabel('Data Misfit')
-            dum = self.multiplier * len(self.currentD.iActive)
-            plt.axhline(dum, color='#C92641', linestyle='dashed', linewidth=3)
-            if (self.burnedIn):
-                plt.axvline(self.iBurn,color='#C92641',linestyle='dashed',linewidth=3)
-            plt.yscale('log')
+            self._plotMisfitVsIteration()
 
             # If the Best Data have changed, update the plot
             plt.sca(self.ax[4])
             # ax = plt.subplot(self.gs[:6, self.nSystems:2 * self.nSystems])
             plt.cla()
-            self.bestD.plot()
-            self.bestD.plotPredicted(color=cP.wellSeparated[3])
+            self._plotObservedPredictedData()
 
             if (self.burnedIn):
                 # Update the histogram of the number of layers
                 plt.sca(self.ax[3])
                 # plt.subplot(self.gs[9:, :self.nSystems])
                 plt.cla()
-                self.kHist.plot()
-                plt.axvline(self.bestModel.nCells,color=cP.wellSeparated[3],linestyle='dashed',linewidth=3)
+                self._plotNumberOfLayersPosterior()
+                self.ax[3].xaxis.set_major_locator(MaxNLocator(integer=True))
 
                 # Histogram of the data point elevation
                 plt.sca(self.ax[2])
                 # plt.subplot(self.gs[6:9, :self.nSystems])
                 plt.cla()
-                self.DzHist.plot()  # cP.title('Histogram of the measurement height')
-                plt.axvline(self.bestD.z,color=cP.wellSeparated[3],linestyle='dashed',linewidth=3)
+                self._plotElevationPosterior()
 
                 j = 5
                 for i in range(self.nSystems):
@@ -321,62 +485,27 @@ class Results(myObject):
                     # plt.subplot(self.gs[:3, 2 * self.nSystems + j])
                     plt.sca(self.ax[j+1])
                     plt.cla()
-                    self.relErr[i].plot()
-                    # Add a line for the relative error in the best data
-                    plt.locator_params(axis='x', nbins=4)
-                    cP.ylabel('Frequency')
+                    self._plotRelativeErrorPosterior()
                     cP.title('System ' + str(i + 1))
-                    plt.axvline(self.bestD.relErr[i],color=cP.wellSeparated[3],linestyle='dashed',linewidth=3)
 
                     # Update the histogram of additive data errors
                     plt.sca(self.ax[j+2])
                     # ax= plt.subplot(self.gs[3:6, 2 * self.nSystems + j])
                     plt.cla()
-                    self.addErr[i].plot()
-#                    ax.set_xlim(-15.0, -12.0)
-
-                    plt.locator_params(axis='x', nbins=4)
-                    cP.ylabel('Frequency')
-                    plt.axvline(self.bestD.addErr[i],color=cP.wellSeparated[3],linestyle='dashed',linewidth=3)
+                    self._plotAdditiveErrorPosterior()
                     j += 2
 
                 # Update the layer depth histogram
                 plt.sca(self.ax[(2*self.nSystems)+6])
                 # plt.subplot(self.gs[6:, 2 * self.nSystems:])
                 plt.cla()
-                self.MzHist.plot(rotate=True, flipY=True, trim=False)
+                self._plotLayerDepthPosterior()
 
                 # Update the model plot
-                # Get the mean and 95% confidence intervals
-                (sigMed, sigLow, sigHigh) = self.Hitmap.getConfidenceIntervals(95.0)
-                
                 plt.sca(self.ax[5])
                 # plt.subplot(self.gs[6:, self.nSystems:2 * self.nSystems])
                 plt.cla()
-                if (self.invertPar):
-                    plt.pcolor(1.0 / (self.Hitmap.x), self.Hitmap.y, self.Hitmap.arr, cmap=mpl.cm.Greys)
-                    plt.plot(1.0 / sigLow, self.Hitmap.y, color='#5046C8', linestyle='dashed', linewidth=2, alpha=0.6)
-                    plt.plot(1.0 / sigHigh, self.Hitmap.y, color='#5046C8', linestyle='dashed', linewidth=2, alpha=0.6)
-                    cP.xlabel('Resistivity ($\Omega m$)')
-                else:
-                    plt.pcolor((self.Hitmap.x), self.Hitmap.y, self.Hitmap.arr)
-                    plt.plot(sigLow, self.Hitmap.y, color='#5046C8', linestyle='dashed', linewidth=2, alpha=0.6)
-                    plt.plot(sigHigh, self.Hitmap.y, color='#5046C8', linestyle='dashed', linewidth=2, alpha=0.6)
-                    cP.xlabel('Conductivity ($Sm^{-1}$)')
-                # Plot the DOI cutoff based on percentage variance
-                self.doi = self.Hitmap.getOpacityLevel(67.0)
-                plt.axhline(self.doi, color='#5046C8', linestyle='dashed', linewidth=3)
-
-                # Plot the best model
-                self.bestModel.plot(flipY=False, reciprocateX=True, noLabels=True)
-                plt.axis([self.limits[0], self.limits[1], self.Hitmap.y[0], self.Hitmap.y[-1]])
-                ax = plt.gca()
-                lim = ax.get_ylim()
-                if (lim[1] > lim[0]):
-                    ax.set_ylim(lim[::-1])
-                cP.ylabel(self.MzHist.bins.getNameUnits())
-#        cP.title('Hit map of layers')
-                plt.xscale('log')
+                self._plotHitmapPosterior()
 
             cP.suptitle(title)
 
@@ -417,6 +546,8 @@ class Results(myObject):
                 plt.grid(b=True, which ='major', color='k', linestyle='--', linewidth=2)
 
 
+        cP.pause(1e-9)
+        # pause(1e-9)
 
 
 
@@ -488,7 +619,7 @@ class Results(myObject):
         grp.create_dataset('invtime', (1,), dtype=float)
         grp.create_dataset('savetime', (1,), dtype=float)
 
-        nz=self.Hitmap.y.size
+        nz=self.Hitmap.y.nCells
         grp.create_dataset('meaninterp', (nz,), dtype=np.float64)
         grp.create_dataset('bestinterp', (nz,), dtype=np.float64)
 #        grp.create_dataset('opacityinterp', (nz,), dtype=np.float64)
@@ -505,7 +636,6 @@ class Results(myObject):
             self.addErr[i].createHdf(grp, 'adderr' + str(i))
 
         self.Hitmap.createHdf(grp,'hitmap')
-        self.currentD.createHdf(grp, 'currentd')
         self.bestD.createHdf(grp, 'bestd')
 
         tmp=self.bestModel.pad(self.bestModel.maxLayers)
@@ -563,7 +693,6 @@ class Results(myObject):
         self.saveTime = np.float64(self.clk.timeinSeconds())
         writeNumpy(self.saveTime, grp, 'savetime')
         self.bestD.writeHdf(grp, 'bestd')
-        self.currentD.writeHdf(grp, 'currentd')
         self.bestModel.writeHdf(grp, 'bestmodel')
 
     def toHdf(self, h5obj, myName):
@@ -608,8 +737,6 @@ class Results(myObject):
         self.Hitmap.writeHdf(grp, 'hitmap')
         # Write the Best Data
         self.bestD.writeHdf(grp, 'bestd')
-        # Write the current Data
-        self.currentD.writeHdf(grp, 'currentd')
         # Write the Best Model
         self.bestModel.writeHdf(grp, 'bestmodel')
         # Interpolate the mean and best model to the discretized hitmap
@@ -682,35 +809,35 @@ class Results(myObject):
         self.multiplier = np.array(grp.get('multiplier'))
 
         item = grp.get('rate')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         self.rate = obj.fromHdf(item)
 
         item = grp.get('ratex')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         self.ratex = obj.fromHdf(item)
 
         item = grp.get('phids')
         if (item is None):
             item = grp.get('PhiDs')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         self.PhiDs = obj.fromHdf(item)
 
         item = grp.get('khist')
         if (item is None):
             item = grp.get('kHist')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         self.kHist = obj.fromHdf(item)
 
         item = grp.get('dzhist')
         if (item is None):
             item = grp.get('DzHist')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         self.DzHist = obj.fromHdf(item)
 
         item = grp.get('mzhist')
         if (item is None):
             item = grp.get('MzHist')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         self.MzHist = obj.fromHdf(item)
 
         item = grp.get('hitmap')
@@ -723,34 +850,29 @@ class Results(myObject):
         item = grp.get('bestd')
         if (item is None):
             item = grp.get('bestD')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         self.bestD = obj.fromHdf(item, sysPath=sysPath)
 
         item = grp.get('bestmodel')
         if (item is None):
             item = grp.get('bestModel')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         self.bestModel = obj.fromHdf(item)
-        self.bestModel.maxDepth = np.log(self.Hitmap.y[-1])
+        self.bestModel.maxDepth = np.log(self.Hitmap.y.cellCentres[-1])
 
-        item = grp.get('currentd')
-        if (item is None):
-            item = grp.get('currentD')
-        obj = eval(safeEval(item.attrs.get('repr')))
-        self.currentD = obj.fromHdf(item, sysPath=sysPath)
         self.relErr = []
         self.addErr = []
         for i in range(self.nSystems):
             item = grp.get('relerr' + str(i))
             if (item is None):
                 item = grp.get('relErr'+str(i))
-            obj = eval(safeEval(item.attrs.get('repr')))
+            obj = eval(cF.safeEval(item.attrs.get('repr')))
             aHist = obj.fromHdf(item)
             self.relErr.append(aHist)
             item = grp.get('adderr' + str(i))
             if (item is None):
                 item = grp.get('addErr'+str(i))
-            obj = eval(safeEval(item.attrs.get('repr')))
+            obj = eval(cF.safeEval(item.attrs.get('repr')))
             aHist = obj.fromHdf(item)
             self.addErr.append(aHist)
 

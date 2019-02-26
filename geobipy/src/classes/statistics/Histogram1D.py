@@ -4,116 +4,140 @@ Module describing an efficient histogram class
 from .baseDistribution import baseDistribution
 from ...classes.mesh.RectilinearMesh1D import RectilinearMesh1D
 from ...classes.core.StatArray import StatArray
-from ...base.customFunctions import safeEval
+from ...base import customFunctions as cF
 from ...base import customPlots as cP
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
 
 class Histogram1D(RectilinearMesh1D):
-    """ Histogram class that can update and plot efficiently """
+    """1D Histogram class that updates efficiently.
+    
+    Fast updating relies on knowing the bins ahead of time.
 
-    def __init__(self, values=None, nBins=None, bins=None, name=None, units=None):
+    Histogram1D(values, bins, binCentres, log)
+
+    Parameters
+    ----------
+    bins : geobipy.StatArray or array_like, optional
+        Specify the bin edges for the histogram. Can be regularly or irregularly increasing.
+    binCentres : geobipy.StatArray or array_like, optional
+        Specify the bin centres for the histogram. Can be regular or irregularly sized.
+    log : 'e' or float, optional
+        Entries are given in linear space, but internally bins and values are logged.
+        Plotting is in log space.
+
+    Returns
+    -------
+    out : Histogram1D
+        1D histogram
+    
+    """
+
+    def __init__(self, bins=None, binCentres=None, log=None):
         """ Initialize a histogram """
 
         # Allow an null instantiation
-        tmp = [values, nBins, bins, name, units]
-        if (all([x is None for x in tmp])):
+        if (bins is None and binCentres is None):
             return
 
-        if not bins is None:
-            if (isinstance(bins, StatArray)):
-                tmp = StatArray(bins, name=name, units=units)
-            else:
-                tmp = StatArray(bins, name=name, units=units)
-        else:
-            assert not values is None, ValueError("missing 1 required argument: counts")
-            assert not nBins is None, ValueError("missing 1 required argument: 'nBins'")
-
-            a = np.nanmin(values)
-            b = np.nanmax(values)
-            tmp = StatArray(np.linspace(a,b,nBins), name=name, units=units)
+        if not log is None:
+            if not bins is None:
+                assert isinstance(bins, StatArray), TypeError("bins must be a geobpiy.StatArray")
+                bins, label = cF._logSomething(bins, log=log)
+                bins.name = label + bins.getName()
+            if not binCentres is None:
+                assert isinstance(binCentres, StatArray), TypeError("binCentres must be a geobpiy.StatArray")
+                binCentres, label = cF._logSomething(binCentres, log=log)
+                binCentres.name = label + binCentres.getName()
 
         # Initialize the parent class
-        RectilinearMesh1D.__init__(self, x=tmp, name=None, units=None, dtype=np.int64)
-        self.arr = StatArray(tmp.size, 'Frequency', dtype=np.int64)
-        # Create pointers for better variable naming
-        self.bins = self.x
-        self.counts = self.arr
-        self.dBin = self.dx
+        RectilinearMesh1D.__init__(self, cellEdges=bins, cellCentres=binCentres)
 
-        # Get the cell widths
-        self.width = np.abs(np.diff(self.bins))
-        self.width = self.width.append(self.width[-1])
+        self._counts = StatArray(self.nCells, 'Frequency', dtype=np.int64)
 
-        # Add the incoming values as counts to the histogram
-        if (not values is None):
-            self.update(values)
+        self.log = log
 
 
-    def update(self, values):
-        """ Update the histogram by counting the entries in values and incrementing the counts accordingly """
-        values = np.reshape(values, np.size(values))
-        if (self.isRegular):
-            self.update_Regular(values)
-            return
-        self.update_irregular(values)
+    @property
+    def counts(self):
+        return self._counts
+
+    
+    @property
+    def bins(self):
+        return self.cellEdges
 
 
-    def update_Regular(self, values):
-        """ Update the counts of regular binned histogram given the values """
-        iBin = np.int64((values - self.bins[0]) / self.dBin)
-        iBin = np.maximum(iBin,0)
-        iBin = np.minimum(iBin,self.counts.size-1)
-        tmp = np.bincount(iBin,minlength = self.counts.size)
-        self.counts += tmp
+    @property
+    def binCentres(self):
+        return self.cellCentres
 
 
-    def update_irregular(self, values):
-        """ Update the counts of regular binned histogram given the values """
-        iBin = self.bins.searchsorted(values)
-        iBin[iBin>=self.counts.size] = self.counts.size - 1
-
-        tmp = np.bincount(iBin,minlength = self.counts.size)
-        self.counts += tmp
+    @property
+    def nBins(self):
+        return self.nCells
 
 
-    def plot(self,rotate=False,flipY=False,trim=True,**kwargs):
+    def update(self, values, clip=False):
+        """Update the histogram by counting the entry of values into the bins of the histogram.
+        
+        Parameters
+        ----------
+        values : array_like
+            Increments the count for the bin that each value falls into.
+        clip : bool
+            A negative index which would normally wrap will clip to 0 and self.bins.size instead.
+        """
+        tmp, dum = cF._logSomething(values, self.log)
+        iBin = np.atleast_1d(self.cellIndex(tmp.flatten(), clip=clip))
+        tmp = np.bincount(iBin, minlength = self.nBins)
+        
+        self._counts += tmp
+
+
+    def pcolor(self, **kwargs):
+        """pcolor the histogram
+
+        Other Parameters
+        ----------------
+        alpha : scalar or array_like, optional
+            If alpha is scalar, behaves like standard matplotlib alpha and opacity is applied to entire plot
+            If array_like, each pixel is given an individual alpha value.
+        log : 'e' or float, optional
+            Take the log of the colour to a base. 'e' if log = 'e', and a number e.g. log = 10.
+            Values in c that are <= 0 are masked.
+        equalize : bool, optional
+            Equalize the histogram of the colourmap so that all colours have an equal amount.
+        nbins : int, optional
+            Number of bins to use for histogram equalization.
+        xscale : str, optional
+            Scale the x axis? e.g. xscale = 'linear' or 'log'
+        yscale : str, optional
+            Scale the y axis? e.g. yscale = 'linear' or 'log'.
+        flipX : bool, optional
+            Flip the X axis
+        flipY : bool, optional
+            Flip the Y axis
+        grid : bool, optional
+            Plot the grid
+        noColorbar : bool, optional
+            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.   
+        trim : bool, optional
+            Set the x and y limits to the first and last non zero values along each axis.
+
+        See Also
+        --------
+        geobipy.customPlots.pcolor : For additional keywords
+
+        """
+        return super().pcolor(self._counts, **kwargs)
+        
+
+    def plot(self, rotate=False, flipX=False, flipY=False, trim=True, normalize=False, **kwargs):
         """ Plots the histogram """
 
-        c = kwargs.pop('color',cP.wellSeparated[0])
-        lw = kwargs.pop('linewidth',0.5)
-        ec = kwargs.pop('edgecolor','k')
-
-        ax = plt.gca()
-        cP.pretty(ax)
-
-        if (rotate):
-            plt.barh(self.bins,self.counts,height=self.width,align='center', color = c, linewidth = lw, edgecolor = ec, **kwargs)
-            cP.ylabel(self.bins.getNameUnits())
-            cP.xlabel('Frequency')
-        else:
-            plt.bar(self.bins,self.counts,width=self.width,align='center', color = c, linewidth = lw, edgecolor = ec, **kwargs)
-            cP.xlabel(self.bins.getNameUnits())
-            cP.ylabel('Frequency')
-
-        i0 = 0
-        i1 = np.size(self.bins) - 1
-        if (trim):
-            while self.counts[i0] == 0:
-                i0 += 1
-            while self.counts[i1] == 0:
-                i1 -= 1
-        if (i1 > i0):
-            if (rotate):
-                plt.ylim(self.bins[i0] - 0.5 * self.width[i0], self.bins[i1] + 0.5 * self.width[i1])
-            else:
-                plt.xlim(self.bins[i0] - 0.5 * self.width[i0], self.bins[i1] + 0.5 * self.width[i1])
-        if (flipY):
-            ax = plt.gca()
-            lim = ax.get_ylim()
-            if (lim[1] > lim[0]):
-                ax.set_ylim(lim[::-1])
+        cP.hist(self.counts, self.bins, rotate=rotate, flipX=flipX, flipY=flipY, trim=trim, normalize=normalize, **kwargs)
 
 
     def hdfName(self):
@@ -130,7 +154,7 @@ class Histogram1D(RectilinearMesh1D):
         grp = parent.create_group(myName)
         grp.attrs["repr"] = self.hdfName()
         self.bins.toHdf(grp, 'bins')
-        self.counts.createHdf(grp, 'counts', nRepeats=nRepeats, fillvalue=fillvalue)
+        self._counts.createHdf(grp, 'counts', nRepeats=nRepeats, fillvalue=fillvalue)
 
 
     def writeHdf(self, parent, myName, index=None):
@@ -139,7 +163,7 @@ class Histogram1D(RectilinearMesh1D):
         myName: object hdf name. Assumes createHdf has already been called
         create: optionally create the data set as well before writing
         """
-        self.counts.writeHdf(parent, myName+'/counts', index=index)
+        self._counts.writeHdf(parent, myName+'/counts', index=index)
 
 
     def toHdf(self, h5obj, myName):
@@ -150,20 +174,31 @@ class Histogram1D(RectilinearMesh1D):
         grp = h5obj.create_group(myName)
         grp.attrs["repr"] = self.hdfName()
         self.bins.toHdf(grp, 'bins')
-        self.counts.toHdf(grp, 'counts')
+        self._counts.toHdf(grp, 'counts')
 
 
     def fromHdf(self, grp, index=None):
         """ Reads in the object froma HDF file """
         item = grp.get('bins')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         bins = obj.fromHdf(item)
-        Hist = Histogram1D(bins=bins)
+
         item = grp.get('counts')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         if (index is None):
-            Hist.counts = obj.fromHdf(item)
+            counts = obj.fromHdf(item)
         else:
-            Hist.counts = obj.fromHdf(item, index=np.s_[index,:])
-        Hist.arr = Hist.counts
+            counts = obj.fromHdf(item, index=np.s_[index,:])
+
+        if bins.size == counts.size:
+            Hist = Histogram1D(binCentres = bins)
+        else:
+            Hist = Histogram1D(bins = bins)
+
+        Hist._counts = counts
         return Hist
+
+
+    def summary(self):
+        RectilinearMesh1D.summary(self)
+        self.counts.summary()

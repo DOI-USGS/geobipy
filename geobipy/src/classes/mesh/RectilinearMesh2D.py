@@ -4,68 +4,168 @@ Module describing a 2D Rectilinear Mesh class with x and y axes specified
 from copy import deepcopy
 from ...classes.core.myObject import myObject
 from ...classes.core.StatArray import StatArray
+from .RectilinearMesh1D import RectilinearMesh1D
 import numpy as np
 from scipy.stats import binned_statistic
 import matplotlib.pyplot as plt
-from ...base import customPlots as cp
+from ...base import customPlots as cP
 from ...base.customFunctions import safeEval
 from ...base.customFunctions import _logSomething, isInt
 
+try:
+    from pyvtk import VtkData, CellData, Scalars, PolyData
+except:
+    pass
+
 
 class RectilinearMesh2D(myObject):
-    """ Class defining a 2D rectilinear mesh whose cells are rectangular with linear sides """
+    """Class defining a 2D rectilinear mesh with cell centres and edges.
+
+    Contains a simple 2D mesh with cell edges, widths, and centre locations.
+    There are two ways of instantiating the RectilinearMesh2D.  
+    The first is by specifying the x and y cell centres or edges. In this case, 
+    the abscissa is the standard x axis, and y is the ordinate. The z co-ordinates are None.
+    The second is by specifyin the x, y, and z cell centres or edges. In this case,
+    The mesh is a 2D plane with the ordinate parallel to z, and the "horizontal" locations
+    have co-ordinates (x, y).
+    This allows you to, for example, create a vertical 2D mesh that is not parallel to either the 
+    x or y axis, like a typical line of data.
+    If x, y, and z are specified, plots can be made against distance which calculated cumulatively between points.
+
+    RectilinearMesh2D([xCentres or xEdges], [yCentres or yEdges], [zCentres or zEdges])
+
+    Parameters
+    ----------
+    xCentres : geobipy.StatArray, optional
+        The locations of the centre of each cell in the "x" direction. Only xCentres or xEdges can be given.
+    xEdges : geobipy.StatArray, optional
+        The locations of the edges of each cell, including the outermost edges, in the "x" direction. Only xCentres or xEdges can be given.
+    yCentres : geobipy.StatArray, optional
+        The locations of the centre of each cell in the "y" direction. Only yCentres or yEdges can be given.
+    yEdges : geobipy.StatArray, optional
+        The locations of the edges of each cell, including the outermost edges, in the "y" direction. Only yCentres or yEdges can be given.
+    zCentres : geobipy.StatArray, optional
+        The locations of the centre of each cell in the "z" direction. Only zCentres or zEdges can be given.
+    zEdges : geobipy.StatArray, optional
+        The locations of the edges of each cell, including the outermost edges, in the "z" direction. Only zCentres or zEdges can be given.
+
+    Returns
+    -------
+    out : RectilinearMesh2D
+        The 2D mesh.
+
+    """
 
 
-    def __init__(self, x=None, y=None, name=None, units=None, dtype=np.float64):
-        """ Initialize a 2D Rectilinear Mesh
-        """
-        if (x is None):
+    def __init__(self, xCentres=None, xEdges=None, yCentres=None, yEdges=None, zCentres=None, zEdges=None):
+        """ Initialize a 2D Rectilinear Mesh"""
+
+        self.x = None
+        self.y = None
+        self.z = None
+        self.distance = None
+        self.xyz = None
+
+        if (all(x is None for x in [xCentres, yCentres, zCentres, xEdges, yEdges, zEdges])):
             return
-        
-        assert np.ndim(x) == 1, TypeError('x must only have 1 dimension')
-        assert np.ndim(y) == 1, TypeError('y must only have 1 dimension')
-        assert isinstance(x,StatArray), TypeError('x must be of type StatArray')
-        assert isinstance(y,StatArray), TypeError('y must be of type StatArray')
-    
-        # StatArray of the 2D mesh values
-        self.arr = StatArray([y.size, x.size], name, units, dtype=dtype)
 
-        # StatArray of the x axis values
-        self.x = x.deepcopy()
+        # RectilinearMesh1D of the x axis values
+        self.x = RectilinearMesh1D(cellCentres=xCentres, cellEdges=xEdges)
         # StatArray of the y axis values
-        self.y = y.deepcopy()
+        self.y = RectilinearMesh1D(cellCentres=yCentres, cellEdges=yEdges)
 
-        # Set some extra variables for speed
-        self.xIsRegular = self.x.isRegular()
-        self.yIsRegular = self.y.isRegular()
-        self.dx = self.x[1] - self.x[0]
-        self.xWidth = np.abs(np.diff(self.x))
-        self.xWidth = self.xWidth.append(self.xWidth[-1])
-        self.dy = self.y[1] - self.y[0]
-        self.yWidth = np.abs(np.diff(self.y))
-        self.yWidth = self.yWidth.append(self.yWidth[-1])
-
-
-    def aggregate(self, y1 = None, y2 = None):
-        """ Aggregate the rows over the interval [y1 y2]
-            if y1 is instead a sequence, aggregate the hitmap for the intervals defined by the sequence, y2 is ignored"""
-
-        if (y1 is None):
-            y1 = self.y[0]
-        if (y2 is None):
-            y2 = self.y[-1]
-
-        if (np.size(y1) == 1):
-            # Don't need to check for depth being shallower than zGrid[0] since the sortedsearch with return 0
-            assert y1 <= self.y[-1], 'aggregate: y1 is greater than max - '+str(self.y[-1])
-            assert y2 <= self.y[-1], 'aggregate: y2 is greater than max - '+str(self.y[-1])
-
-            cell1 = self.y.searchsorted(y1)
-            cell2 = self.y.searchsorted(y2)
-            vals = np.mean(self.arr[cell1:cell2+1,:],axis = 0)
+        if (not zCentres is None or not zEdges is None):
+            assert self.x.nCells == self.y.nCells, Exception("x and y axes must have the same number of cells.")
+            # StatArray of third axis
+            self.z = RectilinearMesh1D(cellCentres=zCentres, cellEdges=zEdges)
+            self.xyz = True
+            self.setDistance()
+            
         else:
-            vals = self.intervalMean(y1,0)
-        return vals
+            self.xyz = False
+            self.z = self.y     
+
+
+    @property
+    def dims(self):
+        """The dimensions of the mesh
+
+        Returns
+        -------
+        out : array_like
+            Array of integers
+
+        """
+
+        return np.asarray([self.z.nCells, self.x.nCells], dtype=np.int)
+
+
+    @property
+    def nCells(self):
+        """The number of cells in the mesh.
+
+        Returns
+        -------
+        out : int
+            Number of cells
+
+        """
+
+        return self.x.nCells * self.z.nCells
+
+
+    @property
+    def nNodes(self):
+        """The number of nodes in the mesh.
+
+        Returns
+        -------
+        out : int
+            Number of nodes
+
+        """
+
+        return self.x.nEdges * self.z.nEdges
+
+
+    def axisMedian(self, arr, log=None, axis=0):
+        """Gets the median for the specified axis.
+        
+        Parameters
+        ----------
+        arr : array_like
+            2D array to get the median.
+        log : 'e' or float, optional
+            Take the log of the median to a base. 'e' if log = 'e', or a number e.g. log = 10.
+        axis : int
+            Along which axis to obtain the median.
+
+        Returns
+        -------
+        med : array_like
+            Contains the locations of the medians along the specified axis. Has size equal to arr.shape[axis].
+
+        """
+
+        total = arr.sum(axis = 1-axis)
+        tmp = np.cumsum(arr, axis = 1-axis)
+
+        if axis == 0:
+            tmp = tmp / np.repeat(total[:, np.newaxis], arr.shape[1], 1)
+        else:
+            tmp = tmp / np.repeat(total[np.newaxis, :], arr.shape[0], 0)
+
+        ixM = np.apply_along_axis(np.searchsorted, 1-axis, tmp, 0.5)
+
+        if axis == 0:
+            med = self.x.cellCentres[ixM]
+        else:
+            med = self.z.cellCentres[ixM]
+
+        if (not log is None):
+            med, dum = _logSomething(med, log=log)
+
+        return med
 
 
     def deepcopy(self):
@@ -74,143 +174,250 @@ class RectilinearMesh2D(myObject):
 
     def __deepcopy__(self, memo):
         """ Define the deepcopy for the StatArray """
-        other = RectilinearMesh2D(self.x, self.y, self.name, self.units, self.arr.dtype)
-        other.arr[:,:] += self.arr
+        other = RectilinearMesh2D(xEdges=self.x.cellEdges, zEdges=self.z.cellEdges)
+        # other.arr[:,:] += self.arr
         return other
 
 
-    def getCellEdges(self, dim):
+    def cellEdges(self, axis):
         """ Gets the cell edges in the given dimension """
-        if (dim == 0):
-            return self.y.edges()
-        else:
-            return self.x.edges()
-
-
-    def getMeanInterval(self):
-        """ Gets the mean of the array """
-        t = np.sum(np.repeat(self.x[np.newaxis,:],self.arr.shape[0],0) * self.arr,1)
-        s = self.arr.sum(1)
-        if all(s == 0.0): return t
-        return t / s
-
-
-    def isSame(self, other):
-        """ Determines if two grids contain the same axes and size """
-        if (not self.hasSameSize(other)):
-            return False
-        if (self.x != other.x):
-            return False
-        if (self.y != other.y):
-            return False
+        return self.z.cellEdges if axis == 0 else self.x.cellEdges
 
 
     def hasSameSize(self, other):
         """ Determines if the meshes have the same dimension sizes """
-        if self.arr.shape != other.arr.shape:
+        # if self.arr.shape != other.arr.shape:
+        #     return False
+        if self.x.nCells != other.x.nCells:
             return False
-        if self.x.size != other.x.size:
-            return False
-        if self.y.size != other.y.size:
+        if self.z.nCells != other.y.nCells:
             return False
         return True
 
 
-    def getConfidenceIntervals(self, percent, log=None):
-        """ Gets the confidence intervals for the specified dimension """
-        total = self.arr[0, :].sum()
+    def intervalMean(self, arr, intervals, axis=0, statistic='mean'):
+        """Compute the mean of an array between the intervals given along dimension dim.
+        
+        Parameters
+        ----------
+        arr : array_like
+            2D array to take the mean over the given intervals
+        intervals : array_like
+            A new set of mesh edges. The mean is computed between each two edges in the array.
+        axis : int, optional
+            Which axis to take the mean
+        statistic : string or callable, optional
+            The statistic to compute (default is 'mean').
+            The following statistics are available:
+    
+          * 'mean' : compute the mean of values for points within each bin.
+            Empty bins will be represented by NaN.
+          * 'median' : compute the median of values for points within each
+            bin. Empty bins will be represented by NaN.
+          * 'count' : compute the count of points within each bin.  This is
+            identical to an unweighted histogram.  `values` array is not
+            referenced.
+          * 'sum' : compute the sum of values for points within each bin.
+            This is identical to a weighted histogram.
+          * 'min' : compute the minimum of values for points within each bin.
+            Empty bins will be represented by NaN.
+          * 'max' : compute the maximum of values for point within each bin.
+            Empty bins will be represented by NaN.
+          * function : a user-defined function which takes a 1D array of
+            values, and outputs a single numerical statistic. This function
+            will be called on the values in each bin.  Empty bins will be
+            represented by function([]), or NaN if this returns an error.
 
-        p = 0.01 * percent
-        tmp = np.cumsum(self.arr, 1)
-        ixM = np.argmin(np.abs(tmp - 0.5 * total), 1)
-        ix1 = np.argmin(np.abs(tmp - ((1.0 - p) * total)), 1)
-        ix2 = np.argmin(np.abs(tmp - p * total), 1)
-        sigMed = self.x[ixM]
-        sigLow = self.x[ix1]
-        sigHigh = self.x[ix2]
 
-        if (not log is None):
-            sigMed, dum = _logSomething(sigMed, log=log)
-            sigLow, dum = _logSomething(sigLow, log=log)
-            sigHigh, dum = _logSomething(sigHigh, log=log)
+        See Also
+        --------
+        scipy.stats.binned_statistic : for more information
 
-        return (sigMed, sigLow, sigHigh)
+        """
 
+        assert np.size(intervals) > 1, ValueError("intervals must have size > 1")
 
-    def intervalMean(self, newGrid, dim):
-        """ Compute the mean for the intervals given by newGrid along dimension dim """
-        if (dim == 0):
-            res = np.zeros([np.size(newGrid)-1,self.x.size])
-            r = range(self.x.size)
-            for i in r:
-                bins = binned_statistic(self.y,self.arr[:,i],bins = newGrid)
-                res[:,i] = bins.statistic
+        if (axis == 0):
+            bins = binned_statistic(self.z.cellCentres, arr.T, bins = intervals, statistic=statistic)
+            res = bins.statistic.T
         else:
-            res = np.zeros([self.arr.shape[0],np.size(newGrid)-1])
-            r = range(self.y.size)
-            for i in r:
-                bins = binned_statistic(self.x,self.arr[i,:],bins = newGrid)
-                res[i,:] = bins.statistic
+            bins = binned_statistic(self.x.cellCentres, arr, bins = intervals, statistic=statistic)
+            res = bins.statistic
+
         return res
 
 
-    def regrid(self, newGrid, dim):
-        """ Regrid a dimension to the new intervals given by newGrid """
-        arr = self.intervalMean(newGrid, dim)
-        if (dim == 0):
-            x = self.x
-            y = StatArray(newGrid[:-1]+0.5*np.diff(newGrid),self.y.name,self.y.units)
-        else:
-            x = StatArray(newGrid[:-1]+0.5*np.diff(newGrid),self.x.name,self.x.units)
-            y = self.y
+    def cellIndices(self, x1, x2, clip=False):
+        """Return the cell indices in x and z for two floats.
 
-        res = RectilinearMesh2D(x, y, name=self.arr.name, units=self.arr.units)
-        res.arr[:,:] = arr
-        return res
+        Parameters
+        ----------
+        x1 : float
+            x location
+        x2 : float
+            y location (or z location if instantiated with 3 co-ordinates)
+        clip : bool
+            A negative index which would normally wrap will clip to 0 instead.
 
+        Returns
+        -------
+        out : ints
+            indices for the locations along [axis0, axis1]
 
-    def normBySum(self, dim):
-        """ Normalizes the parameters by the sum along dimension dim """
-        s = np.sum(self.arr, dim)
-        if (dim == 0):
-            self.arr = self.arr / np.repeat(s[np.newaxis, :], np.size(self.arr, dim), dim)
-        elif (dim == 1):
-            self.arr = self.arr / np.repeat(s[:, np.newaxis], np.size(self.arr, dim), dim)
-        self.arr.name = 'Relative frequency'
+        """
+        out = np.empty(2, dtype=np.int32)
+        out[1] = self.x.cellIndex(x1, clip=clip)
+        out[0] = self.z.cellIndex(x2, clip=clip)
+        return out
 
+    def ravelIndices(self, ixy, order='C'):
+        """Return a global index into a 1D array given the two cell indices in x and z.
 
-    def plot(self,title='',invX=False,logX=False,flipY=False,**kwargs):
-        """ Plot the 2D Rectilinear Mesh values """
-        ax = plt.gca()
-        plt.cla()
-        if (invX):
-            plt.pcolormesh(1.0 / self.x,self.y,np.asarray(self.arr), **kwargs)
-        else:
-            plt.pcolormesh(self.x, self.y, np.asarray(self.arr), **kwargs)
-            cp.xlabel(self.x.getNameUnits())
-        cp.ylabel(self.y.getNameUnits())
-        cp.title(title)
-        if (flipY):
-            ax = plt.gca()
-            lim = ax.get_ylim()
-            if (lim[1] > lim[0]):
-                ax.set_ylim(lim[::-1])
-        if logX:
-            plt.xscale('log')
-        plt.colorbar()
+        Parameters
+        ----------
+        ixy : tuple of array_like
+            A tuple of integer arrays, one array for each dimension.
+        
+        Returns
+        -------
+        out : int
+            Global index.
+
+        """
+
+        return np.ravel_multi_index(ixy, self.dims, order=order)
 
     
-    def pcolor(self, **kwargs):
-        """ Plot the Histogram2D as an image """
-        x = kwargs.pop('x', self.x)
-        y = kwargs.pop('y', self.y)
+    def unravelIndex(self, indices, order='C'):
+        """Return a global index into a 1D array given the two cell indices in x and z.
+
+        Parameters
+        ----------
+        indices : array_like
+            An integer array whose elements are indices into the flattened
+            version of an array.
         
-        self.arr.pcolor(x=x, y=y, **kwargs)
+        Returns
+        -------
+        unraveled_coords : tuple of ndarray
+            Each array in the tuple has the same shape as the self.dims.
+
+        """
+
+        return np.unravel_index(indices, self.dims, order=order)
+
+
+    def pcolor(self, values, xAxis='x', **kwargs):
+        """Create a pseudocolour plot.
+
+        Can take any other matplotlib arguments and keyword arguments e.g. cmap etc.
+
+        Parameters
+        ----------
+        values : array_like
+            2D array of colour values
+        xAxis : str
+            If xAxis is 'x', the horizontal axis uses self.x
+            If xAxis is 'y', the horizontal axis uses self.y
+            If xAxis is 'r', the horizontal axis uses cumulative distance along the line
+
+        Other Parameters
+        ----------------
+        alpha : scalar or array_like, optional
+            If alpha is scalar, behaves like standard matplotlib alpha and opacity is applied to entire plot
+            If array_like, each pixel is given an individual alpha value.
+        log : 'e' or float, optional
+            Take the log of the colour to a base. 'e' if log = 'e', and a number e.g. log = 10.
+            Values in c that are <= 0 are masked.
+        equalize : bool, optional
+            Equalize the histogram of the colourmap so that all colours have an equal amount.
+        nbins : int, optional
+            Number of bins to use for histogram equalization.
+        xscale : str, optional
+            Scale the x axis? e.g. xscale = 'linear' or 'log'
+        yscale : str, optional
+            Scale the y axis? e.g. yscale = 'linear' or 'log'.
+        flipX : bool, optional
+            Flip the X axis
+        flipY : bool, optional
+            Flip the Y axis
+        grid : bool, optional
+            Plot the grid
+        noColorbar : bool, optional
+            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.   
+        trim : bool, optional
+            Set the x and y limits to the first and last non zero values along each axis.
+        
+        See Also
+        --------
+        geobipy.customPlots.pcolor : For non matplotlib keywords.
+        matplotlib.pyplot.pcolormesh : For additional keyword arguments you may use.
+
+        """
+
+        assert np.all(values.shape == self.dims), ValueError("values must have shape {}".format(self.dims))
+
+        xtmp = self.getXAxis(xAxis)
+
+        ax = cP.pcolor(values, x = xtmp, y = self.z.cellEdges, **kwargs)
+        
+        return ax
+
+
+    def plotGrid(self, xAxis='x', **kwargs):
+        """Plot the mesh grid lines. 
+        
+        Parameters
+        ----------
+        xAxis : str
+            If xAxis is 'x', the horizontal axis uses self.x
+            If xAxis is 'y', the horizontal axis uses self.y
+            If xAxis is 'r', the horizontal axis uses sqrt(self.x^2 + self.y^2)
+        
+        """
+
+        tmp = StatArray(np.full([self.z.nCells, self.x.nCells], fill_value=np.nan))
+
+        xtmp = self.getXAxis(xAxis)
+
+        tmp.pcolor(x=xtmp, y=self.z.cellEdges, grid=True, noColorbar=True, **kwargs)
+
+    
+    def setDistance(self):
+        assert self.xyz, Exception("To set the distance, the mesh must be instantiated with three co-ordinates")
+        dx = np.diff(self.x.cellEdges)
+        dy = np.diff(self.y.cellEdges)
+        distance = StatArray(np.zeros(self.x.nEdges), 'Distance', self.x.cellCentres.units)
+        distance[1:] = np.cumsum(np.sqrt(dx**2.0 + dy**2.0))
+        self.distance = RectilinearMesh1D(cellEdges = distance)
+
+
+    def getXAxis(self, axis='x', centres=False):
+        assert axis in ['x', 'y', 'r'], Exception("axis must be either 'x', 'y' or 'r'")
+        if axis == 'x':
+            return self.x.cellCentres if centres else self.x.cellEdges
+        elif axis == 'y':
+            assert self.xyz, Exception("To plot against 'y' the mesh must be instantiated with three co-ordinates")
+            return self.y.cellCentres if centres else self.y.cellEdges
+        elif axis == 'r':
+            assert self.xyz, Exception("To plot against 'r' the mesh must be instantiated with three co-ordinates")
+            return self.distance.cellCentres if centres else self.distance.cellEdges
+
+
+    def plotXY(self, **kwargs):
+        """Plot the cell centres in x and y as points"""
+
+        assert self.xyz, Exception("Mesh must be instantiated with three co-ordinates to use plotXY()")
+
+        kwargs['marker'] = kwargs.pop('marker', 'o')
+        kwargs['linestyle'] = kwargs.pop('linestyle', 'none')
+
+        self.y.cellCentres.plot(x=self.x.cellCentres, **kwargs)
 
 
     def hdfName(self):
         """ Reprodicibility procedure """
-        return('Rmesh2D([1,1])')
+        return('Rmesh2D()')
 
 
     def createHdf(self, parent, myName, nRepeats=None, fillvalue=None):
@@ -221,9 +428,10 @@ class RectilinearMesh2D(myObject):
         # create a new group inside h5obj
         grp = parent.create_group(myName)
         grp.attrs["repr"] = self.hdfName()
-        self.arr.createHdf(grp, 'arr', nRepeats=nRepeats, fillvalue=fillvalue)
+        self._counts.createHdf(grp, 'arr', nRepeats=nRepeats, fillvalue=fillvalue)
         self.x.createHdf(grp,'x', nRepeats=nRepeats, fillvalue=fillvalue)
         self.y.createHdf(grp,'y', nRepeats=nRepeats, fillvalue=fillvalue)
+        self.z.createHdf(grp,'z', nRepeats=nRepeats, fillvalue=fillvalue)
 
 
     def writeHdf(self, parent, myName, index=None):
@@ -240,9 +448,10 @@ class RectilinearMesh2D(myObject):
             ai = np.s_[index,:,:]
             bi = np.s_[index,:]
 
-        self.arr.writeHdf(parent, myName+'/arr',  index=ai)
+        self._counts.writeHdf(parent, myName+'/arr',  index=ai)
         self.x.writeHdf(parent, myName+'/x',  index=bi)
         self.y.writeHdf(parent, myName+'/y',  index=bi)
+        self.z.writeHdf(parent, myName+'/z',  index=bi)
 
 
     def toHdf(self, h5obj, myName):
@@ -252,9 +461,10 @@ class RectilinearMesh2D(myObject):
         # Create a new group inside h5obj
         grp = h5obj.create_group(myName)
         grp.attrs["repr"] = self.hdfName()
-        self.arr.toHdf(grp, 'arr')
+        self._counts.toHdf(grp, 'arr')
         self.x.toHdf(grp, 'x')
         self.y.toHdf(grp, 'y')
+        self.z.toHdf(grp, 'z')
 
 
     def fromHdf(self, grp, index=None):
@@ -264,8 +474,8 @@ class RectilinearMesh2D(myObject):
         bi=None
         if (not index is None):
             assert isInt(index), ValueError('index must be an integer')
-            ai = np.s_[index,:,:]
-            bi = np.s_[index,:]
+            ai = np.s_[index, :, :]
+            bi = np.s_[index, :]
 
         item = grp.get('arr')
         obj = eval(safeEval(item.attrs.get('repr')))
@@ -277,8 +487,9 @@ class RectilinearMesh2D(myObject):
         obj = eval(safeEval(item.attrs.get('repr')))
         y = obj.fromHdf(item, index=bi)
         tmp = RectilinearMesh2D(x, y)
-        tmp.arr = arr
+        tmp._counts = arr
         return tmp
+
 
     def xRange(self):
         """ Get the range of x
@@ -290,16 +501,109 @@ class RectilinearMesh2D(myObject):
 
         """
 
-        return np.float64(self.x[-1] - self.x[0])
+        return self.x.range
 
-    def yRange(self):
-        """ Get the range of y
+
+    def zRange(self):
+        """ Get the range of z
 
         Returns
         -------
         out : numpy.float64
-            The range of y
+            The range of z
 
         """
 
-        return np.float64(self.y[-1] - self.y[0])
+        return self.z.range
+
+    
+    def vtkStructure(self):
+        """Generates a vtk mesh structure that can be used in a vtk file.
+
+        Returns
+        -------
+        out : pyvtk.VtkData
+            Vtk data structure
+
+        """
+
+        # Generate the quad node locations in x
+        x = self.x.cellEdges
+        y = self.y.cellEdges
+        z = self.z.cellEdges
+
+        nCells = self.x.nCells * self.z.nCells
+
+        z = self.z.cellEdges
+        nNodes = self.x.nEdges * self.z.nEdges
+
+        # Constuct the node locations for the vtk file
+        nodes = np.empty([nNodes, 3])
+        nodes[:, 0] = np.tile(x, self.z.nEdges)
+        nodes[:, 1] = np.tile(y, self.z.nEdges)
+        nodes[:, 2] = np.repeat(z, self.x.nEdges)
+
+        tmp = np.int32([0, 1, self.x.nEdges+1, self.x.nEdges])
+        a = np.ones(self.x.nCells, dtype=np.int32)
+        a[0] = 2
+        index = (np.repeat(tmp[:, np.newaxis], nCells, 1) + np.cumsum(np.tile(a, self.z.nCells))-2).T
+
+        return VtkData(PolyData(points=nodes, polygons=index))
+
+
+    def toVTK(self, fileName, pointData=None, cellData=None, format='binary'):
+        """Save to a VTK file.
+
+        Parameters
+        ----------
+        fileName : str
+            Filename to save to.
+        pointData : geobipy.StatArray or list of geobipy.StatArray, optional
+            Data at each node in the mesh. Each entry is saved as a separate 
+            vtk attribute.
+        cellData : geobipy.StatArray or list of geobipy.StatArray, optional
+            Data at each cell in the mesh. Each entry is saved as a separate 
+            vtk attribute.
+        format : str, optional
+            "ascii" or "binary" format. Ascii is readable, binary is not but results in smaller files.
+
+        Raises
+        ------
+        TypeError
+            If pointData or cellData is not a geobipy.StatArray or list of them.
+        ValueError
+            If any pointData (cellData) entry does not have size equal to the number of points (cells).
+        ValueError
+            If any StatArray does not have a name or units. This is needed for the vtk attribute.
+            
+        """
+
+        vtk = self.vtkStructure()
+
+        if not pointData is None:
+            assert isinstance(pointData, (StatArray, list)), TypeError("pointData must a geobipy.StatArray or a list of them.")
+            if isinstance(pointData, list):
+                for p in pointData:
+                    assert isinstance(p, StatArray), TypeError("pointData entries must be a geobipy.StatArray")
+                    assert all(p.shape == [self.z.nEdges, self.x.nEdges]), ValueError("pointData entries must have shape {}".format([self.z.nEdges, self.x.nEdges]))
+                    assert p.hasLabels(), ValueError("StatArray needs a name")
+                    vtk.point_data.append(Scalars(p.reshape(self.nNodes), p.getNameUnits()))
+            else:
+                assert all(pointData.shape == [self.z.nEdges, self.x.nEdges]), ValueError("pointData entries must have shape {}".format([self.z.nEdges, self.x.nEdges]))
+                assert pointData.hasLabels(), ValueError("StatArray needs a name")
+                vtk.point_data.append(Scalars(pointData.reshape(self.nNodes), pointData.getNameUnits()))
+
+        if not cellData is None:
+            assert isinstance(cellData, (StatArray, list)), TypeError("cellData must a geobipy.StatArray or a list of them.")
+            if isinstance(cellData, list):
+                for p in cellData:
+                    assert isinstance(p, StatArray), TypeError("cellData entries must be a geobipy.StatArray")
+                    assert all(p.shape == self.dims), ValueError("cellData entries must have shape {}".format(self.dims))
+                    assert p.hasLabels(), ValueError("StatArray needs a name")
+                    vtk.cell_data.append(Scalars(p.reshape(self.nCells), p.getNameUnits()))
+            else:
+                assert all(cellData.shape == self.dims), ValueError("cellData entries must have shape {}".format(self.dims))
+                assert cellData.hasLabels(), ValueError("StatArray needs a name")
+                vtk.cell_data.append(Scalars(cellData.reshape(self.nCells), cellData.getNameUnits()))
+
+        vtk.tofile(fileName, format)

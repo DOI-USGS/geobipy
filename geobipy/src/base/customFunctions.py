@@ -108,6 +108,77 @@ def findNans(this):
     return(np.argwhere(i).squeeze())
 
 
+def findFirstNonZeros(this, axis, invalid_val=-1):
+    """Find the indices to the first non zero values
+
+    Parameters
+    ----------
+    this : array_like
+        An array of numbers
+    axis : int
+        Axis along which to find first non zeros
+    invalid_val : int
+        If all values along that axis are zero, use this value
+
+    Returns
+    -------
+    out : ints
+        Indices of the first non zero values.
+
+    """
+
+    mask = this != 0
+    return np.where(mask.any(axis=axis), mask.argmax(axis=axis), invalid_val)
+
+
+def findLastNonZeros(this, axis, invalid_val=-1):
+    """Find the indices to the last non zero values
+
+    Parameters
+    ----------
+    this : array_like
+        An array of numbers
+    axis : int
+        Axis along which to find last non zeros
+    invalid_val : int
+        If all values along that axis are zero, use this value
+
+    Returns
+    -------
+    out : ints
+        Indices of the last non zero values.
+
+    """
+
+    mask = this != 0
+    val = this.shape[axis] - np.flip(mask, axis=axis).argmax(axis=axis) - 1
+    return np.where(mask.any(axis=axis), val, invalid_val)
+
+
+def findFirstLastNonZeros(this):
+    """Find the indices to the first and last non zero values along each axis
+
+    Parameters
+    ----------
+    this : array_like
+        An array of numbers
+
+    Returns
+    -------
+    out : array_like
+        Indices of the first and last non zero values along each axisgg
+
+    """
+    out = np.empty([np.ndim(this), 2], dtype=np.int)
+    mask = ((this != 0.0) & (this != np.nan))
+    for i in range(np.ndim(this)):
+        out[i, 0] = np.min(np.where(mask.any(axis=i), mask.argmax(axis=i), 0))
+    for i in range(np.ndim(this)):
+        val = this.shape[i] - np.flip(mask, axis=i).argmax(axis=i) - 1
+        out[i, 1] = np.max((np.where(mask.any(axis=i), val, this.shape[i])))
+    return out
+
+
 def getName(self, default=''):
     """Tries to obtain an attached name to a variable.
 
@@ -424,7 +495,45 @@ def tanh(this):
     return that
 
 
-def _logSomething(values,log=None):
+def _logLabel(log=None):
+    """Returns a LateX string of log_{base} so that auto labeling is easier.
+
+    Parameters
+    ----------
+    log : 'e' or float, optional
+        Take the log of the colour to base 'e' if log = 'e', and a number e.g. log = 10.
+        Values in c that are <= 0 are masked.
+
+    Returns
+    -------
+    out : str
+        Label for logged data.
+
+    """
+
+    if log is None:
+        return ''
+
+    assert not isinstance(log, bool), TypeError('log must be either "e" or a number')
+
+    if (log == 'e'):
+        return 'ln'
+
+    assert log > 0, ValueError('logBase must be a positive number')
+
+    if (log == 10):
+        return 'log$_{10}$'
+
+    if (log == 2):
+        return 'log$_{2}$'
+
+    if (log > 2):
+        return 'log$_{'+str(log)+'}$'
+
+    assert False, ValueError("log must be 'e' or a positive number")
+
+
+def _logSomething(values, log=None):
     """Take the log of something with the given base.
     
     Uses mask arrays for robustness and warns when masking occurs
@@ -489,14 +598,13 @@ def histogramEqualize(values, nBins=256):
         Cumulative Density Function.
 
     """
-
     # get image histogram
     tmp = values.flatten()
     i = np.isfinite(tmp)
     flat = tmp[i]
-    H, bins = np.histogram(flat, nBins, normed=True)
+    H, bins = np.histogram(flat, nBins, density=True)
     cdf = H.cumsum() # cumulative distribution function
-    cdf = (nBins-1) * cdf / cdf[-1] # normalize
+    cdf = (nBins - 1) * cdf / cdf[-1] # normalize
 
     # use linear interpolation of cdf to find new pixel values
     equalized = np.interp(tmp, bins[:-1], cdf)
@@ -504,34 +612,36 @@ def histogramEqualize(values, nBins=256):
     equalized[~i] = np.nan
     # Apply any masks from isfinite
     try:
-        equalized = np.ma.masked_array(equalized,i.mask)
+        equalized = np.ma.masked_array(equalized, i.mask)
     except:
         pass
 
     # Get the centers of the bins
-    tmp=bins[:-1]+0.5*np.diff(bins)
+    tmp = bins[:-1] + 0.5 * np.diff(bins)
 
     # Scale back the equalized image to the bounds of the histogram
-    a1=np.nanmin(equalized)
-    b1=tmp.min()
-    b2=tmp.max()
+    a1 = np.nanmin(equalized)
+    b1 = tmp.min()
+    b2 = tmp.max()
+
     # Shifting the vector so that min(x) == 0
     equalized -= a1
     # Scaling to the range of [0, 1]
     equalized /= np.nanmax(equalized)
+
     # Scaling to the needed amplitude
     equalized *= (b2 - b1)
     # Shifting to the needed level
     equalized += b1
 
-    res = values.copy()
-    res[:] = equalized.reshape(values.shape)
+    res = equalized.reshape(values.shape)
 
     return res, cdf
 
 
 def safeEval(string):
     
+    # Backwards compatibility
     if ('NdArray' in string):
         string = string.replace('NdArray', 'StatArray')
         return string
@@ -539,7 +649,7 @@ def safeEval(string):
         string = string.replace('EmLoop', 'CircularLoop')
         return string
     
-    allowed = ('StatArray', 'Histogram', 'Model1D', 'Hitmap', 'TdemDataPoint', 'FdemDataPoint', 'TdemSystem', 'FdemSystem', 'CircularLoop')  
+    allowed = ('StatArray', 'Histogram', 'Model1D', 'Hitmap', 'TdemData', 'FdemData', 'TdemDataPoint', 'FdemDataPoint', 'TdemSystem', 'FdemSystem', 'CircularLoop', 'RectilinearMesh')  
 
     if (any(x in string for x in allowed)):
         return string

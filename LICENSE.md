@@ -1,4 +1,4 @@
-Unless otherwise noted, this software is dual licensed.
+Unless otherwise noted, this software is multi licensed.
 
 The source code in this project is in the public domain in the United
 States because it contains materials that originally came from the United
@@ -9,16 +9,22 @@ https://www2.usgs.gov/visual-id/credit_usgs.html#copyright
 Additionally, we waive copyright and related rights in the work
 worldwide through the CC0 1.0 Universal public domain dedication.
 
+Since the CC0 1.0 license does not state whether a user can re-distribute the material, we also release the source code under the BSD license.
+
 This software uses external libraries released under the GPLv2 license. As such this work as a whole is also released under the GPLv2 license.
+
+## BSD
+
+[BSD License](https://opensource.org/licenses/BSD-3-Clause)
+
+## GPL v2 
+
+[GPL v2 License](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 
 ## CC0 1.0 Universal Summary
 
 This is a human-readable summary of the
 [Legal Code (read the full text)](https://creativecommons.org/publicdomain/zero/1.0/legalcode).
-
-## GPL v2 
-
-[GPL v2 License](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 
 ### No Copyright
 

@@ -18,12 +18,12 @@ def fdem1dfwd(S, mod, z0):
     # Create the indices of the coil orientations for the frequencies.
     tid = S.getTensorID()
     
-    tHeight = np.zeros(S.nFreq)
-    rHeight = np.zeros(S.nFreq)
-    tMom = np.zeros(S.nFreq)
-    rMom = np.zeros(S.nFreq)
-    rx = np.zeros(S.nFreq)
-    for i in range(S.nFreq):
+    tHeight = np.zeros(S.nFrequencies)
+    rHeight = np.zeros(S.nFrequencies)
+    tMom = np.zeros(S.nFrequencies)
+    rMom = np.zeros(S.nFrequencies)
+    rx = np.zeros(S.nFrequencies)
+    for i in range(S.nFrequencies):
         tHeight[i] = -z0 + S.T[i].z
         rHeight[i] = z0 + S.R[i].z
         tMom[i] = S.T[i].moment
@@ -31,9 +31,9 @@ def fdem1dfwd(S, mod, z0):
         rx[i] = S.R[i].x
     scl = tMom * rMom
        
-    prd = np.zeros(S.nFreq, dtype=np.complex128)
+    prd = np.zeros(S.nFrequencies, dtype=np.complex128)
 
-    fdemforward1d.forward1d(tid, S.freq, tHeight, rHeight, tMom, rx, S.dist, scl, mod.par, mod.thk, prd, S.nFreq,  mod.nCells[0])
+    fdemforward1d.forward1d(tid, S.frequencies, tHeight, rHeight, tMom, rx, S.dist, scl, mod.par, mod.thk, prd, S.nFrequencies,  mod.nCells[0])
 
     return prd
 
@@ -51,12 +51,12 @@ def fdem1dsen(S, mod, z0):
     # Create the indices of the coil orientations for the frequencies.
     tid = S.getTensorID()
 
-    tHeight = np.zeros(S.nFreq)
-    rHeight = np.zeros(S.nFreq)
-    tMom = np.zeros(S.nFreq)
-    rMom = np.zeros(S.nFreq)
-    rx = np.zeros(S.nFreq)
-    for i in range(S.nFreq):
+    tHeight = np.zeros(S.nFrequencies)
+    rHeight = np.zeros(S.nFrequencies)
+    tMom = np.zeros(S.nFrequencies)
+    rMom = np.zeros(S.nFrequencies)
+    rx = np.zeros(S.nFrequencies)
+    for i in range(S.nFrequencies):
         tHeight[i] = -z0 + S.T[i].z
         rHeight[i] = z0 + S.R[i].z
         tMom[i] = S.T[i].moment
@@ -64,8 +64,8 @@ def fdem1dsen(S, mod, z0):
         rx[i] = S.R[i].x
     scl = tMom * rMom
 
-    J = np.zeros([S.nFreq, nLayers], dtype=np.complex128, order='F')
+    J = np.zeros([S.nFrequencies, nLayers], dtype=np.complex128, order='F')
 
-    fdemforward1d.sensitivity1d(tid, S.freq, tHeight, rHeight, tMom, rx, S.dist, scl, mod.par, mod.thk, J, S.nFreq,  mod.nCells[0])
+    fdemforward1d.sensitivity1d(tid, S.frequencies, tHeight, rHeight, tMom, rx, S.dist, scl, mod.par, mod.thk, J, S.nFrequencies,  mod.nCells[0])
 
     return J
