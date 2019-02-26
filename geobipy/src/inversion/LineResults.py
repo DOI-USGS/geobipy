@@ -85,6 +85,23 @@ class LineResults(myObject):
             self.hdfFile.close()
         except:
             pass # Already closed
+            
+    def changeUnits(self, units='m'):
+        """Change the units of the Coordinates
+        
+        Parameters
+        ----------
+        units : str
+            The distance units to change to
+
+        """
+        if (units == 'km' and self.x.units != 'km'):
+            self.x /= 1000.0
+            self.y /= 1000.0
+            
+            self.x.units = 'km'
+            self.y.units = 'km'
+            
 
 
     def crossplotErrors(self, system=0, **kwargs):
@@ -130,18 +147,18 @@ class LineResults(myObject):
         ax = axis.lower()
         if (ax == 'easting'):
             self.getX()
-            self.xPlot = StatArray(self.nPoints, 'Easting', 'm') + self.x
+            self.xPlot = self.x
             return
         if (ax == 'northing'):
             self.getY()
-            self.xPlot = StatArray(self.nPoints, 'Northing', 'm') + self.y
+            self.xPlot = self.y
             return
         if (ax == 'distance'):
             self.getDistanceAlongLine()
             self.xPlot = StatArray(
                 self.nPoints,
                 'Distance Along Line',
-                'm') + self.r
+                self.x.units) + self.r
             return
         if (ax == 'id'):
             self.getIDs()
@@ -156,6 +173,7 @@ class LineResults(myObject):
         """ Creates an array suitable for plt.pcolormesh for the abscissa """
         if (not self._xMesh is None):
             return
+        
         pr = np.min(np.diff(self.xPlot))
         self._xMesh = np.zeros([nV + 1, self.nPoints + 2],order = 'F')
         self._xMesh[:-1, 1:-1] = np.repeat(self.xPlot[np.newaxis, :], nV, 0)
@@ -209,12 +227,14 @@ class LineResults(myObject):
         if (not self.x is None):
             return
         self.x = self.getAttribute('x')
+        self.x.name = 'Northing'
 
     def getY(self):
         """ Get the Y co-ordinates (Easting) """
         if (not self.y is None):
             return
         self.y = self.getAttribute('y')
+        self.y.name='Easting'
 
     def getZgrid(self):
         """ Get the gridded depth intervals """
@@ -632,6 +652,8 @@ class LineResults(myObject):
     def plotInterfaces(self, cut=0.0, useVariance=True, **kwargs):
         """ Plot a cross section of the layer depth histograms. Truncation is optional. """
 
+        colorBar = kwargs.pop('colorBar', 'True')
+    
         self.getZgrid()
 
         self.setAlonglineAxis(self.plotAgainst)
@@ -644,7 +666,7 @@ class LineResults(myObject):
 
         self._getX_pmesh(zGrd.size)
         self._getZ_pmesh(zGrd)
-
+        
         c = np.zeros(self._xMesh.shape, order = 'F')
         c[:-1, 0] = np.nan
         c[:-1, -1] = np.nan
@@ -669,6 +691,9 @@ class LineResults(myObject):
 
         cP.xlabel(self.xPlot.getNameUnits())
         cP.ylabel('Elevation (m)')
+        
+        if (colorBar):
+            plt.colorbar(pm)
 
 
     def plotObservedDataChannel(self, channel=None, **kwargs):
@@ -1476,8 +1501,3 @@ class LineResults(myObject):
 
 #        if results.verbose:
 #            results.posteriorComponents.writeHdf(aFile, 'posteriorcomponents',  index=np.s_[i,:,:])
-
-
-
-
-
