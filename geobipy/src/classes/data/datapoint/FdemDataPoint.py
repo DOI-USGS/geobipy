@@ -290,7 +290,7 @@ class FdemDataPoint(EmDataPoint):
 #    self.sys.summary()
 #    print('')
 
-    def plot(self, title='Frequency Domain EM Data', **kwargs):
+    def plot(self, title='Frequency Domain Data', **kwargs):
         """ Plot the Inphase and Quadrature Data for an EM measurement
         if plotPredicted then the predicted data are plotted as a line, with points for the observed data
         else the observed data with error bars and linear interpolation are shown.
@@ -305,7 +305,7 @@ class FdemDataPoint(EmDataPoint):
         cp.pretty(ax)
 
         cp.xlabel('Frequency (Hz)')
-        cp.ylabel('Data (ppm)')
+        cp.ylabel('Frequency domain data (ppm)')
         cp.title(title)
 
         inColor = kwargs.pop('incolor',cp.wellSeparated[0])
