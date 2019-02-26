@@ -173,9 +173,10 @@ class RectilinearMesh2D(myObject):
         """ Normalizes the parameters by the sum along dimension dim """
         s = np.sum(self.arr, dim)
         if (dim == 0):
-            self.arr /= np.repeat(s[np.newaxis, :], np.size(self.arr, dim), dim)
+            self.arr = self.arr / np.repeat(s[np.newaxis, :], np.size(self.arr, dim), dim)
         elif (dim == 1):
-            self.arr /= np.repeat(s[:, np.newaxis], np.size(self.arr, dim), dim)
+            self.arr = self.arr / np.repeat(s[:, np.newaxis], np.size(self.arr, dim), dim)
+        self.arr.name = 'Relative frequency'
 
 
     def plot(self,title='',invX=False,logX=False,flipY=False,**kwargs):
@@ -201,7 +202,10 @@ class RectilinearMesh2D(myObject):
     
     def pcolor(self, **kwargs):
         """ Plot the Histogram2D as an image """
-        self.arr.pcolor(x=self.x, y=self.y, **kwargs)
+        x = kwargs.pop('x', self.x)
+        y = kwargs.pop('y', self.y)
+        
+        self.arr.pcolor(x=x, y=y, **kwargs)
 
 
     def hdfName(self):
