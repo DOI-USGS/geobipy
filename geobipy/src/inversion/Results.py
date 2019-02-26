@@ -82,8 +82,8 @@ class Results(myObject):
         self.acceptance = 0.0
 #    self.rate=np.zeros(np.int(self.nMC/1000)+1)
         n = 2 * np.int(self.nMC / 1000)
-        self.rate = StatArray(n)
-        self.ratex = StatArray(np.arange(1, n + 1) * 1000)
+        self.rate = StatArray(n, name='% Acceptance')
+        self.ratex = StatArray(np.arange(1, n + 1) * 1000, name='Iteration #')
         # Initialize the burned in state
         self.iBurn = self.nMC
         self.burnedIn = False
@@ -226,7 +226,7 @@ class Results(myObject):
             return
         # Setup the figure region. The figure window is split into a 4x3
         # region. Columns are able to span multiple rows
-        self.fig = plt.figure(iFig, facecolor='white', figsize=(10,7))
+        #self.fig = plt.figure(iFig, facecolor='white', figsize=(10,7))
         mngr = plt.get_current_fig_manager()
         try:
             mngr.window.setGeometry(0, 10, self.sx, self.sy)
@@ -259,19 +259,16 @@ class Results(myObject):
 #        plt.draw()
 
 
-
     def plot(self, title="", iFig=0, forcePlot=False):
         """ Updates the figures for MCMC Inversion """
         # Plots that change with every iteration
         if (not self.plotMe and not forcePlot):
             return
-
-        if (not hasattr(self, 'gs')):
-            self.initFigure(iFig, forcePlot=forcePlot)
-
-
-        plt.figure(iFig)
-
+        
+        print(self.gs)
+        
+        assert hasattr(self, 'gs'), Exception('Must initalize figure with self.initFigure()')           
+                        
 #        if (np.mod(self.i, 1000) == 0 or forcePlot):
 
         if (np.mod(self.i, self.iPlot) == 0 or forcePlot):
@@ -279,7 +276,7 @@ class Results(myObject):
             # Update the acceptance plot
             plt.sca(self.ax[0])
             plt.cla()
-            self.rate.plot(self.ratex, i=np.s_[:np.int64(self.i / 1000)], marker='o',markeredgecolor='k', linestyle='none')
+            self.rate.plot(x=self.ratex, i=np.s_[:np.int64(self.i / 1000)], marker='o',markeredgecolor='k', linestyle='none')
             cP.xlabel('Iteration #')
             cP.ylabel('% Acceptance')
             cP.title('Rate of model acceptance per ' + str(1000) + ' iterations')
@@ -352,7 +349,7 @@ class Results(myObject):
                 # Update the model plot
                 # Get the mean and 95% confidence intervals
                 (sigMed, sigLow, sigHigh) = self.Hitmap.getConfidenceIntervals(95.0)
-
+                
                 plt.sca(self.ax[5])
                 # plt.subplot(self.gs[6:, self.nSystems:2 * self.nSystems])
                 plt.cla()
@@ -371,7 +368,7 @@ class Results(myObject):
                 plt.axhline(self.doi, color='#5046C8', linestyle='dashed', linewidth=3)
 
                 # Plot the best model
-                self.bestModel.plot(flipY=False, invX=True, noLabels=True)
+                self.bestModel.plot(flipY=False, reciprocateX=True, noLabels=True)
                 plt.axis([self.limits[0], self.limits[1], self.Hitmap.y[0], self.Hitmap.y[-1]])
                 ax = plt.gca()
                 lim = ax.get_ylim()
