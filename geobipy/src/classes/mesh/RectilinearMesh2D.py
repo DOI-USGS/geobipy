@@ -270,7 +270,6 @@ class RectilinearMesh2D(myObject):
         out[0] = self.z.cellIndex(x2, clip=clip)
         return out
 
-
     def ravelIndices(self, ixy, order='C'):
         """Return a global index into a 1D array given the two cell indices in x and z.
 

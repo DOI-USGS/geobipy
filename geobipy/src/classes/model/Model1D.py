@@ -695,7 +695,7 @@ class Model1D(Model):
         print(msg)
 
 
-    def plot(self, invX=False, **kwargs):
+    def plot(self, **kwargs):
         """Plots a 1D model parameters as a line against depth
 
         Parameters

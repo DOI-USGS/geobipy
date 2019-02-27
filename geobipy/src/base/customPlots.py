@@ -395,9 +395,11 @@ def pcolor(values, x=None, y=None, **kwargs):
     grid : bool, optional
         Plot the grid
     noColorbar : bool, optional
-        Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.   
-        trim : bool, optional
-        Set the x and y limits to the first and last non zero values along each axis. 
+        Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.        
+    reciprocateX : bool, optional
+        Take the reciprocal of the X axis before other transforms
+    reciprocateY : bool, optional
+        Take the reciprocal of the Y axis before other transforms    
     trim : bool, optional
         Set the x and y limits to the first and last non zero values along each axis.
 
@@ -414,6 +416,28 @@ def pcolor(values, x=None, y=None, **kwargs):
 
     # Set the grid colour if specified.
 
+    log = kwargs.pop('log',False)
+
+    xscale = kwargs.pop('xscale','linear')
+    yscale = kwargs.pop('yscale','linear')
+    flipX = kwargs.pop('flipX',False)
+    flipY = kwargs.pop('flipY',False)
+    
+    cl = kwargs.pop('clabel', None)
+    grid = kwargs.pop('grid', False)
+
+    noColorBar = kwargs.pop('noColorbar', False)
+    
+    recX = kwargs.pop('reciprocateX', False)
+    recY = kwargs.pop('reciprocateY', False)
+
+    # Set the grid colour if specified
+    c = None
+    if grid:
+        c = kwargs.pop('color', 'k')
+
+    ax = plt.gca()
+    pretty(ax)
 
     if (x is None):
         mx = np.arange(np.size(values,1)+1)
@@ -423,6 +447,9 @@ def pcolor(values, x=None, y=None, **kwargs):
             mx = x.edges()
         else:
             assert x.size == values.shape[1]+1, ValueError('x must be size {}. Not {}'.format(values.shape[1]+1, x.size))
+
+    if recX:
+        mx = 1.0 / mx
             
     if (y is None):
         my = np.arange(np.size(values,0)+1)
@@ -432,6 +459,9 @@ def pcolor(values, x=None, y=None, **kwargs):
             my = y.edges()
         else:
             assert y.size == values.shape[0]+1, ValueError('y must be size {}. Not {}'.format(values.shape[0]+1, y.size))
+
+    if recY:
+        my = 1.0 / my
 
     X, Y = np.meshgrid(mx, my)
 

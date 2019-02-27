@@ -459,8 +459,8 @@ class PointCloud3D(myObject):
         -------
         out : pyvtk.VtkData
             Vtk data structure
-
-        """
+        
+       """
 
         nodes = np.vstack([self.x, self.y, self.z]).T
 
@@ -510,7 +510,6 @@ class PointCloud3D(myObject):
 
         vtk.tofile(fileName, format=format)
         
-
 
     def Bcast(self, world, root=0):
         """Broadcast a PointCloud3D using MPI 

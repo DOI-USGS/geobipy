@@ -407,7 +407,7 @@ class FdemDataPoint(EmDataPoint):
         cp.pretty(ax)
 
         cp.xlabel('Frequency (Hz)')
-        cp.ylabel('Data (ppm)')
+        cp.ylabel('Frequency domain data (ppm)')
         cp.title(title)
 
         inColor = kwargs.pop('incolor',cp.wellSeparated[0])

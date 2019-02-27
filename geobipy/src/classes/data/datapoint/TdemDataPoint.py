@@ -384,10 +384,12 @@ class TdemDataPoint(EmDataPoint):
         cp.xlabel('Time (s)')
         cp.ylabel(cf.getNameUnits(self._data))
         cp.title(title)
-        plt.legend()
+        
+        if self.nSystems > 1:
+            plt.legend()
 
         return ax
-
+    
 
     def plotPredicted(self, title='Time Domain EM Data', **kwargs):
 

@@ -133,9 +133,8 @@ class Results(myObject):
         self.acceptance = 0.0
 #    self.rate=np.zeros(np.int(self.nMC/1000)+1)
         n = 2 * np.int(self.nMC / 1000)
-        self.rate = StatArray(n)
-        self.ratex = StatArray(np.arange(1, n + 1) * 1000)
-
+        self.rate = StatArray(n, name='% Acceptance')
+        self.ratex = StatArray(np.arange(1, n + 1) * 1000, name='Iteration #')
         # Initialize the burned in state
         self.iBurn = self.nMC
         self.burnedIn = False
@@ -434,7 +433,6 @@ class Results(myObject):
         cP.ylabel(self.MzHist.bins.getNameUnits())
         plt.xscale('log')
 
-
     def plot(self, title="", iFig=0, forcePlot=False):
         """ Updates the figures for MCMC Inversion """
         # Plots that change with every iteration
@@ -508,7 +506,6 @@ class Results(myObject):
                 # plt.subplot(self.gs[6:, self.nSystems:2 * self.nSystems])
                 plt.cla()
                 self._plotHitmapPosterior()
-
 
             cP.suptitle(title)
 

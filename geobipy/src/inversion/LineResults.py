@@ -86,6 +86,23 @@ class LineResults(myObject):
             self.hdfFile.close()
         except:
             pass # Already closed
+            
+    def changeUnits(self, units='m'):
+        """Change the units of the Coordinates
+        
+        Parameters
+        ----------
+        units : str
+            The distance units to change to
+
+        """
+        if (units == 'km' and self.x.units != 'km'):
+            self.x /= 1000.0
+            self.y /= 1000.0
+            
+            self.x.units = 'km'
+            self.y.units = 'km'
+            
 
 
     def crossplotErrors(self, system=0, **kwargs):
@@ -119,7 +136,6 @@ class LineResults(myObject):
         cP.xlabel(self.relErr.getNameUnits())
         cP.ylabel(self.addErr.getNameUnits())
         
-
 
     def getMesh(self):
         """Get the 2D topo fitting rectilinear mesh. """
@@ -1269,8 +1285,3 @@ class LineResults(myObject):
 
 #        if results.verbose:
 #            results.posteriorComponents.writeHdf(hdfFile, 'posteriorcomponents',  index=np.s_[i,:,:])
-
-
-
-
-
