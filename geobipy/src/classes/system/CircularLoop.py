@@ -186,7 +186,7 @@ class CircularLoop(EmLoop):
         myMPI.Isend(self.moment, dest=dest, world=world)
         tmp = np.empty(7, np.float64)
         tmp[:] = np.asarray([self.x, self.y, self.z, self.pitch, self.roll, self.yaw, self.radius])
-        world.Isend(tmp, dest=dest)
+        req = world.Isend(tmp, dest=dest)
 
 
     def Irecv(self, source, world):
@@ -195,6 +195,7 @@ class CircularLoop(EmLoop):
         m = myMPI.Irecv(source, world)
         tmp = np.empty(7, np.float64)
         req = world.Irecv(tmp, source=source)
+        req.Wait()
         return CircularLoop(o, m, tmp[0], tmp[1], tmp[2], tmp[3], tmp[4], tmp[5], tmp[6])
 
 
