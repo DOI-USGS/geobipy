@@ -1,7 +1,6 @@
 """ @Histogram_Class
 Module describing an efficient histogram class
 """
-from .baseDistribution import baseDistribution
 from ...classes.mesh.RectilinearMesh1D import RectilinearMesh1D
 from ...classes.core.StatArray import StatArray
 from ...base import customFunctions as cF
@@ -44,11 +43,11 @@ class Histogram1D(RectilinearMesh1D):
         if not log is None:
             if not bins is None:
                 assert isinstance(bins, StatArray), TypeError("bins must be a geobpiy.StatArray")
-                bins, label = cF._logSomething(bins, log=log)
+                bins, label = cF._log(bins, log=log)
                 bins.name = label + bins.getName()
             if not binCentres is None:
                 assert isinstance(binCentres, StatArray), TypeError("binCentres must be a geobpiy.StatArray")
-                binCentres, label = cF._logSomething(binCentres, log=log)
+                binCentres, label = cF._log(binCentres, log=log)
                 binCentres.name = label + binCentres.getName()
 
         # Initialize the parent class
@@ -89,7 +88,7 @@ class Histogram1D(RectilinearMesh1D):
         clip : bool
             A negative index which would normally wrap will clip to 0 and self.bins.size instead.
         """
-        tmp, dum = cF._logSomething(values, self.log)
+        tmp, dum = cF._log(values, self.log)
         iBin = np.atleast_1d(self.cellIndex(tmp.flatten(), clip=clip))
         tmp = np.bincount(iBin, minlength = self.nBins)
         
