@@ -1,12 +1,11 @@
 """ @Histogram_Class
 Module describing an efficient histogram class
 """
-from .baseDistribution import baseDistribution
 from ...classes.statistics.Histogram1D import Histogram1D
 from ...classes.mesh.RectilinearMesh2D import RectilinearMesh2D
 from ...classes.core.StatArray import StatArray
 from ...base import customPlots as cP
-from ...base.customFunctions import _logSomething
+from ...base.customFunctions import _log
 import numpy as np
 from scipy.stats import binned_statistic
 import matplotlib.pyplot as plt
@@ -124,7 +123,7 @@ class Histogram2D(RectilinearMesh2D):
         tmp[i] = t[i] / s[i]
         
         if log:
-            tmp, dum = _logSomething(tmp, log=log)
+            tmp, dum = _log(tmp, log=log)
 
         return tmp
 
@@ -206,7 +205,7 @@ class Histogram2D(RectilinearMesh2D):
             out = self.y.cellCentres[ix2]
 
         if (not log is None):
-            out, dum = _logSomething(out, log=log)
+            out, dum = _log(out, log=log)
 
         return out
 
@@ -306,9 +305,9 @@ class Histogram2D(RectilinearMesh2D):
             high = self.y.cellCentres[ix2]
 
         if (not log is None):
-            med, dum = _logSomething(med, log=log)
-            low, dum = _logSomething(low, log=log)
-            high, dum = _logSomething(high, log=log)
+            med, dum = _log(med, log=log)
+            low, dum = _log(low, log=log)
+            high, dum = _log(high, log=log)
 
         return (med, low, high)
 
