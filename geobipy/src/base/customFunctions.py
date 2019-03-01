@@ -1,4 +1,5 @@
 import numpy as np
+from copy import deepcopy
 from numpy import issubdtype
 from math import exp as mExp
 
@@ -533,8 +534,90 @@ def _logLabel(log=None):
     assert False, ValueError("log must be 'e' or a positive number")
 
 
-def _logSomething(values, log=None):
+def _log(values, log=None):
     """Take the log of something with the given base.
+    
+    Uses mask arrays for robustness and warns when masking occurs
+    Also returns a LateX string of log_{base} so that auto labeling is easier.
+
+    Parameters
+    ----------
+    values : scalar or array_like
+        Take the log of these values.
+    log : 'e' or float, optional
+        Take the log of the colour to base 'e' if log = 'e', and a number e.g. log = 10.
+        Values in c that are <= 0 are masked.
+
+    Returns
+    -------
+    out : array_like
+        The logged values
+
+    """
+
+    if np.size(values) == 1:
+        return _logScalar(values, log)
+    else:
+        return _logArray(values, log)
+
+    
+
+def _logScalar(value, log=None):
+    """Take the log of a number with the given base.
+    
+    Uses mask arrays for robustness and warns when masking occurs
+    Also returns a LateX string of log_{base} so that auto labeling is easier.
+
+    Parameters
+    ----------
+    values : scalar
+        Take the log of the value.
+    log : 'e' or float, optional
+        Take the log of the colour to base 'e' if log = 'e', and a number e.g. log = 10.
+        Values in c that are <= 0 are masked.
+
+    Returns
+    -------
+    out : array_like
+        The logged values
+
+    """
+    if log is None:
+        return value, ''
+
+    assert not isinstance(log, bool), TypeError('log must be either "e" or a number')
+
+    # Let the user know that values were masked in order to take the log
+    if (value <= 0.0):
+        print(Warning('Value <= 0.0 have been masked before taking their log'))
+
+    if (log == 'e'):
+        tmp = np.log(value)
+        label = 'ln'
+        return tmp, label
+
+    assert log > 0, ValueError('logBase must be a positive number')
+
+    if (log == 10):
+        tmp = np.log10(value)
+        label = 'log$_{10}$'
+        return tmp, label
+
+    if (log == 2):
+        tmp = np.log2(value)
+        label = 'log$_{2}$'
+        return tmp, label
+
+    if (log > 2):
+        tmp = np.log10(value)/np.log10(log)
+        label = 'log$_{'+str(log)+'}$'
+        return tmp, label
+    
+    assert False, ValueError("log must be 'e' or a positive number")
+
+    
+def _logArray(values, log=None):
+    """Take the log of an array with the given base.
     
     Uses mask arrays for robustness and warns when masking occurs
     Also returns a LateX string of log_{base} so that auto labeling is easier.
@@ -553,32 +636,47 @@ def _logSomething(values, log=None):
         The logged values
 
     """
-
     if log is None:
         return values, ''
 
     assert not isinstance(log, bool), TypeError('log must be either "e" or a number')
-    
 
     # Let the user know that values were masked in order to take the log
+    i = np.s_[:]
     if (np.nanmin(values) <= 0.0):
+        i = np.where(values > 0.0)
         print(Warning('Values <= 0.0 have been masked before taking their log'))
 
+    tmp = deepcopy(values)
+    tmp[:] = np.nan
+
     if (log == 'e'):
-        return np.log(values),'ln'
+        tmp[i] = np.log(values[i])
+        label = 'ln'
+        return tmp, label
 
     assert log > 0, ValueError('logBase must be a positive number')
 
     if (log == 10):
-        return np.log10(values),'log$_{10}$'
+        tmp[i] = np.log10(values[i])
+        label = 'log$_{10}$'
+        return tmp, label
 
     if (log == 2):
-        return np.log2(values),'log$_{2}$'
+        tmp[i] = np.log2(values[i])
+        label = 'log$_{2}$'
+        return tmp, label
 
     if (log > 2):
-        return np.log10(values)/np.log10(log),'log$_{'+str(log)+'}$'
-
+        tmp[i] = np.log10(values[i])/np.log10(log)
+        label = 'log$_{'+str(log)+'}$'
+        return tmp, label
+    
     assert False, ValueError("log must be 'e' or a positive number")
+
+
+
+
     
 def histogramEqualize(values, nBins=256):
     """Equalize the histogram of the values so that all colours have an equal amount
