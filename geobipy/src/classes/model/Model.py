@@ -12,5 +12,10 @@ class Model(myObject):
     See Also
     ----------
     geobipy.Model1D
+    geobipy.Model2D
 
     """
+
+    def __init__(self):
+        """ABC method"""
+        NotImplementedError()

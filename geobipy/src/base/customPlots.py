@@ -415,26 +415,14 @@ def pcolor(values, x=None, y=None, **kwargs):
 
     """
 
-    # Set the grid colour if specified.
+    kwargs['grid'] = kwargs.pop('grid', False)
 
-    log = kwargs.pop('log',False)
-
-    xscale = kwargs.pop('xscale','linear')
-    yscale = kwargs.pop('yscale','linear')
-    flipX = kwargs.pop('flipX',False)
-    flipY = kwargs.pop('flipY',False)
-    
-    cl = kwargs.pop('clabel', None)
-    grid = kwargs.pop('grid', False)
-
-    noColorBar = kwargs.pop('noColorbar', False)
-    
     recX = kwargs.pop('reciprocateX', False)
     recY = kwargs.pop('reciprocateY', False)
 
     # Set the grid colour if specified
     c = None
-    if grid:
+    if kwargs['grid']:
         c = kwargs.pop('color', 'k')
 
     ax = plt.gca()
@@ -609,6 +597,7 @@ def pcolormesh(X, Y, values, **kwargs):
 
     if flipY:
         ax.invert_yaxis()
+        print('here')
         # ax.set_ylim(ax.get_ylim()[::-1])
 
     if np.size(alpha) > 1:

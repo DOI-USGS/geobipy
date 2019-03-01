@@ -5,5 +5,6 @@ System classes
    :maxdepth: 2
 
    EmLoop
+   CircularLoop
    FdemSystem
-   HankelFilter
+   TdemSystem

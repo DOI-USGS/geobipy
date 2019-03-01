@@ -319,6 +319,9 @@ class Results(myObject):
         self.ax[(2*self.nSystems)+6] = plt.subplot(self.gs[6:, 2 * self.nSystems:])
         for ax in self.ax:
             cP.pretty(ax)
+
+        if self.plotMe:
+            plt.show(block=False)
         # plt.draw()
 
 

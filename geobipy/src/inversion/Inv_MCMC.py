@@ -88,8 +88,7 @@ def Inv_MCMC(paras, DataPoint, prng, LineResults=None, rank=1):
         Res.update(i, iBest, bestData, bestModel, DataPoint, multiplier, PhiD, Mod, posterior, posteriorComponents, paras.clipRatio)
         
         Res.plot()   
-        if Res.plotMe:
-            plt.show(block=False)     
+                 
         i += 1
         
         Go = i <= paras.nMarkovChains + iBurn -1
