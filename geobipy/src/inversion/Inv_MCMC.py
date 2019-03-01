@@ -13,6 +13,7 @@ from scipy import sparse
 import numpy as np
 from .Results import Results
 from ..base.MPI import print
+import matplotlib.pyplot as plt
 
 def Inv_MCMC(paras, DataPoint, prng, LineResults=None, rank=1):
     """ Markov Chain Monte Carlo approach for inversion of geophysical data
@@ -85,7 +86,10 @@ def Inv_MCMC(paras, DataPoint, prng, LineResults=None, rank=1):
                 multiplier *= paras.multiplier
 
         Res.update(i, iBest, bestData, bestModel, DataPoint, multiplier, PhiD, Mod, posterior, posteriorComponents, paras.clipRatio)
-        Res.plot()        
+        
+        Res.plot()   
+        if Res.plotMe:
+            plt.show(block=False)     
         i += 1
         
         Go = i <= paras.nMarkovChains + iBurn -1
