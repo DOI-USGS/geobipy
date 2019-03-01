@@ -7,7 +7,7 @@ from ...base.customFunctions import safeEval
 from ..core.StatArray import StatArray
 from ..mesh.RectilinearMesh1D import RectilinearMesh1D
 from .Histogram2D import Histogram2D
-from ...base.customFunctions import _logSomething, isInt
+from ...base.customFunctions import isInt
 
 class Hitmap2D(Histogram2D):
     """ Class defining a 2D hitmap whose cells are rectangular with linear sides """
