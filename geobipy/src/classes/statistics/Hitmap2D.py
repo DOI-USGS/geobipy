@@ -5,8 +5,9 @@ Module describing a 2D Rectilinear Mesh class with x and y axes specified
 import numpy as np
 from ...base.customFunctions import safeEval
 from ..core.StatArray import StatArray
+from ..mesh.RectilinearMesh1D import RectilinearMesh1D
 from .Histogram2D import Histogram2D
-from ...base.customFunctions import _logSomething, isInt
+from ...base.customFunctions import isInt
 
 class Hitmap2D(Histogram2D):
     """ Class defining a 2D hitmap whose cells are rectangular with linear sides """
@@ -21,32 +22,15 @@ class Hitmap2D(Histogram2D):
         return self.y[iC]
 
 
-    def getConfidenceRange(self, percent=95.0, log=None):
-        """ Get the range of confidence with depth """
-        sMed, sLow, sHigh = self.getConfidenceIntervals(percent, log=log)
-
-        return sHigh - sLow
-
-
-    def getOpacity(self, percent=95.0):
-        """ Return an opacity with depth between 0 and 1 based on the 95% confidence inverval of the hitmap """
-        opacity = self.getConfidenceRange(percent=percent)
-        maxes = np.max(opacity)
-        if (maxes == 0.0): return opacity
-        opacity /= maxes
-        opacity = 1.0 - opacity
-        return opacity
-
-
     def getOpacityLevel(self, percent):
         """ Get the index along axis 1 from the bottom up that corresponds to the percent opacity """
         p = 0.01*percent
-        op = self.getOpacity()[::-1]
+        op = self.axisOpacity()[::-1]
         nz = op.size - 1
         iC = 0
         while op[iC] < p and iC < nz:
             iC +=1
-        return self.y[op.size - iC -1]
+        return self.y.cellCentres[op.size - iC -1]
 
 
     def hdfName(self):
@@ -72,6 +56,6 @@ class Hitmap2D(Histogram2D):
         item = grp.get('y')
         this = eval(safeEval(item.attrs.get('repr')))
         y = this.fromHdf(item, index=bi)
-        tmp = Hitmap2D(x, y)
-        tmp.arr = arr
+        tmp = Hitmap2D(xBinCentres=x, yBinCentres=y)
+        tmp._counts[:, :] = arr
         return tmp

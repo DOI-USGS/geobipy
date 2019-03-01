@@ -57,49 +57,37 @@ class Model1D(Model):
 
     """
 
-    def __init__(self, nCells=None, top=0.0, parameters = None, depth = None, thickness = None):
+    def __init__(self, nCells=None, top=None, parameters = None, depth = None, thickness = None, hasHalfspace=True):
         """Instantiate a new Model1D """
-        if (nCells is None): return
-        assert (nCells >= 1), ValueError('nCells must >= 1')
+
+        self.hasHalfspace = hasHalfspace
+
+        if (all((x is None for x in [nCells, top, parameters, depth, thickness]))): return
         assert (not(not thickness is None and not depth is None)), TypeError('Cannot instantiate with both depth and thickness values')
 
         # Number of Cells in the model
-        self.nCells = StatArray(1, '# of Cells', dtype=np.int32) + nCells
+        self.nCells = StatArray(1, '# of Cells', dtype=np.int32)
+        if not nCells is None:
+            assert (nCells >= 1), ValueError('nCells must >= 1')
+            self.nCells[0] = nCells
+
         # Depth to the top of the model
+        if top is None: 
+            top = 0.0
         self.top = StatArray(1) + top
-        # StatArray of depths
-        self.depth = StatArray(nCells, 'Depth', 'm')
-        # StatArray of thicknesses
-        self.thk = StatArray(nCells, 'Thickness', 'm')
+        
 
-        if (not depth is None):
-            if (nCells > 1):
-                assert depth.size == nCells-1, ValueError('Size of depth must equal {}'.format(nCells-1))
-                assert np.all(np.diff(depth) > 0.0), ValueError('Depths must monotonically increase')
-            self.depth[:-1] = depth
-            self.depth[-1] = np.inf
-            self.getThickness()
-
-        if (not thickness is None):
-            if (nCells > 1):
-                assert thickness.size == nCells-1, ValueError('Size of thickness must equal {}'.format(nCells-1))
-                assert np.all(thickness > 0.0), ValueError('Thicknesses must be positive')
-            self.thk[:-1] = thickness
-            self.thk[-1] = np.inf
-            self.getDepths()
-
-        # StatArray of the physical parameters
-        self.par = StatArray(nCells)
-        if (not parameters is None):
-            assert parameters.size == nCells, ValueError('Size of parameters must equal nCells')
-            self.par = StatArray(parameters)
+        if hasHalfspace:
+            self._init_withHalfspace(nCells, top, parameters, depth, thickness)
+        else:
+            self._init_withoutHalfspace(nCells, top, parameters, depth, thickness)
 
         # StatArray of the change in physical parameters
-        self.dpar = StatArray(nCells - 1, 'Derivative', r"$\frac{"+self.par.getUnits()+"}{m}$")
+        self.dpar = StatArray(self.nCells[0] - 1, 'Derivative', r"$\frac{"+self.par.getUnits()+"}{m}$")
 
         # StatArray of magnetic properties.
-        self.chie = StatArray(nCells, "Magnetic Susceptibility", r"$\kappa$")
-        self.chim = StatArray(nCells, "Magnetic Permeability", "$\frac{H}{m}$")
+        self.chie = StatArray(self.nCells[0], "Magnetic Susceptibility", r"$\kappa$")
+        self.chim = StatArray(self.nCells[0], "Magnetic Permeability", "$\frac{H}{m}$")
 
         # Initialize Minimum cell thickness
         self.minThickness = None
@@ -115,6 +103,77 @@ class Model1D(Model):
         self.iLayer = np.int32(-1)
 
         self.Hitmap = None
+
+
+    def _init_withHalfspace(self, nCells=None, top=None, parameters = None, depth = None, thickness = None):
+
+
+        if (not depth is None and nCells is None):
+            self.nCells[0] = depth.size + 1
+        if (not thickness is None and nCells is None):
+            self.nCells[0] = thickness.size + 1
+
+        self.depth = StatArray(self.nCells[0], 'Depth', 'm')
+        self.thk = StatArray(self.nCells[0], 'Thickness', 'm')
+        self.par = StatArray(self.nCells[0])
+
+        if (not depth is None):
+            if (self.nCells > 1):
+                assert depth.size == self.nCells-1, ValueError('Size of depth must equal {}'.format(self.nCells[0]-1))
+                assert np.all(np.diff(depth) > 0.0), ValueError('Depths must monotonically increase')
+            self.depth[:-1] = depth
+            self.depth[-1] = np.inf
+            self.thicknessFromDepth()
+            
+
+        if (not thickness is None):
+            if nCells is None:
+                self.nCells[0] = thickness.size + 1
+            if (self.nCells > 1):
+                assert thickness.size == self.nCells-1, ValueError('Size of thickness must equal {}'.format(self.nCells[0]-1))
+                assert np.all(thickness > 0.0), ValueError('Thicknesses must be positive')
+            self.thk[:-1] = thickness
+            self.thk[-1] = np.inf
+            self.depthFromThickness()
+
+        # StatArray of the physical parameters
+        if (not parameters is None):
+            assert parameters.size == self.nCells, ValueError('Size of parameters must equal {}'.format(self.nCells[0]))
+            self.par = StatArray(parameters)
+
+
+    def _init_withoutHalfspace(self, nCells = None, top = None, parameters = None, depth = None, thickness = None):
+
+
+        if (not depth is None and nCells is None):
+            self.nCells[0] = depth.size
+        if (not thickness is None and nCells is None):
+            self.nCells[0] = thickness.size
+
+        self.depth = StatArray(self.nCells[0], 'Depth', 'm')
+        self.thk = StatArray(self.nCells[0], 'Thickness', 'm')
+        self.par = StatArray(self.nCells[0])
+
+        if (not depth is None):
+            if (self.nCells > 1):
+                assert depth.size == self.nCells, ValueError('Size of depth must equal {}'.format(self.nCells[0]))
+                assert np.all(np.diff(depth) > 0.0), ValueError('Depths must monotonically increase')
+            self.depth[:] = depth
+            self.thicknessFromDepth()
+
+        if (not thickness is None):
+            if nCells is None:
+                self.nCells[0] = thickness.size
+            if (self.nCells > 1):
+                assert thickness.size == self.nCells, ValueError('Size of thickness must equal {}'.format(self.nCells[0]))
+                assert np.all(thickness > 0.0), ValueError('Thicknesses must be positive')
+            self.thk[:] = thickness
+            self.depthFromThickness()
+
+        # StatArray of the physical parameters
+        if (not parameters is None):
+            assert parameters.size == self.nCells, ValueError('Size of parameters must equal {}'.format(self.nCells[0]))
+            self.par = StatArray(parameters)
 
 
     def deepcopy(self):
@@ -142,6 +201,7 @@ class Model1D(Model):
         other.pWheel = self.pWheel
         other.iLayer = self.iLayer
         other.Hitmap = self.Hitmap
+        other.hasHalfspace = self.hasHalfspace
         return other
 
 
@@ -177,21 +237,25 @@ class Model1D(Model):
         return tmp
 
 
-    def getDepths(self):
+    def depthFromThickness(self):
         """Given the thicknesses of each layer, create the depths to each interface. The last depth is inf for the halfspace."""
         self.depth[0] = self.thk[0]
-        for i in range(1, self.nCells[0] - 1):
+        for i in range(1, self.nCells[0]):
             self.depth[i] = self.depth[i - 1] + self.thk[i]
-        self.depth[-1] = np.infty
+
+        if self.hasHalfspace:
+            self.depth[-1] = np.infty
 
 
-    def getThickness(self):
+    def thicknessFromDepth(self):
         """Given the depths to each interface, compute the layer thicknesses. The last thickness is nan for the halfspace."""
         self.thk = self.thk.resize(self.nCells[0])
         self.thk[0] = self.depth[0]
-        for i in range(1, self.nCells[0] - 1):
+        for i in range(1, self.nCells[0]):
             self.thk[i] = self.depth[i] - self.depth[i - 1]
-        self.thk[-1] = np.nan
+
+        if self.hasHalfspace:
+            self.thk[-1] = np.inf
 
 
     def priorProbability(self, sPar, sGradient, limits=None, components=False):
@@ -210,7 +274,6 @@ class Model1D(Model):
         Uninformative prior using a uniform distribution.
 
         .. math::
-            :nowrap:
             :label: layers
 
             p(k | I) = 
@@ -253,8 +316,8 @@ class Model1D(Model):
         .. math::
             :label: dpdz
 
-            \\nabla_{z}^{i}\sigma = \\frac{\sigma_{i+1} - \\\sigma_{i}}{h_{i} - h_{min}}
-        where :math:`\sigma_{i+1}` and :math:`\sigma_{i}` are the log-parameters on either side of an interface, :math:`h_{i}` is the log-thicknesses of the ith layer, and :math:`h_{min}` is the minimum log thickness defined by
+            \\nabla_{z}^{i}\sigma = \\frac{\sigma_{i+1} - \\sigma_{i}}{h_{i} - h_{min}}
+        where :math:`\sigma_{i+1}` and :math:`\sigma_{i}` are the log-parameters on either side of an interface, :math:`h_{i}` is the log-thickness of the ith layer, and :math:`h_{min}` is the minimum log thickness defined by
 
         .. math::
             :label: minThickness
@@ -350,7 +413,7 @@ class Model1D(Model):
         other.depth = self.depth.insert(i, z)
         if (par is None):
             if (i >= self.par.size):
-                i = i - 2
+                i -= 2
                 other.par = other.par.insert(i, self.par[i])
                 other.depth[-2] = other.depth[-1]
             else:
@@ -358,7 +421,7 @@ class Model1D(Model):
         else:
             other.par = other.par.insert(i, par)
         # Get the new thicknesses
-        other.getThickness()
+        other.thicknessFromDepth()
         # Reset ChiE and ChiM
         other.chie = StatArray(other.nCells[0], "Magnetic Susceptibility", r"$\kappa$")
         other.chim = StatArray(other.nCells[0], "Magnetic Permeability", r"$\frac{H}{m}$")
@@ -385,8 +448,10 @@ class Model1D(Model):
 
         if (self.nCells == 0):
             return self
-        if (i >= self.nCells[0] - 1):
-            return self
+
+        assert i < self.nCells[0] - 1, ValueError("i must be less than the number of cells - 1{}".format(self.nCells[0]-1))
+        # if (i >= self.nCells[0] - 1):
+        #     return self
         # Deepcopy the 1D Model to ensure priors and proposals are passed
         other = self.deepcopy()
         # Decrease the number of cells
@@ -394,7 +459,7 @@ class Model1D(Model):
         # Remove the interface depth
         other.depth = other.depth.delete(i)
         # Get the new thicknesses
-        other.getThickness()
+        other.thicknessFromDepth()
         # Take the average of the deleted layer and the one below it
         other.par = other.par.delete(i)
         other.par[i] = 0.5 * (self.par[i] + self.par[i + 1])
@@ -424,8 +489,8 @@ class Model1D(Model):
         .. math::
             :label: dpdz
 
-            \\nabla_{z}^{i}\sigma = \\frac{\sigma_{i+1} - \\\sigma_{i}}{h_{i} - h_{min}}
-        where :math:`\sigma_{i+1}` and :math:`\sigma_{i}` are the log-parameters on either side of an interface, :math:`h_{i}` is the log-thicknesses of the ith layer, and :math:`h_{min}` is the minimum log thickness defined by
+            \\nabla_{z}^{i}\sigma = \\frac{\sigma_{i+1} - \\sigma_{i}}{h_{i} - h_{min}}
+        where :math:`\sigma_{i+1}` and :math:`\sigma_{i}` are the log-parameters on either side of an interface, :math:`h_{i}` is the log-thickness of the ith layer, and :math:`h_{min}` is the minimum log thickness defined by
 
         .. math::
             :label: minThickness
@@ -613,7 +678,7 @@ class Model1D(Model):
                 if (not tryAgain):
                     other.iLayer = i
                     other.depth[i] += dz  # Perturb the depth in the model
-                    other.getThickness()
+                    other.thicknessFromDepth()
                     return other, 2, [i, dz]
 
 
@@ -630,14 +695,12 @@ class Model1D(Model):
         print(msg)
 
 
-    def plot(self, invX=False, **kwargs):
+    def plot(self, **kwargs):
         """Plots a 1D model parameters as a line against depth
 
         Parameters
         ----------
-        flipY : bool, optional
-            Flip the y axis
-        invX : bool, optional
+        reciprocateX : bool, optional
             Take the reciprocal of the x axis
         xscale : str, optional
             Scale the x axis? e.g. xscale = 'linear' or 'log'
@@ -654,43 +717,30 @@ class Model1D(Model):
         # Must create a new parameter, so that the last layer is plotted
         ax = plt.gca()
         cP.pretty(ax)
-        par = np.zeros(self.nCells[0] + 1)
-        par[:self.nCells[0]] = self.par[:]
 
-        xscale = kwargs.pop('xscale', 'log')
-        yscale = kwargs.pop('yscale', 'linear')
-        flipX = kwargs.pop('flipX',False)
-        flipY = kwargs.pop('flipY',False)
-        noLabels = kwargs.pop('noLabels', True)
-
+        reciprocateX = kwargs.pop("reciprocateX", False)
+        kwargs['flipY'] = kwargs.pop('flipY', True)
+        kwargs['xscale'] = kwargs.pop('xscale', 'log')
+        
         # Repeat the last entry
-        par[-1] = self.par[-1]
-        if (invX):
+        par = self.par.append(self.par[-1])
+        if (reciprocateX):
             par = 1.0 / par
-        z = np.zeros(self.nCells[0] + 1)
-        z[1:] = self.depth[:]
-        if (self.maxDepth is None):
-            z[-1] = 1.1 * self.depth[-2]
-        else:
-            z[-1] = 1.1 * np.exp(self.maxDepth)
+            
+        z = self.depth.prepend(0.0)
+        if self.hasHalfspace:
+            if (self.maxDepth is None):
+                z[-1] = 1.1 * self.depth[-2]
+            else:
+                z[-1] = 1.1 * np.exp(self.maxDepth)
 
-        if (not 'color' in kwargs):
-            kwargs['color']=cP.wellSeparated[3]
+        cP.step(x=par, y=z, **kwargs)
 
-        plt.step(x=par, y=z, **kwargs)
-
-        if (flipX):
-            ax.set_xlim(ax.get_xlim()[::-1])
-
-        if (not flipY):
-            ax.set_ylim(ax.get_ylim()[::-1])
-
-        if (not noLabels):
-            cP.xlabel(self.par.getNameUnits())
-            cP.ylabel(self.depth.getNameUnits())
-
-        plt.xscale(xscale)
-        plt.yscale(yscale)
+        if self.hasHalfspace:
+            h = 0.99 * z[-1]
+            if (self.nCells == 1):
+                h = 0.99
+            plt.text(par[-1], h, s=r'$\downarrow \infty$', fontsize=12)
 
 
     def pcolor(self, *args, **kwargs):
@@ -698,8 +748,11 @@ class Model1D(Model):
 
         Can take any other matplotlib arguments and keyword arguments e.g. cmap etc.
 
-        Parameters
-        ----------
+        Other Parameters
+        ----------------
+        alpha : scalar or array_like, optional
+            If alpha is scalar, behaves like standard matplotlib alpha and opacity is applied to entire plot
+            If array_like, each pixel is given an individual alpha value.
         log : 'e' or float, optional
             Take the log of the colour to a base. 'e' if log = 'e', and a number e.g. log = 10.
             Values in c that are <= 0 are masked.
@@ -707,14 +760,20 @@ class Model1D(Model):
             Equalize the histogram of the colourmap so that all colours have an equal amount.
         nbins : int, optional
             Number of bins to use for histogram equalization.
-        xscale : str
+        xscale : str, optional
             Scale the x axis? e.g. xscale = 'linear' or 'log'
-        yscale : str
+        yscale : str, optional
             Scale the y axis? e.g. yscale = 'linear' or 'log'.
+        flipX : bool, optional
+            Flip the X axis
         flipY : bool, optional
             Flip the Y axis
-        noColorBar : bool, optional
-            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
+        grid : bool, optional
+            Plot the grid
+        noColorbar : bool, optional
+            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.   
+        trim : bool, optional
+            Set the x and y limits to the first and last non zero values along each axis.
 
         Returns
         -------
@@ -726,21 +785,26 @@ class Model1D(Model):
         matplotlib.pyplot.pcolormesh : For additional keyword arguments you may use.
 
         """
-        d = StatArray(self.depth.size+1, self.depth.getName(), self.depth.getUnits())
-        
-        if (self.nCells > 1):
-            d[1:] = self.depth[:]
-            d[-1] = d[-2] * 1.25
-        else:
-            d[0] = 1.0
+
+        kwargs['flipY'] = kwargs.pop('flipY', True)
+
+        d = self.depth.prepend(0.0)
+        if self.hasHalfspace:
+            if (self.maxDepth is None):
+                if (self.nCells > 1):
+                    d[-1] = 1.1 * self.depth[-2]
+                else:
+                    d[0] = 1.0               
+            else:
+                d[-1] = 1.1 * np.exp(self.maxDepth)
 
         ax = self.par.pcolor(*args, y = d + self.top, **kwargs)
         
-        h = 0.99*d[-1]
-        if (self.nCells == 1):
-            h = 0.99
-
-        plt.text(0, h, s=r'$\downarrow \infty$', fontsize=12)
+        if self.hasHalfspace:
+            h = 0.99*d[-1]
+            if (self.nCells == 1):
+                h = 0.99
+            plt.text(0, h, s=r'$\downarrow \infty$', fontsize=12)
 
         return ax
 
@@ -833,7 +897,6 @@ class Model1D(Model):
         Hist.sum = np.sum(Hist.arr)
 
 
-
     def addToHitMap(self, Hitmap):
         """ Imposes a model's parameters with depth onto a 2D Hitmap. 
         
@@ -846,8 +909,13 @@ class Model1D(Model):
         
         """
         iM = self.getParMeshXIndex(Hitmap)
-        iz = np.arange(Hitmap.y.size)
-        Hitmap.arr[iz, iM] += 1
+        if self.hasHalfspace:
+            iz = np.arange(Hitmap.y.nCells)
+        else:
+            i = Hitmap.y.cellIndex(self.depth[-1], clip=True)
+            iz = np.arange(i)
+        
+        Hitmap._counts[iz, iM] += 1
 
 
     # def setReferenceHitmap(self, Hitmap):
@@ -874,8 +942,8 @@ class Model1D(Model):
 
         """
         mint = self.interpPar2Mesh(self.par, mesh)
-        iM = mesh.x.searchsorted(mint)
-        return np.minimum(iM, mesh.x.size - 1)
+        iM = mesh.x.cellCentres.searchsorted(mint)
+        return np.minimum(iM, mesh.x.nCells - 1)
 
 
     def interpPar2Mesh(self, par, mesh, matchTop=False, bound=False):
@@ -903,21 +971,42 @@ class Model1D(Model):
         assert (np.size(par) == self.nCells[0]), 'par must have length nCells'
         assert (isinstance(mesh, RectilinearMesh2D)), TypeError('mesh must be a RectilinearMesh2D')
 
-        bounds = [0.0, mesh.yRange()]
-        depth = self.depth[:-1]
+        if self.hasHalfspace:
+            bounds = [0.0, mesh.y.range]
+        else:
+            bounds = [0.0, np.minimum(self.depth[-1], mesh.y.range)]
+
+        if self.hasHalfspace:
+            depth = self.depth[:-1]
+        else:
+            depth = self.depth
+
         # Add in the top of the model
         if (matchTop):
             bounds += self.top
             depth += self.top
 
-        if (self.nCells[0] == 1):
-            mint = np.interp(mesh.y, bounds, np.kron(par[:], [1, 1]))
+        if self.hasHalfspace:
+            y = mesh.y.cellCentres
         else:
-            a = np.kron(np.asarray(depth), [1, 1.001])
-            mint = np.interp(mesh.y, np.insert(a, [0, np.size(a)], bounds), np.kron(par[:], [1, 1]))
+            i = mesh.y.cellIndex(depth[-1], clip=True)
+            y = mesh.y.cellCentres[:i]
+
+        if (self.nCells[0] == 1):
+            mint = np.interp(y, bounds, np.kron(par[:], [1, 1]))
+        else:
+            xp = np.kron(np.asarray(depth), [1, 1.001])
+            if self.hasHalfspace:
+                xp = np.insert(xp, [0, np.size(xp)], bounds)
+
+            fp = np.kron(par[:], [1, 1])
+
+            mint = np.interp(y, xp, fp)
+
         if bound:
-            i = np.where((mesh.y < bounds[0]) & (mesh.y > bounds[-1]))
+            i = np.where((y < bounds[0]) & (y > bounds[-1]))
             mint[i] = np.nan
+
         return mint
 
 
@@ -1050,10 +1139,12 @@ class Model1D(Model):
 
         Creates a new group in a HDF file under h5obj. 
         A nested heirarchy will be created. 
-        This method can be used in an MPI parallel environment, if so however, a) the hdf file must have been opened with the mpio driver, 
-        and b) createHdf must be called collectively, i.e., called by every core in the MPI communicator that was used to open the file. 
-        In order to create large amounts of empty space before writing to it in parallel, the nRepeats parameter will extend the memory 
-        in the first dimension.
+        This method can be used in an MPI parallel environment, if so however, 
+        a) the hdf file must have been opened with the mpio driver, and 
+        b) createHdf must be called collectively, 
+        i.e., called by every core in the MPI communicator that was used to open the file. 
+        In order to create large amounts of empty space before writing to it in parallel, 
+        the nRepeats parameter will extend the memory in the first dimension.
 
         Parameters
         ----------
@@ -1071,9 +1162,9 @@ class Model1D(Model):
         Notes
         -----
         This method can be used in serial and MPI. As an example in MPI. 
-        Given 10 MPI ranks, each with a 10 length array, it is faster to create a 10x10 empty array, and have each rank write its row.  
-        Rather than creating 10 separate length 10 arrays because the overhead when creating the file metadata can become very 
-        cumbersome if done too many times.
+        Given 10 MPI ranks, each with a 10 length array, it is faster to create a 10x10 empty array, 
+        and have each rank write its row. Rather than creating 10 separate length 10 arrays because 
+        the overhead when creating the file metadata can become very cumbersome if done too many times.
 
         Example
         -------
@@ -1103,6 +1194,7 @@ class Model1D(Model):
         >>> f.close()
 
         """
+
         # create a new group inside h5obj
         grp = parent.create_group(myName)
         grp.attrs["repr"] = self.hdfName()
@@ -1135,9 +1227,10 @@ class Model1D(Model):
             grp.create_dataset('hmin', data=self.minThickness)
         except:
             pass
+        grp.create_dataset('hasHalfspace', data=self.hasHalfspace)
 
 
-    def writeHdf(self, parent, myName, index=None):
+    def writeHdf(self, h5obj, myName, index=None):
         """Create the Metadata for a Model1D in a HDF file
 
         Creates a new group in a HDF file under h5obj. 
@@ -1192,7 +1285,7 @@ class Model1D(Model):
 
         """
 
-        grp = parent.get(myName)
+        grp = h5obj.get(myName)
 
         self.nCells.writeHdf(grp, 'nCells',  index=index)
         self.top.writeHdf(grp, 'top',  index=index)
@@ -1267,6 +1360,7 @@ class Model1D(Model):
         self.chie.toHdf(grp, 'chie')
         self.chim.toHdf(grp, 'chim')
         grp.create_dataset('iLayer', data=self.iLayer)
+        grp.create_dataset('hasHalfspace', data=self.hasHalfspace)
 
 
     def fromHdf(self, grp, index=None):
@@ -1302,6 +1396,10 @@ class Model1D(Model):
         item = grp.get('pWheel')
         if (not item is None):
             tmp.pWheel = np.array(item)
+
+        item = grp.get('hasHalfspace')
+        if (not item is None):
+            tmp.hasHalfspace = np.array(item)
 
         item = grp.get('nCells')
         obj = eval(safeEval(item.attrs.get('repr')))

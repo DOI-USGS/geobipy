@@ -179,9 +179,46 @@ class CircularLoop(EmLoop):
 
         return CircularLoop(o, m, x, y, z, pitch, roll, yaw, radius)
 
+
+    def Isend(self, dest, world):
+        req = world.isend(self.orient, dest=dest)
+        req.wait()
+        myMPI.Isend(self.moment, dest=dest, world=world)
+        tmp = np.empty(7, np.float64)
+        tmp[:] = np.asarray([self.x, self.y, self.z, self.pitch, self.roll, self.yaw, self.radius])
+        req = world.Isend(tmp, dest=dest)
+
+
+    def Irecv(self, source, world):
+        req = world.irecv(source=source)
+        o = req.wait()
+        m = myMPI.Irecv(source, world)
+        tmp = np.empty(7, np.float64)
+        req = world.Irecv(tmp, source=source)
+        req.Wait()
+        return CircularLoop(o, m, tmp[0], tmp[1], tmp[2], tmp[3], tmp[4], tmp[5], tmp[6])
+
+
     def __str__(self):
         """ Define print(self) """
         return 'CircularLoop("{0}",{1},{2},{3},{4},{5},{6},{7},{8})'.format(
             self.orient, self.moment, 
             self.x,      self.y,    self.z, 
             self.pitch,  self.roll, self.yaw, self.radius)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

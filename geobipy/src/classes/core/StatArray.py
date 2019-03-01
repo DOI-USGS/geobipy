@@ -111,10 +111,10 @@ class StatArray(np.ndarray, myObject):
 
         if (not name is None):
             assert (isinstance(name,str)), TypeError('name must be a string')
-            name=str_to_raw(name) # Do some possible LateX checking. some Backslash operatores in LateX do not pass correctly as strings
+            name = str_to_raw(name) # Do some possible LateX checking. some Backslash operatores in LateX do not pass correctly as strings
         if (not units is None):
             assert (isinstance(units,str)), TypeError('units must be a string')
-            units=str_to_raw(units) # Do some possible LateX checking. some Backslash operatores in LateX do not pass correctly as strings
+            units = str_to_raw(units) # Do some possible LateX checking. some Backslash operatores in LateX do not pass correctly as strings
 
         # Copies a StatArray but can reassign the name and units
         if isinstance(shape, StatArray):
@@ -126,11 +126,19 @@ class StatArray(np.ndarray, myObject):
             if not units is None:
                 tmp.units = units
 
+            if (shape.hasPrior()):
+                tmp._prior = shape.prior.deepcopy()
+            if (shape.hasProposal()):
+                tmp._proposal = shape.proposal.deepcopy()            
+
             return tmp
         # Can pass in a numpy function call like arange(10) as the first argument
         elif isinstance(shape, np.ndarray):
             self = shape.view(StatArray)
 
+        elif isinstance(shape, float):
+            self = np.ndarray.__new__(subtype, 1, **kwargs)
+            self[:] = shape
         # Convert the entry to a numpy array
         else:
             self = np.ndarray.__new__(subtype, np.asarray(shape), **kwargs)
@@ -160,7 +168,11 @@ class StatArray(np.ndarray, myObject):
         return np.ndarray.__array_wrap__(self, out_arr, context)
 
 
-    def append(self, values):
+    def hasLabels(self):
+        return not self.getNameUnits() == ""
+
+
+    def append(self, values, axis=0):
         """Append to a StatArray
 
         Appends values the end of a StatArray. Be careful with repeated calls to this method as it can be slow due to reallocating memory.
@@ -176,11 +188,8 @@ class StatArray(np.ndarray, myObject):
             Appended StatArray
 
         """
-        assert np.ndim(values) <= 1, ValueError("Dimensions of values must <= 1")
-        out = self.resize(self.size + np.size(values))
-        out[:self.size] = self[:]
-        out[self.size:] = values
-        return out
+        i = self.shape[axis]
+        return self.insert(i=i, values=values, axis=axis)
 
 
     def copy( self, order='F'):       
@@ -240,13 +249,21 @@ class StatArray(np.ndarray, myObject):
         return out
 
 
-    def edges(self):
+    def edges(self, min=None, max=None):
         """Get the midpoint values between elements in the StatArray
 
-        Returns an size(self) + 1 length StatArray of the midpoints between each element. The first and last element are projected edges based on the difference between first two and last two elements in self.
-        edges[0] = self[0] - (self[1]-self[0])
-        edges[-1] = self[-1] + (self[-1] - self[-2])
+        Returns an size(self) + 1 length StatArray of the midpoints between each element. 
+        The first and last element are projected edges based on the difference between first two and last two elements in self.
+        edges[0] = self[0] - 0.5 * (self[1]-self[0])
+        edges[-1] = self[-1] + 0.5 * (self[-1] - self[-2])
+        If min and max are given, the edges are fixed and not calculated.
 
+        Parameters
+        ----------
+        min : float, optional
+            Fix the leftmost edge to min.
+        max : float, optional
+            Fix the rightmost edge to max.
         Returns
         -------
         out : StatArray
@@ -254,12 +271,34 @@ class StatArray(np.ndarray, myObject):
 
         """
         assert (self.size > 1), ValueError("Size of StatArray must be > 1")
-        d = 0.5*np.diff(self)
-        edges = self.resize(self.size+1)
-        edges[0] = self[0] - d[0]
+        d = 0.5 * np.diff(self)
+        edges = self.resize(self.size + 1)
+        # Middle values
         edges[1:-1] = self[:-1] + d
-        edges[-1] = self[-1] + d[-1]
-        return edges
+        # Edge values
+        edges[0] = self[0] - d[0] if min is None else min
+        edges[-1] = self[-1] + d[-1] if max is None else max
+
+        return StatArray(edges, self.name, self.units)
+
+
+    def firstNonZero(self, axis=0, invalid_val=-1):
+        """Find the indices of the first non zero values along the axis.
+
+        Parameters
+        ----------
+        axis : int
+            Axis along which to find first non zeros.
+        
+        Returns
+        -------
+        out : array_like
+            Indices of the first non zero values.
+
+        """
+
+        msk = self != 0.0
+        return np.where(msk.any(axis=axis), msk.argmax(axis=axis), invalid_val)
 
 
     def getNameUnits(self):
@@ -275,9 +314,7 @@ class StatArray(np.ndarray, myObject):
         """
         out = self.getName()
         u = self.getUnits()
-        if (not u == ""):
-            out += "(" + u + ")"
-        return out
+        return out if u == "" else "{} ({})".format(out, u)
 
 
     def getName(self):
@@ -310,7 +347,7 @@ class StatArray(np.ndarray, myObject):
         return "" if self.units is None else self.units
 
 
-    def insert(self, i, values, axis=None):
+    def insert(self, i, values, axis=0):
         """ Insert values
 
         Parameters
@@ -330,9 +367,27 @@ class StatArray(np.ndarray, myObject):
         """
 
         tmp = np.insert(self, i, values, axis)
-        out = self.resize(tmp.shape)
+        out = self.resize(tmp.shape) # Keeps the prior and proposal if set.
         out[:] = tmp[:]
         return out
+
+
+    def internalEdges(self):
+        """Get the midpoint values between elements in the StatArray
+
+        Returns an size(self) + 1 length StatArray of the midpoints between each element
+
+        Returns
+        -------
+        out : StatArray
+            Edges of the StatArray
+
+        """
+        assert (self.size > 1), ValueError("Size of StatArray must be > 1")
+        d = 0.5*np.diff(self)
+        edges = self.resize(self.size - 1)
+        edges[:] = self[:-1] + d
+        return edges
 
 
     def hasPrior(self):
@@ -366,16 +421,36 @@ class StatArray(np.ndarray, myObject):
         except:
             return False
 
+        
+    def lastNonZero(self, axis=0, invalid_val=-1):
+        """Find the indices of the first non zero values along the axis.
 
-    def prepend(self, values):
+        Parameters
+        ----------
+        axis : int
+            Axis along which to find first non zeros.
+        
+        Returns
+        -------
+        out : array_like
+            Indices of the first non zero values.
+
+        """
+
+        msk = self != 0.0
+        val = self.shape[axis] - np.flip(msk, axis=axis).argmax(axis=axis)
+        return np.where(msk.any(axis=axis), val, invalid_val)
+
+
+    def prepend(self, values, axis=0):
         """Prepend to a StatArray
 
-        Incrementally adds to a StatArray, Do not use this too often as it is quite slow
+        Prepends numbers to a StatArray, Do not use this too often as it is quite slow
 
         Parameters
         ----------
         values : scalar or array_like
-            A number to append.
+            A number to prepend.
 
         Returns
         -------
@@ -385,40 +460,41 @@ class StatArray(np.ndarray, myObject):
         """
 
         try:
-            i = np.arange(values.size)
+            i = np.zeros(values.size)
         except:
             i = 0
-        return self.insert(i, values)
+        return self.insert(i, values, axis=axis)
 
 
-    def resize(self, N):
+    def resize(self, new_shape):
         """Resize a StatArray
 
         Resize a StatArray but copy over any attached attributes
 
         Parameters
         ----------
-        N : int or sequence of ints
-            The new size or shape
+        new_shape : int or tuple of ints
+            Shape of the resized array
 
         Returns
         -------
         out : StatArray
             Resized array.
 
+        See Also
+        --------
+        numpy.resize : For more information.
+
         """
         
-        if (np.size(self) == N):
+        if (np.all(np.shape(self) == new_shape)):
             return self.deepcopy()
-        out = StatArray(np.resize(self, N), self.name, self.units)
-        try:
-            out._prior = self.prior
-        except:
-            pass
-        try:
-            out._proposal = self.proposal
-        except:
-            pass
+        out = StatArray(np.resize(self, new_shape), self.name, self.units)
+        if self.hasPrior():
+            out._prior = self.prior.deepcopy()
+        if self.hasProposal():
+            out._proposal = self.proposal.deepcopy()
+
         return out
 
 
@@ -440,7 +516,7 @@ class StatArray(np.ndarray, myObject):
         msg = "Name:  " + self.getName() + '\n'
         msg += "    Units: " + self.getUnits() + '\n'
         msg += "    Shape: " + str(self.shape) + '\n'
-        msg += "    " + str(self[:]) + '\n'
+        msg += "   Values: " + str(self[:]) + '\n'
         if self.hasPrior():
             msg += "Prior: \n"
             msg += self.prior.summary(True)
@@ -464,24 +540,23 @@ class StatArray(np.ndarray, myObject):
         print(self[:])
         np.set_printoptions(threshold=5)
 
+
     def isRegular(self):
-        """Checks that the values increase regularly
+        """Checks that the values change regularly
 
         Returns
         -------
         out : bool
-            Is regularly increasing.
+            Is regularly changing.
 
         """
         tmp = np.diff(self)
-        if (tmp[0] <= 0):
-            return False  # The values decrease or are constant
-        return bool(all(np.abs(tmp[0] - this) < 1e-15 for this in tmp))
+        return np.allclose(tmp, tmp[0])
 
 
     ### Statistical Routines
 
-    def hist(self, *args, **kwargs):
+    def hist(self, bins=10, range=None, normed=None, weights=None, density=None, **kwargs):
         """Plot a histogram of the StatArray
 
         Plots a histogram, estimates the mean and standard deviation and overlays the PDF of a normal distribution with those values, if density=1.
@@ -502,7 +577,9 @@ class StatArray(np.ndarray, myObject):
         >>> plt.show()
 
         """
-        cP.hist(self, *args, **kwargs)
+        cnts, bins = np.histogram(self, bins=bins, range=range, normed=normed, weights=weights, density=density)
+        bins = StatArray(bins, name=self.name, units=self.units)
+        cP.hist(cnts, bins, **kwargs)
 
 
     def pad(self, N):
@@ -590,10 +667,7 @@ class StatArray(np.ndarray, myObject):
         if (len(args) > 0):
             return self.prior.probability(*args)
 
-        if i is None:
-            return self.prior.probability(self[:])
-
-        return self.prior.probability(self[i])
+        return self.prior.probability(self[:]) if i is None else self.prior.probability(self[i])
 
     @property
     def prior(self):
@@ -601,6 +675,16 @@ class StatArray(np.ndarray, myObject):
 
         try:
             return self._prior
+        except:
+            return None
+
+
+    @property
+    def proposal(self):
+        """Returns the prior if available. """
+
+        try:
+            return self._proposal
         except:
             return None
 
@@ -626,15 +710,6 @@ class StatArray(np.ndarray, myObject):
         """
         self._prior = Distribution(distributionType, *args, **kwargs)
 
-
-    @property
-    def proposal(self):
-        """Returns the prior if available. """
-
-        try:
-            return self._proposal
-        except:
-            return None
 
     def setProposal(self, distributionType, *args, **kwargs):
         """Set a proposal distribution
@@ -682,6 +757,11 @@ class StatArray(np.ndarray, myObject):
         matplotlib.pyplot.bar : For additional keyword arguments you may use.
 
         """
+        if (i is None):
+            i = np.size(self)
+        if (x is None):
+            x = StatArray(np.arange(i), name="Array index")
+
         return cP.bar(self, x, i, **kwargs)
 
 
@@ -693,10 +773,16 @@ class StatArray(np.ndarray, myObject):
 
         Parameters
         ----------
-        x : 1D array_like or StatArray, optional. Not used if self is 1 dimensional.
+        x : 1D array_like or StatArray, optional
             Horizontal coordinates of the values edges.
         y : 1D array_like or StatArray, optional
             Vertical coordinates of the values edges.
+
+        Other Parameters
+        ----------------
+        alpha : scalar or arrya_like, optional
+            If alpha is scalar, behaves like standard matplotlib alpha and opacity is applied to entire plot
+            If array_like, each pixel is given an individual alpha value.
         log : 'e' or float, optional
             Take the log of the colour to a base. 'e' if log = 'e', and a number e.g. log = 10.
             Values in c that are <= 0 are masked.
@@ -704,9 +790,9 @@ class StatArray(np.ndarray, myObject):
             Equalize the histogram of the colourmap so that all colours have an equal amount.
         nbins : int, optional
             Number of bins to use for histogram equalization.
-        xscale : str
+        xscale : str, optional
             Scale the x axis? e.g. xscale = 'linear' or 'log'
-        yscale : str
+        yscale : str, optional
             Scale the y axis? e.g. yscale = 'linear' or 'log'.
         flipX : bool, optional
             Flip the X axis
@@ -714,8 +800,10 @@ class StatArray(np.ndarray, myObject):
             Flip the Y axis
         grid : bool, optional
             Plot the grid
-        noColorBar : bool, optional
-            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
+        noColorbar : bool, optional
+            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.   
+        trim : bool, optional
+            Set the x and y limits to the first and last non zero values along each axis. 
 
         Returns
         -------
@@ -897,6 +985,7 @@ class StatArray(np.ndarray, myObject):
         ma[:] = tmp[:]
         ma[ma <= 0.0] = 0.0
         cP.stackplot2D(x[j], ma[i], labels=[], colors=colors, **kwargs)
+
 
     ### HDF Routines
 
@@ -1083,8 +1172,7 @@ class StatArray(np.ndarray, myObject):
         >>> f.close()
 
         """
-        
-        writeNumpy(self,h5obj,myName+'/data',index=index)
+        writeNumpy(self, h5obj, myName+'/data', index=index)
 #        try:
 #            self.prior.writeHdf(h5obj,myName+'/prior',create=False)
 #        except:
@@ -1254,8 +1342,7 @@ class StatArray(np.ndarray, myObject):
         name = world.bcast(self.name, root=root)
         units = world.bcast(self.units, root=root)
         tmp = myMPI.Bcast(self, world, root=root)
-        this = StatArray(tmp, name, units, dtype=tmp.dtype)
-        return this
+        return StatArray(tmp, name, units, dtype=tmp.dtype)
 
 
     def Scatterv(self, starts, chunks, world, axis=0, root=0):
@@ -1286,8 +1373,66 @@ class StatArray(np.ndarray, myObject):
         name = world.bcast(self.name)
         units = world.bcast(self.units)
         tmp = myMPI.Scatterv(self, starts, chunks, world, axis, root)
-        this = StatArray(tmp, name, units, dtype=tmp.dtype)
-        return this
+        return StatArray(tmp, name, units, dtype=tmp.dtype)
 
 
-#
+    def Isend(self, dest, world):
+        
+        world.isend(self.name, dest=dest)
+        world.isend(self.units, dest=dest)
+        req = myMPI.Isend(self, dest=dest, world=world)
+        return req
+
+
+    def Irecv(self, source, world):
+        name = world.irecv(source=source).wait()
+        units = world.irecv(source=source).wait()
+        tmp = myMPI.Irecv(source=source, world=world)
+        return StatArray(tmp, name, units)
+
+
+    def IsendToLeft(self, world):
+        """ISend an array to the rank left of world.rank.
+
+        """
+        dest = world.size - 1 if world.rank == 0 else world.rank - 1
+        self.Isend(dest=dest, world=world)
+
+
+    def IsendToRight(self, world):
+        """ISend an array to the rank right of world.rank.
+
+        """
+        dest = 0 if world.rank == world.size - 1 else world.rank + 1
+        self.Isend(dest=dest, world=world)
+
+    
+    def IrecvFromRight(self, world, wrap=True):
+        """IRecv an array from the rank right of world.rank.
+
+        """
+        source = 0 if world.rank == world.size - 1 else world.rank + 1
+        return self.Irecv(source=source, world=world)
+
+
+    def IrecvFromLeft(self, world, wrap=True):
+        """Irecv an array from the rank left of world.rank.
+ 
+        """
+        source = world.size - 1 if world.rank == 0 else world.rank - 1
+        return self.Irecv(source=source, world=world)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

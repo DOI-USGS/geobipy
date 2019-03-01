@@ -17,6 +17,8 @@ def print(aStr='', end='\n'):
         string appended after the last value, default is a newline.
 
     """
+    if not isinstance(aStr, str):
+        aStr = str(aStr)
     sys.stdout.write(aStr + end)
     sys.stdout.flush()
 
@@ -37,6 +39,8 @@ def rankPrint(world, aStr="", end='\n', rank=0):
 
     """
     if (world.rank == rank):
+        if not isinstance(aStr, str):
+            aStr = str(aStr)
         print(aStr, end)
 
 
@@ -65,7 +69,9 @@ def banner(world, aStr=None, end='\n', rank=0):
 def orderedPrint(world, this, title=None):
     """Prints numbers from each rank in order of rank
 
-    This routine will print an item from each rank in order of rank.  This routine is SLOW due to lots of communication, but is useful for illustration purposes, or debugging. Do not use this in production code!  The title is used in a banner
+    This routine will print an item from each rank in order of rank.  
+    This routine is SLOW due to lots of communication, but is useful for illustration purposes, or debugging. 
+    Do not use this in production code!  The title is used in a banner
 
     Parameters
     ----------
@@ -77,26 +83,14 @@ def orderedPrint(world, this, title=None):
         Creates a banner to separate output with a clear indication of what is being written.
 
     """
-    try:
-        this.shape
-        item = this
-    except:
-        try:
-            dtype = this.dtype
-        except:
-            dtype = type(this)
-
-        item = np.zeros(1, dtype=dtype) + this
-
     if (world.rank > 0):
-        world.Send(item, dest=0, tag=14)
+        world.send(this, dest=0, tag=14)
     else:
         banner(world, title)
-        print('0 ' + str(item))
+        print('Rank 0 {}'.format(this))
         for i in range(1, world.size):
-            tmp = np.empty(item.shape, dtype=item.dtype)
-            world.Recv(tmp, source=i, tag=14)
-            print(str(i) + ' ' + str(tmp))
+            tmp = world.recv(source=i, tag=14)
+            print("Rank {} {}".format(i, tmp))
 
 
 def helloWorld(world):
@@ -110,7 +104,7 @@ def helloWorld(world):
     """
     size = world.size
     rank = world.rank
-    print('Hello! From Rank :' + str(rank + 1) + ' of ' + str(size))
+    orderedPrint(world, '/ {}'.format(rank + 1, size), "Hello From!")
 
 
 def getParallelPrng(world, timeFunction):
@@ -162,63 +156,238 @@ def loadBalance_shrinkingArrays(N, nChunks):
     return starts, chunks
 
 
-def bcastType(self, world, root=0):
-    """Gets the type of an object and broadcasts it to every rank in an MPI communicator.
+def _isendDtype(value, dest, world):
+    """Gets the data type of an object and sends it. 
 
-    Adaptively broadcasts the type of an object. Must be called collectively.
+    Must be used within an if statement. 
+    if (world.rank == source): _sendDtype()
+    Must be accompanied by _irecvDtype on the dest rank.
 
     Parameters
     ----------
-    self : object
-        For numpy arrays and numpy scalars, a numpy data type will be broadcast.
-        For arbitrary objects, the attached __class__.__name__ will be broadcast.
+    value : object 
+        For numpy arrays and numpy scalars, a numpy data type will be sent.
+        For arbitrary objects, the attached __class__.__name__ will be sent.
         For lists, the data type will be list
+    dest : int
+        Rank to send to.
     world : mpi4py.MPI.Comm
         MPI parallel communicator.
-    root : int, optional
-        The MPI rank to broadcast from. Default is 0.
 
     Returns
     -------
     out : object
-        The data type broadcast to every rank including the rank broadcast from.
+        The data type.
 
     """
-    if (world.rank == root):
-        try:
-            tmp = self.dtype  # Try to get the dtype attribute
-        except:
-            tmp = self.__class__.__name__  # Otherwise use the type finder
-    else:
-        tmp = None  # Initialize tmp on all workers
+    try:
+        tmp = str(value.dtype)  # Try to get the dtype attribute
+    except:
+        tmp = str(value.__class__.__name__)  # Otherwise use the type finder
+    world.isend(tmp, dest=dest)
+    return tmp
 
-    tmp = world.bcast(tmp, root=root)  # Bcast out to all
-    if (str(tmp) == 'list'):
+
+def _irecvDtype(source, world):
+    """Receives a data type. 
+
+    Must be used within an if statement. 
+    if (world.rank == dest): _recvDtype()
+    Must be accompanied by _isendDtype on the source rank.
+
+    Parameters
+    ----------
+    self : object
+        For numpy arrays and numpy scalars, a numpy data type will be received.
+        For arbitrary objects, the attached __class__.__name__ will be received.
+        For lists, the data type will be list
+    source : int
+        Receive from source
+    world : mpi4py.MPI.Comm
+        MPI parallel communicator.
+
+    Returns
+    -------
+    out : object
+        The data type.
+
+    """
+    req = world.irecv(source=source)
+    tmp = req.wait()
+
+    if (tmp == 'list'):
         return 'list'
-    tmp = 'np.' + str(tmp)  # Prepend np. to create the numpy type
-    return eval(tmp)  # Return the evaluated string
+    return eval('np.{}'.format(tmp))  # Return the evaluated string
 
 
-#def Sendrecv(self, fromRank, toRank, world):
-#    """ Send and Recieve self from one to another rank
-#
-#    Parameters
-#    ----------
-#    self : object
-#        An object t
-#
-#    """
-#    if (type(self) == str):
-#        if (world.rank == fromRank):
-#            this = [self]
-#            world.send(this, dest=toRank)
-#        if (world.rank == toRank):
-#            this = world.recv(source=fromRank)
-#            print(this[0])
-#            return this[0]
+def Isend(self, dest, world, dType=None, nDim=None, shape=None):
+    """Isend a numpy array. Auto determines data type and shape. Must be accompanied by Irecv on the dest rank.
+
+    """
+
+    # Send the data type
+    if dType is None:
+        dType = _isendDtype(self, dest=dest, world=world)
+
+    assert (not dType == 'list'), TypeError("Cannot Send/Recv a list")
+
+    # Broadcast the number of dimensions
+    if nDim is None:
+        nDim = Isend_1int(np.ndim(self), dest=dest, world=world)
+
+    if (nDim == 0):  # For a single number
+        this = np.full(1, self, dtype=dType)  # Initialize on each worker
+        req = world.Isend(this, dest=dest)  # Broadcast
+
+    elif (nDim == 1):  # For a 1D array
+        if shape is None:
+            shape = Isend_1int(np.size(self), dest=dest, world=world)  # Broadcast the array size
+        req = world.Isend(self, dest=dest)  # Broadcast
+
+    elif (nDim > 1):  # nD Array
+        if shape is None:
+            world.Isend(np.asarray(self.shape), dest=dest)  # Broadcast the shape
+        req = world.Isend(self, dest=dest)  # Broadcast
+
+    return req
 
 
-def Bcast(self, world, root=0):
+def Irecv(source, world, dType=None, nDim=None, shape=None):
+    """Irecv a numpy array. Auto determines data type and shape. Must be accompanied by Isend on the source rank.
+
+    """
+
+    if dType is None:
+        dType = _irecvDtype(source, world)
+
+    assert not dType == 'list', TypeError("Cannot Send/Recv a list")
+
+    if nDim is None:
+        nDim = Irecv_1int(source, world)
+
+    if (nDim == 0):  # For a single number
+        this = np.empty(1, dtype=dType)  # Initialize on each worker
+        req = world.Irecv(this, source=source)  # Broadcast
+        req.Wait()
+        this = this[0]
+    elif (nDim == 1): # For a 1D array
+        if shape is None:
+            shape = Irecv_1int(source=source, world=world)
+        this = np.empty(shape, dtype=dType)
+        req = world.Irecv(this, source=source)
+        req.Wait()
+    elif (nDim > 1): # Nd Array
+        if shape is None:
+            shape = np.empty(nDim, dtype=np.int)
+            req = world.Irecv(shape, source=source)
+            req.Wait()
+        this = np.empty(shape, dtype=dType)
+        req = world.Irecv(this, source=source)
+        req.Wait()
+
+    return this
+
+
+def Isend_1int(self, dest, world):
+    """Send a single integer. Must be accompanied by Irecv_1int on the dest rank.
+
+    Parameters
+    ----------
+    self : int
+        The integer to Send.
+    dest : int
+        Rank to receive
+    world : mpi4py.MPI.Comm
+        MPI parallel communicator.
+
+    Returns
+    -------
+    out : int
+        The sent integer.
+
+    """
+
+    #Examples
+    #--------
+    #Given an integer instantiated on the master rank 0, in order to broadcast it, I must also instantiate a variable with the same name on all other ranks.
+
+    #>>> import numpy as np
+    #>>> from mpi4py import MPI
+    #>>> from geobipy.src.base import MPI as myMPI
+    #>>> world = MPI.COMM_WORLD
+    #>>> if world.rank == 0:
+    #>>>     i = 5
+    #>>> # Instantiate on all other ranks before broadcasting
+    #>>> else:
+    #>>>     i=None
+    #>>> i = myMPI.Bcast(i, world)
+
+    #"""
+    this = np.full(1, self, np.int64)
+    world.Isend(this, dest=dest)
+    return this[0]
+
+
+def Irecv_1int(source, world):
+    """Recv a single integer. Must be accompanied by Isend_1int on the source rank.
+
+    Parameters
+    ----------
+    self : int
+        Integer to Recv
+    source : int
+        Receive from this rank.
+    world : mpi4py.MPI.Comm
+        MPI parallel communicator.
+
+    Returns
+    -------
+    out : int
+        The received integer.
+
+    """
+    this = np.empty(1, np.int64)
+    req = world.Irecv(this, source=source)
+    req.Wait()
+    return this[0]
+
+
+def IsendToLeft(self, world, wrap=True):
+    """ISend an array to the rank left of world.rank.
+
+    """
+
+    dest = world.size - 1 if world.rank == 0 else world.rank - 1
+    Isend(self, dest = dest, world = world)
+
+
+def IsendToRight(self, world, wrap=True):
+    """ISend an array to the rank left of world.rank.
+
+    """
+
+    dest = 0 if world.rank == world.size - 1 else world.rank + 1
+    Isend(self, dest = dest, world=world)
+
+
+def IrecvFromRight(world, wrap=True):
+    """IRecv an array from the rank right of world.rank.
+
+    """
+    source = 0 if world.rank == world.size - 1 else world.rank + 1
+    return Irecv(source=source, world=world)
+
+
+def IrecvFromLeft(world, wrap=True):
+    """Irecv an array from the rank left of world.rank.
+
+    """
+    source = world.size - 1 if world.rank == 0 else world.rank - 1
+    return Irecv(source=source, world=world)
+     
+    
+
+def Bcast(self, world, root=0, dType=None, nDim=None, shape=None):
     """Broadcast a string or a numpy array
 
     Broadcast a string or a numpy array from a root rank to all ranks in an MPI communicator. Must be called collectively.
@@ -274,38 +443,75 @@ def Bcast(self, world, root=0):
         return this
 
     # Broadcast the data type
-    myType = bcastType(self, world, root=root)
+    if dType is None:
+        dType = bcastType(self, world, root=root)
 
-    assert myType != 'list', TypeError("Use MPI.Bcast_list for lists")
+    assert dType != 'list', TypeError("Use MPI.Bcast_list for lists")
 
     # Broadcast the number of dimensions
-    nDim = Bcast_1int(np.ndim(self), world, root=root)
+    if nDim is None:
+        nDim = Bcast_1int(np.ndim(self), world, root=root)
+
     if (nDim == 0):  # For a single number
-        this = np.zeros(1, dtype=myType)  # Initialize on each worker
+        this = np.empty(1, dtype=dType)  # Initialize on each worker
         if (world.rank == root):
             this[0] = self  # Assign on the master
         world.Bcast(this)  # Broadcast
         return this[0]
 
     if (nDim == 1):  # For a 1D array
-        N = Bcast_1int(np.size(self), world, root=root)  # Broadcast the array size
+        if shape is None:
+            shape = Bcast_1int(np.size(self), world, root=root)  # Broadcast the array size
+        this = np.empty(shape, dtype=dType)
         if (world.rank == root):  # Assign on the root
-            this = np.zeros(N, dtype=myType)
             this[:] = self
-        else:  # Initialize on each worker
-            this = np.empty(N, dtype=myType)
         world.Bcast(this, root=root)  # Broadcast
         return this
 
     if (nDim > 1):  # nD Array
-        shape = Bcast(np.asarray(self.shape), world, root=root)  # Broadcast the shape
+        if shape is None:
+            shape = Bcast(np.asarray(self.shape), world, root=root)  # Broadcast the shape
+        this = np.empty(shape, dtype=dType)
         if (world.rank == root):  # Assign on the root
-            this = np.zeros(shape, dtype=myType)
             this[:] = self
-        else:  # Initialize on each worker
-            this = np.empty(shape, dtype=myType)
         world.Bcast(this, root=root)  # Broadcast
         return this
+
+
+def bcastType(self, world, root=0):
+    """Gets the type of an object and broadcasts it to every rank in an MPI communicator.
+
+    Adaptively broadcasts the type of an object. Must be called collectively.
+
+    Parameters
+    ----------
+    self : object
+        For numpy arrays and numpy scalars, a numpy data type will be broadcast.
+        For arbitrary objects, the attached __class__.__name__ will be broadcast.
+        For lists, the data type will be list
+    world : mpi4py.MPI.Comm
+        MPI parallel communicator.
+    root : int, optional
+        The MPI rank to broadcast from. Default is 0.
+
+    Returns
+    -------
+    out : object
+        The data type broadcast to every rank including the rank broadcast from.
+
+    """
+    if (world.rank == root):
+        try:
+            tmp = str(self.dtype)  # Try to get the dtype attribute
+        except:
+            tmp = str(self.__class__.__name__)  # Otherwise use the type finder
+    else:
+        tmp = None  # Initialize tmp on all workers
+
+    tmp = world.bcast(tmp, root=root)  # Bcast out to all
+    if (tmp == 'list'):
+        return 'list'
+    return eval('np.{}'.format(tmp))  # Return the evaluated string
 
 
 def Bcast_1int(self, world, root=0):
@@ -344,7 +550,7 @@ def Bcast_1int(self, world, root=0):
 
     """
     if (world.rank == root):
-        this = np.zeros(1, np.int64) + self
+        this = np.full(1, self, np.int64)
     else:
         this = np.empty(1, np.int64)
     world.Bcast(this, root=root)
@@ -418,11 +624,11 @@ def Scatterv(self, starts, chunks, world, axis=0, root=0):
 
     """
     # Brodacast the type
-    myType = bcastType(self, world, root=root)
+    dType = bcastType(self, world, root=root)
 
-    assert myType != 'list', "Use Scatterv_list for lists!"
+    assert dType != 'list', TypeError("Use Scatterv_list for lists!")
 
-    return Scatterv_numpy(self, starts, chunks, myType, world, axis, root)
+    return Scatterv_numpy(self, starts, chunks, dType, world, axis, root)
 
 
 def Scatterv_list(self, starts, chunks, world, root=0):
@@ -490,7 +696,7 @@ def Scatterv_numpy(self, starts, chunks, dType, world, axis=0, root=0):
     # Broadcast the number of dimensions
     nDim = Bcast_1int(np.ndim(self), world, root=root)
     if (nDim == 1):  # For a 1D Array
-        this = np.zeros(chunks[world.rank], dtype=dType)
+        this = np.empty(chunks[world.rank], dtype=dType)
         world.Scatterv([self, chunks, starts, None], this[:], root=root)
         return this
 
@@ -506,10 +712,8 @@ def Scatterv_numpy(self, starts, chunks, dType, world, axis=0, root=0):
                 self_unpk = np.reshape(self, np.size(self))
             else:
                 self_unpk = np.reshape(self.T, np.size(self))
-        this_unpk = np.zeros(tmpChunks[world.rank], dtype=dType)
-        world.Scatterv([self_unpk, tmpChunks, tmpStarts, None],
-                       this_unpk, root=root)
+        this_unpk = np.empty(tmpChunks[world.rank], dtype=dType)
+        world.Scatterv([self_unpk, tmpChunks, tmpStarts, None], this_unpk, root=root)
         this = np.reshape(this_unpk, [chunks[world.rank], s])
-        if (axis == 1):
-            this = this.T
-        return this
+        
+        return this.T if axis == 1 else this

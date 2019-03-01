@@ -1,6 +1,7 @@
 import numpy as np
 from ...classes.core.myObject import myObject
 from ...base import fileIO as fIO
+from ...classes.core.StatArray import StatArray
 
 try:
     from gatdaem1d import TDAEMSystem
@@ -22,17 +23,25 @@ try:
 
         """
 
-        def __init__(self):
-            """ Nothing needed """
-
-        def read(self, systemFilename):
+        def __init__(self, systemFilename):
+            """ Nothing needed """            
 
             # Check that the file exists, rBodies class does not handle errors
             assert fIO.fileExists(systemFilename),'Could not open file: ' + systemFilename
 
-            # Read in the System file
             TDAEMSystem.__init__(self, systemFilename)
-            self.sysFname = systemFilename
+            self.fileName = systemFilename
+
+
+        @property
+        def times(self):
+            """Time windows."""
+            return StatArray(self.windows.centre, name='Time', units='s')
+            
+
+        def read(self, systemFilename):
+            # Read in the System file
+            self.__init__(systemFilename)
             assert np.min(np.diff(self.windows.centre)) > 0.0, ValueError("Receiver window times must monotonically increase for system "+systemFilename)
 
             self.readCurrentWaveform(systemFilename)
@@ -56,7 +65,13 @@ try:
                         current.append(x[1])
                         
                     if ('WaveFormCurrent Begin' in line):
-                        get = True  
+                        get = True
+
+        def summary(self, out=False):
+            msg = ("TdemSystem: \n"
+                   "{}\n"
+                   "{}\n").format(self.fileName, self.times.summary(True))
+            return msg if out else print(msg)
     
 
 

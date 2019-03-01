@@ -497,7 +497,7 @@ class DataSetResults(myObject):
     def mapDepthSlice(self, dx, dy, depth, depth2 = None, invertPar = True, bestModel = False, mask = None, clip = True, force=False, **kwargs):
         """ Create a depth slice through the recovered model """
 
-        vals1D = self.getDepthSlice(depth=depth, depth2=depth2, invertPar=invertPar, bestModel=bestModel, force=force)
+        vals1D = self.lice(depth=depth, depth2=depth2, invertPar=invertPar, bestModel=bestModel, force=force)
         
         print(vals1D.min(), vals1D.max())
         
@@ -634,7 +634,7 @@ class DataSetResults(myObject):
         self.getZGrid()
         self.points.getBounds()
 
-        x,y,intPoints = interpolation.getGridLocations2D(self.points.bounds, dx, dy)
+        x, y, intPoints = interpolation.getGridLocations2D(self.points.bounds, dx, dy)
         z=self.zGrid
 
 

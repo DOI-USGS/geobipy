@@ -5,11 +5,11 @@ from .EmDataPoint import EmDataPoint
 from ...system.EmLoop import EmLoop
 from ...system.CircularLoop import CircularLoop
 from ....base.logging import myLogger
+from ...system.TdemSystem import TdemSystem
 
 try:
     from gatdaem1d import Earth
     from gatdaem1d import Geometry
-    from gatdaem1d import TDAEMSystem
 except:
     h=("Could not find a Time Domain forward modeller. \n"
        "Please see the package's README for instructions on how to install one")
@@ -22,6 +22,7 @@ from ....base import customFunctions as cf
 from ....base.customFunctions import safeEval
 from ....base.customFunctions import findNotNans, isInt
 from ....base import customPlots as cp
+from ....base import MPI as myMPI
 from os.path import split as psplt
 from os.path import join
 
@@ -30,7 +31,7 @@ class TdemDataPoint(EmDataPoint):
     """ Initialize a Time domain EMData Point
 
 
-    TdemDataPoint(x, y, z, e=0.0, d=None, s=None, sys=None, T=None, R=None)
+    TdemDataPoint(x, y, z, elevation, data, std, system, T, R, lineNumber, fiducial)
 
     Parameters
     ----------
@@ -40,20 +41,24 @@ class TdemDataPoint(EmDataPoint):
         The northing co-ordinate of the data point
     z : np.float64
         The height of the data point above ground
-    e : np.float64, optional
+    elevation : np.float64, optional
         The elevation of the data point, default is 0.0
-    d : list of arrays, optional
+    data : list of arrays, optional
         A list of 1D arrays, where each array contains the data in each system.
         The arrays are vertically concatenated inside the TdemDataPoint object
-    s : list of arrays, optional
+    std : list of arrays, optional
         A list of 1D arrays, where each array contains the errors in each system.
         The arrays are vertically concatenated inside the TdemDataPoint object
-    sys : TdemSystem, optional
+    system : TdemSystem, optional
         Time domain system class
     T : EmLoop, optional
         Transmitter loop class
     R : EmLoop, optional
         Receiver loop class
+    lineNumber : float, optional
+        The line number associated with the datapoint
+    fiducial : float, optional
+        The fiducial associated with the datapoint
 
     Returns
     -------
@@ -62,117 +67,121 @@ class TdemDataPoint(EmDataPoint):
 
     Notes
     -----
-    The data incoming in d is a set of lists with length equal to the number of systems.  These data are unpacked and vertically concatenated in this class. The parameter self.d will have length equal to the sum of the number of time gates in each system.  The same is true for the errors, and the predicted data vector.
-
-
+    The data argument is a set of lists with length equal to the number of systems.  
+    These data are unpacked and vertically concatenated in this class. 
+    The parameter self._data will have length equal to the sum of the number of time gates in each system.  
+    The same is true for the errors, and the predicted data vector.
 
     """
 
-    def __init__(self, x, y, z, e=0.0, d=None, s=None, sys=None, T=None, R=None):
+    def __init__(self, x=0.0, y=0.0, z=0.0, elevation=0.0, data=None, std=None, predictedData=None, system=None, T=None, R=None, lineNumber=0.0, fiducial=0.0):
+        """Initializer. """
+
         if not T is None:
             assert isinstance(T, EmLoop), TypeError("Transmitter must be of type EmLoop")
+
         if not R is None:
             assert isinstance(R, EmLoop), TypeError("Receiver must be of type EmLoop")
-        if not sys is None:
-            for i in range(len(sys)):
-                assert isinstance(sys[i], TDAEMSystem), TypeError("System "+str(i)+" must be of type TDAEMSystem")
-        # x coordinate
-        self.x = StatArray(1) + x
-        # y coordinate
-        self.y = StatArray(1) + y
-        # z coordinate
-        self.z = StatArray(1, 'Measurement height above ground', 'm') + z
-        # Elevation of data point
-        self.e = StatArray(1) + e
-        if (sys is None):
+
+        if (system is None):
             return
-        # EMSystem Class
-        self.sys = sys
-#        if (not sys is None):
-        # Number of systems
-        self.nSystems = np.int32(np.size(sys))
-        # Total number of windows
-        self.nWindows = np.int32(sum(s.nwindows() for s in self.sys))
-        # StatArray of Data
-        self.d = StatArray(self.nWindows, 'Time Domain Data', r'$\frac{V}{Am^{4}}$')
-        # StatArray of Standard Deviations
-        self.s = StatArray(np.ones(self.nWindows), 'Standard Deviation', r'$\frac{V}{Am^{4}}$')
-        # Transfer input to class
-        self.iplotActive = []
-        if (not d is None):
-            i0 = 0
-            for i in range(self.nSystems):
-                i1 = i0 + self.sys[i].nwindows()
-                self.d[i0:i1] = d[i]
-                if (s[i] is None):
-                    self.s[i0:i1] = 0.1 * d[i] 
-                else:
-                    self.s[i0:i1] = s[i]
+        else:
+            if isinstance(system, (str, TdemSystem)):
+                system = [system]
+            assert all((isinstance(sys, (str, TdemSystem)) for sys in system)), TypeError("System must be list with items of type TdemSystem")
 
-                i0 = i1
-                self.iplotActive.append(findNotNans(d[i]))
-                    
+        nSystems = len(system)
+        nTimes = np.empty(nSystems, dtype=np.int32)
+        systems = []
+        for j, sys in enumerate(system):
+            if isinstance(sys, str):
+                systems.append(TdemSystem(sys))
+            elif isinstance(sys, TdemSystem):
+                systems.append(sys)
+            # Number of time gates
+            nTimes[j] = systems[j].nwindows()
 
-#        else:
-#            self.nSystems = 0
-#            self.nWindows = 0
+        nChannels = np.sum(nTimes)
 
+        if not data is None:
+            assert data.size == nChannels, ValueError("Size of data must equal total number of time channels {}".format(nChannels))
+        if not std is None:
+            assert std.size == nChannels, ValueError("Size of std must equal total number of time channels {}".format(nChannels))
+        if not predictedData is None:
+            assert predictedData.size == nChannels, ValueError("Size of predictedData must equal total number of time channels {}".format(nChannels))
+            
+        EmDataPoint.__init__(self, nChannelsPerSystem=nTimes, x=x, y=y, z=z, elevation=elevation, data=data, std=std, predictedData=predictedData, dataUnits=r'$\frac{V}{Am^{4}}$', lineNumber=lineNumber, fiducial=fiducial)
+
+        self._data.name = "Time domain data"
+
+        self.nSystems = nSystems
+        self.system = systems
+
+        self.getIplotActive()
+                
         # EmLoop Transnmitter
         self.T = deepcopy(T)
         # EmLoop Reciever
         self.R = deepcopy(R)
-        # StatArray of Predicted Data
-        self.p = StatArray(self.nWindows, 'Predicted Data', r'$\frac{V}{Am^{4}}$')
-        # StatArray of Relative Errors
-        self.relErr = StatArray(self.nSystems, '$\epsilon_{Relative}x10^{2}$','%')
-        # StatArray of Additive Errors
-        self.addErr = StatArray(self.nSystems, '$\epsilon_{Additive}$',self.d.units)
-        # StatArray of calibration parameters
-        # The four columns are Bias,Variance,InphaseBias,QuadratureBias.
-#    self.calibration=StatArray([sys.nFreq*4],'Calibration Parameters')
-        # Sensitivity Matrix - Stored here so we can update only the necessary
-        # parts
-        self.J = None
-        # Index to non NaN values
-        self.iActive = self.getActiveData()
+
+        k = 0
+        for i in range(self.nSystems):
+            # Set the channel names
+            for iTime in range(self.nTimes[i]):
+                self._channelNames[k] = 'Time {:.3e} s'.format(self.system[i].windows.centre[iTime])
+                k += 1
+
+
+    @property
+    def nTimes(self):
+        return self.nChannelsPerSystem
+
+    @property
+    def nWindows(self):
+        return self.nChannels
+
+
+    def times(self, system=0):
+        """ Return the window times in an StatArray """
+        return self.system[system].times
+
 
     def deepcopy(self):
         """ Define a deepcopy routine """
         return deepcopy(self)
 
+
     def __deepcopy__(self, memo):
-        cls = self.__class__
-        result = cls.__new__(cls)
-        memo[id(self)] = result
-        items = self.__dict__.items()
-        for k, v in items:
-            if (k != 'sys'):
-                setattr(result, k, deepcopy(v, memo))
-        result.sys = self.sys
-        return result
-    
-    def times(self, system=0):
-        """ Return the window times in an StatArray """
-        return StatArray(self.sys[system].windows.centre, name='Time', units='s')
+        out = TdemDataPoint(self.x, self.y, self.z, self.elevation, self._data, self._std, self._predictedData, self.system, self.T, self.R)
+        # StatArray of Relative Errors
+        out.relErr = self.relErr.deepcopy()
+        # StatArray of Additive Errors
+        out.addErr = self.addErr.deepcopy()
+        # Initialize the sensitivity matrix
+        out.J = deepcopy(self.J)
+
+        return out
 
 
     def getIplotActive(self):
         """ Get the active data indices per system.  Used for plotting. """
-        self.iplotActive=[]
+        self.iplotActive = []
         i0 = 0
         for i in range(self.nSystems):
-            i1 = i0 + self.sys[i].nwindows()
-            self.iplotActive.append(findNotNans(self.d[i0:i1]))
+            i1 = i0 + self.nTimes[i]
+            self.iplotActive.append(findNotNans(self._data[i0:i1]))
             i0 = i1
+
 
     def dualMoment(self):
         """ Returns True if the number of systems is > 1 """
-        return len(self.sys) > 1
+        return len(self.system) > 1
 
 
     def hdfName(self):
         """ Reprodicibility procedure """
         return('TdemDataPoint(0.0,0.0,0.0,0.0)')
+
 
     def createHdf(self, parent, myName, nRepeats=None, fillvalue=None):
         """ Create the hdf group metadata in file
@@ -184,14 +193,14 @@ class TdemDataPoint(EmDataPoint):
         grp.attrs["repr"] = self.hdfName()
         grp.create_dataset('nSystems', data=self.nSystems)
         for i in range(self.nSystems):
-            grp.create_dataset('System' + str(i), data=np.string_(psplt(self.sys[i].sysFname)[-1]))
+            grp.create_dataset('System{}'.format(i), data=np.string_(psplt(self.system[i].fileName)[-1]))
         self.x.createHdf(grp, 'x', nRepeats=nRepeats, fillvalue=fillvalue)
         self.y.createHdf(grp, 'y', nRepeats=nRepeats, fillvalue=fillvalue)
         self.z.createHdf(grp, 'z', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.e.createHdf(grp, 'e', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.d.createHdf(grp, 'd', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.s.createHdf(grp, 's', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.p.createHdf(grp, 'p', nRepeats=nRepeats, fillvalue=fillvalue)
+        self.elevation.createHdf(grp, 'e', nRepeats=nRepeats, fillvalue=fillvalue)
+        self._data.createHdf(grp, 'd', nRepeats=nRepeats, fillvalue=fillvalue)
+        self._std.createHdf(grp, 's', nRepeats=nRepeats, fillvalue=fillvalue)
+        self._predictedData.createHdf(grp, 'p', nRepeats=nRepeats, fillvalue=fillvalue)
         self.relErr.createHdf(grp, 'relErr', nRepeats=nRepeats, fillvalue=fillvalue)
         self.addErr.createHdf(grp, 'addErr', nRepeats=nRepeats, fillvalue=fillvalue)
         self.T.createHdf(grp, 'T', nRepeats=nRepeats, fillvalue=fillvalue)
@@ -213,10 +222,10 @@ class TdemDataPoint(EmDataPoint):
         self.x.writeHdf(grp, 'x',  index=index)
         self.y.writeHdf(grp, 'y',  index=index)
         self.z.writeHdf(grp, 'z',  index=index)
-        self.e.writeHdf(grp, 'e',  index=index)
-        self.d.writeHdf(grp, 'd',  index=index)
-        self.s.writeHdf(grp, 's',  index=index)
-        self.p.writeHdf(grp, 'p',  index=index)
+        self.elevation.writeHdf(grp, 'e',  index=index)
+        self._data.writeHdf(grp, 'd',  index=index)
+        self._std.writeHdf(grp, 's',  index=index)
+        self._predictedData.writeHdf(grp, 'p',  index=index)
         self.relErr.writeHdf(grp, 'relErr',  index=index)
         self.addErr.writeHdf(grp, 'addErr',  index=index)
         self.T.writeHdf(grp, 'T',  index=index)
@@ -252,9 +261,13 @@ class TdemDataPoint(EmDataPoint):
         obj = eval(safeEval(item.attrs.get('repr')))
         e = obj.fromHdf(item, index=index)
 
-        _aPoint = TdemDataPoint(x, y, z, e)
+        nSystems = np.int(np.asarray(grp.get('nSystems')))
+        systems = []
+        for i in range(nSystems):
+            # Get the system file name. h5py has to encode strings using utf-8, so decode it!
+            systems.append(TdemSystem(join(sysPath, str(np.asarray(grp.get('System{}'.format(i))), 'utf-8'))))
 
-        _aPoint.nSystems = np.int(np.asarray(grp.get('nSystems')))
+        _aPoint = TdemDataPoint(x, y, z, e, system=systems)
 
         slic = None
         if (not index is None):
@@ -262,13 +275,13 @@ class TdemDataPoint(EmDataPoint):
 
         item = grp.get('d')
         obj = eval(safeEval(item.attrs.get('repr')))
-        _aPoint.d = obj.fromHdf(item, index=slic)
+        _aPoint._data = obj.fromHdf(item, index=slic)
         item = grp.get('s')
         obj = eval(safeEval(item.attrs.get('repr')))
-        _aPoint.s = obj.fromHdf(item, index=slic)
+        _aPoint._std = obj.fromHdf(item, index=slic)
         item = grp.get('p')
         obj = eval(safeEval(item.attrs.get('repr')))
-        _aPoint.p = obj.fromHdf(item, index=slic)
+        _aPoint._predictedData = obj.fromHdf(item, index=slic)
         if (_aPoint.nSystems == 1):
             slic = index
         item = grp.get('relErr')
@@ -284,19 +297,7 @@ class TdemDataPoint(EmDataPoint):
         obj = eval(safeEval(item.attrs.get('repr')))
         _aPoint.R = obj.fromHdf(item, index=index)
 
-
-        _aPoint.sys = np.ndarray(_aPoint.nSystems, dtype=TDAEMSystem)
         _aPoint.iActive = _aPoint.getActiveData()
-
-        for i in range(_aPoint.nSystems):
-            # Get the system file name. h5py has to encode strings using utf-8, so decode it!
-            sysFname = str(np.asarray(grp.get('System'+str(i))), 'utf-8')
-            # Get the system file
-            fName = join(sysPath,sysFname)
-            # Check that the file exists, rBodies class does not handle errors
-            assert fIO.fileExists(fName), 'Could not open file: ' + fName
-            _aPoint.sys[i] = TDAEMSystem(fName)
-            _aPoint.sys[i].sysFname = sysFname
 
         _aPoint.getIplotActive()
 
@@ -307,15 +308,15 @@ class TdemDataPoint(EmDataPoint):
 #    """ Apply calibration factors to the data point """
 #    # Make complex numbers from the data
 #    if (Predicted):
-#      tmp=cf.mergeComplex(self.p)
+#      tmp=cf.mergeComplex(self._predictedData)
 #    else:
-#      tmp=cf.mergeComplex(self.d)
+#      tmp=cf.mergeComplex(self._data)
 #
 #    # Get the calibration factors for each frequency
-#    i1=0;i2=self.sys.nFreq
-#    G=self.calibration[i1:i2];i1+=self.sys.nFreq;i2+=self.sys.nFreq
-#    Phi=self.calibration[i1:i2];i1+=self.sys.nFreq;i2+=self.sys.nFreq
-#    Bi=self.calibration[i1:i2];i1+=self.sys.nFreq;i2+=self.sys.nFreq
+#    i1=0;i2=self.system.nFreq
+#    G=self.calibration[i1:i2];i1+=self.system.nFreq;i2+=self.system.nFreq
+#    Phi=self.calibration[i1:i2];i1+=self.system.nFreq;i2+=self.system.nFreq
+#    Bi=self.calibration[i1:i2];i1+=self.system.nFreq;i2+=self.system.nFreq
 #    Bq=self.calibration[i1:i2]
 #
 #    # Calibrate the data
@@ -323,135 +324,218 @@ class TdemDataPoint(EmDataPoint):
 #
 #    # Split the complex numbers back out
 #    if (Predicted):
-#      self.p[:]=cf.splitComplex(tmp)
+#      self._predictedData[:]=cf.splitComplex(tmp)
 #    else:
-#      self.d[:]=cf.splitComplex(tmp)
+#      self._data[:]=cf.splitComplex(tmp)
 #
 
     def plotWaveform(self,**kwargs):
         for i in range(self.nSystems):
             if (self.nSystems > 1):
                 plt.subplot(2, 1, i + 1)
-            plt.plot(self.sys[i].waveform.time, self.sys[i].waveform.current, **kwargs)
+            plt.plot(self.system[i].waveform.time, self.system[i].waveform.current, **kwargs)
             cp.xlabel('Time (s)')
             cp.ylabel('Normalized Current (A)')
             plt.margins(0.1, 0.1)
 
 
-    def plot(self, title='Time Domain EM Data', withErr=True, **kwargs):
+    def plot(self, title='Time Domain EM Data', withErrorBars=True, **kwargs):
         """ Plot the Inphase and Quadrature Data for an EM measurement
         """
         ax=plt.gca()
 
-        m = kwargs.pop('marker','v')
-        ms = kwargs.pop('markersize',7)
-        c = kwargs.pop('color',[cp.wellSeparated[i+1] for i in range(self.nSystems)])
+        kwargs['marker'] = kwargs.pop('marker', 'v')
+        kwargs['markersize'] = kwargs.pop('markersize', 7)
+        c = kwargs.pop('color', [cp.wellSeparated[i+1] for i in range(self.nSystems)])
         mfc = kwargs.pop('markerfacecolor',[cp.wellSeparated[i+1] for i in range(self.nSystems)])
-        assert len(c) == self.nSystems, ValueError("color must be a list of length "+str(self.nSystems))
-        assert len(mfc) == self.nSystems, ValueError("markerfacecolor must be a list of length "+str(self.nSystems))
-        mec = kwargs.pop('markeredgecolor','k')
-        mew = kwargs.pop('markeredgewidth',1.0)
-        a = kwargs.pop('alpha',0.8)
-        ls = kwargs.pop('linestyle','none')
-        lw = kwargs.pop('linewidth',2)
+        assert len(c) == self.nSystems, ValueError("color must be a list of length {}".format(self.nSystems))
+        assert len(mfc) == self.nSystems, ValueError("markerfacecolor must be a list of length {}".format(self.nSystems))
+        kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor', 'k')
+        kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth', 1.0)
+        kwargs['alpha'] = kwargs.pop('alpha', 0.8)
+        kwargs['linestyle'] = kwargs.pop('linestyle', 'none')
+        kwargs['linewidth'] = kwargs.pop('linewidth', 2)
 
-        xscale = kwargs.pop('xscale','log')
-        yscale = kwargs.pop('yscale','log')
+        xscale = kwargs.pop('xscale', 'log')
+        yscale = kwargs.pop('yscale', 'log')
 
         iJ0 = 0
         for j in range(self.nSystems):
             iAct = self.iplotActive[j]
-            iJ1 = iJ0 + iAct
-            if (withErr):
-                plt.errorbar(self.sys[j].windows.centre[iAct],self.d[iJ1],yerr=self.s[iJ1],
-                marker=m,
-                markersize=ms,
+            iS = self._systemIndices(j)
+            d = self._data[iS]
+            if (withErrorBars):
+                s = self._std[iS]
+                plt.errorbar(self.times(j)[iAct], d[iAct], yerr=s[iAct],
                 color=c[j],
                 markerfacecolor=mfc[j],
-                markeredgecolor=mec,
-                markeredgewidth=mew,
-                alpha=a,
-                linestyle=ls,
-                linewidth=lw,
-                label='System: '+str(j+1),
+                label='System: {}'.format(j+1),
                 **kwargs)
             else:
-                plt.plot(self.sys[j].windows.centre[iAct],self.d[iJ1],
-                marker=m,
-                markersize=ms,
+                plt.plot(self.times(j)[iAct], d[iAct],
                 markerfacecolor=mfc[j],
-                markeredgecolor=mec,
-                markeredgewidth=mew,
-                alpha=a,
-                linestyle=ls,
-                linewidth=lw,
-                label='System: '+str(j+1),
+                label='System: {}'.format(j+1),
                 **kwargs)
-            iJ0 += self.sys[j].nwindows()
+            iJ0 += self.system[j].nwindows()
 
 
         plt.xscale(xscale)
         plt.yscale(yscale)
         cp.xlabel('Time (s)')
-        cp.ylabel(cf.getNameUnits(self.d))
+        cp.ylabel(cf.getNameUnits(self._data))
         cp.title(title)
-        plt.legend()
+        
+        if self.nSystems > 1:
+            plt.legend()
 
         return ax
+    
 
-    def plotPredicted(self,title='Time Domain EM Data',**kwargs):
+    def plotPredicted(self, title='Time Domain EM Data', **kwargs):
 
         noLabels = kwargs.pop('nolabels', False)
 
         if (not noLabels):
             cp.xlabel('Time (s)')
-            cp.ylabel(cf.getNameUnits(self.p))
+            cp.ylabel(cf.getNameUnits(self._predictedData))
             cp.title(title)
         
-        c = kwargs.pop('color', cp.wellSeparated[3])
-        lw = kwargs.pop('linewidth', 2)
-        a = kwargs.pop('alpha', 0.7)
+        kwargs['color'] = kwargs.pop('color', cp.wellSeparated[3])
+        kwargs['linewidth'] = kwargs.pop('linewidth', 2)
+        kwargs['alpha'] = kwargs.pop('alpha', 0.7)
         xscale = kwargs.pop('xscale', 'log')
         yscale = kwargs.pop('yscale', 'log')
-        iJ0 = 0
         for i in range(self.nSystems):
             iAct = self.iplotActive[i]
-            iJ1 = iJ0 + iAct
-            plt.plot(self.sys[i].windows.centre[iAct],  self.p[iJ1], color=c, linewidth=lw, alpha=a, **kwargs)
-            iJ0 += self.sys[i].nwindows()
+
+            p = self._predictedData[self._systemIndices(i)]
+            p[iAct].plot(x=self.times(i)[iAct], **kwargs)
 
         plt.xscale(xscale)
         plt.yscale(yscale)
 
 
     def plotDataResidual(self, title='', **kwargs):
-        cp.xlabel('Time (s)')
-        cp.ylabel('Data Residual ('+cf.getUnits(self.d)+')')
-        cp.title(title)
+
+        
         lw = kwargs.pop('linewidth',2)
         a = kwargs.pop('alpha',0.7)
 
-        xscale = kwargs.pop('xscale','log')
-        yscale = kwargs.pop('yscale','log')
+        xscale = kwargs.pop('xscale','linear')
+        yscale = kwargs.pop('yscale','linear')
 
-        iJ0 = 0
         for i in range(self.nSystems):
             iAct = self.iplotActive[i]
-            iJ1 = iJ0 + iAct
-            plt.plot(self.sys[i].windows.centre[iAct],  np.abs(self.d[iJ1] - self.p[iJ1]), color=cp.wellSeparated[i+1], linewidth=lw, alpha=a, **kwargs)
-            iJ0 += self.sys[i].nwindows()
+            dD = self.deltaD[self._systemIndices(i)]
+            np.abs(dD[iAct]).plot(x=self.times(i)[iAct], **kwargs)
 
         plt.xscale(xscale)
-        plt.yscale(yscale, linthreshy=1e-15)
+        plt.yscale(yscale)
+
+        plt.ylabel("|{}| ({})".format(dD.getName(), dD.getUnits()))
+
+        cp.title(title)
+
+    
+    def priorProbability(self, rErr, aErr, height, calibration, verbose=False):
+        """Evaluate the probability for the EM data point given the specified attached priors
+
+        Parameters
+        ----------
+        rEerr : bool
+            Include the relative error when evaluating the prior
+        aEerr : bool
+            Include the additive error when evaluating the prior
+        height : bool
+            Include the elevation when evaluating the prior
+        calibration : bool
+            Include the calibration parameters when evaluating the prior
+        verbose : bool
+            Return the components of the probability, i.e. the individually evaluated priors
+
+        Returns
+        -------
+        out : np.float64
+            The evaluation of the probability using all assigned priors
+
+        Notes
+        -----
+        For each boolean, the associated prior must have been set.
+
+        Raises
+        ------
+        TypeError
+            If a prior has not been set on a requested parameter
+
+        """
+        probability = np.float64(0.0)
+        errProbability = np.float64(0.0)
+
+        P_relative = np.float64(0.0)
+        P_additive = np.float64(0.0)
+        P_height = np.float64(0.0)
+        P_calibration = np.float64(0.0)
+
+        if rErr:  # Relative Errors
+            P_relative = self.relErr.probability()
+            errProbability += P_relative
+        if aErr:  # Additive Errors
+            P_additive = self.addErr.probability(np.log(self.addErr))
+            errProbability += P_additive
+
+        probability += errProbability
+        if height:  # Elevation
+            P_height = (self.z.probability())
+            probability += P_height
+        if calibration:  # Calibration parameters
+            P_calibration = self.calibration.probability()
+            probability += P_calibration
+
+        probability = np.float64(probability)
+        
+        if verbose:
+            return probability, np.asarray([P_relative, P_additive, P_height, P_calibration])
+        return probability
 
 
+    def proposeAdditiveError(self):
 
+        # Generate a new error
+        tmp = self.addErr.proposal.rng(1)
+        if self.addErr.hasPrior():
+            p = self.addErr.probability(tmp)
+            while p == 0.0 or p == -np.inf:
+                tmp = self.addErr.proposal.rng(1)
+                p = self.addErr.probability(tmp)
+        # Update the mean of the proposed errors
+        self.addErr.proposal.mean[:] = tmp
+        self.addErr[:] = np.exp(tmp)
+
+
+    def setAdditiveErrorPrior(self, minimum, maximum, prng=None):
+        minimum = np.atleast_1d(minimum)
+        assert minimum.size == self.nSystems, ValueError("minimum must have {} entries".format(self.nSystems))
+        assert np.all(minimum > 0.0), ValueError("minimum values must be in linear space i.e. > 0.0")
+        maximum = np.atleast_1d(maximum)
+        assert maximum.size == self.nSystems, ValueError("maximum must have {} entries".format(self.nSystems))
+        assert np.all(maximum > 0.0), ValueError("maximum values must be in linear space i.e. > 0.0")
+        self.addErr.setPrior('UniformLog', np.log(minimum), np.log(maximum), prng=prng)
+
+    
+    def setAdditiveErrorProposal(self, means, variances, prng=None):
+        means = np.atleast_1d(means)
+        assert means.size == self.nSystems, ValueError("means must have {} entries".format(self.nSystems))
+        variances = np.atleast_1d(variances)
+        assert variances.size == self.nSystems, ValueError("variances must have {} entries".format(self.nSystems))
+        variancesOfLog = variances / means
+
+        self.addErr.setProposal('MvNormal', np.log(means), variancesOfLog, prng=prng)
 
     # def scaleJ(self, Jin, power=1.0):
     #     """ Scales a matrix by the errors in the given data
     #     Useful if a sensitivity matrix is generated using one data point, but must be scaled by the errors in another """
     #     J1 = np.zeros(Jin.shape)
-    #     J1[:, :] = Jin * (np.repeat(self.s[self.iActive, np.newaxis]**-power, np.size(J1, 1), 1))
+    #     J1[:, :] = Jin * (np.repeat(self._std[self.iActive, np.newaxis]**-power, np.size(J1, 1), 1))
     #     return J1
 
 
@@ -478,34 +562,34 @@ class TdemDataPoint(EmDataPoint):
             If any item in the relativeErr or additiveErr lists is not a scalar or array_like of length equal to the number of time channels
         ValueError
             If any relative or additive errors are <= 0.0
-        """    
+        """
+        relativeErr = np.atleast_1d(relativeErr)
+        additiveErr = np.atleast_1d(additiveErr)
 
         #assert (isinstance(relativeErr, list)), TypeError("relativeErr must be a list of size equal to the number of systems {}".format(self.nSystems))
-        assert (len(relativeErr) == self.nSystems), TypeError("relativeErr must be a list of size equal to the number of systems {}".format(self.nSystems))
+        assert (relativeErr.size == self.nSystems), TypeError("relativeErr must be a list of size equal to the number of systems {}".format(self.nSystems))
 
         #assert (isinstance(additiveErr, list)), TypeError("additiveErr must be a list of size equal to the number of systems {}".format(self.nSystems))
-        assert (len(relativeErr) == self.nSystems), TypeError("additiveErr must be a list of size equal to the number of systems {}".format(self.nSystems))
+        assert (relativeErr.size == self.nSystems), TypeError("additiveErr must be a list of size equal to the number of systems {}".format(self.nSystems))
 
         t0 = 0.5 * np.log(1e-3)  # Assign fixed t0 at 1ms
-        i0 = 0
         # For each system assign error levels using the user inputs
         for i in range(self.nSystems):
-            assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], np.ndarray)), TypeError("relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.sys[i].nwindows()))
-            assert (isinstance(additiveErr[i], float) or isinstance(additiveErr[i], np.ndarray)), TypeError("additiveErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.sys[i].nwindows()))
-            assert (np.all(relativeErr[i] > 0.0)), ValueError("relativeErr for system {} cannot contain values <= 0.0.".format(self.nSystems))
-            #assert (np.all(additiveErr[i] > 0.0)), ValueError("additiveErr for system {} cannot contain values <= 0.0.".format(self.nSystems))
-            i1 = i0 + self.sys[i].nwindows()
+            assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], np.ndarray)), TypeError("relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
+            assert (isinstance(additiveErr[i], float) or isinstance(additiveErr[i], np.ndarray)), TypeError("additiveErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
+            assert (np.all(relativeErr[i] > 0.0)), ValueError("relativeErr for system {} cannot contain values <= 0.0.".format(i+1))
+            assert (np.all(additiveErr[i] > 0.0)), ValueError("additiveErr for system {} should contain values > 0.0. Make sure the values are in linear space".format(i+1))
+            iSys = self._systemIndices(system=i)
             
             # Compute the relative error
-            rErr = relativeErr[i] * self.d[i0:i1]
-            aErr = np.exp(additiveErr[i]*np.log(10.0) - 0.5 * np.log(self.sys[i].windows.centre) + t0)
+            rErr = relativeErr[i] * self._data[iSys]
+            aErr = np.exp(np.log(additiveErr[i]) - 0.5 * np.log(self.times(i)) + t0)
 
-            self.s[i0:i1] = np.sqrt((rErr**2.0) + (aErr**2.0))
-            i0 = i1
+            self._std[iSys] = np.sqrt((rErr**2.0) + (aErr**2.0))
 
         # Update the variance of the predicted data prior
-        if self.p.hasPrior():
-            self.p.prior.variance[:] = self.s[self.iActive]**2.0
+        if self._predictedData.hasPrior():
+            self._predictedData.prior.variance[:] = self._std[self.iActive]**2.0
 
 
     def updateSensitivity(self, J, mod, option, scale=False):
@@ -539,6 +623,7 @@ class TdemDataPoint(EmDataPoint):
 
         assert False, __name__ + '.updateSensitivity: Invalid option [0,1,2]'
 
+
     def forward(self, mod):
         """ Forward model the data from the given model """
 
@@ -546,12 +631,14 @@ class TdemDataPoint(EmDataPoint):
 
         self._forward1D(mod)
 
+
     def sensitivity(self, mod, ix=None, scale=False, modelChanged=True):
         """ Compute the sensitivty matrix for the given model """
 
         assert isinstance(mod, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
 
         return StatArray(self._sensitivity1D(mod, ix, scale, modelChanged), 'Sensitivity', '$\\frac{V}{ASm^{3}}$')
+
 
     def _forward1D(self, mod):
         """ Forward model the data from a 1D layered earth model """
@@ -561,19 +648,20 @@ class TdemDataPoint(EmDataPoint):
         else:
             self._simPEGForward(mod)
 
+
     def _BrodieForward(self, mod):
         # Generate the Brodie Earth class
         E = Earth(mod.par[:], mod.thk[:-1])
         # Generate the Brodie Geometry class
         G = Geometry(self.z[0], self.T.roll, self.T.pitch, self.T.yaw, -
                     12.64, 0.0, 2.11, self.R.roll, self.R.pitch, self.R.yaw)
+
         # Forward model the data for each system
-        iJ0 = 0
         for i in range(self.nSystems):
-            iJ1 = iJ0 + self.sys[i].nwindows()
-            fm = self.sys[i].forwardmodel(G, E)
-            self.p[iJ0:iJ1] = -fm.SZ[:]  # Store the necessary component
-            iJ0 = iJ1
+            iSys = self._systemIndices(i)
+            fm = self.system[i].forwardmodel(G, E)
+            self._predictedData[iSys] = -fm.SZ[:]  # Store the necessary component
+
 
     def _simPEGForward(self, mod):
         
@@ -586,7 +674,7 @@ class TdemDataPoint(EmDataPoint):
 
         if (self.dualMoment()):
 
-            print(self.sys[0].loopRadius(), self.sys[0].peakCurrent())
+            print(self.system[0].loopRadius(), self.system[0].peakCurrent())
 
             simPEG_survey = EM1DSurveyTD(
                 rx_location=np.array([0., 0., 0.]),
@@ -596,20 +684,20 @@ class TdemDataPoint(EmDataPoint):
                 rx_type='dBzdt',
                 wave_type='general',
                 src_type='CircularLoop',
-                a=self.sys[0].loopRadius(),
-                I=self.sys[0].peakCurrent(),
-                time=self.sys[0].windows.centre,
-                time_input_currents=self.sys[0].waveform.transmitterTime,
-                input_currents=self.sys[0].waveform.transmitterCurrent,
+                a=self.system[0].loopRadius(),
+                I=self.system[0].peakCurrent(),
+                time=self.system[0].windows.centre,
+                time_input_currents=self.system[0].waveform.transmitterTime,
+                input_currents=self.system[0].waveform.transmitterCurrent,
                 n_pulse=2,
-                base_frequency=self.sys[0].baseFrequency(),
+                base_frequency=self.system[0].baseFrequency(),
                 use_lowpass_filter=True,
                 high_cut_frequency=450000,
                 moment_type='dual',
-                time_dual_moment=self.sys[1].windows.centre,
-                time_input_currents_dual_moment=self.sys[1].waveform.transmitterTime,
-                input_currents_dual_moment=self.sys[1].waveform.transmitterCurrent,
-                base_frequency_dual_moment=self.sys[1].baseFrequency(),
+                time_dual_moment=self.system[1].windows.centre,
+                time_input_currents_dual_moment=self.system[1].waveform.transmitterTime,
+                input_currents_dual_moment=self.system[1].waveform.transmitterCurrent,
+                base_frequency_dual_moment=self.system[1].baseFrequency(),
             )
         else:
 
@@ -621,13 +709,13 @@ class TdemDataPoint(EmDataPoint):
                 rx_type='dBzdt',
                 wave_type='general',
                 src_type='CircularLoop',
-                a=self.sys[0].loopRadius(),
-                I=self.sys[0].peakCurrent(),
-                time=self.sys[0].windows.centre,
-                time_input_currents=self.sys[0].waveform.transmitterTime,
-                input_currents=self.sys[0].waveform.transmitterCurrent,
+                a=self.system[0].loopRadius(),
+                I=self.system[0].peakCurrent(),
+                time=self.system[0].windows.centre,
+                time_input_currents=self.system[0].waveform.transmitterTime,
+                input_currents=self.system[0].waveform.transmitterCurrent,
                 n_pulse=1,
-                base_frequency=self.sys[0].baseFrequency(),
+                base_frequency=self.system[0].baseFrequency(),
                 use_lowpass_filter=True,
                 high_cut_frequency=7e4,
                 moment_type='single',
@@ -635,8 +723,7 @@ class TdemDataPoint(EmDataPoint):
 
         prob.pair(simPEG_survey)
             
-        self.p[:] = -simPEG_survey.dpred(mod.par)
-
+        self._predictedData[:] = -simPEG_survey.dpred(mod.par)
 
 
     def _sensitivity1D(self, mod, ix=None, scale=False, modelChanged=True):
@@ -648,52 +735,66 @@ class TdemDataPoint(EmDataPoint):
             G = Geometry(self.z[0], self.T.roll, self.T.pitch, self.T.yaw, -
                          12.64, 0.0, 2.11, self.R.roll, self.R.pitch, self.R.yaw)
             for i in range(self.nSystems):
-                self.sys[i].forwardmodel(G, E)
+                self.system[i].forwardmodel(G, E)
         if (ix is None):  # Generate a full matrix if the layers are not specified
             ix = range(mod.nCells[0])
             J = np.zeros([self.nWindows, mod.nCells[0]])
         else:  # Partial matrix for specified layers
             J = np.zeros([self.nWindows, len(ix)])
 
-        iJ0 = 0
         for j in range(self.nSystems):  # For each system
-            iJ1 = iJ0 + self.sys[j].nwindows()
+            iSys = self._systemIndices(j)
             for i in range(len(ix)):  # For the specified layers
-                tmp = self.sys[j].derivative(
-                    self.sys[j].CONDUCTIVITYDERIVATIVE, ix[i] + 1)
+                tmp = self.system[j].derivative(
+                    self.system[j].CONDUCTIVITYDERIVATIVE, ix[i] + 1)
                 # Store the necessary component
-                J[iJ0:iJ1, i] = -mod.par[ix[i]] * tmp.SZ[:]
-            iJ0 = iJ1
+                J[iSys, i] = -mod.par[ix[i]] * tmp.SZ[:]
 
         if scale:
-            iJ0 = 0
             for j in range(self.nSystems):  # For each system
-                iJ1 = iJ0 + self.sys[j].nwindows()
+                iSys = self._systemIndices(j)
                 for i in range(len(ix)):  # For the specified layers
                     # Scale the sensitivity matix rows by the data weights if
                     # required
-                    J[iJ0:iJ1, i] /= self.s[iJ0:iJ1]
-                iJ0 = iJ1
+                    J[iSys, i] /= self._std[ISYS]
 
         J = J[self.iActive, :]
         return J
 
-#     def fm_dlogc(self, mod):
-#             # Generate the Brodie Earth class
-#         E = Earth(mod.par[:], mod.thk[:-1])
-# #    ####lg.debug('Parameters: '+str(mod.par))
-# #    ####lg.debug('Thickness: '+str(mod.thk[:-1]))
-#         # Generate the Brodie Geometry class
-# #    ####lg.debug('Geometry: '+str([self.z[0],self.T.roll,self.T.pitch,self.T.yaw,-12.64,0.0,2.11,self.R.roll,self.R.pitch,self.R.yaw]))
-#         G = Geometry(self.z[0], self.T.roll, self.T.pitch, self.T.yaw, -
-#                      12.615, 0.0, 2.16, self.R.roll, self.R.pitch, self.R.yaw)
-#         # Forward model the data for each system
-#         iJ0 = 0
-#         for i in range(self.nSystems):
-#             iJ1 = iJ0 + self.sys[i].nwindows()
-#             dummy = self.sys[i].forward(G, E)
 
-# #      self.p[iJ0:iJ1]=-fm.SZ[:]
-# #      iJ0=iJ1
-#         return fm
+    def Isend(self, dest, world, systems=None):
+        tmp = np.empty(7, dtype=np.float64)
+        tmp[:] = np.asarray([self.x, self.y, self.z, self.elevation, self.nSystems, self.lineNumber, self.fiducial])
+        myMPI.Isend(tmp, dest=dest, world=world)
+        if systems is None:
+            for i in range(self.nSystems):
+                world.isend(self.system[i].fileName, dest=dest)
+        self._data.Isend(dest, world)
+        self._std.Isend(dest, world)
+        self._predictedData.Isend(dest, world)
+        self.T.Isend(dest, world)
+        self.R.Isend(dest, world)
 
+
+
+    def Irecv(self, source, world, systems=None):
+
+        tmp = np.empty(7, dtype=np.float64)
+        tmp = myMPI.Irecv(source=source, world=world)
+
+        if systems is None:
+            nSystems = np.int32(tmp[4])
+
+            systems = []
+            for i in range(nSystems):
+                systems.append(world.irecv(source=source).wait())
+
+        s = StatArray(0)
+        d = s.Irecv(source, world)
+        s = s.Irecv(source, world)
+        p = s.Irecv(source, world)
+        c = CircularLoop()
+        T = c.Irecv(source, world)
+        R = c.Irecv(source, world)
+
+        return TdemDataPoint(tmp[0], tmp[1], tmp[2], tmp[3], data=d, std=s, predictedData=p, system=systems, T=T, R=R, lineNumber=tmp[5], fiducial=tmp[6])
