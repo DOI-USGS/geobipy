@@ -269,14 +269,13 @@ def Irecv(source, world, dType=None, nDim=None, shape=None):
         this = np.empty(1, dtype=dType)  # Initialize on each worker
         req = world.Irecv(this, source=source)  # Broadcast
         req.Wait()
-        return this[0]
+        this = this[0]
     elif (nDim == 1): # For a 1D array
         if shape is None:
             shape = Irecv_1int(source=source, world=world)
         this = np.empty(shape, dtype=dType)
         req = world.Irecv(this, source=source)
         req.Wait()
-        return this
     elif (nDim > 1): # Nd Array
         if shape is None:
             shape = np.empty(nDim, dtype=np.int)
@@ -285,7 +284,8 @@ def Irecv(source, world, dType=None, nDim=None, shape=None):
         this = np.empty(shape, dtype=dType)
         req = world.Irecv(this, source=source)
         req.Wait()
-        return this
+
+    return this
 
 
 def Isend_1int(self, dest, world):
