@@ -700,7 +700,7 @@ class Model1D(Model):
 
         Parameters
         ----------
-        invX : bool, optional
+        reciprocateX : bool, optional
             Take the reciprocal of the x axis
         xscale : str, optional
             Scale the x axis? e.g. xscale = 'linear' or 'log'
@@ -718,12 +718,13 @@ class Model1D(Model):
         ax = plt.gca()
         cP.pretty(ax)
 
+        reciprocateX = kwargs.pop("reciprocateX", False)
         kwargs['flipY'] = kwargs.pop('flipY', True)
         kwargs['xscale'] = kwargs.pop('xscale', 'log')
         
         # Repeat the last entry
         par = self.par.append(self.par[-1])
-        if (invX):
+        if (reciprocateX):
             par = 1.0 / par
             
         z = self.depth.prepend(0.0)
