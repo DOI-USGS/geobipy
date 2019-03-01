@@ -65,6 +65,7 @@ class RectilinearMesh1D(myObject):
                 self._cellEdges = cellCentres._cellEdges.deepcopy()
             else:
                 assert isinstance(cellCentres, StatArray), TypeError("cellCentres must be a geobipy.StatArray")
+                cellCentres = np.squeeze(cellCentres)
                 ## StatArray of the x axis values
                 self._cellCentres = cellCentres.deepcopy()
                 self._cellEdges = self._cellCentres.edges(min=edgesMin, max=edgesMax)
@@ -75,6 +76,7 @@ class RectilinearMesh1D(myObject):
                 self._cellEdges = cellEdges._cellEdges.deepcopy()
             else:
                 assert isinstance(cellEdges, StatArray), TypeError("cellEdges must be a geobipy.StatArray")
+                cellEdges = np.squeeze(cellEdges)
                 self._cellEdges = cellEdges.deepcopy()
                 self._cellCentres = cellEdges[:-1] + 0.5 * np.abs(np.diff(cellEdges))
 
