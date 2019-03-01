@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 from os.path import split
 from ..base import fileIO as fIO
 from geobipy.src.inversion.Results import Results
+import progressbar
 
 try:
     from pyvtk import VtkData, UnstructuredGrid, CellData, Scalars
@@ -68,7 +69,7 @@ class LineResults(myObject):
             self.hdfFile = hdfFile
             self.getIDs()
 
-        self.getDataLocations()
+        self.getMesh()
 
 
     def open(self):
@@ -145,10 +146,18 @@ class LineResults(myObject):
         self.getDataLocations()
         if (self.hitMap is None):
             tmp = self.getAttribute('hitmap/y', index=0)
+            try:
+                tmp = RectilinearMesh1D(cellCentres=tmp.cellCentres, edgesMin=0.0)
+            except:
+                tmp = RectilinearMesh1D(cellCentres=tmp, edgesMin=0.0)
         else:
             tmp = self.hitMap.y
+            try:
+                tmp = RectilinearMesh1D(cellCentres=tmp.cellCentres, edgesMin=0.0)
+            except:
+                tmp = RectilinearMesh1D(cellCentres=tmp, edgesMin=0.0)
 
-        self.mesh = TopoRectilinearMesh2D(xCentres=self.x, yCentres=self.y, zEdges=tmp.edges(min=0.0), heightCentres=self.elevation)
+        self.mesh = TopoRectilinearMesh2D(xCentres=self.x, yCentres=self.y, zEdges=tmp.cellEdges, heightCentres=self.elevation)
 
 
     def getAdditiveError(self):
@@ -227,7 +236,7 @@ class LineResults(myObject):
 
     def getInterfaces(self, cut=0.0):
         """ Get the layer interfaces from the layer depth histograms """
-        if (not self.interfaces is None): return
+        # if (not self.interfaces is None): return
 
         tmp = self.getAttribute('layer depth histogram')
 
@@ -261,8 +270,11 @@ class LineResults(myObject):
         """ Get the model parameter opacity using the confidence intervals """
         if (not self.opacity is None): return
 
+        print("Obtaining opacity from file. This can take a while the first time this runs.")
+
         self.getMesh()
         self.opacity = StatArray(np.zeros([self.mesh.dims[1], self.mesh.dims[0]]), 'Opacity')
+
 
         a = np.asarray(self.hdfFile['hitmap/arr/data'])
         try:
@@ -273,14 +285,13 @@ class LineResults(myObject):
         try:
             c = np.asarray(self.hdfFile['hitmap/y/data'])
         except:
-            c = np.asarray(self.hdfFile['hitmap/y/y/data'])
+            c = np.asarray(self.hdfFile['hitmap/y/x/data'])
 
-        yTmp = StatArray(c[0, :])
-        h = Hitmap2D(xBinCentres = StatArray(b[0, :]), yBinCentres = yTmp)
+        h = Hitmap2D(xBinCentres = StatArray(b[0, :]), yBinCentres = StatArray(c[0, :]))
         h._counts[:, :] = a[0, :, :]
         self.opacity[0, :] = h.confidenceRange(percent=percent, log=log)
-
-        for i in range(1, self.nPoints):
+        
+        for i in progressbar.progressbar(range(1, self.nPoints)):
             h.x.xBinCentres = b[i, :]
             h._counts[:, :] = a[i, :, :]
             self.opacity[i, :] = h.confidenceRange(percent=percent, log=log)
@@ -309,7 +320,7 @@ class LineResults(myObject):
         assert index is None or fid is None, Exception("Only specify either an integer index or a fiducial.")
 
         if not fid is None:
-            assert fid in self.iDs, "The HDF file was not initialized to contain the results for this datapoints results "
+            assert fid in self.iDs, ValueError("This fiducial {} is not available from this HDF5 file. The min max fids are {} to {}.".format(fid, self.iDs.min(), self.iDs.max()))
             # Get the point index
             i = self.iDs.searchsorted(fid)
         else:
@@ -399,9 +410,9 @@ class LineResults(myObject):
     def plotAllBestData(self, **kwargs):
         """ Plot a channel of data as points """
 
-        self.setAlonglineAxis(self.plotAgainst)
+        self.getMesh()
 
-        self.getBestData()
+        self.getBestData(sysPath = self.sysPath)
 
         cP.pcolor(self.bestData.p.T, x=self.xPlot, y=StatArray(np.arange(self.bestData.p.shape[1]), name='Channel'), **kwargs)
 
@@ -409,20 +420,24 @@ class LineResults(myObject):
     def plotBestDataChannel(self, channel=None, **kwargs):
         """ Plot a channel of the best predicted data as points """
 
-        self.setAlonglineAxis(self.plotAgainst)
+        self.getMesh()
+
+        xAxis = kwargs.pop('xAxis', 'x')
 
         self.getBestData(sysPath = self.sysPath)
+
+        xtmp = self.mesh.getXAxis(xAxis, centres=False)
 
         if channel is None:
             channel = np.s_[:]
 
-        cP.plot(self.xPlot, self.bestData.p[:, channel], **kwargs)
+        cP.plot(xtmp, self.bestData.p[:, channel], **kwargs)
 
 
     def plotDataElevation(self, **kwargs):
         """ Adds the data elevations to a plot """
 
-        self.getDataLocations()
+        self.getMesh()
 
         xAxis = kwargs.pop('xAxis', 'x')
         labels = kwargs.pop('labels', True)
@@ -820,9 +835,9 @@ class LineResults(myObject):
             units = '$Sm^{-1}$'
 
         if (log):
-            vals, logLabel = cP._logSomething(vals,log)
+            vals, logLabel = cP._log(vals,log)
             name = logLabel + name
-        binEdges = StatArray(np.linspace(np.nanmin(vals),np.nanmax(vals),nBins+1), name, units)
+        binEdges = StatArray(np.linspace(np.nanmin(vals), np.nanmax(vals), nBins+1), name, units)
 
         h = Histogram1D(bins = binEdges)
         h.update(vals)
@@ -830,7 +845,7 @@ class LineResults(myObject):
         cP.title(title)
 
 
-    def plotXsection(self, invertPar = True, bestModel=False, percent = 67.0, useVariance=True, **kwargs):
+    def plotXsection(self, invertPar = False, bestModel=False, percent = 67.0, useVariance=True, **kwargs):
         """ Plot a cross-section of the parameters """
 
         self.getMesh()
@@ -853,7 +868,7 @@ class LineResults(myObject):
         if useVariance:
             self.getOpacity()
             kwargs['alpha'] = self.opacity
-
+    
         self.mesh.pcolor(values = tmp, **kwargs)
 
 
@@ -949,7 +964,7 @@ class LineResults(myObject):
             self.facies[:, i] = np.argmax(faciesWithDepth, 1)
 
 
-    def plotDataPointResults(self, fid, sysPath=None):
+    def plotDataPointResults(self, fid):
         """ Plot the geobipy results for the given data point """
         R = self.getResults(fid=fid)
         R.initFigure(forcePlot=True)
