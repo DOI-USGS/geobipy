@@ -24,10 +24,14 @@ timeDomain = True
 # -------------------------------------------------------
 # Specify the folder to the data
 dataDirectory = "..//Data"
-# Data File Name. If there are multiple, encompass them with [ ].
+
+# Data File Name. If there are multiple, encompass them with [ , ]. This is a standard python list of str.
 dataFilename = dataDirectory + "//Aeroquest.txt"
-# System File Name. If there are multiple, encompass them with [ ].
+# dataFilename = [dataDirectory + "//DataFile1.txt", dataDirectory + "//DataFile2.txt"]
+
+# System File Name. If there are multiple, encompass them with [ , ]. This is a standard python list of str.
 systemFilename = dataDirectory + "//Aeroquest.stm"
+# systemFilename = [dataDirectory + "//SystemFile1.stm", dataDirectory + "//SystemFile2.stm"]
 
 
 class userParameters(_userParameters):
