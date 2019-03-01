@@ -64,6 +64,7 @@ from .src.inversion.DataSetResults import DataSetResults
 
 from .src.inversion.Inv_MCMC import Initialize, Inv_MCMC
 
+
 # Set an MPI failed tag
 dpFailed = 0
 # Set an MPI success tag
@@ -231,7 +232,7 @@ def multipleCore(inputFile, outputDir, skipHDF5):
         Dataset._initLineByLineRead(UP.dataFilename, UP.systemFilename)
         # Get a datapoint from the file.
         DataPoint = Dataset._readSingleDatapoint()
-        
+
         Dataset._closeDatafiles()
 
         # While preparing the file, we need access to the line numbers and fiducials in the data file
@@ -360,7 +361,7 @@ def masterTask(Dataset, world):
     else:
         continueRunning[0] = 1 # Yes, continue with the next point.
         world.Isend(continueRunning, dest=requestingRank)
-        DataPoint.Isend(dest=requestingRank, world=world,  systems=DataPoint.system)
+        DataPoint.Isend(dest=requestingRank, world=world, systems=DataPoint.system)
 
     elapsed = MPI.Wtime() - t0
     eta = (nPoints / nFinished-1) * elapsed
@@ -426,3 +427,4 @@ def runParallel():
     sys.path.append(getcwd())
 
     R = multipleCore(inputFile, outputDir, skipHDF5)
+
