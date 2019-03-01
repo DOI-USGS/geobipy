@@ -10,7 +10,7 @@ import numpy as np
 import numpy.ma as ma
 from .fileIO import deleteFile
 from ..base import Error as Err
-from ..base.customFunctions import (getName, getUnits, getNameUnits, histogramEqualize, _logSomething, findFirstLastNonZeros)
+from ..base.customFunctions import (getName, getUnits, getNameUnits, histogramEqualize, _log, findFirstLastNonZeros)
 from cycler import cycler
 import scipy as sp
 
@@ -301,6 +301,7 @@ def hist(counts, bins, rotate=False, flipX=False, flipY=False, trim=True, normal
             i0 += 1
         while counts[i1] == 0:
             i1 -= 1
+
     if (i1 > i0):
         if (rotate):
             plt.ylim(bins[i0], bins[i1+1])
@@ -558,7 +559,7 @@ def pcolormesh(X, Y, values, **kwargs):
     values = ma.masked_invalid(values)
 
     if (log):
-        values, logLabel = _logSomething(values, log)
+        values, logLabel = _log(values, log)
 
     if equalize:
         nBins = kwargs.pop('nbins', 256)
@@ -611,7 +612,7 @@ def pcolormesh(X, Y, values, **kwargs):
         # ax.set_ylim(ax.get_ylim()[::-1])
 
     if np.size(alpha) > 1:
-        setAlphaPerPcolormeshPixel(pm, alpha)
+       setAlphaPerPcolormeshPixel(pm, alpha)
 
     return ax
 
@@ -710,7 +711,7 @@ def pcolor_1D(values, y=None, **kwargs):
 
     v = ma.masked_invalid(values)
     if (log):
-        v,logLabel=_logSomething(v,log)
+        v,logLabel=_log(v,log)
 
     # Append with null values to correctly use pcolormesh
     v = np.concatenate([np.atleast_2d(np.hstack([np.asarray(v),0])), np.atleast_2d(np.zeros(v.size+1))], axis=0)
@@ -808,7 +809,7 @@ def plot(x, y, **kwargs):
 
     tmp = y
     if (log):
-        tmp, logLabel = _logSomething(y, log)
+        tmp, logLabel = _log(y, log)
         yl = logLabel + yl
 
     if (ax is None):
@@ -913,7 +914,7 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
 
     # Did the user ask for a log colour plot?
     if (log):
-        c,logLabel = _logSomething(c,log)
+        c,logLabel = _log(c,log)
     # Equalize the colours?
     if equalize:
         nBins = kwargs.pop('nbins',256)
