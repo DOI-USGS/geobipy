@@ -192,8 +192,13 @@ class Results(myObject):
         # Set a tag to catch data points that are not minimizing
         self.zeroCount = 0
 
+        self.fig = None
         # Initialize the figure region
+        if self.plotMe:
+            self.fig = plt.figure(0, facecolor='white', figsize=(10,7))
         self.initFigure()
+        if self.plotMe:
+            plt.show(block=False)
 
         # Initialize times in seconds
         self.invTime = np.float64(0.0)
@@ -275,14 +280,17 @@ class Results(myObject):
 
     def initFigure(self, iFig=0, forcePlot=False):
         """ Initialize the plotting region """
-        if (not self.plotMe and not forcePlot):
+
+        if self.plotMe or forcePlot:
+            pass
+        else:
             return
         # Setup the figure region. The figure window is split into a 4x3
         # region. Columns are able to span multiple rows
 
-        plt.ion()
+        # plt.ion()
 
-        self.fig = plt.figure(iFig, facecolor='white', figsize=(10,7))
+        # self.fig = plt.figure(iFig, facecolor='white', figsize=(10,7))
         mngr = plt.get_current_fig_manager()
         try:
             mngr.window.setGeometry(0, 10, self.sx, self.sy)
@@ -311,8 +319,8 @@ class Results(myObject):
         self.ax[(2*self.nSystems)+6] = plt.subplot(self.gs[6:, 2 * self.nSystems:])
         for ax in self.ax:
             cP.pretty(ax)
-        plt.show(block=False)
         # plt.draw()
+
 
     def _plotAcceptanceVsIteration(self, **kwargs):
         """ Plots the acceptance percentage against iteration. """
@@ -383,7 +391,7 @@ class Results(myObject):
         
         self.addErr[system].plot(**kwargs)
         plt.locator_params(axis='x', nbins=4)
-        loc, dum = cF._logSomething(self.bestD.addErr[system], log=self.addErr[system].log)
+        loc, dum = cF._log(self.bestD.addErr[system], log=self.addErr[system].log)
         plt.axvline(loc, color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
 
 
@@ -424,7 +432,7 @@ class Results(myObject):
         plt.axhline(self.doi, color='#5046C8', linestyle='dashed', linewidth=3)
 
         # Plot the best model
-        self.bestModel.plot(flipY=False, invX=True, noLabels=True)
+        self.bestModel.plot(flipY=False, reciprocateX=True, noLabels=True)
         plt.axis([self.limits[0], self.limits[1], self.Hitmap.y.cellEdges[0], self.Hitmap.y.cellEdges[-1]])
         ax = plt.gca()
         lim = ax.get_ylim()
@@ -433,17 +441,20 @@ class Results(myObject):
         cP.ylabel(self.MzHist.bins.getNameUnits())
         plt.xscale('log')
 
+
     def plot(self, title="", iFig=0, forcePlot=False):
         """ Updates the figures for MCMC Inversion """
         # Plots that change with every iteration
-        if (not self.plotMe and not forcePlot):
+        if self.plotMe or forcePlot:
+            pass
+        else:
             return
 
         if (not hasattr(self, 'gs')):
             self.initFigure(iFig, forcePlot=forcePlot)
 
 
-        fig = plt.figure(iFig)
+        # fig = plt.figure(iFig)
 
 #        if (np.mod(self.i, 1000) == 0 or forcePlot):
 
@@ -548,6 +559,7 @@ class Results(myObject):
 
         cP.pause(1e-9)
         # pause(1e-9)
+        # return self.fig
 
 
 
