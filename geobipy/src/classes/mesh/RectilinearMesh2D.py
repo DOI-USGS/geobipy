@@ -7,10 +7,9 @@ from ...classes.core.StatArray import StatArray
 from .RectilinearMesh1D import RectilinearMesh1D
 import numpy as np
 from scipy.stats import binned_statistic
-import matplotlib.pyplot as plt
 from ...base import customPlots as cP
 from ...base.customFunctions import safeEval
-from ...base.customFunctions import _logSomething, isInt
+from ...base.customFunctions import _log, isInt
 
 try:
     from pyvtk import VtkData, CellData, Scalars, PolyData
@@ -163,7 +162,7 @@ class RectilinearMesh2D(myObject):
             med = self.z.cellCentres[ixM]
 
         if (not log is None):
-            med, dum = _logSomething(med, log=log)
+            med, dum = _log(med, log=log)
 
         return med
 
