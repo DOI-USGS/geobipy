@@ -242,7 +242,8 @@ For the serial version the following can be used
 For a parallel installed version use the following, (replace the MPI redirect with whatever is suitable for your machine)
 
 .. code:: bash
-  mpirun geobipyParallel <userParameterFile> <Output Folder>
+
+    mpirun geobipyParallel <userParameterFile> <Output Folder>
   
 In both cases, <Output Folder> specifies where the HDF5 files will be written, while the <userParameterFile> is a python script that contains the customizable parameters for GeoBIPy.
 Below is an example scipt that you can use for reference.
