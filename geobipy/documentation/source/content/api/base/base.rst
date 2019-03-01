@@ -5,6 +5,7 @@ Core routines needed for GeoBIPy
    :maxdepth: 2
 
    customFunctions
+   customPlots
    fileIO
    interpolation
    HDF

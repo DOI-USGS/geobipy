@@ -14,5 +14,6 @@ Statistics classes
    NormalLoggedDistribution
    MvNormalLoggedDistribution
    UniformDistribution
+   UniformLoggedDistribution
    GammaDistribution
    OrderStatistics

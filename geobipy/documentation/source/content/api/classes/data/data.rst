@@ -5,4 +5,4 @@ Data classes
    :maxdepth: 2
 
    dataset/dataset
-   datapoint/datapoint
+   datapoint/datapointrst

@@ -6,3 +6,4 @@ Mesh classes
 
    RectilinearMesh1D
    RectilinearMesh2D
+   TopoRectilinearMesh2D

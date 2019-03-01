@@ -1,9 +1,5 @@
-Datapoint classes
-=================================
+DataPoint
+=========================
 
-.. toctree::
-   :maxdepth: 2
-
-   EmDataPoint
-   FdemDataPoint
-   TdemDataPoint
+.. automodule:: geobipy.src.classes.data.datapoint.DataPoint
+   :members:
