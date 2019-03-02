@@ -527,9 +527,7 @@ class TdemDataPoint(EmDataPoint):
         assert means.size == self.nSystems, ValueError("means must have {} entries".format(self.nSystems))
         variances = np.atleast_1d(variances)
         assert variances.size == self.nSystems, ValueError("variances must have {} entries".format(self.nSystems))
-        variancesOfLog = variances / means
-
-        self.addErr.setProposal('MvNormal', np.log(means), variancesOfLog, prng=prng)
+        self.addErr.setProposal('MvNormal', np.log(means), variances, prng=prng)
 
     # def scaleJ(self, Jin, power=1.0):
     #     """ Scales a matrix by the errors in the given data
