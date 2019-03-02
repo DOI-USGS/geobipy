@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Normal distribution on logged values &mdash; GeoBIPy 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="GeoBIPy 1.0.0 documentation" href="../../../../index.html" />
+    <link rel="up" title="Statistics classes" href="statistics.html" />
+    <link rel="next" title="Multivariate normal distribution on logged values" href="MvNormalLoggedDistribution.html" />
+    <link rel="prev" title="Multivariate normal distribution" href="MvNormalDistribution.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="MvNormalLoggedDistribution.html" title="Multivariate normal distribution on logged values"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="MvNormalDistribution.html" title="Multivariate normal distribution"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">GeoBIPy 1.0.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../api.html" >API</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../classes.html" >Classes used in GeoBIPy</a> &raquo;</li>
+          <li class="nav-item nav-item-3"><a href="statistics.html" accesskey="U">Statistics classes</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="normal-distribution-on-logged-values">
+<h1>Normal distribution on logged values<a class="headerlink" href="#normal-distribution-on-logged-values" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-geobipy.src.classes.statistics.NormalLoggedDistribution"></span><p>&#64;NormalLoggedDistribution
+Module defining a normal distribution for log(parameter) with statistical procedures</p>
+<dl class="class">
+<dt id="geobipy.src.classes.statistics.NormalLoggedDistribution.NormalLog">
+<em class="property">class </em><code class="descclassname">geobipy.src.classes.statistics.NormalLoggedDistribution.</code><code class="descname">NormalLog</code><span class="sig-paren">(</span><em>mean</em>, <em>variance</em>, <em>prng=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.NormalLoggedDistribution.NormalLog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class defining a normal distribution</p>
+<dl class="method">
+<dt id="geobipy.src.classes.statistics.NormalLoggedDistribution.NormalLog.deepcopy">
+<code class="descname">deepcopy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.NormalLoggedDistribution.NormalLog.deepcopy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define a deepcopy routine</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.statistics.NormalLoggedDistribution.NormalLog.getBins">
+<code class="descname">getBins</code><span class="sig-paren">(</span><em>size=100</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.NormalLoggedDistribution.NormalLog.getBins" title="Permalink to this definition">¶</a></dt>
+<dd><p>Discretizes a range given the mean and variance of the distribution</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="MvNormalDistribution.html"
+                        title="previous chapter">Multivariate normal distribution</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="MvNormalLoggedDistribution.html"
+                        title="next chapter">Multivariate normal distribution on logged values</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../../_sources/content/api/classes/statistics/NormalLoggedDistribution.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="MvNormalLoggedDistribution.html" title="Multivariate normal distribution on logged values"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="MvNormalDistribution.html" title="Multivariate normal distribution"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">GeoBIPy 1.0.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../api.html" >API</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../classes.html" >Classes used in GeoBIPy</a> &raquo;</li>
+          <li class="nav-item nav-item-3"><a href="statistics.html" >Statistics classes</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright None.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>
