@@ -148,8 +148,8 @@ class userParameters(_userParameters):
     # These variances are used when we randomly choose a new value for that given variable.
     # Proposal variance for the relative error
     self.relativeErrorProposalVariance = 2.5e-7
-    # Proposal variance for the additive error
-    self.additiveErrorProposalVariance = 5.0e-11
+    # Proposal variance for the exponent of the additive error
+    self.additiveErrorProposalVariance = 0.0025
     # Proposal variance of the elevation
     self.elevationProposalVariance = 0.01
 
