@@ -107,6 +107,7 @@ class TdemData(Data):
 
         self.iActive = self.getActiveChannels()
 
+
     @property
     def nTimes(self):
         return self.nChannelsPerSystem
@@ -553,7 +554,7 @@ class TdemData(Data):
             if self._iS[j] is None:
                 S[iSys] = 0.1 * D[iSys]
             else:
-               S[iSys] = values[self._iS[j]]
+                S[iSys] = values[j][self._iS[j]]
 
         values = values[0]
 
