@@ -19,4 +19,4 @@ class Model(myObject):
     def __init__(self):
         """ABC method"""
         NotImplementedError()
-    """
+
