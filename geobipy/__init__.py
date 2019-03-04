@@ -39,7 +39,6 @@ from .src.classes.data.dataset.TdemData import TdemData
 # Systems
 from .src.classes.system.FdemSystem import FdemSystem
 from .src.classes.system.TdemSystem import TdemSystem
-from .src.classes.system.MTSystem import MTSystem
 # Meshes
 from .src.classes.mesh.RectilinearMesh1D import RectilinearMesh1D
 from .src.classes.mesh.RectilinearMesh2D import RectilinearMesh2D
