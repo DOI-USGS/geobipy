@@ -36,7 +36,6 @@ from .src.classes.data.datapoint.TdemDataPoint import TdemDataPoint
 from .src.classes.data.dataset.Data import Data
 from .src.classes.data.dataset.FdemData import FdemData
 from .src.classes.data.dataset.TdemData import TdemData
-from .src.classes.data.dataset.MTData import MTData
 # Systems
 from .src.classes.system.FdemSystem import FdemSystem
 from .src.classes.system.TdemSystem import TdemSystem
