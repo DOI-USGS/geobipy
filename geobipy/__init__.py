@@ -32,7 +32,6 @@ from .src.classes.data.datapoint.DataPoint import DataPoint
 from .src.classes.data.datapoint.EmDataPoint import EmDataPoint
 from .src.classes.data.datapoint.FdemDataPoint import FdemDataPoint
 from .src.classes.data.datapoint.TdemDataPoint import TdemDataPoint
-from .src.classes.data.datapoint.MTDataPoint import MTDataPoint
 # Datasets
 from .src.classes.data.dataset.Data import Data
 from .src.classes.data.dataset.FdemData import FdemData
