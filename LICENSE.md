@@ -9,13 +9,13 @@ https://www2.usgs.gov/visual-id/credit_usgs.html#copyright
 Additionally, we waive copyright and related rights in the work
 worldwide through the CC0 1.0 Universal public domain dedication.
 
-Since the CC0 1.0 license does not state whether a user can re-distribute the material, we also release the source code under the BSD license.
+Since the CC0 1.0 license does not state whether a user can re-distribute the material, we also release the source code under the BSD-3 license.
 
-This software uses external libraries released under the GPLv2 license. As such this work as a whole is also released under the GPLv2 license.
+This software also uses external libraries released under the GPLv2 license. As such this work as a whole is also released under the GPLv2 license.
 
-## BSD
+## BSD-3
 
-[BSD License](https://opensource.org/licenses/BSD-3-Clause)
+[BSD-3 License](https://opensource.org/licenses/BSD-3-Clause)
 
 ## GPL v2 
 
