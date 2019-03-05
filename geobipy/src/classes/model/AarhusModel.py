@@ -72,7 +72,7 @@ class AarhusModel(Model):
             return np.asarray(tmp)
 
 
-    def read2D(self, fileName, lineNumber=None):
+    def read2D(self, fileName, lineNumber):
         """Read in an inversion file from the Aarhus software
 
         Parameters
@@ -81,7 +81,7 @@ class AarhusModel(Model):
             Path to the inversion file.
         index : int
             Index of the line to read in 0 to nLines.
-        lineNumber : float, optional
+        lineNumber : float
             The line number to read in.
 
         Returns
@@ -152,6 +152,7 @@ class AarhusModel(Model):
 
             # Skip the first data points that are not the line we need
             line = fio.getRealNumbersfromLine(f.readline())
+
             while line[lineIndex] != lineNumber:
                 line = fio.getRealNumbersfromLine(f.readline())
 
