@@ -1,0 +1,547 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>customFunctions &#8212; GeoBIPy 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="customPlots" href="customPlots.html" />
+    <link rel="prev" title="Core routines needed for GeoBIPy" href="base.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="customPlots.html" title="customPlots"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="base.html" title="Core routines needed for GeoBIPy"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">GeoBIPy 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../api.html" >API</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="base.html" accesskey="U">Core routines needed for GeoBIPy</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-geobipy.src.base.customFunctions">
+<span id="customfunctions"></span><h1>customFunctions<a class="headerlink" href="#module-geobipy.src.base.customFunctions" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="geobipy.src.base.customFunctions.Ax">
+<code class="descclassname">geobipy.src.base.customFunctions.</code><code class="descname">Ax</code><span class="sig-paren">(</span><em>A</em>, <em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.Ax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom matrix vector multiplication for different representations of the matrix.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>A</strong> (<em>float</em><em> or </em><em>ndarray of floats</em>) – A scalar, 1D array, or 2D array.
+If A is scalar, assume it represents a diagonal matrix with constant value.
+If A is 1D, assume it represents a diagonal matrix and do an element wise multiply.
+If A is 2D, take the dot product.</li>
+<li><strong>x</strong> (<em>numpy.ndarray</em>) – The 1D vector to multiply A with.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – Resultant matrix vector multiplication.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray of floats</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.customFunctions.Det">
+<code class="descclassname">geobipy.src.base.customFunctions.</code><code class="descname">Det</code><span class="sig-paren">(</span><em>A</em>, <em>N=1.0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.Det" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom function to compute the determinant of a matrix.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>A</strong> (<em>float</em><em> or </em><em>ndarray of floats</em>) – If A is 2D: Use numpy.linalg.det obtain determinant. Uses LU factorization.
+If A is 1D: Take the cumulative product of the numbers, assumes A represents a diagonal matrix.
+If A is scalar: Take the number to power N, assumes A represents a diagonal matrix with constant value.</li>
+<li><strong>N</strong> (<em>int</em><em>, </em><em>optional</em>) – If A is a scalar, N is the number of elements in the constant valued diagonal.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – The determinant of the matrix.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.customFunctions.Inv">
+<code class="descclassname">geobipy.src.base.customFunctions.</code><code class="descname">Inv</code><span class="sig-paren">(</span><em>A</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.Inv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom matrix inversion upto 2 dimensions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>A</strong> (<em>float</em><em> or </em><em>ndarray of floats</em>) – A scalar, 1D array, or 2D array.
+If A is scalar, assume it represents a diagonal matrix with constant value and take the reciprocal.
+If A is 1D, assume it is the diagonal of a matrix: take reciprocal of entries.
+If A is 2D, invert using linalg.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – The inversion of A.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float or ndarray of floats</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.customFunctions.LogDet">
+<code class="descclassname">geobipy.src.base.customFunctions.</code><code class="descname">LogDet</code><span class="sig-paren">(</span><em>A</em>, <em>N=1.0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.LogDet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom function to get the natural logarithm of the determinant.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>A</strong> (<em>float</em><em> or </em><em>numpy.ndarray of floats</em>) – If A is 2D: Use linalg.to obtain determinant. Uses LU factorization.
+If A is 1D: Take the cumulative product of the numbers, assumes A represents a diagonal matrix.
+If A is scalar: Take the number to power N, assumes A represents a diagonal matrix with constant value.</li>
+<li><strong>N</strong> (<em>int</em><em>, </em><em>optional</em>) – If A is a scalar, N is the number of elements in the constant valued diagonal.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – The logged determinant of the matrix.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.customFunctions.cosSin1">
+<code class="descclassname">geobipy.src.base.customFunctions.</code><code class="descname">cosSin1</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>a</em>, <em>p</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.cosSin1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple function for creating tests.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.customFunctions.expReal">
+<code class="descclassname">geobipy.src.base.customFunctions.</code><code class="descname">expReal</code><span class="sig-paren">(</span><em>this</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.expReal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom exponential of a number to allow a large negative exponent, overflow truncates without warning message.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>this</strong> (<em>float</em>) – Real number to take exponential to.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – exp(this).</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.customFunctions.findFirstLastNonZeros">
+<code class="descclassname">geobipy.src.base.customFunctions.</code><code class="descname">findFirstLastNonZeros</code><span class="sig-paren">(</span><em>this</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.findFirstLastNonZeros" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the indices to the first and last non zero values along each axis</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>this</strong> (<em>array_like</em>) – An array of numbers</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – Indices of the first and last non zero values along each axisgg</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">array_like</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.customFunctions.findFirstNonZeros">
+<code class="descclassname">geobipy.src.base.customFunctions.</code><code class="descname">findFirstNonZeros</code><span class="sig-paren">(</span><em>this</em>, <em>axis</em>, <em>invalid_val=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.findFirstNonZeros" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the indices to the first non zero values</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>this</strong> (<em>array_like</em>) – An array of numbers</li>
+<li><strong>axis</strong> (<em>int</em>) – Axis along which to find first non zeros</li>
+<li><strong>invalid_val</strong> (<em>int</em>) – If all values along that axis are zero, use this value</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – Indices of the first non zero values.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ints</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.customFunctions.findLastNonZeros">
+<code class="descclassname">geobipy.src.base.customFunctions.</code><code class="descname">findLastNonZeros</code><span class="sig-paren">(</span><em>this</em>, <em>axis</em>, <em>invalid_val=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.findLastNonZeros" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the indices to the last non zero values</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>this</strong> (<em>array_like</em>) – An array of numbers</li>
+<li><strong>axis</strong> (<em>int</em>) – Axis along which to find last non zeros</li>
+<li><strong>invalid_val</strong> (<em>int</em>) – If all values along that axis are zero, use this value</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – Indices of the last non zero values.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ints</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.customFunctions.findNans">
+<code class="descclassname">geobipy.src.base.customFunctions.</code><code class="descname">findNans</code><span class="sig-paren">(</span><em>this</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.findNans" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the indicies to NaN values.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>this</strong> (<em>array_like</em>) – An array of numbers.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – Integer array to locations of nans.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">array_like</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.customFunctions.findNotNans">
+<code class="descclassname">geobipy.src.base.customFunctions.</code><code class="descname">findNotNans</code><span class="sig-paren">(</span><em>this</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.findNotNans" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the indicies to non NaN values.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>this</strong> (<em>array_like</em>) – An array of numbers.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – Integer array to locations of non nans.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">array_like</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.customFunctions.getName">
+<code class="descclassname">geobipy.src.base.customFunctions.</code><code class="descname">getName</code><span class="sig-paren">(</span><em>self</em>, <em>default=''</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.getName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tries to obtain an attached name to a variable.</p>
+<p>If the variable is an object with a getName() procedure, that function will take precedence.
+If the variable does not have that procedure, a variable called name will be sought.
+If this fails, the specified default will be returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>self</strong> (<em>any type</em>) – Any type of variable.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – A string containing the variable’s name or the default.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.customFunctions.getNameUnits">
+<code class="descclassname">geobipy.src.base.customFunctions.</code><code class="descname">getNameUnits</code><span class="sig-paren">(</span><em>self</em>, <em>defaultName=''</em>, <em>defaultUnits=''</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.getNameUnits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tries to obtain any attached name and units to a variable. Any units are surrounded by round brackets.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>self</strong> (<em>any type</em>) – Any type of variable.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – A string containing the variable’s name and units or the defaults.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.customFunctions.getUnits">
+<code class="descclassname">geobipy.src.base.customFunctions.</code><code class="descname">getUnits</code><span class="sig-paren">(</span><em>self</em>, <em>default=''</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.getUnits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tries to obtain an attached units to a variable.</p>
+<p>If the variable is an object with a getUnits() procedure, that function will take precedence.
+If the variable does not have that procedure, a variable called units will be sought.
+If this fails, the specified default will be returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>self</strong> (<em>any type</em>) – Any type of variable.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – A string containing the variable’s units or the default.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.customFunctions.histogramEqualize">
+<code class="descclassname">geobipy.src.base.customFunctions.</code><code class="descname">histogramEqualize</code><span class="sig-paren">(</span><em>values</em>, <em>nBins=256</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.histogramEqualize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Equalize the histogram of the values so that all colours have an equal amount</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>values</strong> (<em>array_like</em>) – Values to be equalized.</li>
+<li><strong>nBins</strong> (<em>int</em>) – Number of bins to use.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>res</strong> (<em>array_like</em>) – Equalized values</li>
+<li><strong>cdf</strong> (<em>array_like</em>) – Cumulative Density Function.</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.customFunctions.isInt">
+<code class="descclassname">geobipy.src.base.customFunctions.</code><code class="descname">isInt</code><span class="sig-paren">(</span><em>this</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.isInt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether an entry is a subtype of an int</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>this</strong> (<em>variable</em>) – Variable to check whether an int or not</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – Is or is not an int</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.customFunctions.isIntorSlice">
+<code class="descclassname">geobipy.src.base.customFunctions.</code><code class="descname">isIntorSlice</code><span class="sig-paren">(</span><em>this</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.isIntorSlice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether an entry is a subtype of an int or a slice</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>this</strong> (<em>variable</em>) – Variable to check whether an int/slice or not</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – Is or is not an int/slice</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.customFunctions.isNumpy">
+<code class="descclassname">geobipy.src.base.customFunctions.</code><code class="descname">isNumpy</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.isNumpy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test that the variable is a compatible numpy type with built ins like .ndim</p>
+<dl class="docutils">
+<dt>x <span class="classifier-delimiter">:</span> <span class="classifier">anything</span></dt>
+<dd>A variable to check</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – Whether the variable is a compatible numpy type</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.customFunctions.mergeComplex">
+<code class="descclassname">geobipy.src.base.customFunctions.</code><code class="descname">mergeComplex</code><span class="sig-paren">(</span><em>this</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.mergeComplex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge a 1D array containing a vertical concatenation of N real then N imaginary components   into an N/2 complex 1D array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>this</strong> (<em>numpy.ndarray of float64</em>) – 1D array containing the vertical concatentation of real then imaginary values.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – The combined real and imaginary components into a complex 1D array.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">numpy.ndarray of complex128</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.customFunctions.rosenbrock">
+<code class="descclassname">geobipy.src.base.customFunctions.</code><code class="descname">rosenbrock</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>a</em>, <em>b</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.rosenbrock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates values from the Rosenbrock function.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.customFunctions.splitComplex">
+<code class="descclassname">geobipy.src.base.customFunctions.</code><code class="descname">splitComplex</code><span class="sig-paren">(</span><em>this</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.splitComplex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Splits a vector of complex numbers into a vertical concatenation of the real and imaginary components.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>this</strong> (<em>numpy.ndarray of complex128</em>) – 1D array of complex numbers.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – Vertically concatenated real then imaginary components of this.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">numpy.ndarray of float64</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.customFunctions.str_to_raw">
+<code class="descclassname">geobipy.src.base.customFunctions.</code><code class="descname">str_to_raw</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.str_to_raw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function for latex</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>s</strong> (<em>str</em>) – String with special latex commands.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – String with latex special characters.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.customFunctions.tanh">
+<code class="descclassname">geobipy.src.base.customFunctions.</code><code class="descname">tanh</code><span class="sig-paren">(</span><em>this</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.tanh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom hyperbolic tangent, return correct overflow.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="base.html"
+                        title="previous chapter">Core routines needed for GeoBIPy</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="customPlots.html"
+                        title="next chapter">customPlots</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/content/api/base/customFunctions.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="customPlots.html" title="customPlots"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="base.html" title="Core routines needed for GeoBIPy"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">GeoBIPy 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../api.html" >API</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="base.html" >Core routines needed for GeoBIPy</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright None.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.9.
+    </div>
+  </body>
+</html>

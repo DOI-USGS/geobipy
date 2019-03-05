@@ -1,0 +1,299 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>RectilinearMesh1D &#8212; GeoBIPy 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="RectilinearMesh2D" href="RectilinearMesh2D.html" />
+    <link rel="prev" title="Mesh classes" href="mesh.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="RectilinearMesh2D.html" title="RectilinearMesh2D"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="mesh.html" title="Mesh classes"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">GeoBIPy 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../api.html" >API</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../classes.html" >Classes used in GeoBIPy</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="mesh.html" accesskey="U">Mesh classes</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-geobipy.src.classes.mesh.RectilinearMesh1D">
+<span id="rectilinearmesh1d"></span><h1>RectilinearMesh1D<a class="headerlink" href="#module-geobipy.src.classes.mesh.RectilinearMesh1D" title="Permalink to this headline">¶</a></h1>
+<p>&#64;RectilinearMesh1D_Class
+Module describing a 1D Rectilinear Mesh class</p>
+<dl class="class">
+<dt id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D">
+<em class="property">class </em><code class="descclassname">geobipy.src.classes.mesh.RectilinearMesh1D.</code><code class="descname">RectilinearMesh1D</code><span class="sig-paren">(</span><em>cellCentres=None</em>, <em>cellEdges=None</em>, <em>edgesMin=None</em>, <em>edgesMax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class defining a 1D rectilinear mesh with cell centres and edges.</p>
+<p>Contains a simple 1D mesh with cell edges, widths, and centre locations.</p>
+<p>RectilinearMesh1D(cellCentres, cellEdges, edgesMin, edgesMax)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cellCentres</strong> (<em>geobipy.StatArray</em><em>, </em><em>optional</em>) – The locations of the centre of each cell. Only cellCentres or cellEdges can be given.</li>
+<li><strong>cellEdges</strong> (<em>geobipy.StatArray</em><em>, </em><em>optional</em>) – The locations of the edges of each cell, including the outermost edges. Only cellCentres or cellEdges can be given.</li>
+<li><strong>edgesMin</strong> (<em>float</em><em>, </em><em>optional</em>) – Only used if instantiated with cellCentres.
+Normally the ‘left’ edge is calucated by centres[0] - 0.5 * (centres[1] - centres[0]).
+Instead, force the leftmost edge to be edgesMin.</li>
+<li><strong>edgesMax</strong> (<em>float</em><em>, </em><em>optional</em>) – Only used if instantiated with cellCentres.
+Normally the ‘right’ edge is calucated by centres[-1] - 0.5 * (centres[-1] - centres[-2]).
+Instead, force the rightmost edge to be edgesMax.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – The 1D mesh.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference internal" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D" title="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D">RectilinearMesh1D</a></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><code class="xref py py-exc docutils literal notranslate"><span class="pre">Exception</span></code> – If both cellCentres and cellEdges are given.</li>
+<li><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code> – cellCentres must be a geobipy.StatArray.</li>
+<li><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code> – cellEdges must be a geobipy.StatArray.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.cellIndex">
+<code class="descname">cellIndex</code><span class="sig-paren">(</span><em>values</em>, <em>clip=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.cellIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the index to the cell that each value in values falls in.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>values</strong> (<em>array_like</em>) – The values to find the cell indices for</li>
+<li><strong>clip</strong> (<em>bool</em>) – A negative index which would normally wrap will clip to 0 and self.bins.size instead.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – The cell indices</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array_like</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.createHdf">
+<code class="descname">createHdf</code><span class="sig-paren">(</span><em>parent</em>, <em>myName</em>, <em>nRepeats=None</em>, <em>fillvalue=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.createHdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the hdf group metadata in file
+parent: HDF object to create a group inside
+myName: Name of the group</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.deepcopy">
+<code class="descname">deepcopy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.deepcopy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a deepcopy</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – Deepcopy of RectilinearMesh1D</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D" title="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D">RectilinearMesh1D</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.fromHdf">
+<code class="descname">fromHdf</code><span class="sig-paren">(</span><em>grp</em>, <em>index=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.fromHdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads in the object froma HDF file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.hdfName">
+<code class="descname">hdfName</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.hdfName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reprodicibility procedure</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.pcolor">
+<code class="descname">pcolor</code><span class="sig-paren">(</span><em>values</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.pcolor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a pseudocolour plot.</p>
+<p>Can take any other matplotlib arguments and keyword arguments e.g. cmap etc.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>values</strong> (<em>array_like</em>) – The value of each cell.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Other Parameters:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>alpha</strong> (<em>scalar or array_like, optional</em>) – If alpha is scalar, behaves like standard matplotlib alpha and opacity is applied to entire plot
+If array_like, each pixel is given an individual alpha value.</li>
+<li><strong>log</strong> (<em>‘e’ or float, optional</em>) – Take the log of the colour to a base. ‘e’ if log = ‘e’, and a number e.g. log = 10.
+Values in c that are &lt;= 0 are masked.</li>
+<li><strong>equalize</strong> (<em>bool, optional</em>) – Equalize the histogram of the colourmap so that all colours have an equal amount.</li>
+<li><strong>nbins</strong> (<em>int, optional</em>) – Number of bins to use for histogram equalization.</li>
+<li><strong>xscale</strong> (<em>str, optional</em>) – Scale the x axis? e.g. xscale = ‘linear’ or ‘log’</li>
+<li><strong>yscale</strong> (<em>str, optional</em>) – Scale the y axis? e.g. yscale = ‘linear’ or ‘log’.</li>
+<li><strong>flipX</strong> (<em>bool, optional</em>) – Flip the X axis</li>
+<li><strong>flipY</strong> (<em>bool, optional</em>) – Flip the Y axis</li>
+<li><strong>grid</strong> (<em>bool, optional</em>) – Plot the grid</li>
+<li><strong>noColorbar</strong> (<em>bool, optional</em>) – Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.</li>
+<li><strong>trim</strong> (<em>bool, optional</em>) – Set the x and y limits to the first and last non zero values along each axis.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">geobipy.customPlots.pcolor()</span></code></dt>
+<dd>For non matplotlib keywords.</dd>
+<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">matplotlib.pyplot.pcolormesh()</span></code></dt>
+<dd>For additional keyword arguments you may use.</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.plotGrid">
+<code class="descname">plotGrid</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.plotGrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the grid lines of the mesh.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">geobipy.StatArray.pcolor()</span></code></dt>
+<dd>For additional plotting arguments</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.range">
+<code class="descname">range</code><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the difference between end edges.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.summary">
+<code class="descname">summary</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print a summary of self</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.toHdf">
+<code class="descname">toHdf</code><span class="sig-paren">(</span><em>h5obj</em>, <em>myName</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.toHdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the StatArray to an HDF object
+h5obj: :An HDF File or Group Object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.writeHdf">
+<code class="descname">writeHdf</code><span class="sig-paren">(</span><em>parent</em>, <em>myName</em>, <em>index=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.writeHdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the StatArray to an HDF object
+parent: Upper hdf file or group
+myName: object hdf name. Assumes createHdf has already been called
+create: optionally create the data set as well before writing</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="mesh.html"
+                        title="previous chapter">Mesh classes</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="RectilinearMesh2D.html"
+                        title="next chapter">RectilinearMesh2D</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../../_sources/content/api/classes/mesh/RectilinearMesh1D.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="RectilinearMesh2D.html" title="RectilinearMesh2D"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="mesh.html" title="Mesh classes"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">GeoBIPy 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../api.html" >API</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../classes.html" >Classes used in GeoBIPy</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="mesh.html" >Mesh classes</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright None.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.9.
+    </div>
+  </body>
+</html>

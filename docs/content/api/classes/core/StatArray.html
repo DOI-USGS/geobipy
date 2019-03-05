@@ -1,0 +1,1231 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>StatArray &#8212; GeoBIPy 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Data classes" href="../data/data.html" />
+    <link rel="prev" title="Core object class" href="myObject.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../data/data.html" title="Data classes"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="myObject.html" title="Core object class"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">GeoBIPy 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../api.html" >API</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../classes.html" >Classes used in GeoBIPy</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="core.html" accesskey="U">Core classes</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-geobipy.src.classes.core.StatArray">
+<span id="statarray"></span><h1>StatArray<a class="headerlink" href="#module-geobipy.src.classes.core.StatArray" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="geobipy.src.classes.core.StatArray.StatArray">
+<em class="property">class </em><code class="descclassname">geobipy.src.classes.core.StatArray.</code><code class="descname">StatArray</code><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class extension to numpy.ndarray</p>
+<p>This subclass to a numpy array contains extra attributes that can describe the parameters it represents.
+One can also attach prior and proposal distributions so that it may be used in an MCMC algorithm easily.
+Because this is a subclass to numpy, the StatArray contains all numpy array methods and when passed to an
+in-place numpy function will return a StatArray.  See the example section for more information.</p>
+<p>StatArray(shape, name=None, units=None, **kwargs)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>shape</strong> (<em>int</em><em> or </em><em>sequence of ints</em><em> or </em><em>array_like</em><em> or </em><a class="reference internal" href="#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – <ul>
+<li>If shape is int or sequence of ints : give the shape of the new StatArray e.g., <code class="docutils literal notranslate"><span class="pre">2</span></code> or <code class="docutils literal notranslate"><span class="pre">(2,</span> <span class="pre">3)</span></code>. All other arguments that can be passed to functions like numpy.zeros or numpy.arange can be used, see Other Parameters.</li>
+<li>If shape is array_like : any object exposing the array interface, an object whose __array__ method returns an array, or any (nested) sequence. e.g., <code class="docutils literal notranslate"><span class="pre">StatArray(numpy.arange(10))</span></code> will cast the result into a StatArray and will maintain the properies passed through to that function. One could then attach the name, units, prior, and/or proposal through this interface too. e.g., <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">StatArray(numpy.arange(10,dtype=numpy.int),</span> <span class="pre">name='aTest',</span> <span class="pre">units='someUnits')</span></code></li>
+<li>If shape is StatArray : the returned object is a deepcopy of the input. If name and units are specified with this option they will replace those parameters in the copy. e.g., <code class="docutils literal notranslate"><span class="pre">y</span> <span class="pre">=</span> <span class="pre">StatArray(x,</span> <span class="pre">name='anotherTest')</span></code> will be a deepcopy copy of x, but with a different name.</li>
+</ul>
+</li>
+<li><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the StatArray.</li>
+<li><strong>units</strong> (<em>str</em><em>, </em><em>optional</em>) – The units of the StatArray.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Other Parameters:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><ul class="first simple">
+<li><strong>dtype</strong> (<em>data-type, optional</em>) – The desired data-type for the array.  Default is
+<cite>numpy.float64</cite>. Only used when shape is int or sequence of ints.
+The data type could also be a class.</li>
+<li><strong>buffer</strong> (<em>object exposing buffer interface, optional</em>) – Used to fill the array with data. Only used when shape is int or sequence of ints.</li>
+<li><strong>offset</strong> (<em>int, optional</em>) – Offset of array data in buffer. Only used when shape is int or sequence of ints.</li>
+<li><strong>strides</strong> (<em>tuple of ints, optional</em>) – Strides of data in memory. Only used when shape is int or sequence of ints.</li>
+<li><strong>order</strong> (<em>{‘C’, ‘F’, ‘A’}, optional</em>) – Specify the order of the array.  If order is ‘C’, then the array
+will be in C-contiguous order (rightmost-index varies the fastest).
+If order is ‘F’, then the returned array will be in
+Fortran-contiguous order (leftmost-index varies the fastest).
+If order is ‘A’ (default), then the returned array may be in any order (either C-, Fortran-contiguous, or even discontiguous),
+unless a copy is required, in which case it will be C-contiguous. Only used when shape is int or sequence of ints.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – Extension to numpy.ndarray with additional attributes attached.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference internal" href="#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray">StatArray</a></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code> – If name is not a str.</li>
+<li><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code> – If units is not a str.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>When the StatArray is passed through a numpy function, the name and units are maintained in the new object.  Any priors or proposals are not kept for two reasons. a) keep computational overheads low, b) assume that a possible change in size or meaning of a parameter warrants a change in any attached distributions.</p>
+<p class="rubric">Examples</p>
+<p>Since the StatArray is an extension to numpy, all numpy attached methods can be used.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">geobipy</span> <span class="k">import</span> <span class="n">StatArray</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;units&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+<span class="go">4.5</span>
+</pre></div>
+</div>
+<p>If the StatArray is passed to a numpy function that does not return a new instantiation, a StatArray will be returned (as opposed to a numpy array)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="go">StatArray([0, 1, 2, 3, 4, 6, 7, 8, 9])</span>
+</pre></div>
+</div>
+<p>However, if you pass a StatArray to a numpy function that is not in-place, i.e. creates new memory, the return type will be a numpy array and NOT a StatArray subclass</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">,[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">])</span>
+<span class="go">array([0, 1, 2, ..., 3, 4, 5])</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><a class="reference internal" href="../statistics/Distribution.html#module-geobipy.src.classes.statistics.Distribution" title="geobipy.src.classes.statistics.Distribution"><code class="xref py py-class docutils literal notranslate"><span class="pre">geobipy.src.classes.statistics.Distribution</span></code></a></dt>
+<dd>For possible prior and proposal distributions</dd>
+</dl>
+</div>
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.Bcast">
+<code class="descname">Bcast</code><span class="sig-paren">(</span><em>world</em>, <em>root=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.Bcast" title="Permalink to this definition">¶</a></dt>
+<dd><p>Broadcast the StatArray to every rank in the MPI communicator.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>world</strong> (<em>mpi4py.MPI.Comm</em>) – The MPI communicator over which to broadcast.</li>
+<li><strong>root</strong> (<em>int</em><em>, </em><em>optional</em>) – The rank from which to broadcast.  Default is 0 for the master rank.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – The broadcast StatArray on every rank in the MPI communicator.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray">StatArray</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.Irecv">
+<code class="descname">Irecv</code><span class="sig-paren">(</span><em>source</em>, <em>world</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.Irecv" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.IrecvFromLeft">
+<code class="descname">IrecvFromLeft</code><span class="sig-paren">(</span><em>world</em>, <em>wrap=True</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.IrecvFromLeft" title="Permalink to this definition">¶</a></dt>
+<dd><p>Irecv an array from the rank left of world.rank.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.IrecvFromRight">
+<code class="descname">IrecvFromRight</code><span class="sig-paren">(</span><em>world</em>, <em>wrap=True</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.IrecvFromRight" title="Permalink to this definition">¶</a></dt>
+<dd><p>IRecv an array from the rank right of world.rank.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.Isend">
+<code class="descname">Isend</code><span class="sig-paren">(</span><em>dest</em>, <em>world</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.Isend" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.IsendToLeft">
+<code class="descname">IsendToLeft</code><span class="sig-paren">(</span><em>world</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.IsendToLeft" title="Permalink to this definition">¶</a></dt>
+<dd><p>ISend an array to the rank left of world.rank.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.IsendToRight">
+<code class="descname">IsendToRight</code><span class="sig-paren">(</span><em>world</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.IsendToRight" title="Permalink to this definition">¶</a></dt>
+<dd><p>ISend an array to the rank right of world.rank.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.Scatterv">
+<code class="descname">Scatterv</code><span class="sig-paren">(</span><em>starts</em>, <em>chunks</em>, <em>world</em>, <em>axis=0</em>, <em>root=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.Scatterv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scatter variable lengths of the StatArray using MPI</p>
+<p>Takes the StatArray and gives each core in the world a chunk of the array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>starts</strong> (<em>array of ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the starting index for a chunk to be sent to that core. e.g. starts[0] is the starting index for rank = 0.</li>
+<li><strong>chunks</strong> (<em>array of ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the size of a chunk to be sent to that core. e.g. chunks[0] is the chunk size for rank = 0.</li>
+<li><strong>world</strong> (<em>mpi4py.MPI.Comm</em>) – The MPI communicator over which to Scatterv.</li>
+<li><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – This axis is distributed amongst ranks.</li>
+<li><strong>root</strong> (<em>int</em><em>, </em><em>optional</em>) – The MPI rank to ScatterV from. Default is 0.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – The StatArray distributed amongst ranks.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray">StatArray</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.append">
+<code class="descname">append</code><span class="sig-paren">(</span><em>values</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append to a StatArray</p>
+<p>Appends values the end of a StatArray. Be careful with repeated calls to this method as it can be slow due to reallocating memory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>values</strong> (<em>scalar</em><em> or </em><em>array_like</em>) – Numbers to append</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – Appended StatArray</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray">StatArray</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.bar">
+<code class="descname">bar</code><span class="sig-paren">(</span><em>x=None</em>, <em>i=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.bar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the StatArray as a bar chart.</p>
+<p>The values in self are the heights of the bars. Auto labels it if x has type geobipy.StatArray</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a><em>, </em><em>optional</em>) – The horizontal locations of the bars</li>
+<li><strong>i</strong> (<em>sequence of ints</em><em>, </em><em>optional</em>) – Plot the ith indices of self, against the ith indices of x.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">matplotlib .Axes</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ax</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">matplotlib.pyplot.bar()</span></code></dt>
+<dd>For additional keyword arguments you may use.</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><em>order='C'</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a copy of the array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>order</strong> (<em>{'C'</em><em>, </em><em>'F'</em><em>, </em><em>'A'</em><em>, </em><em>'K'}</em><em>, </em><em>optional</em>) – Controls the memory layout of the copy. ‘C’ means C-order,
+‘F’ means F-order, ‘A’ means ‘F’ if <cite>a</cite> is Fortran contiguous,
+‘C’ otherwise. ‘K’ means match the layout of <cite>a</cite> as closely
+as possible. (Note that this function and <code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.copy()</span></code> are very
+similar, but have different default values for their order=
+arguments.)</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><code class="xref py py-meth docutils literal notranslate"><span class="pre">numpy.copy()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">numpy.copyto()</span></code></p>
+</div>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">]],</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span>
+<span class="go">array([[0, 0, 0],</span>
+<span class="go">       [0, 0, 0]])</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">y</span>
+<span class="go">array([[1, 2, 3],</span>
+<span class="go">       [4, 5, 6]])</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">y</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">&#39;C_CONTIGUOUS&#39;</span><span class="p">]</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.createHdf">
+<code class="descname">createHdf</code><span class="sig-paren">(</span><em>h5obj</em>, <em>myName</em>, <em>nRepeats=None</em>, <em>fillvalue=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.createHdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the Metadata for a StatArray in a HDF file</p>
+<p>Creates a new group in a HDF file under h5obj.
+A nested heirarchy will be created e.g., myNamedata, myNameprior, and myNameproposal.
+This method can be used in an MPI parallel environment, if so however, a) the hdf file must have been opened with the mpio driver,
+and b) createHdf must be called collectively, i.e., called by every core in the MPI communicator that was used to open the file.
+In order to create large amounts of empty space before writing to it in parallel, the nRepeats parameter will extend the memory
+in the first dimension.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>h5obj</strong> (<em>h5py._hl.files.File</em><em> or </em><em>h5py._hl.group.Group</em>) – A HDF file or group object to create the contents in.</li>
+<li><strong>myName</strong> (<em>str</em>) – The name of the group to create.</li>
+<li><strong>nRepeats</strong> (<em>int</em><em>, </em><em>optional</em>) – Inserts a first dimension into the shape of the StatArray of length nRepeats. This can be used to extend the available memory of
+the StatArray so that multiple MPI ranks can write to their respective parts in the extended memory.</li>
+<li><strong>fillvalue</strong> (<em>number</em><em>, </em><em>optional</em>) – Initializes the memory in file with the fill value</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>This method can be used in serial and MPI. As an example in MPI.
+Given 10 MPI ranks, each with a 10 length array, it is faster to create a 10x10 empty array, and have each rank write its row.
+Rather than creating 10 separate length 10 arrays because the overhead when creating the file metadata can become very
+cumbersome if done too many times.</p>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">geobipy</span> <span class="k">import</span> <span class="n">StatArray</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mpi4py</span> <span class="k">import</span> <span class="n">MPI</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">h5py</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">world</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;units&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">world</span><span class="o">.</span><span class="n">rank</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># This is a collective open of data in the file</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">fName</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s1">&#39;mpio&#39;</span><span class="p">,</span><span class="n">comm</span><span class="o">=</span><span class="n">world</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Collective creation of space(padded by number of mpi ranks)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">createHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">nRepeats</span><span class="o">=</span><span class="n">world</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">world</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># In a non collective region, we can write to different sections of x in the file</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Fake a non collective region</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">noncollectivewrite</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">world</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="c1"># Each rank carries out this code, but it&#39;s not collective.</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">x</span><span class="o">.</span><span class="n">writeHdf</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">world</span><span class="o">.</span><span class="n">rank</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">noncollectivewrite</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">world</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">world</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.deepcopy">
+<code class="descname">deepcopy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.deepcopy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a deepcopy</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – Deepcopy of StatArray</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray">StatArray</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.delete">
+<code class="descname">delete</code><span class="sig-paren">(</span><em>i</em>, <em>axis=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete elements</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>i</strong> (<em>slice</em><em>, </em><em>int</em><em> or </em><em>array of ints</em>) – Indicate which sub-arrays to remove.</li>
+<li><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – The axis along which to delete the subarray defined by <cite>obj</cite>.
+If <cite>axis</cite> is None, <cite>obj</cite> is applied to the flattened array.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – Deepcopy of StatArray with deleted entry(ies).</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray">StatArray</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.edges">
+<code class="descname">edges</code><span class="sig-paren">(</span><em>min=None</em>, <em>max=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.edges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the midpoint values between elements in the StatArray</p>
+<p>Returns an size(self) + 1 length StatArray of the midpoints between each element.
+The first and last element are projected edges based on the difference between first two and last two elements in self.
+edges[0] = self[0] - 0.5 * (self[1]-self[0])
+edges[-1] = self[-1] + 0.5 * (self[-1] - self[-2])
+If min and max are given, the edges are fixed and not calculated.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>min</strong> (<em>float</em><em>, </em><em>optional</em>) – Fix the leftmost edge to min.</li>
+<li><strong>max</strong> (<em>float</em><em>, </em><em>optional</em>) – Fix the rightmost edge to max.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – Edges of the StatArray</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray">StatArray</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.firstNonZero">
+<code class="descname">firstNonZero</code><span class="sig-paren">(</span><em>axis=0</em>, <em>invalid_val=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.firstNonZero" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the indices of the first non zero values along the axis.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>axis</strong> (<em>int</em>) – Axis along which to find first non zeros.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – Indices of the first non zero values.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">array_like</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.fromHdf">
+<code class="descname">fromHdf</code><span class="sig-paren">(</span><em>h5grp</em>, <em>index=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.fromHdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the StatArray from a HDF group</p>
+<p>Given the HDF group object, read the contents into a StatArray.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>h5obj</strong> (<em>h5py._hl.group.Group</em>) – A HDF group object to write the contents to.</li>
+<li><strong>index</strong> (<em>slice</em><em>, </em><em>optional</em>) – If the group was created using the nRepeats option, index specifies the index’th entry from which to read the data.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.gMM">
+<code class="descname">gMM</code><span class="sig-paren">(</span><em>clusterID, trainPercent=75.0, covType=['spherical'], plot=True</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.gMM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use a Gaussian Mixing Model to classify the data.
+clusterID is the initial assignment of the rows to their clusters</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.getName">
+<code class="descname">getName</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.getName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the name of the StatArray</p>
+<p>If the name has not been attached, returns an empty string</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – The name of the StatArray.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.getNameUnits">
+<code class="descname">getNameUnits</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.getNameUnits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the name and units</p>
+<p>Gets the name and units attached to the StatArray. Units, if present are surrounded by parentheses</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – String containing name(units).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.getUnits">
+<code class="descname">getUnits</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.getUnits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the units of the StatArray</p>
+<p>If the units have not been attached, returns an empty string</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – The unist of the StatArray</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.hasLabels">
+<code class="descname">hasLabels</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.hasLabels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.hasPrior">
+<code class="descname">hasPrior</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.hasPrior" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check that the StatArray has an attached prior.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – Has an attached prior.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.hasProposal">
+<code class="descname">hasProposal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.hasProposal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check that the StatArray has an attached proposal.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – Has an attached proposal.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.hdfName">
+<code class="descname">hdfName</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.hdfName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a string that describes class instantiation</p>
+<p>Returns a string that should be used as an attr[‘repr’] in a HDF group.
+This allows reading of the attribute from the hdf file, evaluating it to return an object,
+and then reading the hdf contents via the object’s methods.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">str</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">out</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.hist">
+<code class="descname">hist</code><span class="sig-paren">(</span><em>bins=10</em>, <em>range=None</em>, <em>normed=None</em>, <em>weights=None</em>, <em>density=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.hist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot a histogram of the StatArray</p>
+<p>Plots a histogram, estimates the mean and standard deviation and overlays the PDF of a normal distribution with those values, if density=1.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">geobipy.customPlots.hist()</span></code></dt>
+<dd>For geobipy additional arguments</dd>
+<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">matplotlib.pyplot.hist()</span></code></dt>
+<dd>For histogram related arguments</dd>
+</dl>
+</div>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">geobipy</span> <span class="k">import</span> <span class="n">StatArray</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1000</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;units&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">hist</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.insert">
+<code class="descname">insert</code><span class="sig-paren">(</span><em>i</em>, <em>values</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.insert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert values</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>i</strong> (<em>int</em><em>, </em><em>slice</em><em> or </em><em>sequence of ints</em>) – Object that defines the index or indices before which <cite>values</cite> is inserted.</li>
+<li><strong>values</strong> (<em>array_like</em>) – Values to insert into <cite>arr</cite>. If the type of <cite>values</cite> is different from that of <cite>arr</cite>, <cite>values</cite> is converted to the type of <cite>arr</cite>. <cite>values</cite> should be shaped so that <code class="docutils literal notranslate"><span class="pre">arr[...,obj,...]</span> <span class="pre">=</span> <span class="pre">values</span></code> is legal.</li>
+<li><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – Axis along which to insert <cite>values</cite>.  If <cite>axis</cite> is None then <cite>arr</cite> is flattened first.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – StatArray after inserting a value.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray">StatArray</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.internalEdges">
+<code class="descname">internalEdges</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.internalEdges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the midpoint values between elements in the StatArray</p>
+<p>Returns an size(self) + 1 length StatArray of the midpoints between each element</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – Edges of the StatArray</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray">StatArray</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.isRegular">
+<code class="descname">isRegular</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.isRegular" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks that the values change regularly</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – Is regularly changing.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.kMeans">
+<code class="descname">kMeans</code><span class="sig-paren">(</span><em>nClusters</em>, <em>standardize=False</em>, <em>nIterations=10</em>, <em>plot=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.kMeans" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform K-Means clustering on the StatArray</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.lastNonZero">
+<code class="descname">lastNonZero</code><span class="sig-paren">(</span><em>axis=0</em>, <em>invalid_val=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.lastNonZero" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the indices of the first non zero values along the axis.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>axis</strong> (<em>int</em>) – Axis along which to find first non zeros.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – Indices of the first non zero values.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">array_like</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.pad">
+<code class="descname">pad</code><span class="sig-paren">(</span><em>N</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.pad" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copies the properties of a StatArray including all priors or proposals, but pads everything to the given size</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>N</strong> (<em>int</em>) – Size to pad to.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">StatArray</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">out</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.pcolor">
+<code class="descname">pcolor</code><span class="sig-paren">(</span><em>x=None</em>, <em>y=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.pcolor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a pseudocolour plot of the StatArray array, Actually uses pcolormesh for speed.</p>
+<p>If the arguments x and y are geobipy.StatArray classes, the axes can be automatically labelled.
+Can take any other matplotlib arguments and keyword arguments e.g. cmap etc.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a><em>, </em><em>optional</em>) – Horizontal coordinates of the values edges.</li>
+<li><strong>y</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a><em>, </em><em>optional</em>) – Vertical coordinates of the values edges.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Other Parameters:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><ul class="first simple">
+<li><strong>alpha</strong> (<em>scalar or arrya_like, optional</em>) – If alpha is scalar, behaves like standard matplotlib alpha and opacity is applied to entire plot
+If array_like, each pixel is given an individual alpha value.</li>
+<li><strong>log</strong> (<em>‘e’ or float, optional</em>) – Take the log of the colour to a base. ‘e’ if log = ‘e’, and a number e.g. log = 10.
+Values in c that are &lt;= 0 are masked.</li>
+<li><strong>equalize</strong> (<em>bool, optional</em>) – Equalize the histogram of the colourmap so that all colours have an equal amount.</li>
+<li><strong>nbins</strong> (<em>int, optional</em>) – Number of bins to use for histogram equalization.</li>
+<li><strong>xscale</strong> (<em>str, optional</em>) – Scale the x axis? e.g. xscale = ‘linear’ or ‘log’</li>
+<li><strong>yscale</strong> (<em>str, optional</em>) – Scale the y axis? e.g. yscale = ‘linear’ or ‘log’.</li>
+<li><strong>flipX</strong> (<em>bool, optional</em>) – Flip the X axis</li>
+<li><strong>flipY</strong> (<em>bool, optional</em>) – Flip the Y axis</li>
+<li><strong>grid</strong> (<em>bool, optional</em>) – Plot the grid</li>
+<li><strong>noColorbar</strong> (<em>bool, optional</em>) – Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.</li>
+<li><strong>trim</strong> (<em>bool, optional</em>) – Set the x and y limits to the first and last non zero values along each axis.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">matplotlib .Axes</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ax</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">matplotlib.pyplot.pcolormesh()</span></code></dt>
+<dd>For additional keyword arguments you may use.</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.perturb">
+<code class="descname">perturb</code><span class="sig-paren">(</span><em>i=None</em>, <em>relative=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.perturb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perturb the values of the StatArray using the attached proposal</p>
+<p>The StatArray must have had a proposal set using StatArray.setProposal()</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>i</strong> (<em>slice</em><em> or </em><em>int</em><em> or </em><em>sequence of ints</em><em>, </em><em>optional</em>) – Index or indices of self that should be perturbed.</li>
+<li><strong>relative</strong> (<em>bool</em>) – Update the StatArray relative to the current values or assign the new samples to the StatArray.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code> – If the proposal has not been set</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><em>x=None</em>, <em>i=None</em>, <em>axis=0</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot self against x</p>
+<p>If x and y are StatArrays, the axes are automatically labelled.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – The abcissa</li>
+<li><strong>i</strong> (<em>sequence of ints</em><em>, </em><em>optional</em>) – Plot the ith indices of self, against the ith indices of x.</li>
+<li><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – If self is 2D, plot values along this axis.</li>
+<li><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Take the log of the colour to a base. ‘e’ if log = ‘e’, and a number e.g. log = 10.
+Values in c that are &lt;= 0 are masked.</li>
+<li><strong>xscale</strong> (<em>str</em><em>, </em><em>optional</em>) – Scale the x axis? e.g. xscale = ‘linear’ or ‘log’.</li>
+<li><strong>yscale</strong> (<em>str</em><em>, </em><em>optional</em>) – Scale the y axis? e.g. yscale = ‘linear’ or ‘log’.</li>
+<li><strong>flipX</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flip the X axis</li>
+<li><strong>flipY</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flip the Y axis</li>
+<li><strong>labels</strong> (<em>bool</em><em>, </em><em>optional</em>) – Plot the labels? Default is True.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">matplotlib .Axes</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ax</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">matplotlib.pyplot.plot()</span></code></dt>
+<dd>For additional keyword arguments you may use.</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.prepend">
+<code class="descname">prepend</code><span class="sig-paren">(</span><em>values</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.prepend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepend to a StatArray</p>
+<p>Prepends numbers to a StatArray, Do not use this too often as it is quite slow</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>values</strong> (<em>scalar</em><em> or </em><em>array_like</em>) – A number to prepend.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – StatArray with prepended values.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray">StatArray</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.prior">
+<code class="descname">prior</code><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.prior" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the prior if available.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.probability">
+<code class="descname">probability</code><span class="sig-paren">(</span><em>*args</em>, <em>i=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.probability" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the probability of the values in self using the attached prior distribution</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>arg1</strong> (<em>array_like</em><em>, </em><em>optional</em>) – Will evaluate the probability of the numbers in the arg1 using the prior attached to self</li>
+<li><strong>i</strong> (<em>slice</em><em> or </em><em>int</em><em> or </em><em>sequence of ints</em><em>, </em><em>optional</em>) – Index or indices of self that should be evaluated.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">numpy.float</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">out</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code> – If the prior has not been set</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.proposal">
+<code class="descname">proposal</code><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.proposal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the prior if available.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.resize">
+<code class="descname">resize</code><span class="sig-paren">(</span><em>new_shape</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.resize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resize a StatArray</p>
+<p>Resize a StatArray but copy over any attached attributes</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>new_shape</strong> (<em>int</em><em> or </em><em>tuple of ints</em>) – Shape of the resized array</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – Resized array.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray">StatArray</a></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">numpy.resize()</span></code></dt>
+<dd>For more information.</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.scatter">
+<code class="descname">scatter</code><span class="sig-paren">(</span><em>x=None</em>, <em>y=None</em>, <em>i=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.scatter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a 2D scatter plot.</p>
+<p>Create a 2D scatter plot, if the y values are not given, the colours are used instead.
+If the arrays x, y, and c are geobipy.StatArray classes, the axes are automatically labelled.
+Can take any other matplotlib arguments and keyword arguments e.g. markersize etc.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – Horizontal locations of the points to plot</li>
+<li><strong>c</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – Colour values of the points</li>
+<li><strong>y</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a><em>, </em><em>optional</em>) – Vertical locations of the points to plot, if y = None, then y = c.</li>
+<li><strong>i</strong> (<em>sequence of ints</em><em>, </em><em>optional</em>) – Plot a subset of x, y, c, using the indices in i.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">geobipy.customPlots.Scatter2D()</span></code></dt>
+<dd>For additional keyword arguments you may use.</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.setPrior">
+<code class="descname">setPrior</code><span class="sig-paren">(</span><em>distributionType</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.setPrior" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a prior distribution</p>
+<p>Sets a prior by interfacing through the Distribution method rather than passing any subclasses of the baseDistribution class.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>distributionType</strong> (<em>str</em>) – The name of the distribution to set.</li>
+<li><strong>*args</strong> – Variable length argument list.</li>
+<li><strong>**kwargs</strong> – Arbitrary keyword arguments.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><a class="reference internal" href="../statistics/Distribution.html#module-geobipy.src.classes.statistics.Distribution" title="geobipy.src.classes.statistics.Distribution"><code class="xref py py-meth docutils literal notranslate"><span class="pre">geobipy.src.classes.statistics.Distribution()</span></code></a></dt>
+<dd>For available distributions to instantiate.</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.setProposal">
+<code class="descname">setProposal</code><span class="sig-paren">(</span><em>distributionType</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.setProposal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a proposal distribution</p>
+<p>Sets a proposal by interfacing through the Distribution method rather than passing any subclasses of the baseDistribution class.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>distributionType</strong> (<em>str</em>) – The name of the distribution to set</li>
+<li><strong>*args</strong> – Variable length argument list.</li>
+<li><strong>**kwargs</strong> – Arbitrary keyword arguments.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><a class="reference internal" href="../statistics/Distribution.html#module-geobipy.src.classes.statistics.Distribution" title="geobipy.src.classes.statistics.Distribution"><code class="xref py py-meth docutils literal notranslate"><span class="pre">geobipy.src.classes.statistics.Distribution()</span></code></a></dt>
+<dd>For available distributions to instantiate</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.stackedAreaPlot">
+<code class="descname">stackedAreaPlot</code><span class="sig-paren">(</span><em>x=None, i=None, axis=0, labels=[], colors=['#000000', '#FFFF00', '#1CE6FF', '#FF34FF', '#FF4A46', '#008941', '#006FA6', '#A30059', '#FFDBE5', '#7A4900', '#0000A6', '#63FFAC', '#B79762', '#004D43', '#8FB0FF', '#997D87', '#5A0007', '#809693', '#FEFFE6', '#1B4400', '#4FC601', '#3B5DFF', '#4A3B53', '#FF2F80', '#61615A', '#BA0900', '#6B7900', '#00C2A0', '#FFAA92', '#FF90C9', '#B903AA', '#D16100', '#DDEFFF', '#000035', '#7B4F4B', '#A1C299', '#300018', '#0AA6D8', '#013349', '#00846F', '#372101', '#FFB500', '#C2FFED', '#A079BF', '#CC0744', '#C0B9B2', '#C2FF99', '#001E09', '#00489C', '#6F0062', '#0CBD66', '#EEC3FF', '#456D75', '#B77B68', '#7A87A1', '#788D66', '#885578', '#FAD09F', '#FF8A9A', '#D157A0', '#BEC459', '#456648', '#0086ED', '#886F4C', '#34362D', '#B4A8BD', '#00A6AA', '#452C2C', '#636375', '#A3C8C9', '#FF913F', '#938A81', '#575329', '#00FECF', '#B05B6F', '#8CD0FF', '#3B9700', '#04F757', '#C8A1A1', '#1E6E00', '#7900D7', '#A77500', '#6367A9', '#A05837', '#6B002C', '#772600', '#D790FF', '#9B9700', '#549E79', '#FFF69F', '#201625', '#72418F', '#BC23FF', '#99ADC0', '#3A2465', '#922329', '#5B4534', '#FDE8DC', '#404E55', '#0089A3', '#CB7E98', '#A4E804', '#324E72', '#6A3A4C'], **kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.stackedAreaPlot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create stacked area plot where column elements are stacked on top of each other.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – The abcissa.</li>
+<li><strong>i</strong> (<em>sequence of ints</em><em>, </em><em>optional</em>) – Plot a subset of x, y, c, using the indices in i.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Other Parameters:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><ul class="first simple">
+<li><strong>axis</strong> (<em>int</em>) – Plot along this axis, stack along the other axis.</li>
+<li><strong>labels</strong> (<em>list of str, optional</em>) – The labels to assign to each column.</li>
+<li><strong>colors</strong> (<em>matplotlib.colors.LinearSegmentedColormap or list of colours</em>) – The colour used for each column.</li>
+<li><strong>xscale</strong> (<em>str, optional</em>) – Scale the x axis? e.g. xscale = ‘linear’ or ‘log’.</li>
+<li><strong>yscale</strong> (<em>str, optional</em>) – Scale the y axis? e.g. yscale = ‘linear’ or ‘log’.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">matplotlib .Axes</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ax</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">matplotlib.pyplot.scatterplot()</span></code></dt>
+<dd>For additional keyword arguments you may use.</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.summary">
+<code class="descname">summary</code><span class="sig-paren">(</span><em>out=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a summary of the StatArray</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>out</strong> (<em>bool</em>) – Whether to return the summary or print to screen</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – Summary of StatArray</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str, optional</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.toHdf">
+<code class="descname">toHdf</code><span class="sig-paren">(</span><em>h5obj</em>, <em>myName</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.toHdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the StatArray to an HDF object</p>
+<p>Creates and writes a new group in a HDF file under h5obj.
+A nested heirarchy will be created e.g., myNamedata, myNameprior, and myNameproposal.
+This function modifies the file metadata and writes the contents at the same time and
+should not be used in a parallel environment.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>h5obj</strong> (<em>h5py._hl.files.File</em><em> or </em><em>h5py._hl.group.Group</em>) – A HDF file or group object to write the contents to.</li>
+<li><strong>myName</strong> (<em>str</em>) – The name of the group to write the StatArray to.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">h5py</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">geobipy.src.classes.core.StatArray</span> <span class="k">import</span> <span class="n">StatArray</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">x</span><span class="o">.</span><span class="n">toHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;aTestGroup&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.verbose">
+<code class="descname">verbose</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.verbose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Explicit print of every element</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.writeHdf">
+<code class="descname">writeHdf</code><span class="sig-paren">(</span><em>h5obj</em>, <em>myName</em>, <em>index=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.writeHdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the values of a StatArray to a HDF file</p>
+<p>Writes the contents of the StatArray to an already created group in a HDF file under h5obj.
+This method can be used in an MPI parallel environment, if so however, the hdf file must have been opened with the mpio driver.
+Unlike createHdf, writeHdf does not have to be called collectively, each rank can call writeHdf independently,
+so long as they do not try to write to the same index.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>h5obj</strong> (<em>h5py._hl.files.File</em><em> or </em><em>h5py._hl.group.Group</em>) – A HDF file or group object to write the contents to.</li>
+<li><strong>myName</strong> (<em>str</em>) – The name of the group to write to. The group must have been created previously.</li>
+<li><strong>index</strong> (<em>int</em><em>, </em><em>optional</em>) – If the group was created using the nRepeats option, index specifies the index’th entry at which to write the data</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">geobipy</span> <span class="k">import</span> <span class="n">StatArray</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mpi4py</span> <span class="k">import</span> <span class="n">MPI</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">h5py</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">world</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;units&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">world</span><span class="o">.</span><span class="n">rank</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># This is a collective open of data in the file</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">fName</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s1">&#39;mpio&#39;</span><span class="p">,</span><span class="n">comm</span><span class="o">=</span><span class="n">world</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Collective creation of space(padded by number of mpi ranks)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">createHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">nRepeats</span><span class="o">=</span><span class="n">world</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">world</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># In a non collective region, we can write to different sections of x in the file</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Fake a non collective region</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">noncollectivewrite</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">world</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="c1"># Each rank carries out this code, but it&#39;s not collective.</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">x</span><span class="o">.</span><span class="n">writeHdf</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">world</span><span class="o">.</span><span class="n">rank</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">noncollectivewrite</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">world</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">world</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="myObject.html"
+                        title="previous chapter">Core object class</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../data/data.html"
+                        title="next chapter">Data classes</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../../_sources/content/api/classes/core/StatArray.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../data/data.html" title="Data classes"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="myObject.html" title="Core object class"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">GeoBIPy 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../api.html" >API</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../classes.html" >Classes used in GeoBIPy</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="core.html" >Core classes</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright None.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.9.
+    </div>
+  </body>
+</html>
