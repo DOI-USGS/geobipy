@@ -90,17 +90,9 @@ Next, copy the following code into a file called install.sh in the h5py folder a
     python setup.py install
 
 
-Installing GeoBIPy on Yeti
+Using GeoBIPy on Yeti
 :::::::::::::::::::::::::::
-If you are installing this package on the USGS machine,  you can bypass all installations regarding MPI, HDF5, and Python's mpi4py and h5py modules.  On Yeti we have a module that you can load using "module load python/pPython3".  This module comes with the bare essentials for parallel python with a working parallel h5py wrapper.
-
-First, you need to create your own environment after you have loaded the pPython module.  This creates a brand new installation directory for you and allows you to install any extra modules yourself.  Do this using 'conda create --name aName'.
-
-You can the activate that environment using 'source activate aName'.
-
-Next pull the GeoBIPy repository and navigate to that folder.  There should be a setup.py file.  In this folder type "pip install -e ." to install the package to python.
-
-You will also need to install the time domain forward modeller.
+There is no need to install GeoBIPy on Yeti.  Simply type "module load python/geobipy" for the serial version of the code, mainly used for plotting results, or "module load python/pGeobipy" for a parallel enabled version.
 
 
 Installing the time domain forward modeller
@@ -109,14 +101,18 @@ Ross Brodie at Geoscience Australia has written a great forward modeller, gatdae
 
 .. _`GA repository`: https://github.com/GeoscienceAustralia/ga-aem
 
-So go ahead and "git clone" that repository.
+However, for use with GeoBIPy, use `this fork of gataem1D`_ if there are open pull requests at the original repository.
 
-These instructions only describe how to install Ross' forward modeller, but it is part of a larger code base for deterministic inversion. If you wish to install his entire package, please follow his instructions.
+.. _`this fork of gataem1D`: https://github.com/leonfoks/ga-aem
+
+Go ahead and "git clone" that repository.
+
+These instructions only describe how to install Ross' forward modeller, but it is part of a larger code base for inversion. If you wish to install his entire package, please follow his instructions.
 
 Prerequisites
 -------------
 
-To compile this forward modeller, you will need a c++ compiler, and `FFTW`_
+To compile his forward modeller, you will need a c++ compiler, and `FFTW`_
 
 .. _`FFTW`: http://www.fftw.org/
 
@@ -157,7 +153,7 @@ where, path-to-install-to is the location where you want fftw to be installed.
 
 Compile the gatdaem1d shared library
 ------------------------------------
-Next, within the gatdaem1d folder, navigate to the makefiles folder modify the top part of the file "gatdaem1d_python.make" to the following
+Next, within the gatdaem1d folder, navigate to the makefiles folder and modify the top part of the file "gatdaem1d_python.make" to the following
 
 .. code:: bash
 
@@ -216,11 +212,15 @@ The code and its processes have been documented in multiple ways.  First we have
 
 Source code HTML pages
 ::::::::::::::::::::::
-For developers and users of the code, the code itself has been thouroughly documented. However you can generate easy to read html pages. To do this, you will first need to install sphinx via "pip install sphinx".
+For developers and users of the code, the code itself has been thouroughly documented. The `source code docs can be found here`_
+
+.. _`source code docs can be found here`: https://usgs.github.io/geobipy/
+
+However you can generate the docs locally as well. To do this, you will first need to install sphinx via "pip install sphinx".
 
 Next, head to the documentation folder in this repository and type "make html".  Sphinx generates linux based and windows based make files so this should be a cross-platform procedure.
 
-The html pages will be generated under "html", so simply open the "index.html" file to view and navigate the code.
+The html pages will be generated under "build/html", so simply open the "index.html" file to view and navigate the code.
 
 Jupyter notebooks to illustrate the classes
 :::::::::::::::::::::::::::::::::::::::::::
@@ -230,8 +230,8 @@ You will need to install jupyter via "pip install jupyter".
 
 You can then edit and run the notebooks by navigating to the notebooks folder, and typing "jupyter notebook". This will open up a new browser window, and you can play in there.
 
-Running GeoBIPy using the hooks
-:::::::::::::::::::::::::::::::
+Running GeoBIPy
+===============
 There are two methods of running GeoBIPy from the command line once it is installed.
 For the serial version the following can be used
 
