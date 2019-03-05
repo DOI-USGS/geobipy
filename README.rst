@@ -22,34 +22,38 @@ If you require parallel file reading and writing, you will also need to install 
 
 If you need to install the parallel IO version of the code, we would recommend that you start with a clean install of Python. This makes it easier to determine whether you have installed and linked the correct version of the parallel HDF5 library.
 
+Installing GeoBIPy
+==================
+
+There are two versions when installing GeoBIPy, a serial version, and a parallel version. Since GeoBIPy uses a Fortran backend for forward modelling frequency domain data, you will need to have a Fortran compiler installed. Make sure that the compiler can handle derived data types since I make use of object oriented programming in Fortran.
 
 Installing a serial version of GeoBIPy
-=======================================
+::::::::::::::::::::::::::::::::::::::
 This is the easiest installation and provides access to a serial implementation of the code.
 
 Simply clone the git repository, navigate to the package folder that contains the setup.py file, and type "pip install -e ."
 
-You should then be able to import modules from geobipy.src.  For this type of installation mpi will not need to be installed, and the serial version of h5py will suffice i.e. the standard "pip install h5py" is fine.
+You should then be able to import modules from geobipy.  For this type of installation mpi will not need to be installed, and the serial version of h5py will suffice i.e. the standard "pip install h5py" is fine.  h5py will automatically be installed during the install of GeoBIPy since it is a dependency.
 
 **Side note:**  Let's say you ran a production run on a parallel machine with MPI and parallel HDF capabilities. You generated all the results, copied them back to your local machine, and wish to make plots and images.  You will only need to install the serial version of the code on your local machine to do this.
 
 Installing a parallel version of GeoBIPy
-=========================================
+::::::::::::::::::::::::::::::::::::::::
 Installing the parallel version of the code is a little trickier due to the dependencies necessary between the OpenMPI and/or HDF libraries, and how Python's mpi4py and h5py wrap around those.
 
 
 Installing MPI and mpi4py
-:::::::::::::::::::::::::
+-------------------------
 To run this code in parallel you will need both an MPI library and the python wrapper, mpi4py.  You must install MPI first before mpi4py.
 
 MPI
----
++++
 
 If you are installing GeoBIPy on a parallel machine, I would think that you have access to prebuilt MPI libraries.  If you are on a local laptop, you will need to install one. This package has been tested with OpenMPI version 1.10.2. Be careful if you want to use a newer version as mpi4py may not communicate with it correctly (at the time of this writing, OpenMPI v2 was having issues).
 
 
 mpi4py
-------
+++++++
 
 At this point, if you have an mpi4py module already installed, please remove it (you can check with "pip list"). If you started with a clean installation you should not have to worry about this. To test whether a new install of mpi4py will see the mpi library you have, just type "which mpicc".  The path that you see should point to the implementation that you want mpi4py to link to.  Make sure you are about to install mpi4py to the correct python installation.  If you type 'which python' it should return the path to the correct python distribution.  If you are using environments, make sure you have activated the correct one.
 
@@ -58,15 +62,15 @@ Next, use "pip install mpi4py --no-cache-dir".  This last option is very importa
 At the end of the day,  h5py needs to communicate with both the correct HDF5 library and mpi4py, and both of those need to communicate with the same MPI library.
 
 Installing parallel HDF5 and h5py
-:::::::::::::::::::::::::::::::::
+---------------------------------
 If a parallel HDF5 library is not available, you will need to install one. First make sure you follow `Installing MPI and mpi4py`_ so that an MPI library is available to you. You must install a HDF5 library first before h5py.
 
 HDF5
-----
+++++
 When you install HDF5, make sure that the correct MPI library can be seen by typing "which mpicc".  When you configure the HDF5 library, be sure to use the --enable-parallel option.
 
 h5py
-----
+++++
 Once the HDF5 library is installed you will need to clone the `h5py repository`_
 
 .. _`h5py repository`: https://github.com/h5py/h5py
@@ -90,17 +94,9 @@ Next, copy the following code into a file called install.sh in the h5py folder a
     python setup.py install
 
 
-Installing GeoBIPy on Yeti
+Using GeoBIPy on Yeti
 :::::::::::::::::::::::::::
-If you are installing this package on the USGS machine,  you can bypass all installations regarding MPI, HDF5, and Python's mpi4py and h5py modules.  On Yeti we have a module that you can load using "module load python/pPython3".  This module comes with the bare essentials for parallel python with a working parallel h5py wrapper.
-
-First, you need to create your own environment after you have loaded the pPython module.  This creates a brand new installation directory for you and allows you to install any extra modules yourself.  Do this using 'conda create --name aName'.
-
-You can the activate that environment using 'source activate aName'.
-
-Next pull the GeoBIPy repository and navigate to that folder.  There should be a setup.py file.  In this folder type "pip install -e ." to install the package to python.
-
-You will also need to install the time domain forward modeller.
+There is no need to install GeoBIPy on Yeti.  Simply type "module load python/geobipy" for the serial version of the code, mainly used for plotting results, or "module load python/pGeobipy" for a parallel enabled version.
 
 
 Installing the time domain forward modeller
@@ -109,14 +105,18 @@ Ross Brodie at Geoscience Australia has written a great forward modeller, gatdae
 
 .. _`GA repository`: https://github.com/GeoscienceAustralia/ga-aem
 
-So go ahead and "git clone" that repository.
+However, for use with GeoBIPy, use `this fork of gataem1D`_ if there are open pull requests at the original repository.
 
-These instructions only describe how to install Ross' forward modeller, but it is part of a larger code base for deterministic inversion. If you wish to install his entire package, please follow his instructions.
+.. _`this fork of gataem1D`: https://github.com/leonfoks/ga-aem
+
+Go ahead and "git clone" that repository.
+
+These instructions only describe how to install Ross' forward modeller, but it is part of a larger code base for inversion. If you wish to install his entire package, please follow his instructions.
 
 Prerequisites
 -------------
 
-To compile this forward modeller, you will need a c++ compiler, and `FFTW`_
+To compile his forward modeller, you will need a c++ compiler, and `FFTW`_
 
 .. _`FFTW`: http://www.fftw.org/
 
@@ -130,9 +130,6 @@ If you use brew, simply do the following
 
    brew install gcc
    brew install fftw
-
-Installing FFTW from Source
-+++++++++++++++++++++++++++
 
 If you do not have brew, or use a package manager, you can install fftw from source instead.
 
@@ -157,7 +154,7 @@ where, path-to-install-to is the location where you want fftw to be installed.
 
 Compile the gatdaem1d shared library
 ------------------------------------
-Next, within the gatdaem1d folder, navigate to the makefiles folder modify the top part of the file "gatdaem1d_python.make" to the following
+Next, within the gatdaem1d folder, navigate to the makefiles folder and modify the top part of the file "gatdaem1d_python.make" to the following
 
 .. code:: bash
 
@@ -196,7 +193,7 @@ Next, type the following to compile the gatdaem1d c++ code.
   make -f gatdaem1d_python.make
 
 Installing the Python Bindings
-::::::::::::::::::::::::::::::
+------------------------------
 
 Finally, to install the python wrapper to gatdaem1d, navigate to the python folder of the gatdaem1d repository.
 Type,
@@ -216,11 +213,15 @@ The code and its processes have been documented in multiple ways.  First we have
 
 Source code HTML pages
 ::::::::::::::::::::::
-For developers and users of the code, the code itself has been thouroughly documented. However you can generate easy to read html pages. To do this, you will first need to install sphinx via "pip install sphinx".
+For developers and users of the code, the code itself has been thouroughly documented. The `source code docs can be found here`_
+
+.. _`source code docs can be found here`: https://usgs.github.io/geobipy/
+
+However you can generate the docs locally as well. To do this, you will first need to install sphinx via "pip install sphinx".
 
 Next, head to the documentation folder in this repository and type "make html".  Sphinx generates linux based and windows based make files so this should be a cross-platform procedure.
 
-The html pages will be generated under "html", so simply open the "index.html" file to view and navigate the code.
+The html pages will be generated under "build/html", so simply open the "index.html" file to view and navigate the code.
 
 Jupyter notebooks to illustrate the classes
 :::::::::::::::::::::::::::::::::::::::::::
@@ -230,8 +231,8 @@ You will need to install jupyter via "pip install jupyter".
 
 You can then edit and run the notebooks by navigating to the notebooks folder, and typing "jupyter notebook". This will open up a new browser window, and you can play in there.
 
-Running GeoBIPy using the hooks
-:::::::::::::::::::::::::::::::
+Running GeoBIPy
+===============
 There are two methods of running GeoBIPy from the command line once it is installed.
 For the serial version the following can be used
 
