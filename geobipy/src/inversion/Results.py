@@ -182,6 +182,7 @@ class Results(myObject):
 
         self.meanInterp = StatArray(zGrd.size)
         self.bestInterp = StatArray(zGrd.size)
+        self.opacityInterp = StatArray(zGrd.size)
 
         # Initialize the Elevation Histogram
         self.DzHist = Histogram1D(bins = StatArray(dataPoint.z.prior.getBins(), name=dataPoint.z.name, units=dataPoint.z.units))
