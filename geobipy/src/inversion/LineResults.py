@@ -2,6 +2,7 @@
 Class to handle the HDF5 result files for a line of data.
  """
 #from ..base import Error as Err
+import os
 import numpy as np
 import numpy.ma as ma
 import h5py
@@ -16,6 +17,7 @@ from ..classes.mesh.TopoRectilinearMesh2D import TopoRectilinearMesh2D
 from ..base.HDF import hdfRead
 from ..base import customPlots as cP
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 from os.path import split
 from ..base import fileIO as fIO
 from geobipy.src.inversion.Results import Results
@@ -60,7 +62,7 @@ class LineResults(myObject):
         self.mesh = None
 
         self.fName = fName
-        self.line = split(fName)[1]
+        self.line = np.float64(os.path.splitext(split(fName)[1])[0])
         self.hdfFile = None
         if (hdfFile is None): # Open the file for serial read access
             self.open()
@@ -356,8 +358,9 @@ class LineResults(myObject):
         R.DzHist = hdfRead.readKeyFromFile(hdfFile,'','/','dzhist', index=i)
         R.MzHist = hdfRead.readKeyFromFile(hdfFile,'','/','mzhist', index=i)
 
-
-        # R.DzHist.bins -= (R.DzHist.bins[int(R.DzHist.bins.size/2)] - R.bestD.z[0])
+        # Hack to recentre the altitude histogram go this datapoints altitude
+        R.DzHist._cellEdges -= (R.DzHist.bins[int(R.DzHist.bins.size/2)-1] - R.bestD.z[0])
+        R.DzHist._cellCentres = R.DzHist._cellEdges[:-1] + 0.5 * np.abs(np.diff(R.DzHist._cellEdges))
 
         R.relErr = []
         R.addErr = []
@@ -970,6 +973,74 @@ class LineResults(myObject):
         R.initFigure(forcePlot=True)
         R.plot(forcePlot=True)
 
+    
+    def plotSummary(self, data, fiducial, **kwargs):
+
+        R = self.getResults(fid=fiducial)
+
+        cWidth = 3
+        
+        nCols = 15 + (3 * R.nSystems) + 1
+
+        gs = gridspec.GridSpec(18, nCols)
+        gs.update(wspace=20.0, hspace=20.0)
+        ax = [None]*(7+(2*R.nSystems))
+
+        ax[0] = plt.subplot(gs[:3, :nCols - 10 - (R.nSystems * 3)]) # Data misfit vs iteration
+        R._plotMisfitVsIteration(markersize=1, marker='.',)
+
+
+        ax[1] = plt.subplot(gs[3:6, :nCols - 10 - (R.nSystems * 3)]) # Histogram of # of layers
+        R._plotNumberOfLayersPosterior()
+
+
+        ax[2] = plt.subplot(gs[6:12, :nCols - 13]) # Site Map
+        data.scatter2D(c='k', s=1)
+        line = data.getLine(line=self.line)
+        line.scatter2D(c='cyan')
+        cP.plot(R.bestD.x, R.bestD.y, color='r', marker='o')
+
+
+        ax[3] = plt.subplot(gs[6:12, nCols - 13:nCols - 10]) # Data Point
+        R._plotObservedPredictedData()
+        plt.title('')
+
+
+        ax[4] = plt.subplot(gs[:12, nCols - 10: nCols - 4]) # Hitmap
+        R._plotHitmapPosterior()
+
+
+        ax[5] = plt.subplot(gs[:12, nCols - 4: nCols-1]) # Interface histogram
+        R._plotLayerDepthPosterior()
+
+
+        ax[6] = plt.subplot(gs[12:, :]) # cross section
+        self.plotXsection(**kwargs)
+
+
+        for i in range(R.nSystems):
+
+            j0 = nCols - 10 - (R.nSystems* 3) + (i * 3)
+            j1 = j0 + 3
+
+            ax[7+(2*i)] = plt.subplot(gs[:3, j0:j1])
+            R._plotRelativeErrorPosterior()
+            cP.title('System ' + str(i + 1))
+
+            # Update the histogram of additive data errors
+            ax[7+(2*i)-1] = plt.subplot(gs[3:6, j0:j1])
+            # ax= plt.subplot(self.gs[3:6, 2 * self.nSystems + j])
+            R._plotAdditiveErrorPosterior()
+
+
+
+
+        
+
+
+
+
+
 
     def toVtk(self, fileName, format='binary'):
         """Write the parameter cross-section to an unstructured grid vtk file 
@@ -1164,11 +1235,9 @@ class LineResults(myObject):
         hdfFile.create_dataset('invtime',  shape=[nPoints], dtype=float, fillvalue=np.nan)
         hdfFile.create_dataset('savetime',  shape=[nPoints], dtype=float, fillvalue=np.nan)
 
-        results.meanInterp.createHdf(hdfFile,'meaninterp',nRepeats=nPoints, fillvalue=np.nan)
-        results.bestInterp.createHdf(hdfFile,'bestinterp',nRepeats=nPoints, fillvalue=np.nan)
-#        results.opacityInterp.createHdf(hdfFile,'opacityinterp',nRepeats=nPoints, fillvalue=np.nan)
-#        hdfFile.create_dataset('meaninterp', [nPoints,nz], dtype=np.float64)
-#        hdfFile.create_dataset('bestinterp', [nPoints,nz], dtype=np.float64)
+        results.meanInterp.createHdf(hdfFile,'meaninterp', nRepeats=nPoints, fillvalue=np.nan)
+        results.bestInterp.createHdf(hdfFile,'bestinterp', nRepeats=nPoints, fillvalue=np.nan)
+        results.opacityInterp.createHdf(hdfFile,'opacityinterp',nRepeats=nPoints, fillvalue=np.nan)
 #        hdfFile.create_dataset('opacityinterp', [nPoints,nz], dtype=np.float64)
         
         results.rate.createHdf(hdfFile,'rate',nRepeats=nPoints, fillvalue=np.nan)
@@ -1259,7 +1328,7 @@ class LineResults(myObject):
         # Interpolate the mean and best model to the discretized hitmap
         results.meanInterp[:] = results.Hitmap.axisMean()
         results.bestInterp[:] = results.bestModel.interpPar2Mesh(results.bestModel.par, results.Hitmap)
-#        results.opacityInterp[:] = results.Hitmap.getOpacity()
+        results.opacityInterp[:] = results.Hitmap.getOpacity()
 
         slic = np.s_[i, :]
         # Add the interpolated mean model
@@ -1267,7 +1336,7 @@ class LineResults(myObject):
         # Add the interpolated best
         results.bestInterp.writeHdf(hdfFile, 'bestinterp',  index=slic)
         # Add the interpolated opacity
-#        results.opacityInterp.writeHdf(hdfFile, 'opacityinterp',  index=slic)
+        results.opacityInterp.writeHdf(hdfFile, 'opacityinterp',  index=slic)
 
         # Add the acceptance rate
         results.rate.writeHdf(hdfFile, 'rate', index=slic)
