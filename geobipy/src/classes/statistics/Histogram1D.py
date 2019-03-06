@@ -154,6 +154,8 @@ class Histogram1D(RectilinearMesh1D):
         grp.attrs["repr"] = self.hdfName()
         self.bins.toHdf(grp, 'bins')
         self._counts.createHdf(grp, 'counts', nRepeats=nRepeats, fillvalue=fillvalue)
+        if not self.log is None:
+            grp.create_dataset('log', data=self.log)
 
 
     def writeHdf(self, parent, myName, index=None):
@@ -195,6 +197,13 @@ class Histogram1D(RectilinearMesh1D):
             Hist = Histogram1D(bins = bins)
 
         Hist._counts = counts
+
+        try:
+            log = np.asscalar(np.asarray(grp.get('log')))
+        except:
+            log = None
+        Hist.log = log
+
         return Hist
 
 
