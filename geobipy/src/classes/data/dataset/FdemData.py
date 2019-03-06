@@ -709,7 +709,7 @@ class FdemData(Data):
             if self._iS[j] is None:
                 S[iSys] = 0.1 * D[iSys]
             else:
-                S[iSys] = values[6 + 2*self.nFrequencies[j] : 6 + 4*self.nFrequencies[j]]
+                S[iSys] = values[j][6 + 2*self.nFrequencies[j] : 6 + 4*self.nFrequencies[j]]
 
         values = values[0]
 
