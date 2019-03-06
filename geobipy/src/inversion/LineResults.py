@@ -1328,7 +1328,7 @@ class LineResults(myObject):
         # Interpolate the mean and best model to the discretized hitmap
         results.meanInterp[:] = results.Hitmap.axisMean()
         results.bestInterp[:] = results.bestModel.interpPar2Mesh(results.bestModel.par, results.Hitmap)
-        results.opacityInterp[:] = results.Hitmap.getOpacity()
+        # results.opacityInterp[:] = results.Hitmap.confidenceRange(percent=95.0, log='e')
 
         slic = np.s_[i, :]
         # Add the interpolated mean model
