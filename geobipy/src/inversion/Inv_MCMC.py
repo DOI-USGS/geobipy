@@ -113,7 +113,7 @@ def Inv_MCMC(paras, DataPoint, prng, LineResults=None, rank=1):
 
    
 def Initialize(paras, DataPoint, prng):
-    np.set_printoptions(threshold=np.inf)
+    # np.set_printoptions(threshold=np.inf)
     """ Initialize variables and priors, and perform the first iteration """
     # Initialize properties of the data
     # Set the distribution of the data misfit
@@ -136,7 +136,8 @@ def Initialize(paras, DataPoint, prng):
     DataPoint.setAdditiveErrorPrior(paras.minimumAdditiveError[:], paras.maximumAdditiveError[:], prng=prng)
 
     # Update the data errors based on user given parameters
-    DataPoint.updateErrors(paras.initialRelativeError, paras.initialAdditiveError)
+    if paras.solveRelativeError or paras.solveAdditiveError:
+        DataPoint.updateErrors(paras.initialRelativeError, paras.initialAdditiveError)
 
     # Save a copy of the original errors
     paras.Err = DataPoint._std.deepcopy()
@@ -283,7 +284,8 @@ def AcceptReject(paras, Mod, DataPoint, prior, posterior, PhiD, Res, prng):# ,oF
     D1.forward(Mod1)
 
     # Update the data errors using the updated relative errors
-    D1.updateErrors(D1.relErr, D1.addErr)
+    if paras.solveRelativeError or paras.solveAdditiveError:
+        D1.updateErrors(D1.relErr, D1.addErr)
 
     # Calibrate the response if it is being solved for
     if (paras.solveCalibration):
