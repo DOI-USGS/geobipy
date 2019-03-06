@@ -719,7 +719,9 @@ class Model1D(Model):
         cP.pretty(ax)
 
         reciprocateX = kwargs.pop("reciprocateX", False)
-        kwargs['flipY'] = kwargs.pop('flipY', True)
+        flipY = kwargs.pop('flipY', True)
+        kwargs['flipY'] = flipY
+
         kwargs['xscale'] = kwargs.pop('xscale', 'log')
         
         # Repeat the last entry
@@ -737,10 +739,14 @@ class Model1D(Model):
         cP.step(x=par, y=z, **kwargs)
 
         if self.hasHalfspace:
-            h = 0.99 * z[-1]
             if (self.nCells == 1):
                 h = 0.99
-            plt.text(par[-1], h, s=r'$\downarrow \infty$', fontsize=12)
+                p = par
+            else:
+                h = z[-2] + 0.75 * (z[-1] - z[-2])
+                p = par[-1]
+            
+            plt.text(p, h, s=r'$\downarrow \infty$', fontsize=12)
 
 
     def pcolor(self, *args, **kwargs):
