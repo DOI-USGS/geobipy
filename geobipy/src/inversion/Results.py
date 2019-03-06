@@ -394,7 +394,10 @@ class Results(myObject):
         
         self.addErr[system].plot(**kwargs)
         plt.locator_params(axis='x', nbins=4)
-        loc, dum = cF._log(self.bestD.addErr[system], log=self.addErr[system].log)
+        log = self.addErr[system].log
+        if self.bestD.addErr[system] > self.addErr[system].bins[-1]:
+            log = 10
+        loc, dum = cF._log(self.bestD.addErr[system], log=log)
         plt.axvline(loc, color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
 
 
