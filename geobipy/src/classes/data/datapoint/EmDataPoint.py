@@ -131,18 +131,19 @@ class EmDataPoint(DataPoint):
         return probability
 
 
-    def propose(self, height, rErr, aErr, calibration):
+    def propose(self, newHeight, newRelativeError, newAdditiveError, newCalibration):
         """Propose a new EM data point given the specified attached propsal distributions
 
         Parameters
         ----------
-        rEerr : bool
-            Propose a new relative error.
-        aEerr : bool
-            Propose a new additive error.
-        height : bool
+        newHeight : bool
             Propose a new observation height.
-        calibration : bool
+        newRelativeError : bool
+            Propose a new relative error.
+        newAdditiveError : bool
+            Propose a new additive error.
+        
+        newCalibration : bool
             Propose new calibration parameters.
 
         Returns
@@ -161,16 +162,16 @@ class EmDataPoint(DataPoint):
 
         """
         other = self.deepcopy()
-        if (height):  # Update the candidate data elevation (if required)
+        if (newHeight):  # Update the candidate data elevation (if required)
             other.proposeHeight()
             
-        if (rErr):
+        if (newRelativeError):
             other.proposeRelativeError()
             
-        if (aErr):
+        if (newAdditiveError):
             other.proposeAdditiveError()
 
-        if (calibration):  # Update the calibration parameters for the candidate data (if required)
+        if (newCalibration):  # Update the calibration parameters for the candidate data (if required)
             # Generate new calibration errors
             other.calibration[:] = self.calibration.proposal.rng(1)
             # Update the mean of the proposed calibration errors
@@ -184,11 +185,9 @@ class EmDataPoint(DataPoint):
         self.addErr[:] = self.addErr.proposal.rng(1)
         if self.addErr.hasPrior():
             p = self.addErr.probability()
-            i=0
-            while p == 0.0 or p == -np.inf and i < 10:
+            while p == 0.0 or p == -np.inf:
                 self.addErr[:] = self.addErr.proposal.rng(1)
                 p = self.addErr.probability()
-                i += 1
         # Update the mean of the proposed errors
         self.addErr.proposal.mean[:] = self.addErr
 
