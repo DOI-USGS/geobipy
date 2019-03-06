@@ -877,41 +877,47 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
     """
     
     if (i is None):
-        i = np.arange(np.size(x))
+        i = np.s_[:]
         
     # Pull options from kwargs to prevent silly crashes
-    log = kwargs.pop('log',False)
-    equalize = kwargs.pop('equalize',False)
-    xscale = kwargs.pop('xscale','linear')
-    yscale = kwargs.pop('yscale','linear')
+    log = kwargs.pop('log', False)
+    equalize = kwargs.pop('equalize', False)
+    xscale = kwargs.pop('xscale', 'linear')
+    yscale = kwargs.pop('yscale', 'linear')
     sl = kwargs.pop('sizeLegend', None)
     noColorBar = kwargs.pop('noColorBar', False)
     
-    kwargs.pop('color',None) # Remove color which could conflict with c
+    kwargs.pop('color', None) # Remove color which could conflict with c
 
     #c = kwargs.pop('c',None)
     assert (not c is None), ValueError('Must specify colour with argument "c"')
 
-    _cLabel = kwargs.pop('clabel',getNameUnits(c))
+    _cLabel = kwargs.pop('clabel', getNameUnits(c))
+
+    standardColour = isinstance(c, str)
     
-    c = c[i]
     xt = x[i]
     
-    iNaN = np.where(~np.isnan(c))[0]
-    c = c[iNaN]
-    xt = xt[iNaN]
+    iNaN = np.s_[:]
+    if not standardColour:
+        c = c[i]
+        iNaN = np.where(~np.isnan(c))[0]
+        c = c[iNaN]
+        xt = xt[iNaN]
 
     # Did the user ask for a log colour plot?
-    if (log):
-        c,logLabel = _log(c,log)
+    if (log and not standardColour):
+        c, logLabel = _log(c, log)
+
     # Equalize the colours?
-    if equalize:
+    if equalize and not standardColour:
         nBins = kwargs.pop('nbins',256)
         assert nBins > 0, ValueError('nBins must be greater than zero')
-        c,dummy = histogramEqualize(c, nBins=nBins)
+        c, dummy = histogramEqualize(c, nBins=nBins)
 
     # Get the yAxis values
     if (y is None):
+        assert not standardColour, Exception("Please specify either the y coordinates or a colour array")
         yt = c
     else:
         yt = y[i]
@@ -919,12 +925,13 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
 
     ax = plt.gca()
     pretty(ax)
-    f = plt.scatter(xt,yt, c = c, **kwargs)
+    f = plt.scatter(xt, yt, c = c, **kwargs)
 
     yl = getNameUnits(yt)
-    if (not noColorBar):
+
+    if (not noColorBar and not standardColour):
         if (equalize):
-            cbar = plt.colorbar(f,extend='both')
+            cbar = plt.colorbar(f, extend='both')
         else:
             cbar = plt.colorbar(f)
         if (log):
@@ -932,7 +939,7 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
             if y is None:
                 yl = logLabel + yl
 
-        clabel(cbar,_cLabel)
+        clabel(cbar, _cLabel)
 
     if ('s' in kwargs and not sl is None):
         assert (not isinstance(sl, bool)), TypeError('sizeLegend must have type int, or array_like')
@@ -946,9 +953,9 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
         
     plt.xscale(xscale)
     plt.yscale(yscale)
-    xlabel(getNameUnits(x,'x'))
+    xlabel(getNameUnits(x, 'x'))
     ylabel(yl)
-    plt.margins(0.1,0.1)
+    plt.margins(0.1, 0.1)
     plt.grid(True)
     return ax
 
