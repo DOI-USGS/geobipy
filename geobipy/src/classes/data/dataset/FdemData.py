@@ -249,6 +249,7 @@ class FdemData(Data):
         Allows slicing into the data FdemData[i]        
         
         """
+        i = np.unique(i)
         tmp = FdemData(np.size(i), self.nFrequencies)
         tmp.x[:] = self.x[i]
         tmp.y[:] = self.y[i]
@@ -577,7 +578,7 @@ class FdemData(Data):
                     nCoordinates += 1
                 elif (channel in ['alt', 'laser', 'bheight', 'height']):
                     nCoordinates += 1
-                elif(channel in ['z','dtm','dem_elev','dem_np','topo', 'elev']):
+                elif(channel in ['z','dtm','dem_elev','dem_np','topo', 'elev', 'elevation']):
                     nCoordinates += 1
 
             assert nCoordinates >= 6, Exception("Data file must contain columns for easting, northing, height, elevation, line, and fid. \n {}".format(self.fileInformation()))
@@ -841,3 +842,51 @@ class FdemData(Data):
         out.line = self.line.Scatterv(starts, chunks, world, root=root)
         
         return out
+
+
+    def write(self, fileNames, std=False, predictedData=False):
+
+        if isinstance(fileNames, str):
+            fileNames = [fileNames]
+
+        assert len(fileNames) == self.nSystems, ValueError("fileNames must have length equal to the number of systems {}".format(self.nSystems))
+
+        for i, sys in enumerate(self.system):
+            # Create the header
+            header = "Line Fid Easting Northing Elevation Height "
+
+            for x in sys.frequencies:
+                header += "I_{0} Q_{0} ".format(x)               
+            d = np.empty(2*sys.nFrequencies)
+
+            if std:
+                for x in sys.frequencies:
+                    header += "I_{0}_Err Q_{0}_Err ".format(x)
+                s = np.empty(2*sys.nFrequencies)
+
+            with open(fileNames[i], 'w') as f:
+                f.write(header+"\n")
+                with np.printoptions(formatter={'float': '{: 0.15g}'.format}, suppress=True):
+                    for j in range(self.nPoints):
+
+                        x = np.asarray([self.line[j], self.id[j], self.x[j], self.y[j], self.elevation[j], self.z[j]])
+
+                        if predictedData:
+                            d[0::2] = self.predictedData[j, :sys.nFrequencies]
+                            d[1::2] = self.predictedData[j, sys.nFrequencies:]
+                        else:
+                            d[0::2] = self.data[j, :sys.nFrequencies]
+                            d[1::2] = self.data[j, sys.nFrequencies:]
+                        
+                        if std:
+                            s[0::2] = self.std[j, :sys.nFrequencies]
+                            s[1::2] = self.std[j, sys.nFrequencies:]
+                            x = np.hstack([x, d, s])
+                        else:
+                            x = np.hstack([x, d])
+
+                        y = ""
+                        for a in x:
+                            y += "{} ".format(a)
+
+                        f.write(y+"\n")

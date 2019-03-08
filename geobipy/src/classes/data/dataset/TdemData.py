@@ -351,13 +351,13 @@ class TdemData(Data):
                     nCoordinates += 1
                 elif(channel in ['id', 'fid']):
                     nCoordinates += 1
-                elif (channel in ['n', 'x','northing']):
+                elif (channel in ['e', 'x','easting']):
                     nCoordinates += 1
-                elif (channel in ['e', 'y', 'easting']):
+                elif (channel in ['n', 'y', 'northing']):
                     nCoordinates += 1
                 elif (channel in ['alt', 'laser', 'bheight', 'height']):
                     nCoordinates += 1
-                elif(channel in ['z','dtm','dem_elev','dem_np','topo', 'elev']):
+                elif(channel in ['z','dtm','dem_elev','dem_np','topo', 'elev', 'elevation']):
                     nCoordinates += 1
                 elif channel in ["rxpitch", "rxroll", "rxyaw"]:
                     nRloop += 1
@@ -638,6 +638,7 @@ class TdemData(Data):
 
     def __getitem__(self, i):
         """ Define item getter for TdemData """
+        i = np.unique(i)
         tmp = TdemData(np.size(i), self.nTimes, self.system)
         tmp.x[:] = self.x[i]
         tmp.y[:] = self.y[i]
@@ -951,3 +952,51 @@ class TdemData(Data):
         this.iActive = this.getActiveChannels()
 
         return this
+
+
+    def write(self, fileNames, std=False, predictedData=False):
+
+        if isinstance(fileNames, str):
+            fileNames = [fileNames]
+
+        assert len(fileNames) == self.nSystems, ValueError("fileNames must have length equal to the number of systems {}".format(self.nSystems))
+
+        for i in range(self.nSystems):
+
+            iSys = self._systemIndices(i)
+            # Create the header
+            header = "Line Fid Easting Northing Elevation Height "
+
+            for x in range(self.nTimes[i]):
+                header += "Off[{}] ".format(x)
+
+            d = np.empty(self.nTimes[i])
+
+            if std:
+                for x in range(self.nTimes[i]):
+                    header += "OffErr[{}] ".format(x)
+                s = np.empty(self.nTimes[i])
+
+            with open(fileNames[i], 'w') as f:
+                f.write(header+"\n")
+                with np.printoptions(formatter={'float': '{: 0.15g}'.format}, suppress=True):
+                    for j in range(self.nPoints):
+
+                        x = np.asarray([self.line[j], self.id[j], self.x[j], self.y[j], self.elevation[j], self.z[j]])
+
+                        if predictedData:
+                            d[:] = self.predictedData[j, iSys]
+                        else:
+                            d[:] = self.data[j, iSys]
+                        
+                        if std:
+                            s[:] = self.std[j, iSys]
+                            x = np.hstack([x, d, s])
+                        else:
+                            x = np.hstack([x, d])
+
+                        y = ""
+                        for a in x:
+                            y += "{} ".format(a)
+
+                        f.write(y+"\n")
