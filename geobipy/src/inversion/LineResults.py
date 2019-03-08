@@ -429,7 +429,7 @@ class LineResults(myObject):
         values = self.bestData.deltaD.T
 
         if abs:
-            values.abs()
+            values = values.abs()
         
         cP.pcolor(values, x=xtmp, y=StatArray(np.arange(self.bestData.predictedData.shape[1]), name='Channel'), **kwargs)
 
@@ -513,7 +513,7 @@ class LineResults(myObject):
         values = self.bestData.deltaD[:, channel]
 
         if abs:
-            values.abs()
+            values = values.abs()
 
         cP.plot(xtmp, values, **kwargs)
 
