@@ -171,6 +171,22 @@ class StatArray(np.ndarray, myObject):
     def hasLabels(self):
         return not self.getNameUnits() == ""
 
+    
+    def abs(self):
+        """Take the absolute value.  In-place operation. 
+        
+        Returns
+        -------
+        out : StatArray
+            Absolute value
+            
+        """
+        
+        out = np.abs(self)
+        out.name = "|{}|".format(out.name)
+
+        return out
+
 
     def append(self, values, axis=0):
         """Append to a StatArray
@@ -687,6 +703,11 @@ class StatArray(np.ndarray, myObject):
             return self._proposal
         except:
             return None
+
+
+    def rolling(self, numpyFunction, window=1):
+        wd = cf.rolling_window(self, window)
+        return StatArray(numpyFunction(wd, -1), self.name, self.units)
 
 
     def setPrior(self, distributionType, *args, **kwargs):
