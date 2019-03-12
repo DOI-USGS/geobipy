@@ -847,7 +847,7 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
         Colour values of the points
     y : 1D array_like or StatArray, optional
         Vertical locations of the points to plot, if y = None, then y = c.
-    i : sequence of ints, optional
+    i : sequence of ints or numpy.slice, optional
         Plot a subset of x, y, c, using the indices in i.
     
     Other Parameters
@@ -916,7 +916,7 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
 
     # Equalize the colours?
     if equalize and not standardColour:
-        nBins = kwargs.pop('nbins',256)
+        nBins = kwargs.pop('nbins', 256)
         assert nBins > 0, ValueError('nBins must be greater than zero')
         c, dummy = histogramEqualize(c, nBins=nBins)
 

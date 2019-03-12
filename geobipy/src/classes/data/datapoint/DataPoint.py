@@ -56,7 +56,7 @@ class DataPoint(Point):
 
         # StatArray of data
         if not elevation is None:
-            assert np.size(elevation) == 1, ValueError("elevation must be single float")
+            # assert np.size(elevation) == 1, ValueError("elevation must be single float")
             self._elevation = StatArray(elevation, "Elevation", "m", order='F')
         else:
             self._elevation = StatArray(1, "Elevation", "m")
@@ -113,7 +113,7 @@ class DataPoint(Point):
             with size equal to the number of active channels.
 
         """
-        return self._predictedData - self._data
+        return StatArray(self._predictedData - self._data, name="Data residual", units=self._data.units)
 
     @property
     def elevation(self):

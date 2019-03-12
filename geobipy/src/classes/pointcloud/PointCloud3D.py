@@ -100,6 +100,7 @@ class PointCloud3D(myObject):
             The potentially smaller point cloud
 
         """
+        i = np.unique(i)
         return PointCloud3D(np.size(i), x=self.x[i], y=self.y[i], z=self.z[i])
 
     @property

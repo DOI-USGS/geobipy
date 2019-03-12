@@ -191,22 +191,28 @@ class LineResults(myObject):
         self.getElevation()
 
 
-    def getDOI(self, percent=67.0):
+    def getDOI(self, percent=67.0, window=1):
         """ Get the DOI of the line depending on a percentage variance cutoff for each data point """
         #if (not self.doi is None): return
+
+        assert window > 0, ValueError("window must be >= 1")
+        assert 0.0 < percent < 100.0, ValueError("Must have 0.0 < percent < 100.0")
         self.getOpacity()
         self.getMesh()
-        p = 0.01*(100.0 - percent)
+        p = 0.01 * (100.0 - percent)
 
         self.doi = StatArray(np.zeros(self.nPoints), 'Depth of investigation', self.z.units)
-        zSize = self.opacity.shape[1]-1
+        nCells = self.mesh.z.nCells - 1
         r = range(self.nPoints)
         for i in r:
-            op = self.opacity[i,:][::-1]
-            iC = 0
-            while op[iC] < p and iC < zSize:
-                iC +=1
-            self.doi[i] = self.depthGrid.cellCentres[zSize - iC]
+            op = self.opacity[:, i]
+            iC = nCells
+            while op[iC] < p and iC > 0:
+                iC -=1
+            
+            self.doi[i] = self.mesh.z.cellCentres[iC]
+
+        self.doi = self.doi.rolling(np.mean, window)
 
 
     def getElevation(self):
@@ -410,17 +416,51 @@ class LineResults(myObject):
             self.y.units = 'm'
 
 
-    def plotAllBestData(self, **kwargs):
+    def pcolorDataResidual(self, abs=False, **kwargs):
         """ Plot a channel of data as points """
 
         self.getMesh()
+        xAxis = kwargs.pop('xAxis', 'x')
 
         self.getBestData(sysPath = self.sysPath)
 
-        cP.pcolor(self.bestData.p.T, x=self.xPlot, y=StatArray(np.arange(self.bestData.p.shape[1]), name='Channel'), **kwargs)
+        xtmp = self.mesh.getXAxis(xAxis, centres=False)
+
+        values = self.bestData.deltaD.T
+
+        if abs:
+            values = values.abs()
+        
+        cP.pcolor(values, x=xtmp, y=StatArray(np.arange(self.bestData.predictedData.shape[1]), name='Channel'), **kwargs)
 
 
-    def plotBestDataChannel(self, channel=None, **kwargs):
+    def pcolorObservedData(self, **kwargs):
+        """ Plot a channel of data as points """
+
+        self.getMesh()
+        xAxis = kwargs.pop('xAxis', 'x')
+
+        self.getBestData(sysPath = self.sysPath)
+
+        xtmp = self.mesh.getXAxis(xAxis, centres=False)
+        
+        cP.pcolor(self.bestData.data.T, x=xtmp, y=StatArray(np.arange(self.bestData.predictedData.shape[1]), name='Channel'), **kwargs)
+
+
+    def pcolorPredictedData(self, **kwargs):
+        """ Plot a channel of data as points """
+
+        self.getMesh()
+        xAxis = kwargs.pop('xAxis', 'x')
+
+        self.getBestData(sysPath = self.sysPath)
+
+        xtmp = self.mesh.getXAxis(xAxis, centres=False)
+        
+        cP.pcolor(self.bestData.predictedData.T, x=xtmp, y=StatArray(np.arange(self.bestData.predictedData.shape[1]), name='Channel'), **kwargs)
+
+    
+    def plotPredictedData(self, channel=None, **kwargs):
         """ Plot a channel of the best predicted data as points """
 
         self.getMesh()
@@ -429,12 +469,12 @@ class LineResults(myObject):
 
         self.getBestData(sysPath = self.sysPath)
 
-        xtmp = self.mesh.getXAxis(xAxis, centres=False)
+        xtmp = self.mesh.getXAxis(xAxis, centres=True)
 
         if channel is None:
             channel = np.s_[:]
 
-        cP.plot(xtmp, self.bestData.p[:, channel], **kwargs)
+        cP.plot(xtmp, self.bestData.predictedData[:, channel], **kwargs)
 
 
     def plotDataElevation(self, **kwargs):
@@ -456,19 +496,49 @@ class LineResults(myObject):
             cP.ylabel('Elevation (m)')
 
 
-    def plotDoi(self, percent=67.0, **kwargs):
+    def plotDataResidual(self, channel=None, abs=False, **kwargs):
+        """ Plot a channel of the observed data as points """
 
         self.getMesh()
-        self.getDOI(percent)
 
+        xAxis = kwargs.pop('xAxis', 'x')
+
+        self.getBestData(sysPath = self.sysPath)
+
+        xtmp = self.mesh.getXAxis(xAxis, centres=True)
+
+        if channel is None:
+            channel = np.s_[:]
+
+        values = self.bestData.deltaD[:, channel]
+
+        if abs:
+            values = values.abs()
+
+        cP.plot(xtmp, values, **kwargs)
+
+
+    def plotDoi(self, percent=67.0, window=1, **kwargs):
+
+        self.getMesh()
+        self.getDOI(percent, window)
         xAxis = kwargs.pop('xAxis', 'x')
         labels = kwargs.pop('labels', True)
         kwargs['color'] = kwargs.pop('color','k')
         kwargs['linewidth'] = kwargs.pop('linewidth',0.5)
 
-        xtmp = self.mesh.getXAxis(xAxis, centres=False)
-        
-        cP.plot(xTmp, self.elevation.edges() - self.doi, **kwargs)
+        if window == 1:
+            xtmp = self.mesh.getXAxis(xAxis, centres=True)
+
+            cP.plot(xtmp, self.elevation - self.doi, **kwargs)
+
+        else:
+            w2 = np.int(0.5 * window)
+            w22 = -w2 if window % 2 == 0 else -w2-1
+            
+            xtmp = self.mesh.getXAxis(xAxis, centres=True)[w2-1:w22]
+
+            cP.plot(xtmp, self.elevation[w2-1:w22] - self.doi, **kwargs)
 
         #if (labels):
         #    cP.xlabel(self.xPlot.getNameUnits())
@@ -655,19 +725,21 @@ class LineResults(myObject):
         pm = self.mesh.pcolor(self.interfaces.T, **kwargs)
 
 
-    def plotObservedDataChannel(self, channel=None, **kwargs):
+    def plotObservedData(self, channel=None, **kwargs):
         """ Plot a channel of the observed data as points """
 
-        self.setAlonglineAxis(self.plotAgainst)
+        self.getMesh()
 
-        self.getBestData()
+        xAxis = kwargs.pop('xAxis', 'x')
+
+        self.getBestData(sysPath = self.sysPath)
+
+        xtmp = self.mesh.getXAxis(xAxis, centres=True)
 
         if channel is None:
             channel = np.s_[:]
 
-        # print(np.min(self.bestData.d[:, channel]))
-
-        cP.plot(self.xPlot, self.bestData.d[:, channel], **kwargs)
+        cP.plot(xtmp, self.bestData.data[:, channel], **kwargs)
 
 
     def plotOpacity(self, log='e', **kwargs):

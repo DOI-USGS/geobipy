@@ -67,9 +67,9 @@ class Point(object):
         return self
 
 
-    def __str__(self):
-        """ Prints the x,y,z co-ordinates of a point """
-        return "Point({}, {}, {})".format(self.x[0], self.y[0], self.z[0])
+    # def __str__(self):
+    #     """ Prints the x,y,z co-ordinates of a point """
+    #     return "Point({}, {}, {})".format(self.x[0], self.y[0], self.z[0])
 
     
     def Isend(self, dest, world):

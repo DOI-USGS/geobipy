@@ -19,6 +19,7 @@ def isInt(this):
     """
     return isinstance(this, (int, np.integer))
 
+
 def isIntorSlice(this):
     """Check whether an entry is a subtype of an int or a slice
 
@@ -56,6 +57,7 @@ def str_to_raw(s):
     """
     raw_map = {8:r'\b', 7:r'\a', 12:r'\f', 10:r'\n', 13:r'\r', 9:r'\t', 11:r'\v'}
     return r''.join(i if ord(i) > 32 else raw_map.get(ord(i), i) for i in s)
+
 
 #def is_Numeric(num):
 #    """Checks whether num is a number
@@ -426,6 +428,12 @@ def LogDet(A, N=1.0):
     if (ndim == 2):
         d = np.linalg.slogdet(A)
         return d[0] * d[1]
+
+
+def rolling_window(a, window):
+    shape = a.shape[:-1] + (a.shape[-1] - window + 1, window)
+    strides = a.strides + (a.strides[-1],)
+    return np.lib.stride_tricks.as_strided(a, shape=shape, strides=strides)
 
 
 def splitComplex(this):

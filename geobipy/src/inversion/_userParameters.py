@@ -63,7 +63,7 @@ class _userParameters(myObject):
         self.gradientStd = np.float64(1.5) if self.gradientStd is None else np.float64(self.gradientStd)
         self.errorModel = 2
 
-        self.covScaling = np.float64(1.5) if self.covScaling is None else  np.float64(self.covScaling)
+        self.covScaling = np.float64(1.65**2.0) if self.covScaling is None else  np.float64(self.covScaling)
 
         # Scaling factor for data misfit
         self.multiplier = np.float64(1.02) if self.multiplier is None else np.float64(self.multiplier)
