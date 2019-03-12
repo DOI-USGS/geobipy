@@ -511,27 +511,26 @@ class LineResults(myObject):
 
     def plotHighlightedObservationLocations(self, iDs, **kwargs):
 
-        self.setAlonglineAxis(self.plotAgainst)
-        # Get the data heights
-        if (self.z is None):
-            self.z = self.getAttribute('z')
-        self.getElevation()
+        self.getMesh()
 
         labels = kwargs.pop('labels', True)
-        m = kwargs.pop('marker','*') # Downward pointing arrow
-        c = kwargs.pop('color',cP.wellSeparated[1])
-        ls = kwargs.pop('linestyle','none')
-        mec = kwargs.pop('markeredgecolor','k')
-        mew = kwargs.pop('markeredgewidth','0.1')
+        kwargs['marker'] = kwargs.pop('marker','*') # Downward pointing arrow
+        kwargs['color'] = kwargs.pop('color',cP.wellSeparated[1])
+        kwargs['linestyle'] = kwargs.pop('linestyle','none')
+        kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor','k')
+        kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth','0.1')
+        xAxis = kwargs.pop('xAxis', 'x')
+
+        xtmp = self.mesh.getXAxis(xAxis)
 
         i = self.iDs.searchsorted(iDs)
 
-        tmp=self.z.reshape(self.z.size) + self.elevation
+        tmp = self.z.reshape(self.z.size) + self.elevation
 
-        plt.plot(self.xPlot[i], tmp[i], color=c, marker=m, markeredgecolor=mec, linestyle=ls, markeredgewidth=mew, **kwargs)
+        plt.plot(xtmp[i], tmp[i], **kwargs)
 
         if (labels):
-            cP.xlabel(self.xPlot.getNameUnits())
+            cP.xlabel(xtmp.getNameUnits())
             cP.ylabel('Elevation (m)')
 
 
