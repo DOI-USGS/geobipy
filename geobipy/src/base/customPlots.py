@@ -791,6 +791,11 @@ def plot(x, y, **kwargs):
     flipY = kwargs.pop('flipY',False)
     labels = kwargs.pop('labels', True)
     log = kwargs.pop('log', None)
+    reciprocateX = kwargs.pop('reciprocateX', False)
+
+    if reciprocateX:
+        x = 1.0 / x
+
     
     if (labels):
         xl = getNameUnits(x)

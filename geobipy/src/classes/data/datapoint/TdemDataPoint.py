@@ -105,11 +105,13 @@ class TdemDataPoint(EmDataPoint):
 
         if not data is None:
             assert data.size == nChannels, ValueError("Size of data must equal total number of time channels {}".format(nChannels))
+            # Mask invalid data values less than 0.0 to NaN
+            data[data <= 0.0] = np.nan
         if not std is None:
             assert std.size == nChannels, ValueError("Size of std must equal total number of time channels {}".format(nChannels))
         if not predictedData is None:
             assert predictedData.size == nChannels, ValueError("Size of predictedData must equal total number of time channels {}".format(nChannels))
-            
+
         EmDataPoint.__init__(self, nChannelsPerSystem=nTimes, x=x, y=y, z=z, elevation=elevation, data=data, std=std, predictedData=predictedData, dataUnits=r'$\frac{V}{Am^{4}}$', lineNumber=lineNumber, fiducial=fiducial)
 
         self._data.name = "Time domain data"

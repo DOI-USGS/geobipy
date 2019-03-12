@@ -92,7 +92,7 @@ class DataPoint(Point):
             self._channelNames = ['Channel {}'.format(i) for i in range(self.nChannels)]
         else:
             assert len(channelNames) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
-            self._channelNames = channelNames       
+            self._channelNames = channelNames
 
 
     @property
