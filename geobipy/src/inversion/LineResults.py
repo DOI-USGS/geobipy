@@ -1096,13 +1096,13 @@ class LineResults(myObject):
             j1 = j0 + 3
 
             ax[7+(2*i)] = plt.subplot(gs[:3, j0:j1])
-            R._plotRelativeErrorPosterior()
+            R._plotRelativeErrorPosterior(system=i)
             cP.title('System ' + str(i + 1))
 
             # Update the histogram of additive data errors
             ax[7+(2*i)-1] = plt.subplot(gs[3:6, j0:j1])
             # ax= plt.subplot(self.gs[3:6, 2 * self.nSystems + j])
-            R._plotAdditiveErrorPosterior()
+            R._plotAdditiveErrorPosterior(system=i)
 
 
 
