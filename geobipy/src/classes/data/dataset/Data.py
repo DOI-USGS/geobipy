@@ -580,7 +580,8 @@ class Data(PointCloud3D):
         msg = ("{}"
               "Data:          : \n"
               "# of Channels: {} \n"
-              "# of Total Data: {} \n").format(super().summary(True), self.nChannels, self.nPoints * self.nChannels)
+              "# of Total Data: {} \n"
+              "{}\n {}\n {}\n").format(super().summary(True), self.nChannels, self.nPoints * self.nChannels, self.data.summary(True), self.std.summary(True), self.predictedData.summary(True))
         return msg if out else print(msg)
 
 
