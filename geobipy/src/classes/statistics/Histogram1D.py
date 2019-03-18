@@ -189,7 +189,7 @@ class Histogram1D(RectilinearMesh1D):
         if (index is None):
             counts = obj.fromHdf(item)
         else:
-            counts = obj.fromHdf(item, index=np.s_[index,:])
+            counts = obj.fromHdf(item, index=np.s_[index, :])
 
         if bins.size == counts.size:
             Hist = Histogram1D(binCentres = bins)
@@ -202,9 +202,11 @@ class Histogram1D(RectilinearMesh1D):
             log = np.asscalar(np.asarray(grp.get('log')))
         except:
             log = None
+
         Hist.log = log
 
         return Hist
+        
 
 
     def summary(self):
