@@ -101,13 +101,12 @@ class StatArray(np.ndarray, myObject):
     """
 
 
-    def __new__(subtype, shape, name=None, units=None, **kwargs):
+    def __new__(subtype, shape=None, name=None, units=None, **kwargs):
         """Instantiate a new StatArray """
         # Create the ndarray instance of our type, given the usual
         # ndarray input arguments.  This will call the standard
         # ndarray constructor, but return an object of our type.
         # It also triggers a call to InfoArray.__array_finalize__
-
 
         if (not name is None):
             assert (isinstance(name,str)), TypeError('name must be a string')
@@ -115,6 +114,9 @@ class StatArray(np.ndarray, myObject):
         if (not units is None):
             assert (isinstance(units,str)), TypeError('units must be a string')
             units = str_to_raw(units) # Do some possible LateX checking. some Backslash operatores in LateX do not pass correctly as strings
+
+        if shape is None:
+            shape = 1
 
         # Copies a StatArray but can reassign the name and units
         if isinstance(shape, StatArray):
@@ -139,6 +141,7 @@ class StatArray(np.ndarray, myObject):
         elif isinstance(shape, float):
             self = np.ndarray.__new__(subtype, 1, **kwargs)
             self[:] = shape
+
         # Convert the entry to a numpy array
         else:
             self = np.ndarray.__new__(subtype, np.asarray(shape), **kwargs)
