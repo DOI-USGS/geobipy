@@ -6,7 +6,7 @@ major, minor = sys.version_info[0:2]
 if (major, minor) < (3, 5):
     sys.stderr.write('\nPython 3.5 or later is needed to use this package\n')
     sys.exit(1)
-
+from setuptools import find_packages
 try:
     from numpy.distutils.core import setup
     from numpy.distutils.core import Extension
@@ -18,7 +18,7 @@ def readme():
         return f.read()
 
 setup(name='geobipy',
-    packages=['geobipy'],
+    packages=find_packages(),
     scripts=[],
     version=1.0,
     description='Markov chain Monte Carlo inversion',
