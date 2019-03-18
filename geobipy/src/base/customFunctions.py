@@ -158,7 +158,7 @@ def findLastNonZeros(this, axis, invalid_val=-1):
     return np.where(mask.any(axis=axis), val, invalid_val)
 
 
-def findFirstLastNonZeros(this):
+def findFirstLastNotValue(this, values, invalid_val=-1):
     """Find the indices to the first and last non zero values along each axis
 
     Parameters
@@ -172,13 +172,19 @@ def findFirstLastNonZeros(this):
         Indices of the first and last non zero values along each axisgg
 
     """
+    values = np.atleast_1d(values)
     out = np.empty([np.ndim(this), 2], dtype=np.int)
-    mask = ((this != 0.0) & (this != np.nan))
+    mask = this != values[0]
+    if values.size > 1:
+        for i in range(1, values.size):
+            mask = mask & (this != values[i])
     for i in range(np.ndim(this)):
-        out[i, 0] = np.min(np.where(mask.any(axis=i), mask.argmax(axis=i), 0))
+        x = np.where(mask.any(axis=i), mask.argmax(axis=i), invalid_val)
+        out[i, 0] = np.min(x[x != invalid_val])
     for i in range(np.ndim(this)):
         val = this.shape[i] - np.flip(mask, axis=i).argmax(axis=i) - 1
-        out[i, 1] = np.max((np.where(mask.any(axis=i), val, this.shape[i])))
+        x = np.where(mask.any(axis=i), val, invalid_val)
+        out[i, 1] = np.min(x[x != invalid_val])
     return out
 
 
