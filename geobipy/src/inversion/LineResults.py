@@ -14,6 +14,8 @@ from ..classes.statistics.Histogram2D import Histogram2D
 from ..classes.statistics.Hitmap2D import Hitmap2D
 from ..classes.mesh.RectilinearMesh1D import RectilinearMesh1D
 from ..classes.mesh.TopoRectilinearMesh2D import TopoRectilinearMesh2D
+from ..classes.data.dataset.FdemData import FdemData
+from ..classes.data.dataset.TdemData import TdemData
 from ..base.HDF import hdfRead
 from ..base import customPlots as cP
 import matplotlib.pyplot as plt
@@ -35,6 +37,7 @@ class LineResults(myObject):
         if (fName is None): return
 
         self.addErr = None
+        self.addErrPosterior = None
         self.best = None
         self.bestData = None
         self.bestModel = None
@@ -46,17 +49,20 @@ class LineResults(myObject):
         self.interfaces = None
         self.hitMap = None
         self.k = None
+        self.kPosterior = None
         self.mean = None
         self.nPoints = None
         self.nSys = None
         self.opacity = None
         self.range = None
         self.relErr = None
+        self.relErrPosterior = None
         self.sysPath=sysPath
         self.totErr = None
         self.x = None
         self.y = None
         self.z = None
+        self.zPosterior = None
         self.depthGrid = None
 
         self.mesh = None
@@ -167,12 +173,23 @@ class LineResults(myObject):
         if (not self.addErr is None): return
         self.addErr = self.getAttribute('Additive Error')
 
+    
+    def getAdditiveErrorPosteriors(self):
+        if (not self.addErrPosterior is None): return
+        self.addErrPosterior = self.getAttribute('Additive error posterior')
+
 
     def getBestData(self, **kwargs):
         """ Get the best data """
 
-        if (not self.bestData is None): return
-        self.bestData = self.getAttribute('best data', **kwargs)
+        if (not self.bestData is None): return       
+        attr = self._attrTokey('best data')
+        dtype = self.hdfFile[attr[0]].attrs['repr']
+        if "FdemDataPoint" in dtype:
+            self.bestData = FdemData().fromHdf(self.hdfFile[attr[0]])
+        elif "TdemDataPoint" in dtype:
+            self.bestData = TdemData().fromHdf(self.hdfFile[attr[0]])
+        
 
 
     def getBestParameters(self):
@@ -227,6 +244,11 @@ class LineResults(myObject):
         self.z = self.getAttribute('z')
 
 
+    def getHeightPosterior(self):
+        if (not self.zPosterior is None): return
+        self.zPosterior = self.getAttribute('height posterior')
+
+
     def getHitMap(self):
         """ Get the hitmaps for each data point """
         print('Be careful with .getHitMap(),  it could require a lot of memory.')
@@ -238,7 +260,10 @@ class LineResults(myObject):
         """ Get the id numbers of the data points in the line results file """
         if (not self.iDs is None): return
 
-        self.iDs = np.asarray(self.hdfFile.get('ids'))
+        try:
+            self.iDs = self.getAttribute('fiducials')
+        except:
+            self.iDs = StatArray(np.asarray(self.hdfFile.get('ids')), "fiducials")
         self.nPoints = self.iDs.size
 
 
@@ -246,10 +271,10 @@ class LineResults(myObject):
         """ Get the layer interfaces from the layer depth histograms """
         # if (not self.interfaces is None): return
 
-        tmp = self.getAttribute('layer depth histogram')
+        self.getInterfacePosterior()
 
-        maxCount = tmp.counts.max()
-        self.interfaces = tmp.counts / np.float64(maxCount)
+        maxCount = self.kPosterior.counts.max()
+        self.interfaces = self.kPosterior.counts / np.float64(maxCount)
         self.interfaces[self.interfaces < cut] = np.nan
         self.interfaces.name = "Interfaces"
 
@@ -258,6 +283,11 @@ class LineResults(myObject):
         """ Get the number of layers in the best model for each data point """
         if (not self.k is None): return
         self.k = StatArray(self.getAttribute('# Layers'), '# of Cells')
+
+    
+    def getInterfacePosterior(self):
+        if (not self.kPosterior is None): return
+        self.kPosterior = self.getAttribute('layer depth posterior')
 
 
     def getMeanParameters(self):
@@ -319,6 +349,12 @@ class LineResults(myObject):
         """ Get the Relative error of the best data points """
         if (not self.relErr is None): return
         self.relErr = self.getAttribute('Relative Error')
+
+    
+    def getRelativeErrorPosteriors(self):
+        """ Get the Relative error of the best data points """
+        if (not self.relErrPosterior is None): return
+        self.relErrPosterior = self.getAttribute('Relative Error posterior')
 
 
     def getResults(self, index=None, fid=None):
@@ -561,22 +597,22 @@ class LineResults(myObject):
         #     cP.ylabel('Elevation (m)')
 
 
-    def plotElevationDistributions(self, **kwargs):
+    def plotHeightPosteriors(self, **kwargs):
         """ Plot the horizontally stacked elevation histograms for each data point along the line """
 
         self.getMesh()
-        tmp = self.getAttribute('elevation histogram')
+        self.getHeightPosterior()
 
         xAxis = kwargs.pop('xAxis', 'x')
 
         xtmp = self.mesh.getXAxis(xAxis)
 
-        c = tmp.counts.T
+        c = self.zPosterior.counts.T
         c = np.divide(c, np.max(c,0), casting='unsafe')
         x = np.zeros(xtmp.size+1)
         d = np.diff(xtmp)
-        c.pcolor(xtmp, y=tmp.bins, **kwargs)
-        cP.title('Data Elevation posterior distributions')
+        c.pcolor(xtmp, y=self.zPosterior.bins, **kwargs)
+        cP.title('Data height posterior distributions')
 
 
     def plotHighlightedObservationLocations(self, iDs, **kwargs):
@@ -621,11 +657,11 @@ class LineResults(myObject):
         cP.title('# of Layers in Best Model')
 
 
-    def plotKlayersDistributions(self, **kwargs):
+    def plotKlayersPosteriors(self, **kwargs):
         """ Plot the horizontally stacked elevation histograms for each data point along the line """
 
         self.getMesh()
-        tmp = self.getAttribute('layer histogram')
+        tmp = self.getAttribute('layer posterior')
 
         xAxis = kwargs.pop('xAxis', 'x')
 
@@ -674,25 +710,25 @@ class LineResults(myObject):
         
 
 
-    def plotAdditiveErrorDistributions(self, system=0, **kwargs):
+    def plotAdditiveErrorPosteriors(self, system=0, **kwargs):
         """ Plot the distributions of additive errors as an image for all data points in the line """
         self.getMesh()
         self.getNsys()
-        tmp=self.getAttribute('Additive error histogram')
+        self.getAdditiveErrorPosteriors()
 
         xAxis = kwargs.pop('xAxis', 'x')
 
         xtmp = self.mesh.getXAxis(xAxis)
 
         if self.nSys > 1:
-            c = tmp[system].counts.T
+            c = self.addErrPosterior[system].counts.T
             c = np.divide(c, np.max(c,0), casting='unsafe')
-            c.pcolor(xtmp, y=tmp[system].bins, **kwargs)
+            c.pcolor(xtmp, y=self.addErrPosterior[system].bins, **kwargs)
             cP.title('Additive error posterior distributions for system {}'.format(system))
         else:
-            c = tmp.counts.T
+            c = self.addErrPosterior.counts.T
             c = np.divide(c, np.max(c,0), casting='unsafe')
-            c.pcolor(xtmp, y=tmp.bins, **kwargs)
+            c.pcolor(xtmp, y=self.addErrPosterior.bins, **kwargs)
             cP.title('Additive error posterior distributions')
 
 
@@ -700,9 +736,9 @@ class LineResults(myObject):
         """ For a given datapoint, obtains the posterior distributions of relative and additive error and creates the 2D joint probability distribution """
 
         # Read in the histogram of relative error for the data point
-        rel=self.getAttribute('Relative error histogram', index=datapoint)
+        rel = self.getAttribute('Relative error histogram', index=datapoint)
         # Read in the histogram of additive error for the data point
-        add=self.getAttribute('Additive error histogram', index=datapoint)
+        add = self.getAttribute('Additive error histogram', index=datapoint)
 
         joint = Histogram2D()
         joint.create2DjointProbabilityDistribution(rel[system],add[system])
@@ -752,26 +788,25 @@ class LineResults(myObject):
         self.mesh.pcolor(values = self.opacity, **kwargs)
 
 
-    def plotRelativeErrorDistributions(self, system=0, **kwargs):
+    def plotRelativeErrorPosteriors(self, system=0, **kwargs):
         """ Plot the distributions of relative errors as an image for all data points in the line """
         self.getMesh()
         self.getNsys()
-
-        tmp=self.getAttribute('Relative error histogram')
+        self.getRelativeErrorPosterior()
 
         xAxis = kwargs.pop('xAxis', 'x')
 
         xtmp = self.mesh.getXAxis(xAxis)
 
         if self.nSys > 1:
-            c = tmp[system].counts.T
+            c = self.relErrPosterior[system].counts.T
             c = np.divide(c, np.max(c,0), casting='unsafe')
-            c.pcolor(xtmp, y=tmp[system].bins, **kwargs)
+            c.pcolor(xtmp, y=self.relErrPosterior[system].bins, **kwargs)
             cP.title('Relative error posterior distributions for system {}'.format(system))
         else:
-            c = tmp.counts.T
+            c = self.relErrPosterior.counts.T
             c = np.divide(c, np.max(c,0), casting='unsafe')
-            c.pcolor(xtmp, y=tmp.bins, **kwargs)
+            c.pcolor(xtmp, y=self.relErrPosterior.bins, **kwargs)
             cP.title('Relative error posterior distributions')
 
 
@@ -1155,7 +1190,7 @@ class LineResults(myObject):
         return hdfRead.readKeyFromFile(self.hdfFile, self.fName, iDs, keys, index=index, **kwargs)
 
 
-    def _attrTokey(self,attributes):
+    def _attrTokey(self, attributes):
         """ Takes an easy to remember user attribute and converts to the tag in the HDF file """
         if (isinstance(attributes, str)):
             attributes = [attributes]
@@ -1173,11 +1208,13 @@ class LineResults(myObject):
                 res.append('iburn')
             elif (low == 'data multiplier'):
                 res.append('multiplier')
-            elif (low == 'layer histogram'):
+            elif (low == 'layer posterior'):
                 res.append('khist')
-            elif (low == 'elevation histogram'):
+            elif (low == 'height posterior'):
                 res.append('dzhist')
-            elif (low == 'layer depth histogram'):
+            elif (low == 'fiducials'):
+                res.append('fiducials')
+            elif (low == 'layer depth posterior'):
                 res.append('mzhist')
             elif (low == 'best data'):
                 res.append('bestd')
@@ -1221,11 +1258,11 @@ class LineResults(myObject):
                 res.append('doi')
             elif (low == 'data misfit'):
                 res.append('phids')
-            elif (low == 'relative error histogram'):
+            elif (low == 'relative error posterior'):
                 if (nSys is None): nSys = hdfRead.readKeyFromFile(self.hdfFile, self.fName, '/','nsystems')
                 for i in range(nSys):
                     res.append('relerr' +str(i))
-            elif (low == 'additive error histogram'):
+            elif (low == 'additive error posterior'):
                 if (nSys is None): nSys = hdfRead.readKeyFromFile(self.hdfFile, self.fName, '/','nsystems')
                 for i in range(nSys):
                     res.append('adderr' +str(i))
@@ -1248,10 +1285,11 @@ class LineResults(myObject):
               "burned in\n" +
               "burn in # \n" +
               "data multiplier \n" +
-              "layer histogram \n" +
-              "elevation histogram \n" +
-              "layer depth histogram \n" +
+              "layer posterior \n" +
+              "height posterior \n" +
+              "layer depth posterior \n" +
               "best data \n" +
+              "fiducials" +
               "x\n" +
               "y\n" +
               "z\n" +
@@ -1267,8 +1305,8 @@ class LineResults(myObject):
               "hit map \n" +
               "doi \n"+
               "data misfit \n" +
-              "relative error histogram\n" +
-              "additive error histogram\n" +
+              "relative error posterior\n" +
+              "additive error posterior\n" +
               "inversion time\n" +
               "saving time\n"+
               "====================================================\n")
@@ -1282,10 +1320,12 @@ class LineResults(myObject):
         self.hdfFile = hdfFile
 
         nPoints = iDs.size
-        self.iDs = np.sort(iDs)
+        self.iDs = StatArray(np.sort(iDs), "fiducials")
 
         # Initialize and write the attributes that won't change
-        hdfFile.create_dataset('ids',data=self.iDs)
+        # hdfFile.create_dataset('ids',data=self.iDs)
+        self.iDs.createHdf(hdfFile, 'fiducials')
+        self.iDs.writeHdf(hdfFile, 'fiducials')
         hdfFile.create_dataset('iplot', data=results.iPlot)
         hdfFile.create_dataset('plotme', data=results.plotMe)
         hdfFile.create_dataset('invertPar', data=results.invertPar)
