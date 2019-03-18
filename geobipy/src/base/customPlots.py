@@ -10,7 +10,7 @@ import numpy as np
 import numpy.ma as ma
 from .fileIO import deleteFile
 from ..base import Error as Err
-from ..base.customFunctions import (getName, getUnits, getNameUnits, histogramEqualize, _log, findFirstLastNonZeros)
+from ..base.customFunctions import (getName, getUnits, getNameUnits, histogramEqualize, _log, findFirstLastNotValue)
 from cycler import cycler
 import scipy as sp
 
@@ -502,8 +502,8 @@ def pcolormesh(X, Y, values, **kwargs):
         Plot the grid
     noColorbar : bool, optional
         Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
-    trim : bool, optional
-        Set the x and y limits to the first and last non zero values along each axis.
+    trim : array_like, optional
+        Set the x and y limits to the first and last locations that don't equal the values in trim.
 
     Returns
     -------
@@ -534,7 +534,7 @@ def pcolormesh(X, Y, values, **kwargs):
     grid = kwargs.pop('grid', False)
 
     noColorBar = kwargs.pop('noColorbar', False)
-    trim = kwargs.pop('trim', False)
+    trim = kwargs.pop('trim', None)
 
     alpha = kwargs.pop('alpha', 1.0)
 
@@ -545,6 +545,12 @@ def pcolormesh(X, Y, values, **kwargs):
         kwargs['linewidth'] = kwargs.pop('linewidth', 2)
 
     values = ma.masked_invalid(values)
+
+    if not trim is None:
+        bounds = findFirstLastNotValue(values, trim)
+        X = X[bounds[0, 0]:bounds[0, 1], bounds[1, 0]:bounds[1, 1]]
+        Y = Y[bounds[0, 0]:bounds[0, 1], bounds[1, 0]:bounds[1, 1]]
+        values = values[bounds[0, 0]:bounds[0, 1], bounds[1, 0]:bounds[1, 1]]
 
     if (log):
         values, logLabel = _log(values, log)
@@ -564,14 +570,9 @@ def pcolormesh(X, Y, values, **kwargs):
     plt.xscale(xscale)
     plt.yscale(yscale)
 
-    if trim:
-        bounds = findFirstLastNonZeros(Zm)
-        ax.set_xlim(X[0, bounds[1, 0]], X[0, bounds[1, 1]])
-        ax.set_ylim(Y[bounds[0, 0], 0], Y[bounds[0, 1], 0])
-
     if (not noColorBar):
         if (equalize):
-            cbar = plt.colorbar(pm,extend='both')
+            cbar = plt.colorbar(pm, extend='both')
         else:
             cbar = plt.colorbar(pm)
 
@@ -593,12 +594,9 @@ def pcolormesh(X, Y, values, **kwargs):
 
     if flipX:
         ax.invert_xaxis()
-        # ax.set_xlim(ax.get_xlim()[::-1])
 
     if flipY:
         ax.invert_yaxis()
-        print('here')
-        # ax.set_ylim(ax.get_ylim()[::-1])
 
     if np.size(alpha) > 1:
        setAlphaPerPcolormeshPixel(pm, alpha)
