@@ -21,6 +21,7 @@ from ....base import customPlots as cP
 from ....base import customFunctions as cF
 from ....base import MPI as myMPI
 import matplotlib.pyplot as plt
+from os.path import join
 
 
 class TdemData(Data):
@@ -193,7 +194,7 @@ class TdemData(Data):
 
         self.readSystemFile(systemFilename)
         nPoints, iC, iR, iT, iD, iS = self.__readColumnIndices(dataFilename, self.system)
-        
+
         TdemData.__init__(self, nPoints, systems=self.system)
 
         # Get all readable column indices for the first file.
@@ -397,13 +398,13 @@ class TdemData(Data):
                     _indices[0] = j
                 elif(channel in ['id', 'fid']):
                     _indices[1] = j
-                elif (channel in ['n', 'x', 'northing']):
+                elif (channel in ['e', 'x', 'easting']):
                     _indices[2] = j
-                elif (channel in ['e', 'y', 'easting']):
+                elif (channel in ['n', 'y', 'northing']):
                     _indices[3] = j
-                elif(channel in ['dtm', 'dem_elev', 'dem_np', 'topo']):
+                elif(channel in ['z', 'dtm', 'dem_elev', 'dem_np', 'topo', 'elev', 'elevation']):
                     _indices[4] = j
-                elif (channel in ['z', 'alt', 'laser', 'bheight']):
+                elif (channel in ['alt', 'laser', 'bheight', 'height']):
                     _indices[5] = j
 
                 # Get the receiver loop orientation indices
@@ -638,8 +639,9 @@ class TdemData(Data):
 
     def __getitem__(self, i):
         """ Define item getter for TdemData """
-        i = np.unique(i)
-        tmp = TdemData(np.size(i), self.nTimes, self.system)
+        if not isinstance(i, slice):
+            i = np.unique(i)
+        tmp = TdemData(np.size(self.x[i]), self.nTimes, self.system)
         tmp.x[:] = self.x[i]
         tmp.y[:] = self.y[i]
         tmp.z[:] = self.z[i]
@@ -782,6 +784,64 @@ class TdemData(Data):
         if (out):
             return msg
         print(msg)
+
+
+    def fromHdf(self, grp, **kwargs):
+        """ Reads the object from a HDF group """
+
+        assert ('sysPath' in kwargs), ValueError("missing 1 required argument 'sysPath', the path to directory containing system files")
+
+        sysPath = kwargs.pop('sysPath', None)
+        assert (not sysPath is None), ValueError("missing 1 required argument 'sysPath', the path to directory containing system files")
+
+        nSystems = np.int(np.asarray(grp.get('nSystems')))
+        systems = []
+        for i in range(nSystems):
+            # Get the system file name. h5py has to encode strings using utf-8, so decode it!
+            systems.append(TdemSystem(join(sysPath, str(np.asarray(grp.get('System{}'.format(i))), 'utf-8'))))
+
+        s = grp['d/data'].shape
+
+        tmp = TdemData(nPoints=s[0], nTimes=s[1], system=systems)
+
+        item = grp.get('x')
+        obj = eval(safeEval(item.attrs.get('repr')))
+        tmp._x = obj.fromHdf(item)
+        item = grp.get('y')
+        obj = eval(safeEval(item.attrs.get('repr')))
+        tmp._y = obj.fromHdf(item)
+        item = grp.get('z')
+        obj = eval(safeEval(item.attrs.get('repr')))
+        tmp._z = obj.fromHdf(item)
+        item = grp.get('e')
+        obj = eval(safeEval(item.attrs.get('repr')))
+        tmp._elevation = obj.fromHdf(item)
+
+        item = grp.get('d')
+        obj = eval(safeEval(item.attrs.get('repr')))
+        tmp._data = obj.fromHdf(item)
+        item = grp.get('s')
+        obj = eval(safeEval(item.attrs.get('repr')))
+        tmp._std = obj.fromHdf(item)
+        item = grp.get('p')
+        obj = eval(safeEval(item.attrs.get('repr')))
+        tmp._predictedData = obj.fromHdf(item)
+        item = grp.get('relErr')
+        obj = eval(safeEval(item.attrs.get('repr')))
+        tmp.relErr = obj.fromHdf(item)
+        item = grp.get('addErr')
+        obj = eval(safeEval(item.attrs.get('repr')))
+        tmp.addErr = obj.fromHdf(item)
+        item = grp.get('T')
+        obj = eval(safeEval(item.attrs.get('repr')))
+        tmp.T = obj.fromHdf(item)
+        item = grp.get('R')
+        obj = eval(safeEval(item.attrs.get('repr')))
+        tmp.R = obj.fromHdf(item)
+
+        tmp.iActive = tmp.getActiveChannels()
+
+        return tmp
 
 
     def scatter2D(self, **kwargs):
