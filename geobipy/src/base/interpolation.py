@@ -46,7 +46,7 @@ def CT(dx, dy, bounds, XY, values, mask = False, kdtree = None, clip = False, ex
 
     """
     # Create the CT function for interpolation
-    f=CloughTocher2DInterpolator(XY,values)
+    f = CloughTocher2DInterpolator(XY,values)
 
     xc,yc,intPoints = getGridLocations2D(bounds, dx, dy)
 
@@ -54,7 +54,7 @@ def CT(dx, dy, bounds, XY, values, mask = False, kdtree = None, clip = False, ex
     vals = f(intPoints)
 
     # Reshape to a 2D array
-    vals=StatArray(vals.reshape(yc.size,xc.size),name=cf.getName(values), units = cf.getUnits(values))
+    vals = StatArray(vals.reshape(yc.size,xc.size),name=cf.getName(values), units = cf.getUnits(values))
 
     if mask or extrapolate:
         if (kdtree is None):
