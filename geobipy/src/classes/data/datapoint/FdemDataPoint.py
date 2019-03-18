@@ -307,6 +307,9 @@ class FdemDataPoint(EmDataPoint):
     def fromHdf(self, grp, index=None, **kwargs):
         """ Reads the object from a HDF group """
 
+        if grp['d/data'].ndim > 1:
+            assert not index is None, ValueError("File contains multiple FdemDataPoints.  Must specify an index.")
+
         item = grp.get('x')
         obj = eval(safeEval(item.attrs.get('repr')))
         x = obj.fromHdf(item, index=index)
@@ -329,9 +332,11 @@ class FdemDataPoint(EmDataPoint):
 
         _aPoint = FdemDataPoint(x, y, z, e, system=system)
 
-        slic = None
-        if not index is None:
-            slic=np.s_[index,:]
+        if grp['d/data'].ndim > 1:
+            slic = np.s_[index, :]
+        else:
+            slic = None
+
         item = grp.get('d')
         obj = eval(safeEval(item.attrs.get('repr')))
         _aPoint._data = obj.fromHdf(item, index=slic)
