@@ -1407,19 +1407,21 @@ class Model1D(Model):
         if (not item is None):
             tmp.hasHalfspace = np.array(item)
 
+        if grp['par/data'].ndim > 1:
+            assert not index is None, ValueError("File was created with multiple Model1Ds, must specify an index")
+
         item = grp.get('nCells')
         obj = eval(safeEval(item.attrs.get('repr')))
         tmp.nCells = obj.fromHdf(item, index=index)
 
+        if grp['par/data'].ndim == 1:
+            i = np.s_[:tmp.nCells[0]]
+        else:
+            i = np.s_[index, :tmp.nCells[0]]
+
         item = grp.get('top')
         obj = eval(safeEval(item.attrs.get('repr')))
         tmp.top = obj.fromHdf(item, index=index)
-
-        if (index is None):
-            i = np.s_[:tmp.nCells[0]]
-        else:
-            i = np.s_[index,:tmp.nCells[0]]
-
 
         item = grp.get('par')
         obj = eval(safeEval(item.attrs.get('repr')))
