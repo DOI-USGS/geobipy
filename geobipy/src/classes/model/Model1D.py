@@ -196,8 +196,8 @@ class Model1D(Model):
         other.maxLayers = self.maxLayers
         other.par = self.par.deepcopy()
         other.dpar = self.dpar.deepcopy()
-        other.chie = self.chie.deepcopy() #StatArray(other.nCells[0], "Magnetic Susceptibility", r"$\kappa$")
-        other.chim = self.chim.deepcopy() #StatArray(other.nCells[0], "Magnetic Permeability", "$\frac{H}{m}$")
+        other.chie = self.chie.deepcopy() #StatArray(other.nCells[0], "Electric Susceptibility", r"$\kappa$")
+        other.chim = self.chim.deepcopy() #StatArray(other.nCells[0], "Magnetic Susceptibility", "$\frac{H}{m}$")
         other.pWheel = self.pWheel
         other.iLayer = self.iLayer
         other.Hitmap = self.Hitmap
@@ -423,8 +423,8 @@ class Model1D(Model):
         # Get the new thicknesses
         other.thicknessFromDepth()
         # Reset ChiE and ChiM
-        other.chie = StatArray(other.nCells[0], "Magnetic Susceptibility", r"$\kappa$")
-        other.chim = StatArray(other.nCells[0], "Magnetic Permeability", r"$\frac{H}{m}$")
+        other.chie = StatArray(other.nCells[0], "Electric Susceptibility", r"$\kappa$")
+        other.chim = StatArray(other.nCells[0], "Magnetic Susceptibility", r"$\frac{H}{m}$")
         # Resize the parameter gradient
         other.dpar = other.dpar.resize(other.par.size - 1)
         other.iLayer = i
