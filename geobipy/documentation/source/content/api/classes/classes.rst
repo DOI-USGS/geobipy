@@ -1,6 +1,7 @@
 Classes used in GeoBIPy
 ========================
 
+
 .. toctree::
    :maxdepth: 3
 
