@@ -330,7 +330,17 @@ def masterTask(Dataset, world):
   for iWorker in range(1, world.size):
     # Get a datapoint from the file.
     DataPoint = Dataset._readSingleDatapoint()
-    DataPoint.Isend(dest=iWorker, world=world)
+
+    # If DataPoint is None, then we reached the end of the file and no more points can be read in.
+    if DataPoint is None:
+        # Send the kill switch to the worker to shut down.
+        continueRunning[0] = 0 # Do not continue running
+        world.Isend(continueRunning, dest=iWorker)
+    else:
+        continueRunning[0] = 1 # Yes, continue with the next point.
+        world.Isend(continueRunning, dest=iWorker)
+        DataPoint.Isend(dest=iWorker, world=world)
+
     nSent += 1
 
   # Start a timer
@@ -366,36 +376,17 @@ def masterTask(Dataset, world):
 
 
 def workerTask(_DataPoint, UP, prng, world, lineNumbers, LineResults):
-  """ Define a wait run ping procedure for each worker """
-  
-  from mpi4py import MPI
-  from geobipy.src.base import MPI as myMPI
-  
-  # Initialize the worker process to go
-  Go = True
-
-  # Initialize communicating variables.
-  continueRunning = np.empty(1, dtype=np.int32)
-  myRank = np.empty(3, dtype=np.float64)
-  
-  # Receive the first point for this rank.
-  DataPoint = _DataPoint.Irecv(source=0, world=world)
-
-  while Go:
-    t0 = MPI.Wtime()
-    # Get the data point for the given index
-    # DataPoint = myData.getDataPoint(iDataPoint)
-    paras = UP.userParameters(DataPoint)
-
-    # Pass through the line results file object if a parallel file system is in use.
-    iLine = lineNumbers.searchsorted(DataPoint.lineNumber)
-    Inv_MCMC(paras, DataPoint, prng=prng, rank=world.rank, LineResults=LineResults[iLine])
+    """ Define a wait run ping procedure for each worker """
     
-    # Send the current rank number to the master
-    myRank[:] = (world.rank, LineResults[iLine].iDs.searchsorted(DataPoint.fiducial), MPI.Wtime() - t0)
+    from mpi4py import MPI
+    from geobipy.src.base import MPI as myMPI
+    
+    # Initialize the worker process to go
+    Go = True
 
-    # With the Data Point inverted, Ping the Master to request a new index
-    world.Send(myRank, dest = 0)
+    # Initialize communicating variables.
+    continueRunning = np.empty(1, dtype=np.int32)
+    myRank = np.empty(3, dtype=np.float64)
 
     # Wait till you are told what to process next
     req = world.Irecv(continueRunning, source=0)
@@ -403,9 +394,35 @@ def workerTask(_DataPoint, UP, prng, world, lineNumbers, LineResults):
 
     # If we continue running, receive the next DataPoint. Otherwise, shutdown the rank
     if continueRunning[0]:
-        DataPoint = _DataPoint.Irecv(source=0, world=world, systems=DataPoint.system)
+        DataPoint = _DataPoint.Irecv(source=0, world=world)
     else:
         Go = False
+    
+    while Go:
+        t0 = MPI.Wtime()
+        # Get the data point for the given index
+        # DataPoint = myData.getDataPoint(iDataPoint)
+        paras = UP.userParameters(DataPoint)
+
+        # Pass through the line results file object if a parallel file system is in use.
+        iLine = lineNumbers.searchsorted(DataPoint.lineNumber)
+        Inv_MCMC(paras, DataPoint, prng=prng, rank=world.rank, LineResults=LineResults[iLine])
+        
+        # Send the current rank number to the master
+        myRank[:] = (world.rank, LineResults[iLine].iDs.searchsorted(DataPoint.fiducial), MPI.Wtime() - t0)
+
+        # With the Data Point inverted, Ping the Master to request a new index
+        world.Send(myRank, dest = 0)
+
+        # Wait till you are told what to process next
+        req = world.Irecv(continueRunning, source=0)
+        req.Wait()
+
+        # If we continue running, receive the next DataPoint. Otherwise, shutdown the rank
+        if continueRunning[0]:
+            DataPoint = _DataPoint.Irecv(source=0, world=world, systems=DataPoint.system)
+        else:
+            Go = False
 
 
 def runSerial():
