@@ -77,8 +77,6 @@ class LineResults(myObject):
             self.hdfFile = hdfFile
             self.getIDs()
 
-        self.getMesh()
-
 
     def open(self):
         """ Check whether the file is open """
@@ -369,12 +367,15 @@ class LineResults(myObject):
             i = self.iDs.searchsorted(fid)
         else:
             i = index
+            fid = self.iDs[index]
 
         hdfFile = self.hdfFile
 
         s = np.s_[i, :]
 
         R = Results()
+
+        R.fiducial = np.float64(fid)
 
         R.iPlot = np.array(hdfFile.get('iplot'))
         R.plotMe = np.array(hdfFile.get('plotme'))
