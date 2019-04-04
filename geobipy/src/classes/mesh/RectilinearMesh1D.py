@@ -84,7 +84,7 @@ class RectilinearMesh1D(myObject):
         # Is the discretization regular
         self.isRegular = self._cellCentres.isRegular
         # Get the increment
-        self.dx = self._cellCentres[1] - self._cellCentres[0]
+        self.dx = self._cellEdges[1] - self._cellEdges[0]
 
 
     def deepcopy(self):
