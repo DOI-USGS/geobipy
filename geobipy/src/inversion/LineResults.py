@@ -76,9 +76,7 @@ class LineResults(myObject):
         else:
             self.hdfFile = hdfFile
             self.getIDs()
-
-        self.getMesh()
-
+            
 
     def open(self):
         """ Check whether the file is open """
