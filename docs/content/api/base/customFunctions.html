@@ -172,8 +172,8 @@ If A is scalar: Take the number to power N, assumes A represents a diagonal matr
 </dd></dl>
 
 <dl class="function">
-<dt id="geobipy.src.base.customFunctions.findFirstLastNonZeros">
-<code class="descclassname">geobipy.src.base.customFunctions.</code><code class="descname">findFirstLastNonZeros</code><span class="sig-paren">(</span><em>this</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.findFirstLastNonZeros" title="Permalink to this definition">¶</a></dt>
+<dt id="geobipy.src.base.customFunctions.findFirstLastNotValue">
+<code class="descclassname">geobipy.src.base.customFunctions.</code><code class="descname">findFirstLastNotValue</code><span class="sig-paren">(</span><em>this</em>, <em>values</em>, <em>invalid_val=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.findFirstLastNotValue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the indices to the first and last non zero values along each axis</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -400,17 +400,15 @@ If this fails, the specified default will be returned.</p>
 <dt id="geobipy.src.base.customFunctions.isNumpy">
 <code class="descclassname">geobipy.src.base.customFunctions.</code><code class="descname">isNumpy</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.isNumpy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Test that the variable is a compatible numpy type with built ins like .ndim</p>
-<dl class="docutils">
-<dt>x <span class="classifier-delimiter">:</span> <span class="classifier">anything</span></dt>
-<dd>A variable to check</dd>
-</dl>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – Whether the variable is a compatible numpy type</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>anything</em>) – A variable to check</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – Whether the variable is a compatible numpy type</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
 </tr>
 </tbody>
 </table>

@@ -47,9 +47,15 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-geobipy.src.classes.data.dataset.FdemData">
-<span id="fdemdata"></span><h1>FdemData<a class="headerlink" href="#module-geobipy.src.classes.data.dataset.FdemData" title="Permalink to this headline">¶</a></h1>
-<p>&#64;FdemData_Class
+  <div class="section" id="fdemdata">
+<h1>FdemData<a class="headerlink" href="#fdemdata" title="Permalink to this headline">¶</a></h1>
+<img src="../../../../../_images/inheritance-079b79de761d8f8eeaf8136b44920b3cddbc6718.png" alt="Inheritance diagram of geobipy.src.classes.data.dataset.FdemData" usemap="#inheritance66f423f7ef" class="inheritance"/>
+<map id="inheritance66f423f7ef" name="inheritance66f423f7ef">
+<area shape="rect" id="node1" href="Data.html#geobipy.src.classes.data.dataset.Data.Data" target="_top" title="Class defining a set of Data." alt="" coords="283,5,355,29"/>
+<area shape="rect" id="node3" href="#geobipy.src.classes.data.dataset.FdemData.FdemData" target="_top" title="Class extension to geobipy.Data defining a Fourier domain electro magnetic data set" alt="" coords="403,5,486,29"/>
+<area shape="rect" id="node2" href="../../pointcloud/PointCloud3D.html#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D" target="_top" title="3D Point Cloud with x,y,z co&#45;ordinates" alt="" coords="131,5,235,29"/>
+<area shape="rect" id="node4" href="../../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="5,5,83,29"/>
+</map><span class="target" id="module-geobipy.src.classes.data.dataset.FdemData"></span><p>&#64;FdemData_Class
 Module describing an EMData Set where channels are associated with an xyz co-ordinate</p>
 <dl class="class">
 <dt id="geobipy.src.classes.data.dataset.FdemData.FdemData">
@@ -199,18 +205,33 @@ t/rx,y,z are the loop offsets from the observation locations in the data file.</
 </dd></dl>
 
 <dl class="method">
+<dt id="geobipy.src.classes.data.dataset.FdemData.FdemData.fromHdf">
+<code class="descname">fromHdf</code><span class="sig-paren">(</span><em>grp</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.fromHdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the object from a HDF group</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="geobipy.src.classes.data.dataset.FdemData.FdemData.getDataPoint">
-<code class="descname">getDataPoint</code><span class="sig-paren">(</span><em>i</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.getDataPoint" title="Permalink to this definition">¶</a></dt>
+<code class="descname">getDataPoint</code><span class="sig-paren">(</span><em>index=None</em>, <em>fiducial=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.getDataPoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the ith data point from the data set</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>i</strong> (<em>int</em>) – The data point to get</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>index</strong> (<em>int</em><em>, </em><em>optional</em>) – Index of the data point to get.</li>
+<li><strong>fiducial</strong> (<em>float</em><em>, </em><em>optional</em>) – Fiducial of the data point to get.</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – The data point</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – The data point.</p>
+</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">geobipy.FdemDataPoints</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">geobipy.FdemDataPoint</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal notranslate"><span class="pre">Exception</span></code> – If neither an index or fiducial are given.</p>
+</td>
 </tr>
 </tbody>
 </table>

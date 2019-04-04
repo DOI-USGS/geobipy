@@ -46,9 +46,14 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-geobipy.src.classes.model.Model1D">
-<span id="model1d"></span><h1>Model1D<a class="headerlink" href="#module-geobipy.src.classes.model.Model1D" title="Permalink to this headline">¶</a></h1>
-<p>&#64;Model1D_Class
+  <div class="section" id="model1d">
+<h1>Model1D<a class="headerlink" href="#model1d" title="Permalink to this headline">¶</a></h1>
+<img src="../../../../_images/inheritance-a96e45ea8b9143901b60fd92b27ebeaaf5a6e71b.png" alt="Inheritance diagram of geobipy.src.classes.model.Model1D" usemap="#inheritance0303cabe1d" class="inheritance"/>
+<map id="inheritance0303cabe1d" name="inheritance0303cabe1d">
+<area shape="rect" id="node1" href="Model_.html#geobipy.src.classes.model.Model.Model" target="_top" title="Abstract Model Class" alt="" coords="131,5,203,29"/>
+<area shape="rect" id="node3" href="#geobipy.src.classes.model.Model1D.Model1D" target="_top" title="Class extension to geobipy.Model" alt="" coords="251,5,326,29"/>
+<area shape="rect" id="node2" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="5,5,83,29"/>
+</map><span class="target" id="module-geobipy.src.classes.model.Model1D"></span><p>&#64;Model1D_Class
 Module describing a 1 Dimensional layered Model</p>
 <dl class="class">
 <dt id="geobipy.src.classes.model.Model1D.Model1D">
@@ -606,14 +611,14 @@ For a death, contains the index of the layer that was deleted [iDeleted, None]</
 <dd><p>Evaluate the prior for the gradient of the parameter with depth</p>
 <p><strong>Prior on the gradient of the physical parameter with depth</strong></p>
 <p>If instead we wish to apply a multivariate normal distribution to the gradient of the parameter with depth we get</p>
-<div class="math notranslate nohighlight">
-\[p(\boldsymbol{\sigma} | k, I) = \left[(2\pi)^{k-1} |\boldsymbol{C}_{\nabla_{z}}|\right]^{-\frac{1}{2}} e ^{-\frac{1}{2}(\nabla_{z} \boldsymbol{\sigma})^{T} \boldsymbol{C}_{\nabla_{z}}^{-1} (\nabla_{z}\boldsymbol{\sigma})}\]</div>
+<div class="math notranslate nohighlight" id="equation-gradient1">
+<span class="eqno">(7)<a class="headerlink" href="#equation-gradient1" title="Permalink to this equation">¶</a></span>\[p(\boldsymbol{\sigma} | k, I) = \left[(2\pi)^{k-1} |\boldsymbol{C}_{\nabla_{z}}|\right]^{-\frac{1}{2}} e ^{-\frac{1}{2}(\nabla_{z} \boldsymbol{\sigma})^{T} \boldsymbol{C}_{\nabla_{z}}^{-1} (\nabla_{z}\boldsymbol{\sigma})}\]</div>
 <p>where the parameter gradient <span class="math notranslate nohighlight">\(\nabla_{z}\sigma\)</span> at the ith layer is computed via</p>
-<div class="math notranslate nohighlight">
-\[\nabla_{z}^{i}\sigma = \frac{\sigma_{i+1} - \sigma_{i}}{h_{i} - h_{min}}\]</div>
+<div class="math notranslate nohighlight" id="equation-dpdz1">
+<span class="eqno">(8)<a class="headerlink" href="#equation-dpdz1" title="Permalink to this equation">¶</a></span>\[\nabla_{z}^{i}\sigma = \frac{\sigma_{i+1} - \sigma_{i}}{h_{i} - h_{min}}\]</div>
 <p>where <span class="math notranslate nohighlight">\(\sigma_{i+1}\)</span> and <span class="math notranslate nohighlight">\(\sigma_{i}\)</span> are the log-parameters on either side of an interface, <span class="math notranslate nohighlight">\(h_{i}\)</span> is the log-thickness of the ith layer, and <span class="math notranslate nohighlight">\(h_{min}\)</span> is the minimum log thickness defined by</p>
-<div class="math notranslate nohighlight">
-\[h_{min} = \frac{z_{max} - z_{min}}{2 k_{max}}\]</div>
+<div class="math notranslate nohighlight" id="equation-minthickness1">
+<span class="eqno">(9)<a class="headerlink" href="#equation-minthickness1" title="Permalink to this equation">¶</a></span>\[h_{min} = \frac{z_{max} - z_{min}}{2 k_{max}}\]</div>
 <p>where <span class="math notranslate nohighlight">\(k_{max}\)</span> is a maximum number of layers, set to be far greater than the expected final solution.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />

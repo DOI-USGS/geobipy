@@ -118,8 +118,8 @@ If values is an StatArray, the axes are automatically labelled.</p>
 <tr class="field-even field"><td>&#160;</td><td class="field-body"><ul class="first simple">
 <li><strong>log</strong> (<em>‘e’ or float, optional</em>) – Take the log of the colour to a base. ‘e’ if log = ‘e’, and a number e.g. log = 10.
 Values in c that are &lt;= 0 are masked.</li>
+<li><strong>reciprocateX</strong> (<em>bool, optiona</em>) – Take the reciprocal of the x axis.</li>
 <li><strong>xscale</strong> (<em>str, optional</em>) – Scale the x axis? e.g. xscale = ‘linear’ or ‘log’.</li>
-<li><strong>yscale</strong> (<em>str, optional</em>) – Scale the y axis? e.g. yscale = ‘linear’ or ‘log’.</li>
 </ul>
 </td>
 </tr>
@@ -207,7 +207,6 @@ Values in c that are &lt;= 0 are masked.</li>
 <li><strong>equalize</strong> (<em>bool, optional</em>) – Equalize the histogram of the colourmap so that all colours have an equal amount.</li>
 <li><strong>nbins</strong> (<em>int, optional</em>) – Number of bins to use for histogram equalization.</li>
 <li><strong>xscale</strong> (<em>str, optional</em>) – Scale the x axis? e.g. xscale = ‘linear’ or ‘log’</li>
-<li><strong>yscale</strong> (<em>str, optional</em>) – Scale the y axis? e.g. yscale = ‘linear’ or ‘log’.</li>
 <li><strong>flipX</strong> (<em>bool, optional</em>) – Flip the X axis</li>
 <li><strong>flipY</strong> (<em>bool, optional</em>) – Flip the Y axis</li>
 <li><strong>grid</strong> (<em>bool, optional</em>) – Plot the grid</li>
@@ -260,7 +259,6 @@ Values in c that are &lt;= 0 are masked.</li>
 <li><strong>equalize</strong> (<em>bool, optional</em>) – Equalize the histogram of the colourmap so that all colours have an equal amount.</li>
 <li><strong>nbins</strong> (<em>int, optional</em>) – Number of bins to use for histogram equalization.</li>
 <li><strong>xscale</strong> (<em>str, optional</em>) – Scale the x axis? e.g. xscale = ‘linear’ or ‘log’</li>
-<li><strong>yscale</strong> (<em>str, optional</em>) – Scale the y axis? e.g. yscale = ‘linear’ or ‘log’.</li>
 <li><strong>flipY</strong> (<em>bool, optional</em>) – Flip the Y axis</li>
 <li><strong>clabel</strong> (<em>str, optional</em>) – colourbar label</li>
 <li><strong>grid</strong> (<em>bool, optional</em>) – Show the grid lines</li>
@@ -312,12 +310,11 @@ Values in c that are &lt;= 0 are masked.</li>
 <li><strong>equalize</strong> (<em>bool, optional</em>) – Equalize the histogram of the colourmap so that all colours have an equal amount.</li>
 <li><strong>nbins</strong> (<em>int, optional</em>) – Number of bins to use for histogram equalization.</li>
 <li><strong>xscale</strong> (<em>str, optional</em>) – Scale the x axis? e.g. xscale = ‘linear’ or ‘log’</li>
-<li><strong>yscale</strong> (<em>str, optional</em>) – Scale the y axis? e.g. yscale = ‘linear’ or ‘log’.</li>
 <li><strong>flipX</strong> (<em>bool, optional</em>) – Flip the X axis</li>
 <li><strong>flipY</strong> (<em>bool, optional</em>) – Flip the Y axis</li>
 <li><strong>grid</strong> (<em>bool, optional</em>) – Plot the grid</li>
 <li><strong>noColorbar</strong> (<em>bool, optional</em>) – Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.</li>
-<li><strong>trim</strong> (<em>bool, optional</em>) – Set the x and y limits to the first and last non zero values along each axis.</li>
+<li><strong>trim</strong> (<em>array_like, optional</em>) – Set the x and y limits to the first and last locations that don’t equal the values in trim.</li>
 </ul>
 </td>
 </tr>
@@ -358,7 +355,6 @@ Values in c that are &lt;= 0 are masked.</li>
 <li><strong>log</strong> (<em>‘e’ or float, optional</em>) – Take the log of the colour to a base. ‘e’ if log = ‘e’, and a number e.g. log = 10.
 Values in c that are &lt;= 0 are masked.</li>
 <li><strong>xscale</strong> (<em>str, optional</em>) – Scale the x axis? e.g. xscale = ‘linear’ or ‘log’.</li>
-<li><strong>yscale</strong> (<em>str, optional</em>) – Scale the y axis? e.g. yscale = ‘linear’ or ‘log’.</li>
 <li><strong>flipX</strong> (<em>bool, optional</em>) – Flip the X axis</li>
 <li><strong>flipY</strong> (<em>bool, optional</em>) – Flip the Y axis</li>
 <li><strong>labels</strong> (<em>bool, optional</em>) – Plot the labels? Default is True.</li>
@@ -412,7 +408,7 @@ Can take any other matplotlib arguments and keyword arguments e.g. markersize et
 <li><strong>x</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – Horizontal locations of the points to plot</li>
 <li><strong>c</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – Colour values of the points</li>
 <li><strong>y</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a><em>, </em><em>optional</em>) – Vertical locations of the points to plot, if y = None, then y = c.</li>
-<li><strong>i</strong> (<em>sequence of ints</em><em>, </em><em>optional</em>) – Plot a subset of x, y, c, using the indices in i.</li>
+<li><strong>i</strong> (<em>sequence of ints</em><em> or </em><em>numpy.slice</em><em>, </em><em>optional</em>) – Plot a subset of x, y, c, using the indices in i.</li>
 </ul>
 </td>
 </tr>
@@ -423,7 +419,6 @@ Values in c that are &lt;= 0 are masked.</li>
 <li><strong>equalize</strong> (<em>bool, optional</em>) – Equalize the histogram of the colourmap so that all colours have an equal amount.</li>
 <li><strong>nbins</strong> (<em>int, optional</em>) – Number of bins to use for histogram equalization.</li>
 <li><strong>xscale</strong> (<em>str, optional</em>) – Scale the x axis? e.g. xscale = ‘linear’ or ‘log’</li>
-<li><strong>yscale</strong> (<em>str, optional</em>) – Scale the y axis? e.g. yscale = ‘linear’ or ‘log’.</li>
 <li><strong>flipX</strong> (<em>bool, optional</em>) – Flip the X axis</li>
 <li><strong>flipY</strong> (<em>bool, optional</em>) – Flip the Y axis</li>
 <li><strong>noColorBar</strong> (<em>bool, optional</em>) – Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.</li>
@@ -504,7 +499,6 @@ Values in c that are &lt;= 0 are masked.</li>
 <li><strong>labels</strong> (<em>list of str, optional</em>) – The labels to assign to each column.</li>
 <li><strong>colors</strong> (<em>matplotlib.colors.LinearSegmentedColormap or list of colours</em>) – The colour used for each column.</li>
 <li><strong>xscale</strong> (<em>str, optional</em>) – Scale the x axis? e.g. xscale = ‘linear’ or ‘log’.</li>
-<li><strong>yscale</strong> (<em>str, optional</em>) – Scale the y axis? e.g. yscale = ‘linear’ or ‘log’.</li>
 </ul>
 </td>
 </tr>

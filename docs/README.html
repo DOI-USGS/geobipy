@@ -53,37 +53,37 @@
 <ul class="simple">
 <li><a class="reference internal" href="#welcome-to-geobipy" id="id1">Welcome to GeoBIPy</a><ul>
 <li><a class="reference internal" href="#getting-started" id="id2">Getting started</a></li>
-<li><a class="reference internal" href="#installing-a-serial-version-of-geobipy" id="id3">Installing a serial version of GeoBIPy</a></li>
-<li><a class="reference internal" href="#installing-a-parallel-version-of-geobipy" id="id4">Installing a parallel version of GeoBIPy</a><ul>
-<li><a class="reference internal" href="#installing-mpi-and-mpi4py" id="id5">Installing MPI and mpi4py</a><ul>
-<li><a class="reference internal" href="#mpi" id="id6">MPI</a></li>
-<li><a class="reference internal" href="#mpi4py" id="id7">mpi4py</a></li>
+<li><a class="reference internal" href="#installing-geobipy" id="id3">Installing GeoBIPy</a><ul>
+<li><a class="reference internal" href="#installing-a-serial-version-of-geobipy" id="id4">Installing a serial version of GeoBIPy</a></li>
+<li><a class="reference internal" href="#installing-a-parallel-version-of-geobipy" id="id5">Installing a parallel version of GeoBIPy</a><ul>
+<li><a class="reference internal" href="#installing-mpi-and-mpi4py" id="id6">Installing MPI and mpi4py</a><ul>
+<li><a class="reference internal" href="#mpi" id="id7">MPI</a></li>
+<li><a class="reference internal" href="#mpi4py" id="id8">mpi4py</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#installing-parallel-hdf5-and-h5py" id="id8">Installing parallel HDF5 and h5py</a><ul>
-<li><a class="reference internal" href="#hdf5" id="id9">HDF5</a></li>
-<li><a class="reference internal" href="#h5py" id="id10">h5py</a></li>
+<li><a class="reference internal" href="#installing-parallel-hdf5-and-h5py" id="id9">Installing parallel HDF5 and h5py</a><ul>
+<li><a class="reference internal" href="#hdf5" id="id10">HDF5</a></li>
+<li><a class="reference internal" href="#h5py" id="id11">h5py</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#installing-geobipy-on-yeti" id="id11">Installing GeoBIPy on Yeti</a></li>
-<li><a class="reference internal" href="#installing-the-time-domain-forward-modeller" id="id12">Installing the time domain forward modeller</a><ul>
-<li><a class="reference internal" href="#prerequisites" id="id13">Prerequisites</a><ul>
-<li><a class="reference internal" href="#installing-fftw-from-source" id="id14">Installing FFTW from Source</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#using-geobipy-on-yeti" id="id12">Using GeoBIPy on Yeti</a></li>
+<li><a class="reference internal" href="#installing-the-time-domain-forward-modeller" id="id13">Installing the time domain forward modeller</a><ul>
+<li><a class="reference internal" href="#prerequisites" id="id14">Prerequisites</a></li>
 <li><a class="reference internal" href="#compile-the-gatdaem1d-shared-library" id="id15">Compile the gatdaem1d shared library</a></li>
+<li><a class="reference internal" href="#installing-the-python-bindings" id="id16">Installing the Python Bindings</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#installing-the-python-bindings" id="id16">Installing the Python Bindings</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#documentation" id="id17">Documentation</a><ul>
 <li><a class="reference internal" href="#publication" id="id18">Publication</a></li>
 <li><a class="reference internal" href="#source-code-html-pages" id="id19">Source code HTML pages</a></li>
 <li><a class="reference internal" href="#jupyter-notebooks-to-illustrate-the-classes" id="id20">Jupyter notebooks to illustrate the classes</a></li>
-<li><a class="reference internal" href="#running-geobipy-using-the-hooks" id="id21">Running GeoBIPy using the hooks</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#running-geobipy" id="id21">Running GeoBIPy</a></li>
 </ul>
 </li>
 </ul>
@@ -97,39 +97,42 @@
 <p>If you require parallel file reading and writing, you will also need to install an MPI enabled HDF5 library, as well as Python’s h5py wrapper to that library. It is important to read the notes below on installing h5py on top of a parallel HDF library.  The traditional “pip install h5py” will not work correctly. See <a class="reference internal" href="#installing-parallel-hdf5-and-h5py">Installing parallel HDF5 and h5py</a> to do this correctly.</p>
 <p>If you need to install the parallel IO version of the code, we would recommend that you start with a clean install of Python. This makes it easier to determine whether you have installed and linked the correct version of the parallel HDF5 library.</p>
 </div>
+<div class="section" id="installing-geobipy">
+<h2><a class="toc-backref" href="#id3">Installing GeoBIPy</a><a class="headerlink" href="#installing-geobipy" title="Permalink to this headline">¶</a></h2>
+<p>There are two versions when installing GeoBIPy, a serial version, and a parallel version. Since GeoBIPy uses a Fortran backend for forward modelling frequency domain data, you will need to have a Fortran compiler installed. Make sure that the compiler can handle derived data types since I make use of object oriented programming in Fortran.</p>
 <div class="section" id="installing-a-serial-version-of-geobipy">
-<h2><a class="toc-backref" href="#id3">Installing a serial version of GeoBIPy</a><a class="headerlink" href="#installing-a-serial-version-of-geobipy" title="Permalink to this headline">¶</a></h2>
+<h3><a class="toc-backref" href="#id4">Installing a serial version of GeoBIPy</a><a class="headerlink" href="#installing-a-serial-version-of-geobipy" title="Permalink to this headline">¶</a></h3>
 <p>This is the easiest installation and provides access to a serial implementation of the code.</p>
 <p>Simply clone the git repository, navigate to the package folder that contains the setup.py file, and type “pip install -e .”</p>
-<p>You should then be able to import modules from geobipy.src.  For this type of installation mpi will not need to be installed, and the serial version of h5py will suffice i.e. the standard “pip install h5py” is fine.</p>
+<p>You should then be able to import modules from geobipy.  For this type of installation mpi will not need to be installed, and the serial version of h5py will suffice i.e. the standard “pip install h5py” is fine.  h5py will automatically be installed during the install of GeoBIPy since it is a dependency.</p>
 <p><strong>Side note:</strong>  Let’s say you ran a production run on a parallel machine with MPI and parallel HDF capabilities. You generated all the results, copied them back to your local machine, and wish to make plots and images.  You will only need to install the serial version of the code on your local machine to do this.</p>
 </div>
 <div class="section" id="installing-a-parallel-version-of-geobipy">
-<h2><a class="toc-backref" href="#id4">Installing a parallel version of GeoBIPy</a><a class="headerlink" href="#installing-a-parallel-version-of-geobipy" title="Permalink to this headline">¶</a></h2>
+<h3><a class="toc-backref" href="#id5">Installing a parallel version of GeoBIPy</a><a class="headerlink" href="#installing-a-parallel-version-of-geobipy" title="Permalink to this headline">¶</a></h3>
 <p>Installing the parallel version of the code is a little trickier due to the dependencies necessary between the OpenMPI and/or HDF libraries, and how Python’s mpi4py and h5py wrap around those.</p>
 <div class="section" id="installing-mpi-and-mpi4py">
-<h3><a class="toc-backref" href="#id5">Installing MPI and mpi4py</a><a class="headerlink" href="#installing-mpi-and-mpi4py" title="Permalink to this headline">¶</a></h3>
+<h4><a class="toc-backref" href="#id6">Installing MPI and mpi4py</a><a class="headerlink" href="#installing-mpi-and-mpi4py" title="Permalink to this headline">¶</a></h4>
 <p>To run this code in parallel you will need both an MPI library and the python wrapper, mpi4py.  You must install MPI first before mpi4py.</p>
 <div class="section" id="mpi">
-<h4><a class="toc-backref" href="#id6">MPI</a><a class="headerlink" href="#mpi" title="Permalink to this headline">¶</a></h4>
+<h5><a class="toc-backref" href="#id7">MPI</a><a class="headerlink" href="#mpi" title="Permalink to this headline">¶</a></h5>
 <p>If you are installing GeoBIPy on a parallel machine, I would think that you have access to prebuilt MPI libraries.  If you are on a local laptop, you will need to install one. This package has been tested with OpenMPI version 1.10.2. Be careful if you want to use a newer version as mpi4py may not communicate with it correctly (at the time of this writing, OpenMPI v2 was having issues).</p>
 </div>
 <div class="section" id="mpi4py">
-<h4><a class="toc-backref" href="#id7">mpi4py</a><a class="headerlink" href="#mpi4py" title="Permalink to this headline">¶</a></h4>
+<h5><a class="toc-backref" href="#id8">mpi4py</a><a class="headerlink" href="#mpi4py" title="Permalink to this headline">¶</a></h5>
 <p>At this point, if you have an mpi4py module already installed, please remove it (you can check with “pip list”). If you started with a clean installation you should not have to worry about this. To test whether a new install of mpi4py will see the mpi library you have, just type “which mpicc”.  The path that you see should point to the implementation that you want mpi4py to link to.  Make sure you are about to install mpi4py to the correct python installation.  If you type ‘which python’ it should return the path to the correct python distribution.  If you are using environments, make sure you have activated the correct one.</p>
 <p>Next, use “pip install mpi4py –no-cache-dir”.  This last option is very important, without it, pip might install its own MPI library called MPICH2. I would try to avoid this because if you need to install the HDF5 library you will need know which directories to link to (see <a class="reference internal" href="#installing-parallel-hdf5-and-h5py">Installing parallel HDF5 and h5py</a>).</p>
 <p>At the end of the day,  h5py needs to communicate with both the correct HDF5 library and mpi4py, and both of those need to communicate with the same MPI library.</p>
 </div>
 </div>
 <div class="section" id="installing-parallel-hdf5-and-h5py">
-<h3><a class="toc-backref" href="#id8">Installing parallel HDF5 and h5py</a><a class="headerlink" href="#installing-parallel-hdf5-and-h5py" title="Permalink to this headline">¶</a></h3>
+<h4><a class="toc-backref" href="#id9">Installing parallel HDF5 and h5py</a><a class="headerlink" href="#installing-parallel-hdf5-and-h5py" title="Permalink to this headline">¶</a></h4>
 <p>If a parallel HDF5 library is not available, you will need to install one. First make sure you follow <a class="reference internal" href="#installing-mpi-and-mpi4py">Installing MPI and mpi4py</a> so that an MPI library is available to you. You must install a HDF5 library first before h5py.</p>
 <div class="section" id="hdf5">
-<h4><a class="toc-backref" href="#id9">HDF5</a><a class="headerlink" href="#hdf5" title="Permalink to this headline">¶</a></h4>
+<h5><a class="toc-backref" href="#id10">HDF5</a><a class="headerlink" href="#hdf5" title="Permalink to this headline">¶</a></h5>
 <p>When you install HDF5, make sure that the correct MPI library can be seen by typing “which mpicc”.  When you configure the HDF5 library, be sure to use the –enable-parallel option.</p>
 </div>
 <div class="section" id="h5py">
-<h4><a class="toc-backref" href="#id10">h5py</a><a class="headerlink" href="#h5py" title="Permalink to this headline">¶</a></h4>
+<h5><a class="toc-backref" href="#id11">h5py</a><a class="headerlink" href="#h5py" title="Permalink to this headline">¶</a></h5>
 <p>Once the HDF5 library is installed you will need to clone the <a class="reference external" href="https://github.com/h5py/h5py">h5py repository</a></p>
 <p>Make sure you are about to install h5py to the correct python installation.  If you type ‘which python’ it should return the path to the correct python installation.</p>
 <p>Next, copy the following code into a file called install.sh in the h5py folder and run it.  You will need to edit 3 entries.</p>
@@ -149,30 +152,26 @@ python setup.py install
 </div>
 </div>
 </div>
-<div class="section" id="installing-geobipy-on-yeti">
-<h3><a class="toc-backref" href="#id11">Installing GeoBIPy on Yeti</a><a class="headerlink" href="#installing-geobipy-on-yeti" title="Permalink to this headline">¶</a></h3>
-<p>If you are installing this package on the USGS machine,  you can bypass all installations regarding MPI, HDF5, and Python’s mpi4py and h5py modules.  On Yeti we have a module that you can load using “module load python/pPython3”.  This module comes with the bare essentials for parallel python with a working parallel h5py wrapper.</p>
-<p>First, you need to create your own environment after you have loaded the pPython module.  This creates a brand new installation directory for you and allows you to install any extra modules yourself.  Do this using ‘conda create –name aName’.</p>
-<p>You can the activate that environment using ‘source activate aName’.</p>
-<p>Next pull the GeoBIPy repository and navigate to that folder.  There should be a setup.py file.  In this folder type “pip install -e .” to install the package to python.</p>
-<p>You will also need to install the time domain forward modeller.</p>
+</div>
+<div class="section" id="using-geobipy-on-yeti">
+<h3><a class="toc-backref" href="#id12">Using GeoBIPy on Yeti</a><a class="headerlink" href="#using-geobipy-on-yeti" title="Permalink to this headline">¶</a></h3>
+<p>There is no need to install GeoBIPy on Yeti.  Simply type “module load python/geobipy” for the serial version of the code, mainly used for plotting results, or “module load python/pGeobipy” for a parallel enabled version.</p>
 </div>
 <div class="section" id="installing-the-time-domain-forward-modeller">
-<h3><a class="toc-backref" href="#id12">Installing the time domain forward modeller</a><a class="headerlink" href="#installing-the-time-domain-forward-modeller" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id13">Installing the time domain forward modeller</a><a class="headerlink" href="#installing-the-time-domain-forward-modeller" title="Permalink to this headline">¶</a></h3>
 <p>Ross Brodie at Geoscience Australia has written a great forward modeller, gatdaem1D,  in C++ with a python interface.  You can obtain that code here at the <a class="reference external" href="https://github.com/GeoscienceAustralia/ga-aem">GA repository</a></p>
-<p>So go ahead and “git clone” that repository.</p>
-<p>These instructions only describe how to install Ross’ forward modeller, but it is part of a larger code base for deterministic inversion. If you wish to install his entire package, please follow his instructions.</p>
+<p>However, for use with GeoBIPy, use <a class="reference external" href="https://github.com/leonfoks/ga-aem">this fork of gataem1D</a> if there are open pull requests at the original repository.</p>
+<p>Go ahead and “git clone” that repository.</p>
+<p>These instructions only describe how to install Ross’ forward modeller, but it is part of a larger code base for inversion. If you wish to install his entire package, please follow his instructions.</p>
 <div class="section" id="prerequisites">
-<h4><a class="toc-backref" href="#id13">Prerequisites</a><a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h4>
-<p>To compile this forward modeller, you will need a c++ compiler, and <a class="reference external" href="http://www.fftw.org/">FFTW</a></p>
+<h4><a class="toc-backref" href="#id14">Prerequisites</a><a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h4>
+<p>To compile his forward modeller, you will need a c++ compiler, and <a class="reference external" href="http://www.fftw.org/">FFTW</a></p>
 <p>On a Mac, installing these two items is easy if you use a package manager such as <a class="reference external" href="https://brew.sh/">homebrew</a></p>
 <p>If you use brew, simply do the following</p>
 <div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">brew</span> <span class="n">install</span> <span class="n">gcc</span>
 <span class="n">brew</span> <span class="n">install</span> <span class="n">fftw</span>
 </pre></div>
 </div>
-<div class="section" id="installing-fftw-from-source">
-<h5><a class="toc-backref" href="#id14">Installing FFTW from Source</a><a class="headerlink" href="#installing-fftw-from-source" title="Permalink to this headline">¶</a></h5>
 <p>If you do not have brew, or use a package manager, you can install fftw from source instead.</p>
 <p>Download fftw-3.3.7.tar.gz from the <a class="reference external" href="http://www.fftw.org/download.html">FFTW downloads</a> .</p>
 <p>Untar the folder and install fftw using the following.</p>
@@ -187,10 +186,9 @@ python setup.py install
 </div>
 <p>where, path-to-install-to is the location where you want fftw to be installed.</p>
 </div>
-</div>
 <div class="section" id="compile-the-gatdaem1d-shared-library">
 <h4><a class="toc-backref" href="#id15">Compile the gatdaem1d shared library</a><a class="headerlink" href="#compile-the-gatdaem1d-shared-library" title="Permalink to this headline">¶</a></h4>
-<p>Next, within the gatdaem1d folder, navigate to the makefiles folder modify the top part of the file “gatdaem1d_python.make” to the following</p>
+<p>Next, within the gatdaem1d folder, navigate to the makefiles folder and modify the top part of the file “gatdaem1d_python.make” to the following</p>
 <div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span>SHELL = /bin/sh
 .SUFFIXES:
 .SUFFIXES: .cpp .o
@@ -220,15 +218,15 @@ library    = $(bindir)/gatdaem1d.so
 </pre></div>
 </div>
 </div>
-</div>
 <div class="section" id="installing-the-python-bindings">
-<h3><a class="toc-backref" href="#id16">Installing the Python Bindings</a><a class="headerlink" href="#installing-the-python-bindings" title="Permalink to this headline">¶</a></h3>
+<h4><a class="toc-backref" href="#id16">Installing the Python Bindings</a><a class="headerlink" href="#installing-the-python-bindings" title="Permalink to this headline">¶</a></h4>
 <p>Finally, to install the python wrapper to gatdaem1d, navigate to the python folder of the gatdaem1d repository.
 Type,</p>
 <div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">.</span>
 </pre></div>
 </div>
 <p>You should now have access to the time domain forward modeller within geobipy.</p>
+</div>
 </div>
 </div>
 <div class="section" id="documentation">
@@ -239,9 +237,10 @@ Type,</p>
 </div>
 <div class="section" id="source-code-html-pages">
 <h3><a class="toc-backref" href="#id19">Source code HTML pages</a><a class="headerlink" href="#source-code-html-pages" title="Permalink to this headline">¶</a></h3>
-<p>For developers and users of the code, the code itself has been thouroughly documented. However you can generate easy to read html pages. To do this, you will first need to install sphinx via “pip install sphinx”.</p>
+<p>For developers and users of the code, the code itself has been thouroughly documented. The <a class="reference external" href="https://usgs.github.io/geobipy/">source code docs can be found here</a></p>
+<p>However you can generate the docs locally as well. To do this, you will first need to install sphinx via “pip install sphinx”.</p>
 <p>Next, head to the documentation folder in this repository and type “make html”.  Sphinx generates linux based and windows based make files so this should be a cross-platform procedure.</p>
-<p>The html pages will be generated under “html”, so simply open the “index.html” file to view and navigate the code.</p>
+<p>The html pages will be generated under “build/html”, so simply open the “index.html” file to view and navigate the code.</p>
 </div>
 <div class="section" id="jupyter-notebooks-to-illustrate-the-classes">
 <h3><a class="toc-backref" href="#id20">Jupyter notebooks to illustrate the classes</a><a class="headerlink" href="#jupyter-notebooks-to-illustrate-the-classes" title="Permalink to this headline">¶</a></h3>
@@ -249,8 +248,9 @@ Type,</p>
 <p>You will need to install jupyter via “pip install jupyter”.</p>
 <p>You can then edit and run the notebooks by navigating to the notebooks folder, and typing “jupyter notebook”. This will open up a new browser window, and you can play in there.</p>
 </div>
-<div class="section" id="running-geobipy-using-the-hooks">
-<h3><a class="toc-backref" href="#id21">Running GeoBIPy using the hooks</a><a class="headerlink" href="#running-geobipy-using-the-hooks" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="running-geobipy">
+<h2><a class="toc-backref" href="#id21">Running GeoBIPy</a><a class="headerlink" href="#running-geobipy" title="Permalink to this headline">¶</a></h2>
 <p>There are two methods of running GeoBIPy from the command line once it is installed.
 For the serial version the following can be used</p>
 <div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">geobipySerial</span> <span class="o">&lt;</span><span class="n">userParameterFile</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">Output</span> <span class="n">Folder</span><span class="o">&gt;</span>
@@ -465,7 +465,6 @@ Below is an example scipt that you can use for reference.</p>
 </div>
 </div>
 </div>
-</div>
 
 
           </div>
@@ -477,6 +476,7 @@ Below is an example scipt that you can use for reference.</p>
   <ul>
 <li><a class="reference internal" href="#">Welcome to GeoBIPy</a><ul>
 <li><a class="reference internal" href="#getting-started">Getting started</a></li>
+<li><a class="reference internal" href="#installing-geobipy">Installing GeoBIPy</a><ul>
 <li><a class="reference internal" href="#installing-a-serial-version-of-geobipy">Installing a serial version of GeoBIPy</a></li>
 <li><a class="reference internal" href="#installing-a-parallel-version-of-geobipy">Installing a parallel version of GeoBIPy</a><ul>
 <li><a class="reference internal" href="#installing-mpi-and-mpi4py">Installing MPI and mpi4py</a><ul>
@@ -489,25 +489,24 @@ Below is an example scipt that you can use for reference.</p>
 <li><a class="reference internal" href="#h5py">h5py</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#installing-geobipy-on-yeti">Installing GeoBIPy on Yeti</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#using-geobipy-on-yeti">Using GeoBIPy on Yeti</a></li>
 <li><a class="reference internal" href="#installing-the-time-domain-forward-modeller">Installing the time domain forward modeller</a><ul>
-<li><a class="reference internal" href="#prerequisites">Prerequisites</a><ul>
-<li><a class="reference internal" href="#installing-fftw-from-source">Installing FFTW from Source</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
 <li><a class="reference internal" href="#compile-the-gatdaem1d-shared-library">Compile the gatdaem1d shared library</a></li>
+<li><a class="reference internal" href="#installing-the-python-bindings">Installing the Python Bindings</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#installing-the-python-bindings">Installing the Python Bindings</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#documentation">Documentation</a><ul>
 <li><a class="reference internal" href="#publication">Publication</a></li>
 <li><a class="reference internal" href="#source-code-html-pages">Source code HTML pages</a></li>
 <li><a class="reference internal" href="#jupyter-notebooks-to-illustrate-the-classes">Jupyter notebooks to illustrate the classes</a></li>
-<li><a class="reference internal" href="#running-geobipy-using-the-hooks">Running GeoBIPy using the hooks</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#running-geobipy">Running GeoBIPy</a></li>
 </ul>
 </li>
 </ul>

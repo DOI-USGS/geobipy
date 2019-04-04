@@ -46,9 +46,14 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-geobipy.src.classes.statistics.Histogram2D">
-<span id="histogram2d"></span><h1>Histogram2D<a class="headerlink" href="#module-geobipy.src.classes.statistics.Histogram2D" title="Permalink to this headline">¶</a></h1>
-<p>&#64;Histogram_Class
+  <div class="section" id="histogram2d">
+<h1>Histogram2D<a class="headerlink" href="#histogram2d" title="Permalink to this headline">¶</a></h1>
+<img src="../../../../_images/inheritance-54250af07f4fd286bb2afbee2e983db749bfdb55.png" alt="Inheritance diagram of geobipy.src.classes.statistics.Histogram2D" usemap="#inheritancede093050cf" class="inheritance"/>
+<map id="inheritancede093050cf" name="inheritancede093050cf">
+<area shape="rect" id="node1" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D" target="_top" title="2D Histogram class that can update and plot efficiently." alt="" coords="313,5,412,29"/>
+<area shape="rect" id="node2" href="../mesh/RectilinearMesh2D.html#geobipy.src.classes.mesh.RectilinearMesh2D.RectilinearMesh2D" target="_top" title="Class defining a 2D rectilinear mesh with cell centres and edges." alt="" coords="131,5,265,29"/>
+<area shape="rect" id="node3" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="5,5,83,29"/>
+</map><span class="target" id="module-geobipy.src.classes.statistics.Histogram2D"></span><p>&#64;Histogram_Class
 Module describing an efficient histogram class</p>
 <dl class="class">
 <dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D">
@@ -254,10 +259,22 @@ Module describing an efficient histogram class</p>
 <dl class="method">
 <dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.create2DjointProbabilityDistribution">
 <code class="descname">create2DjointProbabilityDistribution</code><span class="sig-paren">(</span><em>H1</em>, <em>H2</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.create2DjointProbabilityDistribution" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given two histograms each of a single variable, regrid them to the
-same number of bins if necessary and take their outer product to obtain</p>
-<blockquote>
-<div>a 2D joint probability density</div></blockquote>
+<dd><p>Create 2D joint distribution from two Histograms.</p>
+<p>Given two histograms each of a single variable, regrid them to the
+same number of bins if necessary and take their outer product to obtain
+a 2D joint probability density.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>H1</strong> (<em>geobipy.Histogram1D</em>) – First histogram.</li>
+<li><strong>H2</strong> (<em>geobipy.Histogram1D</em>) – Second histogram.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -275,8 +292,8 @@ same number of bins if necessary and take their outer product to obtain</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.intervalMean">
-<code class="descname">intervalMean</code><span class="sig-paren">(</span><em>intervals</em>, <em>axis=0</em>, <em>statistic='mean'</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.intervalMean" title="Permalink to this definition">¶</a></dt>
+<dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.intervalStatistic">
+<code class="descname">intervalStatistic</code><span class="sig-paren">(</span><em>intervals</em>, <em>axis=0</em>, <em>statistic='mean'</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.intervalStatistic" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the mean of an array between the intervals given along dimension dim.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
