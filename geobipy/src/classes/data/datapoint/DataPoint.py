@@ -275,7 +275,7 @@ class DataPoint(Point):
         assert all(relativeErr > 0.0), ValueError("relativeErr must be > 0.0")
         assert all(additiveErr > 0.0), ValueError("additiveErr must be > 0.0")
 
-        tmp = (relativeErr * self._data)**2.0 + additiveErr**2.0
+        tmp = (relativeErr * np.absolute(self._data) )**2.0 + additiveErr**2.0
 
         if self._predictedData.hasPrior():
             self._predictedData.prior.variance[:] = tmp[self.iActive]
