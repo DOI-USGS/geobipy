@@ -92,6 +92,9 @@ def checkCommandArguments():
 
 
 def singleCore(inputFile, outputDir):
+
+    print('Using user input file {}'.format(inputFile))
+
     # Import the script from the input file
     UP = import_module(inputFile, package=None)
 
@@ -148,6 +151,9 @@ def singleCore(inputFile, outputDir):
         nMarkovChains=paras.nMarkovChains, plotEvery=paras.plotEvery, parameterDisplayLimits=paras.parameterDisplayLimits,
         reciprocateParameters=paras.reciprocateParameters)
 
+    print('Creating HDF5 files, this may take a few minutes...')
+    print('Files are being created for data files {} and system files {}'.format(UP.dataFilename, UP.systemFilename))
+
     # No need to create and close the files like in parallel, so create and keep them open
     LR = [None] * nLines
     H5Files = [None] * nLines
@@ -181,6 +187,7 @@ def multipleCore(inputFile, outputDir, skipHDF5):
     
     world = MPI.COMM_WORLD
     myMPI.rankPrint(world,'Running EMinv1D_MCMC')
+    myMPI.rankPrint(world,'Using user input file {}'.format(inputFile))
     rank = world.rank
     nRanks = world.size
     masterRank = rank == 0
@@ -214,7 +221,8 @@ def multipleCore(inputFile, outputDir, skipHDF5):
     # Create a parallel RNG on each worker with a different seed.
     prng = myMPI.getParallelPrng(world, MPI.Wtime)
 
-    myMPI.rankPrint(world,'Creating HDF5 files, this may take a few minutes...')
+    myMPI.rankPrint(world, 'Creating HDF5 files, this may take a few minutes...')
+    myMPI.rankPrint(world, 'Files are being created for data files {} and system files {}'.format(UP.dataFilename, UP.systemFilename))
     ### Only do this using the Master subcommunicator!
     # Here we initialize the HDF5 files.
     if (masterComm != MPI.COMM_NULL):
@@ -353,7 +361,7 @@ def masterTask(Dataset, world):
     # Wait for a worker to request the next data point
     world.Recv(rankRecv, source = MPI.ANY_SOURCE, tag = MPI.ANY_TAG, status = MPI.Status())
     requestingRank = np.int(rankRecv[0])
-    dataPointProcessed = np.int(rankRecv[1])
+    dataPointProcessed = rankRecv[1]
 
     nFinished += 1
 
@@ -378,6 +386,7 @@ def masterTask(Dataset, world):
 def workerTask(_DataPoint, UP, prng, world, lineNumbers, LineResults):
     """ Define a wait run ping procedure for each worker """
     
+    # Import here so serial code still works...
     from mpi4py import MPI
     from geobipy.src.base import MPI as myMPI
     
@@ -408,8 +417,11 @@ def workerTask(_DataPoint, UP, prng, world, lineNumbers, LineResults):
         iLine = lineNumbers.searchsorted(DataPoint.lineNumber)
         Inv_MCMC(paras, DataPoint, prng=prng, rank=world.rank, LineResults=LineResults[iLine])
         
-        # Send the current rank number to the master
-        myRank[:] = (world.rank, LineResults[iLine].iDs.searchsorted(DataPoint.fiducial), MPI.Wtime() - t0)
+        # Send information back to the master
+        # The current rank, in order to obtain the next point
+        # The fiducial that was just inverted
+        # The time to invert
+        myRank[:] = (world.rank, DataPoint.fiducial, MPI.Wtime() - t0)
 
         # With the Data Point inverted, Ping the Master to request a new index
         world.Send(myRank, dest = 0)
