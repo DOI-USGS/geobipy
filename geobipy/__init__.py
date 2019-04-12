@@ -415,7 +415,7 @@ def workerTask(_DataPoint, UP, prng, world, lineNumbers, LineResults):
 
         # Pass through the line results file object if a parallel file system is in use.
         iLine = lineNumbers.searchsorted(DataPoint.lineNumber)
-        Inv_MCMC(paras, DataPoint, prng=prng, rank=world.rank, LineResults=LineResults[iLine])
+        failed = Inv_MCMC(paras, DataPoint, prng=prng, rank=world.rank, LineResults=LineResults[iLine])
         
         # Send information back to the master
         # The current rank, in order to obtain the next point
@@ -429,6 +429,9 @@ def workerTask(_DataPoint, UP, prng, world, lineNumbers, LineResults):
         # Wait till you are told what to process next
         req = world.Irecv(continueRunning, source=0)
         req.Wait()
+
+        if failed:
+            print("Datapoint {} failed to converge".format(DataPoint.fiducial))
 
         # If we continue running, receive the next DataPoint. Otherwise, shutdown the rank
         if continueRunning[0]:
