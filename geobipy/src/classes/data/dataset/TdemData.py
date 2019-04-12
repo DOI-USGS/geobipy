@@ -271,6 +271,8 @@ class TdemData(Data):
                 self._std[:, iSys] = values[:, self.nTimes[i]:]
 
         self.iActive = self.getActiveChannels()
+
+        self.check()
   
 
     def readSystemFile(self, systemFilename):
@@ -588,6 +590,11 @@ class TdemData(Data):
         for f in self._file:
             if not f.closed:
                 f.close()
+
+
+    def check(self):
+        if (np.any(self.data <= 0.0)):
+            print("Warning: Your data contains values that are <= 0.0")
 
 
     def estimateAdditiveError(self):

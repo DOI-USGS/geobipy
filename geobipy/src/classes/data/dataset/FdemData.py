@@ -133,6 +133,11 @@ class FdemData(Data):
     def channelNames(self):
         return self._channelNames
 
+    
+    def check(self):
+        if (np.any(self._data[~np.isnan(self._data)] <= 0.0)):
+            print("Warning: Your data contains values that are <= 0.0")
+
 
     def fileInformation(self):
         """Description of the data file."""
@@ -266,21 +271,36 @@ class FdemData(Data):
         return tmp
 
 
-    def getDataPoint(self, i):
+    def getDataPoint(self, index=None, fiducial=None):
         """Get the ith data point from the data set 
         
         Parameters
         ----------
-        i : int
-            The data point to get
+        index : int, optional
+            Index of the data point to get.
+        fiducial : float, optional
+            Fiducial of the data point to get.
             
         Returns
         -------
-        out : geobipy.FdemDataPoints
-            The data point
+        out : geobipy.FdemDataPoint
+            The data point.
+        
+        Raises
+        ------
+        Exception
+            If neither an index or fiducial are given.
             
         """
-        return FdemDataPoint(self.x[i], self.y[i], self.z[i], self.elevation[i], self._data[i, :], self._std[i, :], system=self.system, lineNumber=self.line[i], fiducial=self.id[i])
+        iNone = index is None
+        fNone = fiducial is None
+        
+        assert not (iNone and fNone) ^ (not iNone and not fNone), Exception("Must specify either an index OR a fiducial.")
+
+        if not fNone:
+            index = self.id.searchsorted(fiducial)
+
+        return FdemDataPoint(self.x[index], self.y[index], self.z[index], self.elevation[index], self._data[index, :], self._std[index, :], system=self.system, lineNumber=self.line[index], fiducial=self.id[index])
 
 
     # def mapChannel(self, channel, *args, system=0, **kwargs):
@@ -478,6 +498,8 @@ class FdemData(Data):
                 self._std[:, iSys] = 0.1 * self._data[:, iSys]
 
         self.iActive = self.getActiveChannels()
+
+        self.check()
 
 
     def readSystemFile(self, systemFilename):
