@@ -26,6 +26,10 @@ class Gamma(object):
         if (len(args) == 3):
             self.pdf(args[2])
 
+    @property
+    def ndim(self):
+        return 1
+
     def pdf(self, x):
         """ set the PDF, for a gamma distribution """
         self.pdf = x**self._a * np.exp(x * self._b) * self._c

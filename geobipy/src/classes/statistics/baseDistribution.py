@@ -12,9 +12,14 @@ class baseDistribution(myObject):
         else:
             self.prng = prng
 
-    def getBins(self, size=100):
+    @property
+    def ndim(self):
         """ Place Holder for children """
-        assert False, 'Should not calling '+__name__+'.getBins()'
+        assert False, 'Should not calling '+__name__+'.ndim'
+
+    def getBinEdges(self):
+        """ Place Holder for children """
+        assert False, 'Should not calling '+__name__+'.getBinEdges()'
 
     def deepcopy():
         """ Place holder for children """

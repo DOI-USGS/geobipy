@@ -33,6 +33,9 @@ class UniformLog(Uniform):
         # Set the pdf
         self.pdf = np.log(np.float64(1.0 / tmp))
 
+    @property
+    def ndim(self):
+        return self.min.size
 
     def deepcopy(self):
         """ Define a deepcopy routine """
@@ -54,3 +57,35 @@ class UniformLog(Uniform):
         if (out):
             return msg
         print(msg)
+
+
+    def getBinEdges(self, nBins=100, dim=None):
+        """Discretizes a range given the min and max of the distribution 
+        
+        Parameters
+        ----------
+        nBins : int, optional
+            Number of bins to return.
+        dim : int, optional
+            Get the bins of this dimension, if None, returns bins for all dimensions.
+        
+        Returns
+        -------
+        bins : array_like
+            The bin edges.
+
+        """
+        
+        nD = self.ndim
+        if (nD > 1):
+            if dim is None:
+                bins = np.empty([nD, nBins+1])
+                for i in range(nD):
+                    bins[i, :] = np.linspace(self.min[i], self.max[i], nBins+1)
+                return bins
+            else:
+                bins = np.empty(nBins+1)
+                bins[:] = np.linspace(self.min[dim], self.max[dim], nBins+1)
+                return bins
+
+        return np.linspace(self.min, self.max, nBins+1)

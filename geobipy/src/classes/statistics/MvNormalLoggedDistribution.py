@@ -26,6 +26,10 @@ class MvNormalLog(baseDistribution):
 
         self.multivariate = True
 
+    @property
+    def ndim(self):
+        return self.mean.size
+
 
     def deepcopy(self):
         """ Define a deepcopy routine """
@@ -121,3 +125,40 @@ class MvNormalLog(baseDistribution):
 #        T1 = np.array(h5grp.get('mean'))
 #        T2 = np.array(h5grp.get('variance'))
 #        return MvNormalLog(T1, T2)
+
+    def getBinEdges(self, nBins=100, nStd=4.0, dim=None):
+        """Discretizes a range given the mean and variance of the distribution 
+        
+        Parameters
+        ----------
+        nBins : int, optional
+            Number of bins to return.
+        nStd : float, optional
+            The bin edges = mean +- nStd * variance.
+        dim : int, optional
+            Get the bins of this dimension, if None, returns bins for all dimensions.
+        
+        Returns
+        -------
+        bins : array_like
+            The bin edges.
+
+        """
+        
+        nStd = np.float64(nStd)
+        nD = self.ndim
+        if (nD > 1):
+            if dim is None:
+                bins = np.empty([nD, nBins+1])
+                for i in range(nD):
+                    tmp = nStd * np.sqrt(self.variance[i])
+                    bins[i, :] = np.linspace(self.mean[i] - tmp, self.mean[i] + tmp, nBins+1)
+                return bins
+            else:
+                bins = np.empty(nBins+1)
+                tmp = nStd * np.sqrt(self.variance[dim])
+                bins[:] = np.linspace(self.mean[dim] - tmp, self.mean[dim] + tmp, nBins+1)
+                return bins
+
+        tmp = nStd * np.sqrt(self.variance)
+        return np.linspace(self.mean - tmp, self.mean + tmp, nBins+1)

@@ -25,6 +25,11 @@ class NormalLog(baseDistribution):
         self.variance = deepcopy(variance)
 
 
+    @property
+    def ndim(self):
+        return 1
+
+
     def deepcopy(self):
         """ Define a deepcopy routine """
         return NormalLog(self.mean, self.variance, self.prng)
@@ -33,11 +38,6 @@ class NormalLog(baseDistribution):
 #        """ get the PDF, for a normal logged distribution
 #        Currently assumes only variances and constant variance
 #        """
-
-    def getBins(self, size=100):
-        """ Discretizes a range given the mean and variance of the distribution """
-        tmp = 4.0 * np.sqrt(self.variance)
-        return np.linspace(self.mean - tmp, self.mean + tmp, size)
 
     def probability(self, x):
         # ####lg.myLogger("Global");####lg.indent()
@@ -77,6 +77,12 @@ class NormalLog(baseDistribution):
         if (out):
             return msg
         print(msg)
+
+
+    def getBinEdges(self, nBins = 100, nStd=4.0):
+        """ Discretizes a range given the mean and variance of the distribution """
+        tmp = nStd * np.sqrt(self.variance)
+        return np.linspace(self.mean - tmp, self.mean + tmp, nBins+1)
 
 #    def hdfName(self):
 #        """ Create the group name for an HDF file """

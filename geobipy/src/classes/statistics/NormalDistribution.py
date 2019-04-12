@@ -32,6 +32,11 @@ class Normal(baseDistribution):
         self.variance = variance
 
 
+    @property
+    def ndim(self):
+        return 1
+
+
     def deepcopy(self):
         """Create a deepcopy
 
@@ -65,7 +70,7 @@ class Normal(baseDistribution):
     def plotPDF(self, **kwargs):
 
         
-        bins = self.getBins()
+        bins = self.getBinEdges()
         t = r"$\tilde{N}(\mu="+str(self.mean)+", \sigma^{2}="+str(self.variance)+")$"
 
         cP.plot(bins, self.probability(bins), label=t, **kwargs)
@@ -74,6 +79,7 @@ class Normal(baseDistribution):
     def probability(self, x):
         """ For a realization x, compute the probability """
         return norm.pdf(x,loc=self.mean, scale = self.variance)
+        
 
     def summary(self, out=False):
         msg = 'Normal Distribution: \n'
@@ -120,8 +126,8 @@ class Normal(baseDistribution):
 #        T2 = np.array(h5grp.get('variance'))
 #        return MvNormal(T1, T2)
 
-    def getBins(self, size = 100):
+    def getBinEdges(self, nBins = 100, nStd=4.0):
         """ Discretizes a range given the mean and variance of the distribution """
-        tmp = 4.0 * np.sqrt(self.variance)
-        return np.linspace(self.mean - tmp, self.mean + tmp, size)
+        tmp = nStd * np.sqrt(self.variance)
+        return np.linspace(self.mean - tmp, self.mean + tmp, nBins+1)
 
