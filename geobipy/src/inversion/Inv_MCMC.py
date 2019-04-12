@@ -33,7 +33,7 @@ def Inv_MCMC(paras, DataPoint, prng, LineResults=None, rank=1):
                 save = paras.save,
                 plot = paras.plot,
                 savePNG = paras.savePNG,
-                ID = DataPoint.fiducial,
+                fiducial = DataPoint.fiducial,
                 nMarkovChains = paras.nMarkovChains,
                 plotEvery = paras.plotEvery,
                 parameterDisplayLimits = paras.parameterDisplayLimits,
@@ -56,10 +56,11 @@ def Inv_MCMC(paras, DataPoint, prng, LineResults=None, rank=1):
     Res.clk.start()
 
     Go = i <= paras.nMarkovChains + iBurn -1
+    failed = False
     while (Go):
 
         # Accept or reject the new model
-        [Mod, DataPoint, prior, posterior, PhiD, posteriorComponents, time] = AcceptReject(paras, Mod, DataPoint, prior, posterior, PhiD, Res, prng)# ,oF, oD, oRel, oAdd, oP, oA, i)
+        [Mod, DataPoint, prior, posterior, PhiD, posteriorComponents, failed] = AcceptReject(paras, Mod, DataPoint, prior, posterior, PhiD, Res, prng)# ,oF, oD, oRel, oAdd, oP, oA, i)
 
         # Determine if we are burning in
         if (not Res.burnedIn):
@@ -92,6 +93,8 @@ def Inv_MCMC(paras, DataPoint, prng, LineResults=None, rank=1):
         i += 1
         
         Go = i <= paras.nMarkovChains + iBurn -1
+        if failed:
+            Go = False
 
     Res.clk.stop()
     Res.invTime = np.float64(Res.clk.timeinSeconds())
@@ -99,7 +102,7 @@ def Inv_MCMC(paras, DataPoint, prng, LineResults=None, rank=1):
     if (paras.save):
         # No parallel write is being used, so write a single file for the data point
         if (LineResults is None):
-            Res.save(outdir=paras.dataPointResultsDir, ID=DataPoint.fiducial)
+            Res.save(outdir=paras.dataPointResultsDir, fiducial=DataPoint.fiducial)
         else: # Write the contents to the parallel HDF5 file
             LineResults.results2Hdf(Res)
 #            Res.writeHdf(pHDFfile, str(ID), create=False) # Assumes space has been created for the data point
@@ -368,15 +371,19 @@ def AcceptReject(paras, Mod, DataPoint, prior, posterior, PhiD, Res, prng):# ,oF
     P_depth  = np.log(Mod.depth.probability(Mod.nCells[0]))
     P_depth1 = np.log(Mod1.depth.probability(Mod1.nCells[0]))
 
-    tmp = np.float128((posterior1 + prop) -
+    # TEMPORARY TRY EXCEPT UNTIL I FIGURE OUT THE PROBLEM
+    likeRatio = 0.0
+    try:
+        tmp = np.float128((posterior1 + prop) -
                       (posterior + prop1) +
                       (P_depth - P_depth1))
-
-    likeRatio = mExp(tmp)
-
-    if (np.isnan(likeRatio)):
+        likeRatio = mExp(tmp)
+        failed = False
+    except:
+        failed = True
         likeRatio = 0.0
 
+        
     cut = np.minimum(1.0, likeRatio)
 
     # If we accept the model
@@ -407,5 +414,5 @@ def AcceptReject(paras, Mod, DataPoint, prior, posterior, PhiD, Res, prng):# ,oF
 
     clk.stop()
 
-    return(Mod0, D0, prior0, posterior0, PhiD0, posteriorComponents, clk.timeinSeconds())
+    return(Mod0, D0, prior0, posterior0, PhiD0, posteriorComponents, failed)
     #%%
