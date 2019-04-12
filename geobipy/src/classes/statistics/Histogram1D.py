@@ -51,7 +51,7 @@ class Histogram1D(RectilinearMesh1D):
                 binCentres.name = label + binCentres.getName()
 
         # Initialize the parent class
-        RectilinearMesh1D.__init__(self, cellEdges=bins, cellCentres=binCentres)
+        super().__init__(cellEdges=bins, cellCentres=binCentres)
 
         self._counts = StatArray(self.nCells, 'Frequency', dtype=np.int64)
 
@@ -67,7 +67,6 @@ class Histogram1D(RectilinearMesh1D):
     def bins(self):
         return self.cellEdges
 
-
     @property
     def binCentres(self):
         return self.cellCentres
@@ -77,9 +76,27 @@ class Histogram1D(RectilinearMesh1D):
     def nBins(self):
         return self.nCells
 
+    @property
+    def nSamples(self):
+        return self._counts.sum()
+
+
+    def __deepcopy__(self, memo):
+        out = type(self)()
+        out._cellCentres = self._cellCentres.deepcopy()
+        out._cellEdges = self._cellEdges.deepcopy()
+        out.isRegular = self.isRegular
+        out.dx = self.dx
+        out._counts = self._counts.deepcopy()
+        out.log = self.log
+        
+        return out
+
 
     def update(self, values, clip=False):
         """Update the histogram by counting the entry of values into the bins of the histogram.
+
+        Updates the bin counts in the histogram but also iteratively updates the sample mean and sample variance.
         
         Parameters
         ----------

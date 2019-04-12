@@ -36,6 +36,7 @@ class Hitmap2D(Histogram2D):
     def hdfName(self):
         """ Reprodicibility procedure """
         return('Hitmap2D()')
+        
 
     def fromHdf(self, grp, index=None):
         """ Reads in the object froma HDF file """

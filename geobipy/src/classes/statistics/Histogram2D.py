@@ -320,9 +320,20 @@ class Histogram2D(RectilinearMesh2D):
 
 
     def create2DjointProbabilityDistribution(self, H1, H2):
-        """Given two histograms each of a single variable, regrid them to the
+        """Create 2D joint distribution from two Histograms.
+        
+        Given two histograms each of a single variable, regrid them to the 
         same number of bins if necessary and take their outer product to obtain
-         a 2D joint probability density """
+        a 2D joint probability density.
+
+        Parameters
+        ----------
+        H1 : geobipy.Histogram1D
+            First histogram.
+        H2 : geobipy.Histogram1D
+            Second histogram.
+         
+        """
         assert H1.bins.size == H2.bins.size, "Cannot do unequal bins yet"
         assert isinstance(H1, Histogram1D), TypeError("H1 must be a Histogram1D")
         assert isinstance(H2, Histogram1D), TypeError("H2 must be a Histogram1D")
@@ -347,7 +358,7 @@ class Histogram2D(RectilinearMesh2D):
             self._counts /= np.repeat(s[:, np.newaxis], np.size(self._counts, axis), axis)
 
 
-    def intervalMean(self, intervals, axis=0, statistic='mean'):
+    def intervalStatistic(self, intervals, axis=0, statistic='mean'):
         """Compute the mean of an array between the intervals given along dimension dim.
 
         Returns
@@ -362,7 +373,8 @@ class Histogram2D(RectilinearMesh2D):
 
         """
 
-        counts = super().intervalMean(self._counts, intervals, axis, statistic)
+        counts = super().intervalStatistic(self._counts, intervals, axis, statistic)
+
         if axis == 0:
             out = Histogram2D(xBins = self.x.cellEdges, yBins = StatArray(np.asarray(intervals), name=self.y.name(), units=self.y.units()))
             out._counts[:] = counts
