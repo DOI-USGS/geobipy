@@ -68,7 +68,7 @@ class Results(myObject):
     
     """
 
-    def __init__(self, dataPoint=None, model=None, ID=0.0, **kwargs):
+    def __init__(self, dataPoint=None, model=None, fiducial=0.0, **kwargs):
         """ Initialize the results of the inversion """
 
         # Initialize a stopwatch to keep track of time
@@ -97,7 +97,7 @@ class Results(myObject):
 
         # Set the ID for the data point the results pertain to
         # Data Point identifier
-        self.ID = np.float64(ID)
+        self.fiducial = np.float(fiducial)
         # Set the increment at which to plot results
         # Increment at which to update the results
         self.iPlot = np.int64(plotEvery)
@@ -106,7 +106,7 @@ class Results(myObject):
         self.limits = np.zeros(2, dtype=np.float64) + parameterDisplayLimits
         # Should we plot resistivity or Conductivity?
         # Logical whether to take the reciprocal of the parameters
-        self.invertPar = reciprocateParameters
+        self.reciprocateParameter = reciprocateParameters
         # Set the screen resolution
         # Screen Size
         self.sx = np.int32(1920)
@@ -146,8 +146,8 @@ class Results(myObject):
 
         self.kHist = Histogram1D(binCentres=StatArray(np.arange(0.0, model.maxLayers + 1.5), name="# of Layers"))
         # Initialize the histograms for the relative and Additive Errors
-        rBins = dataPoint.relErr.prior.getBins()
-        aBins = dataPoint.addErr.prior.getBins()
+        rBins = dataPoint.relErr.prior.getBinEdges()
+        aBins = dataPoint.addErr.prior.getBinEdges()
 
         log = None
         if isinstance(dataPoint, TdemDataPoint):
@@ -185,7 +185,7 @@ class Results(myObject):
         self.opacityInterp = StatArray(zGrd.size)
 
         # Initialize the Elevation Histogram
-        self.DzHist = Histogram1D(bins = StatArray(dataPoint.z.prior.getBins(), name=dataPoint.z.name, units=dataPoint.z.units))
+        self.DzHist = Histogram1D(bins = StatArray(dataPoint.z.prior.getBinEdges(), name=dataPoint.z.name, units=dataPoint.z.units))
 
         # Initialize the Model Depth Histogram
         self.MzHist = Histogram1D(binCentres = zGrd)
@@ -412,24 +412,24 @@ class Results(myObject):
         self.MzHist.plot(rotate=r, flipY=fY, trim=tr, **kwargs)
 
     
-    def _plotHitmapPosterior(self, confidenceInterval = 95.0, opacityPercentage = 67.0, **kwargs):
+    def _plotHitmapPosterior(self, reciprocateX=False, confidenceInterval = 95.0, opacityPercentage = 67.0, **kwargs):
         """ Plot the hitmap posterior of conductivity with depth """
 
         # Get the mean and 95% confidence intervals
         (sigMed, sigLow, sigHigh) = self.Hitmap.confidenceIntervals(confidenceInterval)
 
-        if (self.invertPar):
+        if (reciprocateX):
             x = 1.0 / self.Hitmap.x.cellCentres
             sl = 1.0 / sigLow
             sh = 1.0 / sigHigh
             xlabel = 'Resistivity ($\Omega m$)'
         else:
-            x = self.Hitmap.x
+            x = self.Hitmap.x.cellCentres
             sl = sigLow
             sh = sigHigh
             xlabel = 'Conductivity ($Sm^{-1}$)'
 
-        plt.pcolor(x, self.Hitmap.y.cellEdges, self.Hitmap.counts, cmap=mpl.cm.Greys)
+        self.Hitmap.counts.pcolor(x=x, y=self.Hitmap.y.cellEdges, cmap=mpl.cm.Greys, **kwargs)
         plt.plot(sl, self.Hitmap.y.cellCentres, color='#5046C8', linestyle='dashed', linewidth=2, alpha=0.6)
         plt.plot(sh, self.Hitmap.y.cellCentres, color='#5046C8', linestyle='dashed', linewidth=2, alpha=0.6)
         cP.xlabel(xlabel)
@@ -439,7 +439,7 @@ class Results(myObject):
         plt.axhline(self.doi, color='#5046C8', linestyle='dashed', linewidth=3)
 
         # Plot the best model
-        self.bestModel.plot(flipY=False, reciprocateX=True, noLabels=True)
+        self.bestModel.plot(flipY=False, reciprocateX=reciprocateX, noLabels=True)
         plt.axis([self.limits[0], self.limits[1], self.Hitmap.y.cellEdges[0], self.Hitmap.y.cellEdges[-1]])
         ax = plt.gca()
         lim = ax.get_ylim()
@@ -523,7 +523,7 @@ class Results(myObject):
                 plt.sca(self.ax[5])
                 # plt.subplot(self.gs[6:, self.nSystems:2 * self.nSystems])
                 plt.cla()
-                self._plotHitmapPosterior()
+                self._plotHitmapPosterior(reciprocateX=self.reciprocateParameter, noColorbar=True)
 
             cP.suptitle(title)
 
@@ -570,43 +570,45 @@ class Results(myObject):
 
 
 
-    def saveToLines(self, h5obj, ID):
+    def saveToLines(self, h5obj, fiducial):
         """ Save the results to a HDF5 object for a line """
         self.clk.restart()
-        self.toHdf(h5obj, str(ID))
+        self.toHdf(h5obj, str(fiducial))
 
 
-    def save(self, outdir, ID):
+    def save(self, outdir, fiducial):
         """ Save the results to their own HDF5 file """
-        with h5py.File(join(outdir,str(ID)+'.h5'),'w') as f:
-            self.toHdf(f, str(ID))
+        with h5py.File(join(outdir,str(fiducial)+'.h5'),'w') as f:
+            self.toHdf(f, str(fiducial))
 
-    def toPNG(self, directory, ID, dpi=300):
+
+    def toPNG(self, directory, fiducial, dpi=300):
        """ save a png of the results """
        fig = plt.figure(0)
        fig.set_size_inches(19, 11)
-       figName = join(directory,str(ID) + '.png')
+       figName = join(directory, '{}.png'.format(fiducial))
        plt.savefig(figName, dpi=dpi)
 
        if (self.verbose):
            fig = plt.figure(99)
            fig.set_size_inches(19, 11)
-           figName = join(directory,str(ID) + '_rap.png')
+           figName = join(directory,str(fiducial) + '_rap.png')
            plt.savefig(figName, dpi=dpi)
 
            fig = plt.figure(100)
            fig.set_size_inches(19, 11)
-           figName = join(directory,str(ID) + '_xp.png')
+           figName = join(directory,str(fiducial) + '_xp.png')
            plt.savefig(figName, dpi=dpi)
 
            fig = plt.figure(101)
            fig.set_size_inches(19, 11)
-           figName = join(directory,str(ID) + '_stack.png')
+           figName = join(directory,str(fiducial) + '_stack.png')
            plt.savefig(figName, dpi=dpi)
 
     def hdfName(self):
         """ Reprodicibility procedure """
         return('Results()')
+
 
     def createHdf(self, parent, myName):
         """ Create the hdf group metadata in file
@@ -626,7 +628,7 @@ class Results(myObject):
         grp.create_dataset('iplot', (1,), dtype=self.iPlot.dtype)
         grp.create_dataset('plotme', (1,), dtype=type(self.plotMe))
         grp.create_dataset('limits', (2,), dtype=self.limits.dtype)
-        grp.create_dataset('dispres', (1,), dtype=type(self.invertPar))
+        grp.create_dataset('dispres', (1,), dtype=type(self.reciprocateParameter))
         grp.create_dataset('sx', (1,), dtype=self.sx.dtype)
         grp.create_dataset('sy', (1,), dtype=self.sy.dtype)
         grp.create_dataset('nmc', (1,), dtype=self.nMC.dtype)
@@ -675,7 +677,7 @@ class Results(myObject):
         writeNumpy(self.iPlot, grp, 'iplot')
         writeNumpy(self.plotMe, grp, 'plotme')
         writeNumpy(self.limits, grp, 'limits')
-        writeNumpy(self.invertPar, grp, 'dispres')
+        writeNumpy(self.reciprocateParameter, grp, 'dispres')
         writeNumpy(self.sx, grp, 'sx')
         writeNumpy(self.sy, grp, 'sy')
         writeNumpy(self.nMC, grp, 'nmc')
@@ -714,6 +716,7 @@ class Results(myObject):
         self.bestD.writeHdf(grp, 'bestd')
         self.bestModel.writeHdf(grp, 'bestmodel')
 
+
     def toHdf(self, h5obj, myName):
         """ Write the object to a HDF file """
         # Create a new group inside h5obj
@@ -729,7 +732,7 @@ class Results(myObject):
         grp.create_dataset('iplot', data=self.iPlot)
         grp.create_dataset('plotme', data=self.plotMe)
         grp.create_dataset('limits', data=self.limits)
-        grp.create_dataset('dispres', data=self.invertPar)
+        grp.create_dataset('dispres', data=self.reciprocateParameter)
         grp.create_dataset('sx', data=self.sx)
         grp.create_dataset('sy', data=self.sy)
         grp.create_dataset('nmc', data=self.nMC)
@@ -779,9 +782,10 @@ class Results(myObject):
         self.saveTime = self.clk.timeinSeconds()
         grp.create_dataset('savetime', data=self.saveTime)
 
+
     def fromHdf(self, grp, sysPath = ''):
         """ Reads in the object froma HDF file """
-        self.ID = np.array(grp.get('id'))
+        self.fiducial = np.array(grp.get('id'))
         self.i = np.array(grp.get('i'))
         tmp = grp.get('iplot')
         if tmp is None:
@@ -798,7 +802,7 @@ class Results(myObject):
         tmp = grp.get('dispres')
         if tmp is None:
             tmp = grp.get('dispRes')
-        self.invertPar = np.array(tmp)
+        self.reciprocateParameter = np.array(tmp)
 
         self.sx = np.array(grp.get('sx'))
         self.sy = np.array(grp.get('sy'))
@@ -907,11 +911,13 @@ class Results(myObject):
 
         self.verbose = False
 
+
     def read(self, fName, grpName, sysPath = ''):
         """ Reads a data points results from HDF5 file """
         assert fIO.fileExists(fName), "Cannot find file "+fName
         with h5py.File(fName, 'r')as f:
           return self.read_fromH5Obj(f, fName, grpName, sysPath)
+          
 
     def read_fromH5Obj(self, h5obj, fName, grpName, sysPath = ''):
         """ Reads a data points results from HDF5 file """
