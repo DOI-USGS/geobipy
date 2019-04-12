@@ -265,6 +265,7 @@ class Model1D(Model):
 
         .. math::
             p(k | I)p(\\boldsymbol{z}| k, I)p(\\boldsymbol{\sigma} | k, \\boldsymbol{z}, I),
+
         where :math:`k, I, \\boldsymbol{z}` and :math:`\\boldsymbol{\sigma}` are the number of layers, prior information, interface depth, and physical property, respectively.
 
         The multiplication here can be turned into a summation by taking the log of the components.
@@ -311,18 +312,21 @@ class Model1D(Model):
             :label: gradient
 
             p(\\boldsymbol{\sigma} | k, I) = \\left[(2\pi)^{k-1} |\\boldsymbol{C}_{\\nabla_{z}}|\\right]^{-\\frac{1}{2}} e ^{-\\frac{1}{2}(\\nabla_{z} \\boldsymbol{\sigma})^{T} \\boldsymbol{C}_{\\nabla_{z}}^{-1} (\\nabla_{z}\\boldsymbol{\sigma})}
+
         where the parameter gradient :math:`\\nabla_{z}\sigma` at the ith layer is computed via
 
         .. math::
             :label: dpdz
 
             \\nabla_{z}^{i}\sigma = \\frac{\sigma_{i+1} - \\sigma_{i}}{h_{i} - h_{min}}
+
         where :math:`\sigma_{i+1}` and :math:`\sigma_{i}` are the log-parameters on either side of an interface, :math:`h_{i}` is the log-thickness of the ith layer, and :math:`h_{min}` is the minimum log thickness defined by
 
         .. math::
             :label: minThickness
 
             h_{min} = \\frac{z_{max} - z_{min}}{2 k_{max}}
+
         where :math:`k_{max}` is a maximum number of layers, set to be far greater than the expected final solution.
         
         Parameters
@@ -481,21 +485,24 @@ class Model1D(Model):
         If instead we wish to apply a multivariate normal distribution to the gradient of the parameter with depth we get
 
         .. math::
-            :label: gradient
+            :label: gradient1
 
             p(\\boldsymbol{\sigma} | k, I) = \\left[(2\pi)^{k-1} |\\boldsymbol{C}_{\\nabla_{z}}|\\right]^{-\\frac{1}{2}} e ^{-\\frac{1}{2}(\\nabla_{z} \\boldsymbol{\sigma})^{T} \\boldsymbol{C}_{\\nabla_{z}}^{-1} (\\nabla_{z}\\boldsymbol{\sigma})}
+
         where the parameter gradient :math:`\\nabla_{z}\sigma` at the ith layer is computed via
 
         .. math::
-            :label: dpdz
+            :label: dpdz1
 
             \\nabla_{z}^{i}\sigma = \\frac{\sigma_{i+1} - \\sigma_{i}}{h_{i} - h_{min}}
+
         where :math:`\sigma_{i+1}` and :math:`\sigma_{i}` are the log-parameters on either side of an interface, :math:`h_{i}` is the log-thickness of the ith layer, and :math:`h_{min}` is the minimum log thickness defined by
 
         .. math::
-            :label: minThickness
+            :label: minThickness1
 
             h_{min} = \\frac{z_{max} - z_{min}}{2 k_{max}}
+
         where :math:`k_{max}` is a maximum number of layers, set to be far greater than the expected final solution.
         
         Parameters

@@ -49,6 +49,11 @@ class Point(object):
         P._z -= other.z
         return P
 
+    
+    def norm(self, other, **kwargs):
+        """Get the Lp norm distance between two points. """
+        return np.linalg.norm(np.asarray([self._x, self._y, self._z])-np.asarray([other._x, other._y, other._z]), **kwargs)
+
 
     def deepcopy(self):
         return self.__deepcopy__()
