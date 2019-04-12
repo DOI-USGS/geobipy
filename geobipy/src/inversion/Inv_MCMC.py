@@ -114,6 +114,8 @@ def Inv_MCMC(paras, DataPoint, prng, LineResults=None, rank=1):
         Res.plot(forcePlot=True)
         Res.toPNG('.', DataPoint.fiducial)
 
+    return failed
+
    
 def Initialize(paras, DataPoint, prng):
     # np.set_printoptions(threshold=np.inf)
