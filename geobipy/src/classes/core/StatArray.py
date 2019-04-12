@@ -100,6 +100,7 @@ class StatArray(np.ndarray, myObject):
 
     """
 
+    ### "hidden" methods
 
     def __new__(subtype, shape=None, name=None, units=None, **kwargs):
         """Instantiate a new StatArray """
@@ -169,6 +170,94 @@ class StatArray(np.ndarray, myObject):
 
     def __array_wrap__(self, out_arr, context = None):
         return np.ndarray.__array_wrap__(self, out_arr, context)
+
+
+    ### Properties
+
+    @property
+    def posterior(self):
+        """Returns the posterior if available. """
+
+        try:
+            return self._posterior
+        except:
+            return None
+    
+
+    @property
+    def prior(self):
+        """Returns the prior if available. """
+
+        try:
+            return self._prior
+        except:
+            return None
+
+
+    @property
+    def proposal(self):
+        """Returns the prior if available. """
+
+        try:
+            return self._proposal
+        except:
+            return None
+
+    
+    def setPosterior(self, posterior):
+        self._posterior = posterior.deepcopy()
+
+
+    def setPrior(self, distributionType, *args, **kwargs):
+        """Set a prior distribution
+
+        Sets a prior by interfacing through the Distribution method rather than passing any subclasses of the baseDistribution class.
+
+        Parameters
+        ----------
+        distributionType : str
+            The name of the distribution to set.
+        \*args
+            Variable length argument list.
+        \*\*kwargs
+            Arbitrary keyword arguments.
+
+        See Also
+        --------
+        geobipy.src.classes.statistics.Distribution : For available distributions to instantiate.
+
+        """
+        self._prior = Distribution(distributionType, *args, **kwargs)
+
+
+
+    def setProposal(self, distributionType, *args, **kwargs):
+        """Set a proposal distribution
+
+        Sets a proposal by interfacing through the Distribution method rather than passing any subclasses of the baseDistribution class.
+
+        Parameters
+        ----------
+        distributionType : str
+            The name of the distribution to set
+        \*args
+            Variable length argument list.
+        \*\*kwargs
+            Arbitrary keyword arguments.
+
+        See Also
+        --------
+        geobipy.src.classes.statistics.Distribution : For available distributions to instantiate
+
+        """
+        self._proposal = Distribution(distributionType, *args, **kwargs)
+
+
+    ### Methods
+
+
+
+
 
 
     def hasLabels(self):
@@ -409,6 +498,22 @@ class StatArray(np.ndarray, myObject):
         return edges
 
 
+    def hasPosterior(self):
+        """Check that the StatArray has an attached posterior.
+
+        Returns
+        -------
+        out : bool
+            Has an attached posterior.
+
+        """
+
+        try:
+            return not self.posterior is None
+        except:
+            return False
+
+
     def hasPrior(self):
         """Check that the StatArray has an attached prior.
 
@@ -532,12 +637,12 @@ class StatArray(np.ndarray, myObject):
 
         """
         np.set_printoptions(threshold=5)
-        msg = "Name:  " + self.getName() + '\n'
-        msg += "    Units: " + self.getUnits() + '\n'
-        msg += "    Shape: " + str(self.shape) + '\n'
-        msg += "   Values: " + str(self[:]) + '\n'
+        msg = "Name: " + self.getName() + '\n'
+        msg += "     Units: " + self.getUnits() + '\n'
+        msg += "     Shape: " + str(self.shape) + '\n'
+        msg += "     Values: " + str(self[:]) + '\n'
         if self.hasPrior():
-            msg += "Prior: \n"
+            msg += "Prior: \n     "
             msg += self.prior.summary(True)
         else:
             msg += "No attached prior \n"
@@ -628,6 +733,7 @@ class StatArray(np.ndarray, myObject):
             pass
         return tmp
 
+
     def perturb(self, i=None, relative=False):
         """Perturb the values of the StatArray using the attached proposal
 
@@ -646,13 +752,11 @@ class StatArray(np.ndarray, myObject):
             If the proposal has not been set
 
         """
-        if self.proposal.multivariate:
-            tmp = self.proposal.rng(1)
-        else:
-            tmp = self.proposal.rng(self.size)
+        tmp = self.propose()
 
         if (i is None):
             i = np.arange(self.size)
+
         if relative:
             self[i] += tmp[i]
         else:
@@ -681,31 +785,23 @@ class StatArray(np.ndarray, myObject):
 
         """
 
-        assert (self.hasPrior()), TypeError('No prior defined on variable ' + self.name + '. Use StatArray.setPrior()')
+        assert (self.hasPrior()), TypeError('No prior defined on variable {}. Use StatArray.setPrior()'.format(self.name))
 
         if (len(args) > 0):
             return self.prior.probability(*args)
 
         return self.prior.probability(self[:]) if i is None else self.prior.probability(self[i])
 
-    @property
-    def prior(self):
-        """Returns the prior if available. """
+    
+    def propose(self):
+        """Propose new values using the attached proposal distribution"""
 
-        try:
-            return self._prior
-        except:
-            return None
-
-
-    @property
-    def proposal(self):
-        """Returns the prior if available. """
-
-        try:
-            return self._proposal
-        except:
-            return None
+        assert (self.hasProposal()), TypeError('No proposal defined on variable {}. Use StatArray.setProposal()'.format(self.name))
+        if self.proposal.multivariate:
+            assert (self.proposal.ndim == self.size), ValueError("Dimensions of attached multivariate proposal {} does not match self.size {} ".format(self.proposal.ndim, self.size))
+            return self.proposal.rng(1) 
+        else: 
+            return self.proposal.rng(self.size)
 
 
     def rolling(self, numpyFunction, window=1):
@@ -713,48 +809,12 @@ class StatArray(np.ndarray, myObject):
         return StatArray(numpyFunction(wd, -1), self.name, self.units)
 
 
-    def setPrior(self, distributionType, *args, **kwargs):
-        """Set a prior distribution
+    def updatePosterior(self):
+        """Adds the current values of the StatArray to the attached posterior. """
+        
+        assert (self.hasPosterior()), TypeError('No posterior defined on variable {}. Use StatArray.setPosterior()'.format(self.name))
 
-        Sets a prior by interfacing through the Distribution method rather than passing any subclasses of the baseDistribution class.
-
-        Parameters
-        ----------
-        distributionType : str
-            The name of the distribution to set.
-        \*args
-            Variable length argument list.
-        \*\*kwargs
-            Arbitrary keyword arguments.
-
-        See Also
-        --------
-        geobipy.src.classes.statistics.Distribution : For available distributions to instantiate.
-
-        """
-        self._prior = Distribution(distributionType, *args, **kwargs)
-
-
-    def setProposal(self, distributionType, *args, **kwargs):
-        """Set a proposal distribution
-
-        Sets a proposal by interfacing through the Distribution method rather than passing any subclasses of the baseDistribution class.
-
-        Parameters
-        ----------
-        distributionType : str
-            The name of the distribution to set
-        \*args
-            Variable length argument list.
-        \*\*kwargs
-            Arbitrary keyword arguments.
-
-        See Also
-        --------
-        geobipy.src.classes.statistics.Distribution : For available distributions to instantiate
-
-        """
-        self._proposal = Distribution(distributionType, *args, **kwargs)
+        self.posterior.update(self)
 
 
     ### Plotting Routines
