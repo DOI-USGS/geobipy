@@ -22,8 +22,8 @@ def Distribution(distributionType, *args, **kwargs):
     distributionType : str or subclass of baseDistribution
         If distributionType is str, choose between {Normal, MvNormal, NormalLogged, MvNormalLogged, Uniform, Gamma, Order}
         if distributionType is subclass of baseDistribution, a copy is made
-    *args : See the documentation for each distribution type to determine what *args could be
-    *kwargs : See the documentation for each distribution type to determine what key words could be
+    \*args : See the documentation for each distribution type to determine what *args could be
+    \*\*kwargs : See the documentation for each distribution type to determine what key words could be
 
     Returns
     -------
@@ -65,38 +65,43 @@ def Distribution(distributionType, *args, **kwargs):
         return distributionType.deepcopy()
     tName = distributionType.lower()
     if (tName == 'uniform'):
-        assert (len(args)+len(kwargs) >= 2), 'Please enter a minimum and maximum for the Uniform distribtion'
+        assert (len(args)+len(kwargs) >= 2), 'Please enter a minimum and maximum for the Uniform distribution'
         out = Uniform(*args, **kwargs)
-        return out
+
     elif (tName == 'uniformlog'):
-        assert (len(args)+len(kwargs) >= 2), 'Please enter a minimum and maximum for the UniformLog distribtion'
+        assert (len(args)+len(kwargs) >= 2), 'Please enter a minimum and maximum for the UniformLog distribution'
         out = UniformLog(*args, **kwargs)
-        return out
+    
     elif (tName == 'normal' or tName == 'gaussian'):
-        assert (len(args)+len(kwargs) >= 2), 'Please enter a mean and variance for the Normal distribtion'
+        assert (len(args)+len(kwargs) >= 2), 'Please enter a mean and variance for the Normal distribution'
         out = Normal(*args, **kwargs)
+    
     elif (tName == 'mvnormal' or tName == 'mvgaussian'):
-        assert (len(args)+len(kwargs) >= 2), 'Please enter a mean and variance for the MvNormal distribtion'
+        assert (len(args)+len(kwargs) >= 2), 'Please enter a mean and variance for the MvNormal distribution'
         out = MvNormal(*args, **kwargs)
+    
     elif (tName == 'normallog' or tName == 'gaussianlog'):
-        assert (len(args)+len(kwargs) >= 2), 'Please enter a mean and variance for the NormalLog distribtion'
+        assert (len(args)+len(kwargs) >= 2), 'Please enter a mean and variance for the NormalLog distribution'
         out = NormalLog(*args, **kwargs)
-        return out
+    
     elif (tName == 'mvnormallog' or tName == 'mvgaussianlog'):
-        assert (len(args)+len(kwargs) >= 2), 'Please enter a mean and variance for the MvNormalLog distribtion'
+        assert (len(args)+len(kwargs) >= 2), 'Please enter a mean and variance for the MvNormalLog distribution'
         out = MvNormalLog(*args, **kwargs)
-        return out
+    
     elif (tName == 'gamma'):
-        assert (len(args)+len(kwargs) >= 2), 'Please enter a scale > 0.0, shape > 0.0, and prng for the gamma distribtion'
+        assert (len(args)+len(kwargs) >= 2), 'Please enter a scale > 0.0, shape > 0.0, and prng for the gamma distribution'
         out = Gamma(*args, **kwargs)
+    
     elif (tName == 'poisson'):
         assert False, ('Poisson not implemented yet')
+    
     elif (tName == 'laplace'):
         assert False, ('Laplace not implemented yet')
+    
     elif (tName == 'order'):
      #   tmp = kwargs.pop('prng')
         out = Order(*args, **kwargs)
-        return out
+    
     else:
         assert False, 'Please choose an appropriate distribution [Uniform, Normal, MvNormal, NormalLog, MvNormalLog, Gamma, Order]'
 
