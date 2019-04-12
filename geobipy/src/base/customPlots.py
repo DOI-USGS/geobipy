@@ -252,10 +252,10 @@ def hist(counts, bins, rotate=False, flipX=False, flipY=False, trim=True, normal
     log : 'e' or float, optional
         Take the log of the colour to a base. 'e' if log = 'e', and a number e.g. log = 10.
         Values in c that are <= 0 are masked.
+    reciprocateX : bool, optiona
+        Take the reciprocal of the x axis.
     xscale : str, optional
         Scale the x axis? e.g. xscale = 'linear' or 'log'.
-    yscale : str, optional
-        Scale the y axis? e.g. yscale = 'linear' or 'log'.
 
     Returns
     -------
@@ -268,29 +268,40 @@ def hist(counts, bins, rotate=False, flipX=False, flipY=False, trim=True, normal
 
     """
 
-    c = kwargs.pop('color', wellSeparated[0])
-    lw = kwargs.pop('linewidth', 0.5)
-    ec = kwargs.pop('edgecolor', 'k')
+    kwargs['color'] = kwargs.pop('color', wellSeparated[0])
+    kwargs['linewidth'] = kwargs.pop('linewidth', 0.5)
+    kwargs['edgecolor'] = kwargs.pop('edgecolor', 'k')
+    xscale = kwargs.pop('xscale', 'linear')
+    reciprocateX = kwargs.pop('reciprocateX', False)
 
     ax = plt.gca()
     pretty(ax)
 
-    if normalize:
-        cnts = counts / np.trapz(counts, x = bins)
-    else:
-        cnts = counts
+    if reciprocateX:
+        bins = 1.0 / bins
 
     width = np.abs(np.diff(bins))
     centres = bins[:-1] + 0.5 * (np.diff(bins))
 
-    if (rotate):
-        plt.barh(centres, cnts, height=width, align='center', color = c, linewidth = lw, edgecolor = ec, **kwargs)
-        ylabel(centres.getNameUnits())
-        xlabel('Frequency')
+    if normalize:
+        cnts = counts / np.trapz(counts, x = centres)
     else:
-        plt.bar(centres, cnts, width=width, align='center', color = c, linewidth = lw, edgecolor = ec, **kwargs)
+        cnts = counts
+
+    if (rotate):
+        plt.barh(centres, cnts, height=width, align='center', **kwargs)
+        ylabel(centres.getNameUnits())
+        if normalize:
+            xlabel('Density')
+        else:
+            xlabel('Frequency')
+    else:
+        plt.bar(centres, cnts, width=width, align='center', **kwargs)
         xlabel(centres.getNameUnits())
-        ylabel('Frequency')
+        if normalize:
+            ylabel('Density')
+        else:
+            ylabel('Frequency')
 
     if all(counts == 0):
         trim = False
@@ -310,11 +321,11 @@ def hist(counts, bins, rotate=False, flipX=False, flipY=False, trim=True, normal
 
     if flipX:
         ax.invert_xaxis()
-        # ax.set_xlim(ax.get_xlim()[::-1])
 
     if flipY:
         ax.invert_yaxis()
-        # ax.set_ylim(ax.get_ylim()[::-1])
+
+    plt.xscale(xscale)
 
     return ax
 
@@ -387,8 +398,6 @@ def pcolor(values, x=None, y=None, **kwargs):
         Number of bins to use for histogram equalization.
     xscale : str, optional
         Scale the x axis? e.g. xscale = 'linear' or 'log'
-    yscale : str, optional
-        Scale the y axis? e.g. yscale = 'linear' or 'log'.
     flipX : bool, optional
         Flip the X axis
     flipY : bool, optional
@@ -492,8 +501,6 @@ def pcolormesh(X, Y, values, **kwargs):
         Number of bins to use for histogram equalization.
     xscale : str, optional
         Scale the x axis? e.g. xscale = 'linear' or 'log'
-    yscale : str, optional
-        Scale the y axis? e.g. yscale = 'linear' or 'log'.
     flipX : bool, optional
         Flip the X axis
     flipY : bool, optional
@@ -631,8 +638,6 @@ def pcolor_1D(values, y=None, **kwargs):
         Number of bins to use for histogram equalization.
     xscale : str, optional
         Scale the x axis? e.g. xscale = 'linear' or 'log'
-    yscale : str, optional
-        Scale the y axis? e.g. yscale = 'linear' or 'log'.
     flipY : bool, optional
         Flip the Y axis
     clabel : str, optional
@@ -762,8 +767,6 @@ def plot(x, y, **kwargs):
         Values in c that are <= 0 are masked.
     xscale : str, optional
         Scale the x axis? e.g. xscale = 'linear' or 'log'.
-    yscale : str, optional
-        Scale the y axis? e.g. yscale = 'linear' or 'log'.
     flipX : bool, optional
         Flip the X axis
     flipY : bool, optional
@@ -859,8 +862,6 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
         Number of bins to use for histogram equalization.
     xscale : str, optional
         Scale the x axis? e.g. xscale = 'linear' or 'log'
-    yscale : str, optional
-        Scale the y axis? e.g. yscale = 'linear' or 'log'.
     flipX : bool, optional
             Flip the X axis
     flipY : bool, optional
@@ -888,7 +889,7 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
     xscale = kwargs.pop('xscale', 'linear')
     yscale = kwargs.pop('yscale', 'linear')
     sl = kwargs.pop('sizeLegend', None)
-    noColorBar = kwargs.pop('noColorBar', False)
+    noColorBar = kwargs.pop('noColorbar', False)
     
     kwargs.pop('color', None) # Remove color which could conflict with c
 
@@ -1030,8 +1031,6 @@ def stackplot2D(x, y, labels=[], colors=tatarize, **kwargs):
         The colour used for each column.
     xscale : str, optional
         Scale the x axis? e.g. xscale = 'linear' or 'log'.
-    yscale : str, optional
-        Scale the y axis? e.g. yscale = 'linear' or 'log'.     
 
     Returns
     -------
