@@ -321,8 +321,8 @@ def Inv(A):
 def isNumpy(x):
     """Test that the variable is a compatible numpy type with built ins like .ndim
 
-    Paramters
-    ---------
+    Parameters
+    ----------
     x : anything
         A variable to check
 
