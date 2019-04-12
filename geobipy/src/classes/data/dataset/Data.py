@@ -216,6 +216,7 @@ class Data(PointCloud3D):
 
         .. math::
             \| \mathbf{W}_{d} (\mathbf{d}^{obs}-\mathbf{d}^{pre})\|_{2}^{2},
+
         where :math:`\mathbf{W}_{d}` are the reciprocal data errors.
 
         Parameters
@@ -302,6 +303,22 @@ class Data(PointCloud3D):
         """ Get the data from the given line number """
         i = np.where(self.line == line)[0]
         return self[i]
+
+
+    def getNumberPointsPerLine(self):
+        """Gets the number of points in each line.
+        
+        Returns
+        -------
+        out : ints
+            Number of points in each line
+            
+        """
+        nPoints = np.zeros(np.unique(self.line).size)
+        lines = np.unique(self.line)
+        for i, line in enumerate(lines):
+            nPoints[i] = np.sum(self.line == line)
+        return nPoints
 
 
     def getPredictedDataChannel(self, channel, system=None):
@@ -592,6 +609,7 @@ class Data(PointCloud3D):
 
         .. math::
             \sqrt{(\mathbf{\epsilon}_{rel} \mathbf{d}^{obs})^{2} + \mathbf{\epsilon}^{2}_{add}},
+            
         where :math:`\mathbf{\epsilon}_{rel}` is the relative error, a percentage fraction and :math:`\mathbf{\epsilon}_{add}` is the additive error.
         
         Parameters
