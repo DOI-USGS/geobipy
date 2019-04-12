@@ -180,6 +180,7 @@ class DataPoint(Point):
 
         .. math::
             \| \mathbf{W}_{d} (\mathbf{d}^{obs}-\mathbf{d}^{pre})\|_{2}^{2},
+
         where :math:`\mathbf{W}_{d}` are the reciprocal data errors.
 
         Parameters
@@ -251,6 +252,7 @@ class DataPoint(Point):
 
         .. math::
             \sqrt{(\mathbf{\epsilon}_{rel} \mathbf{d}^{obs})^{2} + \mathbf{\epsilon}^{2}_{add}},
+            
         where :math:`\mathbf{\epsilon}_{rel}` is the relative error, a percentage fraction and :math:`\mathbf{\epsilon}_{add}` is the additive error.
 
         If the predicted data have been assigned a multivariate normal distribution, the variance of that distribution is also updated as the squared standard deviations.
