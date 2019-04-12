@@ -16,7 +16,7 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="API" href="content/api/api.html" />
+    <link rel="next" title="Getting Started" href="content/getting_started/getting_started.html" />
     <link rel="prev" title="Welcome to GeoBIPy’s documentation!" href="index.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
@@ -29,7 +29,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="content/api/api.html" title="API"
+          <a href="content/getting_started/getting_started.html" title="Getting Started"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Welcome to GeoBIPy’s documentation!"
@@ -44,425 +44,13 @@
           <div class="body" role="main">
             
   <div class="section" id="welcome-to-geobipy">
-<h1><a class="toc-backref" href="#id1">Welcome to GeoBIPy</a><a class="headerlink" href="#welcome-to-geobipy" title="Permalink to this headline">¶</a></h1>
+<h1>Welcome to GeoBIPy<a class="headerlink" href="#welcome-to-geobipy" title="Permalink to this headline">¶</a></h1>
 <p>Geophysical Bayesian Inference in Python</p>
 <p>This package uses a Bayesian formulation and Markov chain Monte Carlo sampling methods to derive posterior distributions of subsurface and measured data properties. The current implementation is applied to time and frequency domain electro-magnetic data. Application outside of these data types is well within scope.</p>
-<p>Currently there are two types of data that we have implemented; frequency domain electromagnetic data, and time domain electromagnetic data. The package comes with a frequency domain forward modeller, but it does not come with a time domain forward modeller.  See the section <a class="reference internal" href="#installing-the-time-domain-forward-modeller">Installing the time domain forward modeller</a> for more information.</p>
-<div class="contents topic" id="table-of-contents">
-<p class="topic-title first">Table of Contents</p>
-<ul class="simple">
-<li><a class="reference internal" href="#welcome-to-geobipy" id="id1">Welcome to GeoBIPy</a><ul>
-<li><a class="reference internal" href="#getting-started" id="id2">Getting started</a></li>
-<li><a class="reference internal" href="#installing-geobipy" id="id3">Installing GeoBIPy</a><ul>
-<li><a class="reference internal" href="#installing-a-serial-version-of-geobipy" id="id4">Installing a serial version of GeoBIPy</a></li>
-<li><a class="reference internal" href="#installing-a-parallel-version-of-geobipy" id="id5">Installing a parallel version of GeoBIPy</a><ul>
-<li><a class="reference internal" href="#installing-mpi-and-mpi4py" id="id6">Installing MPI and mpi4py</a><ul>
-<li><a class="reference internal" href="#mpi" id="id7">MPI</a></li>
-<li><a class="reference internal" href="#mpi4py" id="id8">mpi4py</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#installing-parallel-hdf5-and-h5py" id="id9">Installing parallel HDF5 and h5py</a><ul>
-<li><a class="reference internal" href="#hdf5" id="id10">HDF5</a></li>
-<li><a class="reference internal" href="#h5py" id="id11">h5py</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a class="reference internal" href="#using-geobipy-on-yeti" id="id12">Using GeoBIPy on Yeti</a></li>
-<li><a class="reference internal" href="#installing-the-time-domain-forward-modeller" id="id13">Installing the time domain forward modeller</a><ul>
-<li><a class="reference internal" href="#prerequisites" id="id14">Prerequisites</a></li>
-<li><a class="reference internal" href="#compile-the-gatdaem1d-shared-library" id="id15">Compile the gatdaem1d shared library</a></li>
-<li><a class="reference internal" href="#installing-the-python-bindings" id="id16">Installing the Python Bindings</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a class="reference internal" href="#documentation" id="id17">Documentation</a><ul>
-<li><a class="reference internal" href="#publication" id="id18">Publication</a></li>
-<li><a class="reference internal" href="#source-code-html-pages" id="id19">Source code HTML pages</a></li>
-<li><a class="reference internal" href="#jupyter-notebooks-to-illustrate-the-classes" id="id20">Jupyter notebooks to illustrate the classes</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#running-geobipy" id="id21">Running GeoBIPy</a></li>
-</ul>
-</li>
-</ul>
-</div>
-<div class="section" id="getting-started">
-<h2><a class="toc-backref" href="#id2">Getting started</a><a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
-<p>First things first, install a Python 3.5+ distribution.  This is the minimum version that we have tested with.</p>
-<p>This package has a few requirements depending on what you wish to do with it.</p>
-<p>If you require a serial version of the code, see <a class="reference internal" href="#installing-a-serial-version-of-geobipy">Installing a serial version of GeoBIPy</a>.</p>
-<p>If you require an parallel implementation, you will need to install an MPI library, and Python’s mpi4py module. See <a class="reference internal" href="#installing-mpi-and-mpi4py">Installing MPI and mpi4py</a>.</p>
-<p>If you require parallel file reading and writing, you will also need to install an MPI enabled HDF5 library, as well as Python’s h5py wrapper to that library. It is important to read the notes below on installing h5py on top of a parallel HDF library.  The traditional “pip install h5py” will not work correctly. See <a class="reference internal" href="#installing-parallel-hdf5-and-h5py">Installing parallel HDF5 and h5py</a> to do this correctly.</p>
-<p>If you need to install the parallel IO version of the code, we would recommend that you start with a clean install of Python. This makes it easier to determine whether you have installed and linked the correct version of the parallel HDF5 library.</p>
-</div>
-<div class="section" id="installing-geobipy">
-<h2><a class="toc-backref" href="#id3">Installing GeoBIPy</a><a class="headerlink" href="#installing-geobipy" title="Permalink to this headline">¶</a></h2>
-<p>There are two versions when installing GeoBIPy, a serial version, and a parallel version. Since GeoBIPy uses a Fortran backend for forward modelling frequency domain data, you will need to have a Fortran compiler installed. Make sure that the compiler can handle derived data types since I make use of object oriented programming in Fortran.</p>
-<div class="section" id="installing-a-serial-version-of-geobipy">
-<h3><a class="toc-backref" href="#id4">Installing a serial version of GeoBIPy</a><a class="headerlink" href="#installing-a-serial-version-of-geobipy" title="Permalink to this headline">¶</a></h3>
-<p>This is the easiest installation and provides access to a serial implementation of the code.</p>
-<p>Simply clone the git repository, navigate to the package folder that contains the setup.py file, and type “pip install -e .”</p>
-<p>You should then be able to import modules from geobipy.  For this type of installation mpi will not need to be installed, and the serial version of h5py will suffice i.e. the standard “pip install h5py” is fine.  h5py will automatically be installed during the install of GeoBIPy since it is a dependency.</p>
-<p><strong>Side note:</strong>  Let’s say you ran a production run on a parallel machine with MPI and parallel HDF capabilities. You generated all the results, copied them back to your local machine, and wish to make plots and images.  You will only need to install the serial version of the code on your local machine to do this.</p>
-</div>
-<div class="section" id="installing-a-parallel-version-of-geobipy">
-<h3><a class="toc-backref" href="#id5">Installing a parallel version of GeoBIPy</a><a class="headerlink" href="#installing-a-parallel-version-of-geobipy" title="Permalink to this headline">¶</a></h3>
-<p>Installing the parallel version of the code is a little trickier due to the dependencies necessary between the OpenMPI and/or HDF libraries, and how Python’s mpi4py and h5py wrap around those.</p>
-<div class="section" id="installing-mpi-and-mpi4py">
-<h4><a class="toc-backref" href="#id6">Installing MPI and mpi4py</a><a class="headerlink" href="#installing-mpi-and-mpi4py" title="Permalink to this headline">¶</a></h4>
-<p>To run this code in parallel you will need both an MPI library and the python wrapper, mpi4py.  You must install MPI first before mpi4py.</p>
-<div class="section" id="mpi">
-<h5><a class="toc-backref" href="#id7">MPI</a><a class="headerlink" href="#mpi" title="Permalink to this headline">¶</a></h5>
-<p>If you are installing GeoBIPy on a parallel machine, I would think that you have access to prebuilt MPI libraries.  If you are on a local laptop, you will need to install one. This package has been tested with OpenMPI version 1.10.2. Be careful if you want to use a newer version as mpi4py may not communicate with it correctly (at the time of this writing, OpenMPI v2 was having issues).</p>
-</div>
-<div class="section" id="mpi4py">
-<h5><a class="toc-backref" href="#id8">mpi4py</a><a class="headerlink" href="#mpi4py" title="Permalink to this headline">¶</a></h5>
-<p>At this point, if you have an mpi4py module already installed, please remove it (you can check with “pip list”). If you started with a clean installation you should not have to worry about this. To test whether a new install of mpi4py will see the mpi library you have, just type “which mpicc”.  The path that you see should point to the implementation that you want mpi4py to link to.  Make sure you are about to install mpi4py to the correct python installation.  If you type ‘which python’ it should return the path to the correct python distribution.  If you are using environments, make sure you have activated the correct one.</p>
-<p>Next, use “pip install mpi4py –no-cache-dir”.  This last option is very important, without it, pip might install its own MPI library called MPICH2. I would try to avoid this because if you need to install the HDF5 library you will need know which directories to link to (see <a class="reference internal" href="#installing-parallel-hdf5-and-h5py">Installing parallel HDF5 and h5py</a>).</p>
-<p>At the end of the day,  h5py needs to communicate with both the correct HDF5 library and mpi4py, and both of those need to communicate with the same MPI library.</p>
-</div>
-</div>
-<div class="section" id="installing-parallel-hdf5-and-h5py">
-<h4><a class="toc-backref" href="#id9">Installing parallel HDF5 and h5py</a><a class="headerlink" href="#installing-parallel-hdf5-and-h5py" title="Permalink to this headline">¶</a></h4>
-<p>If a parallel HDF5 library is not available, you will need to install one. First make sure you follow <a class="reference internal" href="#installing-mpi-and-mpi4py">Installing MPI and mpi4py</a> so that an MPI library is available to you. You must install a HDF5 library first before h5py.</p>
-<div class="section" id="hdf5">
-<h5><a class="toc-backref" href="#id10">HDF5</a><a class="headerlink" href="#hdf5" title="Permalink to this headline">¶</a></h5>
-<p>When you install HDF5, make sure that the correct MPI library can be seen by typing “which mpicc”.  When you configure the HDF5 library, be sure to use the –enable-parallel option.</p>
-</div>
-<div class="section" id="h5py">
-<h5><a class="toc-backref" href="#id11">h5py</a><a class="headerlink" href="#h5py" title="Permalink to this headline">¶</a></h5>
-<p>Once the HDF5 library is installed you will need to clone the <a class="reference external" href="https://github.com/h5py/h5py">h5py repository</a></p>
-<p>Make sure you are about to install h5py to the correct python installation.  If you type ‘which python’ it should return the path to the correct python installation.</p>
-<p>Next, copy the following code into a file called install.sh in the h5py folder and run it.  You will need to edit 3 entries.</p>
-<ul class="simple">
-<li>In H5PY_PATH change the path to the location where you want h5py installed.</li>
-<li>In HDF5_PATH change the path to the location of the installed parallel HDF5 library (i.e. the directory above /lib/)</li>
-<li>Check that ‘which mpicc’ returns the correct version.</li>
-</ul>
-<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span>#!/bin/bash
-export HDF5_PATH=&lt;Your path to HDF5&gt;
-python setup.py clean --all
-python setup.py configure -r --hdf5-version=&lt;Your version of HDF5&gt; --mpi --hdf5=$HDF5_PATH
-export gcc=gcc
-CC=mpicc HDF5_DIR=$HDF5_PATH python setup.py build
-python setup.py install
-</pre></div>
-</div>
-</div>
-</div>
-</div>
+<p>Currently there are two types of data that we have implemented; frequency domain electromagnetic data, and time domain electromagnetic data. The package comes with a frequency domain forward modeller, but it does not come with a time domain forward modeller.  See the section <a href="#id1"><span class="problematic" id="id2">`Installing the time domain forward modeller`_</span></a> for more information.</p>
 <div class="section" id="using-geobipy-on-yeti">
-<h3><a class="toc-backref" href="#id12">Using GeoBIPy on Yeti</a><a class="headerlink" href="#using-geobipy-on-yeti" title="Permalink to this headline">¶</a></h3>
+<h2>Using GeoBIPy on Yeti<a class="headerlink" href="#using-geobipy-on-yeti" title="Permalink to this headline">¶</a></h2>
 <p>There is no need to install GeoBIPy on Yeti.  Simply type “module load python/geobipy” for the serial version of the code, mainly used for plotting results, or “module load python/pGeobipy” for a parallel enabled version.</p>
-</div>
-<div class="section" id="installing-the-time-domain-forward-modeller">
-<h3><a class="toc-backref" href="#id13">Installing the time domain forward modeller</a><a class="headerlink" href="#installing-the-time-domain-forward-modeller" title="Permalink to this headline">¶</a></h3>
-<p>Ross Brodie at Geoscience Australia has written a great forward modeller, gatdaem1D,  in C++ with a python interface.  You can obtain that code here at the <a class="reference external" href="https://github.com/GeoscienceAustralia/ga-aem">GA repository</a></p>
-<p>However, for use with GeoBIPy, use <a class="reference external" href="https://github.com/leonfoks/ga-aem">this fork of gataem1D</a> if there are open pull requests at the original repository.</p>
-<p>Go ahead and “git clone” that repository.</p>
-<p>These instructions only describe how to install Ross’ forward modeller, but it is part of a larger code base for inversion. If you wish to install his entire package, please follow his instructions.</p>
-<div class="section" id="prerequisites">
-<h4><a class="toc-backref" href="#id14">Prerequisites</a><a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h4>
-<p>To compile his forward modeller, you will need a c++ compiler, and <a class="reference external" href="http://www.fftw.org/">FFTW</a></p>
-<p>On a Mac, installing these two items is easy if you use a package manager such as <a class="reference external" href="https://brew.sh/">homebrew</a></p>
-<p>If you use brew, simply do the following</p>
-<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">brew</span> <span class="n">install</span> <span class="n">gcc</span>
-<span class="n">brew</span> <span class="n">install</span> <span class="n">fftw</span>
-</pre></div>
-</div>
-<p>If you do not have brew, or use a package manager, you can install fftw from source instead.</p>
-<p>Download fftw-3.3.7.tar.gz from the <a class="reference external" href="http://www.fftw.org/download.html">FFTW downloads</a> .</p>
-<p>Untar the folder and install fftw using the following.</p>
-<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tar</span> <span class="o">-</span><span class="n">zxvf</span> <span class="n">fftw</span><span class="o">-</span><span class="mf">3.3</span><span class="o">.</span><span class="mf">7.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
-<span class="n">cd</span> <span class="n">fftw</span><span class="o">-</span><span class="mf">3.3</span><span class="o">.</span><span class="mi">7</span>
-<span class="n">mkdir</span> <span class="n">build</span>
-<span class="n">cd</span> <span class="n">build</span>
-<span class="o">../</span><span class="n">configure</span> <span class="o">--</span><span class="n">prefix</span><span class="o">=</span><span class="n">path</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">to</span><span class="o">/</span><span class="n">fftw</span><span class="o">-</span><span class="mf">3.3</span><span class="o">.</span><span class="mi">7</span> <span class="o">--</span><span class="n">enable</span><span class="o">-</span><span class="n">threads</span>
-<span class="n">make</span>
-<span class="n">make</span> <span class="n">install</span>
-</pre></div>
-</div>
-<p>where, path-to-install-to is the location where you want fftw to be installed.</p>
-</div>
-<div class="section" id="compile-the-gatdaem1d-shared-library">
-<h4><a class="toc-backref" href="#id15">Compile the gatdaem1d shared library</a><a class="headerlink" href="#compile-the-gatdaem1d-shared-library" title="Permalink to this headline">¶</a></h4>
-<p>Next, within the gatdaem1d folder, navigate to the makefiles folder and modify the top part of the file “gatdaem1d_python.make” to the following</p>
-<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span>SHELL = /bin/sh
-.SUFFIXES:
-.SUFFIXES: .cpp .o
-cxx = g++
-cxxflags = -std=c++11 -O3 -Wall -fPIC
-FFTW_DIR = path-to-fftw
-
-ldflags    += -shared
-bindir     = ../python/gatdaem1d
-
-srcdir     = ../src
-objdir     = ./obj
-includes   = -I$(srcdir) -I$(FFTW_DIR)/include
-libs       = -L$(FFTW_DIR)/lib -lfftw3
-library    = $(bindir)/gatdaem1d.so
-</pre></div>
-</div>
-<p>You can find out where brew installed fftw by typing</p>
-<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">brew</span> <span class="n">info</span> <span class="n">fftw</span>
-</pre></div>
-</div>
-<p>Which may return something like “/usr/local/Cellar/fftw/3.3.5”</p>
-<p>In this case, path-to-fftw is “/usr/local/Cellar/fftw/3.3.5”</p>
-<p>If you installed fftw from source, then path-to-fftw is that install path.</p>
-<p>Next, type the following to compile the gatdaem1d c++ code.</p>
-<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="o">-</span><span class="n">f</span> <span class="n">gatdaem1d_python</span><span class="o">.</span><span class="n">make</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="installing-the-python-bindings">
-<h4><a class="toc-backref" href="#id16">Installing the Python Bindings</a><a class="headerlink" href="#installing-the-python-bindings" title="Permalink to this headline">¶</a></h4>
-<p>Finally, to install the python wrapper to gatdaem1d, navigate to the python folder of the gatdaem1d repository.
-Type,</p>
-<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">.</span>
-</pre></div>
-</div>
-<p>You should now have access to the time domain forward modeller within geobipy.</p>
-</div>
-</div>
-</div>
-<div class="section" id="documentation">
-<h2><a class="toc-backref" href="#id17">Documentation</a><a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="publication">
-<h3><a class="toc-backref" href="#id18">Publication</a><a class="headerlink" href="#publication" title="Permalink to this headline">¶</a></h3>
-<p>The code and its processes have been documented in multiple ways.  First we have the publication associated with this software release, the citation is below, and presents the application of this package to frequency and time domain electro-magnetic inversion.</p>
-</div>
-<div class="section" id="source-code-html-pages">
-<h3><a class="toc-backref" href="#id19">Source code HTML pages</a><a class="headerlink" href="#source-code-html-pages" title="Permalink to this headline">¶</a></h3>
-<p>For developers and users of the code, the code itself has been thouroughly documented. The <a class="reference external" href="https://usgs.github.io/geobipy/">source code docs can be found here</a></p>
-<p>However you can generate the docs locally as well. To do this, you will first need to install sphinx via “pip install sphinx”.</p>
-<p>Next, head to the documentation folder in this repository and type “make html”.  Sphinx generates linux based and windows based make files so this should be a cross-platform procedure.</p>
-<p>The html pages will be generated under “build/html”, so simply open the “index.html” file to view and navigate the code.</p>
-</div>
-<div class="section" id="jupyter-notebooks-to-illustrate-the-classes">
-<h3><a class="toc-backref" href="#id20">Jupyter notebooks to illustrate the classes</a><a class="headerlink" href="#jupyter-notebooks-to-illustrate-the-classes" title="Permalink to this headline">¶</a></h3>
-<p>For more practical, hands-on documentation, we have also provided jupyter notebooks under the documentation/notebooks folder.  These notebooks illustrate how to use each class in the package.</p>
-<p>You will need to install jupyter via “pip install jupyter”.</p>
-<p>You can then edit and run the notebooks by navigating to the notebooks folder, and typing “jupyter notebook”. This will open up a new browser window, and you can play in there.</p>
-</div>
-</div>
-<div class="section" id="running-geobipy">
-<h2><a class="toc-backref" href="#id21">Running GeoBIPy</a><a class="headerlink" href="#running-geobipy" title="Permalink to this headline">¶</a></h2>
-<p>There are two methods of running GeoBIPy from the command line once it is installed.
-For the serial version the following can be used</p>
-<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">geobipySerial</span> <span class="o">&lt;</span><span class="n">userParameterFile</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">Output</span> <span class="n">Folder</span><span class="o">&gt;</span>
-</pre></div>
-</div>
-<p>For a parallel installed version use the following, (replace the MPI redirect with whatever is suitable for your machine)</p>
-<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mpirun</span> <span class="n">geobipyParallel</span> <span class="o">&lt;</span><span class="n">userParameterFile</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">Output</span> <span class="n">Folder</span><span class="o">&gt;</span>
-</pre></div>
-</div>
-<p>In both cases, &lt;Output Folder&gt; specifies where the HDF5 files will be written, while the &lt;userParameterFile&gt; is a python script that contains the customizable parameters for GeoBIPy.
-Below is an example scipt that you can use for reference.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geobipy.src.inversion._userParameters</span> <span class="kn">import</span> <span class="n">_userParameters</span>
-
-<span class="c1"># General information about specifying parameters.</span>
-<span class="c1"># The following list of parameters can be given either a single value or a list of values</span>
-<span class="c1"># of length equal to the number of systems in the data. If one value is specified and there</span>
-<span class="c1"># are multiple systems, that value is used for all of them.</span>
-<span class="c1"># self.initialRelativeError</span>
-<span class="c1"># self.minimumRelativeError</span>
-<span class="c1"># self.maximumRelativeError</span>
-<span class="c1"># self.initialAdditiveError</span>
-<span class="c1"># self.minimumAdditiveError</span>
-<span class="c1"># self.maximumAdditiveError</span>
-<span class="c1"># self.relativeErrorProposalVariance</span>
-<span class="c1"># self.additiveErrorProposalVariance</span>
-
-<span class="c1"># -------------------------------------------------------</span>
-<span class="c1"># Define whether this parameter file uses time domain or frequency domain data!</span>
-<span class="n">timeDomain</span> <span class="o">=</span> <span class="bp">False</span>
-<span class="c1"># -------------------------------------------------------</span>
-
-<span class="c1"># -------------------------------------------------------</span>
-<span class="c1"># General file structure information.</span>
-<span class="c1"># -------------------------------------------------------</span>
-<span class="c1"># Specify the folder to the data</span>
-<span class="n">dataDirectory</span> <span class="o">=</span> <span class="s2">&quot;..//Data&quot;</span>
-<span class="c1"># Data File Name. If there are multiple, encompass them with [ ].</span>
-<span class="n">dataFilename</span> <span class="o">=</span> <span class="n">dataDirectory</span> <span class="o">+</span> <span class="s2">&quot;//DataFile.txt&quot;</span>
-<span class="c1"># dataFilename = [dataDirectory + &quot;//DataFile1.txt&quot;, dataDirectory + &quot;//DataFile2.txt&quot;]</span>
-<span class="c1"># System File Name. If there are multiple, encompass them with [ ].</span>
-<span class="n">systemFilename</span> <span class="o">=</span> <span class="n">dataDirectory</span> <span class="o">+</span> <span class="s2">&quot;//SystemFile.stm&quot;</span>
-<span class="c1"># systemFilename = [dataDirectory + &quot;//SystemFile1.stm&quot;, dataDirectory + &quot;//SystemFile2.stm&quot;]</span>
-
-
-<span class="k">class</span> <span class="nc">userParameters</span><span class="p">(</span><span class="n">_userParameters</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; User Interface Parameters for GeoBIPy &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">DataPoint</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; File for the user to specify inpust to GeoBIPy. &quot;&quot;&quot;</span>
-
-        <span class="c1">## Maximum number of Markov Chains per data point.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">nMarkovChains</span> <span class="o">=</span> <span class="mi">100000</span>
-
-        <span class="c1"># -------------------------------------------------------</span>
-        <span class="c1"># General GeoBIPy options.</span>
-        <span class="c1"># -------------------------------------------------------</span>
-        <span class="c1"># Interactively plot a single data point as it progresses</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">plot</span> <span class="o">=</span> <span class="bp">True</span>
-        <span class="c1"># How often to update the plot. (lower is generally slower)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">plotEvery</span> <span class="o">=</span> <span class="mi">5000</span>
-        <span class="c1"># Save a PNG of the final results for each data point.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">savePNG</span> <span class="o">=</span> <span class="bp">False</span>
-        <span class="c1"># Save the results of the McMC inversion to HDF5 files. (Generally always True)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">save</span> <span class="o">=</span> <span class="bp">True</span>
-        <span class="c1"># Set the display limits [min, max] for the parameter posterior (hitmap)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parameterDisplayLimits</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.001</span><span class="p">,</span> <span class="mi">100000</span><span class="p">]</span>
-
-        <span class="c1"># -------------------------------------------------------</span>
-        <span class="c1"># Turning on or off different solvable parameters.</span>
-        <span class="c1"># -------------------------------------------------------</span>
-        <span class="c1"># Parameter Priors</span>
-        <span class="c1"># solveParameter will prevent parameters from exploding very large or very small numbers.</span>
-        <span class="c1"># solveGradient prevents large changes in parameters value from occurring.</span>
-        <span class="c1"># If both of these are active, the recovered earth models generally contain</span>
-        <span class="c1"># less layers due to an implicit constraint.</span>
-        <span class="c1"># If you feel that your recovered models are too conservative, try turning one of these off.</span>
-        <span class="c1"># It is highly recommended to have at least one of these options turned on!</span>
-        <span class="c1"># Use a prior on the parameter magnitude.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">solveParameter</span> <span class="o">=</span> <span class="bp">False</span>
-        <span class="c1"># Use the Prior on the difference in log parameter diff(log(X))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">solveGradient</span> <span class="o">=</span> <span class="bp">True</span>
-
-        <span class="c1"># Use the prior on the relative data errors</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">solveRelativeError</span> <span class="o">=</span> <span class="bp">True</span>
-        <span class="c1"># Use the prior on the additive data errors</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">solveAdditiveError</span> <span class="o">=</span> <span class="bp">True</span>
-        <span class="c1"># Use the prior on the data elevation</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">solveElevation</span> <span class="o">=</span> <span class="bp">True</span>
-        <span class="c1"># Use the prior on the calibration parameters for the data</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">solveCalibration</span> <span class="o">=</span> <span class="bp">False</span>
-
-        <span class="c1"># -------------------------------------------------------</span>
-        <span class="c1"># Prior Details</span>
-        <span class="c1"># -------------------------------------------------------</span>
-
-        <span class="c1"># Earth model prior details</span>
-        <span class="c1"># -------------------------</span>
-        <span class="c1"># Maximum number of layers in the 1D model</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">maximumNumberofLayers</span> <span class="o">=</span> <span class="mi">30</span>
-        <span class="c1"># Minimum layer depth in metres</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">minimumDepth</span> <span class="o">=</span> <span class="mf">1.0</span>
-        <span class="c1"># Maximum layer depth in metres</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">maximumDepth</span> <span class="o">=</span> <span class="mf">150.0</span>
-        <span class="c1"># Minimum layer thickness.</span>
-        <span class="c1"># If minimumThickness = None, it will be autocalculated.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">minimumThickness</span> <span class="o">=</span> <span class="bp">None</span>
-
-        <span class="c1"># Limit the parameter? Takes the limits as three standard deviations away from the mean. (Computed during initialization)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">LimitPar</span> <span class="o">=</span> <span class="bp">True</span>
-
-        <span class="c1"># Data prior details</span>
-        <span class="c1"># ------------------</span>
-        <span class="c1"># The data priors are imposed on three different aspects of the data.</span>
-        <span class="c1"># The relative and additive error and the elevation of the data point.</span>
-        <span class="c1"># Data uncertainty priors are used if solveRelativeError or solveAdditiveError are True.</span>
-        <span class="c1"># If the data file contains columns of the estimated standard deviations, they are used as the initial values</span>
-        <span class="c1"># when starting an McMC inversion. If the file does not contain these estimates, then the initial</span>
-        <span class="c1"># values are used below as sqrt((relative * data)^2 + (additive)^2).</span>
-
-        <span class="c1"># Assign an initial percentage relative Error</span>
-        <span class="c1"># If the file contains no standard deviations, this will be used</span>
-        <span class="c1"># to assign the initial data uncertainties.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">initialRelativeError</span> <span class="o">=</span> <span class="mf">0.05</span>
-        <span class="c1">## Relative Error Prior Details</span>
-        <span class="c1"># Minimum Relative Error</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">minimumRelativeError</span> <span class="o">=</span> <span class="mf">0.001</span>
-        <span class="c1"># Maximum Relative Error</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">maximumRelativeError</span> <span class="o">=</span> <span class="mf">0.5</span>
-
-        <span class="c1"># Assign an initial additivr error level.</span>
-        <span class="c1"># If the file contains no standard deviations, this will be used</span>
-        <span class="c1"># to assign the initial data uncertainties.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">initialAdditiveError</span> <span class="o">=</span> <span class="mf">5.0</span>
-        <span class="c1"># Additive Error Prior Details</span>
-        <span class="c1"># Minimum Additive Error</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">minimumAdditiveError</span> <span class="o">=</span> <span class="mf">3.0</span>
-        <span class="c1"># Maximum Relative Error</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">maximumAdditiveError</span> <span class="o">=</span> <span class="mf">20.0</span>
-
-        <span class="c1"># Elevation range allowed (m), either side of measured height</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">maximumElevationChange</span> <span class="o">=</span> <span class="mf">1.0</span>
-
-        <span class="c1"># -------------------------------------------------------</span>
-        <span class="c1"># Proposal details</span>
-        <span class="c1"># -------------------------------------------------------</span>
-
-        <span class="c1"># Data proposal details</span>
-        <span class="c1"># ---------------------</span>
-        <span class="c1"># Logical to determine whether to use the Steepest Descent or Stochastic Newton step direction</span>
-        <span class="c1"># The Stochastic Newton approach utilizes information contained in the data themselves</span>
-        <span class="c1"># to guide the model proposal step. This makes the McMC chain more efficient at choosing the next</span>
-        <span class="c1"># model. If this is turned on (and generally it should be) you will notice</span>
-        <span class="c1"># less variance in the parameter posterior once the inversion finishes.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">stochasticNewton</span> <span class="o">=</span> <span class="bp">True</span>
-        <span class="c1"># The relative, additive, and elevation proposal variances are assigned to</span>
-        <span class="c1"># normal distributions with a mean equal to its value in the current model (of the Markov chain)</span>
-        <span class="c1"># These variances are used when we randomly choose a new value for that given variable.</span>
-        <span class="c1"># Proposal variance for the relative error</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">relativeErrorProposalVariance</span> <span class="o">=</span> <span class="mf">2.5e-7</span>
-        <span class="c1"># Proposal variance for the additive error</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">additiveErrorProposalVariance</span> <span class="o">=</span> <span class="mf">1.0e-4</span>
-        <span class="c1"># Proposal variance of the elevation</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">elevationProposalVariance</span> <span class="o">=</span> <span class="mf">0.01</span>
-
-        <span class="c1"># Earth model proposal details</span>
-        <span class="c1"># ----------------------------</span>
-        <span class="c1"># Evolution Probabilities for earth model manipulation during the Markov chain.</span>
-        <span class="c1"># These four values are internally scaled such that their sum is 1.0.</span>
-        <span class="c1"># Probability that a layer is inserted into the model.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pBirth</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="mf">6.0</span>
-        <span class="c1"># Probablitiy that a layer is removed from the model.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pDeath</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="mf">6.0</span>
-        <span class="c1"># Probability that an interface in the model is perturbed.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pPerturb</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="mf">6.0</span>
-        <span class="c1"># Probability of no change occuring to the layers of the model.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pNochange</span> <span class="o">=</span> <span class="mf">0.5</span>
-
-        <span class="c1"># -------------------------------------------------------</span>
-        <span class="c1"># Typically Defaulted parameters</span>
-        <span class="c1"># -------------------------------------------------------</span>
-        <span class="c1"># Standard Deviation of log(rho) = log(1 + factor)</span>
-        <span class="c1"># Default is 10.0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">factor</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="c1"># Standard Deviation for the difference in layer resistivity</span>
-        <span class="c1"># Default is 1.5</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">gradientStd</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="c1"># Initial scaling factor for proposal covariance</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">covScaling</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="c1"># Scaling factor for data misfit</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">multiplier</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="c1"># Clipping Ratio for interface contrasts</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">clipRatio</span> <span class="o">=</span> <span class="bp">None</span>
-
-        <span class="c1"># Display the resistivity?</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">reciprocateParameters</span> <span class="o">=</span> <span class="bp">True</span>
-
-
-        <span class="c1"># Don&#39;t change these.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dataDirectory</span> <span class="o">=</span> <span class="n">dataDirectory</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dataFilename</span> <span class="o">=</span> <span class="n">dataFilename</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">systemFilename</span> <span class="o">=</span> <span class="n">systemFilename</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="bp">False</span>
-
-        <span class="n">_userParameters</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">DataPoint</span><span class="p">)</span>
-
-<span class="c1"># Don&#39;t change this.</span>
-<span class="k">if</span> <span class="p">(</span><span class="n">timeDomain</span><span class="p">):</span>
-<span class="n">dataInit</span> <span class="o">=</span> <span class="s1">&#39;TdemData()&#39;</span>
-<span class="k">else</span><span class="p">:</span>
-<span class="n">dataInit</span> <span class="o">=</span> <span class="s1">&#39;FdemData()&#39;</span>
-</pre></div>
-</div>
 </div>
 </div>
 
@@ -472,51 +60,22 @@ Below is an example scipt that you can use for reference.</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Welcome to GeoBIPy</a><ul>
-<li><a class="reference internal" href="#getting-started">Getting started</a></li>
-<li><a class="reference internal" href="#installing-geobipy">Installing GeoBIPy</a><ul>
-<li><a class="reference internal" href="#installing-a-serial-version-of-geobipy">Installing a serial version of GeoBIPy</a></li>
-<li><a class="reference internal" href="#installing-a-parallel-version-of-geobipy">Installing a parallel version of GeoBIPy</a><ul>
-<li><a class="reference internal" href="#installing-mpi-and-mpi4py">Installing MPI and mpi4py</a><ul>
-<li><a class="reference internal" href="#mpi">MPI</a></li>
-<li><a class="reference internal" href="#mpi4py">mpi4py</a></li>
+<h3><a href="index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Welcome to GeoBIPy</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#using-geobipy-on-yeti">Using GeoBIPy on Yeti</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#installing-parallel-hdf5-and-h5py">Installing parallel HDF5 and h5py</a><ul>
-<li><a class="reference internal" href="#hdf5">HDF5</a></li>
-<li><a class="reference internal" href="#h5py">h5py</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a class="reference internal" href="#using-geobipy-on-yeti">Using GeoBIPy on Yeti</a></li>
-<li><a class="reference internal" href="#installing-the-time-domain-forward-modeller">Installing the time domain forward modeller</a><ul>
-<li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
-<li><a class="reference internal" href="#compile-the-gatdaem1d-shared-library">Compile the gatdaem1d shared library</a></li>
-<li><a class="reference internal" href="#installing-the-python-bindings">Installing the Python Bindings</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a class="reference internal" href="#documentation">Documentation</a><ul>
-<li><a class="reference internal" href="#publication">Publication</a></li>
-<li><a class="reference internal" href="#source-code-html-pages">Source code HTML pages</a></li>
-<li><a class="reference internal" href="#jupyter-notebooks-to-illustrate-the-classes">Jupyter notebooks to illustrate the classes</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#running-geobipy">Running GeoBIPy</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="content/getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="content/api/api.html">API</a></li>
 </ul>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="index.html"
                         title="previous chapter">Welcome to GeoBIPy’s documentation!</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="content/api/api.html"
-                        title="next chapter">API</a></p>
+  <p class="topless"><a href="content/getting_started/getting_started.html"
+                        title="next chapter">Getting Started</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -550,7 +109,7 @@ Below is an example scipt that you can use for reference.</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="content/api/api.html" title="API"
+          <a href="content/getting_started/getting_started.html" title="Getting Started"
              >next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Welcome to GeoBIPy’s documentation!"
