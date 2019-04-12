@@ -380,7 +380,7 @@ class LineResults(myObject):
         R.iPlot = np.array(hdfFile.get('iplot'))
         R.plotMe = np.array(hdfFile.get('plotme'))
         R.limits = np.array(hdfFile.get('limits'))
-        R.invertPar = np.array(hdfFile.get('invertPar'))
+        R.reciprocateParameter = np.array(hdfFile.get('dispres'))
         R.nMC = np.array(hdfFile.get('nmc'))
         R.nSystems = np.array(hdfFile.get('nsystems'))
         R.ratex = hdfRead.readKeyFromFile(hdfFile,'','/','ratex')
@@ -897,7 +897,7 @@ class LineResults(myObject):
 #            c.pcolor(x=self.xPlot, y=tmp.bins, **kwargs)
 #            cP.title('Relative error posterior distributions')
 
-    def histogram(self, nBins, depth1 = None, depth2 = None, invertPar = False, bestModel = False, **kwargs):
+    def histogram(self, nBins, depth1 = None, depth2 = None, reciprocateParameter = False, bestModel = False, **kwargs):
         """ Compute a histogram of the model, optionally show the histogram for given depth ranges instead """
 
         self.getMesh()
@@ -935,7 +935,7 @@ class LineResults(myObject):
 
         log = kwargs.pop('log',False)
 
-        if (invertPar):
+        if (reciprocateParameter):
             i = np.where(vals > 0.0)[0]
             vals[i] = 1.0 / vals[i]
             name = 'Resistivity'
@@ -955,7 +955,7 @@ class LineResults(myObject):
         cP.title(title)
 
 
-    def plotXsection(self, invertPar = False, bestModel=False, percent = 67.0, useVariance=True, **kwargs):
+    def plotXsection(self, reciprocateParameter = False, bestModel=False, percent = 67.0, useVariance=True, **kwargs):
         """ Plot a cross-section of the parameters """
 
         self.getMesh()
@@ -967,7 +967,7 @@ class LineResults(myObject):
             self.getMeanParameters()
             tmp = self.mean.T
 
-        if (invertPar):
+        if (reciprocateParameter):
             tmp = 1.0 / tmp
             tmp.name = 'Resistivity'
             tmp.units = '$\Omega m$'
@@ -1329,7 +1329,7 @@ class LineResults(myObject):
         self.iDs.writeHdf(hdfFile, 'fiducials')
         hdfFile.create_dataset('iplot', data=results.iPlot)
         hdfFile.create_dataset('plotme', data=results.plotMe)
-        hdfFile.create_dataset('invertPar', data=results.invertPar)
+        hdfFile.create_dataset('reciprocateParameter', data=results.reciprocateParameter)
         hdfFile.create_dataset('limits', data=results.limits)
         hdfFile.create_dataset('nmc', data=results.nMC)
         hdfFile.create_dataset('nsystems', data=results.nSystems)
@@ -1409,12 +1409,12 @@ class LineResults(myObject):
     def results2Hdf(self, results):
         """ Given a HDF file initialized as line results, write the contents of results to the appropriate arrays """
 
-        assert results.ID in self.iDs, Exception("The HDF file does not have ID number {}. Available ids are between {} and {}".format(results.ID, np.min(self.iDs), np.max(self.iDs)))
+        assert results.fiducial in self.iDs, Exception("The HDF file does not have ID number {}. Available ids are between {} and {}".format(results.fiducial, np.min(self.iDs), np.max(self.iDs)))
 
         hdfFile = self.hdfFile
 
         # Get the point index
-        i = self.iDs.searchsorted(results.ID)
+        i = self.iDs.searchsorted(results.fiducial)
 
         # Add the iteration number
         hdfFile['i'][i] = results.i
