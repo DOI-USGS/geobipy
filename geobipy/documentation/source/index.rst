@@ -9,9 +9,10 @@ Welcome to GeoBIPy's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 1
 
    README
+   content/getting_started/getting_started
    content/api/api
 
 Indices and tables

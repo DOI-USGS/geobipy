@@ -2,7 +2,7 @@ Data classes
 =================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    Data
    FdemData

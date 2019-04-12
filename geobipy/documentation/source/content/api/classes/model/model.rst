@@ -2,7 +2,7 @@ Model classes
 =================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    Model_
    Model1D

@@ -1,4 +1,4 @@
-PointCloud3D
+Point
 ============
 .. inheritance-diagram:: geobipy.src.classes.pointcloud.Point
    :parts: 1

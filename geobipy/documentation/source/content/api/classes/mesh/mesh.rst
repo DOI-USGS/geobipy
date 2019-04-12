@@ -2,7 +2,7 @@ Mesh classes
 =================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    RectilinearMesh1D
    RectilinearMesh2D

@@ -2,7 +2,7 @@ Datapoint classes
 =================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    DataPoint
    EmDataPoint

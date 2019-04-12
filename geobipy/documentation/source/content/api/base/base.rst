@@ -2,7 +2,7 @@ Core routines needed for GeoBIPy
 =================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    customFunctions
    customPlots

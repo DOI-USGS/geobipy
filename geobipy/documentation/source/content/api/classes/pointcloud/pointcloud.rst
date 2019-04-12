@@ -2,7 +2,7 @@ Pointcloud classes
 =================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    Point
    PointCloud3D

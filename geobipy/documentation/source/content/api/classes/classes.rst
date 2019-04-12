@@ -3,7 +3,7 @@ Classes used in GeoBIPy
 
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 1
 
    core/core
    data/data
