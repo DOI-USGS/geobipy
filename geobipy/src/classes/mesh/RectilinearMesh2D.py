@@ -194,8 +194,8 @@ class RectilinearMesh2D(myObject):
         return True
 
 
-    def intervalMean(self, arr, intervals, axis=0, statistic='mean'):
-        """Compute the mean of an array between the intervals given along dimension dim.
+    def intervalStatistic(self, arr, intervals, axis=0, statistic='mean'):
+        """Compute a statistic of the array between the intervals given along dimension dim.
         
         Parameters
         ----------
