@@ -98,7 +98,7 @@ class RectilinearMesh1D(myObject):
 
 
     def __deepcopy__(self, memo):
-        out = RectilinearMesh1D()
+        out = type(self)()
         out._cellCentres = self._cellCentres.deepcopy()
         out._cellEdges = self._cellEdges.deepcopy()
         out.isRegular = self.isRegular
