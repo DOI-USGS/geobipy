@@ -143,10 +143,10 @@ def singleCore(inputFile, outputDir):
     paras.check(DataPoint)
 
     # Initialize the inversion to obtain the sizes of everything
-    [paras, Mod, D, prior, posterior, PhiD] = Initialize(paras, DataPoint, prng = prng)
+    [paras, Mod, DataPoint, prior, posterior, PhiD] = Initialize(paras, DataPoint, prng = prng)
 
     # Create the results template
-    Res = Results(D, Mod,
+    Res = Results(DataPoint, Mod,
         save=paras.save, plot=paras.plot, savePNG=paras.savePNG,
         nMarkovChains=paras.nMarkovChains, plotEvery=paras.plotEvery, parameterDisplayLimits=paras.parameterDisplayLimits,
         reciprocateParameters=paras.reciprocateParameters)
@@ -258,10 +258,10 @@ def multipleCore(inputFile, outputDir, skipHDF5):
         paras.check(DataPoint)
 
         # Initialize the inversion to obtain the sizes of everything
-        [paras, Mod, D, prior, posterior, PhiD] = Initialize(paras, DataPoint, prng = prng)
+        [paras, Mod, DataPoint, prior, posterior, PhiD] = Initialize(paras, DataPoint, prng = prng)
 
         # Create the results template
-        Res = Results(D, Mod,
+        Res = Results(DataPoint, Mod,
             save=paras.save, plot=paras.plot, savePNG=paras.savePNG,
             nMarkovChains=paras.nMarkovChains, plotEvery=paras.plotEvery, parameterDisplayLimits=paras.parameterDisplayLimits,
             reciprocateParameters=paras.reciprocateParameters)
