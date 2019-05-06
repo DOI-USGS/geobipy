@@ -593,7 +593,7 @@ class TdemData(Data):
 
 
     def check(self):
-        if (np.any(self.data <= 0.0)):
+        if (np.any(self._data[~np.isnan(self._data)] <= 0.0)):
             print("Warning: Your data contains values that are <= 0.0")
 
 
@@ -809,7 +809,7 @@ class TdemData(Data):
 
         s = grp['d/data'].shape
 
-        tmp = TdemData(nPoints=s[0], nTimes=s[1], system=systems)
+        tmp = TdemData(nPoints=s[0], nTimes=s[1], systems=systems)
 
         item = grp.get('x')
         obj = eval(safeEval(item.attrs.get('repr')))
