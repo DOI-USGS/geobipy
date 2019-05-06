@@ -21,7 +21,7 @@ class Order(object):
         """
         # Probability Density Function
         if (zmin is None): return
-        i=np.arange(kmax)
+        i = np.arange(kmax)
         dz = np.log((np.exp(zmax) - np.exp(zmin) - 2.0 * i * np.exp(hmin)))
         tmp = np.cumprod(dz)
         self.pdf = factorial(i) / tmp
@@ -68,4 +68,4 @@ class Order(object):
         """ Reads the Uniform Distribution from an HDF group """
         T = np.array(h5grp.get('pdf'))
         self.pdf = T
-        return self
+        return self        

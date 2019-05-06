@@ -21,16 +21,14 @@ class MvNormal(baseDistribution):
         """
         #assert (np.ndim(mean) > 0 and np.ndim(variance) > 0), ValueError("mean and variance must be > 1 dimension")
 
-        if (type(mean) is float): mean=np.float64(mean)
-        if (type(variance) is float): variance=np.float64(variance)
+        if (type(variance) is float): variance = np.float64(variance)
 
         baseDistribution.__init__(self, prng)
         # Mean
         if np.ndim(mean) == 0:
             self.mean = np.float64(mean)
         else:
-            self.mean = np.zeros(np.size(mean))
-            self.mean[:] += mean
+            self.mean = np.copy(mean)
 
         self.multivariate = True
 
@@ -51,6 +49,9 @@ class MvNormal(baseDistribution):
     def ndim(self):
         return self.mean.size
 
+    @property
+    def std(self):
+        return np.sqrt(self.variance)
 
 
     def deepcopy(self):

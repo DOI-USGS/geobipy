@@ -38,7 +38,7 @@ class CircularLoop(EmLoop):
         self.orient = orient
         # Dipole moment of the loop
         self.moment = np.int32(moment)
-        self.data = np.zeros(6,dtype=np.float64) + [x, y, z, pitch, roll, yaw]
+        self.data = np.hstack([x, y, z, pitch, roll, yaw])
         # Not sure yet
         self.x = self.data[0]
         # Not sure yet
@@ -129,6 +129,7 @@ class CircularLoop(EmLoop):
 
     def fromHdf(self, h5grp, index=None):
         """ Reads in the object from a HDF file """
+
         if (index is None):
             try:
                 o = np.array(h5grp.get('orientation'))
@@ -140,6 +141,8 @@ class CircularLoop(EmLoop):
                     r = 1.0
             except:
                 assert False, ValueError("HDF data was created as a larger array, specify the row index to read from")
+
+            return CircularLoop(o, m, d[:, 0], d[:, 1], d[:, 2], d[:, 3], d[:, 4], d[:, 5], r)
         else:
             o = np.array(h5grp.get('orientation')[index])
             m = np.array(h5grp.get('moment')[index])
@@ -148,8 +151,9 @@ class CircularLoop(EmLoop):
                 r = np.array(h5grp.get('radius')[index])
             except:
                 r = 1.0
+            return CircularLoop(o, m, d[0], d[1], d[2], d[3], d[4], d[5], r)
 
-        return CircularLoop(o, m, d[0], d[1], d[2], d[3], d[4], d[5], r)
+        
 
 
     def Bcast(self, world, root=0):

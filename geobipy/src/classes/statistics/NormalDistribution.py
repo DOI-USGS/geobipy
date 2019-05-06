@@ -26,11 +26,11 @@ class Normal(baseDistribution):
     """
     def __init__(self, mean, variance, prng=None):
         """Instantiate a Normal distribution """
-        assert np.size(mean) == 1, 'Univariate Normal mean must have size = 1'
-        assert np.size(variance) == 1, 'Univariate Normal variance must have size = 1'
+        # assert np.size(mean) == 1, 'Univariate Normal mean must have size = 1'
+        # assert np.size(variance) == 1, 'Univariate Normal variance must have size = 1'
         baseDistribution.__init__(self, prng)
-        self.mean = mean
-        self.variance = variance
+        self.mean = np.asarray(mean)
+        self.variance = np.asarray(variance)
 
 
     @property
@@ -65,7 +65,8 @@ class Normal(baseDistribution):
             numpy.ndarray
 
         """
-        return self.prng.normal(size=size, loc=self.mean, scale=self.variance)
+        size = (size, self.mean.size)
+        return np.squeeze(self.prng.normal(size=size, loc=self.mean, scale=self.variance))
 
     
     def plotPDF(self, **kwargs):
@@ -79,7 +80,7 @@ class Normal(baseDistribution):
 
     def probability(self, x):
         """ For a realization x, compute the probability """
-        return norm.pdf(x,loc=self.mean, scale = self.variance)
+        return norm.pdf(x, loc = self.mean, scale = self.variance)
         
 
     def summary(self, out=False):
