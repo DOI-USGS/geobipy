@@ -179,12 +179,13 @@ def findFirstLastNotValue(this, values, invalid_val=-1):
         for i in range(1, values.size):
             mask = mask & (this != values[i])
     for i in range(np.ndim(this)):
-        x = np.where(mask.any(axis=i), mask.argmax(axis=i), invalid_val)
+        x = np.where(mask.any(axis=i), mask.argmax(axis=i), 1e9)
         out[i, 0] = np.min(x[x != invalid_val])
     for i in range(np.ndim(this)):
         val = this.shape[i] - np.flip(mask, axis=i).argmax(axis=i) - 1
         x = np.where(mask.any(axis=i), val, invalid_val)
-        out[i, 1] = np.min(x[x != invalid_val])
+        out[i, 1] = np.max(x[x != invalid_val])
+    
     return out
 
 
@@ -757,11 +758,14 @@ def safeEval(string):
     if ('NdArray' in string):
         string = string.replace('NdArray', 'StatArray')
         return string
+    if ('StatArray' in string):
+        string = string.replace('StatArray', 'StatArray.StatArray')
+        return string
     if ('EmLoop' in string):
         string = string.replace('EmLoop', 'CircularLoop')
         return string
     
-    allowed = ('StatArray', 'Histogram', 'Model1D', 'Hitmap', 'TdemData', 'FdemData', 'TdemDataPoint', 'FdemDataPoint', 'TdemSystem', 'FdemSystem', 'CircularLoop', 'RectilinearMesh')  
+    allowed = ('Histogram', 'Model1D', 'Hitmap', 'TdemData', 'FdemData', 'TdemDataPoint', 'FdemDataPoint', 'TdemSystem', 'FdemSystem', 'CircularLoop', 'RectilinearMesh')  
 
     if (any(x in string for x in allowed)):
         return string
