@@ -41,7 +41,7 @@ class PointCloud3D(myObject):
     
     """
 
-    def __init__(self, nPoints=0, x=None, y=None, z=None, units="m"):
+    def __init__(self, nPoints=0, x=None, y=None, z=None, elevation=None, units="m"):
         """ Initialize the class """
 
         # Number of points in the cloud
@@ -76,6 +76,18 @@ class PointCloud3D(myObject):
                 self._z = z.deepcopy()
             else:
                 self._z = StatArray.StatArray(z, "Height", units)
+
+
+        # StatArray of elevation
+        if (elevation is None):
+            self._elevation = StatArray.StatArray(self._nPoints, "Elevation", units)
+        else:
+            assert np.size(elevation) == nPoints, ValueError("elevation must have size {}".format(nPoints))
+            if isinstance(elevation, StatArray.StatArray):
+                self._elevation = elevation.deepcopy()
+            else:
+                self._elevation = StatArray.StatArray(elevation, "Elevation", units)
+
 
         if nPoints == 0:
             return
@@ -114,6 +126,10 @@ class PointCloud3D(myObject):
     @property
     def z(self):
         return self._z
+
+    @property
+    def elevation(self):
+        return self._elevation
 
     
     @property
@@ -427,7 +443,7 @@ class PointCloud3D(myObject):
     def summary(self, out=False):
         """ Display a summary of the 3D Point Cloud """
         msg = ("3D Point Cloud: \n"
-              "Number of Points: : {} \n {} {} {}").format(self._nPoints, self.x.summary(True), self.y.summary(True), self.z.summary(True))
+              "Number of Points: : {} \n {} {} {} {}").format(self._nPoints, self.x.summary(True), self.y.summary(True), self.z.summary(True), self.elevation.summary(True))
         return msg if out else print(msg)
 
 
@@ -532,8 +548,9 @@ class PointCloud3D(myObject):
         x = self.x.Bcast(world, root=root)
         y = self.y.Bcast(world, root=root)
         z = self.z.Bcast(world, root=root)
+        e = self.elevation.Bcast(world, root=root)
         N = MPI.Bcast(self._nPoints, world, root=root)
-        return PointCloud3D(N, x=x, y=y, z=z)
+        return PointCloud3D(N, x=x, y=y, z=z, elevation=e)
 
 
     def Scatterv(self, starts, chunks, world, root=0):
@@ -561,4 +578,5 @@ class PointCloud3D(myObject):
         x = self.x.Scatterv(starts, chunks, world, root=root)
         y = self.y.Scatterv(starts, chunks, world, root=root)
         z = self.z.Scatterv(starts, chunks, world, root=root)
-        return PointCloud3D(N, x=x, y=y, z=z)
+        e = self.elevation.Scatterv(starts, chunks, world, root=root)
+        return PointCloud3D(N, x=x, y=y, z=z, elevation=e)
