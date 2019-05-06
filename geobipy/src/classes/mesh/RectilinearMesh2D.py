@@ -86,7 +86,7 @@ class RectilinearMesh2D(myObject):
 
 
     @property
-    def dims(self):
+    def shape(self):
         """The dimensions of the mesh
 
         Returns
@@ -173,9 +173,10 @@ class RectilinearMesh2D(myObject):
 
     def __deepcopy__(self, memo):
         """ Define the deepcopy for the StatArray """
-        other = RectilinearMesh2D(xEdges=self.x.cellEdges, zEdges=self.z.cellEdges)
-        # other.arr[:,:] += self.arr
-        return other
+        if self.xyz:
+            return RectilinearMesh2D(xEdges=self.x.cellEdges, yEdges=self.y.cellEdges, zEdges=self.z.cellEdges)
+        else:
+            return RectilinearMesh2D(xEdges=self.x.cellEdges, zEdges=self.z.cellEdges)
 
 
     def cellEdges(self, axis):
@@ -189,7 +190,7 @@ class RectilinearMesh2D(myObject):
         #     return False
         if self.x.nCells != other.x.nCells:
             return False
-        if self.z.nCells != other.y.nCells:
+        if self.z.nCells != other.z.nCells:
             return False
         return True
 
@@ -246,17 +247,19 @@ class RectilinearMesh2D(myObject):
         return res
 
 
-    def cellIndices(self, x1, x2, clip=False):
+    def cellIndices(self, x1, x2, clip=False, trim=False):
         """Return the cell indices in x and z for two floats.
 
         Parameters
         ----------
-        x1 : float
+        x1 : scalar or array_like
             x location
-        x2 : float
+        x2 : scalar or array_like
             y location (or z location if instantiated with 3 co-ordinates)
         clip : bool
             A negative index which would normally wrap will clip to 0 instead.
+        trim : bool
+            Do not include out of axis indices. Negates clip, since they wont be included in the output.
 
         Returns
         -------
@@ -264,10 +267,18 @@ class RectilinearMesh2D(myObject):
             indices for the locations along [axis0, axis1]
 
         """
-        out = np.empty(2, dtype=np.int32)
-        out[1] = self.x.cellIndex(x1, clip=clip)
-        out[0] = self.z.cellIndex(x2, clip=clip)
-        return out
+        assert (np.size(x1) == np.size(x2)), ValueError("x1 and x2 must have the same size")
+        if trim:
+            flag = self.x.inBounds(x1) & self.z.inBounds(x2)
+            i = np.where(flag)[0]
+            out = np.empty([2, i.size], dtype=np.int32)
+            out[1, :] = self.x.cellIndex(x1[i])
+            out[0, :] = self.z.cellIndex(x2[i])
+        else:
+            out = np.empty([2, np.size(x1)], dtype=np.int32)
+            out[1, :] = self.x.cellIndex(x1, clip=clip)
+            out[0, :] = self.z.cellIndex(x2, clip=clip)
+        return np.squeeze(out)
 
     def ravelIndices(self, ixy, order='C'):
         """Return a global index into a 1D array given the two cell indices in x and z.
@@ -284,7 +295,7 @@ class RectilinearMesh2D(myObject):
 
         """
 
-        return np.ravel_multi_index(ixy, self.dims, order=order)
+        return np.ravel_multi_index(ixy, self.shape, order=order)
 
     
     def unravelIndex(self, indices, order='C'):
@@ -299,11 +310,11 @@ class RectilinearMesh2D(myObject):
         Returns
         -------
         unraveled_coords : tuple of ndarray
-            Each array in the tuple has the same shape as the self.dims.
+            Each array in the tuple has the same shape as the self.shape.
 
         """
 
-        return np.unravel_index(indices, self.dims, order=order)
+        return np.unravel_index(indices, self.shape, order=order)
 
 
     def pcolor(self, values, xAxis='x', **kwargs):
@@ -354,7 +365,7 @@ class RectilinearMesh2D(myObject):
 
         """
 
-        assert np.all(values.shape == self.dims), ValueError("values must have shape {}".format(self.dims))
+        assert np.all(values.shape == self.shape), ValueError("values must have shape {}".format(self.shape))
 
         xtmp = self.getXAxis(xAxis)
 
