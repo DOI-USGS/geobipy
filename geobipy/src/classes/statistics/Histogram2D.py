@@ -38,12 +38,13 @@ class Histogram2D(RectilinearMesh2D):
     
     """
 
-    def __init__(self, xBins=None, xBinCentres=None, yBins=None, yBinCentres=None, values=None):
+    def __init__(self, xBins=None, xBinCentres=None, yBins=None, yBinCentres=None, zBins=None, zBinCentres=None, values=None):
         """ Instantiate a 2D histogram """
         if (xBins is None and xBinCentres is None):
             return
         # Instantiate the parent class
-        RectilinearMesh2D.__init__(self, xCentres=xBinCentres, xEdges=xBins, yCentres=yBinCentres, yEdges=yBins)
+        RectilinearMesh2D.__init__(self, xCentres=xBinCentres, xEdges=xBins, yCentres=yBinCentres, yEdges=yBins, zCentres=zBinCentres, zEdges=zBins)
+
         # Point counts to self.arr to make variable names more intuitive
         self._counts = StatArray.StatArray([self.y.nCells, self.x.nCells], name='Frequency', dtype=np.int64)
 
@@ -57,16 +58,24 @@ class Histogram2D(RectilinearMesh2D):
         return self.x.cellEdges
 
     @property
-    def yBins(self):
-        return self.y.cellEdges
-
-    @property
     def xBinCentres(self):
         return self.x.cellCentres
+
+    @property
+    def yBins(self):
+        return self.y.cellEdges
     
     @property
     def yBinCentres(self):
         return self.y.cellCentres
+
+    @property
+    def zBins(self):
+        return self.z.cellEdges
+    
+    @property
+    def zBinCentres(self):
+        return self.z.cellCentres
 
     @property
     def counts(self):
@@ -248,13 +257,13 @@ class Histogram2D(RectilinearMesh2D):
         self.pcolor(noColorbar = True, **kwargs)
 
         ax = plt.subplot(self.gs[:1, :4]) 
-        h = self.axisHistogram(0).plot(**kwargs)
+        h = self.axisHistogram(0).plot()
         plt.xlabel(''); plt.ylabel('')
         plt.xticks([]); plt.yticks([])
         ax.spines["left"].set_visible(False)
 
         ax = plt.subplot(self.gs[1:, 4:]) 
-        h = self.axisHistogram(0).plot(rotate=True, **kwargs)
+        h = self.axisHistogram(0).plot(rotate=True)
         plt.ylabel(''); plt.xlabel('')
         plt.yticks([]); plt.xticks([])
         ax.spines["bottom"].set_visible(False)
@@ -342,6 +351,21 @@ class Histogram2D(RectilinearMesh2D):
         self.__init__(x=H1.bins, y=H2.bins)
         self._counts[:,:] = np.outer(H1.counts, H2.counts)
 
+    
+    def deepcopy(self):
+        return deepcopy(self)
+
+
+    def __deepcopy__(self, memo):
+        """ Define the deepcopy. """
+
+        if self.xyz:
+            out = Histogram2D(xBins=self.xBins, yBins=self.yBins, zBins=self.zBins)
+        else:
+            out = Histogram2D(xBins=self.xBins, yBins=self.yBins)
+        out._counts = self._counts.deepcopy()
+
+        return out
 
     def divideBySum(self, axis):
         """Divide by the sum along an axis.
@@ -456,23 +480,35 @@ class Histogram2D(RectilinearMesh2D):
             cP.plot(self.x.cellCentres, m, **kwargs)
 
 
-    def update(self, values, clip=False):
+    def update(self, xValues, yValues=None, trim=False):
         """Update the histogram by counting the entry of values into the bins of the histogram.
         
         Parameters
         ----------
-        values : array_like
-            Increments the count for the bin that each value falls into. Array should be 2D with first dimension == 2.
+        xValues : array_like
+            * If xValues is 1D, yValues must be given.
+            * If xValues is 2D, the first dimension must have size = 2. yValues will be ignored.
+        yValues : array_like, optional
+            Added to the second dimension of the histogram
+            Ignored if xValues is 2D.
+        clip : bool
+            Values outside the histogram axes are clipped to the upper and lower bins.
         
         """
-      
-        ixBin = self.x.cellIndex(values[0, :], clip=clip)
-        # xTmp = np.bincount(ixBin, minlength = self.x.nCells-1)
-        iyBin = self.y.cellIndex(values[1, :], clip=clip)
-        # yTmp = np.bincount(iyBin, minlength = self.y.nCells-1)
 
-        for a, b in zip(ixBin, iyBin):       
-            self._counts[b, a] += 1
+        if yValues is None:
+            assert xValues.ndim == 2, ValueError("If yValues is not given, xValues must be 2D.")
+            assert np.shape(xValues)[0] == 2, ValueError("xValues must have first dimension with size 2.")
+
+            yValues = xValues[1, :]
+            xValues = xValues[0, :]
+
+      
+        iBin = self.cellIndices(xValues, yValues, clip=True, trim=trim)
+
+        unique, counts = np.unique(iBin, axis=1, return_counts=True)
+
+        self._counts[unique[0], unique[1]] += counts
 
 
 
