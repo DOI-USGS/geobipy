@@ -1,4 +1,5 @@
 import matplotlib as mpl
+mpl.use('TkAgg')
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
@@ -6,6 +7,7 @@ import pylab as py
 from matplotlib.collections import LineCollection as lc
 from matplotlib.patches import Circle
 from matplotlib.collections import PatchCollection
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
 import numpy.ma as ma
 from .fileIO import deleteFile
@@ -554,10 +556,12 @@ def pcolormesh(X, Y, values, **kwargs):
     values = ma.masked_invalid(values)
 
     if not trim is None:
+        assert isinstance(trim, (float, np.float)), TypeError("trim must be a float")
         bounds = findFirstLastNotValue(values, trim)
-        X = X[bounds[0, 0]:bounds[0, 1], bounds[1, 0]:bounds[1, 1]]
-        Y = Y[bounds[0, 0]:bounds[0, 1], bounds[1, 0]:bounds[1, 1]]
-        values = values[bounds[0, 0]:bounds[0, 1], bounds[1, 0]:bounds[1, 1]]
+        X = X[bounds[0, 0]:bounds[0, 1]+2, bounds[1, 0]:bounds[1, 1]+2]
+        Y = Y[bounds[0, 0]:bounds[0, 1]+2, bounds[1, 0]:bounds[1, 1]+2]
+        values = values[bounds[0, 0]:bounds[0, 1]+2, bounds[1, 0]:bounds[1, 1]+2]
+        
 
     if (log):
         values, logLabel = _log(values, log)
@@ -644,6 +648,8 @@ def pcolor_1D(values, y=None, **kwargs):
         colourbar label
     grid : bool, optional
         Show the grid lines
+    transpose : bool, optional
+        Transpose the image
     noColorBar : bool, optional
         Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.        
 
@@ -676,6 +682,8 @@ def pcolor_1D(values, y=None, **kwargs):
     alpha = kwargs.pop('alpha', 1.0)
 
     width = kwargs.pop('width', None)
+
+    transpose = kwargs.pop('transpose', False)
 
 
     # Set the grid colour if specified
@@ -717,6 +725,9 @@ def pcolor_1D(values, y=None, **kwargs):
 
     Y, X = np.meshgrid(my, mx)
 
+    if transpose:
+        X, Y = Y, X
+
     pm = ax.pcolormesh(X, Y, v, color=c, **kwargs)
 
     ax.set_aspect('equal')
@@ -724,10 +735,16 @@ def pcolor_1D(values, y=None, **kwargs):
     if flipY:
         ax.invert_yaxis()
 
+    plt.xscale(xscale)
     plt.yscale(yscale)
-    ylabel(getNameUnits(y))
-    ax.get_xaxis().set_ticks([])
-    
+
+    if transpose:
+        xlabel(getNameUnits(y))
+        ax.get_yaxis().set_ticks([])
+    else:
+        ylabel(getNameUnits(y))
+        ax.get_xaxis().set_ticks([])
+
     if (not noColorBar):
         if (equalize):
             cbar = plt.colorbar(pm,extend='both')
