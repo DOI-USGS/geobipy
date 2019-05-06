@@ -1,7 +1,8 @@
 import h5py
 import numpy as np
-from ...classes.core.StatArray import StatArray
+from ...classes.core import StatArray
 from ...classes.statistics.Histogram1D import Histogram1D
+from ...classes.statistics.Histogram2D import Histogram2D
 from ...classes.data.datapoint.FdemDataPoint import FdemDataPoint
 from ...classes.data.datapoint.TdemDataPoint import TdemDataPoint
 from ...classes.model.Model1D import Model1D
@@ -69,7 +70,7 @@ def readKeyFromFiles(fNames, groupName, key, index=None, **kwargs):
         fNames = [fNames]
     for f in fNames:
         with h5py.File(f, 'r') as hf:
-            items.append(readKeyFromFile(hf,f,groupName,key, index=None, **kwargs))
+            items.append(readKeyFromFile(hf, f, groupName, key, index=index, **kwargs))
     if (len(items) == 1): items = items[0] # Return unlisted item if single
     return items
 
