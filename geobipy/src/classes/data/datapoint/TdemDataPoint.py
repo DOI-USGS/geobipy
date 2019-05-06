@@ -603,24 +603,24 @@ class TdemDataPoint(EmDataPoint):
             return J1
 
         if (option == 0):  # Created a layer
-            J1[:, :mod.iLayer] = J[:, :mod.iLayer]
-            J1[:, mod.iLayer + 2:] = J[:, mod.iLayer + 1:]
-            tmp = self.sensitivity(mod, ix=[mod.iLayer, mod.iLayer + 1], scale=scale, modelChanged=True)
-            J1[:, mod.iLayer:mod.iLayer + 2] = tmp
+            J1[:, :mod.perturbedLayer] = J[:, :mod.perturbedLayer]
+            J1[:, mod.perturbedLayer + 2:] = J[:, mod.perturbedLayer + 1:]
+            tmp = self.sensitivity(mod, ix=[mod.perturbedLayer, mod.perturbedLayer + 1], scale=scale, modelChanged=True)
+            J1[:, mod.perturbedLayer:mod.perturbedLayer + 2] = tmp
             return J1
 
         if(option == 1):  # Deleted a layer
-            J1[:, :mod.iLayer] = J[:, :mod.iLayer]
-            J1[:, mod.iLayer + 1:] = J[:, mod.iLayer + 2:]
-            tmp = self.sensitivity(mod, ix=[mod.iLayer], scale=scale, modelChanged=True)
-            J1[:, mod.iLayer] = tmp[:, 0]
+            J1[:, :mod.perturbedLayer] = J[:, :mod.perturbedLayer]
+            J1[:, mod.perturbedLayer + 1:] = J[:, mod.perturbedLayer + 2:]
+            tmp = self.sensitivity(mod, ix=[mod.perturbedLayer], scale=scale, modelChanged=True)
+            J1[:, mod.perturbedLayer] = tmp[:, 0]
             return J1
 
         if(option == 2):  # Perturbed a layer
-            J1[:, :mod.iLayer] = J[:, :mod.iLayer]
-            J1[:, mod.iLayer + 1:] = J[:, mod.iLayer + 1:]
-            tmp = self.sensitivity(mod, ix=[mod.iLayer], scale=scale, modelChanged=True)
-            J1[:, mod.iLayer] = tmp[:, 0]
+            J1[:, :mod.perturbedLayer] = J[:, :mod.perturbedLayer]
+            J1[:, mod.perturbedLayer + 1:] = J[:, mod.perturbedLayer + 1:]
+            tmp = self.sensitivity(mod, ix=[mod.perturbedLayer], scale=scale, modelChanged=True)
+            J1[:, mod.perturbedLayer] = tmp[:, 0]
             return J1
 
         assert False, __name__ + '.updateSensitivity: Invalid option [0,1,2]'
