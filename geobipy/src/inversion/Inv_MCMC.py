@@ -5,9 +5,12 @@ Module defining a Markov Chain Monte Carlo approach to 1D EM inversion
 from ..classes.core.Stopwatch import Stopwatch
 from ..classes.data.dataset.FdemData import FdemData
 from ..classes.data.dataset.TdemData import TdemData
+from ..classes.data.datapoint.FdemDataPoint import FdemDataPoint
+from ..classes.data.datapoint.TdemDataPoint import TdemDataPoint
 from ..classes.model.Model1D import Model1D
 from ..classes.core import StatArray
 from ..classes.statistics.Distribution import Distribution
+from ..classes.statistics.Histogram1D import Histogram1D
 from ..base.customFunctions import expReal as mExp
 from scipy import sparse
 import numpy as np
@@ -43,9 +46,9 @@ def Inv_MCMC(paras, DataPoint, prng, LineResults=None, rank=1):
                 verbose=paras.verbose)
 
     # Set the saved best models and data
-    bestModel = Mod  # .deepcopy()
-    bestData = DataPoint  # .deepcopy()
-    bestPosterior = posterior  # .copy()
+    bestModel = Mod#.deepcopy()
+    bestData = DataPoint#.deepcopy()
+    bestPosterior = posterior#.copy()
 
     # Initialize the Chain
     iBurn = 0
@@ -67,6 +70,9 @@ def Inv_MCMC(paras, DataPoint, prng, LineResults=None, rank=1):
             if (PhiD <= multiplier * DataPoint.data.size):
                 Res.burnedIn = True  # Let the results know they are burned in
                 Res.iBurn = i         # Save the burn in iteration to the results
+                bestModel = Mod
+                bestData = DataPoint
+                bestPosterior = posterior
 
         # Update the best best model and data if the posterior is larger
         if (posterior > bestPosterior):
@@ -87,12 +93,12 @@ def Inv_MCMC(paras, DataPoint, prng, LineResults=None, rank=1):
                 multiplier *= paras.multiplier
 
         Res.update(i, iBest, bestData, bestModel, DataPoint, multiplier, PhiD, Mod, posterior, posteriorComponents, paras.clipRatio)
-        
-        Res.plot()   
-                 
+
+        Res.plot("Fiducial {}".format(DataPoint.fiducial))
+
         i += 1
         
-        Go = i <= paras.nMarkovChains + iBurn -1
+        Go = i <= paras.nMarkovChains + iBurn
         if failed:
             Go = False
 
@@ -118,27 +124,71 @@ def Inv_MCMC(paras, DataPoint, prng, LineResults=None, rank=1):
 
    
 def Initialize(paras, DataPoint, prng):
-    # np.set_printoptions(threshold=np.inf)
-    """ Initialize variables and priors, and perform the first iteration """
-    # Initialize properties of the data
+    """Initialize the transdimensional Markov chain Monte Carlo inversion.
+    
+    
+    """
+
+    # Initialize properties of the data point
+
+    # ---------------------------------------
     # Set the distribution of the data misfit
+    # ---------------------------------------
     # Incoming standard deviations may be zero. The variance of the prior is updated
     # later with DataPoint.updateErrors.
     DataPoint._predictedData.setPrior('MvNormalLog', DataPoint._data[DataPoint.iActive], DataPoint._std[DataPoint.iActive]**2.0, prng=prng)
 
-    # Set the prior on the elevation height
+    # ------------------------------------
+    # Set the data point height properties
+    # ------------------------------------
+    # Set the prior on the height
     DataPoint.z.setPrior('UniformLog', np.float64(DataPoint.z) - paras.maximumElevationChange, np.float64(DataPoint.z) + paras.maximumElevationChange)
-    # DataPoint.z.setPrior('NormalLog', DataPoint.z, 1.0, prng=prng)
-    # DataPoint.z.setPrior('Normal',DataPoint.z,paras.zRange)
-
+    # Set the proposal for height
     DataPoint.z.setProposal('Normal', DataPoint.z, paras.elevationProposalVariance, prng=prng)
+    # Create a histogram to set the height posterior.
+    H = Histogram1D(bins = StatArray.StatArray(DataPoint.z.prior.getBinEdges() - DataPoint.z, name=DataPoint.z.name, units=DataPoint.z.units), relativeTo=DataPoint.z)
+    DataPoint.z.setPosterior(H)
 
+    # ---------------------------------
+    # Set the relative error properties
+    # ---------------------------------
     # Set the prior on the relative Errors
     DataPoint.relErr[:] = paras.initialRelativeError.deepcopy()
     DataPoint.setRelativeErrorPrior(paras.minimumRelativeError[:], paras.maximumRelativeError[:], prng=prng)
+
+    # Set the proposal distribution for the relative errors
+    DataPoint.setRelativeErrorProposal(paras.initialRelativeError, paras.relativeErrorProposalVariance, prng=prng)
+
+    # Initialize the histograms for the relative errors
+    rBins = DataPoint.relErr.prior.getBinEdges()
+    if DataPoint.nSystems > 1:
+        DataPoint.relErr.setPosterior([Histogram1D(bins = StatArray.StatArray(rBins[0, :], name='$\epsilon_{Relative}x10^{2}$', units='%')) for i in range(DataPoint.nSystems)])
+    else:
+        DataPoint.relErr.setPosterior(Histogram1D(bins = StatArray.StatArray(rBins, name='$\epsilon_{Relative}x10^{2}$', units='%')))
+
+    # ---------------------------------
+    # Set the additive error properties
+    # ---------------------------------
+
     # Set the prior on the additive Errors
     DataPoint.addErr[:] = paras.initialAdditiveError.deepcopy()
     DataPoint.setAdditiveErrorPrior(paras.minimumAdditiveError[:], paras.maximumAdditiveError[:], prng=prng)
+
+    # Set the proposal distribution for the additive errors
+    DataPoint.setAdditiveErrorProposal(paras.initialAdditiveError, paras.additiveErrorProposalVariance, prng=prng)
+
+    # Initialize the histograms for the additive errors
+    aBins = DataPoint.addErr.prior.getBinEdges()
+    log = None
+    if isinstance(DataPoint, TdemDataPoint):
+        log = 10
+        aBins = np.exp(aBins)
+
+    ab = aBins
+    if DataPoint.nSystems > 1:
+        ab = aBins[0, :]
+    
+    DataPoint.addErr.setPosterior([Histogram1D(bins = StatArray.StatArray(ab, name=DataPoint.addErr.name, units='%'), log=log) for i in range(DataPoint.nSystems)])
 
     # Update the data errors based on user given parameters
     if paras.solveRelativeError or paras.solveAdditiveError:
@@ -146,11 +196,6 @@ def Initialize(paras, DataPoint, prng):
 
     # Save a copy of the original errors
     paras.Err = DataPoint._std.deepcopy()
-    # Set the proposal distribution for the relative errors
-    DataPoint.setRelativeErrorProposal(paras.initialRelativeError, paras.relativeErrorProposalVariance, prng=prng)
-    
-    # Set the proposal distribution for the relative errors
-    DataPoint.setAdditiveErrorProposal(paras.initialAdditiveError, paras.additiveErrorProposalVariance, prng=prng)
 
     # Initialize the calibration parameters
     if (paras.solveCalibration):
@@ -161,37 +206,36 @@ def Initialize(paras, DataPoint, prng):
         # Initialize the calibration proposal
         DataPoint.calibration.setProposal('Normal', DataPoint.calibration, np.reshape(paras.propCal, np.size(paras.propCal), order='F'), prng=prng)
 
+    # ---------------------------------
+    # Set the earth model properties
+    # ---------------------------------
+
     # Find the conductivity of a half space model that best fits the data
-    HScond = DataPoint.FindBestHalfSpace()
+    halfspaceValue = DataPoint.FindBestHalfSpace()
 
     # Create an initial model for the first iteration of the inversion
     # Initialize a 1D model with the half space conductivity
-    parameter = StatArray(np.asarray([HScond, HScond]), name='Conductivity', units=r'$\frac{S}{m}$')
+    parameter = StatArray.StatArray(np.full(2, halfspaceValue), name='Conductivity', units=r'$\frac{S}{m}$')
     # Assign the depth to the interface as half the bounds
     thk = np.asarray([0.5 * (paras.maximumDepth + paras.minimumDepth)])
     Mod = Model1D(2, parameters = parameter, thickness=thk)
 
     # Setup the model for perturbation
     pWheel = [paras.pBirth, paras.pDeath, paras.pPerturb, paras.pNochange]
-    Mod.makePerturbable(pWheel, paras.minimumDepth, paras.maximumDepth, paras.maximumNumberofLayers, prng=prng, minThickness=paras.minimumThickness)
-
-    # Set priors on the depth interfaces, given a number of layers
-    Mod.depth.setPrior('Order', Mod.minDepth, Mod.maxDepth, Mod.minThickness, paras.maximumNumberofLayers)  # priZ
-
-    # Compute the mean and std for the parameter
-    paras.priMu = np.log(HScond)
-    paras.priStd = np.log(1.0 + paras.factor)
-    # Assign a normal distribution to the conductivities
-    Mod.par.setPrior('MvNormalLog', paras.priMu, paras.priStd**2.0, prng=prng)
+    Mod.setPriors(halfspaceValue, pWheel, paras.minimumDepth, paras.maximumDepth, paras.maximumNumberofLayers, minThickness=paras.minimumThickness, prng=prng, factor=paras.factor)
 
     # Assign a Hitmap as a prior if one is given
-    if (not paras.referenceHitmap is None):
-        Mod.setReferenceHitmap(paras.referenceHitmap)
+    # if (not paras.referenceHitmap is None):
+    #     Mod.setReferenceHitmap(paras.referenceHitmap)
+
+    paras.priMu = Mod.par.prior.mean
+    paras.priStd = np.sqrt(Mod.par.prior.variance)
+
+    Mod.setPosteriors()
 
     paras.pLimits = None
     if paras.LimitPar:
-        paras.pLimits = [(np.exp(paras.priMu - 3.0 * paras.priStd)),
-                         (np.exp(paras.priMu + 3.0 * paras.priStd))]
+        paras.pLimits = np.exp(Mod.par.prior.getBinEdges(nBins = 1, nStd = 3.0))
 
     # Compute the predicted data
     DataPoint.forward(Mod)
@@ -240,9 +284,9 @@ def AcceptReject(paras, Mod, DataPoint, prior, posterior, PhiD, Res, prng):# ,oF
     Mod1, option, value = Mod.perturb()
 
     parSaved = Mod1.par.deepcopy()
-
+    
     # Propose a new data point, using assigned proposal distributions
-    D1 = DataPoint.propose(paras.solveElevation,paras.solveRelativeError,paras.solveAdditiveError,paras.solveCalibration)
+    D1 = DataPoint.propose(paras.solveElevation, paras.solveRelativeError, paras.solveAdditiveError, paras.solveCalibration)
 
     if (option < 2):
         # Compute the sensitivity of the data to the perturbed model
@@ -351,20 +395,20 @@ def AcceptReject(paras, Mod, DataPoint, prior, posterior, PhiD, Res, prng):# ,oF
         # Get the pdf for the perturbed parameters
         prop1 = Mod1.par.proposal.getPdf(np.log(Mod1.par))  # CAN.prop
 
-        par = StatArray(np.log(Mod1.par))
-        cov = StatArray(Mod1.par.proposal.variance)
+        par = StatArray.StatArray(np.log(Mod1.par))
+        cov = StatArray.StatArray(Mod1.par.proposal.variance)
   
         if (Mod1.nCells > Mod.nCells):  # Layer was inserted
-            tmp = np.mean(par[Mod1.iLayer:Mod1.iLayer + 2])
-            par = par.delete(Mod1.iLayer)
-            par[Mod1.iLayer] = tmp
-            cov = cov.delete(Mod1.iLayer)
+            tmp = np.mean(par[Mod1.perturbedLayer:Mod1.perturbedLayer + 2])
+            par = par.delete(Mod1.perturbedLayer)
+            par[Mod1.perturbedLayer] = tmp
+            cov = cov.delete(Mod1.perturbedLayer)
 
         elif (Mod1.nCells < Mod.nCells):  # Layer was deleted
-            tmp = par[Mod1.iLayer]
-            par = par.insert(Mod1.iLayer, tmp)
-            tmp2 = cov[Mod1.iLayer]
-            cov = cov.insert(Mod1.iLayer, tmp2)
+            tmp = par[Mod1.perturbedLayer]
+            par = par.insert(Mod1.perturbedLayer, tmp)
+            tmp2 = cov[Mod1.perturbedLayer]
+            cov = cov.insert(Mod1.perturbedLayer, tmp2)
 
         tmp = Mod.deepcopy()
         tmp.par.setProposal('MvNormalLog', par, cov)
@@ -394,7 +438,7 @@ def AcceptReject(paras, Mod, DataPoint, prior, posterior, PhiD, Res, prng):# ,oF
     if (cut > r):
 #        accepted=True
         # Make the Current model the Candidate model
-        Mod0 = Mod1  # .deepcopy()
+        Mod0 = Mod1 #.deepcopy()
         # Make the Current data the Candidate data
         D0 = D1  # .deepcopy()
         # Transfer over the posteriors and priors
@@ -408,7 +452,7 @@ def AcceptReject(paras, Mod, DataPoint, prior, posterior, PhiD, Res, prng):# ,oF
     else:
 #        accepted=False
         # Keep the unperturbed mdel
-        Mod0 = Mod  # .deepcopy()
+        Mod0 = Mod #.deepcopy()
         D0 = DataPoint  # .deepcopy()
         prior0 = prior  # .copy()
         posterior0 = posterior  # .copy()

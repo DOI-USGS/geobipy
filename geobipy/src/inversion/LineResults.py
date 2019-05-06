@@ -186,7 +186,7 @@ class LineResults(myObject):
         if "FdemDataPoint" in dtype:
             self.bestData = FdemData().fromHdf(self.hdfFile[attr[0]])
         elif "TdemDataPoint" in dtype:
-            self.bestData = TdemData().fromHdf(self.hdfFile[attr[0]])
+            self.bestData = TdemData().fromHdf(self.hdfFile[attr[0]], sysPath = self.sysPath)
         
 
 
@@ -312,16 +312,17 @@ class LineResults(myObject):
         self.opacity = StatArray.StatArray(np.zeros([self.mesh.shape[1], self.mesh.shape[0]]), 'Opacity')
 
 
-        a = np.asarray(self.hdfFile['hitmap/arr/data'])
+        loc = 'currentmodel/par/posterior'
+        a = np.asarray(self.hdfFile[loc+'/arr/data'])
         try:
-            b = np.asarray(self.hdfFile['hitmap/x/data'])
+            b = np.asarray(self.hdfFile[loc+'/x/data'])
         except:
-            b = np.asarray(self.hdfFile['hitmap/x/x/data'])
+            b = np.asarray(self.hdfFile[loc+'/x/x/data'])
 
         try:
-            c = np.asarray(self.hdfFile['hitmap/y/data'])
+            c = np.asarray(self.hdfFile[loc+'/y/data'])
         except:
-            c = np.asarray(self.hdfFile['hitmap/y/x/data'])
+            c = np.asarray(self.hdfFile[loc+'/y/x/data'])
 
         h = Hitmap2D(xBinCentres = StatArray.StatArray(b[0, :]), yBinCentres = StatArray.StatArray(c[0, :]))
         h._counts[:, :] = a[0, :, :]
@@ -355,7 +356,7 @@ class LineResults(myObject):
         self.relErrPosterior = self.getAttribute('Relative Error posterior')
 
 
-    def getResults(self, index=None, fid=None):
+    def getResults(self, index=None, fid=None, reciprocateParameter=False):
         """ Obtain the results for the given iD number """
 
         assert not (index is None and fid is None), Exception("Please specify either an integer index or a fiducial.")
@@ -373,14 +374,16 @@ class LineResults(myObject):
 
         s = np.s_[i, :]
 
-        R = Results()
+        R = Results(reciprocateParameter=reciprocateParameter)
 
         R.fiducial = np.float64(fid)
 
         R.iPlot = np.array(hdfFile.get('iplot'))
         R.plotMe = np.array(hdfFile.get('plotme'))
-        R.limits = np.array(hdfFile.get('limits'))
-        R.reciprocateParameter = np.array(hdfFile.get('dispres'))
+
+        tmp = hdfFile.get('limits')
+        R.limits = None if tmp is None else np.array(tmp)
+        R.reciprocateParameter = np.array(hdfFile.get('reciprocateParameter'))
         R.nMC = np.array(hdfFile.get('nmc'))
         R.nSystems = np.array(hdfFile.get('nsystems'))
         R.ratex = hdfRead.readKeyFromFile(hdfFile,'','/','ratex')
@@ -392,31 +395,38 @@ class LineResults(myObject):
         R.multiplier = hdfRead.readKeyFromFile(hdfFile,'','/','multiplier', index=i)
         R.rate = hdfRead.readKeyFromFile(hdfFile,'','/','rate', index=s)
         R.PhiDs = hdfRead.readKeyFromFile(hdfFile,'','/','phids', index=s)
-        R.Hitmap = hdfRead.readKeyFromFile(hdfFile,'','/','hitmap', index=i)
-        R.bestD = hdfRead.readKeyFromFile(hdfFile,'','/','bestd', index=i, sysPath=self.sysPath)
-        #R.currentD = hdfRead.readKeyFromFile(hdfFile,'','/','currentd', index=i, sysPath=self.sysPath)
+
+        R.currentDataPoint = hdfRead.readKeyFromFile(hdfFile,'','/','currentdatapoint', index=i, sysPath=self.sysPath)
+        R.bestDataPoint = hdfRead.readKeyFromFile(hdfFile,'','/','bestd', index=i, sysPath=self.sysPath)
+        
+        R.currentModel = hdfRead.readKeyFromFile(hdfFile,'','/','currentmodel', index=i)
+        R.Hitmap = R.currentModel.par.posterior
+        R.currentModel.maxDepth = np.log(R.Hitmap.y.cellCentres[-1])
         R.bestModel = hdfRead.readKeyFromFile(hdfFile,'','/','bestmodel', index=i)
         R.bestModel.maxDepth = np.log(R.Hitmap.y.cellCentres[-1])
-        R.kHist = hdfRead.readKeyFromFile(hdfFile,'','/','khist', index=i)
-        R.DzHist = hdfRead.readKeyFromFile(hdfFile,'','/','dzhist', index=i)
-        R.MzHist = hdfRead.readKeyFromFile(hdfFile,'','/','mzhist', index=i)
+
+        
+
+        # R.kHist = hdfRead.readKeyFromFile(hdfFile,'','/','khist', index=i)
+        # R.DzHist = hdfRead.readKeyFromFile(hdfFile,'','/','dzhist', index=i)
+        # R.MzHist = hdfRead.readKeyFromFile(hdfFile,'','/','mzhist', index=i)
 
         # Hack to recentre the altitude histogram go this datapoints altitude
-        R.DzHist._cellEdges -= (R.DzHist.bins[int(R.DzHist.bins.size/2)-1] - R.bestD.z[0])
-        R.DzHist._cellCentres = R.DzHist._cellEdges[:-1] + 0.5 * np.abs(np.diff(R.DzHist._cellEdges))
+        # R.DzHist._cellEdges -= (R.DzHist.bins[int(R.DzHist.bins.size/2)-1] - R.bestD.z[0])
+        # R.DzHist._cellCentres = R.DzHist._cellEdges[:-1] + 0.5 * np.abs(np.diff(R.DzHist._cellEdges))
 
-        R.relErr = []
-        R.addErr = []
-        for j in range(R.nSystems):
-            R.relErr.append(hdfRead.readKeyFromFile(hdfFile,'','/','relerr'+str(j), index=i))
-            R.addErr.append(hdfRead.readKeyFromFile(hdfFile,'','/','adderr'+str(j), index=i))
+        # R.relErr = []
+        # R.addErr = []
+        # for j in range(R.nSystems):
+        #     R.relErr.append(hdfRead.readKeyFromFile(hdfFile,'','/','relerr'+str(j), index=i))
+        #     R.addErr.append(hdfRead.readKeyFromFile(hdfFile,'','/','adderr'+str(j), index=i))
 
 
         R.invTime=np.array(hdfFile.get('invtime')[i])
         R.saveTime=np.array(hdfFile.get('savetime')[i])
 
         # Initialize a list of iteration number
-        R.iRange = StatArray(np.arange(2 * R.nMC), name="Iteration #", dtype=np.int64)
+        R.iRange = StatArray.StatArray(np.arange(2 * R.nMC), name="Iteration #", dtype=np.int64)
 
         R.verbose = False
 
@@ -468,7 +478,7 @@ class LineResults(myObject):
         if abs:
             values = values.abs()
         
-        cP.pcolor(values, x=xtmp, y=StatArray(np.arange(self.bestData.predictedData.shape[1]), name='Channel'), **kwargs)
+        cP.pcolor(values, x=xtmp, y=StatArray.StatArray(np.arange(self.bestData.predictedData.shape[1]), name='Channel'), **kwargs)
 
 
     def pcolorObservedData(self, **kwargs):
@@ -481,7 +491,7 @@ class LineResults(myObject):
 
         xtmp = self.mesh.getXAxis(xAxis, centres=False)
         
-        cP.pcolor(self.bestData.data.T, x=xtmp, y=StatArray(np.arange(self.bestData.predictedData.shape[1]), name='Channel'), **kwargs)
+        cP.pcolor(self.bestData.data.T, x=xtmp, y=StatArray.StatArray(np.arange(self.bestData.predictedData.shape[1]), name='Channel'), **kwargs)
 
 
     def pcolorPredictedData(self, **kwargs):
@@ -494,7 +504,7 @@ class LineResults(myObject):
 
         xtmp = self.mesh.getXAxis(xAxis, centres=False)
         
-        cP.pcolor(self.bestData.predictedData.T, x=xtmp, y=StatArray(np.arange(self.bestData.predictedData.shape[1]), name='Channel'), **kwargs)
+        cP.pcolor(self.bestData.predictedData.T, x=xtmp, y=StatArray.StatArray(np.arange(self.bestData.predictedData.shape[1]), name='Channel'), **kwargs)
 
     
     def plotPredictedData(self, channel=None, **kwargs):
@@ -662,15 +672,15 @@ class LineResults(myObject):
         """ Plot the horizontally stacked elevation histograms for each data point along the line """
 
         self.getMesh()
-        tmp = self.getAttribute('layer posterior')
+        post = self.getAttribute('layer posterior')
 
         xAxis = kwargs.pop('xAxis', 'x')
 
         xtmp = self.mesh.getXAxis(xAxis)
 
-        c = tmp.counts.T
+        c = post.counts.T
         c = np.divide(c, np.max(c,0), casting='unsafe')
-        ax = c.pcolor(xtmp, y=tmp.bins, **kwargs)
+        ax = c.pcolor(xtmp, y=post.binCentres[0, :], **kwargs)
         cP.title('# of Layers posterior distributions')
 
 
@@ -722,15 +732,15 @@ class LineResults(myObject):
         xtmp = self.mesh.getXAxis(xAxis)
 
         if self.nSys > 1:
-            c = self.addErrPosterior[system].counts.T
-            c = np.divide(c, np.max(c,0), casting='unsafe')
-            c.pcolor(xtmp, y=self.addErrPosterior[system].bins, **kwargs)
-            cP.title('Additive error posterior distributions for system {}'.format(system))
+            post = self.addErrPosterior[system]
         else:
-            c = self.addErrPosterior.counts.T
-            c = np.divide(c, np.max(c,0), casting='unsafe')
-            c.pcolor(xtmp, y=self.addErrPosterior.bins, **kwargs)
-            cP.title('Additive error posterior distributions')
+            post = self.addErrPosterior
+
+        c = post.counts.T
+        c = np.divide(c, np.max(c, 0), casting='unsafe')
+
+        c.pcolor(xtmp, y = post.binCentres[0, :], **kwargs)
+        cP.title('Additive error posterior distributions for system {}'.format(system))
 
 
     def plotError2DJointProbabilityDistribution(self, datapoint, system=0, **kwargs):
@@ -793,22 +803,21 @@ class LineResults(myObject):
         """ Plot the distributions of relative errors as an image for all data points in the line """
         self.getMesh()
         self.getNsys()
-        self.getRelativeErrorPosterior()
+        self.getRelativeErrorPosteriors()
 
         xAxis = kwargs.pop('xAxis', 'x')
 
         xtmp = self.mesh.getXAxis(xAxis)
 
         if self.nSys > 1:
-            c = self.relErrPosterior[system].counts.T
-            c = np.divide(c, np.max(c,0), casting='unsafe')
-            c.pcolor(xtmp, y=self.relErrPosterior[system].bins, **kwargs)
-            cP.title('Relative error posterior distributions for system {}'.format(system))
+            post = self.relErrPosterior[system]
         else:
-            c = self.relErrPosterior.counts.T
-            c = np.divide(c, np.max(c,0), casting='unsafe')
-            c.pcolor(xtmp, y=self.relErrPosterior.bins, **kwargs)
-            cP.title('Relative error posterior distributions')
+            post = self.relErrPosterior
+
+        c = post.counts.T
+        c = np.divide(c, np.max(c,0), casting='unsafe')
+        c.pcolor(xtmp, y=post.binCentres[0, :], **kwargs)
+        cP.title('Relative error posterior distributions for system {}'.format(system))
 
 
     def plotRelativeError(self, **kwargs):
@@ -1105,7 +1114,7 @@ class LineResults(myObject):
         data.scatter2D(c='k', s=1)
         line = data.getLine(line=self.line)
         line.scatter2D(c='cyan')
-        cP.plot(R.bestD.x, R.bestD.y, color='r', marker='o')
+        cP.plot(R.bestDataPoint.x, R.bestDataPoint.y, color='r', marker='o')
 
 
         ax[3] = plt.subplot(gs[6:12, nCols - 13:nCols - 10]) # Data Point
@@ -1138,14 +1147,6 @@ class LineResults(myObject):
             ax[7+(2*i)-1] = plt.subplot(gs[3:6, j0:j1])
             # ax= plt.subplot(self.gs[3:6, 2 * self.nSystems + j])
             R._plotAdditiveErrorPosterior(system=i)
-
-
-
-
-        
-
-
-
 
 
 
@@ -1209,14 +1210,14 @@ class LineResults(myObject):
                 res.append('iburn')
             elif (low == 'data multiplier'):
                 res.append('multiplier')
-            elif (low == 'layer posterior'):
-                res.append('khist')
             elif (low == 'height posterior'):
-                res.append('dzhist')
+                res.append('currentdatapoint/z/posterior')
             elif (low == 'fiducials'):
                 res.append('fiducials')
+            elif (low == 'layer posterior'):
+                res.append('currentmodel/nCells/posterior')
             elif (low == 'layer depth posterior'):
-                res.append('mzhist')
+                res.append('currentmodel/depth/posterior')
             elif (low == 'best data'):
                 res.append('bestd')
             elif (low == 'x'):
@@ -1249,12 +1250,12 @@ class LineResults(myObject):
                 res.append('opacityinterp')
             elif (low == '# layers'):
                 res.append('bestmodel/nCells')
-#            elif (low == 'current data'):
-#                res.append('currentd')
+            elif (low == 'current data'):
+                res.append('currentdatapoint')
             elif (low == 'hit map'):
-                res.append('hitmap')
+                res.append('currentmodel/par/posterior')
             elif (low == 'hitmap/y'):
-                res.append('hitmap/y')
+                res.append('currentmodel/par/posterior/y')
             elif (low == 'doi'):
                 res.append('doi')
             elif (low == 'data misfit'):
@@ -1262,11 +1263,11 @@ class LineResults(myObject):
             elif (low == 'relative error posterior'):
                 if (nSys is None): nSys = hdfRead.readKeyFromFile(self.hdfFile, self.fName, '/','nsystems')
                 for i in range(nSys):
-                    res.append('relerr' +str(i))
+                    res.append('currentdatapoint/relErr/posterior' +str(i))
             elif (low == 'additive error posterior'):
                 if (nSys is None): nSys = hdfRead.readKeyFromFile(self.hdfFile, self.fName, '/','nsystems')
                 for i in range(nSys):
-                    res.append('adderr' +str(i))
+                    res.append('currentdatapoint/addErr/posterior' +str(i))
             elif (low == 'inversion time'):
                 res.append('invtime')
             elif (low == 'saving time'):
@@ -1330,7 +1331,9 @@ class LineResults(myObject):
         hdfFile.create_dataset('iplot', data=results.iPlot)
         hdfFile.create_dataset('plotme', data=results.plotMe)
         hdfFile.create_dataset('reciprocateParameter', data=results.reciprocateParameter)
-        hdfFile.create_dataset('limits', data=results.limits)
+
+        if not results.limits is None:
+            hdfFile.create_dataset('limits', data=results.limits)
         hdfFile.create_dataset('nmc', data=results.nMC)
         hdfFile.create_dataset('nsystems', data=results.nSystems)
         results.ratex.toHdf(hdfFile,'ratex')
@@ -1358,32 +1361,39 @@ class LineResults(myObject):
         #hdfFile.create_dataset('phids', [nPoints,results.PhiDs.size], dtype=results.PhiDs.dtype)
 
         # Create the layer histogram
-        results.kHist.createHdf(hdfFile,'khist',nRepeats=nPoints, fillvalue=np.nan)
+        # results.kHist.createHdf(hdfFile,'khist',nRepeats=nPoints, fillvalue=np.nan)
 
         # Create the Elevation histogram
-        results.DzHist.createHdf(hdfFile,'dzhist',nRepeats=nPoints, fillvalue=np.nan)
+        # results.DzHist.createHdf(hdfFile,'dzhist',nRepeats=nPoints, fillvalue=np.nan)
 
         # Create the Interface histogram
-        results.MzHist.createHdf(hdfFile,'mzhist',nRepeats=nPoints, fillvalue=np.nan)
+        # results.MzHist.createHdf(hdfFile,'mzhist',nRepeats=nPoints, fillvalue=np.nan)
 
         # Add the relative and additive errors
-        for i in range(results.nSystems):
-            results.relErr[i].createHdf(hdfFile,"relerr"+str(i),nRepeats=nPoints, fillvalue=np.nan)
-            results.addErr[i].createHdf(hdfFile,"adderr"+str(i),nRepeats=nPoints, fillvalue=np.nan)
+        # for i in range(results.nSystems):
+            # results.relErr[i].createHdf(hdfFile,"relerr"+str(i),nRepeats=nPoints, fillvalue=np.nan)
+            # results.addErr[i].createHdf(hdfFile,"adderr"+str(i),nRepeats=nPoints, fillvalue=np.nan)
 
         # Add the Hitmap
-        results.Hitmap.createHdf(hdfFile,'hitmap', nRepeats=nPoints, fillvalue=np.nan)
+        # results.Hitmap.createHdf(hdfFile,'hitmap', nRepeats=nPoints, fillvalue=np.nan)
 
-        # results.currentD.createHdf(hdfFile,'currentd', nRepeats=nPoints, fillvalue=np.nan)
-        results.bestD.createHdf(hdfFile,'bestd', nRepeats=nPoints, fillvalue=np.nan)
+        results.currentDataPoint.createHdf(hdfFile,'currentdatapoint', nRepeats=nPoints, fillvalue=np.nan)
+        results.bestDataPoint.z._posterior = None
+        results.bestDataPoint.relErr._posterior = None
+        results.bestDataPoint.addErr._posterior = None
+        results.bestDataPoint.createHdf(hdfFile,'bestd', nRepeats=nPoints, fillvalue=np.nan)
 
         # Since the 1D models change size adaptively during the inversion, we need to pad the HDF creation to the maximum allowable number of layers.
-        tmp = results.bestModel.pad(results.bestModel.maxLayers)
+        
+        tmp = results.currentModel.pad(results.currentModel.maxLayers)
 
-        tmp.createHdf(hdfFile,'bestmodel',nRepeats=nPoints, fillvalue=np.nan)
+        tmp.createHdf(hdfFile, 'currentmodel', nRepeats=nPoints, fillvalue=np.nan)
+
+        results.bestModel.nCells._posterior = None
+        tmp = results.bestModel.pad(results.bestModel.maxLayers)
+        tmp.createHdf(hdfFile, 'bestmodel', nRepeats=nPoints, fillvalue=np.nan)
 
         if results.verbose:
-
             results.posteriorComponents.createHdf(hdfFile,'posteriorcomponents',nRepeats=nPoints, fillvalue=np.nan)
 
         # Add the best data components
@@ -1438,8 +1448,9 @@ class LineResults(myObject):
 #        hdfFile['savetime'][i] = results.saveTime
 
         # Interpolate the mean and best model to the discretized hitmap
-        results.meanInterp[:] = results.Hitmap.axisMean()
-        results.bestInterp[:] = results.bestModel.interpPar2Mesh(results.bestModel.par, results.Hitmap)
+        hm = results.currentModel.par.posterior
+        results.meanInterp[:] = hm.axisMean()
+        results.bestInterp[:] = results.bestModel.interpPar2Mesh(results.bestModel.par, hm)
         # results.opacityInterp[:] = results.Hitmap.confidenceRange(percent=95.0, log='e')
 
         slic = np.s_[i, :]
@@ -1448,7 +1459,7 @@ class LineResults(myObject):
         # Add the interpolated best
         results.bestInterp.writeHdf(hdfFile, 'bestinterp',  index=slic)
         # Add the interpolated opacity
-        results.opacityInterp.writeHdf(hdfFile, 'opacityinterp',  index=slic)
+        # results.opacityInterp.writeHdf(hdfFile, 'opacityinterp',  index=slic)
 
         # Add the acceptance rate
         results.rate.writeHdf(hdfFile, 'rate', index=slic)
@@ -1458,25 +1469,32 @@ class LineResults(myObject):
         results.PhiDs.writeHdf(hdfFile,'phids',index=slic)
 
         # Add the layer histogram counts
-        results.kHist.writeHdf(hdfFile,'khist',index=slic)
+        # results.kHist.writeHdf(hdfFile,'khist',index=slic)
 
-        # Add the elevation histogram counts
-        results.DzHist.writeHdf(hdfFile,'dzhist',index=slic)
+        # # Add the elevation histogram counts
+        # results.DzHist.writeHdf(hdfFile,'dzhist',index=slic)
 
         # Add the interface histogram counts
-        results.MzHist.writeHdf(hdfFile,'mzhist',index=slic)
+        # results.MzHist.writeHdf(hdfFile,'mzhist',index=slic)
 
-        # Add the relative and additive errors
-        for j in range(results.nSystems):
-            results.relErr[j].writeHdf(hdfFile, "relerr" + str(j), index=slic)
-            results.addErr[j].writeHdf(hdfFile, "adderr" + str(j), index=slic)
+        # # Add the relative and additive errors
+        # for j in range(results.nSystems):
+        #     results.relErr[j].writeHdf(hdfFile, "relerr" + str(j), index=slic)
+        #     results.addErr[j].writeHdf(hdfFile, "adderr" + str(j), index=slic)
 
         # Add the hitmap
-        results.Hitmap.writeHdf(hdfFile,'hitmap',  index=i)
+        # results.Hitmap.writeHdf(hdfFile,'hitmap',  index=i)
 
-        results.bestD.writeHdf(hdfFile,'bestd',  index=i)
-        # results.currentD.writeHdf(hdfFile,'currentd',  index=i)
+        results.currentDataPoint.writeHdf(hdfFile,'currentdatapoint',  index=i)
 
+        results.bestDataPoint.z._posterior = None
+        results.bestDataPoint.relErr._posterior = None
+        results.bestDataPoint.addErr._posterior = None
+        results.bestDataPoint.writeHdf(hdfFile,'bestd',  index=i)
+
+        results.currentModel.writeHdf(hdfFile,'currentmodel', index=i)
+
+        results.bestModel.nCells._posterior = None
         results.bestModel.writeHdf(hdfFile,'bestmodel', index=i)
 
 #        if results.verbose:

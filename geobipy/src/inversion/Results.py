@@ -89,7 +89,7 @@ class Results(myObject):
         nMarkovChains = kwargs.pop('nMarkovChains', 100000)
         plotEvery = kwargs.pop('plotEvery', nMarkovChains / 20)
         parameterDisplayLimits = kwargs.pop('parameterDisplayLimits', [0.0, 1.0])
-        reciprocateParameters = kwargs.pop('reciprocateParameters', False)
+        reciprocateParameter = kwargs.pop('reciprocateParameter', False)
         priMu = kwargs.pop('priMu', 1.0)
         priStd = kwargs.pop('priStd', np.log(11))
 
@@ -103,10 +103,10 @@ class Results(myObject):
         self.iPlot = np.int64(plotEvery)
         # Set the display limits of the parameter in the HitMap
         # Display limits for parameters
-        self.limits = np.zeros(2, dtype=np.float64) + parameterDisplayLimits
+        self.limits = np.asarray(parameterDisplayLimits) if not parameterDisplayLimits is None else None
         # Should we plot resistivity or Conductivity?
         # Logical whether to take the reciprocal of the parameters
-        self.reciprocateParameter = reciprocateParameters
+        self.reciprocateParameter = reciprocateParameter
         # Set the screen resolution
         # Screen Size
         self.sx = np.int32(1920)
@@ -140,52 +140,13 @@ class Results(myObject):
         self.burnedIn = False
         # Initialize the index for the best model
         self.iBest = 0
-
-        # Initialize the number of layers for the histogram
-
-        self.kHist = Histogram1D(binCentres=StatArray(np.arange(0.0, model.maxLayers + 1.5), name="# of Layers"))
-        # Initialize the histograms for the relative and Additive Errors
-        rBins = dataPoint.relErr.prior.getBinEdges()
-        aBins = dataPoint.addErr.prior.getBinEdges()
-
-        log = None
-        if isinstance(dataPoint, TdemDataPoint):
-            log = 10
-            aBins = np.exp(aBins)
-
-        self.relErr = []
-        self.addErr = []
-        if (self.nSystems > 1):
-            for i in range(self.nSystems):
-                self.relErr.append(Histogram1D(bins = StatArray(rBins[i, :], name='$\epsilon_{Relative}x10^{2}$', units='%')))
-                self.addErr.append(Histogram1D(bins = StatArray(aBins[i, :], name='$\epsilon_{Additive}$', units=dataPoint._data.units), log=log))
-        else:
-            self.relErr.append(Histogram1D(bins = StatArray(rBins, name='$\epsilon_{Relative}x10^{2}$', units='%')))
-            self.addErr.append(Histogram1D(bins = StatArray(aBins, name='$\epsilon_{Additive}$', units=dataPoint._data.units), log=log))
-
-
-        # Initialize the hit map of layers and conductivities
-        zGrd = StatArray(np.arange(0.5 * np.exp(model.minDepth), 1.1 * np.exp(model.maxDepth), 0.5 * np.exp(model.minThickness)), model.depth.name, model.depth.units)
-
-        tmp = 3.0 * priStd
-        mGrd = StatArray(
-                np.logspace(np.log10(np.exp(priMu - tmp)), np.log10(np.exp(priMu + tmp)), 250), 
-                'Conductivity', '$Sm^{-1}$')
         self.iBestV = StatArray.StatArray(2*self.nMC, name='Iteration of best model')
 
-        self.iz = np.arange(zGrd.size)
-
-        self.Hitmap = Hitmap2D(xBinCentres = mGrd, yBinCentres = zGrd)
+        self.iz = np.arange(model.par.posterior.y.nCells)
 
         # Initialize the doi
-        self.doi = self.Hitmap.y.cellCentres[0]
+        self.doi = model.par.posterior.yBinCentres[0]
 
-
-        # Initialize the Elevation Histogram
-        self.DzHist = Histogram1D(bins = StatArray(dataPoint.z.prior.getBinEdges(), name=dataPoint.z.name, units=dataPoint.z.units))
-
-        # Initialize the Model Depth Histogram
-        self.MzHist = Histogram1D(binCentres = zGrd)
         self.meanInterp = StatArray.StatArray(model.par.posterior.y.nCells)
         self.bestInterp = StatArray.StatArray(model.par.posterior.y.nCells)
         self.opacityInterp = StatArray.StatArray(model.par.posterior.y.nCells)
@@ -206,7 +167,10 @@ class Results(myObject):
         self.saveTime = np.float64(0.0)
 
         # Initialize the best data, current data and best model
-        self.bestD = dataPoint
+        self.currentDataPoint = dataPoint
+        self.bestDataPoint = dataPoint
+
+        self.currentModel = model
         self.bestModel = model
 
 
@@ -237,24 +201,18 @@ class Results(myObject):
         if (self.burnedIn):  # We need to update some plotting options
             # Added the layer depths to a list, we histogram this list every
             # iPlot iterations
-            self.kHist.update(model.nCells[0], clip=True)
-            self.DzHist.update(dataPoint.z[0], clip=True)
-            for j in range(self.nSystems):
-                self.relErr[j].update(dataPoint.relErr[j], clip=True)
-                self.addErr[j].update(dataPoint.addErr[j], clip=True)
+            model.updatePosteriors(clipRatio)
+            # self.kHist.update(model.nCells[0])
+            # self.DzHist.update(dataPoint.z[0])
 
-            model.addToHitMap(self.Hitmap)
-
-            # Update the layer interface histogram
-            if (model.nCells > 1):
-                ratio = np.exp(np.diff(np.log(model.par)))
-                m1 = ratio <= 1.0 - clipRatio
-                m2 = ratio >= 1.0 + clipRatio
-                #keep = np.ma.mask_or(m1, m2)
-                keep = np.logical_not(np.ma.masked_invalid(ratio).mask) & np.ma.mask_or(m1,m2)
-                tmp = model.depth[:-1]
-                if (len(tmp) > 0):
-                    self.MzHist.update(tmp[keep], clip=True)
+            # Update the height posterior
+            dataPoint.z.updatePosterior()
+            dataPoint.relErr.updatePosterior()
+            
+            dataPoint.addErr.updatePosterior()
+            # for j in range(self.nSystems):
+            #     self.relErr[j].update(dataPoint.relErr[j])
+            #     self.addErr[j].update(dataPoint.addErr[j])
 
             if (self.verbose):
                 iTmp = self.i - self.iBurn
@@ -275,8 +233,11 @@ class Results(myObject):
             else:
                 self.zeroCount = 0
 
-        self.bestD = bestDataPoint
-        self.bestModel = bestModel
+        self.currentDataPoint = dataPoint  # Reference
+        self.bestDataPoint = bestDataPoint # Reference
+
+        self.currentModel = model
+        self.bestModel = bestModel # Reference
 
 
     def initFigure(self, iFig=0, forcePlot=False):
@@ -353,7 +314,7 @@ class Results(myObject):
         
         self.PhiDs.plot(self.iRange, i=np.s_[:self.i], marker=m, alpha=a, markersize=ms, linestyle=ls, color=c, **kwargs)
         plt.ylabel('Data Misfit')
-        dum = self.multiplier * len(self.bestD.iActive)
+        dum = self.multiplier * len(self.bestDataPoint.iActive)
         plt.axhline(dum, color='#C92641', linestyle='dashed', linewidth=lw)
         if (self.burnedIn):
             plt.axvline(self.iBurn, color='#C92641', linestyle='dashed', linewidth=lw)
@@ -363,43 +324,53 @@ class Results(myObject):
     def _plotObservedPredictedData(self, **kwargs):
         """ Plot the observed and predicted data """
 
-        self.bestD.plot(**kwargs)
+        self.bestDataPoint.plot(**kwargs)
 
         c = kwargs.pop('color', cP.wellSeparated[3])
-        self.bestD.plotPredicted(color=c, **kwargs)
+        self.bestDataPoint.plotPredicted(color=c, **kwargs)
 
 
     def _plotNumberOfLayersPosterior(self, **kwargs):
         """ Plot the histogram of the number of layers """
 
-        self.kHist.plot(**kwargs)
+        self.currentModel.nCells.posterior.plot(**kwargs)
         plt.axvline(self.bestModel.nCells, color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
 
 
-    def _plotElevationPosterior(self, **kwargs):
-        """ Plot the histogram of the elevation """
-        self.DzHist.plot(**kwargs)
-        plt.axvline(self.bestD.z, color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
+    def _plotHeightPosterior(self, **kwargs):
+        """ Plot the histogram of the height """
+        # self.DzHist.plot(**kwargs)
+        self.currentDataPoint.z.posterior.plot(**kwargs)
+        plt.axvline(self.bestDataPoint.z, color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
 
     
-    def _plotRelativeErrorPosterior(self, system=0, **kwargs):
+    def _plotRelativeErrorPosterior(self, axes, **kwargs):
         """ Plots the histogram of the relative errors """
-
-        self.relErr[system].plot(**kwargs)
+        self.currentDataPoint.relErr.plotPosteriors(axes=axes, **kwargs)
         plt.locator_params(axis='x', nbins=4)
-        plt.axvline(self.bestD.relErr[system], color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
+        for i, a in enumerate(axes):
+            plt.sca(a)
+            plt.axvline(self.bestDataPoint.relErr[i], color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
 
-    
-    def _plotAdditiveErrorPosterior(self, system=0, **kwargs):
+
+    def _plotAdditiveErrorPosterior(self, axes, **kwargs):
         """ Plot the histogram of the additive errors """
-        
-        self.addErr[system].plot(**kwargs)
+        self.currentDataPoint.addErr.plotPosteriors(axes=axes, **kwargs)
         plt.locator_params(axis='x', nbins=4)
-        log = self.addErr[system].log
-        if self.bestD.addErr[system] > self.addErr[system].bins[-1]:
-            log = 10
-        loc, dum = cF._log(self.bestD.addErr[system], log=log)
-        plt.axvline(loc, color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
+
+        if self.currentDataPoint.addErr.nPosteriors == 1:
+            p = self.currentDataPoint.addErr.posterior
+        else:
+            p = self.currentDataPoint.addErr.posterior[0]
+
+        log = p.log
+        if (self.bestDataPoint.addErr[0] > p.bins[-1]):
+            log = 10 
+        
+        loc, dum = cF._log(self.bestDataPoint.addErr, log=log)
+        for i, a in enumerate(axes):
+            plt.sca(a)
+            plt.axvline(loc[i], color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
 
 
     def _plotLayerDepthPosterior(self, **kwargs):
@@ -409,43 +380,50 @@ class Results(myObject):
         fY = kwargs.pop('flipY', True)
         tr = kwargs.pop('trim', False)
 
-        self.MzHist.plot(rotate=r, flipY=fY, trim=tr, **kwargs)
+        self.currentModel.depth.posterior.plot(rotate=r, flipY=fY, trim=tr, **kwargs)
 
     
     def _plotHitmapPosterior(self, reciprocateX=False, confidenceInterval = 95.0, opacityPercentage = 67.0, **kwargs):
         """ Plot the hitmap posterior of conductivity with depth """
 
         # Get the mean and 95% confidence intervals
-        (sigMed, sigLow, sigHigh) = self.Hitmap.confidenceIntervals(confidenceInterval)
+        hm = self.currentModel.par.posterior
+        (sigMed, sigLow, sigHigh) = hm.confidenceIntervals(confidenceInterval)
 
         if (reciprocateX):
-            x = 1.0 / self.Hitmap.x.cellCentres
+            x = 1.0 / hm.x.cellCentres
             sl = 1.0 / sigLow
             sh = 1.0 / sigHigh
             xlabel = 'Resistivity ($\Omega m$)'
         else:
-            x = self.Hitmap.x.cellCentres
+            x = hm.x.cellCentres
             sl = sigLow
             sh = sigHigh
             xlabel = 'Conductivity ($Sm^{-1}$)'
 
-        self.Hitmap.counts.pcolor(x=x, y=self.Hitmap.y.cellEdges, cmap=mpl.cm.Greys, **kwargs)
-        plt.plot(sl, self.Hitmap.y.cellCentres, color='#5046C8', linestyle='dashed', linewidth=2, alpha=0.6)
-        plt.plot(sh, self.Hitmap.y.cellCentres, color='#5046C8', linestyle='dashed', linewidth=2, alpha=0.6)
+        hm.counts.pcolor(x=x, y=hm.y.cellEdges, cmap=mpl.cm.Greys, **kwargs)
+        plt.plot(sl, hm.y.cellCentres, color='#5046C8', linestyle='dashed', linewidth=2, alpha=0.6)
+        plt.plot(sh, hm.y.cellCentres, color='#5046C8', linestyle='dashed', linewidth=2, alpha=0.6)
         cP.xlabel(xlabel)
 
         # Plot the DOI cutoff based on percentage variance
-        self.doi = self.Hitmap.getOpacityLevel(opacityPercentage)
+        self.doi = hm.getOpacityLevel(opacityPercentage)
         plt.axhline(self.doi, color='#5046C8', linestyle='dashed', linewidth=3)
 
         # Plot the best model
         self.bestModel.plot(flipY=False, reciprocateX=reciprocateX, noLabels=True)
-        plt.axis([self.limits[0], self.limits[1], self.Hitmap.y.cellEdges[0], self.Hitmap.y.cellEdges[-1]])
+
+        # Set parameter limits on the hitmap
+        if self.limits is None:
+            plt.axis([x.min(), x.max(), hm.y.cellEdges[0], hm.y.cellEdges[-1]])
+        else:
+            plt.axis([self.limits[0], self.limits[1], hm.y.cellEdges[0], hm.y.cellEdges[-1]])            
+
         ax = plt.gca()
         lim = ax.get_ylim()
         if (lim[1] > lim[0]):
             ax.set_ylim(lim[::-1])
-        cP.ylabel(self.MzHist.bins.getNameUnits())
+        cP.ylabel(hm.yBins.getNameUnits())
         plt.xscale('log')
 
 
@@ -461,10 +439,6 @@ class Results(myObject):
             self.initFigure(iFig, forcePlot=forcePlot)
 
 
-        # fig = plt.figure(iFig)
-
-#        if (np.mod(self.i, 1000) == 0 or forcePlot):
-
         if (np.mod(self.i, self.iPlot) == 0 or forcePlot):
 
             # Update the acceptance plot
@@ -479,51 +453,50 @@ class Results(myObject):
 
             # If the Best Data have changed, update the plot
             plt.sca(self.ax[4])
-            # ax = plt.subplot(self.gs[:6, self.nSystems:2 * self.nSystems])
             plt.cla()
             self._plotObservedPredictedData()
 
             if (self.burnedIn):
+
+                # Histogram of the data point elevation
+                plt.sca(self.ax[2])
+                plt.cla()
+                self._plotHeightPosterior()
+
+
                 # Update the histogram of the number of layers
                 plt.sca(self.ax[3])
-                # plt.subplot(self.gs[9:, :self.nSystems])
                 plt.cla()
                 self._plotNumberOfLayersPosterior()
                 self.ax[3].xaxis.set_major_locator(MaxNLocator(integer=True))
 
-                # Histogram of the data point elevation
-                plt.sca(self.ax[2])
-                # plt.subplot(self.gs[6:9, :self.nSystems])
-                plt.cla()
-                self._plotElevationPosterior()
-
-                j = 5
-                for i in range(self.nSystems):
-                    # Update the histogram of relative data errors
-                    # plt.subplot(self.gs[:3, 2 * self.nSystems + j])
-                    plt.sca(self.ax[j+1])
-                    plt.cla()
-                    self._plotRelativeErrorPosterior()
-                    cP.title('System ' + str(i + 1))
-
-                    # Update the histogram of additive data errors
-                    plt.sca(self.ax[j+2])
-                    # ax= plt.subplot(self.gs[3:6, 2 * self.nSystems + j])
-                    plt.cla()
-                    self._plotAdditiveErrorPosterior()
-                    j += 2
-
-                # Update the layer depth histogram
-                plt.sca(self.ax[(2*self.nSystems)+6])
-                # plt.subplot(self.gs[6:, 2 * self.nSystems:])
-                plt.cla()
-                self._plotLayerDepthPosterior()
+                
 
                 # Update the model plot
                 plt.sca(self.ax[5])
-                # plt.subplot(self.gs[6:, self.nSystems:2 * self.nSystems])
                 plt.cla()
                 self._plotHitmapPosterior(reciprocateX=self.reciprocateParameter, noColorbar=True)
+
+
+                j = 5
+                relativeAxes = []
+                additiveAxes = []
+                # Get the axes for the relative and additive errors
+                for i in range(self.nSystems):
+                    # Update the histogram of relative data errors
+                    relativeAxes.append(self.ax[j+1])
+                    additiveAxes.append(self.ax[j+2])
+                    j += 2
+
+                self._plotRelativeErrorPosterior(axes=relativeAxes)
+                self._plotAdditiveErrorPosterior(axes=additiveAxes)
+
+                # Update the layer depth histogram
+                plt.sca(self.ax[(2 * self.nSystems) + 6])
+                plt.cla()
+                self._plotLayerDepthPosterior()
+
+                
 
             cP.suptitle(title)
 
@@ -538,9 +511,9 @@ class Results(myObject):
                 plt.subplot(412)
                 self.allAddErr.plot(self.iRange, i=iTmp, axis=1, c='k')
                 plt.subplot(413)
-                self.posterior.plot(self.iRange, i=np.s_[:self.i-self.iBurn+1], c='k')
+                self.posterior.plot(self.iRange, i=np.s_[:self.i - self.iBurn + 1], c='k')
                 plt.subplot(414)
-                self.iBestV.plot(self.iRange, i=np.s_[:self.i-self.iBurn+1], c='k')
+                self.iBestV.plot(self.iRange, i=np.s_[:self.i - self.iBurn + 1], c='k')
 
 
                 plt.figure(100)
@@ -564,8 +537,7 @@ class Results(myObject):
                 plt.grid(b=True, which ='major', color='k', linestyle='--', linewidth=2)
 
 
-        cP.pause(1e-9)
-        # pause(1e-9)
+            cP.pause(1e-9)
         # return self.fig
 
 
@@ -605,311 +577,359 @@ class Results(myObject):
            figName = join(directory,str(fiducial) + '_stack.png')
            plt.savefig(figName, dpi=dpi)
 
-    def hdfName(self):
-        """ Reprodicibility procedure """
-        return('Results()')
+#     def hdfName(self):
+#         """ Reprodicibility procedure """
+#         return('Results()')
 
 
-    def createHdf(self, parent, myName):
-        """ Create the hdf group metadata in file
-        parent: HDF object to create a group inside
-        myName: Name of the group
-        """
-        assert isinstance(myName,str), 'myName must be a string'
-        # create a new group inside h5obj
-        try:
-            grp = parent.create_group(myName)
-        except:
-            # Assume that the file already has the template and return
-            return
-        grp.attrs["repr"] = self.hdfName()
+#     def createHdf(self, parent, myName):
+#         """ Create the hdf group metadata in file
+#         parent: HDF object to create a group inside
+#         myName: Name of the group
+#         """
+#         assert isinstance(myName,str), 'myName must be a string'
+#         # create a new group inside h5obj
+#         try:
+#             grp = parent.create_group(myName)
+#         except:
+#             # Assume that the file already has the template and return
+#             return
+#         grp.attrs["repr"] = self.hdfName()
 
-        grp.create_dataset('i', (1,), dtype=self.i.dtype)
-        grp.create_dataset('iplot', (1,), dtype=self.iPlot.dtype)
-        grp.create_dataset('plotme', (1,), dtype=type(self.plotMe))
-        grp.create_dataset('limits', (2,), dtype=self.limits.dtype)
-        grp.create_dataset('dispres', (1,), dtype=type(self.reciprocateParameter))
-        grp.create_dataset('sx', (1,), dtype=self.sx.dtype)
-        grp.create_dataset('sy', (1,), dtype=self.sy.dtype)
-        grp.create_dataset('nmc', (1,), dtype=self.nMC.dtype)
-        grp.create_dataset('nsystems', (1,), dtype=self.nSystems.dtype)
-        grp.create_dataset('iburn', (1,), dtype=self.iBurn.dtype)
-        grp.create_dataset('burnedin', (1,), dtype=type(self.burnedIn))
-        grp.create_dataset('doi', (1,), dtype=self.doi.dtype)
-        grp.create_dataset('multiplier', (1,), dtype=self.multiplier.dtype)
-        grp.create_dataset('invtime', (1,), dtype=float)
-        grp.create_dataset('savetime', (1,), dtype=float)
+#         grp.create_dataset('i', (1,), dtype=self.i.dtype)
+#         grp.create_dataset('iplot', (1,), dtype=self.iPlot.dtype)
+#         grp.create_dataset('plotme', (1,), dtype=type(self.plotMe))
+#         if not self.limits is None:
+#             grp.create_dataset('limits', (2,), dtype=self.limits.dtype)
+#         grp.create_dataset('dispres', (1,), dtype=type(self.reciprocateParameter))
+#         grp.create_dataset('sx', (1,), dtype=self.sx.dtype)
+#         grp.create_dataset('sy', (1,), dtype=self.sy.dtype)
+#         grp.create_dataset('nmc', (1,), dtype=self.nMC.dtype)
+#         grp.create_dataset('nsystems', (1,), dtype=self.nSystems.dtype)
+#         grp.create_dataset('iburn', (1,), dtype=self.iBurn.dtype)
+#         grp.create_dataset('burnedin', (1,), dtype=type(self.burnedIn))
+#         grp.create_dataset('doi', (1,), dtype=self.doi.dtype)
+#         grp.create_dataset('multiplier', (1,), dtype=self.multiplier.dtype)
+#         grp.create_dataset('invtime', (1,), dtype=float)
+#         grp.create_dataset('savetime', (1,), dtype=float)
 
-        nz=self.Hitmap.y.nCells
-        grp.create_dataset('meaninterp', (nz,), dtype=np.float64)
-        grp.create_dataset('bestinterp', (nz,), dtype=np.float64)
-#        grp.create_dataset('opacityinterp', (nz,), dtype=np.float64)
+#         nz=self.Hitmap.y.nCells
+#         grp.create_dataset('meaninterp', (nz,), dtype=np.float64)
+#         grp.create_dataset('bestinterp', (nz,), dtype=np.float64)
+# #        grp.create_dataset('opacityinterp', (nz,), dtype=np.float64)
 
-        self.rate.createHdf(grp,'rate')
-        self.ratex.createHdf(grp,'ratex')
-        self.PhiDs.createHdf(grp,'phids')
-        self.kHist.createHdf(grp, 'khist')
-        self.DzHist.createHdf(grp, 'dzhist')
-        self.MzHist.createHdf(grp, 'mzhist')
-        for i in range(self.nSystems):
-            self.relErr[i].createHdf(grp, 'relerr' + str(i))
-        for i in range(self.nSystems):
-            self.addErr[i].createHdf(grp, 'adderr' + str(i))
+#         self.rate.createHdf(grp,'rate')
+#         self.ratex.createHdf(grp,'ratex')
+#         self.PhiDs.createHdf(grp,'phids')
+#         # self.kHist.createHdf(grp, 'khist')
+#         # self.currentDataPoint.z.posterior.createHdf(grp, 'dzhist')
+#         self.MzHist.createHdf(grp, 'mzhist')
+#         for i in range(self.nSystems):
+#             self.relErr[i].createHdf(grp, 'relerr' + str(i))
+#         for i in range(self.nSystems):
+#             self.addErr[i].createHdf(grp, 'adderr' + str(i))
 
-        self.Hitmap.createHdf(grp,'hitmap')
-        self.bestD.createHdf(grp, 'bestd')
+#         self.Hitmap.createHdf(grp,'hitmap')
+#         self.currentDataPoint.createHdf(grp, 'currentdatapoint')
+#         self.bestDataPoint.z._posterior = None
+#         self.bestDataPoint.relErr._posterior = None
+#         self.bestDataPoint.addErr._posterior = None
+#         self.bestDataPoint.createHdf(grp, 'bestd')
 
-        tmp=self.bestModel.pad(self.bestModel.maxLayers)
-        tmp.createHdf(grp, 'bestmodel')
+#         tmp = self.currentModel.pad(self.currentModel.maxLayers)
+#         tmp.createHdf(grp, 'currentmodel')
 
-
-    def writeHdf(self, parent, myName, index=None):
-        """ Write the StatArray to an HDF object
-        parent: Upper hdf file or group
-        myName: object hdf name. Assumes createHdf has already been called
-        create: optionally create the data set as well before writing
-        index: optional numpy slice of where to place the arr in the hdf data object
-        """
-        assert isinstance(myName,str), 'myName must be a string'
-
-        grp = parent.get(myName)
-        writeNumpy(self.i, grp, 'i')
-        writeNumpy(self.iPlot, grp, 'iplot')
-        writeNumpy(self.plotMe, grp, 'plotme')
-        writeNumpy(self.limits, grp, 'limits')
-        writeNumpy(self.reciprocateParameter, grp, 'dispres')
-        writeNumpy(self.sx, grp, 'sx')
-        writeNumpy(self.sy, grp, 'sy')
-        writeNumpy(self.nMC, grp, 'nmc')
-        writeNumpy(self.nSystems, grp, 'nsystems')
-        writeNumpy(self.iBurn, grp, 'iburn')
-        writeNumpy(self.burnedIn, grp, 'burnedin')
-        self.doi = self.Hitmap.getOpacityLevel(67.0)
-        writeNumpy(self.doi, grp, 'doi')
-        writeNumpy(self.multiplier, grp, 'multiplier')
-        writeNumpy(self.invTime, grp, 'invtime')
-
-        self.rate.writeHdf(grp, 'rate')
-        self.ratex.writeHdf(grp, 'ratex')
-        self.PhiDs.writeHdf(grp, 'phids')
-        self.kHist.writeHdf(grp, 'khist')
-        self.DzHist.writeHdf(grp, 'dzhist')
-        self.MzHist.writeHdf(grp, 'mzhist')
-         # Histograms for each system
-        for i in range(self.nSystems):
-            self.relErr[i].writeHdf(grp, 'relerr' + str(i))
-        for i in range(self.nSystems):
-            self.addErr[i].writeHdf(grp, 'adderr' + str(i))
-
-        self.Hitmap.writeHdf(grp,'hitmap')
-
-        mean = self.Hitmap.getMeanInterval()
-        best = self.bestModel.interp2depth(self.bestModel.par, self.Hitmap)
-#        opacity = self.Hitmap.getOpacity()
-        writeNumpy(mean, grp,'meaninterp')
-        writeNumpy(best, grp,'bestinterp')
-#        writeNumpy(opacity, grp,'opacityinterp')
-
-        self.clk.stop()
-        self.saveTime = np.float64(self.clk.timeinSeconds())
-        writeNumpy(self.saveTime, grp, 'savetime')
-        self.bestD.writeHdf(grp, 'bestd')
-        self.bestModel.writeHdf(grp, 'bestmodel')
+#         tmp = self.bestModel.pad(self.bestModel.maxLayers)
+#         tmp.nCells._posterior = None
+#         tmp.createHdf(grp, 'bestmodel')
 
 
-    def toHdf(self, h5obj, myName):
-        """ Write the object to a HDF file """
-        # Create a new group inside h5obj
-        try:
-            grp = h5obj.create_group(myName)
-        except:
-            del h5obj[myName]
-            grp = h5obj.create_group(myName)
-        grp.attrs["repr"] = self.hdfName()
-        # Begin by writing the parameters
-#        grp.create_dataset('id', data=self.ID)
-        grp.create_dataset('i', data=self.i)
-        grp.create_dataset('iplot', data=self.iPlot)
-        grp.create_dataset('plotme', data=self.plotMe)
-        grp.create_dataset('limits', data=self.limits)
-        grp.create_dataset('dispres', data=self.reciprocateParameter)
-        grp.create_dataset('sx', data=self.sx)
-        grp.create_dataset('sy', data=self.sy)
-        grp.create_dataset('nmc', data=self.nMC)
-        grp.create_dataset('nsystems', data=self.nSystems)
-        grp.create_dataset('iburn', data=self.iBurn)
-        grp.create_dataset('burnedin', data=self.burnedIn)
-        self.doi = self.Hitmap.getOpacityLevel(67.0)
-        grp.create_dataset('doi', data=self.doi)
-        # Large vector of phiD
-        grp.create_dataset('multiplier', data=self.multiplier)
-        # Rate of acceptance
-        self.rate.writeHdf(grp, 'rate')
-        # x Axis for acceptance rate
-        self.ratex.writeHdf(grp, 'ratex')
-        # Data Misfit
-        self.PhiDs.writeHdf(grp, 'phids')
-        # Histogram of # of Layers
-        self.kHist.writeHdf(grp, 'khist')
-        # Histogram of Elevations
-        self.DzHist.writeHdf(grp, 'dzhist')
-        # Histogram of Layer depths
-        self.MzHist.writeHdf(grp, 'mzhist')
-        # Hit Maps
-        self.Hitmap.writeHdf(grp, 'hitmap')
-        # Write the Best Data
-        self.bestD.writeHdf(grp, 'bestd')
-        # Write the Best Model
-        self.bestModel.writeHdf(grp, 'bestmodel')
-        # Interpolate the mean and best model to the discretized hitmap
-        mean = self.Hitmap.getMeanInterval()
-        best = self.bestModel.interp2depth(self.bestModel.par, self.Hitmap)
-#        opacity = self.Hitmap.getOpacity()
+#     def writeHdf(self, parent, myName, index=None):
+#         """ Write the StatArray to an HDF object
+#         parent: Upper hdf file or group
+#         myName: object hdf name. Assumes createHdf has already been called
+#         create: optionally create the data set as well before writing
+#         index: optional numpy slice of where to place the arr in the hdf data object
+#         """
+#         assert isinstance(myName,str), 'myName must be a string'
 
-        grp.create_dataset('meaninterp', data=mean)
-        grp.create_dataset('bestinterp', data=best)
-#        grp.create_dataset('opacityinterp', data=opacity)
+#         grp = parent.get(myName)
+#         writeNumpy(self.i, grp, 'i')
+#         writeNumpy(self.iPlot, grp, 'iplot')
+#         writeNumpy(self.plotMe, grp, 'plotme')
+#         if not self.limits is None:
+#             writeNumpy(self.limits, grp, 'limits')
+#         writeNumpy(self.reciprocateParameter, grp, 'dispres')
+#         writeNumpy(self.sx, grp, 'sx')
+#         writeNumpy(self.sy, grp, 'sy')
+#         writeNumpy(self.nMC, grp, 'nmc')
+#         writeNumpy(self.nSystems, grp, 'nsystems')
+#         writeNumpy(self.iBurn, grp, 'iburn')
+#         writeNumpy(self.burnedIn, grp, 'burnedin')
+#         self.doi = self.Hitmap.getOpacityLevel(67.0)
+#         writeNumpy(self.doi, grp, 'doi')
+#         writeNumpy(self.multiplier, grp, 'multiplier')
+#         writeNumpy(self.invTime, grp, 'invtime')
 
+#         self.rate.writeHdf(grp, 'rate')
+#         self.ratex.writeHdf(grp, 'ratex')
+#         self.PhiDs.writeHdf(grp, 'phids')
+#         # self.kHist.writeHdf(grp, 'khist')
+#         # self.currentDataPoint.z.posterior.writeHdf(grp, 'dzhist')
+#         self.MzHist.writeHdf(grp, 'mzhist')
+#          # Histograms for each system
+#         for i in range(self.nSystems):
+#             self.relErr[i].writeHdf(grp, 'relerr' + str(i))
+#         for i in range(self.nSystems):
+#             self.addErr[i].writeHdf(grp, 'adderr' + str(i))
 
-        # Histograms for each system
-        for i in range(self.nSystems):
-            self.relErr[i].toHdf(grp, 'relerr' + str(i))
-        for i in range(self.nSystems):
-            self.addErr[i].toHdf(grp, 'adderr' + str(i))
+#         self.Hitmap.writeHdf(grp,'hitmap')
 
-        grp.create_dataset('invtime', data=self.invTime)
-        self.clk.stop()
-        self.saveTime = self.clk.timeinSeconds()
-        grp.create_dataset('savetime', data=self.saveTime)
+#         mean = self.Hitmap.getMeanInterval()
+#         best = self.bestModel.interp2depth(self.bestModel.par, self.Hitmap)
+# #        opacity = self.Hitmap.getOpacity()
+#         writeNumpy(mean, grp,'meaninterp')
+#         writeNumpy(best, grp,'bestinterp')
+# #        writeNumpy(opacity, grp,'opacityinterp')
+
+#         self.clk.stop()
+#         self.saveTime = np.float64(self.clk.timeinSeconds())
+#         writeNumpy(self.saveTime, grp, 'savetime')
+#         self.currentDataPoint.writeHdf(grp, 'currentdatapoint')
+
+#         self.bestDataPoint.z._posterior = None
+#         self.bestDataPoint.relErr._posterior = None
+#         self.bestDataPoint.addErr._posterior = None
+#         self.bestDataPoint.writeHdf(grp, 'bestd')
+
+#         self.currentModel.writeHdf(grp, 'currentmodel')
+
+#         self.bestModel.nCells._posterior = None
+#         self.bestModel.writeHdf(grp, 'bestmodel')
 
 
-    def fromHdf(self, grp, sysPath = ''):
-        """ Reads in the object froma HDF file """
-        self.fiducial = np.array(grp.get('id'))
-        self.i = np.array(grp.get('i'))
-        tmp = grp.get('iplot')
-        if tmp is None:
-            tmp = grp.get('iPlot')
-        self.iPlot = np.array(tmp)
+#     def toHdf(self, h5obj, myName):
+#         """ Write the object to a HDF file """
+#         # Create a new group inside h5obj
+#         try:
+#             grp = h5obj.create_group(myName)
+#         except:
+#             del h5obj[myName]
+#             grp = h5obj.create_group(myName)
+#         grp.attrs["repr"] = self.hdfName()
+#         # Begin by writing the parameters
+# #        grp.create_dataset('id', data=self.ID)
+#         grp.create_dataset('i', data=self.i)
+#         grp.create_dataset('iplot', data=self.iPlot)
+#         grp.create_dataset('plotme', data=self.plotMe)
+#         if not self.limits is None:
+#             grp.create_dataset('limits', data=self.limits)
+#         grp.create_dataset('dispres', data=self.reciprocateParameter)
+#         grp.create_dataset('sx', data=self.sx)
+#         grp.create_dataset('sy', data=self.sy)
+#         grp.create_dataset('nmc', data=self.nMC)
+#         grp.create_dataset('nsystems', data=self.nSystems)
+#         grp.create_dataset('iburn', data=self.iBurn)
+#         grp.create_dataset('burnedin', data=self.burnedIn)
+#         self.doi = self.Hitmap.getOpacityLevel(67.0)
+#         grp.create_dataset('doi', data=self.doi)
+#         # Large vector of phiD
+#         grp.create_dataset('multiplier', data=self.multiplier)
+#         # Rate of acceptance
+#         self.rate.writeHdf(grp, 'rate')
+#         # x Axis for acceptance rate
+#         self.ratex.writeHdf(grp, 'ratex')
+#         # Data Misfit
+#         self.PhiDs.writeHdf(grp, 'phids')
+#         # Histogram of # of Layers
+#         # self.kHist.writeHdf(grp, 'khist')
+#         # Histogram of Elevations
+#         # self.currentDataPoint.z.posterior.writeHdf(grp, 'dzhist')
+#         # Histogram of Layer depths
+#         self.MzHist.writeHdf(grp, 'mzhist')
+#         # Hit Maps
+#         self.Hitmap.writeHdf(grp, 'hitmap')
+#         # Write the current data
+#         self.currentDataPoint.writeHdf(grp, 'currentdatapoint')
+#         # Write the Best Data
+#         self.bestDataPoint.z._posterior = None
+#         self.bestDataPoint.relErr._posterior = None
+#         self.bestDataPoint.addErr._posterior = None
+#         self.bestDataPoint.writeHdf(grp, 'bestd')
 
-        tmp = grp.get('plotme')
-        if tmp is None:
-            tmp = grp.get('plotMe')
-        self.plotMe = np.array(tmp)
+#         self.currentModel.writeHdf(grp, 'currentmodel')
+        
+#         # Write the Best Model
+#         self.bestModel.nCells._posterior = None
+#         self.bestModel.writeHdf(grp, 'bestmodel')
 
-        self.limits = np.array(grp.get('limits'))
+#         # Interpolate the mean and best model to the discretized hitmap
+#         mean = self.Hitmap.getMeanInterval()
+#         best = self.bestModel.interp2depth(self.bestModel.par, self.Hitmap)
+# #        opacity = self.Hitmap.getOpacity()
 
-        tmp = grp.get('dispres')
-        if tmp is None:
-            tmp = grp.get('dispRes')
-        self.reciprocateParameter = np.array(tmp)
+#         grp.create_dataset('meaninterp', data=mean)
+#         grp.create_dataset('bestinterp', data=best)
+# #        grp.create_dataset('opacityinterp', data=opacity)
 
-        self.sx = np.array(grp.get('sx'))
-        self.sy = np.array(grp.get('sy'))
-        tmp = grp.get('nmc')
-        if (tmp is None):
-            tmp = np.array(grp.get('nMC'))
-        self.nMC = np.array(tmp)
-        # Initialize a list of iteration number
-        self.iRange = StatArray(np.arange(2 * self.nMC), name="Iteration #", dtype=np.int64)
 
-        tmp = grp.get('nsystems')
-        if tmp is None:
-            tmp = grp.get('nSystems')
-        self.nSystems = np.array(tmp)
+#         # Histograms for each system
+#         for i in range(self.nSystems):
+#             self.relErr[i].toHdf(grp, 'relerr' + str(i))
+#         for i in range(self.nSystems):
+#             self.addErr[i].toHdf(grp, 'adderr' + str(i))
 
-        tmp = grp.get('iburn')
-        if tmp is None:
-            tmp = grp.get('iBurn')
-        self.iBurn = np.array(tmp)
+#         grp.create_dataset('invtime', data=self.invTime)
+#         self.clk.stop()
+#         self.saveTime = self.clk.timeinSeconds()
+#         grp.create_dataset('savetime', data=self.saveTime)
 
-        tmp = grp.get('burnedin')
-        if tmp is None:
-            tmp = grp.get('burnedIn')
-        self.burnedIn = np.array(tmp)
 
-        self.doi = np.array(grp.get('doi'))
-        self.multiplier = np.array(grp.get('multiplier'))
+#     def fromHdf(self, grp, sysPath = ''):
+#         """ Reads in the object froma HDF file """
+#         self.fiducial = np.array(grp.get('id'))
+#         self.i = np.array(grp.get('i'))
+#         tmp = grp.get('iplot')
+#         if tmp is None:
+#             tmp = grp.get('iPlot')
+#         self.iPlot = np.array(tmp)
 
-        item = grp.get('rate')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        self.rate = obj.fromHdf(item)
+#         tmp = grp.get('plotme')
+#         if tmp is None:
+#             tmp = grp.get('plotMe')
+#         self.plotMe = np.array(tmp)
 
-        item = grp.get('ratex')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        self.ratex = obj.fromHdf(item)
+#         try:
+#             self.limits = np.array(grp.get('limits'))
+#         except:
+#             self.limits = None
 
-        item = grp.get('phids')
-        if (item is None):
-            item = grp.get('PhiDs')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        self.PhiDs = obj.fromHdf(item)
+#         tmp = grp.get('dispres')
+#         if tmp is None:
+#             tmp = grp.get('dispRes')
+#         self.reciprocateParameter = np.array(tmp)
 
-        item = grp.get('khist')
-        if (item is None):
-            item = grp.get('kHist')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        self.kHist = obj.fromHdf(item)
+#         self.sx = np.array(grp.get('sx'))
+#         self.sy = np.array(grp.get('sy'))
+#         tmp = grp.get('nmc')
+#         if (tmp is None):
+#             tmp = np.array(grp.get('nMC'))
+#         self.nMC = np.array(tmp)
+#         # Initialize a list of iteration number
+#         self.iRange = StatArray.StatArray(np.arange(2 * self.nMC), name="Iteration #", dtype=np.int64)
 
-        item = grp.get('dzhist')
-        if (item is None):
-            item = grp.get('DzHist')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        self.DzHist = obj.fromHdf(item)
+#         tmp = grp.get('nsystems')
+#         if tmp is None:
+#             tmp = grp.get('nSystems')
+#         self.nSystems = np.array(tmp)
 
-        item = grp.get('mzhist')
-        if (item is None):
-            item = grp.get('MzHist')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        self.MzHist = obj.fromHdf(item)
+#         tmp = grp.get('iburn')
+#         if tmp is None:
+#             tmp = grp.get('iBurn')
+#         self.iBurn = np.array(tmp)
 
-        item = grp.get('hitmap')
-        if (item is None):
-            item = grp.get('HitMap')
-        s = item.attrs.get('repr')
-        obj = eval(s)
-        self.Hitmap = obj.fromHdf(item)
+#         tmp = grp.get('burnedin')
+#         if tmp is None:
+#             tmp = grp.get('burnedIn')
+#         self.burnedIn = np.array(tmp)
 
-        item = grp.get('bestd')
-        if (item is None):
-            item = grp.get('bestD')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        self.bestD = obj.fromHdf(item, sysPath=sysPath)
+#         self.doi = np.array(grp.get('doi'))
+#         self.multiplier = np.array(grp.get('multiplier'))
 
-        item = grp.get('bestmodel')
-        if (item is None):
-            item = grp.get('bestModel')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        self.bestModel = obj.fromHdf(item)
-        self.bestModel.maxDepth = np.log(self.Hitmap.y.cellCentres[-1])
+#         item = grp.get('rate')
+#         obj = eval(cF.safeEval(item.attrs.get('repr')))
+#         self.rate = obj.fromHdf(item)
 
-        self.relErr = []
-        self.addErr = []
-        for i in range(self.nSystems):
-            item = grp.get('relerr' + str(i))
-            if (item is None):
-                item = grp.get('relErr'+str(i))
-            obj = eval(cF.safeEval(item.attrs.get('repr')))
-            aHist = obj.fromHdf(item)
-            self.relErr.append(aHist)
-            item = grp.get('adderr' + str(i))
-            if (item is None):
-                item = grp.get('addErr'+str(i))
-            obj = eval(cF.safeEval(item.attrs.get('repr')))
-            aHist = obj.fromHdf(item)
-            self.addErr.append(aHist)
+#         item = grp.get('ratex')
+#         obj = eval(cF.safeEval(item.attrs.get('repr')))
+#         self.ratex = obj.fromHdf(item)
 
-        tmp = grp.get('invtime')
-        if tmp is None:
-            tmp = grp.get('invTime')
-        self.invTime = np.array(tmp)
+#         item = grp.get('phids')
+#         if (item is None):
+#             item = grp.get('PhiDs')
+#         obj = eval(cF.safeEval(item.attrs.get('repr')))
+#         self.PhiDs = obj.fromHdf(item)
 
-        tmp = grp.get('savetime')
-        if tmp is None:
-            tmp = grp.get('saveTime')
-        self.saveTime = np.array(tmp)
+#         # item = grp.get('khist')
+#         # if (item is None):
+#         #     item = grp.get('kHist')
+#         # obj = eval(cF.safeEval(item.attrs.get('repr')))
+#         # self.kHist = obj.fromHdf(item)
 
-        self.verbose = False
+#         # item = grp.get('dzhist')
+#         # if (item is None):
+#         #     item = grp.get('DzHist')
+#         # obj = eval(cF.safeEval(item.attrs.get('repr')))
+#         # self.DzHist = obj.fromHdf(item)
+
+#         item = grp.get('mzhist')
+#         if (item is None):
+#             item = grp.get('MzHist')
+#         obj = eval(cF.safeEval(item.attrs.get('repr')))
+#         self.MzHist = obj.fromHdf(item)
+
+#         item = grp.get('hitmap')
+#         if (item is None):
+#             item = grp.get('HitMap')
+#         s = item.attrs.get('repr')
+#         obj = eval(s)
+#         self.Hitmap = obj.fromHdf(item)
+
+#         item = grp.get('currentdatapoint')
+#         obj = eval(cF.safeEval(item.attrs.get('repr')))
+#         self.currentDataPoint = obj.fromHdf(item, sysPath=sysPath)
+
+#         self.DzHist = self.currentDataPoint.z.posterior
+
+#         item = grp.get('bestd')
+#         if (item is None):
+#             item = grp.get('bestD')
+#         obj = eval(cF.safeEval(item.attrs.get('repr')))
+#         self.bestDataPoint = obj.fromHdf(item, sysPath=sysPath)
+
+
+#         item = grp.get('currentmodel')
+#         obj = eval(cF.safeEval(item.attrs.get('repr')))
+#         self.currentModel = obj.fromHdf(item)
+#         self.currentModel.maxDepth = np.log(self.Hitmap.y.cellCentres[-1])
+
+#         self.KzHist = self.currentModel.nCells.posterior
+
+
+#         item = grp.get('bestmodel')
+#         if (item is None):
+#             item = grp.get('bestModel')
+#         obj = eval(cF.safeEval(item.attrs.get('repr')))
+#         self.bestModel = obj.fromHdf(item)
+#         self.bestModel.maxDepth = np.log(self.Hitmap.y.cellCentres[-1])
+
+#         self.relErr = []
+#         self.addErr = []
+#         for i in range(self.nSystems):
+#             item = grp.get('relerr' + str(i))
+#             if (item is None):
+#                 item = grp.get('relErr'+str(i))
+#             obj = eval(cF.safeEval(item.attrs.get('repr')))
+#             aHist = obj.fromHdf(item)
+#             self.relErr.append(aHist)
+#             item = grp.get('adderr' + str(i))
+#             if (item is None):
+#                 item = grp.get('addErr'+str(i))
+#             obj = eval(cF.safeEval(item.attrs.get('repr')))
+#             aHist = obj.fromHdf(item)
+#             self.addErr.append(aHist)
+
+#         tmp = grp.get('invtime')
+#         if tmp is None:
+#             tmp = grp.get('invTime')
+#         self.invTime = np.array(tmp)
+
+#         tmp = grp.get('savetime')
+#         if tmp is None:
+#             tmp = grp.get('saveTime')
+#         self.saveTime = np.array(tmp)
+
+#         self.verbose = False
 
 
     def read(self, fName, grpName, sysPath = ''):
