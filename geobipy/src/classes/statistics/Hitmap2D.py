@@ -13,6 +13,22 @@ from ...base.customFunctions import isInt
 class Hitmap2D(Histogram2D):
     """ Class defining a 2D hitmap whose cells are rectangular with linear sides """
 
+    def deepcopy(self):
+        return deepcopy(self)
+
+
+    def __deepcopy__(self, memo):
+        """ Define the deepcopy. """
+
+        if self.xyz:
+            out = Hitmap2D(xBins=self.xBins, yBins=self.yBins, zBins=self.zBins)
+        else:
+            out = Hitmap2D(xBins=self.xBins, yBins=self.yBins)
+        out._counts = self._counts.deepcopy()
+
+        return out
+        
+
     def varianceCutoff(self, percent=67.0):
         """ Get the cutoff value along y axis from the bottom up where the variance is percent*max(variance) """
         p = 0.01*percent
@@ -45,7 +61,7 @@ class Hitmap2D(Histogram2D):
         ai=None
         bi=None
         if (not index is None):
-            assert isInt(index), TypeError('index must be an integer')
+            assert isInt(index), TypeError('index must be an integer {}'.format(index))
             ai = np.s_[index,:,:]
             bi = np.s_[index,:]
 
