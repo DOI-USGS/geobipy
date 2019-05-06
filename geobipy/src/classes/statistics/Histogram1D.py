@@ -14,7 +14,7 @@ class Histogram1D(RectilinearMesh1D):
     
     Fast updating relies on knowing the bins ahead of time.
 
-    Histogram1D(values, bins, binCentres, log)
+    Histogram1D(values, bins, binCentres, log, relativeTo)
 
     Parameters
     ----------
@@ -25,6 +25,8 @@ class Histogram1D(RectilinearMesh1D):
     log : 'e' or float, optional
         Entries are given in linear space, but internally bins and values are logged.
         Plotting is in log space.
+    relativeTo : float, optional
+        If a float is given, updates and plotting will all be relative to this value.
 
     Returns
     -------
@@ -33,12 +35,14 @@ class Histogram1D(RectilinearMesh1D):
     
     """
 
-    def __init__(self, bins=None, binCentres=None, log=None):
+    def __init__(self, bins=None, binCentres=None, log=None, relativeTo=None):
         """ Initialize a histogram """
 
         # Allow an null instantiation
         if (bins is None and binCentres is None):
             return
+
+        assert not (not log is None and not relativeTo is None), ValueError("Cannot use log option when histogram is relative.")
 
         if not log is None:
             if not bins is None:
@@ -71,7 +75,6 @@ class Histogram1D(RectilinearMesh1D):
     def binCentres(self):
         return self.cellCentres
 
-
     @property
     def nBins(self):
         return self.nCells
@@ -79,6 +82,10 @@ class Histogram1D(RectilinearMesh1D):
     @property
     def nSamples(self):
         return self._counts.sum()
+
+    @property
+    def isRelative(self):
+        return not self.relativeTo is None
 
 
     def __deepcopy__(self, memo):
@@ -89,24 +96,32 @@ class Histogram1D(RectilinearMesh1D):
         out.dx = self.dx
         out._counts = self._counts.deepcopy()
         out.log = self.log
+        out.relativeTo = self.relativeTo
         
         return out
 
 
-    def update(self, values, clip=False):
+    def update(self, values, trim=False):
         """Update the histogram by counting the entry of values into the bins of the histogram.
 
-        Updates the bin counts in the histogram but also iteratively updates the sample mean and sample variance.
+        Updates the bin counts in the histogram using fast methods.
+        The values are clipped so that values outside the bins are forced inside.
+        Optionally, one can trim the values so that those outside the bins are not counted.
         
         Parameters
         ----------
         values : array_like
             Increments the count for the bin that each value falls into.
-        clip : bool
+        trim : bool
             A negative index which would normally wrap will clip to 0 and self.bins.size instead.
+
         """
-        tmp, dum = cF._log(values, self.log)
-        iBin = np.atleast_1d(self.cellIndex(tmp.flatten(), clip=clip))
+        if self.isRelative:
+            tmp = values - self.relativeTo
+        else:
+            tmp, dum = cF._log(values, self.log)
+        
+        iBin = np.atleast_1d(self.cellIndex(tmp.flatten(), clip=True, trim=trim))
         tmp = np.bincount(iBin, minlength = self.nBins)
         
         self._counts += tmp
@@ -147,13 +162,16 @@ class Histogram1D(RectilinearMesh1D):
         geobipy.customPlots.pcolor : For additional keywords
 
         """
+        if self.isRelative:
+            kwargs['y'] = self.bins + self.relativeTo
         return super().pcolor(self._counts, **kwargs)
         
 
     def plot(self, rotate=False, flipX=False, flipY=False, trim=True, normalize=False, **kwargs):
         """ Plots the histogram """
 
-        cP.hist(self.counts, self.bins, rotate=rotate, flipX=flipX, flipY=flipY, trim=trim, normalize=normalize, **kwargs)
+        bins = self.bins + self.relativeTo if self.isRelative else self.bins
+        cP.hist(self.counts, bins, rotate=rotate, flipX=flipX, flipY=flipY, trim=trim, normalize=normalize, **kwargs)
 
 
     def hdfName(self):
@@ -169,10 +187,17 @@ class Histogram1D(RectilinearMesh1D):
         # create a new group inside h5obj
         grp = parent.create_group(myName)
         grp.attrs["repr"] = self.hdfName()
-        self.bins.toHdf(grp, 'bins')
+
         self._counts.createHdf(grp, 'counts', nRepeats=nRepeats, fillvalue=fillvalue)
+
         if not self.log is None:
-            grp.create_dataset('log', data=self.log)
+            grp.create_dataset('log', data = self.log)
+
+        if self.isRelative:
+            self.bins.toHdf(grp, 'bins')
+            self.relativeTo.createHdf(grp, 'relativeTo', nRepeats=nRepeats, fillvalue=fillvalue)
+        else:
+            self.bins.createHdf(grp, 'bins', nRepeats=nRepeats, fillvalue=fillvalue)
 
 
     def writeHdf(self, parent, myName, index=None):
@@ -182,6 +207,11 @@ class Histogram1D(RectilinearMesh1D):
         create: optionally create the data set as well before writing
         """
         self._counts.writeHdf(parent, myName+'/counts', index=index)
+
+        if self.isRelative:
+            self.relativeTo.writeHdf(parent, myName+'/relativeTo', index=index)
+        else:
+            self.bins.writeHdf(parent, myName+'/bins', index=index)
 
 
     def toHdf(self, h5obj, myName):
@@ -193,39 +223,69 @@ class Histogram1D(RectilinearMesh1D):
         grp.attrs["repr"] = self.hdfName()
         self.bins.toHdf(grp, 'bins')
         self._counts.toHdf(grp, 'counts')
+        if not self.log is None:
+            grp.create_dataset('log', data = self.log)
+        if not self.relativeTo is None:
+            self.relativeTo.toHdf(grp, 'relativeTo')
 
 
     def fromHdf(self, grp, index=None):
         """ Reads in the object froma HDF file """
+
+        try:
+            item = grp.get('relativeTo')
+            obj = eval(cF.safeEval(item.attrs.get('repr')))
+            relativeTo = obj.fromHdf(item, index=index)
+        except:
+            relativeTo = None
+
         item = grp.get('bins')
         obj = eval(cF.safeEval(item.attrs.get('repr')))
-        bins = obj.fromHdf(item)
+
+        
+        if relativeTo is None:
+            if index is None:
+                bins = obj.fromHdf(item)
+            else:
+                # slic = np.s_[index, :]
+                bins = obj.fromHdf(item, index=index)
+        else:
+            bins = obj.fromHdf(item)
+
 
         item = grp.get('counts')
         obj = eval(cF.safeEval(item.attrs.get('repr')))
+
         if (index is None):
             counts = obj.fromHdf(item)
         else:
-            counts = obj.fromHdf(item, index=np.s_[index, :])
-
-        if bins.size == counts.size:
-            Hist = Histogram1D(binCentres = bins)
-        else:
-            Hist = Histogram1D(bins = bins)
-
-        Hist._counts = counts
+            slic = np.s_[index, :]
+            counts = obj.fromHdf(item, index=index)
 
         try:
             log = np.asscalar(np.asarray(grp.get('log')))
         except:
             log = None
 
+        if bins.shape[-1] == counts.shape[-1]:
+            Hist = Histogram1D(binCentres = bins)
+        else:
+            Hist = Histogram1D(bins = bins)
+
+        Hist._counts = counts
         Hist.log = log
+        Hist.relativeTo = relativeTo
 
         return Hist
+
+
+    def summary(self, out=False):
+
+        msg = ("{}\n"
+              "Bins: \n{}"
+              "Counts:\n{}"
+              "Relative to: {}").format(type(self), RectilinearMesh1D.summary(self, True), self.counts.summary(True), self.relativeTo)
+
+        return msg if out else print(msg)
         
-
-
-    def summary(self):
-        RectilinearMesh1D.summary(self)
-        self.counts.summary()
+        
