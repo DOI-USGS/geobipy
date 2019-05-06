@@ -7,7 +7,7 @@ import numpy as np
 import numpy.ma as ma
 import h5py
 from ..classes.core.myObject import myObject
-from ..classes.core.StatArray import StatArray
+from ..classes.core import StatArray
 from ..classes.statistics.Distribution import Distribution
 from ..classes.statistics.Histogram1D import Histogram1D
 from ..classes.statistics.Histogram2D import Histogram2D
@@ -193,7 +193,7 @@ class LineResults(myObject):
     def getBestParameters(self):
         """ Get the best model of the parameters """
         if (not self.best is None): return
-        self.best = StatArray(self.getAttribute('bestinterp'), dtype=np.float64)
+        self.best = StatArray.StatArray(self.getAttribute('bestinterp'), dtype=np.float64)
         self.best.name = "Best resistivity"
         self.best.units = "$\Omega m$"
 
@@ -216,7 +216,7 @@ class LineResults(myObject):
         self.getMesh()
         p = 0.01 * (100.0 - percent)
 
-        self.doi = StatArray(np.zeros(self.nPoints), 'Depth of investigation', self.z.units)
+        self.doi = StatArray.StatArray(np.zeros(self.nPoints), 'Depth of investigation', self.z.units)
         nCells = self.mesh.z.nCells - 1
         r = range(self.nPoints)
         for i in r:
@@ -233,7 +233,7 @@ class LineResults(myObject):
     def getElevation(self):
         """ Get the elevation of the data points """
         if (not self.elevation is None): return
-        self.elevation = StatArray(np.asarray(self.getAttribute('elevation')), 'Elevation', 'm')
+        self.elevation = StatArray.StatArray(np.asarray(self.getAttribute('elevation')), 'Elevation', 'm')
 
 
     def getHeight(self):
@@ -261,7 +261,7 @@ class LineResults(myObject):
         try:
             self.iDs = self.getAttribute('fiducials')
         except:
-            self.iDs = StatArray(np.asarray(self.hdfFile.get('ids')), "fiducials")
+            self.iDs = StatArray.StatArray(np.asarray(self.hdfFile.get('ids')), "fiducials")
         self.nPoints = self.iDs.size
 
 
@@ -280,7 +280,7 @@ class LineResults(myObject):
     def getKlayers(self):
         """ Get the number of layers in the best model for each data point """
         if (not self.k is None): return
-        self.k = StatArray(self.getAttribute('# Layers'), '# of Cells')
+        self.k = StatArray.StatArray(self.getAttribute('# Layers'), '# of Cells')
 
     
     def getInterfacePosterior(self):
@@ -291,7 +291,7 @@ class LineResults(myObject):
     def getMeanParameters(self):
         """ Get the mean model of the parameters """
         if (not self.mean is None): return
-        self.mean = StatArray(self.getAttribute('meaninterp'), dtype=np.float64)
+        self.mean = StatArray.StatArray(self.getAttribute('meaninterp'), dtype=np.float64)
         self.mean.name = "Mean resistivity"
         self.mean.units = "$\Omega m$"
 
@@ -309,7 +309,7 @@ class LineResults(myObject):
         print("Obtaining opacity from file. This can take a while the first time this runs.")
 
         self.getMesh()
-        self.opacity = StatArray(np.zeros([self.mesh.dims[1], self.mesh.dims[0]]), 'Opacity')
+        self.opacity = StatArray.StatArray(np.zeros([self.mesh.shape[1], self.mesh.shape[0]]), 'Opacity')
 
 
         a = np.asarray(self.hdfFile['hitmap/arr/data'])
@@ -323,7 +323,7 @@ class LineResults(myObject):
         except:
             c = np.asarray(self.hdfFile['hitmap/y/x/data'])
 
-        h = Hitmap2D(xBinCentres = StatArray(b[0, :]), yBinCentres = StatArray(c[0, :]))
+        h = Hitmap2D(xBinCentres = StatArray.StatArray(b[0, :]), yBinCentres = StatArray.StatArray(c[0, :]))
         h._counts[:, :] = a[0, :, :]
         self.opacity[0, :] = h.confidenceRange(percent=percent, log=log)
         
@@ -947,7 +947,7 @@ class LineResults(myObject):
         if (log):
             vals, logLabel = cP._log(vals,log)
             name = logLabel + name
-        binEdges = StatArray(np.linspace(np.nanmin(vals), np.nanmax(vals), nBins+1), name, units)
+        binEdges = StatArray.StatArray(np.linspace(np.nanmin(vals), np.nanmax(vals), nBins+1), name, units)
 
         h = Histogram1D(bins = binEdges)
         h.update(vals)
@@ -1169,8 +1169,8 @@ class LineResults(myObject):
         b = self.mean.T
         c = self.interfaces.T
 
-        d = StatArray(1.0 / a, "Best Conductivity", "$\fraq{S}{m}$")
-        e = StatArray(1.0 / b, "Mean Conductivity", "$\fraq{S}{m}$")
+        d = StatArray.StatArray(1.0 / a, "Best Conductivity", "$\fraq{S}{m}$")
+        e = StatArray.StatArray(1.0 / b, "Mean Conductivity", "$\fraq{S}{m}$")
 
         self.mesh.toVTK(fileName, format=format, cellData=[a, b, c, d, e])
         
@@ -1321,7 +1321,7 @@ class LineResults(myObject):
         self.hdfFile = hdfFile
 
         nPoints = iDs.size
-        self.iDs = StatArray(np.sort(iDs), "fiducials")
+        self.iDs = StatArray.StatArray(np.sort(iDs), "fiducials")
 
         # Initialize and write the attributes that won't change
         # hdfFile.create_dataset('ids',data=self.iDs)

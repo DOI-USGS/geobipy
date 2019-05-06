@@ -9,7 +9,7 @@
 from ...pointcloud.PointCloud3D import PointCloud3D
 from .Data import Data
 from ..datapoint.TdemDataPoint import TdemDataPoint
-from ....classes.core.StatArray import StatArray
+from ....classes.core import StatArray
 from ...system.CircularLoop import CircularLoop
 from ....base.customFunctions import safeEval
 from ...system.TdemSystem import TdemSystem
@@ -83,16 +83,16 @@ class TdemData(Data):
         Data.__init__(self, nPoints, nTimes, dataUnits=r"$\frac{V}{m^{2}}$")
 
         # StatArray of the line number for flight line data
-        self.line = StatArray(self.nPoints, 'Line Number')
+        self.line = StatArray.StatArray(self.nPoints, 'Line Number')
         # StatArray of the id number
-        self.id = StatArray(self.nPoints, 'ID Number')
+        self.id = StatArray.StatArray(self.nPoints, 'ID Number')
         # StatArray of the elevation
-        self._elevation = StatArray(self.nPoints, 'Elevation', 'm')
+        self._elevation = StatArray.StatArray(self.nPoints, 'Elevation', 'm')
 
         # StatArray of Transmitter loops
-        self.T = StatArray(self.nPoints, 'Transmitter Loops', dtype=CircularLoop)
+        self.T = StatArray.StatArray(self.nPoints, 'Transmitter Loops', dtype=CircularLoop)
         # StatArray of Receiever loops
-        self.R = StatArray(self.nPoints, 'Receiver Loops', dtype=CircularLoop)
+        self.R = StatArray.StatArray(self.nPoints, 'Receiver Loops', dtype=CircularLoop)
 
         self.system = system
         self.nSystems = nSystems
@@ -641,7 +641,7 @@ class TdemData(Data):
     def times(self, system=0):
         """ Obtain the times from the system file """
         assert 0 <= system < self.nSystems, ValueError('system must be in (0, {}]'.format(self.nSystems))
-        return StatArray(self.system[system].windows.centre, 'Time', 'ms')
+        return StatArray.StatArray(self.system[system].windows.centre, 'Time', 'ms')
 
 
     def __getitem__(self, i):

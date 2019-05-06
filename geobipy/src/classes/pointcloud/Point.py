@@ -1,7 +1,7 @@
 """ @Point_Class
 Module describing a Point defined by x,y,z c-ordinates
 """
-from ..core.StatArray import StatArray
+from ..core import StatArray
 import numpy as np
 
 
@@ -12,11 +12,11 @@ class Point(object):
 
         """ Initialize the class """
         # x coordinate
-        self._x = StatArray(x, 'Easting', 'm')
+        self._x = StatArray.StatArray(x, 'Easting', 'm')
         # y coordinate
-        self._y = StatArray(y, 'Northing', 'm')
+        self._y = StatArray.StatArray(y, 'Northing', 'm')
         # z coordinate
-        self._z = StatArray(z, 'Height', 'm')
+        self._z = StatArray.StatArray(z, 'Height', 'm')
 
 
     @property

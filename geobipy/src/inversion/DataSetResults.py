@@ -6,7 +6,7 @@ import numpy as np
 import h5py
 #import numpy.ma as ma
 from ..classes.core.myObject import myObject
-from ..classes.core.StatArray import StatArray
+from ..classes.core import StatArray
 from ..base.fileIO import fileExists
 
 from ..classes.statistics.Histogram1D import Histogram1D
@@ -179,7 +179,7 @@ class DataSetResults(myObject):
         if (log):
             vals,logLabel=cP._logSomething(vals,log)
             name = logLabel+name
-        vals = StatArray(vals, name, units)
+        vals = StatArray.StatArray(vals, name, units)
 
         h = Histogram1D(np.linspace(vals.min(),vals.max(),nBins))
         h.update(vals)
@@ -238,28 +238,28 @@ class DataSetResults(myObject):
         if (xy):
             self.points = PointCloud3D(self.nPoints)
         if (elevation):
-            self.elevation = StatArray(self.nPoints,name='Elevation',units='m')
+            self.elevation = StatArray.StatArray(self.nPoints,name='Elevation',units='m')
         if (mean):
             self.lines[0].getMeanParameters()
-            self.mean = StatArray([nz,self.nPoints], name=self.lines[0].mean.name, units=self.lines[0].mean.units, order = 'F')
+            self.mean = StatArray.StatArray([nz,self.nPoints], name=self.lines[0].mean.name, units=self.lines[0].mean.units, order = 'F')
         if (best):
             self.lines[0].getBestParameters()
-            self.best = StatArray([nz,self.nPoints], name=self.lines[0].best.name, units=self.lines[0].best.units, order = 'F')
+            self.best = StatArray.StatArray([nz,self.nPoints], name=self.lines[0].best.name, units=self.lines[0].best.units, order = 'F')
         if (doi):
             self.opacity=np.zeros([nz,self.nPoints], order = 'F')
-            self.doi = StatArray(np.zeros(self.nPoints),'Depth of Investigation','m')
+            self.doi = StatArray.StatArray(np.zeros(self.nPoints),'Depth of Investigation','m')
         if (relErr):
             self.lines[0].getRelativeError()
             if (self.nSys > 1):
-                self.relErr = StatArray([self.nPoints, self.nSys],name=self.lines[0].relErr.name,units=self.lines[0].relErr.units, order = 'F')
+                self.relErr = StatArray.StatArray([self.nPoints, self.nSys],name=self.lines[0].relErr.name,units=self.lines[0].relErr.units, order = 'F')
             else:
-                self.relErr = StatArray(self.nPoints,name=self.lines[0].relErr.name,units=self.lines[0].relErr.units, order = 'F')
+                self.relErr = StatArray.StatArray(self.nPoints,name=self.lines[0].relErr.name,units=self.lines[0].relErr.units, order = 'F')
         if (addErr):
             self.lines[0].getAdditiveError()
             if (self.nSys > 1):
-                self.addErr = StatArray([self.nPoints, self.nSys],name=self.lines[0].addErr.name,units=self.lines[0].addErr.units, order = 'F')
+                self.addErr = StatArray.StatArray([self.nPoints, self.nSys],name=self.lines[0].addErr.name,units=self.lines[0].addErr.units, order = 'F')
             else:
-                self.addErr = StatArray(self.nPoints,name=self.lines[0].addErr.name,units=self.lines[0].addErr.units, order = 'F')
+                self.addErr = StatArray.StatArray(self.nPoints,name=self.lines[0].addErr.name,units=self.lines[0].addErr.units, order = 'F')
 
         # Loop over the lines in the data set and get the attributes
         i0 = 0
@@ -360,7 +360,7 @@ class DataSetResults(myObject):
         x,y,intPoints = interpolation.getGridLocations2D(self.points.bounds, dx, dy)
         
         # Initialize 3D volume
-        mean3D = StatArray(np.zeros([self.zGrid.size, y.size, x.size], order = 'F'),name = 'Conductivity', units = '$Sm^{-1}$')
+        mean3D = StatArray.StatArray(np.zeros([self.zGrid.size, y.size, x.size], order = 'F'),name = 'Conductivity', units = '$Sm^{-1}$')
         
         # Interpolate for each depth
         print('Interpolating using minimum curvature')
@@ -406,7 +406,7 @@ class DataSetResults(myObject):
         maxV = np.nanmax(self.mean)
 
         # Initialize 3D volume
-        mean3D = StatArray(np.zeros([self.zGrid.size, y.size, x.size], order = 'F'),name = 'Conductivity', units = '$Sm^{-1}$')
+        mean3D = StatArray.StatArray(np.zeros([self.zGrid.size, y.size, x.size], order = 'F'),name = 'Conductivity', units = '$Sm^{-1}$')
 
         # Triangulate the data locations
         dTri = Delaunay(tmp)
@@ -488,9 +488,9 @@ class DataSetResults(myObject):
             vals1D = model[cell1,:]
             
         if (invertPar):
-            vals1D = StatArray(1.0/vals1D,name = 'Resistivity', units = '$\Omega m$')
+            vals1D = StatArray.StatArray(1.0/vals1D,name = 'Resistivity', units = '$\Omega m$')
         else:
-            vals1D = StatArray(vals1D,name = 'Conductivity', units = '$Sm^{-1}$')
+            vals1D = StatArray.StatArray(vals1D,name = 'Conductivity', units = '$Sm^{-1}$')
         return vals1D
 
 
@@ -594,7 +594,7 @@ class DataSetResults(myObject):
         if log10:
             model = np.log10(model)
 
-        res = StatArray(np.column_stack((model,z)))
+        res = StatArray.StatArray(np.column_stack((model,z)))
 
         if (clipNan):
             res = res[np.logical_not(np.isnan(res[:,0]))]
@@ -608,7 +608,7 @@ class DataSetResults(myObject):
         else:
             ParVsZ = precomputedParVsZ
 
-        assert isinstance(ParVsZ, StatArray), "precomputedParVsZ must be an StatArray"
+        assert isinstance(ParVsZ, StatArray.StatArray), "precomputedParVsZ must be an StatArray"
 
         if (log10Depth):
             ParVsZ[:,1] = np.log10(ParVsZ[:,1])
@@ -618,7 +618,7 @@ class DataSetResults(myObject):
 
     def GMM(self, ParVsZ, clusterID, trainPercent=90.0, plot=True):
         """ Classify the subsurface parameters """
-        assert isinstance(ParVsZ, StatArray), "ParVsZ must be an StatArray"
+        assert isinstance(ParVsZ, StatArray.StatArray), "ParVsZ must be an StatArray"
         ParVsZ.GMM(clusterID, trainPercent=trainPercent, covType=['spherical','tied','diag','full'], plot=plot)
 
 

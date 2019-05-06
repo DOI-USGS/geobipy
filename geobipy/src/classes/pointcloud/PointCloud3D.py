@@ -1,7 +1,7 @@
 from copy import deepcopy
 from ...classes.core.myObject import myObject
 import numpy as np
-from ...classes.core.StatArray import StatArray
+from ...classes.core import StatArray
 from ...base import fileIO as fIO
 from ...base import interpolation
 from ...base import customFunctions as cf
@@ -49,33 +49,33 @@ class PointCloud3D(myObject):
 
         # StatArray of the x co-ordinates
         if (x is None):
-            self._x = StatArray(self._nPoints, "Easting", units)
+            self._x = StatArray.StatArray(self._nPoints, "Easting", units)
         else:
             assert np.size(x) == nPoints, ValueError("x must have size {}".format(nPoints))
-            if (isinstance(x, StatArray)):
+            if (isinstance(x, StatArray.StatArray)):
                 self._x = x.deepcopy()
             else:
-                self._x = StatArray(x, "Easting", units)
+                self._x = StatArray.StatArray(x, "Easting", units)
 
         # StatArray of the y co-ordinates
         if (y is None):
-            self._y = StatArray(self._nPoints, "Northing", units)
+            self._y = StatArray.StatArray(self._nPoints, "Northing", units)
         else:
             assert np.size(y) == nPoints, ValueError("y must have size {}".format(nPoints))
-            if isinstance(y, StatArray):
+            if isinstance(y, StatArray.StatArray):
                 self._y = y.deepcopy()
             else:
-                self._y = StatArray(y, "Northing", units)
+                self._y = StatArray.StatArray(y, "Northing", units)
                 
         # StatArray of the z co-ordinates
         if (z is None):
-            self._z = StatArray(self._nPoints, "Height", units)
+            self._z = StatArray.StatArray(self._nPoints, "Height", units)
         else:
             assert np.size(z) == nPoints, ValueError("z must have size {}".format(nPoints))
-            if isinstance(z, StatArray):
+            if isinstance(z, StatArray.StatArray):
                 self._z = z.deepcopy()
             else:
-                self._z = StatArray(z, "Height", units)
+                self._z = StatArray.StatArray(z, "Height", units)
 
         if nPoints == 0:
             return
@@ -171,7 +171,7 @@ class PointCloud3D(myObject):
         """
         assert xAxis in ['index', 'x', 'y', 'z', 'r2d', 'r3d'], Exception("xAxis must be either 'index', x', 'y', 'z', 'r2d', or 'r3d'")
         if xAxis == 'index':
-            return StatArray(np.arange(self.x.size), name="Index")
+            return StatArray.StatArray(np.arange(self.x.size), name="Index")
         elif xAxis == 'x':
             return self.x
         elif xAxis == 'y':
@@ -181,14 +181,14 @@ class PointCloud3D(myObject):
         elif xAxis == 'r2d':
             r = np.diff(self.x)**2.0
             r += np.diff(self.y)**2.0
-            distance = StatArray(np.zeros(self.x.size), 'Distance', self.x.units)
+            distance = StatArray.StatArray(np.zeros(self.x.size), 'Distance', self.x.units)
             distance[1:] = np.cumsum(np.sqrt(r))
             return distance
         elif xAxis == 'r3d':
             r = np.diff(self.x)**2.0
             r += np.diff(self.y)**2.0
             r += np.diff(self.z)**2.0
-            distance = StatArray(np.zeros(self.x.size), 'Distance', self.x.units)
+            distance = StatArray.StatArray(np.zeros(self.x.size), 'Distance', self.x.units)
             distance[1:] = np.cumsum(np.sqrt(r))
             return distance
 
@@ -497,10 +497,10 @@ class PointCloud3D(myObject):
         vtk = self.vtkStructure()
 
         if not pointData is None:
-            assert isinstance(pointData, (StatArray, list)), TypeError("pointData must a geobipy.StatArray or a list of them.")
+            assert isinstance(pointData, (StatArray.StatArray, list)), TypeError("pointData must a geobipy.StatArray or a list of them.")
             if isinstance(pointData, list):
                 for p in pointData:
-                    assert isinstance(p, StatArray), TypeError("pointData entries must be a geobipy.StatArray")
+                    assert isinstance(p, StatArray.StatArray), TypeError("pointData entries must be a geobipy.StatArray")
                     assert p.size == self.nPoints, ValueError("pointData entries must have size {}".format(self.nPoints))
                     assert p.hasLabels(), ValueError("StatArray needs a name")
                     vtk.point_data.append(Scalars(p, p.getNameUnits()))

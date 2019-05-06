@@ -3,7 +3,7 @@ Module describing a 2 Dimensional Model with two axes
 """
 
 import numpy as np
-from ...classes.core.StatArray import StatArray
+from ...classes.core import StatArray
 from .Model import Model
 
 """ @Histogram_Class
@@ -12,7 +12,7 @@ Module describing an efficient histogram class
 from .baseDistribution import baseDistribution
 from ...classes.statistics.Histogram1D import Histogram1D
 from ...classes.mesh.RectilinearMesh2D import RectilinearMesh2D
-from ...classes.core.StatArray import StatArray
+from ...classes.core import StatArray
 from ...base import customPlots as cP
 from ...base.customFunctions import _logSomething
 import numpy as np
@@ -54,9 +54,9 @@ class Model2D(Model):
         RectilinearMesh2D.__init__(self, xCentres=xBinCentres, xEdges=xBins, yCentres=yBinCentres, yEdges=yBins)
         # Assign the values
         if values is None:
-            self._values = StatArray([self.y.nCells, self.x.nCells], name=name, units=units)
+            self._values = StatArray.StatArray([self.y.nCells, self.x.nCells], name=name, units=units)
         else:
-            self._values = StatArray(values)
+            self._values = StatArray.StatArray(values)
             self._values.name = name if not name is None
             self._values.units = units if not units is None
 
@@ -243,10 +243,10 @@ class Model2D(Model):
 
         counts = super().intervalMean(self._values, intervals, axis, statistic)
         if axis == 0:
-            out = Histogram2D(xBins = self.x.cellEdges, yBins = StatArray(np.asarray(intervals), name=self.y.name(), units=self.y.units()))
+            out = Histogram2D(xBins = self.x.cellEdges, yBins = StatArray.StatArray(np.asarray(intervals), name=self.y.name(), units=self.y.units()))
             out._values[:] = counts
         else:
-            out = Histogram2D(xBins = StatArray(np.asarray(intervals), name=self.x.name(), units=self.x.units()), yBins = self.y.cellEdges)
+            out = Histogram2D(xBins = StatArray.StatArray(np.asarray(intervals), name=self.x.name(), units=self.x.units()), yBins = self.y.cellEdges)
             out._values[:] = counts
         return out
 

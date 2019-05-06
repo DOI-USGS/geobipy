@@ -5,7 +5,7 @@ from .Data import Data
 from ..datapoint.FdemDataPoint import FdemDataPoint
 from ....base import customFunctions as cF
 from ....base import customPlots as cP
-from ....classes.core.StatArray import StatArray
+from ....classes.core import StatArray
 from ...system.FdemSystem import FdemSystem
 import numpy as np
 from ....base import fileIO as fIO
@@ -90,9 +90,9 @@ class FdemData(Data):
         # Data Class containing xyz and channel values
         Data.__init__(self, nPoints=nPoints, nChannelsPerSystem=2*nFrequencies, dataUnits="ppm")
         # StatArray of the line number for flight line data
-        self.line = StatArray(nPoints, 'Line Number')
+        self.line = StatArray.StatArray(nPoints, 'Line Number')
         # StatArray of the id number
-        self.id = StatArray(nPoints, 'ID Number')
+        self.id = StatArray.StatArray(nPoints, 'ID Number')
         # StatArray of the elevation
         # Assign data names
         self._data.name = 'Fdem Data'

@@ -2,7 +2,7 @@
 Module describing a Data Set where values are associated with an xyz co-ordinate
 """
 import numpy as np
-from ....classes.core.StatArray import StatArray
+from ....classes.core import StatArray
 from ....base import fileIO as fIO
 from ....base import customFunctions as cf
 from ....base import customPlots as cP
@@ -67,39 +67,31 @@ class Data(PointCloud3D):
         # Number of Channels
         self.nChannelsPerSystem = nChannelsPerSystem
         self._systemOffset = np.append(0, np.cumsum(self.nChannelsPerSystem))
-        PointCloud3D.__init__(self, nPoints, x, y, z)
-
-        # StatArray of data
-        if not elevation is None:
-            assert np.size(elevation) == nPoints, ValueError("elevation must have size {}".format(nPoints))
-            self._elevation = StatArray(elevation, order='F')
-        else:
-            self._elevation = StatArray(nPoints, "Elevation", "m")
-
+        PointCloud3D.__init__(self, nPoints, x, y, z, elevation)
 
         dataShape = [nPoints, self.nChannels]
         # StatArray of data
         if not data is None:
             assert np.allclose(np.shape(data), dataShape) or np.size(data) == nPoints, ValueError("data must have shape {}".format(dataShape))
-            self._data = StatArray(data, order='F')
+            self._data = StatArray.StatArray(data, order='F')
         else:
-            self._data = StatArray([nPoints, self.nChannels], "Data", dataUnits, order='F')
+            self._data = StatArray.StatArray([nPoints, self.nChannels], "Data", dataUnits, order='F')
 
         # StatArray of Standard Deviations
         if not std is None:
             assert np.allclose(np.shape(std), dataShape), ValueError("std must have shape {}".format(dataShape))
             assert np.all(std > 0.0), ValueError("Cannot assign standard deviations that are <= 0.0.")
-            self._std = StatArray(std, order='F')
+            self._std = StatArray.StatArray(std, order='F')
         else:
-            self._std = StatArray(np.ones([nPoints, self.nChannels]), "Standard Deviation", dataUnits, order='F')
+            self._std = StatArray.StatArray(np.ones([nPoints, self.nChannels]), "Standard Deviation", dataUnits, order='F')
         
         
         # Create predicted data
         if not predictedData is None:
             assert np.allclose(np.shape(predictedData), dataShape), ValueError("predictedData must have shape {}".format(dataShape))
-            self._predictedData = StatArray(predictedData, order='F')
+            self._predictedData = StatArray.StatArray(predictedData, order='F')
         else:
-            self._predictedData = StatArray([nPoints, self.nChannels], "Predicted Data", dataUnits, order='F')
+            self._predictedData = StatArray.StatArray([nPoints, self.nChannels], "Predicted Data", dataUnits, order='F')
         
         # Assign the channel names
         if channelNames is None:
@@ -274,10 +266,10 @@ class Data(PointCloud3D):
         """
 
         if system is None:
-            return StatArray(self._data[:, channel], self._channelNames[channel], self._data.units)
+            return StatArray.StatArray(self._data[:, channel], self._channelNames[channel], self._data.units)
         else:
             assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-            return StatArray(self._data[:, self._systemOffset[system] + channel], self._channelNames[self._systemOffset[system] + channel], self._data.units)
+            return StatArray.StatArray(self._data[:, self._systemOffset[system] + channel], self._channelNames[self._systemOffset[system] + channel], self._data.units)
 
 
     def getDataPoint(self, i):
@@ -340,10 +332,10 @@ class Data(PointCloud3D):
         """
 
         if system is None:
-            return StatArray(self._predictedData[:, channel], "Predicted data {}".format(self._channelNames[channel]), self._predictedData.units)
+            return StatArray.StatArray(self._predictedData[:, channel], "Predicted data {}".format(self._channelNames[channel]), self._predictedData.units)
         else:
             assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-            return StatArray(self._predictedData[:, self._systemOffset[system] + channel], "Predicted data {}".format(self._channelNames[self._systemOffset[system] + channel]), self._predictedData.units)
+            return StatArray.StatArray(self._predictedData[:, self._systemOffset[system] + channel], "Predicted data {}".format(self._channelNames[self._systemOffset[system] + channel]), self._predictedData.units)
 
     
     def getStdChannel(self, channel, system=None):
@@ -365,10 +357,10 @@ class Data(PointCloud3D):
         """
 
         if system is None:
-            return StatArray(self._std[:, channel], "Std {}".format(self._channelNames[channel]), self._std.units)
+            return StatArray.StatArray(self._std[:, channel], "Std {}".format(self._channelNames[channel]), self._std.units)
         else:
             assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-            return StatArray(self._std[:, self._systemOffset[system] + channel], "Std {}".format(self._channelNames[self._systemOffset[system] + channel]), self._std.units)
+            return StatArray.StatArray(self._std[:, self._systemOffset[system] + channel], "Std {}".format(self._channelNames[self._systemOffset[system] + channel]), self._std.units)
         
 
     def maketest(self, nPoints, nChannels):

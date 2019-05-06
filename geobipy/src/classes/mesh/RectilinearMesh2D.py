@@ -3,7 +3,7 @@ Module describing a 2D Rectilinear Mesh class with x and y axes specified
 """
 from copy import deepcopy
 from ...classes.core.myObject import myObject
-from ...classes.core.StatArray import StatArray
+from ...classes.core import StatArray
 from .RectilinearMesh1D import RectilinearMesh1D
 import numpy as np
 from scipy.stats import binned_statistic
@@ -375,7 +375,7 @@ class RectilinearMesh2D(myObject):
         
         """
 
-        tmp = StatArray(np.full([self.z.nCells, self.x.nCells], fill_value=np.nan))
+        tmp = StatArray.StatArray(np.full([self.z.nCells, self.x.nCells], fill_value=np.nan))
 
         xtmp = self.getXAxis(xAxis)
 
@@ -386,7 +386,7 @@ class RectilinearMesh2D(myObject):
         assert self.xyz, Exception("To set the distance, the mesh must be instantiated with three co-ordinates")
         dx = np.diff(self.x.cellEdges)
         dy = np.diff(self.y.cellEdges)
-        distance = StatArray(np.zeros(self.x.nEdges), 'Distance', self.x.cellCentres.units)
+        distance = StatArray.StatArray(np.zeros(self.x.nEdges), 'Distance', self.x.cellCentres.units)
         distance[1:] = np.cumsum(np.sqrt(dx**2.0 + dy**2.0))
         self.distance = RectilinearMesh1D(cellEdges = distance)
 
@@ -580,10 +580,10 @@ class RectilinearMesh2D(myObject):
         vtk = self.vtkStructure()
 
         if not pointData is None:
-            assert isinstance(pointData, (StatArray, list)), TypeError("pointData must a geobipy.StatArray or a list of them.")
+            assert isinstance(pointData, (StatArray.StatArray, list)), TypeError("pointData must a geobipy.StatArray or a list of them.")
             if isinstance(pointData, list):
                 for p in pointData:
-                    assert isinstance(p, StatArray), TypeError("pointData entries must be a geobipy.StatArray")
+                    assert isinstance(p, StatArray.StatArray), TypeError("pointData entries must be a geobipy.StatArray")
                     assert all(p.shape == [self.z.nEdges, self.x.nEdges]), ValueError("pointData entries must have shape {}".format([self.z.nEdges, self.x.nEdges]))
                     assert p.hasLabels(), ValueError("StatArray needs a name")
                     vtk.point_data.append(Scalars(p.reshape(self.nNodes), p.getNameUnits()))
@@ -593,15 +593,15 @@ class RectilinearMesh2D(myObject):
                 vtk.point_data.append(Scalars(pointData.reshape(self.nNodes), pointData.getNameUnits()))
 
         if not cellData is None:
-            assert isinstance(cellData, (StatArray, list)), TypeError("cellData must a geobipy.StatArray or a list of them.")
+            assert isinstance(cellData, (StatArray.StatArray, list)), TypeError("cellData must a geobipy.StatArray or a list of them.")
             if isinstance(cellData, list):
                 for p in cellData:
-                    assert isinstance(p, StatArray), TypeError("cellData entries must be a geobipy.StatArray")
-                    assert all(p.shape == self.dims), ValueError("cellData entries must have shape {}".format(self.dims))
+                    assert isinstance(p, StatArray.StatArray), TypeError("cellData entries must be a geobipy.StatArray")
+                    assert all(p.shape == self.shape), ValueError("cellData entries must have shape {}".format(self.shape))
                     assert p.hasLabels(), ValueError("StatArray needs a name")
                     vtk.cell_data.append(Scalars(p.reshape(self.nCells), p.getNameUnits()))
             else:
-                assert all(cellData.shape == self.dims), ValueError("cellData entries must have shape {}".format(self.dims))
+                assert all(cellData.shape == self.shape), ValueError("cellData entries must have shape {}".format(self.shape))
                 assert cellData.hasLabels(), ValueError("StatArray needs a name")
                 vtk.cell_data.append(Scalars(cellData.reshape(self.nCells), cellData.getNameUnits()))
 

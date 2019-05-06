@@ -6,6 +6,7 @@ from .baseDistribution import baseDistribution
 from ...base.HDF.hdfWrite import writeNumpy
 from ...base import customPlots as cP
 import numpy as np
+from ..core import StatArray
 
 
 class Uniform(baseDistribution):
@@ -146,10 +147,10 @@ class Uniform(baseDistribution):
                 bins = np.empty([nD, nBins+1])
                 for i in range(nD):
                     bins[i, :] = np.linspace(self.min[i], self.max[i], nBins+1)
-                return bins
+                return StatArray.StatArray(bins)
             else:
                 bins = np.empty(nBins+1)
                 bins[:] = np.linspace(self.min[dim], self.max[dim], nBins+1)
-                return bins
+                return StatArray.StatArray(bins)
 
-        return np.linspace(self.min, self.max, nBins+1)
+        return StatArray.StatArray(np.linspace(self.min, self.max, nBins+1))

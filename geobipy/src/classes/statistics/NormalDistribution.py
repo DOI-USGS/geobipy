@@ -9,6 +9,7 @@ from ...base.HDF.hdfWrite import writeNumpy
 #from .MvNormalDistribution import MvNormal
 from scipy.stats import norm
 from ...base import customPlots as cP
+from ..core import StatArray
 
 class Normal(baseDistribution):
     """Univariate normal distribution
@@ -129,5 +130,5 @@ class Normal(baseDistribution):
     def getBinEdges(self, nBins = 100, nStd=4.0):
         """ Discretizes a range given the mean and variance of the distribution """
         tmp = nStd * np.sqrt(self.variance)
-        return np.linspace(self.mean - tmp, self.mean + tmp, nBins+1)
+        return StatArray.StatArray(np.linspace(self.mean - tmp, self.mean + tmp, nBins+1))
 

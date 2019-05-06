@@ -1,9 +1,10 @@
 """ @Histogram_Class
 Module describing an efficient histogram class
 """
+from copy import deepcopy
 from ...classes.statistics.Histogram1D import Histogram1D
 from ...classes.mesh.RectilinearMesh2D import RectilinearMesh2D
-from ...classes.core.StatArray import StatArray
+from ...classes.core import StatArray
 from ...base import customPlots as cP
 from ...base.customFunctions import _log
 import numpy as np
@@ -44,7 +45,7 @@ class Histogram2D(RectilinearMesh2D):
         # Instantiate the parent class
         RectilinearMesh2D.__init__(self, xCentres=xBinCentres, xEdges=xBins, yCentres=yBinCentres, yEdges=yBins)
         # Point counts to self.arr to make variable names more intuitive
-        self._counts = StatArray([self.y.nCells, self.x.nCells], name='Frequency', dtype=np.int64)
+        self._counts = StatArray.StatArray([self.y.nCells, self.x.nCells], name='Frequency', dtype=np.int64)
 
         # Add the incoming values as counts to the histogram
         if (not values is None):
@@ -376,10 +377,10 @@ class Histogram2D(RectilinearMesh2D):
         counts = super().intervalStatistic(self._counts, intervals, axis, statistic)
 
         if axis == 0:
-            out = Histogram2D(xBins = self.x.cellEdges, yBins = StatArray(np.asarray(intervals), name=self.y.name(), units=self.y.units()))
+            out = Histogram2D(xBins = self.x.cellEdges, yBins = StatArray.StatArray(np.asarray(intervals), name=self.y.name(), units=self.y.units()))
             out._counts[:] = counts
         else:
-            out = Histogram2D(xBins = StatArray(np.asarray(intervals), name=self.x.name(), units=self.x.units()), yBins = self.y.cellEdges)
+            out = Histogram2D(xBins = StatArray.StatArray(np.asarray(intervals), name=self.x.name(), units=self.x.units()), yBins = self.y.cellEdges)
             out._counts[:] = counts
         return out
 

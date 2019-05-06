@@ -2,7 +2,7 @@
 Module describing a 2D Rectilinear Mesh class with x and y axes specified.  The upper surface of the mesh can be draped.
 """
 from copy import deepcopy
-from ...classes.core.StatArray import StatArray
+from ...classes.core import StatArray
 from .RectilinearMesh1D import RectilinearMesh1D
 from .RectilinearMesh2D import RectilinearMesh2D
 import numpy as np
@@ -97,7 +97,7 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
             assert self.xyz, Exception("To plot against 'r' the mesh must be instantiated with three co-ordinates")
             dx = np.diff(self.x.cellEdges)
             dy = np.diff(self.y.cellEdges)
-            distance = StatArray(np.zeros(self.x.nEdges), 'Distance', self.x.cellCentres.units)
+            distance = StatArray.StatArray(np.zeros(self.x.nEdges), 'Distance', self.x.cellCentres.units)
             distance[1:] = np.cumsum(np.sqrt(dx**2.0 + dy**2.0))
             xMesh = np.repeat(distance[np.newaxis, :], self.z.nCells+1, 0)
 

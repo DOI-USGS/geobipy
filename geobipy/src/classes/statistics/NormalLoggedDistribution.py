@@ -7,6 +7,7 @@ from .baseDistribution import baseDistribution
 import numpy as np
 from ...base.HDF.hdfWrite import writeNumpy
 from .MvNormalLoggedDistribution import MvNormalLog
+from ..core import StatArray
 
 class NormalLog(baseDistribution):
     """ Class defining a normal distribution """
@@ -82,7 +83,7 @@ class NormalLog(baseDistribution):
     def getBinEdges(self, nBins = 100, nStd=4.0):
         """ Discretizes a range given the mean and variance of the distribution """
         tmp = nStd * np.sqrt(self.variance)
-        return np.linspace(self.mean - tmp, self.mean + tmp, nBins+1)
+        return StatArray.StatArray(np.linspace(self.mean - tmp, self.mean + tmp, nBins+1))
 
 #    def hdfName(self):
 #        """ Create the group name for an HDF file """

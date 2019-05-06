@@ -4,7 +4,7 @@ Module describing a frequency domain EM acquisition system
 from copy import deepcopy
 from ...classes.core.myObject import myObject
 import numpy as np
-from ...classes.core.StatArray import StatArray
+from ...classes.core import StatArray
 from .CircularLoop import CircularLoop
 from ...base import fileIO as fIO
 from ...base import MPI as myMPI
@@ -26,13 +26,13 @@ class FdemSystem(myObject):
         # Number of Frequencies
         self._nFrequencies = np.int64(nFrequencies)
         # StatArray of frequencies
-        self._frequencies = StatArray(self.nFrequencies, "Frequencies", "Hz")
+        self._frequencies = StatArray.StatArray(self.nFrequencies, "Frequencies", "Hz")
         # StatArray of Transmitter loops
-        self.T = StatArray(self.nFrequencies, "Transmitter Loops", dtype=CircularLoop)
+        self.T = StatArray.StatArray(self.nFrequencies, "Transmitter Loops", dtype=CircularLoop)
         # StatArray of Reciever loops
-        self.R = StatArray(self.nFrequencies, "Reciever Loops", dtype=CircularLoop)
+        self.R = StatArray.StatArray(self.nFrequencies, "Reciever Loops", dtype=CircularLoop)
         # StatArray of Loop Separations
-        self.dist = StatArray(self.nFrequencies, "Loop Separations", "m")
+        self.dist = StatArray.StatArray(self.nFrequencies, "Loop Separations", "m")
         # Instantiate the circularLoops
         for i in range(self.nFrequencies):
             self.T[i] = CircularLoop()

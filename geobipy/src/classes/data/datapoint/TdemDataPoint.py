@@ -1,5 +1,5 @@
 from copy import deepcopy
-from ....classes.core.StatArray import StatArray
+from ....classes.core import StatArray
 from ...model.Model import Model
 from .EmDataPoint import EmDataPoint
 from ...system.EmLoop import EmLoop
@@ -639,7 +639,7 @@ class TdemDataPoint(EmDataPoint):
 
         assert isinstance(mod, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
 
-        return StatArray(self._sensitivity1D(mod, ix, scale, modelChanged), 'Sensitivity', '$\\frac{V}{ASm^{3}}$')
+        return StatArray.StatArray(self._sensitivity1D(mod, ix, scale, modelChanged), 'Sensitivity', '$\\frac{V}{ASm^{3}}$')
 
 
     def _forward1D(self, mod):
@@ -791,7 +791,7 @@ class TdemDataPoint(EmDataPoint):
             for i in range(nSystems):
                 systems.append(world.irecv(source=source).wait())
 
-        s = StatArray(0)
+        s = StatArray.StatArray(0)
         d = s.Irecv(source, world)
         s = s.Irecv(source, world)
         p = s.Irecv(source, world)

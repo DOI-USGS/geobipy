@@ -2,7 +2,7 @@
 Module describing a frequency domain EMData Point that contains a single measurement.
 """
 from copy import copy, deepcopy
-from ....classes.core.StatArray import StatArray
+from ....classes.core import StatArray
 #from ...forwardmodelling.EMfor1D_F import fdem1dfwd
 from ...forwardmodelling.EMfor1D_F import fdem1dfwd, fdem1dsen
 from .EmDataPoint import EmDataPoint
@@ -95,7 +95,7 @@ class FdemDataPoint(EmDataPoint):
 
         # StatArray of calibration parameters
         # The four columns are Bias,Variance,InphaseBias,QuadratureBias.
-        self.calibration = StatArray([self.nChannels * 2], 'Calibration Parameters')
+        self.calibration = StatArray.StatArray([self.nChannels * 2], 'Calibration Parameters')
 
         k = 0
         for i in range(self.nSystems):
@@ -152,7 +152,7 @@ class FdemDataPoint(EmDataPoint):
 
     def frequencies(self, system=0):
         """ Return the frequencies in an StatArray """
-        return StatArray(self.system[system].frequencies, name='Frequency', units='Hz')
+        return StatArray.StatArray(self.system[system].frequencies, name='Frequency', units='Hz')
 
     
     def inphase(self, system=0):
@@ -205,6 +205,7 @@ class FdemDataPoint(EmDataPoint):
     
     def __deepcopy__(self):
         """ Define a deepcopy routine """
+        
         tmp = FdemDataPoint(self.x, self.y, self.z, self.elevation, self._data, self._std, self._predictedData, self.system, self.lineNumber, self.fiducial)
         # StatArray of Relative Errors
         tmp.relErr = self.relErr.deepcopy()
@@ -556,7 +557,7 @@ class FdemDataPoint(EmDataPoint):
 
         assert isinstance(mod, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
 
-        return StatArray(self._sensitivity1D(mod, scale), 'Sensitivity', '$\\frac{ppm.m}{S}$')
+        return StatArray.StatArray(self._sensitivity1D(mod, scale), 'Sensitivity', '$\\frac{ppm.m}{S}$')
 
 
     def _forward1D(self, mod):
@@ -611,7 +612,7 @@ class FdemDataPoint(EmDataPoint):
             for i in range(nSystems):
                 systems.append(fs.Irecv(source=source, world=world))
 
-        s = StatArray(0)
+        s = StatArray.StatArray(0)
         d = s.Irecv(source, world)
         s = s.Irecv(source, world)
         p = s.Irecv(source, world)

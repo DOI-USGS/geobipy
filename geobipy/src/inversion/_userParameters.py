@@ -4,7 +4,7 @@ This provides a bit more robust checking when the user is new to the codes, and 
 """
 #from ..base import Error as Err
 from ..classes.core.myObject import myObject
-from ..classes.core.StatArray import StatArray
+from ..classes.core import StatArray
 from ..classes.data.datapoint.FdemDataPoint import FdemDataPoint
 from ..classes.data.datapoint.TdemDataPoint import TdemDataPoint
 from ..classes.statistics.Hitmap2D import Hitmap2D
@@ -31,19 +31,19 @@ class _userParameters(myObject):
             self.minimumThickness = np.float64(self.minimumThickness)
 
 
-        self.initialRelativeError = StatArray(Datapoint.nSystems, 'Relative Error') + self.initialRelativeError
-        self.minimumRelativeError = StatArray(Datapoint.nSystems, 'Minimum Relative Error') + self.minimumRelativeError
-        self.maximumRelativeError = StatArray(Datapoint.nSystems, 'Maximum Relative Error') + self.maximumRelativeError
+        self.initialRelativeError = StatArray.StatArray(Datapoint.nSystems, 'Relative Error') + self.initialRelativeError
+        self.minimumRelativeError = StatArray.StatArray(Datapoint.nSystems, 'Minimum Relative Error') + self.minimumRelativeError
+        self.maximumRelativeError = StatArray.StatArray(Datapoint.nSystems, 'Maximum Relative Error') + self.maximumRelativeError
 
-        self.initialAdditiveError = StatArray(Datapoint.nSystems, 'Additive Error') + self.initialAdditiveError
-        self.minimumAdditiveError = StatArray(Datapoint.nSystems, 'Minimum Additive Error') + self.minimumAdditiveError
-        self.maximumAdditiveError = StatArray(Datapoint.nSystems, 'Maximum Additive Error') + self.maximumAdditiveError
+        self.initialAdditiveError = StatArray.StatArray(Datapoint.nSystems, 'Additive Error') + self.initialAdditiveError
+        self.minimumAdditiveError = StatArray.StatArray(Datapoint.nSystems, 'Minimum Additive Error') + self.minimumAdditiveError
+        self.maximumAdditiveError = StatArray.StatArray(Datapoint.nSystems, 'Maximum Additive Error') + self.maximumAdditiveError
 
         self.maximumElevationChange = np.float64(self.maximumElevationChange)
 
-        self.relativeErrorProposalVariance = StatArray(Datapoint.nSystems, 'Proposal relative error') + self.relativeErrorProposalVariance
+        self.relativeErrorProposalVariance = StatArray.StatArray(Datapoint.nSystems, 'Proposal relative error') + self.relativeErrorProposalVariance
         # Proposal variance for the additive error
-        self.additiveErrorProposalVariance = StatArray(Datapoint.nSystems, 'Proposal additive error') + self.additiveErrorProposalVariance
+        self.additiveErrorProposalVariance = StatArray.StatArray(Datapoint.nSystems, 'Proposal additive error') + self.additiveErrorProposalVariance
         # Proposal variance of the elevation
         self.elevationProposalVariance = np.float64(self.elevationProposalVariance)
 
@@ -80,15 +80,15 @@ class _userParameters(myObject):
 
         ## Prior Means for gain, phase, InPhase Bias and Quadrature Bias
         if (self.solveCalibration):
-            tmp = StatArray(4)
+            tmp = StatArray.StatArray(4)
             tmp += [1.0,0.0,0.0,0.0]
-            self.calMean = StatArray([N,4],'prior calibration means')
+            self.calMean = StatArray.StatArray([N,4],'prior calibration means')
             for i in range(N):
                 self.calMean[i,:] = tmp
             ## Prior variance for gain, phase, InPhase Bias and Quadrature Bias
-            tmp = StatArray(4)
+            tmp = StatArray.StatArray(4)
             tmp += [.0225,.0019,19025.0,19025.0]
-            self.calVar = StatArray([N,4],'prior calibration variance')
+            self.calVar = StatArray.StatArray([N,4],'prior calibration variance')
             for i in range(N):
                 self.calVar[i,:] = tmp
         

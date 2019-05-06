@@ -13,7 +13,7 @@ import numpy as np
 from ..base import fileIO as fIO
 import h5py
 from ..base.HDF.hdfWrite import writeNumpy
-from ..classes.core.StatArray import StatArray
+from ..classes.core import StatArray
 from ..classes.statistics.Hitmap2D import Hitmap2D
 from ..classes.statistics.Histogram1D import Histogram1D
 from ..classes.statistics.Distribution import Distribution
@@ -119,13 +119,13 @@ class Results(myObject):
         self.nMC = np.int64(nMarkovChains)
         # Initialize a list of iteration number (This might seem like a waste of memory, but is faster than calling np.arange(nMC) every time)
         # StatArray of precomputed integers
-        self.iRange = StatArray(np.arange(2 * self.nMC), name="Iteration #", dtype=np.int64)
+        self.iRange = StatArray.StatArray(np.arange(2 * self.nMC), name="Iteration #", dtype=np.int64)
         # Initialize the current iteration number
         # Current iteration number
         self.i = np.int64(0)
         # Initialize the vectors to save results
         # StatArray of the data misfit
-        self.PhiDs = StatArray(2 * self.nMC, name = 'Data Misfit')
+        self.PhiDs = StatArray.StatArray(2 * self.nMC, name = 'Data Misfit')
         # Multiplier for discrepancy principle
         self.multiplier = np.float64(0.0)
         # Initialize the acceptance level
@@ -133,14 +133,13 @@ class Results(myObject):
         self.acceptance = 0.0
 #    self.rate=np.zeros(np.int(self.nMC/1000)+1)
         n = 2 * np.int(self.nMC / 1000)
-        self.rate = StatArray(n, name='% Acceptance')
-        self.ratex = StatArray(np.arange(1, n + 1) * 1000, name='Iteration #')
+        self.rate = StatArray.StatArray(n, name='% Acceptance')
+        self.ratex = StatArray.StatArray(np.arange(1, n + 1) * 1000, name='Iteration #')
         # Initialize the burned in state
         self.iBurn = self.nMC
         self.burnedIn = False
         # Initialize the index for the best model
         self.iBest = 0
-        self.iBestV = StatArray(2*self.nMC, name='Iteration of best model')
 
         # Initialize the number of layers for the histogram
 
@@ -172,6 +171,7 @@ class Results(myObject):
         mGrd = StatArray(
                 np.logspace(np.log10(np.exp(priMu - tmp)), np.log10(np.exp(priMu + tmp)), 250), 
                 'Conductivity', '$Sm^{-1}$')
+        self.iBestV = StatArray.StatArray(2*self.nMC, name='Iteration of best model')
 
         self.iz = np.arange(zGrd.size)
 
@@ -180,15 +180,15 @@ class Results(myObject):
         # Initialize the doi
         self.doi = self.Hitmap.y.cellCentres[0]
 
-        self.meanInterp = StatArray(zGrd.size)
-        self.bestInterp = StatArray(zGrd.size)
-        self.opacityInterp = StatArray(zGrd.size)
 
         # Initialize the Elevation Histogram
         self.DzHist = Histogram1D(bins = StatArray(dataPoint.z.prior.getBinEdges(), name=dataPoint.z.name, units=dataPoint.z.units))
 
         # Initialize the Model Depth Histogram
         self.MzHist = Histogram1D(binCentres = zGrd)
+        self.meanInterp = StatArray.StatArray(model.par.posterior.y.nCells)
+        self.bestInterp = StatArray.StatArray(model.par.posterior.y.nCells)
+        self.opacityInterp = StatArray.StatArray(model.par.posterior.y.nCells)
 
         # Set a tag to catch data points that are not minimizing
         self.zeroCount = 0
@@ -212,11 +212,11 @@ class Results(myObject):
 
         self.verbose = verbose
         if verbose:
-            self.allRelErr = StatArray([self.nSystems, self.nMC], name='$\epsilon_{Relative}x10^{2}$', units='%')
-            self.allAddErr = StatArray([self.nSystems, self.nMC], name='$\epsilon_{Additive}$', units=dataPoint.d.units)
-            self.allZ = StatArray(self.nMC, name='Height', units='m')
-            self.posterior = StatArray(self.nMC, name='log(posterior)')
-            self.posteriorComponents = StatArray([9, self.nMC], 'Components of the posterior')
+            self.allRelErr = StatArray.StatArray([self.nSystems, self.nMC], name='$\epsilon_{Relative}x10^{2}$', units='%')
+            self.allAddErr = StatArray.StatArray([self.nSystems, self.nMC], name='$\epsilon_{Additive}$', units=dataPoint.d.units)
+            self.allZ = StatArray.StatArray(self.nMC, name='Height', units='m')
+            self.posterior = StatArray.StatArray(self.nMC, name='log(posterior)')
+            self.posteriorComponents = StatArray.StatArray([9, self.nMC], 'Components of the posterior')
 
 
 #         Initialize and save the first figure

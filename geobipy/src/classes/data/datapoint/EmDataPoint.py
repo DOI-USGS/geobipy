@@ -1,6 +1,6 @@
 from .DataPoint import DataPoint
 from ...model.Model1D import Model1D
-from ....classes.core.StatArray import StatArray
+from ....classes.core import StatArray
 from ....base import customFunctions as cf
 from ....base import customPlots as cP
 import numpy as np
@@ -25,9 +25,9 @@ class EmDataPoint(DataPoint):
         DataPoint.__init__(self, nChannelsPerSystem, x, y, z, elevation, data, std, predictedData, dataUnits, channelNames)
 
         # StatArray of Relative Errors
-        self.relErr = StatArray(self.nSystems, '$\epsilon_{Relative}x10^{2}$', '%')
+        self.relErr = StatArray.StatArray(self.nSystems, '$\epsilon_{Relative}x10^{2}$', '%')
         # StatArray of Additive Errors
-        self.addErr = StatArray(self.nSystems, '$\epsilon_{Additive}$', self._data.units)
+        self.addErr = StatArray.StatArray(self.nSystems, '$\epsilon_{Additive}$', self._data.units)
         # Initialize the sensitivity matrix
         self.J = None
 
@@ -230,8 +230,8 @@ class EmDataPoint(DataPoint):
 
         """
 
-        c = StatArray(np.logspace(minConductivity, maxConductivity, nSamples), 'Conductivity', '$S/m$')
-        PhiD = StatArray(c.size, 'Data Misfit', '')
+        c = StatArray.StatArray(np.logspace(minConductivity, maxConductivity, nSamples), 'Conductivity', '$S/m$')
+        PhiD = StatArray.StatArray(c.size, 'Data Misfit', '')
         mod = Model1D(1)
         for i in range(c.size):
             mod.par[0] = c[i]

@@ -2,9 +2,10 @@
 Module describing a 2D Rectilinear Mesh class with x and y axes specified
 """
 #from ...base import Error as Err
+from copy import deepcopy
 import numpy as np
 from ...base.customFunctions import safeEval
-from ..core.StatArray import StatArray
+from ..core import StatArray
 from ..mesh.RectilinearMesh1D import RectilinearMesh1D
 from .Histogram2D import Histogram2D
 from ...base.customFunctions import isInt

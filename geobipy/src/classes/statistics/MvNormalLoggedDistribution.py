@@ -7,6 +7,7 @@ import numpy as np
 from .baseDistribution import baseDistribution
 from ...base import customFunctions as cf
 from ...base.HDF.hdfWrite import writeNumpy
+from ..core import StatArray
 
 class MvNormalLog(baseDistribution):
     """ Class defining a normal distribution """
@@ -153,12 +154,12 @@ class MvNormalLog(baseDistribution):
                 for i in range(nD):
                     tmp = nStd * np.sqrt(self.variance[i])
                     bins[i, :] = np.linspace(self.mean[i] - tmp, self.mean[i] + tmp, nBins+1)
-                return bins
+                return StatArray.StatArray(bins)
             else:
                 bins = np.empty(nBins+1)
                 tmp = nStd * np.sqrt(self.variance[dim])
                 bins[:] = np.linspace(self.mean[dim] - tmp, self.mean[dim] + tmp, nBins+1)
-                return bins
+                return StatArray.StatArray(bins)
 
         tmp = nStd * np.sqrt(self.variance)
-        return np.linspace(self.mean - tmp, self.mean + tmp, nBins+1)
+        return StatArray.StatArray(np.linspace(self.mean - tmp, self.mean + tmp, nBins+1))

@@ -2,7 +2,7 @@
 Module describing an efficient histogram class
 """
 from ...classes.mesh.RectilinearMesh1D import RectilinearMesh1D
-from ...classes.core.StatArray import StatArray
+from ...classes.core import StatArray
 from ...base import customFunctions as cF
 from ...base import customPlots as cP
 import numpy as np
@@ -42,26 +42,26 @@ class Histogram1D(RectilinearMesh1D):
 
         if not log is None:
             if not bins is None:
-                assert isinstance(bins, StatArray), TypeError("bins must be a geobpiy.StatArray")
+                assert isinstance(bins, StatArray.StatArray), TypeError("bins must be a geobpiy.StatArray")
                 bins, label = cF._log(bins, log=log)
                 bins.name = label + bins.getName()
             if not binCentres is None:
-                assert isinstance(binCentres, StatArray), TypeError("binCentres must be a geobpiy.StatArray")
+                assert isinstance(binCentres, StatArray.StatArray), TypeError("binCentres must be a geobpiy.StatArray")
                 binCentres, label = cF._log(binCentres, log=log)
                 binCentres.name = label + binCentres.getName()
 
         # Initialize the parent class
         super().__init__(cellEdges=bins, cellCentres=binCentres)
 
-        self._counts = StatArray(self.nCells, 'Frequency', dtype=np.int64)
+        self._counts = StatArray.StatArray(self.nCells, 'Frequency', dtype=np.int64)
 
         self.log = log
+        self.relativeTo = None if relativeTo is None else StatArray.StatArray(relativeTo)
 
 
     @property
     def counts(self):
         return self._counts
-
     
     @property
     def bins(self):

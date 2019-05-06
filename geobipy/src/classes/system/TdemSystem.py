@@ -1,7 +1,7 @@
 import numpy as np
 from ...classes.core.myObject import myObject
 from ...base import fileIO as fIO
-from ...classes.core.StatArray import StatArray
+from ...classes.core import StatArray
 
 try:
     from gatdaem1d import TDAEMSystem
@@ -36,7 +36,7 @@ try:
         @property
         def times(self):
             """Time windows."""
-            return StatArray(self.windows.centre, name='Time', units='s')
+            return StatArray.StatArray(self.windows.centre, name='Time', units='s')
             
 
         def read(self, systemFilename):

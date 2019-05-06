@@ -2,7 +2,7 @@
 Module describing a 1D Rectilinear Mesh class
 """
 from ...classes.core.myObject import myObject
-from ...classes.core.StatArray import StatArray
+from ...classes.core import StatArray
 from copy import deepcopy
 import numpy as np
 from ...base import customFunctions as cf
@@ -64,7 +64,8 @@ class RectilinearMesh1D(myObject):
                 self._cellCentres = cellCentres._cellCentres.deepcopy()
                 self._cellEdges = cellCentres._cellEdges.deepcopy()
             else:
-                assert isinstance(cellCentres, StatArray), TypeError("cellCentres must be a geobipy.StatArray")
+                if not isinstance(cellCentres, StatArray.StatArray):
+                    cellCentres = StatArray.StatArray(cellCentres)
                 ## StatArray of the x axis values
                 self._cellCentres = cellCentres.deepcopy()
                 self._cellEdges = self._cellCentres.edges(min=edgesMin, max=edgesMax)
@@ -74,9 +75,11 @@ class RectilinearMesh1D(myObject):
                 self._cellCentres = cellEdges._cellCentres.deepcopy()
                 self._cellEdges = cellEdges._cellEdges.deepcopy()
             else:
-                assert isinstance(cellEdges, StatArray), TypeError("cellEdges must be a geobipy.StatArray")
+                if not isinstance(cellEdges, StatArray.StatArray):
+                    cellEdges = StatArray.StatArray(cellEdges)
                 self._cellEdges = cellEdges.deepcopy()
-                self._cellCentres = cellEdges[:-1] + 0.5 * np.abs(np.diff(cellEdges))
+                
+                self._cellCentres = cellEdges.internalEdges()
 
         # Set some extra variables for speed
         # Is the discretization regular
@@ -246,7 +249,7 @@ class RectilinearMesh1D(myObject):
 
         """
 
-        x = StatArray(np.full(self.nCells, np.nan))
+        x = StatArray.StatArray(np.full(self.nCells, np.nan))
         x.pcolor(y = self.cellEdges, grid=True, noColorbar=True, **kwargs)
 
 

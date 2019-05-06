@@ -2,7 +2,7 @@
 Module describing a 1 Dimensional layered Model
 """
 #from ...base import Error as Err
-from ...classes.core.StatArray import StatArray
+from ...classes.core import StatArray
 from .Model import Model
 from ..mesh.RectilinearMesh2D import RectilinearMesh2D
 from ..statistics.Hitmap2D import Hitmap2D
@@ -66,7 +66,7 @@ class Model1D(Model):
         assert (not(not thickness is None and not depth is None)), TypeError('Cannot instantiate with both depth and thickness values')
 
         # Number of Cells in the model
-        self.nCells = StatArray(1, '# of Cells', dtype=np.int32)
+        self.nCells = StatArray.StatArray(1, '# of Cells', dtype=np.int32)
         if not nCells is None:
             assert (nCells >= 1), ValueError('nCells must >= 1')
             self.nCells[0] = nCells
@@ -74,8 +74,7 @@ class Model1D(Model):
         # Depth to the top of the model
         if top is None: 
             top = 0.0
-        self.top = StatArray(1) + top
-        
+        self.top = StatArray.StatArray(top, "Depth to top", "m")
 
         if hasHalfspace:
             self._init_withHalfspace(nCells, top, parameters, depth, thickness)
@@ -83,25 +82,25 @@ class Model1D(Model):
             self._init_withoutHalfspace(nCells, top, parameters, depth, thickness)
 
         # StatArray of the change in physical parameters
-        self.dpar = StatArray(self.nCells[0] - 1, 'Derivative', r"$\frac{"+self.par.getUnits()+"}{m}$")
+        self.dpar = StatArray.StatArray(self.nCells[0] - 1, 'Derivative', r"$\frac{"+self.par.getUnits()+"}{m}$")
 
         # StatArray of magnetic properties.
-        self.chie = StatArray(self.nCells[0], "Magnetic Susceptibility", r"$\kappa$")
-        self.chim = StatArray(self.nCells[0], "Magnetic Permeability", "$\frac{H}{m}$")
+        self.chie = StatArray.StatArray(self.nCells[0], "Magnetic Susceptibility", r"$\kappa$")
+        self.chim = StatArray.StatArray(self.nCells[0], "Magnetic Permeability", "$\frac{H}{m}$")
 
-        # Initialize Minimum cell thickness
+        # Instantiate extra parameters for Markov chain perturbations.
+        # Minimum cell thickness
         self.minThickness = None
-        # Initialize a minimum depth
+        # Minimum depth
         self.minDepth = None
-        # Initialize a maximum depth
+        # Maximum depth
         self.maxDepth = None
-        # Initialize a maximum number of layers
+        # Maximum number of layers
         self.maxLayers = None
-        # Initialize a probability wheel
+        # Probability wheel
         self.pWheel = None
         # Set an index that keeps track of the last layer to be perturbed
-        self.iLayer = np.int32(-1)
-
+        self.perturbedLayer = np.int32(-1)
         self.Hitmap = None
 
 
@@ -113,9 +112,9 @@ class Model1D(Model):
         if (not thickness is None and nCells is None):
             self.nCells[0] = thickness.size + 1
 
-        self.depth = StatArray(self.nCells[0], 'Depth', 'm')
-        self.thk = StatArray(self.nCells[0], 'Thickness', 'm')
-        self.par = StatArray(self.nCells[0])
+        self.depth = StatArray.StatArray(self.nCells[0], 'Depth', 'm')
+        self.thk = StatArray.StatArray(self.nCells[0], 'Thickness', 'm')
+        self.par = StatArray.StatArray(self.nCells[0])
 
         if (not depth is None):
             if (self.nCells > 1):
@@ -139,7 +138,7 @@ class Model1D(Model):
         # StatArray of the physical parameters
         if (not parameters is None):
             assert parameters.size == self.nCells, ValueError('Size of parameters must equal {}'.format(self.nCells[0]))
-            self.par = StatArray(parameters)
+            self.par = StatArray.StatArray(parameters)
 
 
     def _init_withoutHalfspace(self, nCells = None, top = None, parameters = None, depth = None, thickness = None):
@@ -150,9 +149,9 @@ class Model1D(Model):
         if (not thickness is None and nCells is None):
             self.nCells[0] = thickness.size
 
-        self.depth = StatArray(self.nCells[0], 'Depth', 'm')
-        self.thk = StatArray(self.nCells[0], 'Thickness', 'm')
-        self.par = StatArray(self.nCells[0])
+        self.depth = StatArray.StatArray(self.nCells[0], 'Depth', 'm')
+        self.thk = StatArray.StatArray(self.nCells[0], 'Thickness', 'm')
+        self.par = StatArray.StatArray(self.nCells[0])
 
         if (not depth is None):
             if (self.nCells > 1):
@@ -173,7 +172,7 @@ class Model1D(Model):
         # StatArray of the physical parameters
         if (not parameters is None):
             assert parameters.size == self.nCells, ValueError('Size of parameters must equal {}'.format(self.nCells[0]))
-            self.par = StatArray(parameters)
+            self.par = StatArray.StatArray(parameters)
 
 
     def deepcopy(self):
@@ -427,11 +426,11 @@ class Model1D(Model):
         # Get the new thicknesses
         other.thicknessFromDepth()
         # Reset ChiE and ChiM
-        other.chie = StatArray(other.nCells[0], "Electric Susceptibility", r"$\kappa$")
-        other.chim = StatArray(other.nCells[0], "Magnetic Susceptibility", r"$\frac{H}{m}$")
+        other.chie = StatArray.StatArray(other.nCells[0], "Electric Susceptibility", r"$\kappa$")
+        other.chim = StatArray.StatArray(other.nCells[0], "Magnetic Susceptibility", r"$\frac{H}{m}$")
         # Resize the parameter gradient
         other.dpar = other.dpar.resize(other.par.size - 1)
-        other.iLayer = i
+        other.perturbedLayer = i
         return other
 
 
@@ -1452,7 +1451,7 @@ class Model1D(Model):
         #obj = obj.resize(tmp.nCells[0]); tmp.chim = obj.fromHdf(item, index=i)
 
         if (tmp.nCells[0] > 0):
-            tmp.dpar = StatArray(tmp.nCells[0] - 1, 'Derivative', tmp.par.units + '/m')
+            tmp.dpar = StatArray.StatArray(tmp.nCells[0] - 1, 'Derivative', tmp.par.units + '/m')
         else:
             tmp.dpar = None
 

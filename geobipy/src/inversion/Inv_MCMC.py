@@ -6,7 +6,7 @@ from ..classes.core.Stopwatch import Stopwatch
 from ..classes.data.dataset.FdemData import FdemData
 from ..classes.data.dataset.TdemData import TdemData
 from ..classes.model.Model1D import Model1D
-from ..classes.core.StatArray import StatArray
+from ..classes.core import StatArray
 from ..classes.statistics.Distribution import Distribution
 from ..base.customFunctions import expReal as mExp
 from scipy import sparse

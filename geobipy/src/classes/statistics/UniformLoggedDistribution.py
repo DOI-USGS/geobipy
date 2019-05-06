@@ -7,6 +7,7 @@ from .UniformDistribution import Uniform
 from ...base.HDF.hdfWrite import writeNumpy
 from ...base import customPlots as cP
 import numpy as np
+from ..core import StatArray
 
 
 class UniformLog(Uniform):
@@ -82,10 +83,10 @@ class UniformLog(Uniform):
                 bins = np.empty([nD, nBins+1])
                 for i in range(nD):
                     bins[i, :] = np.linspace(self.min[i], self.max[i], nBins+1)
-                return bins
+                return StatArray.StatArray(np.squeeze(bins))
             else:
                 bins = np.empty(nBins+1)
                 bins[:] = np.linspace(self.min[dim], self.max[dim], nBins+1)
-                return bins
+                return StatArray.StatArray(np.squeeze(bins))
 
-        return np.linspace(self.min, self.max, nBins+1)
+        return StatArray.StatArray(np.squeeze(np.linspace(self.min, self.max, nBins+1)))
