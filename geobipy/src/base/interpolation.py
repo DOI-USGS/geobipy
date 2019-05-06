@@ -1,7 +1,7 @@
 import subprocess
 import numpy as np
 from .fileIO import deleteFile
-from ..classes.core.StatArray import StatArray
+from ..classes.core import StatArray
 from . import customFunctions as cf
 from scipy.interpolate import CloughTocher2DInterpolator
 from scipy.interpolate.interpnd import _ndim_coords_from_arrays
@@ -54,7 +54,7 @@ def CT(dx, dy, bounds, XY, values, mask = False, kdtree = None, clip = False, ex
     vals = f(intPoints)
 
     # Reshape to a 2D array
-    vals = StatArray(vals.reshape(yc.size,xc.size),name=cf.getName(values), units = cf.getUnits(values))
+    vals = StatArray.StatArray(vals.reshape(yc.size,xc.size),name=cf.getName(values), units = cf.getUnits(values))
 
     if mask or extrapolate:
         if (kdtree is None):
@@ -158,7 +158,7 @@ def minimumCurvature(x, y, values, bounds, dx, dy, mask=False, clip=True, iterat
         
     deleteFile('tmp.txt')
     
-    vals=StatArray(vals,name=cf.getName(values), units = cf.getUnits(values))
+    vals=StatArray.StatArray(vals,name=cf.getName(values), units = cf.getUnits(values))
     return x,y,vals
 
 def getGridLocations2D(bounds, dx, dy):
