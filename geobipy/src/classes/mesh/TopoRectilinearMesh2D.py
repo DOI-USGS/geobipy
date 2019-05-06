@@ -164,7 +164,7 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
 
         """
         # assert isinstance(values, StatArray), TypeError("values must be a StatArray")
-        assert np.all(values.shape == self.dims), ValueError("values must have shape {}".format(self.dims))
+        assert np.all(values.shape == self.shape), ValueError("values must have shape {}".format(self.shape))
 
         self.setXMesh(xAxis=xAxis)
         pm = cP.pcolormesh(self._xMesh, self._zMesh, values, **kwargs)
