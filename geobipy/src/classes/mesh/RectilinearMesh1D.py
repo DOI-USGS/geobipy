@@ -154,7 +154,7 @@ class RectilinearMesh1D(myObject):
         return self._cellCentres.getUnits
 
 
-    def cellIndex(self, values, clip=False):
+    def cellIndex(self, values, clip=False, trim=False):
         """ Get the index to the cell that each value in values falls in.
 
         Parameters
@@ -163,6 +163,8 @@ class RectilinearMesh1D(myObject):
             The values to find the cell indices for
         clip : bool
             A negative index which would normally wrap will clip to 0 and self.bins.size instead.
+        trim : bool
+            Do not include out of axis indices. Negates clip, since they wont be included in the output.
     
         Returns
         -------
@@ -171,21 +173,43 @@ class RectilinearMesh1D(myObject):
 
         """
 
+        # Get the bin indices for all values
         if self.isRegular():
             iBin = np.int64((values - self._cellCentres[0]) / self.dx)
-            if not clip:
-                return np.squeeze(iBin[(iBin >= 0) & (iBin < self.nCells)])
-            iBin = np.maximum(iBin,0)
-            iBin = np.minimum(iBin, self.nCells - 1)
         else:
-            iBin = self._cellEdges.searchsorted(values, side='right')
-            iBin -= 1
-            if not clip:
-                return np.squeeze(iBin[(iBin >= 0) & (iBin < self.nCells)])
-            iBin = np.maximum(iBin,0)
-            iBin = np.minimum(iBin,self.nCells - 1)
+            iBin = self._cellEdges.searchsorted(values, side='right') - 1
+        
+        # Remove indices that are out of bounds
+        if trim:
+            iBin = iBin[(values >= self._cellEdges[0]) & (values < self._cellEdges[-1])]
+        else:
+            # Force out of bounds to be in bounds if we are clipping
+            if clip:
+                iBin = np.maximum(iBin, 0)
+                iBin = np.minimum(iBin, self.nCells - 1)
+            # Make sure values outside the lower edge are -1
+            else:
+                iBin[values < self._cellEdges[0]] = -1
+                iBin[values >= self._cellEdges[-1]] = self.nCells
 
         return np.squeeze(iBin)
+
+
+    def inBounds(self, values):
+        """Return whether values are inside the cell edges
+        
+        Parameters
+        ----------
+        values : array_like
+            Check if these are inside left <= values < right.
+            
+        Returns
+        -------
+        out : bools
+            Are the values inside.
+            
+        """
+        return (values >= self._cellEdges[0]) & (values < self._cellEdges[-1])
 
 
     def pcolor(self, values, **kwargs):
@@ -232,10 +256,12 @@ class RectilinearMesh1D(myObject):
 
         """
 
-        assert isinstance(values, StatArray), TypeError("arr must be a StatArray")
+        assert isinstance(values, StatArray.StatArray), TypeError("arr must be a StatArray")
         assert values.size == self.nCells, ValueError("arr must have size nCell {}".format(self.nCells))
 
-        ax = values.pcolor(y = self.cellEdges, **kwargs)
+        kwargs['y'] = kwargs.pop('y', self.cellEdges)
+
+        ax = values.pcolor(**kwargs)
         
         return ax
 
@@ -297,7 +323,9 @@ class RectilinearMesh1D(myObject):
         return res
 
 
-    def summary(self):
+    def summary(self, out=False):
         """ Print a summary of self """
-        self._cellCentres.summary()
+        msg = self._cellCentres.summary(True)
+
+        return msg if out else print(msg)
 
