@@ -1,5 +1,5 @@
 from ...pointcloud.Point import Point
-from ....classes.core.StatArray import StatArray
+from ....classes.core import StatArray
 from ....base import customFunctions as cf
 from ....base import customPlots as cP
 from ....base import MPI as myMPI
@@ -57,16 +57,16 @@ class DataPoint(Point):
         # StatArray of data
         if not elevation is None:
             # assert np.size(elevation) == 1, ValueError("elevation must be single float")
-            self._elevation = StatArray(elevation, "Elevation", "m", order='F')
+            self._elevation = StatArray.StatArray(elevation, "Elevation", "m", order='F')
         else:
-            self._elevation = StatArray(1, "Elevation", "m")
+            self._elevation = StatArray.StatArray(1, "Elevation", "m")
 
         # StatArray of data
         if not data is None:
             assert np.size(data) == self.nChannels, ValueError("data must have size {}".format(self.nChannels))
-            self._data = StatArray(data, "Data", dataUnits, order='F')
+            self._data = StatArray.StatArray(data, "Data", dataUnits, order='F')
         else:
-            self._data = StatArray(self.nChannels, "Data", dataUnits, order='F')
+            self._data = StatArray.StatArray(self.nChannels, "Data", dataUnits, order='F')
 
         # Index to non NaN values
         self.iActive = self.getActiveData()
@@ -75,17 +75,17 @@ class DataPoint(Point):
         if not std is None:
             assert np.size(std) == self.nChannels, ValueError("std must have size {}".format(self.nChannels))
             assert np.all(std[self.iActive] > 0.0), ValueError("Cannot assign standard deviations that are <= 0.0.")
-            self._std = StatArray(std, "Standard Deviation", dataUnits, order='F')
+            self._std = StatArray.StatArray(std, "Standard Deviation", dataUnits, order='F')
         else:
-            self._std = StatArray(np.ones(self.nChannels), "Standard Deviation", dataUnits, order='F')
+            self._std = StatArray.StatArray(np.ones(self.nChannels), "Standard Deviation", dataUnits, order='F')
         
         
         # Create predicted data
         if not predictedData is None:
             assert np.size(predictedData) == self.nChannels, ValueError("predictedData must have size {}".format(self.nChannels))
-            self._predictedData = StatArray(predictedData, "Predicted Data", dataUnits, order='F')
+            self._predictedData = StatArray.StatArray(predictedData, "Predicted Data", dataUnits, order='F')
         else:
-            self._predictedData = StatArray(self.nChannels, "Predicted Data", dataUnits, order='F')
+            self._predictedData = StatArray.StatArray(self.nChannels, "Predicted Data", dataUnits, order='F')
         
         # Assign the channel names
         if channelNames is None:
@@ -113,7 +113,7 @@ class DataPoint(Point):
             with size equal to the number of active channels.
 
         """
-        return StatArray(self._predictedData - self._data, name="Data residual", units=self._data.units)
+        return StatArray.StatArray(self._predictedData - self._data, name="Data residual", units=self._data.units)
 
     @property
     def elevation(self):
@@ -300,7 +300,7 @@ class DataPoint(Point):
         ncps = myMPI.Irecv(source=source, world=world)
         tmp = np.empty(5, np.float64)
         world.Irecv(tmp, source=source).Wait()
-        x = StatArray(0)
+        x = StatArray.StatArray(0)
         d = x.Irecv(source, world)
         s = x.Irecv(source, world)
         p = x.Irecv(source, world)
