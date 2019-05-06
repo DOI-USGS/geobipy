@@ -16,6 +16,8 @@ from sklearn.cluster import KMeans
 from sklearn.preprocessing import scale
 from sklearn.model_selection import StratifiedKFold
 
+from ...base.HDF import hdfRead
+
 
 class StatArray(np.ndarray, myObject):
     """Class extension to numpy.ndarray
@@ -130,9 +132,11 @@ class StatArray(np.ndarray, myObject):
                 tmp.units = units
 
             if (shape.hasPrior()):
-                tmp._prior = shape.prior.deepcopy()
+                tmp._prior = shape._prior.deepcopy()
             if (shape.hasProposal()):
-                tmp._proposal = shape.proposal.deepcopy()            
+                tmp._proposal = shape._proposal.deepcopy()
+            if (shape.hasPosterior()):
+                tmp._posterior = shape._posterior#deepcopy(shape._posterior)
 
             return tmp
         # Can pass in a numpy function call like arange(10) as the first argument
@@ -175,6 +179,13 @@ class StatArray(np.ndarray, myObject):
     ### Properties
 
     @property
+    def nPosteriors(self):
+        if self.hasPosterior():
+            return np.size(self._posterior)
+        return 0
+
+
+    @property
     def posterior(self):
         """Returns the posterior if available. """
 
@@ -205,7 +216,24 @@ class StatArray(np.ndarray, myObject):
 
     
     def setPosterior(self, posterior):
-        self._posterior = posterior.deepcopy()
+        """Set the posterior for the StatArray.
+
+        Parameters
+        ----------
+        posterior : geobipy.Histogram or list of geobipy.Histogram
+            * If a single Histogram is given, all values in the StatArray will be used in any updates.
+            * If a list is given, the size must equal the size of the StatArray's first dimension.
+
+        """
+        nP = np.size(posterior)
+        if nP > 1:
+            assert nP == self.shape[0], ValueError("Number of posteriors must match size of StatArray's first dimension")
+        
+        if nP == 1:
+            if isinstance(posterior, list):
+                posterior = posterior[0]
+
+        self._posterior = posterior#deepcopy(posterior)
 
 
     def setPrior(self, distributionType, *args, **kwargs):
@@ -304,6 +332,15 @@ class StatArray(np.ndarray, myObject):
         return StatArray(self)
 
 
+    def copyStats(self, other):
+        # if self.hasPrior():
+        #     other._prior = self._prior.deepcopy()
+        # if self.hasProposal():
+        #     other._proposal = self._proposal.deepcopy()
+        if self.hasPosterior():
+            other._posterior = self._posterior.deepcopy()
+
+
     def deepcopy(self):
         """Create a deepcopy
 
@@ -327,9 +364,11 @@ class StatArray(np.ndarray, myObject):
         other.units = self.units
 
         if (self.hasPrior()):
-            other._prior = self.prior.deepcopy()
+            other._prior = self._prior.deepcopy()
         if (self.hasProposal()):
-            other._proposal = self.proposal.deepcopy()
+            other._proposal = self._proposal.deepcopy()
+        if (self.hasPosterior()):
+            other._posterior = self._posterior#deepcopy(self._posterior)
         
         return other
 
@@ -354,10 +393,12 @@ class StatArray(np.ndarray, myObject):
         tmp = np.delete(self, i, axis=axis)
         out = self.resize(tmp.shape)
         out[:] = tmp[:]
+
+        self.copyStats(out)
         return out
 
 
-    def edges(self, min=None, max=None):
+    def edges(self, min=None, max=None, axis=-1):
         """Get the midpoint values between elements in the StatArray
 
         Returns an size(self) + 1 length StatArray of the midpoints between each element. 
@@ -372,6 +413,9 @@ class StatArray(np.ndarray, myObject):
             Fix the leftmost edge to min.
         max : float, optional
             Fix the rightmost edge to max.
+        axis : int, optional
+            Compute edges along this dimension if > 1D.
+
         Returns
         -------
         out : StatArray
@@ -379,13 +423,12 @@ class StatArray(np.ndarray, myObject):
 
         """
         assert (self.size > 1), ValueError("Size of StatArray must be > 1")
-        d = 0.5 * np.diff(self)
-        edges = self.resize(self.size + 1)
-        # Middle values
-        edges[1:-1] = self[:-1] + d
-        # Edge values
-        edges[0] = self[0] - d[0] if min is None else min
-        edges[-1] = self[-1] + d[-1] if max is None else max
+        d = 0.5 * np.diff(self, axis=axis)
+
+        x0 = self.take(indices=0, axis=axis)
+        x1 = self.take(indices=-1, axis=axis)
+        x2 = self.take(indices=np.arange(self.shape[axis]-1), axis=axis)
+        edges = np.concatenate([np.expand_dims(x0 - d.take(indices=0, axis=axis), axis), x2 + d, np.expand_dims(x1 + d.take(indices=-1, axis=axis), axis)], axis=axis)
 
         return StatArray(edges, self.name, self.units)
 
@@ -395,8 +438,10 @@ class StatArray(np.ndarray, myObject):
 
         Parameters
         ----------
-        axis : int
+        axis : int, optional
             Axis along which to find first non zeros.
+        invalid_val : int, optional
+            When zero is not available, return this index.
         
         Returns
         -------
@@ -477,10 +522,12 @@ class StatArray(np.ndarray, myObject):
         tmp = np.insert(self, i, values, axis)
         out = self.resize(tmp.shape) # Keeps the prior and proposal if set.
         out[:] = tmp[:]
+
+        self.copyStats(out)
         return out
 
 
-    def internalEdges(self):
+    def internalEdges(self, axis=-1):
         """Get the midpoint values between elements in the StatArray
 
         Returns an size(self) + 1 length StatArray of the midpoints between each element
@@ -492,10 +539,12 @@ class StatArray(np.ndarray, myObject):
 
         """
         assert (self.size > 1), ValueError("Size of StatArray must be > 1")
-        d = 0.5*np.diff(self)
-        edges = self.resize(self.size - 1)
-        edges[:] = self[:-1] + d
-        return edges
+        d = 0.5 * np.diff(self, axis=axis)
+
+        x2 = self.take(indices=np.arange(self.shape[axis]-1), axis=axis)
+        edges = x2 + d
+
+        return StatArray(edges, self.name, self.units)
 
 
     def hasPosterior(self):
@@ -509,7 +558,7 @@ class StatArray(np.ndarray, myObject):
         """
 
         try:
-            return not self.posterior is None
+            return not self._posterior is None
         except:
             return False
 
@@ -525,7 +574,7 @@ class StatArray(np.ndarray, myObject):
         """
 
         try:
-            return not self.prior is None
+            return not self._prior is None
         except:
             return False
 
@@ -541,7 +590,7 @@ class StatArray(np.ndarray, myObject):
         """
 
         try:
-            return not self.proposal is None
+            return not self._proposal is None
         except:
             return False
 
@@ -642,16 +691,13 @@ class StatArray(np.ndarray, myObject):
         msg += "     Shape: " + str(self.shape) + '\n'
         msg += "     Values: " + str(self[:]) + '\n'
         if self.hasPrior():
-            msg += "Prior: \n     "
-            msg += self.prior.summary(True)
-        else:
-            msg += "No attached prior \n"
+            msg += "Prior: \n     {}".format(self.prior.summary(True))
         
         if self.hasProposal():
-            msg += "Proposal: \n"
-            msg += self.proposal.summary(True)
-        else:
-            msg += "No attached proposal \n"
+            msg += "Proposal: \n{}".format(self.proposal.summary(True))
+
+        if self.hasPosterior():
+            msg += "Posterior: \n{}".format(self.posterior.summary(True))
 
         if (out):
             return msg
@@ -665,7 +711,7 @@ class StatArray(np.ndarray, myObject):
         np.set_printoptions(threshold=5)
 
 
-    def isRegular(self):
+    def isRegular(self, axis=-1):
         """Checks that the values change regularly
 
         Returns
@@ -674,7 +720,7 @@ class StatArray(np.ndarray, myObject):
             Is regularly changing.
 
         """
-        tmp = np.diff(self)
+        tmp = np.diff(self, axis=axis)
         return np.allclose(tmp, tmp[0])
 
 
@@ -720,7 +766,7 @@ class StatArray(np.ndarray, myObject):
             StatArray
         
         """
-        tmp = StatArray(N,name=self.name,units=self.units)
+        tmp = StatArray(N, name=self.name, units=self.units)
         try:
             pTmp = self.prior.pad(N)
             tmp._prior = pTmp
@@ -731,6 +777,8 @@ class StatArray(np.ndarray, myObject):
             tmp._proposal = pTmp
         except:
             pass
+        if self.hasPosterior():
+            tmp._posterior = self._posterior.deepcopy()
         return tmp
 
 
@@ -814,7 +862,12 @@ class StatArray(np.ndarray, myObject):
         
         assert (self.hasPosterior()), TypeError('No posterior defined on variable {}. Use StatArray.setPosterior()'.format(self.name))
 
-        self.posterior.update(self)
+        if self.nPosteriors > 1:
+            for i in range(self.nPosteriors):
+                self._posterior[i].update(self.take(indices=i, axis=0))
+
+        else:
+            self.posterior.update(self)
 
 
     ### Plotting Routines
@@ -976,6 +1029,39 @@ class StatArray(np.ndarray, myObject):
 
         cP.plot(x[j],self[i],**kwargs)
 
+    
+    def plotPosteriors(self, axes=None, **kwargs):
+        """Plot the posteriors of the StatArray.
+
+        Parameters
+        ----------
+        axes : matplotlib axis or list of axes, optional
+            Must match the number of attached posteriors.
+            * If not specified, subplots are created vertically.
+
+        """
+        assert self.hasPosterior, Exception("StatArray has no attached posteriors")
+
+        if axes is None:
+            if self.nPosteriors > 1:
+                for i in range(self.nPosteriors):
+                    plt.subplot(self.nPosteriors, 1, i+1)
+                    self.posterior[i].plot(**kwargs)
+            else:
+                self.posterior.plot(**kwargs)
+
+        else:
+            assert np.size(axes) == self.nPosteriors, ValueError("Length of axes {} must equal number of attached posteriors {}".format(np.size(axes), self.nPosteriors))
+            if np.size(axes) > 1:
+                for i in range(self.nPosteriors):
+                    plt.sca(axes[i])
+                    plt.cla()
+                    self.posterior[i].plot(**kwargs)
+            else:
+                plt.sca(axes[0])
+                plt.cla()
+                self.posterior.plot(**kwargs)
+
 
     def scatter(self, x=None, y=None, i=None, **kwargs):
         """Create a 2D scatter plot.
@@ -1130,14 +1216,17 @@ class StatArray(np.ndarray, myObject):
         grp.attrs["repr"] = self.hdfName()
         grp.create_dataset('data', data=self)
         #compression="gzip",compression_opts=6,shuffle=True
-        try:
-            self.prior.toHdf(grp,'prior')
-        except:
-            pass
-        try:
-            self.proposal.toHdf(grp,'proposal')
-        except:
-            pass
+        # if self.hasPrior():
+        #     self.prior.toHdf(grp, 'prior')
+        # if self.hasProposal():
+        #     self.proposal.toHdf(grp, 'proposal')
+        if self.hasPosterior():
+            grp.create_dataset('nPosteriors', data=self.nPosteriors)
+            if self.nPosteriors > 1:
+                for i in range(self.nPosteriors):
+                    self.posterior[i].toHdf(grp, 'posterior{}'.format(i))
+            else:
+                self.posterior.toHdf(grp, 'posterior')
 
 
     def createHdf(self, h5obj, myName, nRepeats=None, fillvalue=None):
@@ -1152,12 +1241,12 @@ class StatArray(np.ndarray, myObject):
 
         Parameters
         ----------
-        h5obj : h5py._hl.files.File or h5py._hl.group.Group
+        h5obj : h5py.File or h5py.Group
             A HDF file or group object to create the contents in.
         myName : str
             The name of the group to create.
         nRepeats : int, optional
-            Inserts a first dimension into the shape of the StatArray of length nRepeats. This can be used to extend the available memory of 
+            Inserts a first dimension into the shape of the StatArray of size nRepeats. This can be used to extend the available memory of 
             the StatArray so that multiple MPI ranks can write to their respective parts in the extended memory.
         fillvalue : number, optional
             Initializes the memory in file with the fill value
@@ -1201,14 +1290,22 @@ class StatArray(np.ndarray, myObject):
         # create a new group inside h5obj
         grp = h5obj.create_group(myName)
         grp.attrs["repr"] = self.hdfName()
-        if (not nRepeats is None):
+        if (nRepeats is None):
+            grp.create_dataset('data', self.shape, dtype=self.dtype, fillvalue=fillvalue)
+        else:
             if (self.size == 1):
                 grp.create_dataset('data', [nRepeats], dtype=self.dtype, fillvalue=fillvalue)
             else:
-                grp.create_dataset('data', [nRepeats,*self.shape], dtype=self.dtype, fillvalue=fillvalue)
-        else:
-            grp.create_dataset('data', self.shape, dtype=self.dtype, fillvalue=fillvalue)
+                grp.create_dataset('data', [nRepeats, *self.shape], dtype=self.dtype, fillvalue=fillvalue)
 
+        if self.hasPosterior():
+            grp.create_dataset('nPosteriors', data=self.nPosteriors)
+            if self.nPosteriors > 1:
+                for i in range(self.nPosteriors):
+                    self.posterior[i].createHdf(grp, 'posterior{}'.format(i), nRepeats=nRepeats, fillvalue=fillvalue)
+            else:
+                self.posterior.createHdf(grp, 'posterior', nRepeats=nRepeats, fillvalue=fillvalue)
+     
 
     def writeHdf(self, h5obj, myName, index=None):
         """Write the values of a StatArray to a HDF file
@@ -1266,6 +1363,15 @@ class StatArray(np.ndarray, myObject):
 #        except:
 #            pass
 
+        if self.hasPosterior():
+            if np.ndim(index) > 0:
+                index = index[0]
+            if self.nPosteriors > 1:
+                for i in range(self.nPosteriors):
+                    self.posterior[i].writeHdf(h5obj, myName + '/posterior{}'.format(i), index=index)
+            else:
+                self.posterior.writeHdf(h5obj, myName + '/posterior', index=index)
+
 
     def fromHdf(self, h5grp, index=None):
         """Read the StatArray from a HDF group
@@ -1281,14 +1387,36 @@ class StatArray(np.ndarray, myObject):
 
         """
 
+        try:
+            nPosteriors = np.asarray(h5grp['nPosteriors'])
+        except:
+            nPosteriors = 0
+
+        posterior = None
+        iTmp = index
+        if not index is None:
+            if np.ndim(index) > 0:
+                iTmp = index[0]
+        if nPosteriors == 1:
+            posterior = hdfRead.read_item(h5grp['posterior'], index = iTmp)
+        elif nPosteriors > 1:
+            posterior = []
+            for i in range(nPosteriors):
+                posterior.append(hdfRead.read_item(h5grp['posterior{}'.format(i)], index = iTmp))
+
         if (index is None):
             try:
-                return StatArray(np.atleast_1d(h5grp.get('data')), self.name, self.units)
+                out =  StatArray(np.atleast_1d(h5grp.get('data')), self.name, self.units)
+                out._posterior = posterior
+                return out
             except:
                 assert False, ValueError("HDF data was created as a larger array, specify the row index to read from")
         else:
             assert isIntorSlice(index), TypeError('index must be an int, slice, or tuple with slices. e.g. use index = np.s_[1,4:5,:] ')
-            return StatArray(np.atleast_1d(h5grp.get('data')[index]), self.name, self.units)
+            d = h5grp.get('data')
+            out = StatArray(np.atleast_1d(d[index]), self.name, self.units)
+            out._posterior = posterior
+            return out
 #        try:
 #            grp = h5grp.get('prior')
 #            self.prior = eval(grp.attrs.get('repr'))
@@ -1303,7 +1431,12 @@ class StatArray(np.ndarray, myObject):
 #                self.proposal = self.proposal.fromHdf(grp)
 #        except:
 #            pass
-        return self
+        # try:
+        
+        # except:
+        #     pass
+
+        return out
 
     ### Classification Routines
 
@@ -1505,18 +1638,3 @@ class StatArray(np.ndarray, myObject):
         """
         source = world.size - 1 if world.rank == 0 else world.rank - 1
         return self.Irecv(source=source, world=world)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
