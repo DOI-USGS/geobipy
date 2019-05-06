@@ -5,6 +5,7 @@ Module describing a 1 Dimensional layered Model
 from ...classes.core import StatArray
 from .Model import Model
 from ..mesh.RectilinearMesh2D import RectilinearMesh2D
+from ..statistics.Histogram1D import Histogram1D
 from ..statistics.Hitmap2D import Hitmap2D
 from ...base.logging import myLogger
 from ..statistics.Distribution import Distribution
@@ -198,7 +199,7 @@ class Model1D(Model):
         other.chie = self.chie.deepcopy() #StatArray(other.nCells[0], "Electric Susceptibility", r"$\kappa$")
         other.chim = self.chim.deepcopy() #StatArray(other.nCells[0], "Magnetic Susceptibility", "$\frac{H}{m}$")
         other.pWheel = self.pWheel
-        other.iLayer = self.iLayer
+        other.perturbedLayer = self.perturbedLayer
         other.Hitmap = self.Hitmap
         other.hasHalfspace = self.hasHalfspace
         return other
@@ -218,14 +219,14 @@ class Model1D(Model):
             Padded model
 
         """
-        tmp=Model1D(size,self.top)
+        tmp = Model1D(size,self.top)
         tmp.nCells = self.nCells
         tmp.depth = self.depth.pad(size)
         tmp.thk = self.thk.pad(size)
         tmp.par = self.par.pad(size)
         tmp.chie = self.chie.pad(size)
         tmp.chim = self.chim.pad(size)
-        tmp.iLayer = self.iLayer
+        tmp.perturbedLayer = self.perturbedLayer
         tmp.dpar=self.dpar.pad(size-1)
         if (not self.minDepth is None): tmp.minDepth=self.minDepth
         if (not self.maxDepth is None): tmp.maxDepth=self.maxDepth
@@ -471,7 +472,7 @@ class Model1D(Model):
         other.chim = other.chim.delete(i)
         # Resize the parameter gradient
         other.dpar = other.dpar.resize(other.par.size - 1)
-        other.iLayer = np.int64(i)
+        other.perturbedLayer = np.int64(i)
 
         return other
 
@@ -520,47 +521,6 @@ class Model1D(Model):
         return self.dpar.probability()
 
 
-    def makePerturbable(self, pWheel, minDepth, maxDepth, maxLayers, prng=None, minThickness=None):
-        """Setup a model such that it can be randomly perturbed.
-
-        Parameters
-        ----------
-        pWheel : array_like
-            Probability of birth, death, perturb, and no change for the model
-            e.g. pWheel = [0.5, 0.25, 0.15, 0.1]
-        minDepth : float64
-            Minimum depth possible for the model
-        maxDepth : float64
-            Maximum depth possible for the model
-        maxLayers : int
-            Maximum number of layers allowable in the model
-        prng : numpy.random.RandomState(), optional
-            Random number generator, if none is given, will use numpy's global generator.
-        minThickness : float64, optional
-            Minimum thickness of any layer. If minThickness = None, minThickness is computed from minDepth, maxDepth, and maxLayers (recommended).
-               
-        See Also
-        --------
-        geobipy.Model1D.perturb : For a description of the perturbation cycle.
-        """
-
-        assert np.size(pWheel) == 4, ValueError('pWheel must have size 4')
-        assert minDepth > 0.0, ValueError("minDepth must be > 0.0")
-        assert maxDepth > 0.0, ValueError("maxDepth must be > 0.0")
-        assert maxLayers > 0.0, ValueError("maxLayers must be > 0.0")
-        self.pWheel = np.cumsum(pWheel/np.sum(pWheel))  # Assign the probability Wheel
-        if (minThickness is None):
-            # Assign a minimum possible thickness
-            self.minThickness = np.log((maxDepth - minDepth) / (2 * maxLayers))
-        else:
-            self.minThickness = minThickness
-        self.minDepth = np.log(minDepth)  # Assign the log of the min depth
-        self.maxDepth = np.log(maxDepth)  # Assign the log of the max depth
-        self.maxLayers = np.int32(maxLayers)
-        # Assign a uniform distribution to the number of layers
-        self.nCells.setPrior('UniformLog', 1, maxLayers, prng=prng)
-
-
     def perturb(self):
         """Perturb a model
 
@@ -595,7 +555,7 @@ class Model1D(Model):
         
         """
         other = self.deepcopy()
-        assert (not other.pWheel is None), ValueError('Please assign a probability wheel to the model with model1D.setProbabilityWheel()')
+        assert (not other.pWheel is None), ValueError('Please set the proposals of the model1D with model1D.setProposals()')
         prng = self.nCells.prior.prng
         # Pre-compute exponential values (Take them out of log space)
         hmin = np.exp(other.minThickness)
@@ -682,10 +642,84 @@ class Model1D(Model):
                         success = True
                         tryAgain = True
                 if (not tryAgain):
-                    other.iLayer = i
+                    other.perturbedLayer = i
                     other.depth[i] += dz  # Perturb the depth in the model
                     other.thicknessFromDepth()
                     return other, 2, [i, dz]
+
+
+    def setPosteriors(self):
+
+        assert not self.maxLayers is None, ValueError("No priors are set, user Model1D.setPriors() to do so.")
+
+        # Initialize the posterior histogram for the number of layers
+        self.nCells.setPosterior(Histogram1D(binCentres=StatArray.StatArray(np.arange(0.0, self.maxLayers + 1.0), name="# of Layers")))
+
+        # Discretize the parameter values
+
+        zGrd = StatArray.StatArray(np.arange(0.5 * np.exp(self.minDepth), 1.1 * np.exp(self.maxDepth), 0.5 * np.exp(self.minThickness)), self.depth.name, self.depth.units)
+        pGrd = StatArray.StatArray(np.exp(self.par.prior.getBinEdges(nBins = 250, nStd=3.0)), self.par.name, self.par.units)
+
+        # Set the posterior hitmap for conductivity vs depth
+        self.par.setPosterior(Hitmap2D(xBins = pGrd, yBinCentres = zGrd))
+
+        # Initialize the interface Depth Histogram
+        self.depth.setPosterior(Histogram1D(binCentres = zGrd))
+
+
+    def setPriors(self, halfSpaceValue, pWheel, minDepth, maxDepth, maxLayers, minThickness=None, factor=10.0, prng=None):
+        """Setup the priors of a 1D model.
+
+        Parameters
+        ----------
+        halfSpaceValue : float
+            Value of the parameter for the halfspace.
+        pWheel : array_like
+            Probability of birth, death, perturb, and no change for the model
+            e.g. pWheel = [0.5, 0.25, 0.15, 0.1]
+        minDepth : float64
+            Minimum depth possible for the model
+        maxDepth : float64
+            Maximum depth possible for the model
+        maxLayers : int
+            Maximum number of layers allowable in the model
+        minThickness : float64, optional
+            Minimum thickness of any layer. If minThickness = None, minThickness is computed from minDepth, maxDepth, and maxLayers (recommended).
+        factor : float, optional
+            Tuning parameter used in the std of the parameter prior.
+        prng : numpy.random.RandomState(), optional
+            Random number generator, if none is given, will use numpy's global generator.
+               
+        See Also
+        --------
+        geobipy.Model1D.perturb : For a description of the perturbation cycle.
+
+        """
+        assert np.size(pWheel) == 4, ValueError('pWheel must have size 4')
+        assert minDepth > 0.0, ValueError("minDepth must be > 0.0")
+        assert maxDepth > 0.0, ValueError("maxDepth must be > 0.0")
+        assert maxLayers > 0.0, ValueError("maxLayers must be > 0.0")
+        self.pWheel = np.cumsum(pWheel/np.sum(pWheel))  # Assign the probability Wheel
+        if (minThickness is None):
+            # Assign a minimum possible thickness
+            self.minThickness = np.log((maxDepth - minDepth) / (2 * maxLayers))
+        else:
+            self.minThickness = minThickness
+            
+        self.minDepth = np.log(minDepth)  # Assign the log of the min depth
+        self.maxDepth = np.log(maxDepth)  # Assign the log of the max depth
+        self.maxLayers = np.int32(maxLayers)
+
+        # Assign a uniform distribution to the number of layers
+        self.nCells.setPrior('UniformLog', 1, self.maxLayers, prng=prng)
+
+        # Set priors on the depth interfaces, given a number of layers
+        self.depth.setPrior('Order', self.minDepth, self.maxDepth, self.minThickness, self.maxLayers)  # priZ
+
+        # Assign the initial prior to the parameters
+        priMu = np.log(halfSpaceValue)
+        priStd = np.log(1.0 + factor)
+        self.par.setPrior('MvNormalLog', priMu, priStd**2.0, prng=prng)
 
 
     def summary(self, out=False):
@@ -746,12 +780,12 @@ class Model1D(Model):
 
         if self.hasHalfspace:
             if (self.nCells == 1):
-                h = 0.99
-                p = par
+                h = np.maximum(0.99, 0.75*np.max(ax.get_ylim()))
+                p = par[-1]
             else:
                 h = z[-2] + 0.75 * (z[-1] - z[-2])
                 p = par[-1]
-            
+
             plt.text(p, h, s=r'$\downarrow \infty$', fontsize=12)
 
 
@@ -1048,87 +1082,26 @@ class Model1D(Model):
         par = self.interpPar2Mesh(self.par, Hitmap)
 
         return np.all(par > sLow) and np.all(par < sHigh)
+        
 
+    def updatePosteriors(self, minThicknessRatio):
 
+        # Update the number of layeres posterior
+        self.nCells.updatePosterior()
 
+        # Update the hitmap posterior
+        self.addToHitMap(self.par.posterior)
 
+        # Update the layer interface histogram
+        if (self.nCells > 1):
+            ratio = np.exp(np.diff(np.log(self.par)))
+            m1 = ratio <= 1.0 - minThicknessRatio
+            m2 = ratio >= 1.0 + minThicknessRatio
+            keep = np.logical_not(np.ma.masked_invalid(ratio).mask) & np.ma.mask_or(m1,m2)
+            tmp = self.depth[:-1]
+            if (tmp.size > 0):
+                self.depth.posterior.update(tmp[keep])
 
-
-# if __name__ == "__main__":
-#     # Create an initial model for the first iteration of the inversion
-#     # Initialize a 1D model
-#     Mod = Model1D(2, 'Current Model')
-#     # Assign a prior to the number of layers
-#     # Mod.nCells.setPrior('Gamma',3.0,3.0,(layerID+1)) # this is priK in matlab
-#     # Assign the depth to the interface as half the bounds
-#     Mod.maketest(10)
-# #  Mod.par[:]=0.0036
-#     Mod.minDepth = np.log(1.0)
-#     Mod.maxDepth = np.log(150.0)
-#     # Compute the probability wheel for birth, death, perturbation, and No
-#     # change in the number of layers and depths
-#     Mod.setPerturbation([0.16666667, 0.333333, 0.5, 1.0], 1.0, 150.0, 30)
-
-#     # Compute the mean and std for the parameter
-#     # Assign a normal distribution to the conductivities
-#     Mod.par.setPrior('NormalLog', np.log(0.004), np.log(11.0))
-
-#     # Set a temporary layer indexer
-#     layerID = StatArray(30, 'LayerID')
-#     layerID += np.arange(30)
-#     # Set priors on the depth interfaces, given a number of layers
-#     Mod.depth.setPrior(
-#         'Order',
-#         Mod.minDepth,
-#         Mod.maxDepth,
-#         Mod.minThk,
-#         layerID)  # priZ
-
-#     # Assign a prior to the derivative of the model
-#     Mod.dpar.setPrior('NormalLog', 0.0, np.float64(1.5))
-
-#     # b.summary()
-# #  mpl.pyplot.figure()
-# #  b.plotBlocks()
-#     plt.figure(1)
-#     Mod.plot()
-#     plt.show()
-
-#     priMu = np.log(0.01)
-#     priStd = np.log(11.0)
-#     zGrd = np.arange(0.5 * np.exp(Mod.minDepth), 1.1 * np.exp(Mod.maxDepth), 0.5 * np.exp(Mod.minThk))
-#     mGrd = np.logspace(np.log10(np.exp(priMu - 4.0 * priStd)), np.log10(np.exp(priMu + 4.0 * priStd)), 250)
-
-#     aMap = Hitmap2D([zGrd.size, mGrd.size], '', '', dtype=np.int32)
-#     aMap.setXaxis(mGrd, 'Resistivity', '$\Omega m$')
-#     aMap.setYaxis(zGrd, Mod.depth.name, Mod.depth.units)
-
-#     Mod.getHitMap(aMap)
-
-#     plt.figure(2)
-#     plt.clf()
-#     aMap.plot(invX=True, logX=True, flipY=True)
-#     plt.show()
-
-#     # Create synthetic variances of each layers conductivity
-#     var = 0.1 * (np.zeros(Mod.nCells[0]) + 1)  # *Mod.par[-1]
-# #  this=Mod.interp2depth(var,aMap)
-# #
-#     bMap = Hitmap2D([zGrd.size, mGrd.size], '', '')
-#     bMap.setXaxis(mGrd, 'Resistivity', '$\Omega m$')
-#     bMap.setYaxis(zGrd, Mod.depth.name, Mod.depth.units)
-#     Mod.asPrior(var, bMap)
-
-#     plt.figure(3)
-#     plt.clf()
-#     bMap.plot(invX=True, logX=True, flipY=True)
-#     Mod.par = 1.0 / Mod.par
-#     Mod.plot()
-#     Mod.par = 1.0 / Mod.par
-#     plt.show()
-
-#     print('Prior Evaluation via Image')
-#     print('Probability: ' + str(Mod.evaluateGridPrior(bMap)))
 
     def hdfName(self):
         """Create a string that describes class instantiation
@@ -1302,6 +1275,7 @@ class Model1D(Model):
         self.nCells.writeHdf(grp, 'nCells',  index=index)
         self.top.writeHdf(grp, 'top',  index=index)
         nCells = self.nCells[0]
+
         if (index is None):
             i = np.s_[0:nCells]
         else:
@@ -1371,7 +1345,7 @@ class Model1D(Model):
         self.par.toHdf(grp, 'par')
         self.chie.toHdf(grp, 'chie')
         self.chim.toHdf(grp, 'chim')
-        grp.create_dataset('iLayer', data=self.iLayer)
+        grp.create_dataset('perturbedLayer', data=self.perturbedLayer)
         grp.create_dataset('hasHalfspace', data=self.hasHalfspace)
 
 
