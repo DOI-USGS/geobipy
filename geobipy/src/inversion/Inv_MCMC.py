@@ -46,8 +46,8 @@ def Inv_MCMC(paras, DataPoint, prng, LineResults=None, rank=1):
                 verbose=paras.verbose)
 
     # Set the saved best models and data
-    bestModel = Mod#.deepcopy()
-    bestData = DataPoint#.deepcopy()
+    bestModel = Mod.deepcopy()
+    bestData = DataPoint.deepcopy()
     bestPosterior = posterior#.copy()
 
     # Initialize the Chain
@@ -70,16 +70,16 @@ def Inv_MCMC(paras, DataPoint, prng, LineResults=None, rank=1):
             if (PhiD <= multiplier * DataPoint.data.size):
                 Res.burnedIn = True  # Let the results know they are burned in
                 Res.iBurn = i         # Save the burn in iteration to the results
-                bestModel = Mod
-                bestData = DataPoint
-                bestPosterior = posterior
+                bestModel = Mod.deepcopy()
+                bestData = DataPoint.deepcopy()
+                bestPosterior = posterior.copy()
 
         # Update the best best model and data if the posterior is larger
         if (posterior > bestPosterior):
             iBest = np.int64(i)
-            bestModel = Mod  # .deepcopy()
-            bestData = DataPoint  # .deepcopy()
-            bestPosterior = posterior  # .copy()
+            bestModel = Mod.deepcopy()
+            bestData = DataPoint.deepcopy()
+            bestPosterior = posterior.copy()
 
         Res.iBestV[i] = iBest
 
@@ -357,7 +357,7 @@ def AcceptReject(paras, Mod, DataPoint, prior, posterior, PhiD, Res, prng):# ,oF
 
 
     else:
-        posteriorComponents=None
+        posteriorComponents = None
         # Evaluate the prior for the current model
         prior1 = Mod1.priorProbability(paras.solveParameter, paras.solveGradient, paras.pLimits)
         # Evaluate the prior for the current data
@@ -438,27 +438,31 @@ def AcceptReject(paras, Mod, DataPoint, prior, posterior, PhiD, Res, prng):# ,oF
     if (cut > r):
 #        accepted=True
         # Make the Current model the Candidate model
-        Mod0 = Mod1 #.deepcopy()
-        # Make the Current data the Candidate data
-        D0 = D1  # .deepcopy()
-        # Transfer over the posteriors and priors
-        prior0 = prior1  # .copy()
-        posterior0 = posterior1  # .copy()
-        PhiD0 = PhiD1  # .copy()
+        # Mod0 = Mod1 #deepcopy()
+        # # Make the Current data the Candidate data
+        # D0 = D1 #deepcopy()
+        # # Transfer over the posteriors and priors
+        # prior0 = prior1 #.copy()
+        # posterior0 = posterior1 #.copy()
+        # PhiD0 = PhiD1 #.copy()
         paras.unscaledVariance = unscaledVariance
         if (Res.saveMe or Res.plotMe):
             Res.acceptance += 1
 
+        return(Mod1, D1, prior1, posterior1, PhiD1, posteriorComponents, failed)
+
     else:
 #        accepted=False
         # Keep the unperturbed mdel
-        Mod0 = Mod #.deepcopy()
-        D0 = DataPoint  # .deepcopy()
-        prior0 = prior  # .copy()
-        posterior0 = posterior  # .copy()
-        PhiD0 = PhiD  # .copy()
+        # Mod0 = Mod.deepcopy()
+        # D0 = DataPoint.deepcopy()
+        # prior0 = prior #.copy()
+        # posterior0 = posterior #.copy()
+        # PhiD0 = PhiD #.copy()
+
+        return(Mod, DataPoint, prior, posterior, PhiD, posteriorComponents, failed)
 
     clk.stop()
 
-    return(Mod0, D0, prior0, posterior0, PhiD0, posteriorComponents, failed)
+    
     #%%
