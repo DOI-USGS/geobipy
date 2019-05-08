@@ -600,27 +600,44 @@ class TdemData(Data):
     def estimateAdditiveError(self):
         """ Uses the late times after 1ms to estimate the additive errors and error bounds in the data. """
         for i in range(self.nSystems):
+            h = 'System {} \n'.format(i)
+            iS = self._systemIndices(i)
+            D = self._data[:, iS]
             t = self.times(i)
             i1ms = t.searchsorted(1e-3)
-            if (i1ms < t.size):
-                print(i1ms)
-                print(self._data.shape[1])
 
-                D=self._data[:,i1ms:self._data.shape[1]]
-                print(self._.data.shape)
-                print(D,D.shape)
-                s=np.nanstd(D)
-                print(
-                'System {} \n' 
-                '  Minimum at times > 1ms: {} \n'
-                '  Maximum at time  = 1ms: {} \n'
-                '  Median:  {} \n'
-                '  Mean:    {} \n'
-                '  Std:     {} \n'
-                '  4Std:    {} \n'.format(i, np.nanmin(D), np.nanmax(D[:,0]), np.nanmedian(D), np.nanmean(D), s, 4.0*s))
+            if (i1ms < t.size):
+                lateD = D[:, i1ms:]
+                if np.all(np.isnan(lateD)):
+                    j = i1ms - 1
+                    d = D[:, j]
+                    while np.all(np.isnan(d)) and j > 0:
+                        j -= 1
+                        d = D[:, j]
+
+                    h += 'All data values for times > 1ms are NaN \nUsing the last time gate with non-NaN values.\n'
+                else:
+                    d = lateD
+                    h += 'Using {} time gates after 1ms\n'.format(self.nTimes[i] - i1ms)
+
             else:
-                print(
-                'System {} has no times after 1ms'.format(i))
+                h = 'System {} has no time gates after 1ms \nUsing the last time gate with non-NaN values. \n'.format(i)
+
+                j = -1
+                d = D[:, j]
+                while np.all(np.isnan(d)) and j > 0:
+                    j -= 1
+                    d = D[:, j]
+            
+            s = np.nanstd(d)
+            h +=    '  Minimum: {} \n'\
+                    '  Maximum: {} \n'\
+                    '  Median:  {} \n'\
+                    '  Mean:    {} \n'\
+                    '  Std:     {} \n'\
+                    '  4Std:    {} \n'.format(np.nanmin(d), np.nanmax(d), np.nanmedian(d), np.nanmean(d), s, 4.0*s)
+            print(h)
+
 
 
     def getDataPoint(self, i):
