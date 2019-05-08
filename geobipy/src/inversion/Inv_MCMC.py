@@ -189,7 +189,10 @@ def Initialize(paras, DataPoint, prng):
     else:
         binsMidpoint = 0.5 * aBins.max(axis=-1) + aBins.min(axis=-1)
 
-    DataPoint.addErr.setPosterior([Histogram1D(bins = StatArray.StatArray(aBins[i, :], name=DataPoint.addErr.name, units=DataPoint.data.units), log=log, relativeTo=binsMidpoint[i]) for i in range(DataPoint.nSystems)])
+    ab = np.atleast_2d(aBins)
+    binsMidpoint = np.atleast_1d(binsMidpoint)
+
+    DataPoint.addErr.setPosterior([Histogram1D(bins = StatArray.StatArray(ab[i, :], name=DataPoint.addErr.name, units=DataPoint.data.units), log=log, relativeTo=binsMidpoint[i]) for i in range(DataPoint.nSystems)])
 
     # Update the data errors based on user given parameters
     if paras.solveRelativeError or paras.solveAdditiveError:
