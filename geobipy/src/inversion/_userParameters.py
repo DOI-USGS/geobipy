@@ -60,7 +60,7 @@ class _userParameters(myObject):
         # Standard Deviation of log(rho) = log(1 + factor)
         self.factor = np.float64(10.0) if self.factor is None else np.float64(self.factor)
         # Standard Deviation for the difference in layer resistivity
-        self.gradientStd = np.float64(1.5) if self.gradientStd is None else np.float64(self.gradientStd)
+        self.gradientStd = np.float64(2.0) if self.gradientStd is None else np.float64(self.gradientStd)
         self.errorModel = 2
 
         self.covScaling = np.float64(1.65**2.0) if self.covScaling is None else  np.float64(self.covScaling)
