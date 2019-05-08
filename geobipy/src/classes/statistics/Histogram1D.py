@@ -26,7 +26,7 @@ class Histogram1D(RectilinearMesh1D):
         Entries are given in linear space, but internally bins and values are logged.
         Plotting is in log space.
     relativeTo : float, optional
-        If a float is given, updates and plotting will all be relative to this value.
+        If a float is given, updates will be relative to this value.
 
     Returns
     -------
@@ -42,17 +42,29 @@ class Histogram1D(RectilinearMesh1D):
         if (bins is None and binCentres is None):
             return
 
-        assert not (not log is None and not relativeTo is None), ValueError("Cannot use log option when histogram is relative.")
+        # assert not (not log is None and not relativeTo is None), ValueError("Cannot use log option when histogram is relative.")
 
-        if not log is None:
-            if not bins is None:
-                assert isinstance(bins, StatArray.StatArray), TypeError("bins must be a geobpiy.StatArray")
+        if not bins is None:
+            assert isinstance(bins, StatArray.StatArray), TypeError("bins must be a geobpiy.StatArray")
+            if relativeTo:
+                relativeTo, label = cF._log(relativeTo, log=log)
                 bins, label = cF._log(bins, log=log)
-                bins.name = label + bins.getName()
-            if not binCentres is None:
-                assert isinstance(binCentres, StatArray.StatArray), TypeError("binCentres must be a geobpiy.StatArray")
+                bins -= relativeTo
+            else:
+                bins, label = cF._log(bins, log=log)
+
+            bins.name = cF._logLabel(log) + bins.getName()
+            
+        if not binCentres is None:
+            assert isinstance(binCentres, StatArray.StatArray), TypeError("binCentres must be a geobpiy.StatArray")
+            if relativeTo:
+                relativeTo, label = cF._log(relativeTo, log=log)
                 binCentres, label = cF._log(binCentres, log=log)
-                binCentres.name = label + binCentres.getName()
+                binCentres -= relativeTo
+            else:
+                binCentres, label = cF._log(binCentres, log=log)
+
+            binCentres.name = cF._logLabel(log) + binCentres.getName()
 
         # Initialize the parent class
         super().__init__(cellEdges=bins, cellCentres=binCentres)
@@ -116,11 +128,11 @@ class Histogram1D(RectilinearMesh1D):
             A negative index which would normally wrap will clip to 0 and self.bins.size instead.
 
         """
+        tmp, dum = cF._log(values, self.log)
+
         if self.isRelative:
-            tmp = values - self.relativeTo
-        else:
-            tmp, dum = cF._log(values, self.log)
-        
+            tmp = tmp - self.relativeTo
+
         iBin = np.atleast_1d(self.cellIndex(tmp.flatten(), clip=True, trim=trim))
         tmp = np.bincount(iBin, minlength = self.nBins)
         
@@ -170,7 +182,11 @@ class Histogram1D(RectilinearMesh1D):
     def plot(self, rotate=False, flipX=False, flipY=False, trim=True, normalize=False, **kwargs):
         """ Plots the histogram """
 
-        bins = self.bins + self.relativeTo if self.isRelative else self.bins
+        if self.isRelative:
+            bins = self.bins + self.relativeTo
+        else:
+            bins = self.bins
+
         cP.hist(self.counts, bins, rotate=rotate, flipX=flipX, flipY=flipY, trim=trim, normalize=normalize, **kwargs)
 
 
@@ -284,7 +300,8 @@ class Histogram1D(RectilinearMesh1D):
         msg = ("{}\n"
               "Bins: \n{}"
               "Counts:\n{}"
-              "Relative to: {}").format(type(self), RectilinearMesh1D.summary(self, True), self.counts.summary(True), self.relativeTo)
+              "Values are logged to base {}\n"
+              "Relative to: {}").format(type(self), RectilinearMesh1D.summary(self, True), self.counts.summary(True), self.log, self.relativeTo)
 
         return msg if out else print(msg)
         
