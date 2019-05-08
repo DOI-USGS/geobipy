@@ -39,6 +39,7 @@ class LineResults(myObject):
         self.addErr = None
         self.addErrPosterior = None
         self.best = None
+        self.currentData = None
         self.bestData = None
         self.bestModel = None
         self.burnedIn = None
@@ -173,8 +174,8 @@ class LineResults(myObject):
 
     
     def getAdditiveErrorPosteriors(self):
-        if (not self.addErrPosterior is None): return
-        self.addErrPosterior = self.getAttribute('Additive error posterior')
+        self.getData()
+        self.addErrPosterior = self.currentData.addErr.posterior
 
 
     def getBestData(self, **kwargs):
@@ -196,6 +197,18 @@ class LineResults(myObject):
         self.best = StatArray.StatArray(self.getAttribute('bestinterp'), dtype=np.float64)
         self.best.name = "Best resistivity"
         self.best.units = "$\Omega m$"
+
+    
+    def getData(self, **kwargs):
+        """ Get the best data """
+
+        if (not self.currentData is None): return       
+        attr = self._attrTokey('current data')
+        dtype = self.hdfFile[attr[0]].attrs['repr']
+        if "FdemDataPoint" in dtype:
+            self.currentData = FdemData().fromHdf(self.hdfFile[attr[0]])
+        elif "TdemDataPoint" in dtype:
+            self.currentData = TdemData().fromHdf(self.hdfFile[attr[0]], sysPath = self.sysPath)
 
 
     def getDataLocations(self):
@@ -352,8 +365,8 @@ class LineResults(myObject):
     
     def getRelativeErrorPosteriors(self):
         """ Get the Relative error of the best data points """
-        if (not self.relErrPosterior is None): return
-        self.relErrPosterior = self.getAttribute('Relative Error posterior')
+        self.getData()
+        self.relErrPosterior = self.currentData.relErr.posterior
 
 
     def getResults(self, index=None, fid=None, reciprocateParameter=False):

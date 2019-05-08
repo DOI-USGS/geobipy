@@ -35,9 +35,13 @@ class _userParameters(myObject):
         self.minimumRelativeError = StatArray.StatArray(Datapoint.nSystems, 'Minimum Relative Error') + self.minimumRelativeError
         self.maximumRelativeError = StatArray.StatArray(Datapoint.nSystems, 'Maximum Relative Error') + self.maximumRelativeError
 
+        assert np.all((self.minimumRelativeError <= self.initialRelativeError) & (self.initialRelativeError <= self.maximumRelativeError) ), ValueError("Initial relative error must be within the min max")
+
         self.initialAdditiveError = StatArray.StatArray(Datapoint.nSystems, 'Additive Error') + self.initialAdditiveError
         self.minimumAdditiveError = StatArray.StatArray(Datapoint.nSystems, 'Minimum Additive Error') + self.minimumAdditiveError
         self.maximumAdditiveError = StatArray.StatArray(Datapoint.nSystems, 'Maximum Additive Error') + self.maximumAdditiveError
+
+        assert np.all((self.minimumAdditiveError <= self.initialAdditiveError) & (self.initialAdditiveError <= self.maximumAdditiveError)), ValueError("Initial additive error must be within the min max")
 
         self.maximumElevationChange = np.float64(self.maximumElevationChange)
 
