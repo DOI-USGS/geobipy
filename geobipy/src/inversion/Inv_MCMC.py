@@ -146,7 +146,7 @@ def Initialize(paras, DataPoint, prng):
     # Set the proposal for height
     DataPoint.z.setProposal('Normal', DataPoint.z, paras.elevationProposalVariance, prng=prng)
     # Create a histogram to set the height posterior.
-    H = Histogram1D(bins = StatArray.StatArray(DataPoint.z.prior.getBinEdges() - DataPoint.z, name=DataPoint.z.name, units=DataPoint.z.units), relativeTo=DataPoint.z)
+    H = Histogram1D(bins = StatArray.StatArray(DataPoint.z.prior.getBinEdges(), name=DataPoint.z.name, units=DataPoint.z.units), relativeTo=DataPoint.z)
     DataPoint.z.setPosterior(H)
 
     # ---------------------------------
@@ -179,16 +179,17 @@ def Initialize(paras, DataPoint, prng):
 
     # Initialize the histograms for the additive errors
     aBins = DataPoint.addErr.prior.getBinEdges()
+
     log = None
     if isinstance(DataPoint, TdemDataPoint):
         log = 10
         aBins = np.exp(aBins)
+        binsMidpoint = 0.5 * aBins.max(axis=-1) + aBins.min(axis=-1)
 
-    ab = aBins
-    if DataPoint.nSystems > 1:
-        ab = aBins[0, :]
-    
-    DataPoint.addErr.setPosterior([Histogram1D(bins = StatArray.StatArray(ab, name=DataPoint.addErr.name, units='%'), log=log) for i in range(DataPoint.nSystems)])
+    else:
+        binsMidpoint = 0.5 * aBins.max(axis=-1) + aBins.min(axis=-1)
+
+    DataPoint.addErr.setPosterior([Histogram1D(bins = StatArray.StatArray(aBins[i, :], name=DataPoint.addErr.name, units=DataPoint.data.units), log=log, relativeTo=binsMidpoint[i]) for i in range(DataPoint.nSystems)])
 
     # Update the data errors based on user given parameters
     if paras.solveRelativeError or paras.solveAdditiveError:
