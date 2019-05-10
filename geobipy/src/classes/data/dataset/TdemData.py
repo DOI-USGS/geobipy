@@ -150,7 +150,7 @@ class TdemData(Data):
         alt or laser or bheight
             Altitude of the transmitter coil
 
-        Off[0] to Off[nWindows]  (with the number and brackets)
+        Off[0] to Off[nWindows-1]  (with the number and brackets)
            The measurements for each time specified in the accompanying system file under Receiver Window Times
 
         **Optional columns**
@@ -170,7 +170,7 @@ class TdemData(Data):
         RxYaw
             Yaw of the receiver loop
 
-        OffErr[0] to ErrOff[nWindows]
+        OffErr[0] to ErrOff[nWindows-1]
             Error estimates for the data
 
 
