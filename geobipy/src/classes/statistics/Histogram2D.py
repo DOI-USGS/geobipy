@@ -6,7 +6,7 @@ from ...classes.statistics.Histogram1D import Histogram1D
 from ...classes.mesh.RectilinearMesh2D import RectilinearMesh2D
 from ...classes.core import StatArray
 from ...base import customPlots as cP
-from ...base.customFunctions import _log
+from ...base import customFunctions as cF
 import numpy as np
 from scipy.stats import binned_statistic
 import matplotlib.pyplot as plt
@@ -82,25 +82,41 @@ class Histogram2D(RectilinearMesh2D):
         return self._counts
 
 
-    def axisHistogram(self, axis=0):
+    def axisHistogram(self, between=None, axis=0, log=None):
         """Get the histogram along an axis
 
         Parameters
         ----------
+        between : array_like
+            Array of size 2 containing lower and upper limits between which to count.
         axis : int
             Axis along which to get the histogram.
+        log : 'e' or float, optional
+            Entries are given in linear space, but internally bins and values are logged.
+            Plotting is in log space.
 
         Returns
         -------
         out : geobipy.Histogram1D
 
         """
+        assert 0 <= axis <= 1, ValueError("0 <= axis <= 1")
 
-        s = np.sum(self._counts, axis=axis)
-        if axis == 0:
-            out = Histogram1D(bins = self.x.cellEdges)
+        bins = self.x if axis == 0 else self.y
+
+        if between is None:
+            s = np.sum(self._counts, axis=axis)
         else:
-            out = Histogram1D(bins = self.y.cellEdges)
+            assert np.size(between) == 2, ValueError("between must have size equal to 2")
+            assert between[1] > between[0], ValueError("between must be monotonically increasing")
+            if axis == 0:
+                iBins = self.y.cellCentres.searchsorted(between)
+                s = np.sum(self._counts[iBins[0]:iBins[1], :], axis=axis)
+            else:
+                iBins = self.x.cellCentres.searchsorted(between)
+                s = np.sum(self._counts[:, iBins[0]:iBins[1]], axis=axis)
+                
+        out = Histogram1D(bins = bins.cellEdges, log=log)
         out._counts += s
         return out
 
@@ -133,7 +149,7 @@ class Histogram2D(RectilinearMesh2D):
         tmp[i] = t[i] / s[i]
         
         if log:
-            tmp, dum = _log(tmp, log=log)
+            tmp, dum = cF._log(tmp, log=log)
 
         return tmp
 
@@ -179,6 +195,31 @@ class Histogram2D(RectilinearMesh2D):
         return 1.0 - self.axisTransparency(percent, axis)
 
 
+    def axisCdf(self, axis=0):
+
+        total = self._counts.sum(axis=1-axis)
+        cdf = np.cumsum(self._counts, axis=1-axis)
+
+        if axis == 0:
+            cdf = cdf / np.repeat(total[:, np.newaxis], self._counts.shape[1], 1)
+        else:
+            cdf = cdf / np.repeat(total[np.newaxis, :], self._counts.shape[0], 0)
+
+        return cdf
+
+
+    def axisPdf(self, axis=0):
+
+        total = self._counts.sum(axis=1-axis)
+
+        if axis == 0:
+            pdf = (self._counts.T / total).T
+        else:
+            pdf = self._counts /  total
+
+        return pdf
+
+
     def axisPercentage(self, percent, log=None, axis=0):
         """Gets the percentage of the CDF for the specified axis.
         
@@ -198,14 +239,9 @@ class Histogram2D(RectilinearMesh2D):
 
         """
 
-        total = self._counts.sum(axis=1-axis)
-        p = 0.01 * percent
-        tmp = np.cumsum(self._counts, axis=1-axis)
+        tmp = self.axisCdf(axis)
 
-        if axis == 0:
-            tmp = tmp / np.repeat(total[:, np.newaxis], self._counts.shape[1], 1)
-        else:
-            tmp = tmp / np.repeat(total[np.newaxis, :], self._counts.shape[0], 0)
+        p = 0.01 * percent
 
         ix2 = np.apply_along_axis(np.searchsorted, 1-axis, tmp, p)
 
@@ -215,7 +251,7 @@ class Histogram2D(RectilinearMesh2D):
             out = self.y.cellCentres[ix2]
 
         if (not log is None):
-            out, dum = _log(out, log=log)
+            out, dum = cF._log(out, log=log)
 
         return out
 
@@ -253,20 +289,20 @@ class Histogram2D(RectilinearMesh2D):
 
         self.gs = gridspec.GridSpec(5, 5)
         self.gs.update(wspace=0.3, hspace=0.3)
-        plt.subplot(self.gs[1:, :4]) 
+        ax = [plt.subplot(self.gs[1:, :4])]
         self.pcolor(noColorbar = True, **kwargs)
 
-        ax = plt.subplot(self.gs[:1, :4]) 
-        h = self.axisHistogram(0).plot()
+        ax.append(plt.subplot(self.gs[:1, :4]))
+        h = self.axisHistogram(axis=0).plot()
         plt.xlabel(''); plt.ylabel('')
         plt.xticks([]); plt.yticks([])
-        ax.spines["left"].set_visible(False)
+        ax[-1].spines["left"].set_visible(False)
 
-        ax = plt.subplot(self.gs[1:, 4:]) 
-        h = self.axisHistogram(0).plot(rotate=True)
+        ax.append(plt.subplot(self.gs[1:, 4:]))
+        h = self.axisHistogram(axis=0).plot(rotate=True)
         plt.ylabel(''); plt.xlabel('')
         plt.yticks([]); plt.xticks([])
-        ax.spines["bottom"].set_visible(False)
+        ax[-1].spines["bottom"].set_visible(False)
 
 
     def confidenceIntervals(self, percent=95.0, log=None, axis=0):
@@ -315,9 +351,9 @@ class Histogram2D(RectilinearMesh2D):
             high = self.y.cellCentres[ix2]
 
         if (not log is None):
-            med, dum = _log(med, log=log)
-            low, dum = _log(low, log=log)
-            high, dum = _log(high, log=log)
+            med, dum = cF._log(med, log=log)
+            low, dum = cF._log(low, log=log)
+            high, dum = cF._log(high, log=log)
 
         return (med, low, high)
 
@@ -440,7 +476,8 @@ class Histogram2D(RectilinearMesh2D):
             Set the x and y limits to the first and last non zero values along each axis.
         
         """
-        self._counts.pcolor(x=self.x.cellEdges, y=self.y.cellEdges, **kwargs)
+        ax = self._counts.pcolor(x=self.x.cellEdges, y=self.y.cellEdges, **kwargs)
+        return ax
 
 
     def plotConfidenceIntervals(self, percent=95.0, log=None, axis=0, **kwargs):
