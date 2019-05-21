@@ -96,6 +96,8 @@ class _userParameters(myObject):
             for i in range(N):
                 self.calVar[i,:] = tmp
         
+        self.ignoreLikelihood = False if self.ignoreLikelihood is None else self.ignoreLikelihood
+        
 
 
     def check(self, DataPoint):
