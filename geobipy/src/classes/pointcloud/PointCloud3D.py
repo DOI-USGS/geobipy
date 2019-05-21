@@ -250,7 +250,7 @@ class PointCloud3D(myObject):
         return x, y, vals
     
     
-    def interpMinimumCurvature(self, values, dx=None, dy=None, mask=False, clip=None, i=None):
+    def interpMinimumCurvature(self, values, dx=None, dy=None, mask=False, clip=True, i=None):
     
         # Get the bounding box
         self.getBounds()
@@ -267,33 +267,31 @@ class PointCloud3D(myObject):
             dy = 0.01 * tmp
         assert dy > 0.0, ValueError("dy must be positive!")
                 
-        x,y,vals = interpolation.minimumCurvature(self.x, self.y, values, self.bounds, dx, dy, mask=mask, iterations=2000, tension=0.25, accuracy=0.01)
+        x, y, vals = interpolation.minimumCurvature(self.x, self.y, values, self.bounds, dx, dy, mask=mask, iterations=2000, tension=0.25, accuracy=0.01, clip=clip)
         return x, y, vals
 
 
     def mapPlot(self, dx=None, dy=None, extrapolate=None, i=None, **kwargs):
         """ Create a map of a parameter """
 
-        cTmp = kwargs.pop('c',self.z)
+        cTmp = kwargs.pop('c', self.z)
         
-        mask = kwargs.pop('mask',False)
+        mask = kwargs.pop('mask', False)
         
-        clip = kwargs.pop('clip',True)
+        clip = kwargs.pop('clip', True)
         
         method = kwargs.pop('method', "ct")
         method = method.lower()
               
         
         if method == 'ct':
-            x,y,vals = self.interpCloughTocher(cTmp, dx=dx, dy=dy, mask=mask, clip=clip, extrapolate=extrapolate, i=i)
+            x, y, vals = self.interpCloughTocher(cTmp, dx=dx, dy=dy, mask=mask, clip=clip, extrapolate=extrapolate, i=i)
         elif method == 'mc':
-            x,y,vals = self.interpMinimumCurvature(cTmp, dx, dy, mask=mask, clip=clip, i=i)
+            x, y, vals = self.interpMinimumCurvature(cTmp, dx, dy, mask=mask, clip=clip, i=i)
         else:
             assert False, ValueError("method must be either 'ct' or 'mc' ")  
                         
-        ax = cP.pcolor(vals,x,y, **kwargs)
-        cP.xlabel(cf.getNameUnits(self.x))
-        cP.ylabel(cf.getNameUnits(self.y))
+        ax = cP.pcolor(vals, x.edges(), y.edges(), **kwargs)
         return ax
 
 
