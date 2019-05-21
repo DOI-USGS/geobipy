@@ -12,9 +12,10 @@ import numpy as np
 import numpy.ma as ma
 from .fileIO import deleteFile
 from ..base import Error as Err
-from ..base.customFunctions import (getName, getUnits, getNameUnits, histogramEqualize, _log, findFirstLastNotValue)
+from ..base import customFunctions as cF # (cF.getName, cF.getUnits, cF.getNameUnits, cF.histogramEqualize, cF._log, cF.findFirstLastNotValue)
 from cycler import cycler
 import scipy as sp
+from ..classes.core import StatArray
 
 def make_colourmap(seq, cname):
     """Generate a Linear Segmented colourmap
@@ -228,9 +229,9 @@ def bar(values, x=None, i=None, **kwargs):
     ax = plt.gca()
     pretty(ax)
     plt.bar(x[:i], values[:i], color=wellSeparated[0], **kwargs)
-    title(getName(values))
-    xlabel(getName(x))
-    ylabel(getNameUnits(values))
+    title(cF.getName(values))
+    xlabel(cF.getName(x))
+    ylabel(cF.getNameUnits(values))
     plt.margins(0.1, 0.1)
 
     return ax
@@ -292,14 +293,14 @@ def hist(counts, bins, rotate=False, flipX=False, flipY=False, trim=True, normal
 
     if (rotate):
         plt.barh(centres, cnts, height=width, align='center', **kwargs)
-        ylabel(centres.getNameUnits())
+        ylabel(cF.getNameUnits(centres))
         if normalize:
             xlabel('Density')
         else:
             xlabel('Frequency')
     else:
         plt.bar(centres, cnts, width=width, align='center', **kwargs)
-        xlabel(centres.getNameUnits())
+        xlabel(cF.getNameUnits(centres))
         if normalize:
             ylabel('Density')
         else:
@@ -358,8 +359,8 @@ def hist(counts, bins, rotate=False, flipX=False, flipY=False, trim=True, normal
 
         plt.xscale(xscale)
         plt.yscale(yscale)
-        cP.xlabel(self.x._cellCentres.getNameUnits())
-        cP.ylabel(self.y._cellCentres.getNameUnits())
+        cP.xlabel(self.x._cellCentres.cF.getNameUnits())
+        cP.ylabel(self.y._cellCentres.cF.getNameUnits())
         
         if flipX:
             ax.invert_xaxis()
@@ -467,8 +468,8 @@ def pcolor(values, x=None, y=None, **kwargs):
 
     ax = pcolormesh(X, Y, values, **kwargs)
 
-    xlabel(getNameUnits(x))
-    ylabel(getNameUnits(y))
+    xlabel(cF.getNameUnits(x))
+    ylabel(cF.getNameUnits(y))
 
     return ax
 
@@ -557,19 +558,18 @@ def pcolormesh(X, Y, values, **kwargs):
 
     if not trim is None:
         assert isinstance(trim, (float, np.float)), TypeError("trim must be a float")
-        bounds = findFirstLastNotValue(values, trim)
+        bounds = cF.findFirstLastNotValue(values, trim)
         X = X[bounds[0, 0]:bounds[0, 1]+2, bounds[1, 0]:bounds[1, 1]+2]
         Y = Y[bounds[0, 0]:bounds[0, 1]+2, bounds[1, 0]:bounds[1, 1]+2]
         values = values[bounds[0, 0]:bounds[0, 1]+2, bounds[1, 0]:bounds[1, 1]+2]
         
-
     if (log):
-        values, logLabel = _log(values, log)
+        values, logLabel = cF._log(values, log)
 
     if equalize:
         nBins = kwargs.pop('nbins', 256)
         assert nBins > 0, ValueError('nBins must be greater than zero')
-        values, dummy = histogramEqualize(values, nBins=nBins)
+        values, dummy = cF.histogramEqualize(values, nBins=nBins)
 
     Zm = ma.masked_invalid(values, copy=False)
 
@@ -589,9 +589,9 @@ def pcolormesh(X, Y, values, **kwargs):
 
         if cl is None:
             if (log):
-                clabel(cbar,logLabel+getNameUnits(values))
+                clabel(cbar,logLabel+cF.getNameUnits(values))
             else:
-                clabel(cbar,getNameUnits(values))
+                clabel(cbar,cF.getNameUnits(values))
         else:
             clabel(cbar, cl)
 
@@ -711,7 +711,7 @@ def pcolor_1D(values, y=None, **kwargs):
 
     v = ma.masked_invalid(values)
     if (log):
-        v,logLabel=_log(v,log)
+        v,logLabel=cF._log(v,log)
 
     # Append with null values to correctly use pcolormesh
     v = np.concatenate([np.atleast_2d(np.hstack([np.asarray(v),0])), np.atleast_2d(np.zeros(v.size+1))], axis=0)
@@ -719,7 +719,7 @@ def pcolor_1D(values, y=None, **kwargs):
     if equalize:
         nBins = kwargs.pop('nbins',256)
         assert nBins > 0, ValueError('nBins must be greater than zero')
-        v,dummy = histogramEqualize(v, nBins=nBins)
+        v,dummy = cF.histogramEqualize(v, nBins=nBins)
 
     # Zm = ma.masked_invalid(v, copy=False)
 
@@ -739,10 +739,10 @@ def pcolor_1D(values, y=None, **kwargs):
     plt.yscale(yscale)
 
     if transpose:
-        xlabel(getNameUnits(y))
+        xlabel(cF.getNameUnits(y))
         ax.get_yaxis().set_ticks([])
     else:
-        ylabel(getNameUnits(y))
+        ylabel(cF.getNameUnits(y))
         ax.get_xaxis().set_ticks([])
 
     if (not noColorBar):
@@ -753,9 +753,9 @@ def pcolor_1D(values, y=None, **kwargs):
 
         if cl is None:
             if (log):
-                clabel(cbar,logLabel+getNameUnits(values))
+                clabel(cbar,logLabel+cF.getNameUnits(values))
             else:
-                clabel(cbar,getNameUnits(values))
+                clabel(cbar,cF.getNameUnits(values))
         else:
             clabel(cbar, cl)
     
@@ -816,12 +816,12 @@ def plot(x, y, **kwargs):
 
     
     if (labels):
-        xl = getNameUnits(x)
-        yl = getNameUnits(y)
+        xl = cF.getNameUnits(x)
+        yl = cF.getNameUnits(y)
 
     tmp = y
     if (log):
-        tmp, logLabel = _log(y, log)
+        tmp, logLabel = cF._log(y, log)
         yl = logLabel + yl
 
     if (ax is None):
@@ -913,7 +913,7 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
     #c = kwargs.pop('c',None)
     assert (not c is None), ValueError('Must specify colour with argument "c"')
 
-    _cLabel = kwargs.pop('clabel', getNameUnits(c))
+    _cLabel = kwargs.pop('clabel', cF.getNameUnits(c))
 
     standardColour = isinstance(c, str)
     
@@ -928,13 +928,13 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
 
     # Did the user ask for a log colour plot?
     if (log and not standardColour):
-        c, logLabel = _log(c, log)
+        c, logLabel = cF._log(c, log)
 
     # Equalize the colours?
     if equalize and not standardColour:
         nBins = kwargs.pop('nbins', 256)
         assert nBins > 0, ValueError('nBins must be greater than zero')
-        c, dummy = histogramEqualize(c, nBins=nBins)
+        c, dummy = cF.histogramEqualize(c, nBins=nBins)
 
     # Get the yAxis values
     if (y is None):
@@ -948,7 +948,7 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
     pretty(ax)
     f = plt.scatter(xt, yt, c = c, **kwargs)
 
-    yl = getNameUnits(yt)
+    yl = cF.getNameUnits(yt)
 
     if (not noColorBar and not standardColour):
         if (equalize):
@@ -974,7 +974,7 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
         
     plt.xscale(xscale)
     plt.yscale(yscale)
-    xlabel(getNameUnits(x, 'x'))
+    xlabel(cF.getNameUnits(x, 'x'))
     ylabel(yl)
     plt.margins(0.1, 0.1)
     plt.grid(True)
@@ -1026,8 +1026,8 @@ def sizeLegend(values, intervals=None, **kwargs):
     ls = kwargs.pop('labelspacing', 1)
 
     for x in intervals:
-        plt.scatter([], [], c=c, alpha=a, s=x, label=str(x) + ' ' + getUnits(values))
-    plt.legend(scatterpoints=sp, frameon=f, labelspacing=ls, title=getName(values), **kwargs)
+        plt.scatter([], [], c=c, alpha=a, s=x, label=str(x) + ' ' + cF.getUnits(values))
+    plt.legend(scatterpoints=sp, frameon=f, labelspacing=ls, title=cF.getName(values), **kwargs)
 
 
 def stackplot2D(x, y, labels=[], colors=tatarize, **kwargs):
@@ -1072,8 +1072,8 @@ def stackplot2D(x, y, labels=[], colors=tatarize, **kwargs):
 
     plt.xscale(xscale)
     plt.yscale(yscale)
-    xlabel(getNameUnits(x))
-    ylabel(getNameUnits(y))
+    xlabel(cF.getNameUnits(x))
+    ylabel(cF.getNameUnits(y))
     plt.margins(0.1, 0.1)
 
     return ax
@@ -1126,8 +1126,8 @@ def step(x, y, **kwargs):
         # ax.set_ylim(ax.get_ylim()[::-1])
 
     if (not noLabels):
-        xlabel(getNameUnits(x))
-        ylabel(getNameUnits(y))
+        xlabel(cF.getNameUnits(x))
+        ylabel(cF.getNameUnits(y))
 
     plt.xscale(xscale)
     plt.yscale(yscale)
