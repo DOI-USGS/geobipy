@@ -100,6 +100,22 @@ class Histogram1D(RectilinearMesh1D):
         return not self.relativeTo is None
 
 
+    @property
+    def linearAbsoluteBinCentres(self):
+        tmp = cF._power(self.log, self.binCentres)
+        if self.relativeTo:
+            tmp = tmp + self.relativeTo
+        return tmp
+
+
+    @property
+    def linearAbsoluteBins(self):
+        tmp = cF._power(self.log, self.bins)
+        if self.relativeTo:
+            tmp = tmp + self.relativeTo
+        return tmp
+
+
     def __deepcopy__(self, memo):
         out = type(self)()
         out._cellCentres = self._cellCentres.deepcopy()
@@ -111,6 +127,44 @@ class Histogram1D(RectilinearMesh1D):
         out.relativeTo = self.relativeTo
         
         return out
+
+
+    def cellIndex(self, values, **kwargs):
+
+        cc, dum = cF._log(values, self.log)
+
+        if self.isRelative:
+            cc = cc - self.relativeTo
+
+        return super().cellIndex(cc, **kwargs)
+
+
+    
+    def combine(self, other):
+        """Combine two histograms together.
+
+        Using the bin centres of other, finds the corresponding bins in self.  The counts of other are then added to self.
+
+        Parameters
+        ----------
+        other : geobipy.Histogram1D
+            A histogram to combine.
+
+        """
+
+        cc = other.cellCentres
+        if other.relativeTo:
+            cc = other.cellCentres + other.relativeTo
+            
+        cc = cF._power(cc, other.log)
+
+        cc, dum = cF._log(cc, self.log)
+
+        if self.isRelative:
+            cc = cc - self.relativeTo
+
+        iBin = self.cellIndex(cc, clip=True)
+        self._counts[iBin] = self._counts[iBin] + other.counts
 
 
     def update(self, values, trim=False):
@@ -187,12 +241,14 @@ class Histogram1D(RectilinearMesh1D):
         else:
             bins = self.bins
 
-        cP.hist(self.counts, bins, rotate=rotate, flipX=flipX, flipY=flipY, trim=trim, normalize=normalize, **kwargs)
+        ax = cP.hist(self.counts, bins, rotate=rotate, flipX=flipX, flipY=flipY, trim=trim, normalize=normalize, **kwargs)
+        return ax
 
 
     def hdfName(self):
         """ Reprodicibility procedure """
         return('Histogram1D()')
+
 
 
     def createHdf(self, parent, myName, nRepeats=None, fillvalue=None):
