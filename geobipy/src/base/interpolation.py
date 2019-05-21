@@ -7,11 +7,7 @@ from scipy.interpolate import CloughTocher2DInterpolator
 from scipy.interpolate.interpnd import _ndim_coords_from_arrays
 #from scipy.interpolate import Rbf
 from scipy.spatial import cKDTree
-
-try:
-    from netCDF4 import Dataset
-except:
-    pass
+from netCDF4 import Dataset
 
 def CT(dx, dy, bounds, XY, values, mask = False, kdtree = None, clip = False, extrapolate=None):
     """Use Scipy's CloughTocher C1 continuous interpolation using unstructured meshes to interpolate arbitrary locations to a grid
@@ -99,48 +95,50 @@ def CT(dx, dy, bounds, XY, values, mask = False, kdtree = None, clip = False, ex
     return xc,yc,vals
 
 
-def minimumCurvature(x, y, values, bounds, dx, dy, mask=False, clip=True, iterations=2000, tension=0.25, accuracy=0.01):
+def minimumCurvature(x, y, values, bounds, dx, dy, mask=False, clip=False, iterations=2000, tension=0.25, accuracy=0.01):
     
     T = np.column_stack([x, y, values])
     np.savetxt('tmp.txt', T)
     
-    nx = np.ceil((bounds[1]-bounds[0])/dx)
-    ny = np.ceil((bounds[3]-bounds[2])/dy)
+    bnds = bounds.copy()
+    nx = np.ceil((bnds[1]-bnds[0])/dx)
+    ny = np.ceil((bnds[3]-bnds[2])/dy)
     
-    bounds[0] -= 0.5*dx
-    bounds[2] -= 0.5*dy
+    bnds[0] -= 0.5*dx
+    bnds[2] -= 0.5*dy
     
-    bounds[1] = bounds[0] + (nx+1)*dx
-    bounds[3] = bounds[2] + (ny+1)*dy
-          
+    bnds[1] = bnds[0] + (nx+1)*dx
+    bnds[3] = bnds[2] + (ny+1)*dy
+
     # Create the grid axes
-    x = np.linspace(bounds[0],bounds[0]+nx*dx,nx+1)
-    y = np.linspace(bounds[2],bounds[2]+ny*dx,ny+1)
+    x = np.linspace(bnds[0], bnds[0]+nx*dx, nx+1)
+    y = np.linspace(bnds[2], bnds[2]+ny*dx, ny+1)
               
     increments = "-I%g/%g"%(dx,dy)
-    region = "-R%g/%g/%g/%g"%(bounds[0],bounds[1],bounds[2],bounds[3])
-    
+    region = "-R%g/%g/%g/%g"%(bnds[0], bnds[1], bnds[2], bnds[3])
     
     if clip:
-        subprocess.call(["surface","tmp.txt",increments,region, "-N%d"%(iterations), "-T%g"%(tension), "-C%g"%(accuracy), "-Gtmp.grd", "-Ll%g"%(values.min()), "-Lu%g"%(values.max())])
+        print()
+        subcall = "surface tmp.txt {} {} -N{:d} -T{:g} -C{:g} -Gtmp.grd -Ll{:g} -Lu{:g}".format(increments, region, iterations, tension, accuracy, values.min(), values.max())
+        subprocess.call(["surface", "tmp.txt", increments, region, "-N%d"%(iterations), "-T%g"%(tension), "-C%g"%(accuracy), "-Gtmp.grd", "-Ll%g"%(np.nanmin(values)), "-Lu%g"%(np.nanmax(values))])
     else:
-        subprocess.call(["surface","tmp.txt",increments,region, "-N%d"%(iterations), "-T%g"%(tension), "-C%g"%(accuracy), "-Gtmp.grd"])
-        
-    
-    try:
-        ds = Dataset("tmp.grd")
-        vals = ds.variables['z'][:,:]
-        deleteFile("tmp.grd")
-    except:
-        assert False, "Could not run minimum curvature using Generic Mapping Tools. \n" \
-                  "You must make sure that Python's netCDF4 package is linked to the same netCDF library that GMT is linked too \n" \
-                  "See the GeoBIPy installation instructions for more instruction."
+        subprocess.call(["surface", "tmp.txt", increments, region, "-N%d"%(iterations), "-T%g"%(tension), "-C%g"%(accuracy), "-Gtmp.grd"])
+
+
+    with Dataset("tmp.grd", "r") as f:
+        xT = np.asarray(f['x'])
+        yT = np.asarray(f['y'])
+        vals = np.asarray(f['z'])
+    deleteFile("tmp.grd")
         
     if mask:
         masked = "-S%g"%(mask)
         subprocess.call(["grdmask", "tmp.txt", increments, region, masked, "-Gmask.grd"])
-        ds = Dataset("mask.grd")
-        msk = ds.variables['z'][:,:]
+
+        with Dataset("mask.grd", 'r') as f:
+            msk = np.asarray(f['z'])
+        deleteFile("mask.grd")
+
         msk[msk == 0.0] = np.nan
         vals *= msk
         deleteFile("mask.grd")
@@ -158,8 +156,11 @@ def minimumCurvature(x, y, values, bounds, dx, dy, mask=False, clip=True, iterat
         
     deleteFile('tmp.txt')
     
-    vals=StatArray.StatArray(vals,name=cf.getName(values), units = cf.getUnits(values))
-    return x,y,vals
+    xT = StatArray.StatArray(x, name=cf.getName(x), units=cf.getUnits(x))
+    yT = StatArray.StatArray(y, name=cf.getName(y), units=cf.getUnits(y))
+
+    vals = StatArray.StatArray(vals, name=cf.getName(values), units = cf.getUnits(values))
+    return xT, yT, vals
 
 def getGridLocations2D(bounds, dx, dy):
     """Discretize a 2D bounding box by increments of dx and return the grid node locations
