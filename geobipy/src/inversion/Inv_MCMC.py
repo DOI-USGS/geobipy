@@ -65,6 +65,8 @@ def Inv_MCMC(paras, DataPoint, prng, LineResults=None, rank=1):
         # Accept or reject the new model
         [Mod, DataPoint, prior, posterior, PhiD, posteriorComponents, failed] = AcceptReject(paras, Mod, DataPoint, prior, posterior, PhiD, Res, prng)# ,oF, oD, oRel, oAdd, oP, oA, i)
 
+        if paras.ignoreLikelihood:
+            Res.burnedIn = True
         # Determine if we are burning in
         if (not Res.burnedIn):
             if (PhiD <= multiplier * DataPoint.data.size):
@@ -73,6 +75,7 @@ def Inv_MCMC(paras, DataPoint, prng, LineResults=None, rank=1):
                 bestModel = Mod.deepcopy()
                 bestData = DataPoint.deepcopy()
                 bestPosterior = posterior.copy()
+            
 
         # Update the best best model and data if the posterior is larger
         if (posterior > bestPosterior):
@@ -269,12 +272,21 @@ def Initialize(paras, DataPoint, prng):
         DataPoint.calibrate()
 
     # Evaluate the prior for the current model
-    prior = Mod.priorProbability(paras.solveParameter,paras.solveGradient,paras.pLimits)
+    p = Mod.priorProbability(paras.solveParameter, paras.solveGradient, paras.pLimits)
+    # print('model prior {}'.format(p))
+    prior = p
     # Evaluate the prior for the current data
-    prior += DataPoint.priorProbability(paras.solveRelativeError, paras.solveAdditiveError, paras.solveElevation, paras.solveCalibration)
+    p = DataPoint.priorProbability(paras.solveRelativeError, paras.solveAdditiveError, paras.solveElevation, paras.solveCalibration)
+    # print('data prior {}'.format(p))
+    prior += p
 
     # Add the likelihood function to the prior
-    posterior = DataPoint.likelihood() + prior
+    likelihood = 1.0
+    if not paras.ignoreLikelihood:
+        likelihood = DataPoint.likelihood()
+
+    # print('likelhiood {}'.format(likelihood))
+    posterior = likelihood + prior
 
     return (paras, Mod, DataPoint, prior, posterior, PhiD)
 
@@ -302,8 +314,9 @@ def AcceptReject(paras, Mod, DataPoint, prior, posterior, PhiD, Res, prng):# ,oF
             unscaledVariance = np.linalg.inv(np.dot(J.T,J) + np.eye(Mod1.nCells[0]) * paras.priStd**-1.0)
             J = DataPoint.scaleJ(D1.J, 2.0)
         else:
-            unscaledVariance = np.diag((paras.covScaling / np.sqrt(Mod1.nCells)) / (
-                (np.dot(J.T, J)) + sparse.eye(Mod1.nCells[0]) * (paras.priStd**-1.0)))
+
+            unscaledVariance = np.diag((paras.covScaling / np.sqrt(Mod1.nCells[0])) / (
+                (np.dot(J.T, J)) + np.eye(Mod1.nCells[0]) * (paras.priStd**-1.0)))
     else:  # There was no change in the model
         # Normalize the saved sensitivity matrix by the previous data errors
         if (paras.stochasticNewton):
@@ -354,7 +367,9 @@ def AcceptReject(paras, Mod, DataPoint, prior, posterior, PhiD, Res, prng):# ,oF
         tmp, posteriorComponents[4:-1] = D1.probability(paras.solveRelativeError, paras.solveAdditiveError, paras.solveElevation, paras.solveCalibration, verbose=True)
 
         prior1 += tmp
-        likelihood = D1.likelihood()
+        likelihood = 1.0
+        if not paras.ignoreLikelihood:
+            likelihood = D1.likelihood()
 
         posteriorComponents[-1] = likelihood
         posterior1 = likelihood + prior1
@@ -363,12 +378,21 @@ def AcceptReject(paras, Mod, DataPoint, prior, posterior, PhiD, Res, prng):# ,oF
     else:
         posteriorComponents = None
         # Evaluate the prior for the current model
-        prior1 = Mod1.priorProbability(paras.solveParameter, paras.solveGradient, paras.pLimits)
+        p = Mod1.priorProbability(paras.solveParameter, paras.solveGradient, paras.pLimits)
+        # print('model prior {}'.format(p))
+        prior1 = p
         # Evaluate the prior for the current data
-        prior1 += D1.priorProbability(paras.solveRelativeError, paras.solveAdditiveError, paras.solveElevation, paras.solveCalibration)
+        p = D1.priorProbability(paras.solveRelativeError, paras.solveAdditiveError, paras.solveElevation, paras.solveCalibration)
+        # print('data prior {}'.format(p))
+        prior1 += p
 
+        likelihood = 1.0
+        if not paras.ignoreLikelihood:
+            likelihood = D1.likelihood()
+
+        # print('likeliohood {}'.format(likelihood))
         # Add the likelihood function to the prior
-        posterior1 = D1.likelihood() + prior1
+        posterior1 = likelihood + prior1
 
     # Exchange the mean of candidate models proposal mean with the
     # pre-perturbed values (maintain the diagonal variance)
@@ -397,7 +421,7 @@ def AcceptReject(paras, Mod, DataPoint, prior, posterior, PhiD, Res, prng):# ,oF
         prop = tmp.probability(np.log(parSaved))  # CUR.prop
     else:
         # Get the pdf for the perturbed parameters
-        prop1 = Mod1.par.proposal.getPdf(np.log(Mod1.par))  # CAN.prop
+        prop1 = Mod1.par.proposal.probability(np.log(Mod1.par))  # CAN.prop
 
         par = StatArray.StatArray(np.log(Mod1.par))
         cov = StatArray.StatArray(Mod1.par.proposal.variance)
@@ -416,55 +440,58 @@ def AcceptReject(paras, Mod, DataPoint, prior, posterior, PhiD, Res, prng):# ,oF
 
         tmp = Mod.deepcopy()
         tmp.par.setProposal('MvNormalLog', par, cov)
-        prop = tmp.par.proposal.getPdf(np.log(Mod.par))  # CUR.prop
+        prop = tmp.par.proposal.probability(np.log(Mod.par))  # CUR.prop
 
-    P_depth  = np.log(Mod.depth.probability(Mod.nCells[0]))
-    P_depth1 = np.log(Mod1.depth.probability(Mod1.nCells[0]))
+    posteriorRatio = posterior1 - posterior
+    proposalRatio = prop - prop1
+
+    P_depth  = np.log(Mod.depth.probability(Mod.nCells[0]-1))
+    P_depth1 = np.log(Mod1.depth.probability(Mod1.nCells[0]-1))
 
     # TEMPORARY TRY EXCEPT UNTIL I FIGURE OUT THE PROBLEM
-    likeRatio = 0.0
+    acceptanceRatio = 0.0
     try:
-        tmp = np.float128((posterior1 + prop) -
-                      (posterior + prop1) +
-                      (P_depth - P_depth1))
-        likeRatio = mExp(tmp)
+        tmp = np.float128(posteriorRatio + proposalRatio + (P_depth - P_depth1))
+        acceptanceRatio = mExp(tmp)
         failed = False
     except:
         failed = True
-        likeRatio = 0.0
-
+        acceptanceRatio = 0.0
         
-    cut = np.minimum(1.0, likeRatio)
+    acceptanceProbability = np.minimum(1.0, acceptanceRatio)
 
     # If we accept the model
     r = prng.uniform()
 
-    if (cut > r):
+    if (acceptanceProbability > r):
 #        accepted=True
         # Make the Current model the Candidate model
-        # Mod0 = Mod1 #deepcopy()
+        Mod0 = Mod1.deepcopy()
         # # Make the Current data the Candidate data
-        # D0 = D1 #deepcopy()
+        D0 = D1.deepcopy()
         # # Transfer over the posteriors and priors
         # prior0 = prior1 #.copy()
         # posterior0 = posterior1 #.copy()
         # PhiD0 = PhiD1 #.copy()
         paras.unscaledVariance = unscaledVariance
-        if (Res.saveMe or Res.plotMe):
-            Res.acceptance += 1
+        Res.acceptance += 1
 
-        return(Mod1, D1, prior1, posterior1, PhiD1, posteriorComponents, failed)
+        # print('Accepted! {} {} {} {} {} {} {}'.format(prop, prop1, posterior, posterior1, P_depth, P_depth1, likeRatio))
+
+        return(Mod0, D0, prior1, posterior1, PhiD1, posteriorComponents, failed)
 
     else:
 #        accepted=False
         # Keep the unperturbed mdel
-        # Mod0 = Mod.deepcopy()
-        # D0 = DataPoint.deepcopy()
+        Mod0 = Mod.deepcopy()
+        D0 = DataPoint.deepcopy()
         # prior0 = prior #.copy()
         # posterior0 = posterior #.copy()
         # PhiD0 = PhiD #.copy()
 
-        return(Mod, DataPoint, prior, posterior, PhiD, posteriorComponents, failed)
+        # print('Rejected! {} {} {} {} {} {} {}'.format(prop, prop1, posterior, posterior1, P_depth, P_depth1, likeRatio))
+
+        return(Mod0, D0, prior, posterior, PhiD, posteriorComponents, failed)
 
     clk.stop()
 
