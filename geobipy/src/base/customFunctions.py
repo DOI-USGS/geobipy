@@ -2,6 +2,7 @@ import numpy as np
 from copy import deepcopy
 from numpy import issubdtype
 from math import exp as mExp
+from ..classes.core import StatArray
 
 def isInt(this):
     """Check whether an entry is a subtype of an int
@@ -689,9 +690,6 @@ def _logArray(values, log=None):
     
     assert False, ValueError("log must be 'e' or a positive number")
 
-
-
-
     
 def histogramEqualize(values, nBins=256):
     """Equalize the histogram of the values so that all colours have an equal amount
@@ -747,9 +745,38 @@ def histogramEqualize(values, nBins=256):
     # Shifting to the needed level
     equalized += b1
 
-    res = equalized.reshape(values.shape)
+    res = StatArray.StatArray(equalized.reshape(values.shape), getName(values), getUnits(values))
 
     return res, cdf
+
+
+def _power(values, exponent=None):
+    """Take values to a power.
+    
+    Uses mask arrays for robustness and warns when masking occurs
+    Also returns a LateX string of log_{base} so that auto labeling is easier.
+
+    Parameters
+    ----------
+    values : scalar or array_like
+        Take the log of these values.
+    exponent : 'e' or float, optional
+        * If exponent = 'e': use np.exp(values)
+        * If exponent is float: use np.power(values)
+
+    Returns
+    -------
+    out : array_like
+        The values to power exponent
+
+    """
+
+    if exponent is None:
+        return values
+    if exponent == 'e':
+        return np.exp(values)
+    else:
+        return np.power(exponent, values)
 
 
 def safeEval(string):
