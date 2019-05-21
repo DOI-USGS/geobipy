@@ -22,6 +22,7 @@ from ..classes.data.datapoint.FdemDataPoint import FdemDataPoint
 from ..classes.data.datapoint.TdemDataPoint import TdemDataPoint
 from ..classes.model.Model1D import Model1D
 from ..classes.core.Stopwatch import Stopwatch
+from ..base.HDF import hdfRead
 
 class Results(myObject):
     """Define the results for the Bayesian MCMC Inversion.
@@ -296,10 +297,11 @@ class Results(myObject):
         ls = kwargs.pop('linestyle', 'none')
         mec = kwargs.pop('markeredgecolor', 'k')
 
-        self.rate.plot(self.ratex, i=np.s_[:np.int64(self.i / 1000)], marker=m, markeredgecolor=mec, linestyle=ls, **kwargs)
+        ax = self.rate.plot(self.ratex, i=np.s_[:np.int64(self.i / 1000)], marker=m, markeredgecolor=mec, linestyle=ls, **kwargs)
         cP.xlabel('Iteration #')
         cP.ylabel('% Acceptance')
         cP.title('Acceptance rate')
+        ax.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
 
 
     def _plotMisfitVsIteration(self, **kwargs):
@@ -312,13 +314,14 @@ class Results(myObject):
         c = kwargs.pop('color', 'k')
         lw = kwargs.pop('linewidth', 3)
         
-        self.PhiDs.plot(self.iRange, i=np.s_[:self.i], marker=m, alpha=a, markersize=ms, linestyle=ls, color=c, **kwargs)
+        ax = self.PhiDs.plot(self.iRange, i=np.s_[:self.i], marker=m, alpha=a, markersize=ms, linestyle=ls, color=c, **kwargs)
         plt.ylabel('Data Misfit')
         dum = self.multiplier * len(self.bestDataPoint.iActive)
         plt.axhline(dum, color='#C92641', linestyle='dashed', linewidth=lw)
         if (self.burnedIn):
             plt.axvline(self.iBurn, color='#C92641', linestyle='dashed', linewidth=lw)
         plt.yscale('log')
+        ax.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
 
 
     def _plotObservedPredictedData(self, **kwargs):
@@ -333,15 +336,18 @@ class Results(myObject):
     def _plotNumberOfLayersPosterior(self, **kwargs):
         """ Plot the histogram of the number of layers """
 
-        self.currentModel.nCells.posterior.plot(**kwargs)
+        ax = self.currentModel.nCells.posterior.plot(**kwargs)
         plt.axvline(self.bestModel.nCells, color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
+        ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 
 
     def _plotHeightPosterior(self, **kwargs):
         """ Plot the histogram of the height """
         # self.DzHist.plot(**kwargs)
-        self.currentDataPoint.z.posterior.plot(**kwargs)
+        ax = self.currentDataPoint.z.posterior.plot(**kwargs)
         plt.axvline(self.bestDataPoint.z, color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
+        ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+
 
     
     def _plotRelativeErrorPosterior(self, axes, **kwargs):
@@ -351,6 +357,8 @@ class Results(myObject):
         for i, a in enumerate(axes):
             plt.sca(a)
             plt.axvline(self.bestDataPoint.relErr[i], color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
+            a.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+        
 
 
     def _plotAdditiveErrorPosterior(self, axes, **kwargs):
@@ -371,6 +379,7 @@ class Results(myObject):
         for i, a in enumerate(axes):
             plt.sca(a)
             plt.axvline(loc[i], color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
+            a.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 
 
     def _plotLayerDepthPosterior(self, **kwargs):
@@ -380,7 +389,8 @@ class Results(myObject):
         fY = kwargs.pop('flipY', True)
         tr = kwargs.pop('trim', False)
 
-        self.currentModel.depth.posterior.plot(rotate=r, flipY=fY, trim=tr, **kwargs)
+        ax = self.currentModel.depth.posterior.plot(rotate=r, flipY=fY, trim=tr, **kwargs)
+        ax.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
 
     
     def _plotHitmapPosterior(self, reciprocateX=False, confidenceInterval = 95.0, opacityPercentage = 67.0, **kwargs):
@@ -785,151 +795,79 @@ class Results(myObject):
 #         grp.create_dataset('savetime', data=self.saveTime)
 
 
-#     def fromHdf(self, grp, sysPath = ''):
-#         """ Reads in the object froma HDF file """
-#         self.fiducial = np.array(grp.get('id'))
-#         self.i = np.array(grp.get('i'))
-#         tmp = grp.get('iplot')
-#         if tmp is None:
-#             tmp = grp.get('iPlot')
-#         self.iPlot = np.array(tmp)
+    def fromHdf(self, hdfFile, index, fid, sysPath):
+    
 
-#         tmp = grp.get('plotme')
-#         if tmp is None:
-#             tmp = grp.get('plotMe')
-#         self.plotMe = np.array(tmp)
+        s = np.s_[index, :]
 
-#         try:
-#             self.limits = np.array(grp.get('limits'))
-#         except:
-#             self.limits = None
+        self.fiducial = np.float64(fid)
 
-#         tmp = grp.get('dispres')
-#         if tmp is None:
-#             tmp = grp.get('dispRes')
-#         self.reciprocateParameter = np.array(tmp)
+        self.iPlot = np.array(hdfFile.get('iplot'))
+        self.plotMe = np.array(hdfFile.get('plotme'))
 
-#         self.sx = np.array(grp.get('sx'))
-#         self.sy = np.array(grp.get('sy'))
-#         tmp = grp.get('nmc')
-#         if (tmp is None):
-#             tmp = np.array(grp.get('nMC'))
-#         self.nMC = np.array(tmp)
-#         # Initialize a list of iteration number
-#         self.iRange = StatArray.StatArray(np.arange(2 * self.nMC), name="Iteration #", dtype=np.int64)
+        tmp = hdfFile.get('limits')
+        self.limits = None if tmp is None else np.array(tmp)
+        self.reciprocateParameter = np.array(hdfFile.get('reciprocateParameter'))
+        self.nMC = np.array(hdfFile.get('nmc'))
+        self.nSystems = np.array(hdfFile.get('nsystems'))
+        self.ratex = hdfRead.readKeyFromFile(hdfFile,'','/','ratex')
 
-#         tmp = grp.get('nsystems')
-#         if tmp is None:
-#             tmp = grp.get('nSystems')
-#         self.nSystems = np.array(tmp)
+        self.i = hdfRead.readKeyFromFile(hdfFile,'','/','i', index=index)
+        self.iBurn = hdfRead.readKeyFromFile(hdfFile,'','/','iburn', index=index)
+        self.burnedIn = hdfRead.readKeyFromFile(hdfFile,'','/','burnedin', index=index)
+        self.doi = hdfRead.readKeyFromFile(hdfFile,'','/','doi', index=index)
+        self.multiplier = hdfRead.readKeyFromFile(hdfFile,'','/','multiplier', index=index)
+        self.rate = hdfRead.readKeyFromFile(hdfFile,'','/','rate', index=s)
+        self.PhiDs = hdfRead.readKeyFromFile(hdfFile,'','/','phids', index=s)
 
-#         tmp = grp.get('iburn')
-#         if tmp is None:
-#             tmp = grp.get('iBurn')
-#         self.iBurn = np.array(tmp)
-
-#         tmp = grp.get('burnedin')
-#         if tmp is None:
-#             tmp = grp.get('burnedIn')
-#         self.burnedIn = np.array(tmp)
-
-#         self.doi = np.array(grp.get('doi'))
-#         self.multiplier = np.array(grp.get('multiplier'))
-
-#         item = grp.get('rate')
-#         obj = eval(cF.safeEval(item.attrs.get('repr')))
-#         self.rate = obj.fromHdf(item)
-
-#         item = grp.get('ratex')
-#         obj = eval(cF.safeEval(item.attrs.get('repr')))
-#         self.ratex = obj.fromHdf(item)
-
-#         item = grp.get('phids')
-#         if (item is None):
-#             item = grp.get('PhiDs')
-#         obj = eval(cF.safeEval(item.attrs.get('repr')))
-#         self.PhiDs = obj.fromHdf(item)
-
-#         # item = grp.get('khist')
-#         # if (item is None):
-#         #     item = grp.get('kHist')
-#         # obj = eval(cF.safeEval(item.attrs.get('repr')))
-#         # self.kHist = obj.fromHdf(item)
-
-#         # item = grp.get('dzhist')
-#         # if (item is None):
-#         #     item = grp.get('DzHist')
-#         # obj = eval(cF.safeEval(item.attrs.get('repr')))
-#         # self.DzHist = obj.fromHdf(item)
-
-#         item = grp.get('mzhist')
-#         if (item is None):
-#             item = grp.get('MzHist')
-#         obj = eval(cF.safeEval(item.attrs.get('repr')))
-#         self.MzHist = obj.fromHdf(item)
-
-#         item = grp.get('hitmap')
-#         if (item is None):
-#             item = grp.get('HitMap')
-#         s = item.attrs.get('repr')
-#         obj = eval(s)
-#         self.Hitmap = obj.fromHdf(item)
-
-#         item = grp.get('currentdatapoint')
-#         obj = eval(cF.safeEval(item.attrs.get('repr')))
-#         self.currentDataPoint = obj.fromHdf(item, sysPath=sysPath)
-
-#         self.DzHist = self.currentDataPoint.z.posterior
-
-#         item = grp.get('bestd')
-#         if (item is None):
-#             item = grp.get('bestD')
-#         obj = eval(cF.safeEval(item.attrs.get('repr')))
-#         self.bestDataPoint = obj.fromHdf(item, sysPath=sysPath)
+        self.bestDataPoint = hdfRead.readKeyFromFile(hdfFile,'','/','bestd', index=index, sysPath=sysPath)
+        try:
+            self.currentDataPoint = hdfRead.readKeyFromFile(hdfFile,'','/','currentdatapoint', index=index, sysPath=sysPath)
+        except:
+            self.currentDataPoint = self.bestDataPoint
+            p = hdfRead.readKeyFromFile(hdfFile,'','/','dzhist', index=index)
+            self.currentDataPoint.z.setPosterior(p)
+        
+        
+        try:
+            self.currentModel = hdfRead.readKeyFromFile(hdfFile,'','/','currentmodel', index=index)
+            self.Hitmap = self.currentModel.par.posterior
+            self.currentModel.maxDepth = np.log(self.Hitmap.y.cellCentres[-1])            
+        except:
+            self.Hitmap = hdfRead.readKeyFromFile(hdfFile,'','/','hitmap', index=index)
 
 
-#         item = grp.get('currentmodel')
-#         obj = eval(cF.safeEval(item.attrs.get('repr')))
-#         self.currentModel = obj.fromHdf(item)
-#         self.currentModel.maxDepth = np.log(self.Hitmap.y.cellCentres[-1])
+        self.bestModel = hdfRead.readKeyFromFile(hdfFile,'','/','bestmodel', index=index)
+        self.bestModel.maxDepth = np.log(self.Hitmap.y.cellCentres[-1])
 
-#         self.KzHist = self.currentModel.nCells.posterior
+        
+
+        # self.kHist = hdfRead.readKeyFromFile(hdfFile,'','/','khist', index=i)
+        # self.DzHist = hdfRead.readKeyFromFile(hdfFile,'','/','dzhist', index=i)
+        # self.MzHist = hdfRead.readKeyFromFile(hdfFile,'','/','mzhist', index=i)
+
+        # Hack to recentre the altitude histogram go this datapoints altitude
+        # self.DzHist._cellEdges -= (self.DzHist.bins[int(self.DzHist.bins.size/2)-1] - self.bestD.z[0])
+        # self.DzHist._cellCentres = self.DzHist._cellEdges[:-1] + 0.5 * np.abs(np.diff(self.DzHist._cellEdges))
+
+        # self.relErr = []
+        # self.addErr = []
+        # for j in range(self.nSystems):
+        #     self.relErself.append(hdfRead.readKeyFromFile(hdfFile,'','/','relerr'+str(j), index=i))
+        #     self.addErself.append(hdfRead.readKeyFromFile(hdfFile,'','/','adderr'+str(j), index=i))
 
 
-#         item = grp.get('bestmodel')
-#         if (item is None):
-#             item = grp.get('bestModel')
-#         obj = eval(cF.safeEval(item.attrs.get('repr')))
-#         self.bestModel = obj.fromHdf(item)
-#         self.bestModel.maxDepth = np.log(self.Hitmap.y.cellCentres[-1])
+        self.invTime=np.array(hdfFile.get('invtime')[index])
+        self.saveTime=np.array(hdfFile.get('savetime')[index])
 
-#         self.relErr = []
-#         self.addErr = []
-#         for i in range(self.nSystems):
-#             item = grp.get('relerr' + str(i))
-#             if (item is None):
-#                 item = grp.get('relErr'+str(i))
-#             obj = eval(cF.safeEval(item.attrs.get('repr')))
-#             aHist = obj.fromHdf(item)
-#             self.relErr.append(aHist)
-#             item = grp.get('adderr' + str(i))
-#             if (item is None):
-#                 item = grp.get('addErr'+str(i))
-#             obj = eval(cF.safeEval(item.attrs.get('repr')))
-#             aHist = obj.fromHdf(item)
-#             self.addErr.append(aHist)
+        # Initialize a list of iteration number
+        self.iRange = StatArray.StatArray(np.arange(2 * self.nMC), name="Iteration #", dtype=np.int64)
 
-#         tmp = grp.get('invtime')
-#         if tmp is None:
-#             tmp = grp.get('invTime')
-#         self.invTime = np.array(tmp)
+        self.verbose = False
 
-#         tmp = grp.get('savetime')
-#         if tmp is None:
-#             tmp = grp.get('saveTime')
-#         self.saveTime = np.array(tmp)
+        return self
 
-#         self.verbose = False
+
 
 
     def read(self, fName, grpName, sysPath = ''):
