@@ -7,7 +7,6 @@ from copy import deepcopy
 import numpy as np
 from ...base import customFunctions as cf
 from ...base import customPlots as cp
-from ...base.customFunctions import safeEval
 
 
 class RectilinearMesh1D(myObject):
@@ -178,6 +177,8 @@ class RectilinearMesh1D(myObject):
             iBin = np.int64((values - self._cellCentres[0]) / self.dx)
         else:
             iBin = self._cellEdges.searchsorted(values, side='right') - 1
+
+        iBin = np.atleast_1d(iBin)
         
         # Remove indices that are out of bounds
         if trim:
@@ -317,7 +318,7 @@ class RectilinearMesh1D(myObject):
     def fromHdf(self, grp, index=None):
         """ Reads in the object froma HDF file """
         item = grp.get('x')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cf.safeEval(item.attrs.get('repr')))
         x = obj.fromHdf(item, index=index)
         res = RectilinearMesh1D(x)
         return res

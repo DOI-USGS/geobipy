@@ -19,8 +19,6 @@ import numpy as np
 #from ....base import Error as Err
 from ....base import fileIO as fIO
 from ....base import customFunctions as cf
-from ....base.customFunctions import safeEval
-from ....base.customFunctions import findNotNans, isInt
 from ....base import customPlots as cp
 from ....base import MPI as myMPI
 from os.path import split as psplt
@@ -173,7 +171,7 @@ class TdemDataPoint(EmDataPoint):
         i0 = 0
         for i in range(self.nSystems):
             i1 = i0 + self.nTimes[i]
-            self.iplotActive.append(findNotNans(self._data[i0:i1]))
+            self.iplotActive.append(cf.findNotNans(self._data[i0:i1]))
             i0 = i1
 
 
@@ -219,7 +217,7 @@ class TdemDataPoint(EmDataPoint):
         """
 
         if (not index is None):
-            assert isInt(index), TypeError('Index must be an int')
+            assert cf.isInt(index), TypeError('Index must be an int')
 
         grp = parent.get(myName)
 
@@ -250,19 +248,19 @@ class TdemDataPoint(EmDataPoint):
         sysPath = kwargs.pop('sysPath', None)
         assert (not sysPath is None), ValueError("missing 1 required argument 'sysPath', the path to directory containing system files")
         if (not index is None):
-            assert isInt(index), ValueError("index must be of type int")
+            assert cf.isInt(index), ValueError("index must be of type int")
 
         item = grp.get('x')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cf.safeEval(item.attrs.get('repr')))
         x = obj.fromHdf(item, index=index)
         item = grp.get('y')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cf.safeEval(item.attrs.get('repr')))
         y = obj.fromHdf(item, index=index)
         item = grp.get('z')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cf.safeEval(item.attrs.get('repr')))
         z = obj.fromHdf(item, index=index)
         item = grp.get('e')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cf.safeEval(item.attrs.get('repr')))
         e = obj.fromHdf(item, index=index)
 
         nSystems = np.int(np.asarray(grp.get('nSystems')))
@@ -278,27 +276,27 @@ class TdemDataPoint(EmDataPoint):
             slic = np.s_[index,:]
 
         item = grp.get('d')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cf.safeEval(item.attrs.get('repr')))
         _aPoint._data = obj.fromHdf(item, index=slic)
         item = grp.get('s')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cf.safeEval(item.attrs.get('repr')))
         _aPoint._std = obj.fromHdf(item, index=slic)
         item = grp.get('p')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cf.safeEval(item.attrs.get('repr')))
         _aPoint._predictedData = obj.fromHdf(item, index=slic)
         if (_aPoint.nSystems == 1):
             slic = index
         item = grp.get('relErr')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cf.safeEval(item.attrs.get('repr')))
         _aPoint.relErr = obj.fromHdf(item, index=slic)
         item = grp.get('addErr')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cf.safeEval(item.attrs.get('repr')))
         _aPoint.addErr = obj.fromHdf(item, index=slic)
         item = grp.get('T')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cf.safeEval(item.attrs.get('repr')))
         _aPoint.T = obj.fromHdf(item, index=index)
         item = grp.get('R')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cf.safeEval(item.attrs.get('repr')))
         _aPoint.R = obj.fromHdf(item, index=index)
 
         _aPoint.iActive = _aPoint.getActiveData()

@@ -8,7 +8,7 @@ from ...classes.core import StatArray
 from .CircularLoop import CircularLoop
 from ...base import fileIO as fIO
 from ...base import MPI as myMPI
-from ...base.customFunctions import safeEval
+from ...base import customFunctions as cF
 #from ...base import Error as Err
 
 
@@ -202,16 +202,16 @@ class FdemSystem(myObject):
         nFreq = np.int(np.array(grp.get('nFreq')))
         tmp = FdemSystem(nFreq)
         item = grp.get('freq')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         tmp._frequencies = obj.fromHdf(item)
         item = grp.get('dist')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         tmp.dist = obj.fromHdf(item)
         for i in range(nFreq):
             item = grp.get('T/T' + str(i))
-            tmp.T[i] = eval(safeEval(item.attrs.get('repr')))
+            tmp.T[i] = eval(cF.safeEval(item.attrs.get('repr')))
             item = grp.get('R/R' + str(i))
-            tmp.R[i] = eval(safeEval(item.attrs.get('repr')))
+            tmp.R[i] = eval(cF.safeEval(item.attrs.get('repr')))
         return tmp
 
     def Bcast(self, world, root=0):

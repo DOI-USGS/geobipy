@@ -8,8 +8,7 @@ from .RectilinearMesh1D import RectilinearMesh1D
 import numpy as np
 from scipy.stats import binned_statistic
 from ...base import customPlots as cP
-from ...base.customFunctions import safeEval
-from ...base.customFunctions import _log, isInt
+from ...base import customFunctions as cF
 
 try:
     from pyvtk import VtkData, CellData, Scalars, PolyData
@@ -162,7 +161,7 @@ class RectilinearMesh2D(myObject):
             med = self.z.cellCentres[ixM]
 
         if (not log is None):
-            med, dum = _log(med, log=log)
+            med, dum = cF._log(med, log=log)
 
         return med
 
@@ -394,11 +393,17 @@ class RectilinearMesh2D(myObject):
 
     
     def setDistance(self):
+        """Calculate the along line distance from mesh node to mesh node.
+
+        """
         assert self.xyz, Exception("To set the distance, the mesh must be instantiated with three co-ordinates")
+
         dx = np.diff(self.x.cellEdges)
         dy = np.diff(self.y.cellEdges)
+
         distance = StatArray.StatArray(np.zeros(self.x.nEdges), 'Distance', self.x.cellCentres.units)
         distance[1:] = np.cumsum(np.sqrt(dx**2.0 + dy**2.0))
+        
         self.distance = RectilinearMesh1D(cellEdges = distance)
 
 
@@ -454,7 +459,7 @@ class RectilinearMesh2D(myObject):
         ai = None
         bi = None
         if not index is None:
-            assert isInt(index), ValueError('index must be an integer')
+            assert cF.isInt(index), ValueError('index must be an integer')
             ai = np.s_[index,:,:]
             bi = np.s_[index,:]
 
@@ -483,18 +488,18 @@ class RectilinearMesh2D(myObject):
         ai=None
         bi=None
         if (not index is None):
-            assert isInt(index), ValueError('index must be an integer')
+            assert cF.isInt(index), ValueError('index must be an integer')
             ai = np.s_[index, :, :]
             bi = np.s_[index, :]
 
         item = grp.get('arr')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         arr = obj.fromHdf(item, index=ai)
         item = grp.get('x')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         x = obj.fromHdf(item, index=bi)
         item = grp.get('y')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         y = obj.fromHdf(item, index=bi)
         tmp = RectilinearMesh2D(x, y)
         tmp._counts = arr

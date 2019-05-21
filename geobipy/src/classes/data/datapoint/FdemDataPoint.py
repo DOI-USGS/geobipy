@@ -13,7 +13,6 @@ from ...system.FdemSystem import FdemSystem
 import matplotlib.pyplot as plt
 import numpy as np
 #from ....base import Error as Err
-from ....base.customFunctions import safeEval
 from ....base import customFunctions as cf
 from ....base import MPI as myMPI
 from ....base import customPlots as cp
@@ -312,23 +311,23 @@ class FdemDataPoint(EmDataPoint):
             assert not index is None, ValueError("File contains multiple FdemDataPoints.  Must specify an index.")
 
         item = grp.get('x')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cf.safeEval(item.attrs.get('repr')))
         x = obj.fromHdf(item, index=index)
 
         item = grp.get('y')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cf.safeEval(item.attrs.get('repr')))
         y = obj.fromHdf(item, index=index)
 
         item = grp.get('z')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cf.safeEval(item.attrs.get('repr')))
         z = obj.fromHdf(item, index=index)
 
         item = grp.get('e')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cf.safeEval(item.attrs.get('repr')))
         e = obj.fromHdf(item, index=index)
 
         item = grp.get('sys')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cf.safeEval(item.attrs.get('repr')))
         system = obj.fromHdf(item)
 
         _aPoint = FdemDataPoint(x, y, z, e, system=system)
@@ -339,27 +338,27 @@ class FdemDataPoint(EmDataPoint):
             slic = None
 
         item = grp.get('d')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cf.safeEval(item.attrs.get('repr')))
         _aPoint._data = obj.fromHdf(item, index=slic)
 
         item = grp.get('s')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cf.safeEval(item.attrs.get('repr')))
         _aPoint._std = obj.fromHdf(item, index=slic)
 
         item = grp.get('p')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cf.safeEval(item.attrs.get('repr')))
         _aPoint._predictedData = obj.fromHdf(item, index=slic)
 
         item = grp.get('relErr')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cf.safeEval(item.attrs.get('repr')))
         _aPoint.relErr = obj.fromHdf(item, index=index)
 
         item = grp.get('addErr')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cf.safeEval(item.attrs.get('repr')))
         _aPoint.addErr = obj.fromHdf(item, index=index)
 
         item = grp.get('calibration')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cf.safeEval(item.attrs.get('repr')))
         _aPoint.calibration = obj.fromHdf(item, index=slic)
 
         _aPoint.iActive = _aPoint.getActiveData()

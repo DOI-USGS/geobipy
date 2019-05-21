@@ -11,7 +11,6 @@ from .Data import Data
 from ..datapoint.TdemDataPoint import TdemDataPoint
 from ....classes.core import StatArray
 from ...system.CircularLoop import CircularLoop
-from ....base.customFunctions import safeEval
 from ...system.TdemSystem import TdemSystem
 
 import numpy as np
@@ -829,38 +828,38 @@ class TdemData(Data):
         tmp = TdemData(nPoints=s[0], nTimes=s[1], systems=systems)
 
         item = grp.get('x')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         tmp._x = obj.fromHdf(item)
         item = grp.get('y')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         tmp._y = obj.fromHdf(item)
         item = grp.get('z')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         tmp._z = obj.fromHdf(item)
         item = grp.get('e')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         tmp._elevation = obj.fromHdf(item)
 
         item = grp.get('d')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         tmp._data = obj.fromHdf(item)
         item = grp.get('s')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         tmp._std = obj.fromHdf(item)
         item = grp.get('p')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         tmp._predictedData = obj.fromHdf(item)
         item = grp.get('relErr')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         tmp.relErr = obj.fromHdf(item)
         item = grp.get('addErr')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         tmp.addErr = obj.fromHdf(item)
         item = grp.get('T')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         tmp.T = obj.fromHdf(item)
         item = grp.get('R')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         tmp.R = obj.fromHdf(item)
 
         tmp.iActive = tmp.getActiveChannels()
@@ -963,7 +962,7 @@ class TdemData(Data):
             this.T = self.T
         else:
             for i in range(this.nPoints):
-                this.T[i] = eval(safeEval(lTmp[i]))
+                this.T[i] = eval(cF.safeEval(lTmp[i]))
 
         # Broadcast the Reciever Loops.
         if (world.rank == 0):
@@ -977,7 +976,7 @@ class TdemData(Data):
             this.R = self.R
         else:
             for i in range(this.nPoints):
-                this.R[i] = eval(safeEval(lTmp[i]))
+                this.R[i] = eval(cF.safeEval(lTmp[i]))
 
         this.iActive = this.getActiveChannels()
 

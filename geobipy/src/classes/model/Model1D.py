@@ -12,7 +12,7 @@ from ..statistics.Distribution import Distribution
 import numpy as np
 import matplotlib.pyplot as plt
 from ...base import customPlots as cP
-from ...base.customFunctions import safeEval
+from ...base import customFunctions as cF
 
 class Model1D(Model):
     """Class extension to geobipy.Model
@@ -366,7 +366,7 @@ class Model1D(Model):
         probability += P_nCells
 
         # Probability of depth given nCells
-        P_depthcells = np.log(self.depth.probability(self.nCells))
+        P_depthcells = np.log(self.depth.probability(self.nCells-1))
         probability += P_depthcells
 
         # Evaluate the prior based on the assigned hitmap
@@ -1391,7 +1391,7 @@ class Model1D(Model):
             assert not index is None, ValueError("File was created with multiple Model1Ds, must specify an index")
 
         item = grp.get('nCells')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         tmp.nCells = obj.fromHdf(item, index=index)
 
         if grp['par/data'].ndim == 1:
@@ -1400,28 +1400,28 @@ class Model1D(Model):
             i = np.s_[index, :tmp.nCells[0]]
 
         item = grp.get('top')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         tmp.top = obj.fromHdf(item, index=index)
 
         item = grp.get('par')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         obj = obj.resize(tmp.nCells[0])
         tmp.par = obj.fromHdf(item, index=i)
 
         item = grp.get('depth')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         obj = obj.resize(tmp.nCells[0])
         tmp.depth = obj.fromHdf(item, index=i)
 
         item = grp.get('thk')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         obj = obj.resize(tmp.nCells[0])
         tmp.thk = obj.fromHdf(item, index=i)
 
-        #item = grp.get('chie'); obj = eval(safeEval(item.attrs.get('repr')));
+        #item = grp.get('chie'); obj = eval(cF.safeEval(item.attrs.get('repr')));
         #obj = obj.resize(tmp.nCells[0]); tmp.chie = obj.fromHdf(item, index=i)
 
-        #item = grp.get('chim'); obj = eval(safeEval(item.attrs.get('repr')));
+        #item = grp.get('chim'); obj = eval(cF.safeEval(item.attrs.get('repr')));
         #obj = obj.resize(tmp.nCells[0]); tmp.chim = obj.fromHdf(item, index=i)
 
         if (tmp.nCells[0] > 0):
