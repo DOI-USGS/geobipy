@@ -6,7 +6,6 @@ from ...base import customFunctions as cf
 from ...base import customPlots as cP
 from ..statistics.Distribution import Distribution
 from ..statistics.baseDistribution import baseDistribution
-from ...base.customFunctions import str_to_raw, isIntorSlice
 from .myObject import myObject
 from ...base.HDF.hdfWrite import writeNumpy
 from ...base import MPI as myMPI
@@ -113,10 +112,10 @@ class StatArray(np.ndarray, myObject):
 
         if (not name is None):
             assert (isinstance(name,str)), TypeError('name must be a string')
-            name = str_to_raw(name) # Do some possible LateX checking. some Backslash operatores in LateX do not pass correctly as strings
+            name = cf.str_to_raw(name) # Do some possible LateX checking. some Backslash operatores in LateX do not pass correctly as strings
         if (not units is None):
             assert (isinstance(units,str)), TypeError('units must be a string')
-            units = str_to_raw(units) # Do some possible LateX checking. some Backslash operatores in LateX do not pass correctly as strings
+            units = cf.str_to_raw(units) # Do some possible LateX checking. some Backslash operatores in LateX do not pass correctly as strings
 
         if shape is None:
             shape = 1
@@ -422,13 +421,27 @@ class StatArray(np.ndarray, myObject):
             Edges of the StatArray
 
         """
-        assert (self.size > 1), ValueError("Size of StatArray must be > 1")
-        d = 0.5 * np.diff(self, axis=axis)
+
+        if self.size == 1:
+            d = np.squeeze(np.asarray([self - 1, self + 1]))
+            return StatArray(d, self.name, self.units)
+        else:
+            d = 0.5 * np.diff(self, axis=axis)
 
         x0 = self.take(indices=0, axis=axis)
         x1 = self.take(indices=-1, axis=axis)
         x2 = self.take(indices=np.arange(self.shape[axis]-1), axis=axis)
-        edges = np.concatenate([np.expand_dims(x0 - d.take(indices=0, axis=axis), axis), x2 + d, np.expand_dims(x1 + d.take(indices=-1, axis=axis), axis)], axis=axis)
+        
+        e0 = np.expand_dims(x0 - d.take(indices=0, axis=axis), axis)
+        e1 = x2 + d
+        e2 = np.expand_dims(x1 + d.take(indices=-1, axis=axis), axis)
+
+        if not min is None:
+            e0[:] = min
+        if not max is None:
+            e2[:] = max
+
+        edges = np.concatenate([e0, e1, e2], axis=axis)
 
         return StatArray(edges, self.name, self.units)
 
@@ -1031,7 +1044,8 @@ class StatArray(np.ndarray, myObject):
             if (i is None): i=np.s_[:self.shape[0], :self.shape[1]]
             j = i[axis]
 
-        cP.plot(x[j],self[i],**kwargs)
+        ax = cP.plot(x[j],self[i],**kwargs)
+        return ax
 
     
     def plotPosteriors(self, axes=None, **kwargs):
@@ -1101,7 +1115,7 @@ class StatArray(np.ndarray, myObject):
         cP.scatter2D(x=x, y=y, c=self, i=i, **kwargs)
 
 
-    def stackedAreaPlot(self, x=None, i=None, axis=0, labels=[], colors=cP.tatarize, **kwargs):
+    def stackedAreaPlot(self, x=None, i=None, axis=0, labels=[], **kwargs):
         """Create stacked area plot where column elements are stacked on top of each other.
 
         Parameters
@@ -1416,7 +1430,7 @@ class StatArray(np.ndarray, myObject):
             except:
                 assert False, ValueError("HDF data was created as a larger array, specify the row index to read from")
         else:
-            assert isIntorSlice(index), TypeError('index must be an int, slice, or tuple with slices. e.g. use index = np.s_[1,4:5,:] ')
+            assert cf.isIntorSlice(index), TypeError('index must be an int, slice, or tuple with slices. e.g. use index = np.s_[1,4:5,:] ')
             d = h5grp.get('data')
             out = StatArray(np.atleast_1d(d[index]), self.name, self.units)
             out._posterior = posterior
