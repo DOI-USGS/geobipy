@@ -2,6 +2,7 @@
 Class to handle the HDF5 result files for a full data set.
  """
 from ..base import Error as Err
+import matplotlib.pyplot as plt
 import numpy as np
 import h5py
 #import numpy.ma as ma
@@ -10,6 +11,7 @@ from ..classes.core import StatArray
 from ..base.fileIO import fileExists
 
 from ..classes.statistics.Histogram1D import Histogram1D
+from ..classes.statistics.Hitmap2D import Hitmap2D
 from ..classes.pointcloud.PointCloud3D import PointCloud3D
 from ..base import interpolation as interpolation
 from .LineResults import LineResults
@@ -36,9 +38,8 @@ class DataSetResults(myObject):
         """
         self.directory = directory
         self.fileList = None
-        self.nPoints = None
+        self._nPoints = None
         self.cumNpoints = None
-        self.nSys = None
         self.nLines = None
         self.bounds = None
         if (files is None):
@@ -52,19 +53,20 @@ class DataSetResults(myObject):
             fName = self.fileList[i]
             fileExists(fName)
             self.lines.append(LineResults(fName))
+        self._lineIndices = None
 
-        self.points = None
-        self.elevation= None
-        self.addErr = None
-        self.relErr = None
+        self._pointcloud = None
+        self._additiveError = None
+        self._relativeError = None
         self.kdtree = None
-        self.mean = None
-        self.best = None
+        self._meanParameters = None
+        self._bestParameters = None
         self.doi = None
         self.doi2D = None
         self.mean3D = None
         self.best3D = None
-        self.zGrid = None
+        self._facies = None
+        self._interfaces = None
 
 
     def open(self):
@@ -89,27 +91,188 @@ class DataSetResults(myObject):
         
         assert len(self.fileList) > 0, 'Could not find .h5 files in current directory'
         self.nLines = len(self.fileList)
-        
 
-    def getNpoints(self, force=False):
+
+    @property
+    def additiveError(self):
+
+        if self._additiveError is None:
+            self._additiveError = StatArray.StatArray([self.nSystems, self.nPoints], name=self.lines[0].additiveError.name, units=self.lines[0].additiveError.units, order = 'F')
+
+            print('Reading additive error')
+            Bar=progressbar.ProgressBar()
+            for i in Bar(range(self.nLines)):
+                self._additiveError[:, self.lineIndices[i]] = self.lines[i].additiveError.T
+                self.lines[i]._additiveError = None # Free memory
+
+        return self._additiveError
+
+
+    @property
+    def bestParameters(self):
+
+        if (self._bestParameters is None):
+
+            self._bestParameters = StatArray.StatArray([self.zGrid.nCells, self.nPoints], name=self.lines[0].bestParameters.name, units=self.lines[0].bestParameters.units, order = 'F')
+
+            print('Reading best parameters')
+            Bar=progressbar.ProgressBar()
+            for i in Bar(range(self.nLines)):
+                self._bestParameters[:, self.lineIndices[i]] = self.lines[i].bestParameters.T
+                self.lines[i]._bestParameters = None # Free memory
+
+        return self._bestParameters
+
+
+    @property
+    def hitmapCounts(self):
+        if (self._counts is None):
+            mesh = self.lines[0].mesh
+            self._counts = np.empty([])
+
+
+    @property
+    def elevation(self):
+        return self.pointcloud.elevation
+
+    
+    @property
+    def facies(self):
+        assert not self._facies is None, Exception("Facies must be set using self.setFaciesProbabilities()")
+        return self._facies
+
+    
+    @property
+    def height(self):
+        return self.pointcloud.z
+
+    
+    @property
+    def interfaces(self):
+        if (self._interfaces is None):
+
+            self._interfaces = StatArray.StatArray([self.zGrid.nCells, self.nPoints], name=self.lines[0].interfaces.name, units=self.lines[0].interfaces.units)
+
+            print('Reading interfaces')
+            Bar=progressbar.ProgressBar()
+            for i in Bar(range(self.nLines)):
+                self._interfaces[:, self.lineIndices[i]] = self.lines[i].interfaces.T
+                self.lines[i]._interfaces = None # Free memory
+
+        return self._interfaces
+
+
+    @property
+    def lineIndices(self):
+        
+        if self._lineIndices is None:
+            self._lineIndices = []
+            i0 = 0
+            for i in range(self.nLines):
+                i1 = i0 + self.lines[i].nPoints
+                self._lineIndices.append(np.s_[i0:i1])
+                i1 = i0
+        return self._lineIndices
+
+
+    @property
+    def meanParameters(self):
+
+        if (self._meanParameters is None):
+
+            self._meanParameters = StatArray.StatArray([self.zGrid.nCells, self.nPoints], name=self.lines[0].meanParameters.name, units=self.lines[0].meanParameters.units, order = 'F')
+
+            print('Reading mean parameters')
+            Bar=progressbar.ProgressBar()
+            for i in Bar(range(self.nLines)):
+                self._meanParameters[:, self.lineIndices[i]] = self.lines[i].meanParameters.T
+                self.lines[i]._meanParameters = None # Free memory
+
+        return self._meanParameters
+
+        
+    @property
+    def nPoints(self):
         """ Get the total number of data points """
-        if (not self.nPoints is None and not force): return
-        tmp=np.asarray([this.nPoints for this in self.lines])
-        self.cumNpoints = np.cumsum(tmp)
-        self.nPoints = np.sum(tmp)
+        if (self._nPoints is None):
+            tmp = np.asarray([this.nPoints for this in self.lines])
+            self._cumNpoints = np.cumsum(tmp)
+            self._nPoints = np.sum(tmp)
+        return self._nPoints
+
+
+    @property
+    def nSystems(self):
+        """ Get the number of systems """
+        return self.lines[0].nSystems
+
+
+    @property
+    def pointcloud(self):
+
+        if self._pointcloud is None:
+
+            x = StatArray.StatArray(self.nPoints, name=self.lines[0].x.name, units=self.lines[0].x.units)
+            y = StatArray.StatArray(self.nPoints, name=self.lines[0].y.name, units=self.lines[0].y.units)
+            z = StatArray.StatArray(self.nPoints, name=self.lines[0].height.name, units=self.lines[0].height.units)
+            e = StatArray.StatArray(self.nPoints, name=self.lines[0].elevation.name, units=self.lines[0].elevation.units)
+            # Loop over the lines in the data set and get the attributes
+            print('Reading co-ordinates')
+            Bar = progressbar.ProgressBar()
+            for i in Bar(range(self.nLines)):
+                indices = self.lineIndices[i]
+                x[indices] = self.lines[i].x
+                y[indices] = self.lines[i].y
+                z[indices] = self.lines[i].height
+                e[indices] = self.lines[i].elevation
+
+                self.lines[i]._x = None
+                self.lines[i]._y = None
+                self.lines[i]._height = None
+                self.lines[i]._elevation = None
+
+            self._pointcloud = PointCloud3D(self.nPoints, x, y, z, e)
+        return self._pointcloud
+
+
+    @property
+    def relativeError(self):
+
+        if self._relativeError is None:
+            self._relativeError = StatArray.StatArray([self.nSystems, self.nPoints], name=self.lines[0].relativeError.name, units=self.lines[0].relativeError.units, order = 'F')
+
+            print('Reading relative error')
+            Bar=progressbar.ProgressBar()
+            for i in Bar(range(self.nLines)):
+                self._relativeError[:, self.lineIndices[i]] = self.lines[i].relativeError.T
+                self.lines[i]._relativeError = None # Free memory
+
+        return self._relativeError
+
+
+    @property
+    def x(self):
+        return self.pointcloud.x
+            
+
+    @property
+    def y(self):
+        return self.pointcloud.y  
+
 
     def getLineNumber(self, i):
         """ Get the line number for the given data point index """
         return self.lines[self.getLineIndex(i)].line
 
+
     def getLineIndex(self, i):
         """ Get the line file name for the given data point index """
-        self.getNpoints()
         assert i >= 0, 'Datapoint index must be >= 0'
-        if i > self.nPoints-1: raise IndexError('index {} is out of bounds for data point index with size {}'.format(i,self.nPoints))
-        return self.cumNpoints.searchsorted(i)
+        if i > self.nPoints-1: raise IndexError('index {} is out of bounds for data point index with size {}'.format(i, self.nPoints))
+        return self._cumNpoints.searchsorted(i)
 
-    def getID(self, i):
+
+    def fiducial(self, i):
         """ Get the ID of the given data point """
         iLine = self.getLineIndex(i)
         if (iLine > 0):
@@ -117,21 +280,13 @@ class DataSetResults(myObject):
         return self.lines[iLine].iDs[i]
 
 
-    def getNsys(self, force=False):
-        """ Get the number of systems """
-        if (not self.nSys is None and not force): return
-        self.nSys = self.lines[0].getAttribute('# of systems')
-
-
-    def histogram(self,nBins, depth1 = None, depth2 = None, invertPar = True, bestModel = False, withDoi=False, percent=67.0, force = False, **kwargs):
+    def histogram(self, nBins, depth1 = None, depth2 = None, reciprocateParameter = False, bestModel = False, withDoi=False, percent=67.0, force = False, **kwargs):
         """ Compute a histogram of the model, optionally show the histogram for given depth ranges instead """
-        # Get the depth grid
-        self.getZGrid(force=force)
 
         if (depth1 is None):
-            depth1 = self.zGrid[0]
+            depth1 = self.zGrid.cellCentres[0]
         if (depth2 is None):
-            depth2 = self.zGrid[-1]
+            depth2 = self.zGrid.cellCentres[-1]
 
         # Ensure order in depth values
         if (depth1 > depth2):
@@ -140,21 +295,13 @@ class DataSetResults(myObject):
             depth1 = tmp
 
         # Don't need to check for depth being shallower than zGrid[0] since the sortedsearch with return 0
-        if (depth1 > self.zGrid[-1]): Err.Emsg('mapDepthSlice: Depth is greater than max depth - '+str(self.zGrid[-1]))
-        if (depth2 > self.zGrid[-1]): Err.Emsg('mapDepthSlice: Depth2 is greater than max depth - '+str(self.zGrid[-1]))
+        if (depth1 > self.zGrid.cellEdges[-1]): Err.Emsg('mapDepthSlice: Depth is greater than max depth - '+str(self.zGrid.cellEdges[-1]))
+        if (depth2 > self.zGrid.cellEdges[-1]): Err.Emsg('mapDepthSlice: Depth2 is greater than max depth - '+str(self.zGrid.cellEdges[-1]))
 
         if (bestModel):
-            if (withDoi):
-                self.getAttribute(best=True, doi=True, percent=percent)
-            else:
-                self.getAttribute(best=True, force=force)
-            model = self.best
+            model = self.bestParameters
         else:
-            if (withDoi):
-                self.getAttribute(mean=True, doi=True, percent=percent)
-            else:
-                self.getAttribute(mean=True, force=force)
-            model = self.mean
+            model = self.meanParameters
 
         if withDoi:
             depth1 = np.minimum(self.doi, depth1)
@@ -162,13 +309,14 @@ class DataSetResults(myObject):
             z = np.repeat(self.zGrid[:,np.newaxis],self.nPoints,axis=1)
             vals = model[(z > depth1)&(z < depth2)]
         else:
-            cell1 = self.zGrid.searchsorted(depth1)
-            cell2 = self.zGrid.searchsorted(depth2)
-            vals = model[cell1:cell2+1,:]
+            cell1 = self.zGrid.cellCentres.searchsorted(depth1)
+            cell2 = self.zGrid.cellCentres.searchsorted(depth2)
+
+            vals = model[cell1:cell2+1, :]
 
         log = kwargs.pop('log',False)
 
-        if (invertPar):
+        if (reciprocateParameter):
             vals = 1.0/vals
             name = 'Resistivity'
             units = '$\Omega m$'
@@ -177,8 +325,8 @@ class DataSetResults(myObject):
             units = '$Sm^{-1}$'
 
         if (log):
-            vals,logLabel=cP._logSomething(vals,log)
-            name = logLabel+name
+            vals,logLabel=cP._log(vals,log)
+            name = logLabel + name
         vals = StatArray.StatArray(vals, name, units)
 
         h = Histogram1D(np.linspace(vals.min(),vals.max(),nBins))
@@ -187,64 +335,41 @@ class DataSetResults(myObject):
         return h
 
 
-    def getZGrid(self, force=False):
+    @property
+    def zGrid(self):
         """ Gets the discretization in depth """
-        if (not self.zGrid is None and not force): return
-        # Get the mean model for the first point to get the axes
-        self.lines[0].getZgrid()
-        self.zGrid = self.lines[0].zGrid
+        return self.lines[0].mesh.z
 
 
-    def getAttribute(self, xy=False, elevation=False, mean=False, best=False, opacity=False, doi=False, relErr=False, addErr=False, percent=67.0, force=False):
+    def getAttribute(self,  mean=False, best=False, opacity=False, doi=False, relErr=False, addErr=False, percent=67.0, force=False):
         """ Get a subsurface property """
 
-        assert (not all([not xy, not elevation, not mean, not best, not opacity, not doi, not relErr, not addErr])), 'Please choose at least one attribute' + help(self.getAttrubute)
+        assert (not all([not mean, not best, not opacity, not doi, not relErr, not addErr])), 'Please choose at least one attribute' + help(self.getAttrubute)
 
         # Turn off attributes that are already loaded
-        if (xy):
-            xy=self.points is None
-        if (elevation):
-            elevation=self.elevation is None
         if (mean):
             mean=self.mean is None
         if (best):
             best=self.best is None
         if (relErr):
             relErr=self.relErr is None
-        if (addErr):
-            addErr=self.addErr is None
         # Getting the doi is cheap, so always ask for it even if opacity is requested
         doi = opacity or doi
         if (doi):
             doi=self.doi is None
 
-        if (all([not xy, not elevation, not mean, not best, not opacity, not doi, not relErr, not addErr])):
+        if (all([not mean, not best, not opacity, not doi, not relErr, not addErr])):
             return
-
-        # Get the number of data points
-        self.getNpoints(force=force)
 
         # Get the number of systems
         if (relErr or addErr):
             self.getNsys()
 
         if (mean or best or doi):
-            # Get the depth grid
-            self.getZGrid(force=force)
             # Get the number of cells
-            nz = self.zGrid.size
+            nz = self.zGrid.nCells
 
-        # Initialize attributes
-        if (xy):
-            self.points = PointCloud3D(self.nPoints)
-        if (elevation):
-            self.elevation = StatArray.StatArray(self.nPoints,name='Elevation',units='m')
-        if (mean):
-            self.lines[0].getMeanParameters()
-            self.mean = StatArray.StatArray([nz,self.nPoints], name=self.lines[0].mean.name, units=self.lines[0].mean.units, order = 'F')
-        if (best):
-            self.lines[0].getBestParameters()
-            self.best = StatArray.StatArray([nz,self.nPoints], name=self.lines[0].best.name, units=self.lines[0].best.units, order = 'F')
+        
         if (doi):
             self.opacity=np.zeros([nz,self.nPoints], order = 'F')
             self.doi = StatArray.StatArray(np.zeros(self.nPoints),'Depth of Investigation','m')
@@ -254,68 +379,33 @@ class DataSetResults(myObject):
                 self.relErr = StatArray.StatArray([self.nPoints, self.nSys],name=self.lines[0].relErr.name,units=self.lines[0].relErr.units, order = 'F')
             else:
                 self.relErr = StatArray.StatArray(self.nPoints,name=self.lines[0].relErr.name,units=self.lines[0].relErr.units, order = 'F')
-        if (addErr):
-            self.lines[0].getAdditiveError()
-            if (self.nSys > 1):
-                self.addErr = StatArray.StatArray([self.nPoints, self.nSys],name=self.lines[0].addErr.name,units=self.lines[0].addErr.units, order = 'F')
-            else:
-                self.addErr = StatArray.StatArray(self.nPoints,name=self.lines[0].addErr.name,units=self.lines[0].addErr.units, order = 'F')
-
+            
         # Loop over the lines in the data set and get the attributes
-        i0 = 0
         print('Reading attributes from dataset results')
         Bar=progressbar.ProgressBar()
         for i in Bar(range(self.nLines)):
-            i1 = i0 + self.lines[i].nPoints
 
             # Perform line getters
-            if (xy):
-                self.lines[i].getX()
-                self.lines[i].getY()
-                self.points.x[i0:i1] = self.lines[i].x
-                self.points.y[i0:i1] = self.lines[i].y
-                self.lines[i].x=None
-                self.lines[i].y=None
-            if (elevation):
-                self.lines[i].getElevation()
-                self.elevation[i0:i1] = self.lines[i].elevation
-                self.lines[i].elevation = None
             if (mean):
-                self.lines[i].getMeanParameters()
-                self.mean[:,i0:i1] = self.lines[i].mean.T
+                self.mean = StatArray.StatArray([nz,self.nPoints], name=self.lines[0].meanParameters.name, units=self.lines[0].meanParameters.units, order = 'F')
+                self.mean[:, self.lineIndices[i]] = self.lines[i].meanParameters.T
                 self.lines[i].mean = None # Free memory
             if (best):
-                self.lines[i].getBestParameters()
-                self.best[:,i0:i1] = self.lines[i].best.T
+                self.best[:, self.lineIndices[i]] = self.lines[i].bestParameters.T
                 self.lines[i].best = None # Free memory
             if (doi):
                 # Get the DOI for this line
                 self.lines[i].getDOI(percent)
-                self.opacity[:,i0:i1] = self.lines[i].opacity.T
-                self.doi[i0:i1] = self.lines[i].doi
+                self.opacity[:, self.lineIndices[i]] = self.lines[i].opacity.T
+                self.doi[self.lineIndices[i]] = self.lines[i].doi
                 self.lines[i].opacity = None # Free memory
                 self.lines[i].doi = None # Free memory
-            if (relErr):
-                self.lines[i].getRelativeError()
-                if (self.nSys > 1):
-                    self.relErr[i0:i1,:] = self.lines[i].relErr
-                else:
-                    self.relErr[i0:i1] = self.lines[i].relErr
-                self.lines[i].relErr = None # Free memory
-            if (addErr):
-                self.lines[i].getAdditiveError()
-                if (self.nSys > 1):
-                    self.addErr[i0:i1,:] = self.lines[i].addErr
-                else:
-                    self.addErr[i0:i1] = self.lines[i].addErr
-                self.lines[i].addErr = None # Free memory
-
             # Deallocate line attributes to save space
-            self.lines[i].hitMap = None
+            self.lines[i]._hitMap = None
 
-            i0 = i1
         if (xy):
             self.points.getBounds() # Get the bounding box
+            
 
     def getMean3D(self, dx, dy, mask = False, clip = False, force=False, method='ct'):
         """ Interpolate each depth slice to create a 3D volume """
@@ -331,8 +421,6 @@ class DataSetResults(myObject):
                 return
             
            
-        self.getAttribute(xy=True, mean=True, force=force)
-        
         method = method.lower()
         if method == 'ct':
             self.__getMean3D_CloughTocher(dx=dx, dy=dy, mask=mask, clip=clip, force=force)
@@ -340,8 +428,6 @@ class DataSetResults(myObject):
             self.__getMean3D_minimumCurvature(dx=dx, dy=dy, mask=mask, clip=clip, force=force)
         else:
             assert False, ValueError("method must be either 'ct' or 'mc' ")
-            
-        print('TEST: ',np.min(self.mean3D), np.max(self.mean3D))
             
         with h5py.File('mean3D.h5','w') as f:
             f.create_dataset(name = 'dx', data = dx)
@@ -356,46 +442,51 @@ class DataSetResults(myObject):
     def __getMean3D_minimumCurvature(self, dx, dy, mask=None, clip=False, force=False):
                
         
-        # Get the points to interpolate to
-        x,y,intPoints = interpolation.getGridLocations2D(self.points.bounds, dx, dy)
-        
+        x = self.pointcloud.x.deepcopy()
+        y = self.pointcloud.y.deepcopy()
+
+        values = self.meanParameters[0, :]
+        x1, y1, vals = interpolation.minimumCurvature(x, y, values, self.pointcloud.bounds, dx=dx, dy=dy, mask=mask, clip=clip, iterations=2000, tension=0.25, accuracy=0.01)
+
         # Initialize 3D volume
-        mean3D = StatArray.StatArray(np.zeros([self.zGrid.size, y.size, x.size], order = 'F'),name = 'Conductivity', units = '$Sm^{-1}$')
+        mean3D = StatArray.StatArray(np.zeros([self.zGrid.nCells, y1.size, x1.size], order = 'F'),name = 'Conductivity', units = '$Sm^{-1}$')
+        mean3D[0, :, :] = vals
         
         # Interpolate for each depth
         print('Interpolating using minimum curvature')
         Bar=progressbar.ProgressBar()
-        for i in Bar(range(self.zGrid.size)):
+        for i in Bar(range(1, self.zGrid.nCells)):
             # Get the model values for the current depth
-            values = self.mean[i,:]
-            x,y,vals = interpolation.minimumCurvature(self.points.x, self.points.y, values, self.points.bounds, dx=dx, dy=dy, mask=mask, clip=clip, iterations=2000, tension=0.25, accuracy=0.01)
+            values = self.meanParameters[i, :]
+            dum1, dum2, vals = interpolation.minimumCurvature(x, y, values, self.pointcloud.bounds, dx=dx, dy=dy, mask=mask, clip=clip, iterations=2000, tension=0.25, accuracy=0.01)
             # Add values to the 3D array
-            mean3D[i,:,:] = vals
+            mean3D[i, :, :] = vals
                   
         self.mean3D = mean3D 
+
     
     def __getMean3D_CloughTocher(self, dx, dy, mask=None, clip=False, force=False):
         
         # Get the discretization
         if (dx is None):
-            tmp = self.points.bounds[1]-self.points.bounds[0]
+            tmp = self.pointcloud.bounds[1]-self.pointcloud.bounds[0]
             dx = 0.01 * tmp
         assert dx > 0.0, "dx must be positive!"
         
         # Get the discretization
         if (dy is None):
-            tmp = self.points.bounds[3]-self.points.bounds[2]
+            tmp = self.pointcloud.bounds[3]-self.pointcloud.bounds[2]
             dy = 0.01 * tmp
         assert dy > 0.0, "dy must be positive!"
         
-        tmp = np.column_stack((self.points.x, self.points.y))
+        tmp = np.column_stack((self.pointcloud.x, self.points.y))
 
         # Get the points to interpolate to
-        x,y,intPoints = interpolation.getGridLocations2D(self.points.bounds, dx, dy)
+        x,y,intPoints = interpolation.getGridLocations2D(self.pointcloud.bounds, dx, dy)
 
         # Create a distance mask
         if mask:
-            self.points.setKdTree(nDims=2) # Set the KdTree on the data points
+            self.pointcloud.setKdTree(nDims=2) # Set the KdTree on the data points
             g = np.meshgrid(x,y)
             xi = _ndim_coords_from_arrays(tuple(g), ndim=tmp.shape[1])
             dists, indexes = self.points.kdtree.query(xi)
@@ -406,7 +497,7 @@ class DataSetResults(myObject):
         maxV = np.nanmax(self.mean)
 
         # Initialize 3D volume
-        mean3D = StatArray.StatArray(np.zeros([self.zGrid.size, y.size, x.size], order = 'F'),name = 'Conductivity', units = '$Sm^{-1}$')
+        mean3D = StatArray.StatArray(np.zeros([self.zGrid.size, y.nCells, x.nCells], order = 'F'),name = 'Conductivity', units = '$Sm^{-1}$')
 
         # Triangulate the data locations
         dTri = Delaunay(tmp)
@@ -436,84 +527,102 @@ class DataSetResults(myObject):
             mean3D[i,:,:] = vals
         self.mean3D = mean3D #.reshape(self.zGrid.size*y.size*x.size)
 
-
-    def mapAdditiveError(self,dx, dy, system=0, mask = None, clip = True, force=False, **kwargs):
+    
+    def map(self, dx, dy, values, system=0, mask = None, clip = True, **kwargs):
         """ Create a map of a parameter """
-        self.getAttribute(xy=True, addErr=True, force=force)        
-        if (self.nSys > 1):
-            self.points.mapPlot(dx = dx, dy = dy, mask = mask, clip = clip, c = self.addErr[:,system], **kwargs)
-        else:
-            self.points.mapPlot(dx = dx, dy = dy, mask = mask, clip = clip, c = self.addErr, **kwargs)
-        cP.xlabel('Easting (m)')
-        cP.ylabel('Northing (m)')
+        nPlots = values.ndim
+
+        for i in range(nPlots):
+            plt.subplot(nPlots, 1, i+1)
+            self.pointcloud.mapPlot(dx = dx, dy = dy, mask = mask, clip = clip, c = np.atleast_2d(values)[i, :], **kwargs)
 
 
-    def mapRelativeError(self,dx, dy, system=0, mask = None, clip = True, force=False, **kwargs):
-        """ Create a map of a parameter """
-        self.getAttribute(xy=True, relErr=True, force=force)
-        if (self.nSys > 1):
-            self.points.mapPlot(dx = dx, dy = dy, mask = mask, clip = clip, c = self.relErr[:,system], **kwargs)
-        else:
-            self.points.mapPlot(dx = dx, dy = dy, mask = mask, clip = clip, c = self.relErr, **kwargs)
-        cP.xlabel('Easting (m)')
-        cP.ylabel('Northing (m)')
+    def mapFacies(self, dx, dy, depth,  **kwargs):
+
+        cell1 = self.zGrid.cellIndex(depth)
+
+        nFacies = self.facies.shape[1]
+
+        for i in range(nFacies):
+            plt.subplot(nFacies, 1, i+1)
+            self.pointcloud.mapPlot(dx = dx, dy = dy, c = self.facies[:, i, cell1], **kwargs)
 
 
-    def getDepthSlice(self, depth, depth2=None, invertPar=True, bestModel=False, force=False):
+    def setFaciesProbabilities(self, fractions, distributions, reciprocateParameter=False, log=None):
+        """ Assign facies to the parameter model given the pdfs of each facies
+        mean:    :Means of the normal distributions for each facies
+        var:     :Variance of the normal distributions for each facies
+        volFrac: :Volume fraction of each facies
+        """
+
+        self._facies = np.empty([self.nPoints, np.size(distributions), self.zGrid.nCells])
+
+        g = self.lines[0].hdfFile['currentmodel/par/posterior']
+
+        i0 = 0
+        Bar = progressbar.ProgressBar()
+        for i in Bar(range(self.lines[0].nPoints)):
+            self._facies[i, :, :] = Hitmap2D().fromHdf(g, index=i).marginalProbability(fractions, distributions, reciprocate=reciprocateParameter, log=log, axis=0)
+
+
+    def percentageParameter(self, value, depth, depth2=None):  
+
+        percentage = StatArray.StatArray(np.empty(self.nPoints), name="Probability of {} > {:0.2f}".format(self.meanParameters.name, value), units = self.meanParameters.units)
+
+        print(self.lineIndices)
+        print('Calculating percentages')
+        Bar=progressbar.ProgressBar()
+        for i in Bar(range(self.nLines)):
+            percentage[self.lineIndices[i]] = self.lines[i].percentageParameter(value, depth, depth2)
+        
+        return percentage
+            
+
+    def getDepthSlice(self, depth, depth2=None, reciprocateParameter=False, bestModel=False, force=False):
+
         # Get the depth grid
-        self.getZGrid(force=force)
-
-        assert depth <= self.zGrid[-1], 'Depth is greater than max depth '+str(self.zGrid[-1])
+        assert depth <= self.zGrid.cellEdges[-1], 'Depth is greater than max depth '+str(self.zGrid.cellEdges[-1])
         if (not depth2 is None):
-            assert depth2 <= self.zGrid[-1], 'Depth2 is greater than max depth '+str(self.zGrid[-1])
+            assert depth2 <= self.zGrid.cellEdges[-1], 'Depth2 is greater than max depth '+str(self.zGrid.cellEdges[-1])
             assert depth <= depth2, 'Depth2 must be >= depth'
 
         if (bestModel):
-            self.getAttribute(xy=True, best=True, force=force)
-            model = self.best
+            model = self.bestParameters
         else:
-            self.getAttribute(xy=True, mean=True, force=force)
-            model = self.mean
-            
+            model = self.meanParameters
+
         model[model == 0.0] = 1.0
-        print(model.shape)
-        print('Model: ',model.min(), model.max())
 
-        cell1 = self.zGrid.searchsorted(depth)
+        cell1 = self.zGrid.cellIndex(depth)
 
-        if (not depth2 is None):
-            cell2 = self.zGrid.searchsorted(depth2)
-            vals1D = np.mean(model[cell1:cell2+1,:],axis = 0)
+        if (depth2 is None):
+            vals1D = model[cell1, :]
         else:
-            vals1D = model[cell1,:]
-            
-        if (invertPar):
-            vals1D = StatArray.StatArray(1.0/vals1D,name = 'Resistivity', units = '$\Omega m$')
+            cell2 = self.zGrid.cellIndex(depth2)
+            vals1D = np.mean(model[cell1:cell2+1,:], axis = 0)
+
+        if (reciprocateParameter):
+            vals1D = StatArray.StatArray(1.0/vals1D, name = 'Resistivity', units = '$\Omega m$')
         else:
-            vals1D = StatArray.StatArray(vals1D,name = 'Conductivity', units = '$Sm^{-1}$')
+            vals1D = StatArray.StatArray(vals1D, name = 'Conductivity', units = '$Sm^{-1}$')
         return vals1D
 
 
-    def mapDepthSlice(self, dx, dy, depth, depth2 = None, invertPar = True, bestModel = False, mask = None, clip = True, force=False, **kwargs):
+    def mapDepthSlice(self, dx, dy, depth, depth2 = None, reciprocateParameter = False, bestModel = False, mask = None, clip = True, **kwargs):
         """ Create a depth slice through the recovered model """
 
-        vals1D = self.lice(depth=depth, depth2=depth2, invertPar=invertPar, bestModel=bestModel, force=force)
+        vals1D = self.getDepthSlice(depth=depth, depth2=depth2, reciprocateParameter=reciprocateParameter, bestModel=bestModel)
         
-        print(vals1D.min(), vals1D.max())
-        
-        ax = self.points.mapPlot(dx = dx, dy = dy, mask = mask, clip = clip, c = vals1D, **kwargs)
-        cP.xlabel('Easting (m)')
-        cP.ylabel('Northing (m)')
+        ax = self.map(dx, dy, vals1D, mask = mask, clip = clip, **kwargs)
         
         return ax
 
 
     def mapElevation(self,dx, dy, mask = None, clip = True, extrapolate=None, force=False, **kwargs):
         """ Create a map of a parameter """
-        self.getAttribute(xy=True, elevation=True, force=force)
-        self.points.mapPlot(dx = dx, dy = dy, mask = mask, clip = clip, extrapolate=extrapolate, c = self.elevation, **kwargs)
-        cP.xlabel('Easting (m)')
-        cP.ylabel('Northing (m)')
+        self.pointcloud.mapPlot(dx = dx, dy = dy, mask = mask, clip = clip, extrapolate=extrapolate, c = self.elevation, **kwargs)
+        # cP.xlabel('Easting (m)')
+        # cP.ylabel('Northing (m)')
 
     def mapDoi(self, dx, dy, mask = None, clip = True, extrapolate=None, force=False, **kwargs):
         """ Create a map of a parameter """
@@ -523,35 +632,83 @@ class DataSetResults(myObject):
         cP.ylabel('Northing (m)')
 
 
-    def plotDepthSlice(self, depth, depth2 = None, invertPar = True, bestModel = False, mask = None, clip = True, force=False, *args, **kwargs):
+    def plotDepthSlice(self, depth, depth2 = None, reciprocateParameter = False, bestModel = False, mask = None, clip = True, force=False, *args, **kwargs):
         """ Create a depth slice through the recovered model """
 
-        vals1D = self.getDepthSlice(depth=depth, depth2=depth2, invertPar=invertPar, bestModel=bestModel, force=force)
-
-        ax = self.points.scatter2D(c = vals1D, *args, **kwargs)
-        cP.xlabel('Easting (m)')
-        cP.ylabel('Northing (m)')
-        
+        vals1D = self.getDepthSlice(depth=depth, depth2=depth2, reciprocateParameter=reciprocateParameter, bestModel=bestModel, force=force)
+        ax = self.pointcloud.scatter2D(c = vals1D, *args, **kwargs)
         return ax
 
-    def plotElevation(self, force=False,**kwargs):
-        """ Plot the observation locations """
-        self.getAttribute(xy=True, elevation=True, force=force)
+
+    def scatter2D(self, values, **kwargs):
 
         if (not 'edgecolor' in kwargs):
             kwargs['edgecolor']='k'
         if (not 's' in kwargs):
             kwargs['s']=10.0
 
-        self.points.scatter2D(c = self.elevation, **kwargs)
-        cP.xlabel('Easting (m)')
-        cP.ylabel('Northing (m)')
+        nPlots = values.ndim
+
+        for i in range(nPlots):
+            plt.subplot(nPlots, 1, i+1)
+            self.pointcloud.scatter2D(c = np.atleast_2d(values)[i, :], **kwargs)
+
+    
+    def plotAdditiveError(self, **kwargs):
+        """ Plot the observation locations """
+        self.scatter2D(self.additiveError, **kwargs)
+
+    
+    def plotBestFacies(self, depth):
+
+        cell1 = self.zGrid.cellIndex(depth)
+
+        nFacies = self.facies.shape[1]
+        bestFacies = StatArray.StatArray(np.argmax(self.facies[:, :, cell1], axis=1), 'Best Facies')
+
+        for i in range(nFacies):
+            j = np.where(bestFacies == i)[0]
+            plt.scatter(self.pointcloud.x[j], self.pointcloud.y[j], label='Facies {}'.format(i), c=cP.wellSeparated[i])
+        plt.legend()
 
 
-    def plotXplot(self, bestModel=True, withDoi=True, invertPar=True, log10=True, **kwargs):
+    def plotInterfaceProbability(self, depth, lowerThreshold=0.0, **kwargs):
+
+        cell1 = self.zGrid.cellIndex(depth)
+
+        slce = self.interfaces[cell1, :]
+        if lowerThreshold > 0.0:
+            slce = self.interfaces[cell1, :].deepcopy()
+            slce[slce < lowerThreshold] = np.nan
+
+        self.pointcloud.scatter2D(c = slce, **kwargs)
+
+
+    def plotElevation(self, **kwargs):
+        """ Plot the observation locations """
+        self.scatter2D(self.elevation, **kwargs)
+
+    
+    def plotFacies(self, depth, **kwargs):
+
+        cell1 = self.zGrid.cellIndex(depth)
+
+        nFacies = self.facies.shape[1]
+
+        for i in range(nFacies):
+            plt.subplot(nFacies, 1, i+1)
+            self.pointcloud.scatter2D(c = self.facies[:, i, cell1], **kwargs)
+
+
+    def plotRelativeError(self, **kwargs):
+        """ Plot the observation locations """
+        self.scatter2D(self.relativeError, **kwargs)
+
+
+    def plotXplot(self, bestModel=True, withDoi=True, reciprocateParameter=True, log10=True, **kwargs):
         """ Plot the cross plot of a model against depth """
 
-        tmp = self.getParVsZ(bestModel=bestModel, withDoi=withDoi, invertPar=invertPar, log10=log10)
+        tmp = self.getParVsZ(bestModel=bestModel, withDoi=withDoi, reciprocateParameter=reciprocateParameter, log10=log10)
         # Repeat the depths for plotting
         cP.plot(tmp[:,0], tmp[:,1], **kwargs)
         if (bestModel):
@@ -560,17 +717,17 @@ class DataSetResults(myObject):
             cP.xlabel(self.mean.getNameUnits())
         cP.ylabel(self.zGrid.getNameUnits())
         return tmp
+
     
-    def plotXsection(self, line, xAxis='easting', invertPar = True, bestModel=False, percent = 67.0, useVariance=True, **kwargs):
+    def plotXsection(self, line, xAxis='easting', reciprocateParameter = False, bestModel=False, percent = 67.0, useVariance=True, **kwargs):
         """ Plot a x section for the ith line """
         self.lines[line].setAlonglineAxis(xAxis)
-        self.lines[line].plotXsection(invertPar=invertPar, bestModel=bestModel, percent=percent, useVariance=useVariance, **kwargs)
+        self.lines[line].plotXsection(reciprocateParameter=reciprocateParameter, bestModel=bestModel, percent=percent, useVariance=useVariance, **kwargs)
 
-    def getParVsZ(self, bestModel=False, withDoi=True, invertPar=True, log10=True, clipNan=True):
+
+    def getParVsZ(self, bestModel=False, withDoi=True, reciprocateParameter=True, log10=True, clipNan=True):
         """ Get the depth and parameters, optionally within the doi """
-        self.getNpoints()
         # Get the depths
-        self.getZGrid()
         z = np.tile(self.zGrid,self.nPoints)
 
         if (bestModel):
@@ -588,7 +745,7 @@ class DataSetResults(myObject):
 
         model = model.reshape(model.size, order='F')
 
-        if invertPar:
+        if reciprocateParameter:
             model = 1.0/model.reshape(model.size, order='F')
 
         if log10:
@@ -601,10 +758,10 @@ class DataSetResults(myObject):
 
         return res
 
-    def kMeans(self, nClusters, precomputedParVsZ=None, standardize=False, log10Depth=False, plot=False, bestModel=True, withDoi=True, invertPar=True, log10=True, clipNan=True, **kwargs):
+    def kMeans(self, nClusters, precomputedParVsZ=None, standardize=False, log10Depth=False, plot=False, bestModel=True, withDoi=True, reciprocateParameter=True, log10=True, clipNan=True, **kwargs):
         """  """
         if (precomputedParVsZ is None):
-            ParVsZ = self.getParVsZ(bestModel=bestModel, withDoi=withDoi, invertPar=invertPar, log10=log10, clipNan=clipNan)
+            ParVsZ = self.getParVsZ(bestModel=bestModel, withDoi=withDoi, reciprocateParameter=reciprocateParameter, log10=log10, clipNan=clipNan)
         else:
             ParVsZ = precomputedParVsZ
 
@@ -626,16 +783,11 @@ class DataSetResults(myObject):
     def toVTK(self, fName, dx, dy, mask=False, clip=False, force=False, method='ct'):
         """ Convert a 3D volume of interpolated values to vtk for visualization in Paraview """
 
-        print('toVTK')
-
-        self.getAttribute(xy=True, elevation=True, force=force)
-        
         self.getMean3D(dx=dx, dy=dy, mask=mask, clip=clip, force=force, method=method)
-        self.getZGrid()
-        self.points.getBounds()
+        self.pointcloud.getBounds()
 
-        x, y, intPoints = interpolation.getGridLocations2D(self.points.bounds, dx, dy)
-        z=self.zGrid
+        x, y, intPoints = interpolation.getGridLocations2D(self.pointcloud.bounds, dx, dy)
+        z = self.zGrid
 
 
         from pyvtk import VtkData, UnstructuredGrid, PointData, CellData, Scalars
@@ -643,29 +795,29 @@ class DataSetResults(myObject):
         # Get the 3D dimensions
         mx = x.size
         my = y.size
-        mz = z.size
+        mz = z.nCells
         
-        nPoints = mx*my*mz
+        nPoints = mx * my * mz
         nCells = (mx-1)*(my-1)*(mz-1)
 
         # Interpolate the elevation to the grid nodes
         if (method == 'ct'):
-            tx,ty, vals = self.points.interpCloughTocher(self.elevation, dx = dx,dy=dy, mask = mask, clip = clip, extrapolate='nearest')
+            tx,ty, vals = self.pointcloud.interpCloughTocher(self.elevation, dx = dx,dy=dy, mask = mask, clip = clip, extrapolate='nearest')
         elif (method == 'mc'):
-            tx,ty, vals = self.points.interpMinimumCurvature(self.elevation, dx = dx, dy=dy, mask = mask, clip = clip)
+            tx,ty, vals = self.pointcloud.interpMinimumCurvature(self.elevation, dx = dx, dy=dy, mask = mask, clip = clip)
             
         vals = vals[:my,:mx]
         vals = vals.reshape(mx*my)
 
         # Set up the nodes and voxel indices
         points = np.zeros([nPoints,3], order='F')
-        points[:,0] = np.tile(x,my*mz)
-        points[:,1] = np.tile(y.repeat(mx),mz)
-        points[:,2] = np.tile(vals,mz)-z.repeat(mx*my)
+        points[:,0] = np.tile(x, my*mz)
+        points[:,1] = np.tile(y.repeat(mx), mz)
+        points[:,2] = np.tile(vals, mz) - z.cellCentres.repeat(mx*my)
 
         # Create the cell indices into the points
-        p = np.arange(nPoints).reshape((mz,my,mx))
-        voxels = np.zeros([nCells,8],dtype=np.int)
+        p = np.arange(nPoints).reshape((mz, my, mx))
+        voxels = np.zeros([nCells, 8], dtype=np.int)
         iCell = 0
         for k in range(mz-1):
             k1 = k + 1
@@ -677,17 +829,24 @@ class DataSetResults(myObject):
                     iCell += 1
 
         # Create the various point data
-        pointID = Scalars(np.arange(nPoints),name='Point iD')
-        pointElev = Scalars(points[:,2],name='Point Elevation (m)')
+        pointID = Scalars(np.arange(nPoints), name='Point iD')
+        pointElev = Scalars(points[:,2], name='Point Elevation (m)')
 
-        tmp=self.mean3D.reshape(np.size(self.mean3D))
-        tmp1 = np.log10(1.0/tmp)
+        tmp = self.mean3D.reshape(np.size(self.mean3D))
+        tmp[tmp == 0.0] = np.nan
+
+        print(np.nanmin(tmp), np.nanmax(tmp))
+        tmp1 = 1.0 / tmp
+
+        print(np.nanmin(tmp), np.nanmax(tmp))
         pointRes = Scalars(tmp1, name = 'log10(Resistivity) (Ohm m)')
         tmp1 = np.log10(tmp)
 
         pointCon = Scalars(tmp1, name = 'log10(Conductivity) (S/m)')
+
+        print(nPoints, tmp.size)
         
-        PData = PointData(pointID, pointElev, pointRes, pointCon)
+        PData = PointData(pointID, pointElev, pointRes)#, pointCon)
         CData = CellData(Scalars(np.arange(nCells),name='Cell iD'))
         vtk = VtkData(
               UnstructuredGrid(points,
@@ -698,7 +857,7 @@ class DataSetResults(myObject):
               'Some Name'
               )
 
-        vtk.tofile(fName, 'ascii')
+        vtk.tofile(fName, 'binary')
 
 
 

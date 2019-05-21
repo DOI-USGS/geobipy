@@ -18,6 +18,7 @@ from ..classes.data.dataset.FdemData import FdemData
 from ..classes.data.dataset.TdemData import TdemData
 from ..base.HDF import hdfRead
 from ..base import customPlots as cP
+from ..base import customFunctions as cF
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from os.path import split
@@ -41,7 +42,7 @@ class LineResults(myObject):
         self._currentData = None
         self._bestData = None
         self._bestModel = None
-        self.burnedIn = None
+        self._burnedIn = None
         self.doi = None
         self._elevation = None
         self.facies = None
@@ -141,14 +142,14 @@ class LineResults(myObject):
         """Get the 2D topo fitting rectilinear mesh. """
         
         if (self._mesh is None):
-            if (self.hitMap is None):
+            if (self._hitMap is None):
                 tmp = self.getAttribute('hitmap/y', index=0)
                 try:
                     tmp = RectilinearMesh1D(cellCentres=tmp.cellCentres, edgesMin=0.0)
                 except:
                     tmp = RectilinearMesh1D(cellCentres=tmp, edgesMin=0.0)
             else:
-                tmp = self.hitMap.y
+                tmp = self.hitMap().y
                 try:
                     tmp = RectilinearMesh1D(cellCentres=tmp.cellCentres, edgesMin=0.0)
                 except:
@@ -185,14 +186,11 @@ class LineResults(myObject):
         return self._bestData
         
 
-
     @property
     def bestParameters(self):
         """ Get the best model of the parameters """
         if (self._best is None):
-            self._best = StatArray.StatArray(self.getAttribute('bestinterp'), dtype=np.float64)
-            self._best.name = "Best resistivity"
-            self._best.units = "$\Omega m$"
+            self._best = StatArray.StatArray(self.getAttribute('bestinterp'), dtype=np.float64, self.hitMap.x.cellCentres.name, self.hitMap.x.cellCentres.units)
         return self._best
 
     
@@ -275,22 +273,15 @@ class LineResults(myObject):
         return self._fiducials
 
 
-    def interfaces(self, cut=0.0):
+    @property
+    def interfaces(self):
         """ Get the layer interfaces from the layer depth histograms """
         # if (not self.interfaces is None): return
         maxCount = self.interfacePosterior.counts.max()
         interfaces = self.interfacePosterior.counts / np.float64(maxCount)
-        interfaces[interfaces < cut] = np.nan
         interfaces.name = "Interfaces"
         return interfaces
 
-
-    @property
-    def nLayers(self):
-        """ Get the number of layers in the best model for each data point """
-        if (self._nLayers is None):
-            self._nLayers = StatArray.StatArray(self.getAttribute('# Layers'), '# of Cells')
-        return self._nLayers
 
     @property
     def interfacePosterior(self):
@@ -300,13 +291,32 @@ class LineResults(myObject):
 
 
     @property
-    def meanParameters(self):
+    def maxParameter(self):
         """ Get the mean model of the parameters """
+        tmp = StatArray.StatArray().fromHdf(self.hdfFile["currentmodel/par/posterior/x/x"])
+        return tmp.max()
+
+
+    @property
+    def meanParameters(self):
         if (self._mean is None):
             self._mean = StatArray.StatArray(self.getAttribute('meaninterp'), dtype=np.float64)
-            self._mean.name = "Mean resistivity"
-            self._mean.units = "$\Omega m$"
         return self._mean
+
+
+    @property
+    def minParameter(self):
+        """ Get the mean model of the parameters """
+        tmp = StatArray.StatArray().fromHdf(self.hdfFile["currentmodel/par/posterior/x/x"])
+        return tmp.min()
+
+
+    @property
+    def nLayers(self):
+        """ Get the number of layers in the best model for each data point """
+        if (self._nLayers is None):
+            self._nLayers = StatArray.StatArray(self.getAttribute('# Layers'), '# of Cells')
+        return self._nLayers
 
 
     @property
@@ -362,7 +372,41 @@ class LineResults(myObject):
 
         self.opacity = 1.0 - self.opacity
 
+    
+    def percentageParameter(self, value, depth=None, depth2=None):
 
+        # Get the depth grid
+        if (not depth is None):
+            assert depth <= self.mesh.z.cellEdges[-1], 'Depth is greater than max depth '+str(self.mesh.z.cellEdges[-1])
+            j = self.mesh.z.cellIndex(depth)
+            k = j+1
+            if (not depth2 is None):
+                assert depth2 <= self.mesh.z.cellEdges[-1], 'Depth2 is greater than max depth '+str(self.mesh.z.cellEdges[-1])
+                assert depth <= depth2, 'Depth2 must be >= depth'
+                k = self.mesh.z.cellIndex(depth2)
+
+        percentage = StatArray.StatArray(np.empty(self.nPoints), name="Probability of {} > {:0.2f}".format(self.hitMap.x.cellCentres.name, value), units = self.hitMap.x.cellCentres.units)
+
+        if depth:
+            counts = self.hdfFile['currentmodel/par/posterior/arr/data'][:, j:k, :]
+            # return StatArray.StatArray(np.sum(counts[:, :, pj:]) / np.sum(counts) * 100.0, name="Probability of {} > {:0.2f}".format(self.meanParameters.name, value), units = self.meanParameters.units)
+        else:
+            counts = self.hdfFile['currentmodel/par/posterior/arr/data']
+
+        parameters = RectilinearMesh1D().fromHdf(self.hdfFile['currentmodel/par/posterior/x'])
+               
+        Bar = progressbar.ProgressBar()
+        for i in Bar(range(self.nPoints)):
+            p = RectilinearMesh1D(cellEdges=parameters.cellEdges[i, :])
+            pj = p.cellIndex(value)
+
+            cTmp = counts[i, :, :]
+
+            percentage[i] = np.sum(cTmp[:, pj:]) / cTmp.sum() * 100.0
+
+        return percentage
+
+        
     @property
     def relativeError(self):
         """ Get the Relative error of the best data points """
@@ -393,65 +437,10 @@ class LineResults(myObject):
 
         hdfFile = self.hdfFile
 
-        s = np.s_[i, :]
-
-        R = Results(reciprocateParameter=reciprocateParameter)
-
-        R.fiducial = np.float64(fid)
-
-        R.iPlot = np.array(hdfFile.get('iplot'))
-        R.plotMe = np.array(hdfFile.get('plotme'))
-
-        tmp = hdfFile.get('limits')
-        R.limits = None if tmp is None else np.array(tmp)
-        R.reciprocateParameter = np.array(hdfFile.get('reciprocateParameter'))
-        R.nMC = np.array(hdfFile.get('nmc'))
-        R.nSystems = np.array(hdfFile.get('nsystems'))
-        R.ratex = hdfRead.readKeyFromFile(hdfFile,'','/','ratex')
-
-        R.i = hdfRead.readKeyFromFile(hdfFile,'','/','i', index=i)
-        R.iBurn = hdfRead.readKeyFromFile(hdfFile,'','/','iburn', index=i)
-        R.burnedIn = hdfRead.readKeyFromFile(hdfFile,'','/','burnedin', index=i)
-        R.doi = hdfRead.readKeyFromFile(hdfFile,'','/','doi', index=i)
-        R.multiplier = hdfRead.readKeyFromFile(hdfFile,'','/','multiplier', index=i)
-        R.rate = hdfRead.readKeyFromFile(hdfFile,'','/','rate', index=s)
-        R.PhiDs = hdfRead.readKeyFromFile(hdfFile,'','/','phids', index=s)
-
-        R.currentDataPoint = hdfRead.readKeyFromFile(hdfFile,'','/','currentdatapoint', index=i, sysPath=self.sysPath)
-        R.bestDataPoint = hdfRead.readKeyFromFile(hdfFile,'','/','bestd', index=i, sysPath=self.sysPath)
-        
-        R.currentModel = hdfRead.readKeyFromFile(hdfFile,'','/','currentmodel', index=i)
-        R.Hitmap = R.currentModel.par.posterior
-        R.currentModel.maxDepth = np.log(R.Hitmap.y.cellCentres[-1])
-        R.bestModel = hdfRead.readKeyFromFile(hdfFile,'','/','bestmodel', index=i)
-        R.bestModel.maxDepth = np.log(R.Hitmap.y.cellCentres[-1])
-
-        
-
-        # R.kHist = hdfRead.readKeyFromFile(hdfFile,'','/','khist', index=i)
-        # R.DzHist = hdfRead.readKeyFromFile(hdfFile,'','/','dzhist', index=i)
-        # R.MzHist = hdfRead.readKeyFromFile(hdfFile,'','/','mzhist', index=i)
-
-        # Hack to recentre the altitude histogram go this datapoints altitude
-        # R.DzHist._cellEdges -= (R.DzHist.bins[int(R.DzHist.bins.size/2)-1] - R.bestD.z[0])
-        # R.DzHist._cellCentres = R.DzHist._cellEdges[:-1] + 0.5 * np.abs(np.diff(R.DzHist._cellEdges))
-
-        # R.relErr = []
-        # R.addErr = []
-        # for j in range(R.nSystems):
-        #     R.relErr.append(hdfRead.readKeyFromFile(hdfFile,'','/','relerr'+str(j), index=i))
-        #     R.addErr.append(hdfRead.readKeyFromFile(hdfFile,'','/','adderr'+str(j), index=i))
-
-
-        R.invTime=np.array(hdfFile.get('invtime')[i])
-        R.saveTime=np.array(hdfFile.get('savetime')[i])
-
-        # Initialize a list of iteration number
-        R.iRange = StatArray.StatArray(np.arange(2 * R.nMC), name="Iteration #", dtype=np.int64)
-
-        R.verbose = False
+        R = Results(reciprocateParameter=reciprocateParameter).fromHdf(hdfFile, index=i, fid=fid, sysPath=self.sysPath)
 
         return R
+        
 
 
     @property
@@ -753,7 +742,7 @@ class LineResults(myObject):
             self.getOpacity()
             kwargs['alpha'] = self.opacity
 
-        pm = self.mesh.pcolor(self.interfaces(cut=cut).T, **kwargs)
+        pm = self.mesh.pcolor(self.interfaces.T, **kwargs)
 
 
     def plotObservedData(self, channel=None, **kwargs):
@@ -880,7 +869,7 @@ class LineResults(myObject):
         """ Compute a histogram of the model, optionally show the histogram for given depth ranges instead """
 
         if (depth1 is None):
-            depth1 = self.mesh.z.cellEdges[0]
+            depth1 = np.maximum(self.mesh.z.cellEdges[0], 0.0)
         if (depth2 is None):
             depth2 = self.mesh.z.cellEdges[-1]
 
@@ -920,7 +909,7 @@ class LineResults(myObject):
             units = '$Sm^{-1}$'
 
         if (log):
-            vals, logLabel = cP._log(vals,log)
+            vals, logLabel = cF._log(vals,log)
             name = logLabel + name
         binEdges = StatArray.StatArray(np.linspace(np.nanmin(vals), np.nanmax(vals), nBins+1), name, units)
 
@@ -928,6 +917,49 @@ class LineResults(myObject):
         h.update(vals)
         h.plot(**kwargs)
         cP.title(title)
+
+    
+    def parameterHistogram(self, nBins, depth = None, depth2 = None, log=None):
+        """ Compute a histogram of all the parameter values, optionally show the histogram for given depth ranges instead """
+
+        # Get the depth grid
+        if (not depth is None):
+            assert depth <= self.mesh.z.cellEdges[-1], 'Depth is greater than max depth '+str(self.mesh.z.cellEdges[-1])
+            j = self.mesh.z.cellIndex(depth)
+            k = j+1
+            if (not depth2 is None):
+                assert depth2 <= self.mesh.z.cellEdges[-1], 'Depth2 is greater than max depth '+str(self.mesh.z.cellEdges[-1])
+                assert depth <= depth2, 'Depth2 must be >= depth'
+                k = self.mesh.z.cellIndex(depth2)
+
+        # First get the min max of the parameter hitmaps
+        x0 = np.log10(self.minParameter)
+        x1 = np.log10(self.maxParameter)
+
+        if depth:
+            counts = self.hdfFile['currentmodel/par/posterior/arr/data'][:, j:k, :]
+            # return StatArray.StatArray(np.sum(counts[:, :, pj:]) / np.sum(counts) * 100.0, name="Probability of {} > {:0.2f}".format(self.meanParameters.name, value), units = self.meanParameters.units)
+        else:
+            counts = self.hdfFile['currentmodel/par/posterior/arr/data']
+
+        parameters = RectilinearMesh1D().fromHdf(self.hdfFile['currentmodel/par/posterior/x'])
+
+        bins = StatArray.StatArray(np.logspace(x0, x1, nBins), self.hitMap.x.cellCentres.name, units = self.hitMap.x.cellCentres.units)
+
+        out = Histogram1D(bins=bins, log=log)
+
+               
+        Bar = progressbar.ProgressBar()
+        for i in Bar(range(self.nPoints)):
+            p = RectilinearMesh1D(cellEdges=parameters.cellEdges[i, :])
+
+            pj = out.cellIndex(p.cellCentres, clip=True)
+
+            cTmp = counts[i, :, :]
+
+            out.counts[pj] += np.sum(cTmp, axis=0)
+
+        return out
 
 
     def plotXsection(self, reciprocateParameter = False, bestModel=False, percent = 67.0, useVariance=True, **kwargs):
@@ -950,6 +982,8 @@ class LineResults(myObject):
         if useVariance:
             self.getOpacity()
             kwargs['alpha'] = self.opacity
+
+        print(np.nanmin(tmp), np.nanmax(tmp))
     
         self.mesh.pcolor(values = tmp, **kwargs)
 
@@ -959,8 +993,6 @@ class LineResults(myObject):
 
         assert False, ValueError('Double check this')
 
-        if (self.hitMap is None):
-            self.hitMap = self.getAttribute('Hit Map')
         self.setAlonglineAxis(self.plotAgainst)
         zGrd = self.zGrid
 
@@ -1019,17 +1051,15 @@ class LineResults(myObject):
         assert False, ValueError('Double check this')
 
         nFacies = len(mean)
-        if (self.hitMap is None):
-            self.hitMap = self.getAttribute('Hit Map')
-        hitMap = self.hitMap[0]
-        p = hitMap.x
+        p = self.hitMap().x
         # Initialize the normalized probability distributions for the facies
         faciesPDF = np.zeros([nFacies, p.size])
         pTmp = np.log10(1.0 / p)
         for i in range(nFacies):
             tmpHist = Distribution('normal', mean[i], var[i])
             faciesPDF[i, :] = volFrac[i] * tmpHist.getPdf(pTmp)
-            # Precompute the sum of the faciesPDF rows
+            
+        # Precompute the sum of the faciesPDF rows
         pdfSum = np.sum(faciesPDF, 0)
         # Compute the denominator
         denominator = 1.0 / \
@@ -1040,7 +1070,7 @@ class LineResults(myObject):
         for i in range(self.nPoints):
             for j in range(nFacies):
                 fTmp = faciesPDF[j, :]
-                faciesWithDepth[:, j] = np.sum(self.hitMap[i]._counts * np.repeat(fTmp[np.newaxis, :], hitMap.y.size, axis=0), 1) * denominator
+                faciesWithDepth[:, j] = np.sum(self.hitMap(i)._counts * np.repeat(fTmp[np.newaxis, :], self.hitMap(i).y.size, axis=0), 1) * denominator
             self.facies[:, i] = np.argmax(faciesWithDepth, 1)
 
 
