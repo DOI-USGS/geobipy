@@ -4,11 +4,10 @@ Module describing a 2D Rectilinear Mesh class with x and y axes specified
 #from ...base import Error as Err
 from copy import deepcopy
 import numpy as np
-from ...base.customFunctions import safeEval
+from ...base import customFunctions as cF
 from ..core import StatArray
 from ..mesh.RectilinearMesh1D import RectilinearMesh1D
 from .Histogram2D import Histogram2D
-from ...base.customFunctions import isInt
 
 class Hitmap2D(Histogram2D):
     """ Class defining a 2D hitmap whose cells are rectangular with linear sides """
@@ -27,6 +26,51 @@ class Hitmap2D(Histogram2D):
         out._counts = self._counts.deepcopy()
 
         return out
+
+
+    def marginalProbability(self, fractions, distributions, axis, reciprocate=False, log=None):
+        """Compute the marginal probability between the hitmap and a set of distributions.
+
+        .. math::
+            :label: marginal
+            
+            p(distribution_{i} | \\boldsymbol{d}) = 
+
+
+        """
+
+        assert axis < 2, ValueError("Must have 0 <= axis < 2")
+
+        if axis == 0:
+            ax = self.x.cellCentres
+
+        else:
+            ax = self.y.cellCentres
+
+        if reciprocate:
+            ax = 1.0 / ax
+
+        ax, dum = cF._log(ax, log)
+
+        if not isinstance(distributions, list):
+            distributions = [distributions]
+
+        # Compute the probabilities along the hitmap axis, using each distribution
+        nDistributions = np.size(distributions)
+        pdfs = np.zeros([nDistributions, ax.size])
+        for i in range(nDistributions):
+            pdfs[i, :] = fractions[i] * distributions[i].probability(ax)
+
+        # Normalize by the sum of the pdfs
+        normalizedPdfs = pdfs / np.sum(pdfs, 0)
+
+        # Initialize the facies Model
+        marginalProbability = np.empty([nDistributions, self.shape[axis]])
+        for j in range(nDistributions):
+            marginalProbability[j, :] = np.sum(self.axisPdf(axis) * normalizedPdfs[j, :], axis=1-axis)
+
+        return np.squeeze(marginalProbability)
+
         
 
     def varianceCutoff(self, percent=67.0):
@@ -61,19 +105,20 @@ class Hitmap2D(Histogram2D):
         ai=None
         bi=None
         if (not index is None):
-            assert isInt(index), TypeError('index must be an integer {}'.format(index))
+            assert cF.isInt(index), TypeError('index must be an integer {}'.format(index))
             ai = np.s_[index,:,:]
             bi = np.s_[index,:]
 
         item = grp.get('arr')
-        obj = eval(safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         arr = obj.fromHdf(item, index=ai)
         item = grp.get('x')
-        this = eval(safeEval(item.attrs.get('repr')))
+        this = eval(cF.safeEval(item.attrs.get('repr')))
         x = this.fromHdf(item, index=bi)
         item = grp.get('y')
-        this = eval(safeEval(item.attrs.get('repr')))
+        this = eval(cF.safeEval(item.attrs.get('repr')))
         y = this.fromHdf(item, index=bi)
         tmp = Hitmap2D(xBinCentres=x, yBinCentres=y)
         tmp._counts[:, :] = arr
+
         return tmp
