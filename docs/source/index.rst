@@ -6,14 +6,23 @@
 Welcome to GeoBIPy's documentation!
 ====================================
 
-Contents:
 
 .. toctree::
-   :maxdepth: 1
+   :hidden:
 
-   README
+   self
+
+
+.. include:: ../../README.rst
+
+
+.. toctree::
+   :maxdepth: 3
+   :hidden:
+
    content/getting_started/getting_started
    content/api/api
+
 
 Indices and tables
 ==================
@@ -21,7 +30,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-
-
-
