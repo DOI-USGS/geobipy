@@ -272,7 +272,7 @@ class Histogram1D(RectilinearMesh1D):
             self.bins.createHdf(grp, 'bins', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
 
 
-    def writeHdf(self, parent, myName, withPosterior=withPosterior, index=None):
+    def writeHdf(self, parent, myName, withPosterior=True, index=None):
         """ Write the StatArray to an HDF object
         parent: Upper hdf file or group
         myName: object hdf name. Assumes createHdf has already been called
