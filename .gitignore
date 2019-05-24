@@ -11,3 +11,4 @@ build
 *.swo
 *.vtk
 *.egg
+docs/source/examples

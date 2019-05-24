@@ -20,6 +20,13 @@ Welcome to GeoBIPy's documentation!
    :maxdepth: 3
    :hidden:
 
+   examples/index
+
+
+.. toctree::
+   :maxdepth: 3
+   :hidden:
+
    content/getting_started/getting_started
    content/api/api
 
