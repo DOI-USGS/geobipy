@@ -1119,7 +1119,7 @@ class Model1D(Model):
         return('Model1D()')
 
 
-    def createHdf(self, parent, myName, nRepeats=None, fillvalue=None):
+    def createHdf(self, parent, myName, withPosterior=True, nRepeats=None, fillvalue=None):
         """Create the Metadata for a Model1D in a HDF file
 
         Creates a new group in a HDF file under h5obj. 
@@ -1185,10 +1185,10 @@ class Model1D(Model):
         grp.attrs["repr"] = self.hdfName()
 
         self.nCells.createHdf(grp, 'nCells', nRepeats=nRepeats)
-        self.top.createHdf(grp, 'top', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.depth.createHdf(grp, 'depth', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.thk.createHdf(grp, 'thk', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.par.createHdf(grp, 'par', nRepeats=nRepeats, fillvalue=fillvalue)
+        self.top.createHdf(grp, 'top', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.depth.createHdf(grp, 'depth', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.thk.createHdf(grp, 'thk', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.par.createHdf(grp, 'par', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         #self.chie.createHdf(grp, 'chie', nRepeats=nRepeats, fillvalue=fillvalue)
         #self.chim.createHdf(grp, 'chim', nRepeats=nRepeats, fillvalue=fillvalue)
 
@@ -1215,7 +1215,7 @@ class Model1D(Model):
         grp.create_dataset('hasHalfspace', data=self.hasHalfspace)
 
 
-    def writeHdf(self, h5obj, myName, index=None):
+    def writeHdf(self, h5obj, myName, withPosterior=True, index=None):
         """Create the Metadata for a Model1D in a HDF file
 
         Creates a new group in a HDF file under h5obj. 
@@ -1272,8 +1272,8 @@ class Model1D(Model):
 
         grp = h5obj.get(myName)
 
-        self.nCells.writeHdf(grp, 'nCells',  index=index)
-        self.top.writeHdf(grp, 'top',  index=index)
+        self.nCells.writeHdf(grp, 'nCells',  withPosterior=withPosterior, index=index)
+        self.top.writeHdf(grp, 'top',  withPosterior=withPosterior, index=index)
         nCells = self.nCells[0]
 
         if (index is None):
@@ -1281,11 +1281,11 @@ class Model1D(Model):
         else:
             i = np.s_[index, 0:nCells]
 
-        self.depth.writeHdf(grp, 'depth',  index=i)
-        self.thk.writeHdf(grp, 'thk',  index=i)
-        self.par.writeHdf(grp, 'par',  index=i)
-        #self.chie.writeHdf(grp, 'chie',  index=i)
-        #self.chim.writeHdf(grp, 'chim',  index=i)
+        self.depth.writeHdf(grp, 'depth',  withPosterior=withPosterior, index=i)
+        self.thk.writeHdf(grp, 'thk',  withPosterior=withPosterior, index=i)
+        self.par.writeHdf(grp, 'par',  withPosterior=withPosterior, index=i)
+        #self.chie.writeHdf(grp, 'chie',  withPosterior=withPosterior, index=i)
+        #self.chim.writeHdf(grp, 'chim',  withPosterior=withPosterior, index=i)
 
 
     def toHdf(self, hObj, myName):

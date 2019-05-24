@@ -285,7 +285,7 @@ class RectilinearMesh1D(myObject):
         return('RectilinearMesh1D()')
 
 
-    def createHdf(self, parent, myName, nRepeats=None, fillvalue=None):
+    def createHdf(self, parent, myName, withPosterior=True, nRepeats=None, fillvalue=None):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
@@ -293,16 +293,16 @@ class RectilinearMesh1D(myObject):
         # create a new group inside h5obj
         grp = parent.create_group(myName)
         grp.attrs["repr"] = self.hdfName()
-        self._cellCentres.createHdf(grp, 'x', nRepeats=nRepeats, fillvalue=fillvalue)
+        self._cellCentres.createHdf(grp, 'x', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
 
 
-    def writeHdf(self, parent, myName, index=None):
+    def writeHdf(self, parent, myName, withPosterior=True, index=None):
         """ Write the StatArray to an HDF object
         parent: Upper hdf file or group
         myName: object hdf name. Assumes createHdf has already been called
         create: optionally create the data set as well before writing
         """
-        self._cellCentres.writeHdf(parent, myName+'/x',  index=index)
+        self._cellCentres.writeHdf(parent, myName+'/x',  withPosterior=withPosterior, index=index)
 
 
     def toHdf(self, h5obj, myName):

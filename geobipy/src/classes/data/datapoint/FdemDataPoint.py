@@ -262,7 +262,7 @@ class FdemDataPoint(EmDataPoint):
         return('FdemDataPoint()')
 
 
-    def createHdf(self, parent, myName, nRepeats=None, fillvalue=None):
+    def createHdf(self, parent, myName, withPosterior=True, nRepeats=None, fillvalue=None):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
@@ -270,20 +270,20 @@ class FdemDataPoint(EmDataPoint):
         # create a new group inside h5obj
         grp = parent.create_group(myName)
         grp.attrs["repr"] = self.hdfName()
-        self.x.createHdf(grp, 'x', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.y.createHdf(grp, 'y', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.z.createHdf(grp, 'z', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.elevation.createHdf(grp, 'e', nRepeats=nRepeats, fillvalue=fillvalue)
-        self._data.createHdf(grp, 'd', nRepeats=nRepeats, fillvalue=fillvalue)
-        self._std.createHdf(grp, 's', nRepeats=nRepeats, fillvalue=fillvalue)
-        self._predictedData.createHdf(grp, 'p', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.relErr.createHdf(grp, 'relErr', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.addErr.createHdf(grp, 'addErr', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.calibration.createHdf(grp, 'calibration', nRepeats=nRepeats, fillvalue=fillvalue)
+        self.x.createHdf(grp, 'x', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.y.createHdf(grp, 'y', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.z.createHdf(grp, 'z', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.elevation.createHdf(grp, 'e', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self._data.createHdf(grp, 'd', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self._std.createHdf(grp, 's', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self._predictedData.createHdf(grp, 'p', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.relErr.createHdf(grp, 'relErr', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.addErr.createHdf(grp, 'addErr', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.calibration.createHdf(grp, 'calibration', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self.system[0].toHdf(grp, 'sys')
 
 
-    def writeHdf(self, parent, myName, index=None):
+    def writeHdf(self, parent, myName, withPosterior=True, index=None):
         """ Write the StatArray to an HDF object
         parent: Upper hdf file or group
         myName: object hdf name. Assumes createHdf has already been called
@@ -291,17 +291,17 @@ class FdemDataPoint(EmDataPoint):
         """
         grp = parent.get(myName)
 
-        self.x.writeHdf(grp, 'x',  index=index)
-        self.y.writeHdf(grp, 'y',  index=index)
-        self.z.writeHdf(grp, 'z',  index=index)
-        self.elevation.writeHdf(grp, 'e',  index=index)
+        self.x.writeHdf(grp, 'x',  withPosterior=withPosterior, index=index)
+        self.y.writeHdf(grp, 'y',  withPosterior=withPosterior, index=index)
+        self.z.writeHdf(grp, 'z',  withPosterior=withPosterior, index=index)
+        self.elevation.writeHdf(grp, 'e',  withPosterior=withPosterior, index=index)
 
-        self._data.writeHdf(grp, 'd',  index=index)
-        self._std.writeHdf(grp, 's',  index=index)
-        self._predictedData.writeHdf(grp, 'p',  index=index)
-        self.relErr.writeHdf(grp, 'relErr',  index=index)
-        self.addErr.writeHdf(grp, 'addErr',  index=index)
-        self.calibration.writeHdf(grp, 'calibration',  index=index)
+        self._data.writeHdf(grp, 'd',  withPosterior=withPosterior, index=index)
+        self._std.writeHdf(grp, 's',  withPosterior=withPosterior, index=index)
+        self._predictedData.writeHdf(grp, 'p',  withPosterior=withPosterior, index=index)
+        self.relErr.writeHdf(grp, 'relErr',  withPosterior=withPosterior, index=index)
+        self.addErr.writeHdf(grp, 'addErr',  withPosterior=withPosterior, index=index)
+        self.calibration.writeHdf(grp, 'calibration',  withPosterior=withPosterior, index=index)
 
 
     def fromHdf(self, grp, index=None, **kwargs):

@@ -1247,7 +1247,7 @@ class StatArray(np.ndarray, myObject):
                 self.posterior.toHdf(grp, 'posterior')
 
 
-    def createHdf(self, h5obj, myName, nRepeats=None, fillvalue=None):
+    def createHdf(self, h5obj, myName, withPosterior=True, nRepeats=None, fillvalue=None):
         """Create the Metadata for a StatArray in a HDF file
 
         Creates a new group in a HDF file under h5obj. 
@@ -1263,6 +1263,8 @@ class StatArray(np.ndarray, myObject):
             A HDF file or group object to create the contents in.
         myName : str
             The name of the group to create.
+        withPosterior : bool, optional
+            Include the creation of space for any attached posterior.
         nRepeats : int, optional
             Inserts a first dimension into the shape of the StatArray of size nRepeats. This can be used to extend the available memory of 
             the StatArray so that multiple MPI ranks can write to their respective parts in the extended memory.
@@ -1316,16 +1318,18 @@ class StatArray(np.ndarray, myObject):
             else:
                 grp.create_dataset('data', [nRepeats, *self.shape], dtype=self.dtype, fillvalue=fillvalue)
 
-        if self.hasPosterior():
-            grp.create_dataset('nPosteriors', data=self.nPosteriors)
-            if self.nPosteriors > 1:
-                for i in range(self.nPosteriors):
-                    self.posterior[i].createHdf(grp, 'posterior{}'.format(i), nRepeats=nRepeats, fillvalue=fillvalue)
-            else:
-                self.posterior.createHdf(grp, 'posterior', nRepeats=nRepeats, fillvalue=fillvalue)
+
+        if withPosterior:
+            if self.hasPosterior():
+                grp.create_dataset('nPosteriors', data=self.nPosteriors)
+                if self.nPosteriors > 1:
+                    for i in range(self.nPosteriors):
+                        self.posterior[i].createHdf(grp, 'posterior{}'.format(i), nRepeats=nRepeats, fillvalue=fillvalue)
+                else:
+                    self.posterior.createHdf(grp, 'posterior', nRepeats=nRepeats, fillvalue=fillvalue)
      
 
-    def writeHdf(self, h5obj, myName, index=None):
+    def writeHdf(self, h5obj, myName, withPosterior=True, index=None):
         """Write the values of a StatArray to a HDF file
 
         Writes the contents of the StatArray to an already created group in a HDF file under h5obj. 
@@ -1339,6 +1343,8 @@ class StatArray(np.ndarray, myObject):
             A HDF file or group object to write the contents to.
         myName : str
             The name of the group to write to. The group must have been created previously.
+        withPosterior : bool, optional
+            Include writing any attached posterior.
         index : int, optional
             If the group was created using the nRepeats option, index specifies the index'th entry at which to write the data
 
@@ -1381,14 +1387,15 @@ class StatArray(np.ndarray, myObject):
 #        except:
 #            pass
 
-        if self.hasPosterior():
-            if np.ndim(index) > 0:
-                index = index[0]
-            if self.nPosteriors > 1:
-                for i in range(self.nPosteriors):
-                    self.posterior[i].writeHdf(h5obj, myName + '/posterior{}'.format(i), index=index)
-            else:
-                self.posterior.writeHdf(h5obj, myName + '/posterior', index=index)
+        if withPosterior:
+            if self.hasPosterior():
+                if np.ndim(index) > 0:
+                    index = index[0]
+                if self.nPosteriors > 1:
+                    for i in range(self.nPosteriors):
+                        self.posterior[i].writeHdf(h5obj, myName + '/posterior{}'.format(i), index=index)
+                else:
+                    self.posterior.writeHdf(h5obj, myName + '/posterior', index=index)
 
 
     def fromHdf(self, h5grp, index=None):
@@ -1482,7 +1489,7 @@ class StatArray(np.ndarray, myObject):
         return clusterID, kmeans
 
 
-    def gMM(self, clusterID, trainPercent=75.0, covType=['spherical'], plot=True):
+    def gaussianMixture(self, clusterID, trainPercent=75.0, covType=['spherical'], plot=True):
         """ Use a Gaussian Mixing Model to classify the data.
         clusterID is the initial assignment of the rows to their clusters """
 

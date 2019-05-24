@@ -435,7 +435,7 @@ class RectilinearMesh2D(myObject):
         return('Rmesh2D()')
 
 
-    def createHdf(self, parent, myName, nRepeats=None, fillvalue=None):
+    def createHdf(self, parent, myName, withPosterior=True, nRepeats=None, fillvalue=None):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
@@ -443,13 +443,13 @@ class RectilinearMesh2D(myObject):
         # create a new group inside h5obj
         grp = parent.create_group(myName)
         grp.attrs["repr"] = self.hdfName()
-        self._counts.createHdf(grp, 'arr', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.x.createHdf(grp,'x', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.y.createHdf(grp,'y', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.z.createHdf(grp,'z', nRepeats=nRepeats, fillvalue=fillvalue)
+        self._counts.createHdf(grp, 'arr', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.x.createHdf(grp,'x', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.y.createHdf(grp,'y', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.z.createHdf(grp,'z', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
 
 
-    def writeHdf(self, parent, myName, index=None):
+    def writeHdf(self, parent, myName, withPosterior=True, index=None):
         """ Write the StatArray to an HDF object
         parent: Upper hdf file or group
         myName: object hdf name. Assumes createHdf has already been called
@@ -463,10 +463,10 @@ class RectilinearMesh2D(myObject):
             ai = np.s_[index,:,:]
             bi = np.s_[index,:]
 
-        self._counts.writeHdf(parent, myName+'/arr',  index=ai)
-        self.x.writeHdf(parent, myName+'/x',  index=bi)
-        self.y.writeHdf(parent, myName+'/y',  index=bi)
-        self.z.writeHdf(parent, myName+'/z',  index=bi)
+        self._counts.writeHdf(parent, myName+'/arr',  withPosterior=withPosterior, index=ai)
+        self.x.writeHdf(parent, myName+'/x',  withPosterior=withPosterior, index=bi)
+        self.y.writeHdf(parent, myName+'/y',  withPosterior=withPosterior, index=bi)
+        self.z.writeHdf(parent, myName+'/z',  withPosterior=withPosterior, index=bi)
 
 
     def toHdf(self, h5obj, myName):

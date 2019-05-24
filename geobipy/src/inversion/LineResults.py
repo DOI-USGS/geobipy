@@ -190,7 +190,7 @@ class LineResults(myObject):
     def bestParameters(self):
         """ Get the best model of the parameters """
         if (self._best is None):
-            self._best = StatArray.StatArray(self.getAttribute('bestinterp'), dtype=np.float64, self.hitMap.x.cellCentres.name, self.hitMap.x.cellCentres.units)
+            self._best = StatArray.StatArray(self.getAttribute('bestinterp'), dtype=np.float64, name=self.hitMap.x.cellCentres.name, units=self.hitMap.x.cellCentres.units)
         return self._best
 
     
@@ -1365,10 +1365,7 @@ class LineResults(myObject):
         # results.Hitmap.createHdf(hdfFile,'hitmap', nRepeats=nPoints, fillvalue=np.nan)
 
         results.currentDataPoint.createHdf(hdfFile,'currentdatapoint', nRepeats=nPoints, fillvalue=np.nan)
-        results.bestDataPoint.z._posterior = None
-        results.bestDataPoint.relErr._posterior = None
-        results.bestDataPoint.addErr._posterior = None
-        results.bestDataPoint.createHdf(hdfFile,'bestd', nRepeats=nPoints, fillvalue=np.nan)
+        results.bestDataPoint.createHdf(hdfFile,'bestd', withPosterior=False, nRepeats=nPoints, fillvalue=np.nan)
 
         # Since the 1D models change size adaptively during the inversion, we need to pad the HDF creation to the maximum allowable number of layers.
         
@@ -1376,9 +1373,8 @@ class LineResults(myObject):
 
         tmp.createHdf(hdfFile, 'currentmodel', nRepeats=nPoints, fillvalue=np.nan)
 
-        results.bestModel.nCells._posterior = None
         tmp = results.bestModel.pad(results.bestModel.maxLayers)
-        tmp.createHdf(hdfFile, 'bestmodel', nRepeats=nPoints, fillvalue=np.nan)
+        tmp.createHdf(hdfFile, 'bestmodel', withPosterior=False, nRepeats=nPoints, fillvalue=np.nan)
 
         if results.verbose:
             results.posteriorComponents.createHdf(hdfFile,'posteriorcomponents',nRepeats=nPoints, fillvalue=np.nan)
@@ -1474,15 +1470,11 @@ class LineResults(myObject):
 
         results.currentDataPoint.writeHdf(hdfFile,'currentdatapoint',  index=i)
 
-        results.bestDataPoint.z._posterior = None
-        results.bestDataPoint.relErr._posterior = None
-        results.bestDataPoint.addErr._posterior = None
-        results.bestDataPoint.writeHdf(hdfFile,'bestd',  index=i)
+        results.bestDataPoint.writeHdf(hdfFile,'bestd', withPosterior=False, index=i)
 
         results.currentModel.writeHdf(hdfFile,'currentmodel', index=i)
 
-        results.bestModel.nCells._posterior = None
-        results.bestModel.writeHdf(hdfFile,'bestmodel', index=i)
+        results.bestModel.writeHdf(hdfFile,'bestmodel', withPosterior=False, index=i)
 
 #        if results.verbose:
 #            results.posteriorComponents.writeHdf(hdfFile, 'posteriorcomponents',  index=np.s_[i,:,:])

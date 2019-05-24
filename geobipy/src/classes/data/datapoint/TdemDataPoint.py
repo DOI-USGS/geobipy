@@ -185,7 +185,7 @@ class TdemDataPoint(EmDataPoint):
         return('TdemDataPoint(0.0,0.0,0.0,0.0)')
 
 
-    def createHdf(self, parent, myName, nRepeats=None, fillvalue=None):
+    def createHdf(self, parent, myName, withPosterior=True, nRepeats=None, fillvalue=None):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
@@ -196,20 +196,20 @@ class TdemDataPoint(EmDataPoint):
         grp.create_dataset('nSystems', data=self.nSystems)
         for i in range(self.nSystems):
             grp.create_dataset('System{}'.format(i), data=np.string_(psplt(self.system[i].fileName)[-1]))
-        self.x.createHdf(grp, 'x', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.y.createHdf(grp, 'y', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.z.createHdf(grp, 'z', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.elevation.createHdf(grp, 'e', nRepeats=nRepeats, fillvalue=fillvalue)
-        self._data.createHdf(grp, 'd', nRepeats=nRepeats, fillvalue=fillvalue)
-        self._std.createHdf(grp, 's', nRepeats=nRepeats, fillvalue=fillvalue)
-        self._predictedData.createHdf(grp, 'p', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.relErr.createHdf(grp, 'relErr', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.addErr.createHdf(grp, 'addErr', nRepeats=nRepeats, fillvalue=fillvalue)
+        self.x.createHdf(grp, 'x', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.y.createHdf(grp, 'y', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.z.createHdf(grp, 'z', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.elevation.createHdf(grp, 'e', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self._data.createHdf(grp, 'd', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self._std.createHdf(grp, 's', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self._predictedData.createHdf(grp, 'p', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.relErr.createHdf(grp, 'relErr', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.addErr.createHdf(grp, 'addErr', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self.T.createHdf(grp, 'T', nRepeats=nRepeats, fillvalue=fillvalue)
         self.R.createHdf(grp, 'R', nRepeats=nRepeats, fillvalue=fillvalue)
 
 
-    def writeHdf(self, parent, myName, index=None):
+    def writeHdf(self, parent, myName, withPosterior=True, index=None):
         """ Write the StatArray to an HDF object
         parent: Upper hdf file or group
         myName: object hdf name. Assumes createHdf has already been called
@@ -221,17 +221,17 @@ class TdemDataPoint(EmDataPoint):
 
         grp = parent.get(myName)
 
-        self.x.writeHdf(grp, 'x',  index=index)
-        self.y.writeHdf(grp, 'y',  index=index)
-        self.z.writeHdf(grp, 'z',  index=index)
-        self.elevation.writeHdf(grp, 'e',  index=index)
-        self._data.writeHdf(grp, 'd',  index=index)
-        self._std.writeHdf(grp, 's',  index=index)
-        self._predictedData.writeHdf(grp, 'p',  index=index)
-        self.relErr.writeHdf(grp, 'relErr',  index=index)
-        self.addErr.writeHdf(grp, 'addErr',  index=index)
-        self.T.writeHdf(grp, 'T',  index=index)
-        self.R.writeHdf(grp, 'R',  index=index)
+        self.x.writeHdf(grp, 'x', withPosterior=withPosterior, index=index)
+        self.y.writeHdf(grp, 'y',  withPosterior=withPosterior, index=index)
+        self.z.writeHdf(grp, 'z',  withPosterior=withPosterior, index=index)
+        self.elevation.writeHdf(grp, 'e',  withPosterior=withPosterior, index=index)
+        self._data.writeHdf(grp, 'd',  withPosterior=withPosterior, index=index)
+        self._std.writeHdf(grp, 's',  withPosterior=withPosterior, index=index)
+        self._predictedData.writeHdf(grp, 'p',  withPosterior=withPosterior, index=index)
+        self.relErr.writeHdf(grp, 'relErr',  withPosterior=withPosterior, index=index)
+        self.addErr.writeHdf(grp, 'addErr',  withPosterior=withPosterior, index=index)
+        self.T.writeHdf(grp, 'T',  withPosterior=withPosterior, index=index)
+        self.R.writeHdf(grp, 'R',  withPosterior=withPosterior, index=index)
         #writeNumpy(self.iActive, grp, 'iActive')
 
 #    def toHdf(self, parent, myName):

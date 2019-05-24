@@ -251,7 +251,7 @@ class Histogram1D(RectilinearMesh1D):
 
 
 
-    def createHdf(self, parent, myName, nRepeats=None, fillvalue=None):
+    def createHdf(self, parent, myName, withPosterior=True, nRepeats=None, fillvalue=None):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
@@ -260,30 +260,30 @@ class Histogram1D(RectilinearMesh1D):
         grp = parent.create_group(myName)
         grp.attrs["repr"] = self.hdfName()
 
-        self._counts.createHdf(grp, 'counts', nRepeats=nRepeats, fillvalue=fillvalue)
+        self._counts.createHdf(grp, 'counts', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
 
         if not self.log is None:
             grp.create_dataset('log', data = self.log)
 
         if self.isRelative:
             self.bins.toHdf(grp, 'bins')
-            self.relativeTo.createHdf(grp, 'relativeTo', nRepeats=nRepeats, fillvalue=fillvalue)
+            self.relativeTo.createHdf(grp, 'relativeTo', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         else:
-            self.bins.createHdf(grp, 'bins', nRepeats=nRepeats, fillvalue=fillvalue)
+            self.bins.createHdf(grp, 'bins', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
 
 
-    def writeHdf(self, parent, myName, index=None):
+    def writeHdf(self, parent, myName, withPosterior=withPosterior, index=None):
         """ Write the StatArray to an HDF object
         parent: Upper hdf file or group
         myName: object hdf name. Assumes createHdf has already been called
         create: optionally create the data set as well before writing
         """
-        self._counts.writeHdf(parent, myName+'/counts', index=index)
+        self._counts.writeHdf(parent, myName+'/counts', withPosterior=withPosterior, index=index)
 
         if self.isRelative:
-            self.relativeTo.writeHdf(parent, myName+'/relativeTo', index=index)
+            self.relativeTo.writeHdf(parent, myName+'/relativeTo', withPosterior=withPosterior, index=index)
         else:
-            self.bins.writeHdf(parent, myName+'/bins', index=index)
+            self.bins.writeHdf(parent, myName+'/bins', withPosterior=withPosterior, index=index)
 
 
     def toHdf(self, h5obj, myName):
