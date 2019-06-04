@@ -1,6 +1,7 @@
 from .DataPoint import DataPoint
 from ...model.Model1D import Model1D
 from ....classes.core import StatArray
+from ...statistics.Histogram1D import Histogram1D
 from ....base import customFunctions as cf
 from ....base import customPlots as cP
 import numpy as np
@@ -240,6 +241,21 @@ class EmDataPoint(DataPoint):
         plt.loglog(c, PhiD, **kwargs)
         cP.xlabel(c.getNameUnits())
         cP.ylabel('Data misfit')
+
+
+    def setAdditiveErrorPosterior(self):
+
+        assert self.addErr.hasPrior(), Exception("Must set a prior on the additive error")
+
+        aBins = self.addErr.prior.getBinEdges()
+
+        binsMidpoint = 0.5 * aBins.max(axis=-1) + aBins.min(axis=-1)
+
+        ab = np.atleast_2d(aBins)
+        binsMidpoint = np.atleast_1d(binsMidpoint)
+
+        self.addErr.setPosterior([Histogram1D(bins = StatArray.StatArray(ab[i, :], name=self.addErr.name, units=self.data.units), relativeTo=binsMidpoint[i]) for i in range(self.nSystems)])
+
 
 
     def setAdditiveErrorPrior(self, minimum, maximum, prng=None):
