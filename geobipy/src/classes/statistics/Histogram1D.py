@@ -167,6 +167,34 @@ class Histogram1D(RectilinearMesh1D):
         self._counts[iBin] = self._counts[iBin] + other.counts
 
 
+    def sample(self, nSamples):
+        """Generates samples from the histogram.
+
+        A uniform distribution is used for each bin to generate samples.  
+        The number of samples generated per bin is scaled by the count for that bin using the requested number of samples.
+
+        parameters
+        ----------
+        nSamples : int
+            Number of samples to generate.
+
+        Returns
+        -------
+        out : geobipy.StatArray
+            The samples.
+
+        """
+        samplesPerBin = np.ceil(self.counts / self.counts.sum() * nSamples)
+        samplesPerBin[self.counts == 0] = 0
+        samples = StatArray.StatArray(np.empty(np.int(np.sum(samplesPerBin))), self.bins.name, self.bins.units)
+        i0 = 0
+        for i in range(self.nBins):
+            i1 = i0 + np.int(samplesPerBin[i])
+            samples[i0:i1] = np.random.uniform(low=self.bins[i], high=self.bins[i+1], size=np.int(samplesPerBin[i]))
+            i0 = i1
+        return samples
+
+
     def update(self, values, trim=False):
         """Update the histogram by counting the entry of values into the bins of the histogram.
 
@@ -240,6 +268,11 @@ class Histogram1D(RectilinearMesh1D):
             bins = self.bins + self.relativeTo
         else:
             bins = self.bins
+
+        # if "reciprocateX" in kwargs:
+        #     bins = cF._power(self.bins, self.log)
+        #     bins = 1.0 / bins
+        #     bins, dum = cF._log(bins, self.log)
 
         ax = cP.hist(self.counts, bins, rotate=rotate, flipX=flipX, flipY=flipY, trim=trim, normalize=normalize, **kwargs)
         return ax
