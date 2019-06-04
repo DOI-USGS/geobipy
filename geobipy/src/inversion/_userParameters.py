@@ -96,7 +96,10 @@ class _userParameters(myObject):
             for i in range(N):
                 self.calVar[i,:] = tmp
         
-        self.ignoreLikelihood = False if self.ignoreLikelihood is None else self.ignoreLikelihood
+        try:
+            self.ignoreLikelihood = False if self.ignoreLikelihood is None else self.ignoreLikelihood
+        except:
+            self.ignoreLikelihood = False
         
 
 
