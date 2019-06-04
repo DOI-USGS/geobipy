@@ -6,6 +6,7 @@ from ...system.EmLoop import EmLoop
 from ...system.CircularLoop import CircularLoop
 from ....base.logging import myLogger
 from ...system.TdemSystem import TdemSystem
+from ...statistics.Histogram1D import Histogram1D
 
 try:
     from gatdaem1d import Earth
@@ -230,8 +231,8 @@ class TdemDataPoint(EmDataPoint):
         self._predictedData.writeHdf(grp, 'p',  withPosterior=withPosterior, index=index)
         self.relErr.writeHdf(grp, 'relErr',  withPosterior=withPosterior, index=index)
         self.addErr.writeHdf(grp, 'addErr',  withPosterior=withPosterior, index=index)
-        self.T.writeHdf(grp, 'T',  withPosterior=withPosterior, index=index)
-        self.R.writeHdf(grp, 'R',  withPosterior=withPosterior, index=index)
+        self.T.writeHdf(grp, 'T', index=index)
+        self.R.writeHdf(grp, 'R', index=index)
         #writeNumpy(self.iActive, grp, 'iActive')
 
 #    def toHdf(self, parent, myName):
@@ -512,6 +513,23 @@ class TdemDataPoint(EmDataPoint):
         # Update the mean of the proposed errors
         self.addErr.proposal.mean[:] = tmp
         self.addErr[:] = np.exp(tmp)
+
+
+    def setAdditiveErrorPosterior(self):
+
+        assert self.addErr.hasPrior(), Exception("Must set a prior on the additive error")
+
+        aBins = self.addErr.prior.getBinEdges()
+
+        log = 10
+        aBins = np.exp(aBins)
+        binsMidpoint = 0.5 * aBins.max(axis=-1) + aBins.min(axis=-1)
+
+        ab = np.atleast_2d(aBins)
+        binsMidpoint = np.atleast_1d(binsMidpoint)
+
+        self.addErr.setPosterior([Histogram1D(bins = StatArray.StatArray(ab[i, :], name=self.addErr.name, units=self.data.units), log=log, relativeTo=binsMidpoint[i]) for i in range(self.nSystems)])
+
 
 
     def setAdditiveErrorPrior(self, minimum, maximum, prng=None):
