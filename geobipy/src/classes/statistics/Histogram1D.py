@@ -131,7 +131,7 @@ class Histogram1D(RectilinearMesh1D):
 
     def cellIndex(self, values, **kwargs):
 
-        cc, dum = cF._log(values, self.log)
+        cc, dum = cF._log(values.flatten(), self.log)
 
         if self.isRelative:
             cc = cc - self.relativeTo
@@ -210,12 +210,12 @@ class Histogram1D(RectilinearMesh1D):
             A negative index which would normally wrap will clip to 0 and self.bins.size instead.
 
         """
-        tmp, dum = cF._log(values, self.log)
+        # tmp, dum = cF._log(values, self.log)
 
-        if self.isRelative:
-            tmp = tmp - self.relativeTo
+        # if self.isRelative:
+        #     tmp = tmp - self.relativeTo
 
-        iBin = np.atleast_1d(self.cellIndex(tmp.flatten(), clip=True, trim=trim))
+        iBin = np.atleast_1d(self.cellIndex(values, clip=True, trim=trim))
         tmp = np.bincount(iBin, minlength = self.nBins)
         
         self._counts += tmp

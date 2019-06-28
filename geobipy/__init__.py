@@ -93,6 +93,7 @@ def checkCommandArguments():
 
 def singleCore(inputFile, outputDir):
 
+    print('Running GeoBIPy in serial mode')
     print('Using user input file {}'.format(inputFile))
 
     # Import the script from the input file
@@ -186,11 +187,12 @@ def multipleCore(inputFile, outputDir, skipHDF5):
     from geobipy.src.base import MPI as myMPI
     
     world = MPI.COMM_WORLD
-    myMPI.rankPrint(world,'Running EMinv1D_MCMC')
-    myMPI.rankPrint(world,'Using user input file {}'.format(inputFile))
     rank = world.rank
     nRanks = world.size
     masterRank = rank == 0
+
+    myMPI.rankPrint(world,'Running GeoBIPy in parallel mode with {} cores'.format(rank))
+    myMPI.rankPrint(world,'Using user input file {}'.format(inputFile))
 
     # Start keeping track of time.
     t0 = MPI.Wtime()
@@ -280,7 +282,7 @@ def multipleCore(inputFile, outputDir, skipHDF5):
             myMPI.rankPrint(world,'Time to create the line with {} data points: {:.3f} s'.format(nFids, MPI.Wtime()-t0))
             t0 = MPI.Wtime()
 
-        myMPI.print('Initialized Results for writing.')
+        myMPI.print('Initialized results for writing.')
 
 
     # Everyone needs the line numbers in order to open the results files collectively.
@@ -301,7 +303,7 @@ def multipleCore(inputFile, outputDir, skipHDF5):
         LR[i] = LineResults(fName, hdfFile = h5py.File(fName, 'a', driver='mpio', comm=world))
 
     world.barrier()
-    myMPI.rankPrint(world,'Files Created in {:.3f} s'.format(MPI.Wtime()-t1))
+    myMPI.rankPrint(world,'Files created in {:.3f} s'.format(MPI.Wtime()-t1))
     t0 = MPI.Wtime()
 
     # Carryout the master-worker tasks
@@ -406,7 +408,7 @@ def workerTask(_DataPoint, UP, prng, world, lineNumbers, LineResults):
         DataPoint = _DataPoint.Irecv(source=0, world=world)
     else:
         Go = False
-    
+
     while Go:
         t0 = MPI.Wtime()
         # Get the data point for the given index
