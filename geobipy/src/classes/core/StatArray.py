@@ -1,7 +1,6 @@
 from copy import copy, deepcopy
 import numpy as np
 
-import matplotlib.pyplot as plt
 from ...base import customFunctions as cf
 from ...base import customPlots as cP
 from ..statistics.Distribution import Distribution
@@ -16,6 +15,8 @@ from sklearn.preprocessing import scale
 from sklearn.model_selection import StratifiedKFold
 
 from ...base.HDF import hdfRead
+
+import matplotlib.pyplot as plt
 
 
 class StatArray(np.ndarray, myObject):
