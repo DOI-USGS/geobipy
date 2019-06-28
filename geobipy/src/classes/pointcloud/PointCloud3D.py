@@ -244,8 +244,8 @@ class PointCloud3D(myObject):
 
         xc,yc,vals = interpolation.CT(dx, dy, self.bounds, tmp, vTmp , mask = mask, kdtree = kdtree, clip = clip, extrapolate=extrapolate)
 
-        x = np.linspace(self.bounds[0], self.bounds[1], xc.size+1)
-        y = np.linspace(self.bounds[2], self.bounds[3], yc.size+1)
+        x = StatArray.StatArray(np.linspace(self.bounds[0], self.bounds[1], xc.size))
+        y = StatArray.StatArray(np.linspace(self.bounds[2], self.bounds[3], yc.size))
 
         return x, y, vals
     

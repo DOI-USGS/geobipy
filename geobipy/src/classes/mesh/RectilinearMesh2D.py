@@ -68,20 +68,20 @@ class RectilinearMesh2D(myObject):
             return
 
         # RectilinearMesh1D of the x axis values
-        self.x = RectilinearMesh1D(cellCentres=xCentres, cellEdges=xEdges)
+        self._x = RectilinearMesh1D(cellCentres=xCentres, cellEdges=xEdges)
         # StatArray of the y axis values
-        self.y = RectilinearMesh1D(cellCentres=yCentres, cellEdges=yEdges)
+        self._y = RectilinearMesh1D(cellCentres=yCentres, cellEdges=yEdges)
 
         if (not zCentres is None or not zEdges is None):
-            assert self.x.nCells == self.y.nCells, Exception("x and y axes must have the same number of cells.")
+            assert self._x.nCells == self._y.nCells, Exception("x and y axes must have the same number of cells.")
             # StatArray of third axis
-            self.z = RectilinearMesh1D(cellCentres=zCentres, cellEdges=zEdges)
+            self._z = RectilinearMesh1D(cellCentres=zCentres, cellEdges=zEdges)
             self.xyz = True
             self.setDistance()
             
         else:
-            self.xyz = False
-            self.z = self.y     
+            self._xyz = False
+            self._z = self._y     
 
 
     @property
@@ -124,6 +124,19 @@ class RectilinearMesh2D(myObject):
         """
 
         return self.x.nEdges * self.z.nEdges
+
+    @property
+    def x(self):
+        return self._x
+
+    @property
+    def y(self):
+        return self._y
+
+    @property
+    def z(self):
+        return self._z
+    
 
 
     def axisMedian(self, arr, log=None, axis=0):
