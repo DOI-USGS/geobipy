@@ -32,7 +32,7 @@ import progressbar
 class DataSetResults(myObject):
     """ Class to define results from Inv_MCMC for a full data set """
 
-    def __init__(self, directory, files = None):
+    def __init__(self, directory, files = None, sysPath = None):
         """ Initialize the lineResults
         directory = directory containing folders for each line of data results
         """
@@ -52,7 +52,7 @@ class DataSetResults(myObject):
         for i in range(self.nLines):
             fName = self.fileList[i]
             fileExists(fName)
-            self.lines.append(LineResults(fName))
+            self.lines.append(LineResults(fName, sysPath=sysPath))
         self._lineIndices = None
 
         self._pointcloud = None
@@ -74,10 +74,12 @@ class DataSetResults(myObject):
         for line in self.lines:
             line.open()
 
+
     def close(self):
         """ Check whether the file is open """
         for line in self.lines:
             line.close()
+
 
     def getFileList(self, directory):
         """ Get the list of line result files for the dataset """
@@ -211,7 +213,6 @@ class DataSetResults(myObject):
     def pointcloud(self):
 
         if self._pointcloud is None:
-
             x = StatArray.StatArray(self.nPoints, name=self.lines[0].x.name, units=self.lines[0].x.units)
             y = StatArray.StatArray(self.nPoints, name=self.lines[0].y.name, units=self.lines[0].y.units)
             z = StatArray.StatArray(self.nPoints, name=self.lines[0].height.name, units=self.lines[0].height.units)
@@ -257,8 +258,28 @@ class DataSetResults(myObject):
 
     @property
     def y(self):
-        return self.pointcloud.y  
+        return self.pointcloud.y
 
+    
+    def dataPointResults(self, fiducial, reciprocateParameters=False):
+        """Get the inversion results for the given fiducial. 
+        
+        Parameters
+        ----------
+        fiducial : float
+            Unique fiducial of the data point.
+            
+        Returns
+        -------
+        out : geobipy.Results
+            The inversion results for the data point.
+            
+        """
+
+        index = self.fiducialIndex(fiducial)
+
+        return self.lines[index[0]].getResults(index=index[1], reciprocateParameter=reciprocateParameters)
+        
 
     def getLineNumber(self, i):
         """ Get the line number for the given data point index """
@@ -278,6 +299,30 @@ class DataSetResults(myObject):
         if (iLine > 0):
             i -= self.cumNpoints[iLine-1]
         return self.lines[iLine].iDs[i]
+
+    
+    def fiducialIndex(self, fiducial):
+        """Get the line number and index for the specified fiducial.
+        
+        Parameters
+        ----------
+        fiducial : float
+            The unique fiducial for the data point
+
+        Returns
+        -------
+        out : ints
+            Line number and index of the data point in that line.
+
+        """
+
+        for iLine, line in enumerate(self.lines):
+            if fiducial in line.fiducials:
+                index = line.fiducials.searchsorted(fiducial)
+
+                return np.asarray([iLine, index])
+
+        assert False, Exception("Could not find fiducial {} in the results".format(fiducial))
 
 
     def histogram(self, nBins, depth1 = None, depth2 = None, reciprocateParameter = False, bestModel = False, withDoi=False, percent=67.0, force = False, **kwargs):
@@ -341,70 +386,70 @@ class DataSetResults(myObject):
         return self.lines[0].mesh.z
 
 
-    def getAttribute(self,  mean=False, best=False, opacity=False, doi=False, relErr=False, addErr=False, percent=67.0, force=False):
-        """ Get a subsurface property """
+    # def getAttribute(self,  mean=False, best=False, opacity=False, doi=False, relErr=False, addErr=False, percent=67.0, force=False):
+    #     """ Get a subsurface property """
 
-        assert (not all([not mean, not best, not opacity, not doi, not relErr, not addErr])), 'Please choose at least one attribute' + help(self.getAttrubute)
+    #     assert (not all([not mean, not best, not opacity, not doi, not relErr, not addErr])), 'Please choose at least one attribute' + help(self.getAttrubute)
 
-        # Turn off attributes that are already loaded
-        if (mean):
-            mean=self.mean is None
-        if (best):
-            best=self.best is None
-        if (relErr):
-            relErr=self.relErr is None
-        # Getting the doi is cheap, so always ask for it even if opacity is requested
-        doi = opacity or doi
-        if (doi):
-            doi=self.doi is None
+    #     # Turn off attributes that are already loaded
+    #     if (mean):
+    #         mean=self.mean is None
+    #     if (best):
+    #         best=self.best is None
+    #     if (relErr):
+    #         relErr=self.relErr is None
+    #     # Getting the doi is cheap, so always ask for it even if opacity is requested
+    #     doi = opacity or doi
+    #     if (doi):
+    #         doi=self.doi is None
 
-        if (all([not mean, not best, not opacity, not doi, not relErr, not addErr])):
-            return
+    #     if (all([not mean, not best, not opacity, not doi, not relErr, not addErr])):
+    #         return
 
-        # Get the number of systems
-        if (relErr or addErr):
-            self.getNsys()
+    #     # Get the number of systems
+    #     if (relErr or addErr):
+    #         self.getNsys()
 
-        if (mean or best or doi):
-            # Get the number of cells
-            nz = self.zGrid.nCells
+    #     if (mean or best or doi):
+    #         # Get the number of cells
+    #         nz = self.zGrid.nCells
 
         
-        if (doi):
-            self.opacity=np.zeros([nz,self.nPoints], order = 'F')
-            self.doi = StatArray.StatArray(np.zeros(self.nPoints),'Depth of Investigation','m')
-        if (relErr):
-            self.lines[0].getRelativeError()
-            if (self.nSys > 1):
-                self.relErr = StatArray.StatArray([self.nPoints, self.nSys],name=self.lines[0].relErr.name,units=self.lines[0].relErr.units, order = 'F')
-            else:
-                self.relErr = StatArray.StatArray(self.nPoints,name=self.lines[0].relErr.name,units=self.lines[0].relErr.units, order = 'F')
+    #     if (doi):
+    #         self.opacity=np.zeros([nz,self.nPoints], order = 'F')
+    #         self.doi = StatArray.StatArray(np.zeros(self.nPoints),'Depth of Investigation','m')
+    #     if (relErr):
+    #         self.lines[0].getRelativeError()
+    #         if (self.nSys > 1):
+    #             self.relErr = StatArray.StatArray([self.nPoints, self.nSys],name=self.lines[0].relErr.name,units=self.lines[0].relErr.units, order = 'F')
+    #         else:
+    #             self.relErr = StatArray.StatArray(self.nPoints,name=self.lines[0].relErr.name,units=self.lines[0].relErr.units, order = 'F')
             
-        # Loop over the lines in the data set and get the attributes
-        print('Reading attributes from dataset results')
-        Bar=progressbar.ProgressBar()
-        for i in Bar(range(self.nLines)):
+    #     # Loop over the lines in the data set and get the attributes
+    #     print('Reading attributes from dataset results')
+    #     Bar=progressbar.ProgressBar()
+    #     for i in Bar(range(self.nLines)):
 
-            # Perform line getters
-            if (mean):
-                self.mean = StatArray.StatArray([nz,self.nPoints], name=self.lines[0].meanParameters.name, units=self.lines[0].meanParameters.units, order = 'F')
-                self.mean[:, self.lineIndices[i]] = self.lines[i].meanParameters.T
-                self.lines[i].mean = None # Free memory
-            if (best):
-                self.best[:, self.lineIndices[i]] = self.lines[i].bestParameters.T
-                self.lines[i].best = None # Free memory
-            if (doi):
-                # Get the DOI for this line
-                self.lines[i].getDOI(percent)
-                self.opacity[:, self.lineIndices[i]] = self.lines[i].opacity.T
-                self.doi[self.lineIndices[i]] = self.lines[i].doi
-                self.lines[i].opacity = None # Free memory
-                self.lines[i].doi = None # Free memory
-            # Deallocate line attributes to save space
-            self.lines[i]._hitMap = None
+    #         # Perform line getters
+    #         if (mean):
+    #             self.mean = StatArray.StatArray([nz,self.nPoints], name=self.lines[0].meanParameters.name, units=self.lines[0].meanParameters.units, order = 'F')
+    #             self.mean[:, self.lineIndices[i]] = self.lines[i].meanParameters.T
+    #             self.lines[i].mean = None # Free memory
+    #         if (best):
+    #             self.best[:, self.lineIndices[i]] = self.lines[i].bestParameters.T
+    #             self.lines[i].best = None # Free memory
+    #         if (doi):
+    #             # Get the DOI for this line
+    #             self.lines[i].getDOI(percent)
+    #             self.opacity[:, self.lineIndices[i]] = self.lines[i].opacity.T
+    #             self.doi[self.lineIndices[i]] = self.lines[i].doi
+    #             self.lines[i].opacity = None # Free memory
+    #             self.lines[i].doi = None # Free memory
+    #         # Deallocate line attributes to save space
+    #         self.lines[i]._hitMap = None
 
-        if (xy):
-            self.points.getBounds() # Get the bounding box
+    #     if (xy):
+    #         self.points.getBounds() # Get the bounding box
             
 
     def getMean3D(self, dx, dy, mask = False, clip = False, force=False, method='ct'):
@@ -624,12 +669,12 @@ class DataSetResults(myObject):
         # cP.xlabel('Easting (m)')
         # cP.ylabel('Northing (m)')
 
-    def mapDoi(self, dx, dy, mask = None, clip = True, extrapolate=None, force=False, **kwargs):
-        """ Create a map of a parameter """
-        self.getAttribute(xy=True, doi=True, force=force)
-        self.points.mapPlot(dx = dx, dy = dy, mask = mask, clip = clip, extrapolate=extrapolate, c = self.doi, **kwargs)
-        cP.xlabel('Easting (m)')
-        cP.ylabel('Northing (m)')
+    # def mapDoi(self, dx, dy, mask = None, clip = True, extrapolate=None, force=False, **kwargs):
+    #     """ Create a map of a parameter """
+    #     self.getAttribute(xy=True, doi=True, force=force)
+    #     self.points.mapPlot(dx = dx, dy = dy, mask = mask, clip = clip, extrapolate=extrapolate, c = self.doi, **kwargs)
+    #     cP.xlabel('Easting (m)')
+    #     cP.ylabel('Northing (m)')
 
 
     def plotDepthSlice(self, depth, depth2 = None, reciprocateParameter = False, bestModel = False, mask = None, clip = True, force=False, *args, **kwargs):
