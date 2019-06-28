@@ -101,13 +101,12 @@ class LineResults(myObject):
 
         """
         if (units == 'km' and self.x.units != 'km'):
-            self._x /= 1000.0
-            self._y /= 1000.0
+            self._x = self.x / 1000.0
+            self._y = self.y / 1000.0
             
             self._x.units = 'km'
             self._y.units = 'km'
             
-
 
     def crossplotErrors(self, system=0, **kwargs):
         """ Create a crossplot of the relative errors against additive errors for the most probable data point, for each data point along the line """
@@ -149,7 +148,7 @@ class LineResults(myObject):
                 except:
                     tmp = RectilinearMesh1D(cellCentres=tmp, edgesMin=0.0)
             else:
-                tmp = self.hitMap().y
+                tmp = self.hitMap.y
                 try:
                     tmp = RectilinearMesh1D(cellCentres=tmp.cellCentres, edgesMin=0.0)
                 except:
@@ -293,7 +292,7 @@ class LineResults(myObject):
     @property
     def maxParameter(self):
         """ Get the mean model of the parameters """
-        tmp = StatArray.StatArray().fromHdf(self.hdfFile["currentmodel/par/posterior/x/x"])
+        tmp = np.asarray(self.hdfFile["currentmodel/par/posterior/x/x/data"][:, -1])
         return tmp.max()
 
 
@@ -307,7 +306,7 @@ class LineResults(myObject):
     @property
     def minParameter(self):
         """ Get the mean model of the parameters """
-        tmp = StatArray.StatArray().fromHdf(self.hdfFile["currentmodel/par/posterior/x/x"])
+        tmp = np.asarray(self.hdfFile["currentmodel/par/posterior/x/x/data"][:, 0])
         return tmp.min()
 
 
@@ -430,10 +429,10 @@ class LineResults(myObject):
         if not fid is None:
             assert fid in self.fiducials, ValueError("This fiducial {} is not available from this HDF5 file. The min max fids are {} to {}.".format(fid, self.fiducials.min(), self.fiducials.max()))
             # Get the point index
-            i = self.fiducials.searchsorted(fid)
+            i = self._fiducials.searchsorted(fid)
         else:
             i = index
-            fid = self.fiducials[index]
+            fid = self._fiducials[index]
 
         hdfFile = self.hdfFile
 
@@ -948,9 +947,10 @@ class LineResults(myObject):
 
         out = Histogram1D(bins=bins, log=log)
 
-               
-        Bar = progressbar.ProgressBar()
-        for i in Bar(range(self.nPoints)):
+                       
+        # Bar = progressbar.ProgressBar()
+        # for i in Bar(range(self.nPoints)):
+        for i in range(self.nPoints):
             p = RectilinearMesh1D(cellEdges=parameters.cellEdges[i, :])
 
             pj = out.cellIndex(p.cellCentres, clip=True)
@@ -962,30 +962,42 @@ class LineResults(myObject):
         return out
 
 
-    def plotXsection(self, reciprocateParameter = False, bestModel=False, percent = 67.0, useVariance=True, **kwargs):
-        """ Plot a cross-section of the parameters """
+    def plotBestModel(self, reciprocateParameter = False, useVariance=True, **kwargs):
 
-
-        if (bestModel):
-            tmp = self.bestParameters.T
-        else:
-            tmp = self.meanParameters.T
-
+        values = self.bestParameters.T
         if (reciprocateParameter):
-            tmp = 1.0 / tmp
-            tmp.name = 'Resistivity'
-            tmp.units = '$\Omega m$'
+            values = 1.0 / values
+            values.name = 'Resistivity'
+            values.units = '$\Omega m$'
         else:
-            tmp.name = 'Conductivity'
-            tmp.units = '$Sm^{-1}$'
+            values.name = 'Conductivity'
+            values.units = '$Sm^{-1}$'
+
+        return self.plotXsection(values = values, useVariance = useVariance, **kwargs)
+
+
+    def plotMeanModel(self, reciprocateParameter = False, useVariance=True, **kwargs):
+
+        values = self.meanParameters.T
+        if (reciprocateParameter):
+            values = 1.0 / values
+            values.name = 'Resistivity'
+            values.units = '$\Omega m$'
+        else:
+            values.name = 'Conductivity'
+            values.units = '$Sm^{-1}$'
+
+        return self.plotXsection(values = values, useVariance = useVariance, **kwargs)
+
+
+    def plotXsection(self, values, percent = 67.0, useVariance=True, **kwargs):
+        """ Plot a cross-section of the parameters """
 
         if useVariance:
             self.getOpacity()
             kwargs['alpha'] = self.opacity
-
-        print(np.nanmin(tmp), np.nanmax(tmp))
     
-        self.mesh.pcolor(values = tmp, **kwargs)
+        return self.mesh.pcolor(values = values, **kwargs)
 
 
     def plotFacies(self, mean, var, volFrac, percent=67.0, ylim=None):
@@ -1041,37 +1053,42 @@ class LineResults(myObject):
         cP.clabel(cb, 'Facies')
 
 
-    def assignFacies(self, mean, var, volFrac):
+    def faciesProbability(self, fractions, distributions, reciprocateParameter=False, log=None):
         """ Assign facies to the parameter model given the pdfs of each facies
         mean:    :Means of the normal distributions for each facies
         var:     :Variance of the normal distributions for each facies
         volFrac: :Volume fraction of each facies
         """
 
-        assert False, ValueError('Double check this')
+        # assert False, ValueError('Double check this')
 
-        nFacies = len(mean)
-        p = self.hitMap().x
-        # Initialize the normalized probability distributions for the facies
-        faciesPDF = np.zeros([nFacies, p.size])
-        pTmp = np.log10(1.0 / p)
-        for i in range(nFacies):
-            tmpHist = Distribution('normal', mean[i], var[i])
-            faciesPDF[i, :] = volFrac[i] * tmpHist.getPdf(pTmp)
-            
-        # Precompute the sum of the faciesPDF rows
-        pdfSum = np.sum(faciesPDF, 0)
-        # Compute the denominator
-        denominator = 1.0 / \
-            np.sum(np.repeat(pdfSum[np.newaxis, :], hitMap.y.size, axis=0), 1)
-        # Initialize the facies Model
-        self.facies = np.zeros([hitMap.y.size, self.nPoints], order = 'F')
-        faciesWithDepth = np.zeros([hitMap.y.size, nFacies], order = 'F')
-        for i in range(self.nPoints):
-            for j in range(nFacies):
-                fTmp = faciesPDF[j, :]
-                faciesWithDepth[:, j] = np.sum(self.hitMap(i)._counts * np.repeat(fTmp[np.newaxis, :], self.hitMap(i).y.size, axis=0), 1) * denominator
-            self.facies[:, i] = np.argmax(faciesWithDepth, 1)
+        # Get the bins for all parameter values
+
+
+        nFacies = np.size(distributions)
+
+        self._faciesProbability = StatArray.StatArray(np.empty([nFacies, self.nPoints, self.hitMap.y.nCells]), name='Probability')
+
+        counts = self.hdfFile['currentmodel/par/posterior/arr/data']
+        parameters = RectilinearMesh1D().fromHdf(self.hdfFile['currentmodel/par/posterior/x'])
+
+        hm = self.getAttribute('hit map', index=0)
+
+        Bar = progressbar.ProgressBar()
+        for i in Bar(range(self.nPoints)):
+            hm._counts = counts[i, :, :]
+            hm.x = RectilinearMesh1D(cellEdges=parameters.cellEdges[i, :])
+            self._faciesProbability[:, i, :] = hm.marginalProbability(fractions, distributions, axis=0, reciprocate=reciprocateParameter, log=log)
+
+        return self._faciesProbability
+
+
+    def mostProbableFacies(self):
+
+        out = np.argmax(self._faciesProbability, axis=0)
+    
+        out.name = "Most Probable Facies"
+        return out
 
 
     def plotDataPointResults(self, fid):
