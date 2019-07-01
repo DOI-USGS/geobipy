@@ -29,4 +29,8 @@ script:
   # TODO: deploy to GitHub pages using doctr - @banesullivan will set this up later
 
 notifications:
-  email: false
+  email:
+      recipients: 
+        - nfoks@contractor.usgs.gov
+      on_success: never
+      on_failure: never
