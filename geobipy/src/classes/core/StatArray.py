@@ -10,10 +10,10 @@ from .myObject import myObject
 from ...base.HDF.hdfWrite import writeNumpy
 from ...base import MPI as myMPI
 
-from sklearn.mixture import GaussianMixture
-from sklearn.cluster import KMeans
-from sklearn.preprocessing import scale
-from sklearn.model_selection import StratifiedKFold
+#from sklearn.mixture import GaussianMixture
+#from sklearn.cluster import KMeans
+#from sklearn.preprocessing import scale
+#from sklearn.model_selection import StratifiedKFold
 
 from ...base.HDF import hdfRead
 
