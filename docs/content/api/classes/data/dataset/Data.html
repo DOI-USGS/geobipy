@@ -1,0 +1,616 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Data &#8212; GeoBIPy 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+    <link rel="next" title="FdemData" href="FdemData.html" />
+    <link rel="prev" title="Data classes" href="dataset.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="FdemData.html" title="FdemData"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="dataset.html" title="Data classes"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">GeoBIPy 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../classes.html" >Classes used in GeoBIPy</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../data.html" >Data classes</a> &#187;</li>
+          <li class="nav-item nav-item-4"><a href="dataset.html" accesskey="U">Data classes</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="data">
+<h1>Data<a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h1>
+<img src="../../../../../_images/inheritance-0b5e23707f97bf194612d7ac35c8d7bebc5f3246.png" alt="Inheritance diagram of geobipy.src.classes.data.dataset.Data.Data" usemap="#inheritance6003e78ca1" class="inheritance"/>
+<map id="inheritance6003e78ca1" name="inheritance6003e78ca1">
+<area shape="rect" id="node1" href="#geobipy.src.classes.data.dataset.Data.Data" target="_top" title="Class defining a set of Data." alt="" coords="283,5,355,29"/>
+<area shape="rect" id="node2" href="../../pointcloud/PointCloud3D.html#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D" target="_top" title="3D Point Cloud with x,y,z co&#45;ordinates" alt="" coords="131,5,235,29"/>
+<area shape="rect" id="node3" href="../../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="5,5,83,29"/>
+</map><span class="target" id="module-geobipy.src.classes.data.dataset.Data"></span><p>&#64;Data_Class
+Module describing a Data Set where values are associated with an xyz co-ordinate</p>
+<dl class="class">
+<dt id="geobipy.src.classes.data.dataset.Data.Data">
+<em class="property">class </em><code class="descclassname">geobipy.src.classes.data.dataset.Data.</code><code class="descname">Data</code><span class="sig-paren">(</span><em>nPoints=1</em>, <em>nChannelsPerSystem=1</em>, <em>x=None</em>, <em>y=None</em>, <em>z=None</em>, <em>elevation=None</em>, <em>data=None</em>, <em>std=None</em>, <em>predictedData=None</em>, <em>dataUnits=None</em>, <em>channelNames=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class defining a set of Data.</p>
+<p>Data(nPoints, nChannelsPerSystem, x, y, z, data, std, predictedData, dataUnits, channelNames)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>nPoints</strong> (<em>int</em>) – Number of points in the data.</li>
+<li><strong>nChannelsPerSystem</strong> (<em>int</em><em> or </em><em>array_like</em>) – Number of data channels in the data
+* If int, a single acquisition system is assumed.
+* If array_like, each item describes the number of points per acquisition system.</li>
+<li><strong>x</strong> (<em>geobipy.StatArray</em><em> or </em><em>array_like</em><em>, </em><em>optional</em>) – The x co-ordinates. Default is zeros of size nPoints.</li>
+<li><strong>y</strong> (<em>geobipy.StatArray</em><em> or </em><em>array_like</em><em>, </em><em>optional</em>) – The y co-ordinates. Default is zeros of size nPoints.</li>
+<li><strong>z</strong> (<em>geobipy.StatArrayor array_like</em><em>, </em><em>optional</em>) – The z co-ordinates. Default is zeros of size nPoints.</li>
+<li><strong>data</strong> (<em>geobipy.StatArrayor array_like</em><em>, </em><em>optional</em>) – The values of the data.
+* If None, zeroes are assigned</li>
+<li><strong>std</strong> (<em>geobipy.StatArrayor array_like</em><em>, </em><em>optional</em>) – The uncertainty estimates of the data.
+* If None, ones are assigned if data is None, else 0.1*data</li>
+<li><strong>predictedData</strong> (<em>geobipy.StatArrayor array_like</em><em>, </em><em>optional</em>) – The predicted data.
+* If None, zeros are assigned.</li>
+<li><strong>dataUnits</strong> (<em>str</em>) – Units of the data.</li>
+<li><strong>channelNames</strong> (<em>list of str</em><em>, </em><em>optional</em>) – Names of each channel of length sum(nChannelsPerSystem)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – Data class</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#geobipy.src.classes.data.dataset.Data.Data" title="geobipy.src.classes.data.dataset.Data.Data">Data</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.Bcast">
+<code class="descname">Bcast</code><span class="sig-paren">(</span><em>world</em>, <em>root=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.Bcast" title="Permalink to this definition">¶</a></dt>
+<dd><p>Broadcast a Data object using MPI</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>world</strong> (<em>mpi4py.MPI.COMM_WORLD</em>) – MPI communicator</li>
+<li><strong>root</strong> (<em>int</em><em>, </em><em>optional</em>) – The MPI rank to broadcast from. Default is 0.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – Data broadcast to each core in the communicator</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">geobipy.Data</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.Scatterv">
+<code class="descname">Scatterv</code><span class="sig-paren">(</span><em>starts</em>, <em>chunks</em>, <em>world</em>, <em>root=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.Scatterv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scatterv a Data object using MPI</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>starts</strong> (<em>array of ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the starting index for a chunk to be sent to that core. e.g. starts[0] is the starting index for rank = 0.</li>
+<li><strong>chunks</strong> (<em>array of ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the size of a chunk to be sent to that core. e.g. chunks[0] is the chunk size for rank = 0.</li>
+<li><strong>world</strong> (<em>mpi4py.MPI.Comm</em>) – The MPI communicator over which to Scatterv.</li>
+<li><strong>root</strong> (<em>int</em><em>, </em><em>optional</em>) – The MPI rank to broadcast from. Default is 0.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – The Data distributed amongst ranks.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">geobipy.Data</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.addToVTK">
+<code class="descname">addToVTK</code><span class="sig-paren">(</span><em>vtk, prop=['data', 'predicted', 'std'], system=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.addToVTK" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a member to a VTK handle.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>vtk</strong> (<em>pyvtk.VtkData</em>) – vtk handle returned from self.vtkStructure()</li>
+<li><strong>prop</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – List of the member to add to a VTK handle, either “data”, “predicted”, or “std”.</li>
+<li><strong>system</strong> (<em>int</em><em>, </em><em>optional</em>) – The system for which to add the data</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.data">
+<code class="descname">data</code><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>The data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.dataMisfit">
+<code class="descname">dataMisfit</code><span class="sig-paren">(</span><em>squared=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.dataMisfit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the <span class="math notranslate nohighlight">\(L_{2}\)</span> norm squared misfit between the observed and predicted data</p>
+<div class="math notranslate nohighlight">
+\[\| \mathbf{W}_{d} (\mathbf{d}^{obs}-\mathbf{d}^{pre})\|_{2}^{2},\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbf{W}_{d}\)</span> are the reciprocal data errors.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>squared</strong> (<em>bool</em>) – Return the squared misfit.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – The misfit value.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">np.float64</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.deltaD">
+<code class="descname">deltaD</code><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.deltaD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the difference between the predicted and observed data,</p>
+<div class="math notranslate nohighlight">
+\[\delta \mathbf{d} = \mathbf{d}^{pre} - \mathbf{d}^{obs}.\]</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – The residual between the active observed and predicted data.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="../../core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray">StatArray</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.elevation">
+<code class="descname">elevation</code><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.elevation" title="Permalink to this definition">¶</a></dt>
+<dd><p>The elevation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.getActiveChannels">
+<code class="descname">getActiveChannels</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.getActiveChannels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logical array whether the channel is active or not.</p>
+<p>An inactive channel is one where channel values are NaN for all points.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – Indices of non-NaN columns.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bools</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.getDataChannel">
+<code class="descname">getDataChannel</code><span class="sig-paren">(</span><em>channel</em>, <em>system=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.getDataChannel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the data in the specified channel</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>channel</strong> (<em>int</em>) – Index of the channel to return
+* If system is None, 0 &lt;= channel &lt; self.nChannels else 0 &lt;= channel &lt; self.nChannelsPerSystem[system]</li>
+<li><strong>system</strong> (<em>int</em><em>, </em><em>optional</em>) – The system to obtain the channel from.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – The data channel</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">geobipy.StatArray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.getDataPoint">
+<code class="descname">getDataPoint</code><span class="sig-paren">(</span><em>i</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.getDataPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the ith data point from the data set</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>i</strong> (<em>int</em>) – The data point to get</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – The data point</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">geobipy.DataPoint</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.getLine">
+<code class="descname">getLine</code><span class="sig-paren">(</span><em>line</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.getLine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the data from the given line number</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.getPredictedDataChannel">
+<code class="descname">getPredictedDataChannel</code><span class="sig-paren">(</span><em>channel</em>, <em>system=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.getPredictedDataChannel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the predicted data in the specified channel</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>channel</strong> (<em>int</em>) – Index of the channel to return
+* If system is None, 0 &lt;= channel &lt; self.nChannels else 0 &lt;= channel &lt; self.nChannelsPerSystem[system]</li>
+<li><strong>system</strong> (<em>int</em><em>, </em><em>optional</em>) – The system to obtain the channel from.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – The predicted data channel</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">geobipy.StatArray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.getStdChannel">
+<code class="descname">getStdChannel</code><span class="sig-paren">(</span><em>channel</em>, <em>system=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.getStdChannel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the uncertainty in the specified channel</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>channel</strong> (<em>int</em>) – Index of the channel to return
+* If system is None, 0 &lt;= channel &lt; self.nChannels else 0 &lt;= channel &lt; self.nChannelsPerSystem[system]</li>
+<li><strong>system</strong> (<em>int</em><em>, </em><em>optional</em>) – The system to obtain the channel from.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – The uncertainty channel</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">geobipy.StatArray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.maketest">
+<code class="descname">maketest</code><span class="sig-paren">(</span><em>nPoints</em>, <em>nChannels</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.maketest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a test example</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.mapData">
+<code class="descname">mapData</code><span class="sig-paren">(</span><em>channel</em>, <em>system=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.mapData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate the data channel between the x, y co-ordinates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>channel</strong> (<em>int</em>) – Index of the channel to return
+* If system is None, 0 &lt;= channel &lt; self.nChannels else 0 &lt;= channel &lt; self.nChannelsPerSystem[system]</li>
+<li><strong>system</strong> (<em>int</em><em>, </em><em>optional</em>) – The system to obtain the channel from.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.mapPredictedData">
+<code class="descname">mapPredictedData</code><span class="sig-paren">(</span><em>channel</em>, <em>system=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.mapPredictedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate the predicted data channel between the x, y co-ordinates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>channel</strong> (<em>int</em>) – Index of the channel to return
+* If system is None, 0 &lt;= channel &lt; self.nChannels else 0 &lt;= channel &lt; self.nChannelsPerSystem[system]</li>
+<li><strong>system</strong> (<em>int</em><em>, </em><em>optional</em>) – The system to obtain the channel from.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><em>xAxis='index'</em>, <em>channels=None</em>, <em>system=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the specifed channels as a line plot.</p>
+<p>Plots the channels along a specified co-ordinate e.g. ‘x’. A legend is auto generated.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xAxis</strong> (<em>str</em>) – If xAxis is ‘index’, returns numpy.arange(self.nPoints)
+If xAxis is ‘x’, returns self.x
+If xAxis is ‘y’, returns self.y
+If xAxis is ‘z’, returns self.z
+If xAxis is ‘r2d’, returns cumulative distance along the line in 2D using x and y.
+If xAxis is ‘r3d’, returns cumulative distance along the line in 3D using x, y, and z.</li>
+<li><strong>channels</strong> (<em>ints</em><em>, </em><em>optional</em>) – Indices of the channels to plot.  All are plotted if None
+* If system is None, 0 &lt;= channel &lt; self.nChannels else 0 &lt;= channel &lt; self.nChannelsPerSystem[system]</li>
+<li><strong>system</strong> (<em>int</em><em>, </em><em>optional</em>) – The system to obtain the channel from.</li>
+<li><strong>noLegend</strong> (<em>bool</em>) – Do not attach a legend to the plot.  Default is False, a legend is attached.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>ax</strong> (<em>matplotlib.axes</em>) – Plot axes handle</li>
+<li><strong>legend</strong> (<em>matplotlib.legend.Legend</em>) – The attached legend.</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">geobipy.customPlots.plot()</span></code></dt>
+<dd>For additional keyword arguments</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.plotPredicted">
+<code class="descname">plotPredicted</code><span class="sig-paren">(</span><em>xAxis='index'</em>, <em>channels=None</em>, <em>system=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.plotPredicted" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the specifed predicted data channels as a line plot.</p>
+<p>Plots the channels along a specified co-ordinate e.g. ‘x’. A legend is auto generated.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xAxis</strong> (<em>str</em>) – If xAxis is ‘index’, returns numpy.arange(self.nPoints)
+If xAxis is ‘x’, returns self.x
+If xAxis is ‘y’, returns self.y
+If xAxis is ‘z’, returns self.z
+If xAxis is ‘r2d’, returns cumulative distance along the line in 2D using x and y.
+If xAxis is ‘r3d’, returns cumulative distance along the line in 3D using x, y, and z.</li>
+<li><strong>channels</strong> (<em>ints</em><em>, </em><em>optional</em>) – Indices of the channels to plot.  All are plotted if None
+* If system is None, 0 &lt;= channel &lt; self.nChannels else 0 &lt;= channel &lt; self.nChannelsPerSystem[system]</li>
+<li><strong>system</strong> (<em>int</em><em>, </em><em>optional</em>) – The system to obtain the channel from.</li>
+<li><strong>noLegend</strong> (<em>bool</em>) – Do not attach a legend to the plot.  Default is False, a legend is attached.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>ax</strong> (<em>matplotlib.axes</em>) – Plot axes handle</li>
+<li><strong>legend</strong> (<em>matplotlib.legend.Legend</em>) – The attached legend.</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">geobipy.customPlots.plot()</span></code></dt>
+<dd>For additional keyword arguments</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.predictedData">
+<code class="descname">predictedData</code><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.predictedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>The predicted data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.read">
+<code class="descname">read</code><span class="sig-paren">(</span><em>fname</em>, <em>columnIndex</em>, <em>nHeaders=0</em>, <em>nChannels=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the specified columns from an ascii file
+cols[0,1,2,…] should be the indices of the x,y,z co-ordinates</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.std">
+<code class="descname">std</code><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.std" title="Permalink to this definition">¶</a></dt>
+<dd><p>The standard deviation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.summary">
+<code class="descname">summary</code><span class="sig-paren">(</span><em>out=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display a summary of the Data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.toVTK">
+<code class="descname">toVTK</code><span class="sig-paren">(</span><em>fileName, prop=['data', 'predicted', 'std'], system=None, format='binary'</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.toVTK" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save to a VTK file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>fileName</strong> (<em>str</em>) – Filename to save to.</li>
+<li><strong>prop</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – List of the members to add to a VTK handle, either “data”, “predicted”, or “std”.</li>
+<li><strong>channels</strong> (<em>#</em>) – </li>
+<li><strong>Indices of the channels to plot.  All are plotted if None</strong> (<em>#</em>) – </li>
+<li><strong>* If system is None</strong><strong>, </strong><strong>0 &lt;= channel &lt; self.nChannels else 0 &lt;= channel &lt; self.nChannelsPerSystem</strong><strong>[</strong><strong>system</strong><strong>]</strong> (<em>#</em>) – </li>
+<li><strong>system</strong> (<em>int</em><em>, </em><em>optional</em>) – The system to obtain the channel from.</li>
+<li><strong>format</strong> (<em>str</em><em>, </em><em>optional</em>) – “ascii” or “binary” format. Ascii is readable, binary is not but results in smaller files.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.updateErrors">
+<code class="descname">updateErrors</code><span class="sig-paren">(</span><em>relativeErr</em>, <em>additiveErr</em>, <em>system=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.updateErrors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the data errors</p>
+<p>Updates the standard deviation of the data errors using the following model</p>
+<div class="math notranslate nohighlight">
+\[\sqrt{(\mathbf{\epsilon}_{rel} \mathbf{d}^{obs})^{2} + \mathbf{\epsilon}^{2}_{add}},\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbf{\epsilon}_{rel}\)</span> is the relative error, a percentage fraction and <span class="math notranslate nohighlight">\(\mathbf{\epsilon}_{add}\)</span> is the additive error.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>relativeErr</strong> (<em>float</em>) – A fraction percentage that is multiplied by the observed data.</li>
+<li><strong>additiveErr</strong> (<em>float</em>) – An absolute value of additive error.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code> – If any relative or additive errors are &lt;= 0.0</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="../../../../../index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../../README.html">Welcome to GeoBIPy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../api.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../../base/base.html">Core routines needed for GeoBIPy</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../classes.html">Classes used in GeoBIPy</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../core/core.html">Core classes</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../data.html">Data classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../mesh/mesh.html">Mesh classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../model/model.html">Model classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pointcloud/pointcloud.html">Pointcloud classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../statistics/statistics.html">Statistics classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../system/system.html">System classes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="dataset.html"
+                        title="previous chapter">Data classes</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="FdemData.html"
+                        title="next chapter">FdemData</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../../../_sources/content/api/classes/data/dataset/Data.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="FdemData.html" title="FdemData"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="dataset.html" title="Data classes"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">GeoBIPy 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../classes.html" >Classes used in GeoBIPy</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../data.html" >Data classes</a> &#187;</li>
+          <li class="nav-item nav-item-4"><a href="dataset.html" >Data classes</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright None.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.9.
+    </div>
+  </body>
+</html>

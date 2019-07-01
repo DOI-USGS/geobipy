@@ -1,0 +1,258 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Installing GeoBIPy &#8212; GeoBIPy 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Running GeoBIPy" href="running_geobipy.html" />
+    <link rel="prev" title="Documentation" href="documentation.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="running_geobipy.html" title="Running GeoBIPy"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="documentation.html" title="Documentation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">GeoBIPy 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="getting_started.html" accesskey="U">Getting Started</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="installing-geobipy">
+<h1>Installing GeoBIPy<a class="headerlink" href="#installing-geobipy" title="Permalink to this headline">¶</a></h1>
+<p>First things first, install a Python 3.5+ distribution.  This is the minimum version that we have tested with.</p>
+<p>This package has a few requirements depending on what you wish to do with it.</p>
+<p>If you require a serial version of the code, see <a class="reference internal" href="#installing-a-serial-version-of-geobipy">Installing a serial version of GeoBIPy</a>.</p>
+<p>If you require an parallel implementation, you will need to install an MPI library, and Python’s mpi4py module. See <a class="reference internal" href="#installing-mpi-and-mpi4py">Installing MPI and mpi4py</a>.</p>
+<p>If you require parallel file reading and writing, you will also need to install an MPI enabled HDF5 library, as well as Python’s h5py wrapper to that library. It is important to read the notes below on installing h5py on top of a parallel HDF library.  The traditional “pip install h5py” will not work correctly. See <a class="reference internal" href="#installing-parallel-hdf5-and-h5py">Installing parallel HDF5 and h5py</a> to do this correctly.</p>
+<p>If you need to install the parallel IO version of the code, we would recommend that you start with a clean install of Python. This makes it easier to determine whether you have installed and linked the correct version of the parallel HDF5 library.</p>
+<p>There are two versions when installing GeoBIPy, a serial version, and a parallel version. Since GeoBIPy uses a Fortran backend for forward modelling frequency domain data, you will need to have a Fortran compiler installed. Make sure that the compiler can handle derived data types since I make use of object oriented programming in Fortran.</p>
+<div class="section" id="installing-a-serial-version-of-geobipy">
+<h2>Installing a serial version of GeoBIPy<a class="headerlink" href="#installing-a-serial-version-of-geobipy" title="Permalink to this headline">¶</a></h2>
+<p>This is the easiest installation and provides access to a serial implementation of the code.</p>
+<p>Simply clone the git repository, navigate to the package folder that contains the setup.py file, and type “pip install -e .”</p>
+<p>You should then be able to import modules from geobipy.  For this type of installation mpi will not need to be installed, and the serial version of h5py will suffice i.e. the standard “pip install h5py” is fine.  h5py will automatically be installed during the install of GeoBIPy since it is a dependency.</p>
+<p><strong>Side note:</strong>  Let’s say you ran a production run on a parallel machine with MPI and parallel HDF capabilities. You generated all the results, copied them back to your local machine, and wish to make plots and images.  You will only need to install the serial version of the code on your local machine to do this.</p>
+</div>
+<div class="section" id="installing-a-parallel-version-of-geobipy">
+<h2>Installing a parallel version of GeoBIPy<a class="headerlink" href="#installing-a-parallel-version-of-geobipy" title="Permalink to this headline">¶</a></h2>
+<p>Installing the parallel version of the code is a little trickier due to the dependencies necessary between the OpenMPI and/or HDF libraries, and how Python’s mpi4py and h5py wrap around those.</p>
+<div class="section" id="installing-mpi-and-mpi4py">
+<h3>Installing MPI and mpi4py<a class="headerlink" href="#installing-mpi-and-mpi4py" title="Permalink to this headline">¶</a></h3>
+<p>To run this code in parallel you will need both an MPI library and the python wrapper, mpi4py.  You must install MPI first before mpi4py.</p>
+<div class="section" id="mpi">
+<h4>MPI<a class="headerlink" href="#mpi" title="Permalink to this headline">¶</a></h4>
+<p>If you are installing GeoBIPy on a parallel machine, I would think that you have access to prebuilt MPI libraries.  If you are on a local laptop, you will need to install one. This package has been tested with OpenMPI version 1.10.2. Be careful if you want to use a newer version as mpi4py may not communicate with it correctly (at the time of this writing, OpenMPI v2 was having issues).</p>
+</div>
+<div class="section" id="mpi4py">
+<h4>mpi4py<a class="headerlink" href="#mpi4py" title="Permalink to this headline">¶</a></h4>
+<p>At this point, if you have an mpi4py module already installed, please remove it (you can check with “pip list”). If you started with a clean installation you should not have to worry about this. To test whether a new install of mpi4py will see the mpi library you have, just type “which mpicc”.  The path that you see should point to the implementation that you want mpi4py to link to.  Make sure you are about to install mpi4py to the correct python installation.  If you type ‘which python’ it should return the path to the correct python distribution.  If you are using environments, make sure you have activated the correct one.</p>
+<p>Next, use “pip install mpi4py –no-cache-dir”.  This last option is very important, without it, pip might install its own MPI library called MPICH2. I would try to avoid this because if you need to install the HDF5 library you will need know which directories to link to (see <a class="reference internal" href="#installing-parallel-hdf5-and-h5py">Installing parallel HDF5 and h5py</a>).</p>
+<p>At the end of the day,  h5py needs to communicate with both the correct HDF5 library and mpi4py, and both of those need to communicate with the same MPI library.</p>
+</div>
+</div>
+<div class="section" id="installing-parallel-hdf5-and-h5py">
+<h3>Installing parallel HDF5 and h5py<a class="headerlink" href="#installing-parallel-hdf5-and-h5py" title="Permalink to this headline">¶</a></h3>
+<p>If a parallel HDF5 library is not available, you will need to install one. First make sure you follow <a class="reference internal" href="#installing-mpi-and-mpi4py">Installing MPI and mpi4py</a> so that an MPI library is available to you. You must install a HDF5 library first before h5py.</p>
+<div class="section" id="hdf5">
+<h4>HDF5<a class="headerlink" href="#hdf5" title="Permalink to this headline">¶</a></h4>
+<p>When you install HDF5, make sure that the correct MPI library can be seen by typing “which mpicc”.  When you configure the HDF5 library, be sure to use the –enable-parallel option.</p>
+</div>
+<div class="section" id="h5py">
+<h4>h5py<a class="headerlink" href="#h5py" title="Permalink to this headline">¶</a></h4>
+<p>Once the HDF5 library is installed you will need to clone the <a class="reference external" href="https://github.com/h5py/h5py">h5py repository</a></p>
+<p>Make sure you are about to install h5py to the correct python installation.  If you type ‘which python’ it should return the path to the correct python installation.</p>
+<p>Next, copy the following code into a file called install.sh in the h5py folder and run it.  You will need to edit 3 entries.</p>
+<ul class="simple">
+<li>In H5PY_PATH change the path to the location where you want h5py installed.</li>
+<li>In HDF5_PATH change the path to the location of the installed parallel HDF5 library (i.e. the directory above /lib/)</li>
+<li>Check that ‘which mpicc’ returns the correct version.</li>
+</ul>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span>#!/bin/bash
+export HDF5_PATH=&lt;Your path to HDF5&gt;
+python setup.py clean --all
+python setup.py configure -r --hdf5-version=&lt;Your version of HDF5&gt; --mpi --hdf5=$HDF5_PATH
+export gcc=gcc
+CC=mpicc HDF5_DIR=$HDF5_PATH python setup.py build
+python setup.py install
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="installing-the-time-domain-forward-modeller">
+<h2>Installing the time domain forward modeller<a class="headerlink" href="#installing-the-time-domain-forward-modeller" title="Permalink to this headline">¶</a></h2>
+<p>Ross Brodie at Geoscience Australia has written a great forward modeller, gatdaem1D,  in C++ with a python interface.  You can obtain that code here at the <a class="reference external" href="https://github.com/GeoscienceAustralia/ga-aem">GA repository</a></p>
+<p>However, for use with GeoBIPy, use <a class="reference external" href="https://github.com/leonfoks/ga-aem">this fork of gataem1D</a> if there are open pull requests at the original repository.</p>
+<p>Go ahead and “git clone” that repository.</p>
+<p>These instructions only describe how to install Ross’ forward modeller, but it is part of a larger code base for inversion. If you wish to install his entire package, please follow his instructions.</p>
+<div class="section" id="prerequisites">
+<h3>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h3>
+<p>To compile his forward modeller, you will need a c++ compiler, and <a class="reference external" href="http://www.fftw.org/">FFTW</a></p>
+<p>On a Mac, installing these two items is easy if you use a package manager such as <a class="reference external" href="https://brew.sh/">homebrew</a></p>
+<p>If you use brew, simply do the following</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">brew</span> <span class="n">install</span> <span class="n">gcc</span>
+<span class="n">brew</span> <span class="n">install</span> <span class="n">fftw</span>
+</pre></div>
+</div>
+<p>If you do not have brew, or use a package manager, you can install fftw from source instead.</p>
+<p>Download fftw-3.3.7.tar.gz from the <a class="reference external" href="http://www.fftw.org/download.html">FFTW downloads</a> .</p>
+<p>Untar the folder and install fftw using the following.</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tar</span> <span class="o">-</span><span class="n">zxvf</span> <span class="n">fftw</span><span class="o">-</span><span class="mf">3.3</span><span class="o">.</span><span class="mf">7.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+<span class="n">cd</span> <span class="n">fftw</span><span class="o">-</span><span class="mf">3.3</span><span class="o">.</span><span class="mi">7</span>
+<span class="n">mkdir</span> <span class="n">build</span>
+<span class="n">cd</span> <span class="n">build</span>
+<span class="o">../</span><span class="n">configure</span> <span class="o">--</span><span class="n">prefix</span><span class="o">=</span><span class="n">path</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">to</span><span class="o">/</span><span class="n">fftw</span><span class="o">-</span><span class="mf">3.3</span><span class="o">.</span><span class="mi">7</span> <span class="o">--</span><span class="n">enable</span><span class="o">-</span><span class="n">threads</span>
+<span class="n">make</span>
+<span class="n">make</span> <span class="n">install</span>
+</pre></div>
+</div>
+<p>where, path-to-install-to is the location where you want fftw to be installed.</p>
+</div>
+<div class="section" id="compile-the-gatdaem1d-shared-library">
+<h3>Compile the gatdaem1d shared library<a class="headerlink" href="#compile-the-gatdaem1d-shared-library" title="Permalink to this headline">¶</a></h3>
+<p>Next, within the gatdaem1d folder, navigate to the makefiles folder and modify the top part of the file “gatdaem1d_python.make” to the following</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span>SHELL = /bin/sh
+.SUFFIXES:
+.SUFFIXES: .cpp .o
+cxx = g++
+cxxflags = -std=c++11 -O3 -Wall -fPIC
+FFTW_DIR = path-to-fftw
+
+ldflags    += -shared
+bindir     = ../python/gatdaem1d
+
+srcdir     = ../src
+objdir     = ./obj
+includes   = -I$(srcdir) -I$(FFTW_DIR)/include
+libs       = -L$(FFTW_DIR)/lib -lfftw3
+library    = $(bindir)/gatdaem1d.so
+</pre></div>
+</div>
+<p>You can find out where brew installed fftw by typing</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">brew</span> <span class="n">info</span> <span class="n">fftw</span>
+</pre></div>
+</div>
+<p>Which may return something like “/usr/local/Cellar/fftw/3.3.5”</p>
+<p>In this case, path-to-fftw is “/usr/local/Cellar/fftw/3.3.5”</p>
+<p>If you installed fftw from source, then path-to-fftw is that install path.</p>
+<p>Next, type the following to compile the gatdaem1d c++ code.</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="o">-</span><span class="n">f</span> <span class="n">gatdaem1d_python</span><span class="o">.</span><span class="n">make</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="installing-the-python-bindings">
+<h3>Installing the Python Bindings<a class="headerlink" href="#installing-the-python-bindings" title="Permalink to this headline">¶</a></h3>
+<p>Finally, to install the python wrapper to gatdaem1d, navigate to the python folder of the gatdaem1d repository.
+Type,</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">.</span>
+</pre></div>
+</div>
+<p>You should now have access to the time domain forward modeller within geobipy.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="../../index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../README.html">Welcome to GeoBIPy</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="getting_started.html">Getting Started</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="documentation.html">Documentation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Installing GeoBIPy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#installing-a-serial-version-of-geobipy">Installing a serial version of GeoBIPy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#installing-a-parallel-version-of-geobipy">Installing a parallel version of GeoBIPy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#installing-the-time-domain-forward-modeller">Installing the time domain forward modeller</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="running_geobipy.html">Running GeoBIPy</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api/api.html">API</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="documentation.html"
+                        title="previous chapter">Documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="running_geobipy.html"
+                        title="next chapter">Running GeoBIPy</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/content/getting_started/installation.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="running_geobipy.html" title="Running GeoBIPy"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="documentation.html" title="Documentation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">GeoBIPy 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="getting_started.html" >Getting Started</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright None.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.9.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,308 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>DataPoint &#8212; GeoBIPy 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+    <link rel="next" title="EmDataPoint" href="EmDataPoint.html" />
+    <link rel="prev" title="Datapoint classes" href="datapointrst.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="EmDataPoint.html" title="EmDataPoint"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="datapointrst.html" title="Datapoint classes"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">GeoBIPy 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../classes.html" >Classes used in GeoBIPy</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../data.html" >Data classes</a> &#187;</li>
+          <li class="nav-item nav-item-4"><a href="datapointrst.html" accesskey="U">Datapoint classes</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="datapoint">
+<h1>DataPoint<a class="headerlink" href="#datapoint" title="Permalink to this headline">¶</a></h1>
+<img src="../../../../../_images/inheritance-f4a54718d42acfc8114776e4e28672305f570eb5.png" alt="Inheritance diagram of geobipy.src.classes.data.datapoint.DataPoint.DataPoint" usemap="#inheritance476311a242" class="inheritance"/>
+<map id="inheritance476311a242" name="inheritance476311a242">
+<area shape="rect" id="node1" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint" target="_top" title="Class defines a data point." alt="" coords="125,5,205,29"/>
+<area shape="rect" id="node2" href="../../pointcloud/Point.html#geobipy.src.classes.pointcloud.Point.Point" target="_top" title="Class defining a point in 3D Euclidean space" alt="" coords="5,5,77,29"/>
+</map><span class="target" id="module-geobipy.src.classes.data.datapoint.DataPoint"></span><dl class="class">
+<dt id="geobipy.src.classes.data.datapoint.DataPoint.DataPoint">
+<em class="property">class </em><code class="descclassname">geobipy.src.classes.data.datapoint.DataPoint.</code><code class="descname">DataPoint</code><span class="sig-paren">(</span><em>nChannelsPerSystem=1</em>, <em>x=0.0</em>, <em>y=0.0</em>, <em>z=0.0</em>, <em>elevation=None</em>, <em>data=None</em>, <em>std=None</em>, <em>predictedData=None</em>, <em>dataUnits=None</em>, <em>channelNames=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class defines a data point.</p>
+<p>Contains an easting, northing, height, elevation, observed and predicted data, and uncertainty estimates for the data.</p>
+<p>DataPoint(x, y, z, elevation, nChannels, data, std, dataUnits)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>nChannelsPerSystem</strong> (<em>int</em><em> or </em><em>array_like</em>) – Number of data channels in the data
+* If int, a single acquisition system is assumed.
+* If array_like, each entry is the number of channels for each system.</li>
+<li><strong>x</strong> (<em>float</em>) – Easting co-ordinate of the data point</li>
+<li><strong>y</strong> (<em>float</em>) – Northing co-ordinate of the data point</li>
+<li><strong>z</strong> (<em>float</em>) – Height above ground of the data point</li>
+<li><strong>elevation</strong> (<em>float</em><em>, </em><em>optional</em>) – Elevation from sea level of the data point</li>
+<li><strong>data</strong> (<em>geobipy.StatArray</em><em> or </em><em>array_like</em><em>, </em><em>optional</em>) – Data values to assign the data of length sum(nChannelsPerSystem).
+* If None, initialized with zeros.</li>
+<li><strong>std</strong> (<em>geobipy.StatArray</em><em> or </em><em>array_like</em><em>, </em><em>optional</em>) – Estimated uncertainty standard deviation of the data of length sum(nChannelsPerSystem).
+* If None, initialized with ones if data is None, else 0.1*data values.</li>
+<li><strong>predictedData</strong> (<em>geobipy.StatArray</em><em> or </em><em>array_like</em><em>, </em><em>optional</em>) – Predicted data values to assign the data of length sum(nChannelsPerSystem).
+* If None, initialized with zeros.</li>
+<li><strong>dataUnits</strong> (<em>str</em><em>, </em><em>optional</em>) – Units of the data.  Default is “ppm”.</li>
+<li><strong>channelNames</strong> (<em>list of str</em><em>, </em><em>optional</em>) – Names of each channel of length sum(nChannelsPerSystem)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="geobipy.src.classes.data.datapoint.DataPoint.DataPoint.dataMisfit">
+<code class="descname">dataMisfit</code><span class="sig-paren">(</span><em>squared=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.dataMisfit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the <span class="math notranslate nohighlight">\(L_{2}\)</span> norm squared misfit between the observed and predicted data</p>
+<div class="math notranslate nohighlight">
+\[\| \mathbf{W}_{d} (\mathbf{d}^{obs}-\mathbf{d}^{pre})\|_{2}^{2},\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbf{W}_{d}\)</span> are the reciprocal data errors.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>squared</strong> (<em>bool</em>) – Return the squared misfit.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – The misfit value.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">np.float64</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="geobipy.src.classes.data.datapoint.DataPoint.DataPoint.deltaD">
+<code class="descname">deltaD</code><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.deltaD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the difference between the predicted and observed data,</p>
+<div class="math notranslate nohighlight">
+\[\delta \mathbf{d} = \mathbf{d}^{pre} - \mathbf{d}^{obs}.\]</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – The residual between the active observed and predicted data
+with size equal to the number of active channels.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="../../core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray">StatArray</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.datapoint.DataPoint.DataPoint.getActiveData">
+<code class="descname">getActiveData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.getActiveData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the indices to the observed data values that are not NaN</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – Indices into the observed data that are not NaN</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">array of ints</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.datapoint.DataPoint.DataPoint.likelihood">
+<code class="descname">likelihood</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.likelihood" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the likelihood of the current predicted data given the observed data and assigned errors</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – Likelihood of the data point</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">np.float64</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.datapoint.DataPoint.DataPoint.scaleJ">
+<code class="descname">scaleJ</code><span class="sig-paren">(</span><em>Jin</em>, <em>power=1.0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.scaleJ" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scales a matrix by the errors in the given data</p>
+<p>Useful if a sensitivity matrix is generated using one data point, but must be scaled by the errors in another.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Jin</strong> (<em>array_like</em>) – 2D array representing a matrix</li>
+<li><strong>power</strong> (<em>float</em>) – Power to raise the error level too. Default is -1.0</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>Jout</strong> – Matrix scaled by the data errors</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">array_like</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code> – If the number of rows in Jin do not match the number of active channels in the datapoint</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.datapoint.DataPoint.DataPoint.summary">
+<code class="descname">summary</code><span class="sig-paren">(</span><em>out=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print a summary of the EMdataPoint</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.datapoint.DataPoint.DataPoint.updateErrors">
+<code class="descname">updateErrors</code><span class="sig-paren">(</span><em>relativeErr</em>, <em>additiveErr</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.updateErrors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the data errors</p>
+<p>Updates the standard deviation of the data errors using the following model</p>
+<div class="math notranslate nohighlight">
+\[\sqrt{(\mathbf{\epsilon}_{rel} \mathbf{d}^{obs})^{2} + \mathbf{\epsilon}^{2}_{add}},\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbf{\epsilon}_{rel}\)</span> is the relative error, a percentage fraction and <span class="math notranslate nohighlight">\(\mathbf{\epsilon}_{add}\)</span> is the additive error.</p>
+<p>If the predicted data have been assigned a multivariate normal distribution, the variance of that distribution is also updated as the squared standard deviations.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>relativeErr</strong> (<em>float</em><em> or </em><em>array_like</em>) – A fraction percentage that is multiplied by the observed data.</li>
+<li><strong>additiveErr</strong> (<em>float</em><em> or </em><em>array_like</em>) – An absolute value of additive error.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code> – If relativeError is &lt;= 0.0</li>
+<li><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code> – If additiveError is &lt;= 0.0</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="../../../../../index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../../README.html">Welcome to GeoBIPy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../api.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../../base/base.html">Core routines needed for GeoBIPy</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../classes.html">Classes used in GeoBIPy</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../core/core.html">Core classes</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../data.html">Data classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../mesh/mesh.html">Mesh classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../model/model.html">Model classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pointcloud/pointcloud.html">Pointcloud classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../statistics/statistics.html">Statistics classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../system/system.html">System classes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="datapointrst.html"
+                        title="previous chapter">Datapoint classes</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="EmDataPoint.html"
+                        title="next chapter">EmDataPoint</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../../../_sources/content/api/classes/data/datapoint/DataPoint.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="EmDataPoint.html" title="EmDataPoint"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="datapointrst.html" title="Datapoint classes"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">GeoBIPy 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../classes.html" >Classes used in GeoBIPy</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../data.html" >Data classes</a> &#187;</li>
+          <li class="nav-item nav-item-4"><a href="datapointrst.html" >Datapoint classes</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright None.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.9.
+    </div>
+  </body>
+</html>

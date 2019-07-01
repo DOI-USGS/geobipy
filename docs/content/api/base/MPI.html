@@ -1,0 +1,602 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>MPI wrapper functions &#8212; GeoBIPy 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Classes used in GeoBIPy" href="../classes/classes.html" />
+    <link rel="prev" title="Heirarchical Data Format (HDF)" href="HDF.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../classes/classes.html" title="Classes used in GeoBIPy"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="HDF.html" title="Heirarchical Data Format (HDF)"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">GeoBIPy 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../api.html" >API</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="base.html" accesskey="U">Core routines needed for GeoBIPy</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-geobipy.src.base.MPI">
+<span id="mpi-wrapper-functions"></span><h1>MPI wrapper functions<a class="headerlink" href="#module-geobipy.src.base.MPI" title="Permalink to this headline">¶</a></h1>
+<p>Module containing custom MPI functions</p>
+<dl class="function">
+<dt id="geobipy.src.base.MPI.Bcast">
+<code class="descclassname">geobipy.src.base.MPI.</code><code class="descname">Bcast</code><span class="sig-paren">(</span><em>self</em>, <em>world</em>, <em>root=0</em>, <em>dType=None</em>, <em>nDim=None</em>, <em>shape=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Bcast" title="Permalink to this definition">¶</a></dt>
+<dd><p>Broadcast a string or a numpy array</p>
+<p>Broadcast a string or a numpy array from a root rank to all ranks in an MPI communicator. Must be called collectively.
+In order to call this function collectively, the variable ‘self’ must be instantiated on every rank. See the example section for more details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>self</strong> (<em>str</em><em> or </em><em>numpy.ndarray</em>) – A string or numpy array to broadcast from root.</li>
+<li><strong>world</strong> (<em>mpi4py.MPI.Comm</em>) – MPI parallel communicator.</li>
+<li><strong>root</strong> (<em>int</em><em>, </em><em>optional</em>) – The MPI rank to broadcast from. Default is 0.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – The broadcast object on every rank.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">same type as self</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code> – If self is a list, tell the user to use the specific Bcast_list function.  While it has less code and seems like it might be faster, MPI actually pickles the list, broadcasts that binary stream, and unpickles on the other side. For a large number of lists, this can take a long time. This way, the user is made aware of the time benefits of using numpy arrays.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<p>Given a numpy array instantiated on the master rank 0, in order to broadcast it, I must also instantiate a variable with the same name on all other ranks.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mpi4py</span> <span class="k">import</span> <span class="n">MPI</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">geobipy.src.base</span> <span class="k">import</span> <span class="n">MPI</span> <span class="k">as</span> <span class="n">myMPI</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">world</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="n">world</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">x</span><span class="o">=</span><span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Instantiate on all other ranks before broadcasting</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">else</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">x</span><span class="o">=</span><span class="kc">None</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">myMPI</span><span class="o">.</span><span class="n">Bcast</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">world</span><span class="p">)</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># A string example</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="p">(</span><span class="n">world</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;some string&#39;</span>  <span class="c1"># This may have been read in through an input file for production code</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">else</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">myMPI</span><span class="o">.</span><span class="n">Bcast</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">world</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.MPI.Bcast_1int">
+<code class="descclassname">geobipy.src.base.MPI.</code><code class="descname">Bcast_1int</code><span class="sig-paren">(</span><em>self</em>, <em>world</em>, <em>root=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Bcast_1int" title="Permalink to this definition">¶</a></dt>
+<dd><p>Broadcast a single integer</p>
+<p>In order to broadcast scalar values using the faster numpy approach, the value must cast into a 1D ndarray. Must be called collectively.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>self</strong> (<em>int</em>) – The integer to broadcast.</li>
+<li><strong>world</strong> (<em>mpi4py.MPI.Comm</em>) – MPI parallel communicator.</li>
+<li><strong>root</strong> (<em>int</em><em>, </em><em>optional</em>) – The MPI rank to broadcast from. Default is 0.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – The broadcast integer.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<p>Given an integer instantiated on the master rank 0, in order to broadcast it, I must also instantiate a variable with the same name on all other ranks.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mpi4py</span> <span class="k">import</span> <span class="n">MPI</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">geobipy.src.base</span> <span class="k">import</span> <span class="n">MPI</span> <span class="k">as</span> <span class="n">myMPI</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">world</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="n">world</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">i</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Instantiate on all other ranks before broadcasting</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">else</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">i</span><span class="o">=</span><span class="kc">None</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">i</span> <span class="o">=</span> <span class="n">myMPI</span><span class="o">.</span><span class="n">Bcast</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">world</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.MPI.Bcast_list">
+<code class="descclassname">geobipy.src.base.MPI.</code><code class="descname">Bcast_list</code><span class="sig-paren">(</span><em>self</em>, <em>world</em>, <em>root=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Bcast_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Broadcast a list by pickling, sending, and unpickling.  This is slower than using numpy arrays and uppercase (Bcast) mpi4py routines. Must be called collectively.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>self</strong> (<em>list</em>) – A list to broadcast.</li>
+<li><strong>world</strong> (<em>mpi4py.MPI.Comm</em>) – MPI parallel communicator.</li>
+<li><strong>root</strong> (<em>int</em><em>, </em><em>optional</em>) – The MPI rank to broadcast from. Default is 0.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – The broadcast list on every MPI rank.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.MPI.Irecv">
+<code class="descclassname">geobipy.src.base.MPI.</code><code class="descname">Irecv</code><span class="sig-paren">(</span><em>source</em>, <em>world</em>, <em>dType=None</em>, <em>nDim=None</em>, <em>shape=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Irecv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Irecv a numpy array. Auto determines data type and shape. Must be accompanied by Isend on the source rank.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.MPI.IrecvFromLeft">
+<code class="descclassname">geobipy.src.base.MPI.</code><code class="descname">IrecvFromLeft</code><span class="sig-paren">(</span><em>world</em>, <em>wrap=True</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.IrecvFromLeft" title="Permalink to this definition">¶</a></dt>
+<dd><p>Irecv an array from the rank left of world.rank.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.MPI.IrecvFromRight">
+<code class="descclassname">geobipy.src.base.MPI.</code><code class="descname">IrecvFromRight</code><span class="sig-paren">(</span><em>world</em>, <em>wrap=True</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.IrecvFromRight" title="Permalink to this definition">¶</a></dt>
+<dd><p>IRecv an array from the rank right of world.rank.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.MPI.Irecv_1int">
+<code class="descclassname">geobipy.src.base.MPI.</code><code class="descname">Irecv_1int</code><span class="sig-paren">(</span><em>source</em>, <em>world</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Irecv_1int" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recv a single integer. Must be accompanied by Isend_1int on the source rank.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>self</strong> (<em>int</em>) – Integer to Recv</li>
+<li><strong>source</strong> (<em>int</em>) – Receive from this rank.</li>
+<li><strong>world</strong> (<em>mpi4py.MPI.Comm</em>) – MPI parallel communicator.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – The received integer.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.MPI.Isend">
+<code class="descclassname">geobipy.src.base.MPI.</code><code class="descname">Isend</code><span class="sig-paren">(</span><em>self</em>, <em>dest</em>, <em>world</em>, <em>dType=None</em>, <em>nDim=None</em>, <em>shape=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Isend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Isend a numpy array. Auto determines data type and shape. Must be accompanied by Irecv on the dest rank.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.MPI.IsendToLeft">
+<code class="descclassname">geobipy.src.base.MPI.</code><code class="descname">IsendToLeft</code><span class="sig-paren">(</span><em>self</em>, <em>world</em>, <em>wrap=True</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.IsendToLeft" title="Permalink to this definition">¶</a></dt>
+<dd><p>ISend an array to the rank left of world.rank.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.MPI.IsendToRight">
+<code class="descclassname">geobipy.src.base.MPI.</code><code class="descname">IsendToRight</code><span class="sig-paren">(</span><em>self</em>, <em>world</em>, <em>wrap=True</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.IsendToRight" title="Permalink to this definition">¶</a></dt>
+<dd><p>ISend an array to the rank left of world.rank.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.MPI.Isend_1int">
+<code class="descclassname">geobipy.src.base.MPI.</code><code class="descname">Isend_1int</code><span class="sig-paren">(</span><em>self</em>, <em>dest</em>, <em>world</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Isend_1int" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send a single integer. Must be accompanied by Irecv_1int on the dest rank.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>self</strong> (<em>int</em>) – The integer to Send.</li>
+<li><strong>dest</strong> (<em>int</em>) – Rank to receive</li>
+<li><strong>world</strong> (<em>mpi4py.MPI.Comm</em>) – MPI parallel communicator.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – The sent integer.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.MPI.Scatterv">
+<code class="descclassname">geobipy.src.base.MPI.</code><code class="descname">Scatterv</code><span class="sig-paren">(</span><em>self</em>, <em>starts</em>, <em>chunks</em>, <em>world</em>, <em>axis=0</em>, <em>root=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Scatterv" title="Permalink to this definition">¶</a></dt>
+<dd><p>ScatterV an array to all ranks in an MPI communicator.</p>
+<p>Each rank gets a chunk defined by a starting index and chunk size. Must be called collectively. The ‘starts’ and ‘chunks’ must be available on every MPI rank. Must be called collectively. See the example for more details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>self</strong> (<em>numpy.ndarray</em>) – A numpy array to broadcast from root.</li>
+<li><strong>starts</strong> (<em>array of ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the starting index for a chunk to be sent to that core. e.g. starts[0] is the starting index for rank = 0.</li>
+<li><strong>chunks</strong> (<em>array of ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the size of a chunk to be sent to that core. e.g. chunks[0] is the chunk size for rank = 0.</li>
+<li><strong>world</strong> (<em>mpi4py.MPI.Comm</em>) – MPI parallel communicator.</li>
+<li><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – Axis along which to Scatterv to the ranks if self is a 2D numpy array. Default is 0</li>
+<li><strong>root</strong> (<em>int</em><em>, </em><em>optional</em>) – The MPI rank to broadcast from. Default is 0.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – A chunk of self on each MPI rank with size chunk[world.rank].</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">numpy.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mpi4py</span> <span class="k">import</span> <span class="n">MPI</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">geobipy.src.base</span> <span class="k">import</span> <span class="n">MPI</span> <span class="k">as</span> <span class="n">myMPI</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">world</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Globally define a size N</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">N</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># On each rank, compute the starting indices and chunk size for the given world.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">starts</span><span class="p">,</span><span class="n">chunks</span><span class="o">=</span><span class="n">loadBalance_shrinkingArrays</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">world</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create an array on the master rank</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="p">(</span><span class="n">world</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">else</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">x</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Scatter the array x among ranks.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myChunk</span> <span class="o">=</span> <span class="n">myMPI</span><span class="o">.</span><span class="n">Scatterv</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">starts</span><span class="p">,</span> <span class="n">chunks</span><span class="p">,</span> <span class="n">world</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.MPI.Scatterv_list">
+<code class="descclassname">geobipy.src.base.MPI.</code><code class="descname">Scatterv_list</code><span class="sig-paren">(</span><em>self</em>, <em>starts</em>, <em>chunks</em>, <em>world</em>, <em>root=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Scatterv_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scatterv a list by pickling, sending, receiving, and unpickling.  This is slower than using numpy arrays and uppercase (Scatterv) mpi4py routines. Must be called collectively.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>self</strong> (<em>list</em>) – A list to scatterv.</li>
+<li><strong>starts</strong> (<em>array of ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the starting index for a chunk to be sent to that core. e.g. starts[0] is the starting index for rank = 0.</li>
+<li><strong>chunks</strong> (<em>array of ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the size of a chunk to be sent to that core. e.g. chunks[0] is the chunk size for rank = 0.</li>
+<li><strong>world</strong> (<em>mpi4py.MPI.Comm</em>) – MPI parallel communicator.</li>
+<li><strong>root</strong> (<em>int</em><em>, </em><em>optional</em>) – The MPI rank to broadcast from. Default is 0.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – A chunk of self on each MPI rank with size chunk[world.rank].</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.MPI.Scatterv_numpy">
+<code class="descclassname">geobipy.src.base.MPI.</code><code class="descname">Scatterv_numpy</code><span class="sig-paren">(</span><em>self</em>, <em>starts</em>, <em>chunks</em>, <em>dType</em>, <em>world</em>, <em>axis=0</em>, <em>root=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Scatterv_numpy" title="Permalink to this definition">¶</a></dt>
+<dd><p>ScatterV a numpy array to all ranks in an MPI communicator.</p>
+<p>Each rank gets a chunk defined by a starting index and chunk size. Must be called collectively. The ‘starts’ and ‘chunks’ must be available on every MPI rank. See the example for more details. Must be called collectively.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>self</strong> (<em>numpy.ndarray</em>) – A numpy array to broadcast from root.</li>
+<li><strong>starts</strong> (<em>array of ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the starting index for a chunk to be sent to that core. e.g. starts[0] is the starting index for rank = 0.</li>
+<li><strong>chunks</strong> (<em>array of ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the size of a chunk to be sent to that core. e.g. chunks[0] is the chunk size for rank = 0.</li>
+<li><strong>dType</strong> (<em>type</em>) – The type of the numpy array being scattered. Must exist on all ranks.</li>
+<li><strong>world</strong> (<em>mpi4py.MPI.Comm</em>) – MPI parallel communicator.</li>
+<li><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – Axis along which to Scatterv to the ranks if self is a 2D numpy array. Default is 0</li>
+<li><strong>root</strong> (<em>int</em><em>, </em><em>optional</em>) – The MPI rank to broadcast from. Default is 0.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – A chunk of self on each MPI rank with size chunk[world.rank].</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">numpy.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.MPI.banner">
+<code class="descclassname">geobipy.src.base.MPI.</code><code class="descname">banner</code><span class="sig-paren">(</span><em>world</em>, <em>aStr=None</em>, <em>end='\n'</em>, <em>rank=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.banner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints a String with Separators above and below</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>world</strong> (<em>mpi4py.MPI.Comm</em>) – MPI parallel communicator.</li>
+<li><strong>aStr</strong> (<em>str</em>) – A string to print.</li>
+<li><strong>end</strong> (<em>str</em>) – string appended after the last value, default is a newline.</li>
+<li><strong>rank</strong> (<em>int</em>) – The rank to print from, default is the master rank, 0.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.MPI.bcastType">
+<code class="descclassname">geobipy.src.base.MPI.</code><code class="descname">bcastType</code><span class="sig-paren">(</span><em>self</em>, <em>world</em>, <em>root=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.bcastType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the type of an object and broadcasts it to every rank in an MPI communicator.</p>
+<p>Adaptively broadcasts the type of an object. Must be called collectively.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>self</strong> (<em>object</em>) – For numpy arrays and numpy scalars, a numpy data type will be broadcast.
+For arbitrary objects, the attached __class__.__name__ will be broadcast.
+For lists, the data type will be list</li>
+<li><strong>world</strong> (<em>mpi4py.MPI.Comm</em>) – MPI parallel communicator.</li>
+<li><strong>root</strong> (<em>int</em><em>, </em><em>optional</em>) – The MPI rank to broadcast from. Default is 0.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – The data type broadcast to every rank including the rank broadcast from.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.MPI.getParallelPrng">
+<code class="descclassname">geobipy.src.base.MPI.</code><code class="descname">getParallelPrng</code><span class="sig-paren">(</span><em>world</em>, <em>timeFunction</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.getParallelPrng" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a random seed using time and the process id</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>seed</strong> – The seed on each core</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.MPI.helloWorld">
+<code class="descclassname">geobipy.src.base.MPI.</code><code class="descname">helloWorld</code><span class="sig-paren">(</span><em>world</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.helloWorld" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print hello from every rank in an MPI communicator</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>world</strong> (<em>mpi4py.MPI.Comm</em>) – MPI parallel communicator.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.MPI.loadBalance_shrinkingArrays">
+<code class="descclassname">geobipy.src.base.MPI.</code><code class="descname">loadBalance_shrinkingArrays</code><span class="sig-paren">(</span><em>N</em>, <em>nChunks</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.loadBalance_shrinkingArrays" title="Permalink to this definition">¶</a></dt>
+<dd><p>Splits the length of an array into a number of chunks. Load balances the chunks in a shrinking arrays fashion.</p>
+<p>Given a length N, split N up into nChunks and return the starting index and size of each chunk. After being split equally among the chunks, the remainder is split so that the first remainder chunks get +1 in size. e.g. N=10, nChunks=3 would return starts=[0,4,7] chunks=[4,3,3]</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>N</strong> (<em>int</em>) – A size to split into chunks.</li>
+<li><strong>nChunks</strong> (<em>int</em>) – The number of chunks to split N into.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>starts</strong> (<em>ndarray of ints</em>) – The starting indices of each chunk.</li>
+<li><strong>chunks</strong> (<em>ndarray of ints</em>) – The size of each chunk.</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.MPI.orderedPrint">
+<code class="descclassname">geobipy.src.base.MPI.</code><code class="descname">orderedPrint</code><span class="sig-paren">(</span><em>world</em>, <em>this</em>, <em>title=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.orderedPrint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints numbers from each rank in order of rank</p>
+<p>This routine will print an item from each rank in order of rank.
+This routine is SLOW due to lots of communication, but is useful for illustration purposes, or debugging.
+Do not use this in production code!  The title is used in a banner</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>world</strong> (<em>mpi4py.MPI.Comm</em>) – MPI parallel communicator.</li>
+<li><strong>this</strong> (<em>array_like</em>) – Variable to print, must exist on every rank in the communicator.</li>
+<li><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – Creates a banner to separate output with a clear indication of what is being written.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.MPI.print">
+<code class="descclassname">geobipy.src.base.MPI.</code><code class="descname">print</code><span class="sig-paren">(</span><em>aStr=''</em>, <em>end='\n'</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.print" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints the str to sys.stdout and flushes the buffer so that printing is immediate</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>aStr</strong> (<em>str</em>) – A string to print.</li>
+<li><strong>end</strong> (<em>str</em>) – string appended after the last value, default is a newline.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.MPI.rankPrint">
+<code class="descclassname">geobipy.src.base.MPI.</code><code class="descname">rankPrint</code><span class="sig-paren">(</span><em>world</em>, <em>aStr=''</em>, <em>end='\n'</em>, <em>rank=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.rankPrint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints only from the specified MPI rank</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>world</strong> (<em>mpi4py.MPI.Comm</em>) – MPI parallel communicator.</li>
+<li><strong>aStr</strong> (<em>str</em>) – A string to print.</li>
+<li><strong>end</strong> (<em>str</em>) – string appended after the last value, default is a newline.</li>
+<li><strong>rank</strong> (<em>int</em>) – The rank to print from, default is the master rank, 0.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../README.html">Welcome to GeoBIPy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="base.html">Core routines needed for GeoBIPy</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="customFunctions.html">customFunctions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="customPlots.html">customPlots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fileIO.html">fileIO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="interpolation.html">interpolation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="HDF.html">Heirarchical Data Format (HDF)</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">MPI wrapper functions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../classes/classes.html">Classes used in GeoBIPy</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="HDF.html"
+                        title="previous chapter">Heirarchical Data Format (HDF)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../classes/classes.html"
+                        title="next chapter">Classes used in GeoBIPy</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/content/api/base/MPI.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../classes/classes.html" title="Classes used in GeoBIPy"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="HDF.html" title="Heirarchical Data Format (HDF)"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">GeoBIPy 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../api.html" >API</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="base.html" >Core routines needed for GeoBIPy</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright None.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.9.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,224 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Circular Loop &#8212; GeoBIPy 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Frequency domain system" href="FdemSystem.html" />
+    <link rel="prev" title="EmLoop" href="EmLoop.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="FdemSystem.html" title="Frequency domain system"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="EmLoop.html" title="EmLoop"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">GeoBIPy 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../api.html" >API</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../classes.html" >Classes used in GeoBIPy</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="system.html" accesskey="U">System classes</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="circular-loop">
+<h1>Circular Loop<a class="headerlink" href="#circular-loop" title="Permalink to this headline">¶</a></h1>
+<img src="../../../../_images/inheritance-e5847cbce4c15da4b2c362279a4f8c524dc83bc1.png" alt="Inheritance diagram of geobipy.src.classes.system.CircularLoop" usemap="#inheritancea1db000af0" class="inheritance"/>
+<map id="inheritancea1db000af0" name="inheritancea1db000af0">
+<area shape="rect" id="node3" href="EmLoop.html#geobipy.src.classes.system.EmLoop.EmLoop" target="_top" title="Defines a loop in an EM system e.g. transmitter or reciever" alt="" coords="131,29,203,53"/>
+<area shape="rect" id="node2" href="#geobipy.src.classes.system.CircularLoop.CircularLoop" target="_top" title="Defines a circular loop for EM acquisition systems" alt="" coords="251,29,348,53"/>
+<area shape="rect" id="node4" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="5,53,83,77"/>
+</map><span class="target" id="module-geobipy.src.classes.system.CircularLoop"></span><dl class="class">
+<dt id="geobipy.src.classes.system.CircularLoop.CircularLoop">
+<em class="property">class </em><code class="descclassname">geobipy.src.classes.system.CircularLoop.</code><code class="descname">CircularLoop</code><span class="sig-paren">(</span><em>orient='z'</em>, <em>moment=0</em>, <em>x=0.0</em>, <em>y=0.0</em>, <em>z=0.0</em>, <em>pitch=0.0</em>, <em>roll=0.0</em>, <em>yaw=0.0</em>, <em>radius=1.0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines a circular loop for EM acquisition systems</p>
+<p>CircularLoop(‘z’, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>orient</strong> (<em>str</em>) – Orientation of the loop, ‘x’ or ‘z’</li>
+<li><strong>moment</strong> (<em>int</em>) – Moment of the loop</li>
+<li><strong>x</strong> (<em>float</em>) – X location of the loop relative to an observation location</li>
+<li><strong>y</strong> (<em>float</em>) – Y location of the loop relative to an observation location</li>
+<li><strong>z</strong> (<em>float</em>) – Z location of the loop relative to an observation location</li>
+<li><strong>pitch</strong> (<em>float</em>) – Pitch of the loop</li>
+<li><strong>roll</strong> (<em>float</em>) – Roll of the loop</li>
+<li><strong>yaw</strong> (<em>float</em>) – Yaw of the loop</li>
+<li><strong>radius</strong> (<em>float</em>) – Radius of the loop</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="geobipy.src.classes.system.CircularLoop.CircularLoop.Bcast">
+<code class="descname">Bcast</code><span class="sig-paren">(</span><em>world</em>, <em>root=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop.Bcast" title="Permalink to this definition">¶</a></dt>
+<dd><p>Broadcast using MPI</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>world</strong> (<em>mpi4py.MPI.COMM_WORLD</em>) – An MPI communicator</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – A CircularLoop on each core</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#geobipy.src.classes.system.CircularLoop.CircularLoop" title="geobipy.src.classes.system.CircularLoop.CircularLoop">CircularLoop</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.system.CircularLoop.CircularLoop.createHdf">
+<code class="descname">createHdf</code><span class="sig-paren">(</span><em>parent</em>, <em>myName</em>, <em>nRepeats=None</em>, <em>fillvalue=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop.createHdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the hdf group metadata in file
+parent: HDF object to create a group inside
+myName: Name of the group</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.system.CircularLoop.CircularLoop.deepcopy">
+<code class="descname">deepcopy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop.deepcopy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Required by subclasses</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.system.CircularLoop.CircularLoop.fromHdf">
+<code class="descname">fromHdf</code><span class="sig-paren">(</span><em>h5grp</em>, <em>index=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop.fromHdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads in the object from a HDF file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.system.CircularLoop.CircularLoop.hdfName">
+<code class="descname">hdfName</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop.hdfName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a reproducibility string that can be instantiated from a hdf file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.system.CircularLoop.CircularLoop.summary">
+<code class="descname">summary</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop.summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print a summary</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.system.CircularLoop.CircularLoop.writeHdf">
+<code class="descname">writeHdf</code><span class="sig-paren">(</span><em>parent</em>, <em>myName</em>, <em>index=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop.writeHdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the StatArray to an HDF object
+parent: Upper hdf file or group
+myName: object hdf name. Assumes createHdf has already been called
+create: optionally create the data set as well before writing</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="../../../../index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../README.html">Welcome to GeoBIPy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../api.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../base/base.html">Core routines needed for GeoBIPy</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../classes.html">Classes used in GeoBIPy</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../core/core.html">Core classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../data/data.html">Data classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../mesh/mesh.html">Mesh classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../model/model.html">Model classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pointcloud/pointcloud.html">Pointcloud classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../statistics/statistics.html">Statistics classes</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="system.html">System classes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="EmLoop.html"
+                        title="previous chapter">EmLoop</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="FdemSystem.html"
+                        title="next chapter">Frequency domain system</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../../_sources/content/api/classes/system/CircularLoop.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="FdemSystem.html" title="Frequency domain system"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="EmLoop.html" title="EmLoop"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">GeoBIPy 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../api.html" >API</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../classes.html" >Classes used in GeoBIPy</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="system.html" >System classes</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright None.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.9.
+    </div>
+  </body>
+</html>

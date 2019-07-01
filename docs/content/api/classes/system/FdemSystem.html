@@ -1,0 +1,205 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Frequency domain system &#8212; GeoBIPy 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Time domain system" href="TdemSystem.html" />
+    <link rel="prev" title="Circular Loop" href="CircularLoop.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="TdemSystem.html" title="Time domain system"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="CircularLoop.html" title="Circular Loop"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">GeoBIPy 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../api.html" >API</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../classes.html" >Classes used in GeoBIPy</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="system.html" accesskey="U">System classes</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="frequency-domain-system">
+<h1>Frequency domain system<a class="headerlink" href="#frequency-domain-system" title="Permalink to this headline">¶</a></h1>
+<img src="../../../../_images/inheritance-393cda7442e6a95dc575c42cba71f01bdb30c0c7.png" alt="Inheritance diagram of geobipy.src.classes.system.FdemSystem" usemap="#inheritance3626e3b5d4" class="inheritance"/>
+<map id="inheritance3626e3b5d4" name="inheritance3626e3b5d4">
+<area shape="rect" id="node1" href="#geobipy.src.classes.system.FdemSystem.FdemSystem" target="_top" title="Defines a Frequency Domain ElectroMagnetic acquisition system" alt="" coords="131,5,231,29"/>
+<area shape="rect" id="node2" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="5,5,83,29"/>
+</map><span class="target" id="module-geobipy.src.classes.system.FdemSystem"></span><p>&#64;FdemSystem_Class
+Module describing a frequency domain EM acquisition system</p>
+<dl class="class">
+<dt id="geobipy.src.classes.system.FdemSystem.FdemSystem">
+<em class="property">class </em><code class="descclassname">geobipy.src.classes.system.FdemSystem.</code><code class="descname">FdemSystem</code><span class="sig-paren">(</span><em>nFrequencies=0</em>, <em>systemFilename=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.FdemSystem.FdemSystem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines a Frequency Domain ElectroMagnetic acquisition system</p>
+<dl class="method">
+<dt id="geobipy.src.classes.system.FdemSystem.FdemSystem.Bcast">
+<code class="descname">Bcast</code><span class="sig-paren">(</span><em>world</em>, <em>root=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.FdemSystem.FdemSystem.Bcast" title="Permalink to this definition">¶</a></dt>
+<dd><p>Broadcast the FdemSystem using MPI</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.system.FdemSystem.FdemSystem.fileInformation">
+<code class="descname">fileInformation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.FdemSystem.FdemSystem.fileInformation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description of the system file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.system.FdemSystem.FdemSystem.fromHdf">
+<code class="descname">fromHdf</code><span class="sig-paren">(</span><em>grp</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.FdemSystem.FdemSystem.fromHdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the object from a HDF file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.system.FdemSystem.FdemSystem.getComponentID">
+<code class="descname">getComponentID</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.FdemSystem.FdemSystem.getComponentID" title="Permalink to this definition">¶</a></dt>
+<dd><p>For each coil orientation pair, adds the index of the frequency to the appropriate list
+e.g. two coils at the i$^{th}$ frequency with ‘x’ as their orientation cause i to be added to the ‘xx’ list.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.system.FdemSystem.FdemSystem.getTensorID">
+<code class="descname">getTensorID</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.FdemSystem.FdemSystem.getTensorID" title="Permalink to this definition">¶</a></dt>
+<dd><p>For each coil orientation pair, adds the index of the frequency to the appropriate list
+e.g. two coils at the i$^{th}$ frequency with ‘x’ as their orientation cause i to be added to the ‘xx’ list.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.system.FdemSystem.FdemSystem.read">
+<code class="descname">read</code><span class="sig-paren">(</span><em>fileName</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.FdemSystem.FdemSystem.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read in a file containing the system information</p>
+<p>The system file is structured using columns with the first line containing header information
+Each subsequent row contains the information for each measurement frequency
+freq  tor  tmom  tx ty tz ror rmom  rx   ry rz
+378   z    1     0  0  0  z   1     7.93 0  0
+1776  z    1     0  0  0  z   1     7.91 0  0
+…</p>
+<p>where tor and ror are the orientations of the transmitter/reciever loops [x or z].
+tmom and rmom are the moments of the loops.
+t/rx,y,z are the loop offsets from the observation locations in the data file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.system.FdemSystem.FdemSystem.summary">
+<code class="descname">summary</code><span class="sig-paren">(</span><em>out=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.FdemSystem.FdemSystem.summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>print a summary of the FdemSystem</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.system.FdemSystem.FdemSystem.toHdf">
+<code class="descname">toHdf</code><span class="sig-paren">(</span><em>h5obj</em>, <em>myName</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.FdemSystem.FdemSystem.toHdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the object to a HDF file</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="../../../../index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../README.html">Welcome to GeoBIPy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../api.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../base/base.html">Core routines needed for GeoBIPy</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../classes.html">Classes used in GeoBIPy</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../core/core.html">Core classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../data/data.html">Data classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../mesh/mesh.html">Mesh classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../model/model.html">Model classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pointcloud/pointcloud.html">Pointcloud classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../statistics/statistics.html">Statistics classes</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="system.html">System classes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="CircularLoop.html"
+                        title="previous chapter">Circular Loop</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="TdemSystem.html"
+                        title="next chapter">Time domain system</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../../_sources/content/api/classes/system/FdemSystem.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="TdemSystem.html" title="Time domain system"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="CircularLoop.html" title="Circular Loop"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">GeoBIPy 1.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../api.html" >API</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../classes.html" >Classes used in GeoBIPy</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="system.html" >System classes</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright None.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.9.
+    </div>
+  </body>
+</html>
