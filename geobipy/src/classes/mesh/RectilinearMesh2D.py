@@ -58,10 +58,10 @@ class RectilinearMesh2D(myObject):
     def __init__(self, xCentres=None, xEdges=None, yCentres=None, yEdges=None, zCentres=None, zEdges=None):
         """ Initialize a 2D Rectilinear Mesh"""
 
-        self._x = None
-        self._y = None
-        self._z = None
-        self._distance = None
+        self.x = None
+        self.y = None
+        self.z = None
+        self.distance = None
         self.xyz = None
 
         if (all(x is None for x in [xCentres, yCentres, zCentres, xEdges, yEdges, zEdges])):
@@ -77,6 +77,7 @@ class RectilinearMesh2D(myObject):
             # StatArray of third axis
             self._z = RectilinearMesh1D(cellCentres=zCentres, cellEdges=zEdges)
             self.xyz = True
+            self.setDistance()
             
         else:
             self._xyz = False
@@ -84,22 +85,17 @@ class RectilinearMesh2D(myObject):
 
 
     @property
-    def distance(self):
-        """Calculate the along line distance from mesh node to mesh node.
+    def shape(self):
+        """The dimensions of the mesh
+
+        Returns
+        -------
+        out : array_like
+            Array of integers
 
         """
 
-        assert self.xyz, Exception("To get the distance, the mesh must be instantiated with three co-ordinates")
-
-        if self._distance is None:
-            dx = np.diff(self._x.cellEdges)
-            dy = np.diff(self._y.cellEdges)
-
-            distance = StatArray.StatArray(np.zeros(self._x.nEdges), 'Distance', self._x.cellCentres.units)
-            distance[1:] = np.cumsum(np.sqrt(dx**2.0 + dy**2.0))
-            
-            self._distance = RectilinearMesh1D(cellEdges = distance)
-        return self._distance
+        return np.asarray([self.z.nCells, self.x.nCells], dtype=np.int)
 
 
     @property
@@ -128,21 +124,6 @@ class RectilinearMesh2D(myObject):
         """
 
         return self.x.nEdges * self.z.nEdges
-
-
-    @property
-    def shape(self):
-        """The dimensions of the mesh
-
-        Returns
-        -------
-        out : array_like
-            Array of integers
-
-        """
-
-        return np.asarray([self.z.nCells, self.x.nCells], dtype=np.int)
-
 
     @property
     def x(self):
@@ -215,34 +196,6 @@ class RectilinearMesh2D(myObject):
         return self.z.cellEdges if axis == 0 else self.x.cellEdges
 
 
-    def extract1DModel(self, x, y=None, squeeze=False):
-        """Extract a location as a 1D model
-
-        Parameters
-        ----------
-        x : float
-            x location of the model to extract.
-        y : float, optional
-            y locations of the model to extract if the mesh is 2.5D.
-        squeeze : bool, optional
-            Once the model is extracted, combine layers with the same parameter values in one layer.
-
-        Returns
-        -------
-        out : geobipy.Model1D
-            1D model.
-
-        """
-
-        if y is None:
-            assert not self.xyz, ValueError("Mesh is 2.5D, please specify a y coordinate too.")
-
-        ix = self._x.cellIndex(x)
-        if self.xyz:
-            iy = self._y.cellIndex(y)
-        else:
-
-
     def hasSameSize(self, other):
         """ Determines if the meshes have the same dimension sizes """
         # if self.arr.shape != other.arr.shape:
@@ -252,28 +205,6 @@ class RectilinearMesh2D(myObject):
         if self.z.nCells != other.z.nCells:
             return False
         return True
-
-
-    def xyIndex(self, x, y):
-        """Get the index along the x-y coordinates.  Accounts for non-linear x-y co-ordinates of the mesh.
-
-        Parameters
-        ----------
-        x : float
-            x co-orinate.
-        y : float
-            y co-orinate.
-
-        Returns
-        -------
-        out : int
-            Index in x-y.
-
-        """
-
-        assert self.xyz, Exception("To set the distance, the mesh must be instantiated with three co-ordinates")
-
-        
 
 
     def intervalStatistic(self, arr, intervals, axis=0, statistic='mean'):
@@ -360,7 +291,6 @@ class RectilinearMesh2D(myObject):
             out[1, :] = self.x.cellIndex(x1, clip=clip)
             out[0, :] = self.z.cellIndex(x2, clip=clip)
         return np.squeeze(out)
-
 
     def ravelIndices(self, ixy, order='C'):
         """Return a global index into a 1D array given the two cell indices in x and z.
@@ -473,6 +403,21 @@ class RectilinearMesh2D(myObject):
         xtmp = self.getXAxis(xAxis)
 
         tmp.pcolor(x=xtmp, y=self.z.cellEdges, grid=True, noColorbar=True, **kwargs)
+
+    
+    def setDistance(self):
+        """Calculate the along line distance from mesh node to mesh node.
+
+        """
+        assert self.xyz, Exception("To set the distance, the mesh must be instantiated with three co-ordinates")
+
+        dx = np.diff(self.x.cellEdges)
+        dy = np.diff(self.y.cellEdges)
+
+        distance = StatArray.StatArray(np.zeros(self.x.nEdges), 'Distance', self.x.cellCentres.units)
+        distance[1:] = np.cumsum(np.sqrt(dx**2.0 + dy**2.0))
+        
+        self.distance = RectilinearMesh1D(cellEdges = distance)
 
 
     def getXAxis(self, axis='x', centres=False):
