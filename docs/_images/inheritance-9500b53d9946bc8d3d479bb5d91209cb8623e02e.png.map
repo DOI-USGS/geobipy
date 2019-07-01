@@ -1,6 +1,0 @@
-<map id="inheritance1348eec39b" name="inheritance1348eec39b">
-<area shape="rect" id="node1" href="Histogram2D.html#geobipy.src.classes.statistics.Histogram2D.Histogram2D" target="_top" title="2D Histogram class that can update and plot efficiently." alt="" coords="313,5,412,29"/>
-<area shape="rect" id="node3" href="#geobipy.src.classes.statistics.Hitmap2D.Hitmap2D" target="_top" title="Class defining a 2D hitmap whose cells are rectangular with linear sides" alt="" coords="460,5,541,29"/>
-<area shape="rect" id="node2" href="../mesh/RectilinearMesh2D.html#geobipy.src.classes.mesh.RectilinearMesh2D.RectilinearMesh2D" target="_top" title="Class defining a 2D rectilinear mesh with cell centres and edges." alt="" coords="131,5,265,29"/>
-<area shape="rect" id="node4" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="5,5,83,29"/>
-</map>
