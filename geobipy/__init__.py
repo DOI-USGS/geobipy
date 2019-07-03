@@ -191,7 +191,7 @@ def multipleCore(inputFile, outputDir, skipHDF5):
     nRanks = world.size
     masterRank = rank == 0
 
-    myMPI.rankPrint(world,'Running GeoBIPy in parallel mode with {} cores'.format(rank))
+    myMPI.rankPrint(world,'Running GeoBIPy in parallel mode with {} cores'.format(nRanks))
     myMPI.rankPrint(world,'Using user input file {}'.format(inputFile))
 
     # Start keeping track of time.
