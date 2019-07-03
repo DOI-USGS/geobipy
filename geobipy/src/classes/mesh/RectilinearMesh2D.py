@@ -58,9 +58,9 @@ class RectilinearMesh2D(myObject):
     def __init__(self, xCentres=None, xEdges=None, yCentres=None, yEdges=None, zCentres=None, zEdges=None):
         """ Initialize a 2D Rectilinear Mesh"""
 
-        self.x = None
-        self.y = None
-        self.z = None
+        self._x = None
+        self._y = None
+        self._z = None
         self.distance = None
         self.xyz = None
 
