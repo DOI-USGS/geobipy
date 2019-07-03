@@ -51,7 +51,7 @@ class Model2D(Model):
         if (mesh is None):
             return
         # Instantiate the parent class
-        RectilinearMesh2D.__init__(self, xCentres=xBinCentres, xEdges=xBins, yCentres=yBinCentres, yEdges=yBins)
+        self._mesh = mesh
         # Assign the values
         if values is None:
             self._values = StatArray.StatArray([self.y.nCells, self.x.nCells], name=name, units=units)
@@ -59,6 +59,11 @@ class Model2D(Model):
             self._values = StatArray.StatArray(values)
             self._values.name = name if not name is None
             self._values.units = units if not units is None
+
+
+    @property
+    def mesh(self):
+        return self._mesh
 
     
     def axisMean(self, log=None, axis=0):
