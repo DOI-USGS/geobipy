@@ -58,10 +58,10 @@ class RectilinearMesh2D(myObject):
     def __init__(self, xCentres=None, xEdges=None, yCentres=None, yEdges=None, zCentres=None, zEdges=None):
         """ Initialize a 2D Rectilinear Mesh"""
 
-        self.x = None
-        self.y = None
-        self.z = None
-        self.distance = None
+        self._x = None
+        self._y = None
+        self._z = None
+        self._distance = None
         self.xyz = None
 
         if (all(x is None for x in [xCentres, yCentres, zCentres, xEdges, yEdges, zEdges])):
@@ -77,25 +77,29 @@ class RectilinearMesh2D(myObject):
             # StatArray of third axis
             self._z = RectilinearMesh1D(cellCentres=zCentres, cellEdges=zEdges)
             self.xyz = True
-            self.setDistance()
             
         else:
             self._xyz = False
-            self._z = self._y     
+            self._z = self._y
+        
 
 
     @property
-    def shape(self):
-        """The dimensions of the mesh
+    def distance(self):
+        """The distance along the top of the mesh using the x and y co-ordinates. """
 
-        Returns
-        -------
-        out : array_like
-            Array of integers
+        assert self.xyz, Exception("To set the distance, the mesh must be instantiated with three co-ordinates")
 
-        """
+        if self._distance is None:
 
-        return np.asarray([self.z.nCells, self.x.nCells], dtype=np.int)
+            dx = np.diff(self.x.cellEdges)
+            dy = np.diff(self.y.cellEdges)
+
+            distance = StatArray.StatArray(np.zeros(self.x.nEdges), 'Distance', self.x.cellCentres.units)
+            distance[1:] = np.cumsum(np.sqrt(dx**2.0 + dy**2.0))
+            
+            self._distance = RectilinearMesh1D(cellEdges = distance)
+        return self._distance
 
 
     @property
@@ -124,6 +128,21 @@ class RectilinearMesh2D(myObject):
         """
 
         return self.x.nEdges * self.z.nEdges
+
+
+    @property
+    def shape(self):
+        """The dimensions of the mesh
+
+        Returns
+        -------
+        out : array_like
+            Array of integers
+
+        """
+
+        return np.asarray([self.z.nCells, self.x.nCells], dtype=np.int)
+
 
     @property
     def x(self):
@@ -195,6 +214,18 @@ class RectilinearMesh2D(myObject):
         """ Gets the cell edges in the given dimension """
         return self.z.cellEdges if axis == 0 else self.x.cellEdges
 
+    
+    def getXAxis(self, axis='x', centres=False):
+        assert axis in ['x', 'y', 'r'], Exception("axis must be either 'x', 'y' or 'r'")
+        if axis == 'x':
+            return self.x.cellCentres if centres else self.x.cellEdges
+        elif axis == 'y':
+            assert self.xyz, Exception("To plot against 'y' the mesh must be instantiated with three co-ordinates")
+            return self.y.cellCentres if centres else self.y.cellEdges
+        elif axis == 'r':
+            assert self.xyz, Exception("To plot against 'r' the mesh must be instantiated with three co-ordinates")
+            return self.distance.cellCentres if centres else self.distance.cellEdges
+
 
     def hasSameSize(self, other):
         """ Determines if the meshes have the same dimension sizes """
@@ -259,14 +290,14 @@ class RectilinearMesh2D(myObject):
         return res
 
 
-    def cellIndices(self, x1, x2, clip=False, trim=False):
+    def cellIndices(self, x, y, clip=False, trim=False):
         """Return the cell indices in x and z for two floats.
 
         Parameters
         ----------
-        x1 : scalar or array_like
+        x : scalar or array_like
             x location
-        x2 : scalar or array_like
+        y : scalar or array_like
             y location (or z location if instantiated with 3 co-ordinates)
         clip : bool
             A negative index which would normally wrap will clip to 0 instead.
@@ -279,18 +310,19 @@ class RectilinearMesh2D(myObject):
             indices for the locations along [axis0, axis1]
 
         """
-        assert (np.size(x1) == np.size(x2)), ValueError("x1 and x2 must have the same size")
+        assert (np.size(x) == np.size(y)), ValueError("x and y must have the same size")
         if trim:
-            flag = self.x.inBounds(x1) & self.z.inBounds(x2)
+            flag = self.x.inBounds(x) & self.z.inBounds(y)
             i = np.where(flag)[0]
             out = np.empty([2, i.size], dtype=np.int32)
-            out[1, :] = self.x.cellIndex(x1[i])
-            out[0, :] = self.z.cellIndex(x2[i])
+            out[1, :] = self.x.cellIndex(x[i])
+            out[0, :] = self.z.cellIndex(y[i])
         else:
-            out = np.empty([2, np.size(x1)], dtype=np.int32)
-            out[1, :] = self.x.cellIndex(x1, clip=clip)
-            out[0, :] = self.z.cellIndex(x2, clip=clip)
+            out = np.empty([2, np.size(x)], dtype=np.int32)
+            out[1, :] = self.x.cellIndex(x, clip=clip)
+            out[0, :] = self.z.cellIndex(y, clip=clip)
         return np.squeeze(out)
+
 
     def ravelIndices(self, ixy, order='C'):
         """Return a global index into a 1D array given the two cell indices in x and z.
@@ -403,33 +435,6 @@ class RectilinearMesh2D(myObject):
         xtmp = self.getXAxis(xAxis)
 
         tmp.pcolor(x=xtmp, y=self.z.cellEdges, grid=True, noColorbar=True, **kwargs)
-
-    
-    def setDistance(self):
-        """Calculate the along line distance from mesh node to mesh node.
-
-        """
-        assert self.xyz, Exception("To set the distance, the mesh must be instantiated with three co-ordinates")
-
-        dx = np.diff(self.x.cellEdges)
-        dy = np.diff(self.y.cellEdges)
-
-        distance = StatArray.StatArray(np.zeros(self.x.nEdges), 'Distance', self.x.cellCentres.units)
-        distance[1:] = np.cumsum(np.sqrt(dx**2.0 + dy**2.0))
-        
-        self.distance = RectilinearMesh1D(cellEdges = distance)
-
-
-    def getXAxis(self, axis='x', centres=False):
-        assert axis in ['x', 'y', 'r'], Exception("axis must be either 'x', 'y' or 'r'")
-        if axis == 'x':
-            return self.x.cellCentres if centres else self.x.cellEdges
-        elif axis == 'y':
-            assert self.xyz, Exception("To plot against 'y' the mesh must be instantiated with three co-ordinates")
-            return self.y.cellCentres if centres else self.y.cellEdges
-        elif axis == 'r':
-            assert self.xyz, Exception("To plot against 'r' the mesh must be instantiated with three co-ordinates")
-            return self.distance.cellCentres if centres else self.distance.cellEdges
 
 
     def plotXY(self, **kwargs):
