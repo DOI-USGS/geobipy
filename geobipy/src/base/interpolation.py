@@ -7,7 +7,10 @@ from scipy.interpolate import CloughTocher2DInterpolator
 from scipy.interpolate.interpnd import _ndim_coords_from_arrays
 #from scipy.interpolate import Rbf
 from scipy.spatial import cKDTree
-from netCDF4 import Dataset
+try:
+    from netCDF4 import Dataset
+except:
+    pass
 
 def CT(dx, dy, bounds, XY, values, mask = False, kdtree = None, clip = False, extrapolate=None):
     """Use Scipy's CloughTocher C1 continuous interpolation using unstructured meshes to interpolate arbitrary locations to a grid
