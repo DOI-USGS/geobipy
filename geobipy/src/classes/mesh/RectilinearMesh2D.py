@@ -381,9 +381,9 @@ class RectilinearMesh2D(myObject):
 
         xtmp = self.getXAxis(xAxis)
 
-        ax = cP.pcolor(values, x = xtmp, y = self.z.cellEdges, **kwargs)
+        ax, pm = cP.pcolor(values, x = xtmp, y = self.z.cellEdges, **kwargs)
         
-        return ax
+        return ax, pm
 
 
     def plotGrid(self, xAxis='x', **kwargs):
