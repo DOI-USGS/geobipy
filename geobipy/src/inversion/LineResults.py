@@ -53,7 +53,7 @@ class LineResults(myObject):
         self._mean = None
         self._nPoints = None
         self._nSystems = None
-        self.opacity = None
+        self._opacity = None
         self.range = None
         self._relativeError = None
         self.sysPath = sysPath
@@ -79,7 +79,7 @@ class LineResults(myObject):
         try:
             self.hdfFile.attrs
         except:
-            self.hdfFile = h5py.File(self.fName,'r+')
+            self.hdfFile = h5py.File(self.fName, 'r')
 
 
     def close(self):
@@ -213,7 +213,6 @@ class LineResults(myObject):
 
         assert window > 0, ValueError("window must be >= 1")
         assert 0.0 < percent < 100.0, ValueError("Must have 0.0 < percent < 100.0")
-        self.getOpacity()
         p = 0.01 * (100.0 - percent)
 
         self.doi = StatArray.StatArray(np.zeros(self.nPoints), 'Depth of investigation', self.height.units)
@@ -330,15 +329,26 @@ class LineResults(myObject):
             self._nSystems = self.getAttribute('# of systems')
         return self._nSystems
 
-
-    def getOpacity(self, percent=95.0, multiplier=0.5, log='e'):
+    @property
+    def opacity(self):
         """ Get the model parameter opacity using the confidence intervals """
-        if (not self.opacity is None): return
+        if (self._opacity is None):
+            # Read in the opacity if present
+            if "opacity" in self.hdfFile.keys():
+                self._opacity = StatArray.StatArray().fromHdf(self.hdfFile['opacity'])
+            else:
+                self.computeOpacity()
+                    
+        return self._opacity
+
+    
+    def computeOpacity(self, percent=95.0, multiplier=0.5, log='e'):
 
         print("Obtaining opacity from file. This can take a while the first time this runs.")
 
-        self.opacity = StatArray.StatArray(np.zeros([self.mesh.shape[1], self.mesh.shape[0]]), 'Opacity')
+        s = 'percent={}, multiplier={}, log={}'.format(percent, multiplier, log)
 
+        transparency = StatArray.StatArray(np.zeros([self.mesh.shape[1], self.mesh.shape[0]]), 'Opacity')
 
         loc = 'currentmodel/par/posterior'
         a = np.asarray(self.hdfFile[loc+'/arr/data'])
@@ -354,22 +364,27 @@ class LineResults(myObject):
 
         h = Hitmap2D(xBinCentres = StatArray.StatArray(b[0, :]), yBinCentres = StatArray.StatArray(c[0, :]))
         h._counts[:, :] = a[0, :, :]
-        self.opacity[0, :] = h.confidenceRange(percent=percent, log=log)
+        transparency[0, :] = h.confidenceRange(percent=percent, log=log)
         
         for i in progressbar.progressbar(range(1, self.nPoints)):
             h.x.xBinCentres = b[i, :]
             h._counts[:, :] = a[i, :, :]
-            self.opacity[i, :] = h.confidenceRange(percent=percent, log=log)
+            transparency[i, :] = h.confidenceRange(percent=percent, log=log)
 
-        self.opacity = self.opacity.T
+        high = multiplier * (transparency.max() - transparency.min())
 
-        high = multiplier * (self.opacity.max() - self.opacity.min())
+        transparency[transparency > high] = high
 
-        self.opacity[self.opacity > high] = high
+        self._opacity = 1.0 - (transparency.T / high)
 
-        self.opacity /= high
-
-        self.opacity = 1.0 - self.opacity
+        self.close()
+        with h5py.File(self.fName, 'a') as f:
+            if 'opacity' in f.keys():
+                self._opacity.writeHdf(f, 'opacity')
+            else:
+                self._opacity.toHdf(f, 'opacity')
+            f['opacity'].attrs['options'] = s
+        self.open()
 
     
     def percentageParameter(self, value, depth=None, depth2=None):
@@ -738,7 +753,6 @@ class LineResults(myObject):
         kwargs['noColorbar'] = kwargs.pop('noColorbar', True)
 
         if useVariance:
-            self.getOpacity()
             kwargs['alpha'] = self.opacity
 
         pm = self.mesh.pcolor(self.interfaces.T, **kwargs)
@@ -760,7 +774,6 @@ class LineResults(myObject):
     def plotOpacity(self, log='e', **kwargs):
         """ Plot the opacity """
 
-        self.getOpacity(log=log)
         kwargs.pop('log', None)
 
         self.mesh.pcolor(values = self.opacity, **kwargs)
@@ -994,7 +1007,6 @@ class LineResults(myObject):
         """ Plot a cross-section of the parameters """
 
         if useVariance:
-            self.getOpacity()
             kwargs['alpha'] = self.opacity
     
         return self.mesh.pcolor(values = values, **kwargs)
@@ -1008,7 +1020,6 @@ class LineResults(myObject):
         self.setAlonglineAxis(self.plotAgainst)
         zGrd = self.zGrid
 
-        self.getOpacity()
         a = np.zeros([zGrd.size, self.nPoints + 1],order = 'F')  # Transparency amounts
         a[:, 1:] = self.opacity
 
@@ -1053,17 +1064,24 @@ class LineResults(myObject):
         cP.clabel(cb, 'Facies')
 
 
-    def faciesProbability(self, fractions, distributions, reciprocateParameter=False, log=None):
+    @property
+    def faciesProbability(self):
         """ Assign facies to the parameter model given the pdfs of each facies
         mean:    :Means of the normal distributions for each facies
         var:     :Variance of the normal distributions for each facies
         volFrac: :Volume fraction of each facies
         """
 
-        # assert False, ValueError('Double check this')
+        if self._faciesProbability is None:
+            assert 'facies_probability' in self.hdfFile.keys(), Exception("Facies probabilities need computing, use LineResults.computeFaciesProbability()")
+            self._faciesProbability = StatArray.StatArray().fromHdf(f['facies_probability'])
 
-        # Get the bins for all parameter values
+        return self._faciesProbability
 
+    
+    def computeFaciesProbability(self, fractions, distributions, reciprocateParameter=False, log=None):
+
+        print("Computing facies probabilities. This can take a while. \nOnce you have done this, and you no longer need to change the input parameters, simply use LineResults.faciesProbability to access.")
 
         nFacies = np.size(distributions)
 
@@ -1077,10 +1095,19 @@ class LineResults(myObject):
         Bar = progressbar.ProgressBar()
         for i in Bar(range(self.nPoints)):
             hm._counts = counts[i, :, :]
-            hm.x = RectilinearMesh1D(cellEdges=parameters.cellEdges[i, :])
+            hm._x = RectilinearMesh1D(cellEdges=parameters.cellEdges[i, :])
             self._faciesProbability[:, i, :] = hm.marginalProbability(fractions, distributions, axis=0, reciprocate=reciprocateParameter, log=log)
 
-        return self._faciesProbability
+        
+        self.close()
+        with h5py.File(self.fName, 'a') as f:
+            if 'facies_probability' in f.keys():
+                del f['facies_probability']
+            else:
+                self._faciesProbability.toHdf(f, 'facies_probability')
+        self.open()
+
+    
 
 
     def mostProbableFacies(self):
