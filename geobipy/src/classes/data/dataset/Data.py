@@ -152,6 +152,10 @@ class Data(PointCloud3D):
         return np.sum(self.nChannelsPerSystem)
 
     @property
+    def nLines(self):
+        return np.unique(self.line).size
+
+    @property
     def predictedData(self):
         """The predicted data. """
         return self._predictedData
