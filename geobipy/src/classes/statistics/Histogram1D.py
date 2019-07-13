@@ -5,9 +5,14 @@ from ...classes.mesh.RectilinearMesh1D import RectilinearMesh1D
 from ...classes.core import StatArray
 from ...base import customFunctions as cF
 from ...base import customPlots as cP
+from .Distribution import Distribution
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
+
+from scipy.signal import find_peaks
+from scipy.optimize import curve_fit
+
 
 class Histogram1D(RectilinearMesh1D):
     """1D Histogram class that updates efficiently.
@@ -138,7 +143,6 @@ class Histogram1D(RectilinearMesh1D):
 
         return super().cellIndex(cc, **kwargs)
 
-
     
     def combine(self, other):
         """Combine two histograms together.
@@ -165,6 +169,133 @@ class Histogram1D(RectilinearMesh1D):
 
         iBin = self.cellIndex(cc, clip=True)
         self._counts[iBin] = self._counts[iBin] + other.counts
+
+
+    def estimatePdf(self):
+        return self._counts / np.sum(self._counts)
+
+
+    def findPeaks(self, width, **kwargs):
+        """Identify peaks in the histogram.
+
+        See Also
+        --------
+        scipy.spatial.find_peaks
+
+        """
+        
+        return find_peaks(h.counts,  width=width, **kwargs)
+
+
+    def _sum_of_gaussians(self, x, *params):
+        from scipy.stats import norm
+        y = np.zeros_like(x)
+
+        for i in range(np.int(len(params)/3)):
+            y = y + params[(3*i)+1] * norm.pdf(x, loc = params[i*3], scale = params[(i*3)+2])
+        return y
+
+
+    def fit_gaussians(self, nDistributions=1, log=None, **kwargs):
+        """Fit the histogram with a number of distributions that minimizes the fit between the distribution pdfs and the counts.
+
+        """
+
+        x, dum = cF._log(self.binCentres, log)
+
+        guess = np.tile(np.asarray([x[np.int(self.nBins/2)], 1.0, 1.0]), nDistributions)
+        bounds = (np.tile(np.asarray([x[0], 0.0, 0.0]), nDistributions), np.tile(np.asarray([x[-1], np.inf, np.inf]), nDistributions))
+
+        popt, pcov = curve_fit(self._sum_of_gaussians, xdata=x, ydata=self.estimatePdf(), p0=guess, bounds=bounds, **kwargs)
+        popt = np.asarray(popt)
+
+        # amp = popt[1::3]
+        # iSort = np.argsort(amp)[::-1]
+        # contribution = amp[iSort]/np.sum(amp)
+
+        # gaussians = []
+        # amp = []
+        # j = 0
+        # weight = 0.0
+        # add = True
+        # while j < nDistributions and add:
+        #     i = iSort[j]
+        #     weight += contribution[j]
+        #     print(weight, contribution[j])
+
+        #     add = weight <= 0.9# or contribution[j] > 0.1
+
+        #     if add:
+        #         gaussians.append(Distribution("Normal", popt[3*i], popt[(3*i)+2]))
+        #         amp.append(popt[(3*i)+1])
+
+        #     j += 1
+
+        gaussians = []
+        for i in range(np.int(len(popt)/3)):
+            gaussians.append(Distribution("Normal", popt[3*i], popt[(3*i)+2]))
+
+        return gaussians, popt[1::3]
+
+
+    def findBestNumberOfGaussians(self, maxDistributions=1, tolerance=0.05, log=None):
+        """Iteratively fits the histogram with an increasing number of distributions until the fit changes by less than a tolerance.
+
+        """
+
+        
+        x, dum = cF._log(self.binCentres, log)
+        yData = self.estimatePdf()
+
+        guess = np.asarray([x[np.int(self.nBins/2)], 1.0, 1.0])
+        lowerBounds = np.asarray([x[0], 0.0, 0.0])
+        upperBounds = np.asarray([x[-1], np.inf, np.inf])
+        bounds = (lowerBounds, upperBounds)
+
+        # Fit with a single distribution
+        nDistributions = 1
+        pOptimal, pcov = curve_fit(self._sum_of_gaussians, xdata=x, ydata=yData, p0=guess, bounds=bounds)
+        pOptimal = np.asarray(pOptimal)
+        fit = np.linalg.norm(yData - self._sum_of_gaussians(x, *pOptimal))
+
+        go = True
+        while go:
+            # Create new initial guess and bounds
+            guess = np.hstack([pOptimal, np.asarray([x[np.int(self.nBins/2)], 1.0, 1.0])])
+            lowerBounds = np.hstack([lowerBounds, np.asarray([x[0], 0.0, 0.0])])
+            upperBounds = np.hstack([upperBounds, np.asarray([x[-1], np.inf, np.inf])])
+
+            # Modify guess and bounds to match previous solution
+            for i in range(nDistributions+1):
+                lowerBounds[3*i] = guess[3*i] - np.sqrt(guess[(3*i)+2])
+                upperBounds[3*i] = guess[3*i] + np.sqrt(guess[(3*i)+2])
+
+            bounds = (lowerBounds, upperBounds)
+
+            # guess = np.tile(np.asarray([x[np.int(self.nBins/2)], 1.0, 1.0]), nDistributions+1)
+            # bounds = (np.tile(np.asarray([x[0], 0.0, 0.0]), nDistributions+1), np.tile(np.asarray([x[-1], np.inf, np.inf]), nDistributions+1))
+
+            # Solve with additional distribution
+            testModel, pcov = curve_fit(self._sum_of_gaussians, xdata=x, ydata=yData, p0=guess, bounds=bounds)
+            testModel = np.asarray(testModel)
+
+            newFit = np.linalg.norm(yData - self._sum_of_gaussians(x, *testModel))
+
+            fitChange = np.abs(fit - newFit) / fit
+
+            go = fitChange > tolerance
+
+            if go:
+                pOptimal = testModel
+                nDistributions += 1
+                fit = newFit
+
+        solns = [pOptimal]
+        gaussians = []
+        for i in range(np.int(len(pOptimal)/3)):
+            gaussians.append(Distribution("Normal", pOptimal[3*i], pOptimal[(3*i)+2]))
+
+        return gaussians, pOptimal[1::3], solns, fit
 
 
     def sample(self, nSamples):
