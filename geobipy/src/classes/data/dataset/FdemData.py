@@ -62,7 +62,7 @@ class FdemData(Data):
 
     """
 
-    def __init__(self, nPoints=1, nFrequencies=1, systems=None):
+    def __init__(self, nPoints=1, nFrequencies=1, systems=None, **kwargs):
         """Instantiate the FdemData class. """
 
         if (not systems is None):
@@ -88,7 +88,7 @@ class FdemData(Data):
             system = np.ndarray(nSystems, dtype=FdemSystem)
 
         # Data Class containing xyz and channel values
-        Data.__init__(self, nPoints=nPoints, nChannelsPerSystem=2*nFrequencies, dataUnits="ppm")
+        Data.__init__(self, nPoints=nPoints, nChannelsPerSystem=2*nFrequencies, dataUnits="ppm", **kwargs)
         # StatArray of the line number for flight line data
         self.line = StatArray.StatArray(nPoints, 'Line Number')
         # StatArray of the id number
