@@ -419,8 +419,23 @@ class Histogram2D(RectilinearMesh2D):
             self._counts /= np.repeat(s[:, np.newaxis], np.size(self._counts, axis), axis)
 
 
+    def findPeaks(self, intervals, axis=0):
+        """Find peaks in the histogram along an axis.
+
+        Parameters
+        ----------
+        intervals : array_like, optional
+            Accumulate the histogram between these invervals before finding peaks
+        axis : int, optional
+            Axis along which to find peaks.
+
+        """
+        counts = super().intervalStatistic(self._counts, intervals, axis, 'sum')
+
+
+
     def intervalStatistic(self, intervals, axis=0, statistic='mean'):
-        """Compute the mean of an array between the intervals given along dimension dim.
+        """Compute the statistic of an array between the intervals given along dimension dim.
 
         Returns
         -------
