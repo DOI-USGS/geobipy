@@ -64,11 +64,16 @@ class _userParameters(myObject):
         # Standard Deviation of log(rho) = log(1 + factor)
         self.factor = np.float64(10.0) if self.factor is None else np.float64(self.factor)
         # Standard Deviation for the difference in layer resistivity
-        self.gradientStd = np.float64(2.0) if self.gradientStd is None else np.float64(self.gradientStd)
+        self.gradientStd = np.float64(1.5) if self.gradientStd is None else np.float64(self.gradientStd)
         self.errorModel = 2
 
-        self.covScaling = np.float64(1.65**2.0) if self.covScaling is None else  np.float64(self.covScaling)
 
+        try:
+            self.parameterCovarianceScaling = np.float64(1.65) if self.parameterCovarianceScaling is None else  np.float64(self.parameterCovarianceScaling)
+        except:
+            self.parameterCovarianceScaling = np.float64(1.65)
+
+            
         # Scaling factor for data misfit
         self.multiplier = np.float64(1.02) if self.multiplier is None else np.float64(self.multiplier)
 
@@ -100,7 +105,6 @@ class _userParameters(myObject):
             self.ignoreLikelihood = False if self.ignoreLikelihood is None else self.ignoreLikelihood
         except:
             self.ignoreLikelihood = False
-        
 
 
     def check(self, DataPoint):
@@ -178,7 +182,7 @@ class _userParameters(myObject):
             assert self.propCal.shape == [N1, nCalibration], ValueError('Proposal Calibration variance must have shape {}'.forma([N1, nCalibration]))
 
         # Check the covariance scaling parameter
-        assert isinstance(self.covScaling, float), TypeError('Covariance scaling must be a float (preferably np.float64)')
+        assert isinstance(self.parameterCovarianceScaling, float), TypeError('Covariance scaling must be a float (preferably np.float64)')
 
         # Check the data misfit multiplier factor
         assert isinstance(self.multiplier, float), TypeError('Data misfit multiplier must be a float (preferably np.float64)')
@@ -188,4 +192,7 @@ class _userParameters(myObject):
         assert isinstance(self.pDeath, float), TypeError('Probability of death must be a float (preferably np.float64)')
         assert isinstance(self.pPerturb, float), TypeError('Probability of perturb must be a float (preferably np.float64)')
         assert isinstance(self.pNochange, float), TypeError('Probability of no change must be a float (preferably np.float64)')
+
+        if self.ignoreLikelihood:
+            self.stochasticNewton = False
 
