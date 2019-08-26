@@ -15,7 +15,7 @@ from ...base import customFunctions as cF
 class FdemSystem(myObject):
     """ Defines a Frequency Domain ElectroMagnetic acquisition system """
 
-    def __init__(self, nFrequencies=0, systemFilename=None):
+    def __init__(self, nFrequencies=0, frequencies=None, transmitterLoops = None, receiverLoops=None, loopSeparation=None, systemFilename=None):
         """ Initialize an FdemSystem """
 
         if (not systemFilename is None):
@@ -26,17 +26,39 @@ class FdemSystem(myObject):
         # Number of Frequencies
         self._nFrequencies = np.int64(nFrequencies)
         # StatArray of frequencies
-        self._frequencies = StatArray.StatArray(self.nFrequencies, "Frequencies", "Hz")
+        if frequencies is None:
+            self._frequencies = StatArray.StatArray(self._nFrequencies, "Frequencies", "Hz")
+        else:
+            assert np.size(frequencies) == self._nFrequencies, ValueError("frequencies must have size {}".format(self._nFrequencies))
+            self._frequencies = StatArray.StatArray(frequencies, "Frequencies", "Hz")
+
         # StatArray of Transmitter loops
-        self.T = StatArray.StatArray(self.nFrequencies, "Transmitter Loops", dtype=CircularLoop)
+        self.T = StatArray.StatArray(self._nFrequencies, "Transmitter Loops", dtype=CircularLoop)
+        if transmitterLoops is None:
+            for i in range(self._nFrequencies):
+                self.T[i] = CircularLoop()
+        else:
+            assert np.size(frequencies) == self._nFrequencies, ValueError("transmitterLoops must have size {}".format(self._nFrequencies))
+            assert all([isinstance(x, CircularLoop) for x in transmitterLoops]), TypeError("transmitterLoops must have type geobipy.CircularLoop")
+            for i in range(self._nFrequencies):
+                self.T[i] = transmitterLoops[i].deepcopy()
+
         # StatArray of Reciever loops
-        self.R = StatArray.StatArray(self.nFrequencies, "Reciever Loops", dtype=CircularLoop)
+        self.R = StatArray.StatArray(self._nFrequencies, "Receiver Loops", dtype=CircularLoop)
+        if receiverLoops is None:
+            for i in range(self._nFrequencies):
+                self.R[i] = CircularLoop()
+        else:
+            assert np.size(frequencies) == self._nFrequencies, ValueError("receiverLoops must have size {}".format(self._nFrequencies))
+            assert all([isinstance(x, CircularLoop) for x in transmitterLoops]), TypeError("receiverLoops must have type geobipy.CircularLoop")
+            for i in range(self._nFrequencies):
+                self.R[i] = receiverLoops[i].deepcopy()
+
         # StatArray of Loop Separations
-        self.dist = StatArray.StatArray(self.nFrequencies, "Loop Separations", "m")
-        # Instantiate the circularLoops
-        for i in range(self.nFrequencies):
-            self.T[i] = CircularLoop()
-            self.R[i] = CircularLoop()
+        if loopSeparation is None:
+            self.dist = StatArray.StatArray(self._nFrequencies, "Loop Separations", "m")
+        else:
+            self.dist = StatArray.StatArray(loopSeparation, "Loop Separations", "m")
 
         self._fileName = systemFilename
 
@@ -177,7 +199,8 @@ class FdemSystem(myObject):
         """ print a summary of the FdemSystem """
         msg = ("FdemSystem: \n"
                "{} \n"
-               "{} \n").format(self.fileName, self._frequencies.summary(True))
+               "{} \n"
+               "{} \n").format(self._fileName, self._frequencies.summary(True), self.dist.summary(True))
         return msg if out else print(msg)
 
     def hdfName(self):

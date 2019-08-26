@@ -80,7 +80,7 @@ class Normal(baseDistribution):
 
     def probability(self, x):
         """ For a realization x, compute the probability """
-        return norm.pdf(x, loc = self.mean, scale = self.variance)
+        return StatArray.StatArray(norm.pdf(x, loc = self.mean, scale = self.variance))
         
 
     def summary(self, out=False):

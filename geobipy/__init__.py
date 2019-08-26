@@ -144,13 +144,13 @@ def singleCore(inputFile, outputDir):
     paras.check(DataPoint)
 
     # Initialize the inversion to obtain the sizes of everything
-    [paras, Mod, DataPoint, prior, posterior, PhiD] = Initialize(paras, DataPoint, prng = prng)
+    [paras, Mod, DataPoint, prior, likelihood, posterior, PhiD] = Initialize(paras, DataPoint, prng = prng)
 
     # Create the results template
     Res = Results(DataPoint, Mod,
         save=paras.save, plot=paras.plot, savePNG=paras.savePNG,
         nMarkovChains=paras.nMarkovChains, plotEvery=paras.plotEvery, parameterDisplayLimits=paras.parameterDisplayLimits,
-        reciprocateParameters=paras.reciprocateParameters)
+        reciprocateParameters=paras.reciprocateParameters, verbose=paras.verbose)
 
     print('Creating HDF5 files, this may take a few minutes...')
     print('Files are being created for data files {} and system files {}'.format(UP.dataFilename, UP.systemFilename))
@@ -191,7 +191,7 @@ def multipleCore(inputFile, outputDir, skipHDF5):
     nRanks = world.size
     masterRank = rank == 0
 
-    myMPI.rankPrint(world,'Running GeoBIPy in parallel mode with {} cores'.format(rank))
+    myMPI.rankPrint(world,'Running GeoBIPy in parallel mode with {} cores'.format(nRanks))
     myMPI.rankPrint(world,'Using user input file {}'.format(inputFile))
 
     # Start keeping track of time.

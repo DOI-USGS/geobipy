@@ -4,7 +4,7 @@ Module describing a 1 Dimensional layered Model
 #from ...base import Error as Err
 from ...classes.core import StatArray
 from .Model import Model
-from ..mesh.RectilinearMesh2D import RectilinearMesh2D
+from ..mesh import RectilinearMesh2D
 from ..statistics.Histogram1D import Histogram1D
 from ..statistics.Hitmap2D import Hitmap2D
 from ...base.logging import myLogger
@@ -100,8 +100,9 @@ class Model1D(Model):
         self.maxLayers = None
         # Probability wheel
         self.pWheel = None
-        # Set an index that keeps track of the last layer to be perturbed
-        self.perturbedLayer = np.int32(-1)
+        # Keep track of actions made to the Model.
+        self.action = ['none', 0, 0.0]
+
         self.Hitmap = None
 
 
@@ -199,7 +200,7 @@ class Model1D(Model):
         other.chie = self.chie.deepcopy() #StatArray(other.nCells[0], "Electric Susceptibility", r"$\kappa$")
         other.chim = self.chim.deepcopy() #StatArray(other.nCells[0], "Magnetic Susceptibility", "$\frac{H}{m}$")
         other.pWheel = self.pWheel
-        other.perturbedLayer = self.perturbedLayer
+        other.action = self.action.copy()
         other.Hitmap = self.Hitmap
         other.hasHalfspace = self.hasHalfspace
         return other
@@ -226,7 +227,6 @@ class Model1D(Model):
         tmp.par = self.par.pad(size)
         tmp.chie = self.chie.pad(size)
         tmp.chim = self.chim.pad(size)
-        tmp.perturbedLayer = self.perturbedLayer
         tmp.dpar=self.dpar.pad(size-1)
         if (not self.minDepth is None): tmp.minDepth=self.minDepth
         if (not self.maxDepth is None): tmp.maxDepth=self.maxDepth
@@ -239,9 +239,7 @@ class Model1D(Model):
 
     def depthFromThickness(self):
         """Given the thicknesses of each layer, create the depths to each interface. The last depth is inf for the halfspace."""
-        self.depth[0] = self.thk[0]
-        for i in range(1, self.nCells[0]):
-            self.depth[i] = self.depth[i - 1] + self.thk[i]
+        self.depth[:] = np.cumsum(self.thk)
 
         if self.hasHalfspace:
             self.depth[-1] = np.infty
@@ -258,7 +256,7 @@ class Model1D(Model):
             self.thk[-1] = np.inf
 
 
-    def priorProbability(self, sPar, sGradient, limits=None, components=False):
+    def priorProbability(self, sPar, sGradient, limits=None, verbose=False):
         """Evaluate the prior probability for the 1D Model.
 
         The following equation describes the components of the prior that correspond to the Model1D,
@@ -383,8 +381,7 @@ class Model1D(Model):
             P_gradient = self.smoothModelPrior(self.minThickness)
             probability += P_gradient
 
-        # probability=np.float64(probability)
-        if components:
+        if verbose:
             return probability, np.asarray([P_nCells, P_depthcells, P_parameter, P_gradient])
         return probability
 
@@ -431,7 +428,7 @@ class Model1D(Model):
         other.chim = StatArray.StatArray(other.nCells[0], "Magnetic Susceptibility", r"$\frac{H}{m}$")
         # Resize the parameter gradient
         other.dpar = other.dpar.resize(other.par.size - 1)
-        other.perturbedLayer = i
+        other.action = ['birth', np.int(i), z]
         return other
 
 
@@ -454,8 +451,7 @@ class Model1D(Model):
             return self
 
         assert i < self.nCells[0] - 1, ValueError("i must be less than the number of cells - 1{}".format(self.nCells[0]-1))
-        # if (i >= self.nCells[0] - 1):
-        #     return self
+
         # Deepcopy the 1D Model to ensure priors and proposals are passed
         other = self.deepcopy()
         # Decrease the number of cells
@@ -472,7 +468,7 @@ class Model1D(Model):
         other.chim = other.chim.delete(i)
         # Resize the parameter gradient
         other.dpar = other.dpar.resize(other.par.size - 1)
-        other.perturbedLayer = np.int64(i)
+        other.action = ['death', np.int(i), self.depth[i]]
 
         return other
 
@@ -517,11 +513,18 @@ class Model1D(Model):
         
         """
         assert (self.dpar.hasPrior()), TypeError('No prior defined on parameter gradient. Use Model1D.dpar.setPrior() to set the prior.')
-        self.dpar[:] = (np.diff(np.log(self.par))) / (np.log(self.thk[:-1]) - hmin)
-        return self.dpar.probability()
+
+        if self.nCells[0] == 1:
+            tmp = self.insertLayer(self.minDepth + (0.5 * (np.exp(self.maxDepth) - np.exp(self.minDepth))))
+            tmp.dpar[:] = (np.diff(np.log(tmp.par))) / (np.log(tmp.thk[:-1]) - hmin)
+            probability = tmp.dpar.probability()
+        else:
+            self.dpar[:] = (np.diff(np.log(self.par))) / (np.log(self.thk[:-1]) - hmin)
+            probability = self.dpar.probability()
+        return probability
 
 
-    def perturb(self):
+    def perturbStructure(self):
         """Perturb a model
 
         Generates a new model by perturbing the current model based on four probabilities.
@@ -542,61 +545,58 @@ class Model1D(Model):
         -------
         out[0] : Model1D
             The perturbed model
-        out[1] : int
-            Integer for the type of perturbation, [0,1,2,3] = [birth, death, change, no change]
-        out[2] : list
-            Two values for the cycle that was chosen. Only matters if the cycle was a birth, death, or change.
-            For a birth, contains the depth of the new layer and None [newZ, None]
-            For a death, contains the index of the layer that was deleted [iDeleted, None]
             
         See Also
         --------
         geobipy.Model1D.makePerturbable : Must be used before calling self.perturb
         
         """
-        other = self.deepcopy()
-        assert (not other.pWheel is None), ValueError('Please set the proposals of the model1D with model1D.setProposals()')
+
+        assert (not self.pWheel is None), ValueError('Please set the proposals of the model1D with model1D.setProposals()')
         prng = self.nCells.prior.prng
         # Pre-compute exponential values (Take them out of log space)
-        hmin = np.exp(other.minThickness)
-        zmin = np.exp(other.minDepth)
-        zmax = np.exp(other.maxDepth)
+        hmin = np.exp(self.minThickness)
+        zmin = np.exp(self.minDepth)
+        zmax = np.exp(self.maxDepth)
         nTries = 10
         # This outer loop will allow the perturbation to change types. e.g. if the loop is stuck in a birthing
         # cycle, the number of tries will exceed 10, and we can try a different perturbation type.
         tryAgain = True  # Temporary to enter the loop
         while (tryAgain):
             tryAgain = False
-            # Get a random probability from 0-1
-            lifeCycle = prng.rand(1)
-            if (other.nCells == 1):
-                lifeCycle = np.round(lifeCycle)
-            elif (other.nCells == other.nCells.prior.max):
-                lifeCycle = np.amax([lifeCycle, other.pWheel[0]])
 
-            # Determine what evolution we will follow.
-            if (lifeCycle >= other.pWheel[2]):
-                option = 3 # No change to anything
-            if (lifeCycle < other.pWheel[0]):
-                option = 0 # Create a layer
-            elif (lifeCycle < other.pWheel[1]):
-                option = 1 # Delete a layer
-            elif (lifeCycle < other.pWheel[2]):
-                option = 2 # Perturb a layers interface
+            goodAction = False
+
+            # Choose an action to perform, and make sure its legitimate
+            #i.e. don't delete a single layer model, or add a layer to a model that is at the priors max on number of cells.
+            while not goodAction:
+                goodAction = True
+                # Get a random probability from 0-1
+                lifeCycle = prng.rand(1)
+
+                # Get the option to use
+                option = self.pWheel.searchsorted(lifeCycle)
+
+                if (self.nCells == 1 and (option == 1 or option == 2)):
+                    goodAction = False
+                elif (self.nCells == self.nCells.prior.max and option == 0):
+                    goodAction = False
 
             # Return if no change
             if (option == 3):
-                return other, 3, [None, None]
+                out = self.deepcopy()
+                out.action = ['none', 0, 0.0]
+                return out
 
             # Otherwise enter life-death-perturb cycle
             if (option == 0):  # Create a new layer
-                success = False
+                newThicknessBiggerThanMinimum = False
                 tries = 0
-                while (not success):  # Continue while the new layer is smaller than the minimum
+                while (not newThicknessBiggerThanMinimum):  # Continue while the new layer is smaller than the minimum
                     # Get the new depth
-                    tmp = np.float64(prng.uniform(other.minDepth, other.maxDepth, 1))
+                    tmp = np.float64(prng.uniform(self.minDepth, self.maxDepth, 1))
                     newDepth = np.exp(tmp)
-                    z = other.depth[:-1]
+                    z = self.depth[:-1]
                     # Insert the new depth
                     i = z.searchsorted(newDepth)
                     z = z.insert(i, newDepth)
@@ -605,25 +605,25 @@ class Model1D(Model):
                     h = np.min(np.diff(z[:]))
                     tries += 1
                     if (h > hmin):
-                        success = True  # Exit if thickness is larger than minimum
+                        newThicknessBiggerThanMinimum = True  # Exit if thickness is larger than minimum
                     if (tries == nTries):
-                        success = True
+                        newThicknessBiggerThanMinimum = True # just to exit.
                         tryAgain = True
                 if (not tryAgain):
-                    return other.insertLayer(newDepth), 0, [newDepth, None]
+                    return self.insertLayer(newDepth)
 
             if (option == 1):
                 # Get the layer to remove
-                iDeleted = np.int64(prng.uniform(0, other.nCells - 1, 1)[0])
+                iDeleted = np.int64(prng.uniform(0, self.nCells - 1, 1)[0])
                 # Remove the layer and return
-                return other.deleteLayer(iDeleted), 1, [iDeleted, None]
+                return self.deleteLayer(iDeleted)
 
             if (option == 2):
-                success = False
-                k = other.nCells[0] - 1
+                newThicknessBiggerThanMinimum = False
+                k = self.nCells[0] - 1
                 tries = 0
-                while (not success):  # Continue while the perturbed layer is suitable
-                    z = other.depth[:-1]
+                while (not newThicknessBiggerThanMinimum):  # Continue while the perturbed layer is suitable
+                    z = self.depth[:-1]
                     # Get the layer to perturb
                     i = np.int64(prng.uniform(0, k, 1)[0])
                     # Get the perturbation amount
@@ -637,15 +637,35 @@ class Model1D(Model):
                     # Exit if the thickness is big enough, and we stayed within
                     # the depth bounds
                     if (h > hmin and z[1] > zmin and z[-1] < zmax):
-                        success = True
+                        newThicknessBiggerThanMinimum = True
                     if (tries == nTries):
-                        success = True
+                        newThicknessBiggerThanMinimum = True
                         tryAgain = True
                 if (not tryAgain):
-                    other.perturbedLayer = i
+                    other = self.deepcopy()
                     other.depth[i] += dz  # Perturb the depth in the model
                     other.thicknessFromDepth()
-                    return other, 2, [i, dz]
+                    other.action = ['perturb', np.int(i), dz]
+                    return other
+
+
+    def unperturb(self):
+        """After a model has had its structure perturbed, remap the model back its previous state. Used for the reversible jump McMC step.
+
+        """
+        if self.action[0] == 'none':
+            return self.deepcopy()
+
+        if self.action[0] == 'perturb':
+            other = self.deepcopy()
+            other.depth[self.action[1]] -= self.action[2]
+            return other
+
+        if self.action[0] == 'birth':
+            return self.deleteLayer(self.action[1])
+
+        if self.action[0] == 'death':
+            return self.insertLayer(self.action[2])
 
 
     def setPosteriors(self):
@@ -658,12 +678,15 @@ class Model1D(Model):
         # Discretize the parameter values
 
         zGrd = StatArray.StatArray(np.arange(0.5 * np.exp(self.minDepth), 1.1 * np.exp(self.maxDepth), 0.5 * np.exp(self.minThickness)), self.depth.name, self.depth.units)
-        pGrd = StatArray.StatArray(np.exp(self.par.prior.getBinEdges(nBins = 250, nStd=3.0)), self.par.name, self.par.units)
+        pGrd = StatArray.StatArray(np.exp(self.par.prior.getBinEdges(nBins = 250, nStd=4.0)), self.par.name, self.par.units)
 
         # Set the posterior hitmap for conductivity vs depth
         self.par.setPosterior(Hitmap2D(xBins = pGrd, yBinCentres = zGrd))
 
         # Initialize the interface Depth Histogram
+        # tmp = np.logspace(np.log10(0.5 * np.exp(self.minDepth)), np.log10(1.1 * np.exp(self.maxDepth)), zGrd.size)
+        # zGrd = StatArray.StatArray(tmp, self.depth.name, self.depth.units)
+        # self.depth.setPosterior(Histogram1D(binCentres = zGrd, log=10))
         self.depth.setPosterior(Histogram1D(binCentres = zGrd))
 
 
@@ -1015,7 +1038,7 @@ class Model1D(Model):
 
         """
         assert (np.size(par) == self.nCells[0]), 'par must have length nCells'
-        assert (isinstance(mesh, RectilinearMesh2D)), TypeError('mesh must be a RectilinearMesh2D')
+        assert (isinstance(mesh, RectilinearMesh2D.RectilinearMesh2D)), TypeError('mesh must be a RectilinearMesh2D')
 
         if self.hasHalfspace:
             bounds = [0.0, mesh.y.range]
@@ -1099,7 +1122,8 @@ class Model1D(Model):
             m2 = ratio >= 1.0 + minThicknessRatio
             keep = np.logical_not(np.ma.masked_invalid(ratio).mask) & np.ma.mask_or(m1,m2)
             tmp = self.depth[:-1]
-            if (tmp.size > 0):
+
+            if (tmp[keep].size > 0):
                 self.depth.posterior.update(tmp[keep])
 
 
@@ -1345,7 +1369,6 @@ class Model1D(Model):
         self.par.toHdf(grp, 'par')
         self.chie.toHdf(grp, 'chie')
         self.chim.toHdf(grp, 'chim')
-        grp.create_dataset('perturbedLayer', data=self.perturbedLayer)
         grp.create_dataset('hasHalfspace', data=self.hasHalfspace)
 
 

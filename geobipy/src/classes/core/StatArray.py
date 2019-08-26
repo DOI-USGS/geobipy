@@ -1113,7 +1113,9 @@ class StatArray(np.ndarray, myObject):
         else:
             assert x.size == self.size, ValueError('x must be size '+str(self.size))
 
-        cP.scatter2D(x=x, y=y, c=self, i=i, **kwargs)
+        c = kwargs.pop('c', self)
+
+        cP.scatter2D(x=x, y=y, c=c, i=i, **kwargs)
 
 
     def stackedAreaPlot(self, x=None, i=None, axis=0, labels=[], **kwargs):
@@ -1170,10 +1172,10 @@ class StatArray(np.ndarray, myObject):
 
         ma = tmp.copy()
         ma[ma >= 0.0] = 0.0
-        cP.stackplot2D(x[j], ma[i], labels=labels, colors=colors, **kwargs)
+        cP.stackplot2D(x[j], ma[i], labels=labels, **kwargs)
         ma[:] = tmp[:]
         ma[ma <= 0.0] = 0.0
-        cP.stackplot2D(x[j], ma[i], labels=[], colors=colors, **kwargs)
+        cP.stackplot2D(x[j], ma[i], labels=[], **kwargs)
 
 
     ### HDF Routines

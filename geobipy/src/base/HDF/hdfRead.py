@@ -111,7 +111,7 @@ def readKeyFromFile(h5obj, fName, groupName, key, index=None, **kwargs):
 
     for g in groupName:
         for k in key:
-            h=g+'/'+k
+            h = g + '/' + k
             grp = h5obj.get(h)
             assert (not grp is None), ValueError('Could not read '+h+' from file '+fName)
             tmp = read_item(grp, index=index, **kwargs)
