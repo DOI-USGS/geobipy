@@ -240,10 +240,10 @@ def Initialize(userParameters, DataPoint, prng):
         # Scale the sensitivity matrix by the data errors.
         J = DataPoint.scaleJ(DataPoint.J)
         # Compute a quasi-Newton based variance update
-        userParameters.unscaledVariance = np.linalg.inv(np.dot(J.T, J) + np.eye(Mod.nCells[0]) * userParameters.priStd**-1.0)
+        userParameters.unscaledVariance = np.linalg.inv(np.dot(J.T, J) + np.eye(Mod.nCells[0]) * userParameters.priStd**-2.0)
     else:
         # Compute a steepest descent based variance update
-        userParameters.unscaledVariance = (np.ones(Mod.nCells[0]) * (userParameters.priStd))**2.0
+        userParameters.unscaledVariance = np.eye(Mod.nCells[0]) * userParameters.priStd**2.0
 
     # Instantiate the proposal for the parameters.
     Mod.par.setProposal('MvNormal', np.log(Mod.par), userParameters.unscaledVariance, prng=prng)
@@ -282,51 +282,69 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
     clk.start()
 
     # Perturb the current model to produce an initial candidate model
-    Mod1, option, value = Mod.perturb()
+    Mod1 = Mod.perturbStructure()
 
-    parSaved = Mod1.par.deepcopy()
-    
+    unperturbedParameter = Mod1.par.deepcopy()
+
     # Propose a new data point, using assigned proposal distributions
     D1 = DataPoint.propose(userParameters.solveElevation, userParameters.solveRelativeError, userParameters.solveAdditiveError, userParameters.solveCalibration)
 
-    if (option < 2):
+
+    # Compute a new parameter variance matrix if the structure of the model changed.
+    if (Mod1.action[0] in ['birth', 'death']):
         # Compute the sensitivity of the data to the perturbed model
-        D1.J = D1.updateSensitivity(D1.J, Mod1, option, scale=False)
+        D1.J = D1.updateSensitivity(D1.J, Mod1, Mod1.action[0], scale=False)
         J = DataPoint.scaleJ(D1.J)
+        JtJ = np.dot(J.T, J)
 
         # Propose new layer conductivities
         if userParameters.stochasticNewton:
-            unscaledVariance = np.linalg.inv(np.dot(J.T,J) + np.eye(Mod1.nCells[0]) * userParameters.priStd**-1.0)
-            J = DataPoint.scaleJ(D1.J, 2.0)
+            A = JtJ + (np.eye(Mod1.nCells[0]) * userParameters.priStd**-2.0)
+            unscaledVariance = np.linalg.inv(A)
         else:
 
-            unscaledVariance = np.diag((userParameters.covScaling / np.sqrt(Mod1.nCells[0])) / (
-                (np.dot(J.T, J)) + np.eye(Mod1.nCells[0]) * (userParameters.priStd**-1.0)))
-    else:  # There was no change in the model
-        # Normalize the saved sensitivity matrix by the previous data errors
-        if (userParameters.stochasticNewton):
-            J = DataPoint.scaleJ(D1.J, 2.0)
+            MalinvernoGelmanScaling = userParameters.parameterCovarianceScaling / np.sqrt(Mod1.nCells[0])
 
+            A = JtJ + (MalinvernoGelmanScaling * np.eye(Mod1.nCells[0]) * userParameters.priStd**-2.0)
+            unscaledVariance = np.linalg.inv(A)
+
+            if userParameters.ignoreLikelihood:
+                # Inverse of diagonal matrix is the reciprocal
+                A = (MalinvernoGelmanScaling * np.ones(Mod1.nCells[0]) * userParameters.priStd**-2.0)
+                unscaledVariance = np.diag(1.0 / A)
+            
+    else:  # There was no change in the model
         unscaledVariance = userParameters.unscaledVariance
 
+
+    ### Proposing new parameter values
+
     # If we are using the stochastic Newton step, compute the gradient of the
-    # objective function
+    # objective function from the unperturbed parameter values.
     if (userParameters.stochasticNewton):
         # Compute the gradient
-        gradient = np.dot(J.T, DataPoint.deltaD[DataPoint.iActive]) + \
-            ((userParameters.priStd**-1.0) * (np.log(Mod1.par) - userParameters.priMu))
+        J = DataPoint.scaleJ(D1.J, 2.0)
+        gradient = np.dot(J.T, DataPoint.deltaD[DataPoint.iActive]) + ((userParameters.priStd**-1.0) * (np.log(unperturbedParameter) - userParameters.priMu))
 
-        scaling = userParameters.covScaling * \
-            ((2.0 * np.float64(Mod1.nCells[0])) - 1)**(-1.0 / 3.0)
+        scaling = userParameters.parameterCovarianceScaling * ((2.0 * np.float64(Mod1.nCells[0])) - 1)**(-1.0 / 3.0)
+
         # Compute the Model perturbation
-        dm = 0.5 * scaling * np.dot(unscaledVariance, gradient)
+        # The negative sign because we want to move "downhill"
+        SN_step_from_unperturbed = -0.5 * scaling * np.dot(unscaledVariance, gradient)
 
         if (not Res.burnedIn):
-            dm = 0.0
+            SN_step_from_unperturbed = 0.0
 
-        Mod1.par.setProposal('MvNormal', np.log(Mod1.par) - dm, scaling * unscaledVariance, prng=Mod1.par.proposal.prng)
-    else:  # Use the steepest descent method
-        Mod1.par.setProposal('MvNormal', np.log(Mod1.par), unscaledVariance, prng=Mod1.par.proposal.prng)
+        mean = np.log(Mod1.par) + SN_step_from_unperturbed
+        variance = scaling * unscaledVariance
+
+    # Otherwise use the steepest descent method
+    else:  
+        mean = np.log(Mod1.par)
+        variance = unscaledVariance
+
+    # Assign a proposal distribution for the parameter using the mean and variance.
+    Mod1.par.setProposal('MvNormal', mean, variance, prng=prng)
 
     # Generate new conductivities
     Mod1.par[:] = np.exp(Mod1.par.proposal.rng(1))
