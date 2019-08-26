@@ -82,6 +82,27 @@ class Histogram2D(RectilinearMesh2D):
         return self._counts
 
 
+    def __getitem__(self, slic):
+        """Allow slicing of the histogram.
+
+        """
+        assert np.shape(slic) == (2,), ValueError("slic must be over two dimensions.")
+        if np.any(slic == 1):
+            # 1D Histogram
+
+            print(1)
+
+        else:
+            # 2D Histogram
+            if self.xyz:
+                out = Histogram2D(xBinCentres=self._x[slic[1]], yBinCentres=self._y[slic[1]], zBinCentres=self._z[slic[0]])
+            else:
+                out = Histogram2D(xBinCentres=self._x[slic[1]], yBinCentres=self._y[slic[0]])
+            out._counts += self.counts[slic]
+
+            return out
+
+
     def axisHistogram(self, between=None, axis=0, log=None):
         """Get the histogram along an axis
 
