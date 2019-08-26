@@ -52,13 +52,17 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
 
     # Initialize the Chain
     iBurn = 0
-    i = 1
+    i = 0
     iBest = 1
     multiplier = 1.0
 
+    if userParameters.ignoreLikelihood:
+        Res.burnedIn = True
+        Res.iBurn = 0
+
     Res.clk.start()
 
-    Go = i <= userParameters.nMarkovChains + iBurn -1
+    Go = True
     failed = False
     while (Go):
 
@@ -76,7 +80,7 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
             
 
         # Update the best best model and data if the posterior is larger
-        if (posterior > bestPosterior):
+        if (posterior > bestPosterior and Res.burnedIn):
             iBest = np.int64(i)
             bestModel = Mod.deepcopy()
             bestData = DataPoint.deepcopy()
@@ -99,7 +103,7 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
 
         i += 1
         
-        Go = i <= userParameters.nMarkovChains + iBurn
+        Go = i <= userParameters.nMarkovChains + Res.iBurn
         if failed:
             Go = False
 
