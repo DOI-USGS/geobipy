@@ -19,7 +19,6 @@ class Order(object):
         hmin:  :log(minimum thickness)
         kmax:  :Maximum number of possible samples
         """
-        # Probability Density Function
         if (zmin is None): return
         i = np.arange(kmax)
         dz = np.log((np.exp(zmax) - np.exp(zmin) - 2.0 * i * np.exp(hmin)))
@@ -41,7 +40,7 @@ class Order(object):
 
     def probability(self, x):
         tmp = np.int32(x)
-        return self.pdf[tmp]
+        return np.squeeze(self.pdf[tmp])
 
 
     def summary(self, out=False):
