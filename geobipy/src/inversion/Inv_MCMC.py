@@ -133,9 +133,6 @@ def Initialize(userParameters, DataPoint, prng):
     
     
     """
-
-    # Initialize properties of the data point
-
     # ---------------------------------------
     # Set the distribution of the data misfit
     # ---------------------------------------
@@ -232,7 +229,7 @@ def Initialize(userParameters, DataPoint, prng):
 
     userParameters.pLimits = None
     if userParameters.LimitPar:
-        userParameters.pLimits = np.exp(Mod.par.prior.getBinEdges(nBins = 1, nStd = 3.0))
+        userParameters.pLimits = np.exp(Mod.par.prior.getBinEdges(nBins = 1, nStd = 4.0))
 
     # Compute the predicted data
     DataPoint.forward(Mod)
