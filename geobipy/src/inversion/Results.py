@@ -155,10 +155,9 @@ class Results(myObject):
         # Set a tag to catch data points that are not minimizing
         self.zeroCount = 0
 
+        self.verbose = verbose
+
         self.fig = None
-        # Initialize the figure region
-        if self.plotMe:
-            self.fig = plt.figure(0, facecolor='white', figsize=(10,7))
         self.initFigure()
         if self.plotMe:
             plt.show(block=False)
@@ -174,14 +173,16 @@ class Results(myObject):
         self.currentModel = model
         self.bestModel = model
 
-
-        self.verbose = verbose
         if verbose:
-            self.allRelErr = StatArray.StatArray([self.nSystems, self.nMC], name='$\epsilon_{Relative}x10^{2}$', units='%')
-            self.allAddErr = StatArray.StatArray([self.nSystems, self.nMC], name='$\epsilon_{Additive}$', units=dataPoint.d.units)
-            self.allZ = StatArray.StatArray(self.nMC, name='Height', units='m')
-            self.posterior = StatArray.StatArray(self.nMC, name='log(posterior)')
-            self.posteriorComponents = StatArray.StatArray([9, self.nMC], 'Components of the posterior')
+            n = np.int(1.2*self.nMC)
+            self.allRelErr = StatArray.StatArray(np.full([self.nSystems, n], np.nan), name='$\epsilon_{Relative}x10^{2}$', units='%')
+            self.allAddErr = StatArray.StatArray(np.full([self.nSystems, n], np.nan), name='$\epsilon_{Additive}$', units=dataPoint.data.units)
+            self.allZ = StatArray.StatArray(np.full(n, np.nan), name='Height', units='m')
+            self.allK = StatArray.StatArray(np.full(n, np.nan), name='Number of Layers')
+            self.posteriorComponents = StatArray.StatArray(np.full([8, n], np.nan), 'Components of the posterior')
+            self.ratioComponents = StatArray.StatArray(np.full([7, n], np.nan), 'log(Ratio Components)')
+            self.accepted = StatArray.StatArray(np.zeros(n, dtype=bool), name='Accepted')
+            self.dimensionChange = StatArray.StatArray(np.zeros(n, dtype=bool), name='Dimensions were changed')
 
 
 #         Initialize and save the first figure
@@ -190,7 +191,7 @@ class Results(myObject):
 #                fIO.getFileNameInteger(self.i, np.int(np.log10(self.nMC))) + '.png'
 #            plt.savefig(figName)
 
-    def update(self, i, iBest, bestDataPoint, bestModel, dataPoint, multiplier, PhiD, model, posterior, posteriorComponents, clipRatio):
+    def update(self, i, iBest, bestDataPoint, bestModel, dataPoint, multiplier, PhiD, model, posterior, posteriorComponents, ratioComponents, accepted, dimensionChange, clipRatio):
         """ Update the attributes of the plotter """
         if (not self.plotMe and not self.saveMe):
             return
@@ -203,27 +204,25 @@ class Results(myObject):
             # Added the layer depths to a list, we histogram this list every
             # iPlot iterations
             model.updatePosteriors(clipRatio)
-            # self.kHist.update(model.nCells[0])
-            # self.DzHist.update(dataPoint.z[0])
 
             # Update the height posterior
             dataPoint.z.updatePosterior()
             dataPoint.relErr.updatePosterior()
             
             dataPoint.addErr.updatePosterior()
-            # for j in range(self.nSystems):
-            #     self.relErr[j].update(dataPoint.relErr[j])
-            #     self.addErr[j].update(dataPoint.addErr[j])
 
             if (self.verbose):
                 iTmp = self.i - self.iBurn
                 for j in range(self.nSystems):
-                    self.allRelErr[j,iTmp]=dataPoint.relErr[j]
-                    self.allAddErr[j,iTmp]=dataPoint.addErr[j]
-                self.posterior[iTmp] = np.log(posterior)
+                    self.allRelErr[j, iTmp] = dataPoint.relErr[j]
+                    self.allAddErr[j, iTmp] = dataPoint.addErr[j]
                 self.allZ[iTmp] = dataPoint.z[0]
-                self.posteriorComponents[:,iTmp] = posteriorComponents
-
+                self.allK[iTmp] = model.nCells[0]
+                self.posteriorComponents[:, iTmp] = posteriorComponents
+                self.ratioComponents[:, iTmp] = ratioComponents
+                self.accepted[iTmp] = accepted
+                self.dimensionChange[iTmp] = dimensionChange
+                
 
         if (np.mod(i, 1000) == 0):
             ratePercent = 100.0 * (np.float64(self.acceptance) / np.float64(1000))
@@ -241,7 +240,7 @@ class Results(myObject):
         self.bestModel = bestModel # Reference
 
 
-    def initFigure(self, iFig=0, forcePlot=False):
+    def initFigure(self, forcePlot=False):
         """ Initialize the plotting region """
 
         if self.plotMe or forcePlot:
@@ -253,35 +252,71 @@ class Results(myObject):
 
         # plt.ion()
 
-        # self.fig = plt.figure(iFig, facecolor='white', figsize=(10,7))
+        self.fig = plt.figure(0, facecolor='white', figsize=(10,7))
         mngr = plt.get_current_fig_manager()
         try:
             mngr.window.setGeometry(0, 10, self.sx, self.sy)
         except:
             pass
         nCols = 3 * self.nSystems
+        nRows = 12
 
-        self.gs = gridspec.GridSpec(12, nCols)
-        self.gs.update(wspace=0.3 * self.nSystems, hspace=6.0)
-        self.ax = [None]*(7+(2*self.nSystems))
+        gs = gridspec.GridSpec(nRows, nCols)
+        gs.update(wspace=0.3 * self.nSystems, hspace=6.0)
+        self.ax = [None]*(7 + (2 * self.nSystems))
 
-        self.ax[0] = plt.subplot(self.gs[:3, :self.nSystems]) # Acceptance Rate
-        self.ax[1] = plt.subplot(self.gs[3:6, :self.nSystems]) # Data misfit vs iteration
-        self.ax[2] = plt.subplot(self.gs[6:9, :self.nSystems]) # Histogram of data point elevations
-        self.ax[3] = plt.subplot(self.gs[9:, :self.nSystems]) # Histogram of # of layers
-        self.ax[4] = plt.subplot(self.gs[:6,self.nSystems:2 * self.nSystems]) # Data fit plot
-        self.ax[5] = plt.subplot(self.gs[6:,self.nSystems:2 * self.nSystems]) # 1D layer plot
+        self.ax[0] = plt.subplot(gs[:3, :self.nSystems]) # Acceptance Rate
+        self.ax[1] = plt.subplot(gs[3:6, :self.nSystems]) # Data misfit vs iteration
+        self.ax[2] = plt.subplot(gs[6:9, :self.nSystems]) # Histogram of data point elevations
+        self.ax[3] = plt.subplot(gs[9:12, :self.nSystems]) # Histogram of # of layers
+        self.ax[4] = plt.subplot(gs[:6,self.nSystems:2 * self.nSystems]) # Data fit plot
+        self.ax[5] = plt.subplot(gs[6:12,self.nSystems:2 * self.nSystems]) # 1D layer plot
         # Histogram of data errors 
         j = 5
         for i in range(self.nSystems):
-            self.ax[j+1] = plt.subplot(self.gs[:3, 2 * self.nSystems + i]) # Relative Errors
-            self.ax[j+2] = plt.subplot(self.gs[3:6,2 * self.nSystems + i]) # Additive Errors
+            self.ax[j+1] = plt.subplot(gs[:3, 2 * self.nSystems + i]) # Relative Errors
+            self.ax[j+2] = plt.subplot(gs[3:6,2 * self.nSystems + i]) # Additive Errors
             j += 2
 
         # Histogram of layer depths
-        self.ax[(2*self.nSystems)+6] = plt.subplot(self.gs[6:, 2 * self.nSystems:])
+        self.ax[(2*self.nSystems)+6] = plt.subplot(gs[6:12, 2 * self.nSystems:])
+
         for ax in self.ax:
             cP.pretty(ax)
+
+        if self.verbose:
+            self.verboseFigs = []
+            self.verboseAxs = []
+
+            # Posterior components
+            fig = plt.figure(1, facecolor='white', figsize=(10,7))
+            self.verboseFigs.append(fig)
+            self.verboseAxs.append(fig.add_subplot(511))
+            self.verboseAxs.append(fig.add_subplot(512))
+            self.verboseAxs.append(fig.add_subplot(513))
+            self.verboseAxs.append(fig.add_subplot(514))
+
+                        
+            fig = plt.figure(2, facecolor='white', figsize=(10,7))
+            self.verboseFigs.append(fig)
+            for i in range(8):
+                self.verboseAxs.append(fig.add_subplot(8, 1, i+1))
+
+            # Cross Plots
+            fig = plt.figure(3, facecolor='white', figsize=(10,7))
+            self.verboseFigs.append(fig)
+            for i in range(4):
+                self.verboseAxs.append(fig.add_subplot(1, 4, i+1))
+
+            # ratios vs iteration number
+            fig = plt.figure(4, facecolor='white', figsize=(10,7))
+            self.verboseFigs.append(fig)
+            for i in range(5):
+                self.verboseAxs.append(fig.add_subplot(5, 1, i+1))
+
+            for ax in self.verboseAxs:
+                cP.pretty(ax)
+            
 
         if self.plotMe:
             plt.show(block=False)
@@ -313,15 +348,16 @@ class Results(myObject):
         ls = kwargs.pop('linestyle', 'none')
         c = kwargs.pop('color', 'k')
         lw = kwargs.pop('linewidth', 3)
-        
+
         ax = self.PhiDs.plot(self.iRange, i=np.s_[:self.i], marker=m, alpha=a, markersize=ms, linestyle=ls, color=c, **kwargs)
         plt.ylabel('Data Misfit')
-        dum = self.multiplier * len(self.bestDataPoint.iActive)
+        dum = self.multiplier * self.bestDataPoint.iActive.size
         plt.axhline(dum, color='#C92641', linestyle='dashed', linewidth=lw)
         if (self.burnedIn):
             plt.axvline(self.iBurn, color='#C92641', linestyle='dashed', linewidth=lw)
         plt.yscale('log')
         ax.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
+        plt.xlim([0, self.iRange[self.i]])
 
 
     def _plotObservedPredictedData(self, **kwargs):
@@ -348,7 +384,6 @@ class Results(myObject):
         plt.axvline(self.bestDataPoint.z, color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
         ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 
-
     
     def _plotRelativeErrorPosterior(self, axes, **kwargs):
         """ Plots the histogram of the relative errors """
@@ -359,7 +394,6 @@ class Results(myObject):
             plt.axvline(self.bestDataPoint.relErr[i], color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
             a.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
         
-
 
     def _plotAdditiveErrorPosterior(self, axes, **kwargs):
         """ Plot the histogram of the additive errors """
@@ -435,18 +469,21 @@ class Results(myObject):
             ax.set_ylim(lim[::-1])
         cP.ylabel(hm.yBins.getNameUnits())
         plt.xscale('log')
+        plt.margins(0.01)
 
 
-    def plot(self, title="", iFig=0, forcePlot=False):
+    def plot(self, title="", forcePlot=False):
         """ Updates the figures for MCMC Inversion """
         # Plots that change with every iteration
         if self.plotMe or forcePlot:
             pass
         else:
             return
+        if self.i == 0:
+            return
 
-        if (not hasattr(self, 'gs')):
-            self.initFigure(iFig, forcePlot=forcePlot)
+        if (self.fig is None):
+            self.initFigure(forcePlot=forcePlot)
 
 
         if (np.mod(self.i, self.iPlot) == 0 or forcePlot):
@@ -481,12 +518,11 @@ class Results(myObject):
                 self.ax[3].xaxis.set_major_locator(MaxNLocator(integer=True))
 
                 
-
                 # Update the model plot
                 plt.sca(self.ax[5])
                 plt.cla()
                 self._plotHitmapPosterior(reciprocateX=self.reciprocateParameter, noColorbar=True)
-
+                
 
                 j = 5
                 relativeAxes = []
@@ -507,45 +543,152 @@ class Results(myObject):
                 self._plotLayerDepthPosterior()
 
                 
-
             cP.suptitle(title)
 
 
             if self.verbose & self.burnedIn:
-                plt.figure(99)
+
+                plt.sca(self.verboseAxs[0])
                 plt.cla()
-                plt.subplot(411)
-                iTmp = np.s_[:,:self.i-self.iBurn+1]
-
-                self.allRelErr.plot(self.iRange, i=iTmp, axis=1, c='k')
-                plt.subplot(412)
-                self.allAddErr.plot(self.iRange, i=iTmp, axis=1, c='k')
-                plt.subplot(413)
-                self.posterior.plot(self.iRange, i=np.s_[:self.i - self.iBurn + 1], c='k')
-                plt.subplot(414)
-                self.iBestV.plot(self.iRange, i=np.s_[:self.i - self.iBurn + 1], c='k')
-
-
-                plt.figure(100)
+                self.allRelErr[0, :].plot(self.iRange, i=np.s_[:self.i], c='k')
+                plt.sca(self.verboseAxs[1])
                 plt.cla()
-                plt.subplot(311)
-                self.allRelErr.plot(x=self.posterior, i=iTmp, axis=1, marker='o', linestyle='none',markersize=2, alpha=0.7, markeredgewidth=1)
-                plt.subplot(312)
-                self.allAddErr.plot(x=self.posterior, i=iTmp, axis=1, marker='o', linestyle='none', markersize=2, alpha=0.7, markeredgewidth=1)
-                plt.subplot(313)
-                self.allZ.plot(x=self.posterior, i=np.s_[:self.i-self.iBurn+1], marker='o', linestyle='none', markersize=2, alpha=0.7, markeredgewidth=1)
-
-                plt.figure(101)
+                self.allAddErr[0, :].plot(self.iRange, i=np.s_[:self.i], axis=1, c='k')
+                plt.sca(self.verboseAxs[3])
                 plt.cla()
-                plt.subplot(211)
-                iTmp = np.s_[:-1,:self.i-self.iBurn+1]
-                self.posteriorComponents.stackedAreaPlot(self.iRange[:self.nMC], i=iTmp, axis=1, labels=['nCells','depth','parameter','gradient','relative','additive','height','calibration'])
-                plt.ylim([-40.0, 1.0])
-                plt.subplot(212)
-                iTmp=np.s_[:self.i-self.iBurn+1]
-                cP.plot(self.iRange[iTmp], self.posteriorComponents[-1,iTmp])
-                plt.grid(b=True, which ='major', color='k', linestyle='--', linewidth=2)
+                self.allZ.plot(x=self.iRange, i=np.s_[:self.i], marker='o', linestyle='none', markersize=2, alpha=0.3, markeredgewidth=1)
 
+
+                # Posterior components plot Figure 1
+                labels=['nCells','depth','parameter','gradient','relative','additive','height','calibration']
+                for i in range(8):
+                    plt.sca(self.verboseAxs[4 + i])
+                    plt.cla()
+                    self.posteriorComponents[i, :].plot(linewidth=0.5)
+                    plt.ylabel('')
+                    plt.title(labels[i])
+
+
+                ira = self.iRange[:np.int(1.2*self.nMC)][self.accepted]
+                irna = self.iRange[:np.int(1.2*self.nMC)][~self.accepted]
+
+                # Number of layers vs iteration
+                plt.sca(self.verboseAxs[16])
+                plt.cla()
+                self.allK[~self.accepted].plot(x = irna, marker='o', markersize=1,  linestyle='None', alpha=0.3, color='k')
+                self.allK[self.accepted].plot(x = ira, marker='o', markersize=1, linestyle='None', alpha=0.3)
+                plt.title('black = rejected')
+
+                
+                # Cross plot of current vs candidate prior
+                plt.sca(self.verboseAxs[12])
+                plt.cla()
+                x = StatArray.StatArray(self.ratioComponents[0, :], 'Candidate Prior')
+                y = StatArray.StatArray(self.ratioComponents[1, :], 'Current Prior')
+
+                x[x == -np.inf] = np.nan
+                y[y == -np.inf] = np.nan
+                x[~self.accepted].plot(x = y[~self.accepted], linestyle='', marker='.', color='k', alpha=0.3)
+                x[self.accepted].plot(x = y[self.accepted], linestyle='', marker='.', alpha=0.3)
+                # v1 = np.maximum(np.minimum(np.nanmin(x), np.nanmin(y)), -20.0)
+                v2 = np.maximum(np.nanmax(x), np.nanmax(y))
+                v1 = v2 - 25.0
+                plt.xlim([v1, v2])
+                plt.ylim([v1, v2])
+                plt.plot([v1,v2], [v1,v2])
+
+                # Prior ratio vs iteration                
+                plt.sca(self.verboseAxs[17])
+                plt.cla()
+                r = x - y
+                r[~self.accepted].plot(x = irna, marker='o', markersize=1, linestyle='None', alpha=0.3, color='k')
+                r[self.accepted].plot(x = ira, marker='o', markersize=1, linestyle='None', alpha=0.3)
+                plt.ylim(bottom=v2-10.0)
+                cP.ylabel('Prior Ratio')
+                
+
+
+                # Cross plot of the likelihood ratios
+                plt.sca(self.verboseAxs[13])
+                plt.cla()
+                x = StatArray.StatArray(self.ratioComponents[2, :], 'Candidate Likelihood')
+                y = StatArray.StatArray(self.ratioComponents[3, :], 'Current Likelihood')
+                x[~self.accepted].plot(x = y[~self.accepted], linestyle='', marker='.', color='k', alpha=0.3)
+                x[self.accepted].plot(x = y[self.accepted], linestyle='', marker='.', alpha=0.3)
+                
+                v2 = np.maximum(np.nanmax(x), np.nanmax(y)) + 5.0
+                v1 = v2 - 200.0
+                # v1 = -100.0
+                # v2 = -55.0
+                plt.xlim([v1, v2])
+                plt.ylim([v1, v2])
+                plt.plot([v1, v2], [v1, v2])
+                plt.title('black = rejected')
+
+                # Likelihood ratio vs iteration
+                plt.sca(self.verboseAxs[18])
+                plt.cla()
+                r = x - y
+                r[~self.accepted].plot(x = irna, marker='o', markersize=1, linestyle='None', alpha=0.3, color='k')
+                r[self.accepted].plot(x = ira, marker='o', markersize=1, linestyle='None', alpha=0.3)
+                cP.ylabel('Likelihood Ratio')
+                plt.ylim([-20.0, 20.0])
+                
+
+                # Cross plot of the proposal ratios
+                plt.sca(self.verboseAxs[14])
+                plt.cla()
+                y = StatArray.StatArray(self.ratioComponents[4, :], 'Current Proposal')
+                x = StatArray.StatArray(self.ratioComponents[5, :], 'Candidate Proposal')
+                x[~self.accepted].plot(x = y[~self.accepted], linestyle='', marker='.', color='k', alpha=0.3)
+                x[self.accepted].plot(x = y[self.accepted], linestyle='', marker='.', alpha=0.3)
+                # v1 = np.maximum(np.minimum(np.nanmin(x), np.nanmin(y)), -200.0)
+                v2 = np.maximum(np.nanmax(x), np.nanmax(y)) + 10.0
+                v1 = v2 - 60.0
+                # plt.plot([v1,v2], [v1,v2])
+                plt.xlim([v1, v2])
+                plt.ylim([v1, v2])
+
+
+                # Cross plot of the proposal ratios coloured by a change in dimension
+                plt.sca(self.verboseAxs[15])
+                plt.cla()
+                y = StatArray.StatArray(self.ratioComponents[4, :], 'Current Proposal')
+                x = StatArray.StatArray(self.ratioComponents[5, :], 'Candidate Proposal')
+                x[~self.dimensionChange].plot(x = y[~self.dimensionChange], linestyle='', marker='.', color='k', alpha=0.3)
+                x[self.dimensionChange].plot(x = y[self.dimensionChange], linestyle='', marker='.', alpha=0.3)
+                # v1 = np.maximum(np.minimum(np.nanmin(x), np.nanmin(y)), -200.0)
+                v2 = np.maximum(np.nanmax(x), np.nanmax(y)) + 10.0
+                v1 = v2 - 60.0
+                # plt.plot([v1,v2], [v1,v2])
+                plt.xlim([v1, v2])
+                plt.ylim([v1, v2])
+                plt.title('black = no dimension change')
+
+
+                # Proposal ratio vs iteration
+                plt.sca(self.verboseAxs[19])
+                plt.cla()
+                r = x - y
+                r[~self.accepted].plot(x = irna, marker='o', markersize=1, linestyle='None', alpha=0.3, color='k')
+                r[self.accepted].plot(x = ira, marker='o', markersize=1, linestyle='None', alpha=0.3)
+                cP.ylabel('Proposal Ratio')
+                # plt.ylim([v1, v2])
+
+                # Acceptance ratio vs iteration
+                plt.sca(self.verboseAxs[20])
+                plt.cla()
+                x = StatArray.StatArray(self.ratioComponents[6, :], 'Acceptance Ratio')
+                x[~self.accepted].plot(x = irna, marker='o', markersize=1, linestyle='None', alpha=0.3, color='k')
+                x[self.accepted].plot(x = ira, marker='o', markersize=1, linestyle='None', alpha=0.3)
+                plt.ylim([-20.0, 20.0])
+                
+
+                self.fig.canvas.draw()
+                self.fig.canvas.flush_events()
+                for fig in self.verboseFigs:
+                    fig.canvas.draw()
+                    fig.canvas.flush_events()
 
             cP.pause(1e-9)
         # return self.fig
@@ -572,19 +715,24 @@ class Results(myObject):
        plt.savefig(figName, dpi=dpi)
 
        if (self.verbose):
-           fig = plt.figure(99)
+           fig = plt.figure(1)
            fig.set_size_inches(19, 11)
            figName = join(directory,str(fiducial) + '_rap.png')
            plt.savefig(figName, dpi=dpi)
 
-           fig = plt.figure(100)
+           fig = plt.figure(2)
            fig.set_size_inches(19, 11)
-           figName = join(directory,str(fiducial) + '_xp.png')
+           figName = join(directory,str(fiducial) + '_posterior_components.png')
            plt.savefig(figName, dpi=dpi)
 
-           fig = plt.figure(101)
+           fig = plt.figure(3)
            fig.set_size_inches(19, 11)
-           figName = join(directory,str(fiducial) + '_stack.png')
+           figName = join(directory,str(fiducial) + '_ratio_crossplot.png')
+           plt.savefig(figName, dpi=dpi)
+
+           fig = plt.figure(4)
+           fig.set_size_inches(19, 11)
+           figName = join(directory,str(fiducial) + '_ratios_vs_iteration.png')
            plt.savefig(figName, dpi=dpi)
 
 #     def hdfName(self):
@@ -795,12 +943,38 @@ class Results(myObject):
 #         grp.create_dataset('savetime', data=self.saveTime)
 
 
-    def fromHdf(self, hdfFile, index, fid, sysPath):
-    
+    def read(self, fileName, systemFilePath, fiducial=None, index=None):
+        """ Reads a data point's results from HDF5 file """
 
+        with h5py.File(fileName, 'r')as f:
+            R = Results().fromHdf(f, systemFilePath, index=index, fiducial=fiducial)
+
+        R.plotMe = True
+        return R
+          
+
+    def read_fromH5Obj(self, h5obj, fName, grpName, sysPath = ''):
+        """ Reads a data points results from HDF5 file """
+        grp = h5obj.get(grpName)
+        assert not grp is None, "ID "+str(grpName) + " does not exist in file " + fName
+        self.fromHdf(grp, sysPath)
+
+
+    def fromHdf(self, hdfFile, systemFilePath, index=None, fiducial=None):
+
+        iNone = index is None
+        fNone = fiducial is None
+        
+        assert not (iNone and fNone) ^ (not iNone and not fNone), Exception("Must specify either an index OR a fiducial.")
+
+        fiducials = StatArray.StatArray().fromHdf(hdfFile['fiducials'])
+        
+        if not fNone:
+            index = fiducials.searchsorted(fiducial)
+    
         s = np.s_[index, :]
 
-        self.fiducial = np.float64(fid)
+        self.fiducial = np.float64(fiducials[index])
 
         self.iPlot = np.array(hdfFile.get('iplot'))
         self.plotMe = np.array(hdfFile.get('plotme'))
@@ -820,9 +994,9 @@ class Results(myObject):
         self.rate = hdfRead.readKeyFromFile(hdfFile,'','/','rate', index=s)
         self.PhiDs = hdfRead.readKeyFromFile(hdfFile,'','/','phids', index=s)
 
-        self.bestDataPoint = hdfRead.readKeyFromFile(hdfFile,'','/','bestd', index=index, sysPath=sysPath)
+        self.bestDataPoint = hdfRead.readKeyFromFile(hdfFile,'','/','bestd', index=index, sysPath=systemFilePath)
         try:
-            self.currentDataPoint = hdfRead.readKeyFromFile(hdfFile,'','/','currentdatapoint', index=index, sysPath=sysPath)
+            self.currentDataPoint = hdfRead.readKeyFromFile(hdfFile,'','/','currentdatapoint', index=index, sysPath=systemFilePath)
         except:
             self.currentDataPoint = self.bestDataPoint
             p = hdfRead.readKeyFromFile(hdfFile,'','/','dzhist', index=index)
@@ -865,20 +1039,7 @@ class Results(myObject):
 
         self.verbose = False
 
+        self.plotMe = True
+
         return self
 
-
-
-
-    def read(self, fName, grpName, sysPath = ''):
-        """ Reads a data points results from HDF5 file """
-        assert fIO.fileExists(fName), "Cannot find file "+fName
-        with h5py.File(fName, 'r')as f:
-          return self.read_fromH5Obj(f, fName, grpName, sysPath)
-          
-
-    def read_fromH5Obj(self, h5obj, fName, grpName, sysPath = ''):
-        """ Reads a data points results from HDF5 file """
-        grp = h5obj.get(grpName)
-        assert not grp is None, "ID "+str(grpName) + " does not exist in file " + fName
-        self.fromHdf(grp, sysPath)

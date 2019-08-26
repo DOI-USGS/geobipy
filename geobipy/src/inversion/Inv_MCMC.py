@@ -25,12 +25,12 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
     ID: Datapoint label for saving results
     pHDFfile: Optional HDF5 file opened using h5py.File('name.h5','w',driver='mpio', comm=world) before calling Inv_MCMC
     """
-    #%%
+    
     # Check the user input parameters against the datapoint
     userParameters.check(DataPoint)
 
     # Initialize the MCMC parameters and perform the initial iteration
-    [userParameters, Mod, DataPoint, prior, posterior, PhiD] = Initialize(userParameters, DataPoint, prng=prng)
+    [userParameters, Mod, DataPoint, prior, likelihood, posterior, PhiD] = Initialize(userParameters, DataPoint, prng=prng)
 
     Res = Results(DataPoint, Mod,
                 save = userParameters.save,
@@ -63,10 +63,8 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
     while (Go):
 
         # Accept or reject the new model
-        [Mod, DataPoint, prior, posterior, PhiD, posteriorComponents, failed] = AcceptReject(userParameters, Mod, DataPoint, prior, posterior, PhiD, Res, prng)# ,oF, oD, oRel, oAdd, oP, oA, i)
-
-        if userParameters.ignoreLikelihood:
-            Res.burnedIn = True
+        [Mod, DataPoint, prior, likelihood, posterior, PhiD, posteriorComponents, ratioComponents, accepted, dimensionChange] = AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, PhiD, Res, prng)# ,oF, oD, oRel, oAdd, oP, oA, i)
+        
         # Determine if we are burning in
         if (not Res.burnedIn):
             if (PhiD <= multiplier * DataPoint.data.size):
@@ -95,7 +93,7 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
             if (not Res.burnedIn and not userParameters.solveRelativeError):
                 multiplier *= userParameters.multiplier
 
-        Res.update(i, iBest, bestData, bestModel, DataPoint, multiplier, PhiD, Mod, posterior, posteriorComponents, userParameters.clipRatio)
+        Res.update(i, iBest, bestData, bestModel, DataPoint, multiplier, PhiD, Mod, posterior, posteriorComponents, ratioComponents, accepted, dimensionChange, userParameters.clipRatio)
 
         Res.plot("Fiducial {}".format(DataPoint.fiducial))
 
@@ -261,11 +259,9 @@ def Initialize(userParameters, DataPoint, prng):
 
     # Evaluate the prior for the current model
     p = Mod.priorProbability(userParameters.solveParameter, userParameters.solveGradient, userParameters.pLimits)
-    # print('model prior {}'.format(p))
     prior = p
     # Evaluate the prior for the current data
     p = DataPoint.priorProbability(userParameters.solveRelativeError, userParameters.solveAdditiveError, userParameters.solveElevation, userParameters.solveCalibration)
-    # print('data prior {}'.format(p))
     prior += p
 
     # Add the likelihood function to the prior
@@ -276,10 +272,10 @@ def Initialize(userParameters, DataPoint, prng):
     # print('likelhiood {}'.format(likelihood))
     posterior = likelihood + prior
 
-    return (userParameters, Mod, DataPoint, prior, posterior, PhiD)
+    return (userParameters, Mod, DataPoint, prior, likelihood, posterior, PhiD)
 
 
-def AcceptReject(userParameters, Mod, DataPoint, prior, posterior, PhiD, Res, prng):# ,oF, oD, oRel, oAdd, oP, oA ,curIter):
+def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, PhiD, Res, prng):# ,oF, oD, oRel, oAdd, oP, oA ,curIter):
     """ Propose a new random model and accept or reject it """
     clk = Stopwatch()
     clk.start()
@@ -348,22 +344,22 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, posterior, PhiD, Res, pr
     # Compute the data misfit
     PhiD1 = D1.dataMisfit(squared=True)
 
-    # Evaluate the prior for the current model
+    
     if (userParameters.verbose):
-        posteriorComponents = np.zeros(9, dtype=np.float64)
-        prior1, posteriorComponents[:4] = Mod1.probability(userParameters.solveParameter, userParameters.solveGradient, userParameters.pLimits, verbose=True)
-        tmp, posteriorComponents[4:-1] = D1.probability(userParameters.solveRelativeError, userParameters.solveAdditiveError, userParameters.solveElevation, userParameters.solveCalibration, verbose=True)
+        posteriorComponents = np.zeros(8, dtype=np.float64)
+        prior1, posteriorComponents[:4] = Mod1.priorProbability(userParameters.solveParameter, userParameters.solveGradient, userParameters.pLimits, verbose=True)
 
+        tmp, posteriorComponents[4:] = D1.priorProbability(userParameters.solveRelativeError, userParameters.solveAdditiveError, userParameters.solveElevation, userParameters.solveCalibration, verbose=True)
         prior1 += tmp
-        likelihood = 1.0
-        if not userParameters.ignoreLikelihood:
-            likelihood = D1.likelihood()
 
-        posteriorComponents[-1] = likelihood
-        posterior1 = likelihood + prior1
+        likelihood1 = D1.likelihood()
+
+        posterior1 = prior1 + likelihood1
 
 
     else:
+
+        # Evaluate the prior for the current model
         posteriorComponents = None
         # Evaluate the prior for the current model
         p = Mod1.priorProbability(userParameters.solveParameter, userParameters.solveGradient, userParameters.pLimits)
@@ -445,41 +441,26 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, posterior, PhiD, Res, pr
     except:
         failed = True
         acceptanceRatio = 0.0
+    if userParameters.verbose:
+        ratioComponents = np.asarray([prior1, prior, likelihood1, likelihood, proposal, proposal1, log_acceptanceRatio])
+        # print('ratio comp: {}'.format(rat
+        # 
+        # ioComponents))
+    else:
+        ratioComponents = None
         
-    acceptanceProbability = np.minimum(1.0, acceptanceRatio)
+    # acceptanceProbability = np.minimum(1.0, acceptanceRatio)
 
     # If we accept the model
     r = prng.uniform()
 
     if (acceptanceProbability > r):
-#        accepted=True
-        # Make the Current model the Candidate model
-        Mod0 = Mod1.deepcopy()
-        # # Make the Current data the Candidate data
-        D0 = D1.deepcopy()
-        # # Transfer over the posteriors and priors
-        # prior0 = prior1 #.copy()
-        # posterior0 = posterior1 #.copy()
-        # PhiD0 = PhiD1 #.copy()
         userParameters.unscaledVariance = unscaledVariance
         Res.acceptance += 1
-
-        # print('Accepted! {} {} {} {} {} {} {}'.format(prop, prop1, posterior, posterior1, P_depth, P_depth1, likeRatio))
-
-        return(Mod0, D0, prior1, posterior1, PhiD1, posteriorComponents, failed)
+        return(Mod1, D1, prior1, likelihood1, posterior1, PhiD1, posteriorComponents, ratioComponents, True, Mod.nCells[0] != Mod1.nCells[0])
 
     else:
-#        accepted=False
-        # Keep the unperturbed mdel
-        Mod0 = Mod.deepcopy()
-        D0 = DataPoint.deepcopy()
-        # prior0 = prior #.copy()
-        # posterior0 = posterior #.copy()
-        # PhiD0 = PhiD #.copy()
-
-        # print('Rejected! {} {} {} {} {} {} {}'.format(prop, prop1, posterior, posterior1, P_depth, P_depth1, likeRatio))
-
-        return(Mod0, D0, prior, posterior, PhiD, posteriorComponents, failed)
+        return(Mod, DataPoint, prior, likelihood, posterior, PhiD, posteriorComponents, ratioComponents, False, Mod.nCells[0] != Mod1.nCells[0])
 
     clk.stop()
 
