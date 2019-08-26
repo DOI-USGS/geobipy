@@ -382,89 +382,84 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
         posteriorComponents = None
         # Evaluate the prior for the current model
         p = Mod1.priorProbability(userParameters.solveParameter, userParameters.solveGradient, userParameters.pLimits)
-        # print('model prior {}'.format(p))
         prior1 = p
         # Evaluate the prior for the current data
         p = D1.priorProbability(userParameters.solveRelativeError, userParameters.solveAdditiveError, userParameters.solveElevation, userParameters.solveCalibration)
-        # print('data prior {}'.format(p))
         prior1 += p
 
-        likelihood = 1.0
-        if not userParameters.ignoreLikelihood:
-            likelihood = D1.likelihood()
+        likelihood1 = D1.likelihood()
 
-        # print('likeliohood {}'.format(likelihood))
-        # Add the likelihood function to the prior
-        posterior1 = likelihood + prior1
+        posterior1 = prior1 + likelihood1
 
-    # Exchange the mean of candidate models proposal mean with the
-    # pre-perturbed values (maintain the diagonal variance)
-
+    ### Evaluate the Reversible Jump Step.
     if (userParameters.stochasticNewton):
-        Mod1.par.setProposal('MvNormalLog', np.log(parSaved) - dm, Mod1.par.proposal.variance, prng=Mod1.par.proposal.prng)
-    else:
-        Mod1.par.setProposal('MvNormalLog', np.log(parSaved), Mod1.par.proposal.variance, prng=Mod1.par.proposal.prng)
 
-    if (userParameters.stochasticNewton):
-        # Get the pdf for the perturbed parameters
-        prop1 = Mod1.par.proposal.probability(np.log(Mod1.par))  # CAN.prop
-
+        # For the reversible jump, we need to compute the gradient from the perturbed parameter values.
+        # We therefore scale the sensitivity matrix by the proposed errors in the data, and our gradient uses
+        # the data residual using the perturbed parameter values.        
         J = D1.scaleJ(D1.J, power=2.0)
-        # Compute the gradient "uphill" back towards the previous model
-        gradient = np.dot(J.T, D1.deltaD[D1.iActive]) + \
-            userParameters.priStd**-1.0 * (np.log(Mod1.par) - userParameters.priMu)
 
-        # Compute the Model perturbation
-        dm = 0.5 * scaling * np.dot(unscaledVariance, gradient)
+        # Compute the gradient according to the perturbed parameters and data residual
+        gradient = np.dot(J.T, D1.deltaD[D1.iActive]) + userParameters.priStd**-1.0 * (np.log(Mod1.par) - userParameters.priMu)
+
+        # Compute the stochastic newton offset.
+        # The negative sign because we want to move downhill
+        SN_step_from_perturbed = -0.5 * scaling * np.dot(unscaledVariance, gradient)
 
         if (not Res.burnedIn):
-            dm = 0.0
-        tmp = Distribution('MvNormalLog', np.log(Mod1.par) - dm, scaling * unscaledVariance, prng=Mod1.par.proposal.prng)
+            SN_step_from_perturbed = 0.0
 
-        prop = tmp.probability(np.log(parSaved))  # CUR.prop
-    else:
+        # Create a multivariate normal distribution centered on the shifted parameter values, and with variance computed from the forward step.
+        # We don't recompute the variance using the perturbed parameters, because we need to check that we could in fact step back from 
+        # our perturbed parameters to the unperturbed parameters. This is the crux of the reversible jump.
+        tmp = Distribution('MvNormalLog', np.log(Mod1.par) + SN_step_from_perturbed, variance, prng=prng)
+        # Probability of jumping from our perturbed parameter values to the unperturbed values.
+        proposal = tmp.probability(np.log(unperturbedParameter))  # CUR.prop
+
+        # Now we evaluate the probability of jumping from our unperturbed parameter values to our perturbed parameter values using the variance 
+        # computed previously.
+        # Mod1.par.setProposal('MvNormalLog', np.log(unperturbedParameter) + SN_step_from_unperturbed, variance, prng=Mod1.par.proposal.prng)
+        tmp = Distribution('MvNormalLog', np.log(unperturbedParameter) + SN_step_from_unperturbed, variance, prng=prng)
         # Get the pdf for the perturbed parameters
-        prop1 = Mod1.par.proposal.probability(np.log(Mod1.par))  # CAN.prop
+        proposal1 = tmp.probability(np.log(Mod1.par))  # CAN.prop
+        
+    else:
 
-        par = StatArray.StatArray(np.log(Mod1.par))
-        cov = StatArray.StatArray(Mod1.par.proposal.variance)
-  
-        if (Mod1.nCells > Mod.nCells):  # Layer was inserted
-            tmp = np.mean(par[Mod1.perturbedLayer:Mod1.perturbedLayer + 2])
-            par = par.delete(Mod1.perturbedLayer)
-            par[Mod1.perturbedLayer] = tmp
-            cov = cov.delete(Mod1.perturbedLayer)
+        # Create a multivariate normal distribution centered on the perturbed parameter values, and with variance computed from the forward step.
+        # We don't recompute the variance using the perturbed parameters, because we need to check that we could in fact step back from 
+        # our perturbed parameters to the unperturbed parameters. This is the crux of the reversible jump.
+        tmp = Distribution('MvNormalLog', np.log(Mod1.par), variance, prng=prng)
+        proposal = tmp.probability(np.log(unperturbedParameter))  # CUR.prop
 
-        elif (Mod1.nCells < Mod.nCells):  # Layer was deleted
-            tmp = par[Mod1.perturbedLayer]
-            par = par.insert(Mod1.perturbedLayer, tmp)
-            tmp2 = cov[Mod1.perturbedLayer]
-            cov = cov.insert(Mod1.perturbedLayer, tmp2)
+        # Now we evaluate the probability of jumping from our unperturbed parameter values to our perturbed parameter values using the variance 
+        # computed previously.
+        remapped = Mod1.unperturb()
 
-        tmp = Mod.deepcopy()
-        tmp.par.setProposal('MvNormalLog', par, cov)
-        prop = tmp.par.proposal.probability(np.log(Mod.par))  # CUR.prop
+        tmp = Distribution('MvNormalLog', np.log(Mod.par), Mod.par.proposal.variance, prng=prng)
 
-    posteriorRatio = posterior1 - posterior
-    proposalRatio = prop - prop1
+        proposal1 = tmp.probability(np.log(remapped.par))  # CAN.prop
 
-    P_depth  = np.log(Mod.depth.probability(Mod.nCells[0]-1))
-    P_depth1 = np.log(Mod1.depth.probability(Mod1.nCells[0]-1))
 
-    # TEMPORARY TRY EXCEPT UNTIL I FIGURE OUT THE PROBLEM
-    acceptanceRatio = 0.0
+    priorRatio = prior1 - prior
+    likelihoodRatio = likelihood1 - likelihood
+    if userParameters.ignoreLikelihood:
+        likelihoodRatio = 0.0
+    proposalRatio = proposal - proposal1
+
+    # P_depth  = np.log(Mod.depth.probability(Mod.nCells[0] - 1))
+    # P_depth1 = np.log(Mod1.depth.probability(Mod1.nCells[0] - 1))
+
     try:
-        tmp = np.float128(posteriorRatio + proposalRatio + (P_depth - P_depth1))
-        acceptanceRatio = mExp(tmp)
-        failed = False
+        log_acceptanceRatio = np.float128(priorRatio + likelihoodRatio + proposalRatio) # + P_depth - P_depth1)
+
+        acceptanceProbability = mExp(log_acceptanceRatio)
     except:
-        failed = True
-        acceptanceRatio = 0.0
+        log_acceptanceRatio = -np.inf
+        acceptanceProbability = -1.0
+
+    
     if userParameters.verbose:
         ratioComponents = np.asarray([prior1, prior, likelihood1, likelihood, proposal, proposal1, log_acceptanceRatio])
-        # print('ratio comp: {}'.format(rat
-        # 
-        # ioComponents))
     else:
         ratioComponents = None
         
