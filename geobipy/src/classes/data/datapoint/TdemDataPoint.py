@@ -610,33 +610,35 @@ class TdemDataPoint(EmDataPoint):
             self._predictedData.prior.variance[:] = self._std[self.iActive]**2.0
 
 
-    def updateSensitivity(self, J, mod, option, scale=False):
+    def updateSensitivity(self, J, mod, action, scale=False):
         """ Compute an updated sensitivity matrix using a new model based on an existing matrix """
         J1 = np.zeros([np.size(self.iActive), mod.nCells[0]])
 
-        if(option == 3):  # Do Nothing!
+        if(action == 'none'):  # Do Nothing!
             J1[:, :] = J[:, :]
             return J1
 
-        if (option == 0):  # Created a layer
-            J1[:, :mod.perturbedLayer] = J[:, :mod.perturbedLayer]
-            J1[:, mod.perturbedLayer + 2:] = J[:, mod.perturbedLayer + 1:]
-            tmp = self.sensitivity(mod, ix=[mod.perturbedLayer, mod.perturbedLayer + 1], scale=scale, modelChanged=True)
-            J1[:, mod.perturbedLayer:mod.perturbedLayer + 2] = tmp
+        perturbedLayer = mod.action[1]
+
+        if (action == 'birth'):  # Created a layer
+            J1[:, :perturbedLayer] = J[:, :perturbedLayer]
+            J1[:, perturbedLayer + 2:] = J[:, perturbedLayer + 1:]
+            tmp = self.sensitivity(mod, ix=[perturbedLayer, perturbedLayer + 1], scale=scale, modelChanged=True)
+            J1[:, perturbedLayer:perturbedLayer + 2] = tmp
             return J1
 
-        if(option == 1):  # Deleted a layer
-            J1[:, :mod.perturbedLayer] = J[:, :mod.perturbedLayer]
-            J1[:, mod.perturbedLayer + 1:] = J[:, mod.perturbedLayer + 2:]
-            tmp = self.sensitivity(mod, ix=[mod.perturbedLayer], scale=scale, modelChanged=True)
-            J1[:, mod.perturbedLayer] = tmp[:, 0]
+        if(action == 'death'):  # Deleted a layer
+            J1[:, :perturbedLayer] = J[:, :perturbedLayer]
+            J1[:, perturbedLayer + 1:] = J[:, perturbedLayer + 2:]
+            tmp = self.sensitivity(mod, ix=[perturbedLayer], scale=scale, modelChanged=True)
+            J1[:, perturbedLayer] = tmp[:, 0]
             return J1
 
-        if(option == 2):  # Perturbed a layer
-            J1[:, :mod.perturbedLayer] = J[:, :mod.perturbedLayer]
-            J1[:, mod.perturbedLayer + 1:] = J[:, mod.perturbedLayer + 1:]
-            tmp = self.sensitivity(mod, ix=[mod.perturbedLayer], scale=scale, modelChanged=True)
-            J1[:, mod.perturbedLayer] = tmp[:, 0]
+        if(action == 'perturb'):  # Perturbed a layer
+            J1[:, :perturbedLayer] = J[:, :perturbedLayer]
+            J1[:, perturbedLayer + 1:] = J[:, perturbedLayer + 1:]
+            tmp = self.sensitivity(mod, ix=[perturbedLayer], scale=scale, modelChanged=True)
+            J1[:, perturbedLayer] = tmp[:, 0]
             return J1
 
         assert False, __name__ + '.updateSensitivity: Invalid option [0,1,2]'
