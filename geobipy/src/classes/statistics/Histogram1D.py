@@ -45,6 +45,7 @@ class Histogram1D(RectilinearMesh1D):
 
         # Allow an null instantiation
         if (bins is None and binCentres is None):
+            self._counts = None
             return
 
         # assert not (not log is None and not relativeTo is None), ValueError("Cannot use log option when histogram is relative.")
@@ -78,6 +79,25 @@ class Histogram1D(RectilinearMesh1D):
 
         self.log = log
         self.relativeTo = None if relativeTo is None else StatArray.StatArray(relativeTo)
+
+
+    def __getitem__(self, slic):
+        """Slice into the class. """
+        
+        assert np.shape(slic) == (), ValueError("slic must have one dimension.")
+
+
+        bins = super().__getitem__(slic).cellEdges
+
+        out = Histogram1D()
+        
+        out._cellEdges = bins
+        out.log = self.log
+        out.relativeTo = self.relativeTo
+
+        out._counts = self.counts[slic]
+        return out
+
 
 
     @property
@@ -400,11 +420,6 @@ class Histogram1D(RectilinearMesh1D):
         else:
             bins = self.bins
 
-        # if "reciprocateX" in kwargs:
-        #     bins = cF._power(self.bins, self.log)
-        #     bins = 1.0 / bins
-        #     bins, dum = cF._log(bins, self.log)
-
         ax = cP.hist(self.counts, bins, rotate=rotate, flipX=flipX, flipY=flipY, trim=trim, normalize=normalize, **kwargs)
         return ax
 
@@ -412,7 +427,6 @@ class Histogram1D(RectilinearMesh1D):
     def hdfName(self):
         """ Reprodicibility procedure """
         return('Histogram1D()')
-
 
 
     def createHdf(self, parent, myName, withPosterior=True, nRepeats=None, fillvalue=None):
