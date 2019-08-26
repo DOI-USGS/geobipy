@@ -7,6 +7,7 @@ from ....base import customFunctions as cF
 from ....base import customPlots as cP
 from ....classes.core import StatArray
 from ...system.FdemSystem import FdemSystem
+from ...system.CircularLoop import CircularLoop
 import numpy as np
 from ....base import fileIO as fIO
 #from ....base import Error as Err
@@ -92,7 +93,7 @@ class FdemData(Data):
         # StatArray of the line number for flight line data
         self.line = StatArray.StatArray(nPoints, 'Line Number')
         # StatArray of the id number
-        self.id = StatArray.StatArray(nPoints, 'ID Number')
+        self.fiducial = StatArray.StatArray(nPoints, 'Fiducial')
         # StatArray of the elevation
         # Assign data names
         self._data.name = 'Fdem Data'
@@ -109,6 +110,9 @@ class FdemData(Data):
                     k += 1
 
         self.iActive = self.getActiveChannels()
+
+        self.magnetic = None
+        self.powerline = None
 
     @property
     def nFrequencies(self):
@@ -263,11 +267,15 @@ class FdemData(Data):
         tmp._std[:, :] = self._std[i, :]
         tmp._predictedData[:, :] = self._predictedData[i, :]
         tmp.line[:] = self.line[i]
-        tmp.id[:] = self.id[i]
+        tmp.fiducial[:] = self.fiducial[i]
         tmp.elevation[:] = self.elevation[i]
         tmp.system = self.system
         tmp.nSystems = self.nSystems
-        # tmp.nChannelsPerSystem = self.nChannelsPerSystem
+        
+        if not self.powerline is None:
+            tmp.powerline = self.powerline[i].deepcopy()
+        if not self.magnetic is None:
+            tmp.magnetic = self.magnetic[i].deepcopy()
         return tmp
 
 
@@ -298,9 +306,9 @@ class FdemData(Data):
         assert not (iNone and fNone) ^ (not iNone and not fNone), Exception("Must specify either an index OR a fiducial.")
 
         if not fNone:
-            index = self.id.searchsorted(fiducial)
+            index = self.fiducial.searchsorted(fiducial)
 
-        return FdemDataPoint(self.x[index], self.y[index], self.z[index], self.elevation[index], self._data[index, :], self._std[index, :], system=self.system, lineNumber=self.line[index], fiducial=self.id[index])
+        return FdemDataPoint(self.x[index], self.y[index], self.z[index], self.elevation[index], self._data[index, :], self._std[index, :], system=self.system, lineNumber=self.line[index], fiducial=self.fiducial[index])
 
 
     # def mapChannel(self, channel, *args, system=0, **kwargs):
@@ -444,7 +452,9 @@ class FdemData(Data):
 
         self.readSystemFile(systemFilename)
 
-        nPoints, iC, iD, iS = self.__readColumnIndices(dataFilename, self.system)
+        nPoints, iC, iD, iS, powerline, magnetic = self.__readColumnIndices(dataFilename, self.system)
+
+        nBase = np.size(iC[0])
 
         # Get all readable column indices for the first file.
         tmp = [iC[0]]
@@ -452,6 +462,7 @@ class FdemData(Data):
         if not iS[0] is None:
             tmp.append(iS[0])
         indicesForFile = np.hstack(tmp)
+
 
         # Initialize the EMData Class
         FdemData.__init__(self, nPoints, systems=self.system)
@@ -461,21 +472,28 @@ class FdemData(Data):
 
         # Assign columns to variables
         self.line[:] = values[:, 0]
-        self.id[:] = values[:, 1]
+        self.fiducial[:] = values[:, 1]
         self.x[:] = values[:, 2]
         self.y[:] = values[:, 3]
         self.z[:] = values[:, 4]
         self.elevation[:] = values[:, 5]
+
+        if not powerline is None:
+            self.powerline = StatArray.StatArray(values[:, powerline], name='Powerline')
+        if not magnetic is None:
+            self.magnetic = StatArray.StatArray(values[:, magnetic], name='Magnetic', units='$nT$')
 
         # EM data columns are in the following order
         # I1 Q1 I2 Q2 .... IN QN ErrI1 ErrQ1 ... ErrIN ErrQN
         # Reshuffle to the following
         # I1 I2 ... IN Q1 Q2 ... QN and
         # ErrI1 ErrI2 ... ErrIN ErrQ1 ErrQ2 ... ErrQN
+
+        v = values[0, :]
         iSys = self._systemIndices(0)
-        self._data[:, iSys] = values[:, 6:6+2*self.nFrequencies[0]]
+        self._data[:, iSys] = values[:, nBase:nBase + (2 * self.nFrequencies[0])]
         if (iS[0]):
-            self._std[:, iSys] = values[:, 6+2*self.nFrequencies[0]:]
+            self._std[:, iSys] = values[:, nBase + (2 * self.nFrequencies[0]):]
         else:
             self._std[:, iSys] = 0.1 * self._data[:, iSys]
                     
@@ -491,9 +509,9 @@ class FdemData(Data):
             values = fIO.read_columns(dataFilename[i], indicesForFile[i], 1, nPoints)
             # Assign the data
             iSys = self._systemIndices(i)
-            self._data[:, iSys] = values[:, 6:6 + 2*self.nFrequencies[i]]
+            self._data[:, iSys] = values[:, nBase:nBase + 2 * self.nFrequencies[i]]
             if (iS[i]):
-                self._std[:, iSys] = values[:, 6+2*self.nFrequencies[i]:]
+                self._std[:, iSys] = values[:, nBase + 2 * self.nFrequencies[i]:]
             else:
                 self._std[:, iSys] = 0.1 * self._data[:, iSys]
 
@@ -589,7 +607,10 @@ class FdemData(Data):
             # Check for each aspect of the data file and the number of columns
             nCoordinates = 0
 
+            powerline = None
+            magnetic = None
             for channel in channels:
+                channel = channel.lower()
                 if(channel in ['line']):
                     nCoordinates += 1
                 elif(channel in ['id', 'fid']):
@@ -602,11 +623,15 @@ class FdemData(Data):
                     nCoordinates += 1
                 elif(channel in ['z','dtm','dem_elev','dem_np','topo', 'elev', 'elevation']):
                     nCoordinates += 1
+                elif(channel in ['powerline']):
+                    nCoordinates += 1
+                elif(channel in ['magnetic']):
+                    nCoordinates += 1
 
             assert nCoordinates >= 6, Exception("Data file must contain columns for easting, northing, height, elevation, line, and fid. \n {}".format(self.fileInformation()))
 
             nData = nChannels - nCoordinates
-
+            
             if nData > 2*system[k].nFrequencies:
                 _hasErrors = True
                 assert nData == 4*system[k].nFrequencies, Exception("Data file must have {0} data channels and {0} uncertainty channels each for in-phase and quadrature data.".format(system[k].nFrequencies))
@@ -618,7 +643,9 @@ class FdemData(Data):
 
             # To grab the EM data, skip the following header names. (More can be added to this)
             # Initialize a column identifier for x y z
-            _columnIndex = np.zeros(6, dtype=np.int32)
+            _columnIndex = np.zeros(nCoordinates, dtype=np.int32)
+            inPhase = []
+            quadrature = []
             for j, channel in enumerate(channels):
                 if(channel in ['line']):
                     _columnIndex[0] = j
@@ -630,21 +657,32 @@ class FdemData(Data):
                     _columnIndex[3] = j
                 elif (channel in ['alt', 'laser', 'bheight', 'height']):
                     _columnIndex[4] = j
-                elif(channel in ['z','dtm','dem_elev','dem_np','topo', 'elev']):
+                elif(channel in ['z','dtm','dem_elev','dem_np','topo', 'elev', 'elevation']):
                     _columnIndex[5] = j
-
-            i1 = nCoordinates + 2*system[k].nFrequencies
-            i2 = nCoordinates + 4*system[k].nFrequencies
-            tmp = np.arange(nCoordinates, i1)
-            _dataIndices = np.hstack((tmp[::2], tmp[1::2]))
-            tmp = np.arange(i1, i2)
-            _errIndices = np.hstack((tmp[::2], tmp[1::2])) if _hasErrors else None
+                elif channel in ['powerline']:
+                    _columnIndex[6] = j
+                    powerline = 6
+                elif channel in ['magnetic']:
+                    if nCoordinates == 6:
+                        _columnIndex[6] = j
+                        magnetic = 6
+                    else:
+                        _columnIndex[7] = j
+                        magnetic = 7
+                elif 'i_' in channel:
+                    inPhase.append(j)
+                elif 'q_' in channel:
+                    quadrature.append(j)           
+            
+            _dataIndices = np.hstack([inPhase, quadrature])
+            
+            _errIndices = np.hstack([inPhase + 2*system[k].nFrequencies, quadrature + 2*system[k].nFrequencies]) if _hasErrors else None
 
             indices.append(_columnIndex)
             dataIndices.append(_dataIndices)
             errIndices.append(_errIndices)
 
-        return nPoints, indices, dataIndices, errIndices
+        return nPoints, indices, dataIndices, errIndices, powerline, magnetic
 
 
     def _initLineByLineRead(self, dataFilename, systemFilename):
@@ -661,7 +699,7 @@ class FdemData(Data):
 
         # Read in the EM System file
         self.readSystemFile(systemFilename)
-        self._nPoints, self._iC, self._iD, self._iS = self.__readColumnIndices(dataFilename, self.system)
+        self._nPoints, self._iC, self._iD, self._iS, iP, iM = self.__readColumnIndices(dataFilename, self.system)
 
         if isinstance(dataFilename, str):
             dataFilename = [dataFilename]
@@ -737,6 +775,150 @@ class FdemData(Data):
         values = values[0]
 
         return FdemDataPoint(x=values[2], y=values[3], z=values[4], elevation=values[5], data=D, std=S, system=self.system, lineNumber=values[0], fiducial=values[1])
+
+
+    def readAarhusFile(self, dataFilename):
+        """Read in frequency domain data from an Aarhus workbench file.
+
+        Parameters
+        ----------
+        dataFilename : str
+            The data file.
+
+        """
+
+        # Read in the EM System file
+        if (isinstance(dataFilename, str)):
+            dataFilename = [dataFilename]
+
+        nDatafiles = len(dataFilename)
+        nSystems = nDatafiles
+
+        system, nPoints, iC, iD, nHeaderLines, iP, iM = self._readAarhusHeader(dataFilename[0])
+
+        # nPoints, iC, iD, iS = self.__readColumnIndices(dataFilename, self.system)
+
+        # Get all readable column indices for the first file.
+        tmp = [iC]
+        tmp.append(iD)
+        # if not iS[0] is None:
+        #     tmp.append(iS[0])
+        
+        if not iP is None:
+            tmp.append(iP)
+        if not iM is None:
+            tmp.append(iM)
+
+        indicesForFile = np.hstack(tmp)
+
+
+        # Initialize the EMData Class
+        FdemData.__init__(self, nPoints, systems=system)
+
+        values = fIO.read_columns(dataFilename[0], indicesForFile, nHeaderLines, nPoints)
+
+        # Assign columns to variables
+        self.line[:] = values[:, 0]
+        self.fiducial[:] = values[:, 1]
+        self.x[:] = values[:, 2]
+        self.y[:] = values[:, 3]
+        self.z[:] = values[:, 4]
+        self.elevation[:] = values[:, 5]
+
+        self._data[:, :] = values[:, 6:6+2*self.nFrequencies[0]]
+
+        if not iP is None:
+            self.powerline = StatArray.StatArray(values[:, 6+2*self.nFrequencies[0]])
+        if not iM is None:
+            iM = 6+2*self.nFrequencies[0]
+            if not iP is None:
+                iM += 1
+            self.magnetic = StatArray.StatArray(values[:, iM])
+            
+
+
+    def _readAarhusHeader(self, dataFilename):
+        """Read in the header information from an Aarhus workbench file.
+
+        Parameters
+        ----------
+        dataFilename : str
+            The data file.
+
+        """
+
+        with open(dataFilename, 'r') as f:
+            go = True
+            nHeaderLines = 0
+            while go:
+                line = f.readline().strip('/').lower()
+                nHeaderLines += 1
+                if "number of channels" in line:
+                    line = f.readline().strip('/')
+                    nHeaderLines += 1
+                    nFrequencies = np.int(line)
+                if "frequencies" in line:
+                    line = f.readline().strip('/').split()
+                    nHeaderLines += 1
+                    frequencies = np.asarray([np.float64(x) for x in line])
+                if "coil configurations" in line:
+                    pairs = f.readline().strip('/').split(')  (')
+                    nHeaderLines += 1
+                    transmitterLoops = StatArray.StatArray(nFrequencies, dtype=CircularLoop)
+                    receiverLoops = StatArray.StatArray(nFrequencies, dtype=CircularLoop)
+                    for i, pair in enumerate(pairs):
+                        tmp = pair.split(',')
+                        if 'VMD' in tmp[0]:
+                            transmitterLoops[i] = CircularLoop()
+                        else:
+                            transmitterLoops[i] = CircularLoop(orient='x', moment=-1)
+
+                        if 'VMD' in tmp[1]:
+                            receiverLoops[i] = CircularLoop()
+                        else:
+                            receiverLoops[i] = CircularLoop(orient='x', moment=-1)
+
+                if "coil separations" in line:
+                    line = f.readline().strip('/').split()
+                    nHeaderLines += 1
+                    loopSeparation = np.asarray([np.float64(x) for x in line])                    
+                    go = False
+                    channels = f.readline().strip('/')
+                    nHeaderLines += 1
+                
+
+        system = FdemSystem(nFrequencies, frequencies, transmitterLoops, receiverLoops, loopSeparation)
+
+
+        _powerline = None
+        _magnetic = None
+        _columnIndex = np.zeros(6, dtype=np.int32)
+        for j, channel in enumerate(channels.split()):
+            channel = channel.lower()
+            if(channel in ['line_no']):
+                _columnIndex[0] = j
+            elif(channel in ['fiducial']):
+                _columnIndex[1] = j
+            elif (channel in ['utmx']):
+                _columnIndex[2] = j
+            elif (channel in ['utmy']):
+                _columnIndex[3] = j
+            elif (channel in ['sensor_height']):
+                _columnIndex[4] = j
+            elif(channel in ['elevation']):
+                _columnIndex[5] = j
+            elif(channel == 'imag1'):
+                tmp = np.arange(j, j + 2 * nFrequencies)
+                _dataIndices = np.hstack((tmp[1::2], tmp[::2]))
+            elif channel == 'powerline':
+                _powerline = j
+            elif channel == 'magnetic':
+                _magnetic = j
+
+
+        nPoints = self._readNpoints([dataFilename]) - nHeaderLines + 1
+        
+        return system, nPoints, _columnIndex, _dataIndices, nHeaderLines, _powerline, _magnetic
         
 
     def fromHdf(self, grp, **kwargs):
@@ -847,7 +1029,7 @@ class FdemData(Data):
         out._data = self._data.Bcast(world, root=root)
         out._std = self._std.Bcast(world, root=root)
         out._predictedData = self._predictedData.Bcast(world, root=root)
-        out.id = self.id.Bcast(world, root=root)
+        out.fiducial = self.fiducial.Bcast(world, root=root)
         out.line = self.line.Bcast(world, root=root)
         return out
 
@@ -914,7 +1096,7 @@ class FdemData(Data):
         out._data = self._data.Scatterv(starts, chunks, world, root=root)
         out._std = self._std.Scatterv(starts, chunks, world, root=root)
         out._predictedData = self._predictedData.Scatterv(starts, chunks, world, root=root)
-        out.id = self.id.Scatterv(starts, chunks, world, root=root)
+        out.fiducial = self.fiducial.Scatterv(starts, chunks, world, root=root)
         out.line = self.line.Scatterv(starts, chunks, world, root=root)
         
         return out
@@ -932,7 +1114,13 @@ class FdemData(Data):
             header = "Line Fid Easting Northing Elevation Height "
 
             for x in sys.frequencies:
-                header += "I_{0} Q_{0} ".format(x)               
+                header += "I_{0} Q_{0} ".format(x)
+
+            if not self.powerline is None:
+                header += 'Power_line '
+            if not self.magnetic is None:
+                header += 'Magnetic'
+                
             d = np.empty(2*sys.nFrequencies)
 
             if std:
@@ -945,7 +1133,7 @@ class FdemData(Data):
                 with np.printoptions(formatter={'float': '{: 0.15g}'.format}, suppress=True):
                     for j in range(self.nPoints):
 
-                        x = np.asarray([self.line[j], self.id[j], self.x[j], self.y[j], self.elevation[j], self.z[j]])
+                        x = np.asarray([self.line[j], self.fiducial[j], self.x[j], self.y[j], self.elevation[j], self.z[j]])
 
                         if predictedData:
                             d[0::2] = self.predictedData[j, :sys.nFrequencies]
@@ -960,6 +1148,11 @@ class FdemData(Data):
                             x = np.hstack([x, d, s])
                         else:
                             x = np.hstack([x, d])
+
+                        if not self.powerline is None:
+                            x = np.hstack([x, self.powerline[j]])
+                        if not self.magnetic is None:
+                            x = np.hstack([x, self.magnetic[j]])
 
                         y = ""
                         for a in x:
