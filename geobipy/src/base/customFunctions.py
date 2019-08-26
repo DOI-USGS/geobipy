@@ -501,7 +501,13 @@ def expReal(this):
         exp(this).
 
     """
-    return np.float128(0.0) if this < -746.0 else np.float128(np.exp(this))
+    # if this < -746.0:
+    #     return 0.0
+
+    if this > 709.0:
+        return np.inf
+
+    return np.float128(np.exp(this))
 
 
 def tanh(this):
