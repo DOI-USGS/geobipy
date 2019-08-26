@@ -649,6 +649,23 @@ class Model1D(Model):
                     return other
 
 
+    def unperturb(self):
+        """After a model has had its structure perturbed, remap the model back its previous state. Used for the reversible jump McMC step.
+
+        """
+        if self.action[0] == 'none':
+            return self.deepcopy()
+
+        if self.action[0] == 'perturb':
+            other = self.deepcopy()
+            other.depth[self.action[1]] -= self.action[2]
+            return other
+
+        if self.action[0] == 'birth':
+            return self.deleteLayer(self.action[1])
+
+        if self.action[0] == 'death':
+            return self.insertLayer(self.action[2])
 
 
     def setPosteriors(self):
