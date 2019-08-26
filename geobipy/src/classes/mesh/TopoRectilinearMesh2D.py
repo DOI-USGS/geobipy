@@ -67,12 +67,28 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
         super().__init__(xCentres, xEdges, yCentres, yEdges, zCentres, zEdges)
 
         # mesh of the z axis values
-        self.height = RectilinearMesh1D(cellCentres=heightCentres, cellEdges=heightEdges)
+        self._height = RectilinearMesh1D(cellCentres=heightCentres, cellEdges=heightEdges)
 
-        assert self.height.nCells == self.x.nCells, Exception("heights must have enough values for {} cells or {} edges.".format(self.x.nCells, self.x.nEdges))
+        assert self._height.nCells == self._x.nCells, Exception("heights must have enough values for {} cells or {} edges.".format(self.x.nCells, self.x.nEdges))
 
         self.setXMesh()
         self.zMesh()
+
+    
+    def __getitem__(self, slic):
+        """Slice into the mesh. """
+
+        assert np.shape(slic) == (2, ), ValueError("slic must be over two dimensions.")
+
+        if self.xyz:
+            return TopoRectilinearMesh2D(xEdges=self._x[slic[1]], yEdges=self._y[slic[1]], zEdges=self._z[slic[0]], heightEdges=self._height[slic[1]])
+        else:
+            return TopoRectilinearMesh2D(xEdges=self._x[slic[1]], yEdges=self._y[slic[0]], heightEdges=self._height[slic[1]])
+
+
+    @property
+    def height(self):
+        return self._height
 
 
     def XMesh(self, xAxis='x'):
