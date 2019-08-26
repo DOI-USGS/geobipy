@@ -513,8 +513,15 @@ class Model1D(Model):
         
         """
         assert (self.dpar.hasPrior()), TypeError('No prior defined on parameter gradient. Use Model1D.dpar.setPrior() to set the prior.')
-        self.dpar[:] = (np.diff(np.log(self.par))) / (np.log(self.thk[:-1]) - hmin)
-        return self.dpar.probability()
+
+        if self.nCells[0] == 1:
+            tmp = self.insertLayer(self.minDepth + (0.5 * (np.exp(self.maxDepth) - np.exp(self.minDepth))))
+            tmp.dpar[:] = (np.diff(np.log(tmp.par))) / (np.log(tmp.thk[:-1]) - hmin)
+            probability = tmp.dpar.probability()
+        else:
+            self.dpar[:] = (np.diff(np.log(self.par))) / (np.log(self.thk[:-1]) - hmin)
+            probability = self.dpar.probability()
+        return probability
 
 
     def perturbStructure(self):
