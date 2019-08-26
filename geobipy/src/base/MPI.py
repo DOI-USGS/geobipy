@@ -6,6 +6,65 @@ from time import time
 #from ...base.Error import Error as Err
 
 
+class world3D(object):
+
+    def __init__(self, shape, world):
+        
+        assert world.size >= 8, ValueError("Must have at least 8 chunks for 3D load balancing.")
+
+        target = shape / np.linalg.norm(shape)
+        best = None
+        bestFit = 1e20
+        for i in range(2, int(world.size/2)+1):
+            for j in range(2, int(world.size/i)):
+                k = int(world.size/(i*j))
+                nBlocks = np.asarray([i, j, k])
+                total = np.prod(nBlocks)
+                
+                if total == world.size:
+                    fraction = nBlocks / np.linalg.norm(nBlocks)
+                    fit = np.linalg.norm(fraction - target)
+                    if fit < bestFit:
+                        best = nBlocks
+                        bestFit = fit
+
+
+        assert not best is None, Exception("Could not split {} into {} blocks. ".format(shape, world.size))
+
+        self.xStarts, self.xChunkSizes = loadBalance1D_shrinkingArrays(shape[0], best[0])
+        self.yStarts, self.ychunkSizes = loadBalance1D_shrinkingArrays(shape[1], best[1])
+        self.zStarts, self.zChunkSizes = loadBalance1D_shrinkingArrays(shape[2], best[2])
+
+        self.chunkShape = np.asarray([self.zChunks.size, self.yChunks.size, self.xChunks.size])
+        self.chunkIndex = np.unravel_index(self.rank, self.chunkShape)
+
+        self.world = world
+
+    
+    @property
+    def xIndices(self):
+        index = self.chunksIndex[2]
+        i0 = self.xStarts[index]
+        i1 = i0 + self.xChunkSizes[index]
+        return np.s_[i0:i1]
+
+    
+    @property
+    def yIndices(self):
+        index = self.chunksIndex[1]
+        i0 = self.yStarts[index]
+        i1 = i0 + self.yChunkSizes[index]
+        return np.s_[i0:i1]
+
+    
+    @property
+    def zIndices(self):
+        index = self.chunksIndex[0]
+        i0 = self.zStarts[index]
+        i1 = i0 + self.zChunkSizes[index]
+        return np.s_[i0:i1]
+    
+
 def print(aStr='', end='\n'):
     """Prints the str to sys.stdout and flushes the buffer so that printing is immediate
 
@@ -126,7 +185,7 @@ def getParallelPrng(world, timeFunction):
     return prng
 
 
-def loadBalance_shrinkingArrays(N, nChunks):
+def loadBalance1D_shrinkingArrays(N, nChunks):
     """Splits the length of an array into a number of chunks. Load balances the chunks in a shrinking arrays fashion.
 
     Given a length N, split N up into nChunks and return the starting index and size of each chunk. After being split equally among the chunks, the remainder is split so that the first remainder chunks get +1 in size. e.g. N=10, nChunks=3 would return starts=[0,4,7] chunks=[4,3,3]
@@ -154,6 +213,60 @@ def loadBalance_shrinkingArrays(N, nChunks):
     if (Nmod > 0):
         starts[Nmod:] += 1
     return starts, chunks
+
+
+def loadBalance3D_shrinkingArrays(shape, nChunks):
+    """Splits three dimensions among nChunks. 
+    
+    The number of chunks honours the relative difference in the values of shape. e.g. if shape is [600, 600, 300], then the number of chunks will be larger for the 
+    first two dimensions, and less for the third.
+    Once the chunks are obtained, the start indices and chunk sizes for each dimension are returned.
+
+    Parameters
+    ----------
+    N : array_like
+        A 3D shape to split.
+    nChunks : int
+        The number of chunks to split shape into.
+
+    Returns
+    -------
+    starts : ndarray of ints
+        The starting indices of each chunk.
+    chunks : ndarray of ints
+        The size of each chunk.
+
+    """
+    
+    # Find the "optimal" three product whose prod equals nChunks
+    # and whose relative amounts match as closely to shape as possible.
+
+    assert nChunks >= 8, ValueError("Must have at least 8 chunks for 3D load balancing.")
+
+    target = shape / np.linalg.norm(shape)
+    best = None
+    bestFit = 1e20
+    for i in range(2, int(nChunks/2)+1):
+        for j in range(2, int(nChunks/i)):
+            k = int(nChunks/(i*j))
+            nBlocks = np.asarray([i, j, k])
+            total = np.prod(nBlocks)
+            
+            if total == nChunks:
+                fraction = nBlocks / np.linalg.norm(nBlocks)
+                fit = np.linalg.norm(fraction - target)
+                if fit < bestFit:
+                    best = nBlocks
+                    bestFit = fit
+
+
+    assert not best is None, Exception("Could not split {} into {} blocks. ".format(shape, nChunks))
+
+    starts0, chunks0 = loadBalance1D_shrinkingArrays(shape[0], best[0])
+    starts1, chunks1 = loadBalance1D_shrinkingArrays(shape[1], best[1])
+    starts2, chunks2 = loadBalance1D_shrinkingArrays(shape[2], best[2])
+
+    return starts0, starts1, starts2, chunks0, chunks1, chunks2
 
 
 def _isendDtype(value, dest, world):
