@@ -47,6 +47,11 @@ setup(name='geobipy',
                            extra_link_args = ['-ffree-line-length-none', '-O3', '-finline-functions', '-funroll-all-loops', '-g0'],
                            sources=['geobipy/src/classes/forwardmodelling/fdemforward1D_fortran/m_fdemforward1D.f90'],
 		 ),
+         Extension(name='geobipy.src.classes.forwardmodelling.ipforward1d_fortran',
+                           extra_f90_compile_args = ['-ffree-line-length-none','-O3', '-finline-functions', '-funroll-all-loops'],
+                           extra_link_args = ['-ffree-line-length-none', '-O3', '-finline-functions', '-funroll-all-loops', '-g0'],
+                           sources=['geobipy/src/classes/forwardmodelling/ipforward1D_fortran/m_ipforward1D.f90'],
+		 ),
                  ],
     entry_points = {
         'console_scripts':[
