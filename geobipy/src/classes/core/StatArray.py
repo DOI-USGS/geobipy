@@ -821,7 +821,7 @@ class StatArray(np.ndarray, myObject):
         tmp = self.propose()
 
         if (i is None):
-            i = np.arange(self.size)
+            i = np.s_[:]
 
         if relative:
             self[i] += tmp[i]

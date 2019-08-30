@@ -351,7 +351,7 @@ class Results(myObject):
 
         ax = self.PhiDs.plot(self.iRange, i=np.s_[:self.i], marker=m, alpha=a, markersize=ms, linestyle=ls, color=c, **kwargs)
         plt.ylabel('Data Misfit')
-        dum = self.multiplier * self.bestDataPoint.iActive.size
+        dum = self.multiplier * self.currentDataPoint.iActive.size
         plt.axhline(dum, color='#C92641', linestyle='dashed', linewidth=lw)
         if (self.burnedIn):
             plt.axvline(self.iBurn, color='#C92641', linestyle='dashed', linewidth=lw)
@@ -363,11 +363,15 @@ class Results(myObject):
     def _plotObservedPredictedData(self, **kwargs):
         """ Plot the observed and predicted data """
 
-        self.bestDataPoint.plot(**kwargs)
+        self.currentDataPoint.plot(**kwargs)
 
-        c = kwargs.pop('color', cP.wellSeparated[3])
-        self.bestDataPoint.plotPredicted(color=c, **kwargs)
-
+        if self.burnedIn:
+            c = kwargs.pop('color', cP.wellSeparated[3])
+            self.bestDataPoint.plotPredicted(color=c, **kwargs)
+        else:
+            c = kwargs.pop('color', cP.wellSeparated[4])
+            self.currentDataPoint.plotPredicted(color=c, **kwargs)
+            
 
     def _plotNumberOfLayersPosterior(self, **kwargs):
         """ Plot the histogram of the number of layers """
@@ -381,18 +385,21 @@ class Results(myObject):
         """ Plot the histogram of the height """
         # self.DzHist.plot(**kwargs)
         ax = self.currentDataPoint.z.posterior.plot(**kwargs)
-        plt.axvline(self.bestDataPoint.z, color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
+        if self.burnedIn:
+            plt.axvline(self.bestDataPoint.z, color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
         ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 
     
     def _plotRelativeErrorPosterior(self, axes, **kwargs):
         """ Plots the histogram of the relative errors """
         self.currentDataPoint.relErr.plotPosteriors(axes=axes, **kwargs)
-        plt.locator_params(axis='x', nbins=4)
-        for i, a in enumerate(axes):
-            plt.sca(a)
-            plt.axvline(self.bestDataPoint.relErr[i], color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
-            a.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+
+        if self.burnedIn:
+            plt.locator_params(axis='x', nbins=4)
+            for i, a in enumerate(axes):
+                plt.sca(a)
+                plt.axvline(self.bestDataPoint.relErr[i], color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
+                a.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
         
 
     def _plotAdditiveErrorPosterior(self, axes, **kwargs):
@@ -405,15 +412,16 @@ class Results(myObject):
         else:
             p = self.currentDataPoint.addErr.posterior[0]
 
-        log = p.log
-        if (self.bestDataPoint.addErr[0] > p.bins[-1]):
-            log = 10 
-        
-        loc, dum = cF._log(self.bestDataPoint.addErr, log=log)
-        for i, a in enumerate(axes):
-            plt.sca(a)
-            plt.axvline(loc[i], color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
-            a.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+        if self.burnedIn:
+            log = p.log
+            if (self.bestDataPoint.addErr[0] > p.bins[-1]):
+                log = 10 
+            
+            loc, dum = cF._log(self.bestDataPoint.addErr, log=log)
+            for i, a in enumerate(axes):
+                plt.sca(a)
+                plt.axvline(loc[i], color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
+                a.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 
 
     def _plotLayerDepthPosterior(self, **kwargs):
@@ -645,6 +653,8 @@ class Results(myObject):
                 # v1 = np.maximum(np.minimum(np.nanmin(x), np.nanmin(y)), -200.0)
                 v2 = np.maximum(np.nanmax(x), np.nanmax(y)) + 10.0
                 v1 = v2 - 60.0
+                v1 = -20.0
+                v2 = 20.0
                 # plt.plot([v1,v2], [v1,v2])
                 plt.xlim([v1, v2])
                 plt.ylim([v1, v2])
@@ -658,8 +668,9 @@ class Results(myObject):
                 x[~self.dimensionChange].plot(x = y[~self.dimensionChange], linestyle='', marker='.', color='k', alpha=0.3)
                 x[self.dimensionChange].plot(x = y[self.dimensionChange], linestyle='', marker='.', alpha=0.3)
                 # v1 = np.maximum(np.minimum(np.nanmin(x), np.nanmin(y)), -200.0)
-                v2 = np.maximum(np.nanmax(x), np.nanmax(y)) + 10.0
-                v1 = v2 - 60.0
+                # v2 = np.maximum(np.nanmax(x), np.nanmax(y)) + 10.0
+                # v1 = v2 - 60.0
+                
                 # plt.plot([v1,v2], [v1,v2])
                 plt.xlim([v1, v2])
                 plt.ylim([v1, v2])
@@ -673,7 +684,7 @@ class Results(myObject):
                 r[~self.accepted].plot(x = irna, marker='o', markersize=1, linestyle='None', alpha=0.3, color='k')
                 r[self.accepted].plot(x = ira, marker='o', markersize=1, linestyle='None', alpha=0.3)
                 cP.ylabel('Proposal Ratio')
-                # plt.ylim([v1, v2])
+                plt.ylim([v1, v2])
 
                 # Acceptance ratio vs iteration
                 plt.sca(self.verboseAxs[20])
