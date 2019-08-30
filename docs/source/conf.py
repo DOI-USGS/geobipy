@@ -356,12 +356,21 @@ texinfo_documents = [
 
 # -- Sphinx Gallery Options
 from sphinx_gallery.sorting import FileNameSortKey
+from sphinx_gallery.sorting import ExplicitOrder
 
 sphinx_gallery_conf = {
     # path to your examples scripts
     "examples_dirs": [
         "../../examples/",
+        "../../examples/Data/",
     ],
+   'subsection_order': ExplicitOrder(['../../examples/Statistics/',
+                                    '../../examples/Meshes/',
+                                    '../../examples/Models/',
+                                    '../../examples/Pointclouds/',
+                                    '../../examples/Data/',
+                                    '../../examples/Inversion/',
+                                    ]),
     # path where to save gallery generated examples
     "gallery_dirs": ["examples"],
     # Patter to search for example files
@@ -376,7 +385,7 @@ sphinx_gallery_conf = {
     "doc_module": "geobipy",
     "image_scrapers": ('matplotlib'),
     "thumbnail_size": (350, 350),
-    'first_notebook_cell': ("%matplotlib inline\n"
-                            "%load_ext autoreload\n"
-                            "%autoreload 2")
+    'first_notebook_cell': ("%matplotlib inline\n"),
+    'abort_on_example_error': True,
+    'remove_config_comments': True,
 }

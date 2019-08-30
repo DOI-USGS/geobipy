@@ -11,10 +11,15 @@ from os.path import join
 ################################################################################
 # Let's read in a frequency domain data set
 
+dataFolder = "..//supplementary//Data//"
+
+# The data file name
+dataFile = dataFolder + 'Resolve2.txt'
+# The EM system file name
+systemFile = dataFolder + 'FdemSystem2.stm'
+
 FD1 = FdemData()
-dataFname=join('supplementary','Data','Resolve2.txt')
-systemFname=join('supplementary','Data','FdemSystem2.stm')
-FD1.read(dataFname, systemFname)
+FD1.read(dataFile, systemFile)
 
 ################################################################################
 
@@ -50,7 +55,7 @@ FD1.plot(channels=[0,11,8], log=10, linewidth=0.5);
 
 
 FD2 = FdemData()
-FD2.read(dataFilename=join('supplementary','Data','Resolve1.txt'), systemFilename=join('supplementary','Data','FdemSystem1.stm'))
+FD2.read(dataFilename=dataFolder + 'Resolve1.txt', systemFilename=dataFolder + 'FdemSystem1.stm')
 
 ################################################################################
 # We can create maps of the elevations in two separate figures

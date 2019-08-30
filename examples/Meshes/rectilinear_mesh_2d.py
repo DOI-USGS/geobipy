@@ -59,31 +59,31 @@ a
 ################################################################################
 # Compute the mean over an interval for the mesh.
 
-rm.intervalMean(a, [6.8, 12.4], 0)
+rm.intervalStatistic(a, intervals=[6.8, 12.4], axis=0, statistic='mean')
 
 
 ################################################################################
 # Compute the mean over multiple intervals for the mesh.
 
-rm.intervalMean(a, [6.8, 12.4, 20.0, 40.0], 0)
+rm.intervalStatistic(a, intervals=[6.8, 12.4, 20.0, 40.0], axis=0, statistic='mean')
 
 
 ################################################################################
 
 
-rm.intervalMean(a, [2.8, 4.2], 1)
+rm.intervalStatistic(a, intervals=[2.8, 4.2], axis=1, statistic='mean')
 
 
 ################################################################################
 
 
-rm.intervalMean(a, [2.8, 4.2, 5.1, 8.4], 1)
+rm.intervalStatistic(a, intervals=[2.8, 4.2, 5.1, 8.4], axis=1, statistic='mean')
 
 
 ################################################################################
 
 
-arr = StatArray(np.random.random(rm.dims), 'Name', 'Units')
+arr = StatArray(np.random.random(rm.shape), 'Name', 'Units')
 
 
 ################################################################################

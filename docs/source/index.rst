@@ -15,21 +15,13 @@ Welcome to GeoBIPy's documentation!
 
 .. include:: ../../README.rst
 
-
-.. toctree::
-   :maxdepth: 3
-   :hidden:
-
-   examples/index
-
-
 .. toctree::
    :maxdepth: 3
    :hidden:
 
    content/getting_started/getting_started
    content/api/api
-
+   examples/index
 
 Indices and tables
 ==================

@@ -1,6 +1,6 @@
 """
-Fdem Data Point Class
----------------------
+Frequency Domain Datapoint Class
+--------------------------------
 
 Fdem Data contains entire data sets
 
@@ -21,10 +21,12 @@ from geobipy import StatArray
 
 ################################################################################
 
+dataFolder = "..//supplementary//Data//"
+
 # The data file name
-dataFile = join('supplementary','Data','Resolve2.txt')
+dataFile = dataFolder + 'Resolve2.txt'
 # The EM system file name
-systemFile = join('supplementary','Data','FdemSystem2.stm')
+systemFile = dataFolder + 'FdemSystem2.stm'
 
 
 ################################################################################

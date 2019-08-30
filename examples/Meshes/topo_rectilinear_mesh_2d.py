@@ -16,7 +16,7 @@ import numpy as np
 # Create input StatArrays for the horizontal and vertical (x and y) mesh axes
 
 x = StatArray(np.arange(10.0), 'Easting', 'm')
-y = StatArray(np.arange(10.0), 'Northing', 'm')
+y = StatArray(np.arange(10.0), 'Height', 'm')
 
 ################################################################################
 # Create a height profile for the mesh
@@ -39,29 +39,29 @@ rm.plotGrid()
 ################################################################################
 # Create an array of random numbers that we can pass to the mesh and perform operations
 
-values = StatArray(np.random.random(rm.dims), 'Name', 'Units')
+values = StatArray(np.random.random(rm.shape), 'Name', 'Units')
 
 ################################################################################
 # Compute the mean over an interval for the mesh.
 
-rm.intervalMean(values, intervals=[6.8, 12.4], axis=0)
+rm.intervalStatistic(values, intervals=[6.8, 12.4], axis=0)
 
 ################################################################################
 # Compute the mean over multiple intervals for the mesh.
 
-rm.intervalMean(values, intervals=[6.8, 12.4, 20.0, 40.0], axis=0)
+rm.intervalStatistic(values, intervals=[6.8, 12.4, 20.0, 40.0], axis=0)
 
 
 ################################################################################
 
 
-rm.intervalMean(values, intervals=[2.8, 4.2], axis=1)
+rm.intervalStatistic(values, intervals=[2.8, 4.2], axis=1)
 
 
 ################################################################################
 
 
-rm.intervalMean(values, intervals=[2.8, 4.2, 5.1, 8.4], axis=1)
+rm.intervalStatistic(values, intervals=[2.8, 4.2, 5.1, 8.4], axis=1)
 
 
 ################################################################################
@@ -93,7 +93,7 @@ z = StatArray(np.cumsum(np.arange(10.0)), 'Depth', 'm')
 
 
 rm = TopoRectilinearMesh2D(xCentres=x, yCentres=y, zCentres=z, heightCentres=height)
-values = StatArray(np.arange(rm.nCells, dtype=np.float).reshape(rm.dims), 'Name', 'Units')
+values = StatArray(np.arange(rm.nCells, dtype=np.float).reshape(rm.shape), 'Name', 'Units')
 
 
 ################################################################################

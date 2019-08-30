@@ -1,9 +1,8 @@
 """
-1D Model
---------
+1D Model with an infinite halfspace
+-----------------------------------
 
 """
-
 ################################################################################
 
 from geobipy import StatArray
@@ -17,8 +16,8 @@ from geobipy import hdfRead
 # Make a test model with 10 layers, and increasing parameter values
 
 par = StatArray(np.linspace(0.01, 0.1, 10), "Conductivity", "$\\frac{S}{m}$")
-thk = StatArray(np.arange(1, 11))
-mod = Model1D(parameters=par, thickness=thk, hasHalfspace=False)
+thk = StatArray(np.ones(9) * 10.0)
+mod = Model1D(parameters=par, thickness=thk)
 
 
 ################################################################################
@@ -37,9 +36,9 @@ mod.summary()
 prng = np.random.RandomState()
 # Assign probabilities to the model layers
 # They are the cumulative probability of life-death-perturb-doNothing
-mod.makePerturbable(pWheel=[0.5, 0.05, 0.15, 0.1], minDepth=1.0, maxDepth=150.0, maxLayers=30, prng=prng)
+mod.setPriors(pWheel=[0.5, 0.05, 0.15, 0.1], halfSpaceValue=1.0, minDepth=1.0, maxDepth=150.0, maxLayers=30, prng=prng)
 # We can then perturb the layers of the model
-perturbed,option,value = mod.perturb()
+perturbed = mod.perturbStructure()
 
 
 ################################################################################
@@ -57,7 +56,8 @@ plt.savefig('Perturbed.png', dpi=200, figsize=(8,6))
 
 
 plt.figure()
-mod.plot(flipY=True, xscale='log')
+mod.plot()
+
 
 ################################################################################
 # We can evaluate the prior of the model
@@ -67,10 +67,8 @@ try:
 except:
   print('This will not work because no prior has been assigned')
 
-
 ################################################################################
-# This last command failed because we did not assign a prior distribution to
-# the model parameters
+# This last command failed because we did not assign a prior distribution to the model parameters
 
 # Set priors on the depth interfaces, given a number of layers
 mod.depth.setPrior('Order',mod.minDepth,mod.maxDepth,mod.minThickness,30)
@@ -84,23 +82,24 @@ print('Probability of the Model given its priors: ', mod.priorProbability(False,
 # Or with priors on its parameters, and parameter gradient with depth.
 print('Probability of the Model given its priors: ', mod.priorProbability(True,True))
 
-
 ################################################################################
 # Evaluating the prior uses the probability of the parameter distributions
 
 # Evaluate the probability for these depths
 print(mod.depth.probability(mod.nCells))
 
-
 ################################################################################
-# Writing with HDF5
+# Write to a HDF5 file
 
 with h5py.File('Model1D.h5','w') as hf:
     mod.toHdf(hf,'Model1D')
 
+
 ################################################################################
 # Read from the file
-ModNew = hdfRead.readKeyFromFiles('Model1D.h5','/','Model1D')
+
+
+ModNew=hdfRead.readKeyFromFiles('Model1D.h5','/','Model1D')
 
 
 ################################################################################
@@ -109,7 +108,7 @@ ModNew = hdfRead.readKeyFromFiles('Model1D.h5','/','Model1D')
 plt.figure()
 ax = plt.subplot(131)
 ModNew.pcolor(grid=True)
-ax = plt.subplot(133, sharey = ax)
+plt.subplot(133, sharey = ax)
 ModNew.plot(flipY=False)
 
 
@@ -148,7 +147,7 @@ f.close()
 
 from geobipy import Hitmap2D
 x = StatArray(np.logspace(-3, -0, 100), name='Parameter')
-y = StatArray(np.linspace(0.0, 60.0, 100), name='Depth', units='m')
+y = StatArray(np.linspace(0.0, 200.0, 100), name='Depth', units='m')
 Hit = Hitmap2D(xBins=x, yBins=y)
 
 
@@ -157,7 +156,7 @@ Hit = Hitmap2D(xBins=x, yBins=y)
 
 perturbed.addToHitMap(Hitmap=Hit)
 for i in range(100):
-    perturbed,option,value = perturbed.perturb()
+    perturbed = perturbed.perturbStructure()
     perturbed.addToHitMap(Hitmap=Hit)
 
 
@@ -167,14 +166,11 @@ for i in range(100):
 plt.figure()
 Hit.pcolor(flipY=True, xscale='log', cmap='gray_r')
 
-
 ################################################################################
-# We can access and plot the elements of model.
-# The parameters are an [StatArray](../../Base/StatArray_Class.ipynb)
+# We can access and plot the elements of model. The parameters are an [StatArray](../../Base/StatArray_Class.ipynb)
 
 plt.figure()
 mod.par.plot()
-
 
 ################################################################################
 # Or we can plot the 1D model as coloured blocks

@@ -1,6 +1,6 @@
 """
-Tdem Data Point Class
----------------------
+Time Domain Datapoint Class
+---------------------------
 
 Tdem Data contains entire data sets
 
@@ -21,11 +21,12 @@ from geobipy import StatArray
 
 ################################################################################
 
+dataFolder = "..//supplementary//Data//"
 
 # The data file name
-dataFile=[join('supplementary','Data','Skytem_High.txt'), join('supplementary','Data','Skytem_Low.txt')]
+dataFile=[dataFolder + 'Skytem_High.txt', dataFolder + 'Skytem_Low.txt']
 # The EM system file name
-systemFile=[join('supplementary','Data','SkytemHM-SLV.stm'), join('supplementary','Data','SkytemLM-SLV.stm')]
+systemFile=[dataFolder + 'SkytemHM-SLV.stm', dataFolder + 'SkytemLM-SLV.stm']
 
 ################################################################################
 # Initialize and read an EM data set
@@ -147,10 +148,10 @@ with h5py.File('TdemDataPoint.h5','w') as hf:
 ################################################################################
 # And then read it in
 
-P1 = hdfRead.readKeyFromFiles('TdemDataPoint.h5','/','tdp', sysPath=join('supplementary','Data'))
+# P1 = hdfRead.readKeyFromFiles('TdemDataPoint.h5','/','tdp', sysPath=join('supplementary','Data'))
 
 
 ################################################################################
 
 
-P1.summary()
+# P1.summary()

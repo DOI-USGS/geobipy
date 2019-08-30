@@ -11,8 +11,12 @@ from geobipy import Data
 import numpy as np
 import matplotlib.pyplot as plt
 from os.path import join
-# Set the example file name
-filename = join('supplementary','Data','Resolve1.txt')
+
+
+dataFolder = "..//supplementary//Data//"
+
+# The data file name
+dataFile = dataFolder + 'Resolve2.txt'
 
 ################################################################################
 # We can read data from an ascii file.  The number of headers is given, and the
@@ -21,7 +25,7 @@ filename = join('supplementary','Data','Resolve1.txt')
 # The first three indices are the x, y, z columns.
 D = Data()
 iCols = [2,3,4,6,7,8,9,10,11]
-D.read(filename, columnIndex=iCols, nHeaders=1)
+D.read(dataFile, columnIndex=iCols, nHeaders=1)
 
 ################################################################################
 # We can grab one of the channels as an StatArray

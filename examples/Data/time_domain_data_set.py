@@ -13,16 +13,18 @@ from geobipy.src.classes.data.dataset.TdemData import TdemData
 
 ################################################################################
 
+dataFolder = "..//supplementary//Data//"
 
-dataFname = [join('supplementary','Data','Skytem_High.txt'), join('supplementary','Data','Skytem_Low.txt')]
-systemFname = [join('supplementary','Data','SkytemHM-SLV.stm'), join('supplementary','Data','SkytemLM-SLV.stm')]
-
+# The data file name
+dataFiles=[dataFolder + 'Skytem_High.txt', dataFolder + 'Skytem_Low.txt']
+# The EM system file name
+systemFiles=[dataFolder + 'SkytemHM-SLV.stm', dataFolder + 'SkytemLM-SLV.stm']
 
 ################################################################################
 
 
 TD = TdemData()
-TD.read(dataFname, systemFname)
+TD.read(dataFiles, systemFiles)
 
 
 ################################################################################

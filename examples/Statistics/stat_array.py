@@ -17,6 +17,7 @@ from geobipy import hdfRead
 
 ################################################################################
 # Instantiating a new StatArray class
+# ===================================
 #
 # The StatArray can take any numpy function that returns an array as an input.
 # The name and units of the variable can be assigned to the StatArray.
@@ -26,17 +27,21 @@ Density.summary()
 
 
 ################################################################################
-# Attaching a Prior and Proposal Distributions to an StatArray
+# Attaching Prior and Proposal Distributions to a StatArray
+# =========================================================
 #
 # The StatArray class has been built so that we may easily attach not only names and units, but statistical distributions too.  We won't go into too much detail about the different distribution classes here so check out [This Notebook](Distributions.ipynb) for a better description.
 #
 # Two types of distributions can be attached to the StatArray.
+#
 # * Prior Distribution
-#     The prior represents how the user believes the variable should behave from a statistical standpoint.  The values of the variable can be evaluated against the attached prior, to determine how likely they are to have occured [Wiki Page](https://en.wikipedia.org/wiki/Prior_probability).
+#     The prior represents how the user believes the variable should behave from a statistical standpoint.  The values of the variable can be evaluated against the attached prior, to determine how likely they are to have occured https://en.wikipedia.org/wiki/Prior_probability
+#
 # * Proposal Distribution
-#     The proposal describes a probability distribution from which to sample when we wish to perturb the variable [Wiki Page](https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm).
+#     The proposal describes a probability distribution from which to sample when we wish to perturb the variable https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm
 #
 # Attach a univariate normal distribution as the prior
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 # Obtain an instantiation of a random number generator
@@ -58,28 +63,25 @@ print("Class type of the proposal: ",type(Density.proposal))
 # The values in the variable can be evaluated against the prior
 # In this case, we have 3 elements in the variable, and a univariate Normal for the prior. Therefore each element is evaluated to get 3 probabilities, one for each element.
 
-
-Density.probability()
+print(Density.probability())
 
 ################################################################################
 # The univarite proposal distribution can generate random samples from itself.
 
-Density.proposal.rng()
+print(Density.proposal.rng())
 
 
 ################################################################################
 # We can perturb the variable by drawing from the attached proposal distribution.
 
 Density.perturb()
-
-
+Density.summary()
 
 ################################################################################
-# Attach multivariate normal distributions as the prior and proposal
+# Attach a multivariate normal distribution as the prior and proposal
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
 # Attach the multivariate prior
-
-
 
 mean = np.random.randn(Density.size)
 variance = np.ones(Density.size)
@@ -89,8 +91,9 @@ Density.setPrior('MvNormal', mean, variance, prng=prng)
 ################################################################################
 # Since the prior is multivariate, the appropriate equations are used to
 # evaluate the probability for all elements in the StatArray.
+# This produces a single probability.
 
-Density.probability()
+print(Density.probability())
 
 ################################################################################
 # Attach the multivariate proposal
@@ -104,187 +107,184 @@ Density.setProposal('MvNormal', mean, variance, prng=prng)
 # Perturb the variables using the multivariate proposal.
 
 Density.perturb()
+Density.summary()
 
 
 ################################################################################
 # Basic manipulation
+# ==================
 #
 # The StatArray contains other functions to perform basic array manipulations
 #
 # These routines essentially wrap around numpy functions, but the result will have the same name and units, and if any prior or proposal are set, those will be carried through too.
 #
 # 1D example
-
+# ++++++++++
 
 x = StatArray(-np.cumsum(np.arange(10.0)))
-x
+print(x)
+
+################################################################################
+
+
+print(x.insert(i=[0, 9], values=[999.0, 999.0]))
 
 
 ################################################################################
 
 
-x.insert(i=[0, 9], values=[999.0, 999.0])
+print(x.prepend(999.0))
 
 
 ################################################################################
 
 
-x.prepend(999.0)
+print(x.prepend([998.0, 999.0]))
 
 
 ################################################################################
 
 
-x.prepend([998.0, 999.0])
+print(x.append([998.0, 999.0]))
 
 
 ################################################################################
 
 
-x.append([998.0, 999.0])
+print(x.resize(14))
 
 
 ################################################################################
 
 
-x.resize(14)
+print(x.delete([5,8]))
 
 
 ################################################################################
 
 
-x.delete([5,8])
+print(x.edges())
 
 
 ################################################################################
 
 
-x.edges()
+print(x.internalEdges())
 
 
 ################################################################################
 
 
-x.internalEdges()
+print(x.firstNonZero())
 
 
 ################################################################################
 
 
-x.firstNonZero()
+print(x.lastNonZero())
 
 
 ################################################################################
 
 
-x.lastNonZero()
-
-
-################################################################################
-
-
-x.abs()
+print(x.abs())
 
 
 ################################################################################
 # 2D example
+# ++++++++++
 
 x = StatArray(np.asarray([[0, -2, 3],[3, 0, -1],[1, 2, 0]]))
-x
+print(x)
 
 
 ################################################################################
 
 
-x.insert(i=0, values=4)
+print(x.insert(i=0, values=4))
 
 
 ################################################################################
 
 
-x.insert(i=[2, 3], values=5, axis=1)
+print(x.insert(i=[2, 3], values=5, axis=1))
 
 
 ################################################################################
 
 
-x.insert(i=2, values=[10, 11, 12], axis=1)
+print(x.insert(i=2, values=[10, 11, 12], axis=1))
 
 
 ################################################################################
 
 
-x.prepend(999)
+print(x.prepend(999))
 
 
 ################################################################################
 
 
-x.prepend([999, 998, 997], axis=1)
+print(x.prepend([999, 998, 997], axis=1))
 
 
 ################################################################################
 
 
-x.append([[999, 998, 997]])
+print(x.append([[999, 998, 997]]))
 
 
 ################################################################################
 
 
-x.resize([5,5])
+print(x.resize([5,5]))
 
 
 ################################################################################
 
 
-x.delete(5)
+print(x.delete(5))
 
 
 ################################################################################
 
 
-x.delete(2, axis=0)
+print(x.delete(2, axis=0))
 
 
 ################################################################################
 
 
-x
+print(x.firstNonZero(axis=0))
 
 
 ################################################################################
 
 
-x.firstNonZero(axis=0)
+print(x.lastNonZero(axis=0))
 
 
 ################################################################################
 
 
-x.lastNonZero(axis=0)
+print(x.firstNonZero(axis=1))
 
 
 ################################################################################
 
 
-x.firstNonZero(axis=1)
+print(x.lastNonZero(axis=1))
 
 
 ################################################################################
 
 
-x.lastNonZero(axis=1)
-
-
-################################################################################
-
-
-x.abs()
+print(x.abs())
 
 
 ################################################################################
 # Plotting
+# ========
 #
 # We can easily plot the StatArray with its built in plotting functions.
 # All plotting functions can take the matplotlib keywords
@@ -318,6 +318,7 @@ Density.scatter(alpha=0.7)
 
 ################################################################################
 # Histogram Equalization
+# ++++++++++++++++++++++
 #
 # A neat trick with colourmaps is histogram equalization.
 # This approach forces all colours in the images to have an equal weight.
@@ -348,9 +349,13 @@ Density.scatter(x=Time, alpha=0.7, edgecolor='k')
 
 
 ################################################################################
-# Notice that I never specified the y axis, so the y axis defaulted to the values in the StatArray. In this case, any operations applied to the colours, are also applied to the y axis, e.g. log=10.  When I take the values of Density to log base 10, because I do not specify the y plotting locations, those locations are similarly affected.
+# Notice that I never specified the y axis, so the y axis defaulted to the values in the StatArray. 
+# In this case, any operations applied to the colours, are also applied to the y axis, e.g. log=10.  
+# When I take the values of Density to log base 10, because I do not specify the y plotting locations, those locations are similarly affected.
 #
-# I can however force the y co-ordinates by specifying it as input. In the second subplot I explicitly plot distance on the y axis. In the first subplot, the y axis is the same as the colourbar.
+# I can however force the y co-ordinates by specifying it as input. 
+# In the second subplot I explicitly plot distance on the y axis. 
+# In the first subplot, the y axis is the same as the colourbar.
 
 
 plt.figure()
@@ -428,7 +433,6 @@ Density.hist(100)
 
 with h5py.File('1Dtest.h5','w') as f:
     Density.toHdf(f,'test')
-
 
 
 ################################################################################
@@ -517,9 +521,9 @@ a = StatArray(np.random.random(Density.shape), 'Opacity from 0.0 to 1.0')
 
 plt.figure()
 ax1 = plt.subplot(131)
-ax = Density.pcolor(x=x, y=y, flipY=True, grid=True, linewidth=0.1, noColorbar=True)
+ax = Density.pcolor(x=x, y=y, flipY=True, linewidth=0.1, noColorbar=True)
 plt.subplot(132, sharex=ax1, sharey=ax1)
-ax = Density.pcolor(x=x, y=y, alpha=a, flipY=True, grid=True, linewidth=0.1, noColorbar=True)
+ax = Density.pcolor(x=x, y=y, alpha=a, flipY=True, linewidth=0.1, noColorbar=True)
 plt.subplot(133, sharex=ax1, sharey=ax1)
 ax = a.pcolor(x=x, y=y, flipY=True)
 
@@ -535,7 +539,7 @@ plt.figure()
 plt.subplot(121)
 Density.pcolor()
 plt.subplot(122)
-Density.pcolor(trim=True)
+Density.pcolor(trim=0.0)
 
 
 ################################################################################

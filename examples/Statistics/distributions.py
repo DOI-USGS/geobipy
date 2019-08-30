@@ -10,16 +10,16 @@ import numpy as np
 
 ################################################################################
 # Normal Distribution
-D = Distribution('Normal',0.0,1.0)
+D = Distribution('Normal', 0.0, 1.0)
 
 ################################################################################
 # Grab random samples from the distribution
-D.rng(10)
+print(D.rng(10))
 
 ################################################################################
 # Get the bins of the Distribution from +- 4 standard deviations of the mean
-bins = D.getBins()
-bins
+bins = D.getBinEdges()
+print(bins)
 
 ################################################################################
 # We can then get the Probability Density Function for those bins
@@ -34,15 +34,8 @@ cP.plot(bins,pdf)
 D = Distribution('MvNormal',[0.0,1.0,2.0],[1.0,1.0,1.0])
 D.rng()
 
-################################################################################
-bins = D.getBins()
-
-s = np.random.random.__self__
-s.gamma
-
-bins
 
 ################################################################################
 # Uniform Distribution
 D = Distribution('Uniform', 0.0, 1.0)
-D.getBins()
+D.getBinEdges()

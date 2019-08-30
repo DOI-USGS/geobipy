@@ -87,7 +87,9 @@ plt.plot(0.0, 0.0, 'x')
 ################################################################################
 # Read in the xyz co-ordinates in columns 2,3,4 from a file. Skip 1 header line.
 
-PC3D.read(fileName=join('supplementary','data','Resolve1.txt'), nHeaderLines=1, columnIndices=[2,3,4])
+dataFolder = "..//supplementary//Data//"
+
+PC3D.read(fileName=dataFolder + 'Resolve1.txt', nHeaderLines=1, columnIndices=[2,3,4])
 
 
 ################################################################################

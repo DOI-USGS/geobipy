@@ -46,8 +46,8 @@ H.pcolor(cmap='gray_r')
 ################################################################################
 
 
-h1 = H.axisHistogram(0)
-h2 = H.axisHistogram(1)
+h1 = H.axisHistogram(axis=0)
+h2 = H.axisHistogram(axis=1)
 
 
 ################################################################################
@@ -123,11 +123,11 @@ H.plotMean(axis=1, color='y')
 
 plt.figure(figsize=(9.5, 5))
 ax = plt.subplot(121)
-H1 = H.intervalMean([-4.0, -2.0, 2.0, 4.0])
+H1 = H.intervalStatistic([-4.0, -2.0, 2.0, 4.0], statistic='mean', axis=0)
 H1.pcolor(cmap='gray_r', equalize=True, noColorbar=True)
 H1.plotConfidenceIntervals()
 plt.subplot(122, sharex=ax, sharey=ax)
-H1 = H.intervalMean([-4.0, -2.0, 2.0, 4.0], axis=1)
+H1 = H.intervalStatistic([-4.0, -2.0, 2.0, 4.0], statistic='mean', axis=1)
 H1.pcolor(cmap='gray_r', equalize=True, noColorbar=True)
 H1.plotConfidenceIntervals(axis=1)
 
