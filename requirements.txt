@@ -1,0 +1,12 @@
+netCDF4
+h5py
+matplotlib
+Sphinx
+sphinx-autobuild
+sphinx-rtd-theme
+sphinx-automodapi
+sphinxcontrib-napoleon
+sphinxcontrib-websupport
+pytest-sphinx
+sphinx-copybutton
+sphinx-gallery

@@ -54,6 +54,8 @@ class RectilinearMesh1D(myObject):
         self._cellEdges = None
         
         if (cellCentres is None and cellEdges is None):
+            self._cellEdges = StatArray.StatArray(0)
+            self._cellCentres = StatArray.StatArray(0)
             return
         
         assert (not(not cellCentres is None and not cellEdges is None)), Exception('Cannot instantiate with both centres and edges values')
@@ -109,6 +111,21 @@ class RectilinearMesh1D(myObject):
         return out
 
 
+    def __getitem__(self, slic):
+        """Slice into the class. """
+        
+        assert np.shape(slic) == (), ValueError("slic must have one dimension.")
+
+        s2stop = None
+        if not slic.stop is None:
+            s2stop = slic.stop + 1 if slic.stop > 0 else slic.stop
+
+        s2 = slice(slic.start, s2stop, slic.step)
+        tmp = self._cellEdges[s2]
+        assert tmp.size > 1, ValueError("slic must contain at least one cell.")
+        return type(self)(cellEdges=tmp)
+
+
     @property
     def cellCentres(self):
         return self._cellCentres
@@ -133,11 +150,15 @@ class RectilinearMesh1D(myObject):
 
     @property
     def nCells(self):
-        return self._cellCentres.size
+        return 0 if self._cellCentres is None else self._cellCentres.size
 
     @property
     def nEdges(self):
-        return self._cellEdges.size
+        return 0 if self._cellEdges is None else self._cellEdges.size
+    
+    @property
+    def nNodes(self):
+        return self.nEdges
 
     @property
     def name(self):
@@ -329,4 +350,18 @@ class RectilinearMesh1D(myObject):
         msg = self._cellCentres.summary(True)
 
         return msg if out else print(msg)
+
+
+    def Bcast(self, world, root=0):
+
+        if world.rank == root:
+            edges = self.cellEdges
+        else:
+            edges = StatArray.StatArray(0)
+
+        edges = self.cellEdges.Bcast(world, root=root)
+
+        return RectilinearMesh1D(cellEdges=edges)
+
+
 

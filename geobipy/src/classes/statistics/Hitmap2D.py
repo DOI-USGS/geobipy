@@ -28,7 +28,7 @@ class Hitmap2D(Histogram2D):
         return out
 
 
-    def marginalProbability(self, fractions, distributions, axis, reciprocate=False, log=None):
+    def marginalProbability(self, fractions, distributions, axis, reciprocateParameter=False, log=None):
         """Compute the marginal probability between the hitmap and a set of distributions.
 
         .. math::
@@ -47,7 +47,7 @@ class Hitmap2D(Histogram2D):
         else:
             ax = self.y.cellCentres
 
-        if reciprocate:
+        if reciprocateParameter:
             ax = 1.0 / ax
 
         ax, dum = cF._log(ax, log)

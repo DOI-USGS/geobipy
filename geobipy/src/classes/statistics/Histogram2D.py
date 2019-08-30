@@ -82,6 +82,27 @@ class Histogram2D(RectilinearMesh2D):
         return self._counts
 
 
+    def __getitem__(self, slic):
+        """Allow slicing of the histogram.
+
+        """
+        assert np.shape(slic) == (2,), ValueError("slic must be over two dimensions.")
+        if np.any(slic == 1):
+            # 1D Histogram
+
+            print(1)
+
+        else:
+            # 2D Histogram
+            if self.xyz:
+                out = Histogram2D(xBinCentres=self._x[slic[1]], yBinCentres=self._y[slic[1]], zBinCentres=self._z[slic[0]])
+            else:
+                out = Histogram2D(xBinCentres=self._x[slic[1]], yBinCentres=self._y[slic[0]])
+            out._counts += self.counts[slic]
+
+            return out
+
+
     def axisHistogram(self, between=None, axis=0, log=None):
         """Get the histogram along an axis
 
@@ -419,8 +440,23 @@ class Histogram2D(RectilinearMesh2D):
             self._counts /= np.repeat(s[:, np.newaxis], np.size(self._counts, axis), axis)
 
 
+    def findPeaks(self, intervals, axis=0):
+        """Find peaks in the histogram along an axis.
+
+        Parameters
+        ----------
+        intervals : array_like, optional
+            Accumulate the histogram between these invervals before finding peaks
+        axis : int, optional
+            Axis along which to find peaks.
+
+        """
+        counts = super().intervalStatistic(self._counts, intervals, axis, 'sum')
+
+
+
     def intervalStatistic(self, intervals, axis=0, statistic='mean'):
-        """Compute the mean of an array between the intervals given along dimension dim.
+        """Compute the statistic of an array between the intervals given along dimension dim.
 
         Returns
         -------

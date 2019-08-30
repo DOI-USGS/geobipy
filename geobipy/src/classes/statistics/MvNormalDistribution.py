@@ -70,18 +70,21 @@ class MvNormal(baseDistribution):
 
     def rng(self, size = 1):
         """  """
-        if self.variance.ndim == 0:
-            return np.sqrt(self.variance) * self.prng.randn(size) + self.mean
-        if (self.variance.ndim == 1):
-            tmp = self.prng.multivariate_normal(self.mean, np.diag(self.variance), size)
-            return np.squeeze(tmp)
+
+        variance = np.squeeze(self.variance)
+        if variance.ndim == 0:
+            return np.sqrt(variance) * self.prng.randn(size) + self.mean
+        if (variance.ndim == 1):
+            tmp = self.prng.multivariate_normal(self.mean, np.diag(variance), size)
+            return tmp
         else:
-            return self.prng.multivariate_normal(self.mean, self.variance, size)
+            return self.prng.multivariate_normal(self.mean, variance, size)
 
     def probability(self, samples):
         """ For a realization x, compute the probability """
         N = samples.size
         nD = self.mean.size
+
         assert (N == nD), TypeError('size of samples {} must equal number of distribution dimensions {} for a multivariate distribution'.format(N, nD))
         # For a diagonal matrix, the determinant is the product of the diagonal
         # entries

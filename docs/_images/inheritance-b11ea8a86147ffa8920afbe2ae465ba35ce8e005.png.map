@@ -1,5 +1,0 @@
-<map id="inheritancef4d5cd9044" name="inheritancef4d5cd9044">
-<area shape="rect" id="node1" title="Helper class that provides a standard way to create an ABC using" alt="" coords="8,5,80,29"/>
-<area shape="rect" id="node2" href="#geobipy.src.classes.system.EmLoop.EmLoop" target="_top" title="Defines a loop in an EM system e.g. transmitter or reciever" alt="" coords="131,29,203,53"/>
-<area shape="rect" id="node3" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="5,53,83,77"/>
-</map>

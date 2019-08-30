@@ -100,7 +100,9 @@ class Data(PointCloud3D):
             assert len(channelNames) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
             self._channelNames = channelNames
 
-        self.line = None
+
+        self._fiducial = None
+        self._line = None
     
     
     def _systemIndices(self, system=0):
@@ -148,8 +150,20 @@ class Data(PointCloud3D):
         return self._elevation
 
     @property
+    def fiducial(self):
+        return self._fiducial
+
+    @property
+    def line(self):
+        return self._line
+
+    @property
     def nChannels(self):
         return np.sum(self.nChannelsPerSystem)
+
+    @property
+    def nLines(self):
+        return np.unique(self.line).size
 
     @property
     def predictedData(self):
