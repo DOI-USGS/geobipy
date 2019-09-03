@@ -1,0 +1,433 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Running GeoBIPy &mdash; GeoBIPy 1.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="API" href="../api/api.html" />
+    <link rel="prev" title="Installing GeoBIPy" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> GeoBIPy
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Welcome to GeoBIPy’s documentation!</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="getting_started.html">Getting Started</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="documentation.html">Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html">Installing GeoBIPy</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Running GeoBIPy</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api/api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GeoBIPy</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="getting_started.html">Getting Started</a> &raquo;</li>
+        
+      <li>Running GeoBIPy</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/content/getting_started/running_geobipy.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="running-geobipy">
+<h1>Running GeoBIPy<a class="headerlink" href="#running-geobipy" title="Permalink to this headline">¶</a></h1>
+<p>There are two methods of running GeoBIPy from the command line once it is installed.
+For the serial version the following can be used</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>geobipySerial &lt;userParameterFile&gt; &lt;Output Folder&gt;
+</pre></div>
+</div>
+<p>For a parallel installed version use the following, (replace the MPI redirect with whatever is suitable for your machine)</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpirun geobipyParallel &lt;userParameterFile&gt; &lt;Output Folder&gt;
+</pre></div>
+</div>
+<p>In both cases, &lt;Output Folder&gt; specifies where the HDF5 files will be written, while the &lt;userParameterFile&gt; is a python script that contains the customizable parameters for GeoBIPy.
+Below is an example scipt that you can use for reference.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geobipy.src.inversion._userParameters</span> <span class="kn">import</span> <span class="n">_userParameters</span>
+
+<span class="c1"># General information about specifying parameters.</span>
+<span class="c1"># The following list of parameters can be given either a single value or a list of values</span>
+<span class="c1"># of length equal to the number of systems in the data. If one value is specified and there</span>
+<span class="c1"># are multiple systems, that value is used for all of them.</span>
+<span class="c1"># self.initialRelativeError</span>
+<span class="c1"># self.minimumRelativeError</span>
+<span class="c1"># self.maximumRelativeError</span>
+<span class="c1"># self.initialAdditiveError</span>
+<span class="c1"># self.minimumAdditiveError</span>
+<span class="c1"># self.maximumAdditiveError</span>
+<span class="c1"># self.relativeErrorProposalVariance</span>
+<span class="c1"># self.additiveErrorProposalVariance</span>
+
+<span class="c1"># -------------------------------------------------------</span>
+<span class="c1"># Define whether this parameter file uses time domain or frequency domain data!</span>
+<span class="n">timeDomain</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="c1"># -------------------------------------------------------</span>
+
+<span class="c1"># -------------------------------------------------------</span>
+<span class="c1"># General file structure information.</span>
+<span class="c1"># -------------------------------------------------------</span>
+<span class="c1"># Specify the folder to the data</span>
+<span class="n">dataDirectory</span> <span class="o">=</span> <span class="s2">&quot;..//Data&quot;</span>
+<span class="c1"># Data File Name. If there are multiple, encompass them with [ ].</span>
+<span class="n">dataFilename</span> <span class="o">=</span> <span class="n">dataDirectory</span> <span class="o">+</span> <span class="s2">&quot;//DataFile.txt&quot;</span>
+<span class="c1"># dataFilename = [dataDirectory + &quot;//DataFile1.txt&quot;, dataDirectory + &quot;//DataFile2.txt&quot;]</span>
+<span class="c1"># System File Name. If there are multiple, encompass them with [ ].</span>
+<span class="n">systemFilename</span> <span class="o">=</span> <span class="n">dataDirectory</span> <span class="o">+</span> <span class="s2">&quot;//SystemFile.stm&quot;</span>
+<span class="c1"># systemFilename = [dataDirectory + &quot;//SystemFile1.stm&quot;, dataDirectory + &quot;//SystemFile2.stm&quot;]</span>
+
+
+<span class="k">class</span> <span class="nc">userParameters</span><span class="p">(</span><span class="n">_userParameters</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; User Interface Parameters for GeoBIPy &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">DataPoint</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; File for the user to specify inpust to GeoBIPy. &quot;&quot;&quot;</span>
+
+        <span class="c1">## Maximum number of Markov Chains per data point.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nMarkovChains</span> <span class="o">=</span> <span class="mi">100000</span>
+
+        <span class="c1"># -------------------------------------------------------</span>
+        <span class="c1"># General GeoBIPy options.</span>
+        <span class="c1"># -------------------------------------------------------</span>
+        <span class="c1"># Interactively plot a single data point as it progresses</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="c1"># How often to update the plot. (lower is generally slower)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotEvery</span> <span class="o">=</span> <span class="mi">5000</span>
+        <span class="c1"># Save a PNG of the final results for each data point.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">savePNG</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="c1"># Save the results of the McMC inversion to HDF5 files. (Generally always True)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="c1"># Set the display limits [min, max] for the parameter posterior (hitmap)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameterDisplayLimits</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.001</span><span class="p">,</span> <span class="mi">100000</span><span class="p">]</span>
+
+        <span class="c1"># -------------------------------------------------------</span>
+        <span class="c1"># Turning on or off different solvable parameters.</span>
+        <span class="c1"># -------------------------------------------------------</span>
+        <span class="c1"># Parameter Priors</span>
+        <span class="c1"># solveParameter will prevent parameters from exploding very large or very small numbers.</span>
+        <span class="c1"># solveGradient prevents large changes in parameters value from occurring.</span>
+        <span class="c1"># If both of these are active, the recovered earth models generally contain</span>
+        <span class="c1"># less layers due to an implicit constraint.</span>
+        <span class="c1"># If you feel that your recovered models are too conservative, try turning one of these off.</span>
+        <span class="c1"># It is highly recommended to have at least one of these options turned on!</span>
+        <span class="c1"># Use a prior on the parameter magnitude.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solveParameter</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="c1"># Use the Prior on the difference in log parameter diff(log(X))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solveGradient</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="c1"># Use the prior on the relative data errors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solveRelativeError</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="c1"># Use the prior on the additive data errors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solveAdditiveError</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="c1"># Use the prior on the data elevation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solveElevation</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="c1"># Use the prior on the calibration parameters for the data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solveCalibration</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="c1"># -------------------------------------------------------</span>
+        <span class="c1"># Prior Details</span>
+        <span class="c1"># -------------------------------------------------------</span>
+
+        <span class="c1"># Earth model prior details</span>
+        <span class="c1"># -------------------------</span>
+        <span class="c1"># Maximum number of layers in the 1D model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maximumNumberofLayers</span> <span class="o">=</span> <span class="mi">30</span>
+        <span class="c1"># Minimum layer depth in metres</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minimumDepth</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="c1"># Maximum layer depth in metres</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maximumDepth</span> <span class="o">=</span> <span class="mf">150.0</span>
+        <span class="c1"># Minimum layer thickness.</span>
+        <span class="c1"># If minimumThickness = None, it will be autocalculated.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minimumThickness</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c1"># Limit the parameter? Takes the limits as three standard deviations away from the mean. (Computed during initialization)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LimitPar</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="c1"># Data prior details</span>
+        <span class="c1"># ------------------</span>
+        <span class="c1"># The data priors are imposed on three different aspects of the data.</span>
+        <span class="c1"># The relative and additive error and the elevation of the data point.</span>
+        <span class="c1"># Data uncertainty priors are used if solveRelativeError or solveAdditiveError are True.</span>
+        <span class="c1"># If the data file contains columns of the estimated standard deviations, they are used as the initial values</span>
+        <span class="c1"># when starting an McMC inversion. If the file does not contain these estimates, then the initial</span>
+        <span class="c1"># values are used below as sqrt((relative * data)^2 + (additive)^2).</span>
+
+        <span class="c1"># Assign an initial percentage relative Error</span>
+        <span class="c1"># If the file contains no standard deviations, this will be used</span>
+        <span class="c1"># to assign the initial data uncertainties.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialRelativeError</span> <span class="o">=</span> <span class="mf">0.05</span>
+        <span class="c1">## Relative Error Prior Details</span>
+        <span class="c1"># Minimum Relative Error</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minimumRelativeError</span> <span class="o">=</span> <span class="mf">0.001</span>
+        <span class="c1"># Maximum Relative Error</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maximumRelativeError</span> <span class="o">=</span> <span class="mf">0.5</span>
+
+        <span class="c1"># Assign an initial additivr error level.</span>
+        <span class="c1"># If the file contains no standard deviations, this will be used</span>
+        <span class="c1"># to assign the initial data uncertainties.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialAdditiveError</span> <span class="o">=</span> <span class="mf">5.0</span>
+        <span class="c1"># Additive Error Prior Details</span>
+        <span class="c1"># Minimum Additive Error</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minimumAdditiveError</span> <span class="o">=</span> <span class="mf">3.0</span>
+        <span class="c1"># Maximum Relative Error</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maximumAdditiveError</span> <span class="o">=</span> <span class="mf">20.0</span>
+
+        <span class="c1"># Elevation range allowed (m), either side of measured height</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maximumElevationChange</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+        <span class="c1"># -------------------------------------------------------</span>
+        <span class="c1"># Proposal details</span>
+        <span class="c1"># -------------------------------------------------------</span>
+
+        <span class="c1"># Data proposal details</span>
+        <span class="c1"># ---------------------</span>
+        <span class="c1"># Logical to determine whether to use the Steepest Descent or Stochastic Newton step direction</span>
+        <span class="c1"># The Stochastic Newton approach utilizes information contained in the data themselves</span>
+        <span class="c1"># to guide the model proposal step. This makes the McMC chain more efficient at choosing the next</span>
+        <span class="c1"># model. If this is turned on (and generally it should be) you will notice</span>
+        <span class="c1"># less variance in the parameter posterior once the inversion finishes.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stochasticNewton</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="c1"># The relative, additive, and elevation proposal variances are assigned to</span>
+        <span class="c1"># normal distributions with a mean equal to its value in the current model (of the Markov chain)</span>
+        <span class="c1"># These variances are used when we randomly choose a new value for that given variable.</span>
+        <span class="c1"># Proposal variance for the relative error</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">relativeErrorProposalVariance</span> <span class="o">=</span> <span class="mf">2.5e-7</span>
+        <span class="c1"># Proposal variance for the additive error</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">additiveErrorProposalVariance</span> <span class="o">=</span> <span class="mf">1.0e-4</span>
+        <span class="c1"># Proposal variance of the elevation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elevationProposalVariance</span> <span class="o">=</span> <span class="mf">0.01</span>
+
+        <span class="c1"># Earth model proposal details</span>
+        <span class="c1"># ----------------------------</span>
+        <span class="c1"># Evolution Probabilities for earth model manipulation during the Markov chain.</span>
+        <span class="c1"># These four values are internally scaled such that their sum is 1.0.</span>
+        <span class="c1"># Probability that a layer is inserted into the model.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pBirth</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="mf">6.0</span>
+        <span class="c1"># Probablitiy that a layer is removed from the model.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pDeath</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="mf">6.0</span>
+        <span class="c1"># Probability that an interface in the model is perturbed.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pPerturb</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="mf">6.0</span>
+        <span class="c1"># Probability of no change occuring to the layers of the model.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pNochange</span> <span class="o">=</span> <span class="mf">0.5</span>
+
+        <span class="c1"># -------------------------------------------------------</span>
+        <span class="c1"># Typically Defaulted parameters</span>
+        <span class="c1"># -------------------------------------------------------</span>
+        <span class="c1"># Standard Deviation of log(rho) = log(1 + factor)</span>
+        <span class="c1"># Default is 10.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">factor</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="c1"># Standard Deviation for the difference in layer resistivity</span>
+        <span class="c1"># Default is 1.5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gradientStd</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="c1"># Initial scaling factor for proposal covariance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">covScaling</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="c1"># Scaling factor for data misfit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multiplier</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="c1"># Clipping Ratio for interface contrasts</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clipRatio</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c1"># Display the resistivity?</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reciprocateParameters</span> <span class="o">=</span> <span class="bp">True</span>
+
+
+        <span class="c1"># Don&#39;t change these.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataDirectory</span> <span class="o">=</span> <span class="n">dataDirectory</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataFilename</span> <span class="o">=</span> <span class="n">dataFilename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systemFilename</span> <span class="o">=</span> <span class="n">systemFilename</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="n">_userParameters</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">DataPoint</span><span class="p">)</span>
+
+<span class="c1"># Don&#39;t change this.</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">timeDomain</span><span class="p">):</span>
+<span class="n">dataInit</span> <span class="o">=</span> <span class="s1">&#39;TdemData()&#39;</span>
+<span class="k">else</span><span class="p">:</span>
+<span class="n">dataInit</span> <span class="o">=</span> <span class="s1">&#39;FdemData()&#39;</span>
+</pre></div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../api/api.html" class="btn btn-neutral float-right" title="API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installing GeoBIPy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright None
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
