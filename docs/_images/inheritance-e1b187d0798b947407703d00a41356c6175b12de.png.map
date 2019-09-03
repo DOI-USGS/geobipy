@@ -1,0 +1,6 @@
+<map id="inheritanceeb2965ddb0" name="inheritanceeb2965ddb0">
+<area shape="rect" id="node1" href="Data.html#geobipy.src.classes.data.dataset.Data.Data" target="_top" title="Class defining a set of Data." alt="" coords="283,5,355,29"/>
+<area shape="rect" id="node4" href="#geobipy.src.classes.data.dataset.TdemData.TdemData" target="_top" title="Time domain electro magnetic data set" alt="" coords="403,5,486,29"/>
+<area shape="rect" id="node2" href="../../pointcloud/PointCloud3D.html#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D" target="_top" title="3D Point Cloud with x,y,z co&#45;ordinates" alt="" coords="131,5,235,29"/>
+<area shape="rect" id="node3" href="../../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="5,5,83,29"/>
+</map>

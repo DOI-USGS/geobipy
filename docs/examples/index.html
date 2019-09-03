@@ -1,0 +1,356 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Examples &mdash; GeoBIPy 1.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Distribution Class" href="Statistics/distributions.html" />
+    <link rel="prev" title="Time domain system" href="../content/api/classes/system/TdemSystem.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> GeoBIPy
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Welcome to GeoBIPy’s documentation!</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../content/getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../content/api/api.html">API</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#statistical-distributions-histograms-and-the-statarray">Statistical Distributions, Histograms, and the StatArray</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Statistics/distributions.html">Distribution Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Statistics/histogram_1d.html">Histogram 1D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Statistics/histogram_2d.html">Histogram 2D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Statistics/stat_array.html">Stat Array Class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#meshes">Meshes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Meshes/rectilinear_mesh_1d.html">1D Rectilinear Mesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Meshes/rectilinear_mesh_2d.html">2D Rectilinear Mesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Meshes/topo_rectilinear_mesh_2d.html">Topo Rectilinear Mesh 2D</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#models">Models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Models/model_1d.html">1D Model with an infinite halfspace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Models/model_1d_no_hs.html">1D Model</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#point-clouds">Point Clouds</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Pointclouds/point_cloud_3d.html">3D Point Cloud class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#data">Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Data/data_class.html">Data Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Data/frequency_domain_data_set.html">Frequency Domain Data Set</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Data/frequency_domain_datapoint.html">Frequency Domain Datapoint Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Data/time_domain_data_set.html">Time Domain Data Set</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Data/time_domain_datapoint.html">Time Domain Datapoint Class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#inversion-results">Inversion Results</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">GeoBIPy</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Examples</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/examples/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="examples">
+<span id="sphx-glr-examples"></span><h1>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h1>
+<div style='clear:both'></div><div class="section" id="statistical-distributions-histograms-and-the-statarray">
+<span id="sphx-glr-examples-statistics"></span><h2>Statistical Distributions, Histograms, and the StatArray<a class="headerlink" href="#statistical-distributions-histograms-and-the-statarray" title="Permalink to this headline">¶</a></h2>
+<div class="sphx-glr-thumbcontainer" tooltip="Handles the initialization of different statistical distribution"><div class="figure align-center" id="id1">
+<img alt="../_images/sphx_glr_distributions_thumb.png" src="../_images/sphx_glr_distributions_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="Statistics/distributions.html#sphx-glr-examples-statistics-distributions-py"><span class="std std-ref">Distribution Class</span></a></span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="This histogram class allows efficient updating of histograms, plotting and saving as HDF5"><div class="figure align-center" id="id2">
+<img alt="../_images/sphx_glr_histogram_1d_thumb.png" src="../_images/sphx_glr_histogram_1d_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="Statistics/histogram_1d.html#sphx-glr-examples-statistics-histogram-1d-py"><span class="std std-ref">Histogram 1D</span></a></span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="Histogram 2D"><div class="figure align-center" id="id3">
+<img alt="../_images/sphx_glr_histogram_2d_thumb.png" src="../_images/sphx_glr_histogram_2d_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="Statistics/histogram_2d.html#sphx-glr-examples-statistics-histogram-2d-py"><span class="std std-ref">Histogram 2D</span></a></span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="Extends the numpy ndarray class to add extra attributes such as names, and units, and allows us..."><div class="figure align-center" id="id4">
+<img alt="../_images/sphx_glr_stat_array_thumb.png" src="../_images/sphx_glr_stat_array_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="Statistics/stat_array.html#sphx-glr-examples-statistics-stat-array-py"><span class="std std-ref">Stat Array Class</span></a></span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div style='clear:both'></div></div>
+<div class="section" id="meshes">
+<span id="sphx-glr-examples-meshes"></span><h2>Meshes<a class="headerlink" href="#meshes" title="Permalink to this headline">¶</a></h2>
+<div class="sphx-glr-thumbcontainer" tooltip="1D Rectilinear Mesh"><div class="figure align-center" id="id5">
+<img alt="../_images/sphx_glr_rectilinear_mesh_1d_thumb.png" src="../_images/sphx_glr_rectilinear_mesh_1d_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="Meshes/rectilinear_mesh_1d.html#sphx-glr-examples-meshes-rectilinear-mesh-1d-py"><span class="std std-ref">1D Rectilinear Mesh</span></a></span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="2D Rectilinear Mesh"><div class="figure align-center" id="id6">
+<img alt="../_images/sphx_glr_rectilinear_mesh_2d_thumb.png" src="../_images/sphx_glr_rectilinear_mesh_2d_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="Meshes/rectilinear_mesh_2d.html#sphx-glr-examples-meshes-rectilinear-mesh-2d-py"><span class="std std-ref">2D Rectilinear Mesh</span></a></span><a class="headerlink" href="#id6" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="Topo Rectilinear Mesh 2D"><div class="figure align-center" id="id7">
+<img alt="../_images/sphx_glr_topo_rectilinear_mesh_2d_thumb.png" src="../_images/sphx_glr_topo_rectilinear_mesh_2d_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="Meshes/topo_rectilinear_mesh_2d.html#sphx-glr-examples-meshes-topo-rectilinear-mesh-2d-py"><span class="std std-ref">Topo Rectilinear Mesh 2D</span></a></span><a class="headerlink" href="#id7" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div style='clear:both'></div></div>
+<div class="section" id="models">
+<span id="sphx-glr-examples-models"></span><h2>Models<a class="headerlink" href="#models" title="Permalink to this headline">¶</a></h2>
+<div class="sphx-glr-thumbcontainer" tooltip="1D Model with an infinite halfspace"><div class="figure align-center" id="id8">
+<img alt="../_images/sphx_glr_model_1d_thumb.png" src="../_images/sphx_glr_model_1d_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="Models/model_1d.html#sphx-glr-examples-models-model-1d-py"><span class="std std-ref">1D Model with an infinite halfspace</span></a></span><a class="headerlink" href="#id8" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="1D Model"><div class="figure align-center" id="id9">
+<img alt="../_images/sphx_glr_model_1d_no_hs_thumb.png" src="../_images/sphx_glr_model_1d_no_hs_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="Models/model_1d_no_hs.html#sphx-glr-examples-models-model-1d-no-hs-py"><span class="std std-ref">1D Model</span></a></span><a class="headerlink" href="#id9" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div style='clear:both'></div></div>
+<div class="section" id="point-clouds">
+<span id="sphx-glr-examples-pointclouds"></span><h2>Point Clouds<a class="headerlink" href="#point-clouds" title="Permalink to this headline">¶</a></h2>
+<div class="sphx-glr-thumbcontainer" tooltip="The 3D Point Cloud class extracts and utilizes the [Point](Point%20Class.ipynb) Class"><div class="figure align-center" id="id10">
+<img alt="../_images/sphx_glr_point_cloud_3d_thumb.png" src="../_images/sphx_glr_point_cloud_3d_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="Pointclouds/point_cloud_3d.html#sphx-glr-examples-pointclouds-point-cloud-3d-py"><span class="std std-ref">3D Point Cloud class</span></a></span><a class="headerlink" href="#id10" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div style='clear:both'></div></div>
+<div class="section" id="data">
+<span id="sphx-glr-examples-data"></span><h2>Data<a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h2>
+<div class="sphx-glr-thumbcontainer" tooltip="The Data class is an extenstion to the [3D Point Cloud](pointCloud3D.ipynb) Class"><div class="figure align-center" id="id11">
+<img alt="../_images/sphx_glr_data_class_thumb.png" src="../_images/sphx_glr_data_class_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="Data/data_class.html#sphx-glr-examples-data-data-class-py"><span class="std std-ref">Data Class</span></a></span><a class="headerlink" href="#id11" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="Frequency Domain Data Set"><div class="figure align-center" id="id12">
+<img alt="../_images/sphx_glr_frequency_domain_data_set_thumb.png" src="../_images/sphx_glr_frequency_domain_data_set_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="Data/frequency_domain_data_set.html#sphx-glr-examples-data-frequency-domain-data-set-py"><span class="std std-ref">Frequency Domain Data Set</span></a></span><a class="headerlink" href="#id12" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="Fdem Data contains entire data sets"><div class="figure align-center" id="id13">
+<img alt="../_images/sphx_glr_frequency_domain_datapoint_thumb.png" src="../_images/sphx_glr_frequency_domain_datapoint_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="Data/frequency_domain_datapoint.html#sphx-glr-examples-data-frequency-domain-datapoint-py"><span class="std std-ref">Frequency Domain Datapoint Class</span></a></span><a class="headerlink" href="#id13" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="Time Domain Data Set"><div class="figure align-center" id="id14">
+<img alt="../_images/sphx_glr_time_domain_data_set_thumb.png" src="../_images/sphx_glr_time_domain_data_set_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="Data/time_domain_data_set.html#sphx-glr-examples-data-time-domain-data-set-py"><span class="std std-ref">Time Domain Data Set</span></a></span><a class="headerlink" href="#id14" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="Tdem Data contains entire data sets"><div class="figure align-center" id="id15">
+<img alt="../_images/sphx_glr_time_domain_datapoint_thumb.png" src="../_images/sphx_glr_time_domain_datapoint_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="Data/time_domain_datapoint.html#sphx-glr-examples-data-time-domain-datapoint-py"><span class="std std-ref">Time Domain Datapoint Class</span></a></span><a class="headerlink" href="#id15" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div style='clear:both'></div></div>
+<div class="section" id="inversion-results">
+<span id="sphx-glr-examples-inversion"></span><h2>Inversion Results<a class="headerlink" href="#inversion-results" title="Permalink to this headline">¶</a></h2>
+<div style='clear:both'></div><p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Statistics/distributions.html" class="btn btn-neutral float-right" title="Distribution Class" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../content/api/classes/system/TdemSystem.html" class="btn btn-neutral float-left" title="Time domain system" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright None
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
