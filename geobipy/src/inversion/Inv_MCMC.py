@@ -47,8 +47,8 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
                 verbose=userParameters.verbose)
 
     # Set the saved best models and data
-    bestModel = None #Mod.deepcopy()
-    bestData = None #DataPoint.deepcopy()
+    bestModel = Mod.deepcopy()
+    bestData = DataPoint.deepcopy()
     bestPosterior = -np.inf #posterior#.copy()
 
     # Initialize the Chain
@@ -102,8 +102,12 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
         i += 1
         
         Go = i <= userParameters.nMarkovChains + Res.iBurn
-        if failed:
-            Go = False
+        
+        if not Res.burnedIn:
+            Go = i < userParameters.nMarkovChains
+            if not Go:
+                failed = True
+
 
     Res.clk.stop()
     Res.invTime = np.float64(Res.clk.timeinSeconds())
@@ -483,3 +487,6 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
 
     
     #%%
+
+
+#%%
