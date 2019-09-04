@@ -1096,7 +1096,7 @@ class LineResults(myObject):
         for i in Bar(range(self.nPoints)):
             hm._counts = counts[i, :, :]
             hm._x = RectilinearMesh1D(cellEdges=parameters.cellEdges[i, :])
-            self._faciesProbability[:, i, :] = hm.marginalProbability(fractions, distributions, axis=0, reciprocate=reciprocateParameter, log=log)
+            self._faciesProbability[:, i, :] = hm.marginalProbability(fractions, distributions, axis=0, reciprocateParameter=reciprocateParameter, log=log)
 
         
         self.close()
