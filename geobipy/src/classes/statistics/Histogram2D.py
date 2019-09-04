@@ -172,6 +172,36 @@ class Histogram2D(RectilinearMesh2D):
         """
         return super().axisMedian(self._counts, log, axis)
 
+    
+    def axisMode(self, log=None, axis=0):
+        """Gets the mode for the specified axis.
+        
+        Parameters
+        ----------
+        log : 'e' or float, optional
+            Take the log of the mode to a base. 'e' if log = 'e', or a number e.g. log = 10.
+        axis : int
+            Along which axis to obtain the mode.
+
+        Returns
+        -------
+        med : array_like
+            Contains the modes along the specified axis. Has size equal to arr.shape[axis].
+
+        """
+
+        iMode = np.argmax(self._counts, axis = 1-axis)
+    
+        if axis == 0:
+            mode = self.x.cellCentres[iMode]
+        else:
+            mode = self.z.cellCentres[iMode]
+
+        if (not log is None):
+            mode, dum = cF._log(mode, log=log)
+
+        return mode
+
 
     def axisOpacity(self, percent=95.0, axis=0):
         """Return an opacity between 0 and 1 based on the difference between confidence invervals of the hitmap.
