@@ -148,6 +148,28 @@ class DataSetResults(myObject):
     def height(self):
         return self.pointcloud.z
 
+
+    def identifyPeaks(self, depths, nBins = 250, width=4, limits=None):
+        """Identifies peaks in the parameter posterior for each depth in depths.
+
+        Parameters
+        ----------
+        depths : array_like
+            Depth intervals to identify peaks between.
+
+        Returns
+        -------
+
+        """
+
+        print(limits)
+
+        out = self.lines[0].identifyPeaks(depths, nBins, width, limits)
+        for line in self.lines[1:]:
+            out = np.vstack([out, line.identifyPeaks(depths, nBins, width, limits)])        
+
+        return out
+
     
     @property
     def interfaces(self):
@@ -187,7 +209,7 @@ class DataSetResults(myObject):
             print('Reading mean parameters')
             Bar=progressbar.ProgressBar()
             for i in Bar(range(self.nLines)):
-                self._meanParameters[:, self.lineIndices[i]] = self.lines[i].meanParameters.T
+                self._meanParameters[:, self.lineIndices[i]] = self.lines[i].meanParameters
                 self.lines[i]._meanParameters = None # Free memory
 
         return self._meanParameters
@@ -208,6 +230,18 @@ class DataSetResults(myObject):
         """ Get the number of systems """
         return self.lines[0].nSystems
 
+    
+    def parameterHistogram(self, nBins, depth = None, depth2 = None, log=None):
+        """ Compute a histogram of all the parameter values, optionally show the histogram for given depth ranges instead """
+
+        out = self.lines[0].parameterHistogram(nBins=nBins, depth=depth, depth2=depth2, log=log)
+
+        for line in self.lines[1:]:
+            tmp = line.parameterHistogram(nBins=nBins, depth=depth, depth2=depth2, log=log)
+            out._counts += tmp.counts
+
+        return out
+        
 
     @property
     def pointcloud(self):
@@ -315,14 +349,18 @@ class DataSetResults(myObject):
             Line number and index of the data point in that line.
 
         """
+        
+        if np.size(fiducial) == 1:
+            for iLine, line in enumerate(self.lines):
+                if fiducial in line.fiducials:
+                    return np.asarray([iLine, line.fiducials.searchsorted(fiducial)])
 
+        indices = []
         for iLine, line in enumerate(self.lines):
-            if fiducial in line.fiducials:
-                index = line.fiducials.searchsorted(fiducial)
-
-                return np.asarray([iLine, index])
-
-        assert False, Exception("Could not find fiducial {} in the results".format(fiducial))
+            for fid in fiducial:
+                if fid in line.fiducials:
+                    indices.append([iLine, line.fiducials.searchsorted(fid)])
+        return np.asarray(indices)
 
 
     def histogram(self, nBins, depth1 = None, depth2 = None, reciprocateParameter = False, bestModel = False, withDoi=False, percent=67.0, force = False, **kwargs):
