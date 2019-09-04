@@ -16,6 +16,7 @@ try:
 except:
     pass
 
+
 class TopoRectilinearMesh2D(RectilinearMesh2D):
     """Class defining a 2D rectilinear mesh with cell centres and edges and an upper surface that is draped along
     an elevation profile.
@@ -167,9 +168,11 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
         assert np.all(values.shape == self.shape), ValueError("values must have shape {}".format(self.shape))
 
         self.setXMesh(xAxis=xAxis)
-        pm = cP.pcolormesh(self._xMesh, self._zMesh, values, **kwargs)
+        ax, pm = cP.pcolormesh(self._xMesh, self._zMesh, values, **kwargs)
         cP.xlabel(self._xMesh.getNameUnits())
         cP.ylabel(self.z.cellCentres.getNameUnits())
+
+        return ax, pm
 
     
     def plotGrid(self, xAxis='x', **kwargs):
