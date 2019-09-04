@@ -761,8 +761,7 @@ class Model1D(Model):
         reciprocateX = kwargs.pop("reciprocateX", False)
         flipY = kwargs.pop('flipY', True)
         kwargs['flipY'] = flipY
-
-        kwargs['xscale'] = kwargs.pop('xscale', 'log')
+        kwargs['xscale'] = kwargs.pop('xscale', 'linear')
         
         # Repeat the last entry
         par = self.par.append(self.par[-1])
