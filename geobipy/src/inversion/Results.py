@@ -795,12 +795,12 @@ class Results(myObject):
 #         grp.create_dataset('savetime', data=self.saveTime)
 
 
-    def fromHdf(self, hdfFile, index, fid, sysPath):
+    def fromHdf(self, hdfFile, index, fiducial, sysPath):
     
 
         s = np.s_[index, :]
 
-        self.fiducial = np.float64(fid)
+        self.fiducial = np.float64(fiducial)
 
         self.iPlot = np.array(hdfFile.get('iplot'))
         self.plotMe = np.array(hdfFile.get('plotme'))
@@ -829,12 +829,12 @@ class Results(myObject):
             self.currentDataPoint.z.setPosterior(p)
         
         
-        try:
-            self.currentModel = hdfRead.readKeyFromFile(hdfFile,'','/','currentmodel', index=index)
-            self.Hitmap = self.currentModel.par.posterior
-            self.currentModel.maxDepth = np.log(self.Hitmap.y.cellCentres[-1])            
-        except:
-            self.Hitmap = hdfRead.readKeyFromFile(hdfFile,'','/','hitmap', index=index)
+        # try:
+        self.currentModel = hdfRead.readKeyFromFile(hdfFile,'','/','currentmodel', index=index)
+        self.Hitmap = self.currentModel.par.posterior
+        self.currentModel.maxDepth = np.log(self.Hitmap.y.cellCentres[-1])            
+        # except:
+        #     self.Hitmap = hdfRead.readKeyFromFile(hdfFile,'','/','hitmap', index=index)
 
 
         self.bestModel = hdfRead.readKeyFromFile(hdfFile,'','/','bestmodel', index=index)
