@@ -1,0 +1,6 @@
+<map id="inheritance205783337d" name="inheritance205783337d">
+<area shape="rect" id="node1" href="datapoint.html#geobipy.src.classes.data.datapoint.DataPoint.DataPoint" target="_top" title="Class defines a data point." alt="" coords="125,5,205,29"/>
+<area shape="rect" id="node3" href="EmDataPoint.html#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint" target="_top" title="Abstract EmDataPoint Class" alt="" coords="253,5,353,29"/>
+<area shape="rect" id="node2" href="../../pointcloud/Point.html#geobipy.src.classes.pointcloud.Point.Point" target="_top" title="Class defining a point in 3D Euclidean space" alt="" coords="5,5,77,29"/>
+<area shape="rect" id="node4" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint" target="_top" title="Class defines a Frequency domain electromagnetic data point." alt="" coords="401,5,515,29"/>
+</map>

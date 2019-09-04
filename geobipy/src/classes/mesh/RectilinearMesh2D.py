@@ -81,6 +81,17 @@ class RectilinearMesh2D(myObject):
         else:
             self._xyz = False
             self._z = self._y
+
+
+    def __getitem__(self, slic):
+        """Slice into the mesh. """
+
+        assert np.shape(slic) == (2, ), ValueError("slic must be over two dimensions.")
+
+        if self.xyz:
+            return RectilinearMesh2D(xEdges=self._x[slic[1]], yEdges=self._y[slic[1]], zEdges=self._z[slic[0]])
+        else:
+            return RectilinearMesh2D(xEdges=self._x[slic[1]], yEdges=self._y[slic[0]])
         
 
 
@@ -435,6 +446,10 @@ class RectilinearMesh2D(myObject):
         xtmp = self.getXAxis(xAxis)
 
         tmp.pcolor(x=xtmp, y=self.z.cellEdges, grid=True, noColorbar=True, **kwargs)
+
+    
+    def summary(self, out=False):
+        return
 
 
     def plotXY(self, **kwargs):

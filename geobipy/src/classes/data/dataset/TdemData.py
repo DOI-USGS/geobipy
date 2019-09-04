@@ -82,9 +82,9 @@ class TdemData(Data):
         Data.__init__(self, nPoints, nTimes, dataUnits=r"$\frac{V}{m^{2}}$")
 
         # StatArray of the line number for flight line data
-        self.line = StatArray.StatArray(self.nPoints, 'Line Number')
+        self._line = StatArray.StatArray(self.nPoints, 'Line Number')
         # StatArray of the id number
-        self.id = StatArray.StatArray(self.nPoints, 'ID Number')
+        self._fiducial = StatArray.StatArray(self.nPoints, 'ID Number')
         # StatArray of the elevation
         self._elevation = StatArray.StatArray(self.nPoints, 'Elevation', 'm')
 
@@ -211,8 +211,8 @@ class TdemData(Data):
         values = fIO.read_columns(dataFilename[0], indicesForFile, 1, nPoints)
 
         # Assign columns to variables
-        self.line[:] = values[:, 0]
-        self.id[:] = values[:, 1]
+        self._line[:] = values[:, 0]
+        self._fiducial[:] = values[:, 1]
         self.x[:] = values[:, 2]
         self.y[:] = values[:, 3]
         self.elevation[:] = values[:, 4]
@@ -644,7 +644,7 @@ class TdemData(Data):
 
         assert 0 <= i < self.nPoints, ValueError("Requested data point must have index (0, "+str(self.nPoints) + ']')
 
-        return TdemDataPoint(self.x[i], self.y[i], self.z[i], self.elevation[i], self._data[i, :], self.std[i, :], self._predictedData[i, :], self.system, self.T[i], self.R[i], self.line[i], self.id[i])
+        return TdemDataPoint(self.x[i], self.y[i], self.z[i], self.elevation[i], self._data[i, :], self.std[i, :], self._predictedData[i, :], self.system, self.T[i], self.R[i], self.line[i], self.fiducial[i])
 
 
     def getLine(self, line):
@@ -669,7 +669,7 @@ class TdemData(Data):
         tmp.y[:] = self.y[i]
         tmp.z[:] = self.z[i]
         tmp.line[:] = self.line[i]
-        tmp.id[:] = self.id[i]
+        tmp._fiducial[:] = self.fiducial[i]
         tmp.elevation[:] = self.elevation[i]
         tmp.T[:] = self.T[i]
         tmp.R[:] = self.R[i]

@@ -100,7 +100,9 @@ class Data(PointCloud3D):
             assert len(channelNames) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
             self._channelNames = channelNames
 
-        self.line = None
+
+        self._fiducial = None
+        self._line = None
     
     
     def _systemIndices(self, system=0):
@@ -146,6 +148,14 @@ class Data(PointCloud3D):
     def elevation(self):
         """The elevation. """
         return self._elevation
+
+    @property
+    def fiducial(self):
+        return self._fiducial
+
+    @property
+    def line(self):
+        return self._line
 
     @property
     def nChannels(self):

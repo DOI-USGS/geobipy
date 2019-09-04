@@ -4,10 +4,11 @@
 *DS_Store
 .ipynb_checkpoints
 *.h5
-*.txt
 MANIFEST.in
 build
 *.so
 *.swp
 *.swo
 *.vtk
+*.egg
+docs/source/examples

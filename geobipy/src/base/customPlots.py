@@ -255,6 +255,8 @@ def hist(counts, bins, rotate=False, flipX=False, flipY=False, trim=True, normal
     log : 'e' or float, optional
         Take the log of the colour to a base. 'e' if log = 'e', and a number e.g. log = 10.
         Values in c that are <= 0 are masked.
+    logBins : 'e' or float, optiona
+        Take the log of the bins.
     reciprocateX : bool, optiona
         Take the reciprocal of the x axis.
     xscale : str, optional
@@ -276,6 +278,7 @@ def hist(counts, bins, rotate=False, flipX=False, flipY=False, trim=True, normal
     kwargs['edgecolor'] = kwargs.pop('edgecolor', 'k')
     xscale = kwargs.pop('xscale', 'linear')
     reciprocateX = kwargs.pop('reciprocateX', False)
+    logBins = kwargs.pop('logBins', False)
 
     ax = plt.gca()
     pretty(ax)
@@ -283,6 +286,12 @@ def hist(counts, bins, rotate=False, flipX=False, flipY=False, trim=True, normal
     if reciprocateX:
         bins = 1.0 / bins
 
+    if logBins:
+        bins, logLabel = cF._log(bins, logBins)
+        label = logLabel + cF.getNameUnits(bins)
+    else:
+        label = cF.getNameUnits(bins)
+    
     width = np.abs(np.diff(bins))
     centres = bins[:-1] + 0.5 * (np.diff(bins))
 
@@ -293,14 +302,14 @@ def hist(counts, bins, rotate=False, flipX=False, flipY=False, trim=True, normal
 
     if (rotate):
         plt.barh(centres, cnts, height=width, align='center', **kwargs)
-        ylabel(cF.getNameUnits(centres))
+        ylabel(label)
         if normalize:
             xlabel('Density')
         else:
             xlabel('Frequency')
     else:
         plt.bar(centres, cnts, width=width, align='center', **kwargs)
-        xlabel(cF.getNameUnits(centres))
+        xlabel(label)
         if normalize:
             ylabel('Density')
         else:
@@ -328,7 +337,7 @@ def hist(counts, bins, rotate=False, flipX=False, flipY=False, trim=True, normal
     if flipY:
         ax.invert_yaxis()
 
-    plt.xscale(xscale)
+    # plt.xscale(xscale)
 
     return ax
 

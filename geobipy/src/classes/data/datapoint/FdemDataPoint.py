@@ -496,7 +496,7 @@ class FdemDataPoint(EmDataPoint):
     #     return J1
 
 
-    def updateSensitivity(self, J, mod, option, scale=False):
+    def updateSensitivity(self, J, mod, action, scale=False):
         """ Compute an updated sensitivity matrix based on the one already containined in the FdemDataPoint object  """
         # If there is no matrix saved in the data object, compute the entire
         # thing
