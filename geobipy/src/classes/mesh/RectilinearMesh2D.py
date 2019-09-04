@@ -173,7 +173,7 @@ class RectilinearMesh2D(myObject):
         Returns
         -------
         med : array_like
-            Contains the locations of the medians along the specified axis. Has size equal to arr.shape[axis].
+            Contains the medians along the specified axis. Has size equal to arr.shape[axis].
 
         """
 
