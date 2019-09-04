@@ -466,12 +466,12 @@ def pcolor(values, x=None, y=None, **kwargs):
 
     X, Y = np.meshgrid(mx, my)
 
-    ax = pcolormesh(X, Y, values, **kwargs)
+    ax, pm = pcolormesh(X, Y, values, **kwargs)
 
     xlabel(cF.getNameUnits(x))
     ylabel(cF.getNameUnits(y))
 
-    return ax
+    return ax, pm
 
 
 def pcolormesh(X, Y, values, **kwargs):
@@ -576,6 +576,8 @@ def pcolormesh(X, Y, values, **kwargs):
     if np.size(alpha) == 1:
         pm = ax.pcolormesh(X, Y, Zm, alpha = alpha, **kwargs)
     else:
+        assert np.all(alpha.shape == Zm.shape), ValueError("Alpha array must have shape {}".format(Zm.shape))
+        Zm[alpha == 0.0] = np.nan
         pm = ax.pcolormesh(X, Y, Zm, **kwargs)
 
     plt.xscale(xscale)
@@ -610,9 +612,24 @@ def pcolormesh(X, Y, values, **kwargs):
         ax.invert_yaxis()
 
     if np.size(alpha) > 1:
-       setAlphaPerPcolormeshPixel(pm, alpha)
+        alpha_to_colour(pm, alpha, np.asarray([1, 1, 1]))
+        # setAlphaPerPcolormeshPixel(pm, alpha)     
 
-    return ax
+    return ax, pm
+
+
+def alpha_to_colour(pcmesh, alphaArray, colour):
+    plt.savefig('tmp.png')
+    for cellColour, alpha in zip(pcmesh.get_facecolors(), alphaArray.flatten()):
+        cellColour[3] = 1.0
+        cellColour[:3] = alpha * cellColour[:3] + (1.0 - alpha) * colour
+
+def nonZeroes_to_colour(pcmesh, alphaArray, colour):
+    plt.savefig('tmp.png')
+    for cellColour, alpha in zip(pcmesh.get_facecolors(), alphaArray.flatten()):
+        cellColour[3] = 1.0
+        if alpha != 0.0:
+            cellColour[:3] = colour
 
 
 def pcolor_1D(values, y=None, **kwargs):
