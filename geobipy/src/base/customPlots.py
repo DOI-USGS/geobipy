@@ -624,6 +624,9 @@ def pcolormesh(X, Y, values, **kwargs):
         alpha_to_colour(pm, alpha, np.asarray([1, 1, 1]))
         # setAlphaPerPcolormeshPixel(pm, alpha)     
 
+    current_cmap = mpl.cm.get_cmap()
+    current_cmap.set_bad(color='white')
+
     return ax, pm
 
 

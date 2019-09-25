@@ -45,7 +45,7 @@ class LineResults(myObject):
         self._bestModel = None
         self._burnedIn = None
         self._confidenceRange = None
-        self.doi = None
+        self._doi = None
         self._elevation = None
         self._faciesProbability = None
         self._fiducials = None
@@ -210,12 +210,12 @@ class LineResults(myObject):
 
         h = Hitmap2D(xBinCentres = StatArray.StatArray(b[0, :]), yBinCentres = StatArray.StatArray(c[0, :]))
         h._counts[:, :] = a[0, :, :]
-        self._confidenceRange[:, 0] = h.confidenceRange(percent=percent, log=log)
+        self._confidenceRange[:, 0] = h.axisConfidenceRange(percent=percent, log=log)
         
         for i in progressbar.progressbar(range(1, self.nPoints)):
             h.x.xBinCentres = b[i, :]
             h._counts[:, :] = a[i, :, :]
-            self._confidenceRange[:, i] = h.confidenceRange(percent=percent, log=log)
+            self._confidenceRange[:, i] = h.axisConfidenceRange(percent=percent, log=log)
 
         self.close()
         try:
@@ -244,7 +244,20 @@ class LineResults(myObject):
         return self._currentData
 
 
-    def getDOI(self, percent=67.0, window=1):
+    @property
+    def doi(self):
+
+        if (self._doi is None):
+            # Read in the opacity if present
+            if "doi" in self.hdfFile.keys():
+                self._doi = StatArray.StatArray().fromHdf(self.hdfFile['doi'])
+            else:
+                self.computeDOI()
+        
+        return self._doi
+
+
+    def computeDOI(self, percent=67.0, window=1):
         """ Get the DOI of the line depending on a percentage variance cutoff for each data point """
         #if (not self.doi is None): return
 
@@ -252,18 +265,46 @@ class LineResults(myObject):
         assert 0.0 < percent < 100.0, ValueError("Must have 0.0 < percent < 100.0")
         p = 0.01 * (100.0 - percent)
 
-        self.doi = StatArray.StatArray(np.zeros(self.nPoints), 'Depth of investigation', self.height.units)
-        nCells = self.mesh.z.nCells - 1
-        r = range(self.nPoints)
-        for i in r:
-            op = self.opacity[:, i]
-            iC = nCells
-            while op[iC] < p and iC > 0:
-                iC -=1
-            
-            self.doi[i] = self.mesh.z.cellCentres[iC]
+        doi = StatArray.StatArray(np.zeros(self.nPoints), 'Depth of investigation', self.height.units)
 
-        self.doi = self.doi.rolling(np.mean, window)
+        loc = 'currentmodel/par/posterior'
+        a = np.asarray(self.hdfFile[loc+'/arr/data'])
+        try:
+            b = np.asarray(self.hdfFile[loc+'/x/data'])
+        except:
+            b = np.asarray(self.hdfFile[loc+'/x/x/data'])
+
+        try:
+            c = np.asarray(self.hdfFile[loc+'/y/data'])
+        except:
+            c = np.asarray(self.hdfFile[loc+'/y/x/data'])
+
+        h = Hitmap2D(xBinCentres = StatArray.StatArray(b[0, :]), yBinCentres = StatArray.StatArray(c[0, :]))
+        h._counts[:, :] = a[0, :, :]
+        doi[0] = h.getOpacityLevel(percent)
+        
+        for i in progressbar.progressbar(range(1, self.nPoints)):
+            h.x.xBinCentres = b[i, :]
+            h._counts[:, :] = a[i, :, :]
+            doi[i] = h.getOpacityLevel(percent)
+
+        self._doi = doi
+        if window > 1:
+            buffer = np.int(0.5 * window)
+            tmp = doi.rolling(np.mean, window)
+            self._doi[buffer:-buffer] = tmp
+            self._doi[:buffer] = tmp[0]
+            self._doi[-buffer:] = tmp[-1]
+        
+            
+
+        self.close()
+        with h5py.File(self.fName, 'a') as f:
+            if 'doi' in f.keys():
+                self._doi.writeHdf(f, 'doi')
+            else:
+                self._doi.toHdf(f, 'doi')
+        self.open()
 
 
     @property
@@ -495,6 +536,7 @@ class LineResults(myObject):
                     
         return self._modeParameter
 
+
     def computeModeParameter(self):
        
         self._modeParameter = StatArray.StatArray(np.zeros(self.mesh.shape), self.parameterName, self.parameterUnits)
@@ -554,29 +596,31 @@ class LineResults(myObject):
     def opacity(self):
         """ Get the model parameter opacity using the confidence intervals """
         if (self._opacity is None):
-
-            high = 0.5 * (self.confidenceRange.max() - self.confidenceRange.min())
-
-            self._opacity = StatArray.StatArray(self.confidenceRange, "Opacity", "")
-
-            self._opacity[self._opacity > high] = high
-
-            self._opacity = 1.0 - (self._opacity / high)
+           self.computeOpacity()
                     
         return self._opacity
 
     
-    def computeOpacity(self, percent=95.0, multiplier=0.5, log=10):
+    def computeOpacity(self, percent=95.0, log=10, multiplier=0.5, useDOI=True):
 
-        self.computeConfidenceRange(percent, log)
+        tmp = self.confidenceRange
 
-        high = multiplier * (self.confidenceRange.max() - self.confidenceRange.min())
+        # if depthScaling:
+        #     tmp = self.confidenceRange * np.repeat(self.mesh.z.cellCentres[:, np.newaxis], self.nPoints, axis=1)
 
-        self._opacity = StatArray.StatArray(self.confidenceRange, "Opacity", "")
+        rnge = multiplier * (tmp.max() - tmp.min())
+
+        self._opacity = StatArray.StatArray(tmp, "Opacity", "")
         
-        self._opacity[self._opacity > high] = high
+        self._opacity[self._opacity > rnge] = rnge
 
-        self._opacity = 1.0 - (self._opacity / high)
+        self._opacity = 1.0 - (self._opacity / rnge)
+
+        if useDOI:
+            indices = self.mesh.z.cellIndex(self.doi)
+
+            for i in range(self.nPoints):
+                self._opacity[:indices[i], i] = 1.0
 
 
     @property
@@ -655,7 +699,7 @@ class LineResults(myObject):
 
         hdfFile = self.hdfFile
 
-        R = Results(reciprocateParameter=reciprocateParameter).fromHdf(hdfFile, index=i, fiducial=fiducial, sysPath=self.sysPath)
+        R = Results(reciprocateParameter=reciprocateParameter).fromHdf(hdfFile, index=i, systemFilePath=self.sysPath)
 
         return R
         
@@ -779,7 +823,6 @@ class LineResults(myObject):
 
     def plotDoi(self, percent=67.0, window=1, **kwargs):
 
-        self.getDOI(percent, window)
         xAxis = kwargs.pop('xAxis', 'x')
         labels = kwargs.pop('labels', True)
         kwargs['color'] = kwargs.pop('color','k')
