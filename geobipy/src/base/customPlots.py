@@ -337,7 +337,7 @@ def hist(counts, bins, rotate=False, flipX=False, flipY=False, trim=True, normal
     if flipY:
         ax.invert_yaxis()
 
-    # plt.xscale(xscale)
+    plt.xscale(xscale)
 
     return ax
 
@@ -563,7 +563,7 @@ def pcolormesh(X, Y, values, **kwargs):
         kwargs['edgecolor'] = kwargs.pop('edgecolor', 'k')
         kwargs['linewidth'] = kwargs.pop('linewidth', 2)
 
-    values = ma.masked_invalid(values)
+    values = values.astype('float64')
 
     if not trim is None:
         assert isinstance(trim, (float, np.float)), TypeError("trim must be a float")
