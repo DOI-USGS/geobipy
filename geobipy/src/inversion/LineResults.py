@@ -218,12 +218,15 @@ class LineResults(myObject):
             self._confidenceRange[:, i] = h.confidenceRange(percent=percent, log=log)
 
         self.close()
-        with h5py.File(self.fName, 'a') as f:
-            if 'confidence_range' in f.keys():
-                self._confidenceRange.writeHdf(f, 'confidence_range')
-            else:
-                self._confidenceRange.toHdf(f, 'confidence_range')
-            f['confidence_range'].attrs['options'] = s
+        try:
+            with h5py.File(self.fName, 'a') as f:
+                if 'confidence_range' in f.keys():
+                    self._confidenceRange.writeHdf(f, 'confidence_range')
+                else:
+                    self._confidenceRange.toHdf(f, 'confidence_range')
+                f['confidence_range'].attrs['options'] = s
+        except:
+            pass
         self.open()
 
     
@@ -1324,17 +1327,18 @@ class LineResults(myObject):
         for i in Bar(range(self.nPoints)):
             hm._counts = counts[i, :, :]
             hm._x = RectilinearMesh1D(cellEdges=parameters.cellEdges[i, :])
-            self._faciesProbability[:, i, :] = hm.marginalProbability(fractions, distributions, axis=0, reciprocateParameter=reciprocateParameter, log=log)
+            self._faciesProbability[:, :, i] = hm.marginalProbability(fractions, distributions, axis=0, reciprocateParameter=reciprocateParameter, log=log)
         
         self.close()
-        with h5py.File(self.fName, 'a') as f:
-            if 'facies_probability' in f.keys():
-                del f['facies_probability']
-            else:
-                self._faciesProbability.toHdf(f, 'facies_probability')
+        try:
+            with h5py.File(self.fName, 'r+') as f:
+                if 'facies_probability' in f.keys():
+                    del f['facies_probability']
+                else:
+                    self._faciesProbability.toHdf(f, 'facies_probability')
+        except:
+            pass
         self.open()
-
-    
 
 
     def mostProbableFacies(self):
