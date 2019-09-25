@@ -81,6 +81,8 @@ class Results(myObject):
         self.saveMe = kwargs.pop('save', True)
         self.plotMe = kwargs.pop('plot', False)
         self.savePNG = kwargs.pop('savePNG', False)
+
+        self.fig = None
         # Return none if important parameters are not used (used for hdf 5)
         if all(x1 is None for x1 in [dataPoint, model]):
             return
@@ -146,7 +148,7 @@ class Results(myObject):
         self.iz = np.arange(model.par.posterior.y.nCells)
 
         # Initialize the doi
-        self.doi = model.par.posterior.yBinCentres[0]
+        # self.doi = model.par.posterior.yBinCentres[0]
 
         self.meanInterp = StatArray.StatArray(model.par.posterior.y.nCells)
         self.bestInterp = StatArray.StatArray(model.par.posterior.y.nCells)
@@ -157,7 +159,6 @@ class Results(myObject):
 
         self.verbose = verbose
 
-        self.fig = None
         self.initFigure()
         if self.plotMe:
             plt.show(block=False)
@@ -190,6 +191,11 @@ class Results(myObject):
 #            figName = 'PNG/_tmp' + \
 #                fIO.getFileNameInteger(self.i, np.int(np.log10(self.nMC))) + '.png'
 #            plt.savefig(figName)
+
+
+    def doi(self, percentage = 67.0):
+        return self.Hitmap.getOpacityLevel(percentage)
+
 
     def update(self, i, iBest, bestDataPoint, bestModel, dataPoint, multiplier, PhiD, model, posterior, posteriorComponents, ratioComponents, accepted, dimensionChange, clipRatio):
         """ Update the attributes of the plotter """
@@ -240,7 +246,7 @@ class Results(myObject):
         self.bestModel = bestModel # Reference
 
 
-    def initFigure(self, forcePlot=False):
+    def initFigure(self, forcePlot=False, fig = None):
         """ Initialize the plotting region """
 
         if self.plotMe or forcePlot:
@@ -252,7 +258,11 @@ class Results(myObject):
 
         # plt.ion()
 
-        self.fig = plt.figure(0, facecolor='white', figsize=(10,7))
+        if fig is None:
+            self.fig = plt.figure(facecolor='white', figsize=(10,7))
+        else:
+            self.fig = fig
+
         mngr = plt.get_current_fig_manager()
         try:
             mngr.window.setGeometry(0, 10, self.sx, self.sy)
@@ -440,7 +450,7 @@ class Results(myObject):
 
         # Get the mean and 95% confidence intervals
         hm = self.currentModel.par.posterior
-        (sigMed, sigLow, sigHigh) = hm.confidenceIntervals(confidenceInterval)
+        (sigMed, sigLow, sigHigh) = hm.axisConfidenceIntervals(confidenceInterval)
 
         if (reciprocateX):
             x = 1.0 / hm.x.cellCentres
@@ -459,8 +469,7 @@ class Results(myObject):
         cP.xlabel(xlabel)
 
         # Plot the DOI cutoff based on percentage variance
-        self.doi = hm.getOpacityLevel(opacityPercentage)
-        plt.axhline(self.doi, color='#5046C8', linestyle='dashed', linewidth=3)
+        plt.axhline(self.doi(), color='#5046C8', linestyle='dashed', linewidth=3)
 
         # Plot the best model
         self.bestModel.plot(flipY=False, reciprocateX=reciprocateX, noLabels=True)
@@ -480,7 +489,7 @@ class Results(myObject):
         plt.margins(0.01)
 
 
-    def plot(self, title="", forcePlot=False):
+    def plot(self, title="", forcePlot=False, fig=None):
         """ Updates the figures for MCMC Inversion """
         # Plots that change with every iteration
         if self.plotMe or forcePlot:
@@ -491,7 +500,7 @@ class Results(myObject):
             return
 
         if (self.fig is None):
-            self.initFigure(forcePlot=forcePlot)
+            self.initFigure(forcePlot=forcePlot, fig=fig)
 
 
         if (np.mod(self.i, self.iPlot) == 0 or forcePlot):
@@ -1000,7 +1009,7 @@ class Results(myObject):
         self.i = hdfRead.readKeyFromFile(hdfFile,'','/','i', index=index)
         self.iBurn = hdfRead.readKeyFromFile(hdfFile,'','/','iburn', index=index)
         self.burnedIn = hdfRead.readKeyFromFile(hdfFile,'','/','burnedin', index=index)
-        self.doi = hdfRead.readKeyFromFile(hdfFile,'','/','doi', index=index)
+        # self.doi = hdfRead.readKeyFromFile(hdfFile,'','/','doi', index=index)
         self.multiplier = hdfRead.readKeyFromFile(hdfFile,'','/','multiplier', index=index)
         self.rate = hdfRead.readKeyFromFile(hdfFile,'','/','rate', index=s)
         self.PhiDs = hdfRead.readKeyFromFile(hdfFile,'','/','phids', index=s)
