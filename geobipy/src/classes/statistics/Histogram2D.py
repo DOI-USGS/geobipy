@@ -103,12 +103,12 @@ class Histogram2D(RectilinearMesh2D):
             return out
 
 
-    def axisHistogram(self, between=None, axis=0, log=None):
+    def axisHistogram(self, intervals=None, axis=0, log=None):
         """Get the histogram along an axis
 
         Parameters
         ----------
-        between : array_like
+        intervals : array_like
             Array of size 2 containing lower and upper limits between which to count.
         axis : int
             Axis along which to get the histogram.
@@ -125,16 +125,16 @@ class Histogram2D(RectilinearMesh2D):
 
         bins = self.x if axis == 0 else self.y
 
-        if between is None:
+        if intervals is None:
             s = np.sum(self._counts, axis=axis)
         else:
-            assert np.size(between) == 2, ValueError("between must have size equal to 2")
-            assert between[1] > between[0], ValueError("between must be monotonically increasing")
+            assert np.size(intervals) == 2, ValueError("intervals must have size equal to 2")
+            assert intervals[1] > intervals[0], ValueError("intervals must be monotonically increasing")
             if axis == 0:
-                iBins = self.y.cellCentres.searchsorted(between)
+                iBins = self.y.cellCentres.searchsorted(intervals)
                 s = np.sum(self._counts[iBins[0]:iBins[1], :], axis=axis)
             else:
-                iBins = self.x.cellCentres.searchsorted(between)
+                iBins = self.x.cellCentres.searchsorted(intervals)
                 s = np.sum(self._counts[:, iBins[0]:iBins[1]], axis=axis)
                 
         out = Histogram1D(bins = bins.cellEdges, log=log)
@@ -454,6 +454,7 @@ class Histogram2D(RectilinearMesh2D):
 
         return out
 
+
     def divideBySum(self, axis):
         """Divide by the sum along an axis.
         
@@ -470,7 +471,7 @@ class Histogram2D(RectilinearMesh2D):
             self._counts /= np.repeat(s[:, np.newaxis], np.size(self._counts, axis), axis)
 
 
-    def findPeaks(self, intervals, axis=0):
+    def fitMajorPeaks(self, intervals, axis=0, **kwargs):
         """Find peaks in the histogram along an axis.
 
         Parameters
@@ -483,7 +484,19 @@ class Histogram2D(RectilinearMesh2D):
         """
         counts = super().intervalStatistic(self._counts, intervals, axis, 'sum')
 
+        distributions = []
+        if axis == 0:
+            h = Histogram1D(bins = self.xBins)
+            for i in range(intervals.size - 1):
+                h._counts = counts[i, :]
+                distributions.append(h.fitMajorPeaks(**kwargs))
+        else:
+            h = Histogram1D(bins = self.yBins)
+            for i in range(intervals.size - 1):
+                h._counts = counts[:, i]
+                distributions.append(h.fitMajorPeaks(**kwargs))
 
+        return distributions
 
     def intervalStatistic(self, intervals, axis=0, statistic='mean'):
         """Compute the statistic of an array between the intervals given along dimension dim.
