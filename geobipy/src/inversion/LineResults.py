@@ -47,7 +47,7 @@ class LineResults(myObject):
         self._confidenceRange = None
         self._doi = None
         self._elevation = None
-        self._faciesProbability = None
+        self._marginalProbability = None
         self._fiducials = None
         self._hitMap = None
         self._interfaces = None
@@ -84,7 +84,7 @@ class LineResults(myObject):
         try:
             self.hdfFile.attrs
         except:
-            self.hdfFile = h5py.File(self.fName, 'r')
+            self.hdfFile = h5py.File(self.fName, 'r+')
 
 
     def close(self):
@@ -217,17 +217,12 @@ class LineResults(myObject):
             h._counts[:, :] = a[i, :, :]
             self._confidenceRange[:, i] = h.axisConfidenceRange(percent=percent, log=log)
 
-        self.close()
-        try:
-            with h5py.File(self.fName, 'a') as f:
-                if 'confidence_range' in f.keys():
-                    self._confidenceRange.writeHdf(f, 'confidence_range')
-                else:
-                    self._confidenceRange.toHdf(f, 'confidence_range')
-                f['confidence_range'].attrs['options'] = s
-        except:
-            pass
-        self.open()
+
+        if 'confidence_range' in self.hdfFile.keys():
+            del self.hdfFile['confidence_range']
+                
+        self._confidenceRange.toHdf(self.hdfFile, 'confidence_range')
+        self.hdfFile['confidence_range'].attrs['options'] = s
 
     
     @property
@@ -296,16 +291,10 @@ class LineResults(myObject):
             self._doi[:buffer] = tmp[0]
             self._doi[-buffer:] = tmp[-1]
         
-            
-
-        self.close()
-        with h5py.File(self.fName, 'a') as f:
-            if 'doi' in f.keys():
-                self._doi.writeHdf(f, 'doi')
-            else:
-                self._doi.toHdf(f, 'doi')
-        self.open()
-
+        if 'doi' in self.hdfFile.keys():
+            del self.hdfFile['doi']
+                
+        self._doi.toHdf(self.hdfFile, 'doi')
 
     @property
     def elevation(self):
@@ -367,16 +356,35 @@ class LineResults(myObject):
                 self._fiducials = self.getAttribute('fiducials')
             except:
                 self._fiducials = StatArray.StatArray(np.asarray(self.hdfFile.get('ids')), "fiducials")
-        return self._fiducials
+        return self._fiducials      
 
+    
+    def fitMajorPeaks(self, intervals, **kwargs):
+        """Fit distributions to the major peaks in each hitmap along the line.
 
-    def fitHitmapOverDepth(self):
-        """At each depth interval in the hitmap, fit the histogram with the best number of normal distributions.
+        Parameters
+        ----------
+        intervals : array_like, optional
+            Accumulate the histogram between these invervals before finding peaks
 
         """
+        distributions = []
 
-        lh = self.lineHitmap
-        
+        hm = self.hitMap.deepcopy()
+        counts = np.asarray(self.hdfFile['currentmodel/par/posterior/arr/data'])
+
+        Bar = progressbar.ProgressBar()
+        for i in Bar(range(self.nPoints)):
+
+            try:
+                dpDistributions = hm.fitMajorPeaks(intervals, **kwargs)
+                distributions.append(dpDistributions)
+            except:
+                pass
+
+            hm._counts = counts[i, :, :]
+
+        return distributions
 
 
     def identifyPeaks(self, depths, nBins = 250, width=4, limits=None):
@@ -469,15 +477,10 @@ class LineResults(myObject):
 
             self._lineHitmap._counts[:, pj] += cTmp
 
-        self.close()
-        with h5py.File(self.fName, 'a') as f:
-            if 'line_hitmap' in f.keys():
-                self._lineHitmap.writeHdf(f, 'line_hitmap')
-            else:
-                self._lineHitmap.toHdf(f, 'line_hitmap')
-        self.open()
-
-
+        if 'line_hitmap' in self.hdfFile.keys():
+            del self.hdfFile['line_hitmap']
+                
+        self._lineHitmap.toHdf(self.hdfFile, 'line_hitmap')
 
     @property
     def maxParameter(self):
@@ -562,13 +565,11 @@ class LineResults(myObject):
             h._counts[:, :] = a[i, :, :]
             self._modeParameter[:, i] = h.axisMode()
 
-        self.close()
-        with h5py.File(self.fName, 'a') as f:
-            if 'mode_parameter' in f.keys():
-                self._modeParameter.writeHdf(f, 'mode_parameter')
-            else:
-                self._modeParameter.toHdf(f, 'mode_parameter')
-        self.open()
+
+        if 'mode_parameter' in self.hdfFile.keys():
+            del self.hdfFile['mode_parameter']
+                
+        self._modeParameter.toHdf(self.hdfFile, 'mode_parameter')
 
 
     @property
@@ -934,7 +935,7 @@ class LineResults(myObject):
 
         c = post.counts.T
         c = np.divide(c, np.max(c,0), casting='unsafe')
-        ax = c.pcolor(xtmp, y=post.binCentres[0, :], **kwargs)
+        ax, pm, cb = c.pcolor(xtmp, y=post.binCentres[0, :], **kwargs)
         cP.title('# of Layers posterior distributions')
 
 
@@ -1283,83 +1284,88 @@ class LineResults(myObject):
         if useVariance:
             kwargs['alpha'] = self.opacity
     
-        ax, pm = self.mesh.pcolor(values = values, **kwargs)
+        ax, pm, cb = self.mesh.pcolor(values = values, **kwargs)
+        return ax, pm, cb
 
 
-    def plotFacies(self, mean, var, volFrac, percent=67.0, ylim=None):
-        """ Plot a cross-section of the parameters """
+    # def plotFacies(self, mean, var, volFrac, percent=67.0, ylim=None):
+    #     """ Plot a cross-section of the parameters """
 
-        assert False, ValueError('Double check this')
+    #     assert False, ValueError('Double check this')
 
-        self.setAlonglineAxis(self.plotAgainst)
-        zGrd = self.zGrid
+    #     self.setAlonglineAxis(self.plotAgainst)
+    #     zGrd = self.zGrid
 
-        a = np.zeros([zGrd.size, self.nPoints + 1],order = 'F')  # Transparency amounts
-        a[:, 1:] = self.opacity
+    #     a = np.zeros([zGrd.size, self.nPoints + 1],order = 'F')  # Transparency amounts
+    #     a[:, 1:] = self.opacity
 
-        self._getX_pmesh(zGrd.size)
-        self._getZ_pmesh(zGrd)
+    #     self._getX_pmesh(zGrd.size)
+    #     self._getZ_pmesh(zGrd)
 
-        c = np.zeros(self._xMesh.shape, order = 'F')  # Colour value of each cell
-        c[:-1, 0] = np.nan
-        c[:-1, -1] = np.nan
-        c[-1, :] = np.nan
+    #     c = np.zeros(self._xMesh.shape, order = 'F')  # Colour value of each cell
+    #     c[:-1, 0] = np.nan
+    #     c[:-1, -1] = np.nan
+    #     c[-1, :] = np.nan
 
-        self.assignFacies(mean, var, volFrac)
-        c[:-1, 1:-1] = self.facies
+    #     self.assignFacies(mean, var, volFrac)
+    #     c[:-1, 1:-1] = self.facies
 
-        # Mask the Nans in the colorMap
-        cm = ma.masked_invalid(c)
+    #     # Mask the Nans in the colorMap
+    #     cm = ma.masked_invalid(c)
 
-        # Get the "depth of investigation"
-        self.getDOI(percent)
+    #     # Get the "depth of investigation"
+    #     self.getDOI(percent)
 
-        ax = plt.gca()
-        cP.pretty(ax)
-        p = ax.pcolormesh(self._xMesh, self._zMesh, cm)
-        cb = plt.colorbar(p, ax=ax)
-        plt.plot(self.xPlot, self.elevation, color='k')
-        if (self.z is None):
-            self.z = np.asarray(self.getAttribute('z'))
-        plt.plot(self.xPlot, self.z.reshape(self.z.size) + self.elevation, color='k')
+    #     ax = plt.gca()
+    #     cP.pretty(ax)
+    #     p = ax.pcolormesh(self._xMesh, self._zMesh, cm)
+    #     cb = plt.colorbar(p, ax=ax)
+    #     plt.plot(self.xPlot, self.elevation, color='k')
+    #     if (self.z is None):
+    #         self.z = np.asarray(self.getAttribute('z'))
+    #     plt.plot(self.xPlot, self.z.reshape(self.z.size) + self.elevation, color='k')
 
-        plt.plot(self.xPlot, self.elevation - self.doi, color='k', linestyle='-', alpha=0.7, linewidth=1)
+    #     plt.plot(self.xPlot, self.elevation - self.doi, color='k', linestyle='-', alpha=0.7, linewidth=1)
 
-        plt.savefig('myfig.png')
-        for i, j in zip(p.get_facecolors(), a.flatten()):
-            i[3] = j  # Set the alpha value of the RGBA tuple using m2
-        fIO.deleteFile('myfig.png')
+    #     plt.savefig('myfig.png')
+    #     for i, j in zip(p.get_facecolors(), a.flatten()):
+    #         i[3] = j  # Set the alpha value of the RGBA tuple using m2
+    #     fIO.deleteFile('myfig.png')
 
-        if (not ylim is None):
-            plt.ylim(ylim)
+    #     if (not ylim is None):
+    #         plt.ylim(ylim)
 
-        cP.xlabel(self.xPlot.getNameUnits())
-        cP.ylabel('Elevation (m)')
-        cP.clabel(cb, 'Facies')
+    #     cP.xlabel(self.xPlot.getNameUnits())
+    #     cP.ylabel('Elevation (m)')
+    #     cP.clabel(cb, 'Facies')
 
 
-    @property
-    def faciesProbability(self):
-        """ Assign facies to the parameter model given the pdfs of each facies
-        mean:    :Means of the normal distributions for each facies
-        var:     :Variance of the normal distributions for each facies
-        volFrac: :Volume fraction of each facies
-        """
+    def marginalProbability(self, i=None):
 
-        if self._faciesProbability is None:
-            assert 'facies_probability' in self.hdfFile.keys(), Exception("Facies probabilities need computing, use LineResults.computeFaciesProbability()")
-            self._faciesProbability = StatArray.StatArray().fromHdf(self.hdfFile['facies_probability'])
+        if self._marginalProbability is None:
 
-        return self._faciesProbability
+            assert 'marginal_probability' in self.hdfFile.keys() or 'facies_probability' in self.hdfFile.keys(), Exception("Marginal probabilities need computing, use LineResults.computeMarginalProbability()")
+
+            if 'marginal_probability' in self.hdfFile.keys():
+                self._marginalProbability = StatArray.StatArray().fromHdf(self.hdfFile['marginal_probability'])
+            elif 'facies_probability' in self.hdfFile.keys():
+                self._marginalProbability = StatArray.StatArray().fromHdf(self.hdfFile['facies_probability'])
+
+        if i is None:
+            return self._marginalProbability
+
+        else:
+            nClasses = self._marginalProbability.shape[0]
+            return StatArray.StatArray(self._marginalProbability[i, :, :], name = "$\frac{P_{" + str(i+1) + "}}{\sum_{i=1}^{" + str(nClasses) + "}P_{i}}$")
 
     
-    def computeFaciesProbability(self, fractions, distributions, reciprocateParameter=False, log=None):
+    def computeMarginalProbability(self, fractions, distributions, **kwargs):
 
-        print("Computing facies probabilities. This can take a while. \nOnce you have done this, and you no longer need to change the input parameters, simply use LineResults.faciesProbability to access.")
+        print("Computing marginal probabilities. This can take a while. \nOnce you have done this, and you no longer need to change the input parameters, simply use LineResults.marginalProbability to access.")
 
         nFacies = np.size(distributions)
 
-        self._faciesProbability = StatArray.StatArray(np.empty([nFacies, self.hitMap.y.nCells, self.nPoints]), name='Probability')
+        self._marginalProbability = StatArray.StatArray(np.empty([nFacies, self.hitMap.y.nCells, self.nPoints]), name='Marginal probability')
 
         counts = self.hdfFile['currentmodel/par/posterior/arr/data']
         parameters = RectilinearMesh1D().fromHdf(self.hdfFile['currentmodel/par/posterior/x'])
@@ -1370,25 +1376,43 @@ class LineResults(myObject):
         for i in Bar(range(self.nPoints)):
             hm._counts = counts[i, :, :]
             hm._x = RectilinearMesh1D(cellEdges=parameters.cellEdges[i, :])
-            self._faciesProbability[:, :, i] = hm.marginalProbability(fractions, distributions, axis=0, reciprocateParameter=reciprocateParameter, log=log)
+            self._marginalProbability[:, :, i] = hm.marginalProbability(fractions, distributions, axis=0, **kwargs)
         
-        self.close()
-        try:
-            with h5py.File(self.fName, 'r+') as f:
-                if 'facies_probability' in f.keys():
-                    del f['facies_probability']
-                else:
-                    self._faciesProbability.toHdf(f, 'facies_probability')
-        except:
-            pass
-        self.open()
+        if 'marginal_probability' in self.hdfFile.keys():
+            del self.hdfFile['marginal_probability']
+        if 'facies_probability' in self.hdfFile.keys():
+            del self.hdfFile['facies_probability']
+        
+        self._marginalProbability.toHdf(self.hdfFile, 'marginal_probability')
+
+        return self.marginalProbability
 
 
-    def mostProbableFacies(self):
+    @property
+    def highestMarginal(self):
 
-        out = np.argmax(self.faciesProbability, axis=0)
+        out = StatArray.StatArray(self.mesh.shape, "Most probable class")
+        mp = self.marginalProbability()
+        for i in range(self.nPoints):
+            out[:, i] = np.argmax(mp[:, :, i], axis=0)
     
-        out.name = "Most Probable Facies"
+        return out
+
+
+    @property
+    def probability_of_highest_marginal(self):
+
+        out = StatArray.StatArray(self.mesh.shape, "Probability")
+        
+        hm = self.highestMarginal
+        classes = np.unique(hm)
+
+        mp = self.marginalProbability()
+
+        for i, c in enumerate(classes):
+            iWhere = np.where(hm == c)
+            out[iWhere[0], iWhere[1]] = mp[i, iWhere[0], iWhere[1]]
+    
         return out
 
 
@@ -1650,7 +1674,7 @@ class LineResults(myObject):
         hdfFile.create_dataset('i', shape=[nPoints], dtype=results.i.dtype, fillvalue=np.nan)
         hdfFile.create_dataset('iburn', shape=[nPoints], dtype=results.iBurn.dtype, fillvalue=np.nan)
         hdfFile.create_dataset('burnedin', shape=[nPoints], dtype=type(results.burnedIn))
-        hdfFile.create_dataset('doi',  shape=[nPoints], dtype=results.doi.dtype, fillvalue=np.nan)
+        hdfFile.create_dataset('doi',  shape=[nPoints], dtype=float, fillvalue=np.nan)
         hdfFile.create_dataset('multiplier',  shape=[nPoints], dtype=results.multiplier.dtype, fillvalue=np.nan)
         hdfFile.create_dataset('invtime',  shape=[nPoints], dtype=float, fillvalue=np.nan)
         hdfFile.create_dataset('savetime',  shape=[nPoints], dtype=float, fillvalue=np.nan)
@@ -1737,7 +1761,7 @@ class LineResults(myObject):
         hdfFile['burnedin'][i] = results.burnedIn
 
         # Add the depth of investigation
-        hdfFile['doi'][i] = results.doi
+        hdfFile['doi'][i] = results.doi()
 
         # Add the multiplier
         hdfFile['multiplier'][i] = results.multiplier
