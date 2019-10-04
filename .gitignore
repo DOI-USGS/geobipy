@@ -1,7 +1,7 @@
 *__pycache__*
 *egg-info*
-*.png
 *DS_Store
+images/
 .ipynb_checkpoints
 *.h5
 MANIFEST.in
@@ -11,4 +11,3 @@ build
 *.swo
 *.vtk
 *.egg
-docs/source/examples
