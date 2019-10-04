@@ -162,7 +162,7 @@ class RectilinearMesh1D(myObject):
 
     @property
     def name(self):
-        return self._cellCentres.getName
+        return self._cellCentres.getName()
 
     @property
     def range(self):
@@ -171,7 +171,7 @@ class RectilinearMesh1D(myObject):
 
     @property
     def units(self):
-        return self._cellCentres.getUnits
+        return self._cellCentres.getUnits()
 
 
     def cellIndex(self, values, clip=False, trim=False):
