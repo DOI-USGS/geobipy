@@ -152,7 +152,7 @@ class RectilinearMesh2D(myObject):
 
         """
 
-        return np.asarray([self.z.nCells, self.x.nCells], dtype=np.int)
+        return (self.z.nCells, self.x.nCells)
 
 
     @property
