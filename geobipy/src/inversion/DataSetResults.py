@@ -313,7 +313,7 @@ class DataSetResults(myObject):
         index = self.fiducialIndex(fiducial)
 
         return self.lines[index[0]].getResults(index=index[1], reciprocateParameter=reciprocateParameters)
-        
+       
 
     def getLineNumber(self, i):
         """ Get the line number for the given data point index """
