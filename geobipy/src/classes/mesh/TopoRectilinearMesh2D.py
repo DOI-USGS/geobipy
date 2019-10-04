@@ -72,7 +72,7 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
 
         assert self._height.nCells == self._x.nCells, Exception("heights must have enough values for {} cells or {} edges.".format(self.x.nCells, self.x.nEdges))
 
-        self.setXMesh()
+        self.xMesh()
         self.zMesh()
 
     
@@ -92,7 +92,7 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
         return self._height
 
 
-    def XMesh(self, xAxis='x'):
+    def xMesh(self, xAxis='x'):
         """Creates an array suitable for plt.pcolormesh for the abscissa.
         
         Parameters
@@ -120,18 +120,17 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
 
         return xMesh
 
-    
-    def setXMesh(self, xAxis='x'):
 
-        self._xMesh = self.XMesh(xAxis=xAxis)
-
-
-    def zMesh(self):
+    def zMesh(self, zAxis='absolute'):
         """Creates an array suitable for plt.pcolormesh for the ordinate """
-        self._zMesh = self.height.cellEdges - np.repeat(self.z.cellEdges[:, np.newaxis], self.x.nCells+1, 1)
+        assert zAxis.lower() in ['relative', 'absolute'], Exception("zAxis must be either 'relative' or 'absolute'")
+        if zAxis.lower() == 'relative':
+            return np.repeat(self.z.cellEdges[:, np.newaxis], self.x.nCells+1, 1)
+        elif zAxis.lower() == 'absolute':
+            return self.height.cellEdges - np.repeat(self.z.cellEdges[:, np.newaxis], self.x.nCells+1, 1)
 
 
-    def pcolor(self, values, xAxis='x', **kwargs):
+    def pcolor(self, values, xAxis='x', zAxis='absolute', **kwargs):
         """Create a pseudocolour plot of a 2D array using the mesh.
 
         Parameters
@@ -142,6 +141,9 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
             If xAxis is 'x', the horizontal xAxis uses self.x
             If xAxis is 'y', the horizontal xAxis uses self.y
             If xAxis is 'r', the horizontal xAxis uses cumulative distance along the line
+        zAxis : str
+            If zAxis is 'absolute' the vertical axis is the height plus z.
+            If zAxis is 'relative' the vertical axis is z.
 
         Other Parameters
         ----------------
@@ -183,12 +185,16 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
         # assert isinstance(values, StatArray), TypeError("values must be a StatArray")
         assert np.all(values.shape == self.shape), ValueError("values must have shape {}".format(self.shape))
 
-        self.setXMesh(xAxis=xAxis)
-        ax, pm = cP.pcolormesh(self._xMesh, self._zMesh, values, **kwargs)
-        cP.xlabel(self._xMesh.getNameUnits())
-        cP.ylabel(self.z.cellCentres.getNameUnits())
+        xm = self.xMesh(xAxis=xAxis)
+        zm = self.zMesh(zAxis=zAxis)
 
-        return ax, pm
+        if zAxis.lower() == 'relative':
+            kwargs['flipY'] = kwargs.pop('flipY', True)
+        ax, pm, cb = cP.pcolormesh(xm, zm, values, **kwargs)
+        cP.xlabel(xm.getNameUnits())
+        cP.ylabel(zm.getNameUnits())
+
+        return ax, pm, cb
 
     
     def plotGrid(self, xAxis='x', **kwargs):
