@@ -193,8 +193,13 @@ class Results(myObject):
 #            plt.savefig(figName)
 
 
+    @property
+    def hitmap(self):
+        return self.currentModel.par.posterior
+
+
     def doi(self, percentage = 67.0):
-        return self.Hitmap.getOpacityLevel(percentage)
+        return self.hitmap.getOpacityLevel(percentage)
 
 
     def update(self, i, iBest, bestDataPoint, bestModel, dataPoint, multiplier, PhiD, model, posterior, posteriorComponents, ratioComponents, accepted, dimensionChange, clipRatio):
@@ -387,7 +392,7 @@ class Results(myObject):
         """ Plot the histogram of the number of layers """
 
         ax = self.currentModel.nCells.posterior.plot(**kwargs)
-        plt.axvline(self.bestModel.nCells, color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
+        plt.axvline(self.bestModel.nCells, color=cP.wellSeparated[3], linewidth=1)
         ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 
 
@@ -396,7 +401,7 @@ class Results(myObject):
         # self.DzHist.plot(**kwargs)
         ax = self.currentDataPoint.z.posterior.plot(**kwargs)
         if self.burnedIn:
-            plt.axvline(self.bestDataPoint.z, color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
+            plt.axvline(self.bestDataPoint.z, color=cP.wellSeparated[3], linewidth=1)
         ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 
     
@@ -408,7 +413,7 @@ class Results(myObject):
             plt.locator_params(axis='x', nbins=4)
             for i, a in enumerate(axes):
                 plt.sca(a)
-                plt.axvline(self.bestDataPoint.relErr[i], color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
+                plt.axvline(self.bestDataPoint.relErr[i], color=cP.wellSeparated[3], linewidth=1)
                 a.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
         
 
@@ -430,7 +435,7 @@ class Results(myObject):
             loc, dum = cF._log(self.bestDataPoint.addErr, log=log)
             for i, a in enumerate(axes):
                 plt.sca(a)
-                plt.axvline(loc[i], color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
+                plt.axvline(loc[i], color=cP.wellSeparated[3], linewidth=1)
                 a.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 
 
@@ -445,7 +450,7 @@ class Results(myObject):
         ax.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
 
     
-    def _plotHitmapPosterior(self, reciprocateX=False, confidenceInterval = 95.0, opacityPercentage = 67.0, **kwargs):
+    def _plotParameterPosterior(self, reciprocateX=False, confidenceInterval = 95.0, opacityPercentage = 67.0, xlim=None, **kwargs):
         """ Plot the hitmap posterior of conductivity with depth """
 
         # Get the mean and 95% confidence intervals
@@ -464,21 +469,24 @@ class Results(myObject):
             xlabel = 'Conductivity ($Sm^{-1}$)'
 
         hm.counts.pcolor(x=x, y=hm.y.cellEdges, cmap=mpl.cm.Greys, **kwargs)
-        plt.plot(sl, hm.y.cellCentres, color='#5046C8', linestyle='dashed', linewidth=2, alpha=0.6)
-        plt.plot(sh, hm.y.cellCentres, color='#5046C8', linestyle='dashed', linewidth=2, alpha=0.6)
+
+        CI_kw = {'color':'#5046C8', 'linestyle':'dashed', 'linewidth':1, 'alpha':0.6}
+        plt.plot(sl, hm.y.cellCentres, **CI_kw)
+        plt.plot(sh, hm.y.cellCentres, **CI_kw)
         cP.xlabel(xlabel)
 
         # Plot the DOI cutoff based on percentage variance
-        plt.axhline(self.doi(), color='#5046C8', linestyle='dashed', linewidth=3)
+        plt.axhline(self.doi(), **CI_kw)
 
         # Plot the best model
-        self.bestModel.plot(flipY=False, reciprocateX=reciprocateX, noLabels=True)
+        self.bestModel.plot(flipY=False, reciprocateX=reciprocateX, noLabels=True, linewidth=1)
 
         # Set parameter limits on the hitmap
-        if self.limits is None:
+        if xlim is None:
             plt.axis([x.min(), x.max(), hm.y.cellEdges[0], hm.y.cellEdges[-1]])
         else:
-            plt.axis([self.limits[0], self.limits[1], hm.y.cellEdges[0], hm.y.cellEdges[-1]])            
+            assert np.size(xlim) == 2, ValueError("xlim must have size 2")
+            plt.axis([xlim[0], xlim[1], hm.y.cellEdges[0], hm.y.cellEdges[-1]])            
 
         ax = plt.gca()
         lim = ax.get_ylim()
@@ -538,7 +546,7 @@ class Results(myObject):
                 # Update the model plot
                 plt.sca(self.ax[5])
                 plt.cla()
-                self._plotHitmapPosterior(reciprocateX=self.reciprocateParameter, noColorbar=True)
+                self._plotParameterPosterior(reciprocateX=self.reciprocateParameter, noColorbar=True)
                 
 
                 j = 5
