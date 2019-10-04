@@ -38,15 +38,22 @@ To run this code in parallel you will need both an MPI library and the python wr
 MPI
 +++
 
-If you are installing GeoBIPy on a parallel machine, I would think that you have access to prebuilt MPI libraries.  If you are on a local laptop, you will need to install one. This package has been tested with OpenMPI version 1.10.2. Be careful if you want to use a newer version as mpi4py may not communicate with it correctly (at the time of this writing, OpenMPI v2 was having issues).
-
+If you are installing GeoBIPy on a parallel machine, I would think that you have access to prebuilt MPI libraries.  
+If you are on a local laptop, you will need to install one. 
 
 mpi4py
 ++++++
 
-At this point, if you have an mpi4py module already installed, please remove it (you can check with "pip list"). If you started with a clean installation you should not have to worry about this. To test whether a new install of mpi4py will see the mpi library you have, just type "which mpicc".  The path that you see should point to the implementation that you want mpi4py to link to.  Make sure you are about to install mpi4py to the correct python installation.  If you type 'which python' it should return the path to the correct python distribution.  If you are using environments, make sure you have activated the correct one.
+At this point, if you have an mpi4py module already installed, please remove it (you can check with "pip list"). 
+If you started with a clean installation you should not have to worry about this. 
+To test whether a new install of mpi4py will see the mpi library you have, just type "which mpicc".  
+The path that you see should point to the implementation that you want mpi4py to link to.  
+Make sure you are about to install mpi4py to the correct python installation.  
+If you type 'which python' it should return the path to the correct python distribution.  
+If you are using environments, make sure you have activated the correct one.
 
-Next, use "pip install mpi4py --no-cache-dir".  This last option is very important, without it, pip might install its own MPI library called MPICH2. I would try to avoid this because if you need to install the HDF5 library you will need know which directories to link to (see `Installing parallel HDF5 and h5py`_).
+Next, use "pip install mpi4py --no-cache-dir".  This last option is very important, without it, pip might install its own MPI library called MPICH2. 
+I would try to avoid this because if you need to install the HDF5 library you will need know which directories to link to (see `Installing parallel HDF5 and h5py`_).
 
 At the end of the day,  h5py needs to communicate with both the correct HDF5 library and mpi4py, and both of those need to communicate with the same MPI library.
 
@@ -60,42 +67,36 @@ When you install HDF5, make sure that the correct MPI library can be seen by typ
 
 h5py
 ++++
-Once the HDF5 library is installed you will need to clone the `h5py repository`_
+Once the HDF5 library is installed you will need to install a parallel enabled `h5py package`_
 
-.. _`h5py repository`: https://github.com/h5py/h5py
+.. _`h5py package`: https://github.com/h5py/h5py
 
 Make sure you are about to install h5py to the correct python installation.  If you type 'which python' it should return the path to the correct python installation.
 
-Next, copy the following code into a file called install.sh in the h5py folder and run it.  You will need to edit 3 entries.
+First check the following
 
-- In H5PY_PATH change the path to the location where you want h5py installed.
-- In HDF5_PATH change the path to the location of the installed parallel HDF5 library (i.e. the directory above /lib/)
-- Check that 'which mpicc' returns the correct version.
+- HDF5_DIR = Get the path to the HDF5 installation.
+- Check that 'which mpicc' returns the correct version of an mpi enabled compiler. This needs to point to the same MPI library that mpi4py was installed on top of.
+
+- Do the following, replacing items in < > with your mpicc compiler and you HDF5 install directory.
+This will install h5py and compile the source.
 
 .. code:: bash
 
-    #!/bin/bash
-    export HDF5_PATH=<Your path to HDF5>
-    python setup.py clean --all
-    python setup.py configure -r --hdf5-version=<Your version of HDF5> --mpi --hdf5=$HDF5_PATH
-    export gcc=gcc
-    CC=mpicc HDF5_DIR=$HDF5_PATH python setup.py build
-    python setup.py install
+    CC=<Your mpicc compiler> HDF5_MPI="ON" HDF5_DIR=<Your HDF5_DIR> pip install --no-binary=h5py h5py
 
 
 Installing the time domain forward modeller
 :::::::::::::::::::::::::::::::::::::::::::
-Ross Brodie at Geoscience Australia has written a great forward modeller, gatdaem1D,  in C++ with a python interface.  You can obtain that code here at the `GA repository`_
+Ross Brodie at Geoscience Australia has written a great forward modeller, gatdaem1D,  in C++ with a python interface.  
+You can obtain that code here at the `GA repository`_
 
 .. _`GA repository`: https://github.com/GeoscienceAustralia/ga-aem
 
-However, for use with GeoBIPy, use `this fork of gataem1D`_ if there are open pull requests at the original repository.
-
-.. _`this fork of gataem1D`: https://github.com/leonfoks/ga-aem
-
 Go ahead and "git clone" that repository.
 
-These instructions only describe how to install Ross' forward modeller, but it is part of a larger code base for inversion. If you wish to install his entire package, please follow his instructions.
+These instructions only describe how to install Ross' forward modeller, but it is part of a larger code base for inversion. 
+If you wish to install his entire package, please follow his instructions.
 
 Prerequisites
 -------------
