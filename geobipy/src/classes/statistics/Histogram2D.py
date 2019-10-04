@@ -166,7 +166,7 @@ class Histogram2D(RectilinearMesh2D):
 
 
 
-    def axisHistogram(self, between=None, axis=0, log=None):
+    def axisHistogram(self, intervals=None, axis=0, log=None):
         """Get the histogram along an axis
 
         Parameters
@@ -488,18 +488,37 @@ class Histogram2D(RectilinearMesh2D):
         counts = super().intervalStatistic(self._counts, intervals, axis, 'sum')
 
         distributions = []
+        amplitudes = []
         if axis == 0:
             h = Histogram1D(bins = self.xBins)
+            # if distribution.lower() == 'gaussian':
+            #     method = h.fitMajorPeaks_gaussian
+            # else:
+            #     method = 
             for i in range(intervals.size - 1):
-                h._counts = counts[i, :]
-                distributions.append(h.fitMajorPeaks(**kwargs))
+                h._counts[:] = counts[i, :]
+
+                try:
+                    d, a = h.fitMajorPeaks(**kwargs)
+                    distributions.append(d)
+                    amplitudes.append(a)
+                except:
+                    pass
+
         else:
             h = Histogram1D(bins = self.yBins)
+            if distribution.lower() == 'gaussian':
+                method = h.fitMajorPeaks_gaussian
+            else:
+                method = h.fitMajorPeaks
             for i in range(intervals.size - 1):
-                h._counts = counts[:, i]
-                distributions.append(h.fitMajorPeaks(**kwargs))
+                h._counts[:] = counts[:, i]
+                d, a = h.fitMajorPeaks(**kwargs)
+                distributions.append(d)
+                amplitudes.append(a)
 
-        return distributions
+        return distributions, amplitudes
+
 
     def intervalStatistic(self, intervals, axis=0, statistic='mean'):
         """Compute the statistic of an array between the intervals given along dimension dim.
