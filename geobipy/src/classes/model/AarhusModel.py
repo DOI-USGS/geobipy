@@ -18,9 +18,24 @@ class AarhusModel(Model):
         self.fid = None
 
     
-    def pcolor(self, **kwargs):
+    def pcolor(self, useDOI = True, **kwargs):
+
+        if useDOI:
+            alpha = np.ones(self.mesh.shape)
+            cellId = self.mesh.z.cellIndex(self.doi)
+            for i in range(self.mesh.x.nCells):
+                alpha[cellId[i]:, i] = 0.0
+            kwargs['alpha'] = alpha
+
         self.mesh.pcolor(self.rho, **kwargs)
     
+
+    def plotDOI(self, xAxis='x', **kwargs):
+
+        xtmp = self.mesh.getXAxis(xAxis, centres=True)
+
+        (self.mesh.height.cellCentres - self.doi).plot(x = xtmp, **kwargs)
+
 
     def plotElevation(self, **kwargs):
         self.mesh.plotHeight(**kwargs)
@@ -120,6 +135,7 @@ class AarhusModel(Model):
             fidIndex = 3
             rhoIndex = []
             topIndex = []
+            doiIndex = None
             
             for i, head in enumerate(header):
                 head = head.lower()
@@ -133,6 +149,8 @@ class AarhusModel(Model):
                     fidIndex = i
                 elif head == "topo":
                     zIndex = i
+                elif head == "doi_lower":
+                    doiIndex = i
                 
                 if "rho_i" in head and not "std" in head:
                     rhoIndex.append(i)
@@ -147,6 +165,7 @@ class AarhusModel(Model):
             y = StatArray(nPoints, 'Northing', 'm')
             z = StatArray(nPoints, 'Elevation', 'm')
             fid = StatArray(nPoints, 'Fiducial')
+            doi = StatArray(nPoints, 'Depth of investigation', 'm')
             rho = np.zeros([nLayers, nPoints])
             depthEdges = StatArray(nLayers+1, 'Depth', 'm')
 
@@ -169,6 +188,7 @@ class AarhusModel(Model):
                 z[nPoints] = line[zIndex]
                 fid[nPoints] = line[fidIndex]
                 rho[:, nPoints] = line[rhoIndex]
+                doi[nPoints] = line[doiIndex]
 
 
                 nPoints += 1
@@ -182,6 +202,7 @@ class AarhusModel(Model):
         self.mesh = TopoRectilinearMesh2D(xCentres=x[:nPoints], yCentres=y[:nPoints], zEdges=depthEdges, heightCentres=z[:nPoints])
         self.fid = StatArray(fid[:nPoints], 'Fiducial')
         self.rho = StatArray(rho[:, :nPoints], 'Resistivity', '$\Omega m$')
+        self.doi = StatArray(doi[:nPoints], 'Depth of investigation', 'm')
 
 
 
