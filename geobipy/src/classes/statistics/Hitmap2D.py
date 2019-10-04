@@ -38,12 +38,10 @@ class Hitmap2D(Histogram2D):
 
 
         """
-
         assert axis < 2, ValueError("Must have 0 <= axis < 2")
 
         if axis == 0:
             ax = self.x.cellCentres
-
         else:
             ax = self.y.cellCentres
 
@@ -55,19 +53,41 @@ class Hitmap2D(Histogram2D):
         if not isinstance(distributions, list):
             distributions = [distributions]
 
+        # Sort by mean
+        # means = [x.mean for x in distributions]
+        # i = np.argsort(means)
+        # sortedDistributions = []
+        # for j in i:
+        #     sortedDistributions.append(distributions[j])
+        sortedDistributions = distributions
+
         # Compute the probabilities along the hitmap axis, using each distribution
-        nDistributions = np.size(distributions)
+        nDistributions = np.size(sortedDistributions)
         pdfs = np.zeros([nDistributions, ax.size])
         for i in range(nDistributions):
-            pdfs[i, :] = fractions[i] * distributions[i].probability(ax)
+            pdfs[i, :] = fractions[i] * sortedDistributions[i].probability(ax)
+
+        if nDistributions > 1:
+            x = np.searchsorted(ax, sortedDistributions[1].mean)
+            pdfs[0, x:] = 0.0
+
+            for i in range(1, nDistributions-1):
+                x = ax.searchsorted(sortedDistributions[i-1].mean)
+                pdfs[i, :x] = 0.0
+                x = ax.searchsorted(sortedDistributions[i+1].mean)
+                pdfs[i, x:] = 0.0
+
+            x = ax.searchsorted(sortedDistributions[nDistributions-2].mean)
+            pdfs[-1, :x] = 0.0
 
         # Normalize by the sum of the pdfs
-        normalizedPdfs = pdfs / np.sum(pdfs, 0)
+        normalizedPdfs = pdfs / np.sum(pdfs, axis=0)
 
         # Initialize the facies Model
+        axisPdf = self.axisPdf(axis)
         marginalProbability = np.empty([nDistributions, self.shape[axis]])
         for j in range(nDistributions):
-            marginalProbability[j, :] = np.sum(self.axisPdf(axis) * normalizedPdfs[j, :], axis=1-axis)
+            marginalProbability[j, :] = np.sum(axisPdf * normalizedPdfs[j, :], axis=1-axis)
 
         return np.squeeze(marginalProbability)
 
@@ -106,19 +126,21 @@ class Hitmap2D(Histogram2D):
         bi=None
         if (not index is None):
             assert cF.isInt(index), TypeError('index must be an integer {}'.format(index))
-            ai = np.s_[index,:,:]
-            bi = np.s_[index,:]
+            ai = np.s_[index, :, :]
+            bi = np.s_[index, :]
 
         item = grp.get('arr')
         obj = eval(cF.safeEval(item.attrs.get('repr')))
         arr = obj.fromHdf(item, index=ai)
+
         item = grp.get('x')
         this = eval(cF.safeEval(item.attrs.get('repr')))
         x = this.fromHdf(item, index=bi)
         item = grp.get('y')
         this = eval(cF.safeEval(item.attrs.get('repr')))
         y = this.fromHdf(item, index=bi)
-        tmp = Hitmap2D(xBinCentres=x, yBinCentres=y)
+
+        tmp = Hitmap2D(xBins=x.cellEdges, yBins=y.cellEdges)
         tmp._counts[:, :] = arr
 
         return tmp
