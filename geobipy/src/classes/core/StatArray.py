@@ -147,7 +147,6 @@ class StatArray(np.ndarray, myObject):
             self = np.ndarray.__new__(subtype, 1, **kwargs)
             self[:] = shape
 
-        # Convert the entry to a numpy array
         else:
             self = np.ndarray.__new__(subtype, np.asarray(shape), **kwargs)
             self[:] = 0
@@ -958,7 +957,13 @@ class StatArray(np.ndarray, myObject):
         noColorbar : bool, optional
             Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.   
         trim : bool, optional
-            Set the x and y limits to the first and last non zero values along each axis. 
+            Set the x and y limits to the first and last non zero values along each axis.
+        classes : dict, optional
+            A dictionary containing three entries.
+            classes['id'] : array_like of same shape as self containing the class id of each element in self.
+            classes['cmaps'] : list of matplotlib colourmaps.  The number of colourmaps should equal the number of classes.
+            classes['labels'] : list of str.  The length should equal the number of classes.
+            If classes is provided, alpha is ignored if provided.
 
         Returns
         -------
@@ -992,8 +997,8 @@ class StatArray(np.ndarray, myObject):
                     except:
                         pass
 
-            ax = cP.pcolor(self, x=mx, y=my, **kwargs)
-        return ax
+            ax, pm, cb = cP.pcolor(self, x=mx, y=my, **kwargs)
+        return ax, pm, cb
 
 
     def plot(self, x=None, i=None, axis=0, **kwargs):
@@ -1112,6 +1117,9 @@ class StatArray(np.ndarray, myObject):
             x = StatArray(np.arange(self.size),'Array Index')
         else:
             assert x.size == self.size, ValueError('x must be size '+str(self.size))
+
+        if (y is None):
+            y = self
 
         c = kwargs.pop('c', self)
 
@@ -1232,22 +1240,27 @@ class StatArray(np.ndarray, myObject):
         >>>     x.toHdf(f, 'aTestGroup')
 
         """
-        # Create a new group inside h5obj
-        grp = h5obj.create_group(myName)
-        grp.attrs["repr"] = self.hdfName()
-        grp.create_dataset('data', data=self)
-        #compression="gzip",compression_opts=6,shuffle=True
-        # if self.hasPrior():
-        #     self.prior.toHdf(grp, 'prior')
-        # if self.hasProposal():
-        #     self.proposal.toHdf(grp, 'proposal')
-        if self.hasPosterior():
-            grp.create_dataset('nPosteriors', data=self.nPosteriors)
-            if self.nPosteriors > 1:
-                for i in range(self.nPosteriors):
-                    self.posterior[i].toHdf(grp, 'posterior{}'.format(i))
-            else:
-                self.posterior.toHdf(grp, 'posterior')
+
+        self.createHdf(h5obj, myName)
+        self.writeHdf(h5obj, myName)
+
+        # print('SA toHdf')
+        # # Create a new group inside h5obj
+        # grp = h5obj.create_group(myName)
+        # grp.attrs["repr"] = self.hdfName()
+        # grp.create_dataset('data', data=self)
+        # #compression="gzip",compression_opts=6,shuffle=True
+        # # if self.hasPrior():
+        # #     self.prior.toHdf(grp, 'prior')
+        # # if self.hasProposal():
+        # #     self.proposal.toHdf(grp, 'proposal')
+        # if self.hasPosterior():
+        #     grp.create_dataset('nPosteriors', data=self.nPosteriors)
+        #     if self.nPosteriors > 1:
+        #         for i in range(self.nPosteriors):
+        #             self.posterior[i].toHdf(grp, 'posterior{}'.format(i))
+        #     else:
+        #         self.posterior.toHdf(grp, 'posterior')
 
 
     def createHdf(self, h5obj, myName, withPosterior=True, nRepeats=None, fillvalue=None):
@@ -1310,6 +1323,7 @@ class StatArray(np.ndarray, myObject):
         >>> f.close()
 
         """
+
         # create a new group inside h5obj
         grp = h5obj.create_group(myName)
         grp.attrs["repr"] = self.hdfName()
@@ -1380,6 +1394,7 @@ class StatArray(np.ndarray, myObject):
         >>> f.close()
 
         """
+
         writeNumpy(self, h5obj, myName+'/data', index=index)
 #        try:
 #            self.prior.writeHdf(h5obj,myName+'/prior',create=False)
