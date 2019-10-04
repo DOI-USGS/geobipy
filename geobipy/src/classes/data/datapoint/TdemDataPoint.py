@@ -342,7 +342,7 @@ class TdemDataPoint(EmDataPoint):
             plt.margins(0.1, 0.1)
 
 
-    def plot(self, title='Time Domain EM Data', withErrorBars=True, **kwargs):
+    def plot(self, title='Time Domain EM Data', with_error_bars=True, **kwargs):
         """ Plot the Inphase and Quadrature Data for an EM measurement
         """
         ax=plt.gca()
@@ -367,7 +367,7 @@ class TdemDataPoint(EmDataPoint):
             iAct = self.iplotActive[j]
             iS = self._systemIndices(j)
             d = self._data[iS]
-            if (withErrorBars):
+            if (with_error_bars):
                 s = self._std[iS]
                 plt.errorbar(self.times(j)[iAct], d[iAct], yerr=s[iAct],
                 color=c[j],
