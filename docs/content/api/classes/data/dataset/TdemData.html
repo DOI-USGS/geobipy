@@ -1,55 +1,191 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>TemData &#8212; GeoBIPy 1.0.0 documentation</title>
-    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>TemData &mdash; GeoBIPy 1.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/gallery.css" type="text/css" />
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" />
     <link rel="next" title="Datapoint classes" href="../datapoint/datapointrst.html" />
     <link rel="prev" title="FdemData" href="FdemData.html" /> 
-  </head><body>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../../../../../genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="../../../../../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="../datapoint/datapointrst.html" title="Datapoint classes"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="FdemData.html" title="FdemData"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">GeoBIPy 1.0.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../api.html" >API</a> &#187;</li>
-          <li class="nav-item nav-item-2"><a href="../../classes.html" >Classes used in GeoBIPy</a> &#187;</li>
-          <li class="nav-item nav-item-3"><a href="../data.html" >Data classes</a> &#187;</li>
-          <li class="nav-item nav-item-4"><a href="dataset.html" accesskey="U">Data classes</a> &#187;</li> 
-      </ul>
-    </div>  
+</head>
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../../index.html" class="icon icon-home"> GeoBIPy
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../index.html">Welcome to GeoBIPy’s documentation!</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../api.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../../base/base.html">Core routines needed for GeoBIPy</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../classes.html">Classes used in GeoBIPy</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../core/core.html">Core classes</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../data.html">Data classes</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="dataset.html">Data classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../datapoint/datapointrst.html">Datapoint classes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../mesh/mesh.html">Mesh classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../model/model.html">Model classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pointcloud/pointcloud.html">Pointcloud classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../statistics/statistics.html">Statistics classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../system/system.html">System classes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../examples/index.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">GeoBIPy</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../api.html">API</a> &raquo;</li>
+        
+          <li><a href="../../classes.html">Classes used in GeoBIPy</a> &raquo;</li>
+        
+          <li><a href="../data.html">Data classes</a> &raquo;</li>
+        
+          <li><a href="dataset.html">Data classes</a> &raquo;</li>
+        
+      <li>TemData</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../../../../_sources/content/api/classes/data/dataset/TdemData.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
             
   <div class="section" id="temdata">
 <h1>TemData<a class="headerlink" href="#temdata" title="Permalink to this headline">¶</a></h1>
-<img src="../../../../../_images/inheritance-e1b187d0798b947407703d00a41356c6175b12de.png" alt="Inheritance diagram of geobipy.src.classes.data.dataset.TdemData" usemap="#inheritanceeb2965ddb0" class="inheritance"/>
+<div class="graphviz"><img src="../../../../../_images/inheritance-e1b187d0798b947407703d00a41356c6175b12de.png" alt="Inheritance diagram of geobipy.src.classes.data.dataset.TdemData" usemap="#inheritanceeb2965ddb0" class="inheritance graphviz" /></div>
 <map id="inheritanceeb2965ddb0" name="inheritanceeb2965ddb0">
 <area shape="rect" id="node1" href="Data.html#geobipy.src.classes.data.dataset.Data.Data" target="_top" title="Class defining a set of Data." alt="" coords="283,5,355,29"/>
 <area shape="rect" id="node4" href="#geobipy.src.classes.data.dataset.TdemData.TdemData" target="_top" title="Time domain electro magnetic data set" alt="" coords="403,5,486,29"/>
@@ -61,30 +197,26 @@
 <dd><p>Time domain electro magnetic data set</p>
 <p>A time domain data set with easting, northing, height, and elevation values. Each sounding in the data set can be given a receiver and transmitter loop.</p>
 <p>TdemData(nPoints=1, nTimes=[1], nSystems=1)</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>nPoints</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of soundings in the data file</li>
-<li><strong>nTimes</strong> (<em>array of ints</em><em>, </em><em>optional</em>) – Array of size nSystemsx1 containing the number of time gates in each system</li>
-<li><strong>nSystem</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of measurement systems</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nPoints</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of soundings in the data file</p></li>
+<li><p><strong>nTimes</strong> (<em>array of ints</em><em>, </em><em>optional</em>) – Array of size nSystemsx1 containing the number of time gates in each system</p></li>
+<li><p><strong>nSystem</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of measurement systems</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – Time domain data set</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#geobipy.src.classes.data.dataset.TdemData.TdemData" title="geobipy.src.classes.data.dataset.TdemData.TdemData">TdemData</a></p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – Time domain data set</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#geobipy.src.classes.data.dataset.TdemData.TdemData" title="geobipy.src.classes.data.dataset.TdemData.TdemData">TdemData</a></p>
+</dd>
+</dl>
 <div class="admonition seealso">
-<p class="first admonition-title">See also</p>
-<dl class="last docutils">
-<dt><a class="reference internal" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.read" title="geobipy.src.classes.data.dataset.TdemData.TdemData.read"><code class="xref py py-func docutils literal notranslate"><span class="pre">read()</span></code></a></dt>
-<dd>For information on file format</dd>
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.read" title="geobipy.src.classes.data.dataset.TdemData.TdemData.read"><code class="xref py py-func docutils literal notranslate"><span class="pre">read()</span></code></a></dt><dd><p>For information on file format</p>
+</dd>
 </dl>
 </div>
 <dl class="method">
@@ -109,16 +241,14 @@
 <dt id="geobipy.src.classes.data.dataset.TdemData.TdemData.fileInformation">
 <code class="descname">fileInformation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.fileInformation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Description of PointCloud3D file.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – File description.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">str</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>out</strong> – File description.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -155,77 +285,69 @@
 <dt id="geobipy.src.classes.data.dataset.TdemData.TdemData.plot">
 <code class="descname">plot</code><span class="sig-paren">(</span><em>system=0</em>, <em>channels=None</em>, <em>xAxis='index'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots the data</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>system</strong> (<em>int</em>) – System to plot</li>
-<li><strong>channels</strong> (<em>sequence of ints</em>) – Channels to plot</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>system</strong> (<em>int</em>) – System to plot</p></li>
+<li><p><strong>channels</strong> (<em>sequence of ints</em>) – Channels to plot</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="geobipy.src.classes.data.dataset.TdemData.TdemData.read">
 <code class="descname">read</code><span class="sig-paren">(</span><em>dataFilename</em>, <em>systemFilename</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads the data and system parameters from file</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>dataFilename</strong> (<em>str</em><em> or </em><em>list of str</em>) – Time domain data file names</li>
-<li><strong>systemFilename</strong> (<em>str</em><em> or </em><em>list of str</em>) – Time domain system file names</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataFilename</strong> (<em>str</em><em> or </em><em>list of str</em>) – Time domain data file names</p></li>
+<li><p><strong>systemFilename</strong> (<em>str</em><em> or </em><em>list of str</em>) – Time domain system file names</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <p class="rubric">Notes</p>
 <p>File Format</p>
 <p>The data columns are read in according to the column names in the first line.  The header line should contain at least the following column names. Extra columns may exist, but will be ignored. In this description, the column name or its alternatives are given followed by what the name represents. Optional columns are also described.</p>
 <p><strong>Required columns</strong></p>
-<dl class="docutils">
-<dt>line</dt>
-<dd>Line number for the data point</dd>
-<dt>id or fid</dt>
-<dd>Id number of the data point, these be unique</dd>
-<dt>x or northing or n</dt>
-<dd>Northing co-ordinate of the data point</dd>
-<dt>y or easting or e</dt>
-<dd>Easting co-ordinate of the data point</dd>
-<dt>z or dtm or dem_elev or dem_np or topo</dt>
-<dd>Elevation of the ground at the data point</dd>
-<dt>alt or laser or bheight</dt>
-<dd>Altitude of the transmitter coil</dd>
-<dt>Off[0] to Off[nWindows]  (with the number and brackets)</dt>
-<dd>The measurements for each time specified in the accompanying system file under Receiver Window Times</dd>
+<dl class="simple">
+<dt>line</dt><dd><p>Line number for the data point</p>
+</dd>
+<dt>id or fid</dt><dd><p>Id number of the data point, these be unique</p>
+</dd>
+<dt>x or northing or n</dt><dd><p>Northing co-ordinate of the data point</p>
+</dd>
+<dt>y or easting or e</dt><dd><p>Easting co-ordinate of the data point</p>
+</dd>
+<dt>z or dtm or dem_elev or dem_np or topo</dt><dd><p>Elevation of the ground at the data point</p>
+</dd>
+<dt>alt or laser or bheight</dt><dd><p>Altitude of the transmitter coil</p>
+</dd>
+<dt>Off[0] to Off[nWindows-1]  (with the number and brackets)</dt><dd><p>The measurements for each time specified in the accompanying system file under Receiver Window Times</p>
+</dd>
 </dl>
 <p><strong>Optional columns</strong></p>
 <p>If any loop orientation columns are omitted the loop is assumed to be horizontal.</p>
-<dl class="docutils">
-<dt>TxPitch</dt>
-<dd>Pitch of the transmitter loop</dd>
-<dt>TxRoll</dt>
-<dd>Roll of the transmitter loop</dd>
-<dt>TxYaw</dt>
-<dd>Yaw of the transmitter loop</dd>
-<dt>RxPitch</dt>
-<dd>Pitch of the receiver loop</dd>
-<dt>RxRoll</dt>
-<dd>Roll of the receiver loop</dd>
-<dt>RxYaw</dt>
-<dd>Yaw of the receiver loop</dd>
-<dt>OffErr[0] to ErrOff[nWindows]</dt>
-<dd>Error estimates for the data</dd>
+<dl class="simple">
+<dt>TxPitch</dt><dd><p>Pitch of the transmitter loop</p>
+</dd>
+<dt>TxRoll</dt><dd><p>Roll of the transmitter loop</p>
+</dd>
+<dt>TxYaw</dt><dd><p>Yaw of the transmitter loop</p>
+</dd>
+<dt>RxPitch</dt><dd><p>Pitch of the receiver loop</p>
+</dd>
+<dt>RxRoll</dt><dd><p>Roll of the receiver loop</p>
+</dd>
+<dt>RxYaw</dt><dd><p>Yaw of the receiver loop</p>
+</dd>
+<dt>OffErr[0] to ErrOff[nWindows-1]</dt><dd><p>Error estimates for the data</p>
+</dd>
 </dl>
 <div class="admonition seealso">
-<p class="first admonition-title">See also</p>
-<p class="last"><code class="xref py py-meth docutils literal notranslate"><span class="pre">INFORMATION()</span></code></p>
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">INFORMATION()</span></code></p>
 </div>
 </dd></dl>
 
@@ -240,23 +362,19 @@
 <code class="descname">scatter2D</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.scatter2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a 2D scatter plot using the x, y coordinates.</p>
 <p>Can take any other matplotlib arguments and keyword arguments e.g. markersize etc.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>c</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="../../core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a><em>, </em><em>optional</em>) – Colour values of the points, default is the height of the points</li>
-<li><strong>i</strong> (<em>sequence of ints</em><em>, </em><em>optional</em>) – Plot a subset of x, y, c, using the indices in i</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>c</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="../../core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a><em>, </em><em>optional</em>) – Colour values of the points, default is the height of the points</p></li>
+<li><p><strong>i</strong> (<em>sequence of ints</em><em>, </em><em>optional</em>) – Plot a subset of x, y, c, using the indices in i</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <div class="admonition seealso">
-<p class="first admonition-title">See also</p>
-<dl class="last docutils">
-<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">geobipy.customPlots.Scatter2D()</span></code></dt>
-<dd>For additional keyword arguments you may use.</dd>
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">geobipy.customPlots.Scatter2D()</span></code></dt><dd><p>For additional keyword arguments you may use.</p>
+</dd>
 </dl>
 </div>
 </dd></dl>
@@ -278,85 +396,52 @@
 </div>
 
 
+           </div>
+           
           </div>
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<h3><a href="../../../../../index.html">Table Of Contents</a></h3>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../../../../../README.html">Welcome to GeoBIPy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/getting_started.html">Getting Started</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../../../api.html">API</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../../../base/base.html">Core routines needed for GeoBIPy</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../../classes.html">Classes used in GeoBIPy</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="../../core/core.html">Core classes</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="../data.html">Data classes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../mesh/mesh.html">Mesh classes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../model/model.html">Model classes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../pointcloud/pointcloud.html">Pointcloud classes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../statistics/statistics.html">Statistics classes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../system/system.html">System classes</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../datapoint/datapointrst.html" class="btn btn-neutral float-right" title="Datapoint classes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="FdemData.html" class="btn btn-neutral float-left" title="FdemData" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="FdemData.html"
-                        title="previous chapter">FdemData</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="../datapoint/datapointrst.html"
-                        title="next chapter">Datapoint classes</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../../../../../_sources/content/api/classes/data/dataset/TdemData.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="../../../../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    </div>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright None
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../../../../../genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="../../../../../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="../datapoint/datapointrst.html" title="Datapoint classes"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="FdemData.html" title="FdemData"
-             >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">GeoBIPy 1.0.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../../api.html" >API</a> &#187;</li>
-          <li class="nav-item nav-item-2"><a href="../../classes.html" >Classes used in GeoBIPy</a> &#187;</li>
-          <li class="nav-item nav-item-3"><a href="../data.html" >Data classes</a> &#187;</li>
-          <li class="nav-item nav-item-4"><a href="dataset.html" >Data classes</a> &#187;</li> 
-      </ul>
-    </div>
-    <div class="footer" role="contentinfo">
-        &#169; Copyright None.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.9.
-    </div>
-  </body>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
 </html>

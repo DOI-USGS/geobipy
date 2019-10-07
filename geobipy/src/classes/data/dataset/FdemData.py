@@ -91,9 +91,9 @@ class FdemData(Data):
         # Data Class containing xyz and channel values
         Data.__init__(self, nPoints=nPoints, nChannelsPerSystem=2*nFrequencies, dataUnits="ppm", **kwargs)
         # StatArray of the line number for flight line data
-        self.line = StatArray.StatArray(nPoints, 'Line Number')
+        self._line = StatArray.StatArray(nPoints, 'Line Number')
         # StatArray of the id number
-        self.fiducial = StatArray.StatArray(nPoints, 'Fiducial')
+        self._fiducial = StatArray.StatArray(nPoints, 'Fiducial')
         # StatArray of the elevation
         # Assign data names
         self._data.name = 'Fdem Data'
@@ -111,8 +111,8 @@ class FdemData(Data):
 
         self.iActive = self.getActiveChannels()
 
-        self.magnetic = None
-        self.powerline = None
+        self._magnetic = None
+        self._powerline = None
 
     @property
     def nFrequencies(self):
@@ -122,6 +122,14 @@ class FdemData(Data):
     def data(self):
         """The data"""
         return self._data
+
+    @property
+    def magnetic(self):
+        return self._magnetic
+
+    @property
+    def powerline(self):
+        return self._powerline
 
     @property
     def predictedData(self):
@@ -167,6 +175,53 @@ class FdemData(Data):
         """
         
         return np.sum(~np.isnan(self._data, 1))
+
+
+    def __add__(self, other):
+
+        out = FdemData(self.nPoints + other.nPoints, self.nFrequencies, systems=self.system)
+
+        i1 = self.nPoints
+
+        out._line[:i1] = self.line
+        out._line[i1:] = other.line
+
+        out._fiducial[:i1] = self.fiducial
+        out._fiducial[i1:] = other.fiducial
+
+        out._x[:i1] = self.x
+        out._x[i1:] = other.x
+
+        out._y[:i1] = self.y
+        out._y[i1:] = other.y
+
+        out._z[:i1] = self.z
+        out._z[i1:] = other.z
+
+        out._elevation[:i1] = self.elevation
+        out._elevation[i1:] = other.elevation
+
+        out._data[:i1, :] = self.data
+        out._data[i1:, :] = other.data
+
+        out._predictedData[:i1, :] = self.predictedData
+        out._predictedData[i1:, :] = other.predictedData
+
+        out._std[:i1, :] = self.std
+        out._std[i1:, :] = other.std
+
+        if not self.powerline is None:
+            out._powerline = StatArray.StatArray(out.nPoints, name='Powerline')
+            out._powerline[:i1] = self.powerline
+            out._powerline[i1:] = other.powerline
+
+        if not self.magnetic is None:
+            out._magnetic = StatArray.StatArray(out.nPoints, name='Magnetic', units='$nT$')
+            out._magnetic[:i1] = self.magnetic
+            out._magnetic[i1:] = other.magnetic
+
+
+        return out
 
 
     # def getChannel(self, channel):
@@ -479,9 +534,9 @@ class FdemData(Data):
         self.elevation[:] = values[:, 5]
 
         if not powerline is None:
-            self.powerline = StatArray.StatArray(values[:, powerline], name='Powerline')
+            self._powerline = StatArray.StatArray(values[:, powerline], name='Powerline')
         if not magnetic is None:
-            self.magnetic = StatArray.StatArray(values[:, magnetic], name='Magnetic', units='$nT$')
+            self._magnetic = StatArray.StatArray(values[:, magnetic], name='Magnetic', units='$nT$')
 
         # EM data columns are in the following order
         # I1 Q1 I2 Q2 .... IN QN ErrI1 ErrQ1 ... ErrIN ErrQN

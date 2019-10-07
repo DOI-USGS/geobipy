@@ -81,6 +81,8 @@ class Results(myObject):
         self.saveMe = kwargs.pop('save', True)
         self.plotMe = kwargs.pop('plot', False)
         self.savePNG = kwargs.pop('savePNG', False)
+
+        self.fig = None
         # Return none if important parameters are not used (used for hdf 5)
         if all(x1 is None for x1 in [dataPoint, model]):
             return
@@ -146,7 +148,7 @@ class Results(myObject):
         self.iz = np.arange(model.par.posterior.y.nCells)
 
         # Initialize the doi
-        self.doi = model.par.posterior.yBinCentres[0]
+        # self.doi = model.par.posterior.yBinCentres[0]
 
         self.meanInterp = StatArray.StatArray(model.par.posterior.y.nCells)
         self.bestInterp = StatArray.StatArray(model.par.posterior.y.nCells)
@@ -157,7 +159,6 @@ class Results(myObject):
 
         self.verbose = verbose
 
-        self.fig = None
         self.initFigure()
         if self.plotMe:
             plt.show(block=False)
@@ -190,6 +191,16 @@ class Results(myObject):
 #            figName = 'PNG/_tmp' + \
 #                fIO.getFileNameInteger(self.i, np.int(np.log10(self.nMC))) + '.png'
 #            plt.savefig(figName)
+
+
+    @property
+    def hitmap(self):
+        return self.currentModel.par.posterior
+
+
+    def doi(self, percentage = 67.0):
+        return self.hitmap.getOpacityLevel(percentage)
+
 
     def update(self, i, iBest, bestDataPoint, bestModel, dataPoint, multiplier, PhiD, model, posterior, posteriorComponents, ratioComponents, accepted, dimensionChange, clipRatio):
         """ Update the attributes of the plotter """
@@ -240,7 +251,7 @@ class Results(myObject):
         self.bestModel = bestModel # Reference
 
 
-    def initFigure(self, forcePlot=False):
+    def initFigure(self, forcePlot=False, fig = None):
         """ Initialize the plotting region """
 
         if self.plotMe or forcePlot:
@@ -252,7 +263,11 @@ class Results(myObject):
 
         # plt.ion()
 
-        self.fig = plt.figure(0, facecolor='white', figsize=(10,7))
+        if fig is None:
+            self.fig = plt.figure(facecolor='white', figsize=(10,7))
+        else:
+            self.fig = fig
+
         mngr = plt.get_current_fig_manager()
         try:
             mngr.window.setGeometry(0, 10, self.sx, self.sy)
@@ -351,7 +366,7 @@ class Results(myObject):
 
         ax = self.PhiDs.plot(self.iRange, i=np.s_[:self.i], marker=m, alpha=a, markersize=ms, linestyle=ls, color=c, **kwargs)
         plt.ylabel('Data Misfit')
-        dum = self.multiplier * self.bestDataPoint.iActive.size
+        dum = self.multiplier * self.currentDataPoint.iActive.size
         plt.axhline(dum, color='#C92641', linestyle='dashed', linewidth=lw)
         if (self.burnedIn):
             plt.axvline(self.iBurn, color='#C92641', linestyle='dashed', linewidth=lw)
@@ -363,17 +378,21 @@ class Results(myObject):
     def _plotObservedPredictedData(self, **kwargs):
         """ Plot the observed and predicted data """
 
-        self.bestDataPoint.plot(**kwargs)
+        self.currentDataPoint.plot(**kwargs)
 
-        c = kwargs.pop('color', cP.wellSeparated[3])
-        self.bestDataPoint.plotPredicted(color=c, **kwargs)
-
+        if self.burnedIn:
+            c = kwargs.pop('color', cP.wellSeparated[3])
+            self.bestDataPoint.plotPredicted(color=c, **kwargs)
+        else:
+            c = kwargs.pop('color', cP.wellSeparated[4])
+            self.currentDataPoint.plotPredicted(color=c, **kwargs)
+            
 
     def _plotNumberOfLayersPosterior(self, **kwargs):
         """ Plot the histogram of the number of layers """
 
         ax = self.currentModel.nCells.posterior.plot(**kwargs)
-        plt.axvline(self.bestModel.nCells, color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
+        plt.axvline(self.bestModel.nCells, color=cP.wellSeparated[3], linewidth=1)
         ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 
 
@@ -381,18 +400,21 @@ class Results(myObject):
         """ Plot the histogram of the height """
         # self.DzHist.plot(**kwargs)
         ax = self.currentDataPoint.z.posterior.plot(**kwargs)
-        plt.axvline(self.bestDataPoint.z, color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
+        if self.burnedIn:
+            plt.axvline(self.bestDataPoint.z, color=cP.wellSeparated[3], linewidth=1)
         ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 
     
     def _plotRelativeErrorPosterior(self, axes, **kwargs):
         """ Plots the histogram of the relative errors """
         self.currentDataPoint.relErr.plotPosteriors(axes=axes, **kwargs)
-        plt.locator_params(axis='x', nbins=4)
-        for i, a in enumerate(axes):
-            plt.sca(a)
-            plt.axvline(self.bestDataPoint.relErr[i], color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
-            a.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+
+        if self.burnedIn:
+            plt.locator_params(axis='x', nbins=4)
+            for i, a in enumerate(axes):
+                plt.sca(a)
+                plt.axvline(self.bestDataPoint.relErr[i], color=cP.wellSeparated[3], linewidth=1)
+                a.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
         
 
     def _plotAdditiveErrorPosterior(self, axes, **kwargs):
@@ -405,15 +427,16 @@ class Results(myObject):
         else:
             p = self.currentDataPoint.addErr.posterior[0]
 
-        log = p.log
-        if (self.bestDataPoint.addErr[0] > p.bins[-1]):
-            log = 10 
-        
-        loc, dum = cF._log(self.bestDataPoint.addErr, log=log)
-        for i, a in enumerate(axes):
-            plt.sca(a)
-            plt.axvline(loc[i], color=cP.wellSeparated[3], linestyle='dashed', linewidth=3)
-            a.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+        if self.burnedIn:
+            log = p.log
+            if (self.bestDataPoint.addErr[0] > p.bins[-1]):
+                log = 10 
+            
+            loc, dum = cF._log(self.bestDataPoint.addErr, log=log)
+            for i, a in enumerate(axes):
+                plt.sca(a)
+                plt.axvline(loc[i], color=cP.wellSeparated[3], linewidth=1)
+                a.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 
 
     def _plotLayerDepthPosterior(self, **kwargs):
@@ -427,12 +450,12 @@ class Results(myObject):
         ax.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
 
     
-    def _plotHitmapPosterior(self, reciprocateX=False, confidenceInterval = 95.0, opacityPercentage = 67.0, **kwargs):
+    def _plotParameterPosterior(self, reciprocateX=False, confidenceInterval = 95.0, opacityPercentage = 67.0, xlim=None, **kwargs):
         """ Plot the hitmap posterior of conductivity with depth """
 
         # Get the mean and 95% confidence intervals
         hm = self.currentModel.par.posterior
-        (sigMed, sigLow, sigHigh) = hm.confidenceIntervals(confidenceInterval)
+        (sigMed, sigLow, sigHigh) = hm.axisConfidenceIntervals(confidenceInterval)
 
         if (reciprocateX):
             x = 1.0 / hm.x.cellCentres
@@ -446,22 +469,24 @@ class Results(myObject):
             xlabel = 'Conductivity ($Sm^{-1}$)'
 
         hm.counts.pcolor(x=x, y=hm.y.cellEdges, cmap=mpl.cm.Greys, **kwargs)
-        plt.plot(sl, hm.y.cellCentres, color='#5046C8', linestyle='dashed', linewidth=2, alpha=0.6)
-        plt.plot(sh, hm.y.cellCentres, color='#5046C8', linestyle='dashed', linewidth=2, alpha=0.6)
+
+        CI_kw = {'color':'#5046C8', 'linestyle':'dashed', 'linewidth':1, 'alpha':0.6}
+        plt.plot(sl, hm.y.cellCentres, **CI_kw)
+        plt.plot(sh, hm.y.cellCentres, **CI_kw)
         cP.xlabel(xlabel)
 
         # Plot the DOI cutoff based on percentage variance
-        self.doi = hm.getOpacityLevel(opacityPercentage)
-        plt.axhline(self.doi, color='#5046C8', linestyle='dashed', linewidth=3)
+        plt.axhline(self.doi(), **CI_kw)
 
         # Plot the best model
-        self.bestModel.plot(flipY=False, reciprocateX=reciprocateX, noLabels=True)
+        self.bestModel.plot(flipY=False, reciprocateX=reciprocateX, noLabels=True, linewidth=1)
 
         # Set parameter limits on the hitmap
-        if self.limits is None:
+        if xlim is None:
             plt.axis([x.min(), x.max(), hm.y.cellEdges[0], hm.y.cellEdges[-1]])
         else:
-            plt.axis([self.limits[0], self.limits[1], hm.y.cellEdges[0], hm.y.cellEdges[-1]])            
+            assert np.size(xlim) == 2, ValueError("xlim must have size 2")
+            plt.axis([xlim[0], xlim[1], hm.y.cellEdges[0], hm.y.cellEdges[-1]])            
 
         ax = plt.gca()
         lim = ax.get_ylim()
@@ -472,7 +497,7 @@ class Results(myObject):
         plt.margins(0.01)
 
 
-    def plot(self, title="", forcePlot=False):
+    def plot(self, title="", forcePlot=False, fig=None):
         """ Updates the figures for MCMC Inversion """
         # Plots that change with every iteration
         if self.plotMe or forcePlot:
@@ -483,7 +508,7 @@ class Results(myObject):
             return
 
         if (self.fig is None):
-            self.initFigure(forcePlot=forcePlot)
+            self.initFigure(forcePlot=forcePlot, fig=fig)
 
 
         if (np.mod(self.i, self.iPlot) == 0 or forcePlot):
@@ -521,7 +546,7 @@ class Results(myObject):
                 # Update the model plot
                 plt.sca(self.ax[5])
                 plt.cla()
-                self._plotHitmapPosterior(reciprocateX=self.reciprocateParameter, noColorbar=True)
+                self._plotParameterPosterior(reciprocateX=self.reciprocateParameter, noColorbar=True)
                 
 
                 j = 5
@@ -645,6 +670,8 @@ class Results(myObject):
                 # v1 = np.maximum(np.minimum(np.nanmin(x), np.nanmin(y)), -200.0)
                 v2 = np.maximum(np.nanmax(x), np.nanmax(y)) + 10.0
                 v1 = v2 - 60.0
+                v1 = -20.0
+                v2 = 20.0
                 # plt.plot([v1,v2], [v1,v2])
                 plt.xlim([v1, v2])
                 plt.ylim([v1, v2])
@@ -658,8 +685,9 @@ class Results(myObject):
                 x[~self.dimensionChange].plot(x = y[~self.dimensionChange], linestyle='', marker='.', color='k', alpha=0.3)
                 x[self.dimensionChange].plot(x = y[self.dimensionChange], linestyle='', marker='.', alpha=0.3)
                 # v1 = np.maximum(np.minimum(np.nanmin(x), np.nanmin(y)), -200.0)
-                v2 = np.maximum(np.nanmax(x), np.nanmax(y)) + 10.0
-                v1 = v2 - 60.0
+                # v2 = np.maximum(np.nanmax(x), np.nanmax(y)) + 10.0
+                # v1 = v2 - 60.0
+                
                 # plt.plot([v1,v2], [v1,v2])
                 plt.xlim([v1, v2])
                 plt.ylim([v1, v2])
@@ -673,7 +701,7 @@ class Results(myObject):
                 r[~self.accepted].plot(x = irna, marker='o', markersize=1, linestyle='None', alpha=0.3, color='k')
                 r[self.accepted].plot(x = ira, marker='o', markersize=1, linestyle='None', alpha=0.3)
                 cP.ylabel('Proposal Ratio')
-                # plt.ylim([v1, v2])
+                plt.ylim([v1, v2])
 
                 # Acceptance ratio vs iteration
                 plt.sca(self.verboseAxs[20])
@@ -989,7 +1017,7 @@ class Results(myObject):
         self.i = hdfRead.readKeyFromFile(hdfFile,'','/','i', index=index)
         self.iBurn = hdfRead.readKeyFromFile(hdfFile,'','/','iburn', index=index)
         self.burnedIn = hdfRead.readKeyFromFile(hdfFile,'','/','burnedin', index=index)
-        self.doi = hdfRead.readKeyFromFile(hdfFile,'','/','doi', index=index)
+        # self.doi = hdfRead.readKeyFromFile(hdfFile,'','/','doi', index=index)
         self.multiplier = hdfRead.readKeyFromFile(hdfFile,'','/','multiplier', index=index)
         self.rate = hdfRead.readKeyFromFile(hdfFile,'','/','rate', index=s)
         self.PhiDs = hdfRead.readKeyFromFile(hdfFile,'','/','phids', index=s)
@@ -1003,12 +1031,12 @@ class Results(myObject):
             self.currentDataPoint.z.setPosterior(p)
         
         
-        try:
-            self.currentModel = hdfRead.readKeyFromFile(hdfFile,'','/','currentmodel', index=index)
-            self.Hitmap = self.currentModel.par.posterior
-            self.currentModel.maxDepth = np.log(self.Hitmap.y.cellCentres[-1])            
-        except:
-            self.Hitmap = hdfRead.readKeyFromFile(hdfFile,'','/','hitmap', index=index)
+        # try:
+        self.currentModel = hdfRead.readKeyFromFile(hdfFile,'','/','currentmodel', index=index)
+        self.Hitmap = self.currentModel.par.posterior
+        self.currentModel.maxDepth = np.log(self.Hitmap.y.cellCentres[-1])            
+        # except:
+        #     self.Hitmap = hdfRead.readKeyFromFile(hdfFile,'','/','hitmap', index=index)
 
 
         self.bestModel = hdfRead.readKeyFromFile(hdfFile,'','/','bestmodel', index=index)

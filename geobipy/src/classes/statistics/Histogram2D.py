@@ -103,12 +103,75 @@ class Histogram2D(RectilinearMesh2D):
             return out
 
 
-    def axisHistogram(self, between=None, axis=0, log=None):
+    def axisConfidenceIntervals(self, percent=95.0, log=None, axis=0):
+        """Gets the confidence intervals for the specified axis.
+        
+        Parameters
+        ----------
+        percent : float
+            Confidence percentage.
+        log : 'e' or float, optional
+            Take the log of the confidence intervals to a base. 'e' if log = 'e', or a number e.g. log = 10.
+        axis : int
+            Along which axis to obtain the interval locations.
+
+        Returns
+        -------
+        med : array_like
+            Contains the locations of the medians along the specified axis. Has size equal to arr.shape[axis].
+        low : array_like
+            Contains the locations of the lower interval along the specified axis. Has size equal to arr.shape[axis].
+        high : array_like
+            Contains the locations of the upper interval along the specified axis. Has size equal to arr.shape[axis].
+
+        """
+
+        total = self._counts.sum(axis=1-axis)
+        p = 0.01 * percent
+        cs = np.cumsum(self._counts, axis=1-axis)
+
+        if axis == 0:
+            tmp = np.divide(cs, total[:, np.newaxis])
+            # tmp = tmp / np.repeat(total[:, np.newaxis], self._counts.shape[1], 1)
+        else:
+            tmp = np.divide(cs, total[np.newaxis, :])
+            # tmp = tmp / np.repeat(total[np.newaxis, :], self._counts.shape[0], 0)
+
+        ixM = np.apply_along_axis(np.searchsorted, 1-axis, tmp, 0.5)
+        ix1 = np.apply_along_axis(np.searchsorted, 1-axis, tmp, (1.0 - p))
+        ix2 = np.apply_along_axis(np.searchsorted, 1-axis, tmp, p)
+
+        if axis == 0:
+            med = self.x.cellCentres[ixM]
+            low = self.x.cellCentres[ix1]
+            high = self.x.cellCentres[ix2]
+        else:
+            med = self.y.cellCentres[ixM]
+            low = self.y.cellCentres[ix1]
+            high = self.y.cellCentres[ix2]
+
+        if (not log is None):
+            med, dum = cF._log(med, log=log)
+            low, dum = cF._log(low, log=log)
+            high, dum = cF._log(high, log=log)
+
+        return (med, low, high)
+
+
+    def axisConfidenceRange(self, percent=95.0, log=None, axis=0):
+        """ Get the range of confidence with depth """
+        sMed, sLow, sHigh = self.axisConfidenceIntervals(percent, log=log, axis=axis)
+
+        return sHigh - sLow
+
+
+
+    def axisHistogram(self, intervals=None, axis=0, log=None):
         """Get the histogram along an axis
 
         Parameters
         ----------
-        between : array_like
+        intervals : array_like
             Array of size 2 containing lower and upper limits between which to count.
         axis : int
             Axis along which to get the histogram.
@@ -125,16 +188,16 @@ class Histogram2D(RectilinearMesh2D):
 
         bins = self.x if axis == 0 else self.y
 
-        if between is None:
+        if intervals is None:
             s = np.sum(self._counts, axis=axis)
         else:
-            assert np.size(between) == 2, ValueError("between must have size equal to 2")
-            assert between[1] > between[0], ValueError("between must be monotonically increasing")
+            assert np.size(intervals) == 2, ValueError("intervals must have size equal to 2")
+            assert intervals[1] > intervals[0], ValueError("intervals must be monotonically increasing")
             if axis == 0:
-                iBins = self.y.cellCentres.searchsorted(between)
+                iBins = self.y.cellCentres.searchsorted(intervals)
                 s = np.sum(self._counts[iBins[0]:iBins[1], :], axis=axis)
             else:
-                iBins = self.x.cellCentres.searchsorted(between)
+                iBins = self.x.cellCentres.searchsorted(intervals)
                 s = np.sum(self._counts[:, iBins[0]:iBins[1]], axis=axis)
                 
         out = Histogram1D(bins = bins.cellEdges, log=log)
@@ -175,7 +238,7 @@ class Histogram2D(RectilinearMesh2D):
         return tmp
 
 
-    def axisMedian(self, log=None, axis=0):
+    def axisMedian(self, log=None, axis=0): 
         """Gets the median for the specified axis.
         
         Parameters
@@ -192,6 +255,36 @@ class Histogram2D(RectilinearMesh2D):
 
         """
         return super().axisMedian(self._counts, log, axis)
+
+    
+    def axisMode(self, log=None, axis=0):
+        """Gets the mode for the specified axis.
+        
+        Parameters
+        ----------
+        log : 'e' or float, optional
+            Take the log of the mode to a base. 'e' if log = 'e', or a number e.g. log = 10.
+        axis : int
+            Along which axis to obtain the mode.
+
+        Returns
+        -------
+        med : array_like
+            Contains the modes along the specified axis. Has size equal to arr.shape[axis].
+
+        """
+
+        iMode = np.argmax(self._counts, axis = 1-axis)
+    
+        if axis == 0:
+            mode = self.x.cellCentres[iMode]
+        else:
+            mode = self.z.cellCentres[iMode]
+
+        if (not log is None):
+            mode, dum = cF._log(mode, log=log)
+
+        return mode
 
 
     def axisOpacity(self, percent=95.0, axis=0):
@@ -296,7 +389,7 @@ class Histogram2D(RectilinearMesh2D):
 
         """
 
-        out = self.confidenceRange(percent=percent)
+        out = self.axisConfidenceRange(percent=percent, axis=axis)
         maxes = np.max(out)
         if (maxes == 0.0): return out
         out /= maxes
@@ -324,66 +417,6 @@ class Histogram2D(RectilinearMesh2D):
         plt.ylabel(''); plt.xlabel('')
         plt.yticks([]); plt.xticks([])
         ax[-1].spines["bottom"].set_visible(False)
-
-
-    def confidenceIntervals(self, percent=95.0, log=None, axis=0):
-        """Gets the confidence intervals for the specified axis.
-        
-        Parameters
-        ----------
-        percent : float
-            Confidence percentage.
-        log : 'e' or float, optional
-            Take the log of the confidence intervals to a base. 'e' if log = 'e', or a number e.g. log = 10.
-        axis : int
-            Along which axis to obtain the interval locations.
-
-        Returns
-        -------
-        med : array_like
-            Contains the locations of the medians along the specified axis. Has size equal to arr.shape[axis].
-        low : array_like
-            Contains the locations of the lower interval along the specified axis. Has size equal to arr.shape[axis].
-        high : array_like
-            Contains the locations of the upper interval along the specified axis. Has size equal to arr.shape[axis].
-
-        """
-
-        total = self._counts.sum(axis=1-axis)
-        p = 0.01 * percent
-        tmp = np.cumsum(self._counts, axis=1-axis)
-
-        if axis == 0:
-            tmp = tmp / np.repeat(total[:, np.newaxis], self._counts.shape[1], 1)
-        else:
-            tmp = tmp / np.repeat(total[np.newaxis, :], self._counts.shape[0], 0)
-
-        ixM = np.apply_along_axis(np.searchsorted, 1-axis, tmp, 0.5)
-        ix1 = np.apply_along_axis(np.searchsorted, 1-axis, tmp, (1.0 - p))
-        ix2 = np.apply_along_axis(np.searchsorted, 1-axis, tmp, p)
-
-        if axis == 0:
-            med = self.x.cellCentres[ixM]
-            low = self.x.cellCentres[ix1]
-            high = self.x.cellCentres[ix2]
-        else:
-            med = self.y.cellCentres[ixM]
-            low = self.y.cellCentres[ix1]
-            high = self.y.cellCentres[ix2]
-
-        if (not log is None):
-            med, dum = cF._log(med, log=log)
-            low, dum = cF._log(low, log=log)
-            high, dum = cF._log(high, log=log)
-
-        return (med, low, high)
-
-
-    def confidenceRange(self, percent=95.0, log=None, axis=0):
-        """ Get the range of confidence with depth """
-        sMed, sLow, sHigh = self.confidenceIntervals(percent, log=log, axis=axis)
-
-        return sHigh - sLow
 
 
     def create2DjointProbabilityDistribution(self, H1, H2):
@@ -424,6 +457,7 @@ class Histogram2D(RectilinearMesh2D):
 
         return out
 
+
     def divideBySum(self, axis):
         """Divide by the sum along an axis.
         
@@ -440,7 +474,7 @@ class Histogram2D(RectilinearMesh2D):
             self._counts /= np.repeat(s[:, np.newaxis], np.size(self._counts, axis), axis)
 
 
-    def findPeaks(self, intervals, axis=0):
+    def fitMajorPeaks(self, intervals, axis=0, **kwargs):
         """Find peaks in the histogram along an axis.
 
         Parameters
@@ -453,6 +487,37 @@ class Histogram2D(RectilinearMesh2D):
         """
         counts = super().intervalStatistic(self._counts, intervals, axis, 'sum')
 
+        distributions = []
+        amplitudes = []
+        if axis == 0:
+            h = Histogram1D(bins = self.xBins)
+            # if distribution.lower() == 'gaussian':
+            #     method = h.fitMajorPeaks_gaussian
+            # else:
+            #     method = 
+            for i in range(intervals.size - 1):
+                h._counts[:] = counts[i, :]
+
+                try:
+                    d, a = h.fitMajorPeaks(**kwargs)
+                    distributions.append(d)
+                    amplitudes.append(a)
+                except:
+                    pass
+
+        else:
+            h = Histogram1D(bins = self.yBins)
+            if distribution.lower() == 'gaussian':
+                method = h.fitMajorPeaks_gaussian
+            else:
+                method = h.fitMajorPeaks
+            for i in range(intervals.size - 1):
+                h._counts[:] = counts[:, i]
+                d, a = h.fitMajorPeaks(**kwargs)
+                distributions.append(d)
+                amplitudes.append(a)
+
+        return distributions, amplitudes
 
 
     def intervalStatistic(self, intervals, axis=0, statistic='mean'):

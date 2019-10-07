@@ -1,419 +1,96 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>fileIO &#8212; GeoBIPy 1.0.0 documentation</title>
-    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>fileIO &mdash; GeoBIPy 1.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery.css" type="text/css" />
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="interpolation" href="interpolation.html" />
     <link rel="prev" title="customPlots" href="customPlots.html" /> 
-  </head><body>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../../../genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="../../../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="interpolation.html" title="interpolation"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="customPlots.html" title="customPlots"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">GeoBIPy 1.0.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../api.html" >API</a> &#187;</li>
-          <li class="nav-item nav-item-2"><a href="base.html" accesskey="U">Core routines needed for GeoBIPy</a> &#187;</li> 
-      </ul>
-    </div>  
+</head>
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> GeoBIPy
+          
+
+          
+          </a>
+
+          
             
-  <div class="section" id="module-geobipy.src.base.fileIO">
-<span id="fileio"></span><h1>fileIO<a class="headerlink" href="#module-geobipy.src.base.fileIO" title="Permalink to this headline">¶</a></h1>
-<p>&#64;fileIO
-Module with custom file handling operations</p>
-<dl class="function">
-<dt id="geobipy.src.base.fileIO.bytes2readable">
-<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">bytes2readable</code><span class="sig-paren">(</span><em>nBytes</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.bytes2readable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert bytes to KB, MB, …, PB</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>nBytes</strong> (<em>float</em>) – The number of bytes</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – The number of KB, MB, etc.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
 
-<dl class="function">
-<dt id="geobipy.src.base.fileIO.deleteFile">
-<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">deleteFile</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.deleteFile" title="Permalink to this definition">¶</a></dt>
-<dd><p>Deletes a file if it exists</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fName</strong> (<em>str</em>) – A path and/or file name</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="geobipy.src.base.fileIO.dirExists">
-<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">dirExists</code><span class="sig-paren">(</span><em>dirPath</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.dirExists" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check if a directory exists on disk</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dirPath</strong> (<em>str</em>) – A directory path</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – Whether the directory path exists</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="geobipy.src.base.fileIO.fileExists">
-<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">fileExists</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.fileExists" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check if a single file exists on disk</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fname</strong> (<em>str</em>) – A file name</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – Whether the file exists or not</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="geobipy.src.base.fileIO.filesExist">
-<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">filesExist</code><span class="sig-paren">(</span><em>fNames</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.filesExist" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check if all files in fNames exist on disk</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fNames</strong> (<em>list of str</em>) – </td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – Whether all files exist or not</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="geobipy.src.base.fileIO.getFileExtension">
-<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">getFileExtension</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.getFileExtension" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the extension of the filename</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fname</strong> (<em>str</em>) – A path and/or file name</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – The extension of the filename</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="geobipy.src.base.fileIO.getFileSize">
-<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">getFileSize</code><span class="sig-paren">(</span><em>fName</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.getFileSize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the size of a file on disk</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fName</strong> (<em>str</em>) – A path and/or file name</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – The file size in KB, MB, etc.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="geobipy.src.base.fileIO.getHeaderNames">
-<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">getHeaderNames</code><span class="sig-paren">(</span><em>fName, i=[-1], nHeaders=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.getHeaderNames" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read headers names from a line in a file</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>fName</strong> (<em>str</em>) – A path and/or file name.</li>
-<li><strong>i</strong> (<em>in</em><em> or </em><em>list of ints</em><em>, </em><em>optional</em>) – The indices of the entries to read from the string.  By default, all entries are read in.</li>
-<li><strong>nHeaders</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of header lines to skip in the file.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – A list of the parsed header entries.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list of str</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="geobipy.src.base.fileIO.getNcolumns">
-<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">getNcolumns</code><span class="sig-paren">(</span><em>fName</em>, <em>nHeaders=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.getNcolumns" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the number of columns in a file using the line after nHeaders</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>fName</strong> (<em>str</em>) – A path and/or file name</li>
-<li><strong>nHeaders</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of header lines to skip before obtaining the number of columns</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – The number of columns</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="geobipy.src.base.fileIO.getNlines">
-<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">getNlines</code><span class="sig-paren">(</span><em>fname</em>, <em>nHeaders=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.getNlines" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the number of lines in a file after taking into account the number of header lines</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>fName</strong> (<em>str</em>) – A path and/or file name</li>
-<li><strong>nHeaders</strong> (<em>int</em><em>, </em><em>optional</em>) – Subtract the number of header lines from the total number of lines in the file</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – Number of lines without the headers</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int, optional</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="geobipy.src.base.fileIO.getRealNumbersfromLine">
-<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">getRealNumbersfromLine</code><span class="sig-paren">(</span><em>line</em>, <em>indices=None</em>, <em>delimiters='</em>, <em>'</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.getRealNumbersfromLine" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reads strictly the numbers from a string</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>line</strong> (<em>str</em>) – A string, or a line from a file.</li>
-<li><strong>i</strong> (<em>in</em><em> or </em><em>list of ints</em><em>, </em><em>optional</em>) – The indices of the entries to read from the string.  By default, all entries are read in.</li>
-<li><strong>delimiters</strong> (<em>str</em>) – Splits the line based on these delimiters.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – The values read in from the string.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">numpy.ndarray</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="geobipy.src.base.fileIO.int2str">
-<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">int2str</code><span class="sig-paren">(</span><em>i</em>, <em>N</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.int2str" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converts an integer to a string with leading zeros in order to maintain the correct order in the file system</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>i</strong> (<em>int</em>) – The integer to convert to a string.</li>
-<li><strong>N</strong> (<em>int</em>) – The maximum number of digits you wish to have in the integer. e.g. int2str(3,4)=‘0003’.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – The integer padded with zeroes on the front.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="geobipy.src.base.fileIO.isFileExtension">
-<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">isFileExtension</code><span class="sig-paren">(</span><em>fname</em>, <em>ext</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.isFileExtension" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check that the filename is of the given extension</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>fname</strong> (<em>str</em>) – A path and/or file name</li>
-<li><strong>ext</strong> (<em>str</em>) – The extension you want to check the file name against</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – Whether the extension of fname matches ext</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="geobipy.src.base.fileIO.parseString">
-<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">parseString</code><span class="sig-paren">(</span><em>this</em>, <em>delimiters='</em>, <em>'</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.parseString" title="Permalink to this definition">¶</a></dt>
-<dd><p>Parse a string into its entries</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>this</strong> (<em>str</em>) – The string to parse.</li>
-<li><strong>delimiters</strong> (<em>str</em>) – Patterns to split against, e.g. ‘,’ splits at every comma.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – A list of the parsed entries</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list of str</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="geobipy.src.base.fileIO.read_columns">
-<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">read_columns</code><span class="sig-paren">(</span><em>fName</em>, <em>indices=None</em>, <em>nHeaders=0</em>, <em>nLines=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.read_columns" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reads specified columns from a file</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>fName</strong> (<em>str</em>) – A path and/or file name.</li>
-<li><strong>indices</strong> (<em>in</em><em> or </em><em>list of ints</em><em>, </em><em>optional</em>) – The indices of the columns to read in from the file.  By default, all columns are read in.</li>
-<li><strong>nHeaders</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of header lines to skip in the file.</li>
-<li><strong>nLines</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of lines to read in.  By default, all lines are read in after the header lines.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> – 2D array containing the lines in the file.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">numpy.ndarray</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="geobipy.src.base.fileIO.skipLines">
-<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">skipLines</code><span class="sig-paren">(</span><em>f</em>, <em>nLines=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.skipLines" title="Permalink to this definition">¶</a></dt>
-<dd><p>Skip N lines in an open file object</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>f</strong> (<em>_io.TextIOWrapper</em>) – A file handle generated with open(file, mode=’r’, buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None).</li>
-<li><strong>nLines</strong> (<em>int</em>) – The number of lines to skip.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="geobipy.src.base.fileIO.wccount">
-<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">wccount</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.wccount" title="Permalink to this definition">¶</a></dt>
-<dd><p>Count the number of lines in a file using a wc system call</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fName</strong> (<em>str</em>) – A path and/or file name</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>out</strong> – The number of lines in the file</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
 </div>
 
-
-          </div>
+          
         </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<h3><a href="../../../index.html">Table Of Contents</a></h3>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Welcome to GeoBIPy’s documentation!</a></li>
+</ul>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../../../README.html">Welcome to GeoBIPy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started/getting_started.html">Getting Started</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="base.html">Core routines needed for GeoBIPy</a><ul class="current">
@@ -428,60 +105,436 @@ Module with custom file handling operations</p>
 <li class="toctree-l2"><a class="reference internal" href="../classes/classes.html">Classes used in GeoBIPy</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
 </ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="customPlots.html"
-                        title="previous chapter">customPlots</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="interpolation.html"
-                        title="next chapter">interpolation</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../../../_sources/content/api/base/fileIO.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    </div>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+            
+          
         </div>
       </div>
-      <div class="clearer"></div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">GeoBIPy</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../api.html">API</a> &raquo;</li>
+        
+          <li><a href="base.html">Core routines needed for GeoBIPy</a> &raquo;</li>
+        
+      <li>fileIO</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../../_sources/content/api/base/fileIO.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-geobipy.src.base.fileIO">
+<span id="fileio"></span><h1>fileIO<a class="headerlink" href="#module-geobipy.src.base.fileIO" title="Permalink to this headline">¶</a></h1>
+<p>&#64;fileIO
+Module with custom file handling operations</p>
+<dl class="function">
+<dt id="geobipy.src.base.fileIO.bytes2readable">
+<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">bytes2readable</code><span class="sig-paren">(</span><em>nBytes</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.bytes2readable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert bytes to KB, MB, …, PB</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>nBytes</strong> (<em>float</em>) – The number of bytes</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – The number of KB, MB, etc.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.fileIO.deleteFile">
+<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">deleteFile</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.deleteFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deletes a file if it exists</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fName</strong> (<em>str</em>) – A path and/or file name</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.fileIO.dirExists">
+<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">dirExists</code><span class="sig-paren">(</span><em>dirPath</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.dirExists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if a directory exists on disk</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dirPath</strong> (<em>str</em>) – A directory path</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – Whether the directory path exists</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.fileIO.fileExists">
+<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">fileExists</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.fileExists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if a single file exists on disk</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fname</strong> (<em>str</em>) – A file name</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – Whether the file exists or not</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.fileIO.filesExist">
+<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">filesExist</code><span class="sig-paren">(</span><em>fNames</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.filesExist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if all files in fNames exist on disk</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fNames</strong> (<em>list of str</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – Whether all files exist or not</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.fileIO.getFileExtension">
+<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">getFileExtension</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.getFileExtension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the extension of the filename</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fname</strong> (<em>str</em>) – A path and/or file name</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – The extension of the filename</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.fileIO.getFileSize">
+<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">getFileSize</code><span class="sig-paren">(</span><em>fName</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.getFileSize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the size of a file on disk</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fName</strong> (<em>str</em>) – A path and/or file name</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – The file size in KB, MB, etc.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.fileIO.getHeaderNames">
+<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">getHeaderNames</code><span class="sig-paren">(</span><em>fName, i=[-1], nHeaders=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.getHeaderNames" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read headers names from a line in a file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fName</strong> (<em>str</em>) – A path and/or file name.</p></li>
+<li><p><strong>i</strong> (<em>in</em><em> or </em><em>list of ints</em><em>, </em><em>optional</em>) – The indices of the entries to read from the string.  By default, all entries are read in.</p></li>
+<li><p><strong>nHeaders</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of header lines to skip in the file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – A list of the parsed header entries.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.fileIO.getNcolumns">
+<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">getNcolumns</code><span class="sig-paren">(</span><em>fName</em>, <em>nHeaders=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.getNcolumns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the number of columns in a file using the line after nHeaders</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fName</strong> (<em>str</em>) – A path and/or file name</p></li>
+<li><p><strong>nHeaders</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of header lines to skip before obtaining the number of columns</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – The number of columns</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.fileIO.getNlines">
+<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">getNlines</code><span class="sig-paren">(</span><em>fname</em>, <em>nHeaders=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.getNlines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the number of lines in a file after taking into account the number of header lines</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fName</strong> (<em>str</em>) – A path and/or file name</p></li>
+<li><p><strong>nHeaders</strong> (<em>int</em><em>, </em><em>optional</em>) – Subtract the number of header lines from the total number of lines in the file</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – Number of lines without the headers</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.fileIO.getRealNumbersfromLine">
+<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">getRealNumbersfromLine</code><span class="sig-paren">(</span><em>line</em>, <em>indices=None</em>, <em>delimiters='</em>, <em>'</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.getRealNumbersfromLine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads strictly the numbers from a string</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>line</strong> (<em>str</em>) – A string, or a line from a file.</p></li>
+<li><p><strong>i</strong> (<em>in</em><em> or </em><em>list of ints</em><em>, </em><em>optional</em>) – The indices of the entries to read from the string.  By default, all entries are read in.</p></li>
+<li><p><strong>delimiters</strong> (<em>str</em>) – Splits the line based on these delimiters.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – The values read in from the string.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.fileIO.int2str">
+<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">int2str</code><span class="sig-paren">(</span><em>i</em>, <em>N</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.int2str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts an integer to a string with leading zeros in order to maintain the correct order in the file system</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>i</strong> (<em>int</em>) – The integer to convert to a string.</p></li>
+<li><p><strong>N</strong> (<em>int</em>) – The maximum number of digits you wish to have in the integer. e.g. int2str(3,4)=‘0003’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – The integer padded with zeroes on the front.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.fileIO.isFileExtension">
+<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">isFileExtension</code><span class="sig-paren">(</span><em>fname</em>, <em>ext</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.isFileExtension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check that the filename is of the given extension</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fname</strong> (<em>str</em>) – A path and/or file name</p></li>
+<li><p><strong>ext</strong> (<em>str</em>) – The extension you want to check the file name against</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – Whether the extension of fname matches ext</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.fileIO.parseString">
+<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">parseString</code><span class="sig-paren">(</span><em>this</em>, <em>delimiters='</em>, <em>'</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.parseString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a string into its entries</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>this</strong> (<em>str</em>) – The string to parse.</p></li>
+<li><p><strong>delimiters</strong> (<em>str</em>) – Patterns to split against, e.g. ‘,’ splits at every comma.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – A list of the parsed entries</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.fileIO.read_columns">
+<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">read_columns</code><span class="sig-paren">(</span><em>fName</em>, <em>indices=None</em>, <em>nHeaders=0</em>, <em>nLines=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.read_columns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads specified columns from a file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fName</strong> (<em>str</em>) – A path and/or file name.</p></li>
+<li><p><strong>indices</strong> (<em>in</em><em> or </em><em>list of ints</em><em>, </em><em>optional</em>) – The indices of the columns to read in from the file.  By default, all columns are read in.</p></li>
+<li><p><strong>nHeaders</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of header lines to skip in the file.</p></li>
+<li><p><strong>nLines</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of lines to read in.  By default, all lines are read in after the header lines.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – 2D array containing the lines in the file.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.fileIO.skipLines">
+<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">skipLines</code><span class="sig-paren">(</span><em>f</em>, <em>nLines=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.skipLines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Skip N lines in an open file object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>f</strong> (<em>_io.TextIOWrapper</em>) – A file handle generated with open(file, mode=’r’, buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None).</p></li>
+<li><p><strong>nLines</strong> (<em>int</em>) – The number of lines to skip.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="geobipy.src.base.fileIO.wccount">
+<code class="descclassname">geobipy.src.base.fileIO.</code><code class="descname">wccount</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.fileIO.wccount" title="Permalink to this definition">¶</a></dt>
+<dd><p>Count the number of lines in a file using a wc system call</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fName</strong> (<em>str</em>) – A path and/or file name</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – The number of lines in the file</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="interpolation.html" class="btn btn-neutral float-right" title="interpolation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="customPlots.html" class="btn btn-neutral float-left" title="customPlots" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../../../genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="../../../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="interpolation.html" title="interpolation"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="customPlots.html" title="customPlots"
-             >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">GeoBIPy 1.0.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../api.html" >API</a> &#187;</li>
-          <li class="nav-item nav-item-2"><a href="base.html" >Core routines needed for GeoBIPy</a> &#187;</li> 
-      </ul>
-    </div>
-    <div class="footer" role="contentinfo">
-        &#169; Copyright None.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.9.
-    </div>
-  </body>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright None
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
 </html>

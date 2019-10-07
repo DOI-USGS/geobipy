@@ -37,6 +37,11 @@ class Normal(baseDistribution):
     def ndim(self):
         return 1
 
+    
+    def cdf(self, x):
+        """ For a realization x, compute the probability """
+        return StatArray.StatArray(norm.cdf(x, loc = self.mean, scale = self.variance), "Cumulative Density")
+
 
     def deepcopy(self):
         """Create a deepcopy
@@ -49,6 +54,16 @@ class Normal(baseDistribution):
         """
         # return deepcopy(self)
         return Normal(self.mean, self.variance, self.prng)
+
+
+    def derivative(self, x, moment):
+        assert 0 <= moment <= 1, ValueError("Must have 0 <= moment < 2")
+        
+        if moment == 0:
+            return ((x - self.mean) / self.variance) * self.probability(x)
+        else:
+            return (0.5 / self.variance**2.0) * ((x - self.mean)**2.0 - self.variance) * self.probability(x)
+
 
 
     def rng(self, size=1):
@@ -80,7 +95,7 @@ class Normal(baseDistribution):
 
     def probability(self, x):
         """ For a realization x, compute the probability """
-        return StatArray.StatArray(norm.pdf(x, loc = self.mean, scale = self.variance))
+        return StatArray.StatArray(norm.pdf(x, loc = self.mean, scale = self.variance), "Probability Density")
         
 
     def summary(self, out=False):

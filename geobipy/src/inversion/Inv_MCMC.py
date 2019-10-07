@@ -18,6 +18,7 @@ from .Results import Results
 from ..base.MPI import print
 import matplotlib.pyplot as plt
 
+
 def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
     """ Markov Chain Monte Carlo approach for inversion of geophysical data
     userParameters: User input parameters object
@@ -48,7 +49,7 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
     # Set the saved best models and data
     bestModel = Mod.deepcopy()
     bestData = DataPoint.deepcopy()
-    bestPosterior = posterior#.copy()
+    bestPosterior = -np.inf #posterior#.copy()
 
     # Initialize the Chain
     iBurn = 0
@@ -76,17 +77,14 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
                 Res.iBurn = i         # Save the burn in iteration to the results
                 bestModel = Mod.deepcopy()
                 bestData = DataPoint.deepcopy()
-                bestPosterior = posterior.copy()
-            
+                bestPosterior = posterior
 
-        # Update the best best model and data if the posterior is larger
-        if (posterior > bestPosterior and Res.burnedIn):
-            iBest = np.int64(i)
-            bestModel = Mod.deepcopy()
-            bestData = DataPoint.deepcopy()
-            bestPosterior = posterior.copy()
-
-        Res.iBestV[i] = iBest
+        else: # Update the best best model and data if the posterior is larger
+            if (posterior > bestPosterior):
+                iBest = np.int64(i)
+                bestModel = Mod.deepcopy()
+                bestData = DataPoint.deepcopy()
+                bestPosterior = posterior
 
         if (np.mod(i, userParameters.plotEvery) == 0):
             tPerMod = Res.clk.lap() / userParameters.plotEvery
@@ -104,8 +102,12 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
         i += 1
         
         Go = i <= userParameters.nMarkovChains + Res.iBurn
-        if failed:
-            Go = False
+        
+        if not Res.burnedIn:
+            Go = i < userParameters.nMarkovChains
+            if not Go:
+                failed = True
+
 
     Res.clk.stop()
     Res.invTime = np.float64(Res.clk.timeinSeconds())
@@ -183,8 +185,8 @@ def Initialize(userParameters, DataPoint, prng):
     DataPoint.setAdditiveErrorPosterior()
 
     # Update the data errors based on user given parameters
-    if userParameters.solveRelativeError or userParameters.solveAdditiveError:
-        DataPoint.updateErrors(userParameters.initialRelativeError, userParameters.initialAdditiveError)
+    # if userParameters.solveRelativeError or userParameters.solveAdditiveError:
+    DataPoint.updateErrors(userParameters.initialRelativeError, userParameters.initialAdditiveError)
 
     DataPoint.addErr.updatePosterior()
 
@@ -240,13 +242,13 @@ def Initialize(userParameters, DataPoint, prng):
         # Scale the sensitivity matrix by the data errors.
         J = DataPoint.scaleJ(DataPoint.J)
         # Compute a quasi-Newton based variance update
-        userParameters.unscaledVariance = np.linalg.inv(np.dot(J.T, J) + np.eye(Mod.nCells[0]) * userParameters.priStd**-2.0)
+        userParameters.Hessian = np.linalg.inv(np.dot(J.T, J) + np.eye(Mod.nCells[0]) * userParameters.priStd**-2.0)
     else:
         # Compute a steepest descent based variance update
-        userParameters.unscaledVariance = np.eye(Mod.nCells[0]) * userParameters.priStd**2.0
+        userParameters.Hessian = np.eye(Mod.nCells[0]) * userParameters.priStd**2.0
 
     # Instantiate the proposal for the parameters.
-    Mod.par.setProposal('MvNormal', np.log(Mod.par), userParameters.unscaledVariance, prng=prng)
+    Mod.par.setProposal('MvNormal', np.log(Mod.par), userParameters.Hessian, prng=prng)
 
     # Assign a prior to the derivative of the model
     Mod.dpar.setPrior('MvNormalLog', 0.0, userParameters.gradientStd**2.0, prng=prng)
@@ -284,7 +286,7 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
     # Perturb the current model to produce an initial candidate model
     Mod1 = Mod.perturbStructure()
 
-    unperturbedParameter = Mod1.par.deepcopy()
+    remappedParameter = Mod1.par.deepcopy()
 
     # Propose a new data point, using assigned proposal distributions
     D1 = DataPoint.propose(userParameters.solveElevation, userParameters.solveRelativeError, userParameters.solveAdditiveError, userParameters.solveCalibration)
@@ -300,21 +302,25 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
         # Propose new layer conductivities
         if userParameters.stochasticNewton:
             A = JtJ + (np.eye(Mod1.nCells[0]) * userParameters.priStd**-2.0)
-            unscaledVariance = np.linalg.inv(A)
+            Hessian = np.linalg.inv(A)
         else:
 
             MalinvernoGelmanScaling = userParameters.parameterCovarianceScaling / np.sqrt(Mod1.nCells[0])
 
-            A = JtJ + (MalinvernoGelmanScaling * np.eye(Mod1.nCells[0]) * userParameters.priStd**-2.0)
-            unscaledVariance = np.linalg.inv(A)
-
-            if userParameters.ignoreLikelihood:
+            if Res.burnedIn:
+                A = JtJ + (MalinvernoGelmanScaling * np.eye(Mod1.nCells[0]) * userParameters.priStd**-2.0)
+                Hessian = np.linalg.inv(A)
+            else:
                 # Inverse of diagonal matrix is the reciprocal
                 A = (MalinvernoGelmanScaling * np.ones(Mod1.nCells[0]) * userParameters.priStd**-2.0)
-                unscaledVariance = np.diag(1.0 / A)
+                Hessian = np.diag(1.0 / A)
+
+            if userParameters.ignoreLikelihood:
+                A = (MalinvernoGelmanScaling * np.ones(Mod1.nCells[0]) * userParameters.priStd**-2.0)
+                Hessian = np.diag(1.0 / A)
             
     else:  # There was no change in the model
-        unscaledVariance = userParameters.unscaledVariance
+        Hessian = userParameters.Hessian
 
 
     ### Proposing new parameter values
@@ -324,24 +330,24 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
     if (userParameters.stochasticNewton):
         # Compute the gradient
         J = DataPoint.scaleJ(D1.J, 2.0)
-        gradient = np.dot(J.T, DataPoint.deltaD[DataPoint.iActive]) + ((userParameters.priStd**-1.0) * (np.log(unperturbedParameter) - userParameters.priMu))
+        gradient = np.dot(J.T, DataPoint.deltaD[DataPoint.iActive]) + ((userParameters.priStd**-1.0) * (np.log(remappedParameter) - userParameters.priMu))
 
         scaling = userParameters.parameterCovarianceScaling * ((2.0 * np.float64(Mod1.nCells[0])) - 1)**(-1.0 / 3.0)
 
         # Compute the Model perturbation
         # The negative sign because we want to move "downhill"
-        SN_step_from_unperturbed = -0.5 * scaling * np.dot(unscaledVariance, gradient)
+        SN_step_from_unperturbed = -0.5 * scaling * np.dot(Hessian, gradient)
 
         if (not Res.burnedIn):
             SN_step_from_unperturbed = 0.0
 
-        mean = np.log(Mod1.par) + SN_step_from_unperturbed
-        variance = scaling * unscaledVariance
+        mean = np.log(remappedParameter) + SN_step_from_unperturbed
+        variance = scaling * Hessian
 
     # Otherwise use the steepest descent method
     else:  
-        mean = np.log(Mod1.par)
-        variance = unscaledVariance
+        mean = np.log(remappedParameter)
+        variance = Hessian
 
     # Assign a proposal distribution for the parameter using the mean and variance.
     Mod1.par.setProposal('MvNormal', mean, variance, prng=prng)
@@ -363,6 +369,7 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
     # Compute the data misfit
     PhiD1 = D1.dataMisfit(squared=True)
 
+    # print('Phid1 {}'.format(PhiD1))
     
     if (userParameters.verbose):
         posteriorComponents = np.zeros(8, dtype=np.float64)
@@ -374,7 +381,6 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
         likelihood1 = D1.likelihood()
 
         posterior1 = prior1 + likelihood1
-
 
     else:
 
@@ -391,6 +397,7 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
 
         posterior1 = prior1 + likelihood1
 
+
     ### Evaluate the Reversible Jump Step.
     if (userParameters.stochasticNewton):
 
@@ -404,7 +411,7 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
 
         # Compute the stochastic newton offset.
         # The negative sign because we want to move downhill
-        SN_step_from_perturbed = -0.5 * scaling * np.dot(unscaledVariance, gradient)
+        SN_step_from_perturbed = -0.5 * scaling * np.dot(Hessian, gradient)
 
         if (not Res.burnedIn):
             SN_step_from_perturbed = 0.0
@@ -414,14 +421,19 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
         # our perturbed parameters to the unperturbed parameters. This is the crux of the reversible jump.
         tmp = Distribution('MvNormalLog', np.log(Mod1.par) + SN_step_from_perturbed, variance, prng=prng)
         # Probability of jumping from our perturbed parameter values to the unperturbed values.
-        proposal = tmp.probability(np.log(unperturbedParameter))  # CUR.prop
+        proposal = tmp.probability(np.log(remappedParameter))  # CUR.prop
+
+        # Now we compute the backwards reversible jump step by remapping our perturbed parameters to the same dimensional space as the previous iteration.
+        remapped = Mod1.unperturb()
+        # tmp = Distribution('MvNormalLog', np.log(Mod.par), Mod.par.proposal.variance, prng=prng)
+        proposal1 = Mod.par.proposal.probability(np.log(remapped.par))  # CAN.prop
 
         # Now we evaluate the probability of jumping from our unperturbed parameter values to our perturbed parameter values using the variance 
         # computed previously.
-        # Mod1.par.setProposal('MvNormalLog', np.log(unperturbedParameter) + SN_step_from_unperturbed, variance, prng=Mod1.par.proposal.prng)
-        tmp = Distribution('MvNormalLog', np.log(unperturbedParameter) + SN_step_from_unperturbed, variance, prng=prng)
+        # Mod1.par.setProposal('MvNormalLog', np.log(remappedParameter) + SN_step_from_unperturbed, variance, prng=Mod1.par.proposal.prng)
+        # tmp = Distribution('MvNormalLog', np.log(remappedParameter) + SN_step_from_unperturbed, variance, prng=prng)
         # Get the pdf for the perturbed parameters
-        proposal1 = tmp.probability(np.log(Mod1.par))  # CAN.prop
+        # proposal1 = tmp.probability(np.log(Mod1.par))  # CAN.prop
         
     else:
 
@@ -429,14 +441,11 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
         # We don't recompute the variance using the perturbed parameters, because we need to check that we could in fact step back from 
         # our perturbed parameters to the unperturbed parameters. This is the crux of the reversible jump.
         tmp = Distribution('MvNormalLog', np.log(Mod1.par), variance, prng=prng)
-        proposal = tmp.probability(np.log(unperturbedParameter))  # CUR.prop
+        proposal = tmp.probability(np.log(remappedParameter))  # CUR.prop
 
-        # Now we evaluate the probability of jumping from our unperturbed parameter values to our perturbed parameter values using the variance 
-        # computed previously.
+        # Now we compute the backwards reversible jump step by remapping our perturbed parameters to the same dimensional space as the previous iteration.
         remapped = Mod1.unperturb()
-
         tmp = Distribution('MvNormalLog', np.log(Mod.par), Mod.par.proposal.variance, prng=prng)
-
         proposal1 = tmp.probability(np.log(remapped.par))  # CAN.prop
 
 
@@ -463,13 +472,11 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
     else:
         ratioComponents = None
         
-    # acceptanceProbability = np.minimum(1.0, acceptanceRatio)
-
     # If we accept the model
     r = prng.uniform()
 
     if (acceptanceProbability > r):
-        userParameters.unscaledVariance = unscaledVariance
+        userParameters.Hessian = Hessian
         Res.acceptance += 1
         return(Mod1, D1, prior1, likelihood1, posterior1, PhiD1, posteriorComponents, ratioComponents, True, Mod.nCells[0] != Mod1.nCells[0])
 
@@ -480,3 +487,6 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
 
     
     #%%
+
+
+#%%

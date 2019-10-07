@@ -397,7 +397,7 @@ class FdemDataPoint(EmDataPoint):
             self._data[:] = cf.splitComplex(tmp)
 
 
-    def plot(self, title='Frequency Domain EM Data', system=0,  **kwargs):
+    def plot(self, title='Frequency Domain EM Data', system=0,  with_error_bars=True, **kwargs):
         """ Plot the Inphase and Quadrature Data for an EM measurement
         if plotPredicted then the predicted data are plotted as a line, with points for the observed data
         else the observed data with error bars and linear interpolation are shown.
@@ -415,47 +415,38 @@ class FdemDataPoint(EmDataPoint):
         cp.ylabel('Frequency domain data (ppm)')
         cp.title(title)
 
-        inColor = kwargs.pop('incolor',cp.wellSeparated[0])
-        quadColor = kwargs.pop('quadcolor',cp.wellSeparated[1])
-        im = kwargs.pop('inmarker','v')
-        qm = kwargs.pop('quadmarker','o')
-        ms = kwargs.pop('markersize',7)
-        mec = kwargs.pop('markeredgecolor','k')
-        mew = kwargs.pop('markeredgewidth',1.0)
-        a = kwargs.pop('alpha',0.8)
-        ls = kwargs.pop('linestyle','none')
-        lw = kwargs.pop('linewidth',2)
+        inColor = kwargs.pop('incolor', cp.wellSeparated[0])
+        quadColor = kwargs.pop('quadcolor', cp.wellSeparated[1])
+        im = kwargs.pop('inmarker', 'v')
+        qm = kwargs.pop('quadmarker', 'o')
+        kwargs['markersize'] = kwargs.pop('markersize', 7)
+        kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor', 'k')
+        kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth', 1.0)
+        kwargs['alpha'] = kwargs.pop('alpha', 0.8)
+        kwargs['linestyle'] = kwargs.pop('linestyle', 'none')
+        kwargs['linewidth'] = kwargs.pop('linewidth', 2)
 
         xscale = kwargs.pop('xscale','log')
         yscale = kwargs.pop('yscale','log')
 
-        plt.errorbar(self.frequencies(system), self.inphase(system), yerr=self.inphaseStd(system),
-            marker=im,
-            markersize=ms,
-            color=inColor,
-            markerfacecolor=inColor,
-            markeredgecolor=mec,
-            markeredgewidth=mew,
-            alpha=a,
-            linestyle=ls,
-            linewidth=lw,
-            label='In-Phase', **kwargs)
 
-        plt.errorbar(self.frequencies(system), self.quadrature(system), yerr=self.quadratureStd(system),
-            marker=qm,
-            markersize=ms,
-            color=quadColor,
-            markerfacecolor=quadColor,
-            markeredgecolor=mec,
-            markeredgewidth=mew,
-            alpha=a,
-            linestyle=ls,
-            linewidth=lw,
-            label='Quadrature', **kwargs)
+
+        if with_error_bars:
+            plt.errorbar(self.frequencies(system), self.inphase(system), yerr=self.inphaseStd(system),
+                marker=im, color=inColor, markerfacecolor=inColor, label='In-Phase', **kwargs)
+
+            plt.errorbar(self.frequencies(system), self.quadrature(system), yerr=self.quadratureStd(system),
+                marker=qm, color=quadColor, markerfacecolor=quadColor, label='Quadrature', **kwargs)
+        else:
+            plt.plot(self.frequencies(system), self.inphase(system),
+                marker=im, color=inColor, markerfacecolor=inColor, label='In-Phase', **kwargs)
+
+            plt.plot(self.frequencies(system), self.quadrature(system),
+                marker=qm, color=quadColor, markerfacecolor=quadColor, label='Quadrature', **kwargs)
 
         plt.xscale(xscale)
         plt.yscale(yscale)
-        plt.legend()
+        plt.legend(fontsize=8)
 
         return ax
 

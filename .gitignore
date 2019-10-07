@@ -1,13 +1,13 @@
 *__pycache__*
 *egg-info*
-*.png
 *DS_Store
+images/
 .ipynb_checkpoints
 *.h5
-*.txt
 MANIFEST.in
 build
 *.so
 *.swp
 *.swo
 *.vtk
+*.egg

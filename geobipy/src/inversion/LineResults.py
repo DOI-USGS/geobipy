@@ -16,6 +16,7 @@ from ..classes.mesh.RectilinearMesh1D import RectilinearMesh1D
 from ..classes.mesh.TopoRectilinearMesh2D import TopoRectilinearMesh2D
 from ..classes.data.dataset.FdemData import FdemData
 from ..classes.data.dataset.TdemData import TdemData
+from ..classes.model.Model1D import Model1D
 from ..base.HDF import hdfRead
 from ..base import customPlots as cP
 from ..base import customFunctions as cF
@@ -43,14 +44,18 @@ class LineResults(myObject):
         self._bestData = None
         self._bestModel = None
         self._burnedIn = None
-        self.doi = None
+        self._confidenceRange = None
+        self._doi = None
         self._elevation = None
-        self.facies = None
+        self._marginalProbability = None
         self._fiducials = None
         self._hitMap = None
-        self._nLayers = None
+        self._interfaces = None
         self._interfacePosterior = None
+        self._lineHitmap = None
         self._mean = None
+        self._modeParameter = None
+        self._nLayers = None
         self._nPoints = None
         self._nSystems = None
         self._opacity = None
@@ -79,7 +84,7 @@ class LineResults(myObject):
         try:
             self.hdfFile.attrs
         except:
-            self.hdfFile = h5py.File(self.fName, 'r')
+            self.hdfFile = h5py.File(self.fName, 'r+')
 
 
     def close(self):
@@ -134,28 +139,6 @@ class LineResults(myObject):
 
         cP.xlabel(self.relativeError.getNameUnits())
         cP.ylabel(self.additiveError.getNameUnits())
-        
-
-    @property
-    def mesh(self):
-        """Get the 2D topo fitting rectilinear mesh. """
-        
-        if (self._mesh is None):
-            if (self._hitMap is None):
-                tmp = self.getAttribute('hitmap/y', index=0)
-                try:
-                    tmp = RectilinearMesh1D(cellCentres=tmp.cellCentres, edgesMin=0.0)
-                except:
-                    tmp = RectilinearMesh1D(cellCentres=tmp, edgesMin=0.0)
-            else:
-                tmp = self.hitMap.y
-                try:
-                    tmp = RectilinearMesh1D(cellCentres=tmp.cellCentres, edgesMin=0.0)
-                except:
-                    tmp = RectilinearMesh1D(cellCentres=tmp, edgesMin=0.0)
-
-            self._mesh = TopoRectilinearMesh2D(xCentres=self.x, yCentres=self.y, zEdges=tmp.cellEdges, heightCentres=self.elevation)
-        return self._mesh
 
 
     @property
@@ -189,8 +172,57 @@ class LineResults(myObject):
     def bestParameters(self):
         """ Get the best model of the parameters """
         if (self._best is None):
-            self._best = StatArray.StatArray(self.getAttribute('bestinterp'), dtype=np.float64, name=self.hitMap.x.cellCentres.name, units=self.hitMap.x.cellCentres.units)
+            self._best = StatArray.StatArray(self.getAttribute('bestinterp'), dtype=np.float64, name=self.parameterName, units=self.parameterUnits).T
         return self._best
+
+
+    @property
+    def confidenceRange(self):
+        """ Get the model parameter opacity using the confidence intervals """
+        if (self._confidenceRange is None):
+            # Read in the opacity if present
+            if "confidence_range" in self.hdfFile.keys():
+                self._confidenceRange = StatArray.StatArray().fromHdf(self.hdfFile['confidence_range'])
+            else:
+                self.computeConfidenceRange()
+                
+                    
+        return self._confidenceRange
+
+    
+    def computeConfidenceRange(self, percent=95.0, log=10):
+
+        s = 'percent={}, log={}'.format(percent, log)
+
+        self._confidenceRange = StatArray.StatArray(np.zeros(self.mesh.shape), '{} {}% Confidence Range'.format(cF._logLabel(log), percent), self.parameterUnits)
+
+        loc = 'currentmodel/par/posterior'
+        a = np.asarray(self.hdfFile[loc+'/arr/data'])
+        try:
+            b = np.asarray(self.hdfFile[loc+'/x/data'])
+        except:
+            b = np.asarray(self.hdfFile[loc+'/x/x/data'])
+
+        try:
+            c = np.asarray(self.hdfFile[loc+'/y/data'])
+        except:
+            c = np.asarray(self.hdfFile[loc+'/y/x/data'])
+
+        h = Hitmap2D(xBinCentres = StatArray.StatArray(b[0, :]), yBinCentres = StatArray.StatArray(c[0, :]))
+        h._counts[:, :] = a[0, :, :]
+        self._confidenceRange[:, 0] = h.axisConfidenceRange(percent=percent, log=log)
+        
+        for i in progressbar.progressbar(range(1, self.nPoints)):
+            h.x.xBinCentres = b[i, :]
+            h._counts[:, :] = a[i, :, :]
+            self._confidenceRange[:, i] = h.axisConfidenceRange(percent=percent, log=log)
+
+
+        if 'confidence_range' in self.hdfFile.keys():
+            del self.hdfFile['confidence_range']
+                
+        self._confidenceRange.toHdf(self.hdfFile, 'confidence_range')
+        self.hdfFile['confidence_range'].attrs['options'] = s
 
     
     @property
@@ -207,7 +239,20 @@ class LineResults(myObject):
         return self._currentData
 
 
-    def getDOI(self, percent=67.0, window=1):
+    @property
+    def doi(self):
+
+        if (self._doi is None):
+            # Read in the opacity if present
+            if "doi" in self.hdfFile.keys():
+                self._doi = StatArray.StatArray().fromHdf(self.hdfFile['doi'])
+            else:
+                self.computeDOI()
+        
+        return self._doi
+
+
+    def computeDOI(self, percent=67.0, window=1):
         """ Get the DOI of the line depending on a percentage variance cutoff for each data point """
         #if (not self.doi is None): return
 
@@ -215,19 +260,41 @@ class LineResults(myObject):
         assert 0.0 < percent < 100.0, ValueError("Must have 0.0 < percent < 100.0")
         p = 0.01 * (100.0 - percent)
 
-        self.doi = StatArray.StatArray(np.zeros(self.nPoints), 'Depth of investigation', self.height.units)
-        nCells = self.mesh.z.nCells - 1
-        r = range(self.nPoints)
-        for i in r:
-            op = self.opacity[:, i]
-            iC = nCells
-            while op[iC] < p and iC > 0:
-                iC -=1
-            
-            self.doi[i] = self.mesh.z.cellCentres[iC]
+        doi = StatArray.StatArray(np.zeros(self.nPoints), 'Depth of investigation', self.height.units)
 
-        self.doi = self.doi.rolling(np.mean, window)
+        loc = 'currentmodel/par/posterior'
+        a = np.asarray(self.hdfFile[loc+'/arr/data'])
+        try:
+            b = np.asarray(self.hdfFile[loc+'/x/data'])
+        except:
+            b = np.asarray(self.hdfFile[loc+'/x/x/data'])
 
+        try:
+            c = np.asarray(self.hdfFile[loc+'/y/data'])
+        except:
+            c = np.asarray(self.hdfFile[loc+'/y/x/data'])
+
+        h = Hitmap2D(xBinCentres = StatArray.StatArray(b[0, :]), yBinCentres = StatArray.StatArray(c[0, :]))
+        h._counts[:, :] = a[0, :, :]
+        doi[0] = h.getOpacityLevel(percent)
+        
+        for i in progressbar.progressbar(range(1, self.nPoints)):
+            h.x.xBinCentres = b[i, :]
+            h._counts[:, :] = a[i, :, :]
+            doi[i] = h.getOpacityLevel(percent)
+
+        self._doi = doi
+        if window > 1:
+            buffer = np.int(0.5 * window)
+            tmp = doi.rolling(np.mean, window)
+            self._doi[buffer:-buffer] = tmp
+            self._doi[:buffer] = tmp[0]
+            self._doi[-buffer:] = tmp[-1]
+        
+        if 'doi' in self.hdfFile.keys():
+            del self.hdfFile['doi']
+                
+        self._doi.toHdf(self.hdfFile, 'doi')
 
     @property
     def elevation(self):
@@ -237,6 +304,26 @@ class LineResults(myObject):
         return self._elevation
 
 
+    def extract1DModel(self, values, index=None, fiducial=None):
+        """ Obtain the results for the given iD number """
+
+        assert not (index is None and fiducial is None), Exception("Please specify either an integer index or a fiducial.")
+        assert index is None or fiducial is None, Exception("Only specify either an integer index or a fiducial.")
+
+        if not fiducial is None:
+            assert fiducial in self.fiducials, ValueError("This fiducial {} is not available from this HDF5 file. The min max fids are {} to {}.".format(fiducial, self.fiducials.min(), self.fiducials.max()))
+            # Get the point index
+            i = self.fiducials.searchsorted(fiducial)
+        else:
+            i = index
+            fiducial = self.fiducials[index]
+
+        depth = self.mesh.z.cellEdges[:-1]
+        parameter = values[:, i]
+
+        return Model1D(self.mesh.z.nCells, depth=depth, parameters=parameter, hasHalfspace=False)
+
+    
     @property
     def height(self):
         """Get the height of the observations. """
@@ -249,6 +336,7 @@ class LineResults(myObject):
     def heightPosterior(self):
         if (self._zPosterior is None):
             self._zPosterior = self.getAttribute('height posterior')
+            self._zPosterior.bins.name = 'Relative ' + self._zPosterior.bins.name
         return self._zPosterior
 
 
@@ -268,17 +356,80 @@ class LineResults(myObject):
                 self._fiducials = self.getAttribute('fiducials')
             except:
                 self._fiducials = StatArray.StatArray(np.asarray(self.hdfFile.get('ids')), "fiducials")
-        return self._fiducials
+        return self._fiducials      
+
+    
+    def fitMajorPeaks(self, intervals, **kwargs):
+        """Fit distributions to the major peaks in each hitmap along the line.
+
+        Parameters
+        ----------
+        intervals : array_like, optional
+            Accumulate the histogram between these invervals before finding peaks
+
+        """
+        distributions = []
+
+        hm = self.hitMap.deepcopy()
+        counts = np.asarray(self.hdfFile['currentmodel/par/posterior/arr/data'])
+
+        Bar = progressbar.ProgressBar()
+        for i in Bar(range(self.nPoints)):
+
+            try:
+                dpDistributions = hm.fitMajorPeaks(intervals, **kwargs)
+                distributions.append(dpDistributions)
+            except:
+                pass
+
+            hm._counts = counts[i, :, :]
+
+        return distributions
+
+
+    def identifyPeaks(self, depths, nBins = 250, width=4, limits=None):
+        """Identifies peaks in the parameter posterior for each depth in depths.
+
+        Parameters
+        ----------
+        depths : array_like
+            Depth intervals to identify peaks between.
+
+        Returns
+        -------
+
+        """
+
+        from scipy.signal import find_peaks
+
+        assert np.size(depths) > 2, ValueError("Depths must have size > 1.")
+
+        tmp = self.lineHitmap.intervalStatistic(axis=0, intervals = depths, statistic='sum')
+
+        depth = np.zeros(0)
+        parameter = np.zeros(0)
+                       
+        # # Bar = progressbar.ProgressBar()
+        # # for i in Bar(range(self.nPoints)):
+        for i in range(tmp.y.nCells):
+            peaks, _ = find_peaks(tmp.counts[i, :],  width=width)
+            values = tmp.x.cellCentres[peaks]
+            if not limits is None:
+                values = values[(values > limits[0]) & (values < limits[1])]
+            parameter = np.hstack([parameter, values])
+            depth = np.hstack([depth, np.full(values.size, fill_value=0.5*(depths[i]+depths[i+1]))])
+
+        return np.asarray([depth, parameter]).T
 
 
     @property
     def interfaces(self):
         """ Get the layer interfaces from the layer depth histograms """
-        # if (not self.interfaces is None): return
-        maxCount = self.interfacePosterior.counts.max()
-        interfaces = self.interfacePosterior.counts / np.float64(maxCount)
-        interfaces.name = "Interfaces"
-        return interfaces
+        if (self._interfaces is None):
+            maxCount = self.interfacePosterior.counts.max()
+            self._interfaces = StatArray.StatArray(self.interfacePosterior.counts.T / np.float64(maxCount), "interfaces", "")
+
+        return self._interfaces
 
 
     @property
@@ -287,6 +438,49 @@ class LineResults(myObject):
             self._interfacePosterior = self.getAttribute('layer depth posterior')
         return self._interfacePosterior
 
+
+    @property
+    def lineHitmap(self):
+        """ Get the model parameter opacity using the confidence intervals """
+        if (self._lineHitmap is None):
+            # Read in the opacity if present
+            if "line_hitmap" in self.hdfFile.keys():
+                self._lineHitmap = Hitmap2D().fromHdf(self.hdfFile['line_hitmap'])
+            else:
+                self.computeLineHitmap()
+                    
+        return self._lineHitmap
+
+    
+    def computeLineHitmap(self, nBins=250, log=10):
+
+        # First get the min max of the parameter hitmaps
+        x0 = np.log10(self.minParameter)
+        x1 = np.log10(self.maxParameter)
+
+        counts = self.hdfFile['currentmodel/par/posterior/arr/data']
+
+        xBins = StatArray.StatArray(np.logspace(x0, x1, nBins+1), self.parameterName, units = self.parameterUnits)
+
+        self._lineHitmap = Histogram2D(xBins=xBins, yBins=self.mesh.z.cellEdges)
+
+        parameters = RectilinearMesh1D().fromHdf(self.hdfFile['currentmodel/par/posterior/x'])
+                       
+        # Bar = progressbar.ProgressBar()
+        # for i in Bar(range(self.nPoints)):
+        for i in range(self.nPoints):
+            p = RectilinearMesh1D(cellEdges=parameters.cellEdges[i, :])
+
+            pj = self._lineHitmap.x.cellIndex(p.cellCentres, clip=True)
+
+            cTmp = counts[i, :, :]
+
+            self._lineHitmap._counts[:, pj] += cTmp
+
+        if 'line_hitmap' in self.hdfFile.keys():
+            del self.hdfFile['line_hitmap']
+                
+        self._lineHitmap.toHdf(self.hdfFile, 'line_hitmap')
 
     @property
     def maxParameter(self):
@@ -298,8 +492,31 @@ class LineResults(myObject):
     @property
     def meanParameters(self):
         if (self._mean is None):
-            self._mean = StatArray.StatArray(self.getAttribute('meaninterp'), dtype=np.float64)
+            self._mean = StatArray.StatArray(self.getAttribute('meaninterp').T, name=self.parameterName, units=self.parameterUnits)
+
         return self._mean
+
+
+    @property
+    def mesh(self):
+        """Get the 2D topo fitting rectilinear mesh. """
+        
+        if (self._mesh is None):
+            if (self._hitMap is None):
+                tmp = self.getAttribute('hitmap/y', index=0)
+                try:
+                    tmp = RectilinearMesh1D(cellCentres=tmp.cellCentres, edgesMin=0.0)
+                except:
+                    tmp = RectilinearMesh1D(cellCentres=tmp, edgesMin=0.0)
+            else:
+                tmp = self.hitMap.y
+                try:
+                    tmp = RectilinearMesh1D(cellCentres=tmp.cellCentres, edgesMin=0.0)
+                except:
+                    tmp = RectilinearMesh1D(cellCentres=tmp, edgesMin=0.0)
+
+            self._mesh = TopoRectilinearMesh2D(xCentres=self.x, yCentres=self.y, zEdges=tmp.cellEdges, heightCentres=self.elevation)
+        return self._mesh
 
 
     @property
@@ -307,6 +524,52 @@ class LineResults(myObject):
         """ Get the mean model of the parameters """
         tmp = np.asarray(self.hdfFile["currentmodel/par/posterior/x/x/data"][:, 0])
         return tmp.min()
+
+
+    @property
+    def modeParameter(self):
+        """ Get the model parameter opacity using the confidence intervals """
+        if (self._modeParameter is None):
+            # Read in the opacity if present
+            if "mode_parameter" in self.hdfFile.keys():
+                self._modeParameter = StatArray.StatArray().fromHdf(self.hdfFile['mode_parameter'])
+            else:
+                self.computeModeParameter()
+                
+                    
+        return self._modeParameter
+
+
+    def computeModeParameter(self):
+       
+        self._modeParameter = StatArray.StatArray(np.zeros(self.mesh.shape), self.parameterName, self.parameterUnits)
+
+        loc = 'currentmodel/par/posterior'
+        a = np.asarray(self.hdfFile[loc+'/arr/data'])
+        try:
+            b = np.asarray(self.hdfFile[loc+'/x/data'])
+        except:
+            b = np.asarray(self.hdfFile[loc+'/x/x/data'])
+
+        try:
+            c = np.asarray(self.hdfFile[loc+'/y/data'])
+        except:
+            c = np.asarray(self.hdfFile[loc+'/y/x/data'])
+
+        h = Hitmap2D(xBinCentres = StatArray.StatArray(b[0, :]), yBinCentres = StatArray.StatArray(c[0, :]))
+        h._counts[:, :] = a[0, :, :]
+        self._modeParameter[:, 0] = h.axisMode()
+        
+        for i in progressbar.progressbar(range(1, self.nPoints)):
+            h.x.xBinCentres = b[i, :]
+            h._counts[:, :] = a[i, :, :]
+            self._modeParameter[:, i] = h.axisMode()
+
+
+        if 'mode_parameter' in self.hdfFile.keys():
+            del self.hdfFile['mode_parameter']
+                
+        self._modeParameter.toHdf(self.hdfFile, 'mode_parameter')
 
 
     @property
@@ -329,62 +592,48 @@ class LineResults(myObject):
             self._nSystems = self.getAttribute('# of systems')
         return self._nSystems
 
+
     @property
     def opacity(self):
         """ Get the model parameter opacity using the confidence intervals """
         if (self._opacity is None):
-            # Read in the opacity if present
-            if "opacity" in self.hdfFile.keys():
-                self._opacity = StatArray.StatArray().fromHdf(self.hdfFile['opacity'])
-            else:
-                self.computeOpacity()
+           self.computeOpacity()
                     
         return self._opacity
 
     
-    def computeOpacity(self, percent=95.0, multiplier=0.5, log='e'):
+    def computeOpacity(self, percent=95.0, log=10, multiplier=0.5, useDOI=True):
 
-        print("Obtaining opacity from file. This can take a while the first time this runs.")
+        tmp = self.confidenceRange
 
-        s = 'percent={}, multiplier={}, log={}'.format(percent, multiplier, log)
+        # if depthScaling:
+        #     tmp = self.confidenceRange * np.repeat(self.mesh.z.cellCentres[:, np.newaxis], self.nPoints, axis=1)
 
-        transparency = StatArray.StatArray(np.zeros([self.mesh.shape[1], self.mesh.shape[0]]), 'Opacity')
+        rnge = multiplier * (tmp.max() - tmp.min())
 
-        loc = 'currentmodel/par/posterior'
-        a = np.asarray(self.hdfFile[loc+'/arr/data'])
-        try:
-            b = np.asarray(self.hdfFile[loc+'/x/data'])
-        except:
-            b = np.asarray(self.hdfFile[loc+'/x/x/data'])
-
-        try:
-            c = np.asarray(self.hdfFile[loc+'/y/data'])
-        except:
-            c = np.asarray(self.hdfFile[loc+'/y/x/data'])
-
-        h = Hitmap2D(xBinCentres = StatArray.StatArray(b[0, :]), yBinCentres = StatArray.StatArray(c[0, :]))
-        h._counts[:, :] = a[0, :, :]
-        transparency[0, :] = h.confidenceRange(percent=percent, log=log)
+        self._opacity = StatArray.StatArray(tmp, "Opacity", "")
         
-        for i in progressbar.progressbar(range(1, self.nPoints)):
-            h.x.xBinCentres = b[i, :]
-            h._counts[:, :] = a[i, :, :]
-            transparency[i, :] = h.confidenceRange(percent=percent, log=log)
+        self._opacity[self._opacity > rnge] = rnge
 
-        high = multiplier * (transparency.max() - transparency.min())
+        self._opacity = 1.0 - (self._opacity / rnge)
 
-        transparency[transparency > high] = high
+        if useDOI:
+            indices = self.mesh.z.cellIndex(self.doi)
 
-        self._opacity = 1.0 - (transparency.T / high)
+            for i in range(self.nPoints):
+                self._opacity[:indices[i], i] = 1.0
 
-        self.close()
-        with h5py.File(self.fName, 'a') as f:
-            if 'opacity' in f.keys():
-                self._opacity.writeHdf(f, 'opacity')
-            else:
-                self._opacity.toHdf(f, 'opacity')
-            f['opacity'].attrs['options'] = s
-        self.open()
+
+    @property
+    def parameterName(self):
+
+        return self.hitMap.x.cellCentres.name
+
+
+    @property
+    def parameterUnits(self):
+
+        return self.hitMap.x.cellCentres.units    
 
     
     def percentageParameter(self, value, depth=None, depth2=None):
@@ -399,7 +648,7 @@ class LineResults(myObject):
                 assert depth <= depth2, 'Depth2 must be >= depth'
                 k = self.mesh.z.cellIndex(depth2)
 
-        percentage = StatArray.StatArray(np.empty(self.nPoints), name="Probability of {} > {:0.2f}".format(self.hitMap.x.cellCentres.name, value), units = self.hitMap.x.cellCentres.units)
+        percentage = StatArray.StatArray(np.empty(self.nPoints), name="Probability of {} > {:0.2f}".format(parameterName, value), units = parameterName.units)
 
         if depth:
             counts = self.hdfFile['currentmodel/par/posterior/arr/data'][:, j:k, :]
@@ -435,23 +684,23 @@ class LineResults(myObject):
         return self.data.relErr.posterior
 
 
-    def getResults(self, index=None, fid=None, reciprocateParameter=False):
+    def getResults(self, index=None, fiducial=None, reciprocateParameter=False):
         """ Obtain the results for the given iD number """
 
-        assert not (index is None and fid is None), Exception("Please specify either an integer index or a fiducial.")
-        assert index is None or fid is None, Exception("Only specify either an integer index or a fiducial.")
+        assert not (index is None and fiducial is None), Exception("Please specify either an integer index or a fiducial.")
+        assert index is None or fiducial is None, Exception("Only specify either an integer index or a fiducial.")
 
-        if not fid is None:
-            assert fid in self.fiducials, ValueError("This fiducial {} is not available from this HDF5 file. The min max fids are {} to {}.".format(fid, self.fiducials.min(), self.fiducials.max()))
+        if not fiducial is None:
+            assert fiducial in self.fiducials, ValueError("This fiducial {} is not available from this HDF5 file. The min max fids are {} to {}.".format(fiducial, self.fiducials.min(), self.fiducials.max()))
             # Get the point index
-            i = self._fiducials.searchsorted(fid)
+            i = self._fiducials.searchsorted(fiducial)
         else:
             i = index
-            fid = self._fiducials[index]
+            fiducial = self._fiducials[index]
 
         hdfFile = self.hdfFile
 
-        R = Results(reciprocateParameter=reciprocateParameter).fromHdf(hdfFile, index=i, fid=fid, sysPath=self.sysPath)
+        R = Results(reciprocateParameter=reciprocateParameter).fromHdf(hdfFile, index=i, systemFilePath=self.sysPath)
 
         return R
         
@@ -575,7 +824,6 @@ class LineResults(myObject):
 
     def plotDoi(self, percent=67.0, window=1, **kwargs):
 
-        self.getDOI(percent, window)
         xAxis = kwargs.pop('xAxis', 'x')
         labels = kwargs.pop('labels', True)
         kwargs['color'] = kwargs.pop('color','k')
@@ -620,11 +868,22 @@ class LineResults(myObject):
 
         xtmp = self.mesh.getXAxis(xAxis)
 
-        c = self.heightPosterior.counts.T
+        post = self.heightPosterior
+
+
+        c = post.counts.T
         c = np.divide(c, np.max(c,0), casting='unsafe')
-        x = np.zeros(xtmp.size+1)
-        d = np.diff(xtmp)
-        c.pcolor(xtmp, y=self.heightPosterior.bins, **kwargs)
+
+        ax1 = plt.subplot(111)        
+        c.pcolor(xtmp, y=post.bins, noColorbar=True, **kwargs)
+        
+        ax2 = ax1.twinx()
+
+        c = cP.wellSeparated[0]
+        post.relativeTo.plot(xtmp.internalEdges(), c=c, ax=ax2)
+        ax2.set_ylabel(ax2.get_ylabel(), color=c)
+        ax2.tick_params(axis='y', labelcolor=c)
+
         cP.title('Data height posterior distributions')
 
 
@@ -676,7 +935,7 @@ class LineResults(myObject):
 
         c = post.counts.T
         c = np.divide(c, np.max(c,0), casting='unsafe')
-        ax = c.pcolor(xtmp, y=post.binCentres[0, :], **kwargs)
+        ax, pm, cb = c.pcolor(xtmp, y=post.binCentres[0, :], **kwargs)
         cP.title('# of Layers posterior distributions')
 
 
@@ -729,7 +988,14 @@ class LineResults(myObject):
         c = post.counts.T
         c = np.divide(c, np.max(c, 0), casting='unsafe')
 
-        c.pcolor(xtmp, y = post.binCentres[0, :], **kwargs)
+        if post.isRelative:
+            if np.all(post.relativeTo == post.relativeTo[0]):
+                y = post.binCentres + post.relativeTo[0]
+            else:
+                stuff = 2
+        else:
+            y = post.binCentres[0, :]
+        c.pcolor(xtmp, y=y, **kwargs)
         cP.title('Additive error posterior distributions for system {}'.format(system))
 
 
@@ -747,15 +1013,13 @@ class LineResults(myObject):
         joint.pcolor(**kwargs)
 
 
-    def plotInterfaces(self, cut=0.0, useVariance=True, **kwargs):
+    def plotInterfaces(self, cut=0.0, **kwargs):
         """ Plot a cross section of the layer depth histograms. Truncation is optional. """
 
         kwargs['noColorbar'] = kwargs.pop('noColorbar', True)
 
-        if useVariance:
-            kwargs['alpha'] = self.opacity
-
-        pm = self.mesh.pcolor(self.interfaces.T, **kwargs)
+        self.plotXsection(values=self.interfaces, **kwargs)
+        
 
 
     def plotObservedData(self, channel=None, **kwargs):
@@ -771,12 +1035,9 @@ class LineResults(myObject):
         cP.plot(xtmp, self.bestData.data[:, channel], **kwargs)
 
 
-    def plotOpacity(self, log='e', **kwargs):
+    def plotOpacity(self, **kwargs):
         """ Plot the opacity """
-
-        kwargs.pop('log', None)
-
-        self.mesh.pcolor(values = self.opacity, **kwargs)
+        self.plotXsection(values = self.opacity, **kwargs)
 
 
     def plotRelativeErrorPosteriors(self, system=0, **kwargs):
@@ -787,13 +1048,22 @@ class LineResults(myObject):
         xtmp = self.mesh.getXAxis(xAxis)
 
         if self.nSystems > 1:
-            post = self.relativeErrorPosterior[system]
+            post = self.relativeErrorPosteriors[system]
         else:
-            post = self.relativeErrorPosterior
+            post = self.relativeErrorPosteriors
 
         c = post.counts.T
         c = np.divide(c, np.max(c,0), casting='unsafe')
-        c.pcolor(xtmp, y=post.binCentres[0, :], **kwargs)
+
+        if post.isRelative:
+            if np.all(post.relativeTo == post.relativeTo[0]):
+                y = post.binCentres + post.relativeTo[0]
+            else:
+                stuff = 2
+        else:
+            y = post.binCentres[0, :]
+        c.pcolor(xtmp, y=y, **kwargs)
+
         cP.title('Relative error posterior distributions for system {}'.format(system))
 
 
@@ -956,7 +1226,7 @@ class LineResults(myObject):
 
         parameters = RectilinearMesh1D().fromHdf(self.hdfFile['currentmodel/par/posterior/x'])
 
-        bins = StatArray.StatArray(np.logspace(x0, x1, nBins), self.hitMap.x.cellCentres.name, units = self.hitMap.x.cellCentres.units)
+        bins = StatArray.StatArray(np.logspace(x0, x1, nBins), self.parameterName, units = self.parameterUnits)
 
         out = Histogram1D(bins=bins, log=log)
 
@@ -977,115 +1247,125 @@ class LineResults(myObject):
 
     def plotBestModel(self, reciprocateParameter = False, useVariance=True, **kwargs):
 
-        values = self.bestParameters.T
+        values = self.bestParameters
         if (reciprocateParameter):
             values = 1.0 / values
             values.name = 'Resistivity'
             values.units = '$\Omega m$'
-        else:
-            values.name = 'Conductivity'
-            values.units = '$Sm^{-1}$'
 
         return self.plotXsection(values = values, useVariance = useVariance, **kwargs)
 
 
     def plotMeanModel(self, reciprocateParameter = False, useVariance=True, **kwargs):
 
-        values = self.meanParameters.T
+        values = self.meanParameters
         if (reciprocateParameter):
             values = 1.0 / values
             values.name = 'Resistivity'
             values.units = '$\Omega m$'
-        else:
-            values.name = 'Conductivity'
-            values.units = '$Sm^{-1}$'
 
         return self.plotXsection(values = values, useVariance = useVariance, **kwargs)
 
 
-    def plotXsection(self, values, percent = 67.0, useVariance=True, **kwargs):
+    def plotModeModel(self, reciprocateParameter = False, useVariance=True, **kwargs):
+
+        values = self.modeParameter
+        if (reciprocateParameter):
+            values = 1.0 / values
+            values.name = 'Resistivity'
+            values.units = '$\Omega m$'
+
+        return self.plotXsection(values = values, useVariance = useVariance, **kwargs)
+
+
+    def plotXsection(self, values, useVariance=False, **kwargs):
         """ Plot a cross-section of the parameters """
 
         if useVariance:
             kwargs['alpha'] = self.opacity
     
-        return self.mesh.pcolor(values = values, **kwargs)
+        ax, pm, cb = self.mesh.pcolor(values = values, **kwargs)
+        return ax, pm, cb
 
 
-    def plotFacies(self, mean, var, volFrac, percent=67.0, ylim=None):
-        """ Plot a cross-section of the parameters """
+    # def plotFacies(self, mean, var, volFrac, percent=67.0, ylim=None):
+    #     """ Plot a cross-section of the parameters """
 
-        assert False, ValueError('Double check this')
+    #     assert False, ValueError('Double check this')
 
-        self.setAlonglineAxis(self.plotAgainst)
-        zGrd = self.zGrid
+    #     self.setAlonglineAxis(self.plotAgainst)
+    #     zGrd = self.zGrid
 
-        a = np.zeros([zGrd.size, self.nPoints + 1],order = 'F')  # Transparency amounts
-        a[:, 1:] = self.opacity
+    #     a = np.zeros([zGrd.size, self.nPoints + 1],order = 'F')  # Transparency amounts
+    #     a[:, 1:] = self.opacity
 
-        self._getX_pmesh(zGrd.size)
-        self._getZ_pmesh(zGrd)
+    #     self._getX_pmesh(zGrd.size)
+    #     self._getZ_pmesh(zGrd)
 
-        c = np.zeros(self._xMesh.shape, order = 'F')  # Colour value of each cell
-        c[:-1, 0] = np.nan
-        c[:-1, -1] = np.nan
-        c[-1, :] = np.nan
+    #     c = np.zeros(self._xMesh.shape, order = 'F')  # Colour value of each cell
+    #     c[:-1, 0] = np.nan
+    #     c[:-1, -1] = np.nan
+    #     c[-1, :] = np.nan
 
-        self.assignFacies(mean, var, volFrac)
-        c[:-1, 1:-1] = self.facies
+    #     self.assignFacies(mean, var, volFrac)
+    #     c[:-1, 1:-1] = self.facies
 
-        # Mask the Nans in the colorMap
-        cm = ma.masked_invalid(c)
+    #     # Mask the Nans in the colorMap
+    #     cm = ma.masked_invalid(c)
 
-        # Get the "depth of investigation"
-        self.getDOI(percent)
+    #     # Get the "depth of investigation"
+    #     self.getDOI(percent)
 
-        ax = plt.gca()
-        cP.pretty(ax)
-        p = ax.pcolormesh(self._xMesh, self._zMesh, cm)
-        cb = plt.colorbar(p, ax=ax)
-        plt.plot(self.xPlot, self.elevation, color='k')
-        if (self.z is None):
-            self.z = np.asarray(self.getAttribute('z'))
-        plt.plot(self.xPlot, self.z.reshape(self.z.size) + self.elevation, color='k')
+    #     ax = plt.gca()
+    #     cP.pretty(ax)
+    #     p = ax.pcolormesh(self._xMesh, self._zMesh, cm)
+    #     cb = plt.colorbar(p, ax=ax)
+    #     plt.plot(self.xPlot, self.elevation, color='k')
+    #     if (self.z is None):
+    #         self.z = np.asarray(self.getAttribute('z'))
+    #     plt.plot(self.xPlot, self.z.reshape(self.z.size) + self.elevation, color='k')
 
-        plt.plot(self.xPlot, self.elevation - self.doi, color='k', linestyle='-', alpha=0.7, linewidth=1)
+    #     plt.plot(self.xPlot, self.elevation - self.doi, color='k', linestyle='-', alpha=0.7, linewidth=1)
 
-        plt.savefig('myfig.png')
-        for i, j in zip(p.get_facecolors(), a.flatten()):
-            i[3] = j  # Set the alpha value of the RGBA tuple using m2
-        fIO.deleteFile('myfig.png')
+    #     plt.savefig('myfig.png')
+    #     for i, j in zip(p.get_facecolors(), a.flatten()):
+    #         i[3] = j  # Set the alpha value of the RGBA tuple using m2
+    #     fIO.deleteFile('myfig.png')
 
-        if (not ylim is None):
-            plt.ylim(ylim)
+    #     if (not ylim is None):
+    #         plt.ylim(ylim)
 
-        cP.xlabel(self.xPlot.getNameUnits())
-        cP.ylabel('Elevation (m)')
-        cP.clabel(cb, 'Facies')
+    #     cP.xlabel(self.xPlot.getNameUnits())
+    #     cP.ylabel('Elevation (m)')
+    #     cP.clabel(cb, 'Facies')
 
 
-    @property
-    def faciesProbability(self):
-        """ Assign facies to the parameter model given the pdfs of each facies
-        mean:    :Means of the normal distributions for each facies
-        var:     :Variance of the normal distributions for each facies
-        volFrac: :Volume fraction of each facies
-        """
+    def marginalProbability(self, i=None):
 
-        if self._faciesProbability is None:
-            assert 'facies_probability' in self.hdfFile.keys(), Exception("Facies probabilities need computing, use LineResults.computeFaciesProbability()")
-            self._faciesProbability = StatArray.StatArray().fromHdf(f['facies_probability'])
+        if self._marginalProbability is None:
 
-        return self._faciesProbability
+            assert 'marginal_probability' in self.hdfFile.keys() or 'facies_probability' in self.hdfFile.keys(), Exception("Marginal probabilities need computing, use LineResults.computeMarginalProbability()")
+
+            if 'marginal_probability' in self.hdfFile.keys():
+                self._marginalProbability = StatArray.StatArray().fromHdf(self.hdfFile['marginal_probability'])
+            elif 'facies_probability' in self.hdfFile.keys():
+                self._marginalProbability = StatArray.StatArray().fromHdf(self.hdfFile['facies_probability'])
+
+        if i is None:
+            return self._marginalProbability
+
+        else:
+            nClasses = self._marginalProbability.shape[0]
+            return StatArray.StatArray(self._marginalProbability[i, :, :], name = "$\frac{P_{" + str(i+1) + "}}{\sum_{i=1}^{" + str(nClasses) + "}P_{i}}$")
 
     
-    def computeFaciesProbability(self, fractions, distributions, reciprocateParameter=False, log=None):
+    def computeMarginalProbability(self, fractions, distributions, **kwargs):
 
-        print("Computing facies probabilities. This can take a while. \nOnce you have done this, and you no longer need to change the input parameters, simply use LineResults.faciesProbability to access.")
+        print("Computing marginal probabilities. This can take a while. \nOnce you have done this, and you no longer need to change the input parameters, simply use LineResults.marginalProbability to access.")
 
         nFacies = np.size(distributions)
 
-        self._faciesProbability = StatArray.StatArray(np.empty([nFacies, self.nPoints, self.hitMap.y.nCells]), name='Probability')
+        self._marginalProbability = StatArray.StatArray(np.empty([nFacies, self.hitMap.y.nCells, self.nPoints]), name='Marginal probability')
 
         counts = self.hdfFile['currentmodel/par/posterior/arr/data']
         parameters = RectilinearMesh1D().fromHdf(self.hdfFile['currentmodel/par/posterior/x'])
@@ -1096,38 +1376,56 @@ class LineResults(myObject):
         for i in Bar(range(self.nPoints)):
             hm._counts = counts[i, :, :]
             hm._x = RectilinearMesh1D(cellEdges=parameters.cellEdges[i, :])
-            self._faciesProbability[:, i, :] = hm.marginalProbability(fractions, distributions, axis=0, reciprocate=reciprocateParameter, log=log)
-
+            self._marginalProbability[:, :, i] = hm.marginalProbability(fractions, distributions, axis=0, **kwargs)
         
-        self.close()
-        with h5py.File(self.fName, 'a') as f:
-            if 'facies_probability' in f.keys():
-                del f['facies_probability']
-            else:
-                self._faciesProbability.toHdf(f, 'facies_probability')
-        self.open()
+        if 'marginal_probability' in self.hdfFile.keys():
+            del self.hdfFile['marginal_probability']
+        if 'facies_probability' in self.hdfFile.keys():
+            del self.hdfFile['facies_probability']
+        
+        self._marginalProbability.toHdf(self.hdfFile, 'marginal_probability')
 
+        return self.marginalProbability
+
+
+    @property
+    def highestMarginal(self):
+
+        out = StatArray.StatArray(self.mesh.shape, "Most probable class")
+        mp = self.marginalProbability()
+        for i in range(self.nPoints):
+            out[:, i] = np.argmax(mp[:, :, i], axis=0)
     
-
-
-    def mostProbableFacies(self):
-
-        out = np.argmax(self._faciesProbability, axis=0)
-    
-        out.name = "Most Probable Facies"
         return out
 
 
-    def plotDataPointResults(self, fid):
+    @property
+    def probability_of_highest_marginal(self):
+
+        out = StatArray.StatArray(self.mesh.shape, "Probability")
+        
+        hm = self.highestMarginal
+        classes = np.unique(hm)
+
+        mp = self.marginalProbability()
+
+        for i, c in enumerate(classes):
+            iWhere = np.where(hm == c)
+            out[iWhere[0], iWhere[1]] = mp[i, iWhere[0], iWhere[1]]
+    
+        return out
+
+
+    def plotDataPointResults(self, fiducial):
         """ Plot the geobipy results for the given data point """
-        R = self.getResults(fid=fid)
+        R = self.getResults(fiducial=fiducial)
         R.initFigure(forcePlot=True)
         R.plot(forcePlot=True)
 
     
     def plotSummary(self, data, fiducial, **kwargs):
 
-        R = self.getResults(fid=fiducial)
+        R = self.getResults(fiducial=fiducial)
 
         cWidth = 3
         
@@ -1376,7 +1674,7 @@ class LineResults(myObject):
         hdfFile.create_dataset('i', shape=[nPoints], dtype=results.i.dtype, fillvalue=np.nan)
         hdfFile.create_dataset('iburn', shape=[nPoints], dtype=results.iBurn.dtype, fillvalue=np.nan)
         hdfFile.create_dataset('burnedin', shape=[nPoints], dtype=type(results.burnedIn))
-        hdfFile.create_dataset('doi',  shape=[nPoints], dtype=results.doi.dtype, fillvalue=np.nan)
+        hdfFile.create_dataset('doi',  shape=[nPoints], dtype=float, fillvalue=np.nan)
         hdfFile.create_dataset('multiplier',  shape=[nPoints], dtype=results.multiplier.dtype, fillvalue=np.nan)
         hdfFile.create_dataset('invtime',  shape=[nPoints], dtype=float, fillvalue=np.nan)
         hdfFile.create_dataset('savetime',  shape=[nPoints], dtype=float, fillvalue=np.nan)
@@ -1463,7 +1761,7 @@ class LineResults(myObject):
         hdfFile['burnedin'][i] = results.burnedIn
 
         # Add the depth of investigation
-        hdfFile['doi'][i] = results.doi
+        hdfFile['doi'][i] = results.doi()
 
         # Add the multiplier
         hdfFile['multiplier'][i] = results.multiplier

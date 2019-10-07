@@ -152,7 +152,7 @@ class RectilinearMesh2D(myObject):
 
         """
 
-        return np.asarray([self.z.nCells, self.x.nCells], dtype=np.int)
+        return (self.z.nCells, self.x.nCells)
 
 
     @property
@@ -184,7 +184,7 @@ class RectilinearMesh2D(myObject):
         Returns
         -------
         med : array_like
-            Contains the locations of the medians along the specified axis. Has size equal to arr.shape[axis].
+            Contains the medians along the specified axis. Has size equal to arr.shape[axis].
 
         """
 
@@ -424,9 +424,9 @@ class RectilinearMesh2D(myObject):
 
         xtmp = self.getXAxis(xAxis)
 
-        ax = cP.pcolor(values, x = xtmp, y = self.z.cellEdges, **kwargs)
+        ax, pm = cP.pcolor(values, x = xtmp, y = self.z.cellEdges, **kwargs)
         
-        return ax
+        return ax, pm
 
 
     def plotGrid(self, xAxis='x', **kwargs):

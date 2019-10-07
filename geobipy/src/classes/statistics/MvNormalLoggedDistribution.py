@@ -17,8 +17,8 @@ class MvNormalLog(baseDistribution):
         mu:     :Mean of the distribution
         sigma:  :Standard deviation of the distribution
         """
-        if (type(mean) is float): mean = np.float64(mean)
-        if (type(variance) is float): variance = np.float64(variance)
+        if (type(mean) is float): mean=np.float64(mean)
+        if (type(variance) is float): variance=np.float64(variance)
         baseDistribution.__init__(self, prng)
         # Mean
         self.mean = deepcopy(mean)

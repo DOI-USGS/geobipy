@@ -12,6 +12,7 @@ from .UniformDistribution import Uniform
 from .UniformLoggedDistribution import UniformLog
 from .GammaDistribution import Gamma
 from .OrderStatistics import Order
+from .StudentT import StudentT
 
 
 def Distribution(distributionType, *args, **kwargs):
@@ -87,6 +88,10 @@ def Distribution(distributionType, *args, **kwargs):
     elif (tName == 'mvnormallog' or tName == 'mvgaussianlog'):
         assert (len(args)+len(kwargs) >= 2), 'Please enter a mean and variance for the MvNormalLog distribution'
         out = MvNormalLog(*args, **kwargs)
+
+    elif (tName == 'studentt'):
+        assert (len(args)+len(kwargs) >= 3), 'Please enter a mean, variance, and degrees of freedom for the StudentT distribution'
+        out = StudentT(*args, **kwargs)
     
     elif (tName == 'gamma'):
         assert (len(args)+len(kwargs) >= 2), 'Please enter a scale > 0.0, shape > 0.0, and prng for the gamma distribution'

@@ -35,7 +35,7 @@ class Uniform(baseDistribution):
 
     @property
     def ndim(self):
-        return self.min.size
+        return np.size(self.min)
 
 
     def deepcopy(self):

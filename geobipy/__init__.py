@@ -75,7 +75,7 @@ killSwitch = 9
 def checkCommandArguments():
     """Check the users command line arguments. """
     import warnings
-    warnings.filterwarnings('error')
+    # warnings.filterwarnings('error')
 
     Parser = argparse.ArgumentParser(description="GeoBIPy",
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -144,7 +144,7 @@ def singleCore(inputFile, outputDir):
     paras.check(DataPoint)
 
     # Initialize the inversion to obtain the sizes of everything
-    [paras, Mod, DataPoint, prior, likelihood, posterior, PhiD] = Initialize(paras, DataPoint, prng = prng)
+    paras, Mod, DataPoint, prior, likelihood, posterior, PhiD = Initialize(paras, DataPoint, prng = prng)
 
     # Create the results template
     Res = Results(DataPoint, Mod,
@@ -260,29 +260,32 @@ def multipleCore(inputFile, outputDir, skipHDF5):
         paras.check(DataPoint)
 
         # Initialize the inversion to obtain the sizes of everything
-        [paras, Mod, DataPoint, prior, posterior, PhiD] = Initialize(paras, DataPoint, prng = prng)
+        paras, Mod, DataPoint, prior, likelihood, posterior, PhiD = Initialize(paras, DataPoint, prng = prng)
 
         # Create the results template
         Res = Results(DataPoint, Mod,
             save=paras.save, plot=paras.plot, savePNG=paras.savePNG,
             nMarkovChains=paras.nMarkovChains, plotEvery=paras.plotEvery, parameterDisplayLimits=paras.parameterDisplayLimits,
             reciprocateParameters=paras.reciprocateParameters)
+            
 
         # For each line. Get the fiducials, and create a HDF5 for the Line results.
         # A line results file needs an initialized Results class for a single data point.
-        for line in lineNumbers:
-            fiducialsForLine = np.where(tmp[:, 0] == line)[0]
-            nFids = fiducialsForLine.size
-            # Create a filename for the current line number
-            fName = join(outputDir, '{}.h5'.format(line))
-            # Open a HDF5 file in parallel mode.
-            with h5py.File(fName, 'w', driver='mpio', comm=masterComm) as f:
-                LR = LineResults()
-                LR.createHdf(f, tmp[fiducialsForLine, 1], Res)
-            myMPI.rankPrint(world,'Time to create the line with {} data points: {:.3f} s'.format(nFids, MPI.Wtime()-t0))
-            t0 = MPI.Wtime()
+        if not skipHDF5:
+            for line in lineNumbers:
+                fiducialsForLine = np.where(tmp[:, 0] == line)[0]
+                nFids = fiducialsForLine.size
+                # Create a filename for the current line number
+                fName = join(outputDir, '{}.h5'.format(line))
+                # Open a HDF5 file in parallel mode.
 
-        myMPI.print('Initialized results for writing.')
+                with h5py.File(fName, 'w', driver='mpio', comm=masterComm) as f:
+                    LR = LineResults()
+                    LR.createHdf(f, tmp[fiducialsForLine, 1], Res)
+                myMPI.rankPrint(world,'Time to create the line with {} data points: {:.3f} s'.format(nFids, MPI.Wtime()-t0))
+                t0 = MPI.Wtime()
+
+            myMPI.print('Initialized results for writing.')
 
 
     # Everyone needs the line numbers in order to open the results files collectively.

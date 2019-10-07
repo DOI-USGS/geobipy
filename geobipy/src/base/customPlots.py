@@ -8,6 +8,7 @@ from matplotlib.collections import LineCollection as lc
 from matplotlib.patches import Circle
 from matplotlib.collections import PatchCollection
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+import matplotlib.gridspec as gridspec
 import numpy as np
 import numpy.ma as ma
 from .fileIO import deleteFile
@@ -88,14 +89,14 @@ armytage = [
 # Generate default properties for GeoBIPy
 #==============================================
 
-label_size = 12
+label_size = 8
 
 try:
     mpl.axes.rcParams['ytick.labelsize'] = label_size
 except:
     assert not Err.isIpython(), 'Please use %matplotlib inline for ipython notebook on the very first line'
 
-myFonts = {'fontsize': 12}
+myFonts = {'fontsize': 8}
 # mpl.rcParams['title.labelsize'] = 14
 #mpl.rcParams['xtick.labelsize'] = label_size
 #mpl.rcParams['ytick.labelsize'] = label_size
@@ -337,7 +338,7 @@ def hist(counts, bins, rotate=False, flipX=False, flipY=False, trim=True, normal
     if flipY:
         ax.invert_yaxis()
 
-    # plt.xscale(xscale)
+    plt.xscale(xscale)
 
     return ax
 
@@ -424,6 +425,12 @@ def pcolor(values, x=None, y=None, **kwargs):
         Take the reciprocal of the Y axis before other transforms    
     trim : bool, optional
         Set the x and y limits to the first and last non zero values along each axis.
+    classes : dict, optional
+            A dictionary containing three entries.
+            classes['id'] : array_like of same shape as self containing the class id of each element in self.
+            classes['cmaps'] : list of matplotlib colourmaps.  The number of colourmaps should equal the number of classes.
+            classes['labels'] : list of str.  The length should equal the number of classes.
+            If classes is provided, alpha is ignored if provided.
 
     Returns
     -------
@@ -475,15 +482,68 @@ def pcolor(values, x=None, y=None, **kwargs):
 
     X, Y = np.meshgrid(mx, my)
 
-    ax = pcolormesh(X, Y, values, **kwargs)
+    ax, pm, cb = pcolormesh(X, Y, values, **kwargs)
 
     xlabel(cF.getNameUnits(x))
     ylabel(cF.getNameUnits(y))
 
-    return ax
+    return ax, pm, cb
 
 
 def pcolormesh(X, Y, values, **kwargs):
+
+    classes = kwargs.pop('classes', None)
+
+    if classes is None:
+        ax, pm, cb = _pcolormesh(X, Y, values, **kwargs)
+
+    else:
+        originalAlpha = kwargs.pop('alpha', None)
+        originalAlphaColour = kwargs.pop('alphaColour', [1, 1, 1])
+        kwargs['alphaColour'] = 'transparent'
+        kwargs.pop('cmap', None)
+
+        classId = classes['id']
+        cmaps = classes['cmaps']
+        labels = classes['labels']
+        classNumber = np.unique(classId)
+        nClasses = classNumber.size
+
+        assert len(cmaps) == nClasses, Exception("Number of colour maps must be {}".format(nClasses))
+        assert len(labels) == nClasses, Exception("Number of labels must be {}".format(nClasses))
+
+        # Set up the grid for plotting
+
+        gs1 = gridspec.GridSpec(nrows=1, ncols=1, left=0.05, right=0.70, wspace=0.05)
+        gs2 = gridspec.GridSpec(nrows=1, ncols=2*nClasses, left=0.71, right=0.95, wspace=1.0)
+
+        cbAx = []
+        for i in range(nClasses):
+            cbAx.append(plt.subplot(gs2[:, 2*i]))
+        axMain = plt.subplot(gs1[:, :])
+
+        ax = []; pm = []; cb = []
+        for i in range(nClasses):
+            cn = classNumber[i]
+            cmap = cmaps[i]
+            label = labels[i]
+
+            # Set max transparency for pixels not belonging to the current class.
+            alpha = np.ones_like(values)
+            alpha[classId != cn] = 0.0
+
+            if not originalAlpha is None:
+                alpha *= originalAlpha
+            
+            a, p, c = _pcolormesh(X, Y, values, alpha=alpha, cmap=cmap, colourBarAxis=cbAx[i], **kwargs)
+
+            c.ax.set_ylabel(label)
+            ax.append(a); pm.append(p); cb.append(c)
+
+    return ax, pm, cb
+
+
+def _pcolormesh(X, Y, values, **kwargs):
     """Create a pseudocolour plot of a 2D array, Actually uses pcolormesh for speed.
 
     Create a colour plot of a 2D array.
@@ -504,6 +564,9 @@ def pcolormesh(X, Y, values, **kwargs):
     alpha : scalar or array_like, optional
         If alpha is scalar, behaves like standard matplotlib alpha and opacity is applied to entire plot
         If array_like, each pixel is given an individual alpha value.
+    alphaColour : 'trans' or length 3 array
+        If 'trans', low alpha values are mapped to transparency
+        If 3 array, each entry is the RGB value of a colour to map to, e.g. white = [1, 1, 1].
     log : 'e' or float, optional
         Take the log of the colour to a base. 'e' if log = 'e', and a number e.g. log = 10.
         Values in c that are <= 0 are masked.
@@ -523,6 +586,12 @@ def pcolormesh(X, Y, values, **kwargs):
         Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
     trim : array_like, optional
         Set the x and y limits to the first and last locations that don't equal the values in trim.
+    classes : dict, optional
+            A dictionary containing three entries.
+            classes['id'] : array_like of same shape as self containing the class id of each element in self.
+            classes['cmaps'] : list of matplotlib colourmaps.  The number of colourmaps should equal the number of classes.
+            classes['labels'] : list of str.  The length should equal the number of classes.
+            If classes is provided, alpha is ignored if provided.
 
     Returns
     -------
@@ -553,9 +622,15 @@ def pcolormesh(X, Y, values, **kwargs):
     grid = kwargs.pop('grid', False)
 
     noColorBar = kwargs.pop('noColorbar', False)
+    cax = kwargs.pop('cax', None)
+    cmap = kwargs.pop('cmap', 'viridis')
+    cmapIntervals = kwargs.pop('cmapIntervals', None)
+    kwargs['cmap'] = mpl.cm.get_cmap(cmap, cmapIntervals)
+    kwargs['cmap'].set_bad(color='white')
     trim = kwargs.pop('trim', None)
 
     alpha = kwargs.pop('alpha', 1.0)
+    alphaColour = kwargs.pop('alphaColour', [1, 1, 1])
 
     if 'edgecolor' in kwargs:
         grid = True
@@ -563,7 +638,7 @@ def pcolormesh(X, Y, values, **kwargs):
         kwargs['edgecolor'] = kwargs.pop('edgecolor', 'k')
         kwargs['linewidth'] = kwargs.pop('linewidth', 2)
 
-    values = ma.masked_invalid(values)
+    values = values.astype('float64')
 
     if not trim is None:
         assert isinstance(trim, (float, np.float)), TypeError("trim must be a float")
@@ -585,24 +660,12 @@ def pcolormesh(X, Y, values, **kwargs):
     if np.size(alpha) == 1:
         pm = ax.pcolormesh(X, Y, Zm, alpha = alpha, **kwargs)
     else:
+        assert np.all(alpha.shape == Zm.shape), ValueError("Alpha array must have shape {}".format(Zm.shape))
+        Zm[alpha == 0.0] = np.nan
         pm = ax.pcolormesh(X, Y, Zm, **kwargs)
 
     plt.xscale(xscale)
     plt.yscale(yscale)
-
-    if (not noColorBar):
-        if (equalize):
-            cbar = plt.colorbar(pm, extend='both')
-        else:
-            cbar = plt.colorbar(pm)
-
-        if cl is None:
-            if (log):
-                clabel(cbar,logLabel+cF.getNameUnits(values))
-            else:
-                clabel(cbar,cF.getNameUnits(values))
-        else:
-            clabel(cbar, cl)
 
     if grid:
         xlim = ax.get_xlim()
@@ -618,10 +681,49 @@ def pcolormesh(X, Y, values, **kwargs):
     if flipY:
         ax.invert_yaxis()
 
-    if np.size(alpha) > 1:
-       setAlphaPerPcolormeshPixel(pm, alpha)
+    cbar = None
+    if (not noColorBar):
+        if (equalize):
+            cbar = plt.colorbar(pm, extend='both', cax=cax)
+        else:
+            cbar = plt.colorbar(pm, cax=cax)
 
-    return ax
+        if cl is None:
+            if (log):
+                clabel(cbar, logLabel + cF.getNameUnits(values))
+            else:
+                clabel(cbar, cF.getNameUnits(values))
+        else:
+            clabel(cbar, cl)
+
+    if np.size(alpha) > 1:
+        if isinstance(alphaColour, str):
+            alpha_to_transparent(pm, alpha)
+        else:
+            alpha_to_colour(pm, alpha, np.asarray(alphaColour))
+
+    return ax, pm, cbar
+
+
+def alpha_to_colour(pcmesh, alphaArray, colour):
+    plt.savefig('tmp.png')
+    for cellColour, alpha in zip(pcmesh.get_facecolors(), alphaArray.flatten()):
+        cellColour[3] = 1.0
+        cellColour[:3] = alpha * cellColour[:3] + (1.0 - alpha) * colour
+
+
+def alpha_to_transparent(pcmesh, alphaArray):
+    plt.savefig('tmp.png')
+    for cellColour, alpha in zip(pcmesh.get_facecolors(), alphaArray.flatten()):
+        cellColour[3] = alpha
+
+
+def nonZeroes_to_colour(pcmesh, alphaArray, colour):
+    plt.savefig('tmp.png')
+    for cellColour, alpha in zip(pcmesh.get_facecolors(), alphaArray.flatten()):
+        cellColour[3] = 1.0
+        if alpha != 0.0:
+            cellColour[:3] = colour
 
 
 def pcolor_1D(values, y=None, **kwargs):
@@ -756,7 +858,7 @@ def pcolor_1D(values, y=None, **kwargs):
 
     if (not noColorBar):
         if (equalize):
-            cbar = plt.colorbar(pm,extend='both')
+            cbar = plt.colorbar(pm, extend='both')
         else:
             cbar = plt.colorbar(pm)
 
@@ -916,6 +1018,9 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
     yscale = kwargs.pop('yscale', 'linear')
     sl = kwargs.pop('sizeLegend', None)
     noColorBar = kwargs.pop('noColorbar', False)
+
+    flipx = kwargs.pop('flipX', False)
+    flipy = kwargs.pop('flipY', False)
     
     kwargs.pop('color', None) # Remove color which could conflict with c
 
@@ -980,6 +1085,11 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
         else:
             a = sl
         sizeLegend(kwargs['s'], a)
+
+    if flipx:
+        ax.invert_xaxis()
+    if flipy:
+        ax.invert_yaxis()
         
     plt.xscale(xscale)
     plt.yscale(yscale)
