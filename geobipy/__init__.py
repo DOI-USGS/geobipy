@@ -75,7 +75,7 @@ killSwitch = 9
 def checkCommandArguments():
     """Check the users command line arguments. """
     import warnings
-    warnings.filterwarnings('error')
+    # warnings.filterwarnings('error')
 
     Parser = argparse.ArgumentParser(description="GeoBIPy",
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -144,7 +144,7 @@ def singleCore(inputFile, outputDir):
     paras.check(DataPoint)
 
     # Initialize the inversion to obtain the sizes of everything
-    [paras, Mod, DataPoint, prior, likelihood, posterior, PhiD] = Initialize(paras, DataPoint, prng = prng)
+    paras, Mod, DataPoint, prior, likelihood, posterior, PhiD = Initialize(paras, DataPoint, prng = prng)
 
     # Create the results template
     Res = Results(DataPoint, Mod,
@@ -260,7 +260,7 @@ def multipleCore(inputFile, outputDir, skipHDF5):
         paras.check(DataPoint)
 
         # Initialize the inversion to obtain the sizes of everything
-        [paras, Mod, DataPoint, prior, likelihood, posterior, PhiD] = Initialize(paras, DataPoint, prng = prng)
+        paras, Mod, DataPoint, prior, likelihood, posterior, PhiD = Initialize(paras, DataPoint, prng = prng)
 
         # Create the results template
         Res = Results(DataPoint, Mod,
