@@ -92,6 +92,8 @@ class TdemData(Data):
         self.T = StatArray.StatArray(self.nPoints, 'Transmitter Loops', dtype=CircularLoop)
         # StatArray of Receiever loops
         self.R = StatArray.StatArray(self.nPoints, 'Receiver Loops', dtype=CircularLoop)
+        # Loop Offsets
+        self.loopOffset = StatArray.StatArray([self.nPoints, 3], 'Loop Offset', 'm')
 
         self.system = system
         self.nSystems = nSystems
@@ -192,17 +194,13 @@ class TdemData(Data):
         assert nDatafiles == nSystems, Exception("Number of data files must match number of system files.")
 
         self.readSystemFile(systemFilename)
-        nPoints, iC, iR, iT, iD, iS = self.__readColumnIndices(dataFilename, self.system)
+        nPoints, iC, iR, iT, iOffset, iD, iS = self.__readColumnIndices(dataFilename, self.system)
+    
 
         TdemData.__init__(self, nPoints, systems=self.system)
 
         # Get all readable column indices for the first file.
-        tmp = [iC[0]]
-        if not iR[0] is None:
-            tmp.append(iR[0])
-        if not iT[0] is None:
-            tmp.append(iT[0])
-        tmp.append(iD[0])
+        tmp = [iC[0], iR[0], iT[0], iOffset[0], iD[0]]
         if not iS[0] is None:
             tmp.append(iS[0])
         indicesForFile = np.hstack(tmp)
@@ -219,23 +217,17 @@ class TdemData(Data):
         self.z[:] = values[:, 5]
 
         # Assign the orientations of the acquisistion loops
-
         i0 = 6
-        if (not iR[0] is None):
-            for i in range(nPoints):
-                self.R[i] = CircularLoop(z=self.z[i], pitch=values[i, i0], roll=values[i, i0+1], yaw=values[i, i0+2], radius=self.system[0].loopRadius())
-            i0 += 3
-        else:
-            for i in range(nPoints):
-                self.R[i] = CircularLoop(z=self.z[i], radius=self.system[0].loopRadius())
+        for i in range(nPoints):
+            self.R[i] = CircularLoop(z=self.z[i], pitch=values[i, i0], roll=values[i, i0+1], yaw=values[i, i0+2], radius=self.system[0].loopRadius())
+        i0 += 3
 
-        if (not iT[0] is None):
-            for i in range(nPoints):
-                self.T[i] = CircularLoop(z=self.z[i], pitch=values[i, i0], roll=values[i, i0+1], yaw=values[i, i0+2], radius=self.system[0].loopRadius())
-            i0 += 3
-        else:
-            for i in range(nPoints):
-                self.T[i] = CircularLoop(z=self.z[i], radius=self.system[0].loopRadius())
+        for i in range(nPoints):
+            self.T[i] = CircularLoop(z=self.z[i], pitch=values[i, i0], roll=values[i, i0+1], yaw=values[i, i0+2], radius=self.system[0].loopRadius())
+        i0 += 3
+
+        self.loopOffset[:, :] = values[:, i0:i0+3]
+        i0 += 3
 
         # Assign the data values
         i1 = i0 + self.nTimes[0]
@@ -320,6 +312,7 @@ class TdemData(Data):
         indices = []
         rLoopIndices = []
         tLoopIndices = []
+        offsetIndices = []
         offdataIndices = []
         offerrIndices = []
 
@@ -339,6 +332,8 @@ class TdemData(Data):
             channels = fIO.getHeaderNames(f)
             channels = [channel.lower() for channel in channels]
 
+
+
             # Check for each aspect of the data file and the number of columns
             nCoordinates = 0
             nOffData = 0
@@ -347,6 +342,7 @@ class TdemData(Data):
             nOnErr = 0
             nRloop = 0
             nTloop = 0
+            nOffset = 0
 
             for channel in channels:
                 if(channel in ['line']):
@@ -365,6 +361,8 @@ class TdemData(Data):
                     nRloop += 1
                 elif channel in ["txpitch", "txroll", "txyaw"]:
                     nTloop += 1
+                elif channel in ['txrx_dx', 'txrx_dy', 'txrx_dz']:
+                    nOffset += 1
                 elif "on[" in channel:
                     nOnData += 1
                 elif "onerr[" in channel:
@@ -376,11 +374,10 @@ class TdemData(Data):
 
             assert nCoordinates >= 6, Exception("Data file must contain columns for easting, northing, height, elevation, line, and fid. \n {}".format(self.fileInformation()))
 
-            if nRloop > 0:
-                assert nRloop == 3, Exception('Must have all three RxPitch, RxRoll, and RxYaw headers in data file {} if reciever orientation is specified. \n {}'.format(f, self.fileInformation()))
-            if nTloop > 0:
-                assert nTloop == 3, Exception('Must have all three TxPitch, TxRoll, and TxYaw headers in data file {} if transmitter orientation is specified. \n {}'.format(f, self.fileInformation()))
-            
+            assert nRloop == 3, Exception('Must have all three RxPitch, RxRoll, and RxYaw headers in data file {} if reciever orientation is specified. \n {}'.format(f, self.fileInformation()))
+            assert nTloop == 3, Exception('Must have all three TxPitch, TxRoll, and TxYaw headers in data file {} if transmitter orientation is specified. \n {}'.format(f, self.fileInformation()))
+            assert nOffset == 3, Exception('Must have all three txrx_dx, txrx_dy, and txrx_dz headers in data file {} if transmitter-reciever loop separation is specified. \n {}'.format(f, self.fileInformation()))
+
             assert nOffData == system[k].windows.centre.size, Exception("Number of Off time columns in {} does not match number of times in system file {}. \n {}".format(f, system[k].fileName, self.fileInformation()))
             if nOffErr > 0:
                 assert nOffErr == nOffData, Exception("Number of Off time standard deviation estimates does not match number of Off time data columns in file {}. \n {}".format(f, self.fileInformation()))
@@ -388,6 +385,7 @@ class TdemData(Data):
             _indices = np.zeros(6, dtype=np.int32)
             _rLoopIndices = None if nRloop == 0 else np.empty(3, dtype=np.int32)
             _tLoopIndices = None if nTloop == 0 else np.empty(3, dtype=np.int32)
+            _offsetIndices = None if nOffset == 0 else np.empty(3, dtype=np.int32)
             _offdataIndices = np.empty(nOffData, dtype=np.int32)
             _offerrIndices = None if nOffErr == 0 else np.empty(nOffErr, dtype=np.int32)
 
@@ -424,6 +422,14 @@ class TdemData(Data):
                 elif (channel == 'txyaw'):
                     _tLoopIndices[2] = j
 
+                # Get the transmitter loop orientation indices
+                elif (channel == 'txrx_dx'):
+                    _offsetIndices[0] = j
+                elif (channel == 'txrx_dy'):
+                    _offsetIndices[1] = j
+                elif (channel == 'txrx_dz'):
+                    _offsetIndices[2] = j
+
                 elif ('off[' in channel):
                     i1 += 1
                     _offdataIndices[i1] = j
@@ -435,10 +441,11 @@ class TdemData(Data):
             indices.append(_indices)
             rLoopIndices.append(_rLoopIndices)
             tLoopIndices.append(_tLoopIndices)
+            offsetIndices.append(_offsetIndices)
             offdataIndices.append(_offdataIndices)
             offerrIndices.append(_offerrIndices)
 
-        return nPoints, indices, rLoopIndices, tLoopIndices, offdataIndices, offerrIndices
+        return nPoints, indices, rLoopIndices, tLoopIndices, offsetIndices, offdataIndices, offerrIndices
 
     
     def _readNpoints(self, dataFilename):
@@ -479,7 +486,7 @@ class TdemData(Data):
         # Read in the EM System file
         self.readSystemFile(systemFilename)
         
-        self._nPoints, self._iC, self._iR, self._iT, self._iD, self._iS = self.__readColumnIndices(dataFileName, self.system)
+        self._nPoints, self._iC, self._iR, self._iT, self._iOffset, self._iD, self._iS = self.__readColumnIndices(dataFileName, self.system)
 
         if isinstance(dataFileName, str):
             dataFileName = [dataFileName]
@@ -494,12 +501,7 @@ class TdemData(Data):
         self._indicesForFile = []
         
         for i in range(self.nSystems):
-            tmp = [self._iC[i]]
-            if not self._iR[i] is None:
-                tmp.append(self._iR[i])
-            if not self._iT[i] is None:
-                tmp.append(self._iT[i])
-            tmp.append(self._iD[i])
+            tmp = [self._iC[i], self._iR[i], self._iT[i], self._iOffset[i], self._iD[i]]
             if not self._iS[i] is None:
                 tmp.append(self._iS[i])
             self._indicesForFile.append(np.hstack(tmp))
@@ -508,14 +510,13 @@ class TdemData(Data):
         for i in range(self.nSystems):
             offset = self._iC[i].size
             self._iC[i] = np.arange(offset)
-            if not self._iR[i] is None:
-                nTmp = self._iR[i].size
-                self._iR[i] = np.arange(nTmp) + offset
-                offset += nTmp
-            if not self._iT[i] is None:
-                nTmp = self._iT[i].size
-                self._iT[i] = np.arange(nTmp) + offset
-                offset += nTmp
+            self._iR[i] = np.arange(3) + offset
+            offset += 3
+            self._iT[i] = np.arange(3) + offset
+            offset += 3
+            self._iOffset[i] = np.arange(3) + offset
+            offset += 3
+
             nTmp = self._iD[i].size
             self._iD[i] = np.arange(nTmp) + offset
             offset += nTmp
@@ -561,19 +562,16 @@ class TdemData(Data):
         values = values[0]
 
         i0 = 6
-        if (not self._iR[0] is None):
-            R = CircularLoop(z=values[4], pitch=values[i0], roll=values[i0+1], yaw=values[i0+2], radius=self.system[0].loopRadius())
-            i0 += 3
-        else:
-            R = CircularLoop(z=values[4], radius=self.system[0].loopRadius())
+        R = CircularLoop(z=values[4], pitch=values[i0], roll=values[i0+1], yaw=values[i0+2], radius=self.system[0].loopRadius())
+        i0 += 3
 
-        if (not self._iT[0] is None):
-            T = CircularLoop(z=values[4], pitch=values[i0], roll=values[i0+1], yaw=values[i0+2], radius=self.system[0].loopRadius())
-            i0 += 3
-        else:
-            T = CircularLoop(z=values[4], radius=self.system[0].loopRadius())
+        T = CircularLoop(z=values[4], pitch=values[i0], roll=values[i0+1], yaw=values[i0+2], radius=self.system[0].loopRadius())
+        i0 += 3
 
-        out = TdemDataPoint(x=values[2], y=values[3], z=values[5], elevation=values[4], data=D, std=S, system=self.system, T=T, R=R, lineNumber=values[0], fiducial=values[1])
+        loopOffset = values[i0:i0+3]
+        i0 += 3
+
+        out = TdemDataPoint(x=values[2], y=values[3], z=values[5], elevation=values[4], data=D, std=S, system=self.system, T=T, R=R, loopOffset=loopOffset, lineNumber=values[0], fiducial=values[1])
 
         return out
 
@@ -644,7 +642,7 @@ class TdemData(Data):
 
         assert 0 <= i < self.nPoints, ValueError("Requested data point must have index (0, "+str(self.nPoints) + ']')
 
-        return TdemDataPoint(self.x[i], self.y[i], self.z[i], self.elevation[i], self._data[i, :], self.std[i, :], self._predictedData[i, :], self.system, self.T[i], self.R[i], self.line[i], self.fiducial[i])
+        return TdemDataPoint(self.x[i], self.y[i], self.z[i], self.elevation[i], self._data[i, :], self.std[i, :], self._predictedData[i, :], self.system, self.T[i], self.R[i], self.loopOffset[i, :], self.line[i], self.fiducial[i])
 
 
     def getLine(self, line):
@@ -673,6 +671,7 @@ class TdemData(Data):
         tmp.elevation[:] = self.elevation[i]
         tmp.T[:] = self.T[i]
         tmp.R[:] = self.R[i]
+        tmp.loopOffset[:, :] = self.loopOffset[i, :]
         tmp.sys = np.ndarray(self.nSystems, dtype=TdemSystem)
         tmp._data[:, :] = self._data[i, :]
         tmp._std[:, :] = self._std[i, :]
@@ -699,9 +698,12 @@ class TdemData(Data):
             '    Altitude of the transmitter coil\n'
             'dtm or dem_elev or dem_np \n'
             '    Elevation of the ground at the data point\n'
-            'Off[0] to Off[nWindows]  - with the number and brackets\n'
-            '    The measurements for each time specified in the accompanying system file under Receiver Window Times \n'
-            'Optional columns for loop orientation. If these are omitted, the loop is assumed horizontal \n'
+            'txrx_dx \n'
+            '    Distance in x between transmitter and reciever\n'
+            'txrx_dy \n'
+            '    Distance in y between transmitter and reciever\n'
+            'txrx_dz \n'
+            '    Distance in z between transmitter and reciever\n'
             'TxPitch \n'
             '    Pitch of the transmitter loop\n'
             'TxRoll \n'
@@ -714,9 +716,11 @@ class TdemData(Data):
             '    Roll of the receiver loop\n'
             'RxYaw \n'
             '    Yaw of the receiver loop\n'
+            'Off[0] Off[1] ... Off[nWindows]  - with the number and brackets\n'
+            '    The measurements for each time specified in the accompanying system file under Receiver Window Times \n'
             'Optional columns for off time uncertainty estimates. These should be estimates of the data standard deviation. \n'
-            'OffErr[0] to Off[nWindows]\n'
-            '    Uncertainty estimates for the data')
+            'OffErr[0] OffErr[1] ... Off[nWindows]\n'
+            '    Estimates of standard deviation for each off time measurement.')
         return s
 
 
@@ -1048,7 +1052,7 @@ class TdemData(Data):
 
             iSys = self._systemIndices(i)
             # Create the header
-            header = "Line Fid Easting Northing Elevation Height "
+            header = "Line Fid Easting Northing Elevation Height txrx_dx txrx_dy txrx_dz TxPitch TxRoll TxYaw RxPitch RxRoll RxYaw "
 
             for x in range(self.nTimes[i]):
                 header += "Off[{}] ".format(x)
@@ -1065,7 +1069,10 @@ class TdemData(Data):
                 with np.printoptions(formatter={'float': '{: 0.15g}'.format}, suppress=True):
                     for j in range(self.nPoints):
 
-                        x = np.asarray([self.line[j], self.id[j], self.x[j], self.y[j], self.elevation[j], self.z[j]])
+                        x = np.asarray([self.line[j], self.id[j], self.x[j], self.y[j], self.elevation[j], self.z[j],
+                                        self.loopOffset[j, 0], self.loopOffset[j, 1], self.loopOffset[j, 2],
+                                        self.T.pitch, self.T.roll, self.T.yaw,
+                                        self.R.pitch, self.R.roll, self.R.yaw])
 
                         if predictedData:
                             d[:] = self.predictedData[j, iSys]
@@ -1082,4 +1089,4 @@ class TdemData(Data):
                         for a in x:
                             y += "{} ".format(a)
 
-                        f.write(y+"\n")
+                        f.write(y + "\n")
