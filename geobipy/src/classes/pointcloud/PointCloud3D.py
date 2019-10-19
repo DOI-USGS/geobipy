@@ -244,8 +244,8 @@ class PointCloud3D(myObject):
 
         xc,yc,vals = interpolation.CT(dx, dy, self.bounds, tmp, vTmp , mask = mask, kdtree = kdtree, clip = clip, extrapolate=extrapolate)
 
-        x = StatArray.StatArray(np.linspace(self.bounds[0], self.bounds[1], xc.size))
-        y = StatArray.StatArray(np.linspace(self.bounds[2], self.bounds[3], yc.size))
+        x = StatArray.StatArray(np.linspace(self.bounds[0], self.bounds[1], xc.size), name=self.x.name, units=self.x.units)
+        y = StatArray.StatArray(np.linspace(self.bounds[2], self.bounds[3], yc.size), name=self.y.name, units=self.y.units)
 
         return x, y, vals
     
@@ -268,6 +268,8 @@ class PointCloud3D(myObject):
         assert dy > 0.0, ValueError("dy must be positive!")
                 
         x, y, vals = interpolation.minimumCurvature(self.x, self.y, values, self.bounds, dx, dy, mask=mask, iterations=2000, tension=0.25, accuracy=0.01, clip=clip)
+        x = StatArray.StatArray(x, name=self.x.name, units=self.x.units)
+        y = StatArray.StatArray(y, name=self.y.name, units=self.y.units)
         return x, y, vals
 
 
