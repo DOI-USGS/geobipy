@@ -986,7 +986,7 @@ class StatArray(np.ndarray, myObject):
                     pass
 
         if (self.ndim == 1):
-            ax = cP.pcolor_1D(self, y=my, **kwargs)
+            return cP.pcolor_1D(self, y=my, **kwargs)
         else:
             mx = x
             if (not x is None):
@@ -997,8 +997,7 @@ class StatArray(np.ndarray, myObject):
                     except:
                         pass
 
-            ax, pm, cb = cP.pcolor(self, x=mx, y=my, **kwargs)
-        return ax, pm, cb
+            return cP.pcolor(self, x=mx, y=my, **kwargs)
 
 
     def plot(self, x=None, i=None, axis=0, **kwargs):
@@ -1123,7 +1122,7 @@ class StatArray(np.ndarray, myObject):
 
         c = kwargs.pop('c', self)
 
-        cP.scatter2D(x=x, y=y, c=c, i=i, **kwargs)
+        return cP.scatter2D(x=x, y=y, c=c, i=i, **kwargs)
 
 
     def stackedAreaPlot(self, x=None, i=None, axis=0, labels=[], **kwargs):
