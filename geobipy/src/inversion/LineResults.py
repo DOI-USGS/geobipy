@@ -323,6 +323,20 @@ class LineResults(myObject):
 
         return Model1D(self.mesh.z.nCells, depth=depth, parameters=parameter, hasHalfspace=False)
 
+
+    def fiducialIndex(self, fiducial):
+
+        if np.size(fiducial) == 1:
+            return np.where(self.fiducials == fiducial)[0]
+
+        fiducial = np.asarray(fiducial)
+        idx = np.searchsorted(self.fiducials, fiducial)
+
+        # Take care of out of bounds cases
+        idx[idx==self.nPoints] = 0
+
+        return fiducial[fiducial == self.fiducials[idx]]
+
     
     @property
     def height(self):
@@ -1363,6 +1377,17 @@ class LineResults(myObject):
 
         print("Computing marginal probabilities. This can take a while. \nOnce you have done this, and you no longer need to change the input parameters, simply use LineResults.marginalProbability to access.")
 
+        assert isinstance(distributions, list), TypeError("distributions must be a list")
+        assert np.size(fractions) == np.size(distributions), ValueError("fractions and distributions must have the same length")
+
+        if distributions[0].multivariate:
+            self._computeMarginalProbability_2D(fractions, distributions, **kwargs)
+        else:
+            self._computeMarginalProbability_1D(fractions, distributions, **kwargs)
+
+
+    def _computeMarginalProbability_1D(self, fractions, distributions, **kwargs):
+
         nFacies = np.size(distributions)
 
         self._marginalProbability = StatArray.StatArray(np.empty([nFacies, self.hitMap.y.nCells, self.nPoints]), name='Marginal probability')
@@ -1377,6 +1402,33 @@ class LineResults(myObject):
             hm._counts = counts[i, :, :]
             hm._x = RectilinearMesh1D(cellEdges=parameters.cellEdges[i, :])
             self._marginalProbability[:, :, i] = hm.marginalProbability(fractions, distributions, axis=0, **kwargs)
+        
+        if 'marginal_probability' in self.hdfFile.keys():
+            del self.hdfFile['marginal_probability']
+        if 'facies_probability' in self.hdfFile.keys():
+            del self.hdfFile['facies_probability']
+        
+        self._marginalProbability.toHdf(self.hdfFile, 'marginal_probability')
+
+        return self.marginalProbability
+
+
+    def _computeMarginalProbability_2D(self, fractions, distributions, **kwargs):
+
+        nFacies = np.size(distributions)
+
+        self._marginalProbability = StatArray.StatArray(np.empty([nFacies, self.hitMap.y.nCells, self.nPoints]), name='Marginal probability')
+
+        counts = self.hdfFile['currentmodel/par/posterior/arr/data']
+        parameters = RectilinearMesh1D().fromHdf(self.hdfFile['currentmodel/par/posterior/x'])
+
+        hm = self.getAttribute('hit map', index=0)
+
+        Bar = progressbar.ProgressBar()
+        for i in Bar(range(self.nPoints)):
+            hm._counts = counts[i, :, :]
+            hm._x = RectilinearMesh1D(cellEdges=parameters.cellEdges[i, :])
+            self._marginalProbability[:, :, i] = hm.marginalProbability(fractions, distributions, axis=2, **kwargs)
         
         if 'marginal_probability' in self.hdfFile.keys():
             del self.hdfFile['marginal_probability']
