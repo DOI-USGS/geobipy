@@ -327,6 +327,29 @@ class StatArray(np.ndarray, myObject):
         return self.insert(i=i, values=values, axis=axis)
 
 
+    def argmax_multiple_to_nan(self, axis=0):
+        """Perform the numpy argmax function on the StatArray but optionally mask multiple max values as NaN.
+
+        Parameters
+        ----------
+        nan_multiple : bool
+            If multiple locations contain the same max value, mask as nan.
+
+        Returns
+        -------
+        out : ndarray of floats
+            Array of indices into the array. It has the same shape as `self.shape`
+            with the dimension along `axis` removed.
+
+        """
+
+        mx = np.argmax(self, axis=axis).astype(np.float)
+        x = np.sum((self == np.max(self, axis=axis)), axis=axis)
+        mx[x>1.0] = np.nan
+
+        return mx
+
+
     def copy( self, order='F'):       
         return StatArray(self)
 
