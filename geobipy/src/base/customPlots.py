@@ -8,6 +8,7 @@ from matplotlib.collections import LineCollection as lc
 from matplotlib.patches import Circle
 from matplotlib.collections import PatchCollection
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+from matplotlib.colors import ListedColormap
 import matplotlib.gridspec as gridspec
 import numpy as np
 import numpy.ma as ma
@@ -55,6 +56,14 @@ def make_colourmap(seq, cname):
     myMap = mcolors.LinearSegmentedColormap(cname, cdict, 256)
     plt.register_cmap(name=cname, cmap=myMap)
     return myMap
+
+def white_to_colour(rgba, N=256):
+    rgba = mcolors.to_rgba(rgba)
+    vals = np.ones((N, 4))
+    vals[:, 0] = np.linspace(1, rgba[0], N)
+    vals[:, 1] = np.linspace(1, rgba[1], N)
+    vals[:, 2] = np.linspace(1, rgba[2], N)
+    return ListedColormap(vals)
 
 # Define our own colour maps in hex. Gets better range and nicer visuals.
 wellSeparated = [
@@ -514,7 +523,7 @@ def pcolormesh(X, Y, values, **kwargs):
 
         # Set up the grid for plotting
 
-        gs1 = gridspec.GridSpec(nrows=1, ncols=1, left=0.05, right=0.70, wspace=0.05)
+        gs1 = gridspec.GridSpec(nrows=1, ncols=1, left=0.1, right=0.70, wspace=0.05)
         gs2 = gridspec.GridSpec(nrows=1, ncols=2*nClasses, left=0.71, right=0.95, wspace=1.0)
 
         cbAx = []
@@ -526,6 +535,9 @@ def pcolormesh(X, Y, values, **kwargs):
         for i in range(nClasses):
             cn = classNumber[i]
             cmap = cmaps[i]
+            cmaptmp = cmap
+            if not isinstance(cmap, mpl.colors.Colormap):
+                cmaptmp = white_to_colour(cmap)
             label = labels[i]
 
             # Set max transparency for pixels not belonging to the current class.
@@ -535,7 +547,7 @@ def pcolormesh(X, Y, values, **kwargs):
             if not originalAlpha is None:
                 alpha *= originalAlpha
             
-            a, p, c = _pcolormesh(X, Y, values, alpha=alpha, cmap=cmap, colourBarAxis=cbAx[i], **kwargs)
+            a, p, c = _pcolormesh(X, Y, values, alpha=alpha, cmap=cmaptmp, cax=cbAx[i], **kwargs)
 
             c.ax.set_ylabel(label)
             ax.append(a); pm.append(p); cb.append(c)
@@ -627,6 +639,7 @@ def _pcolormesh(X, Y, values, **kwargs):
     cmapIntervals = kwargs.pop('cmapIntervals', None)
     kwargs['cmap'] = mpl.cm.get_cmap(cmap, cmapIntervals)
     kwargs['cmap'].set_bad(color='white')
+    orientation = kwargs.pop('orientation', 'vertical')
     trim = kwargs.pop('trim', None)
 
     alpha = kwargs.pop('alpha', 1.0)
@@ -684,9 +697,9 @@ def _pcolormesh(X, Y, values, **kwargs):
     cbar = None
     if (not noColorBar):
         if (equalize):
-            cbar = plt.colorbar(pm, extend='both', cax=cax)
+            cbar = plt.colorbar(pm, extend='both', cax=cax, orientation=orientation)
         else:
-            cbar = plt.colorbar(pm, cax=cax)
+            cbar = plt.colorbar(pm, cax=cax, orientation=orientation)
 
         if cl is None:
             if (log):
@@ -1017,7 +1030,12 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
     xscale = kwargs.pop('xscale', 'linear')
     yscale = kwargs.pop('yscale', 'linear')
     sl = kwargs.pop('sizeLegend', None)
+
     noColorBar = kwargs.pop('noColorbar', False)
+    cax = kwargs.pop('cax', None)
+    cmap = kwargs.pop('cmap', 'viridis')
+    cmapIntervals = kwargs.pop('cmapIntervals', None)
+    kwargs['cmap'] = mpl.cm.get_cmap(cmap, cmapIntervals)
 
     flipx = kwargs.pop('flipX', False)
     flipy = kwargs.pop('flipY', False)
@@ -1064,11 +1082,12 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
 
     yl = cF.getNameUnits(yt)
 
+    cbar = None
     if (not noColorBar and not standardColour):
         if (equalize):
-            cbar = plt.colorbar(f, extend='both')
+            cbar = plt.colorbar(f, extend='both', cax=cax)
         else:
-            cbar = plt.colorbar(f)
+            cbar = plt.colorbar(f, cax=cax)
         if (log):
             _cLabel = logLabel + _cLabel
             if y is None:
@@ -1097,7 +1116,7 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
     ylabel(yl)
     plt.margins(0.1, 0.1)
     plt.grid(True)
-    return ax
+    return ax, f, cbar
 
 
 def setAlphaPerPcolormeshPixel(pcmesh, alphaArray):
