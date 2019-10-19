@@ -25,11 +25,14 @@ class MvNormalLog(baseDistribution):
         # Variance
         self.variance = deepcopy(variance)
 
-        self.multivariate = True
 
     @property
     def ndim(self):
         return self.mean.size
+
+    @property
+    def multivariate(self):
+        return True
 
 
     def deepcopy(self):

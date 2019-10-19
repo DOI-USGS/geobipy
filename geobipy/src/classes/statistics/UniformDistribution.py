@@ -6,6 +6,7 @@ from .baseDistribution import baseDistribution
 from ...base.HDF.hdfWrite import writeNumpy
 from ...base import customPlots as cP
 import numpy as np
+from scipy.stats import uniform
 from ..core import StatArray
 
 
@@ -19,23 +20,27 @@ class Uniform(baseDistribution):
         """
 
         assert max > min, ValueError("Maximum must be > minimum")
-        baseDistribution.__init__(self, prng)
+        super().__init__(prng)
         # Minimum
         self.min = deepcopy(min)
         # Maximum
         self.max = deepcopy(max)
         # Mean
         self.mean = 0.5 * (max + min)
-        tmp = max - min
+        self.scale = max - min
         # Variance
-        self.variance = (1.0 / 12.0) * tmp**2.0
-        # Set the pdf
-        self.pdf = np.float64(1.0 / tmp)
+        self.variance = (1.0 / 12.0) * self.scale**2.0
+        
+        
 
 
     @property
     def ndim(self):
         return np.size(self.min)
+
+    @property
+    def multivariate(self):
+        return True if self.ndim > 1 else False
 
 
     def deepcopy(self):
@@ -64,11 +69,7 @@ class Uniform(baseDistribution):
 
 
     def probability(self, x):
-        if np.any(x < self.min):
-            return 0.0
-        if np.any(x > self.max):
-            return 0.0
-        return np.sum(self.pdf)
+        return uniform.pdf(x, self.min, self.scale)
 
     def rng(self, size=1):
         return self.prng.uniform(self.min, self.max, size=size)

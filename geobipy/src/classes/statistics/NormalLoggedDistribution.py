@@ -19,7 +19,7 @@ class NormalLog(baseDistribution):
         """
         assert np.size(mean) == 1, 'Univariate Normal Logged mean must have size = 1'
         assert np.size(variance) == 1, 'Univariate Normal Logged variance must have size = 1'
-        baseDistribution.__init__(self, prng)
+        super().__init__(prng)
         # Mean
         self.mean = deepcopy(mean)
         # Variance
@@ -29,6 +29,10 @@ class NormalLog(baseDistribution):
     @property
     def ndim(self):
         return 1
+
+    @property
+    def multivariate(self):
+        return False
 
 
     def deepcopy(self):

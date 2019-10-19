@@ -30,8 +30,6 @@ class MvNormal(baseDistribution):
         else:
             self.mean = np.copy(mean)
 
-        self.multivariate = True
-
         # Variance
         if np.ndim(variance) == 0:
             self.variance = np.zeros(np.size(mean))
@@ -53,6 +51,10 @@ class MvNormal(baseDistribution):
     def std(self):
         return np.sqrt(self.variance)
 
+    @property
+    def multivariate(self):
+        return True
+
 
     def deepcopy(self):
         """ Define a deepcopy routine """
@@ -60,13 +62,13 @@ class MvNormal(baseDistribution):
         return MvNormal(self.mean, self.variance, self.prng)
 
 
-    def getPdf(self, x):
-        """ Get the PDF of Normal Distribution for the values in x """
-        N = np.size(x)
-        pdf = np.zeros(N)
-        for i in range(N):
-            pdf[i] = self.probability(x[i])
-        return pdf
+    # def getPdf(self, x):
+    #     """ Get the PDF of Normal Distribution for the values in x """
+    #     N = np.size(x)
+    #     pdf = np.zeros(N)
+    #     for i in range(N):
+    #         pdf[i] = self.probability(x[i])
+    #     return pdf
 
     def rng(self, size = 1):
         """  """

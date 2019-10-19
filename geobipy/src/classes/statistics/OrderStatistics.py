@@ -26,6 +26,11 @@ class Order(object):
         self.pdf = factorial(i) / tmp
 
 
+    @property
+    def multivariate(self):
+        return False
+
+
     def deepcopy(self):
         """ Define a deepcopy routine """
         tmp = Order(None, 0, 0, 1)
