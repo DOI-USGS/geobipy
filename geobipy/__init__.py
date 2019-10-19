@@ -8,6 +8,7 @@ from os.path import join
 import argparse
 from importlib import import_module
 import sys
+from shutil import copy
 import time
 
 import h5py
@@ -51,6 +52,7 @@ from .src.classes.pointcloud.PointCloud3D import PointCloud3D
 from .src.classes.pointcloud.Point import Point
 # Statistics
 from .src.classes.statistics.Distribution import Distribution
+from .src.classes.statistics.MvDistribution import MvDistribution
 from .src.classes.statistics.Histogram1D import Histogram1D
 from .src.classes.statistics.Histogram2D import Histogram2D
 from .src.classes.statistics.Hitmap2D import Hitmap2D
@@ -95,6 +97,8 @@ def singleCore(inputFile, outputDir):
 
     print('Running GeoBIPy in serial mode')
     print('Using user input file {}'.format(inputFile))
+    print('Output files will be produced at {}'.format(outputDir))
+
 
     # Import the script from the input file
     UP = import_module(inputFile, package=None)
@@ -119,6 +123,9 @@ def singleCore(inputFile, outputDir):
         makedirs(outputDir)
     except:
         pass
+
+    # Copy the input file to the output directory for book keeping.
+    copy(inputFile+'.py', outputDir)
 
     # Prepare the dataset so that we can read a point at a time.
     Dataset._initLineByLineRead(UP.dataFilename, UP.systemFilename)
@@ -193,6 +200,7 @@ def multipleCore(inputFile, outputDir, skipHDF5):
 
     myMPI.rankPrint(world,'Running GeoBIPy in parallel mode with {} cores'.format(nRanks))
     myMPI.rankPrint(world,'Using user input file {}'.format(inputFile))
+    myMPI.rankPrint(world,'Output files will be produced at {}'.format(outputDir))
 
     # Start keeping track of time.
     t0 = MPI.Wtime()
@@ -234,6 +242,8 @@ def multipleCore(inputFile, outputDir, skipHDF5):
             makedirs(outputDir)
         except:
             pass
+
+        copy(inputFile+'.py', outputDir)
 
         # Prepare the dataset so that we can read a point at a time.
         Dataset._initLineByLineRead(UP.dataFilename, UP.systemFilename)
