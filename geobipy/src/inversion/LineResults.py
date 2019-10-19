@@ -1761,7 +1761,7 @@ class LineResults(myObject):
         hdfFile['burnedin'][i] = results.burnedIn
 
         # Add the depth of investigation
-        hdfFile['doi'][i] = results.doi()
+        #hdfFile['doi'][i] = results.doi()
 
         # Add the multiplier
         hdfFile['multiplier'][i] = results.multiplier
