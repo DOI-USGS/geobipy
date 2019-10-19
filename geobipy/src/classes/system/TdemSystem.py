@@ -29,7 +29,7 @@ try:
             # Check that the file exists, rBodies class does not handle errors
             assert fIO.fileExists(systemFilename),'Could not open file: ' + systemFilename
 
-            TDAEMSystem.__init__(self, systemFilename)
+            super().__init__(systemFilename)
             self.fileName = systemFilename
 
 

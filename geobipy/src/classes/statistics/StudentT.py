@@ -30,7 +30,7 @@ class StudentT(baseDistribution):
         """Instantiate a Normal distribution """
         # assert np.size(mean) == 1, 'Univariate Normal mean must have size = 1'
         # assert np.size(variance) == 1, 'Univariate Normal variance must have size = 1'
-        baseDistribution.__init__(self, prng)
+        super().__init__(prng)
         self.mean = np.asarray(mean)
         self.variance = np.asarray(variance)
         self.degrees = np.asarray(degrees)
@@ -39,6 +39,10 @@ class StudentT(baseDistribution):
     @property
     def ndim(self):
         return 1
+
+    @property
+    def multivariate(self):
+        return True
 
 
     def deepcopy(self):

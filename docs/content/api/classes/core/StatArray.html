@@ -877,6 +877,11 @@ Values in c that are &lt;= 0 are masked.</p></li>
 <li><p><strong>grid</strong> (<em>bool, optional</em>) – Plot the grid</p></li>
 <li><p><strong>noColorbar</strong> (<em>bool, optional</em>) – Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.</p></li>
 <li><p><strong>trim</strong> (<em>bool, optional</em>) – Set the x and y limits to the first and last non zero values along each axis.</p></li>
+<li><p><strong>classes</strong> (<em>dict, optional</em>) – A dictionary containing three entries.
+classes[‘id’] : array_like of same shape as self containing the class id of each element in self.
+classes[‘cmaps’] : list of matplotlib colourmaps.  The number of colourmaps should equal the number of classes.
+classes[‘labels’] : list of str.  The length should equal the number of classes.
+If classes is provided, alpha is ignored if provided.</p></li>
 </ul>
 </dd>
 <dt class="field-odd">Returns</dt>

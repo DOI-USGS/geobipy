@@ -5,8 +5,7 @@ class baseDistribution(myObject):
     """ Define an abstract base distribution class """
 
     def __init__(self, prng=None):
-        self.multivariate = False
-
+        
         if (prng is None):
             self.prng = rng.__self__
         else:

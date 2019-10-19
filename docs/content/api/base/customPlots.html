@@ -321,6 +321,11 @@ Values in c that are &lt;= 0 are masked.</p></li>
 <li><p><strong>reciprocateX</strong> (<em>bool, optional</em>) – Take the reciprocal of the X axis before other transforms</p></li>
 <li><p><strong>reciprocateY</strong> (<em>bool, optional</em>) – Take the reciprocal of the Y axis before other transforms</p></li>
 <li><p><strong>trim</strong> (<em>bool, optional</em>) – Set the x and y limits to the first and last non zero values along each axis.</p></li>
+<li><p><strong>classes</strong> (<em>dict, optional</em>) – A dictionary containing three entries.
+classes[‘id’] : array_like of same shape as self containing the class id of each element in self.
+classes[‘cmaps’] : list of matplotlib colourmaps.  The number of colourmaps should equal the number of classes.
+classes[‘labels’] : list of str.  The length should equal the number of classes.
+If classes is provided, alpha is ignored if provided.</p></li>
 </ul>
 </dd>
 <dt class="field-odd">Returns</dt>
@@ -366,53 +371,6 @@ Values in c that are &lt;= 0 are masked.</p></li>
 <li><p><strong>grid</strong> (<em>bool, optional</em>) – Show the grid lines</p></li>
 <li><p><strong>transpose</strong> (<em>bool, optional</em>) – Transpose the image</p></li>
 <li><p><strong>noColorBar</strong> (<em>bool, optional</em>) – Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.</p></li>
-</ul>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>matplotlib .Axes</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>ax</p>
-</dd>
-</dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<dl class="simple">
-<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">matplotlib.pyplot.pcolormesh()</span></code></dt><dd><p>For additional keyword arguments you may use.</p>
-</dd>
-</dl>
-</div>
-</dd></dl>
-
-<dl class="function">
-<dt id="geobipy.src.base.customPlots.pcolormesh">
-<code class="descclassname">geobipy.src.base.customPlots.</code><code class="descname">pcolormesh</code><span class="sig-paren">(</span><em>X</em>, <em>Y</em>, <em>values</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.pcolormesh" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a pseudocolour plot of a 2D array, Actually uses pcolormesh for speed.</p>
-<p>Create a colour plot of a 2D array.
-If the arrays x, y, and values are geobipy.StatArray classes, the axes can be automatically labelled.
-Can take any other matplotlib arguments and keyword arguments e.g. cmap etc.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>values</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – A 2D array of colour values.</p></li>
-<li><p><strong>X</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a><em>, </em><em>optional</em>) – Horizontal coordinates of the values edges.</p></li>
-<li><p><strong>Y</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a><em>, </em><em>optional</em>) – Vertical coordinates of the values edges.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Other Parameters</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>alpha</strong> (<em>scalar or array_like, optional</em>) – If alpha is scalar, behaves like standard matplotlib alpha and opacity is applied to entire plot
-If array_like, each pixel is given an individual alpha value.</p></li>
-<li><p><strong>log</strong> (<em>‘e’ or float, optional</em>) – Take the log of the colour to a base. ‘e’ if log = ‘e’, and a number e.g. log = 10.
-Values in c that are &lt;= 0 are masked.</p></li>
-<li><p><strong>equalize</strong> (<em>bool, optional</em>) – Equalize the histogram of the colourmap so that all colours have an equal amount.</p></li>
-<li><p><strong>nbins</strong> (<em>int, optional</em>) – Number of bins to use for histogram equalization.</p></li>
-<li><p><strong>xscale</strong> (<em>str, optional</em>) – Scale the x axis? e.g. xscale = ‘linear’ or ‘log’</p></li>
-<li><p><strong>flipX</strong> (<em>bool, optional</em>) – Flip the X axis</p></li>
-<li><p><strong>flipY</strong> (<em>bool, optional</em>) – Flip the Y axis</p></li>
-<li><p><strong>grid</strong> (<em>bool, optional</em>) – Plot the grid</p></li>
-<li><p><strong>noColorbar</strong> (<em>bool, optional</em>) – Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.</p></li>
-<li><p><strong>trim</strong> (<em>array_like, optional</em>) – Set the x and y limits to the first and last locations that don’t equal the values in trim.</p></li>
 </ul>
 </dd>
 <dt class="field-odd">Returns</dt>

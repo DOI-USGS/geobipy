@@ -226,21 +226,8 @@ The cell locations in z are then added to the height profile.</p>
 </dd>
 </dl>
 <dl class="method">
-<dt id="geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D.XMesh">
-<code class="descname">XMesh</code><span class="sig-paren">(</span><em>xAxis='x'</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D.XMesh" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates an array suitable for plt.pcolormesh for the abscissa.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>xAxis</strong> (<em>str</em>) – If xAxis is ‘x’, the horizontal xAxis uses self.x
-If xAxis is ‘y’, the horizontal xAxis uses self.y
-If xAxis is ‘r’, the horizontal xAxis uses cumulative distance along the line.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
 <dt id="geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D.pcolor">
-<code class="descname">pcolor</code><span class="sig-paren">(</span><em>values</em>, <em>xAxis='x'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D.pcolor" title="Permalink to this definition">¶</a></dt>
+<code class="descname">pcolor</code><span class="sig-paren">(</span><em>values</em>, <em>xAxis='x'</em>, <em>zAxis='absolute'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D.pcolor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a pseudocolour plot of a 2D array using the mesh.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -249,6 +236,8 @@ If xAxis is ‘r’, the horizontal xAxis uses cumulative distance along the lin
 <li><p><strong>xAxis</strong> (<em>str</em>) – If xAxis is ‘x’, the horizontal xAxis uses self.x
 If xAxis is ‘y’, the horizontal xAxis uses self.y
 If xAxis is ‘r’, the horizontal xAxis uses cumulative distance along the line</p></li>
+<li><p><strong>zAxis</strong> (<em>str</em>) – If zAxis is ‘absolute’ the vertical axis is the height plus z.
+If zAxis is ‘relative’ the vertical axis is z.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Other Parameters</dt>
@@ -311,8 +300,21 @@ Values in c that are &lt;= 0 are masked.</p></li>
 </dd></dl>
 
 <dl class="method">
+<dt id="geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D.xMesh">
+<code class="descname">xMesh</code><span class="sig-paren">(</span><em>xAxis='x'</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D.xMesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an array suitable for plt.pcolormesh for the abscissa.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>xAxis</strong> (<em>str</em>) – If xAxis is ‘x’, the horizontal xAxis uses self.x
+If xAxis is ‘y’, the horizontal xAxis uses self.y
+If xAxis is ‘r’, the horizontal xAxis uses cumulative distance along the line.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
 <dt id="geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D.zMesh">
-<code class="descname">zMesh</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D.zMesh" title="Permalink to this definition">¶</a></dt>
+<code class="descname">zMesh</code><span class="sig-paren">(</span><em>zAxis='absolute'</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D.zMesh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates an array suitable for plt.pcolormesh for the ordinate</p>
 </dd></dl>
 

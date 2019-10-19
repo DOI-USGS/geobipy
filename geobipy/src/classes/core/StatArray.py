@@ -327,6 +327,29 @@ class StatArray(np.ndarray, myObject):
         return self.insert(i=i, values=values, axis=axis)
 
 
+    def argmax_multiple_to_nan(self, axis=0):
+        """Perform the numpy argmax function on the StatArray but optionally mask multiple max values as NaN.
+
+        Parameters
+        ----------
+        nan_multiple : bool
+            If multiple locations contain the same max value, mask as nan.
+
+        Returns
+        -------
+        out : ndarray of floats
+            Array of indices into the array. It has the same shape as `self.shape`
+            with the dimension along `axis` removed.
+
+        """
+
+        mx = np.argmax(self, axis=axis).astype(np.float)
+        x = np.sum((self == np.max(self, axis=axis)), axis=axis)
+        mx[x>1.0] = np.nan
+
+        return mx
+
+
     def copy( self, order='F'):       
         return StatArray(self)
 
@@ -986,7 +1009,7 @@ class StatArray(np.ndarray, myObject):
                     pass
 
         if (self.ndim == 1):
-            ax = cP.pcolor_1D(self, y=my, **kwargs)
+            return cP.pcolor_1D(self, y=my, **kwargs)
         else:
             mx = x
             if (not x is None):
@@ -997,8 +1020,7 @@ class StatArray(np.ndarray, myObject):
                     except:
                         pass
 
-            ax, pm, cb = cP.pcolor(self, x=mx, y=my, **kwargs)
-        return ax, pm, cb
+            return cP.pcolor(self, x=mx, y=my, **kwargs)
 
 
     def plot(self, x=None, i=None, axis=0, **kwargs):
@@ -1123,7 +1145,7 @@ class StatArray(np.ndarray, myObject):
 
         c = kwargs.pop('c', self)
 
-        cP.scatter2D(x=x, y=y, c=c, i=i, **kwargs)
+        return cP.scatter2D(x=x, y=y, c=c, i=i, **kwargs)
 
 
     def stackedAreaPlot(self, x=None, i=None, axis=0, labels=[], **kwargs):

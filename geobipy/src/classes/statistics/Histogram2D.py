@@ -7,10 +7,12 @@ from ...classes.mesh.RectilinearMesh2D import RectilinearMesh2D
 from ...classes.core import StatArray
 from ...base import customPlots as cP
 from ...base import customFunctions as cF
+from .baseDistribution import baseDistribution
 import numpy as np
 from scipy.stats import binned_statistic
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+import progressbar
 
 
 class Histogram2D(RectilinearMesh2D):
@@ -166,15 +168,15 @@ class Histogram2D(RectilinearMesh2D):
 
 
 
-    def axisHistogram(self, intervals=None, axis=0, log=None):
-        """Get the histogram along an axis
+    def marginalHistogram(self, intervals=None, axis=0, log=None):
+        """Get the marginal histogram along an axis
 
         Parameters
         ----------
         intervals : array_like
             Array of size 2 containing lower and upper limits between which to count.
         axis : int
-            Axis along which to get the histogram.
+            Axis along which to get the marginal histogram.
         log : 'e' or float, optional
             Entries are given in linear space, but internally bins and values are logged.
             Plotting is in log space.
@@ -327,11 +329,11 @@ class Histogram2D(RectilinearMesh2D):
         total = self._counts.sum(axis=1-axis)
 
         if axis == 0:
-            pdf = (self._counts.T / total).T
+            out = StatArray.StatArray(np.divide(self._counts.T, total).T, 'Probability density')
         else:
-            pdf = self._counts /  total
-
-        return pdf
+            out = StatArray.StatArray(np.divide(self._counts, total), 'Probability density')
+        out[np.isnan(out)] = 0.0
+        return out
 
 
     def axisPercentage(self, percent, log=None, axis=0):
@@ -458,20 +460,24 @@ class Histogram2D(RectilinearMesh2D):
         return out
 
 
-    def divideBySum(self, axis):
-        """Divide by the sum along an axis.
+    # def divideBySum(self, axis):
+    #     """Divide by the sum along an axis.
         
-        Parameters
-        ----------
-        axis : int
-            Axis to sum along and then divide by.
+    #     Parameters
+    #     ----------
+    #     axis : int
+    #         Axis to sum along and then divide by.
                 
-        """
-        s = np.sum(self._counts, axis)
-        if (axis == 0):
-            self._counts /= np.repeat(s[np.newaxis, :], np.size(self._counts, axis), axis)
-        else:
-            self._counts /= np.repeat(s[:, np.newaxis], np.size(self._counts, axis), axis)
+    #     """
+    #     s = np.sum(self._counts, axis)
+    #     if (axis == 0):
+    #         self._counts /= np.repeat(s[np.newaxis, :], np.size(self._counts, axis), axis)
+    #     else:
+    #         self._counts /= np.repeat(s[:, np.newaxis], np.size(self._counts, axis), axis)
+
+
+    def estimatePdf(self):
+        return self._counts / np.sum(self._counts)
 
 
     def fitMajorPeaks(self, intervals, axis=0, **kwargs):
@@ -485,19 +491,16 @@ class Histogram2D(RectilinearMesh2D):
             Axis along which to find peaks.
 
         """
-        counts = super().intervalStatistic(self._counts, intervals, axis, 'sum')
+        counts, new_intervals = super().intervalStatistic(self._counts, intervals, axis, 'sum')
 
         distributions = []
         amplitudes = []
         if axis == 0:
             h = Histogram1D(bins = self.xBins)
-            # if distribution.lower() == 'gaussian':
-            #     method = h.fitMajorPeaks_gaussian
-            # else:
-            #     method = 
-            for i in range(intervals.size - 1):
-                h._counts[:] = counts[i, :]
 
+            Bar = progressbar.ProgressBar()
+            for i in Bar(range(new_intervals.size - 1)):
+                h._counts[:] = counts[i, :]
                 try:
                     d, a = h.fitMajorPeaks(**kwargs)
                     distributions.append(d)
@@ -507,11 +510,8 @@ class Histogram2D(RectilinearMesh2D):
 
         else:
             h = Histogram1D(bins = self.yBins)
-            if distribution.lower() == 'gaussian':
-                method = h.fitMajorPeaks_gaussian
-            else:
-                method = h.fitMajorPeaks
-            for i in range(intervals.size - 1):
+            Bar = progressbar.ProgressBar()
+            for i in Bar(range(new_intervals.size - 1)):
                 h._counts[:] = counts[:, i]
                 d, a = h.fitMajorPeaks(**kwargs)
                 distributions.append(d)
@@ -535,15 +535,175 @@ class Histogram2D(RectilinearMesh2D):
 
         """
 
-        counts = super().intervalStatistic(self._counts, intervals, axis, statistic)
+        counts, intervals = super().intervalStatistic(self._counts, intervals, axis, statistic)
 
         if axis == 0:
-            out = Histogram2D(xBins = self.x.cellEdges, yBins = StatArray.StatArray(np.asarray(intervals), name=self.y.name(), units=self.y.units()))
+            out = Histogram2D(xBins = self.x.cellEdges, yBins = StatArray.StatArray(np.asarray(intervals), name=self.y.name, units=self.y.units))
             out._counts[:] = counts
         else:
-            out = Histogram2D(xBins = StatArray.StatArray(np.asarray(intervals), name=self.x.name(), units=self.x.units()), yBins = self.y.cellEdges)
+            out = Histogram2D(xBins = StatArray.StatArray(np.asarray(intervals), name=self.x.name, units=self.x.units), yBins = self.y.cellEdges)
             out._counts[:] = counts
         return out
+
+
+    def marginalProbability(self, fractions, distributions, axis=0, reciprocateParameter=None, log=None, verbose=False):
+        """Compute the marginal (joint) probability between the Histogram and a set of distributions.
+
+        .. math::
+            :label: marginal
+            
+            p(distribution_{i} | \\boldsymbol{v}) = 
+
+
+        """
+
+        if not isinstance(distributions, list):
+            distributions = [distributions]
+
+        # If the distributions are univariate, and there is only one per class, its a '1D' problem
+
+        assert isinstance(distributions[0], baseDistribution), TypeError("Distributions must be geobipy distributions.")
+
+        if distributions[0].multivariate:
+            if reciprocateParameter is None:
+                reciprocateParameter = [False, False]
+            if log is None:
+                log = [None, None]
+            return self._marginalProbability_2D(fractions, distributions, axis=axis, reciprocateParameter=reciprocateParameter, log=log, verbose=verbose)
+        else:
+            if reciprocateParameter is None:
+                reciprocateParameter = False
+            return self._marginalProbability_1D(fractions, distributions, axis=axis, reciprocateParameter=reciprocateParameter, log=log)
+
+
+    def _marginalProbability_1D(self, fractions, distributions, axis=0, reciprocateParameter=False, log=None):
+        
+        assert axis < 2, ValueError("Must have 0 <= axis < 2")
+        nDistributions = np.size(distributions)
+        assert np.size(fractions) == nDistributions, ValueError("Fractions must have same size as number of distributions")
+
+        if axis == 0:
+            ax = self.x.cellCentres
+        else:
+            ax = self.y.cellCentres
+
+        if reciprocateParameter:
+            ax = 1.0 / ax[::-1]
+
+        ax, dum = cF._log(ax, log)
+
+        # Compute the probabilities along the hitmap axis, using each distribution
+        pdfs = np.zeros([nDistributions, ax.size])
+        for i in range(nDistributions):
+            pdfs[i, :] = fractions[i] * distributions[i].probability(ax)
+
+        # Normalize by the sum of the pdfs
+        normalizedPdfs = pdfs / np.sum(pdfs, axis=0)
+
+        # import matplotlib.pyplot as plt
+        # plt.figure()
+        # for i in range(nDistributions):
+        #     plt.subplot(nDistributions, 1, i+1)
+        #     StatArray.StatArray(pdfs[i, :]).plot(x=ax)
+
+        # Initialize the facies Model
+        axisPdf = self.axisPdf(axis=axis)
+
+        marginalProbability = StatArray.StatArray([nDistributions, self.shape[axis]], 'Marginal probability')
+        for j in range(nDistributions):
+            marginalProbability[j, :] = np.sum(axisPdf * normalizedPdfs[j, :], axis=1-axis)
+
+        return np.squeeze(marginalProbability)
+
+
+    def _marginalProbability_2D(self, fractions, distributions, axis=None, reciprocateParameter=[False, False], log=[None, None], verbose=False):
+
+        assert np.size(reciprocateParameter) == 2, ValueError('reciprocateParameter must have 2 bools')
+        assert np.size(log) == 2, ValueError('log must have size 2')
+        if not axis is None:
+            assert 1 <= axis <= 2, ValueError("axis must be 1 or 2")
+
+        nDistributions = np.size(distributions)
+        for d in distributions:
+            assert d.multivariate and d.ndim == 2, TypeError("Each distribution must be multivariate with 2 dimensions.")
+
+        assert np.size(fractions) == nDistributions, ValueError("Fractions must have same size as number of distributions")
+
+        # Get the axes
+        ax0 = self.y.cellCentres
+
+        if reciprocateParameter[0]:
+            ax0 = 1.0 / ax0[::-1]
+        
+        ax0, dum = cF._log(ax0, log[0])
+
+        ax1 = self.x.cellCentres
+
+        if reciprocateParameter[1]:
+            ax1 = 1.0 / ax1[::-1]
+        
+        ax1, dum = cF._log(ax1, log[1])
+
+        # Compute the 2D joint probability density function for each distribution
+        class_xPdfs = np.zeros([nDistributions, self.shape[1]])
+        class_yPdfs = np.zeros([nDistributions, self.shape[0]])
+        for i, d in enumerate(distributions):
+            class_yPdfs[i, :] = fractions[i] * d.probability(ax0, axis=0)
+            class_xPdfs[i, :] = fractions[i] * d.probability(ax1, axis=1)
+
+
+        histogram_xPdf = StatArray.StatArray(self.axisPdf(axis=1))
+        histogram_yPdf = StatArray.StatArray(self.axisPdf(axis=0))
+
+        if verbose:
+            plt.figure(figsize=(6.67, 6.0))
+            ax = plt.subplot(2, 1, 1)
+            histogram_yPdf.pcolor(x=ax1, y=ax0, cmap='gray_r', equalize=False, flipY=True)
+            ax.set_xticklabels([])
+            plt.xlabel('')
+            plt.subplot(2, 1, 2)
+            histogram_xPdf.pcolor(x=ax1, y=ax0, cmap='gray_r', flipY=True)
+            plt.tight_layout()
+            plt.suptitle("Hitmap marginal PDFs")
+            plt.savefig("Hitmap_marginal_PDFs.png", dpi=300, figsize=(6.67, 3.0))
+
+
+            plt.figure(figsize=(6.67, 6.0))
+            for j in range(nDistributions):
+                plt.subplot(nDistributions, 2, (2*j)+1)
+                (class_xPdfs[j, :] * histogram_xPdf).pcolor(x=ax1, flipY=True, cmap='plasma')
+                if j == 0:
+                    cP.title("P(class | conductivity) * P(conductivity)")
+                plt.subplot(nDistributions, 2, (2*j)+2)
+                (class_yPdfs[j, :] * histogram_yPdf.T).T.pcolor(x=ax1, flipY=True, cmap='plasma')
+                if j == 0:
+                    cP.title("P(class | depth) * P(depth)")
+                plt.tight_layout()
+                
+                plt.savefig("Intermediate_step.png", dpi=300, figsize=(6.67, 6.0))
+
+        P_class_given_v1v2 = StatArray.StatArray([nDistributions, self.shape[0] ,self.shape[1]], 'Marginal probability')
+        for j in range(nDistributions):
+            P_class_given_v1v2[j, :, :] = (class_xPdfs[j, :] * histogram_xPdf) * (class_yPdfs[j, :] * histogram_yPdf.T).T
+
+        if verbose:
+            plt.figure(figsize=(6.67, 6.0))
+            for i in range(nDistributions):
+                plt.subplot(nDistributions, 1, i+1)
+                tmp = StatArray.StatArray(P_class_given_v1v2[i, :, :])
+                tmp.pcolor(x=ax1, y=ax0, equalize=False, flipY=True)
+            plt.suptitle("P(class | conductivity ^ depth) * P(conductivity ^ depth)")
+            plt.savefig("Hitmap_marginal_join_probabily.png", dpi=300, figsize=(6.67, 6.0))
+
+        if axis is None:
+            denominator = np.sum(P_class_given_v1v2, axis=0)
+            marginalProbability = P_class_given_v1v2 / denominator
+        else:
+            p_tmp = np.sum(P_class_given_v1v2, axis=axis)
+            denominator = np.sum(p_tmp, axis=0)
+            marginalProbability = p_tmp / denominator
+
+        return marginalProbability
 
 
     def pcolor(self, **kwargs):
@@ -577,13 +737,13 @@ class Histogram2D(RectilinearMesh2D):
             Set the x and y limits to the first and last non zero values along each axis.
         
         """
-        ax = self._counts.pcolor(x=self.x.cellEdges, y=self.y.cellEdges, **kwargs)
+        ax = StatArray.StatArray(self.counts).pcolor(x=self.x.cellEdges, y=self.y.cellEdges, **kwargs)
         return ax
 
 
     def plotConfidenceIntervals(self, percent=95.0, log=None, axis=0, **kwargs):
 
-        med, low, high = self.confidenceIntervals(percent, log, axis)
+        med, low, high = self.axisConfidenceIntervals(percent, log, axis)
 
         c = kwargs.pop('color', '#5046C8')
         ls = kwargs.pop('linestyle', 'dashed')

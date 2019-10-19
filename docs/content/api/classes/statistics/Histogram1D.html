@@ -266,12 +266,6 @@ myName: Name of the group</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="geobipy.src.classes.statistics.Histogram1D.Histogram1D.findBestNumberOfGaussians">
-<code class="descname">findBestNumberOfGaussians</code><span class="sig-paren">(</span><em>maxDistributions=1</em>, <em>tolerance=0.05</em>, <em>log=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.findBestNumberOfGaussians" title="Permalink to this definition">¶</a></dt>
-<dd><p>Iteratively fits the histogram with an increasing number of distributions until the fit changes by less than a tolerance.</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="geobipy.src.classes.statistics.Histogram1D.Histogram1D.findPeaks">
 <code class="descname">findPeaks</code><span class="sig-paren">(</span><em>width</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.findPeaks" title="Permalink to this definition">¶</a></dt>
 <dd><p>Identify peaks in the histogram.</p>
@@ -282,9 +276,9 @@ myName: Name of the group</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="geobipy.src.classes.statistics.Histogram1D.Histogram1D.fit_gaussians">
-<code class="descname">fit_gaussians</code><span class="sig-paren">(</span><em>nDistributions=1</em>, <em>log=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.fit_gaussians" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fit the histogram with a number of distributions that minimizes the fit between the distribution pdfs and the counts.</p>
+<dt id="geobipy.src.classes.statistics.Histogram1D.Histogram1D.fitMajorPeaks">
+<code class="descname">fitMajorPeaks</code><span class="sig-paren">(</span><em>log=None</em>, <em>loc_bounds=None</em>, <em>constrain_loc=True</em>, <em>variance_upper_bound=None</em>, <em>maxDistributions=None</em>, <em>tolerance=0.05</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.fitMajorPeaks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iteratively fits the histogram with an increasing number of distributions until the fit changes by less than a tolerance.</p>
 </dd></dl>
 
 <dl class="method">

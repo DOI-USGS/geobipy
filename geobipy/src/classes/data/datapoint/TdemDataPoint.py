@@ -73,7 +73,7 @@ class TdemDataPoint(EmDataPoint):
 
     """
 
-    def __init__(self, x=0.0, y=0.0, z=0.0, elevation=0.0, data=None, std=None, predictedData=None, system=None, T=None, R=None, lineNumber=0.0, fiducial=0.0):
+    def __init__(self, x=0.0, y=0.0, z=0.0, elevation=0.0, data=None, std=None, predictedData=None, system=None, T=None, R=None, loopOffset=[0.0, 0.0, 0.0], lineNumber=0.0, fiducial=0.0):
         """Initializer. """
 
         if not T is None:
@@ -126,6 +126,8 @@ class TdemDataPoint(EmDataPoint):
         self.T = deepcopy(T)
         # EmLoop Reciever
         self.R = deepcopy(R)
+        # Set the loop offset
+        self.loopOffset = StatArray.StatArray(np.asarray(loopOffset), 'Loop Offset', 'm')
 
         k = 0
         for i in range(self.nSystems):
@@ -155,7 +157,7 @@ class TdemDataPoint(EmDataPoint):
 
 
     def __deepcopy__(self, memo):
-        out = TdemDataPoint(self.x, self.y, self.z, self.elevation, self._data, self._std, self._predictedData, self.system, self.T, self.R)
+        out = TdemDataPoint(self.x, self.y, self.z, self.elevation, self._data, self._std, self._predictedData, self.system, self.T, self.R, self.loopOffset, self.lineNumber, self.fiducial)
         # StatArray of Relative Errors
         out.relErr = self.relErr.deepcopy()
         # StatArray of Additive Errors
@@ -208,6 +210,7 @@ class TdemDataPoint(EmDataPoint):
         self.addErr.createHdf(grp, 'addErr', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self.T.createHdf(grp, 'T', nRepeats=nRepeats, fillvalue=fillvalue)
         self.R.createHdf(grp, 'R', nRepeats=nRepeats, fillvalue=fillvalue)
+        self.loopOffset.createHdf(grp, 'loop_offset', nRepeats=nRepeats, fillvalue=fillvalue)
 
 
     def writeHdf(self, parent, myName, withPosterior=True, index=None):
@@ -233,6 +236,7 @@ class TdemDataPoint(EmDataPoint):
         self.addErr.writeHdf(grp, 'addErr',  withPosterior=withPosterior, index=index)
         self.T.writeHdf(grp, 'T', index=index)
         self.R.writeHdf(grp, 'R', index=index)
+        self.loopOffset.writeHdf(grp, 'loop_offset', index=index)
         #writeNumpy(self.iActive, grp, 'iActive')
 
 #    def toHdf(self, parent, myName):
@@ -299,6 +303,13 @@ class TdemDataPoint(EmDataPoint):
         item = grp.get('R')
         obj = eval(cf.safeEval(item.attrs.get('repr')))
         _aPoint.R = obj.fromHdf(item, index=index)
+
+        try:
+            item = grp.get('loop_offset')
+            obj = eval(cf.safeEval(item.attrs.get('repr')))
+            _aPoint.loopOffset = obj.fromHdf(item, index=index)
+        except:
+            pass
 
         _aPoint.iActive = _aPoint.getActiveData()
 
@@ -673,8 +684,9 @@ class TdemDataPoint(EmDataPoint):
         # Generate the Brodie Earth class
         E = Earth(mod.par[:], mod.thk[:-1])
         # Generate the Brodie Geometry class
-        G = Geometry(self.z[0], self.T.roll, self.T.pitch, self.T.yaw, -
-                    12.64, 0.0, 2.11, self.R.roll, self.R.pitch, self.R.yaw)
+        G = Geometry(self.z[0], self.T.roll, self.T.pitch, self.T.yaw, 
+                     self.loopOffset[0], self.loopOffset[1], self.loopOffset[2],
+                     self.R.roll, self.R.pitch, self.R.yaw)
 
         # Forward model the data for each system
         for i in range(self.nSystems):
@@ -752,10 +764,13 @@ class TdemDataPoint(EmDataPoint):
         # sensitivity if the model has changed since last time
         if modelChanged:
             E = Earth(mod.par[:], mod.thk[:-1])
-            G = Geometry(self.z[0], self.T.roll, self.T.pitch, self.T.yaw, -
-                         12.64, 0.0, 2.11, self.R.roll, self.R.pitch, self.R.yaw)
+            G = Geometry(self.z[0], self.T.roll, self.T.pitch, self.T.yaw, 
+                         self.loopOffset[0], self.loopOffset[1], self.loopOffset[2],
+                         self.R.roll, self.R.pitch, self.R.yaw)
+
             for i in range(self.nSystems):
                 self.system[i].forwardmodel(G, E)
+
         if (ix is None):  # Generate a full matrix if the layers are not specified
             ix = range(mod.nCells[0])
             J = np.zeros([self.nWindows, mod.nCells[0]])
@@ -794,6 +809,7 @@ class TdemDataPoint(EmDataPoint):
         self._predictedData.Isend(dest, world)
         self.T.Isend(dest, world)
         self.R.Isend(dest, world)
+        self.loopOffset.Isend(dest, world)
 
 
 
@@ -816,5 +832,6 @@ class TdemDataPoint(EmDataPoint):
         c = CircularLoop()
         T = c.Irecv(source, world)
         R = c.Irecv(source, world)
+        loopOffset = s.Irecv(source, world)
 
-        return TdemDataPoint(tmp[0], tmp[1], tmp[2], tmp[3], data=d, std=s, predictedData=p, system=systems, T=T, R=R, lineNumber=tmp[5], fiducial=tmp[6])
+        return TdemDataPoint(tmp[0], tmp[1], tmp[2], tmp[3], data=d, std=s, predictedData=p, system=systems, T=T, R=R, loopOffset=loopOffset, lineNumber=tmp[5], fiducial=tmp[6])

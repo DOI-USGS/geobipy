@@ -18,7 +18,7 @@ class UniformLog(Uniform):
         xmin:  :Minimum value
         xmax:  :Maximum value
         """
-        baseDistribution.__init__(self, prng)
+        super().__init__(min, max, prng)
         # Minimum
         self.min = deepcopy(min)
         # Maximum
@@ -37,6 +37,12 @@ class UniformLog(Uniform):
     @property
     def ndim(self):
         return self.min.size
+
+
+    @property
+    def multivariate(self):
+        return True if self.ndim > 1 else False
+
 
     def deepcopy(self):
         """ Define a deepcopy routine """
