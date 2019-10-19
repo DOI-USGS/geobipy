@@ -12,6 +12,7 @@ import sys
 
 from scipy.signal import find_peaks
 from scipy.optimize import curve_fit
+from scipy.stats import norm
 
 
 class Histogram1D(RectilinearMesh1D):
@@ -192,7 +193,7 @@ class Histogram1D(RectilinearMesh1D):
 
 
     def estimatePdf(self):
-        return self._counts / np.sum(self._counts)
+        return np.divide(self._counts, np.sum(self._counts))
 
 
     def findPeaks(self, width, **kwargs):
@@ -207,21 +208,7 @@ class Histogram1D(RectilinearMesh1D):
         return find_peaks(self.estimatePdf(),  width=width, **kwargs)
 
 
-    # def _sum_of_studentT(self, x, *params):
-    #     from scipy.stats import t
-    #     y = np.zeros_like(x)
-
-    #     nG = np.int(len(params)/3)
-
-    #     for i in range(nG):
-    #         i1 = i*3
-    #         y += t.pdf(x, params[i1 + 2], params[i1], params[i1+1])
-        
-    #     return y
-
-
     def _sum_of_gaussians(self, x, *params):
-        from scipy.stats import norm
         y = np.zeros_like(x)
 
         nG = np.int(len(params)/3)
@@ -233,26 +220,6 @@ class Histogram1D(RectilinearMesh1D):
         return y
 
         
-    # def fit_gaussians(self, nDistributions=1, log=None, **kwargs):
-    #     """Fit the histogram with a number of distributions that minimizes the fit between the distribution pdfs and the counts.
-
-    #     """
-
-    #     x, dum = cF._log(self.binCentres, log)
-
-    #     guess = np.tile(np.asarray([x[np.int(self.nBins/2)], 1.0, 1.0]), nDistributions)
-    #     bounds = (np.tile(np.asarray([x[0], 0.0, 0.0]), nDistributions), np.tile(np.asarray([x[-1], np.inf, np.inf]), nDistributions))
-
-    #     popt, pcov = curve_fit(self._sum_of_pdfs, xdata=x, ydata=self.estimatePdf(), p0=guess, bounds=bounds, **kwargs)
-    #     popt = np.asarray(popt)
-
-    #     gaussians = []
-    #     for i in range(np.int(len(popt)/3)):
-    #         gaussians.append(Distribution("Normal", popt[3*i], popt[(3*i)+2]))
-
-    #     return gaussians, popt[1::3]
-
-
     def fitMajorPeaks(self, log=None, loc_bounds=None, constrain_loc = True, variance_upper_bound=None, maxDistributions = None, tolerance=0.05):
         """Iteratively fits the histogram with an increasing number of distributions until the fit changes by less than a tolerance.
 
@@ -266,9 +233,6 @@ class Histogram1D(RectilinearMesh1D):
 
         # First find the maximum width that finds a peak
         width = self.nBins + 1
-
-        # if not variance_upper_bound is None:
-        #     width = np.int(variance_upper_bound / np.max(np.diff(self.binCentres)))
 
         go = True
         while go:
@@ -327,8 +291,6 @@ class Histogram1D(RectilinearMesh1D):
 
             nPeaks = n_new_peaks
 
-            # print(x[iPeaks])
-
             # Perform the new fit
             guess = np.ones(nPeaks * 3)
             lowerBounds = np.zeros(nPeaks * 3)
@@ -374,127 +336,6 @@ class Histogram1D(RectilinearMesh1D):
             dists.append(Distribution("normal", model[3*i], model[(3*i)+1]))
 
         return dists, model[2::3]
-
-
-    # def fitMajorPeaks(self, log=None, loc_bounds=None, variance_upper_bound=None, degrees_lower_bound = 1e-4, maxDistributions = None, tolerance=0.05):
-    #     """Iteratively fits the histogram with an increasing number of distributions until the fit changes by less than a tolerance.
-
-    #     """
-
-    #     if not loc_bounds is None:
-    #         assert np.size(loc_bounds) == 2, ValueError("loc_bounds must have size 2")
-
-    #     x, dum = cF._log(self.binCentres, log)
-    #     yData = self.estimatePdf()
-
-    #     # First find the maximum width that finds a peak
-    #     width = self.nBins + 1
-    #     go = True
-    #     while go:
-    #         width -= 1
-    #         iPeaks = self.findPeaks(width=width)[0]
-    #         if not loc_bounds is None:
-    #             keepPeaks = np.where((loc_bounds[0] < x[iPeaks]) & (x[iPeaks] < loc_bounds[1]))[0]
-    #             iPeaks = iPeaks[keepPeaks]
-    #         nPeaks = np.size(iPeaks)
-    #         go = nPeaks == 0
-
-    #     # Carry out the first fitting.
-    #     guess = np.ones(nPeaks * 3)
-    #     lowerBounds = np.zeros(nPeaks * 3)
-    #     upperBounds = np.full(nPeaks * 3, np.inf)
-    #     i = 3 * np.arange(nPeaks)
-    #     guess[i] = x[iPeaks]
-    #     lowerBounds[i] = x[iPeaks] - 1e-6
-    #     upperBounds[i] = x[iPeaks] + 1e-6
-        
-    #     if not variance_upper_bound is None:
-    #         upperBounds[1::3] = variance_upper_bound
-    #         guess[1::3] = 0.5 * (lowerBounds[1::3] + upperBounds[1::3])
-
-    #     lowerBounds[2::3] = degrees_lower_bound
-
-    #     bounds = (lowerBounds, upperBounds)
-
-    #     iWhere = np.where(yData > 0.0)[0]
-
-    #     xd = x[iWhere]
-    #     yd = yData[iWhere]
-
-    #     # Fit with a single distribution
-    #     model, pcov = curve_fit(self._sum_of_studentT, xdata=xd, ydata=yd, p0=guess, bounds=bounds)
-    #     model = np.asarray(model)
-
-    #     yFit = self._sum_of_studentT(xd, *model)
-    #     fit0 = np.linalg.norm((yd - yFit))
-
-    #     # print(x[iPeaks])
-
-    #     go = True
-    #     while go:
-
-    #         # Find the next width that produces more peaks.
-    #         no_new_peaks = True
-    #         n_new_peaks = nPeaks
-    #         while no_new_peaks and width > 1:
-    #             width -= 1
-    #             iPeaks = self.findPeaks(width=width)[0]
-    #             if not loc_bounds is None:
-    #                 keepPeaks = np.where((loc_bounds[0] < x[iPeaks]) & (x[iPeaks] < loc_bounds[1]))[0]
-    #                 iPeaks = iPeaks[keepPeaks]
-    #             n_new_peaks = np.size(iPeaks)
-    #             no_new_peaks = nPeaks == n_new_peaks
-
-    #         nPeaks = n_new_peaks
-
-    #         # print(x[iPeaks])
-
-    #         # Perform the new fit
-    #         guess = np.ones(nPeaks * 3)
-    #         lowerBounds = np.zeros(nPeaks * 3)
-    #         upperBounds = np.full(nPeaks * 3, np.inf)
-
-    #         i = 3 * np.arange(nPeaks)
-    #         guess[i] = x[iPeaks]
-    #         lowerBounds[i] = x[iPeaks] - 1e-6
-    #         upperBounds[i] = x[iPeaks] + 1e-6
-
-    #         if not variance_upper_bound is None:
-    #             upperBounds[1::3] = variance_upper_bound
-    #             guess[1::3] = 0.5 * (lowerBounds[1::3] + upperBounds[1::3])
-
-    #         lowerBounds[2::3] = degrees_lower_bound
-
-    #         bounds = (lowerBounds, upperBounds)
-    #         new_model, pcov = curve_fit(self._sum_of_studentT, xdata=xd, ydata=yd, p0=guess, bounds=bounds)
-    #         new_model = np.asarray(new_model)
-
-    #         yFit = self._sum_of_studentT(xd, *new_model)
-    #         fit = np.linalg.norm((yd - yFit))
-
-    #         # if the new fit is better than the old one by a suitable increase in percentage, keep it.
-    #         # otherwise, quit.
-    #         fitChange = np.abs(fit0 - fit)
-    #         percentChange = fitChange / fit0
-
-    #         width_gt_one = width > 1
-    #         good_change = percentChange > tolerance
-            
-
-    #         # Continue if we have a width > 1, and the change is still good
-    #         go = width_gt_one and good_change
-    #         if not maxDistributions is None:
-    #             go = go and nPeaks < maxDistributions
-
-    #         if go:
-    #             model = new_model.copy()
-    #             fit0 = fit
-
-    #     dists = []
-    #     for i in range(np.int(len(model)/3)):
-    #         dists.append(Distribution("StudentT", model[3*i], model[(3*i)+1], model[(3*i)+2]))
-
-    #     return dists
 
 
     def sample(self, nSamples):
