@@ -335,7 +335,7 @@ class LineResults(myObject):
         # Take care of out of bounds cases
         idx[idx==self.nPoints] = 0
 
-        return fiducial[fiducial == self.fiducials[idx]]
+        return idx[fiducial == self.fiducials[idx]]
 
     
     @property
