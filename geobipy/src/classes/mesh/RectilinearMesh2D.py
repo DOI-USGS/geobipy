@@ -292,13 +292,22 @@ class RectilinearMesh2D(myObject):
         assert np.size(intervals) > 1, ValueError("intervals must have size > 1")
 
         if (axis == 0):
+            # Make sure the intervals are within the axis.
+            i0 = np.maximum(0, np.searchsorted(intervals, self.z.cellCentres[0]))
+            i1 = np.minimum(self.z.nCells, np.searchsorted(intervals, self.z.cellCentres[-1]))
+            intervals = intervals[i0:i1]
+
             bins = binned_statistic(self.z.cellCentres, arr.T, bins = intervals, statistic=statistic)
             res = bins.statistic.T
         else:
+            i0 = np.maximum(0, np.searchsorted(intervals, self.x.cellCentres[0]))
+            i1 = np.minimum(self.zx.nCells, np.searchsorted(intervals, self.x.cellCentres[-1]))
+            intervals = intervals[i0:i1]
+
             bins = binned_statistic(self.x.cellCentres, arr, bins = intervals, statistic=statistic)
             res = bins.statistic
 
-        return res
+        return res, intervals
 
 
     def cellIndices(self, x, y, clip=False, trim=False):
