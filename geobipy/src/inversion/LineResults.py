@@ -34,9 +34,11 @@ except:
 
 class LineResults(myObject):
     """ Class to define results from EMinv1D_MCMC for a line of data """
-    def __init__(self, fName=None, sysPath=None, hdfFile=None):
+    def __init__(self, fName=None, systemFilepath=None, hdfFile=None):
         """ Initialize the lineResults """
         if (fName is None): return
+
+        assert not systemFilepath is None, Exception("Please also specify the path to the system file")
 
         self._additiveError = None
         self._best = None
@@ -61,7 +63,7 @@ class LineResults(myObject):
         self._opacity = None
         self.range = None
         self._relativeError = None
-        self.sysPath = sysPath
+        self.systemFilepath = systemFilepath
         self._totalError = None
         self._x = None
         self._y = None
@@ -164,7 +166,7 @@ class LineResults(myObject):
             if "FdemDataPoint" in dtype:
                 self._bestData = FdemData().fromHdf(self.hdfFile[attr[0]])
             elif "TdemDataPoint" in dtype:
-                self._bestData = TdemData().fromHdf(self.hdfFile[attr[0]], sysPath = self.sysPath)
+                self._bestData = TdemData().fromHdf(self.hdfFile[attr[0]], sysPath = self.systemFilepath)
         return self._bestData
         
 
@@ -235,7 +237,7 @@ class LineResults(myObject):
             if "FdemDataPoint" in dtype:
                 self._currentData = FdemData().fromHdf(self.hdfFile[attr[0]])
             elif "TdemDataPoint" in dtype:
-                self._currentData = TdemData().fromHdf(self.hdfFile[attr[0]], sysPath = self.sysPath)
+                self._currentData = TdemData().fromHdf(self.hdfFile[attr[0]], sysPath = self.systemFilepath)
         return self._currentData
 
 
@@ -244,10 +246,10 @@ class LineResults(myObject):
 
         if (self._doi is None):
             # Read in the opacity if present
-            if "doi" in self.hdfFile.keys():
-                self._doi = StatArray.StatArray().fromHdf(self.hdfFile['doi'])
-            else:
-                self.computeDOI()
+            # if "doi" in self.hdfFile.keys():
+            #     self._doi = StatArray.StatArray().fromHdf(self.hdfFile['doi'])
+            # else:
+            self.computeDOI()
         
         return self._doi
 
@@ -338,6 +340,26 @@ class LineResults(myObject):
         return idx[fiducial == self.fiducials[idx]]
 
     
+    def _get(self, variable, index=None):
+
+        variable = variable.lower()
+        assert variable in ['mean', 'best', 'interfaces', 'opacity', 'highestmarginal', 'marginalprobability'], ValueError("variable must be ['mean', 'best', 'interfaces', 'opacity', 'highestMarginal', 'marginalProbability']")
+
+        if variable == 'mean':
+            return self.meanParameters
+        elif variable == 'best':
+            return self.bestParameters
+        if variable == 'interfaces':
+            return self.interfaces
+        if variable == 'opacity':
+            return self.opacity
+        if variable == 'highestmarginal':
+            return self.highestMarginal
+        if variable == 'marginalprobability':
+            assert not index is None, ValueError('Please specify keyword "index" when requesting marginalProbability')
+            return self.marginalProbability(index)
+
+    
     @property
     def height(self):
         """Get the height of the observations. """
@@ -387,8 +409,8 @@ class LineResults(myObject):
         hm = self.hitMap.deepcopy()
         counts = np.asarray(self.hdfFile['currentmodel/par/posterior/arr/data'])
 
-        Bar = progressbar.ProgressBar()
-        for i in Bar(range(self.nPoints)):
+        # Bar = progressbar.ProgressBar()
+        for i in range(self.nPoints):
 
             try:
                 dpDistributions = hm.fitMajorPeaks(intervals, **kwargs)
@@ -399,6 +421,89 @@ class LineResults(myObject):
             hm._counts = counts[i, :, :]
 
         return distributions
+
+
+    def depthSlice(self, depth, values, **kwargs):
+        """ Obtain a slice at depth from values
+
+        Parameters
+        ----------
+        depth : float or array_like
+            If float: The depth at which to obtain the slice
+            If arraylike: length 2 array of an interval over which to average.
+        values : array_like
+            Values of shape self.mesh.shape from which to obtain the slice.
+
+        Returns
+        -------
+        out : geobipy.StatArray
+            The slice at depth.
+
+        """
+
+        if np.size(depth) > 1:
+            assert np.size(depth) == 2, ValueError("depth must be a scalar or size 2 array.")
+            depth.sort()
+            assert np.all(depth < self.mesh.z.cellEdges[-1]), 'Depths must be lees than max depth {}'.format(self.mesh.z.cellEdges[-1])
+            assert depth[0] <= depth[1], ValueError("Depths must be monotonically increasing")
+        else:
+            assert depth < self.mesh.z.cellEdges[-1], 'Depth must be lees than max depth {}'.format(self.mesh.z.cellEdges[-1])
+
+        assert np.all(np.shape(values)[-2:] == self.mesh.shape), ValueError("values must have shape {}".fomat(self.mesh.shape))
+
+        if np.size(depth) > 1:
+            cell1 = self.mesh.z.cellIndex(depth[0])
+            cell2 = self.mesh.z.cellIndex(depth[1])
+            out = np.mean(values[cell1:cell2+1, :], axis = 0)
+        else:
+            cell1 = self.mesh.z.cellIndex(depth)
+            out = values[cell1, :]
+        
+        return out
+
+    
+    def elevationSlice(self, elevation, values):
+        """ Obtain a slice at an elevation from values
+
+        Parameters
+        ----------
+        elevation : float or array_like
+            If float: The depth at which to obtain the slice
+            If arraylike: length 2 array of an interval over which to average.
+        values : array_like
+            Values of shape self.mesh.shape from which to obtain the slice.
+
+        Returns
+        -------
+        out : geobipy.StatArray
+            The slice at depth.
+
+        """
+
+        assert np.all(np.shape(values) == self.mesh.shape), ValueError("values must have shape {}".fomat(self.mesh.shape))
+        
+        out = np.full(self.nPoints, fill_value=np.nan)
+
+        if np.size(elevation) > 1:
+
+            for i in range(self.nPoints):
+                tmp = self.elevation[i] - elevation
+                if tmp[1] < self.mesh.z.cellEdges[-1] and tmp[0] > self.mesh.z.cellEdges[0]:
+                    cell1 = self.mesh.z.cellIndex(tmp[1], clip=True)
+                    cell2 = self.mesh.z.cellIndex(tmp[0], clip=True)
+
+                    out[i] = np.mean(values[cell1:cell2+1, i])
+
+        else:
+
+            for i in range(self.nPoints):
+                tmp = self.elevation[i] - elevation
+                if tmp > self.mesh.z.cellEdges[0] and tmp < self.mesh.z.cellEdges[-1]:
+                    cell1 = self.mesh.z.cellIndex(tmp, clip=True)
+
+                    out[i] = values[cell1, i]
+            
+        return out
 
 
     def identifyPeaks(self, depths, nBins = 250, width=4, limits=None):
@@ -611,7 +716,10 @@ class LineResults(myObject):
     def opacity(self):
         """ Get the model parameter opacity using the confidence intervals """
         if (self._opacity is None):
-           self.computeOpacity()
+            if "opacity" in self.hdfFile.keys():
+                self._opacity = StatArray.StatArray().fromHdf(self.hdfFile['opacity'])
+            else:
+                self.computeOpacity()
                     
         return self._opacity
 
@@ -638,6 +746,11 @@ class LineResults(myObject):
                 self._opacity[:indices[i], i] = 1.0
 
 
+        if 'opacity' in self.hdfFile.keys():
+            del self.hdfFile['opacity']
+                
+        self._opacity.toHdf(self.hdfFile, 'opacity')
+
     @property
     def parameterName(self):
 
@@ -662,7 +775,7 @@ class LineResults(myObject):
                 assert depth <= depth2, 'Depth2 must be >= depth'
                 k = self.mesh.z.cellIndex(depth2)
 
-        percentage = StatArray.StatArray(np.empty(self.nPoints), name="Probability of {} > {:0.2f}".format(parameterName, value), units = parameterName.units)
+        percentage = StatArray.StatArray(np.empty(self.nPoints), name="Probability of {} > {:0.2f}".format(self.parameterName, value), units = self.parameterUnits)
 
         if depth:
             counts = self.hdfFile['currentmodel/par/posterior/arr/data'][:, j:k, :]
@@ -679,7 +792,7 @@ class LineResults(myObject):
 
             cTmp = counts[i, :, :]
 
-            percentage[i] = np.sum(cTmp[:, pj:]) / cTmp.sum() * 100.0
+            percentage[i] = np.sum(cTmp[:, pj:]) / cTmp.sum()
 
         return percentage
 
@@ -714,7 +827,7 @@ class LineResults(myObject):
 
         hdfFile = self.hdfFile
 
-        R = Results(reciprocateParameter=reciprocateParameter).fromHdf(hdfFile, index=i, systemFilePath=self.sysPath)
+        R = Results(reciprocateParameter=reciprocateParameter).fromHdf(hdfFile, index=i, systemFilePath=self.systemFilepath)
 
         return R
         
@@ -1726,7 +1839,7 @@ class LineResults(myObject):
         hdfFile.create_dataset('i', shape=[nPoints], dtype=results.i.dtype, fillvalue=np.nan)
         hdfFile.create_dataset('iburn', shape=[nPoints], dtype=results.iBurn.dtype, fillvalue=np.nan)
         hdfFile.create_dataset('burnedin', shape=[nPoints], dtype=type(results.burnedIn))
-        hdfFile.create_dataset('doi',  shape=[nPoints], dtype=float, fillvalue=np.nan)
+        # hdfFile.create_dataset('doi',  shape=[nPoints], dtype=float, fillvalue=np.nan)
         hdfFile.create_dataset('multiplier',  shape=[nPoints], dtype=results.multiplier.dtype, fillvalue=np.nan)
         hdfFile.create_dataset('invtime',  shape=[nPoints], dtype=float, fillvalue=np.nan)
         hdfFile.create_dataset('savetime',  shape=[nPoints], dtype=float, fillvalue=np.nan)
@@ -1813,7 +1926,7 @@ class LineResults(myObject):
         hdfFile['burnedin'][i] = results.burnedIn
 
         # Add the depth of investigation
-        hdfFile['doi'][i] = results.doi()
+        # hdfFile['doi'][i] = results.doi()
 
         # Add the multiplier
         hdfFile['multiplier'][i] = results.multiplier
