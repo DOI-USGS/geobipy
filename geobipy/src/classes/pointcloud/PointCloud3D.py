@@ -293,8 +293,8 @@ class PointCloud3D(myObject):
         else:
             assert False, ValueError("method must be either 'ct' or 'mc' ")  
                         
-        ax = cP.pcolor(vals, x.edges(), y.edges(), **kwargs)
-        return ax
+        return cP.pcolor(vals, x.edges(), y.edges(), **kwargs)
+        
 
 
     def maketest(self, nPoints):
@@ -419,8 +419,8 @@ class PointCloud3D(myObject):
 
         kwargs['linewidth'] = kwargs.pop('linewidth', 0.1)
         kwargs['c'] = kwargs.pop('c', self.z)
-        ax = cP.scatter2D(self.x, y=self.y, **kwargs)
-        return ax
+        ax, sc, cbar = cP.scatter2D(self.x, y=self.y, **kwargs)
+        return ax, sc, cbar
 
 
     def setKdTree(self, nDims=3):
