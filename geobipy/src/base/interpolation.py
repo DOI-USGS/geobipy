@@ -100,6 +100,11 @@ def CT(dx, dy, bounds, XY, values, mask = False, kdtree = None, clip = False, ex
 
 def minimumCurvature(x, y, values, bounds, dx, dy, mask=False, clip=False, iterations=2000, tension=0.25, accuracy=0.01):
     
+
+    mn = np.nanmin(values)
+    mx = np.nanmax(values)
+    values = (values - mn) / (mx - mn)
+
     T = np.column_stack([x, y, values])
     np.savetxt('tmp.txt', T)
     
@@ -119,9 +124,8 @@ def minimumCurvature(x, y, values, bounds, dx, dy, mask=False, clip=False, itera
               
     increments = "-I%g/%g"%(dx,dy)
     region = "-R%g/%g/%g/%g"%(bnds[0], bnds[1], bnds[2], bnds[3])
-    
+
     if clip:
-        print()
         subcall = "surface tmp.txt {} {} -N{:d} -T{:g} -C{:g} -Gtmp.grd -Ll{:g} -Lu{:g}".format(increments, region, iterations, tension, accuracy, values.min(), values.max())
         subprocess.call(["surface", "tmp.txt", increments, region, "-N%d"%(iterations), "-T%g"%(tension), "-C%g"%(accuracy), "-Gtmp.grd", "-Ll%g"%(np.nanmin(values)), "-Lu%g"%(np.nanmax(values))])
     else:
@@ -133,6 +137,8 @@ def minimumCurvature(x, y, values, bounds, dx, dy, mask=False, clip=False, itera
         yT = np.asarray(f['y'])
         vals = np.asarray(f['z'])
     deleteFile("tmp.grd")
+
+    vals = (vals * (mx - mn)) + mn
         
     if mask:
         masked = "-S%g"%(mask)
