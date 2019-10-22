@@ -499,7 +499,7 @@ class Histogram2D(RectilinearMesh2D):
             h = Histogram1D(bins = self.xBins)
 
             Bar = progressbar.ProgressBar()
-            for i in Bar(range(new_intervals.size - 1)):
+            for i in Bar(range(np.size(new_intervals) - 1)):
                 h._counts[:] = counts[i, :]
                 try:
                     d, a = h.fitMajorPeaks(**kwargs)
@@ -511,7 +511,7 @@ class Histogram2D(RectilinearMesh2D):
         else:
             h = Histogram1D(bins = self.yBins)
             Bar = progressbar.ProgressBar()
-            for i in Bar(range(new_intervals.size - 1)):
+            for i in Bar(range(np.size(new_intervals) - 1)):
                 h._counts[:] = counts[:, i]
                 d, a = h.fitMajorPeaks(**kwargs)
                 distributions.append(d)
