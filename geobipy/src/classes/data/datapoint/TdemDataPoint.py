@@ -248,10 +248,10 @@ class TdemDataPoint(EmDataPoint):
     def fromHdf(self, grp, index=None, **kwargs):
         """ Reads the object from a HDF group """
 
-        assert ('sysPath' in kwargs), ValueError("missing 1 required argument 'sysPath', the path to directory containing system files")
+        assert ('systemFilepath' in kwargs), ValueError("missing 1 required argument 'systemFilepath', the path to directory containing system files")
 
-        sysPath = kwargs.pop('sysPath', None)
-        assert (not sysPath is None), ValueError("missing 1 required argument 'sysPath', the path to directory containing system files")
+        systemFilepath = kwargs.pop('systemFilepath', None)
+        assert (not systemFilepath is None), ValueError("missing 1 required argument 'systemFilepath', the path to directory containing system files")
         if (not index is None):
             assert cf.isInt(index), ValueError("index must be of type int")
 
@@ -272,7 +272,7 @@ class TdemDataPoint(EmDataPoint):
         systems = []
         for i in range(nSystems):
             # Get the system file name. h5py has to encode strings using utf-8, so decode it!
-            systems.append(TdemSystem(join(sysPath, str(np.asarray(grp.get('System{}'.format(i))), 'utf-8'))))
+            systems.append(TdemSystem(join(systemFilepath, str(np.asarray(grp.get('System{}'.format(i))), 'utf-8'))))
 
         _aPoint = TdemDataPoint(x, y, z, e, system=systems)
 
