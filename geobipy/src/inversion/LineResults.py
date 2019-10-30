@@ -46,7 +46,8 @@ class LineResults(myObject):
         self._bestData = None
         self._bestModel = None
         self._burnedIn = None
-        self._confidenceRange = None
+        self._credibleLower = None
+        self._credibleUpper = None
         self._doi = None
         self._elevation = None
         self._marginalProbability = None
@@ -166,7 +167,7 @@ class LineResults(myObject):
             if "FdemDataPoint" in dtype:
                 self._bestData = FdemData().fromHdf(self.hdfFile[attr[0]])
             elif "TdemDataPoint" in dtype:
-                self._bestData = TdemData().fromHdf(self.hdfFile[attr[0]], sysPath = self.systemFilepath)
+                self._bestData = TdemData().fromHdf(self.hdfFile[attr[0]], systemFilepath = self.systemFilepath)
         return self._bestData
         
 
@@ -177,26 +178,34 @@ class LineResults(myObject):
             self._best = StatArray.StatArray(self.getAttribute('bestinterp'), dtype=np.float64, name=self.parameterName, units=self.parameterUnits).T
         return self._best
 
-
-    @property
-    def confidenceRange(self):
-        """ Get the model parameter opacity using the confidence intervals """
-        if (self._confidenceRange is None):
-            # Read in the opacity if present
-            if "confidence_range" in self.hdfFile.keys():
-                self._confidenceRange = StatArray.StatArray().fromHdf(self.hdfFile['confidence_range'])
-            else:
-                self.computeConfidenceRange()
-                
-                    
-        return self._confidenceRange
-
     
-    def computeConfidenceRange(self, percent=95.0, log=10):
+    @property
+    def credibleLower(self):
+        if (self._credibleLower is None):
+            # Read in the opacity if present
+            if "credible_lower" in self.hdfFile.keys():
+                self._credibleLower = StatArray.StatArray().fromHdf(self.hdfFile['credible_lower'])
+            else:
+                self.computeConfidenceInterval(log=10)
+        return self._credibleLower
+    
+    @property
+    def credibleUpper(self):
+        if (self._credibleUpper is None):
+            # Read in the opacity if present
+            if "credible_upper" in self.hdfFile.keys():
+                self._credibleUpper = StatArray.StatArray().fromHdf(self.hdfFile['credible_upper'])
+            else:
+                self.computeConfidenceInterval(log=10)
+        return self._credibleUpper
 
-        s = 'percent={}, log={}'.format(percent, log)
 
-        self._confidenceRange = StatArray.StatArray(np.zeros(self.mesh.shape), '{} {}% Confidence Range'.format(cF._logLabel(log), percent), self.parameterUnits)
+    def computeCredibleInterval(self, percent=95.0, log=None):
+
+        s = 'percent={}'.format(percent)
+
+        self._credibleLower = StatArray.StatArray(np.zeros(self.mesh.shape), '{}% Credible Interval'.format(100.0 - percent), self.parameterUnits)
+        self._credibleUpper = StatArray.StatArray(np.zeros(self.mesh.shape), '{}% Credible Interval'.format(percent), self.parameterUnits)
 
         loc = 'currentmodel/par/posterior'
         a = np.asarray(self.hdfFile[loc+'/arr/data'])
@@ -212,19 +221,34 @@ class LineResults(myObject):
 
         h = Hitmap2D(xBinCentres = StatArray.StatArray(b[0, :]), yBinCentres = StatArray.StatArray(c[0, :]))
         h._counts[:, :] = a[0, :, :]
-        self._confidenceRange[:, 0] = h.axisConfidenceRange(percent=percent, log=log)
+        m, l, u = h.credibleIntervals(percent=percent, log=log)
+        self._credibleLower[:, 0] = l
+        self._credibleUpper[:, 0] = u
         
+        print('Computing {}% Credible Intervals'.format(percent), flush=True)
         for i in progressbar.progressbar(range(1, self.nPoints)):
             h.x.xBinCentres = b[i, :]
             h._counts[:, :] = a[i, :, :]
-            self._confidenceRange[:, i] = h.axisConfidenceRange(percent=percent, log=log)
+            m, l, u = h.credibleIntervals(percent=percent, log=log)
+            self._credibleLower[:, i] = l
+            self._credibleUpper[:, i] = u
 
 
-        if 'confidence_range' in self.hdfFile.keys():
-            del self.hdfFile['confidence_range']
-                
-        self._confidenceRange.toHdf(self.hdfFile, 'confidence_range')
-        self.hdfFile['confidence_range'].attrs['options'] = s
+        key = 'credible_lower'
+        if key in self.hdfFile.keys():
+            del self.hdfFile[key]
+        self._credibleLower.toHdf(self.hdfFile, key)
+
+        key = 'credible_upper'
+        if key in self.hdfFile.keys():
+            del self.hdfFile[key]
+        self._credibleUpper.toHdf(self.hdfFile, key)
+
+
+    @property
+    def credibleRange(self):
+        """ Get the model parameter opacity using the credible intervals """
+        return self.credibleUpper - self.credibleLower
 
     
     @property
@@ -237,7 +261,7 @@ class LineResults(myObject):
             if "FdemDataPoint" in dtype:
                 self._currentData = FdemData().fromHdf(self.hdfFile[attr[0]])
             elif "TdemDataPoint" in dtype:
-                self._currentData = TdemData().fromHdf(self.hdfFile[attr[0]], sysPath = self.systemFilepath)
+                self._currentData = TdemData().fromHdf(self.hdfFile[attr[0]], systemFilepath = self.systemFilepath)
         return self._currentData
 
 
@@ -255,35 +279,29 @@ class LineResults(myObject):
 
 
     def computeDOI(self, percent=67.0, window=1):
-        """ Get the DOI of the line depending on a percentage variance cutoff for each data point """
+        """ Get the DOI of the line depending on a percentage credible interval cutoff for each data point """
         #if (not self.doi is None): return
 
         assert window > 0, ValueError("window must be >= 1")
         assert 0.0 < percent < 100.0, ValueError("Must have 0.0 < percent < 100.0")
-        p = 0.01 * (100.0 - percent)
 
-        doi = StatArray.StatArray(np.zeros(self.nPoints), 'Depth of investigation', self.height.units)
+        opacity = self.opacity
 
-        loc = 'currentmodel/par/posterior'
-        a = np.asarray(self.hdfFile[loc+'/arr/data'])
-        try:
-            b = np.asarray(self.hdfFile[loc+'/x/data'])
-        except:
-            b = np.asarray(self.hdfFile[loc+'/x/x/data'])
+        nz = self.hitMap.z.nCells
+        doi = StatArray.StatArray(np.full(self.nPoints, fill_value=self.hitMap.z.cellEdges[-1]), 'Depth of investigation', self.height.units)
 
-        try:
-            c = np.asarray(self.hdfFile[loc+'/y/data'])
-        except:
-            c = np.asarray(self.hdfFile[loc+'/y/x/data'])
+        p = 0.01 * percent
 
-        h = Hitmap2D(xBinCentres = StatArray.StatArray(b[0, :]), yBinCentres = StatArray.StatArray(c[0, :]))
-        h._counts[:, :] = a[0, :, :]
-        doi[0] = h.getOpacityLevel(percent)
-        
-        for i in progressbar.progressbar(range(1, self.nPoints)):
-            h.x.xBinCentres = b[i, :]
-            h._counts[:, :] = a[i, :, :]
-            doi[i] = h.getOpacityLevel(percent)
+        print('Computing Depth of Investigation', flush=True)
+
+        for i in progressbar.progressbar(range(self.nPoints)):
+            tmp = opacity[:, i]
+            iCell = nz-1
+            while tmp[iCell] < p and iCell >= 0:
+                iCell -=1
+
+            if iCell >= 0:
+                doi[i] = self.hitMap.z.cellCentres[iCell-1]
 
         self._doi = doi
         if window > 1:
@@ -297,6 +315,7 @@ class LineResults(myObject):
             del self.hdfFile['doi']
                 
         self._doi.toHdf(self.hdfFile, 'doi')
+
 
     @property
     def elevation(self):
@@ -340,15 +359,27 @@ class LineResults(myObject):
         return idx[fiducial == self.fiducials[idx]]
 
     
-    def _get(self, variable, index=None):
+    def _get(self, variable, index=None, reciprocateParameter=False, **kwargs):
 
         variable = variable.lower()
         assert variable in ['mean', 'best', 'interfaces', 'opacity', 'highestmarginal', 'marginalprobability'], ValueError("variable must be ['mean', 'best', 'interfaces', 'opacity', 'highestMarginal', 'marginalProbability']")
 
         if variable == 'mean':
-            return self.meanParameters
+            if reciprocateParameter:
+                vals = np.divide(1.0, self.meanParameters)
+                vals.name = 'Resistivity'
+                vals.units = '$\Omega m$'
+                return vals
+            else:
+                return self.meanParameters
         elif variable == 'best':
-            return self.bestParameters
+            if reciprocateParameter:
+                vals = 1.0 / self.meanParameters
+                vals.name = 'Resistivity'
+                vals.units = '$\Omega m$'
+                return vals
+            else:
+                return self.bestParameters
         if variable == 'interfaces':
             return self.interfaces
         if variable == 'opacity':
@@ -560,7 +591,7 @@ class LineResults(myObject):
 
     @property
     def lineHitmap(self):
-        """ Get the model parameter opacity using the confidence intervals """
+        """ """
         if (self._lineHitmap is None):
             # Read in the opacity if present
             if "line_hitmap" in self.hdfFile.keys():
@@ -647,7 +678,7 @@ class LineResults(myObject):
 
     @property
     def modeParameter(self):
-        """ Get the model parameter opacity using the confidence intervals """
+        """ """
         if (self._modeParameter is None):
             # Read in the opacity if present
             if "mode_parameter" in self.hdfFile.keys():
@@ -677,12 +708,13 @@ class LineResults(myObject):
 
         h = Hitmap2D(xBinCentres = StatArray.StatArray(b[0, :]), yBinCentres = StatArray.StatArray(c[0, :]))
         h._counts[:, :] = a[0, :, :]
-        self._modeParameter[:, 0] = h.axisMode()
+        self._modeParameter[:, 0] = h.mode()
         
+        print('Computing Mode Parameter', flush=True)
         for i in progressbar.progressbar(range(1, self.nPoints)):
             h.x.xBinCentres = b[i, :]
             h._counts[:, :] = a[i, :, :]
-            self._modeParameter[:, i] = h.axisMode()
+            self._modeParameter[:, i] = h.mode()
 
 
         if 'mode_parameter' in self.hdfFile.keys():
@@ -714,7 +746,7 @@ class LineResults(myObject):
 
     @property
     def opacity(self):
-        """ Get the model parameter opacity using the confidence intervals """
+        """ Get the model parameter opacity using the credible intervals """
         if (self._opacity is None):
             if "opacity" in self.hdfFile.keys():
                 self._opacity = StatArray.StatArray().fromHdf(self.hdfFile['opacity'])
@@ -726,18 +758,12 @@ class LineResults(myObject):
     
     def computeOpacity(self, percent=95.0, log=10, multiplier=0.5, useDOI=True):
 
-        tmp = self.confidenceRange
+        tmp = self.credibleRange
 
-        # if depthScaling:
-        #     tmp = self.confidenceRange * np.repeat(self.mesh.z.cellCentres[:, np.newaxis], self.nPoints, axis=1)
-
-        rnge = multiplier * (tmp.max() - tmp.min())
-
-        self._opacity = StatArray.StatArray(tmp, "Opacity", "")
-        
-        self._opacity[self._opacity > rnge] = rnge
-
-        self._opacity = 1.0 - (self._opacity / rnge)
+        mn = np.nanmin(tmp)
+        mx = np.nanmax(tmp)
+    
+        self._opacity = 1.0 - StatArray.StatArray(tmp, "Opacity", "").normalize(axis=0)
 
         if useDOI:
             indices = self.mesh.z.cellIndex(self.doi)
@@ -750,6 +776,7 @@ class LineResults(myObject):
             del self.hdfFile['opacity']
                 
         self._opacity.toHdf(self.hdfFile, 'opacity')
+
 
     @property
     def parameterName(self):
@@ -786,6 +813,7 @@ class LineResults(myObject):
         parameters = RectilinearMesh1D().fromHdf(self.hdfFile['currentmodel/par/posterior/x'])
                
         Bar = progressbar.ProgressBar()
+        print('Computing P(X > value)', flush=True)
         for i in Bar(range(self.nPoints)):
             p = RectilinearMesh1D(cellEdges=parameters.cellEdges[i, :])
             pj = p.cellIndex(value)
@@ -956,22 +984,9 @@ class LineResults(myObject):
         kwargs['color'] = kwargs.pop('color','k')
         kwargs['linewidth'] = kwargs.pop('linewidth',0.5)
 
-        if window == 1:
-            xtmp = self.mesh.getXAxis(xAxis, centres=True)
+        xtmp = self.mesh.getXAxis(xAxis, centres=True)
 
-            cP.plot(xtmp, self.elevation - self.doi, **kwargs)
-
-        else:
-            w2 = np.int(0.5 * window)
-            w22 = -w2 if window % 2 == 0 else -w2-1
-            
-            xtmp = self.mesh.getXAxis(xAxis, centres=True)[w2-1:w22]
-
-            cP.plot(xtmp, self.elevation[w2-1:w22] - self.doi, **kwargs)
-
-        #if (labels):
-        #    cP.xlabel(self.xPlot.getNameUnits())
-        #    cP.ylabel('Elevation (m)')
+        (self.elevation - self.doi).plot(x=xtmp, **kwargs)
 
 
     def plotElevation(self, **kwargs):
@@ -1219,6 +1234,10 @@ class LineResults(myObject):
             kwargs['c'] = cP.wellSeparated[2]
             self.relativeError.plot(xtmp,
                     alpha = 0.7, label='System {}'.format(1), **kwargs)
+
+
+    def scatter2D(self, **kwargs):
+        return self.data.scatter2D(**kwargs)
 
 
     def plotTotalError(self, channel, **kwargs):
@@ -1488,7 +1507,8 @@ class LineResults(myObject):
     
     def computeMarginalProbability(self, fractions, distributions, **kwargs):
 
-        print("Computing marginal probabilities. This can take a while. \nOnce you have done this, and you no longer need to change the input parameters, simply use LineResults.marginalProbability to access.")
+        print("Computing marginal probabilities. This can take a while. \n",
+        "Once you have done this, and you no longer need to change the input parameters, simply use LineResults.marginalProbability to access.")
 
         assert isinstance(distributions, list), TypeError("distributions must be a list")
         assert np.size(fractions) == np.size(distributions), ValueError("fractions and distributions must have the same length")
@@ -1511,6 +1531,7 @@ class LineResults(myObject):
         hm = self.getAttribute('hit map', index=0)
 
         Bar = progressbar.ProgressBar()
+        print('Computing 1D Marginal', flush=True)
         for i in Bar(range(self.nPoints)):
             hm._counts = counts[i, :, :]
             hm._x = RectilinearMesh1D(cellEdges=parameters.cellEdges[i, :])
@@ -1537,6 +1558,7 @@ class LineResults(myObject):
 
         hm = self.getAttribute('hit map', index=0)
 
+        print("Computing 2D Marginal", flush=True)
         Bar = progressbar.ProgressBar()
         for i in Bar(range(self.nPoints)):
             hm._counts = counts[i, :, :]
@@ -1659,9 +1681,9 @@ class LineResults(myObject):
             "ascii" or "binary" format. Ascii is readable, binary is not but results in smaller files.
 
         """
-        a = self.bestParameters.T
-        b = self.meanParameters.T
-        c = self.interfaces().T
+        a = self.bestParameters
+        b = self.meanParameters
+        c = self.interfaces
 
         d = StatArray.StatArray(1.0 / a, "Best Conductivity", "$\fraq{S}{m}$")
         e = StatArray.StatArray(1.0 / b, "Mean Conductivity", "$\fraq{S}{m}$")
@@ -1939,9 +1961,9 @@ class LineResults(myObject):
 
         # Interpolate the mean and best model to the discretized hitmap
         hm = results.currentModel.par.posterior
-        results.meanInterp[:] = hm.axisMean()
+        results.meanInterp[:] = hm.mean()
         results.bestInterp[:] = results.bestModel.interpPar2Mesh(results.bestModel.par, hm)
-        # results.opacityInterp[:] = results.Hitmap.confidenceRange(percent=95.0, log='e')
+        # results.opacityInterp[:] = results.Hitmap.credibleRange(percent=95.0, log='e')
 
         slic = np.s_[i, :]
         # Add the interpolated mean model
