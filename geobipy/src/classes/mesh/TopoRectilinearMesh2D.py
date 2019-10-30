@@ -272,9 +272,9 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
         # Constuct the node locations for the vtk file
         nodes = np.empty([nNodes, 3])
 
-        nodes[:, 0] = self.XMesh('x').reshape(self.nNodes)
-        nodes[:, 1] = self.XMesh('y').reshape(self.nNodes)
-        nodes[:, 2] = self._zMesh.reshape(self.nNodes)
+        nodes[:, 0] = self.xMesh('x').reshape(self.nNodes)
+        nodes[:, 1] = self.xMesh('y').reshape(self.nNodes)
+        nodes[:, 2] = self.zMesh('absolute').reshape(self.nNodes)
 
         tmp = np.int32([0, 1, self.x.nEdges+1, self.x.nEdges])
         a = np.ones(self.x.nCells, dtype=np.int32)

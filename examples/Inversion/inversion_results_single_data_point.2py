@@ -11,9 +11,9 @@ import numpy as np
 ################################################################################
 # Results for a single data point
 
-sysPath = join('supplementary', 'Data')
+systemFilepath = join('supplementary', 'Data')
 fName = join('supplementary','run_TimeDomain','30010.0.h5')
-LR = LineResults(fName, sysPath=sysPath)
+LR = LineResults(fName, systemFilepath=systemFilepath)
 
 
 ################################################################################

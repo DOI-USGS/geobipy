@@ -105,26 +105,26 @@ class Histogram2D(RectilinearMesh2D):
             return out
 
 
-    def axisConfidenceIntervals(self, percent=95.0, log=None, axis=0):
-        """Gets the confidence intervals for the specified axis.
+    def credibleIntervals(self, percent=95.0, log=None, axis=0):
+        """Gets the credible intervals for the specified axis.
         
         Parameters
         ----------
         percent : float
             Confidence percentage.
         log : 'e' or float, optional
-            Take the log of the confidence intervals to a base. 'e' if log = 'e', or a number e.g. log = 10.
+            Take the log of the credible intervals to a base. 'e' if log = 'e', or a number e.g. log = 10.
         axis : int
             Along which axis to obtain the interval locations.
 
         Returns
         -------
         med : array_like
-            Contains the locations of the medians along the specified axis. Has size equal to arr.shape[axis].
+            Contains the medians along the specified axis. Has size equal to arr.shape[axis].
         low : array_like
-            Contains the locations of the lower interval along the specified axis. Has size equal to arr.shape[axis].
+            Contains the lower interval along the specified axis. Has size equal to arr.shape[axis].
         high : array_like
-            Contains the locations of the upper interval along the specified axis. Has size equal to arr.shape[axis].
+            Contains the upper interval along the specified axis. Has size equal to arr.shape[axis].
 
         """
 
@@ -160,26 +160,39 @@ class Histogram2D(RectilinearMesh2D):
         return (med, low, high)
 
 
-    def axisConfidenceRange(self, percent=95.0, log=None, axis=0):
-        """ Get the range of confidence with depth """
-        sMed, sLow, sHigh = self.axisConfidenceIntervals(percent, log=log, axis=axis)
+    def credibleRange(self, percent=95.0, log=None, axis=0):
+        """ Get the range of credibility with depth
+        
+        Parameters
+        ----------
+        percent : float
+            Percent of the credible intervals
+        log : 'e' or float, optional
+            If None: The range is the difference in linear space of the credible intervals
+            If 'e' or float: The range is the difference in log space, or ratio in linear space.
+        axis : int
+            Axis along which to get the marginal histogram.
+
+        
+        """
+        sMed, sLow, sHigh = self.credibleIntervals(percent, log=log, axis=axis)
 
         return sHigh - sLow
 
 
 
-    def marginalHistogram(self, intervals=None, axis=0, log=None):
+    def marginalHistogram(self, intervals=None, log=None, axis=0):
         """Get the marginal histogram along an axis
 
         Parameters
         ----------
         intervals : array_like
             Array of size 2 containing lower and upper limits between which to count.
-        axis : int
-            Axis along which to get the marginal histogram.
         log : 'e' or float, optional
             Entries are given in linear space, but internally bins and values are logged.
             Plotting is in log space.
+        axis : int
+            Axis along which to get the marginal histogram.
 
         Returns
         -------
@@ -207,13 +220,15 @@ class Histogram2D(RectilinearMesh2D):
         return out
 
     
-    def axisMean(self, log=None, axis=0):
+    def mean(self, log=None, axis=0):
         """Gets the mean along the given axis.
         
         This is not the true mean of the original samples. It is the best estimated mean using the binned counts multiplied by the axis bin centres.
 
         Parameters
         ----------
+        log : 'e' or float, optional.
+            Take the log of the mean to base "log"
         axis : int
             Axis to take the mean along.
 
@@ -240,7 +255,7 @@ class Histogram2D(RectilinearMesh2D):
         return tmp
 
 
-    def axisMedian(self, log=None, axis=0): 
+    def median(self, log=None, axis=0): 
         """Gets the median for the specified axis.
         
         Parameters
@@ -256,10 +271,10 @@ class Histogram2D(RectilinearMesh2D):
             The medians along the specified axis. Has size equal to arr.shape[axis].
 
         """
-        return super().axisMedian(self._counts, log, axis)
+        return super().median(self._counts, log, axis)
 
     
-    def axisMode(self, log=None, axis=0):
+    def mode(self, log=None, axis=0):
         """Gets the mode for the specified axis.
         
         Parameters
@@ -289,16 +304,19 @@ class Histogram2D(RectilinearMesh2D):
         return mode
 
 
-    def axisOpacity(self, percent=95.0, axis=0):
-        """Return an opacity between 0 and 1 based on the difference between confidence invervals of the hitmap.
+    def opacity(self, percent=95.0, log=None, axis=0):
+        """Return an opacity between 0 and 1 based on the difference between credible invervals of the hitmap.
 
-        Higher ranges in confidence map to less opaqueness.
+        Higher ranges in credibility map to less opaqueness.
         
         Parameters
         ----------
-        percent : float
+        percent : float, optional.
             Confidence percentage.
-        axis : int
+        log : 'e' or float, optional.
+            If None: Take the difference in credible intervals.
+            Else: Take the ratio of the credible intervals.
+        axis : int, optional.
             Along which axis to obtain the interval locations.
 
         Returns
@@ -308,10 +326,10 @@ class Histogram2D(RectilinearMesh2D):
 
         """
 
-        return 1.0 - self.axisTransparency(percent, axis)
+        return 1.0 - self.transparency(percent=percent, log=log, axis=axis)
 
 
-    def axisCdf(self, axis=0):
+    def cdf(self, axis=0):
 
         total = self._counts.sum(axis=1-axis)
         cdf = np.cumsum(self._counts, axis=1-axis)
@@ -324,7 +342,7 @@ class Histogram2D(RectilinearMesh2D):
         return cdf
 
 
-    def axisPdf(self, axis=0):
+    def pdf(self, axis=0):
 
         total = self._counts.sum(axis=1-axis)
 
@@ -336,7 +354,7 @@ class Histogram2D(RectilinearMesh2D):
         return out
 
 
-    def axisPercentage(self, percent, log=None, axis=0):
+    def percentage(self, percent, log=None, axis=0):
         """Gets the percentage of the CDF for the specified axis.
         
         Parameters
@@ -355,7 +373,7 @@ class Histogram2D(RectilinearMesh2D):
 
         """
 
-        tmp = self.axisCdf(axis)
+        tmp = self.cdf(axis)
 
         p = 0.01 * percent
 
@@ -372,15 +390,18 @@ class Histogram2D(RectilinearMesh2D):
         return out
 
 
-    def axisTransparency(self, percent=95.0, axis=0):
-        """Return a transparency value between 0 and 1 based on the difference between confidence invervals of the hitmap.
+    def transparency(self, percent=95.0, log=None, axis=0):
+        """Return a transparency value between 0 and 1 based on the difference between credible invervals of the hitmap.
 
-        Higher ranges in confidence are mapped to more transparency.
+        Higher ranges in credibility are mapped to more transparency.
         
         Parameters
         ----------
         percent : float
             Confidence percentage.
+        log : 'e' or float, optional.
+            If None: Take the difference in credible intervals.
+            Else: Take the ratio of the credible intervals.
         axis : int
             Along which axis to obtain the interval locations.
 
@@ -391,11 +412,14 @@ class Histogram2D(RectilinearMesh2D):
 
         """
 
-        out = self.axisConfidenceRange(percent=percent, axis=axis)
-        maxes = np.max(out)
-        if (maxes == 0.0): return out
-        out /= maxes
-        return out
+        out = self.credibleRange(percent=percent, log=log, axis=axis)
+        mn = np.nanmin(out)
+        mx = np.nanmax(out)
+        t = mx - mn
+        if t > 0.0:
+            return (out - mn) / t
+        else:
+            return out - mn
 
 
     def comboPlot(self, **kwargs):
@@ -409,13 +433,13 @@ class Histogram2D(RectilinearMesh2D):
         self.pcolor(noColorbar = True, **kwargs)
 
         ax.append(plt.subplot(self.gs[:1, :4]))
-        h = self.axisHistogram(axis=0).plot()
+        h = self.marginalHistogram(axis=0).plot()
         plt.xlabel(''); plt.ylabel('')
         plt.xticks([]); plt.yticks([])
         ax[-1].spines["left"].set_visible(False)
 
         ax.append(plt.subplot(self.gs[1:, 4:]))
-        h = self.axisHistogram(axis=0).plot(rotate=True)
+        h = self.marginalHistogram(axis=0).plot(rotate=True)
         plt.ylabel(''); plt.xlabel('')
         plt.yticks([]); plt.xticks([])
         ax[-1].spines["bottom"].set_visible(False)
@@ -499,7 +523,8 @@ class Histogram2D(RectilinearMesh2D):
             h = Histogram1D(bins = self.xBins)
 
             Bar = progressbar.ProgressBar()
-            for i in Bar(range(new_intervals.size - 1)):
+            print('Fitting Peaks', flush=True)
+            for i in Bar(range(np.size(new_intervals) - 1)):
                 h._counts[:] = counts[i, :]
                 try:
                     d, a = h.fitMajorPeaks(**kwargs)
@@ -511,7 +536,8 @@ class Histogram2D(RectilinearMesh2D):
         else:
             h = Histogram1D(bins = self.yBins)
             Bar = progressbar.ProgressBar()
-            for i in Bar(range(new_intervals.size - 1)):
+            print('Fitting Peaks', flush=True)
+            for i in Bar(range(np.size(new_intervals) - 1)):
                 h._counts[:] = counts[:, i]
                 d, a = h.fitMajorPeaks(**kwargs)
                 distributions.append(d)
@@ -607,7 +633,7 @@ class Histogram2D(RectilinearMesh2D):
         #     StatArray.StatArray(pdfs[i, :]).plot(x=ax)
 
         # Initialize the facies Model
-        axisPdf = self.axisPdf(axis=axis)
+        axisPdf = self.pdf(axis=axis)
 
         marginalProbability = StatArray.StatArray([nDistributions, self.shape[axis]], 'Marginal probability')
         for j in range(nDistributions):
@@ -652,8 +678,8 @@ class Histogram2D(RectilinearMesh2D):
             class_xPdfs[i, :] = fractions[i] * d.probability(ax1, axis=1)
 
 
-        histogram_xPdf = StatArray.StatArray(self.axisPdf(axis=1))
-        histogram_yPdf = StatArray.StatArray(self.axisPdf(axis=0))
+        histogram_xPdf = StatArray.StatArray(self.pdf(axis=1))
+        histogram_yPdf = StatArray.StatArray(self.pdf(axis=0))
 
         if verbose:
             plt.figure(figsize=(6.67, 6.0))
@@ -760,7 +786,7 @@ class Histogram2D(RectilinearMesh2D):
     
     def plotMean(self, log=None, axis=0, **kwargs):
 
-        m = self.axisMean(log=log, axis=axis)
+        m = self.mean(log=log, axis=axis)
 
         if axis == 0:
             cP.plot(m, self.y.cellCentres, **kwargs)
@@ -770,7 +796,7 @@ class Histogram2D(RectilinearMesh2D):
 
     def plotMedian(self, log=None, axis=0, **kwargs):
 
-        m = self.axisMedian(log=log, axis=axis)
+        m = self.median(log=log, axis=axis)
 
         if axis == 0:
             cP.plot(m, self.y.cellCentres, **kwargs)

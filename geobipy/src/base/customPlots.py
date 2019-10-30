@@ -1047,7 +1047,7 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
 
     _cLabel = kwargs.pop('clabel', cF.getNameUnits(c))
 
-    standardColour = isinstance(c, str)
+    standardColour = isinstance(c, (str, tuple))
     
     xt = x[i]
     

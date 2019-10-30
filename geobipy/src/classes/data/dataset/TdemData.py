@@ -816,16 +816,16 @@ class TdemData(Data):
     def fromHdf(self, grp, **kwargs):
         """ Reads the object from a HDF group """
 
-        assert ('sysPath' in kwargs), ValueError("missing 1 required argument 'sysPath', the path to directory containing system files")
+        assert ('systemFilepath' in kwargs), ValueError("missing 1 required argument 'systemFilepath', the path to directory containing system files")
 
-        sysPath = kwargs.pop('sysPath', None)
-        assert (not sysPath is None), ValueError("missing 1 required argument 'sysPath', the path to directory containing system files")
+        systemFilepath = kwargs.pop('systemFilepath', None)
+        assert (not systemFilepath is None), ValueError("missing 1 required argument 'systemFilepath', the path to directory containing system files")
 
         nSystems = np.int(np.asarray(grp.get('nSystems')))
         systems = []
         for i in range(nSystems):
             # Get the system file name. h5py has to encode strings using utf-8, so decode it!
-            systems.append(TdemSystem(join(sysPath, str(np.asarray(grp.get('System{}'.format(i))), 'utf-8'))))
+            systems.append(TdemSystem(join(systemFilepath, str(np.asarray(grp.get('System{}'.format(i))), 'utf-8'))))
 
         s = grp['d/data'].shape
 

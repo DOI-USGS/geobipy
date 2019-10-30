@@ -224,178 +224,6 @@ Module describing an efficient histogram class</p>
 </dd>
 </dl>
 <dl class="method">
-<dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.axisConfidenceIntervals">
-<code class="descname">axisConfidenceIntervals</code><span class="sig-paren">(</span><em>percent=95.0</em>, <em>log=None</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.axisConfidenceIntervals" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the confidence intervals for the specified axis.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>percent</strong> (<em>float</em>) – Confidence percentage.</p></li>
-<li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Take the log of the confidence intervals to a base. ‘e’ if log = ‘e’, or a number e.g. log = 10.</p></li>
-<li><p><strong>axis</strong> (<em>int</em>) – Along which axis to obtain the interval locations.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>med</strong> (<em>array_like</em>) – Contains the locations of the medians along the specified axis. Has size equal to arr.shape[axis].</p></li>
-<li><p><strong>low</strong> (<em>array_like</em>) – Contains the locations of the lower interval along the specified axis. Has size equal to arr.shape[axis].</p></li>
-<li><p><strong>high</strong> (<em>array_like</em>) – Contains the locations of the upper interval along the specified axis. Has size equal to arr.shape[axis].</p></li>
-</ul>
-</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.axisConfidenceRange">
-<code class="descname">axisConfidenceRange</code><span class="sig-paren">(</span><em>percent=95.0</em>, <em>log=None</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.axisConfidenceRange" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the range of confidence with depth</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.axisHistogram">
-<code class="descname">axisHistogram</code><span class="sig-paren">(</span><em>intervals=None</em>, <em>axis=0</em>, <em>log=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.axisHistogram" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the histogram along an axis</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>intervals</strong> (<em>array_like</em>) – Array of size 2 containing lower and upper limits between which to count.</p></li>
-<li><p><strong>axis</strong> (<em>int</em>) – Axis along which to get the histogram.</p></li>
-<li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Entries are given in linear space, but internally bins and values are logged.
-Plotting is in log space.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>out</strong></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>geobipy.Histogram1D</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.axisMean">
-<code class="descname">axisMean</code><span class="sig-paren">(</span><em>log=None</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.axisMean" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the mean along the given axis.</p>
-<p>This is not the true mean of the original samples. It is the best estimated mean using the binned counts multiplied by the axis bin centres.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>axis</strong> (<em>int</em>) – Axis to take the mean along.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>out</strong> – The means along the axis.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>geobipy.StatArray</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.axisMedian">
-<code class="descname">axisMedian</code><span class="sig-paren">(</span><em>log=None</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.axisMedian" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the median for the specified axis.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Take the log of the median to a base. ‘e’ if log = ‘e’, or a number e.g. log = 10.</p></li>
-<li><p><strong>axis</strong> (<em>int</em>) – Along which axis to obtain the median.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>out</strong> – The medians along the specified axis. Has size equal to arr.shape[axis].</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>array_like</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.axisMode">
-<code class="descname">axisMode</code><span class="sig-paren">(</span><em>log=None</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.axisMode" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the mode for the specified axis.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Take the log of the mode to a base. ‘e’ if log = ‘e’, or a number e.g. log = 10.</p></li>
-<li><p><strong>axis</strong> (<em>int</em>) – Along which axis to obtain the mode.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>med</strong> – Contains the modes along the specified axis. Has size equal to arr.shape[axis].</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>array_like</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.axisOpacity">
-<code class="descname">axisOpacity</code><span class="sig-paren">(</span><em>percent=95.0</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.axisOpacity" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return an opacity between 0 and 1 based on the difference between confidence invervals of the hitmap.</p>
-<p>Higher ranges in confidence map to less opaqueness.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>percent</strong> (<em>float</em>) – Confidence percentage.</p></li>
-<li><p><strong>axis</strong> (<em>int</em>) – Along which axis to obtain the interval locations.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>out</strong> – Opacity along the axis.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>array_like</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.axisPercentage">
-<code class="descname">axisPercentage</code><span class="sig-paren">(</span><em>percent</em>, <em>log=None</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.axisPercentage" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the percentage of the CDF for the specified axis.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>percent</strong> (<em>float</em>) – Confidence percentage.</p></li>
-<li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Take the log to a base. ‘e’ if log = ‘e’, or a number e.g. log = 10.</p></li>
-<li><p><strong>axis</strong> (<em>int</em>) – Along which axis to obtain the CDF percentage.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>out</strong> – The CDF percentage along the specified axis. Has size equal to arr.shape[axis].</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>array_like</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.axisTransparency">
-<code class="descname">axisTransparency</code><span class="sig-paren">(</span><em>percent=95.0</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.axisTransparency" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a transparency value between 0 and 1 based on the difference between confidence invervals of the hitmap.</p>
-<p>Higher ranges in confidence are mapped to more transparency.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>percent</strong> (<em>float</em>) – Confidence percentage.</p></li>
-<li><p><strong>axis</strong> (<em>int</em>) – Along which axis to obtain the interval locations.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>out</strong> – Transparency along the axis.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>array_like</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
 <dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.comboPlot">
 <code class="descname">comboPlot</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.comboPlot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Combination plot using the 2D histogram and two axis histograms</p>
@@ -419,12 +247,40 @@ a 2D joint probability density.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.divideBySum">
-<code class="descname">divideBySum</code><span class="sig-paren">(</span><em>axis</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.divideBySum" title="Permalink to this definition">¶</a></dt>
-<dd><p>Divide by the sum along an axis.</p>
+<dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.credibleIntervals">
+<code class="descname">credibleIntervals</code><span class="sig-paren">(</span><em>percent=95.0</em>, <em>log=None</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.credibleIntervals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the credible intervals for the specified axis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>axis</strong> (<em>int</em>) – Axis to sum along and then divide by.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>percent</strong> (<em>float</em>) – Confidence percentage.</p></li>
+<li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Take the log of the credible intervals to a base. ‘e’ if log = ‘e’, or a number e.g. log = 10.</p></li>
+<li><p><strong>axis</strong> (<em>int</em>) – Along which axis to obtain the interval locations.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>med</strong> (<em>array_like</em>) – Contains the medians along the specified axis. Has size equal to arr.shape[axis].</p></li>
+<li><p><strong>low</strong> (<em>array_like</em>) – Contains the lower interval along the specified axis. Has size equal to arr.shape[axis].</p></li>
+<li><p><strong>high</strong> (<em>array_like</em>) – Contains the upper interval along the specified axis. Has size equal to arr.shape[axis].</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.credibleRange">
+<code class="descname">credibleRange</code><span class="sig-paren">(</span><em>percent=95.0</em>, <em>log=None</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.credibleRange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the range of credibility with depth</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>percent</strong> (<em>float</em>) – Percent of the credible intervals</p></li>
+<li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – If None: The range is the difference in linear space of the credible intervals
+If ‘e’ or float: The range is the difference in log space, or ratio in linear space.</p></li>
+<li><p><strong>axis</strong> (<em>int</em>) – Axis along which to get the marginal histogram.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -467,6 +323,120 @@ a 2D joint probability density.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.marginalHistogram">
+<code class="descname">marginalHistogram</code><span class="sig-paren">(</span><em>intervals=None</em>, <em>log=None</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.marginalHistogram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the marginal histogram along an axis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>intervals</strong> (<em>array_like</em>) – Array of size 2 containing lower and upper limits between which to count.</p></li>
+<li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Entries are given in linear space, but internally bins and values are logged.
+Plotting is in log space.</p></li>
+<li><p><strong>axis</strong> (<em>int</em>) – Axis along which to get the marginal histogram.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>geobipy.Histogram1D</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.marginalProbability">
+<code class="descname">marginalProbability</code><span class="sig-paren">(</span><em>fractions</em>, <em>distributions</em>, <em>axis=0</em>, <em>reciprocateParameter=None</em>, <em>log=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.marginalProbability" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the marginal (joint) probability between the Histogram and a set of distributions.</p>
+<div class="math notranslate nohighlight">
+\[p(distribution_{i} | \boldsymbol{v}) =\]</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.mean">
+<code class="descname">mean</code><span class="sig-paren">(</span><em>log=None</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.mean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the mean along the given axis.</p>
+<p>This is not the true mean of the original samples. It is the best estimated mean using the binned counts multiplied by the axis bin centres.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional.</em>) – Take the log of the mean to base “log”</p></li>
+<li><p><strong>axis</strong> (<em>int</em>) – Axis to take the mean along.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – The means along the axis.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>geobipy.StatArray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.median">
+<code class="descname">median</code><span class="sig-paren">(</span><em>log=None</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.median" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the median for the specified axis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Take the log of the median to a base. ‘e’ if log = ‘e’, or a number e.g. log = 10.</p></li>
+<li><p><strong>axis</strong> (<em>int</em>) – Along which axis to obtain the median.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – The medians along the specified axis. Has size equal to arr.shape[axis].</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array_like</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.mode">
+<code class="descname">mode</code><span class="sig-paren">(</span><em>log=None</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the mode for the specified axis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Take the log of the mode to a base. ‘e’ if log = ‘e’, or a number e.g. log = 10.</p></li>
+<li><p><strong>axis</strong> (<em>int</em>) – Along which axis to obtain the mode.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>med</strong> – Contains the modes along the specified axis. Has size equal to arr.shape[axis].</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array_like</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.opacity">
+<code class="descname">opacity</code><span class="sig-paren">(</span><em>percent=95.0</em>, <em>log=None</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.opacity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an opacity between 0 and 1 based on the difference between credible invervals of the hitmap.</p>
+<p>Higher ranges in credibility map to less opaqueness.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>percent</strong> (<em>float</em><em>, </em><em>optional.</em>) – Confidence percentage.</p></li>
+<li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional.</em>) – If None: Take the difference in credible intervals.
+Else: Take the ratio of the credible intervals.</p></li>
+<li><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional.</em>) – Along which axis to obtain the interval locations.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – Opacity along the axis.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array_like</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
 <dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.pcolor">
 <code class="descname">pcolor</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.pcolor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot the Histogram2D as an image</p>
@@ -487,6 +457,50 @@ Values in c that are &lt;= 0 are masked.</p></li>
 <li><p><strong>noColorbar</strong> (<em>bool, optional</em>) – Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.</p></li>
 <li><p><strong>trim</strong> (<em>bool, optional</em>) – Set the x and y limits to the first and last non zero values along each axis.</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.percentage">
+<code class="descname">percentage</code><span class="sig-paren">(</span><em>percent</em>, <em>log=None</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.percentage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the percentage of the CDF for the specified axis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>percent</strong> (<em>float</em>) – Confidence percentage.</p></li>
+<li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Take the log to a base. ‘e’ if log = ‘e’, or a number e.g. log = 10.</p></li>
+<li><p><strong>axis</strong> (<em>int</em>) – Along which axis to obtain the CDF percentage.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – The CDF percentage along the specified axis. Has size equal to arr.shape[axis].</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array_like</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.transparency">
+<code class="descname">transparency</code><span class="sig-paren">(</span><em>percent=95.0</em>, <em>log=None</em>, <em>axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.transparency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a transparency value between 0 and 1 based on the difference between credible invervals of the hitmap.</p>
+<p>Higher ranges in credibility are mapped to more transparency.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>percent</strong> (<em>float</em>) – Confidence percentage.</p></li>
+<li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional.</em>) – If None: Take the difference in credible intervals.
+Else: Take the ratio of the credible intervals.</p></li>
+<li><p><strong>axis</strong> (<em>int</em>) – Along which axis to obtain the interval locations.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – Transparency along the axis.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array_like</p>
 </dd>
 </dl>
 </dd></dl>

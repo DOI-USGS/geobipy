@@ -42,7 +42,7 @@ mpl.rcParams['figure.figsize'] = figSize[0], figSize[1]
 dpi = args.dpi
                     
 # Open up the HDF5 file
-LR = LineResults(args.h5file, sysPath=args.datadir)
+LR = LineResults(args.h5file, systemFilepath=args.datadir)
 
 fids = None
 if not args.points is None:

@@ -450,12 +450,12 @@ class Results(myObject):
         ax.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
 
     
-    def _plotParameterPosterior(self, reciprocateX=False, confidenceInterval = 95.0, opacityPercentage = 67.0, xlim=None, **kwargs):
+    def _plotParameterPosterior(self, reciprocateX=False, credibleInterval = 95.0, opacityPercentage = 67.0, xlim=None, **kwargs):
         """ Plot the hitmap posterior of conductivity with depth """
 
-        # Get the mean and 95% confidence intervals
+        # Get the mean and 95% credible intervals
         hm = self.currentModel.par.posterior
-        (sigMed, sigLow, sigHigh) = hm.axisConfidenceIntervals(confidenceInterval)
+        (sigMed, sigLow, sigHigh) = hm.credibleIntervals(credibleInterval)
 
         if (reciprocateX):
             x = 1.0 / hm.x.cellCentres
@@ -981,11 +981,11 @@ class Results(myObject):
         return R
           
 
-    def read_fromH5Obj(self, h5obj, fName, grpName, sysPath = ''):
+    def read_fromH5Obj(self, h5obj, fName, grpName, systemFilepath = ''):
         """ Reads a data points results from HDF5 file """
         grp = h5obj.get(grpName)
         assert not grp is None, "ID "+str(grpName) + " does not exist in file " + fName
-        self.fromHdf(grp, sysPath)
+        self.fromHdf(grp, systemFilepath)
 
 
     def fromHdf(self, hdfFile, systemFilePath, index=None, fiducial=None):
@@ -1022,9 +1022,9 @@ class Results(myObject):
         self.rate = hdfRead.readKeyFromFile(hdfFile,'','/','rate', index=s)
         self.PhiDs = hdfRead.readKeyFromFile(hdfFile,'','/','phids', index=s)
 
-        self.bestDataPoint = hdfRead.readKeyFromFile(hdfFile,'','/','bestd', index=index, sysPath=systemFilePath)
+        self.bestDataPoint = hdfRead.readKeyFromFile(hdfFile,'','/','bestd', index=index, systemFilepath=systemFilePath)
         try:
-            self.currentDataPoint = hdfRead.readKeyFromFile(hdfFile,'','/','currentdatapoint', index=index, sysPath=systemFilePath)
+            self.currentDataPoint = hdfRead.readKeyFromFile(hdfFile,'','/','currentdatapoint', index=index, systemFilepath=systemFilePath)
         except:
             self.currentDataPoint = self.bestDataPoint
             p = hdfRead.readKeyFromFile(hdfFile,'','/','dzhist', index=index)

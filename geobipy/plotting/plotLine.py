@@ -50,7 +50,7 @@ for file in files:
     fName = join(args.h5dir, file)
     file = os.path.join(args.outdir, file)
         
-    LR = LineResults(fName, sysPath=args.datadir)
+    LR = LineResults(fName, systemFilepath=args.datadir)
     
     p = 0
     

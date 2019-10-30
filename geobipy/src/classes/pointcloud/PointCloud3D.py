@@ -209,22 +209,21 @@ class PointCloud3D(myObject):
             return distance
 
 
-    def interpCloughTocher(self, values, dx = None, dy=None, mask = False, clip = None, extrapolate=None, i=None):
+    def interpolate(self, dx, dy, values, method='ct', mask = False, clip = None, i=None, **kwargs):
+
+        if method.lower() == 'ct':
+            return self.interpCloughTocher(dx, dy, values, mask, clip, i, **kwargs)
+        else:
+            return self.interpMinimumCurvature(dx, dy, values, mask, clip, i, **kwargs)
+
+    def interpCloughTocher(self, dx, dy, values, mask = False, clip = None, i=None, **kwargs):
         """ Interpolate values at the points to a grid """
 
+        extrapolate = kwargs.pop('extrapolate', None)
         # Get the bounding box
         self.getBounds()
-        
-        # Get the discretization
-        if (dx is None):
-            tmp = self.bounds[1]-self.bounds[0]
-            dx = 0.01 * tmp
+
         assert dx > 0.0, ValueError("dx must be positive!")
-        
-        # Get the discretization
-        if (dy is None):
-            tmp = self.bounds[3]-self.bounds[2]
-            dy = 0.01 * tmp
         assert dy > 0.0, ValueError("dy must be positive!")
 
         kdtree = None
@@ -242,38 +241,35 @@ class PointCloud3D(myObject):
                 self.setKdTree(nDims = 2)
                 kdtree = self.kdtree
 
-        xc,yc,vals = interpolation.CT(dx, dy, self.bounds, tmp, vTmp , mask = mask, kdtree = kdtree, clip = clip, extrapolate=extrapolate)
+        xc, yc, vals = interpolation.CT(dx, dy, self.bounds, tmp, vTmp , mask = mask, kdtree = kdtree, clip = clip, extrapolate=extrapolate)
 
-        x = StatArray.StatArray(np.linspace(self.bounds[0], self.bounds[1], xc.size), name=self.x.name, units=self.x.units)
-        y = StatArray.StatArray(np.linspace(self.bounds[2], self.bounds[3], yc.size), name=self.y.name, units=self.y.units)
+        x = StatArray.StatArray(xc, name=self.x.name, units=self.x.units)
+        y = StatArray.StatArray(yc, name=self.y.name, units=self.y.units)
 
-        return x, y, vals
+        return x, y, vals, kwargs
     
     
-    def interpMinimumCurvature(self, values, dx=None, dy=None, mask=False, clip=True, i=None):
+    def interpMinimumCurvature(self, dx, dy, values, mask=False, clip=True, i=None, **kwargs):
     
+
+        iterations = kwargs.pop('iterations', 2000)
+        tension = kwargs.pop('tension', 0.25)
+        accuracy = kwargs.pop('accuracy', 0.01)
+
         # Get the bounding box
         self.getBounds()
-        
+
         # Get the discretization
-        if (dx is None):
-            tmp = self.bounds[1]-self.bounds[0]
-            dx = 0.01 * tmp
         assert dx > 0.0, ValueError("dx must be positive!")
-        
-        # Get the discretization
-        if (dy is None):
-            tmp = self.bounds[3]-self.bounds[2]
-            dy = 0.01 * tmp
         assert dy > 0.0, ValueError("dy must be positive!")
                 
-        x, y, vals = interpolation.minimumCurvature(self.x, self.y, values, self.bounds, dx, dy, mask=mask, iterations=2000, tension=0.25, accuracy=0.01, clip=clip)
+        x, y, vals = interpolation.minimumCurvature(self.x, self.y, values, self.bounds, dx, dy, mask=mask, clip=clip, iterations=iterations, tension=tension, accuracy=accuracy)
         x = StatArray.StatArray(x, name=self.x.name, units=self.x.units)
         y = StatArray.StatArray(y, name=self.y.name, units=self.y.units)
-        return x, y, vals
+        return x, y, vals, kwargs
 
 
-    def mapPlot(self, dx=None, dy=None, extrapolate=None, i=None, **kwargs):
+    def mapPlot(self, dx=None, dy=None, i=None, **kwargs):
         """ Create a map of a parameter """
 
         cTmp = kwargs.pop('c', self.z)
@@ -282,19 +278,18 @@ class PointCloud3D(myObject):
         
         clip = kwargs.pop('clip', True)
         
-        method = kwargs.pop('method', "ct")
-        method = method.lower()
+        method = kwargs.pop('method', "ct").lower()
               
         
         if method == 'ct':
-            x, y, vals = self.interpCloughTocher(cTmp, dx=dx, dy=dy, mask=mask, clip=clip, extrapolate=extrapolate, i=i)
+            x, y, vals, kwargs = self.interpCloughTocher(dx=dx, dy=dy, values=cTmp, mask=mask, clip=clip, i=i, **kwargs)
         elif method == 'mc':
-            x, y, vals = self.interpMinimumCurvature(cTmp, dx, dy, mask=mask, clip=clip, i=i)
+            x, y, vals, kwargs = self.interpMinimumCurvature(dx, dy, values=cTmp, mask=mask, clip=clip, i=i, **kwargs)
         else:
             assert False, ValueError("method must be either 'ct' or 'mc' ")  
                         
-        ax = cP.pcolor(vals, x.edges(), y.edges(), **kwargs)
-        return ax
+        return cP.pcolor(vals, x.edges(), y.edges(), **kwargs)
+        
 
 
     def maketest(self, nPoints):
@@ -419,8 +414,8 @@ class PointCloud3D(myObject):
 
         kwargs['linewidth'] = kwargs.pop('linewidth', 0.1)
         kwargs['c'] = kwargs.pop('c', self.z)
-        ax = cP.scatter2D(self.x, y=self.y, **kwargs)
-        return ax
+        ax, sc, cbar = cP.scatter2D(self.x, y=self.y, **kwargs)
+        return ax, sc, cbar
 
 
     def setKdTree(self, nDims=3):

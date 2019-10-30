@@ -4,6 +4,7 @@ Time Domain Data Set
 """
 ################################################################################
 
+from geobipy import customPlots as cP
 from os.path import join
 import matplotlib.pyplot as plt
 import numpy as np
@@ -38,6 +39,7 @@ TD.iActive
 
 plt.figure()
 TD.scatter2D()
+plt.show()
 
 
 ################################################################################
@@ -71,6 +73,7 @@ plt.subplot(224, sharex=ax1)
 TD.getDataPoint(200).plot()
 plt.ylabel('')
 plt.title('')
+plt.show()
 
 
 ################################################################################
@@ -78,7 +81,7 @@ plt.title('')
 
 plt.figure()
 TD.plotWaveform()
-
+plt.show()
 
 ################################################################################
 
@@ -86,6 +89,7 @@ TD.plotWaveform()
 plt.figure()
 ax = TD.scatter2D(s=1.0, c=TD.getDataChannel(system=0, channel=23), equalize=True)
 plt.axis('equal')
+plt.show()
 
 
 ################################################################################
@@ -105,7 +109,7 @@ TD.iActive
 
 plt.figure()
 TD.plot(system=0, channels=TD.iActive[:3], log=10)
-
+plt.show()
 
 ################################################################################
 
@@ -115,14 +119,14 @@ plt.subplot(211)
 TD.pcolor(system=0, log=10, xscale='log')
 plt.subplot(212)
 TD.pcolor(system=1, log=10, xscale='log')
-
+plt.show()
 
 ################################################################################
 
 
 plt.figure()
 TD.plotLine(100601.0, log=10)
-
+plt.show()
 
 ################################################################################
 
@@ -147,10 +151,11 @@ line = TD.getLine(100601.0)
 
 plt.figure()
 line.scatter2D(c = line.getDataChannel(10, system=1))
-
+plt.show()
 
 ################################################################################
 
 
 plt.figure()
 line.plot(xAxis='x', log=10)
+plt.show()

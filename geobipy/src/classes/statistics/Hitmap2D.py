@@ -41,7 +41,7 @@ class Hitmap2D(Histogram2D):
     def getOpacityLevel(self, percent):
         """ Get the index along axis 1 from the bottom up that corresponds to the percent opacity """
         p = 0.01*percent
-        op = self.axisOpacity()[::-1]
+        op = self.opacity()[::-1]
         nz = op.size - 1
         iC = 0
         while op[iC] < p and iC < nz:

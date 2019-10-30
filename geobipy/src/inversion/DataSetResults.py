@@ -18,6 +18,7 @@ from .LineResults import LineResults
 #from ..classes.statistics.Distribution import Distribution
 from ..base.HDF import hdfRead
 from ..base import customPlots as cP
+from ..base import customFunctions as cF
 from os.path import join
 from scipy.spatial import Delaunay
 from scipy.interpolate import CloughTocher2DInterpolator
@@ -32,29 +33,30 @@ import progressbar
 class DataSetResults(myObject):
     """ Class to define results from Inv_MCMC for a full data set """
 
-    def __init__(self, directory, files = None, sysPath = None):
+    def __init__(self, directory, systemFilepath, files = None):
         """ Initialize the lineResults
         directory = directory containing folders for each line of data results
         """
         self.directory = directory
-        self.fileList = None
+        self._h5files = None
         self._nPoints = None
         self.cumNpoints = None
-        self.nLines = None
         self.bounds = None
-        if (files is None):
-            self.getFileList(directory)
+
+        if files is None:
+            self._h5files = self._get_h5Files_from_directory(directory)
         else:
-            self.fileList = files
-            self.nLines = len(files)
-
-        self.lines=[]
+            self._h5files = self._get_h5Files_from_list(directory, files)
+            
+        self._lines=[]
+        self._lineNumbers = np.empty(self.nLines)
         for i in range(self.nLines):
-            fName = self.fileList[i]
-            fileExists(fName)
-            self.lines.append(LineResults(fName, sysPath=sysPath))
-        self._lineIndices = None
+            fName = self.h5files[i]
+            LR = LineResults(fName, systemFilepath=systemFilepath)
+            self._lines.append(LR)
+            self._lineNumbers[i] = LR.line
 
+        self._lineIndices = None
         self._pointcloud = None
         self._additiveError = None
         self._relativeError = None
@@ -81,18 +83,48 @@ class DataSetResults(myObject):
             line.close()
 
 
-    def getFileList(self, directory):
+    @property
+    def h5files(self):
         """ Get the list of line result files for the dataset """
-        self.fileList = []
+        return self._h5files
+
+    @property
+    def lines(self):
+        return self._lines
+
+    @property
+    def lineNumbers(self):
+        return self._lineNumbers
+
+
+    @property
+    def nLines(self):
+        return np.size(self._h5files)
+
+
+    def _get_h5Files_from_list(self, directory, files):
+        if not isinstance(files, list):
+            files = [files]
+        h5files = []
+        for f in files:
+            fName = join(directory, f)
+            assert fileExists(fName), Exception("File {} does not exist".format(fName))
+            h5files.append(fName)
+        return h5files
+
+
+    def _get_h5Files_from_directory(self, directory):
+        h5files = []
         for file in [f for f in listdir(directory) if f.endswith('.h5')]:
-            fName = join(directory,file)
+            fName = join(directory, file)
             fileExists(fName)
-            self.fileList.append(fName)
+            h5files.append(fName)
             
-        self.fileList = sorted(self.fileList)
+        h5files = sorted(h5files)
         
-        assert len(self.fileList) > 0, 'Could not find .h5 files in current directory'
-        self.nLines = len(self.fileList)
+        assert len(h5files) > 0, 'Could not find .h5 files in directory {}'.format(directory)
+
+        return h5files
 
 
     @property
@@ -101,9 +133,8 @@ class DataSetResults(myObject):
         if self._additiveError is None:
             self._additiveError = StatArray.StatArray([self.nSystems, self.nPoints], name=self.lines[0].additiveError.name, units=self.lines[0].additiveError.units, order = 'F')
 
-            print('Reading additive error')
-            Bar=progressbar.ProgressBar()
-            for i in Bar(range(self.nLines)):
+            Bar = progressbar.ProgressBar()
+            for i in Bar(range(self.nLines), "Reading Additive Errors Posteriors \n"):
                 self._additiveError[:, self.lineIndices[i]] = self.lines[i].additiveError.T
                 self.lines[i]._additiveError = None # Free memory
 
@@ -119,11 +150,16 @@ class DataSetResults(myObject):
 
             print('Reading best parameters')
             Bar=progressbar.ProgressBar()
-            for i in Bar(range(self.nLines)):
+            for i in Bar(range(self.nLines), "Reading Most Probable Parameters"):
                 self._bestParameters[:, self.lineIndices[i]] = self.lines[i].bestParameters.T
                 self.lines[i]._bestParameters = None # Free memory
 
         return self._bestParameters
+
+
+    def computeMarginalProbability(self, fractions, distributions, **kwargs):
+        for line in self.lines:
+            line.computeMarginalProbability(fractions, distributions, **kwargs)
 
 
     @property
@@ -177,9 +213,8 @@ class DataSetResults(myObject):
 
             self._interfaces = StatArray.StatArray([self.zGrid.nCells, self.nPoints], name=self.lines[0].interfaces.name, units=self.lines[0].interfaces.units)
 
-            print('Reading interfaces')
             Bar=progressbar.ProgressBar()
-            for i in Bar(range(self.nLines)):
+            for i in Bar(range(self.nLines), "Reading Depth Posteriors"):
                 self._interfaces[:, self.lineIndices[i]] = self.lines[i].interfaces.T
                 self.lines[i]._interfaces = None # Free memory
 
@@ -195,7 +230,7 @@ class DataSetResults(myObject):
             for i in range(self.nLines):
                 i1 = i0 + self.lines[i].nPoints
                 self._lineIndices.append(np.s_[i0:i1])
-                i1 = i0
+                i0 = i1
         return self._lineIndices
 
 
@@ -206,7 +241,7 @@ class DataSetResults(myObject):
 
             self._meanParameters = StatArray.StatArray([self.zGrid.nCells, self.nPoints], name=self.lines[0].meanParameters.name, units=self.lines[0].meanParameters.units, order = 'F')
 
-            print('Reading mean parameters')
+            print("Reading Mean Parameters", flush=True)
             Bar=progressbar.ProgressBar()
             for i in Bar(range(self.nLines)):
                 self._meanParameters[:, self.lineIndices[i]] = self.lines[i].meanParameters
@@ -276,7 +311,7 @@ class DataSetResults(myObject):
         if self._relativeError is None:
             self._relativeError = StatArray.StatArray([self.nSystems, self.nPoints], name=self.lines[0].relativeError.name, units=self.lines[0].relativeError.units, order = 'F')
 
-            print('Reading relative error')
+            print('Reading Relative Error Posteriors', flush=True)
             Bar=progressbar.ProgressBar()
             for i in Bar(range(self.nLines)):
                 self._relativeError[:, self.lineIndices[i]] = self.lines[i].relativeError.T
@@ -295,7 +330,7 @@ class DataSetResults(myObject):
         return self.pointcloud.y
 
     
-    def dataPointResults(self, fiducial, reciprocateParameters=False):
+    def dataPointResults(self, fiducial=None, index=None):
         """Get the inversion results for the given fiducial. 
         
         Parameters
@@ -309,30 +344,41 @@ class DataSetResults(myObject):
             The inversion results for the data point.
             
         """
+        tmp = np.sum([x is None for x in [fiducial, index]])
+        assert tmp == 1, Exception("Please specify one argument, fiducial, or index")
+
+        if not index is None:
+            fiducial = self.fiducial(index)
 
         index = self.fiducialIndex(fiducial)
+        lineIndex = index[0][0]
+        fidIndex = index[1][0]            
 
-        return self.lines[index[0]].getResults(index=index[1], reciprocateParameter=reciprocateParameters)
+        return self.lines[lineIndex].getResults(fidIndex)
        
 
-    def getLineNumber(self, i):
-        """ Get the line number for the given data point index """
-        return self.lines[self.getLineIndex(i)].line
+    def lineIndex(self, lineNumber=None, fiducial=None, index=None):
+        """ Get the line index for the given data point index """
+        tmp = np.sum([not x is None for x in [lineNumber, fiducial, index]])
+        assert tmp == 1, Exception("Please specify one argument, lineNumber, fiducial, or index")
 
 
-    def getLineIndex(self, i):
-        """ Get the line file name for the given data point index """
-        assert i >= 0, 'Datapoint index must be >= 0'
-        if i > self.nPoints-1: raise IndexError('index {} is out of bounds for data point index with size {}'.format(i, self.nPoints))
-        return self._cumNpoints.searchsorted(i)
+        if not lineNumber is None:
+            return np.where(self.lineNumbers == lineNumber)[0]
+
+        if not fiducial is None:
+            return self.fiducialIndex(fiducial)[0]
+
+        if index > self.nPoints-1: raise IndexError('index {} is out of bounds for data point index with size {}'.format(index, self.nPoints))
+        return self._cumNpoints.searchsorted(index)
 
 
-    def fiducial(self, i):
-        """ Get the ID of the given data point """
-        iLine = self.getLineIndex(i)
+    def fiducial(self, index):
+        """ Get the fiducial of the given data point """
+        iLine = self.lineIndex(index=index)
         if (iLine > 0):
-            i -= self.cumNpoints[iLine-1]
-        return self.lines[iLine].iDs[i]
+            index -= self.cumNpoints[iLine-1]
+        return self.lines[iLine].fiducials[index]
 
     
     def fiducialIndex(self, fiducial):
@@ -345,22 +391,37 @@ class DataSetResults(myObject):
 
         Returns
         -------
-        out : ints
-            Line number and index of the data point in that line.
+        lineIndex : ints
+            lineIndex for each fiducial
+        index : ints
+            Index of each fiducial in their respective line
 
         """
         
-        if np.size(fiducial) == 1:
-            for iLine, line in enumerate(self.lines):
-                if fiducial in line.fiducials:
-                    return np.asarray([iLine, line.fiducials.searchsorted(fiducial)])
+        lineIndex = []
+        index = []
 
-        indices = []
-        for iLine, line in enumerate(self.lines):
-            for fid in fiducial:
-                if fid in line.fiducials:
-                    indices.append([iLine, line.fiducials.searchsorted(fid)])
-        return np.asarray(indices)
+        for i, line in enumerate(self.lines):
+            ids = line.fiducialIndex(fiducial)
+            nIds = np.size(ids)
+            if nIds > 0:
+                lineIndex.append(np.full(nIds, fill_value=i))
+                index.append(ids)
+
+        if np.size(index) > 0:
+            return np.hstack(lineIndex), np.hstack(index)
+
+
+    def fitMajorPeaks(self, intervals, **kwargs):
+
+        distributions = []
+        amplitudes = []
+        for line in self.lines:
+            d, a = line.lineHitmap.fitMajorPeaks(intervals, **kwargs)
+            distributions.append(d)
+            amplitudes.append(a)
+
+        return distributions, amplitudes
 
 
     def histogram(self, nBins, depth1 = None, depth2 = None, reciprocateParameter = False, bestModel = False, withDoi=False, percent=67.0, force = False, **kwargs):
@@ -408,7 +469,7 @@ class DataSetResults(myObject):
             units = '$Sm^{-1}$'
 
         if (log):
-            vals,logLabel=cP._log(vals,log)
+            vals,logLabel=cF._log(vals,log)
             name = logLabel + name
         vals = StatArray.StatArray(vals, name, units)
 
@@ -508,7 +569,7 @@ class DataSetResults(myObject):
         if method == 'ct':
             self.__getMean3D_CloughTocher(dx=dx, dy=dy, mask=mask, clip=clip, force=force)
         elif method == 'mc':
-            self.__getMean3D_minimumCurvature(dx=dx, dy=dy, mask=mask, clip=clip, force=force)
+            self.__getMean3D_minimumCurvature(dx=dx, dy=dy, mask=mask, clip=clip)
         else:
             assert False, ValueError("method must be either 'ct' or 'mc' ")
             
@@ -521,8 +582,7 @@ class DataSetResults(myObject):
             self.mean3D.toHdf(f,'mean3d')
             
         
-    
-    def __getMean3D_minimumCurvature(self, dx, dy, mask=None, clip=False, force=False):
+    def __getMean3D_minimumCurvature(self, dx, dy, mask=None, clip=False):
                
         
         x = self.pointcloud.x.deepcopy()
@@ -532,7 +592,7 @@ class DataSetResults(myObject):
         x1, y1, vals = interpolation.minimumCurvature(x, y, values, self.pointcloud.bounds, dx=dx, dy=dy, mask=mask, clip=clip, iterations=2000, tension=0.25, accuracy=0.01)
 
         # Initialize 3D volume
-        mean3D = StatArray.StatArray(np.zeros([self.zGrid.nCells, y1.size, x1.size], order = 'F'),name = 'Conductivity', units = '$Sm^{-1}$')
+        mean3D = StatArray.StatArray(np.zeros([self.zGrid.nCells, y1.size+1, x1.size+1], order = 'F'),name = 'Conductivity', units = '$Sm^{-1}$')
         mean3D[0, :, :] = vals
         
         # Interpolate for each depth
@@ -610,50 +670,42 @@ class DataSetResults(myObject):
             mean3D[i,:,:] = vals
         self.mean3D = mean3D #.reshape(self.zGrid.size*y.size*x.size)
 
+
+    def interpolate(self, dx, dy, values, method='ct', mask=None, clip=True, **kwargs):
+
+        return self.pointcloud.interpolate(dx=dx, dy=dy, values=values, method=method, mask=mask, clip=clip, **kwargs)
+
     
-    def map(self, dx, dy, values, system=0, mask = None, clip = True, **kwargs):
+    def map(self, dx, dy, values, method='ct', mask = None, clip = True, **kwargs):
         """ Create a map of a parameter """
-        nPlots = values.ndim
+        
+        assert values.size == self.nPoints, ValueError("values must have size {}".format(self.nPoints))
 
-        for i in range(nPlots):
-            plt.subplot(nPlots, 1, i+1)
-            self.pointcloud.mapPlot(dx = dx, dy = dy, mask = mask, clip = clip, c = np.atleast_2d(values)[i, :], **kwargs)
+        # x, y, z = self.interpolate(50.0, 50.0, values=self.depthSlice(10.0, variable='mean'))
+        # print(np.linalg.norm(values - self.depthSlice(10.0, variable='mean')))
+        # print(dx, dy, method, mask, clip, extrapolate)
+
+        x, y, z, kwargs = self.interpolate(dx=dx, dy=dy, values=values, method=method, mask=mask, clip=clip, **kwargs)
+
+        return z.pcolor(x=x.edges(), y=y.edges(), **kwargs)
 
 
-    def mapFacies(self, dx, dy, depth,  **kwargs):
+    def mapMarginalProbability(self, dx, dy, depth,  **kwargs):
 
         cell1 = self.zGrid.cellIndex(depth)
 
-        nFacies = self.facies.shape[1]
+        nFacies = self.MarginalProbability().shape[0]
 
         for i in range(nFacies):
             plt.subplot(nFacies, 1, i+1)
-            self.pointcloud.mapPlot(dx = dx, dy = dy, c = self.facies[:, i, cell1], **kwargs)
-
-
-    def setFaciesProbabilities(self, fractions, distributions, reciprocateParameter=False, log=None):
-        """ Assign facies to the parameter model given the pdfs of each facies
-        mean:    :Means of the normal distributions for each facies
-        var:     :Variance of the normal distributions for each facies
-        volFrac: :Volume fraction of each facies
-        """
-
-        self._facies = np.empty([self.nPoints, np.size(distributions), self.zGrid.nCells])
-
-        g = self.lines[0].hdfFile['currentmodel/par/posterior']
-
-        i0 = 0
-        Bar = progressbar.ProgressBar()
-        for i in Bar(range(self.lines[0].nPoints)):
-            self._facies[i, :, :] = Hitmap2D().fromHdf(g, index=i).marginalProbability(fractions, distributions, reciprocate=reciprocateParameter, log=log, axis=0)
+            self.pointcloud.mapPlot(dx = dx, dy = dy, c = self.marginalProbability[i, :, cell1], **kwargs)
 
 
     def percentageParameter(self, value, depth, depth2=None):  
 
         percentage = StatArray.StatArray(np.empty(self.nPoints), name="Probability of {} > {:0.2f}".format(self.meanParameters.name, value), units = self.meanParameters.units)
 
-        print(self.lineIndices)
-        print('Calculating percentages')
+        print('Calculating percentages', flush = True)
         Bar=progressbar.ProgressBar()
         for i in Bar(range(self.nLines)):
             percentage[self.lineIndices[i]] = self.lines[i].percentageParameter(value, depth, depth2)
@@ -661,7 +713,19 @@ class DataSetResults(myObject):
         return percentage
             
 
-    def getDepthSlice(self, depth, depth2=None, reciprocateParameter=False, bestModel=False, force=False):
+    def depthSlice(self, depth, variable, reciprocateParameter=False, **kwargs):
+
+        out = np.empty(self.nPoints)
+        for i, line in enumerate(self.lines):
+            p = line._get(variable, reciprocateParameter=reciprocateParameter, **kwargs)    
+            tmp = line.depthSlice(depth, p, **kwargs)
+
+            out[self.lineIndices[i]] = tmp
+
+        return StatArray.StatArray(out, p.name, p.units)
+
+    
+    def getElevationSlice(self, depth, depth2=None, reciprocateParameter=False, bestModel=False, force=False):
 
         # Get the depth grid
         assert depth <= self.zGrid.cellEdges[-1], 'Depth is greater than max depth '+str(self.zGrid.cellEdges[-1])
@@ -691,21 +755,31 @@ class DataSetResults(myObject):
         return vals1D
 
 
-    def mapDepthSlice(self, dx, dy, depth, depth2 = None, reciprocateParameter = False, bestModel = False, mask = None, clip = True, **kwargs):
+    def mapAdditiveError(self,dx, dy, system=0, mask = None, clip = True, extrapolate=None, **kwargs):
+        """ Create a map of a parameter """
+        return self.map(dx = dx, dy = dy, mask = mask, clip = clip, extrapolate=extrapolate, values = self.additiveError[system, :], **kwargs)
+
+
+    def mapDepthSlice(self, dx, dy, depth, variable, method='ct', mask = None, clip = True, reciprocateParameter=False, useVariance=False, **kwargs):
         """ Create a depth slice through the recovered model """
 
-        vals1D = self.getDepthSlice(depth=depth, depth2=depth2, reciprocateParameter=reciprocateParameter, bestModel=bestModel)
-        
-        ax = self.map(dx, dy, vals1D, mask = mask, clip = clip, **kwargs)
-        
-        return ax
+        vals1D = self.depthSlice(depth=depth, variable=variable, reciprocateParameter=reciprocateParameter)
+
+        if useVariance:
+            tmp = self.depthSlice(depth=depth, variable='opacity')
+            x, y, a = self.interpolate(dx=dx, dy=dy, values=tmp, method=method, clip=True, **kwargs)
+            kwargs['alpha'] = a
 
 
-    def mapElevation(self,dx, dy, mask = None, clip = True, extrapolate=None, force=False, **kwargs):
+        return self.map(dx, dy, vals1D, method=method, mask = mask, clip = clip, **kwargs)
+
+
+
+    def mapElevation(self,dx, dy, mask = None, clip = True, extrapolate=None, **kwargs):
         """ Create a map of a parameter """
-        self.pointcloud.mapPlot(dx = dx, dy = dy, mask = mask, clip = clip, extrapolate=extrapolate, c = self.elevation, **kwargs)
-        # cP.xlabel('Easting (m)')
-        # cP.ylabel('Northing (m)')
+        return self.map(dx = dx, dy = dy, mask = mask, clip = clip, extrapolate=extrapolate, values = self.elevation, **kwargs)
+        
+
 
     # def mapDoi(self, dx, dy, mask = None, clip = True, extrapolate=None, force=False, **kwargs):
     #     """ Create a map of a parameter """
@@ -714,45 +788,31 @@ class DataSetResults(myObject):
     #     cP.xlabel('Easting (m)')
     #     cP.ylabel('Northing (m)')
 
+    def mapRelativeError(self,dx, dy, system=0, mask = None, clip = True, extrapolate=None, **kwargs):
+        """ Create a map of a parameter """
+        return  self.map(dx = dx, dy = dy, mask = mask, clip = clip, extrapolate=extrapolate, values = self.relativeError[system, :], **kwargs)
 
-    def plotDepthSlice(self, depth, depth2 = None, reciprocateParameter = False, bestModel = False, mask = None, clip = True, force=False, *args, **kwargs):
+
+    def plotDepthSlice(self, depth, variable, mask = None, clip = True, **kwargs):
         """ Create a depth slice through the recovered model """
 
-        vals1D = self.getDepthSlice(depth=depth, depth2=depth2, reciprocateParameter=reciprocateParameter, bestModel=bestModel, force=force)
-        ax = self.pointcloud.scatter2D(c = vals1D, *args, **kwargs)
-        return ax
+        vals1D = self.depthSlice(depth=depth, variable=variable, **kwargs)
+        return self.scatter2D(c = vals1D, **kwargs)
 
 
-    def scatter2D(self, values, **kwargs):
+    def scatter2D(self, **kwargs):
 
         if (not 'edgecolor' in kwargs):
-            kwargs['edgecolor']='k'
+            kwargs['edgecolor'] = 'k'
         if (not 's' in kwargs):
-            kwargs['s']=10.0
+            kwargs['s'] = 10.0
 
-        nPlots = values.ndim
-
-        for i in range(nPlots):
-            plt.subplot(nPlots, 1, i+1)
-            self.pointcloud.scatter2D(c = np.atleast_2d(values)[i, :], **kwargs)
-
+        return self.pointcloud.scatter2D(**kwargs)
     
-    def plotAdditiveError(self, **kwargs):
+
+    def plotAdditiveError(self, system=0, **kwargs):
         """ Plot the observation locations """
-        self.scatter2D(self.additiveError, **kwargs)
-
-    
-    def plotBestFacies(self, depth):
-
-        cell1 = self.zGrid.cellIndex(depth)
-
-        nFacies = self.facies.shape[1]
-        bestFacies = StatArray.StatArray(np.argmax(self.facies[:, :, cell1], axis=1), 'Best Facies')
-
-        for i in range(nFacies):
-            j = np.where(bestFacies == i)[0]
-            plt.scatter(self.pointcloud.x[j], self.pointcloud.y[j], label='Facies {}'.format(i), c=cP.wellSeparated[i])
-        plt.legend()
+        return self.scatter2D(c=self.additiveError[system, :], **kwargs)
 
 
     def plotInterfaceProbability(self, depth, lowerThreshold=0.0, **kwargs):
@@ -764,31 +824,20 @@ class DataSetResults(myObject):
             slce = self.interfaces[cell1, :].deepcopy()
             slce[slce < lowerThreshold] = np.nan
 
-        self.pointcloud.scatter2D(c = slce, **kwargs)
+        return self.scatter2D(c = slce, **kwargs)
 
 
     def plotElevation(self, **kwargs):
         """ Plot the observation locations """
-        self.scatter2D(self.elevation, **kwargs)
-
-    
-    def plotFacies(self, depth, **kwargs):
-
-        cell1 = self.zGrid.cellIndex(depth)
-
-        nFacies = self.facies.shape[1]
-
-        for i in range(nFacies):
-            plt.subplot(nFacies, 1, i+1)
-            self.pointcloud.scatter2D(c = self.facies[:, i, cell1], **kwargs)
+        return self.scatter2D(c=self.elevation, **kwargs)
 
 
-    def plotRelativeError(self, **kwargs):
+    def plotRelativeError(self, system=0, **kwargs):
         """ Plot the observation locations """
-        self.scatter2D(self.relativeError, **kwargs)
+        return self.scatter2D(c=self.relativeError[system, :], **kwargs)
 
 
-    def plotXplot(self, bestModel=True, withDoi=True, reciprocateParameter=True, log10=True, **kwargs):
+    def plotCrossPlot(self, bestModel=True, withDoi=True, reciprocateParameter=True, log10=True, **kwargs):
         """ Plot the cross plot of a model against depth """
 
         tmp = self.getParVsZ(bestModel=bestModel, withDoi=withDoi, reciprocateParameter=reciprocateParameter, log10=log10)
@@ -800,12 +849,6 @@ class DataSetResults(myObject):
             cP.xlabel(self.mean.getNameUnits())
         cP.ylabel(self.zGrid.getNameUnits())
         return tmp
-
-    
-    def plotXsection(self, line, xAxis='easting', reciprocateParameter = False, bestModel=False, percent = 67.0, useVariance=True, **kwargs):
-        """ Plot a x section for the ith line """
-        self.lines[line].setAlonglineAxis(xAxis)
-        self.lines[line].plotXsection(reciprocateParameter=reciprocateParameter, bestModel=bestModel, percent=percent, useVariance=useVariance, **kwargs)
 
 
     def getParVsZ(self, bestModel=False, withDoi=True, reciprocateParameter=True, log10=True, clipNan=True):
@@ -885,9 +928,9 @@ class DataSetResults(myObject):
 
         # Interpolate the elevation to the grid nodes
         if (method == 'ct'):
-            tx,ty, vals = self.pointcloud.interpCloughTocher(self.elevation, dx = dx,dy=dy, mask = mask, clip = clip, extrapolate='nearest')
+            tx,ty, vals, k = self.pointcloud.interpCloughTocher(dx = dx,dy=dy, values=self.elevation, mask = mask, clip = clip, extrapolate='nearest')
         elif (method == 'mc'):
-            tx,ty, vals = self.pointcloud.interpMinimumCurvature(self.elevation, dx = dx, dy=dy, mask = mask, clip = clip)
+            tx,ty, vals, k = self.pointcloud.interpMinimumCurvature(dx = dx, dy=dy, values=self.elevation, mask = mask, clip = clip)
             
         vals = vals[:my,:mx]
         vals = vals.reshape(mx*my)
@@ -941,49 +984,3 @@ class DataSetResults(myObject):
               )
 
         vtk.tofile(fName, 'binary')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-if __name__ == "__main__":
-
-    d="/Users/nfoks/Projects/bMinsley/Tdem/SLV/ScatterV"
-    ds = DataSetResults(d)

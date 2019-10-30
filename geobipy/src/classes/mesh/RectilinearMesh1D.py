@@ -125,6 +125,22 @@ class RectilinearMesh1D(myObject):
         assert tmp.size > 1, ValueError("slic must contain at least one cell.")
         return type(self)(cellEdges=tmp)
 
+    def __add__(self, other):
+
+        return RectilinearMesh1D(cellEdges=self.cellCentres + other)
+    
+    def __sub__(self, other):
+
+        return RectilinearMesh1D(cellEdges=self.cellCentres - other)
+
+    def __mul__(self, other):
+
+        return RectilinearMesh1D(cellEdges=self.cellCentres * other)
+
+    def __truediv__(self, other):
+
+        return RectilinearMesh1D(cellEdges=self.cellCentres / other)
+
 
     @property
     def cellCentres(self):
