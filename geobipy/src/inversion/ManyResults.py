@@ -59,14 +59,14 @@ class ManyResults(myObject):
             Err.Emsg(
                 'Please set the file list in order to read attributes\nUse: self.setFileList()')
 
-    def groupResults2Line(self,sysPath = ''):
+    def groupResults2Line(self,systemFilepath = ''):
         """ Groups the individual HDF5 result files for each data point into a single line results file """
         self.checkFileList()
         with h5py.File(join(split(self.directory)[0],self.line+'.h5'),'w') as f:
             for file in self.fileList:
                 print('Processing ID: ',file)
                 R=Results()
-                R=R.read(file,sysPath)
+                R=R.read(file, systemFilepath)
                 R.toHdf(f,split(file)[1])
 
     def getAttribute(self, attribute, fileList=None):
