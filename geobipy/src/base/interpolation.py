@@ -3,6 +3,7 @@ import numpy as np
 from .fileIO import deleteFile
 from ..classes.core import StatArray
 from . import customFunctions as cf
+from scipy import interpolate
 from scipy.interpolate import CloughTocher2DInterpolator
 from scipy.interpolate.interpnd import _ndim_coords_from_arrays
 #from scipy.interpolate import Rbf
@@ -44,16 +45,27 @@ def CT(dx, dy, bounds, XY, values, mask = False, kdtree = None, clip = False, ex
         The interpolated values on a grid, represented by a 2D array
 
     """
-    # Create the CT function for interpolation
-    f = CloughTocher2DInterpolator(XY,values)
 
-    xc,yc,intPoints = getGridLocations2D(bounds, dx, dy)
+    values[values == np.inf] = np.nan
+    mn = np.nanmin(values)
+    mx = np.nanmax(values)
+
+    if (mx - mn) == 0.0:
+        values = values - mn
+    else:
+        values = (values - mn) / (mx - mn)
+
+    # Create the CT function for interpolation
+    f = CloughTocher2DInterpolator(XY, values)
+
+    xc, yc, intPoints = getGridLocations2D(bounds, dx, dy)
 
     # Interpolate to the grid
     vals = f(intPoints)
 
     # Reshape to a 2D array
-    vals = StatArray.StatArray(vals.reshape(yc.size,xc.size),name=cf.getName(values), units = cf.getUnits(values))
+    vals = StatArray.StatArray(vals.reshape(yc.size, xc.size),name=cf.getName(values), units = cf.getUnits(values))
+
 
     if mask or extrapolate:
         if (kdtree is None):
@@ -67,6 +79,7 @@ def CT(dx, dy, bounds, XY, values, mask = False, kdtree = None, clip = False, ex
         xi = _ndim_coords_from_arrays(tuple(g), ndim=XY.shape[1])
         dists, indexes = kdt.query(xi)
         vals[dists > mask] = np.nan
+
     # Truncate values to the observed values
     if (clip):
         minV = np.nanmin(values)
@@ -95,15 +108,24 @@ def CT(dx, dy, bounds, XY, values, mask = False, kdtree = None, clip = False, ex
         else:
             assert False, 'Extrapolation option not available. Choose [Nearest]'
 
-    return xc,yc,vals
+    if (mx - mn) == 0.0:
+        values = values + mn
+    else:
+        vals = (vals * (mx - mn)) + mn
+
+    return xc, yc, vals
 
 
 def minimumCurvature(x, y, values, bounds, dx, dy, mask=False, clip=False, iterations=2000, tension=0.25, accuracy=0.01):
     
-
+    values[values == np.inf] = np.nan
     mn = np.nanmin(values)
     mx = np.nanmax(values)
-    values = (values - mn) / (mx - mn)
+
+    if (mx - mn) == 0.0:
+        values = values - mn
+    else:
+        values = (values - mn) / (mx - mn)
 
     T = np.column_stack([x, y, values])
     np.savetxt('tmp.txt', T)
@@ -138,8 +160,11 @@ def minimumCurvature(x, y, values, bounds, dx, dy, mask=False, clip=False, itera
         vals = np.asarray(f['z'])
     deleteFile("tmp.grd")
 
-    vals = (vals * (mx - mn)) + mn
-        
+    if (mx - mn) == 0.0:
+        values = values + mn
+    else:
+        vals = (vals * (mx - mn)) + mn
+
     if mask:
         masked = "-S%g"%(mask)
         subprocess.call(["grdmask", "tmp.txt", increments, region, masked, "-Gmask.grd"])
