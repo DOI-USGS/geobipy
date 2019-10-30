@@ -89,7 +89,7 @@ class userParameters(_userParameters):
 
 #    with h5py.File(join(resultsDir,str(self.refLine)+'.h5'),'r') as f:
 #        R=Results()
-#        R.read_fromH5Obj(f, self.refID, sysPath = dataDir)
+#        R.read_fromH5Obj(f, self.refID, systemFilepath = dataDir)
 #        self.referenceHitmap=R.Hitmap
 
     ## Standard Deviation of log(rho) = log(1 + factor)
