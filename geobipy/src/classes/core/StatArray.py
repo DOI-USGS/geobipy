@@ -651,6 +651,15 @@ class StatArray(np.ndarray, myObject):
         return np.where(msk.any(axis=axis), val, invalid_val)
 
 
+    def normalize(self, axis = None):
+        """Normalize to range 0 - 1. """
+        mn = np.nanmin(self, axis=axis)
+        mx = np.nanmax(self, axis=axis)
+
+        t = mx - mn
+        return (self - mn) / t
+
+
     def prepend(self, values, axis=0):
         """Prepend to a StatArray
 
@@ -705,6 +714,15 @@ class StatArray(np.ndarray, myObject):
             out._proposal = self.proposal.deepcopy()
 
         return out
+
+
+    def standardize(self, axis=None):
+        """Standardize by subtracting the mean and dividing by the standard deviation. """
+
+        mn = np.mean(self, axis=axis)
+        std = np.std(self, axis=axis)
+
+        return (self - mn) / std
 
 
     def summary(self, out=False):
@@ -891,7 +909,7 @@ class StatArray(np.ndarray, myObject):
         else: 
             return self.proposal.rng(self.size)
 
-
+        
     def rolling(self, numpyFunction, window=1):
         wd = cf.rolling_window(self, window)
         return StatArray(numpyFunction(wd, -1), self.name, self.units)
