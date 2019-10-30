@@ -14,6 +14,7 @@ Time Domain Data Set
 .. code-block:: default
 
 
+    from geobipy import customPlots as cP
     from os.path import join
     import matplotlib.pyplot as plt
     import numpy as np
@@ -80,6 +81,7 @@ Time Domain Data Set
 
     plt.figure()
     TD.scatter2D()
+    plt.show()
 
 
 
@@ -88,6 +90,15 @@ Time Domain Data Set
 .. image:: /examples/Data/images/sphx_glr_time_domain_data_set_001.png
     :class: sphx-glr-single-img
 
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /Users/nfoks/miniconda3/lib/python3.7/site-packages/matplotlib/figure.py:445: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+      % get_backend())
 
 
 
@@ -140,6 +151,7 @@ Time Domain Data Set
     TD.getDataPoint(200).plot()
     plt.ylabel('')
     plt.title('')
+    plt.show()
 
 
 
@@ -158,7 +170,7 @@ Time Domain Data Set
 
     plt.figure()
     TD.plotWaveform()
-
+    plt.show()
 
 
 
@@ -177,6 +189,7 @@ Time Domain Data Set
     plt.figure()
     ax = TD.scatter2D(s=1.0, c=TD.getDataChannel(system=0, channel=23), equalize=True)
     plt.axis('equal')
+    plt.show()
 
 
 
@@ -223,7 +236,7 @@ Time Domain Data Set
 
     plt.figure()
     TD.plot(system=0, channels=TD.iActive[:3], log=10)
-
+    plt.show()
 
 
 
@@ -244,7 +257,7 @@ Time Domain Data Set
     TD.pcolor(system=0, log=10, xscale='log')
     plt.subplot(212)
     TD.pcolor(system=1, log=10, xscale='log')
-
+    plt.show()
 
 
 
@@ -262,7 +275,7 @@ Time Domain Data Set
 
     plt.figure()
     TD.plotLine(100601.0, log=10)
-
+    plt.show()
 
 
 
@@ -322,7 +335,7 @@ Time Domain Data Set
 
     plt.figure()
     line.scatter2D(c = line.getDataChannel(10, system=1))
-
+    plt.show()
 
 
 
@@ -340,7 +353,7 @@ Time Domain Data Set
 
     plt.figure()
     line.plot(xAxis='x', log=10)
-
+    plt.show()
 
 
 .. image:: /examples/Data/images/sphx_glr_time_domain_data_set_009.png
@@ -353,7 +366,7 @@ Time Domain Data Set
 
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy_public/geobipy/src/base/customFunctions.py:668: RuntimeWarning: All-NaN axis encountered
+    /Users/nfoks/codes/repositories/geobipy_public/geobipy/src/base/customFunctions.py:669: RuntimeWarning: All-NaN axis encountered
       if (np.nanmin(values) <= 0.0):
 
 
@@ -361,7 +374,7 @@ Time Domain Data Set
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  9.448 seconds)
+   **Total running time of the script:** ( 0 minutes  10.149 seconds)
 
 
 .. _sphx_glr_download_examples_Data_time_domain_data_set.py:

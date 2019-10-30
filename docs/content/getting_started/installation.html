@@ -181,7 +181,8 @@
             
   <div class="section" id="installing-geobipy">
 <h1>Installing GeoBIPy<a class="headerlink" href="#installing-geobipy" title="Permalink to this headline">¶</a></h1>
-<p>First things first, install a Python 3.5+ distribution.  This is the minimum version that we have tested with.</p>
+<p>First things first, install a Python 3.5+ distribution.  This is the minimum version that we have tested with.
+You will also need to install Numpy and a Fortran compiler.</p>
 <p>This package has a few requirements depending on what you wish to do with it.</p>
 <p>If you require a serial version of the code, see <a class="reference internal" href="#installing-a-serial-version-of-geobipy">Installing a serial version of GeoBIPy</a>.</p>
 <p>If you require an parallel implementation, you will need to install an MPI library, and Python’s mpi4py module. See <a class="reference internal" href="#installing-mpi-and-mpi4py">Installing MPI and mpi4py</a>.</p>
@@ -191,7 +192,7 @@
 <div class="section" id="installing-a-serial-version-of-geobipy">
 <h2>Installing a serial version of GeoBIPy<a class="headerlink" href="#installing-a-serial-version-of-geobipy" title="Permalink to this headline">¶</a></h2>
 <p>This is the easiest installation and provides access to a serial implementation of the code.</p>
-<p>Simply clone the git repository, navigate to the package folder that contains the setup.py file, and type “pip install -e .”</p>
+<p>Simply clone the git repository, navigate to the package folder that contains the setup.py file, and type “pip install .”</p>
 <p>You should then be able to import modules from geobipy.  For this type of installation mpi will not need to be installed, and the serial version of h5py will suffice i.e. the standard “pip install h5py” is fine.  h5py will automatically be installed during the install of GeoBIPy since it is a dependency.</p>
 <p><strong>Side note:</strong>  Let’s say you ran a production run on a parallel machine with MPI and parallel HDF capabilities. You generated all the results, copied them back to your local machine, and wish to make plots and images.  You will only need to install the serial version of the code on your local machine to do this.</p>
 </div>
@@ -245,7 +246,7 @@ I would try to avoid this because if you need to install the HDF5 library you wi
 </div>
 </div>
 <div class="section" id="installing-the-time-domain-forward-modeller">
-<h2>Installing the time domain forward modeller<a class="headerlink" href="#installing-the-time-domain-forward-modeller" title="Permalink to this headline">¶</a></h2>
+<span id="installing-time-domain-forward-modeller"></span><h2>Installing the time domain forward modeller<a class="headerlink" href="#installing-the-time-domain-forward-modeller" title="Permalink to this headline">¶</a></h2>
 <p>Ross Brodie at Geoscience Australia has written a great forward modeller, gatdaem1D,  in C++ with a python interface.
 You can obtain that code here at the <a class="reference external" href="https://github.com/GeoscienceAustralia/ga-aem">GA repository</a></p>
 <p>Go ahead and “git clone” that repository.</p>

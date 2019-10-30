@@ -2,6 +2,7 @@ Installing GeoBIPy
 ==================
 
 First things first, install a Python 3.5+ distribution.  This is the minimum version that we have tested with.
+You will also need to install Numpy and a Fortran compiler.
 
 This package has a few requirements depending on what you wish to do with it.
 
@@ -20,7 +21,7 @@ Installing a serial version of GeoBIPy
 ::::::::::::::::::::::::::::::::::::::
 This is the easiest installation and provides access to a serial implementation of the code.
 
-Simply clone the git repository, navigate to the package folder that contains the setup.py file, and type "pip install -e ."
+Simply clone the git repository, navigate to the package folder that contains the setup.py file, and type "pip install ."
 
 You should then be able to import modules from geobipy.  For this type of installation mpi will not need to be installed, and the serial version of h5py will suffice i.e. the standard "pip install h5py" is fine.  h5py will automatically be installed during the install of GeoBIPy since it is a dependency.
 
@@ -85,6 +86,7 @@ This will install h5py and compile the source.
 
     CC=<Your mpicc compiler> HDF5_MPI="ON" HDF5_DIR=<Your HDF5_DIR> pip install --no-binary=h5py h5py
 
+.. _Installing_time_domain_forward_modeller:
 
 Installing the time domain forward modeller
 :::::::::::::::::::::::::::::::::::::::::::

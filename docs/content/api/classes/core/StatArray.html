@@ -377,6 +377,24 @@ unless a copy is required, in which case it will be C-contiguous. Only used when
 </dd></dl>
 
 <dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.argmax_multiple_to_nan">
+<code class="descname">argmax_multiple_to_nan</code><span class="sig-paren">(</span><em>axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.argmax_multiple_to_nan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform the numpy argmax function on the StatArray but optionally mask multiple max values as NaN.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>nan_multiple</strong> (<em>bool</em>) – If multiple locations contain the same max value, mask as nan.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – Array of indices into the array. It has the same shape as <cite>self.shape</cite>
+with the dimension along <cite>axis</cite> removed.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray of floats</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
 <dt id="geobipy.src.classes.core.StatArray.StatArray.bar">
 <code class="descname">bar</code><span class="sig-paren">(</span><em>x=None</em>, <em>i=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.bar" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot the StatArray as a bar chart.</p>
@@ -833,6 +851,12 @@ and then reading the hdf contents via the object’s methods.</p>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.normalize">
+<code class="descname">normalize</code><span class="sig-paren">(</span><em>axis=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.normalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalize to range 0 - 1.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="geobipy.src.classes.core.StatArray.StatArray.pad">
 <code class="descname">pad</code><span class="sig-paren">(</span><em>N</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.pad" title="Permalink to this definition">¶</a></dt>
 <dd><p>Copies the properties of a StatArray including all priors or proposals, but pads everything to the given size</p>
@@ -1182,6 +1206,12 @@ Can take any other matplotlib arguments and keyword arguments e.g. markersize et
 </dd>
 </dl>
 </div>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.standardize">
+<code class="descname">standardize</code><span class="sig-paren">(</span><em>axis=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.standardize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Standardize by subtracting the mean and dividing by the standard deviation.</p>
 </dd></dl>
 
 <dl class="method">

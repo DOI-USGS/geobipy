@@ -148,7 +148,7 @@ with h5py.File('TdemDataPoint.h5','w') as hf:
 ################################################################################
 # And then read it in
 
-# P1 = hdfRead.readKeyFromFiles('TdemDataPoint.h5','/','tdp', sysPath=join('supplementary','Data'))
+# P1 = hdfRead.readKeyFromFiles('TdemDataPoint.h5','/','tdp', systemFilepath=join('supplementary','Data'))
 
 
 ################################################################################
