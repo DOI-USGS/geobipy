@@ -655,7 +655,7 @@ class RectilinearMesh2D(myObject):
             if isinstance(cellData, list):
                 for p in cellData:
                     assert isinstance(p, StatArray.StatArray), TypeError("cellData entries must be a geobipy.StatArray")
-                    assert all(p.shape == self.shape), ValueError("cellData entries must have shape {}".format(self.shape))
+                    assert np.all(p.shape == self.shape), ValueError("cellData entries must have shape {}".format(self.shape))
                     assert p.hasLabels(), ValueError("StatArray needs a name")
                     vtk.cell_data.append(Scalars(p.reshape(self.nCells), p.getNameUnits()))
             else:
