@@ -19,248 +19,233 @@ rank = world.rank
 master = rank == 0
 size = world.size
 
-myMPI.helloWorld(world)
+assert size == 4, Exception("Please use 4 cores to test")
 
 x = 1
 # Set up array sizes for consistency and chunk lengths per core
 N = x * size+1
 
-starts, chunks = myMPI.loadBalance_shrinkingArrays(N, size)
-
-myMPI.rankPrint(world, "start indices: {}".format(starts))
-myMPI.rankPrint(world, "chunk sizes: {}".format(chunks))
+starts, chunks = myMPI.loadBalance1D_shrinkingArrays(N, size)
+i0 = starts[rank]
+i1 = i0 + chunks[rank]
 
 ### Test base geobipy.MPI routines
 
 # data type
-# dt = None
-# if master:
-#     x = np.full(rank+1, rank)
-#     myMPI._isendDtype(x, dest=1, world=world)
-# elif rank == 1:
-#     dt = myMPI._irecvDtype(source=0, world=world)
-
-# myMPI.orderedPrint(world, dt, 'datatype send and recv')
-
-# if not master:
-#     x = None
-
-# dt = myMPI.bcastType(x, world)
-
-# myMPI.orderedPrint(world, dt, 'datatype bcast')
-
-# nDim = myMPI.Bcast_1int(np.size(x), world)
-
-# myMPI.orderedPrint(world, nDim, 'integer bcast')
-
-# x = np.full(rank+1, rank)
-
-# # Single Integers
-# i = rank
-# j = None
-# if rank == 0:
-#     myMPI.Isend_1int(i, 1, world)
-# elif rank == 1:
-#     j = myMPI.Irecv_1int(0, world)
-
-# if rank == 1:
-#     myMPI.Isend_1int(i, 2, world)
-# elif rank == 2:
-#     j = myMPI.Irecv_1int(1, world)
-
-# myMPI.orderedPrint(world, j, 'integer Send and Recv')
-
-# # Send and Recv
-# y = None
-# if master:
-#     myMPI.Isend(x, dest=1, world=world)
-# elif rank == 1:
-#     y = myMPI.Irecv(source=0, world=world)
-
-# if rank == 1:
-#     myMPI.Isend(x, 2, world)
-# elif rank == 2:
-#     y = myMPI.Irecv(1, world)
-
-# myMPI.orderedPrint(world, y, 'Send and Recv')
-
-# if master:
-#     for i in range(1, size):
-#         myMPI.Isend(x, dest=i, world=world)
-# else:
-#     y = myMPI.Irecv(0, world)
-
-# myMPI.orderedPrint(world, y, 'Send and Recv - Master to Workers')
+dt = None
+if master:
+    x = np.full(rank+1, rank)
+    myMPI._isendDtype(x, dest=1, world=world)
+elif rank == 1:
+    dt = myMPI._irecvDtype(source=0, world=world)
 
 
-# # Send and Recv Left
-# myMPI.IsendToLeft(x, world)
-# z = myMPI.IrecvFromRight(world)
+if not master:
+    x = None
 
-# myMPI.orderedPrint(world, z, "Send Left Recv Right")
+dt = myMPI.bcastType(x, world)
 
-# myMPI.IsendToRight(x, world)
-# z = myMPI.IrecvFromLeft(world)
+assert isinstance(dt, type), Exception("Could not broadcast datatype. Rank {}".format(rank))
 
-# myMPI.orderedPrint(world, z, "Send Right Recv Left")
+nDim = myMPI.Bcast_1int(np.size(x), world)
+assert nDim == 1, Exception("Could not broadcast integer. Rank {}".format(rank))
+
+x = np.full(rank+1, rank)
+
+# Single Integers
+i = rank
+j = None
+if rank == 0:
+    myMPI.Isend_1int(i, 1, world)
+elif rank == 1:
+    j = myMPI.Irecv_1int(0, world)
+
+if rank == 1:
+    myMPI.Isend_1int(i, 2, world)
+elif rank == 2:
+    j = myMPI.Irecv_1int(1, world)
+
+tst = [None, 0, 1, None]
+assert j == tst[rank], Exception("a) Could not Isend/Irecv. Rank {}".format(rank))
+
+# Send and Recv
+y = None
+if master:
+    myMPI.Isend(x, dest=1, world=world)
+elif rank == 1:
+    y = myMPI.Irecv(source=0, world=world)
+
+if rank == 1:
+    myMPI.Isend(x, 2, world)
+elif rank == 2:
+    y = myMPI.Irecv(1, world)
+
+tst = [None, 0, [1, 1], None]
+assert np.all(y == tst[rank]), Exception("b) Could not Isend/Irecv. Rank {}".format(rank))
+
+if master:
+    for i in range(1, size):
+        myMPI.Isend(x, dest=i, world=world)
+else:
+    y = myMPI.Irecv(0, world)
+
+tst = [None, 0, 0, 0]
+assert y == tst[rank], Exception("c) Could not Isend/Irecv. Rank {}".format(rank))
+
+# Send and Recv Left
+myMPI.IsendToLeft(x, world)
+z = myMPI.IrecvFromRight(world)
+
+tst = [[1, 1], [2, 2, 2], [3, 3, 3, 3], [0]]
+assert np.all(z == tst[rank]), Exception("d) Could not Isend/Irecv Right to Left. Rank {}".format(rank))
+
+myMPI.IsendToRight(x, world)
+z = myMPI.IrecvFromLeft(world)
+
+tst = [[3, 3, 3, 3], 0, [1, 1], [2, 2, 2]]
+assert np.all(z == tst[rank]), Exception("e) Could not Isend/Irecv Left to Right. Rank {}".format(rank))
+
+## Test the StatArray routines
+x = StatArray((rank+1) * np.arange(N, dtype=np.float64), "name", "units")
+
+# Bcast
+y = x.Bcast(world)
+assert np.all(y == [0.0, 1.0, 2.0, 3.0, 4.0]), Exception("Could not use StatArray.Bcast. Rank {}".format(rank))
+
+# Scatterv
+y = x.Scatterv(starts, chunks, world)
+
+tst = [[0.0, 1.0], 2.0, 3.0, 4.0 ]
+assert np.all(y == tst[rank]), Exception("Could not use StatArray.Scatterv. Rank {}".format(rank))
+
+# Send and Recv
+z = None
+if master:
+    x.Isend(1, world)
+elif world.rank == 1:
+    x.Isend(2, world)
+    z = StatArray(0).Irecv(0, world)
+elif world.rank == 2:
+    z = StatArray(0).Irecv(1, world) 
+
+tst = [None, [0.0, 1.0, 2.0, 3.0, 4.0], [0.0, 2.0, 4.0, 6.0, 8.0], None]
+assert np.all(z == tst[rank]), Exception("Could not use StatArray.Isend/Irecv. Rank {}".format(rank))
+
+if master:
+    for i in range(1, size):
+        x.Isend(dest=i, world=world)
+else:
+    z = StatArray(0).Irecv(0, world)
+
+tst = [None, [0.0, 1.0, 2.0, 3.0, 4.0], [0.0, 1.0, 2.0, 3.0, 4.0], [0.0, 1.0, 2.0, 3.0, 4.0]]
+assert np.all(z == tst[rank]), Exception("Could not use StatArray.Isend/Irecv. Rank {}".format(rank))
 
 
-# ### Test the StatArray routines
-# x = StatArray((rank+1) * np.arange(N, dtype=np.float64), "name", "units")
+# Send and Recv Left
+x.IsendToLeft(world)
+z = StatArray(0).IrecvFromRight(world)
 
-# # Bcast
-# y = x.Bcast(world)
+tst = [[0., 2., 4., 6., 8.], [ 0.,  3.,  6.,  9., 12.], [ 0.,  4.,  8., 12., 16.], [0., 1., 2., 3., 4.]]
+assert np.all(z == tst[rank]), Exception("Could not use StatArray.IsendToLeft/IrecvFromRight. Rank {}".format(rank))
 
-# myMPI.orderedPrint(world, y, "StatArray.Bcast")
+x.IsendToRight(world)
+z = StatArray(0).IrecvFromLeft(world)
 
-# # Scatterv
+tst = [[ 0.,  4., 8., 12., 16.], [0., 1., 2., 3., 4.], [0., 2., 4., 6., 8.], [ 0.,  3.,  6.,  9., 12.]]
+assert np.all(z == tst[rank]), Exception("Could not use StatArray.IsendToRight/IrecvFromLeft. Rank {}".format(rank))
 
-# y = None
-# y = x.Scatterv(starts, chunks, world)
+xSave = np.arange(N)
+ySave = np.arange(N) + 10.0
+zSave = np.arange(N) + 100.0
 
-# myMPI.orderedPrint(world, y, "StatArray.Scatterv")
+### Test the PointCloud3D
+if master:
+    pc = PointCloud3D(N, xSave, ySave, zSave)
+else:
+    pc = PointCloud3D(0)
 
-# # Send and Recv
-# z = None
-# if master:
-#     x.Isend(1, world)
-# elif world.rank == 1:
-#     x.Isend(2, world)
-#     z = StatArray(0).Irecv(0, world)
-# elif world.rank == 2:
-#     z = StatArray(0).Irecv(1, world) 
+# Bcast
+pc1 = pc.Bcast(world)
+assert np.all(pc1.x == xSave) and np.all(pc1.y == ySave) and np.all(pc1.z == zSave), Exception("Could not use PointCloud3D.Bcast. Rank {}".format(rank))
 
-# myMPI.orderedPrint(world, z, "StatArray.Isend/Irecv")
+# Scatterv
+pc1 = pc.Scatterv(starts, chunks, world)
 
-# if master:
-#     for i in range(1, size):
-#         x.Isend(dest=i, world=world)
-# else:
-#     z = StatArray(0).Irecv(0, world)
+assert np.all(pc1.x == xSave[i0:i1]) and np.all(pc1.y == ySave[i0:i1]) and np.all(pc1.z == zSave[i0:i1]), Exception("Could not use PointCloud3D.Scatterv. Rank {}".format(rank))
 
-# myMPI.orderedPrint(world, z, 'Send and Recv - Master to Workers')
+dSave = np.repeat(np.arange(N)[:, np.newaxis], 4, 1) + np.asarray([1000,2000,3000,4000])
+sSave = np.full([N, 4], 5.0)
+pSave = np.ones([N, 4])
+## Test the Data class
+if master:
+    ncps = np.asarray([2,2])
+    data = Data(nPoints=N, nChannelsPerSystem=ncps, x=xSave, y=ySave, z=zSave, data=dSave, std=sSave, predictedData=pSave, channelNames=['t1', 't2', 't3', 't4'])
+else:
+    data = Data(0)
 
+# Bcast
+data1 = data.Bcast(world)
 
-# # Send and Recv Left
-# x.IsendToLeft(world)
-# z = StatArray(0).IrecvFromRight(world)
+assert np.all(data1.x == xSave) and np.all(data1.y == ySave) and np.all(data1.z == zSave), Exception("Could not use Data.Bcast. Rank {}".format(rank))
+assert np.all(data1.data == dSave) and np.all(data1.std == sSave) and np.all(data1.predictedData == pSave), Exception("Could not use Data.Bcast. Rank {}".format(rank))
 
-# myMPI.orderedPrint(world, z, "StatArray.IsendToLeft/IrecvFromRight")
+# Scatterv
+data1 = data.Scatterv(starts, chunks, world)
 
-# x.IsendToRight(world)
-# z = StatArray(0).IrecvFromLeft(world)
+assert np.all(data1.x == xSave[i0:i1]) and np.all(data1.y == ySave[i0:i1]) and np.all(data1.z == zSave[i0:i1]), Exception("Could not use Data.Scatterv. Rank {}".format(rank))
+assert np.all(data1.data == dSave[i0:i1, :]) and np.all(data1.std == sSave[i0:i1, :]) and np.all(data1.predictedData == pSave[i0:i1, :]), Exception("Could not use Data.Scatterv. Rank {}".format(rank))
 
-# myMPI.orderedPrint(world, z, "StatArray.IsendToLeft/IrecvFromRight")
+# Send and Recv a point
+y = None
+if master:
+    y = data.getDataPoint(0)
+    for i in range(1, size):
+        data.getDataPoint(i).Isend(dest=i, world=world)
+else:
+    y = DataPoint().Irecv(0, world)
 
+assert np.all(y.data == dSave[rank, :]) and np.all(y.std == sSave[rank, :]) and np.all(y.predictedData == pSave[rank, :]), Exception("Could not use Data.Isend/Irecv. Rank {}".format(rank))
 
-# ### Test the PointCloud3D
-# if master:
-#     y = np.arange(N) + 10.0
-#     z = np.arange(N) + 100.0
-#     pc = PointCloud3D(N, x, y, z)
-# else:
-#     pc = PointCloud3D(0)
+### Test Frequency Domain Data
+dataPath = "..//examples//supplementary//Data//" 
+fdSave = FdemData()
+fdSave.read(dataPath+"Resolve2.txt", dataPath+"FdemSystem2.stm")
+if master:
+    fd = fdSave
+else:
+    fd = FdemData()
 
-# # Bcast
-# pc1 = pc.Bcast(world)
+# Bcast
+fd1 = fd.Bcast(world)
 
-# myMPI.orderedPrint(world, np.asarray([pc1.x, pc1.y, pc1.z]), "PointCloud3D.Bcast")
+assert np.allclose(fd1.data, fdSave.data, equal_nan=True), Exception("Could not use FdemData.Bcast. Rank {}".format(rank))
 
-# # Scatterv
-# pc1 = pc.Scatterv(starts, chunks, world)
+# Scatterv
+starts, chunks = myMPI.loadBalance1D_shrinkingArrays(fd1.nPoints, size)
+i0 = starts[rank]
+i1 = i0 + chunks[rank]
 
-# myMPI.orderedPrint(world, np.asarray([pc1.x, pc1.y, pc1.z]), "PointCloud3D.Scatterv")
+fd1 = fd.Scatterv(starts, chunks, world)
 
-# # Send and Recv a point
-# y = None
-# if master:
-#     for i in range(1, size):
-#         pc.getPoint(i).Isend(dest=i, world=world)
-# else:
-#     y = Point().Irecv(0, world)
-    
-# myMPI.orderedPrint(world, str(y), "Point.Isend/Irecv")
-
-
-# ## Test the Data class
-# if master:
-#     y = np.arange(N) + 10.0
-#     z = np.arange(N) + 100.0
-#     ncps = np.asarray([2,2])
-#     d = np.repeat(np.arange(N)[:, np.newaxis], 4, 1) + np.asarray([1000,2000,3000,4000])
-#     s = np.full([N, 4], 5.0)
-#     p = np.ones([N, 4])
-#     data = Data(nPoints=N, nChannelsPerSystem=ncps, x=x, y=y, z=z, data=d, std=s, predictedData=p, channelNames=['t1', 't2', 't3', 't4'])
-# else:
-#     data = Data(0)
-
-# # Bcast
-# data1 = data.Bcast(world)
-
-# myMPI.orderedPrint(world, np.asarray([data1.x, data1.y, data1.z]), "Data.Bcast")
-# myMPI.orderedPrint(world, data1._data)
-# myMPI.orderedPrint(world, data1._std)
-# myMPI.orderedPrint(world, data1._predictedData)
-
-# # Scatterv
-# data1 = data.Scatterv(starts, chunks, world)
-
-# myMPI.orderedPrint(world, np.asarray([data1.x, data1.y, data1.z]), "Data.Scatterv")
-# myMPI.orderedPrint(world, data1._data)
-# myMPI.orderedPrint(world, data1._std)
-# myMPI.orderedPrint(world, data1._predictedData)
-
-# # Send and Recv a point
-# y = DataPoint()
-# if master:
-#     for i in range(1, size):
-#         data.getDataPoint(i).Isend(dest=i, world=world)
-# else:
-#     y = DataPoint().Irecv(0, world)
-
-# world.barrier()
-
-# myMPI.orderedPrint(world, y.summary(True), "DataPoint.Isend/Irecv")
-
-# ### Test Frequency Domain Data
-dataPath = "..//geobipy//documentation//notebooks//supplementary//Data//" 
-# if master:
-#     fd = FdemData()
-#     fd.read(dataPath+"Resolve2.txt", dataPath+"FdemSystem2.stm")
-# else:
-#     fd = FdemData()
-
-# # Bcast
-# fd1 = fd.Bcast(world)
-
-# myMPI.orderedPrint(world, fd1.summary(True), "FdemData.Bcast")
-
-# # Scatterv
-# starts, chunks = myMPI.loadBalance_shrinkingArrays(fd1.nPoints, size)
-
-# fd1 = fd.Scatterv(starts, chunks, world)
-
-# myMPI.orderedPrint(world, np.asarray([fd1.x, fd1.y, fd1.z]), "FdemData.Scatterv")
-# myMPI.orderedPrint(world, fd1._data)
-# myMPI.orderedPrint(world, fd1._std)
-# myMPI.orderedPrint(world, fd1._predictedData)
+assert np.allclose(fd1.data, fdSave.data[i0:i1, :], equal_nan=True), Exception("Could not use FdemData.Scatterv. Rank {}".format(rank))
 
 # Point by Point read in and send 
 if master:
     fd = FdemData()
     fd._initLineByLineRead(dataPath+"Resolve2.txt", dataPath+"FdemSystem2.stm")
 
-# # Send and recieve a single datapoint from the file.
-# if master:
-#     for i in range(1, size):
-#         fdp = fd._readSingleDatapoint()
-#         fdp.Isend(dest=i, world=world)
-# else:
-#     fdp = FdemDataPoint().Irecv(source=0, world=world)
+# Send and recieve a single datapoint from the file.
+if master:
+    fdp = fd._readSingleDatapoint()
+    for i in range(1, size):
+        fdp1 = fd._readSingleDatapoint()
+        fdp1.Isend(dest=i, world=world)
+else:
+    fdp = FdemDataPoint().Irecv(source=0, world=world)
 
-# myMPI.orderedPrint(world, fdp.summary(True), "FdemData.Isend/Irecv")
+assert np.allclose(fdp.data, fdSave.data[rank, :], equal_nan=True), Exception("Could not use FdemData.Isend/Irecv. Rank {}".format(rank))
 
-# Testing pre-read in system classes
+#Testing pre-read in system classes
 sysPath = [dataPath+"FdemSystem2.stm"]
 systems = []
 for s in sysPath:
@@ -268,55 +253,54 @@ for s in sysPath:
 
 # Send and recieve a single datapoint from the file.
 if master:
+    fd = FdemData()
+    fd._initLineByLineRead(dataPath+"Resolve2.txt", dataPath+"FdemSystem2.stm")
+
+    fdp = fd._readSingleDatapoint()
     for i in range(1, size):
-        fdp = fd._readSingleDatapoint()
-        fdp.Isend(dest=i, world=world, systems=systems)
+        fdp1 = fd._readSingleDatapoint()
+        fdp1.Isend(dest=i, world=world, systems=systems)
 else:
     fdp = FdemDataPoint().Irecv(source=0, world=world, systems=systems)
 
-myMPI.orderedPrint(world, fdp.summary(True), "FdemData.Isend/Irecv")
+assert np.allclose(fdp.data, fdSave.data[rank, :], equal_nan=True), Exception("Could not use FdemData.Isend/Irecv, with pre-existing system class. Rank {}".format(rank))   
 
 
-# ### Test Time Domain Data
-# if master:
-#     td = TdemData()
-#     td.read([dataPath+"Skytem_High.txt", dataPath+"Skytem_Low.txt"], [dataPath+"SkytemHM-SLV.stm", dataPath+"SkytemLM-SLV.stm"])
-# else:
-#     td = TdemData()
+tdSave = TdemData()
+tdSave.read([dataPath+"Skytem_High.txt", dataPath+"Skytem_Low.txt"], [dataPath+"SkytemHM-SLV.stm", dataPath+"SkytemLM-SLV.stm"])
+### Test Time Domain Data
+if master:
+    td = tdSave
+else:
+    td = TdemData()
 
-# # Bcast
-# td1 = td.Bcast(world)
+#Bcast
+td1 = td.Bcast(world)
 
+assert np.allclose(td1.data, tdSave.data, equal_nan=True), Exception("Could not use TdemData.Bcast. Rank {}".format(rank))
 
-# myMPI.orderedPrint(world, np.asarray([td1.x, td1.y, td1.z]), "TdemData.Bcast")
-# myMPI.orderedPrint(world, td1._data[:, td1.iActive])
-# myMPI.orderedPrint(world, td1._std[:, td1.iActive])
-# myMPI.orderedPrint(world, td1._predictedData[:, td1.iActive])
-   
 # # Scatterv
-# starts, chunks = myMPI.loadBalance_shrinkingArrays(td1.nPoints, size)
+starts, chunks = myMPI.loadBalance1D_shrinkingArrays(tdSave.nPoints, size)
+i0 = starts[rank]
+i1 = i0 + chunks[rank]
 
-# td1 = td.Scatterv(starts, chunks, world)
+td1 = td.Scatterv(starts, chunks, world)
 
-# myMPI.orderedPrint(world, np.asarray([td1.x, td1.y, td1.z]), "TdemData.Scatterv")
-# myMPI.orderedPrint(world, td1._data[:, td1.iActive])
-# myMPI.orderedPrint(world, td1._std[:, td1.iActive])
-# myMPI.orderedPrint(world, td1._predictedData[:, td1.iActive])
+assert np.allclose(td1.data, tdSave.data[i0:i1, :], equal_nan=True), Exception("Could not use TdemData.Scatterv. Rank {}".format(rank))
 
-# Point by Point read in and send 
+# Send and recieve a single datapoint from the file.
 if master:
     td = TdemData()
     td._initLineByLineRead([dataPath+"Skytem_High.txt", dataPath+"Skytem_Low.txt"], [dataPath+"SkytemHM-SLV.stm", dataPath+"SkytemLM-SLV.stm"])
 
-# # Send and recieve a single datapoint from the file.
-# if master:
-#     for i in range(1, size):
-#         tdp = td._readSingleDatapoint()
-#         tdp.Isend(dest=i, world=world)
-# else:
-#     tdp = TdemDataPoint().Irecv(source=0, world=world)
+    tdp = td._readSingleDatapoint()
+    for i in range(1, size):
+        tdp1 = td._readSingleDatapoint()
+        tdp1.Isend(dest=i, world=world)
+else:
+    tdp = TdemDataPoint().Irecv(source=0, world=world)
 
-# myMPI.orderedPrint(world, tdp.summary(True), "FdemData.Isend/Irecv")
+assert np.allclose(tdp.data, tdSave.data[rank, :], equal_nan=True), Exception("Could not use TdemData.Isend/Irecv. Rank {}".format(rank))
 
 # Testing pre-read in system classes
 sysPath = [dataPath+"SkytemHM-SLV.stm", dataPath+"SkytemLM-SLV.stm"]
@@ -324,20 +308,21 @@ systems = []
 for s in sysPath:
     systems.append(TdemSystem(s))
 
-
 # Send and recieve a single datapoint from the file.
 if master:
+    td = TdemData()
+    td._initLineByLineRead([dataPath+"Skytem_High.txt", dataPath+"Skytem_Low.txt"], [dataPath+"SkytemHM-SLV.stm", dataPath+"SkytemLM-SLV.stm"])
+    tdp = td._readSingleDatapoint()
     for i in range(1, size):
-        tdp = td._readSingleDatapoint()
-        tdp.Isend(dest=i, world=world, systems=systems)
+        tdp1 = td._readSingleDatapoint()
+        tdp1.Isend(dest=i, world=world, systems=systems)
 else:
     tdp = TdemDataPoint().Irecv(source=0, world=world, systems=systems)
 
-myMPI.orderedPrint(world, tdp.summary(True), "FdemData.Isend/Irecv")
+assert np.allclose(tdp.data, tdSave.data[rank, :], equal_nan=True), Exception("Could not use TdemData.Isend/Irecv. Rank {}".format(rank))
 
 
-
-
+print("All tests passed. Rank {}".format(rank), flush=True)
 
 
 
