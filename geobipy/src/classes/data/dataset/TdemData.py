@@ -920,8 +920,7 @@ class TdemData(Data):
 
             system = np.ndarray(nSystems, dtype=TdemSystem)
             for i in range(nSystems):
-                    system[i] = TdemSystem()
-                    system[i].read(systemFilename[i])
+                    system[i] = TdemSystem(systemFilename[i])
 
         return system
         
@@ -944,8 +943,8 @@ class TdemData(Data):
         this = TdemData(nPoints, nTimes, systems)
 
         # Broadcast the Data point id, line numbers and elevations
-        this.id = self.id.Bcast(world, root=root)
-        this.line = self.line.Bcast(world, root=root)
+        this._fiducial = self.fiducial.Bcast(world, root=root)
+        this._line = self.line.Bcast(world, root=root)
         this._x = self.x.Bcast(world, root=root)
         this._y = self.y.Bcast(world, root=root)
         this._z = self.z.Bcast(world, root=root)
@@ -998,8 +997,8 @@ class TdemData(Data):
         this = TdemData(chunks[world.rank], nTimes, systems)
 
         # Broadcast the Data point id, line numbers and elevations
-        this.id = self.id.Scatterv(starts, chunks, world, root=root)
-        this.line = self.line.Scatterv(starts, chunks, world, root=root)
+        this._fiducial = self.fiducial.Scatterv(starts, chunks, world, root=root)
+        this._line = self.line.Scatterv(starts, chunks, world, root=root)
         this._x = self.x.Scatterv(starts, chunks, world, root=root)
         this._y = self.y.Scatterv(starts, chunks, world, root=root)
         this._z = self.z.Scatterv(starts, chunks, world, root=root)
