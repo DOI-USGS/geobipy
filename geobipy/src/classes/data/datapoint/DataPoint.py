@@ -288,7 +288,7 @@ class DataPoint(Point):
     def Isend(self, dest, world):
         myMPI.Isend(self.nChannelsPerSystem, dest=dest, world=world)
         tmp = np.hstack([self.x, self.y, self.z, self.elevation])
-        world.Isend(tmp, dest=dest)
+        myMPI.Isend(tmp, dest=dest, world=world)
         self._data.Isend(dest, world)
         self._std.Isend(dest, world)
         self._predictedData.Isend(dest, world)
@@ -298,8 +298,7 @@ class DataPoint(Point):
         
     def Irecv(self, source, world):
         ncps = myMPI.Irecv(source=source, world=world)
-        tmp = np.empty(5, np.float64)
-        world.Irecv(tmp, source=source).Wait()
+        tmp = myMPI.Irecv(source=source, world=world)
         x = StatArray.StatArray(0)
         d = x.Irecv(source, world)
         s = x.Irecv(source, world)
