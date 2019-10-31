@@ -1084,8 +1084,8 @@ class FdemData(Data):
         out._data = self._data.Bcast(world, root=root)
         out._std = self._std.Bcast(world, root=root)
         out._predictedData = self._predictedData.Bcast(world, root=root)
-        out.fiducial = self.fiducial.Bcast(world, root=root)
-        out.line = self.line.Bcast(world, root=root)
+        out._fiducial = self.fiducial.Bcast(world, root=root)
+        out._line = self.line.Bcast(world, root=root)
         return out
 
 
@@ -1151,8 +1151,8 @@ class FdemData(Data):
         out._data = self._data.Scatterv(starts, chunks, world, root=root)
         out._std = self._std.Scatterv(starts, chunks, world, root=root)
         out._predictedData = self._predictedData.Scatterv(starts, chunks, world, root=root)
-        out.fiducial = self.fiducial.Scatterv(starts, chunks, world, root=root)
-        out.line = self.line.Scatterv(starts, chunks, world, root=root)
+        out._fiducial = self.fiducial.Scatterv(starts, chunks, world, root=root)
+        out._line = self.line.Scatterv(starts, chunks, world, root=root)
         
         return out
 
