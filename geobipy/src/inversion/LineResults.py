@@ -186,7 +186,7 @@ class LineResults(myObject):
             if "credible_lower" in self.hdfFile.keys():
                 self._credibleLower = StatArray.StatArray().fromHdf(self.hdfFile['credible_lower'])
             else:
-                self.computeConfidenceInterval(log=10)
+                self.computeCredibleInterval(log=10)
         return self._credibleLower
     
     @property
@@ -196,7 +196,7 @@ class LineResults(myObject):
             if "credible_upper" in self.hdfFile.keys():
                 self._credibleUpper = StatArray.StatArray().fromHdf(self.hdfFile['credible_upper'])
             else:
-                self.computeConfidenceInterval(log=10)
+                self.computeCredibleInterval(log=10)
         return self._credibleUpper
 
 
