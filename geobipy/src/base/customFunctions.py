@@ -306,18 +306,14 @@ def Inv(A):
 
     """
 
-    ndim = A.ndim
+    ndim = np.ndim(A)
 
     assert ndim <= 2, TypeError('The number of dimesions of A must be <= 2')
 
-    if (A.ndim == 0):
-        return 1.0 / A
-
-    if (A.ndim == 1):
-        return 1.0 / A
-
-    if (A.ndim == 2):
+    if (ndim == 2):
         return np.linalg.inv(A)
+
+    return 1.0 / A
 
 
 def isNumpy(x):
@@ -360,15 +356,14 @@ def Ax(A, x):
         Resultant matrix vector multiplication.
     """
 
-    ndim = A.ndim
+    ndim = np.ndim(A)
 
     assert ndim <= 2, TypeError('The number of dimesions of A must be <= 2')
-    if (ndim == 0):
-        return A * x
-    if (ndim == 1):
-        return A * x
+        
     if (ndim == 2):
         return np.dot(A, x)
+
+    return A * x
 
 
 def Det(A, N=1.0):
@@ -391,7 +386,7 @@ def Det(A, N=1.0):
 
     """
 
-    ndim = A.ndim
+    ndim = np.ndim(A)
     assert ndim <= 2, TypeError('The number of dimesions of A must be <= 2')
 
     if (ndim == 0):
@@ -424,7 +419,7 @@ def LogDet(A, N=1.0):
 
     """
 
-    ndim = A.ndim
+    ndim = np.ndim(A)
     assert ndim <= 2, TypeError('The number of dimesions of A must be <= 2')
 
     if (ndim == 0):
