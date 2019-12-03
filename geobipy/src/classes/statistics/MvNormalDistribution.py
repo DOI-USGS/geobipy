@@ -4,11 +4,9 @@ Module defining a multivariate normal distribution with statistical procedures
 #from copy import deepcopy
 import numpy as np
 from ...base  import customFunctions as cf
-from ...base.logging import myLogger
 from .baseDistribution import baseDistribution
-from .NormalDistribution import Normal
-from ...base.HDF.hdfWrite import writeNumpy
 from ..core import StatArray
+from scipy.stats import multivariate_normal
 
 class MvNormal(baseDistribution):
     """Multivariate normal distribution """
@@ -26,49 +24,53 @@ class MvNormal(baseDistribution):
         baseDistribution.__init__(self, prng)
         # Mean
         if np.ndim(mean) == 0:
-            self.mean = np.float64(mean)
+            self._mean = np.float64(mean)
         else:
-            self.mean = np.copy(mean)
+            self._mean = np.copy(mean)
 
         # Variance
-        if np.ndim(variance) == 0:
-            self.variance = np.zeros(np.size(mean))
-            self.variance[:] = variance
-            return
-        if (np.ndim(variance) == 1):
+        ndim = np.ndim(variance)
+        if ndim == 0:
+            self._variance = np.zeros(np.size(mean))
+            self._variance[:] = variance
+        elif ndim == 1:
             assert np.size(variance) == np.size(mean), 'Mismatch in size of mean and variance'
-            self.variance = np.zeros(np.size(mean))
-            self.variance[:] += variance
-            return
-        assert (variance.shape[0] == mean.size and variance.shape[1] == mean.size), 'Covariance must have same dimensions as the mean'
-        self.variance = np.asarray(variance)
+            
+            self._variance = np.zeros(np.size(mean))
+            self._variance[:] = variance
+        elif ndim == 2:
+            assert (variance.shape[0] == mean.size and variance.shape[1] == mean.size), 'Covariance must have same dimensions as the mean'
+            self._variance = np.asarray(variance)
+
+        if self._variance.size == 1:
+            self._variance = np.float64(self._variance)
+
+
+    @property
+    def mean(self):
+        return self._mean
+
+    @property
+    def multivariate(self):
+        return True
 
     @property
     def ndim(self):
-        return self.mean.size
+        return np.size(self.mean)
 
     @property
     def std(self):
         return np.sqrt(self.variance)
 
     @property
-    def multivariate(self):
-        return True
-
+    def variance(self):
+        return self._variance
 
     def deepcopy(self):
         """ Define a deepcopy routine """
         # return deepcopy(self)
         return MvNormal(self.mean, self.variance, self.prng)
 
-
-    # def getPdf(self, x):
-    #     """ Get the PDF of Normal Distribution for the values in x """
-    #     N = np.size(x)
-    #     pdf = np.zeros(N)
-    #     for i in range(N):
-    #         pdf[i] = self.probability(x[i])
-    #     return pdf
 
     def rng(self, size = 1):
         """  """
@@ -82,24 +84,66 @@ class MvNormal(baseDistribution):
         else:
             return self.prng.multivariate_normal(self.mean, variance, size)
 
-    def probability(self, samples):
-        """ For a realization x, compute the probability """
-        N = samples.size
-        nD = self.mean.size
 
-        assert (N == nD), TypeError('size of samples {} must equal number of distribution dimensions {} for a multivariate distribution'.format(N, nD))
-        # For a diagonal matrix, the determinant is the product of the diagonal
-        # entries
-        dv = cf.Det(self.variance)
-        # subtract the mean from the samples.
-        xMu = samples - self.mean
-        # Take the inverse of the variance
-        tmp = cf.Inv(self.variance)
-        iv = cf.Ax(tmp, xMu)
-        exp = np.exp(-0.5 * np.dot(xMu, iv))
-        # Probability Density Function
-        prob = (1.0 / np.sqrt(((2.0 * np.pi)**N) * dv)) * exp
-        return prob
+    def probability(self, x, log):
+        """ For a realization x, compute the probability """
+
+        if log:
+
+            N = np.size(x)
+            nD = self.mean.size
+
+            mean = self.mean
+            if (nD == 1):
+                mean = np.repeat(self.mean, N)
+            else:
+                assert (N == nD), TypeError('size of samples {} must equal number of distribution dimensions {} for a multivariate distribution'.format(N, nD))
+
+            nD = self.variance.size
+            variance = self.variance
+            if nD == 1:
+                variance = np.float(variance)
+
+            # return multivariate_normal.logpdf(x, mean, self.variance.copy())
+            
+            # For a diagonal matrix, the log determinant is the cumulative sum of
+            # the log of the diagonal entries
+
+            tmp = cf.LogDet(variance, N)
+            dv = 0.5 * tmp
+            # subtract the mean from the samples
+            xMu = x - mean
+            # Start computing the exponent term
+            # e^(-0.5*(x-mu)'*inv(cov)*(x-mu))                        (1)
+            # Take the inverse of the variance
+            tmp = cf.Inv(variance)
+            # Compute the multiplication on the right of equation 1
+            iv = cf.Ax(tmp, xMu)
+            tmp = 0.5 * np.dot(xMu, iv)
+            # Probability Density Function
+            prob = -(0.5 * N) * np.log(2.0 * np.pi) - dv - tmp
+            tmp = np.float64(prob)
+            return tmp
+
+        else:
+            
+            N = x.size
+            nD = self.mean.size
+
+            assert (N == nD), TypeError('size of samples {} must equal number of distribution dimensions {} for a multivariate distribution'.format(N, nD))
+            # For a diagonal matrix, the determinant is the product of the diagonal
+            # entries
+            dv = cf.Det(self.variance)
+            # print(dv)
+            # subtract the mean from the samples.
+            xMu = x - self.mean
+            # Take the inverse of the variance
+            tmp = cf.Inv(self.variance)
+            iv = cf.Ax(tmp, xMu)
+            exp = np.exp(-0.5 * np.dot(xMu, iv))
+            # Probability Density Function
+            prob = (1.0 / np.sqrt(((2.0 * np.pi)**N) * dv)) * exp
+            return prob
 
     def summary(self, out=False):
         msg = 'MV Normal Distribution: \n'
@@ -118,44 +162,8 @@ class MvNormal(baseDistribution):
         if (self.variance.ndim == 2):
             return MvNormal(np.zeros(N,dtype=self.mean.dtype),np.zeros([N,N], dtype=self.variance.dtype), self.prng)
 
-#    def hdfName(self):
-#        """ Create the group name for an HDF file """
-#        return('Distribution("MvNormal",0.0,1.0)')
-#
-#    def createHdf(self, parent, myName):
-#        """ Create the hdf group metadata in file """
-#        grp = parent.create_group(myName)
-#        grp.attrs["repr"] = self.hdfName()
-#        grp.create_dataset('mean', self.mean.shape, dtype=self.mean.dtype)
-#        grp.create_dataset('variance', self.variance.shape, dtype=self.variance.dtype)
-#
-#    def writeHdf(self, parent, myName, create=True):
-#        """ Write the StatArray to an HDF object
-#        parent: Upper hdf file or group
-#        myName: object hdf name. Assumes createHdf has already been called
-#        """
-#        # create a new group inside h5obj
-#        if (create):
-#            self.createHdf(parent, myName)
-#
-#        grp = parent.get(myName)
-#        writeNumpy(self.mean,grp,'mean')
-#        writeNumpy(self.variance,grp,'variance')
-#
-#    def toHdf(self, h5obj, myName):
-#        """ Write the object to an HDF file """
-#        grp = h5obj.create_group(myName)
-#        grp.attrs["repr"] = self.hdfName()
-#        grp.create_dataset('mean', data=self.mean)
-#        grp.create_dataset('variance', data=self.variance)
-#
-#    def fromHdf(self, h5grp):
-#        """ Reads the Uniform Distribution from an HDF group """
-#        T1 = np.array(h5grp.get('mean'))
-#        T2 = np.array(h5grp.get('variance'))
-#        return MvNormal(T1, T2)
 
-    def getBinEdges(self, nBins=100, nStd=4.0, dim=None):
+    def bins(self, nBins=100, nStd=4.0, dim=None):
         """Discretizes a range given the mean and variance of the distribution 
         
         Parameters
@@ -182,12 +190,12 @@ class MvNormal(baseDistribution):
                 for i in range(nD):
                     tmp = nStd * np.sqrt(self.variance[i])
                     bins[i, :] = np.linspace(self.mean[i] - tmp, self.mean[i] + tmp, nBins+1)
-                return StatArray.StatArray(bins)
+                return StatArray.StatArray(np.squeeze(bins))
             else:
                 bins = np.empty(nBins+1)
                 tmp = nStd * np.sqrt(self.variance[dim])
                 bins[:] = np.linspace(self.mean[dim] - tmp, self.mean[dim] + tmp, nBins+1)
-                return StatArray.StatArray(bins)
+                return StatArray.StatArray(np.squeeze(bins))
 
         tmp = nStd * np.sqrt(self.variance)
-        return StatArray.StatArray(np.linspace(self.mean - tmp, self.mean + tmp, nBins+1))
+        return StatArray.StatArray(np.squeeze(np.linspace(self.mean - tmp, self.mean + tmp, nBins+1)))
