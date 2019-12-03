@@ -350,7 +350,7 @@ class StatArray(np.ndarray, myObject):
         return mx
 
 
-    def copy( self, order='F'):       
+    def copy(self, order='F'):       
         return StatArray(self)
 
 
@@ -390,7 +390,7 @@ class StatArray(np.ndarray, myObject):
         if (self.hasProposal()):
             other._proposal = self._proposal.deepcopy()
         if (self.hasPosterior()):
-            other._posterior = self._posterior#deepcopy(self._posterior)
+            other._posterior = self._posterior #deepcopy(self._posterior)
         
         return other
 
@@ -869,7 +869,7 @@ class StatArray(np.ndarray, myObject):
             self[i] = tmp[i]
 
 
-    def probability(self, *args, i=None):
+    def probability(self, log, x=None, i=None):
         """Evaluate the probability of the values in self using the attached prior distribution
 
         Parameters
@@ -893,10 +893,14 @@ class StatArray(np.ndarray, myObject):
 
         assert (self.hasPrior()), TypeError('No prior defined on variable {}. Use StatArray.setPrior()'.format(self.name))
 
-        if (len(args) > 0):
-            return self.prior.probability(*args)
+        samples = self[:]
+        if not x is None:
+            samples = x
 
-        return self.prior.probability(self[:]) if i is None else self.prior.probability(self[i])
+        if not i is None:
+            samples = samples[i]
+
+        return self.prior.probability(x=samples, log=log)
 
     
     def propose(self):
