@@ -767,9 +767,9 @@ class Histogram2D(RectilinearMesh2D):
         return ax
 
 
-    def plotConfidenceIntervals(self, percent=95.0, log=None, axis=0, **kwargs):
+    def plotCredibleIntervals(self, percent=95.0, log=None, axis=0, **kwargs):
 
-        med, low, high = self.axisConfidenceIntervals(percent, log, axis)
+        med, low, high = self.credibleIntervals(percent, log, axis)
 
         c = kwargs.pop('color', '#5046C8')
         ls = kwargs.pop('linestyle', 'dashed')
