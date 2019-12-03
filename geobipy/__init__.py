@@ -84,16 +84,17 @@ def checkCommandArguments():
     Parser.add_argument('inputFile', help='User input file')
     Parser.add_argument('outputDir', help='Output directory for results')
     Parser.add_argument('--skipHDF5', dest='skipHDF5', default=False, help='Skip the creation of the HDF5 files.  Only do this if you know they have been created.')
+    Parser.add_argument('--seed', dest='seed', type=int, default=None, help='Specify a single integer to fix the seed of the random number generator. Only used in serial mode.')
     
     args = Parser.parse_args()
 
     # Strip .py from the input file name
     inputFile = args.inputFile.replace('.py','')
 
-    return inputFile, args.outputDir, args.skipHDF5
+    return inputFile, args.outputDir, args.skipHDF5, args.seed
 
 
-def singleCore(inputFile, outputDir):
+def singleCore(inputFile, outputDir, seed=None):
 
     print('Running GeoBIPy in serial mode')
     print('Using user input file {}'.format(inputFile))
@@ -112,7 +113,7 @@ def singleCore(inputFile, outputDir):
     t0 = time.time()
 
     # Get the random number generator
-    prng = np.random.RandomState()
+    prng = np.random.RandomState(seed)
 
     # Everyone needs the system classes read in early.
     Dataset = eval(customFunctions.safeEval(UP.dataInit))
@@ -458,17 +459,17 @@ def workerTask(_DataPoint, UP, prng, world, lineNumbers, LineResults):
 def runSerial():
     """Run the serial implementation of GeoBIPy. """
         
-    inputFile, outputDir, skipHDF5 = checkCommandArguments()    
+    inputFile, outputDir, skipHDF5, seed = checkCommandArguments()    
     sys.path.append(getcwd())
 
-    R = singleCore(inputFile, outputDir)
+    R = singleCore(inputFile, outputDir, seed)
 
 
 def runParallel():
     """Run the parallel implementation of GeoBIPy. """
 
-    inputFile, outputDir, skipHDF5 = checkCommandArguments()    
+    inputFile, outputDir, skipHDF5, seed = checkCommandArguments()    
     sys.path.append(getcwd())
 
-    R = multipleCore(inputFile, outputDir, skipHDF5)
+    R = multipleCore(inputFile, outputDir, skipHDF5, seed)
 
