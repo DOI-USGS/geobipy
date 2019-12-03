@@ -67,15 +67,15 @@ class Model1D(Model):
         assert (not(not thickness is None and not depth is None)), TypeError('Cannot instantiate with both depth and thickness values')
 
         # Number of Cells in the model
-        self.nCells = StatArray.StatArray(1, '# of Cells', dtype=np.int32)
+        self._nCells = StatArray.StatArray(1, '# of Cells', dtype=np.int32)
         if not nCells is None:
             assert (nCells >= 1), ValueError('nCells must >= 1')
-            self.nCells[0] = nCells
+            self._nCells[0] = nCells
 
         # Depth to the top of the model
         if top is None: 
             top = 0.0
-        self.top = StatArray.StatArray(top, "Depth to top", "m")
+        self._top = StatArray.StatArray(top, "Depth to top", "m")
 
         if hasHalfspace:
             self._init_withHalfspace(nCells, top, parameters, depth, thickness)
@@ -83,7 +83,7 @@ class Model1D(Model):
             self._init_withoutHalfspace(nCells, top, parameters, depth, thickness)
 
         # StatArray of the change in physical parameters
-        self.dpar = StatArray.StatArray(self.nCells[0] - 1, 'Derivative', r"$\frac{"+self.par.getUnits()+"}{m}$")
+        self._dpar = StatArray.StatArray(self.nCells[0] - 1, 'Derivative', r"$\frac{"+self.par.getUnits()+"}{m}$")
 
         # StatArray of magnetic properties.
         self.chie = StatArray.StatArray(self.nCells[0], "Magnetic Susceptibility", r"$\kappa$")
@@ -98,32 +98,45 @@ class Model1D(Model):
         self.maxDepth = None
         # Maximum number of layers
         self.maxLayers = None
-        # Probability wheel
-        self.pWheel = None
+        # Categorical distribution for choosing perturbation events
+        self.eventProposal = None
         # Keep track of actions made to the Model.
         self.action = ['none', 0, 0.0]
 
         self.Hitmap = None
+
+    
+    @property
+    def nCells(self):
+        return self._nCells
+
+    @property
+    def top(self):
+        return self._top
+
+    @property
+    def dpar(self):
+        return self._dpar
 
 
     def _init_withHalfspace(self, nCells=None, top=None, parameters = None, depth = None, thickness = None):
 
 
         if (not depth is None and nCells is None):
-            self.nCells[0] = depth.size + 1
+            self._nCells[0] = depth.size + 1
         if (not thickness is None and nCells is None):
-            self.nCells[0] = thickness.size + 1
+            self._nCells[0] = thickness.size + 1
 
-        self.depth = StatArray.StatArray(self.nCells[0], 'Depth', 'm')
-        self.thk = StatArray.StatArray(self.nCells[0], 'Thickness', 'm')
-        self.par = StatArray.StatArray(self.nCells[0])
+        self._depth = StatArray.StatArray(self.nCells[0], 'Depth', 'm')
+        self._thk = StatArray.StatArray(self.nCells[0], 'Thickness', 'm')
+        self._par = StatArray.StatArray(self.nCells[0])
 
         if (not depth is None):
             if (self.nCells > 1):
                 assert depth.size == self.nCells-1, ValueError('Size of depth must equal {}'.format(self.nCells[0]-1))
                 assert np.all(np.diff(depth) > 0.0), ValueError('Depths must monotonically increase')
-            self.depth[:-1] = depth
-            self.depth[-1] = np.inf
+            self._depth[:-1] = depth
+            self._depth[-1] = np.inf
             self.thicknessFromDepth()
             
 
@@ -133,14 +146,14 @@ class Model1D(Model):
             if (self.nCells > 1):
                 assert thickness.size == self.nCells-1, ValueError('Size of thickness must equal {}'.format(self.nCells[0]-1))
                 assert np.all(thickness > 0.0), ValueError('Thicknesses must be positive')
-            self.thk[:-1] = thickness
-            self.thk[-1] = np.inf
+            self._thk[:-1] = thickness
+            self._thk[-1] = np.inf
             self.depthFromThickness()
 
         # StatArray of the physical parameters
         if (not parameters is None):
             assert parameters.size == self.nCells, ValueError('Size of parameters must equal {}'.format(self.nCells[0]))
-            self.par = StatArray.StatArray(parameters)
+            self._par = StatArray.StatArray(parameters)
 
 
     def _init_withoutHalfspace(self, nCells = None, top = None, parameters = None, depth = None, thickness = None):
@@ -151,15 +164,15 @@ class Model1D(Model):
         if (not thickness is None and nCells is None):
             self.nCells[0] = thickness.size
 
-        self.depth = StatArray.StatArray(self.nCells[0], 'Depth', 'm')
-        self.thk = StatArray.StatArray(self.nCells[0], 'Thickness', 'm')
-        self.par = StatArray.StatArray(self.nCells[0])
+        self._depth = StatArray.StatArray(self.nCells[0], 'Depth', 'm')
+        self._thk = StatArray.StatArray(self.nCells[0], 'Thickness', 'm')
+        self._par = StatArray.StatArray(self.nCells[0])
 
         if (not depth is None):
             if (self.nCells > 1):
                 assert depth.size == self.nCells, ValueError('Size of depth must equal {}'.format(self.nCells[0]))
                 assert np.all(np.diff(depth) > 0.0), ValueError('Depths must monotonically increase')
-            self.depth[:] = depth
+            self._depth[:] = depth
             self.thicknessFromDepth()
 
         if (not thickness is None):
@@ -168,13 +181,25 @@ class Model1D(Model):
             if (self.nCells > 1):
                 assert thickness.size == self.nCells, ValueError('Size of thickness must equal {}'.format(self.nCells[0]))
                 assert np.all(thickness > 0.0), ValueError('Thicknesses must be positive')
-            self.thk[:] = thickness
+            self._thk[:] = thickness
             self.depthFromThickness()
 
         # StatArray of the physical parameters
         if (not parameters is None):
             assert parameters.size == self.nCells, ValueError('Size of parameters must equal {}'.format(self.nCells[0]))
-            self.par = StatArray.StatArray(parameters)
+            self._par = StatArray.StatArray(parameters)
+
+    @property
+    def depth(self):
+        return self._depth
+
+    @property
+    def thk(self):
+        return self._thk
+
+    @property
+    def par(self):
+        return self._par
 
 
     def deepcopy(self):
@@ -187,19 +212,19 @@ class Model1D(Model):
 
         """
         other = Model1D(nCells=None)
-        other.nCells = self.nCells.deepcopy()
-        other.top = self.top
-        other.depth = self.depth.deepcopy()
-        other.thk = self.thk.deepcopy()
+        other._nCells = self.nCells.deepcopy()
+        other._top = self.top
+        other._depth = self.depth.deepcopy()
+        other._thk = self.thk.deepcopy()
         other.minThickness = self.minThickness
         other.minDepth = self.minDepth
         other.maxDepth = self.maxDepth
         other.maxLayers = self.maxLayers
-        other.par = self.par.deepcopy()
-        other.dpar = self.dpar.deepcopy()
+        other._par = self.par.deepcopy()
+        other._dpar = self.dpar.deepcopy()
         other.chie = self.chie.deepcopy() #StatArray(other.nCells[0], "Electric Susceptibility", r"$\kappa$")
         other.chim = self.chim.deepcopy() #StatArray(other.nCells[0], "Magnetic Susceptibility", "$\frac{H}{m}$")
-        other.pWheel = self.pWheel
+        other.eventProposal = self.eventProposal.deepcopy()
         other.action = self.action.copy()
         other.Hitmap = self.Hitmap
         other.hasHalfspace = self.hasHalfspace
@@ -221,42 +246,250 @@ class Model1D(Model):
 
         """
         tmp = Model1D(size,self.top)
-        tmp.nCells = self.nCells
-        tmp.depth = self.depth.pad(size)
-        tmp.thk = self.thk.pad(size)
-        tmp.par = self.par.pad(size)
+        tmp._nCells = self.nCells
+        tmp._depth = self.depth.pad(size)
+        tmp._thk = self.thk.pad(size)
+        tmp._par = self.par.pad(size)
         tmp.chie = self.chie.pad(size)
         tmp.chim = self.chim.pad(size)
-        tmp.dpar=self.dpar.pad(size-1)
+        tmp._dpar=self.dpar.pad(size-1)
         if (not self.minDepth is None): tmp.minDepth=self.minDepth
         if (not self.maxDepth is None): tmp.maxDepth=self.maxDepth
         if (not self.maxLayers is None): tmp.maxLayers=self.maxLayers
         if (not self.minThickness is None): tmp.minThickness=self.minThickness
-        if (not self.pWheel is None): tmp.pWheel=self.pWheel
         if (not self.Hitmap is None): tmp.Hitmap=self.Hitmap
         return tmp
 
 
     def depthFromThickness(self):
         """Given the thicknesses of each layer, create the depths to each interface. The last depth is inf for the halfspace."""
-        self.depth[:] = np.cumsum(self.thk)
+        self._depth[:] = np.cumsum(self.thk)
 
         if self.hasHalfspace:
-            self.depth[-1] = np.infty
+            self._depth[-1] = np.infty
 
 
     def thicknessFromDepth(self):
         """Given the depths to each interface, compute the layer thicknesses. The last thickness is nan for the halfspace."""
-        self.thk = self.thk.resize(self.nCells[0])
-        self.thk[0] = self.depth[0]
+        self._thk = self.thk.resize(self.nCells[0])
+        self._thk[0] = self.depth[0]
         for i in range(1, self.nCells[0]):
-            self.thk[i] = self.depth[i] - self.depth[i - 1]
+            self._thk[i] = self.depth[i] - self.depth[i - 1]
 
         if self.hasHalfspace:
-            self.thk[-1] = np.inf
+            self._thk[-1] = np.inf
 
 
-    def priorProbability(self, sPar, sGradient, limits=None, verbose=False):
+    def insertLayer(self, z, par=None):
+        """Insert a new layer into a model at a given depth
+
+        Parameters
+        ----------
+        z : numpy.float64
+            Depth at which to insert a new interface
+        par : numpy.float64, optional 
+            Value of the parameter for the new layer
+            
+        Returns
+        -------
+        out : geobipy.Model1D
+            Model with inserted layer.
+
+        """
+        # Deepcopy the 1D Model
+        tmp = self.depth[:-1]
+        # Get the index to insert the new layer
+        i = tmp.searchsorted(z)
+        # Deepcopy the 1D Model
+        other = self.deepcopy()
+        # Increase the number of cells
+        other._nCells += 1
+        # Insert the new layer depth
+        other._depth = self.depth.insert(i, z)
+        if (par is None):
+            if (i >= self.par.size):
+                i -= 2
+                other._par = other.par.insert(i, self.par[i])
+                other._depth[-2] = other.depth[-1]
+            else:
+                other._par = other.par.insert(i, self.par[i])
+        else:
+            other._par = other.par.insert(i, par)
+        # Get the new thicknesses
+        other.thicknessFromDepth()
+        # Reset ChiE and ChiM
+        other.chie = StatArray.StatArray(other.nCells[0], "Electric Susceptibility", r"$\kappa$")
+        other.chim = StatArray.StatArray(other.nCells[0], "Magnetic Susceptibility", r"$\frac{H}{m}$")
+        # Resize the parameter gradient
+        other._dpar = other.dpar.resize(other.par.size - 1)
+        other.action = ['birth', np.int(i), z]
+        return other
+
+
+    def deleteLayer(self, i):
+        """Remove a layer from the model
+        
+        Parameters
+        ----------
+        i : int
+            The layer to remove.
+
+        Returns
+        -------
+        out : geobipy.Model1D
+            Model with layer removed.
+        
+        """
+
+        if (self.nCells == 0):
+            return self
+
+        assert i < self.nCells[0] - 1, ValueError("i must be less than the number of cells - 1{}".format(self.nCells[0]-1))
+
+        # Deepcopy the 1D Model to ensure priors and proposals are passed
+        other = self.deepcopy()
+        # Decrease the number of cells
+        other._nCells -= 1
+        # Remove the interface depth
+        other._depth = other.depth.delete(i)
+        # Get the new thicknesses
+        other.thicknessFromDepth()
+        # Take the average of the deleted layer and the one below it
+        other._par = other.par.delete(i)
+        other._par[i] = 0.5 * (self.par[i] + self.par[i + 1])
+        # Reset ChiE and ChiM
+        other.chie = other.chie.delete(i)
+        other.chim = other.chim.delete(i)
+        # Resize the parameter gradient
+        other._dpar = other.dpar.resize(other.par.size - 1)
+        other.action = ['death', np.int(i), self.depth[i]]
+
+        return other
+
+
+    def perturbStructure(self):
+        """Perturb a model
+
+        Generates a new model by perturbing the current model based on four probabilities.
+        The probabilities correspond to
+        * Birth, the insertion of a new layer into the model
+        * Death, the deletion of a layer from the model
+        * Change, change one the existing interfaces
+        * No change, do nothing and return the original
+
+        The method self.makePerturbable must be used before calling self.perturb.
+
+        The perturbation starts by generating a random number from a uniform distribution to determine which cycle to go through.
+        If a layer is created, or an interface perturbed, any resulting layer thicknesses must be greater than the minimum thickness :math:`h_{min}`.
+        If the new layer thickness test fails, the birth or perturbation tries again. If the cycle fails after 10 tries, the entire process begins again
+        such that a death, or no change is possible thus preventing any neverending cycles.
+
+        Returns
+        -------
+        out[0] : Model1D
+            The perturbed model
+            
+        See Also
+        --------
+        geobipy.Model1D.makePerturbable : Must be used before calling self.perturb
+        
+        """
+
+        assert (not self.eventProposal is None), ValueError('Please set the proposals of the model1D with model1D.setProposals()')
+        prng = self.nCells.prior.prng
+        # Pre-compute exponential values (Take them out of log space)
+        hmin = np.exp(self.minThickness)
+        zmin = np.exp(self.minDepth)
+        zmax = np.exp(self.maxDepth)
+        nTries = 10
+        # This outer loop will allow the perturbation to change types. e.g. if the loop is stuck in a birthing
+        # cycle, the number of tries will exceed 10, and we can try a different perturbation type.
+        tryAgain = True  # Temporary to enter the loop
+        while (tryAgain):
+            tryAgain = False
+
+            goodAction = False
+
+            # Choose an action to perform, and make sure its legitimate
+            #i.e. don't delete a single layer model, or add a layer to a model that is at the priors max on number of cells.
+            while not goodAction:
+                goodAction = True
+                # Get a random probability from 0-1
+                event = self.eventProposal.rng()
+
+                if (self.nCells == 1 and (event == 1 or event == 2)):
+                    goodAction = False
+                elif (self.nCells == self.nCells.prior.max and event == 0):
+                    goodAction = False
+
+            # Return if no change
+            if (event == 3):
+                out = self.deepcopy()
+                out.action = ['none', 0, 0.0]
+                return out
+
+            # Otherwise enter life-death-perturb cycle
+            if (event == 0):  # Create a new layer
+                newThicknessBiggerThanMinimum = False
+                tries = 0
+                while (not newThicknessBiggerThanMinimum):  # Continue while the new layer is smaller than the minimum
+                    # Get the new depth
+                    tmp = np.float64(prng.uniform(self.minDepth, self.maxDepth, 1))
+                    newDepth = np.exp(tmp)
+                    z = self.depth[:-1]
+                    # Insert the new depth
+                    i = z.searchsorted(newDepth)
+                    z = z.insert(i, newDepth)
+                    # Get the thicknesses
+                    z = z.prepend(0.0)
+                    h = np.min(np.diff(z[:]))
+                    tries += 1
+                    if (h > hmin):
+                        newThicknessBiggerThanMinimum = True  # Exit if thickness is larger than minimum
+                    if (tries == nTries):
+                        newThicknessBiggerThanMinimum = True # just to exit.
+                        tryAgain = True
+                if (not tryAgain):
+                    return self.insertLayer(newDepth)
+
+            if (event == 1):
+                # Get the layer to remove
+                iDeleted = np.int64(prng.uniform(0, self.nCells - 1, 1)[0])
+                # Remove the layer and return
+                return self.deleteLayer(iDeleted)
+
+            if (event == 2):
+                newThicknessBiggerThanMinimum = False
+                k = self.nCells[0] - 1
+                tries = 0
+                while (not newThicknessBiggerThanMinimum):  # Continue while the perturbed layer is suitable
+                    z = self.depth[:-1]
+                    # Get the layer to perturb
+                    i = np.int64(prng.uniform(0, k, 1)[0])
+                    # Get the perturbation amount
+                    dz = np.sign(prng.randn()) * hmin * prng.uniform()
+                    # Perturb the layer
+                    z = z.prepend(0.0)
+                    z[i + 1] += dz
+                    # Get the minimum thickness
+                    h = np.min(np.diff(z))
+                    tries += 1
+                    # Exit if the thickness is big enough, and we stayed within
+                    # the depth bounds
+                    if (h > hmin and z[1] > zmin and z[-1] < zmax):
+                        newThicknessBiggerThanMinimum = True
+                    if (tries == nTries):
+                        newThicknessBiggerThanMinimum = True
+                        tryAgain = True
+                if (not tryAgain):
+                    other = self.deepcopy()
+                    other.depth[i] += dz  # Perturb the depth in the model
+                    other.thicknessFromDepth()
+                    other.action = ['perturb', np.int(i), dz]
+                    return other
+
+
+    def priorProbability(self, parameterPrior, gradientPrior, limits=None, verbose=False):
         """Evaluate the prior probability for the 1D Model.
 
         The following equation describes the components of the prior that correspond to the Model1D,
@@ -349,7 +582,6 @@ class Model1D(Model):
 
         P_parameter = np.float64(0.0)
         P_gradient = np.float64(0.0)
-
         probability = np.float64(0.0)
 
         # Check that the parameters are within the limits if they are bound
@@ -360,11 +592,11 @@ class Model1D(Model):
                 probability = -np.infty
 
         # Probability of the number of layers
-        P_nCells = self.nCells.probability()
+        P_nCells = self.nCells.probability(log=True)
         probability += P_nCells
 
         # Probability of depth given nCells
-        P_depthcells = np.log(self.depth.probability(self.nCells-1))
+        P_depthcells = self.depth.probability(x=self.nCells-1, log=True)
         probability += P_depthcells
 
         # Evaluate the prior based on the assigned hitmap
@@ -372,12 +604,12 @@ class Model1D(Model):
             self.evaluateHitmapPrior(self.Hitmap)
 
         # Probability of parameter
-        if sPar:  
-            P_parameter = self.par.probability(np.log(self.par))
+        if parameterPrior:  
+            P_parameter = self.par.probability(x=np.log(self.par), log=True)
             probability += P_parameter
 
         # Probability of model gradient
-        if sGradient:  
+        if gradientPrior:  
             P_gradient = self.smoothModelPrior(self.minThickness)
             probability += P_gradient
 
@@ -386,91 +618,157 @@ class Model1D(Model):
         return probability
 
 
-    def insertLayer(self, z, par=None):
-        """Insert a new layer into a model at a given depth
+    def remainingSpace(self, nLayers):
+        return (np.exp(self.maxDepth) - np.exp(self.minDepth)) - nLayers * np.exp(self.minThickness)
+
+
+    def proposalProbabilities(self):
+        """Return the forward and reverse proposal probabilities for the model
+
+        Returns the denominator and numerator for the model's components of the proposal ratio.
+
+        .. math::
+            :label: proposal numerator
+
+            q(k, \\boldsymbol{z} | \\boldsymbol{m}^{'})
+
+        and 
+
+        .. math::
+            :label: proposal denominator
+
+            q(k^{'}, \\boldsymbol{z}^{'} | \\boldsymbol{m})
+
+        Each component is dependent on the event that was chosen during perturbation.
+
+        Returns
+        -------
+        forward : float
+            The forward proposal probability
+        reverse : float
+            The reverse proposal probability
+
+        """
+
+        if self.action[0] in ['none', 'perturb']:
+            return 1.0, 1.0
+
+        if self.action[0] == 'birth':
+            k = self.nCells - 1
+
+            forward = Distribution('Uniform', 0.0, self.remainingSpace(k))
+            reverse = Distribution('Uniform', 0.0, k)
+
+            return forward.probability(self.maxDepth, log=True), reverse.probability(k, log=True)
+
+        if self.action[0] == 'death':
+            k = self.nCells
+
+            forward = Distribution('Uniform', 0.0, self.remainingSpace(k))
+            reverse = Distribution('Uniform', 0.0, k)
+
+            return reverse.probability(k, log=True), forward.probability(self.maxDepth, log=True)
+
+        
+    def setPosteriors(self):
+
+        assert not self.maxLayers is None, ValueError("No priors are set, user Model1D.setPriors() to do so.")
+
+        # Initialize the posterior histogram for the number of layers
+        self.nCells.setPosterior(Histogram1D(binCentres=StatArray.StatArray(np.arange(0.0, self.maxLayers + 1.0), name="# of Layers")))
+
+        # Discretize the parameter values
+
+        zGrd = StatArray.StatArray(np.arange(0.5 * np.exp(self.minDepth), 1.1 * np.exp(self.maxDepth), 0.5 * np.exp(self.minThickness)), self.depth.name, self.depth.units)
+        pGrd = StatArray.StatArray(np.exp(self.par.prior.bins(nBins = 250, nStd=4.0)), self.par.name, self.par.units)
+
+        # Set the posterior hitmap for conductivity vs depth
+        self.par.setPosterior(Hitmap2D(xBins = pGrd, yBinCentres = zGrd))
+
+        # Initialize the interface Depth Histogram
+        # tmp = np.logspace(np.log10(0.5 * np.exp(self.minDepth)), np.log10(1.1 * np.exp(self.maxDepth)), zGrd.size)
+        # zGrd = StatArray.StatArray(tmp, self.depth.name, self.depth.units)
+        # self.depth.setPosterior(Histogram1D(binCentres = zGrd, log=10))
+        self.depth.setPosterior(Histogram1D(binCentres = zGrd))
+
+
+    def setPriors(self, halfSpaceValue, minDepth, maxDepth, maxLayers, minThickness=None, factor=10.0, prng=None):
+        """Setup the priors of a 1D model.
 
         Parameters
         ----------
-        z : numpy.float64
-            Depth at which to insert a new interface
-        par : numpy.float64, optional 
-            Value of the parameter for the new layer
-            
-        Returns
-        -------
-        out : geobipy.Model1D
-            Model with inserted layer.
+        halfSpaceValue : float
+            Value of the parameter for the halfspace.
+        minDepth : float64
+            Minimum depth possible for the model
+        maxDepth : float64
+            Maximum depth possible for the model
+        maxLayers : int
+            Maximum number of layers allowable in the model
+        minThickness : float64, optional
+            Minimum thickness of any layer. If minThickness = None, minThickness is computed from minDepth, maxDepth, and maxLayers (recommended).
+        factor : float, optional
+            Tuning parameter used in the std of the parameter prior.
+        prng : numpy.random.RandomState(), optional
+            Random number generator, if none is given, will use numpy's global generator.
+               
+        See Also
+        --------
+        geobipy.Model1D.perturb : For a description of the perturbation cycle.
 
         """
-        # Deepcopy the 1D Model
-        tmp = self.depth[:-1]
-        # Get the index to insert the new layer
-        i = tmp.searchsorted(z)
-        # Deepcopy the 1D Model
-        other = self.deepcopy()
-        # Increase the number of cells
-        other.nCells += 1
-        # Insert the new layer depth
-        other.depth = self.depth.insert(i, z)
-        if (par is None):
-            if (i >= self.par.size):
-                i -= 2
-                other.par = other.par.insert(i, self.par[i])
-                other.depth[-2] = other.depth[-1]
-            else:
-                other.par = other.par.insert(i, self.par[i])
+        assert minDepth > 0.0, ValueError("minDepth must be > 0.0")
+        assert maxDepth > 0.0, ValueError("maxDepth must be > 0.0")
+        assert maxLayers > 0.0, ValueError("maxLayers must be > 0.0")
+        
+        if (minThickness is None):
+            # Assign a minimum possible thickness
+            self.minThickness = np.log((maxDepth - minDepth) / (2 * maxLayers))
         else:
-            other.par = other.par.insert(i, par)
-        # Get the new thicknesses
-        other.thicknessFromDepth()
-        # Reset ChiE and ChiM
-        other.chie = StatArray.StatArray(other.nCells[0], "Electric Susceptibility", r"$\kappa$")
-        other.chim = StatArray.StatArray(other.nCells[0], "Magnetic Susceptibility", r"$\frac{H}{m}$")
-        # Resize the parameter gradient
-        other.dpar = other.dpar.resize(other.par.size - 1)
-        other.action = ['birth', np.int(i), z]
-        return other
+            self.minThickness = np.log(minThickness)
+            
+        self.minDepth = np.log(minDepth)  # Assign the log of the min depth
+        self.maxDepth = np.log(maxDepth)  # Assign the log of the max depth
+        self.maxLayers = np.int32(maxLayers)
+
+        # Assign a uniform distribution to the number of layers
+        self.nCells.setPrior('Uniform', 1, self.maxLayers, prng=prng)
+
+        # Set priors on the depth interfaces, given a number of layers
+        i = np.arange(self.maxLayers)
+        # dz = np.log((np.exp(self.maxDepth) - np.exp(self.minDepth) - 2.0 * i * np.exp(self.minThickness)))
+        dz = self.remainingSpace(i)
+
+        self.depth.setPrior('Order', denominator=dz)  # priZ
+
+        # Assign the initial prior to the parameters
+        priMu = np.log(halfSpaceValue)
+        priStd = np.log(1.0 + factor)
+        self.par.setPrior('MvNormal', priMu, priStd**2.0, prng=prng)
 
 
-    def deleteLayer(self, i):
-        """Remove a layer from the model
-        
+    def setProposals(self, probabilities, prng=None):
+        """Setup the proposals of a 1D model.
+
         Parameters
         ----------
-        i : int
-            The layer to remove.
+        halfSpaceValue : float
+            Value of the parameter for the halfspace.
+        probabilities : array_like
+            Probability of birth, death, perturb, and no change for the model
+            e.g. pWheel = [0.5, 0.25, 0.15, 0.1]
+        prng : numpy.random.RandomState(), optional
+            Random number generator, if none is given, will use numpy's global generator.
+               
+        See Also
+        --------
+        geobipy.Model1D.perturb : For a description of the perturbation cycle.
 
-        Returns
-        -------
-        out : geobipy.Model1D
-            Model with layer removed.
-        
         """
-
-        if (self.nCells == 0):
-            return self
-
-        assert i < self.nCells[0] - 1, ValueError("i must be less than the number of cells - 1{}".format(self.nCells[0]-1))
-
-        # Deepcopy the 1D Model to ensure priors and proposals are passed
-        other = self.deepcopy()
-        # Decrease the number of cells
-        other.nCells -= 1
-        # Remove the interface depth
-        other.depth = other.depth.delete(i)
-        # Get the new thicknesses
-        other.thicknessFromDepth()
-        # Take the average of the deleted layer and the one below it
-        other.par = other.par.delete(i)
-        other.par[i] = 0.5 * (self.par[i] + self.par[i + 1])
-        # Reset ChiE and ChiM
-        other.chie = other.chie.delete(i)
-        other.chim = other.chim.delete(i)
-        # Resize the parameter gradient
-        other.dpar = other.dpar.resize(other.par.size - 1)
-        other.action = ['death', np.int(i), self.depth[i]]
-
-        return other
+        assert np.size(probabilities) == 4, ValueError('pWheel must have size 4')
+        # assert not self.maxLayers is None, Exception("Please set the priors on the model with setPriors()")
+        
+        self.eventProposal = Distribution('Categorical', probabilities, ['birth', 'death', 'perturb', 'noChange'], prng=prng)
 
 
     def smoothModelPrior(self, hmin=0.0):
@@ -514,139 +812,30 @@ class Model1D(Model):
         """
         assert (self.dpar.hasPrior()), TypeError('No prior defined on parameter gradient. Use Model1D.dpar.setPrior() to set the prior.')
 
+        
+
         if self.nCells[0] == 1:
             tmp = self.insertLayer(self.minDepth + (0.5 * (np.exp(self.maxDepth) - np.exp(self.minDepth))))
             tmp.dpar[:] = (np.diff(np.log(tmp.par))) / (np.log(tmp.thk[:-1]) - hmin)
-            probability = tmp.dpar.probability()
+            probability = tmp.dpar.probability(log=True)
+
         else:
             self.dpar[:] = (np.diff(np.log(self.par))) / (np.log(self.thk[:-1]) - hmin)
-            probability = self.dpar.probability()
+            probability = self.dpar.probability(log=True)
         return probability
 
 
-    def perturbStructure(self):
-        """Perturb a model
-
-        Generates a new model by perturbing the current model based on four probabilities.
-        The probabilities correspond to
-        * Birth, the insertion of a new layer into the model
-        * Death, the deletion of a layer from the model
-        * Change, change one the existing interfaces
-        * No change, do nothing and return the original
-
-        The method self.makePerturbable must be used before calling self.perturb.
-
-        The perturbation starts by generating a random number from a uniform distribution to determine which cycle to go through.
-        If a layer is created, or an interface perturbed, any resulting layer thicknesses must be greater than the minimum thickness :math:`h_{min}`.
-        If the new layer thickness test fails, the birth or perturbation tries again. If the cycle fails after 10 tries, the entire process begins again
-        such that a death, or no change is possible thus preventing any neverending cycles.
-
-        Returns
-        -------
-        out[0] : Model1D
-            The perturbed model
-            
-        See Also
-        --------
-        geobipy.Model1D.makePerturbable : Must be used before calling self.perturb
-        
-        """
-
-        assert (not self.pWheel is None), ValueError('Please set the proposals of the model1D with model1D.setProposals()')
-        prng = self.nCells.prior.prng
-        # Pre-compute exponential values (Take them out of log space)
-        hmin = np.exp(self.minThickness)
-        zmin = np.exp(self.minDepth)
-        zmax = np.exp(self.maxDepth)
-        nTries = 10
-        # This outer loop will allow the perturbation to change types. e.g. if the loop is stuck in a birthing
-        # cycle, the number of tries will exceed 10, and we can try a different perturbation type.
-        tryAgain = True  # Temporary to enter the loop
-        while (tryAgain):
-            tryAgain = False
-
-            goodAction = False
-
-            # Choose an action to perform, and make sure its legitimate
-            #i.e. don't delete a single layer model, or add a layer to a model that is at the priors max on number of cells.
-            while not goodAction:
-                goodAction = True
-                # Get a random probability from 0-1
-                lifeCycle = prng.rand(1)
-
-                # Get the option to use
-                option = self.pWheel.searchsorted(lifeCycle)
-
-                if (self.nCells == 1 and (option == 1 or option == 2)):
-                    goodAction = False
-                elif (self.nCells == self.nCells.prior.max and option == 0):
-                    goodAction = False
-
-            # Return if no change
-            if (option == 3):
-                out = self.deepcopy()
-                out.action = ['none', 0, 0.0]
-                return out
-
-            # Otherwise enter life-death-perturb cycle
-            if (option == 0):  # Create a new layer
-                newThicknessBiggerThanMinimum = False
-                tries = 0
-                while (not newThicknessBiggerThanMinimum):  # Continue while the new layer is smaller than the minimum
-                    # Get the new depth
-                    tmp = np.float64(prng.uniform(self.minDepth, self.maxDepth, 1))
-                    newDepth = np.exp(tmp)
-                    z = self.depth[:-1]
-                    # Insert the new depth
-                    i = z.searchsorted(newDepth)
-                    z = z.insert(i, newDepth)
-                    # Get the thicknesses
-                    z = z.prepend(0.0)
-                    h = np.min(np.diff(z[:]))
-                    tries += 1
-                    if (h > hmin):
-                        newThicknessBiggerThanMinimum = True  # Exit if thickness is larger than minimum
-                    if (tries == nTries):
-                        newThicknessBiggerThanMinimum = True # just to exit.
-                        tryAgain = True
-                if (not tryAgain):
-                    return self.insertLayer(newDepth)
-
-            if (option == 1):
-                # Get the layer to remove
-                iDeleted = np.int64(prng.uniform(0, self.nCells - 1, 1)[0])
-                # Remove the layer and return
-                return self.deleteLayer(iDeleted)
-
-            if (option == 2):
-                newThicknessBiggerThanMinimum = False
-                k = self.nCells[0] - 1
-                tries = 0
-                while (not newThicknessBiggerThanMinimum):  # Continue while the perturbed layer is suitable
-                    z = self.depth[:-1]
-                    # Get the layer to perturb
-                    i = np.int64(prng.uniform(0, k, 1)[0])
-                    # Get the perturbation amount
-                    dz = np.sign(prng.randn()) * hmin * prng.uniform()
-                    # Perturb the layer
-                    z = z.prepend(0.0)
-                    z[i + 1] += dz
-                    # Get the minimum thickness
-                    h = np.min(np.diff(z))
-                    tries += 1
-                    # Exit if the thickness is big enough, and we stayed within
-                    # the depth bounds
-                    if (h > hmin and z[1] > zmin and z[-1] < zmax):
-                        newThicknessBiggerThanMinimum = True
-                    if (tries == nTries):
-                        newThicknessBiggerThanMinimum = True
-                        tryAgain = True
-                if (not tryAgain):
-                    other = self.deepcopy()
-                    other.depth[i] += dz  # Perturb the depth in the model
-                    other.thicknessFromDepth()
-                    other.action = ['perturb', np.int(i), dz]
-                    return other
+    def summary(self, out=False):
+        """ Write a summary of the 1D model """
+        msg = "1D Model: \n"
+        msg += self.nCells.summary(True)
+        msg += 'Top of the model: ' + str(self.top) + '\n'
+        msg += self.thk.summary(True)
+        msg += self.par.summary(True)
+        msg += self.depth.summary(True)
+        if (out):
+            return msg
+        print(msg)
 
 
     def unperturb(self):
@@ -666,96 +855,6 @@ class Model1D(Model):
 
         if self.action[0] == 'death':
             return self.insertLayer(self.action[2])
-
-
-    def setPosteriors(self):
-
-        assert not self.maxLayers is None, ValueError("No priors are set, user Model1D.setPriors() to do so.")
-
-        # Initialize the posterior histogram for the number of layers
-        self.nCells.setPosterior(Histogram1D(binCentres=StatArray.StatArray(np.arange(0.0, self.maxLayers + 1.0), name="# of Layers")))
-
-        # Discretize the parameter values
-
-        zGrd = StatArray.StatArray(np.arange(0.5 * np.exp(self.minDepth), 1.1 * np.exp(self.maxDepth), 0.5 * np.exp(self.minThickness)), self.depth.name, self.depth.units)
-        pGrd = StatArray.StatArray(np.exp(self.par.prior.getBinEdges(nBins = 250, nStd=4.0)), self.par.name, self.par.units)
-
-        # Set the posterior hitmap for conductivity vs depth
-        self.par.setPosterior(Hitmap2D(xBins = pGrd, yBinCentres = zGrd))
-
-        # Initialize the interface Depth Histogram
-        # tmp = np.logspace(np.log10(0.5 * np.exp(self.minDepth)), np.log10(1.1 * np.exp(self.maxDepth)), zGrd.size)
-        # zGrd = StatArray.StatArray(tmp, self.depth.name, self.depth.units)
-        # self.depth.setPosterior(Histogram1D(binCentres = zGrd, log=10))
-        self.depth.setPosterior(Histogram1D(binCentres = zGrd))
-
-
-    def setPriors(self, halfSpaceValue, pWheel, minDepth, maxDepth, maxLayers, minThickness=None, factor=10.0, prng=None):
-        """Setup the priors of a 1D model.
-
-        Parameters
-        ----------
-        halfSpaceValue : float
-            Value of the parameter for the halfspace.
-        pWheel : array_like
-            Probability of birth, death, perturb, and no change for the model
-            e.g. pWheel = [0.5, 0.25, 0.15, 0.1]
-        minDepth : float64
-            Minimum depth possible for the model
-        maxDepth : float64
-            Maximum depth possible for the model
-        maxLayers : int
-            Maximum number of layers allowable in the model
-        minThickness : float64, optional
-            Minimum thickness of any layer. If minThickness = None, minThickness is computed from minDepth, maxDepth, and maxLayers (recommended).
-        factor : float, optional
-            Tuning parameter used in the std of the parameter prior.
-        prng : numpy.random.RandomState(), optional
-            Random number generator, if none is given, will use numpy's global generator.
-               
-        See Also
-        --------
-        geobipy.Model1D.perturb : For a description of the perturbation cycle.
-
-        """
-        assert np.size(pWheel) == 4, ValueError('pWheel must have size 4')
-        assert minDepth > 0.0, ValueError("minDepth must be > 0.0")
-        assert maxDepth > 0.0, ValueError("maxDepth must be > 0.0")
-        assert maxLayers > 0.0, ValueError("maxLayers must be > 0.0")
-        self.pWheel = np.cumsum(pWheel/np.sum(pWheel))  # Assign the probability Wheel
-        if (minThickness is None):
-            # Assign a minimum possible thickness
-            self.minThickness = np.log((maxDepth - minDepth) / (2 * maxLayers))
-        else:
-            self.minThickness = minThickness
-            
-        self.minDepth = np.log(minDepth)  # Assign the log of the min depth
-        self.maxDepth = np.log(maxDepth)  # Assign the log of the max depth
-        self.maxLayers = np.int32(maxLayers)
-
-        # Assign a uniform distribution to the number of layers
-        self.nCells.setPrior('UniformLog', 1, self.maxLayers, prng=prng)
-
-        # Set priors on the depth interfaces, given a number of layers
-        self.depth.setPrior('Order', self.minDepth, self.maxDepth, self.minThickness, self.maxLayers)  # priZ
-
-        # Assign the initial prior to the parameters
-        priMu = np.log(halfSpaceValue)
-        priStd = np.log(1.0 + factor)
-        self.par.setPrior('MvNormalLog', priMu, priStd**2.0, prng=prng)
-
-
-    def summary(self, out=False):
-        """ Write a summary of the 1D model """
-        msg = "1D Model: \n"
-        msg += self.nCells.summary(True)
-        msg += 'Top of the model: ' + str(self.top) + '\n'
-        msg += self.thk.summary(True)
-        msg += self.par.summary(True)
-        msg += self.depth.summary(True)
-        if (out):
-            return msg
-        print(msg)
 
 
     def plot(self, **kwargs):
@@ -954,7 +1053,7 @@ class Model1D(Model):
 
             dist = Distribution('Normal', np.log(par[i]), var[i])
 
-            Hist.arr[i, :] = np.exp(dist.probability(np.log(Hist.x)))
+            Hist.arr[i, :] = np.exp(dist.probability(np.log(Hist.x), log=True))
             # print(np.max(Hist.arr[i, :]))
             # plt.subplot(212)
             # plt.plot(np.log10(tmp), Hist.arr[i, :])
