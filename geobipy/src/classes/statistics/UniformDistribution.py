@@ -22,17 +22,15 @@ class Uniform(baseDistribution):
         assert max > min, ValueError("Maximum must be > minimum")
         super().__init__(prng)
         # Minimum
-        self.min = deepcopy(min)
+        self._min = deepcopy(min)
         # Maximum
-        self.max = deepcopy(max)
+        self._max = deepcopy(max)
         # Mean
-        self.mean = 0.5 * (max + min)
-        self.scale = max - min
+        self._mean = 0.5 * (max + min)
+        self._scale = max - min
         # Variance
-        self.variance = (1.0 / 12.0) * self.scale**2.0
+        self._variance = (1.0 / 12.0) * self.scale**2.0
         
-        
-
 
     @property
     def ndim(self):
@@ -41,6 +39,26 @@ class Uniform(baseDistribution):
     @property
     def multivariate(self):
         return True if self.ndim > 1 else False
+
+    @property
+    def min(self):
+        return self._min
+
+    @property
+    def max(self):
+        return self._max
+
+    @property
+    def mean(self):
+        return self._mean
+
+    @property
+    def scale(self):
+        return self._scale
+
+    @property
+    def variance(self):
+        return self._variance
 
 
     def deepcopy(self):
@@ -53,26 +71,30 @@ class Uniform(baseDistribution):
         return np.sum(self.pdf)
 
 
-    def cdf(self, x):
+    def cdf(self, x, log=False):
         """ Get the value of the cumulative distribution function for a x """
-        if (x < self.min):
-            return 0.0
-        if (x >= self.max):
-            return 1.0
-        return self.pdf * (x - self.min)
+        if log:
+            return uniform.logcdf(x, self.min, self.scale)
+        else:
+            return uniform.cdf(x, self.min, self.scale)
 
 
     def plotPDF(self, **kwargs):
-        bins = self.getBinEdges()
+        bins = self.bins()
         t = r"$\tilde{U}("+str(self.min)+","+str(self.max)+")$"
         cP.plot(bins, np.repeat(self.pdf, np.size(bins)), label=t, **kwargs)
 
 
-    def probability(self, x):
-        return uniform.pdf(x, self.min, self.scale)
+    def probability(self, x, log):
+        if log:
+            return np.squeeze(uniform.logpdf(x, self.min, self.scale))
+        else:
+            return np.squeeze(uniform.pdf(x, self.min, self.scale))
+
 
     def rng(self, size=1):
         return self.prng.uniform(self.min, self.max, size=size)
+
 
     def summary(self, out=False):
         msg = 'Uniform Distribution: \n'
@@ -82,50 +104,8 @@ class Uniform(baseDistribution):
             return msg
         print(msg)
 
-#    def hdfName(self):
-#        """ Create the group name for an HDF file """
-#        return('Distribution("Uniform",0.0,1.0,False)')
-#
-#    def createHdf(self, parent, myName):
-#        """ Create the hdf group metadata in file """
-#        grp = parent.create_group(myName)
-#        grp.attrs["repr"] = self.hdfName()
-#        grp.create_dataset('min', (1,), dtype=self.min.dtype)
-#        grp.create_dataset('max', (1,), dtype=self.max.dtype)
-#        grp.create_dataset('isLogged', (1,), dtype=bool)
-#
-#
-#    def writeHdf(self, parent, myName, create=True):
-#        """ Write the object to an HDF group
-#        parent: Upper hdf file or group
-#        myName: object hdf name. Assumes createHdf has already been called
-#        """
-#        # create a new group inside h5obj
-#        if (create):
-#            self.createHdf(parent, myName)
-#
-#        grp = parent.get(myName)
-#        writeNumpy(self.min,grp,'min')
-#        writeNumpy(self.max,grp,'max')
-#        writeNumpy(self.logged,grp,'isLogged')
-#
-#    def toHdf(self, h5obj, myName):
-#        """ Write the object to an HDF file """
-#        grp = h5obj.create_group(myName)
-#        grp.attrs["repr"] = self.hdfName()
-#        grp.create_dataset('min', data=self.min)
-#        grp.create_dataset('max', data=self.max)
-#        grp.create_dataset('isLogged', data=self.logged, dtype=bool)
-#
-#    def fromHdf(self, h5grp):
-#        """ Reads the Uniform Distribution from an HDF group """
-#        minT = np.array(h5grp.get('min'))
-#        maxT = np.array(h5grp.get('max'))
-#        ilT = np.array(h5grp.get('isLogged'))
-#        return Uniform(minT, maxT, ilT)
 
-
-    def getBinEdges(self, nBins=100, dim=None):
+    def bins(self, nBins=100, dim=None):
         """Discretizes a range given the min and max of the distribution 
         
         Parameters
@@ -148,10 +128,10 @@ class Uniform(baseDistribution):
                 bins = np.empty([nD, nBins+1])
                 for i in range(nD):
                     bins[i, :] = np.linspace(self.min[i], self.max[i], nBins+1)
-                return StatArray.StatArray(bins)
+                return StatArray.StatArray(np.squeeze(bins))
             else:
                 bins = np.empty(nBins+1)
                 bins[:] = np.linspace(self.min[dim], self.max[dim], nBins+1)
-                return StatArray.StatArray(bins)
+                return StatArray.StatArray(np.squeeze(bins))
 
-        return StatArray.StatArray(np.linspace(self.min, self.max, nBins+1))
+        return StatArray.StatArray(np.squeeze(np.linspace(self.min, self.max, nBins+1)))

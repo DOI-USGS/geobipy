@@ -92,15 +92,19 @@ class Normal(baseDistribution):
     def plotPDF(self, **kwargs):
 
         
-        bins = self.getBinEdges()
+        bins = self.bins()
         t = r"$\tilde{N}(\mu="+str(self.mean)+", \sigma^{2}="+str(self.variance)+")$"
 
         cP.plot(bins, self.probability(bins), label=t, **kwargs)
 
 
-    def probability(self, x):
+    def probability(self, x, log):
         """ For a realization x, compute the probability """
-        return StatArray.StatArray(norm.pdf(x, loc = self.mean, scale = self.variance), "Probability Density")
+
+        if log:
+            return StatArray.StatArray(norm.logpdf(x, loc = self.mean, scale = self.variance), "Probability Density")
+        else:
+            return StatArray.StatArray(norm.pdf(x, loc = self.mean, scale = self.variance), "Probability Density")
         
 
     def summary(self, out=False):
@@ -148,7 +152,7 @@ class Normal(baseDistribution):
 #        T2 = np.array(h5grp.get('variance'))
 #        return MvNormal(T1, T2)
 
-    def getBinEdges(self, nBins = 100, nStd=4.0):
+    def bins(self, nBins = 100, nStd=4.0):
         """ Discretizes a range given the mean and variance of the distribution """
         tmp = nStd * np.sqrt(self.variance)
         return StatArray.StatArray(np.linspace(self.mean - tmp, self.mean + tmp, nBins+1))

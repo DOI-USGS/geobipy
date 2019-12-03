@@ -111,21 +111,19 @@ class EmDataPoint(DataPoint):
         P_calibration = np.float64(0.0)
 
         if rErr:  # Relative Errors
-            P_relative = self.relErr.probability()
+            P_relative = self.relErr.probability(log=True)
             errProbability += P_relative
         if aErr:  # Additive Errors
-            P_additive = self.addErr.probability()
+            P_additive = self.addErr.probability(log=True)
             errProbability += P_additive
 
         probability += errProbability
         if height:  # Elevation
-            P_height = (self.z.probability())
+            P_height = (self.z.probability(log=True))
             probability += P_height
         if calibration:  # Calibration parameters
-            P_calibration = self.calibration.probability()
+            P_calibration = self.calibration.probability(log=True)
             probability += P_calibration
-
-        probability = np.float64(probability)
         
         if verbose:
             return probability, np.asarray([P_relative, P_additive, P_height, P_calibration])
@@ -181,14 +179,13 @@ class EmDataPoint(DataPoint):
 
 
     def proposeAdditiveError(self):
-
         # Generate a new error
         self.addErr[:] = self.addErr.proposal.rng(1)
         if self.addErr.hasPrior():
-            p = self.addErr.probability()
-            while p == 0.0 or p == -np.inf:
+            p = self.addErr.probability(log=True)
+            while p == -np.inf:
                 self.addErr[:] = self.addErr.proposal.rng(1)
-                p = self.addErr.probability()
+                p = self.addErr.probability(log=True)
         # Update the mean of the proposed errors
         self.addErr.proposal.mean[:] = self.addErr
 
@@ -197,10 +194,10 @@ class EmDataPoint(DataPoint):
         # Generate a new elevation
         self.z[:] = self.z.proposal.rng(1)
         if self.z.hasPrior():
-            p = self.z.probability()
-            while p == 0.0 or p == -np.inf:
+            p = self.z.probability(log=True)
+            while p == -np.inf:
                 self.z[:] = self.z.proposal.rng(1)
-                p = self.z.probability()
+                p = self.z.probability(log=True)
         # Update the mean of the proposed elevation
         self.z.proposal.mean[:] = self.z
 
@@ -209,10 +206,10 @@ class EmDataPoint(DataPoint):
         # Generate a new error
         self.relErr[:] = self.relErr.proposal.rng(1)
         if self.relErr.hasPrior():
-            p = self.relErr.probability()
-            while p == 0.0 or p == -np.inf:
+            p = self.relErr.probability(log=True)
+            while p == -np.inf:
                 self.relErr[:] = self.relErr.proposal.rng(1)
-                p = self.relErr.probability()
+                p = self.relErr.probability(log=True)
         # Update the mean of the proposed errors
         self.relErr.proposal.mean[:] = self.relErr
 
@@ -247,7 +244,7 @@ class EmDataPoint(DataPoint):
 
         assert self.addErr.hasPrior(), Exception("Must set a prior on the additive error")
 
-        aBins = self.addErr.prior.getBinEdges()
+        aBins = self.addErr.prior.bins()
 
         binsMidpoint = 0.5 * aBins.max(axis=-1) + aBins.min(axis=-1)
 
@@ -266,7 +263,7 @@ class EmDataPoint(DataPoint):
         assert maximum.size == self.nSystems, ValueError("maximum must have {} entries".format(self.nSystems))
         assert np.all(maximum > 0.0), ValueError("maximum values must be > 0.0")
 
-        self.addErr.setPrior('UniformLog', minimum, maximum, prng=prng)
+        self.addErr.setPrior('Uniform', minimum, maximum, prng=prng)
 
     
     def setAdditiveErrorProposal(self, means, variances, prng=None):
@@ -285,7 +282,7 @@ class EmDataPoint(DataPoint):
         maximum = np.atleast_1d(maximum)
         assert maximum.size == self.nSystems, ValueError("maximum must have {} entries".format(self.nSystems))
         assert np.all(maximum > 0.0), ValueError("maximum values must be > 0.0")
-        self.relErr.setPrior('UniformLog', minimum, maximum, prng=prng)
+        self.relErr.setPrior('Uniform', minimum, maximum, prng=prng)
 
 
     def setRelativeErrorProposal(self, means, variances, prng=None):

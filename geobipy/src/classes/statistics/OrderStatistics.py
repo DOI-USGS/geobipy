@@ -5,6 +5,8 @@ in a nonlinear geophysical problem,Geophysical Journal International
 from copy import deepcopy
 import numpy as np
 from scipy.special import factorial
+from ..core import StatArray
+
 
 
 class Order(object):
@@ -12,17 +14,15 @@ class Order(object):
     Specific application to Bayesian inversion of EM data
     """
 
-    def __init__(self, zmin, zmax, hmin, kmax, *args, **kwargs):
+    def __init__(self, denominator, **kwargs):
         """ Initialize the order statistics
-        zmin:  :log(minimum depth)
-        zmax:  :log(maximum depth)
-        hmin:  :log(minimum thickness)
-        kmax:  :Maximum number of possible samples
+        
         """
-        if (zmin is None): return
-        i = np.arange(kmax)
-        dz = np.log((np.exp(zmax) - np.exp(zmin) - 2.0 * i * np.exp(hmin)))
-        tmp = np.cumprod(dz)
+        if (denominator is None): return
+        
+        i = np.arange(np.size(denominator))
+        self.denominator = deepcopy(denominator)
+        tmp = np.cumprod(denominator)
         self.pdf = factorial(i) / tmp
 
 
@@ -33,19 +33,18 @@ class Order(object):
 
     def deepcopy(self):
         """ Define a deepcopy routine """
-        tmp = Order(None, 0, 0, 1)
-        tmp.pdf = deepcopy(self.pdf)
-        return tmp
+        return Order(self.denominator)
 
 
-    def getPdf(self, *args):
-        """ Get the pdf value for a given number of layers """
-        return self.pdf[args[0] - 1]  # Subtracts 1 for python
+    def probability(self, x, log):
+        tmp = np.squeeze(self.pdf[np.int(x)])
 
-
-    def probability(self, x):
-        tmp = np.int32(x)
-        return np.squeeze(self.pdf[tmp])
+        return np.log(tmp) if log else tmp
+        # print('tmp {}'.format(tmp))
+        # if log:
+        #     return StatArray.StatArray(np.log(tmp), "Log Probability Density")
+        # else:
+        #     return StatArray.StatArray(tmp, "Probability Density")
 
 
     def summary(self, out=False):
@@ -56,20 +55,20 @@ class Order(object):
         print(msg)
 
 
-    def hdfName(self):
-        """ Create the group name for an HDF file """
-        return('Distribution("Order",None,1.0,0.1,1)')
+    # def hdfName(self):
+    #     """ Create the group name for an HDF file """
+    #     return('Distribution("Order",None,1.0,0.1,1)')
 
 
-    def toHdf(self, h5obj, myName):
-        """ Write the object to an HDF file """
-        grp = h5obj.create_group(myName)
-        grp.attrs["repr"] = self.hdfName()
-        grp.create_dataset('pdf', data=self.pdf)
+    # def toHdf(self, h5obj, myName):
+    #     """ Write the object to an HDF file """
+    #     grp = h5obj.create_group(myName)
+    #     grp.attrs["repr"] = self.hdfName()
+    #     grp.create_dataset('pdf', data=self.pdf)
 
 
-    def fromHdf(self, h5grp):
-        """ Reads the Uniform Distribution from an HDF group """
-        T = np.array(h5grp.get('pdf'))
-        self.pdf = T
-        return self        
+    # def fromHdf(self, h5grp):
+    #     """ Reads the Uniform Distribution from an HDF group """
+    #     T = np.array(h5grp.get('pdf'))
+    #     self.pdf = T
+    #     return self        

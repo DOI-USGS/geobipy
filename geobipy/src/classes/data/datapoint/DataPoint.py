@@ -163,7 +163,7 @@ class DataPoint(Point):
         return cf.findNotNans(self._data)
 
 
-    def likelihood(self):
+    def likelihood(self, log):
         """Compute the likelihood of the current predicted data given the observed data and assigned errors
 
         Returns
@@ -172,7 +172,7 @@ class DataPoint(Point):
             Likelihood of the data point
 
         """
-        return self._predictedData.probability(i=self.iActive)
+        return self._predictedData.probability(i=self.iActive, log=log)
 
 
     def dataMisfit(self, squared=False):

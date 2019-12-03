@@ -491,18 +491,18 @@ class TdemDataPoint(EmDataPoint):
         P_calibration = np.float64(0.0)
 
         if rErr:  # Relative Errors
-            P_relative = self.relErr.probability()
+            P_relative = self.relErr.probability(log=True)
             errProbability += P_relative
         if aErr:  # Additive Errors
-            P_additive = self.addErr.probability(np.log(self.addErr))
+            P_additive = self.addErr.probability(x=np.log(self.addErr), log=True)
             errProbability += P_additive
 
         probability += errProbability
         if height:  # Elevation
-            P_height = (self.z.probability())
+            P_height = (self.z.probability(log=True))
             probability += P_height
         if calibration:  # Calibration parameters
-            P_calibration = self.calibration.probability()
+            P_calibration = self.calibration.probability(log=True)
             probability += P_calibration
 
         probability = np.float64(probability)
@@ -517,10 +517,10 @@ class TdemDataPoint(EmDataPoint):
         # Generate a new error
         tmp = self.addErr.proposal.rng(1)
         if self.addErr.hasPrior():
-            p = self.addErr.probability(tmp)
-            while p == 0.0 or p == -np.inf:
+            p = self.addErr.probability(x=tmp, log=True)
+            while p == -np.inf:
                 tmp = self.addErr.proposal.rng(1)
-                p = self.addErr.probability(tmp)
+                p = self.addErr.probability(x=tmp, log=True)
         # Update the mean of the proposed errors
         self.addErr.proposal.mean[:] = tmp
         self.addErr[:] = np.exp(tmp)
@@ -530,7 +530,7 @@ class TdemDataPoint(EmDataPoint):
 
         assert self.addErr.hasPrior(), Exception("Must set a prior on the additive error")
 
-        aBins = self.addErr.prior.getBinEdges()
+        aBins = self.addErr.prior.bins()
 
         log = 10
         aBins = np.exp(aBins)
@@ -550,7 +550,7 @@ class TdemDataPoint(EmDataPoint):
         maximum = np.atleast_1d(maximum)
         assert maximum.size == self.nSystems, ValueError("maximum must have {} entries".format(self.nSystems))
         assert np.all(maximum > 0.0), ValueError("maximum values must be in linear space i.e. > 0.0")
-        self.addErr.setPrior('UniformLog', np.log(minimum), np.log(maximum), prng=prng)
+        self.addErr.setPrior('Uniform', np.log(minimum), np.log(maximum), prng=prng)
 
     
     def setAdditiveErrorProposal(self, means, variances, prng=None):

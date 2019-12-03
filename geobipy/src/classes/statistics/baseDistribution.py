@@ -16,9 +16,9 @@ class baseDistribution(myObject):
         """ Place Holder for children """
         assert False, 'Should not calling '+__name__+'.ndim'
 
-    def getBinEdges(self):
+    def bins(self):
         """ Place Holder for children """
-        assert False, 'Should not calling '+__name__+'.getBinEdges()'
+        assert False, 'Should not calling '+__name__+'.bins()'
 
     def deepcopy():
         """ Place holder for children """
