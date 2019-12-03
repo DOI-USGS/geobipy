@@ -169,7 +169,7 @@ class RectilinearMesh2D(myObject):
     
 
 
-    def axisMedian(self, arr, log=None, axis=0):
+    def median(self, arr, log=None, axis=0):
         """Gets the median for the specified axis.
         
         Parameters
@@ -301,7 +301,7 @@ class RectilinearMesh2D(myObject):
             res = bins.statistic.T
         else:
             i0 = np.maximum(0, np.searchsorted(intervals, self.x.cellCentres[0]))
-            i1 = np.minimum(self.zx.nCells, np.searchsorted(intervals, self.x.cellCentres[-1]))
+            i1 = np.minimum(self.x.nCells, np.searchsorted(intervals, self.x.cellCentres[-1]))
             intervals = intervals[i0:i1]
 
             bins = binned_statistic(self.x.cellCentres, arr, bins = intervals, statistic=statistic)
