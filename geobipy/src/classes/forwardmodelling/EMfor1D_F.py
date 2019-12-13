@@ -4,39 +4,55 @@ Leon Foks
 June 2015
 """
 import numpy as np
-from .fdemforward1d_fortran import fdemforward1d
+from .fdem1d_numba import (pyFdem1dfwd, pyFdem1dsen)
 from .ipforward1d_fortran import ipforward1d
 
-def fdem1dfwd(S, mod, z0):
-    """ Forward Model a single EM data point from a 1D layered earth conductivity model
-    S:    :EmSystem Class describing the aquisition system
-    mod: : Model1D Class describing the 1D layered earth model
-    z0:  : Altitude of the sensor above the top of the 1D model
-    TODO: SPEED UP THIS CODE
+def fdem1dfwd(system, model1d, altitude, f=False):
+    """Wrapper to freqeuency domain EM forward modellers
+
+    Parameters
+    ----------
+    system : geobipy.FdemSystem
+        Acquisition system information
+    model1d : geobipy.Model1D
+        1D layered earth geometry
+    altitude : float
+        Acquisition height above the model
+
+    Returns
+    -------
+    predictedData : array_like
+        Frequency domain data.
+
     """
-    assert z0 <= mod.top, "Sensor altitude must be above the top of the model"
+    assert altitude >= model1d.top, "Sensor altitude must be above the top of the model"
+
+    if system.lamda0 is None:
+        system.set_lamdas()
 
     # Create the indices of the coil orientations for the frequencies.
-    tid = S.getTensorID()
+    tid = system.getTensorID()
 
-    tHeight = np.zeros(S.nFrequencies)
-    rHeight = np.zeros(S.nFrequencies)
-    tMom = np.zeros(S.nFrequencies)
-    rMom = np.zeros(S.nFrequencies)
-    rx = np.zeros(S.nFrequencies)
-    for i in range(S.nFrequencies):
-        tHeight[i] = -z0 + S.T[i].z
-        rHeight[i] = z0 + S.R[i].z
-        tMom[i] = S.T[i].moment
-        rMom[i] = S.R[i].moment
-        rx[i] = S.R[i].x
+    tHeight = np.empty(system.nFrequencies, dtype=np.float64)
+    rHeight = np.empty(system.nFrequencies, dtype=np.float64)
+    tMom = np.empty(system.nFrequencies, dtype=np.float64)
+    rMom = np.empty(system.nFrequencies, dtype=np.float64)
+    rx = np.empty(system.nFrequencies, dtype=np.float64)
+
+    for i in range(system.nFrequencies):
+        tHeight[i] = altitude + system.T[i].z
+        rHeight[i] = -altitude + system.R[i].z
+        tMom[i] = system.T[i].moment
+        rMom[i] = system.R[i].moment
+        rx[i] = system.R[i].x
     scl = tMom * rMom
 
-    prd = np.zeros(S.nFrequencies, dtype=np.complex128)
+    frequencies = np.asarray(system.frequencies)
+    conductivity = np.asarray(model1d.par)
+    thickness = np.asarray(model1d.thk)
+    loopSeparation = np.asarray(system.loopSeparation)
 
-    fdemforward1d.forward1d(tid, S.frequencies, tHeight, rHeight, tMom, rx, S.dist, scl, mod.par, mod.thk, prd, S.nFrequencies,  mod.nCells[0])
-
-    return prd
+    return pyFdem1dfwd(tid, frequencies, tHeight, rHeight, tMom, rx, loopSeparation, system.w0, system.lamda0, system.lamda02, system.w1, system.lamda1, system.lamda12, scl, conductivity, thickness)
 
 
 def ip1dfwd(S, mod, z0):
@@ -46,59 +62,75 @@ def ip1dfwd(S, mod, z0):
     z0:  : Altitude of the sensor above the top of the 1D model
     TODO: SPEED UP THIS CODE
     """
-    assert z0 <= mod.top, "Sensor altitude must be above the top of the model"
+    assert z0 <= model1d.top, "Sensor altitude must be above the top of the model"
 
     # Create the indices of the coil orientations for the frequencies.
-    tid = S.getTensorID()
+    tid = system.getTensorID()
 
-    tHeight = np.zeros(S.nFrequencies)
-    rHeight = np.zeros(S.nFrequencies)
-    tMom = np.zeros(S.nFrequencies)
-    rMom = np.zeros(S.nFrequencies)
-    rx = np.zeros(S.nFrequencies)
-    for i in range(S.nFrequencies):
-        tHeight[i] = -z0 + S.T[i].z
-        rHeight[i] = z0 + S.R[i].z
-        tMom[i] = S.T[i].moment
-        rMom[i] = S.R[i].moment
-        rx[i] = S.R[i].x
+    tHeight = np.zeros(system.nFrequencies)
+    rHeight = np.zeros(system.nFrequencies)
+    tMom = np.zeros(system.nFrequencies)
+    rMom = np.zeros(system.nFrequencies)
+    rx = np.zeros(system.nFrequencies)
+    for i in range(system.nFrequencies):
+        tHeight[i] = -z0 + system.T[i].z
+        rHeight[i] = z0 + system.R[i].z
+        tMom[i] = system.T[i].moment
+        rMom[i] = system.R[i].moment
+        rx[i] = system.R[i].x
     scl = tMom * rMom
 
-    prd = np.zeros(S.nFrequencies, dtype=np.complex128)
+    prd = np.zeros(system.nFrequencies, dtype=np.complex128)
 
-    ipforward1d.forward1d(tid, S.frequencies, tHeight, rHeight, tMom, rx, S.dist, scl, mod.par, mod.thk, prd, S.nFrequencies,  mod.nCells[0])
+    ipforward1d.forward1d(tid, system.frequencies, tHeight, rHeight, tMom, rx, system.loopSeparation, scl, model1d.par, model1d.thk, prd, system.nFrequencies,  model1d.nCells[0])
 
     return prd
 
 
-def fdem1dsen(S, mod, z0):
-    """ Forward Model a single EM data point from a 1D layered earth conductivity model
-    S:    :EmSystem Class describing the aquisition system
-    mod: : Model1D Class describing the 1D layered earth model
-    z0:  : Altitude of the sensor above the top of the 1D model
-    TODO: SPEED UP THIS CODE
+def fdem1dsen(system, model1d, altitude):
+    """Wrapper to freqeuency domain EM forward modellers
+
+    Parameters
+    ----------
+    system : geobipy.FdemSystem
+        Acquisition system information
+    model1d : geobipy.Model1D
+        1D layered earth geometry
+    altitude : float
+        Acquisition height above the model
+
+    Returns
+    -------
+    predictedData : array_like
+        Frequency domain data.
+
     """
-    assert z0 <= mod.top, "Sensor altitude must be above the top of the model"
 
-    nLayers = mod.nCells[0]
+    assert altitude >= model1d.top, "Sensor altitude must be above the top of the model"
+
+    if system.lamda0 is None:
+        system.set_lamdas()
+
     # Create the indices of the coil orientations for the frequencies.
-    tid = S.getTensorID()
+    tid = system.getTensorID()
 
-    tHeight = np.zeros(S.nFrequencies)
-    rHeight = np.zeros(S.nFrequencies)
-    tMom = np.zeros(S.nFrequencies)
-    rMom = np.zeros(S.nFrequencies)
-    rx = np.zeros(S.nFrequencies)
-    for i in range(S.nFrequencies):
-        tHeight[i] = -z0 + S.T[i].z
-        rHeight[i] = z0 + S.R[i].z
-        tMom[i] = S.T[i].moment
-        rMom[i] = S.R[i].moment
-        rx[i] = S.R[i].x
+    tHeight = np.zeros(system.nFrequencies)
+    rHeight = np.zeros(system.nFrequencies)
+    tMom = np.zeros(system.nFrequencies)
+    rMom = np.zeros(system.nFrequencies)
+    rx = np.zeros(system.nFrequencies)
+    for i in range(system.nFrequencies):
+        tHeight[i] = altitude + system.T[i].z
+        rHeight[i] = -altitude + system.R[i].z
+        tMom[i] = system.T[i].moment
+        rMom[i] = system.R[i].moment
+        rx[i] = system.R[i].x
     scl = tMom * rMom
 
-    J = np.zeros([S.nFrequencies, nLayers], dtype=np.complex128, order='F')
+    frequencies = np.asarray(system.frequencies)
+    conductivity = np.asarray(model1d.par)
+    thickness = np.asarray(model1d.thk)
+    loopSeparation = np.asarray(system.loopSeparation)
 
-    fdemforward1d.sensitivity1d(tid, S.frequencies, tHeight, rHeight, tMom, rx, S.dist, scl, mod.par, mod.thk, J, S.nFrequencies,  mod.nCells[0])
-
-    return J
+    return pyFdem1dsen(tid, frequencies, tHeight, rHeight, tMom, rx, loopSeparation, system.w0, system.lamda0, system.lamda02, system.w1, system.lamda1, system.lamda12, scl, conductivity, thickness)
+    

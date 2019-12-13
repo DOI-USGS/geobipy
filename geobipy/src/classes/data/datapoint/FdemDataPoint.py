@@ -553,7 +553,7 @@ class FdemDataPoint(EmDataPoint):
     def _forward1D(self, mod):
         """ Forward model the data from a 1D layered earth model """
         for i, s in enumerate(self.system):
-            tmp = fdem1dfwd(s, mod, -self.z[0])
+            tmp = fdem1dfwd(s, mod, self.z[0])
             self._predictedData[:self.nFrequencies[i]] = tmp.real
             self._predictedData[self.nFrequencies[i]:] = tmp.imag
 
@@ -565,7 +565,7 @@ class FdemDataPoint(EmDataPoint):
         J = np.zeros([self.nChannels, mod.nCells[0]])
 
         for j, s in enumerate(self.system):
-            Jtmp = fdem1dsen(s, mod, -self.z[0])
+            Jtmp = fdem1dsen(s, mod, self.z[0])
             J[:self.nFrequencies[j], :] = Jtmp.real
             J[self.nFrequencies[j]:, :] = Jtmp.imag
 
