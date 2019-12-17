@@ -19,7 +19,7 @@ class Uniform(baseDistribution):
         xmax:  :Maximum value
         """
 
-        assert max > min, ValueError("Maximum must be > minimum")
+        assert np.all(max > min), ValueError("Maximum must be > minimum")
         super().__init__(prng)
         # Minimum
         self._min = deepcopy(min)
@@ -87,9 +87,11 @@ class Uniform(baseDistribution):
 
     def probability(self, x, log):
         if log:
-            return np.squeeze(uniform.logpdf(x, self.min, self.scale))
+            out = np.squeeze(uniform.logpdf(x, self.min, self.scale))
+            return np.sum(out) if self.multivariate else out
         else:
-            return np.squeeze(uniform.pdf(x, self.min, self.scale))
+            out = np.squeeze(uniform.pdf(x, self.min, self.scale))
+            return np.prod(out) if self.multivariate else out
 
 
     def rng(self, size=1):
