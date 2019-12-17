@@ -314,7 +314,7 @@ def multipleCore(inputFile, outputDir, skipHDF5):
     LR = [None] * nLines
     for i, line in enumerate(lineNumbers):
         fName = join(outputDir, '{}.h5'.format(line))
-        LR[i] = LineResults(fName, hdfFile = h5py.File(fName, 'a', driver='mpio', comm=world))
+        LR[i] = LineResults(fName, UP.systemFilename, hdfFile = h5py.File(fName, 'a', driver='mpio', comm=world))
 
     world.barrier()
     myMPI.rankPrint(world,'Files created in {:.3f} s'.format(MPI.Wtime()-t1))
@@ -471,5 +471,5 @@ def runParallel():
     inputFile, outputDir, skipHDF5, seed = checkCommandArguments()    
     sys.path.append(getcwd())
 
-    R = multipleCore(inputFile, outputDir, skipHDF5, seed)
+    R = multipleCore(inputFile, outputDir, skipHDF5)
 

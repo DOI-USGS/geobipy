@@ -137,7 +137,7 @@ class FdemSystem(myObject):
     def __deepcopy__(self, memo):
         tmp = FdemSystem(nFrequencies = self._nFrequencies)
         tmp._frequencies[:] = self._frequencies
-        tmp.dist[:] = self.loopSeparation
+        tmp.loopSeparation[:] = self.loopSeparation
         for i in range(self._nFrequencies):
             tmp.T[i] = self.T[i].deepcopy()
             tmp.R[i] = self.R[i].deepcopy()
@@ -289,7 +289,7 @@ class FdemSystem(myObject):
         tmp._frequencies = obj.fromHdf(item)
         item = grp.get('dist')
         obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp.dist = obj.fromHdf(item)
+        tmp.loopSeparation = obj.fromHdf(item)
         for i in range(nFreq):
             item = grp.get('T/T' + str(i))
             tmp.T[i] = eval(cF.safeEval(item.attrs.get('repr')))
@@ -305,7 +305,7 @@ class FdemSystem(myObject):
             self = FdemSystem(nFreq)
         this = FdemSystem(nFreq)
         this._frequencies = self._frequencies.Bcast(world, root=root)
-        this.dist = self.loopSeparation.Bcast(world, root=root)
+        this.loopSeparation = self.loopSeparation.Bcast(world, root=root)
         for i in range(self._nFrequencies):
             this.T[i] = self.T[i].Bcast(world, root=root)
             this.R[i] = self.R[i].Bcast(world, root=root)
@@ -325,7 +325,7 @@ class FdemSystem(myObject):
         nFreq = myMPI.Irecv(source=source, world=world)
         out = FdemSystem(nFreq)
         out._frequencies = out._frequencies.Irecv(source=source, world=world)
-        out.loopSeparation = out.dist.Irecv(source=source, world=world)
+        out.loopSeparation = out.loopSeparation.Irecv(source=source, world=world)
         for i in range(nFreq):
             out.T[i] = out.T[i].Irecv(source=source, world=world)
             out.R[i] = out.R[i].Irecv(source=source, world=world)
