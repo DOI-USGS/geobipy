@@ -1513,7 +1513,7 @@ class Model1D(Model):
 
         item = grp.get('nCells')
         obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp.nCells = obj.fromHdf(item, index=index)
+        tmp._nCells = obj.fromHdf(item, index=index)
 
         if grp['par/data'].ndim == 1:
             i = np.s_[:tmp.nCells[0]]
@@ -1522,22 +1522,22 @@ class Model1D(Model):
 
         item = grp.get('top')
         obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp.top = obj.fromHdf(item, index=index)
+        tmp._top = obj.fromHdf(item, index=index)
 
         item = grp.get('par')
         obj = eval(cF.safeEval(item.attrs.get('repr')))
         obj = obj.resize(tmp.nCells[0])
-        tmp.par = obj.fromHdf(item, index=i)
+        tmp._par = obj.fromHdf(item, index=i)
 
         item = grp.get('depth')
         obj = eval(cF.safeEval(item.attrs.get('repr')))
         obj = obj.resize(tmp.nCells[0])
-        tmp.depth = obj.fromHdf(item, index=i)
+        tmp._depth = obj.fromHdf(item, index=i)
 
         item = grp.get('thk')
         obj = eval(cF.safeEval(item.attrs.get('repr')))
         obj = obj.resize(tmp.nCells[0])
-        tmp.thk = obj.fromHdf(item, index=i)
+        tmp._thk = obj.fromHdf(item, index=i)
 
         #item = grp.get('chie'); obj = eval(cF.safeEval(item.attrs.get('repr')));
         #obj = obj.resize(tmp.nCells[0]); tmp.chie = obj.fromHdf(item, index=i)
@@ -1546,8 +1546,8 @@ class Model1D(Model):
         #obj = obj.resize(tmp.nCells[0]); tmp.chim = obj.fromHdf(item, index=i)
 
         if (tmp.nCells[0] > 0):
-            tmp.dpar = StatArray.StatArray(tmp.nCells[0] - 1, 'Derivative', tmp.par.units + '/m')
+            tmp._dpar = StatArray.StatArray(tmp.nCells[0] - 1, 'Derivative', tmp.par.units + '/m')
         else:
-            tmp.dpar = None
+            tmp._dpar = None
 
         return tmp
