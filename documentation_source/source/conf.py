@@ -41,8 +41,9 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.graphviz',
     'sphinx.ext.inheritance_diagram',
-    'sphinx_automodapi.automodapi',
-    'sphinx_gallery.gen_gallery'
+    # 'sphinx_automodapi.automodapi',
+    'sphinx_gallery.gen_gallery',
+    'sphinx.ext.autosectionlabel'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -354,38 +355,54 @@ texinfo_documents = [
 
 
 
-# -- Sphinx Gallery Options
-from sphinx_gallery.sorting import FileNameSortKey
+# # -- Sphinx Gallery Options
+# from sphinx_gallery.sorting import FileNameSortKey
 from sphinx_gallery.sorting import ExplicitOrder
 
 sphinx_gallery_conf = {
-    # path to your examples scripts
-    "examples_dirs": [
-        "../../examples/",
-        "../../examples/Data/",
-    ],
-   'subsection_order': ExplicitOrder(['../../examples/Statistics/',
-                                    '../../examples/Meshes/',
-                                    '../../examples/Models/',
-                                    '../../examples/Pointclouds/',
-                                    '../../examples/Data/',
-                                    '../../examples/Inversion/',
+    'examples_dirs': 'examples',   # path to your example scripts
+    'gallery_dirs': 'examples',  # path to where to save gallery generated output
+    'subsection_order': ExplicitOrder(['examples/Statistics/',
+                                    'examples/Meshes/',
+                                    'examples/Models/',
+                                    'examples/Distributions/',
+#                                     '../../examples/Pointclouds/',
+#                                     '../../examples/Data/',
+#                                     '../../examples/Inversion/',
                                     ]),
-    # path where to save gallery generated examples
-    "gallery_dirs": ["examples"],
-    # Patter to search for example files
-    "filename_pattern": r"\.py",
-    # Remove the "Download all examples" button from the top level gallery
-    "download_all_examples": False,
-    # Sort gallery example by file name instead of number of lines (default)
-    "within_subsection_order": FileNameSortKey,
-    # directory where function granular galleries are stored
-    "backreferences_dir": False,
-    # Modules for which function level galleries are created.  In
-    "doc_module": "geobipy",
     "image_scrapers": ('matplotlib'),
     "thumbnail_size": (350, 350),
     'first_notebook_cell': ("%matplotlib inline\n"),
     'abort_on_example_error': True,
     'remove_config_comments': True,
 }
+#     # path to your examples scripts
+#     "examples_dirs": [
+#         "../../examples/",
+#         "../../examples/Data/",
+#     ],
+#    'subsection_order': ExplicitOrder(['../../examples/Statistics/',
+#                                     '../../examples/Meshes/',
+#                                     '../../examples/Models/',
+#                                     '../../examples/Pointclouds/',
+#                                     '../../examples/Data/',
+#                                     '../../examples/Inversion/',
+#                                     ]),
+#     # path where to save gallery generated examples
+#     "gallery_dirs": ["examples"],
+#     # Pattern to search for example files
+
+#     # Remove the "Download all examples" button from the top level gallery
+#     "download_all_examples": False,
+#     # Sort gallery example by file name instead of number of lines (default)
+#     "within_subsection_order": FileNameSortKey,
+#     # directory where function granular galleries are stored
+#     "backreferences_dir": ".",
+#     # Modules for which function level galleries are created.  In
+#     "doc_module": "geobipy",
+#     "image_scrapers": ('matplotlib'),
+#     "thumbnail_size": (350, 350),
+#     'first_notebook_cell': ("%matplotlib inline\n"),
+#     'abort_on_example_error': True,
+#     'remove_config_comments': True,
+# }

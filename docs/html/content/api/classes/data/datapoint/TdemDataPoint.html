@@ -1,0 +1,410 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>TdemDataPoint &mdash; GeoBIPy 1.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/gallery.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+    <link rel="next" title="Mesh classes" href="../../mesh/mesh.html" />
+    <link rel="prev" title="FdemDataPoint" href="FdemDataPoint.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../../index.html" class="icon icon-home"> GeoBIPy
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../api.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../../base/base.html">Core routines needed for GeoBIPy</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../classes.html">Classes used in GeoBIPy</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../core/core.html">Core classes</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../data.html">Data classes</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../dataset/dataset.html">Dataset classes</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="datapointrst.html">Datapoint classes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../mesh/mesh.html">Mesh classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../model/model.html">Model classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pointcloud/pointcloud.html">Pointcloud classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../statistics/statistics.html">Statistics classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../system/system.html">System classes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../examples/index.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">GeoBIPy</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../api.html">API</a> &raquo;</li>
+        
+          <li><a href="../../classes.html">Classes used in GeoBIPy</a> &raquo;</li>
+        
+          <li><a href="../data.html">Data classes</a> &raquo;</li>
+        
+          <li><a href="datapointrst.html">Datapoint classes</a> &raquo;</li>
+        
+      <li>TdemDataPoint</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../../../../_sources/content/api/classes/data/datapoint/TdemDataPoint.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="tdemdatapoint">
+<h1>TdemDataPoint<a class="headerlink" href="#tdemdatapoint" title="Permalink to this headline">¶</a></h1>
+<div class="graphviz"><img src="../../../../../_images/inheritance-8488942573932715edcd8b9408422cc7e091a156.png" alt="Inheritance diagram of geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint" usemap="#inheritance42929051d3" class="inheritance graphviz" /></div>
+<map id="inheritance42929051d3" name="inheritance42929051d3">
+<area shape="rect" id="node1" href="datapoint.html#geobipy.src.classes.data.datapoint.DataPoint.DataPoint" target="_top" title="Class defines a data point." alt="" coords="125,5,205,29"/>
+<area shape="rect" id="node3" href="EmDataPoint.html#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint" target="_top" title="Abstract EmDataPoint Class" alt="" coords="253,5,353,29"/>
+<area shape="rect" id="node2" href="../../pointcloud/Point.html#geobipy.src.classes.pointcloud.Point.Point" target="_top" title="Class defining a point in 3D Euclidean space" alt="" coords="5,5,77,29"/>
+<area shape="rect" id="node4" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint" target="_top" title="Initialize a Time domain EMData Point" alt="" coords="401,5,515,29"/>
+</map><span class="target" id="module-geobipy.src.classes.data.datapoint.TdemDataPoint"></span><dl class="class">
+<dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint">
+<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.data.datapoint.TdemDataPoint.</code><code class="sig-name descname">TdemDataPoint</code><span class="sig-paren">(</span><em class="sig-param">x=0.0, y=0.0, z=0.0, elevation=0.0, data=None, std=None, predictedData=None, system=None, T=None, R=None, loopOffset=[0.0, 0.0, 0.0], lineNumber=0.0, fiducial=0.0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize a Time domain EMData Point</p>
+<p>TdemDataPoint(x, y, z, elevation, data, std, system, T, R, lineNumber, fiducial)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>np.float64</em>) – The easting co-ordinate of the data point</p></li>
+<li><p><strong>y</strong> (<em>np.float64</em>) – The northing co-ordinate of the data point</p></li>
+<li><p><strong>z</strong> (<em>np.float64</em>) – The height of the data point above ground</p></li>
+<li><p><strong>elevation</strong> (<em>np.float64</em><em>, </em><em>optional</em>) – The elevation of the data point, default is 0.0</p></li>
+<li><p><strong>data</strong> (<em>list of arrays</em><em>, </em><em>optional</em>) – A list of 1D arrays, where each array contains the data in each system.
+The arrays are vertically concatenated inside the TdemDataPoint object</p></li>
+<li><p><strong>std</strong> (<em>list of arrays</em><em>, </em><em>optional</em>) – A list of 1D arrays, where each array contains the errors in each system.
+The arrays are vertically concatenated inside the TdemDataPoint object</p></li>
+<li><p><strong>system</strong> (<a class="reference internal" href="../../system/TdemSystem.html#geobipy.src.classes.system.TdemSystem.TdemSystem" title="geobipy.src.classes.system.TdemSystem.TdemSystem"><em>TdemSystem</em></a><em>, </em><em>optional</em>) – Time domain system class</p></li>
+<li><p><strong>T</strong> (<a class="reference internal" href="../../system/EmLoop.html#geobipy.src.classes.system.EmLoop.EmLoop" title="geobipy.src.classes.system.EmLoop.EmLoop"><em>EmLoop</em></a><em>, </em><em>optional</em>) – Transmitter loop class</p></li>
+<li><p><strong>R</strong> (<a class="reference internal" href="../../system/EmLoop.html#geobipy.src.classes.system.EmLoop.EmLoop" title="geobipy.src.classes.system.EmLoop.EmLoop"><em>EmLoop</em></a><em>, </em><em>optional</em>) – Receiver loop class</p></li>
+<li><p><strong>lineNumber</strong> (<em>float</em><em>, </em><em>optional</em>) – The line number associated with the datapoint</p></li>
+<li><p><strong>fiducial</strong> (<em>float</em><em>, </em><em>optional</em>) – The fiducial associated with the datapoint</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – A time domain EM sounding</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint" title="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint">TdemDataPoint</a></p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The data argument is a set of lists with length equal to the number of systems.
+These data are unpacked and vertically concatenated in this class.
+The parameter self._data will have length equal to the sum of the number of time gates in each system.
+The same is true for the errors, and the predicted data vector.</p>
+<dl class="method">
+<dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.createHdf">
+<code class="sig-name descname">createHdf</code><span class="sig-paren">(</span><em class="sig-param">parent</em>, <em class="sig-param">myName</em>, <em class="sig-param">withPosterior=True</em>, <em class="sig-param">nRepeats=None</em>, <em class="sig-param">fillvalue=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.createHdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the hdf group metadata in file
+parent: HDF object to create a group inside
+myName: Name of the group</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.deepcopy">
+<code class="sig-name descname">deepcopy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.deepcopy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define a deepcopy routine</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.dualMoment">
+<code class="sig-name descname">dualMoment</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.dualMoment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if the number of systems is &gt; 1</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">mod</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forward model the data from the given model</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.fromHdf">
+<code class="sig-name descname">fromHdf</code><span class="sig-paren">(</span><em class="sig-param">grp</em>, <em class="sig-param">index=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.fromHdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the object from a HDF group</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.getIplotActive">
+<code class="sig-name descname">getIplotActive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.getIplotActive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the active data indices per system.  Used for plotting.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.hdfName">
+<code class="sig-name descname">hdfName</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.hdfName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reprodicibility procedure</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.plot">
+<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param">title='Time Domain EM Data'</em>, <em class="sig-param">with_error_bars=True</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the Inphase and Quadrature Data for an EM measurement</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.priorProbability">
+<code class="sig-name descname">priorProbability</code><span class="sig-paren">(</span><em class="sig-param">rErr</em>, <em class="sig-param">aErr</em>, <em class="sig-param">height</em>, <em class="sig-param">calibration</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.priorProbability" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the probability for the EM data point given the specified attached priors</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rEerr</strong> (<em>bool</em>) – Include the relative error when evaluating the prior</p></li>
+<li><p><strong>aEerr</strong> (<em>bool</em>) – Include the additive error when evaluating the prior</p></li>
+<li><p><strong>height</strong> (<em>bool</em>) – Include the elevation when evaluating the prior</p></li>
+<li><p><strong>calibration</strong> (<em>bool</em>) – Include the calibration parameters when evaluating the prior</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – Return the components of the probability, i.e. the individually evaluated priors</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – The evaluation of the probability using all assigned priors</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.float64</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>For each boolean, the associated prior must have been set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>TypeError</strong> – If a prior has not been set on a requested parameter</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.sensitivity">
+<code class="sig-name descname">sensitivity</code><span class="sig-paren">(</span><em class="sig-param">mod</em>, <em class="sig-param">ix=None</em>, <em class="sig-param">scale=False</em>, <em class="sig-param">modelChanged=True</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.sensitivity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the sensitivty matrix for the given model</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.times">
+<code class="sig-name descname">times</code><span class="sig-paren">(</span><em class="sig-param">system=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.times" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the window times in an StatArray</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.updateErrors">
+<code class="sig-name descname">updateErrors</code><span class="sig-paren">(</span><em class="sig-param">relativeErr</em>, <em class="sig-param">additiveErr</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.updateErrors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the data errors</p>
+<p>Assumes a t^-0.5 behaviour e.g. logarithmic gate averaging
+V0 is assumed to be ln(Error &#64; 1ms)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>relativeErr</strong> (<em>list of scalars</em><em> or </em><em>list of array_like</em>) – A fraction percentage that is multiplied by the observed data. The list should have length equal to the number of systems. The entries in each item can be scalar or array_like.</p></li>
+<li><p><strong>additiveErr</strong> (<em>list of scalars</em><em> or </em><em>list of array_like</em>) – An absolute value of additive error. The list should have length equal to the number of systems. The entries in each item can be scalar or array_like.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>TypeError</strong> – If relativeErr or additiveErr is not a list</p></li>
+<li><p><strong>TypeError</strong> – If the length of relativeErr or additiveErr is not equal to the number of systems</p></li>
+<li><p><strong>TypeError</strong> – If any item in the relativeErr or additiveErr lists is not a scalar or array_like of length equal to the number of time channels</p></li>
+<li><p><strong>ValueError</strong> – If any relative or additive errors are &lt;= 0.0</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.updateSensitivity">
+<code class="sig-name descname">updateSensitivity</code><span class="sig-paren">(</span><em class="sig-param">mod</em>, <em class="sig-param">scale=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.updateSensitivity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute an updated sensitivity matrix using a new model based on an existing matrix</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.writeHdf">
+<code class="sig-name descname">writeHdf</code><span class="sig-paren">(</span><em class="sig-param">parent</em>, <em class="sig-param">myName</em>, <em class="sig-param">withPosterior=True</em>, <em class="sig-param">index=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.writeHdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the StatArray to an HDF object
+parent: Upper hdf file or group
+myName: object hdf name. Assumes createHdf has already been called
+create: optionally create the data set as well before writing</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../../mesh/mesh.html" class="btn btn-neutral float-right" title="Mesh classes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="FdemDataPoint.html" class="btn btn-neutral float-left" title="FdemDataPoint" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright None
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

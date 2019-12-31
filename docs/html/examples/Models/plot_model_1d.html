@@ -1,0 +1,376 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>1D Model with an infinite halfspace &mdash; GeoBIPy 1.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="1D Model without an infinite halfspace" href="plot_model_1d_no_hs.html" />
+    <link rel="prev" title="Topo Rectilinear Mesh 2D" href="../Meshes/plot_topo_rectilinear_mesh_2d.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> GeoBIPy
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../content/getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../content/api/api.html">API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#statistics">Statistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#meshes">Meshes</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#models">Models</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">1D Model with an infinite halfspace</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#instantiate-the-1d-model-with-a-half-space">Instantiate the 1D Model with a Half Space</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#perturbing-a-model-multiple-times">Perturbing a model multiple times</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="plot_model_1d_no_hs.html">1D Model without an infinite halfspace</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#distributions">Distributions</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GeoBIPy</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Examples</a> &raquo;</li>
+        
+      <li>1D Model with an infinite halfspace</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/examples/Models/plot_model_1d.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-models-plot-model-1d-py"><span class="std std-ref">here</span></a> to download the full example code</p>
+</div>
+<div class="sphx-glr-example-title section" id="d-model-with-an-infinite-halfspace">
+<span id="sphx-glr-examples-models-plot-model-1d-py"></span><h1>1D Model with an infinite halfspace<a class="headerlink" href="#d-model-with-an-infinite-halfspace" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">StatArray</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">Model1D</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">hdfRead</span>
+</pre></div>
+</div>
+<div class="section" id="instantiate-the-1d-model-with-a-half-space">
+<h2>Instantiate the 1D Model with a Half Space<a class="headerlink" href="#instantiate-the-1d-model-with-a-half-space" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Make a test model with 10 layers, and increasing parameter values</span>
+<span class="n">par</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="s2">&quot;Conductivity&quot;</span><span class="p">,</span> <span class="s2">&quot;$</span><span class="se">\\</span><span class="s2">frac</span><span class="si">{S}{m}</span><span class="s2">$&quot;</span><span class="p">)</span>
+<span class="n">thk</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span> <span class="o">*</span> <span class="mf">10.0</span><span class="p">)</span>
+<span class="n">mod</span> <span class="o">=</span> <span class="n">Model1D</span><span class="p">(</span><span class="n">parameters</span><span class="o">=</span><span class="n">par</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="n">thk</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Randomness and Model Perturbations
+We can set the priors on the 1D model by assigning minimum and maximum layer
+depths and a maximum number of layers.  These are used to create priors on
+the number of cells in the model, a new depth interface, new parameter values
+and the vertical gradient of those parameters.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">prng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">()</span>
+<span class="c1"># Set the priors</span>
+<span class="n">mod</span><span class="o">.</span><span class="n">setPriors</span><span class="p">(</span><span class="n">halfSpaceValue</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">minDepth</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">maxDepth</span><span class="o">=</span><span class="mf">150.0</span><span class="p">,</span> <span class="n">maxLayers</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To propose new models, we specify the probabilities of creating, removing, perturbing, and not changing
+a layer interface
+mod.setProposals(probabilities = [0.25, 0.25, 0.1, 0.1], prng=prng)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># ################################################################################</span>
+<span class="c1"># # We can then perturb the layers of the model</span>
+<span class="c1"># perturbed = mod.perturbStructure()</span>
+
+<span class="c1"># ################################################################################</span>
+<span class="c1"># plt.figure(figsize=(8,6))</span>
+<span class="c1"># plt.subplot(121)</span>
+<span class="c1"># mod.pcolor(grid=True)</span>
+<span class="c1"># plt.subplot(122)</span>
+<span class="c1"># _ = perturbed.pcolor(grid=True)</span>
+
+<span class="c1"># ################################################################################</span>
+<span class="c1"># plt.figure()</span>
+<span class="c1"># _ = mod.plot()</span>
+
+<span class="c1"># ################################################################################</span>
+<span class="c1"># # We can evaluate the prior of the model using depths only</span>
+<span class="c1"># print(&#39;Probability of the Model given its priors: &#39;, mod.priorProbability(False, False))</span>
+<span class="c1"># # Or with priors on its parameters, and parameter gradient with depth.</span>
+<span class="c1"># print(&#39;Probability of the Model given its priors: &#39;, mod.priorProbability(True, True))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="perturbing-a-model-multiple-times">
+<h2>Perturbing a model multiple times<a class="headerlink" href="#perturbing-a-model-multiple-times" title="Permalink to this headline">¶</a></h2>
+<p>We have already</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># ################################################################################</span>
+<span class="c1"># # If we perturb a model multiple times, we can add each model to the hitmap</span>
+<span class="c1"># perturbed.addToHitMap(Hitmap=Hit)</span>
+<span class="c1"># for i in range(1000):</span>
+<span class="c1">#     perturbed = perturbed.perturbStructure()</span>
+<span class="c1">#     perturbed.addToHitMap(Hitmap=Hit)</span>
+
+<span class="c1"># ################################################################################</span>
+<span class="c1"># plt.figure()</span>
+<span class="c1"># _ = Hit.pcolor(flipY=True, xscale=&#39;log&#39;, cmap=&#39;gray_r&#39;)</span>
+
+
+
+
+
+
+
+<span class="c1"># ################################################################################</span>
+<span class="c1"># # Write to a HDF5 file</span>
+
+<span class="c1"># with h5py.File(&#39;Model1D.h5&#39;,&#39;w&#39;) as hf:</span>
+<span class="c1">#     mod.toHdf(hf,&#39;Model1D&#39;)</span>
+
+<span class="c1"># ################################################################################</span>
+<span class="c1"># # Read from the file</span>
+<span class="c1"># ModNew = hdfRead.readKeyFromFiles(&#39;Model1D.h5&#39;,&#39;/&#39;,&#39;Model1D&#39;)</span>
+
+
+<span class="c1"># ################################################################################</span>
+<span class="c1"># plt.figure()</span>
+<span class="c1"># ax = plt.subplot(131)</span>
+<span class="c1"># ModNew.pcolor(grid=True)</span>
+<span class="c1"># plt.subplot(133, sharey = ax)</span>
+<span class="c1"># _ = ModNew.plot(flipY=False)</span>
+
+
+<span class="c1"># ################################################################################</span>
+<span class="c1"># # Creating memory in HDF5 to accomodate multiple models</span>
+
+<span class="c1"># # Create an initial Model class with enough layers to hold as many layers as we expect. (an upper bound)</span>
+<span class="c1"># tmp = Model1D(nCells=20)</span>
+
+<span class="c1"># # Open the file</span>
+<span class="c1"># f = h5py.File(&#39;Model1D.h5&#39;,&#39;w&#39;)</span>
+
+<span class="c1"># # Create the memory using the temporary model with space for 2 models.</span>
+<span class="c1"># tmp.createHdf(f, myName=&#39;test&#39;, nRepeats=2)</span>
+
+<span class="c1"># # Write mod and perturbed to different entries in the HDF5 file</span>
+<span class="c1"># mod.writeHdf(f, &#39;test&#39;, index=0)</span>
+<span class="c1"># perturbed.writeHdf(f, &#39;test&#39;, index=1)</span>
+
+<span class="c1"># # Close the file</span>
+<span class="c1"># f.close()</span>
+
+<span class="c1"># ################################################################################</span>
+<span class="c1"># # Reading from a HDF5 file with multiple models</span>
+
+<span class="c1"># # Special read functions</span>
+<span class="c1"># from geobipy import hdfRead</span>
+<span class="c1"># # Open the file</span>
+<span class="c1"># f = h5py.File(&#39;Model1D.h5&#39;, &#39;r&#39;)</span>
+<span class="c1"># # Read the Model1D from the file</span>
+<span class="c1"># tmp = hdfRead.readKeyFromFile(f, fName=&#39;Model1D.h5&#39;, groupName=&#39;/&#39;, key=&#39;test&#39;, index=1)</span>
+<span class="c1"># f.close()</span>
+
+
+
+<span class="c1"># ################################################################################</span>
+<span class="c1"># # We can access and plot the elements of model. The parameters are an [StatArray](../../Base/StatArray_Class.ipynb)</span>
+<span class="c1"># plt.figure()</span>
+<span class="c1"># _ = mod.par.plot()</span>
+
+<span class="c1"># ################################################################################</span>
+<span class="c1"># # Or we can plot the 1D model as coloured blocks</span>
+<span class="c1"># plt.figure()</span>
+<span class="c1"># _ = perturbed.pcolor(grid=True)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.003 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-models-plot-model-1d-py">
+<div class="sphx-glr-download docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/f48e5c05cfcaf1411cc06bb7a0ed1eb0/plot_model_1d.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_model_1d.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/7d8af6f7b40a771fd3b189fc4fd80360/plot_model_1d.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_model_1d.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="plot_model_1d_no_hs.html" class="btn btn-neutral float-right" title="1D Model without an infinite halfspace" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../Meshes/plot_topo_rectilinear_mesh_2d.html" class="btn btn-neutral float-left" title="Topo Rectilinear Mesh 2D" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright None
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

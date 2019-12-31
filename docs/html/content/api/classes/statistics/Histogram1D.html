@@ -1,0 +1,461 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Histogram1D &mdash; GeoBIPy 1.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/gallery.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Histogram2D" href="Histogram2D.html" />
+    <link rel="prev" title="Distribution Wrapper" href="Distribution.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> GeoBIPy
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../api.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../base/base.html">Core routines needed for GeoBIPy</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../classes.html">Classes used in GeoBIPy</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../core/core.html">Core classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../data/data.html">Data classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../mesh/mesh.html">Mesh classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../model/model.html">Model classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pointcloud/pointcloud.html">Pointcloud classes</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="statistics.html">Statistics classes</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="Distribution.html">Distribution Wrapper</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Histogram1D</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Histogram2D.html">Histogram2D</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Hitmap2D.html">Hitmap2D</a></li>
+<li class="toctree-l4"><a class="reference internal" href="baseDistribution.html">baseDistribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="NormalDistribution.html">Normal distribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MvNormalDistribution.html">MvNormal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="UniformDistribution.html">Uniform distribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="GammaDistribution.html">Gamma Distribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="OrderStatistics.html">Order Statistics</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../system/system.html">System classes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/index.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">GeoBIPy</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../api.html">API</a> &raquo;</li>
+        
+          <li><a href="../classes.html">Classes used in GeoBIPy</a> &raquo;</li>
+        
+          <li><a href="statistics.html">Statistics classes</a> &raquo;</li>
+        
+      <li>Histogram1D</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../../../_sources/content/api/classes/statistics/Histogram1D.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="histogram1d">
+<h1>Histogram1D<a class="headerlink" href="#histogram1d" title="Permalink to this headline">¶</a></h1>
+<div class="graphviz"><img src="../../../../_images/inheritance-9c47c39ce0416a4812104653731b63fddb92334b.png" alt="Inheritance diagram of geobipy.src.classes.statistics.Histogram1D" usemap="#inheritancefb461bf5d3" class="inheritance graphviz" /></div>
+<map id="inheritancefb461bf5d3" name="inheritancefb461bf5d3">
+<area shape="rect" id="node1" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D" target="_top" title="1D Histogram class that updates efficiently." alt="" coords="313,5,412,29"/>
+<area shape="rect" id="node2" href="../mesh/RectilinearMesh1D.html#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D" target="_top" title="Class defining a 1D rectilinear mesh with cell centres and edges." alt="" coords="131,5,265,29"/>
+<area shape="rect" id="node3" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="5,5,83,29"/>
+</map><span class="target" id="module-geobipy.src.classes.statistics.Histogram1D"></span><p>&#64;Histogram_Class
+Module describing an efficient histogram class</p>
+<dl class="class">
+<dt id="geobipy.src.classes.statistics.Histogram1D.Histogram1D">
+<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.statistics.Histogram1D.</code><code class="sig-name descname">Histogram1D</code><span class="sig-paren">(</span><em class="sig-param">bins=None</em>, <em class="sig-param">binCentres=None</em>, <em class="sig-param">log=None</em>, <em class="sig-param">relativeTo=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D" title="Permalink to this definition">¶</a></dt>
+<dd><p>1D Histogram class that updates efficiently.</p>
+<p>Fast updating relies on knowing the bins ahead of time.</p>
+<p>Histogram1D(values, bins, binCentres, log, relativeTo)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bins</strong> (<em>geobipy.StatArray</em><em> or </em><em>array_like</em><em>, </em><em>optional</em>) – Specify the bin edges for the histogram. Can be regularly or irregularly increasing.</p></li>
+<li><p><strong>binCentres</strong> (<em>geobipy.StatArray</em><em> or </em><em>array_like</em><em>, </em><em>optional</em>) – Specify the bin centres for the histogram. Can be regular or irregularly sized.</p></li>
+<li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Entries are given in linear space, but internally bins and values are logged.
+Plotting is in log space.</p></li>
+<li><p><strong>relativeTo</strong> (<em>float</em><em>, </em><em>optional</em>) – If a float is given, updates will be relative to this value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – 1D histogram</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D" title="geobipy.src.classes.statistics.Histogram1D.Histogram1D">Histogram1D</a></p>
+</dd>
+</dl>
+<dl class="method">
+<dt id="geobipy.src.classes.statistics.Histogram1D.Histogram1D.cellIndex">
+<code class="sig-name descname">cellIndex</code><span class="sig-paren">(</span><em class="sig-param">values</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.cellIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the index to the cell that each value in values falls in.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> (<em>array_like</em>) – The values to find the cell indices for</p></li>
+<li><p><strong>clip</strong> (<em>bool</em>) – A negative index which would normally wrap will clip to 0 and self.bins.size instead.</p></li>
+<li><p><strong>trim</strong> (<em>bool</em>) – Do not include out of axis indices. Negates clip, since they wont be included in the output.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – The cell indices</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array_like</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.statistics.Histogram1D.Histogram1D.combine">
+<code class="sig-name descname">combine</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.combine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combine two histograms together.</p>
+<p>Using the bin centres of other, finds the corresponding bins in self.  The counts of other are then added to self.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>other</strong> (<em>geobipy.Histogram1D</em>) – A histogram to combine.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.statistics.Histogram1D.Histogram1D.createHdf">
+<code class="sig-name descname">createHdf</code><span class="sig-paren">(</span><em class="sig-param">parent</em>, <em class="sig-param">myName</em>, <em class="sig-param">withPosterior=True</em>, <em class="sig-param">nRepeats=None</em>, <em class="sig-param">fillvalue=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.createHdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the hdf group metadata in file
+parent: HDF object to create a group inside
+myName: Name of the group</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.statistics.Histogram1D.Histogram1D.credibleIntervals">
+<code class="sig-name descname">credibleIntervals</code><span class="sig-paren">(</span><em class="sig-param">percent=95.0</em>, <em class="sig-param">log=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.credibleIntervals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the credible intervals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>percent</strong> (<em>float</em>) – Confidence percentage.</p></li>
+<li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Take the log of the credible intervals to a base. ‘e’ if log = ‘e’, or a number e.g. log = 10.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>med</strong> (<em>array_like</em>) – Contains the median. Has size equal to arr.shape[axis].</p></li>
+<li><p><strong>low</strong> (<em>array_like</em>) – Contains the lower interval.</p></li>
+<li><p><strong>high</strong> (<em>array_like</em>) – Contains the upper interval.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.statistics.Histogram1D.Histogram1D.findPeaks">
+<code class="sig-name descname">findPeaks</code><span class="sig-paren">(</span><em class="sig-param">width</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.findPeaks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identify peaks in the histogram.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">scipy.spatial.find_peaks()</span></code></p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.statistics.Histogram1D.Histogram1D.fitMajorPeaks">
+<code class="sig-name descname">fitMajorPeaks</code><span class="sig-paren">(</span><em class="sig-param">log=None</em>, <em class="sig-param">loc_bounds=None</em>, <em class="sig-param">constrain_loc=True</em>, <em class="sig-param">variance_upper_bound=None</em>, <em class="sig-param">maxDistributions=None</em>, <em class="sig-param">tolerance=0.05</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.fitMajorPeaks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iteratively fits the histogram with an increasing number of distributions until the fit changes by less than a tolerance.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.statistics.Histogram1D.Histogram1D.fromHdf">
+<code class="sig-name descname">fromHdf</code><span class="sig-paren">(</span><em class="sig-param">grp</em>, <em class="sig-param">index=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.fromHdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads in the object froma HDF file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.statistics.Histogram1D.Histogram1D.hdfName">
+<code class="sig-name descname">hdfName</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.hdfName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reprodicibility procedure</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.statistics.Histogram1D.Histogram1D.pcolor">
+<code class="sig-name descname">pcolor</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.pcolor" title="Permalink to this definition">¶</a></dt>
+<dd><p>pcolor the histogram</p>
+<dl class="field-list simple">
+<dt class="field-odd">Other Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>alpha</strong> (<em>scalar or array_like, optional</em>) – If alpha is scalar, behaves like standard matplotlib alpha and opacity is applied to entire plot
+If array_like, each pixel is given an individual alpha value.</p></li>
+<li><p><strong>log</strong> (<em>‘e’ or float, optional</em>) – Take the log of the colour to a base. ‘e’ if log = ‘e’, and a number e.g. log = 10.
+Values in c that are &lt;= 0 are masked.</p></li>
+<li><p><strong>equalize</strong> (<em>bool, optional</em>) – Equalize the histogram of the colourmap so that all colours have an equal amount.</p></li>
+<li><p><strong>nbins</strong> (<em>int, optional</em>) – Number of bins to use for histogram equalization.</p></li>
+<li><p><strong>xscale</strong> (<em>str, optional</em>) – Scale the x axis? e.g. xscale = ‘linear’ or ‘log’</p></li>
+<li><p><strong>yscale</strong> (<em>str, optional</em>) – Scale the y axis? e.g. yscale = ‘linear’ or ‘log’.</p></li>
+<li><p><strong>flipX</strong> (<em>bool, optional</em>) – Flip the X axis</p></li>
+<li><p><strong>flipY</strong> (<em>bool, optional</em>) – Flip the Y axis</p></li>
+<li><p><strong>grid</strong> (<em>bool, optional</em>) – Plot the grid</p></li>
+<li><p><strong>noColorbar</strong> (<em>bool, optional</em>) – Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.</p></li>
+<li><p><strong>trim</strong> (<em>bool, optional</em>) – Set the x and y limits to the first and last non zero values along each axis.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">geobipy.customPlots.pcolor()</span></code></dt><dd><p>For additional keywords</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.statistics.Histogram1D.Histogram1D.plot">
+<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param">rotate=False</em>, <em class="sig-param">flipX=False</em>, <em class="sig-param">flipY=False</em>, <em class="sig-param">trim=True</em>, <em class="sig-param">normalize=False</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the histogram</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.statistics.Histogram1D.Histogram1D.sample">
+<code class="sig-name descname">sample</code><span class="sig-paren">(</span><em class="sig-param">nSamples</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates samples from the histogram.</p>
+<p>A uniform distribution is used for each bin to generate samples.
+The number of samples generated per bin is scaled by the count for that bin using the requested number of samples.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>nSamples</strong> (<em>int</em>) – Number of samples to generate.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – The samples.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>geobipy.StatArray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.statistics.Histogram1D.Histogram1D.summary">
+<code class="sig-name descname">summary</code><span class="sig-paren">(</span><em class="sig-param">out=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print a summary of self</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.statistics.Histogram1D.Histogram1D.toHdf">
+<code class="sig-name descname">toHdf</code><span class="sig-paren">(</span><em class="sig-param">h5obj</em>, <em class="sig-param">myName</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.toHdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the StatArray to an HDF object
+h5obj: :An HDF File or Group Object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.statistics.Histogram1D.Histogram1D.update">
+<code class="sig-name descname">update</code><span class="sig-paren">(</span><em class="sig-param">values</em>, <em class="sig-param">clip=True</em>, <em class="sig-param">trim=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the histogram by counting the entry of values into the bins of the histogram.</p>
+<p>Updates the bin counts in the histogram using fast methods.
+The values are clipped so that values outside the bins are forced inside.
+Optionally, one can trim the values so that those outside the bins are not counted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> (<em>array_like</em>) – Increments the count for the bin that each value falls into.</p></li>
+<li><p><strong>trim</strong> (<em>bool</em>) – A negative index which would normally wrap will clip to 0 and self.bins.size instead.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.statistics.Histogram1D.Histogram1D.writeHdf">
+<code class="sig-name descname">writeHdf</code><span class="sig-paren">(</span><em class="sig-param">parent</em>, <em class="sig-param">myName</em>, <em class="sig-param">withPosterior=True</em>, <em class="sig-param">index=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.writeHdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the StatArray to an HDF object
+parent: Upper hdf file or group
+myName: object hdf name. Assumes createHdf has already been called
+create: optionally create the data set as well before writing</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Histogram2D.html" class="btn btn-neutral float-right" title="Histogram2D" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Distribution.html" class="btn btn-neutral float-left" title="Distribution Wrapper" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright None
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
