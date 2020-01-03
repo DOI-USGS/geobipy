@@ -30,6 +30,9 @@ class _userParameters(myObject):
         if not self.minimumThickness is None:
             self.minimumThickness = np.float64(self.minimumThickness)
 
+        assert np.size(self.parameterLimits) == 2, ValueError("parameterLimits must have 2 entries")
+        assert self.parameterLimits[0] < self.parameterLimits[1], ValueError("parameterLimits must be in increasing order.")
+
 
         self.initialRelativeError = StatArray.StatArray(Datapoint.nSystems, 'Relative Error') + self.initialRelativeError
         self.minimumRelativeError = StatArray.StatArray(Datapoint.nSystems, 'Minimum Relative Error') + self.minimumRelativeError
