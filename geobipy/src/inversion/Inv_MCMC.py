@@ -278,7 +278,7 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
     perturbedDatapoint = DataPoint.deepcopy()
 
     # Perturb the current model
-    remappedModel, perturbedModel = Mod.perturb(perturbedDatapoint, userParameters.priStd, userParameters.parameterCovarianceScaling, Res.burnedIn)
+    remappedModel, perturbedModel = Mod.perturb(perturbedDatapoint, userParameters.priStd, Res.burnedIn)
 
     # Propose a new data point, using assigned proposal distributions
     perturbedDatapoint.perturb(userParameters.solveElevation, userParameters.solveRelativeError, userParameters.solveAdditiveError, userParameters.solveCalibration)
@@ -305,11 +305,16 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
         # Evaluate the prior for the current data
         prior1 += perturbedDatapoint.priorProbability(userParameters.solveRelativeError, userParameters.solveAdditiveError, userParameters.solveElevation, userParameters.solveCalibration)
 
+    # Test for early rejection
+    if (prior1 == -np.inf):
+        return(Mod, DataPoint, prior, likelihood, posterior, PhiD, posteriorComponents, ratioComponents, False, Mod.nCells[0] != perturbedModel.nCells[0])
+
+    # Compute the components of each acceptance ratio
     likelihood1 = perturbedDatapoint.likelihood(log=True)
 
     posterior1 = prior1 + likelihood1
 
-    proposal, proposal1 = perturbedModel.proposalProbabilities(perturbedDatapoint, remappedModel, userParameters.parameterCovarianceScaling, Res.burnedIn)
+    proposal, proposal1 = perturbedModel.proposalProbabilities(perturbedDatapoint, remappedModel, Res.burnedIn)
 
     priorRatio = prior1 - prior
     likelihoodRatio = likelihood1 - likelihood
@@ -332,13 +337,13 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
         ratioComponents = None
         
     # If we accept the model
-    r = prng.uniform()
+    accepted = acceptanceProbability > prng.uniform()
 
-    if (acceptanceProbability > r):
+    if (accepted):
         Res.acceptance += 1
         return(perturbedModel, perturbedDatapoint, prior1, likelihood1, posterior1, PhiD1, posteriorComponents, ratioComponents, True, Mod.nCells[0] != perturbedModel.nCells[0])
 
-    else:
+    else: # Rejected
         return(Mod, DataPoint, prior, likelihood, posterior, PhiD, posteriorComponents, ratioComponents, False, Mod.nCells[0] != perturbedModel.nCells[0])
 
     clk.stop()
