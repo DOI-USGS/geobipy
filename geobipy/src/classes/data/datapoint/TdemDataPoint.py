@@ -592,7 +592,7 @@ class TdemDataPoint(EmDataPoint):
         assert (relativeErr.size == self.nSystems), TypeError("relativeErr must be a list of size equal to the number of systems {}".format(self.nSystems))
 
         #assert (isinstance(additiveErr, list)), TypeError("additiveErr must be a list of size equal to the number of systems {}".format(self.nSystems))
-        assert (relativeErr.size == self.nSystems), TypeError("additiveErr must be a list of size equal to the number of systems {}".format(self.nSystems))
+        assert (additiveErr.size == self.nSystems), TypeError("additiveErr must be a list of size equal to the number of systems {}".format(self.nSystems))
 
         t0 = 0.5 * np.log(1e-3)  # Assign fixed t0 at 1ms
         # For each system assign error levels using the user inputs
