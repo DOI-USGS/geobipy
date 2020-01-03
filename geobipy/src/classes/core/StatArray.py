@@ -903,15 +903,56 @@ class StatArray(np.ndarray, myObject):
         return self.prior.probability(x=samples, log=log)
 
     
-    def propose(self):
-        """Propose new values using the attached proposal distribution"""
+    def propose(self, i=np.s_[:], relative=False, imposePrior = False, log=False):
+        """Propose new values using the attached proposal distribution
+        
+        Parameters
+        ----------
+        i : ints, optional
+            Only propose values for these indices.
+        relative : bool, optional
+            Use the proposal distribution as a relative change to the parameter values.
+        imposePrior : bool, optional 
+            Continue to propose new values until the prior probability is non-zero or -infinity.
+        log : bool, required if imposePrior is True.
+            Use log probability when imposing the prior.
 
-        assert (self.hasProposal()), TypeError('No proposal defined on variable {}. Use StatArray.setProposal()'.format(self.name))
-        if self.proposal.multivariate:
-            assert (self.proposal.ndim == self.size), ValueError("Dimensions of attached multivariate proposal {} does not match self.size {} ".format(self.proposal.ndim, self.size))
-            return self.proposal.rng(1) 
-        else: 
-            return self.proposal.rng(self.size)
+        Returns
+        -------
+        out : array_like
+            Valuese generated from the proposal.
+
+        """
+
+        assert (self.hasProposal), TypeError('No proposal defined on variable {}. Use StatArray.setProposal()'.format(self.name))
+       
+        mv = self.proposal.multivariate
+
+        if mv:
+            nSamples = 1
+        else:
+            nSamples = self.size
+            
+        # Generate new values
+        proposed = self.proposal.rng(nSamples)
+
+        if relative:
+            proposed = self + proposed
+
+        if not imposePrior:
+            return proposed[i] if mv else proposed
+
+        assert self.hasPrior, TypeError('No prior defined on variable {}. Use StatArray.setPrior()'.format(self.name))
+        p = self.probability(x=proposed, log=log)
+        while p == 0.0 or p == -np.inf:
+            proposed = self.proposal.rng(nSamples)
+        
+            if relative:
+                proposed = self + proposed
+
+            p = self.probability(x=proposed, log=log)
+
+        return proposed[i] if mv else proposed
 
         
     def rolling(self, numpyFunction, window=1):
