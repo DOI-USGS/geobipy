@@ -365,7 +365,7 @@ The update takes in the numbers in linear space and takes their log=10
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.303 seconds)
+   **Total running time of the script:** ( 0 minutes  1.236 seconds)
 
 
 .. _sphx_glr_download_examples_Statistics_plot_histogram_1d.py:

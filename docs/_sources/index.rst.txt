@@ -1,3 +1,7 @@
+##################################################
+GeoBIPy - Geophysical Bayesian Inference in Python
+##################################################
+
 .. toctree::
     :maxdepth: 5
 
