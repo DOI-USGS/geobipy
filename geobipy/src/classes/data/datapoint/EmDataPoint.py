@@ -130,7 +130,7 @@ class EmDataPoint(DataPoint):
         return probability
 
 
-    def perturb(self, newHeight, newRelativeError, newAdditiveError, newCalibration):
+    def perturb(self, height, relativeError, additiveError, calibration):
         """Propose a new EM data point given the specified attached propsal distributions
 
         Parameters
@@ -160,20 +160,26 @@ class EmDataPoint(DataPoint):
             If a proposal has not been set on a requested parameter
 
         """
-        if (newHeight):  # Update the candidate data elevation (if required)
+        if (height):  # Update the candidate data elevation (if required)
             self.perturbHeight()
             
-        if (newRelativeError):
+        if (relativeError):
             self.perturbRelativeError()
             
-        if (newAdditiveError):
+        if (additiveError):
             self.perturbAdditiveError()
 
-        if (newCalibration):  # Update the calibration parameters for the candidate data (if required)
+        # Update the data errors using the updated relative errors
+        if relativeError or additiveError:
+            self.updateErrors(self.relErr, self.addErr)
+
+        if (calibration):  # Update the calibration parameters for the candidate data (if required)
             # Generate new calibration errors
             self.calibration[:] = self.calibration.proposal.rng(1)
             # Update the mean of the proposed calibration errors
             self.calibration.proposal.mean[:] = self.calibration
+
+            self.calibrate()
 
 
     def perturbAdditiveError(self):

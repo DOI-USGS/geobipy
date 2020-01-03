@@ -283,14 +283,6 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
     # Propose a new data point, using assigned proposal distributions
     perturbedDatapoint.perturb(userParameters.solveElevation, userParameters.solveRelativeError, userParameters.solveAdditiveError, userParameters.solveCalibration)
 
-    # Update the data errors using the updated relative errors
-    if userParameters.solveRelativeError or userParameters.solveAdditiveError:
-        perturbedDatapoint.updateErrors(perturbedDatapoint.relErr, perturbedDatapoint.addErr)
-
-    # Calibrate the response if it is being solved for
-    if (userParameters.solveCalibration):
-        perturbedDatapoint.calibrate()
-
     # Forward model the data from the candidate model
     perturbedDatapoint.forward(perturbedModel)
 
