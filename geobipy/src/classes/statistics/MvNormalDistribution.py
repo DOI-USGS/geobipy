@@ -208,12 +208,12 @@ class MvNormal(baseDistribution):
         N: Padded size
         """
         if (self.variance.ndim == 1):
-            return MvNormal(np.zeros(N,dtype=self.mean.dtype),np.zeros(N, dtype=self.variance.dtype), self.prng)
+            return MvNormal(np.zeros(N,dtype=self.mean.dtype),np.zeros(N, dtype=self.variance.dtype), prng=self.prng)
         if (self.variance.ndim == 2):
-            return MvNormal(np.zeros(N,dtype=self.mean.dtype),np.zeros([N,N], dtype=self.variance.dtype), self.prng)
+            return MvNormal(np.zeros(N,dtype=self.mean.dtype),np.zeros([N,N], dtype=self.variance.dtype), prng=self.prng)
 
 
-    def bins(self, nBins=100, nStd=4.0, dim=None):
+    def bins(self, nBins=100, nStd=4.0, axis=None):
         """Discretizes a range given the mean and variance of the distribution 
         
         Parameters
@@ -235,7 +235,7 @@ class MvNormal(baseDistribution):
         nStd = np.float64(nStd)
         nD = self.ndim
         if (nD > 1):
-            if dim is None:
+            if axis is None:
                 bins = np.empty([nD, nBins+1])
                 for i in range(nD):
                     tmp = nStd * np.sqrt(self.variance[i])
@@ -243,8 +243,8 @@ class MvNormal(baseDistribution):
                 return StatArray.StatArray(np.squeeze(bins))
             else:
                 bins = np.empty(nBins+1)
-                tmp = nStd * np.sqrt(self.variance[dim])
-                bins[:] = np.linspace(self.mean[dim] - tmp, self.mean[dim] + tmp, nBins+1)
+                tmp = nStd * np.sqrt(self.variance[axis])
+                bins[:] = np.linspace(self.mean[axis] - tmp, self.mean[axis] + tmp, nBins+1)
                 return StatArray.StatArray(np.squeeze(bins))
 
         tmp = nStd * np.sqrt(self.variance)
