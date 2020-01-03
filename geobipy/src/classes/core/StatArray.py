@@ -187,7 +187,7 @@ class StatArray(np.ndarray, myObject):
 
     @property
     def nPosteriors(self):
-        if self.hasPosterior():
+        if self.hasPosterior:
             return np.size(self._posterior)
         return 0
 
@@ -195,30 +195,27 @@ class StatArray(np.ndarray, myObject):
     @property
     def posterior(self):
         """Returns the posterior if available. """
-
-        try:
+        if self.hasPosterior:
             return self._posterior
-        except:
+        else:
             return None
     
 
     @property
     def prior(self):
         """Returns the prior if available. """
-
-        try:
+        if self.hasPrior:
             return self._prior
-        except:
+        else:
             return None
 
 
     @property
     def proposal(self):
         """Returns the prior if available. """
-
-        try:
+        if self.hasProposal:
             return self._proposal
-        except:
+        else:
             return None
 
     @property
@@ -375,11 +372,11 @@ class StatArray(np.ndarray, myObject):
 
 
     def copyStats(self, other):
-        # if self.hasPrior():
+        # if self.hasPrior:
         #     other._prior = self._prior.deepcopy()
-        # if self.hasProposal():
+        # if self.hasProposal:
         #     other._proposal = self._proposal.deepcopy()
-        if self.hasPosterior():
+        if self.hasPosterior:
             other._posterior = self._posterior.deepcopy()
 
 
@@ -405,11 +402,11 @@ class StatArray(np.ndarray, myObject):
         other._name = self._name
         other._units = self._units
 
-        if (self.hasPrior()):
+        if (self.hasPrior):
             other._prior = self._prior.deepcopy()
-        if (self.hasProposal()):
+        if (self.hasProposal):
             other._proposal = self._proposal.deepcopy()
-        if (self.hasPosterior()):
+        if (self.hasPosterior):
             other._posterior = self._posterior #deepcopy(self._posterior)
         
         return other
@@ -603,6 +600,7 @@ class StatArray(np.ndarray, myObject):
         return StatArray(edges, self.name, self.units)
 
 
+    @property
     def hasPosterior(self):
         """Check that the StatArray has an attached posterior.
 
@@ -619,6 +617,7 @@ class StatArray(np.ndarray, myObject):
             return False
 
 
+    @property
     def hasPrior(self):
         """Check that the StatArray has an attached prior.
 
@@ -635,6 +634,7 @@ class StatArray(np.ndarray, myObject):
             return False
 
 
+    @property
     def hasProposal(self):
         """Check that the StatArray has an attached proposal.
 
@@ -728,9 +728,9 @@ class StatArray(np.ndarray, myObject):
         if (np.all(np.shape(self) == new_shape)):
             return self.deepcopy()
         out = StatArray(np.resize(self, new_shape), self.name, self.units)
-        if self.hasPrior():
+        if self.hasPrior:
             out._prior = self.prior.deepcopy()
-        if self.hasProposal():
+        if self.hasProposal:
             out._proposal = self.proposal.deepcopy()
 
         return out
@@ -764,13 +764,13 @@ class StatArray(np.ndarray, myObject):
         msg += "     Units: " + self.getUnits() + '\n'
         msg += "     Shape: " + str(self.shape) + '\n'
         msg += "     Values: " + str(self[:]) + '\n'
-        if self.hasPrior():
+        if self.hasPrior:
             msg += "Prior: \n     {}".format(self.prior.summary(True))
         
-        if self.hasProposal():
+        if self.hasProposal:
             msg += "Proposal: \n{}".format(self.proposal.summary(True))
 
-        if self.hasPosterior():
+        if self.hasPosterior:
             if self.nPosteriors > 1:
                 for p in self.posterior:
                     msg += "Posterior: \n{}".format(p.summary(True))
@@ -855,7 +855,7 @@ class StatArray(np.ndarray, myObject):
             tmp._proposal = pTmp
         except:
             pass
-        if self.hasPosterior():
+        if self.hasPosterior:
             tmp._posterior = self._posterior.deepcopy()
         return tmp
 
@@ -911,7 +911,7 @@ class StatArray(np.ndarray, myObject):
 
         """
 
-        assert (self.hasPrior()), TypeError('No prior defined on variable {}. Use StatArray.setPrior()'.format(self.name))
+        assert (self.hasPrior), TypeError('No prior defined on variable {}. Use StatArray.setPrior()'.format(self.name))
 
         samples = self[:]
         if not x is None:
@@ -983,7 +983,7 @@ class StatArray(np.ndarray, myObject):
     def updatePosterior(self):
         """Adds the current values of the StatArray to the attached posterior. """
         
-        assert (self.hasPosterior()), TypeError('No posterior defined on variable {}. Use StatArray.setPosterior()'.format(self.name))
+        assert (self.hasPosterior), TypeError('No posterior defined on variable {}. Use StatArray.setPosterior()'.format(self.name))
 
         if self.nPosteriors > 1:
             for i in range(self.nPosteriors):
@@ -1355,11 +1355,11 @@ class StatArray(np.ndarray, myObject):
         # grp.attrs["repr"] = self.hdfName()
         # grp.create_dataset('data', data=self)
         # #compression="gzip",compression_opts=6,shuffle=True
-        # # if self.hasPrior():
+        # # if self.hasPrior:
         # #     self.prior.toHdf(grp, 'prior')
-        # # if self.hasProposal():
+        # # if self.hasProposal:
         # #     self.proposal.toHdf(grp, 'proposal')
-        # if self.hasPosterior():
+        # if self.hasPosterior:
         #     grp.create_dataset('nPosteriors', data=self.nPosteriors)
         #     if self.nPosteriors > 1:
         #         for i in range(self.nPosteriors):
@@ -1442,7 +1442,7 @@ class StatArray(np.ndarray, myObject):
 
 
         if withPosterior:
-            if self.hasPosterior():
+            if self.hasPosterior:
                 grp.create_dataset('nPosteriors', data=self.nPosteriors)
                 if self.nPosteriors > 1:
                     for i in range(self.nPosteriors):
@@ -1511,7 +1511,7 @@ class StatArray(np.ndarray, myObject):
 #            pass
 
         if withPosterior:
-            if self.hasPosterior():
+            if self.hasPosterior:
                 if np.ndim(index) > 0:
                     index = index[0]
                 if self.nPosteriors > 1:
