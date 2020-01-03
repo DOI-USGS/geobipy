@@ -181,7 +181,7 @@ class EmDataPoint(DataPoint):
     def proposeAdditiveError(self):
         # Generate a new error
         self.addErr[:] = self.addErr.proposal.rng(1)
-        if self.addErr.hasPrior():
+        if self.addErr.hasPrior:
             p = self.addErr.probability(log=True)
             while p == -np.inf:
                 self.addErr[:] = self.addErr.proposal.rng(1)
@@ -193,7 +193,7 @@ class EmDataPoint(DataPoint):
     def proposeHeight(self):
         # Generate a new elevation
         self.z[:] = self.z.proposal.rng(1)
-        if self.z.hasPrior():
+        if self.z.hasPrior:
             p = self.z.probability(log=True)
             while p == -np.inf:
                 self.z[:] = self.z.proposal.rng(1)
@@ -205,7 +205,7 @@ class EmDataPoint(DataPoint):
     def proposeRelativeError(self):
         # Generate a new error
         self.relErr[:] = self.relErr.proposal.rng(1)
-        if self.relErr.hasPrior():
+        if self.relErr.hasPrior:
             p = self.relErr.probability(log=True)
             while p == -np.inf:
                 self.relErr[:] = self.relErr.proposal.rng(1)
@@ -242,7 +242,7 @@ class EmDataPoint(DataPoint):
 
     def setAdditiveErrorPosterior(self):
 
-        assert self.addErr.hasPrior(), Exception("Must set a prior on the additive error")
+        assert self.addErr.hasPrior, Exception("Must set a prior on the additive error")
 
         aBins = self.addErr.prior.bins()
 

@@ -516,7 +516,7 @@ class TdemDataPoint(EmDataPoint):
 
         # Generate a new error
         tmp = self.addErr.proposal.rng(1)
-        if self.addErr.hasPrior():
+        if self.addErr.hasPrior:
             p = self.addErr.probability(x=tmp, log=True)
             while p == -np.inf:
                 tmp = self.addErr.proposal.rng(1)
@@ -528,7 +528,7 @@ class TdemDataPoint(EmDataPoint):
 
     def setAdditiveErrorPosterior(self):
 
-        assert self.addErr.hasPrior(), Exception("Must set a prior on the additive error")
+        assert self.addErr.hasPrior, Exception("Must set a prior on the additive error")
 
         aBins = self.addErr.prior.bins()
 
@@ -617,7 +617,7 @@ class TdemDataPoint(EmDataPoint):
             self._std[iSys] = np.sqrt((rErr**2.0) + (aErr**2.0))
 
         # Update the variance of the predicted data prior
-        if self._predictedData.hasPrior():
+        if self._predictedData.hasPrior:
             self._predictedData.prior.variance[:] = self._std[self.iActive]**2.0
 
 

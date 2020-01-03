@@ -279,7 +279,7 @@ class DataPoint(Point):
 
         tmp = (relativeErr * self._data)**2.0 + additiveErr**2.0
 
-        if self._predictedData.hasPrior():
+        if self._predictedData.hasPrior:
             self._predictedData.prior.variance[:] = tmp[self.iActive]
 
         self._std[:] = np.sqrt(tmp)
