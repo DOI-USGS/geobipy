@@ -9,6 +9,7 @@ import numpy as np
 from scipy.stats import binned_statistic
 from ...base import customPlots as cP
 from ...base import customFunctions as cF
+from scipy.sparse import kron
 
 try:
     from pyvtk import VtkData, CellData, Scalars, PolyData
@@ -236,6 +237,19 @@ class RectilinearMesh2D(myObject):
         elif axis == 'r':
             assert self.xyz, Exception("To plot against 'r' the mesh must be instantiated with three co-ordinates")
             return self.distance.cellCentres if centres else self.distance.cellEdges
+
+
+    def xGradientMatrix(self):
+        tmp = self.x.gradientMatrix()
+        return kron(np.diag(np.sqrt(self.z.cellWidths)), tmp)
+    
+    
+    def zGradientMatrix(self):
+        nx = self.x.nCells
+        nz = self.z.nCells
+        tmp = 1.0 / np.sqrt(rm2.x.centreTocentre)
+        a = np.repeat(tmp, nz) * np.tile(np.sqrt(rm2.z.cellWidths), nx-1)
+        return diags([a, -a], [0, nx], shape=(nz * (nx-1), nz*nz))
 
 
     def hasSameSize(self, other):
