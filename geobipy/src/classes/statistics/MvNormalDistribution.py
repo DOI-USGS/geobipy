@@ -87,6 +87,25 @@ class MvNormal(baseDistribution):
     def ndim(self):
         return np.size(self.mean)
 
+    @ndim.setter
+    def ndim(self, newDimension):
+        if newDimension == self.ndim:
+            return
+        assert newDimension > 0, ValueError("Cannot have zero dimensions.")
+        assert self._constant, ValueError("Cannot change the dimension of a non-constant multivariate distribution.")
+        if np.ndim(self.mean) == 0:
+            mean = self.mean
+        else:
+            mean = self.mean[0]
+
+        if np.ndim(self.variance) == 0:
+            variance = self.variance
+        else:
+            variance = self.variance[0]
+
+        self._mean = np.full(newDimension, fill_value=mean)
+        self._variance = np.full(newDimension, fill_value=variance)
+
     @property
     def std(self):
         return np.sqrt(self.variance)
