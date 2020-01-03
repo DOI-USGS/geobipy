@@ -132,6 +132,11 @@ class DataPoint(Point):
         return self._std
 
 
+    def weightingMatrix(self, power=1.0):
+        """Return a diagonal data weighting matrix of the reciprocated data standard deviations."""
+        return np.diag(self.std[self.iActive]**-power)    
+
+
     def _systemIndices(self, system=0):
         """The slice indices for the requested system.
         
