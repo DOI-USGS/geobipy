@@ -66,11 +66,6 @@ class Uniform(baseDistribution):
         return Uniform(self.min, self.max, self.prng)
 
 
-    def getPdf(self, x=0):
-        """ get the PDF, for a uniform distribution this does not need a procedure, however other distributions might, and we will need a function """
-        return np.sum(self.pdf)
-
-
     def cdf(self, x, log=False):
         """ Get the value of the cumulative distribution function for a x """
         if log:
@@ -79,10 +74,10 @@ class Uniform(baseDistribution):
             return uniform.cdf(x, self.min, self.scale)
 
 
-    def plotPDF(self, **kwargs):
+    def plotPDF(self, log=False, **kwargs):
         bins = self.bins()
         t = r"$\tilde{U}("+str(self.min)+","+str(self.max)+")$"
-        cP.plot(bins, np.repeat(self.pdf, np.size(bins)), label=t, **kwargs)
+        cP.plot(bins, self.probability(bins, log=log), label=t, **kwargs)
 
 
     def probability(self, x, log):

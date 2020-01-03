@@ -89,13 +89,13 @@ class Normal(baseDistribution):
         return np.squeeze(self.prng.normal(size=size, loc=self.mean, scale=self.variance))
 
     
-    def plotPDF(self, **kwargs):
+    def plotPDF(self, log=False, **kwargs):
 
         
         bins = self.bins()
         t = r"$\tilde{N}(\mu="+str(self.mean)+", \sigma^{2}="+str(self.variance)+")$"
 
-        cP.plot(bins, self.probability(bins), label=t, **kwargs)
+        cP.plot(bins, self.probability(bins, log=log), label=t, **kwargs)
 
 
     def probability(self, x, log):
