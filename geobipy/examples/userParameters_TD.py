@@ -53,8 +53,6 @@ class userParameters(_userParameters):
     self.savePNG = False
     # Save the results of the McMC inversion to HDF5 files. (Generally always True)
     self.save = True
-    # Set the display limits [min, max] for the parameter posterior (hitmap)
-    self.parameterDisplayLimits = [0.001, 100000]
     
     # -------------------------------------------------------
     # Turning on or off different solvable parameters.
@@ -96,8 +94,8 @@ class userParameters(_userParameters):
     # If minimumThickness = None, it will be autocalculated.
     self.minimumThickness = None
 
-    # Limit the parameter? Takes the limits as three standard deviations away from the mean. (Computed during initialization)
-    self.LimitPar = True
+    # Impose hard bounds on the Model parameter values. e.g. self.parameterLimits = [a, b]
+    self.parameterLimits = None
 
     # Data prior details
     # ------------------
