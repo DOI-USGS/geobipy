@@ -693,7 +693,7 @@ class Model1D(Model):
         return (np.exp(self.maxDepth) - np.exp(self.minDepth)) - nLayers * np.exp(self.minThickness)
 
 
-    def proposalProbabilities(self, dataPoint, remappedModel, parameterCovarianceScaling, burnedIn):
+    def proposalProbabilities(self, dataPoint, remappedModel, burnedIn):
         """Return the forward and reverse proposal probabilities for the model
 
         Returns the denominator and numerator for the model's components of the proposal ratio.
@@ -805,7 +805,7 @@ class Model1D(Model):
     #     return Pforward, Preverse
 
 
-    def perturb(self, dataPoint, priStd, parameterCovarianceScaling, burnedIn):
+    def perturb(self, dataPoint, priStd, burnedIn):
         """Perturb a model using the Stochastic Newton approach.
 
         Parameters
