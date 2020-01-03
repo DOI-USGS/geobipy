@@ -251,6 +251,12 @@ class RectilinearMesh1D(myObject):
         return np.squeeze(iBin)
 
 
+    def gradientMatrix(self):
+        tmp = 1.0/np.sqrt(self.centreTocentre)
+        return diags([tmp, -tmp], [0, 1], shape=(self.nCells-1, self.nCells))
+
+
+
     def inBounds(self, values):
         """Return whether values are inside the cell edges
         
