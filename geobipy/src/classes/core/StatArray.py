@@ -9,14 +9,10 @@ from .myObject import myObject
 from ...base.HDF.hdfWrite import writeNumpy
 from ...base import MPI as myMPI
 
-#from sklearn.mixture import GaussianMixture
-#from sklearn.cluster import KMeans
-#from sklearn.preprocessing import scale
-#from sklearn.model_selection import StratifiedKFold
-
 from ...base.HDF import hdfRead
 
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 
 
 class StatArray(np.ndarray, myObject):
@@ -232,7 +228,7 @@ class StatArray(np.ndarray, myObject):
 
     
     def setPosterior(self, posterior):
-        """Set the posterior for the StatArray.
+        """Add a posterior for the StatArray.
 
         Parameters
         ----------
@@ -255,7 +251,7 @@ class StatArray(np.ndarray, myObject):
     def setPrior(self, distributionType, *args, **kwargs):
         """Set a prior distribution
 
-        Sets a prior by interfacing through the Distribution method rather than passing any subclasses of the baseDistribution class.
+        Adds a prior by interfacing through the Distribution method rather than passing any subclasses of the baseDistribution class.
 
         Parameters
         ----------
@@ -278,7 +274,7 @@ class StatArray(np.ndarray, myObject):
     def setProposal(self, distributionType, *args, **kwargs):
         """Set a proposal distribution
 
-        Sets a proposal by interfacing through the Distribution method rather than passing any subclasses of the baseDistribution class.
+        Adds a proposal by interfacing through the Distribution method rather than passing any subclasses of the baseDistribution class.
 
         Parameters
         ----------
@@ -298,12 +294,6 @@ class StatArray(np.ndarray, myObject):
 
 
     ### Methods
-
-
-
-
-
-
     def hasLabels(self):
         return not self.getNameUnits() == ""
 
@@ -1172,8 +1162,7 @@ class StatArray(np.ndarray, myObject):
             if (i is None): i=np.s_[:self.shape[0], :self.shape[1]]
             j = i[axis]
 
-        ax = cP.plot(x[j],self[i],**kwargs)
-        return ax
+        return cP.plot(x[j],self[i],**kwargs)
 
     
     def plotPosteriors(self, axes=None, **kwargs):
