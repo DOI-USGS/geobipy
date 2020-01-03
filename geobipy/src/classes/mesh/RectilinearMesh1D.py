@@ -179,6 +179,10 @@ class RectilinearMesh1D(myObject):
         return np.abs(np.diff(self._cellEdges))
 
     @property
+    def centreTocentre(self):
+        return np.diff(self.cellCentres)
+
+    @property
     def nCells(self):
         return 0 if self._cellCentres is None else self._cellCentres.size
 
@@ -377,7 +381,13 @@ class RectilinearMesh1D(myObject):
 
     def summary(self, out=False):
         """ Print a summary of self """
-        msg = self._cellCentres.summary(True)
+        msg = ("Cell Centres \n"
+               "{}"
+               "Cell Edges"
+               "{}").format(
+                   self._cellCentres.summary(True),
+                   self._cellEdges.summary(True)
+               )
 
         return msg if out else print(msg)
 
