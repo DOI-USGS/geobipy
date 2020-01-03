@@ -157,7 +157,7 @@ def singleCore(inputFile, outputDir, seed=None):
     # Create the results template
     Res = Results(DataPoint, Mod,
         save=paras.save, plot=paras.plot, savePNG=paras.savePNG,
-        nMarkovChains=paras.nMarkovChains, plotEvery=paras.plotEvery, parameterDisplayLimits=paras.parameterDisplayLimits,
+        nMarkovChains=paras.nMarkovChains, plotEvery=paras.plotEvery,
         reciprocateParameters=paras.reciprocateParameters, verbose=paras.verbose)
 
     print('Creating HDF5 files, this may take a few minutes...')
@@ -276,7 +276,7 @@ def multipleCore(inputFile, outputDir, skipHDF5):
         # Create the results template
         Res = Results(DataPoint, Mod,
             save=paras.save, plot=paras.plot, savePNG=paras.savePNG,
-            nMarkovChains=paras.nMarkovChains, plotEvery=paras.plotEvery, parameterDisplayLimits=paras.parameterDisplayLimits,
+            nMarkovChains=paras.nMarkovChains, plotEvery=paras.plotEvery,
             reciprocateParameters=paras.reciprocateParameters)
             
 
