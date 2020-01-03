@@ -782,6 +782,31 @@ class StatArray(np.ndarray, myObject):
         print(msg)
 
 
+    def summaryPlot(self, **kwargs):
+        """ Creates a summary plot of the StatArray with any attached priors, proposal, or posteriors. """
+
+        gs1 = gridspec.GridSpec(nrows=1, ncols=1, left=0.5, right=0.92, wspace=0.01, hspace=0.13)
+        gs2 = gridspec.GridSpec(nrows=2, ncols=1, left=0.085, right=0.40, wspace=0.06, hspace=0.5)
+
+        ax = plt.subplot(gs2[0, 0])
+        self.prior.plotPDF()
+        cP.xlabel(self.getNameUnits())
+        cP.title('Prior')
+
+        plt.subplot(gs2[1, 0], sharex=ax, sharey=ax)
+        self.proposal.plotPDF()
+        cP.title('Proposal')
+        cP.xlabel(self.getNameUnits())
+
+        plt.subplot(gs1[0, 0])
+        self.posterior.plot(**kwargs)
+        cP.title("Posterior")
+        cP.xlabel(self.getNameUnits())
+
+        
+
+        
+
     def verbose(self):
         """Explicit print of every element """
         np.set_printoptions(threshold=self.size)
