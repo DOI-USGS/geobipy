@@ -124,21 +124,15 @@ class StatArray(np.ndarray, myObject):
         # Copies a StatArray but can reassign the name and units
         if isinstance(shape, StatArray):
             shp = np.shape(shape)
-            tmp = StatArray(shp, name=shape.name, units=shape.units) + shape
+            self = StatArray(shp, name=cf.getName(shape), units=cf.getUnits(shape)) + shape
+        
+            if (shape.hasPrior):
+                self._prior = shape._prior.deepcopy()
+            if (shape.hasProposal):
+                self._proposal = shape._proposal.deepcopy()
+            if (shape.hasPosterior):
+                self._posterior = shape._posterior#deepcopy(shape._posterior)
 
-            if not name is None:
-                tmp.name = name
-            if not units is None:
-                tmp.units = units
-
-            if (shape.hasPrior()):
-                tmp._prior = shape._prior.deepcopy()
-            if (shape.hasProposal()):
-                tmp._proposal = shape._proposal.deepcopy()
-            if (shape.hasPosterior()):
-                tmp._posterior = shape._posterior#deepcopy(shape._posterior)
-
-            return tmp
         # Can pass in a numpy function call like arange(10) as the first argument
         elif isinstance(shape, np.ndarray):
             self = shape.view(StatArray)
@@ -152,9 +146,9 @@ class StatArray(np.ndarray, myObject):
             self[:] = 0
 
         # Set the name of the StatArray
-        self.name = name
+        self._name = name
         # Set the Units of the StatArray
-        self.units = units
+        self._units = units
 
         return self
 
@@ -164,11 +158,12 @@ class StatArray(np.ndarray, myObject):
             return
         try:
             d = obj.__dict__
-            self.name = d.get('name')
-            self.units = d.get('units')
+            self._name = d.get('_name')
+            self._units = d.get('_units')
         except:
-            self.name = None
-            self.units = None
+            self._name = None
+            self._units = None
+        
 
 
     def __array_wrap__(self, out_arr, context = None):
@@ -176,6 +171,19 @@ class StatArray(np.ndarray, myObject):
 
 
     ### Properties
+    @property
+    def name(self):
+        return self._name
+        
+
+    @name.setter
+    def name(self, values):
+        if values is None:
+            self._name = None
+        else:
+            assert isinstance(values, str)
+            self._name = values
+
 
     @property
     def nPosteriors(self):
@@ -212,6 +220,18 @@ class StatArray(np.ndarray, myObject):
             return self._proposal
         except:
             return None
+
+    @property
+    def units(self):
+        return self._units
+
+    @units.setter
+    def units(self, values):
+        if values is None:
+            self._units = None
+        else:
+            assert isinstance(values, str)
+            self._units = values
 
     
     def setPosterior(self, posterior):
@@ -382,8 +402,8 @@ class StatArray(np.ndarray, myObject):
         elif (np.ndim(self) == 2):
             other[:, :] = self[:, :]
 
-        other.name = self.name
-        other.units = self.units
+        other._name = self._name
+        other._units = self._units
 
         if (self.hasPrior()):
             other._prior = self._prior.deepcopy()
