@@ -7,6 +7,7 @@ from copy import deepcopy
 import numpy as np
 from ...base import customFunctions as cf
 from ...base import customPlots as cp
+from scipy.sparse import diags
 
 
 class RectilinearMesh1D(myObject):
@@ -61,26 +62,10 @@ class RectilinearMesh1D(myObject):
         assert (not(not cellCentres is None and not cellEdges is None)), Exception('Cannot instantiate with both centres and edges values')
 
         if not cellCentres is None:
-            if isinstance(cellCentres, RectilinearMesh1D):
-                self._cellCentres = cellCentres._cellCentres.deepcopy()
-                self._cellEdges = cellCentres._cellEdges.deepcopy()
-            else:
-                if not isinstance(cellCentres, StatArray.StatArray):
-                    cellCentres = StatArray.StatArray(cellCentres)
-                ## StatArray of the x axis values
-                self._cellCentres = cellCentres.deepcopy()
-                self._cellEdges = self._cellCentres.edges(min=edgesMin, max=edgesMax)
+            self.cellCentres = cellCentres
 
         if not cellEdges is None:
-            if isinstance(cellEdges, RectilinearMesh1D):
-                self._cellCentres = cellEdges._cellCentres.deepcopy()
-                self._cellEdges = cellEdges._cellEdges.deepcopy()
-            else:
-                if not isinstance(cellEdges, StatArray.StatArray):
-                    cellEdges = StatArray.StatArray(cellEdges)
-                self._cellEdges = cellEdges.deepcopy()
-                
-                self._cellCentres = cellEdges.internalEdges()
+            self.cellEdges = cellEdges
 
         # Set some extra variables for speed
         # Is the discretization regular
@@ -147,9 +132,38 @@ class RectilinearMesh1D(myObject):
         return self._cellCentres
 
 
+    @cellCentres.setter
+    def cellCentres(self, values):
+        if isinstance(values, RectilinearMesh1D):
+            self._cellCentres = values._cellCentres.deepcopy()
+            self._cellEdges = values._cellEdges.deepcopy()
+        else:
+            if not isinstance(values, StatArray.StatArray):
+                values = StatArray.StatArray(values)
+
+            assert np.ndim(values) == 1, ValueError("cellCentres must be 1D")
+            ## StatArray of the x axis values
+            self._cellCentres = values.deepcopy()
+            self._cellEdges = self._cellCentres.edges()
+
+
     @property
     def cellEdges(self):
         return self._cellEdges
+
+
+    @cellEdges.setter
+    def cellEdges(self, values):
+        if isinstance(values, RectilinearMesh1D):
+            self._cellCentres = values._cellCentres.deepcopy()
+            self._cellEdges = values._cellEdges.deepcopy()
+        else:
+            if not isinstance(values, StatArray.StatArray):
+                values = StatArray.StatArray(values)
+            assert np.ndim(values) == 1, ValueError("cellEdges must be 1D")
+            self._cellEdges = values.deepcopy()
+            self._cellCentres = values.internalEdges()
+
 
     @property
     def displayLimits(self):
