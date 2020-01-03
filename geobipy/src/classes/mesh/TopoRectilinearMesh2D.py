@@ -72,8 +72,8 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
 
         assert self._height.nCells == self._x.nCells, Exception("heights must have enough values for {} cells or {} edges.".format(self.x.nCells, self.x.nEdges))
 
-        self.xMesh()
-        self.zMesh()
+        self._xMesh = self.xMesh()
+        self._zMesh = self.zMesh()
 
     
     def __getitem__(self, slic):
