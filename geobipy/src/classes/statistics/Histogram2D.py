@@ -789,9 +789,9 @@ class Histogram2D(RectilinearMesh2D):
         m = self.mean(log=log, axis=axis)
 
         if axis == 0:
-            cP.plot(m, self.y.cellCentres, **kwargs)
+            cP.plot(m, self.y.cellCentres, label='mean',  **kwargs)
         else:
-            cP.plot(self.x.cellCentres, m, **kwargs)
+            cP.plot(self.x.cellCentres, m, label='mean', **kwargs)
 
 
     def plotMedian(self, log=None, axis=0, **kwargs):
@@ -799,9 +799,9 @@ class Histogram2D(RectilinearMesh2D):
         m = self.median(log=log, axis=axis)
 
         if axis == 0:
-            cP.plot(m, self.y.cellCentres, **kwargs)
+            cP.plot(m, self.y.cellCentres, label='median', **kwargs)
         else:
-            cP.plot(self.x.cellCentres, m, **kwargs)
+            cP.plot(self.x.cellCentres, m, label='median', **kwargs)
 
 
     def update(self, xValues, yValues=None, trim=False):
