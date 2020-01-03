@@ -214,8 +214,8 @@
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(array([[0.87720642, 0.40904094, 0.43464205, ..., 0.64485991, 0.53716404,
-        0.54013333]]), [6.8, 12.4])
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(array([[0.3439499 , 0.5214965 , 0.80996331, ..., 0.35856703, 0.42788613,
+        0.48130358]]), [6.8, 12.4])
 </pre></div>
 </div>
 <p>Compute the mean over multiple intervals for the mesh.</p>
@@ -223,8 +223,8 @@
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(array([[0.87720642, 0.40904094, 0.43464205, ..., 0.64485991, 0.53716404,
-        0.54013333]]), [6.8, 12.4])
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(array([[0.3439499 , 0.5214965 , 0.80996331, ..., 0.35856703, 0.42788613,
+        0.48130358]]), [6.8, 12.4])
 </pre></div>
 </div>
 <p>We can apply the interval statistics to either axis</p>
@@ -232,26 +232,26 @@
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(array([[0.71278733],
-       [0.20448838],
-       [0.47321715],
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(array([[0.59373192],
+       [0.37285537],
+       [0.8410982 ],
        ...,
-       [0.74166356],
-       [0.9185982 ],
-       [0.51579066]]), [2.8, 4.2])
+       [0.64687061],
+       [0.39809465],
+       [0.58599967]]), [2.8, 4.2])
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rm</span><span class="o">.</span><span class="n">intervalStatistic</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">intervals</span><span class="o">=</span><span class="p">[</span><span class="mf">2.8</span><span class="p">,</span> <span class="mf">4.2</span><span class="p">,</span> <span class="mf">5.1</span><span class="p">,</span> <span class="mf">8.4</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(array([[0.71278733, 0.43169431, 0.67368253],
-       [0.20448838, 0.05056166, 0.29646385],
-       [0.47321715, 0.88127156, 0.13470937],
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(array([[0.59373192, 0.19711756, 0.42288791],
+       [0.37285537, 0.82433965, 0.4202654 ],
+       [0.8410982 , 0.77005935, 0.68610875],
        ...,
-       [0.74166356, 0.4524216 , 0.61225374],
-       [0.9185982 , 0.73070056, 0.69509408],
-       [0.51579066, 0.36484508, 0.54990936]]), [2.8, 4.2, 5.1, 8.4])
+       [0.64687061, 0.9580578 , 0.24022187],
+       [0.39809465, 0.22452647, 0.35240523],
+       [0.58599967, 0.56123133, 0.50521431]]), [2.8, 4.2, 5.1, 8.4])
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rm</span><span class="o">.</span><span class="n">ravelIndices</span><span class="p">([[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">]])</span>
@@ -293,11 +293,11 @@
 </div>
 <img alt="../../_images/sphx_glr_plot_topo_rectilinear_mesh_2d_005.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_topo_rectilinear_mesh_2d_005.png" />
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;matplotlib.axes._subplots.AxesSubplot object at 0x130d25e10&gt;, &lt;matplotlib.collections.QuadMesh object at 0x1306d3f10&gt;, &lt;matplotlib.colorbar.Colorbar object at 0x12c4bc110&gt;)
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;matplotlib.axes._subplots.AxesSubplot object at 0x12682a510&gt;, &lt;matplotlib.collections.QuadMesh object at 0x129e46a90&gt;, &lt;matplotlib.colorbar.Colorbar object at 0x129bba850&gt;)
 </pre></div>
 </div>
 <p>rm.toVTK(‘test’, cellData=values)</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.478 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.439 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-meshes-plot-topo-rectilinear-mesh-2d-py">
 <div class="sphx-glr-download docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/5c88523c9869c0a0887f04061d053af3/plot_topo_rectilinear_mesh_2d.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_topo_rectilinear_mesh_2d.py</span></code></a></p>

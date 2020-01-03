@@ -33,12 +33,12 @@ Density.summary()
 
 # Obtain an instantiation of a random number generator
 prng = np.random.RandomState()
-Density.addPrior('Uniform', -2.0, 2.0, prng=prng)
+Density.setPrior('Uniform', -2.0, 2.0, prng=prng)
 
 #%%
 # We can also attach a proposal distribution
 
-Density.addProposal('Normal', 0.0, 1.0, prng=prng)
+Density.setProposal('Normal', 0.0, 1.0, prng=prng)
 Density.summary()
 print("Class type of the prior: ",type(Density.prior))
 print("Class type of the proposal: ",type(Density.proposal))

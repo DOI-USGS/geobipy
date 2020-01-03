@@ -686,7 +686,7 @@ clusterID is the initial assignment of the rows to their clusters</p>
 
 <dl class="method">
 <dt id="geobipy.src.classes.core.StatArray.StatArray.hasPosterior">
-<code class="sig-name descname">hasPosterior</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.hasPosterior" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">hasPosterior</code><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.hasPosterior" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check that the StatArray has an attached posterior.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -700,7 +700,7 @@ clusterID is the initial assignment of the rows to their clusters</p>
 
 <dl class="method">
 <dt id="geobipy.src.classes.core.StatArray.StatArray.hasPrior">
-<code class="sig-name descname">hasPrior</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.hasPrior" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">hasPrior</code><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.hasPrior" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check that the StatArray has an attached prior.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -714,7 +714,7 @@ clusterID is the initial assignment of the rows to their clusters</p>
 
 <dl class="method">
 <dt id="geobipy.src.classes.core.StatArray.StatArray.hasProposal">
-<code class="sig-name descname">hasProposal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.hasProposal" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">hasProposal</code><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.hasProposal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check that the StatArray has an attached proposal.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1132,7 +1132,7 @@ Can take any other matplotlib arguments and keyword arguments e.g. markersize et
 <dl class="method">
 <dt id="geobipy.src.classes.core.StatArray.StatArray.setPosterior">
 <code class="sig-name descname">setPosterior</code><span class="sig-paren">(</span><em class="sig-param">posterior</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.setPosterior" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the posterior for the StatArray.</p>
+<dd><p>Add a posterior for the StatArray.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>posterior</strong> (<em>geobipy.Histogram</em><em> or </em><em>list of geobipy.Histogram</em>) – <ul class="simple">
@@ -1148,7 +1148,7 @@ Can take any other matplotlib arguments and keyword arguments e.g. markersize et
 <dt id="geobipy.src.classes.core.StatArray.StatArray.setPrior">
 <code class="sig-name descname">setPrior</code><span class="sig-paren">(</span><em class="sig-param">distributionType</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.setPrior" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set a prior distribution</p>
-<p>Sets a prior by interfacing through the Distribution method rather than passing any subclasses of the baseDistribution class.</p>
+<p>Adds a prior by interfacing through the Distribution method rather than passing any subclasses of the baseDistribution class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -1171,7 +1171,7 @@ Can take any other matplotlib arguments and keyword arguments e.g. markersize et
 <dt id="geobipy.src.classes.core.StatArray.StatArray.setProposal">
 <code class="sig-name descname">setProposal</code><span class="sig-paren">(</span><em class="sig-param">distributionType</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.setProposal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set a proposal distribution</p>
-<p>Sets a proposal by interfacing through the Distribution method rather than passing any subclasses of the baseDistribution class.</p>
+<p>Adds a proposal by interfacing through the Distribution method rather than passing any subclasses of the baseDistribution class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

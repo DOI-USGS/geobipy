@@ -517,7 +517,7 @@
 </li>
       <li><a href="content/api/classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray.gaussianMixture">gaussianMixture() (geobipy.src.classes.core.StatArray.StatArray method)</a>
 </li>
-      <li><a href="content/api/classes/model/Model1D.html#geobipy.src.classes.model.Model1D.Model1D.generateLocalHessian">generateLocalHessian() (geobipy.src.classes.model.Model1D.Model1D method)</a>
+      <li><a href="content/api/classes/model/Model1D.html#geobipy.src.classes.model.Model1D.Model1D.generateLocalParameterVariance">generateLocalParameterVariance() (geobipy.src.classes.model.Model1D.Model1D method)</a>
 </li>
       <li><a href="content/api/base/customFunctions.html#module-geobipy.src.base.customFunctions">geobipy.src.base.customFunctions (module)</a>
 </li>
@@ -667,8 +667,6 @@
 </li>
       <li><a href="content/api/classes/model/Model1D.html#geobipy.src.classes.model.Model1D.Model1D.getParMeshXIndex">getParMeshXIndex() (geobipy.src.classes.model.Model1D.Model1D method)</a>
 </li>
-      <li><a href="content/api/classes/statistics/UniformDistribution.html#geobipy.src.classes.statistics.UniformDistribution.Uniform.getPdf">getPdf() (geobipy.src.classes.statistics.UniformDistribution.Uniform method)</a>
-</li>
       <li><a href="content/api/classes/pointcloud/PointCloud3D.html#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.getPoint">getPoint() (geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D method)</a>
 </li>
       <li><a href="content/api/classes/data/dataset/Data.html#geobipy.src.classes.data.dataset.Data.Data.getPredictedDataChannel">getPredictedDataChannel() (geobipy.src.classes.data.dataset.Data.Data method)</a>
@@ -689,6 +687,8 @@
       </ul></li>
       <li><a href="content/api/classes/pointcloud/PointCloud3D.html#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.getXAxis">getXAxis() (geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D method)</a>
 </li>
+      <li><a href="content/api/classes/model/Model1D.html#geobipy.src.classes.model.Model1D.Model1D.gradientProbability">gradientProbability() (geobipy.src.classes.model.Model1D.Model1D method)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -697,11 +697,11 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="content/api/classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray.hasLabels">hasLabels() (geobipy.src.classes.core.StatArray.StatArray method)</a>
 </li>
-      <li><a href="content/api/classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray.hasPosterior">hasPosterior() (geobipy.src.classes.core.StatArray.StatArray method)</a>
+      <li><a href="content/api/classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray.hasPosterior">hasPosterior() (geobipy.src.classes.core.StatArray.StatArray property)</a>
 </li>
-      <li><a href="content/api/classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray.hasPrior">hasPrior() (geobipy.src.classes.core.StatArray.StatArray method)</a>
+      <li><a href="content/api/classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray.hasPrior">hasPrior() (geobipy.src.classes.core.StatArray.StatArray property)</a>
 </li>
-      <li><a href="content/api/classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray.hasProposal">hasProposal() (geobipy.src.classes.core.StatArray.StatArray method)</a>
+      <li><a href="content/api/classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray.hasProposal">hasProposal() (geobipy.src.classes.core.StatArray.StatArray property)</a>
 </li>
       <li><a href="content/api/classes/mesh/RectilinearMesh2D.html#geobipy.src.classes.mesh.RectilinearMesh2D.RectilinearMesh2D.hasSameSize">hasSameSize() (geobipy.src.classes.mesh.RectilinearMesh2D.RectilinearMesh2D method)</a>
 </li>
@@ -1002,7 +1002,13 @@
       <li><a href="content/api/classes/statistics/Histogram2D.html#geobipy.src.classes.statistics.Histogram2D.Histogram2D.percentage">percentage() (geobipy.src.classes.statistics.Histogram2D.Histogram2D method)</a>
 </li>
       <li><a href="content/api/classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray.perturb">perturb() (geobipy.src.classes.core.StatArray.StatArray method)</a>
+
+      <ul>
+        <li><a href="content/api/classes/data/datapoint/EmDataPoint.html#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.perturb">(geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint method)</a>
 </li>
+        <li><a href="content/api/classes/model/Model1D.html#geobipy.src.classes.model.Model1D.Model1D.perturb">(geobipy.src.classes.model.Model1D.Model1D method)</a>
+</li>
+      </ul></li>
       <li><a href="content/api/classes/model/Model1D.html#geobipy.src.classes.model.Model1D.Model1D.perturbStructure">perturbStructure() (geobipy.src.classes.model.Model1D.Model1D method)</a>
 </li>
       <li><a href="content/api/classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray.plot">plot() (geobipy.src.classes.core.StatArray.StatArray method)</a>
@@ -1090,11 +1096,7 @@
       <li><a href="content/api/classes/model/Model1D.html#geobipy.src.classes.model.Model1D.Model1D.proposalProbabilities">proposalProbabilities() (geobipy.src.classes.model.Model1D.Model1D method)</a>
 </li>
       <li><a href="content/api/classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray.propose">propose() (geobipy.src.classes.core.StatArray.StatArray method)</a>
-
-      <ul>
-        <li><a href="content/api/classes/data/datapoint/EmDataPoint.html#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.propose">(geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint method)</a>
 </li>
-      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -1217,13 +1219,11 @@
 </li>
       <li><a href="content/api/classes/mesh/RectilinearMesh2D.html#geobipy.src.classes.mesh.RectilinearMesh2D.RectilinearMesh2D.shape">shape() (geobipy.src.classes.mesh.RectilinearMesh2D.RectilinearMesh2D property)</a>
 </li>
-      <li><a href="content/api/base/customPlots.html#geobipy.src.base.customPlots.sizeLegend">sizeLegend() (in module geobipy.src.base.customPlots)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="content/api/base/fileIO.html#geobipy.src.base.fileIO.skipLines">skipLines() (in module geobipy.src.base.fileIO)</a>
+      <li><a href="content/api/base/customPlots.html#geobipy.src.base.customPlots.sizeLegend">sizeLegend() (in module geobipy.src.base.customPlots)</a>
 </li>
-      <li><a href="content/api/classes/model/Model1D.html#geobipy.src.classes.model.Model1D.Model1D.smoothModelPrior">smoothModelPrior() (geobipy.src.classes.model.Model1D.Model1D method)</a>
+      <li><a href="content/api/base/fileIO.html#geobipy.src.base.fileIO.skipLines">skipLines() (in module geobipy.src.base.fileIO)</a>
 </li>
       <li><a href="content/api/base/customFunctions.html#geobipy.src.base.customFunctions.splitComplex">splitComplex() (in module geobipy.src.base.customFunctions)</a>
 </li>
@@ -1361,7 +1361,7 @@
         <li><a href="content/api/classes/data/dataset/Data.html#geobipy.src.classes.data.dataset.Data.Data.updateErrors">(geobipy.src.classes.data.dataset.Data.Data method)</a>
 </li>
       </ul></li>
-      <li><a href="content/api/classes/model/Model1D.html#geobipy.src.classes.model.Model1D.Model1D.updateLocalHessian">updateLocalHessian() (geobipy.src.classes.model.Model1D.Model1D method)</a>
+      <li><a href="content/api/classes/model/Model1D.html#geobipy.src.classes.model.Model1D.Model1D.updateLocalParameterVariance">updateLocalParameterVariance() (geobipy.src.classes.model.Model1D.Model1D method)</a>
 </li>
       <li><a href="content/api/classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray.updatePosterior">updatePosterior() (geobipy.src.classes.core.StatArray.StatArray method)</a>
 </li>
@@ -1398,6 +1398,8 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="content/api/base/fileIO.html#geobipy.src.base.fileIO.wccount">wccount() (in module geobipy.src.base.fileIO)</a>
+</li>
+      <li><a href="content/api/classes/data/datapoint/datapoint.html#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.weightingMatrix">weightingMatrix() (geobipy.src.classes.data.datapoint.DataPoint.DataPoint method)</a>
 </li>
       <li><a href="content/api/classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray.writeHdf">writeHdf() (geobipy.src.classes.core.StatArray.StatArray method)</a>
 

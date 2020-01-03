@@ -52,11 +52,11 @@ Density.summary()
 # Obtain an instantiation of a random number generator. 
 # This is optional, but is an important consideration for parallel programming.
 prng = np.random.RandomState()
-Density.addPrior('Uniform', -2.0, 2.0, prng=prng)
+Density.setPrior('Uniform', -2.0, 2.0, prng=prng)
 
 #%%
 # We can also attach a proposal distribution
-Density.addProposal('Normal', 0.0, 1.0, prng=prng)
+Density.setProposal('Normal', 0.0, 1.0, prng=prng)
 Density.summary()
 print("Class type of the prior: ",type(Density.prior))
 print("Class type of the proposal: ",type(Density.proposal))
@@ -94,7 +94,7 @@ post = Histogram1D(bins=bins)
 
 ################################################################################
 # Attach the histogram
-Density.addPosterior(post)
+Density.setPosterior(post)
 
 ################################################################################
 # In an iterative sense, we can propose and evaluate new values, and update the posterior
@@ -117,7 +117,7 @@ Density.summaryPlot()
 
 mean = np.random.randn(Density.size)
 variance = np.ones(Density.size)
-Density.addPrior('MvNormal', mean, variance, prng=prng)
+Density.setPrior('MvNormal', mean, variance, prng=prng)
 
 
 ################################################################################
@@ -132,7 +132,7 @@ print(Density.probability(log=False))
 
 mean = np.random.randn(Density.size)
 variance = np.ones(Density.size)
-Density.addProposal('MvNormal', mean, variance, prng=prng)
+Density.setProposal('MvNormal', mean, variance, prng=prng)
 
 
 ################################################################################

@@ -5,12 +5,12 @@
 
 Computation times
 =================
-**00:06.957** total execution time for **examples_Statistics** files:
+**00:04.326** total execution time for **examples_Statistics** files:
 
 +-------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Statistics_plot_StatArray.py` (``plot_StatArray.py``)       | 00:03.941 | 0.0 MB |
+| :ref:`sphx_glr_examples_Statistics_plot_StatArray.py` (``plot_StatArray.py``)       | 00:04.326 | 0.0 MB |
 +-------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Statistics_plot_histogram_2d.py` (``plot_histogram_2d.py``) | 00:01.920 | 0.0 MB |
+| :ref:`sphx_glr_examples_Statistics_plot_histogram_1d.py` (``plot_histogram_1d.py``) | 00:00.000 | 0.0 MB |
 +-------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Statistics_plot_histogram_1d.py` (``plot_histogram_1d.py``) | 00:01.096 | 0.0 MB |
+| :ref:`sphx_glr_examples_Statistics_plot_histogram_2d.py` (``plot_histogram_2d.py``) | 00:00.000 | 0.0 MB |
 +-------------------------------------------------------------------------------------+-----------+--------+

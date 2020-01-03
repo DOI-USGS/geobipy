@@ -28,12 +28,12 @@ mod = Model1D(parameters=par, thickness=thk)
 # and the vertical gradient of those parameters.
 prng = np.random.RandomState()
 # Set the priors
-mod.addPriors(halfSpaceValue=1.0, minDepth=1.0, maxDepth=150.0, maxLayers=30, prng=prng)
+mod.setPriors(halfSpaceValue=1.0, minDepth=1.0, maxDepth=150.0, maxLayers=30, parameterPrior=True, gradientPrior=True, prng=prng)
 
 ################################################################################
 # To propose new models, we specify the probabilities of creating, removing, perturbing, and not changing
 # a layer interface
-# mod.addProposals(probabilities = [0.25, 0.25, 0.1, 0.1], prng=prng)
+# mod.setProposals(probabilities = [0.25, 0.25, 0.1, 0.1], prng=prng)
 
 # ################################################################################
 # # We can then perturb the layers of the model

@@ -57,7 +57,7 @@ and the vertical gradient of those parameters.
 
     prng = np.random.RandomState()
     # Set the priors
-    mod.setPriors(halfSpaceValue=1.0, minDepth=1.0, maxDepth=150.0, maxLayers=30, prng=prng)
+    mod.setPriors(halfSpaceValue=1.0, minDepth=1.0, maxDepth=150.0, maxLayers=30, parameterPrior=True, gradientPrior=True, prng=prng)
 
 
 
@@ -197,7 +197,7 @@ We have already
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.003 seconds)
+   **Total running time of the script:** ( 0 minutes  0.400 seconds)
 
 
 .. _sphx_glr_download_examples_Models_plot_model_1d.py:

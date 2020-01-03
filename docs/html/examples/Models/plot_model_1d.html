@@ -200,7 +200,7 @@ the number of cells in the model, a new depth interface, new parameter values
 and the vertical gradient of those parameters.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">prng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">()</span>
 <span class="c1"># Set the priors</span>
-<span class="n">mod</span><span class="o">.</span><span class="n">setPriors</span><span class="p">(</span><span class="n">halfSpaceValue</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">minDepth</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">maxDepth</span><span class="o">=</span><span class="mf">150.0</span><span class="p">,</span> <span class="n">maxLayers</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
+<span class="n">mod</span><span class="o">.</span><span class="n">setPriors</span><span class="p">(</span><span class="n">halfSpaceValue</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">minDepth</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">maxDepth</span><span class="o">=</span><span class="mf">150.0</span><span class="p">,</span> <span class="n">maxLayers</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">parameterPrior</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">gradientPrior</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>To propose new models, we specify the probabilities of creating, removing, perturbing, and not changing
@@ -311,7 +311,7 @@ mod.setProposals(probabilities = [0.25, 0.25, 0.1, 0.1], prng=prng)</p>
 <span class="c1"># _ = perturbed.pcolor(grid=True)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.003 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.400 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-models-plot-model-1d-py">
 <div class="sphx-glr-download docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/f48e5c05cfcaf1411cc06bb7a0ed1eb0/plot_model_1d.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_model_1d.py</span></code></a></p>

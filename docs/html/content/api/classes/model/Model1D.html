@@ -386,10 +386,9 @@ the overhead when creating the file metadata can become very cumbersome if done 
 </dd></dl>
 
 <dl class="method">
-<dt id="geobipy.src.classes.model.Model1D.Model1D.generateLocalHessian">
-<code class="sig-name descname">generateLocalHessian</code><span class="sig-paren">(</span><em class="sig-param">dataPoint</em>, <em class="sig-param">priStd</em>, <em class="sig-param">scaling</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.generateLocalHessian" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate a localized Hessian matrix using
-a dataPoint and the current realization of the Model1D.</p>
+<dt id="geobipy.src.classes.model.Model1D.Model1D.generateLocalParameterVariance">
+<code class="sig-name descname">generateLocalParameterVariance</code><span class="sig-paren">(</span><em class="sig-param">dataPoint</em>, <em class="sig-param">priStd</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.generateLocalParameterVariance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a localized Hessian matrix using a dataPoint and the current realization of the Model1D.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>dataPoint</strong> (<em>geobipy.DataPoint</em>) – The data point to use when computing the local estimate of the variance.</p>
@@ -418,6 +417,34 @@ Then the indices into the mesh x axis for those interpolated values are returned
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.model.Model1D.Model1D.gradientProbability">
+<code class="sig-name descname">gradientProbability</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.gradientProbability" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the prior for the gradient of the parameter with depth</p>
+<p><strong>Prior on the gradient of the physical parameter with depth</strong></p>
+<p>If instead we wish to apply a multivariate normal distribution to the gradient of the parameter with depth we get</p>
+<div class="math notranslate nohighlight" id="equation-gradient1">
+<span class="eqno">(1)<a class="headerlink" href="#equation-gradient1" title="Permalink to this equation">¶</a></span>\[p(\boldsymbol{\sigma} | k, I) = \left[(2\pi)^{k-1} |\boldsymbol{C}_{\nabla_{z}}|\right]^{-\frac{1}{2}} e ^{-\frac{1}{2}(\nabla_{z} \boldsymbol{\sigma})^{T} \boldsymbol{C}_{\nabla_{z}}^{-1} (\nabla_{z}\boldsymbol{\sigma})}\]</div>
+<p>where the parameter gradient <span class="math notranslate nohighlight">\(\nabla_{z}\sigma\)</span> at the ith layer is computed via</p>
+<div class="math notranslate nohighlight" id="equation-dpdz1">
+<span class="eqno">(2)<a class="headerlink" href="#equation-dpdz1" title="Permalink to this equation">¶</a></span>\[\nabla_{z}^{i}\sigma = \frac{\sigma_{i+1} - \sigma_{i}}{h_{i} - h_{min}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\sigma_{i+1}\)</span> and <span class="math notranslate nohighlight">\(\sigma_{i}\)</span> are the log-parameters on either side of an interface, <span class="math notranslate nohighlight">\(h_{i}\)</span> is the log-thickness of the ith layer, and <span class="math notranslate nohighlight">\(h_{min}\)</span> is the minimum log thickness defined by</p>
+<div class="math notranslate nohighlight" id="equation-minthickness1">
+<span class="eqno">(3)<a class="headerlink" href="#equation-minthickness1" title="Permalink to this equation">¶</a></span>\[h_{min} = \frac{z_{max} - z_{min}}{2 k_{max}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(k_{max}\)</span> is a maximum number of layers, set to be far greater than the expected final solution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>hmin</strong> (<em>float64</em>) – The minimum thickness of any layer.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – The probability given the prior on the gradient of the parameters with depth.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.float64</p>
 </dd>
 </dl>
 </dd></dl>
@@ -560,6 +587,27 @@ Values in c that are &lt;= 0 are masked.</p></li>
 </dd></dl>
 
 <dl class="method">
+<dt id="geobipy.src.classes.model.Model1D.Model1D.perturb">
+<code class="sig-name descname">perturb</code><span class="sig-paren">(</span><em class="sig-param">dataPoint</em>, <em class="sig-param">priStd</em>, <em class="sig-param">burnedIn</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.perturb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perturb a model using the Stochastic Newton approach.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>currentDatapoint</strong> (<em>geobipy.DataPoint</em>) – The Datapoint before perturbation that self was generated from.</p></li>
+<li><p><strong>perturbedDatapoint</strong> (<em>geobipy.DataPoint</em>) – The perturbed Datapoint with possibly new error levels.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>remappedModel</strong> (<em>geobipy.Model1D</em>) – The current model remapped onto the perturbed dimension.</p></li>
+<li><p><strong>perturbedModel</strong> (<em>geobipy.Model1D</em>) – The model with perturbed structure and parameter values.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.perturbStructure">
 <code class="sig-name descname">perturbStructure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.perturbStructure" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perturb a model</p>
@@ -611,7 +659,7 @@ such that a death, or no change is possible thus preventing any neverending cycl
 
 <dl class="method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.priorProbability">
-<code class="sig-name descname">priorProbability</code><span class="sig-paren">(</span><em class="sig-param">parameterPrior</em>, <em class="sig-param">gradientPrior</em>, <em class="sig-param">limits=None</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.priorProbability" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">priorProbability</code><span class="sig-paren">(</span><em class="sig-param">pPrior</em>, <em class="sig-param">gPrior</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.priorProbability" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate the prior probability for the 1D Model.</p>
 <p>The following equation describes the components of the prior that correspond to the Model1D,</p>
 <div class="math notranslate nohighlight">
@@ -621,7 +669,7 @@ such that a death, or no change is possible thus preventing any neverending cycl
 <p><strong>Prior on the number of layers</strong></p>
 <p>Uninformative prior using a uniform distribution.</p>
 <div class="math notranslate nohighlight" id="equation-layers">
-<span class="eqno">(1)<a class="headerlink" href="#equation-layers" title="Permalink to this equation">¶</a></span>\[p(k | I) =
+<span class="eqno">(4)<a class="headerlink" href="#equation-layers" title="Permalink to this equation">¶</a></span>\[p(k | I) =
 \begin{cases}
 \frac{1}{k_{max} - 1} &amp; \quad 1 \leq k \leq k_{max} \newline
 0 &amp; \quad otherwise
@@ -629,30 +677,29 @@ such that a death, or no change is possible thus preventing any neverending cycl
 <p><strong>Prior on the layer interface depths</strong></p>
 <p>We use order statistics for the prior on layer depth interfaces.</p>
 <div class="math notranslate nohighlight" id="equation-depth">
-<span class="eqno">(2)<a class="headerlink" href="#equation-depth" title="Permalink to this equation">¶</a></span>\[p(\boldsymbol{z} | k, I) = \frac{(k -1)!}{\prod_{i=0}^{k-1} \Delta z_{i}},\]</div>
+<span class="eqno">(5)<a class="headerlink" href="#equation-depth" title="Permalink to this equation">¶</a></span>\[p(\boldsymbol{z} | k, I) = \frac{(k -1)!}{\prod_{i=0}^{k-1} \Delta z_{i}},\]</div>
 <p>where the numerator describes the number of ways that <span class="math notranslate nohighlight">\((k - 1)\)</span> interfaces can be ordered and
 <span class="math notranslate nohighlight">\(\Delta z_{i} = (z_{max} - z_{min}) - 2 i h_{min}\)</span> describes the depth interval that is available to place a layer when there are already i interfaces in the model</p>
 <p><strong>Prior on the physical parameter</strong></p>
 <p>If we use a multivariate normal distribution to describe the joint prior pdf for log-parameter values in all layers we use,</p>
 <div class="math notranslate nohighlight" id="equation-parameter">
-<span class="eqno">(3)<a class="headerlink" href="#equation-parameter" title="Permalink to this equation">¶</a></span>\[p(\boldsymbol{\sigma} | k, I) = \left[(2\pi)^{k} |\boldsymbol{C}_{\boldsymbol{\sigma}0}|\right]^{-\frac{1}{2}} e ^{-\frac{1}{2}(\boldsymbol{\sigma} - \boldsymbol{\sigma}_{0})^{T} \boldsymbol{C}_{\boldsymbol{\sigma} 0}^{-1} (\boldsymbol{\sigma} - \boldsymbol{\sigma}_{0})}\]</div>
+<span class="eqno">(6)<a class="headerlink" href="#equation-parameter" title="Permalink to this equation">¶</a></span>\[p(\boldsymbol{\sigma} | k, I) = \left[(2\pi)^{k} |\boldsymbol{C}_{\boldsymbol{\sigma}0}|\right]^{-\frac{1}{2}} e ^{-\frac{1}{2}(\boldsymbol{\sigma} - \boldsymbol{\sigma}_{0})^{T} \boldsymbol{C}_{\boldsymbol{\sigma} 0}^{-1} (\boldsymbol{\sigma} - \boldsymbol{\sigma}_{0})}\]</div>
 <p><strong>Prior on the gradient of the physical parameter with depth</strong></p>
 <p>If instead we wish to apply a multivariate normal distribution to the gradient of the parameter with depth we get</p>
 <div class="math notranslate nohighlight" id="equation-gradient">
-<span class="eqno">(4)<a class="headerlink" href="#equation-gradient" title="Permalink to this equation">¶</a></span>\[p(\boldsymbol{\sigma} | k, I) = \left[(2\pi)^{k-1} |\boldsymbol{C}_{\nabla_{z}}|\right]^{-\frac{1}{2}} e ^{-\frac{1}{2}(\nabla_{z} \boldsymbol{\sigma})^{T} \boldsymbol{C}_{\nabla_{z}}^{-1} (\nabla_{z}\boldsymbol{\sigma})}\]</div>
+<span class="eqno">(7)<a class="headerlink" href="#equation-gradient" title="Permalink to this equation">¶</a></span>\[p(\boldsymbol{\sigma} | k, I) = \left[(2\pi)^{k-1} |\boldsymbol{C}_{\nabla_{z}}|\right]^{-\frac{1}{2}} e ^{-\frac{1}{2}(\nabla_{z} \boldsymbol{\sigma})^{T} \boldsymbol{C}_{\nabla_{z}}^{-1} (\nabla_{z}\boldsymbol{\sigma})}\]</div>
 <p>where the parameter gradient <span class="math notranslate nohighlight">\(\nabla_{z}\sigma\)</span> at the ith layer is computed via</p>
 <div class="math notranslate nohighlight" id="equation-dpdz">
-<span class="eqno">(5)<a class="headerlink" href="#equation-dpdz" title="Permalink to this equation">¶</a></span>\[\nabla_{z}^{i}\sigma = \frac{\sigma_{i+1} - \sigma_{i}}{h_{i} - h_{min}}\]</div>
+<span class="eqno">(8)<a class="headerlink" href="#equation-dpdz" title="Permalink to this equation">¶</a></span>\[\nabla_{z}^{i}\sigma = \frac{\sigma_{i+1} - \sigma_{i}}{h_{i} - h_{min}}\]</div>
 <p>where <span class="math notranslate nohighlight">\(\sigma_{i+1}\)</span> and <span class="math notranslate nohighlight">\(\sigma_{i}\)</span> are the log-parameters on either side of an interface, <span class="math notranslate nohighlight">\(h_{i}\)</span> is the log-thickness of the ith layer, and <span class="math notranslate nohighlight">\(h_{min}\)</span> is the minimum log thickness defined by</p>
 <div class="math notranslate nohighlight" id="equation-minthickness">
-<span class="eqno">(6)<a class="headerlink" href="#equation-minthickness" title="Permalink to this equation">¶</a></span>\[h_{min} = \frac{z_{max} - z_{min}}{2 k_{max}}\]</div>
+<span class="eqno">(9)<a class="headerlink" href="#equation-minthickness" title="Permalink to this equation">¶</a></span>\[h_{min} = \frac{z_{max} - z_{min}}{2 k_{max}}\]</div>
 <p>where <span class="math notranslate nohighlight">\(k_{max}\)</span> is a maximum number of layers, set to be far greater than the expected final solution.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>sPar</strong> (<em>bool</em>) – Evaluate the prior on the parameters <a class="reference internal" href="#equation-parameter">(3)</a> in the final probability</p></li>
-<li><p><strong>sGradient</strong> (<em>bool</em>) – Evaluate the prior on the parameter gradient <a class="reference internal" href="#equation-gradient">(4)</a> in the final probability</p></li>
-<li><p><strong>limits</strong> (<em>array_like</em><em>, </em><em>optional</em>) – Bound the parameter value.  If the parameter value falls outside of the limits, -inf is returned.</p></li>
+<li><p><strong>sPar</strong> (<em>bool</em>) – Evaluate the prior on the parameters <a class="reference internal" href="#equation-parameter">(6)</a> in the final probability</p></li>
+<li><p><strong>sGradient</strong> (<em>bool</em>) – Evaluate the prior on the parameter gradient <a class="reference internal" href="#equation-gradient">(7)</a> in the final probability</p></li>
 <li><p><strong>components</strong> (<em>bool</em><em>, </em><em>optional</em>) – Return all components used in the final probability as well as the final probability</p></li>
 </ul>
 </dd>
@@ -668,18 +715,24 @@ such that a death, or no change is possible thus preventing any neverending cycl
 
 <dl class="method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.proposalProbabilities">
-<code class="sig-name descname">proposalProbabilities</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.proposalProbabilities" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">proposalProbabilities</code><span class="sig-paren">(</span><em class="sig-param">dataPoint</em>, <em class="sig-param">remappedModel</em>, <em class="sig-param">burnedIn</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.proposalProbabilities" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the forward and reverse proposal probabilities for the model</p>
 <p>Returns the denominator and numerator for the model’s components of the proposal ratio.</p>
 <div class="math notranslate nohighlight" id="equation-proposal-numerator">
-<span class="eqno">(7)<a class="headerlink" href="#equation-proposal-numerator" title="Permalink to this equation">¶</a></span>\[q(k, \boldsymbol{z} | \boldsymbol{m}^{'})\]</div>
+<span class="eqno">(10)<a class="headerlink" href="#equation-proposal-numerator" title="Permalink to this equation">¶</a></span>\[q(k, \boldsymbol{z} | \boldsymbol{m}^{'})\]</div>
 <p>and</p>
 <div class="math notranslate nohighlight" id="equation-proposal-denominator">
-<span class="eqno">(8)<a class="headerlink" href="#equation-proposal-denominator" title="Permalink to this equation">¶</a></span>\[q(k^{'}, \boldsymbol{z}^{'} | \boldsymbol{m})\]</div>
+<span class="eqno">(11)<a class="headerlink" href="#equation-proposal-denominator" title="Permalink to this equation">¶</a></span>\[q(k^{'}, \boldsymbol{z}^{'} | \boldsymbol{m})\]</div>
 <p>Each component is dependent on the event that was chosen during perturbation.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><ul class="simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datapoint</strong> (<em>geobipy.DataPoint</em>) – The perturbed datapoint that was used to generate self.</p></li>
+<li><p><strong>remappedModel</strong> (<em>geobipy.Model1D</em>) – The current model, remapped onto the dimension of self.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
 <li><p><strong>forward</strong> (<em>float</em>) – The forward proposal probability</p></li>
 <li><p><strong>reverse</strong> (<em>float</em>) – The reverse proposal probability</p></li>
 </ul>
@@ -690,7 +743,7 @@ such that a death, or no change is possible thus preventing any neverending cycl
 
 <dl class="method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.setPriors">
-<code class="sig-name descname">setPriors</code><span class="sig-paren">(</span><em class="sig-param">halfSpaceValue</em>, <em class="sig-param">minDepth</em>, <em class="sig-param">maxDepth</em>, <em class="sig-param">maxLayers</em>, <em class="sig-param">minThickness=None</em>, <em class="sig-param">factor=10.0</em>, <em class="sig-param">dzVariance=1.5</em>, <em class="sig-param">prng=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.setPriors" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">setPriors</code><span class="sig-paren">(</span><em class="sig-param">halfSpaceValue</em>, <em class="sig-param">minDepth</em>, <em class="sig-param">maxDepth</em>, <em class="sig-param">maxLayers</em>, <em class="sig-param">parameterPrior</em>, <em class="sig-param">gradientPrior</em>, <em class="sig-param">parameterLimits=None</em>, <em class="sig-param">minThickness=None</em>, <em class="sig-param">factor=10.0</em>, <em class="sig-param">dzVariance=1.5</em>, <em class="sig-param">prng=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.setPriors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Setup the priors of a 1D model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -699,6 +752,9 @@ such that a death, or no change is possible thus preventing any neverending cycl
 <li><p><strong>minDepth</strong> (<em>float64</em>) – Minimum depth possible for the model</p></li>
 <li><p><strong>maxDepth</strong> (<em>float64</em>) – Maximum depth possible for the model</p></li>
 <li><p><strong>maxLayers</strong> (<em>int</em>) – Maximum number of layers allowable in the model</p></li>
+<li><p><strong>parameterPrior</strong> (<em>bool</em>) – Sets a prior on the parameter values</p></li>
+<li><p><strong>gradientPrior</strong> (<em>bool</em>) – Sets a prior on the gradient of the parameter values</p></li>
+<li><p><strong>parameterLimits</strong> (<em>array_like</em><em>, </em><em>optional</em>) – Length 2 array with the bounds on the parameter values to impose.</p></li>
 <li><p><strong>minThickness</strong> (<em>float64</em><em>, </em><em>optional</em>) – Minimum thickness of any layer. If minThickness = None, minThickness is computed from minDepth, maxDepth, and maxLayers (recommended).</p></li>
 <li><p><strong>factor</strong> (<em>float</em><em>, </em><em>optional</em>) – Tuning parameter used in the std of the parameter prior.</p></li>
 <li><p><strong>prng</strong> (<em>numpy.random.RandomState</em><em>(</em><em>)</em><em>, </em><em>optional</em>) – Random number generator, if none is given, will use numpy’s global generator.</p></li>
@@ -735,34 +791,6 @@ e.g. pWheel = [0.5, 0.25, 0.15, 0.1]</p></li>
 </dd>
 </dl>
 </div>
-</dd></dl>
-
-<dl class="method">
-<dt id="geobipy.src.classes.model.Model1D.Model1D.smoothModelPrior">
-<code class="sig-name descname">smoothModelPrior</code><span class="sig-paren">(</span><em class="sig-param">hmin=0.0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.smoothModelPrior" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate the prior for the gradient of the parameter with depth</p>
-<p><strong>Prior on the gradient of the physical parameter with depth</strong></p>
-<p>If instead we wish to apply a multivariate normal distribution to the gradient of the parameter with depth we get</p>
-<div class="math notranslate nohighlight" id="equation-gradient1">
-<span class="eqno">(9)<a class="headerlink" href="#equation-gradient1" title="Permalink to this equation">¶</a></span>\[p(\boldsymbol{\sigma} | k, I) = \left[(2\pi)^{k-1} |\boldsymbol{C}_{\nabla_{z}}|\right]^{-\frac{1}{2}} e ^{-\frac{1}{2}(\nabla_{z} \boldsymbol{\sigma})^{T} \boldsymbol{C}_{\nabla_{z}}^{-1} (\nabla_{z}\boldsymbol{\sigma})}\]</div>
-<p>where the parameter gradient <span class="math notranslate nohighlight">\(\nabla_{z}\sigma\)</span> at the ith layer is computed via</p>
-<div class="math notranslate nohighlight" id="equation-dpdz1">
-<span class="eqno">(10)<a class="headerlink" href="#equation-dpdz1" title="Permalink to this equation">¶</a></span>\[\nabla_{z}^{i}\sigma = \frac{\sigma_{i+1} - \sigma_{i}}{h_{i} - h_{min}}\]</div>
-<p>where <span class="math notranslate nohighlight">\(\sigma_{i+1}\)</span> and <span class="math notranslate nohighlight">\(\sigma_{i}\)</span> are the log-parameters on either side of an interface, <span class="math notranslate nohighlight">\(h_{i}\)</span> is the log-thickness of the ith layer, and <span class="math notranslate nohighlight">\(h_{min}\)</span> is the minimum log thickness defined by</p>
-<div class="math notranslate nohighlight" id="equation-minthickness1">
-<span class="eqno">(11)<a class="headerlink" href="#equation-minthickness1" title="Permalink to this equation">¶</a></span>\[h_{min} = \frac{z_{max} - z_{min}}{2 k_{max}}\]</div>
-<p>where <span class="math notranslate nohighlight">\(k_{max}\)</span> is a maximum number of layers, set to be far greater than the expected final solution.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>hmin</strong> (<em>float64</em>) – The minimum thickness of any layer.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>out</strong> – The probability given the prior on the gradient of the parameters with depth.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>numpy.float64</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="method">
@@ -811,8 +839,8 @@ should not be used in a parallel environment.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="geobipy.src.classes.model.Model1D.Model1D.updateLocalHessian">
-<code class="sig-name descname">updateLocalHessian</code><span class="sig-paren">(</span><em class="sig-param">dataPoint</em>, <em class="sig-param">priStd</em>, <em class="sig-param">scaling</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.updateLocalHessian" title="Permalink to this definition">¶</a></dt>
+<dt id="geobipy.src.classes.model.Model1D.Model1D.updateLocalParameterVariance">
+<code class="sig-name descname">updateLocalParameterVariance</code><span class="sig-paren">(</span><em class="sig-param">dataPoint</em>, <em class="sig-param">priStd</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.updateLocalParameterVariance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a localized Hessian matrix using
 a dataPoint and the current realization of the Model1D.</p>
 <dl class="field-list simple">

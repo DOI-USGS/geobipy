@@ -35,10 +35,10 @@
 
 # prng = np.random.RandomState()
 # # Set the priors on a perturbable model
-# mod.addPriors(halfSpaceValue=1.0, minDepth=1.0, maxDepth=150.0, maxLayers=30, prng=prng)
+# mod.setPriors(halfSpaceValue=1.0, minDepth=1.0, maxDepth=150.0, maxLayers=30, prng=prng)
 # # Set the proposals for the perturbable model by assigning the probabilities
 # # of birth, death, perturb, or no change
-# mod.addProposals(probabilities = [0.25, 0.25, 0.25, 0.25], prng=prng)
+# mod.setProposals(probabilities = [0.25, 0.25, 0.25, 0.25], prng=prng)
 # # We can then perturb the layers of the model
 # perturbed = mod.perturbStructure()
 
