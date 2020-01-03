@@ -860,7 +860,7 @@ class StatArray(np.ndarray, myObject):
         return tmp
 
 
-    def perturb(self, i=None, relative=False):
+    def perturb(self, i=np.s_[:], relative=False, imposePrior=False, log=False):
         """Perturb the values of the StatArray using the attached proposal
 
         The StatArray must have had a proposal set using StatArray.setProposal()
@@ -878,15 +878,7 @@ class StatArray(np.ndarray, myObject):
             If the proposal has not been set
 
         """
-        tmp = self.propose()
-
-        if (i is None):
-            i = np.s_[:]
-
-        if relative:
-            self[i] += tmp[i]
-        else:
-            self[i] = tmp[i]
+        self[i] = self.propose(i, relative, imposePrior, log)
 
 
     def probability(self, log, x=None, i=None):
