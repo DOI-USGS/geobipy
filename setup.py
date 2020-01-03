@@ -40,7 +40,8 @@ setup(name='geobipy',
         'matplotlib',
         'pyvtk',
         'sphinx',
-        'progressbar2'
+        'progressbar2',
+        'numba'
     ],
     ext_modules=[Extension(name='geobipy.src.classes.forwardmodelling.ipforward1d_fortran',
                 extra_f90_compile_args = ['-ffree-line-length-none','-O3', '-finline-functions', '-funroll-all-loops'],
