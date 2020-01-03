@@ -560,13 +560,6 @@ class TdemDataPoint(EmDataPoint):
         assert variances.size == self.nSystems, ValueError("variances must have {} entries".format(self.nSystems))
         self.addErr.setProposal('MvNormal', np.log(means), variances, prng=prng)
 
-    # def scaleJ(self, Jin, power=1.0):
-    #     """ Scales a matrix by the errors in the given data
-    #     Useful if a sensitivity matrix is generated using one data point, but must be scaled by the errors in another """
-    #     J1 = np.zeros(Jin.shape)
-    #     J1[:, :] = Jin * (np.repeat(self._std[self.iActive, np.newaxis]**-power, np.size(J1, 1), 1))
-    #     return J1
-
 
     def updateErrors(self, relativeErr, additiveErr):
         """ Updates the data errors
@@ -621,38 +614,35 @@ class TdemDataPoint(EmDataPoint):
             self._predictedData.prior.variance[:] = self._std[self.iActive]**2.0
 
 
-    def updateSensitivity(self, J, mod, action, scale=False):
+    def updateSensitivity(self, mod, scale=False):
         """ Compute an updated sensitivity matrix using a new model based on an existing matrix """
-        J1 = np.zeros([np.size(self.iActive), mod.nCells[0]])
 
-        if(action == 'none'):  # Do Nothing!
-            J1[:, :] = J[:, :]
-            return J1
+        J1 = np.zeros([np.size(self.iActive), mod.nCells[0]])
 
         perturbedLayer = mod.action[1]
 
-        if (action == 'birth'):  # Created a layer
-            J1[:, :perturbedLayer] = J[:, :perturbedLayer]
-            J1[:, perturbedLayer + 2:] = J[:, perturbedLayer + 1:]
+        if(mod.action[0] == 'none'):  # Do Nothing!
+            J1[:, :] = self.J[:, :]      
+
+        elif (mod.action[0] == 'birth'):  # Created a layer
+            J1[:, :perturbedLayer] = self.J[:, :perturbedLayer]
+            J1[:, perturbedLayer + 2:] = self.J[:, perturbedLayer + 1:]
             tmp = self.sensitivity(mod, ix=[perturbedLayer, perturbedLayer + 1], scale=scale, modelChanged=True)
             J1[:, perturbedLayer:perturbedLayer + 2] = tmp
-            return J1
 
-        if(action == 'death'):  # Deleted a layer
-            J1[:, :perturbedLayer] = J[:, :perturbedLayer]
-            J1[:, perturbedLayer + 1:] = J[:, perturbedLayer + 2:]
+        elif(mod.action[0] == 'death'):  # Deleted a layer
+            J1[:, :perturbedLayer] = self.J[:, :perturbedLayer]
+            J1[:, perturbedLayer + 1:] = self.J[:, perturbedLayer + 2:]
             tmp = self.sensitivity(mod, ix=[perturbedLayer], scale=scale, modelChanged=True)
             J1[:, perturbedLayer] = tmp[:, 0]
-            return J1
 
-        if(action == 'perturb'):  # Perturbed a layer
-            J1[:, :perturbedLayer] = J[:, :perturbedLayer]
-            J1[:, perturbedLayer + 1:] = J[:, perturbedLayer + 1:]
+        elif(mod.action[0] == 'perturb'):  # Perturbed a layer
+            J1[:, :perturbedLayer] = self.J[:, :perturbedLayer]
+            J1[:, perturbedLayer + 1:] = self.J[:, perturbedLayer + 1:]
             tmp = self.sensitivity(mod, ix=[perturbedLayer], scale=scale, modelChanged=True)
             J1[:, perturbedLayer] = tmp[:, 0]
-            return J1
 
-        assert False, __name__ + '.updateSensitivity: Invalid option [0,1,2]'
+        self.J = J1
 
 
     def forward(self, mod):
@@ -668,7 +658,8 @@ class TdemDataPoint(EmDataPoint):
 
         assert isinstance(mod, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
 
-        return StatArray.StatArray(self._sensitivity1D(mod, ix, scale, modelChanged), 'Sensitivity', '$\\frac{V}{ASm^{3}}$')
+        self.J = StatArray.StatArray(self._sensitivity1D(mod, ix, scale, modelChanged), 'Sensitivity', '$\\frac{V}{ASm^{3}}$')
+        return self.J
 
 
     def _forward1D(self, mod):

@@ -479,19 +479,9 @@ class FdemDataPoint(EmDataPoint):
         return ax
 
 
-    # def scaleJ(self, Jin, power=1.0):
-    #     """ Scales a matrix by the errors in the given data
-    #     Useful if a sensitivity matrix is generated using one data point, but must be scaled by the errors in another """
-    #     J1 = np.zeros(Jin.shape)
-    #     J1[:, :] = Jin * (np.repeat(self.s[self.iActive, np.newaxis] ** -power, np.size(J1, 1), 1))
-    #     return J1
-
-
-    def updateSensitivity(self, J, mod, action, scale=False):
+    def updateSensitivity(self, mod, scale=False):
         """ Compute an updated sensitivity matrix based on the one already containined in the FdemDataPoint object  """
-        # If there is no matrix saved in the data object, compute the entire
-        # thing
-        return self.sensitivity(mod, scale=scale)
+        self.J = self.sensitivity(mod, scale=scale)
 
 
     def FindBestHalfSpace(self):
@@ -573,8 +563,8 @@ class FdemDataPoint(EmDataPoint):
         if scale:
             J *= (np.repeat(self._std[:, np.newaxis]**-1.0, np.size(J, 1), 1))
 
-        J = J[self.iActive, :]
-        return J
+        self.J = J[self.iActive, :]
+        return self.J
 
     
     def Isend(self, dest, world, systems=None):
