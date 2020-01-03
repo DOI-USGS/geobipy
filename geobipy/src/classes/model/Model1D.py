@@ -13,6 +13,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from ...base import customPlots as cP
 from ...base import customFunctions as cF
+from copy import deepcopy
 
 class Model1D(Model):
     """Class extension to geobipy.Model
@@ -104,6 +105,7 @@ class Model1D(Model):
         self.action = ['none', 0, 0.0]
 
         self.Hitmap = None
+        self._inverseHessian = None
 
     
     @property
@@ -117,6 +119,10 @@ class Model1D(Model):
     @property
     def dpar(self):
         return self._dpar
+
+    @property
+    def inverseHessian(self):
+        return self._inverseHessian
 
 
     def _init_withHalfspace(self, nCells=None, top=None, parameters = None, depth = None, thickness = None):
@@ -228,6 +234,9 @@ class Model1D(Model):
         other.action = self.action.copy()
         other.Hitmap = self.Hitmap
         other.hasHalfspace = self.hasHalfspace
+        other._inverseHessian = deepcopy(self._inverseHessian)
+        other.parameterBounds = self.parameterBounds
+        other._halfSpaceParameter = self._halfSpaceParameter
         return other
 
 
@@ -278,6 +287,69 @@ class Model1D(Model):
 
         if self.hasHalfspace:
             self._thk[-1] = np.inf
+
+        
+    def generateLocalParameterVariance(self, dataPoint, priStd):
+        """Generate a localized Hessian matrix using a dataPoint and the current realization of the Model1D.
+
+        Parameters
+        ----------
+        dataPoint : geobipy.DataPoint
+            The data point to use when computing the local estimate of the variance.
+
+        Returns
+        -------
+        out : array_like
+            Hessian matrix
+
+        """
+        assert self.par.hasPrior or self.dpar.hasPrior, Exception("Model must have either a parameter prior or gradient prior, use self.setPriors()")
+        # Compute the sensitivity of the data to the perturbed model
+        dataPoint.sensitivity(self, scale=False)
+        Wd = dataPoint.weightingMatrix(1.0)
+        WdJ = np.dot(Wd, dataPoint.J)
+        WdJTWdJ = np.dot(WdJ.T, WdJ)
+
+        # Propose new layer conductivities
+        self._inverseHessian = np.linalg.inv(2.0*WdJTWdJ + 2.0*(np.eye(self.nCells[0]) * priStd**-2.0))
+        
+        return self._inverseHessian
+
+
+    def updateLocalParameterVariance(self, dataPoint, priStd):
+        """Generate a localized Hessian matrix using 
+        a dataPoint and the current realization of the Model1D.
+
+
+        Parameters
+        ----------
+        dataPoint : geobipy.DataPoint
+            The data point to use when computing the local estimate of the variance.
+
+        Returns
+        -------
+        out : array_like
+            Hessian matrix
+
+        """
+        # Compute a new parameter variance matrix if the structure of the model changed.
+        if (self.action[0] in ['birth', 'death']):
+            # Compute the sensitivity of the data to the perturbed model
+            dataPoint.updateSensitivity(self, scale=False)
+            Wd = dataPoint.weightingMatrix(power=1.0)
+            WdJ = np.dot(Wd, dataPoint.J)
+            WdJTWdJ = np.dot(WdJ.T, WdJ)
+
+            # Propose new layer conductivities
+            self._inverseHessian = np.linalg.inv(2.0*WdJTWdJ + 2.0*(np.eye(self.nCells[0]) * priStd**-2.0))
+                
+        else:  # There was no change in the model
+
+            if self.inverseHessian is None:
+                self.generateLocalParameterVariance(dataPoint, priStd)
+        
+        return self.inverseHessian
+
 
 
     def insertLayer(self, z, par=None):
@@ -395,7 +467,7 @@ class Model1D(Model):
         
         """
 
-        assert (not self.eventProposal is None), ValueError('Please set the proposals of the model1D with model1D.setProposals()')
+        assert (not self.eventProposal is None), ValueError('Please set the proposals of the model1D with model1D.addProposals()')
         prng = self.nCells.prior.prng
         # Pre-compute exponential values (Take them out of log space)
         hmin = np.exp(self.minThickness)
@@ -482,14 +554,14 @@ class Model1D(Model):
                         newThicknessBiggerThanMinimum = True
                         tryAgain = True
                 if (not tryAgain):
-                    other = self.deepcopy()
-                    other.depth[i] += dz  # Perturb the depth in the model
-                    other.thicknessFromDepth()
-                    other.action = ['perturb', np.int(i), dz]
-                    return other
+                    out = self.deepcopy()
+                    out.depth[i] += dz  # Perturb the depth in the model
+                    out.thicknessFromDepth()
+                    out.action = ['perturb', np.int(i), dz]
+                    return out
 
 
-    def priorProbability(self, parameterPrior, gradientPrior, limits=None, verbose=False):
+    def priorProbability(self, pPrior, gPrior, verbose=False):
         """Evaluate the prior probability for the 1D Model.
 
         The following equation describes the components of the prior that correspond to the Model1D,
@@ -566,8 +638,6 @@ class Model1D(Model):
             Evaluate the prior on the parameters :eq:`parameter` in the final probability
         sGradient : bool
             Evaluate the prior on the parameter gradient :eq:`gradient` in the final probability
-        limits : array_like, optional
-            Bound the parameter value.  If the parameter value falls outside of the limits, -inf is returned.
         components : bool, optional
             Return all components used in the final probability as well as the final probability
 
@@ -585,11 +655,10 @@ class Model1D(Model):
         probability = np.float64(0.0)
 
         # Check that the parameters are within the limits if they are bound
-        if (not limits is None):
-            if (np.min(self.par) <= limits[0]):
-                probability = -np.infty
-            if (np.max(self.par) >= limits[1]):
-                probability = -np.infty
+        if not self.parameterBounds is None:
+            pInBounds = self.parameterBounds.probability(x=np.log(self.par), log=True)
+            if np.any(np.isinf(pInBounds)):
+                return -np.inf
 
         # Probability of the number of layers
         P_nCells = self.nCells.probability(log=True)
@@ -604,13 +673,15 @@ class Model1D(Model):
             self.evaluateHitmapPrior(self.Hitmap)
 
         # Probability of parameter
-        if parameterPrior:  
+        # if self.par.hasPrior:
+        if pPrior:
             P_parameter = self.par.probability(x=np.log(self.par), log=True)
             probability += P_parameter
 
         # Probability of model gradient
-        if gradientPrior:  
-            P_gradient = self.smoothModelPrior(self.minThickness)
+        # if self.dpar.hasPrior:
+        if gPrior:
+            P_gradient = self.gradientProbability()
             probability += P_gradient
 
         if verbose:
@@ -622,7 +693,7 @@ class Model1D(Model):
         return (np.exp(self.maxDepth) - np.exp(self.minDepth)) - nLayers * np.exp(self.minThickness)
 
 
-    def proposalProbabilities(self):
+    def proposalProbabilities(self, dataPoint, remappedModel, parameterCovarianceScaling, burnedIn):
         """Return the forward and reverse proposal probabilities for the model
 
         Returns the denominator and numerator for the model's components of the proposal ratio.
@@ -641,6 +712,13 @@ class Model1D(Model):
 
         Each component is dependent on the event that was chosen during perturbation.
 
+        Parameters
+        ----------
+        datapoint : geobipy.DataPoint
+            The perturbed datapoint that was used to generate self.
+        remappedModel : geobipy.Model1D
+            The current model, remapped onto the dimension of self.
+
         Returns
         -------
         forward : float
@@ -650,8 +728,34 @@ class Model1D(Model):
 
         """
 
-        if self.action[0] in ['none', 'perturb']:
-            return 1.0, 1.0
+        ### Evaluate the Reversible Jump Step.
+        # For the reversible jump, we need to compute the gradient from the perturbed parameter values.
+        # We therefore scale the sensitivity matrix by the proposed errors in the data, and our gradient uses
+        # the data residual using the perturbed parameter values.        
+        Wd2 = dataPoint.weightingMatrix(power=2.0)
+        Wd2J = np.dot(Wd2, dataPoint.J)
+
+        # Compute the gradient according to the perturbed parameters and data residual
+        gradient = np.dot(Wd2J.T, dataPoint.deltaD[dataPoint.iActive]) + np.log(11.0)**-2.0 * (np.log(self.par) - self._halfSpaceParameter)
+
+        # if (not burnedIn):
+        #     SN_step_from_perturbed = 0.0
+        # else:
+        # Compute the stochastic newton offset.
+        # The negative sign because we want to move downhill
+        SN_step_from_perturbed = 0.5 * np.dot(self._inverseHessian, gradient)
+
+        prng = self.par.proposal.prng
+
+        # Create a multivariate normal distribution centered on the shifted parameter values, and with variance computed from the forward step.
+        # We don't recompute the variance using the perturbed parameters, because we need to check that we could in fact step back from 
+        # our perturbed parameters to the unperturbed parameters. This is the crux of the reversible jump.
+        tmp = Distribution('MvNormal', np.log(self.par) - SN_step_from_perturbed, self.inverseHessian, prng=prng)
+        # Probability of jumping from our perturbed parameter values to the unperturbed values.
+        proposal = tmp.probability(x=np.log(remappedModel.par), log=True)  # CUR.prop
+
+        tmp = Distribution('MvNormal', np.log(remappedModel.par), self.inverseHessian, prng=prng)
+        proposal1 = tmp.probability(x=np.log(self.par), log=True)
 
         if self.action[0] == 'birth':
             k = self.nCells - 1
@@ -659,7 +763,9 @@ class Model1D(Model):
             forward = Distribution('Uniform', 0.0, self.remainingSpace(k))
             reverse = Distribution('Uniform', 0.0, k)
 
-            return forward.probability(self.maxDepth, log=True), reverse.probability(k, log=True)
+            proposal  += reverse.probability(k, log=True)
+            proposal1 += forward.probability(self.maxDepth, log=True)
+            
 
         if self.action[0] == 'death':
             k = self.nCells
@@ -667,7 +773,96 @@ class Model1D(Model):
             forward = Distribution('Uniform', 0.0, self.remainingSpace(k))
             reverse = Distribution('Uniform', 0.0, k)
 
-            return reverse.probability(k, log=True), forward.probability(self.maxDepth, log=True)
+            proposal  += forward.probability(self.maxDepth, log=True)
+            proposal1 += reverse.probability(k, log=True)
+
+        return proposal, proposal1
+            
+
+    # def reversibleJumpProbabilities(self):
+
+    #     if self.action[0] in ['none', 'perturb']:
+    #         return 1.0, 1.0
+
+    #     if self.action[0] == 'birth':
+    #         k = self.nCells - 1
+
+    #         forward = Distribution('Uniform', 0.0, self.remainingSpace(k))
+    #         reverse = Distribution('Uniform', 0.0, k)
+
+    #         Pforward = forward.probability(self.maxDepth, log=True)
+    #         Preverse = reverse.probability(k, log=True)
+
+    #     if self.action[0] == 'death':
+    #         k = self.nCells
+
+    #         forward = Distribution('Uniform', 0.0, self.remainingSpace(k))
+    #         reverse = Distribution('Uniform', 0.0, k)
+
+    #         Pforward = reverse.probability(k, log=True)
+    #         Preverse = forward.probability(self.maxDepth, log=True)
+
+    #     return Pforward, Preverse
+
+
+    def perturb(self, dataPoint, priStd, parameterCovarianceScaling, burnedIn):
+        """Perturb a model using the Stochastic Newton approach.
+
+        Parameters
+        ----------
+        currentDatapoint : geobipy.DataPoint
+            The Datapoint before perturbation that self was generated from.
+        perturbedDatapoint : geobipy.DataPoint
+            The perturbed Datapoint with possibly new error levels.
+
+
+        Returns
+        -------
+        remappedModel : geobipy.Model1D
+            The current model remapped onto the perturbed dimension.
+        perturbedModel : geobipy.Model1D
+            The model with perturbed structure and parameter values.
+        
+
+        """
+        # Perturb the structure of the model
+        remappedModel = self.perturbStructure()
+        
+        # Update the dimensions of any priors.
+        remappedModel.par.prior.ndim = remappedModel.nCells[0]
+        remappedModel.dpar.prior.ndim = np.maximum(1, remappedModel.nCells[0]-1)
+
+        # Update the local Hessian around the current model.
+        inverseHessian = remappedModel.updateLocalParameterVariance(dataPoint, priStd)
+
+        ### Proposing new parameter values
+        # Compute the gradient of the "deterministic" objective function using the unperturbed, remapped, parameter values.
+        Wd2 = dataPoint.weightingMatrix(power=2.0)
+        Wd2J = np.dot(Wd2, dataPoint.J)
+
+        gradient = np.dot(Wd2J.T, dataPoint.deltaD[dataPoint.iActive]) + ((priStd**-2.0) * (np.log(remappedModel.par) - remappedModel._halfSpaceParameter))
+
+        # scaling = parameterCovarianceScaling * ((2.0 * np.float64(Mod1.nCells[0])) - 1)**(-1.0 / 3.0)
+
+        # Compute the Model perturbation
+        # The negative sign because we want to move "downhill"
+        # if (not burnedIn):
+        #     SN_step_from_unperturbed = 0.0
+        # else:
+        SN_step_from_unperturbed = 0.5 * np.dot(inverseHessian, gradient)
+
+        mean = np.log(remappedModel.par) - SN_step_from_unperturbed
+        # variance = Mod1.inverseHessian
+
+        perturbedModel = remappedModel.deepcopy()
+
+        # Assign a proposal distribution for the parameter using the mean and variance.
+        perturbedModel.par.setProposal('MvNormal', mean, inverseHessian, prng=perturbedModel.par.proposal.prng)
+
+        # Generate new conductivities
+        perturbedModel.par[:] = np.exp(perturbedModel.par.propose())
+
+        return remappedModel, perturbedModel
 
         
     def setPosteriors(self):
@@ -678,21 +873,24 @@ class Model1D(Model):
         self.nCells.setPosterior(Histogram1D(binCentres=StatArray.StatArray(np.arange(0.0, self.maxLayers + 1.0), name="# of Layers")))
 
         # Discretize the parameter values
-
         zGrd = StatArray.StatArray(np.arange(0.5 * np.exp(self.minDepth), 1.1 * np.exp(self.maxDepth), 0.5 * np.exp(self.minThickness)), self.depth.name, self.depth.units)
-        pGrd = StatArray.StatArray(np.exp(self.par.prior.bins(nBins = 250, nStd=4.0)), self.par.name, self.par.units)
+
+        if self.par.hasPrior:
+            p = self.par.prior.bins(nBins = 250, nStd=4.0, axis=0)
+        else:
+            tmp = 4.0 * np.log(11.0)
+            p = np.linspace(self._halfSpaceParameter - tmp, self._halfSpaceParameter + tmp, 251)
+        
+        pGrd = StatArray.StatArray(np.exp(p), self.par.name, self.par.units)
 
         # Set the posterior hitmap for conductivity vs depth
         self.par.setPosterior(Hitmap2D(xBins = pGrd, yBinCentres = zGrd))
 
         # Initialize the interface Depth Histogram
-        # tmp = np.logspace(np.log10(0.5 * np.exp(self.minDepth)), np.log10(1.1 * np.exp(self.maxDepth)), zGrd.size)
-        # zGrd = StatArray.StatArray(tmp, self.depth.name, self.depth.units)
-        # self.depth.setPosterior(Histogram1D(binCentres = zGrd, log=10))
         self.depth.setPosterior(Histogram1D(binCentres = zGrd))
 
 
-    def setPriors(self, halfSpaceValue, minDepth, maxDepth, maxLayers, minThickness=None, factor=10.0, prng=None):
+    def setPriors(self, halfSpaceValue, minDepth, maxDepth, maxLayers, parameterPrior, gradientPrior, parameterLimits=None, minThickness=None, factor=10.0, dzVariance=1.5, prng=None):
         """Setup the priors of a 1D model.
 
         Parameters
@@ -705,6 +903,12 @@ class Model1D(Model):
             Maximum depth possible for the model
         maxLayers : int
             Maximum number of layers allowable in the model
+        parameterPrior : bool
+            Sets a prior on the parameter values
+        gradientPrior : bool
+            Sets a prior on the gradient of the parameter values
+        parameterLimits : array_like, optional
+            Length 2 array with the bounds on the parameter values to impose.
         minThickness : float64, optional
             Minimum thickness of any layer. If minThickness = None, minThickness is computed from minDepth, maxDepth, and maxLayers (recommended).
         factor : float, optional
@@ -741,10 +945,21 @@ class Model1D(Model):
 
         self.depth.setPrior('Order', denominator=dz)  # priZ
 
+        if not parameterLimits is None:
+            assert np.size(parameterLimits) == 2, ValueError("parameterLimits must have size 2.")
+            self.parameterBounds = Distribution('Uniform', np.log(parameterLimits[0]), np.log(parameterLimits[1]))
+        else:
+            self.parameterBounds = None
+
+        self._halfSpaceParameter = np.log(halfSpaceValue)
+
+        # if parameterPrior:
         # Assign the initial prior to the parameters
-        priMu = np.log(halfSpaceValue)
-        priStd = np.log(1.0 + factor)
-        self.par.setPrior('MvNormal', priMu, priStd**2.0, prng=prng)
+        self.par.setPrior('MvNormal', self._halfSpaceParameter, np.log(1.0 + factor)**2.0, ndim=self.nCells, prng=prng)
+
+        # if gradientPrior:
+        # Assign the prior on the parameter gradient
+        self.dpar.setPrior('MvNormal', 0.0, dzVariance, ndim=np.maximum(1, self.nCells-1), prng=prng)
 
 
     def setProposals(self, probabilities, prng=None):
@@ -768,10 +983,10 @@ class Model1D(Model):
         assert np.size(probabilities) == 4, ValueError('pWheel must have size 4')
         # assert not self.maxLayers is None, Exception("Please set the priors on the model with setPriors()")
         
-        self.eventProposal = Distribution('Categorical', probabilities, ['birth', 'death', 'perturb', 'noChange'], prng=prng)
+        self.eventProposal = Distribution('Categorical', np.asarray(probabilities), ['birth', 'death', 'perturb', 'noChange'], prng=prng)
 
 
-    def smoothModelPrior(self, hmin=0.0):
+    def gradientProbability(self):
         """Evaluate the prior for the gradient of the parameter with depth
 
         **Prior on the gradient of the physical parameter with depth**
@@ -810,19 +1025,18 @@ class Model1D(Model):
             The probability given the prior on the gradient of the parameters with depth.
         
         """
-        assert (self.dpar.hasPrior()), TypeError('No prior defined on parameter gradient. Use Model1D.dpar.setPrior() to set the prior.')
-
-        
+        assert (self.dpar.hasPrior), TypeError('No prior defined on parameter gradient. Use Model1D.dpar.addPrior() to set the prior.')
 
         if self.nCells[0] == 1:
             tmp = self.insertLayer(self.minDepth + (0.5 * (np.exp(self.maxDepth) - np.exp(self.minDepth))))
-            tmp.dpar[:] = (np.diff(np.log(tmp.par))) / (np.log(tmp.thk[:-1]) - hmin)
+            tmp.dpar[:] = (np.diff(np.log(tmp.par))) / (np.log(tmp.thk[:-1]) - self.minThickness)
             probability = tmp.dpar.probability(log=True)
 
         else:
-            self.dpar[:] = (np.diff(np.log(self.par))) / (np.log(self.thk[:-1]) - hmin)
+            self.dpar[:] = (np.diff(np.log(self.par))) / (np.log(self.thk[:-1]) - self.minThickness)
             probability = self.dpar.probability(log=True)
         return probability
+
 
 
     def summary(self, out=False):
@@ -1019,24 +1233,6 @@ class Model1D(Model):
         # Interpolate the variance to the depths of the grid
         var = self.interp2depth(variance, Hist)
 
-        # Hist.sum = 0.0
-
-        # dist = Distribution('MvNormal', par, var)
-
-        # print(dist.mean, dist.variance)
-        # print(Hist.x)
-
-        # print(var.shape)
-        # print(Hist.x.shape)
-
-        # print(np.min(np.abs(Hist.x)))
-
-        #Hist.arr[:,:] = dist.probability(Hist.x)
-
-        # tmp = np.logspace(-3, 0, 100)
-        # print(par[0], var[0])
-        # print(tmp)
-        # print(Hist.x)
 
         # plt.figure()
         for i in range(Hist.y.size):

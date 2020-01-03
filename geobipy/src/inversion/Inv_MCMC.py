@@ -30,10 +30,6 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
     # Check the user input parameters against the datapoint
     userParameters.check(DataPoint)
 
-    # stochasticNewton = userParameters.stochasticNewton
-    # if stochasticNewton:
-    #     userParameters.stochasticNewton = False
-
     # Initialize the MCMC parameters and perform the initial iteration
     [userParameters, Mod, DataPoint, prior, likelihood, posterior, PhiD] = Initialize(userParameters, DataPoint, prng=prng)
 
@@ -44,7 +40,7 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
                 fiducial = DataPoint.fiducial,
                 nMarkovChains = userParameters.nMarkovChains,
                 plotEvery = userParameters.plotEvery,
-                parameterDisplayLimits = userParameters.parameterDisplayLimits,
+                # parameterDisplayLimits = userParameters.parameterDisplayLimits,
                 reciprocateParameters = userParameters.reciprocateParameters,
                 priMu = userParameters.priMu,
                 priStd = userParameters.priStd,
@@ -77,7 +73,7 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
 
         # Accept or reject the new model
         [Mod, DataPoint, prior, likelihood, posterior, PhiD, posteriorComponents, ratioComponents, accepted, dimensionChange] = AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, PhiD, Res, prng)# ,oF, oD, oRel, oAdd, oP, oA, i)
-        
+
         # Determine if we are burning in
         if (not Res.burnedIn):
             if (PhiD <= multiplier * DataPoint.data.size):
@@ -87,9 +83,6 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
                 bestModel = Mod.deepcopy()
                 bestData = DataPoint.deepcopy()
                 bestPosterior = posterior
-
-                # if stochasticNewton:
-                #     userParameters.stochasticNewton = True
 
         if (posterior > bestPosterior):
             iBest = i
@@ -227,7 +220,7 @@ def Initialize(userParameters, DataPoint, prng):
     Mod = Model1D(2, parameters = parameter, thickness=thk)
 
     # Setup the model for perturbation
-    Mod.setPriors(halfspaceValue, userParameters.minimumDepth, userParameters.maximumDepth, userParameters.maximumNumberofLayers, minThickness=userParameters.minimumThickness, factor=userParameters.factor, prng=prng)
+    Mod.setPriors(halfspaceValue, userParameters.minimumDepth, userParameters.maximumDepth, userParameters.maximumNumberofLayers, userParameters.solveParameter, userParameters.solveGradient, parameterLimits=userParameters.parameterLimits, minThickness=userParameters.minimumThickness, factor=userParameters.factor, prng=prng)
 
     probabilities = [userParameters.pBirth, userParameters.pDeath, userParameters.pPerturb, userParameters.pNochange]
     Mod.setProposals(probabilities, prng=prng)
@@ -237,34 +230,21 @@ def Initialize(userParameters, DataPoint, prng):
     # if (not userParameters.referenceHitmap is None):
     #     Mod.setReferenceHitmap(userParameters.referenceHitmap)
 
-    userParameters.priMu = Mod.par.prior.mean
-    userParameters.priStd = np.sqrt(Mod.par.prior.variance)
+    userParameters.priMu = Mod.par.prior.mean[0]
+    userParameters.priStd = np.sqrt(Mod.par.prior.variance[0])
 
     Mod.setPosteriors()
 
-    userParameters.pLimits = None
-    if userParameters.LimitPar:
-        userParameters.pLimits = np.exp(Mod.par.prior.bins(nBins = 1, nStd = 4.0))
-
     # Compute the predicted data
     DataPoint.forward(Mod)
-    # Compute the sensitivity wrt parameter
-    DataPoint.J = DataPoint.sensitivity(Mod)
 
-    if (userParameters.stochasticNewton):
-        # Scale the sensitivity matrix by the data errors.
-        J = DataPoint.scaleJ(DataPoint.J)
-        # Compute a quasi-Newton based variance update
-        userParameters.Hessian = np.linalg.inv(np.dot(J.T, J) + np.eye(Mod.nCells[0]) * userParameters.priStd**-2.0)
-    else:
-        # Compute a steepest descent based variance update
-        userParameters.Hessian = np.eye(Mod.nCells[0]) * userParameters.priStd**2.0
+    inverseHessian = Mod.generateLocalParameterVariance(DataPoint, userParameters.priStd)
 
     # Instantiate the proposal for the parameters.
-    Mod.par.setProposal('MvNormal', np.log(Mod.par), userParameters.Hessian, prng=prng)
+    Mod.par.setProposal('MvNormal', np.log(Mod.par), inverseHessian, prng=prng)
 
-    # Assign a prior to the derivative of the model
-    Mod.dpar.setPrior('MvNormal', 0.0, userParameters.gradientStd**2.0, prng=prng)
+    # # Assign a prior to the derivative of the model
+    # Mod.dpar.setPrior('MvNormal', 0.0, userParameters.gradientStd**2.0, prng=prng)
 
     # Compute the data misfit
     PhiD = DataPoint.dataMisfit(squared=True)
@@ -274,7 +254,7 @@ def Initialize(userParameters, DataPoint, prng):
         DataPoint.calibrate()
 
     # Evaluate the prior for the current model
-    p = Mod.priorProbability(userParameters.solveParameter, userParameters.solveGradient, userParameters.pLimits)
+    p = Mod.priorProbability(userParameters.solveParameter, userParameters.solveGradient)
     prior = p
     # Evaluate the prior for the current data
     p = DataPoint.priorProbability(userParameters.solveRelativeError, userParameters.solveAdditiveError, userParameters.solveElevation, userParameters.solveCalibration)
@@ -295,94 +275,33 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
     clk = Stopwatch()
     clk.start()
 
-    # Perturb the current model to produce an initial candidate model
-    Mod1 = Mod.perturbStructure()
+    perturbedDatapoint = DataPoint.deepcopy()
 
-    remappedParameter = Mod1.par.deepcopy()
+    # Perturb the current model
+    remappedModel, perturbedModel = Mod.perturb(perturbedDatapoint, userParameters.priStd, userParameters.parameterCovarianceScaling, Res.burnedIn)
 
     # Propose a new data point, using assigned proposal distributions
-    D1 = DataPoint.propose(userParameters.solveElevation, userParameters.solveRelativeError, userParameters.solveAdditiveError, userParameters.solveCalibration)
-
-    # Compute a new parameter variance matrix if the structure of the model changed.
-    if (Mod1.action[0] in ['birth', 'death']):
-        # Compute the sensitivity of the data to the perturbed model
-        D1.J = D1.updateSensitivity(D1.J, Mod1, Mod1.action[0], scale=False)
-        J = DataPoint.scaleJ(D1.J)
-        JtJ = np.dot(J.T, J)
-
-        # Propose new layer conductivities
-        if userParameters.stochasticNewton:
-            A = JtJ + (np.eye(Mod1.nCells[0]) * userParameters.priStd**-2.0)
-            Hessian = np.linalg.inv(A)
-        else:
-
-            MalinvernoGelmanScaling = userParameters.parameterCovarianceScaling / np.sqrt(Mod1.nCells[0])
-
-            if Res.burnedIn:
-                A = JtJ + (MalinvernoGelmanScaling * np.eye(Mod1.nCells[0]) * userParameters.priStd**-2.0)
-                Hessian = np.linalg.inv(A)
-            else:
-                # Inverse of diagonal matrix is the reciprocal
-                A = (MalinvernoGelmanScaling * np.ones(Mod1.nCells[0]) * userParameters.priStd**-2.0)
-                Hessian = np.diag(1.0 / A)
-
-            if userParameters.ignoreLikelihood:
-                A = (MalinvernoGelmanScaling * np.ones(Mod1.nCells[0]) * userParameters.priStd**-2.0)
-                Hessian = np.diag(1.0 / A)
-            
-    else:  # There was no change in the model
-        Hessian = userParameters.Hessian
-
-    ### Proposing new parameter values
-    # If we are using the stochastic Newton step, compute the gradient of the
-    # objective function from the unperturbed parameter values.
-    if (userParameters.stochasticNewton):
-        # Compute the gradient
-        J = DataPoint.scaleJ(D1.J, 2.0)
-        gradient = np.dot(J.T, DataPoint.deltaD[DataPoint.iActive]) + ((userParameters.priStd**-1.0) * (np.log(remappedParameter) - userParameters.priMu))
-
-        scaling = userParameters.parameterCovarianceScaling * ((2.0 * np.float64(Mod1.nCells[0])) - 1)**(-1.0 / 3.0)
-
-        # Compute the Model perturbation
-        # The negative sign because we want to move "downhill"
-        SN_step_from_unperturbed = -0.5 * scaling * np.dot(Hessian, gradient)
-
-        if (not Res.burnedIn):
-            SN_step_from_unperturbed = 0.0
-
-        mean = np.log(remappedParameter) + SN_step_from_unperturbed
-        variance = scaling * Hessian
-
-    # Otherwise use the steepest descent method
-    else:  
-        mean = np.log(remappedParameter)
-        variance = Hessian
-
-    # Assign a proposal distribution for the parameter using the mean and variance.
-    Mod1.par.setProposal('MvNormal', mean, variance, prng=prng)
-
-    # Generate new conductivities
-    Mod1.par[:] = np.exp(Mod1.par.proposal.rng(1))
-
-    # Forward model the data from the candidate model
-    D1.forward(Mod1)
+    perturbedDatapoint.perturb(userParameters.solveElevation, userParameters.solveRelativeError, userParameters.solveAdditiveError, userParameters.solveCalibration)
 
     # Update the data errors using the updated relative errors
     if userParameters.solveRelativeError or userParameters.solveAdditiveError:
-        D1.updateErrors(D1.relErr, D1.addErr)
+        perturbedDatapoint.updateErrors(perturbedDatapoint.relErr, perturbedDatapoint.addErr)
 
     # Calibrate the response if it is being solved for
     if (userParameters.solveCalibration):
-        D1.calibrate()
+        perturbedDatapoint.calibrate()
+
+    # Forward model the data from the candidate model
+    perturbedDatapoint.forward(perturbedModel)
 
     # Compute the data misfit
-    PhiD1 = D1.dataMisfit(squared=True)
+    PhiD1 = perturbedDatapoint.dataMisfit(squared=True)
 
     if (userParameters.verbose):
         posteriorComponents = np.zeros(8, dtype=np.float64)
-        prior1, posteriorComponents[:4] = Mod1.priorProbability(userParameters.solveParameter, userParameters.solveGradient, userParameters.pLimits, verbose=True)
+        prior1, posteriorComponents[:4] = perturbedModel.priorProbability(userParameters.solveParameter, userParameters.solveGradient, verbose=True)
 
-        tmp, posteriorComponents[4:] = D1.priorProbability(userParameters.solveRelativeError, userParameters.solveAdditiveError, userParameters.solveElevation, userParameters.solveCalibration, verbose=True)
+        tmp, posteriorComponents[4:] = perturbedDatapoint.priorProbability(userParameters.solveRelativeError, userParameters.solveAdditiveError, userParameters.solveElevation, userParameters.solveCalibration, verbose=True)
         prior1 += tmp
 
     else:
@@ -390,62 +309,15 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
         # Evaluate the prior for the current model
         posteriorComponents = None
         # Evaluate the prior for the current model
-        prior1 = Mod1.priorProbability(userParameters.solveParameter, userParameters.solveGradient, userParameters.pLimits)
+        prior1 = perturbedModel.priorProbability(userParameters.solveParameter, userParameters.solveGradient)
         # Evaluate the prior for the current data
-        tmp = D1.priorProbability(userParameters.solveRelativeError, userParameters.solveAdditiveError, userParameters.solveElevation, userParameters.solveCalibration)
-        prior1 += tmp
+        prior1 += perturbedDatapoint.priorProbability(userParameters.solveRelativeError, userParameters.solveAdditiveError, userParameters.solveElevation, userParameters.solveCalibration)
 
-
-    likelihood1 = D1.likelihood(log=True)
+    likelihood1 = perturbedDatapoint.likelihood(log=True)
 
     posterior1 = prior1 + likelihood1
 
-    ### Evaluate the Reversible Jump Step.
-    if (userParameters.stochasticNewton):
-
-        # For the reversible jump, we need to compute the gradient from the perturbed parameter values.
-        # We therefore scale the sensitivity matrix by the proposed errors in the data, and our gradient uses
-        # the data residual using the perturbed parameter values.        
-        J = D1.scaleJ(D1.J, power=2.0)
-
-        # Compute the gradient according to the perturbed parameters and data residual
-        gradient = np.dot(J.T, D1.deltaD[D1.iActive]) + userParameters.priStd**-1.0 * (np.log(Mod1.par) - userParameters.priMu)
-
-        # Compute the stochastic newton offset.
-        # The negative sign because we want to move downhill
-        SN_step_from_perturbed = -0.5 * scaling * np.dot(Hessian, gradient)
-
-        if (not Res.burnedIn):
-            SN_step_from_perturbed = 0.0
-
-        # Create a multivariate normal distribution centered on the shifted parameter values, and with variance computed from the forward step.
-        # We don't recompute the variance using the perturbed parameters, because we need to check that we could in fact step back from 
-        # our perturbed parameters to the unperturbed parameters. This is the crux of the reversible jump.
-        tmp = Distribution('MvNormal', np.log(Mod1.par) + SN_step_from_perturbed, variance, prng=prng)
-        # Probability of jumping from our perturbed parameter values to the unperturbed values.
-        proposal = tmp.probability(x=np.log(remappedParameter), log=True)  # CUR.prop
-
-        # print('Using new dimension method')
-        tmp = Distribution('MvNormal', np.log(remappedParameter), variance, prng=prng)
-        proposal1 = tmp.probability(x=np.log(Mod1.par), log=True)
-
-    else:
-
-        # Create a multivariate normal distribution centered on the perturbed parameter values, and with variance computed from the forward step.
-        # We don't recompute the variance using the perturbed parameters, because we need to check that we could in fact step back from 
-        # our perturbed parameters to the unperturbed parameters. This is the crux of the reversible jump.
-        tmp = Distribution('MvNormal', np.log(Mod1.par), variance, prng=prng)
-        proposal = tmp.probability(x=np.log(remappedParameter), log=True)  # CUR.prop
-
-        # Now we compute the backwards reversible jump step by remapping our perturbed parameters to the same dimensional space as the previous iteration.
-
-        tmp = Distribution('MvNormal', np.log(remappedParameter), variance, prng=prng)
-        proposal1 = tmp.probability(x=np.log(Mod1.par), log=True)
-
-
-    forward, reverse = Mod1.proposalProbabilities()
-    proposal += reverse
-    proposal1 += forward
+    proposal, proposal1 = perturbedModel.proposalProbabilities(perturbedDatapoint, remappedModel, userParameters.parameterCovarianceScaling, Res.burnedIn)
 
     priorRatio = prior1 - prior
     likelihoodRatio = likelihood1 - likelihood
@@ -471,12 +343,11 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
     r = prng.uniform()
 
     if (acceptanceProbability > r):
-        userParameters.Hessian = Hessian
         Res.acceptance += 1
-        return(Mod1, D1, prior1, likelihood1, posterior1, PhiD1, posteriorComponents, ratioComponents, True, Mod.nCells[0] != Mod1.nCells[0])
+        return(perturbedModel, perturbedDatapoint, prior1, likelihood1, posterior1, PhiD1, posteriorComponents, ratioComponents, True, Mod.nCells[0] != perturbedModel.nCells[0])
 
     else:
-        return(Mod, DataPoint, prior, likelihood, posterior, PhiD, posteriorComponents, ratioComponents, False, Mod.nCells[0] != Mod1.nCells[0])
+        return(Mod, DataPoint, prior, likelihood, posterior, PhiD, posteriorComponents, ratioComponents, False, Mod.nCells[0] != perturbedModel.nCells[0])
 
     clk.stop()
 
