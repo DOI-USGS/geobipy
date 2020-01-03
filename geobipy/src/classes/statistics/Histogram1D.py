@@ -192,6 +192,48 @@ class Histogram1D(RectilinearMesh1D):
         self._counts[iBin] = self._counts[iBin] + other.counts
 
 
+    def credibleIntervals(self, percent=95.0, log=None):
+        """Gets the credible intervals.
+        
+        Parameters
+        ----------
+        percent : float
+            Confidence percentage.
+        log : 'e' or float, optional
+            Take the log of the credible intervals to a base. 'e' if log = 'e', or a number e.g. log = 10.
+
+        Returns
+        -------
+        med : array_like
+            Contains the median. Has size equal to arr.shape[axis].
+        low : array_like
+            Contains the lower interval.
+        high : array_like
+            Contains the upper interval.
+
+        """
+
+        total = self._counts.sum()
+        p = 0.01 * percent
+        cs = np.cumsum(self._counts / total)
+
+        ixM = np.searchsorted(cs, 0.5)
+        ix1 = np.searchsorted(cs, (1.0 - p))
+        ix2 = np.searchsorted(cs, p)
+
+        x = self.bins.internalEdges()
+        med = x[ixM]
+        low = x[ix1]
+        high = x[ix2]
+
+        if (not log is None):
+            med, dum = cF._log(med, log=log)
+            low, dum = cF._log(low, log=log)
+            high, dum = cF._log(high, log=log)
+
+        return (med, low, high)
+
+
     def estimatePdf(self):
         return np.divide(self._counts, np.sum(self._counts))
 
@@ -366,7 +408,7 @@ class Histogram1D(RectilinearMesh1D):
         return samples
 
 
-    def update(self, values, trim=False):
+    def update(self, values, clip=True, trim=False):
         """Update the histogram by counting the entry of values into the bins of the histogram.
 
         Updates the bin counts in the histogram using fast methods.
@@ -386,7 +428,7 @@ class Histogram1D(RectilinearMesh1D):
         # if self.isRelative:
         #     tmp = tmp - self.relativeTo
 
-        iBin = np.atleast_1d(self.cellIndex(values, clip=True, trim=trim))
+        iBin = np.atleast_1d(self.cellIndex(values, clip=clip, trim=trim))
         tmp = np.bincount(iBin, minlength = self.nBins)
         
         self._counts += tmp
