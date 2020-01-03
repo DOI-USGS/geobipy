@@ -9,41 +9,70 @@ from ..core import StatArray
 from scipy.stats import multivariate_normal
 
 class MvNormal(baseDistribution):
-    """Multivariate normal distribution """
+    """Class extension to geobipy.baseDistribution
 
-    def __init__(self, mean, variance, prng=None):
+    Handles a multivariate normal distribution.  Uses Scipy to evaluate probabilities, 
+    but Numpy to generate random samples since scipy is slow.
+
+    MvNormal(mean, variance, ndim, prng)
+
+    Parameters
+    ----------
+    mean : scalar or array_like
+        Mean(s) for each dimension
+    variance : scalar or array_like
+        Variance for each dimension
+    ndim : int, optional
+        The number of dimensions in the multivariate normal.
+        Only used if mean and variance are scalars that are constant for all dimensions
+    prng : numpy.random.RandomState, optional
+        A random state to generate random numbers. Required for parallel instantiation.
+        
+    Returns
+    -------
+    out : MvNormal
+        Multivariate normal distribution.
+
+    """
+
+    def __init__(self, mean, variance, ndim=None, prng=None):
         """ Initialize a normal distribution
         mu:     :Mean of the distribution
         sigma:  :Standard deviation of the distribution
 
         """
-        #assert (np.ndim(mean) > 0 and np.ndim(variance) > 0), ValueError("mean and variance must be > 1 dimension")
 
         if (type(variance) is float): variance = np.float64(variance)
 
         baseDistribution.__init__(self, prng)
-        # Mean
-        if np.ndim(mean) == 0:
-            self._mean = np.float64(mean)
-        else:
+
+        if ndim is None:
             self._mean = np.copy(mean)
 
-        # Variance
-        ndim = np.ndim(variance)
-        if ndim == 0:
-            self._variance = np.zeros(np.size(mean))
-            self._variance[:] = variance
-        elif ndim == 1:
-            assert np.size(variance) == np.size(mean), 'Mismatch in size of mean and variance'
-            
-            self._variance = np.zeros(np.size(mean))
-            self._variance[:] = variance
-        elif ndim == 2:
-            assert (variance.shape[0] == mean.size and variance.shape[1] == mean.size), 'Covariance must have same dimensions as the mean'
-            self._variance = np.asarray(variance)
+            # Variance
+            ndim = np.ndim(variance)
+            if ndim == 0:
+                self._variance = np.full(np.size(mean), fill_value=variance)
 
-        if self._variance.size == 1:
-            self._variance = np.float64(self._variance)
+            elif ndim == 1:
+                assert np.size(variance) == np.size(mean), Exception('Mismatch in size of mean and variance')
+                self._variance = np.asarray(variance)
+
+            elif ndim == 2:
+                assert np.all(np.equal(variance.shape,  np.size(mean))), ValueError('Covariance must have same dimensions as the mean')
+                self._variance = np.asarray(variance)
+
+            self._constant = False
+
+        else:
+
+            assert np.size(mean) == 1, ValueError("When specifying ndim, mean must be a scalar.")
+            assert np.size(variance) == 1, ValueError("When specifying ndim, variance must be a scalar.")
+
+            ndim = np.maximum(1, ndim)
+            self._constant = True
+            self._mean = np.full(ndim, fill_value=mean)
+            self._variance = np.full(ndim, fill_value=variance)
 
 
     @property
@@ -68,8 +97,10 @@ class MvNormal(baseDistribution):
 
     def deepcopy(self):
         """ Define a deepcopy routine """
-        # return deepcopy(self)
-        return MvNormal(self.mean, self.variance, self.prng)
+        if self._constant:
+            return MvNormal(mean=self.mean[0], variance=self.variance[0], ndim=self.ndim, prng=self.prng)
+        else:
+            return MvNormal(mean=self.mean, variance=self.variance, prng=self.prng)
 
 
     def rng(self, size = 1):
