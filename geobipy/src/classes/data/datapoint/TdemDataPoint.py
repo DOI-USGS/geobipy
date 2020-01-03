@@ -512,7 +512,7 @@ class TdemDataPoint(EmDataPoint):
         return probability
 
 
-    def proposeAdditiveError(self):
+    def perturbAdditiveError(self):
 
         # Generate a new error
         tmp = self.addErr.proposal.rng(1)

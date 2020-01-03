@@ -130,7 +130,7 @@ class EmDataPoint(DataPoint):
         return probability
 
 
-    def propose(self, newHeight, newRelativeError, newAdditiveError, newCalibration):
+    def perturb(self, newHeight, newRelativeError, newAdditiveError, newCalibration):
         """Propose a new EM data point given the specified attached propsal distributions
 
         Parameters
@@ -160,25 +160,23 @@ class EmDataPoint(DataPoint):
             If a proposal has not been set on a requested parameter
 
         """
-        other = self.deepcopy()
         if (newHeight):  # Update the candidate data elevation (if required)
-            other.proposeHeight()
+            self.perturbHeight()
             
         if (newRelativeError):
-            other.proposeRelativeError()
+            self.perturbRelativeError()
             
         if (newAdditiveError):
-            other.proposeAdditiveError()
+            self.perturbAdditiveError()
 
         if (newCalibration):  # Update the calibration parameters for the candidate data (if required)
             # Generate new calibration errors
-            other.calibration[:] = self.calibration.proposal.rng(1)
+            self.calibration[:] = self.calibration.proposal.rng(1)
             # Update the mean of the proposed calibration errors
-            other.calibration.proposal.mean[:] = other.calibration
-        return other
+            self.calibration.proposal.mean[:] = self.calibration
 
 
-    def proposeAdditiveError(self):
+    def perturbAdditiveError(self):
         # Generate a new error
         self.addErr[:] = self.addErr.proposal.rng(1)
         if self.addErr.hasPrior:
@@ -190,7 +188,7 @@ class EmDataPoint(DataPoint):
         self.addErr.proposal.mean[:] = self.addErr
 
     
-    def proposeHeight(self):
+    def perturbHeight(self):
         # Generate a new elevation
         self.z[:] = self.z.proposal.rng(1)
         if self.z.hasPrior:
@@ -202,7 +200,7 @@ class EmDataPoint(DataPoint):
         self.z.proposal.mean[:] = self.z
 
     
-    def proposeRelativeError(self):
+    def perturbRelativeError(self):
         # Generate a new error
         self.relErr[:] = self.relErr.proposal.rng(1)
         if self.relErr.hasPrior:
