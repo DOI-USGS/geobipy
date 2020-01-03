@@ -307,15 +307,15 @@ class RectilinearMesh2D(myObject):
 
         if (axis == 0):
             # Make sure the intervals are within the axis.
-            i0 = np.maximum(0, np.searchsorted(intervals, self.z.cellCentres[0]))
-            i1 = np.minimum(self.z.nCells, np.searchsorted(intervals, self.z.cellCentres[-1]))
+            i0 = np.maximum(0, np.searchsorted(intervals, self.z.cellEdges[0]))
+            i1 = np.minimum(self.z.nCells, np.searchsorted(intervals, self.z.cellEdges[-1])+1)
             intervals = intervals[i0:i1]
 
             bins = binned_statistic(self.z.cellCentres, arr.T, bins = intervals, statistic=statistic)
             res = bins.statistic.T
         else:
-            i0 = np.maximum(0, np.searchsorted(intervals, self.x.cellCentres[0]))
-            i1 = np.minimum(self.x.nCells, np.searchsorted(intervals, self.x.cellCentres[-1]))
+            i0 = np.maximum(0, np.searchsorted(intervals, self.x.cellEdges[0]))
+            i1 = np.minimum(self.x.nCells, np.searchsorted(intervals, self.x.cellEdges[-1])+1)
             intervals = intervals[i0:i1]
 
             bins = binned_statistic(self.x.cellCentres, arr, bins = intervals, statistic=statistic)
@@ -447,9 +447,9 @@ class RectilinearMesh2D(myObject):
 
         xtmp = self.getXAxis(xAxis)
 
-        ax, pm = cP.pcolor(values, x = xtmp, y = self.z.cellEdges, **kwargs)
+        ax, pm, cb = cP.pcolor(values, x = xtmp, y = self.z.cellEdges, **kwargs)
         
-        return ax, pm
+        return ax, pm, cb
 
 
     def plotGrid(self, xAxis='x', **kwargs):
