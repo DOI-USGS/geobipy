@@ -306,7 +306,7 @@ class Model1D(Model):
         assert self.par.hasPrior or self.dpar.hasPrior, Exception("Model must have either a parameter prior or gradient prior, use self.setPriors()")
         # Compute the sensitivity of the data to the perturbed model
         dataPoint.sensitivity(self, scale=False)
-        Wd = dataPoint.weightingMatrix(1.0)
+        Wd = dataPoint.weightingMatrix(power=1.0)
         WdJ = np.dot(Wd, dataPoint.J)
         WdJTWdJ = np.dot(WdJ.T, WdJ)
 
@@ -466,13 +466,12 @@ class Model1D(Model):
         geobipy.Model1D.makePerturbable : Must be used before calling self.perturb
         
         """
-
         assert (not self.eventProposal is None), ValueError('Please set the proposals of the model1D with model1D.addProposals()')
         prng = self.nCells.prior.prng
         # Pre-compute exponential values (Take them out of log space)
-        hmin = np.exp(self.minThickness)
-        zmin = np.exp(self.minDepth)
-        zmax = np.exp(self.maxDepth)
+        hmin = self.minThickness
+        zmin = self.minDepth
+        zmax = self.maxDepth
         nTries = 10
         # This outer loop will allow the perturbation to change types. e.g. if the loop is stuck in a birthing
         # cycle, the number of tries will exceed 10, and we can try a different perturbation type.
@@ -506,8 +505,8 @@ class Model1D(Model):
                 tries = 0
                 while (not newThicknessBiggerThanMinimum):  # Continue while the new layer is smaller than the minimum
                     # Get the new depth
-                    tmp = np.float64(prng.uniform(self.minDepth, self.maxDepth, 1))
-                    newDepth = np.exp(tmp)
+                    newDepth = np.float64(prng.uniform(self.minDepth, self.maxDepth, 1))
+                    # newDepth = np.exp(tmp)
                     z = self.depth[:-1]
                     # Insert the new depth
                     i = z.searchsorted(newDepth)
@@ -559,6 +558,8 @@ class Model1D(Model):
                     out.thicknessFromDepth()
                     out.action = ['perturb', np.int(i), dz]
                     return out
+
+        assert False, Exception("Should not be here, file a bug report....")
 
 
     def priorProbability(self, pPrior, gPrior, verbose=False):
@@ -656,7 +657,7 @@ class Model1D(Model):
 
         # Check that the parameters are within the limits if they are bound
         if not self.parameterBounds is None:
-            pInBounds = self.parameterBounds.probability(x=np.log(self.par), log=True)
+            pInBounds = self.parameterBounds.probability(x=self.par, log=True)
             if np.any(np.isinf(pInBounds)):
                 return -np.inf
 
@@ -675,7 +676,7 @@ class Model1D(Model):
         # Probability of parameter
         # if self.par.hasPrior:
         if pPrior:
-            P_parameter = self.par.probability(x=np.log(self.par), log=True)
+            P_parameter = self.par.probability(log=True)
             probability += P_parameter
 
         # Probability of model gradient
@@ -690,7 +691,7 @@ class Model1D(Model):
 
 
     def remainingSpace(self, nLayers):
-        return (np.exp(self.maxDepth) - np.exp(self.minDepth)) - nLayers * np.exp(self.minThickness)
+        return (self.maxDepth - self.minDepth) - nLayers * self.minThickness
 
 
     def proposalProbabilities(self, dataPoint, remappedModel, burnedIn):
@@ -731,12 +732,10 @@ class Model1D(Model):
         ### Evaluate the Reversible Jump Step.
         # For the reversible jump, we need to compute the gradient from the perturbed parameter values.
         # We therefore scale the sensitivity matrix by the proposed errors in the data, and our gradient uses
-        # the data residual using the perturbed parameter values.        
-        Wd2 = dataPoint.weightingMatrix(power=2.0)
-        Wd2J = np.dot(Wd2, dataPoint.J)
+        # the data residual using the perturbed parameter values.
 
         # Compute the gradient according to the perturbed parameters and data residual
-        gradient = np.dot(Wd2J.T, dataPoint.deltaD[dataPoint.iActive]) + np.log(11.0)**-2.0 * (np.log(self.par) - self._halfSpaceParameter)
+        gradient = np.dot(dataPoint.J.T, dataPoint.predictedData.priorDerivative(order=1, i=dataPoint.iActive)) + self.par.priorDerivative(order=1)
 
         # if (not burnedIn):
         #     SN_step_from_perturbed = 0.0
@@ -750,12 +749,12 @@ class Model1D(Model):
         # Create a multivariate normal distribution centered on the shifted parameter values, and with variance computed from the forward step.
         # We don't recompute the variance using the perturbed parameters, because we need to check that we could in fact step back from 
         # our perturbed parameters to the unperturbed parameters. This is the crux of the reversible jump.
-        tmp = Distribution('MvNormal', np.log(self.par) - SN_step_from_perturbed, self.inverseHessian, prng=prng)
+        tmp = Distribution('MvNormal', np.exp(np.log(self.par) - SN_step_from_perturbed), self.inverseHessian, log=True, prng=prng)
         # Probability of jumping from our perturbed parameter values to the unperturbed values.
-        proposal = tmp.probability(x=np.log(remappedModel.par), log=True)  # CUR.prop
+        proposal = tmp.probability(x=remappedModel.par, log=True)  # CUR.prop
 
-        tmp = Distribution('MvNormal', np.log(remappedModel.par), self.inverseHessian, prng=prng)
-        proposal1 = tmp.probability(x=np.log(self.par), log=True)
+        tmp = Distribution('MvNormal', remappedModel.par, self.inverseHessian, log=True, prng=prng)
+        proposal1 = tmp.probability(x=self.par, log=True)
 
         if self.action[0] == 'birth':
             k = self.nCells - 1
@@ -763,9 +762,8 @@ class Model1D(Model):
             forward = Distribution('Uniform', 0.0, self.remainingSpace(k))
             reverse = Distribution('Uniform', 0.0, k)
 
-            proposal  += reverse.probability(k, log=True)
-            proposal1 += forward.probability(self.maxDepth, log=True)
-            
+            proposal  += reverse.probability(1, log=True)
+            proposal1 += forward.probability(0.0, log=True)
 
         if self.action[0] == 'death':
             k = self.nCells
@@ -773,8 +771,8 @@ class Model1D(Model):
             forward = Distribution('Uniform', 0.0, self.remainingSpace(k))
             reverse = Distribution('Uniform', 0.0, k)
 
-            proposal  += forward.probability(self.maxDepth, log=True)
-            proposal1 += reverse.probability(k, log=True)
+            proposal  += forward.probability(0.0, log=True)
+            proposal1 += reverse.probability(1, log=True)
 
         return proposal, proposal1
             
@@ -840,7 +838,9 @@ class Model1D(Model):
         Wd2 = dataPoint.weightingMatrix(power=2.0)
         Wd2J = np.dot(Wd2, dataPoint.J)
 
-        gradient = np.dot(Wd2J.T, dataPoint.deltaD[dataPoint.iActive]) + ((priStd**-2.0) * (np.log(remappedModel.par) - remappedModel._halfSpaceParameter))
+        # print((priStd**-2.0) * (remappedModel.par - np.exp(remappedModel._halfSpaceParameter)))
+
+        gradient = np.dot(Wd2J.T, dataPoint.deltaD[dataPoint.iActive]) + ((priStd**-2.0) * (np.log(remappedModel.par) - np.log(remappedModel._halfSpaceParameter)))
 
         # scaling = parameterCovarianceScaling * ((2.0 * np.float64(Mod1.nCells[0])) - 1)**(-1.0 / 3.0)
 
@@ -857,10 +857,10 @@ class Model1D(Model):
         perturbedModel = remappedModel.deepcopy()
 
         # Assign a proposal distribution for the parameter using the mean and variance.
-        perturbedModel.par.setProposal('MvNormal', mean, inverseHessian, prng=perturbedModel.par.proposal.prng)
+        perturbedModel.par.setProposal('MvNormal', np.exp(mean), inverseHessian, log=True, prng=perturbedModel.par.proposal.prng)
 
         # Generate new conductivities
-        perturbedModel.par[:] = np.exp(perturbedModel.par.propose())
+        perturbedModel.par.perturb()
 
         return remappedModel, perturbedModel
 
@@ -873,7 +873,7 @@ class Model1D(Model):
         self.nCells.setPosterior(Histogram1D(binCentres=StatArray.StatArray(np.arange(0.0, self.maxLayers + 1.0), name="# of Layers")))
 
         # Discretize the parameter values
-        zGrd = StatArray.StatArray(np.arange(0.5 * np.exp(self.minDepth), 1.1 * np.exp(self.maxDepth), 0.5 * np.exp(self.minThickness)), self.depth.name, self.depth.units)
+        zGrd = StatArray.StatArray(np.arange(0.5 * self.minDepth, 1.1 * self.maxDepth, 0.5 * self.minThickness), self.depth.name, self.depth.units)
 
         if self.par.hasPrior:
             p = self.par.prior.bins(nBins = 250, nStd=4.0, axis=0)
@@ -881,7 +881,7 @@ class Model1D(Model):
             tmp = 4.0 * np.log(11.0)
             p = np.linspace(self._halfSpaceParameter - tmp, self._halfSpaceParameter + tmp, 251)
         
-        pGrd = StatArray.StatArray(np.exp(p), self.par.name, self.par.units)
+        pGrd = StatArray.StatArray(p, self.par.name, self.par.units)
 
         # Set the posterior hitmap for conductivity vs depth
         self.par.setPosterior(Hitmap2D(xBins = pGrd, yBinCentres = zGrd))
@@ -927,12 +927,12 @@ class Model1D(Model):
         
         if (minThickness is None):
             # Assign a minimum possible thickness
-            self.minThickness = np.log((maxDepth - minDepth) / (2 * maxLayers))
+            self.minThickness = (maxDepth - minDepth) / (2 * maxLayers)
         else:
-            self.minThickness = np.log(minThickness)
+            self.minThickness = minThickness
             
-        self.minDepth = np.log(minDepth)  # Assign the log of the min depth
-        self.maxDepth = np.log(maxDepth)  # Assign the log of the max depth
+        self.minDepth = minDepth  # Assign the log of the min depth
+        self.maxDepth = maxDepth  # Assign the log of the max depth
         self.maxLayers = np.int32(maxLayers)
 
         # Assign a uniform distribution to the number of layers
@@ -940,29 +940,28 @@ class Model1D(Model):
 
         # Set priors on the depth interfaces, given a number of layers
         i = np.arange(self.maxLayers)
-        # dz = np.log((np.exp(self.maxDepth) - np.exp(self.minDepth) - 2.0 * i * np.exp(self.minThickness)))
         dz = self.remainingSpace(i)
 
         self.depth.setPrior('Order', denominator=dz)  # priZ
 
         if not parameterLimits is None:
             assert np.size(parameterLimits) == 2, ValueError("parameterLimits must have size 2.")
-            self.parameterBounds = Distribution('Uniform', np.log(parameterLimits[0]), np.log(parameterLimits[1]))
+            self.parameterBounds = Distribution('Uniform', parameterLimits[0], parameterLimits[1], log=True)
         else:
             self.parameterBounds = None
 
-        self._halfSpaceParameter = np.log(halfSpaceValue)
+        self._halfSpaceParameter = halfSpaceValue
 
         # if parameterPrior:
         # Assign the initial prior to the parameters
-        self.par.setPrior('MvNormal', self._halfSpaceParameter, np.log(1.0 + factor)**2.0, ndim=self.nCells, prng=prng)
+        self.par.setPrior('MvNormal', self._halfSpaceParameter, np.log(1.0 + factor)**2.0, ndim=self.nCells, log=True, prng=prng)
 
         # if gradientPrior:
         # Assign the prior on the parameter gradient
         self.dpar.setPrior('MvNormal', 0.0, dzVariance, ndim=np.maximum(1, self.nCells-1), prng=prng)
 
 
-    def setProposals(self, probabilities, prng=None):
+    def setProposals(self, probabilities, parameterProposal, prng=None):
         """Setup the proposals of a 1D model.
 
         Parameters
@@ -972,6 +971,8 @@ class Model1D(Model):
         probabilities : array_like
             Probability of birth, death, perturb, and no change for the model
             e.g. pWheel = [0.5, 0.25, 0.15, 0.1]
+        parameterProposal : geobipy.Distribution
+            The proposal  distribution for the parameter.
         prng : numpy.random.RandomState(), optional
             Random number generator, if none is given, will use numpy's global generator.
                
@@ -984,6 +985,8 @@ class Model1D(Model):
         # assert not self.maxLayers is None, Exception("Please set the priors on the model with setPriors()")
         
         self.eventProposal = Distribution('Categorical', np.asarray(probabilities), ['birth', 'death', 'perturb', 'noChange'], prng=prng)
+
+        self.par.setProposal(parameterProposal)
 
 
     def gradientProbability(self):
@@ -1028,12 +1031,12 @@ class Model1D(Model):
         assert (self.dpar.hasPrior), TypeError('No prior defined on parameter gradient. Use Model1D.dpar.addPrior() to set the prior.')
 
         if self.nCells[0] == 1:
-            tmp = self.insertLayer(self.minDepth + (0.5 * (np.exp(self.maxDepth) - np.exp(self.minDepth))))
-            tmp.dpar[:] = (np.diff(np.log(tmp.par))) / (np.log(tmp.thk[:-1]) - self.minThickness)
+            tmp = self.insertLayer(np.log(self.minDepth) + (0.5 * (self.maxDepth - self.minDepth)))
+            tmp.dpar[:] = (np.diff(np.log(tmp.par))) / (np.log(tmp.thk[:-1]) - np.log(self.minThickness))
             probability = tmp.dpar.probability(log=True)
 
         else:
-            self.dpar[:] = (np.diff(np.log(self.par))) / (np.log(self.thk[:-1]) - self.minThickness)
+            self.dpar[:] = (np.diff(np.log(self.par))) / (np.log(self.thk[:-1]) - np.log(self.minThickness))
             probability = self.dpar.probability(log=True)
         return probability
 
@@ -1069,59 +1072,6 @@ class Model1D(Model):
 
         if self.action[0] == 'death':
             return self.insertLayer(self.action[2])
-
-
-    def plot(self, **kwargs):
-        """Plots a 1D model parameters as a line against depth
-
-        Parameters
-        ----------
-        reciprocateX : bool, optional
-            Take the reciprocal of the x axis
-        xscale : str, optional
-            Scale the x axis? e.g. xscale = 'linear' or 'log'
-        yscale : str, optional
-            Scale the y axis? e.g. yscale = 'linear' or 'log'
-        flipX : bool, optional
-            Flip the X axis
-        flipY : bool, optional
-            Flip the Y axis
-        noLabels : bool, optional
-            Do not plot the labels
-
-        """
-        # Must create a new parameter, so that the last layer is plotted
-        ax = plt.gca()
-        cP.pretty(ax)
-
-        reciprocateX = kwargs.pop("reciprocateX", False)
-        flipY = kwargs.pop('flipY', True)
-        kwargs['flipY'] = flipY
-        kwargs['xscale'] = kwargs.pop('xscale', 'linear')
-        
-        # Repeat the last entry
-        par = self.par.append(self.par[-1])
-        if (reciprocateX):
-            par = 1.0 / par
-            
-        z = self.depth.prepend(0.0)
-        if self.hasHalfspace:
-            if (self.maxDepth is None):
-                z[-1] = 1.1 * self.depth[-2]
-            else:
-                z[-1] = 1.1 * np.exp(self.maxDepth)
-
-        cP.step(x=par, y=z, **kwargs)
-
-        if self.hasHalfspace:
-            if (self.nCells == 1):
-                h = np.maximum(0.99, 0.75*np.max(ax.get_ylim()))
-                p = par[-1]
-            else:
-                h = z[-2] + 0.75 * (z[-1] - z[-2])
-                p = par[-1]
-
-            plt.text(p, h, s=r'$\downarrow \infty$', fontsize=12)
 
 
     def pcolor(self, *args, **kwargs):
@@ -1177,7 +1127,7 @@ class Model1D(Model):
                 else:
                     d[0] = 1.0               
             else:
-                d[-1] = 1.1 * np.exp(self.maxDepth)
+                d[-1] = 1.1 * self.maxDepth
 
         ax = self.par.pcolor(*args, y = d + self.top, **kwargs)
         
@@ -1188,6 +1138,59 @@ class Model1D(Model):
             plt.text(0, h, s=r'$\downarrow \infty$', fontsize=12)
 
         return ax
+
+
+    def plot(self, **kwargs):
+        """Plots a 1D model parameters as a line against depth
+
+        Parameters
+        ----------
+        reciprocateX : bool, optional
+            Take the reciprocal of the x axis
+        xscale : str, optional
+            Scale the x axis? e.g. xscale = 'linear' or 'log'
+        yscale : str, optional
+            Scale the y axis? e.g. yscale = 'linear' or 'log'
+        flipX : bool, optional
+            Flip the X axis
+        flipY : bool, optional
+            Flip the Y axis
+        noLabels : bool, optional
+            Do not plot the labels
+
+        """
+        # Must create a new parameter, so that the last layer is plotted
+        ax = plt.gca()
+        cP.pretty(ax)
+
+        reciprocateX = kwargs.pop("reciprocateX", False)
+        flipY = kwargs.pop('flipY', True)
+        kwargs['flipY'] = flipY
+        kwargs['xscale'] = kwargs.pop('xscale', 'linear')
+        
+        # Repeat the last entry
+        par = self.par.append(self.par[-1])
+        if (reciprocateX):
+            par = 1.0 / par
+            
+        z = self.depth.prepend(0.0)
+        if self.hasHalfspace:
+            if (self.maxDepth is None):
+                z[-1] = 1.1 * self.depth[-2]
+            else:
+                z[-1] = 1.1 * self.maxDepth
+
+        cP.step(x=par, y=z, **kwargs)
+
+        if self.hasHalfspace:
+            if (self.nCells == 1):
+                h = np.maximum(0.99, 0.75*np.max(ax.get_ylim()))
+                p = par[-1]
+            else:
+                h = z[-2] + 0.75 * (z[-1] - z[-2])
+                p = par[-1]
+
+            plt.text(p, h, s=r'$\downarrow \infty$', fontsize=12)
 
 
     def evaluateHitmapPrior(self, Hitmap):
@@ -1401,7 +1404,16 @@ class Model1D(Model):
         return np.all(par > sLow) and np.all(par < sHigh)
         
 
-    def updatePosteriors(self, minThicknessRatio):
+    def updatePosteriors(self, minimumRatio=0.5):
+        """Update any attached posterior distributions.
+
+        Parameters
+        ----------
+        minimumRatio : float
+            Only update the depth posterior if the layer parameter ratio
+            is greater than this number.
+
+        """
 
         # Update the number of layeres posterior
         self.nCells.updatePosterior()
@@ -1412,8 +1424,8 @@ class Model1D(Model):
         # Update the layer interface histogram
         if (self.nCells > 1):
             ratio = np.exp(np.diff(np.log(self.par)))
-            m1 = ratio <= 1.0 - minThicknessRatio
-            m2 = ratio >= 1.0 + minThicknessRatio
+            m1 = ratio <= 1.0 - minimumRatio
+            m2 = ratio >= 1.0 + minimumRatio
             keep = np.logical_not(np.ma.masked_invalid(ratio).mask) & np.ma.mask_or(m1,m2)
             tmp = self.depth[:-1]
 
