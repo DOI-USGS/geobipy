@@ -40,10 +40,7 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
                 fiducial = DataPoint.fiducial,
                 nMarkovChains = userParameters.nMarkovChains,
                 plotEvery = userParameters.plotEvery,
-                # parameterDisplayLimits = userParameters.parameterDisplayLimits,
                 reciprocateParameters = userParameters.reciprocateParameters,
-                priMu = userParameters.priMu,
-                priStd = userParameters.priStd,
                 verbose=userParameters.verbose)
 
     if Res.plotMe:
@@ -139,62 +136,47 @@ def Initialize(userParameters, DataPoint, prng):
     
     """
     # ---------------------------------------
-    # Set the distribution of the data misfit
+    # Set the priors on the data point
     # ---------------------------------------
-    # Incoming standard deviations may be zero. The variance of the prior is updated
-    # later with DataPoint.updateErrors.
-    DataPoint._predictedData.setPrior('MvNormal', DataPoint._data[DataPoint.iActive], DataPoint._std[DataPoint.iActive]**2.0, prng=prng)
-
-    # ------------------------------------
-    # Set the data point height properties
-    # ------------------------------------
+    # Set the prior on the data
+    DataPoint.predictedData.setPrior('MvNormal', DataPoint.data[DataPoint.iActive], DataPoint.std[DataPoint.iActive]**2.0, prng=prng)
     # Set the prior on the height
     DataPoint.z.setPrior('Uniform', np.float64(DataPoint.z) - userParameters.maximumElevationChange, np.float64(DataPoint.z) + userParameters.maximumElevationChange)
+    # Set the prior on the relative Errors
+    DataPoint.relErr = userParameters.initialRelativeError
+    DataPoint.setRelativeErrorPrior(userParameters.minimumRelativeError, userParameters.maximumRelativeError, prng=prng)
+    # Set the prior on the additive Errors
+    DataPoint.addErr = userParameters.initialAdditiveError
+    DataPoint.setAdditiveErrorPrior(userParameters.minimumAdditiveError, userParameters.maximumAdditiveError, prng=prng)
+
+    # ------------------------------------
+    # Set the proposal distributions for the data point
+    # ------------------------------------
     # Set the proposal for height
     DataPoint.z.setProposal('Normal', DataPoint.z, userParameters.elevationProposalVariance, prng=prng)
-    # Create a histogram to set the height posterior.
-    H = Histogram1D(bins = StatArray.StatArray(DataPoint.z.prior.bins(), name=DataPoint.z.name, units=DataPoint.z.units), relativeTo=DataPoint.z)
-    DataPoint.z.setPosterior(H)
-
-    # ---------------------------------
-    # Set the relative error properties
-    # ---------------------------------
-    # Set the prior on the relative Errors
-    DataPoint.relErr[:] = userParameters.initialRelativeError.deepcopy()
-    DataPoint.setRelativeErrorPrior(userParameters.minimumRelativeError[:], userParameters.maximumRelativeError[:], prng=prng)
-
     # Set the proposal distribution for the relative errors
     DataPoint.setRelativeErrorProposal(userParameters.initialRelativeError, userParameters.relativeErrorProposalVariance, prng=prng)
+    # Set the proposal distribution for the additive errors
+    DataPoint.setAdditiveErrorProposal(userParameters.initialAdditiveError, userParameters.additiveErrorProposalVariance, prng=prng)
 
+    # ---------------------------------
+    # Set the posterior histograms for the data point
+    # ---------------------------------
+    # Create a histogram to set the height posterior.
+    H = Histogram1D(bins = StatArray.StatArray(DataPoint.z.prior.bins(), name=DataPoint.z.name, units=DataPoint.z.units), relativeTo=DataPoint.z)
+    DataPoint.z.setPosterior(H)  
     # Initialize the histograms for the relative errors
     rBins = DataPoint.relErr.prior.bins()
     if DataPoint.nSystems > 1:
         DataPoint.relErr.setPosterior([Histogram1D(bins = StatArray.StatArray(rBins[0, :], name='$\epsilon_{Relative}x10^{2}$', units='%')) for i in range(DataPoint.nSystems)])
     else:
         DataPoint.relErr.setPosterior(Histogram1D(bins = StatArray.StatArray(rBins, name='$\epsilon_{Relative}x10^{2}$', units='%')))
-
-    # ---------------------------------
-    # Set the additive error properties
-    # ---------------------------------
-
-    # Set the prior on the additive Errors
-    DataPoint.addErr[:] = userParameters.initialAdditiveError.deepcopy()
-    DataPoint.setAdditiveErrorPrior(userParameters.minimumAdditiveError[:], userParameters.maximumAdditiveError[:], prng=prng)
-
-    # Set the proposal distribution for the additive errors
-    DataPoint.setAdditiveErrorProposal(userParameters.initialAdditiveError, userParameters.additiveErrorProposalVariance, prng=prng)
-
     # Set the posterior for the data point.
     DataPoint.setAdditiveErrorPosterior()
 
     # Update the data errors based on user given parameters
     # if userParameters.solveRelativeError or userParameters.solveAdditiveError:
     DataPoint.updateErrors(userParameters.initialRelativeError, userParameters.initialAdditiveError)
-
-    DataPoint.addErr.updatePosterior()
-
-    # Save a copy of the original errors
-    userParameters.Err = DataPoint._std.deepcopy()
 
     # Initialize the calibration parameters
     if (userParameters.solveCalibration):
@@ -204,6 +186,11 @@ def Initialize(userParameters, DataPoint, prng):
         DataPoint.calibration[:] = DataPoint.calibration.prior.mean
         # Initialize the calibration proposal
         DataPoint.calibration.setProposal('Normal', DataPoint.calibration, np.reshape(userParameters.propCal, np.size(userParameters.propCal), order='F'), prng=prng)
+
+
+    DataPoint.relErr.updatePosterior()
+    DataPoint.addErr.updatePosterior()
+
 
     # ---------------------------------
     # Set the earth model properties
@@ -222,9 +209,6 @@ def Initialize(userParameters, DataPoint, prng):
     # Setup the model for perturbation
     Mod.setPriors(halfspaceValue, userParameters.minimumDepth, userParameters.maximumDepth, userParameters.maximumNumberofLayers, userParameters.solveParameter, userParameters.solveGradient, parameterLimits=userParameters.parameterLimits, minThickness=userParameters.minimumThickness, factor=userParameters.factor, prng=prng)
 
-    probabilities = [userParameters.pBirth, userParameters.pDeath, userParameters.pPerturb, userParameters.pNochange]
-    Mod.setProposals(probabilities, prng=prng)
-
 
     # Assign a Hitmap as a prior if one is given
     # if (not userParameters.referenceHitmap is None):
@@ -233,18 +217,18 @@ def Initialize(userParameters, DataPoint, prng):
     userParameters.priMu = Mod.par.prior.mean[0]
     userParameters.priStd = np.sqrt(Mod.par.prior.variance[0])
 
-    Mod.setPosteriors()
-
     # Compute the predicted data
     DataPoint.forward(Mod)
 
     inverseHessian = Mod.generateLocalParameterVariance(DataPoint, userParameters.priStd)
 
     # Instantiate the proposal for the parameters.
-    Mod.par.setProposal('MvNormal', np.log(Mod.par), inverseHessian, prng=prng)
+    parameterProposal = Distribution('MvNormal', np.log(Mod.par), inverseHessian, prng=prng)
 
-    # # Assign a prior to the derivative of the model
-    # Mod.dpar.setPrior('MvNormal', 0.0, userParameters.gradientStd**2.0, prng=prng)
+    probabilities = [userParameters.pBirth, userParameters.pDeath, userParameters.pPerturb, userParameters.pNochange]
+    Mod.setProposals(probabilities, parameterProposal=parameterProposal, prng=prng)
+
+    Mod.setPosteriors()
 
     # Compute the data misfit
     PhiD = DataPoint.dataMisfit(squared=True)
@@ -350,6 +334,3 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
 
     
     #%%
-
-
-#%%

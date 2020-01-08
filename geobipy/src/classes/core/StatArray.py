@@ -640,6 +640,36 @@ class StatArray(np.ndarray, myObject):
         except:
             return False
 
+
+    def priorDerivative(self, order, i=None):
+        """ Get the derivative of the prior.
+
+        Parameters
+        ----------
+        order : int
+            1 or 2 for first or second order derivative
+
+        """
+        assert self.hasPrior, TypeError('No prior defined on variable {}. Use StatArray.setPrior()'.format(self.name))
+        if i is None:
+            i = np.s_[:]
+        return self.prior.derivative(self[i], order)
+
+
+    def proposalDerivative(self, order, i=None):
+        """ Get the derivative of the proposal.
+
+        Parameters
+        ----------
+        order : int
+            1 or 2 for first or second order derivative
+
+        """
+        assert self.hasProposal, TypeError('No proposal defined on variable {}. Use StatArray.setProposal()'.format(self.name))
+        if i is None:
+            i = np.s_[:]
+        return self.proposal.derivative(self[i], order)
+
         
     def lastNonZero(self, axis=0, invalid_val=-1):
         """Find the indices of the first non zero values along the axis.
@@ -957,6 +987,7 @@ class StatArray(np.ndarray, myObject):
 
         if mv:
             nSamples = 1
+            assert self.proposal.ndim == self.size, ValueError("Trying to generate {} samples from an {}-dimensional distribution. Proposal dimensions must match self.size.".format(self.size, self.proposal.ndim))
         else:
             nSamples = self.size
             
@@ -971,7 +1002,8 @@ class StatArray(np.ndarray, myObject):
 
         assert self.hasPrior, TypeError('No prior defined on variable {}. Use StatArray.setPrior()'.format(self.name))
         p = self.probability(x=proposed, log=log)
-        while p == 0.0 or p == -np.inf:
+        num = -np.inf if log else 0.0
+        while p == num:
             proposed = self.proposal.rng(nSamples)
         
             if relative:

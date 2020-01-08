@@ -24,14 +24,18 @@ class Normal(baseDistribution):
         The variance of the distribution
 
     """
-    def __init__(self, mean, variance, prng=None):
+    def __init__(self, mean, variance, log=False, prng=None):
         """Instantiate a Normal distribution """
         # assert np.size(mean) == 1, 'Univariate Normal mean must have size = 1'
         # assert np.size(variance) == 1, 'Univariate Normal variance must have size = 1'
         super().__init__(prng)
-        self.mean = np.asarray(mean)
-        self.variance = np.asarray(variance)
+        self._mean = np.log(mean) if log else np.asarray(mean)
+        self._variance = np.asarray(variance)
+        self.log = log
 
+    @property
+    def mean(self):
+        return np.exp(self._mean) if self.log else self._mean
 
     @property
     def ndim(self):
@@ -43,9 +47,16 @@ class Normal(baseDistribution):
         return False
 
     
+    @property
+    def variance(self):
+        return self._variance
+
+    
     def cdf(self, x):
         """ For a realization x, compute the probability """
-        return StatArray.StatArray(norm.cdf(x, loc = self.mean, scale = self.variance), "Cumulative Density")
+        if self.log:
+            x = np.log(x)
+        return StatArray.StatArray(norm.cdf(x, loc = self._mean, scale = self.variance), "Cumulative Density")
 
 
     def deepcopy(self):
@@ -58,16 +69,19 @@ class Normal(baseDistribution):
  
         """
         # return deepcopy(self)
-        return Normal(self.mean, self.variance, self.prng)
+        return Normal(self.mean, self.variance, self.log, self.prng)
 
 
     def derivative(self, x, moment):
         assert 0 <= moment <= 1, ValueError("Must have 0 <= moment < 2")
+
+        if self.log:
+            x = np.log(x)
         
         if moment == 0:
-            return ((x - self.mean) / self.variance) * self.probability(x)
+            return ((x - self._mean) / self.variance) * self.probability(x)
         else:
-            return (0.5 / self.variance**2.0) * ((x - self.mean)**2.0 - self.variance) * self.probability(x)
+            return (0.5 / self.variance**2.0) * ((x - self._mean)**2.0 - self.variance) * self.probability(x)
 
 
 
@@ -86,7 +100,9 @@ class Normal(baseDistribution):
 
         """
         size = (size, self.mean.size)
-        return np.squeeze(self.prng.normal(size=size, loc=self.mean, scale=self.variance))
+        values = np.squeeze(self.prng.normal(size=size, loc=self._mean, scale=self.variance))
+
+        return np.exp(values) if self.log else values
 
     
     def plotPDF(self, log=False, **kwargs):
@@ -101,10 +117,13 @@ class Normal(baseDistribution):
     def probability(self, x, log):
         """ For a realization x, compute the probability """
 
+        if self.log:
+            x= np.log(x)
+
         if log:
-            return StatArray.StatArray(norm.logpdf(x, loc = self.mean, scale = self.variance), "Probability Density")
+            return StatArray.StatArray(norm.logpdf(x, loc = self._mean, scale = self.variance), "Probability Density")
         else:
-            return StatArray.StatArray(norm.pdf(x, loc = self.mean, scale = self.variance), "Probability Density")
+            return StatArray.StatArray(norm.pdf(x, loc = self._mean, scale = self.variance), "Probability Density")
         
 
     def summary(self, out=False):
@@ -155,5 +174,7 @@ class Normal(baseDistribution):
     def bins(self, nBins = 100, nStd=4.0):
         """ Discretizes a range given the mean and variance of the distribution """
         tmp = nStd * np.sqrt(self.variance)
-        return StatArray.StatArray(np.linspace(self.mean - tmp, self.mean + tmp, nBins+1))
+        values = np.linspace(self._mean - tmp, self._mean + tmp, nBins+1)
+
+        return StatArray.StatArray(np.exp(values)) if self.log else StatArray.StatArray(values)
 

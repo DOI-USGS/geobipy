@@ -35,7 +35,7 @@ class MvNormal(baseDistribution):
 
     """
 
-    def __init__(self, mean, variance, ndim=None, prng=None):
+    def __init__(self, mean, variance, ndim=None, log=False, prng=None):
         """ Initialize a normal distribution
         mu:     :Mean of the distribution
         sigma:  :Standard deviation of the distribution
@@ -73,11 +73,19 @@ class MvNormal(baseDistribution):
             self._constant = True
             self._mean = np.full(ndim, fill_value=mean)
             self._variance = np.full(ndim, fill_value=variance)
+    
+        self.log = log
+        if log:
+            self._mean = np.log(self._mean)
 
 
     @property
     def mean(self):
-        return self._mean
+        return np.exp(self._mean) if self.log else self._mean
+
+    @mean.setter
+    def mean(self, values):
+        self._mean[:] = np.log(values) if self.log else values
 
     @property
     def multivariate(self):
@@ -94,9 +102,9 @@ class MvNormal(baseDistribution):
         assert newDimension > 0, ValueError("Cannot have zero dimensions.")
         assert self._constant, ValueError("Cannot change the dimension of a non-constant multivariate distribution.")
         if np.ndim(self.mean) == 0:
-            mean = self.mean
+            mean = self._mean
         else:
-            mean = self.mean[0]
+            mean = self._mean[0]
 
         if np.ndim(self.variance) == 0:
             variance = self.variance
@@ -106,6 +114,7 @@ class MvNormal(baseDistribution):
         self._mean = np.full(newDimension, fill_value=mean)
         self._variance = np.full(newDimension, fill_value=variance)
 
+
     @property
     def std(self):
         return np.sqrt(self.variance)
@@ -114,12 +123,28 @@ class MvNormal(baseDistribution):
     def variance(self):
         return self._variance
 
+    @property
+    def inverseVariance(self):
+        return cf.Inv(self._variance)
+
     def deepcopy(self):
         """ Define a deepcopy routine """
         if self._constant:
-            return MvNormal(mean=self.mean[0], variance=self.variance[0], ndim=self.ndim, prng=self.prng)
+            return MvNormal(mean=self.mean[0], variance=self.variance[0], ndim=self.ndim, log=self.log, prng=self.prng)
         else:
-            return MvNormal(mean=self.mean, variance=self.variance, prng=self.prng)
+            return MvNormal(mean=self.mean, variance=self.variance, log=self.log, prng=self.prng)
+
+
+    def derivative(self, x, order):
+
+        assert order in [1, 2], ValueError("Order must be 1 or 2.")
+        if order == 1:
+            if self.log:
+                x = np.log(x)
+
+            return cf.Ax(self.inverseVariance, x - self._mean)
+        elif order == 2:
+            return self.inverseVariance
 
 
     def rng(self, size = 1):
@@ -127,25 +152,29 @@ class MvNormal(baseDistribution):
 
         variance = np.squeeze(self.variance)
         if variance.ndim == 0:
-            return np.sqrt(variance) * self.prng.randn(size) + self.mean
-        if (variance.ndim == 1):
-            tmp = self.prng.multivariate_normal(self.mean, np.diag(variance), size)
-            return tmp
+            values = np.sqrt(variance) * self.prng.randn(size) + self._mean
+        elif (variance.ndim == 1):
+            values = self.prng.multivariate_normal(self._mean, np.diag(variance), size)
         else:
-            return self.prng.multivariate_normal(self.mean, variance, size)
+            values = np.squeeze(self.prng.multivariate_normal(self._mean, variance, size))
+        
+        return np.exp(values) if self.log else values
 
 
     def probability(self, x, log):
         """ For a realization x, compute the probability """
+
+        if self.log:
+            x = np.log(x)
 
         if log:
 
             N = np.size(x)
             nD = self.mean.size
 
-            mean = self.mean
+            mean = self._mean
             if (nD == 1):
-                mean = np.repeat(self.mean, N)
+                mean = np.repeat(self._mean, N)
             else:
                 assert (N == nD), TypeError('size of samples {} must equal number of distribution dimensions {} for a multivariate distribution'.format(N, nD))
 
@@ -186,7 +215,7 @@ class MvNormal(baseDistribution):
             dv = cf.Det(self.variance)
             # print(dv)
             # subtract the mean from the samples.
-            xMu = x - self.mean
+            xMu = x - self._mean
             # Take the inverse of the variance
             tmp = cf.Inv(self.variance)
             iv = cf.Ax(tmp, xMu)
@@ -208,9 +237,9 @@ class MvNormal(baseDistribution):
         N: Padded size
         """
         if (self.variance.ndim == 1):
-            return MvNormal(np.zeros(N,dtype=self.mean.dtype),np.zeros(N, dtype=self.variance.dtype), prng=self.prng)
+            return MvNormal(np.zeros(N,dtype=self.mean.dtype),np.zeros(N, dtype=self.variance.dtype), log=self.log, prng=self.prng)
         if (self.variance.ndim == 2):
-            return MvNormal(np.zeros(N,dtype=self.mean.dtype),np.zeros([N,N], dtype=self.variance.dtype), prng=self.prng)
+            return MvNormal(np.zeros(N,dtype=self.mean.dtype),np.zeros([N,N], dtype=self.variance.dtype), log=self.log, prng=self.prng)
 
 
     def bins(self, nBins=100, nStd=4.0, axis=None):
@@ -239,13 +268,16 @@ class MvNormal(baseDistribution):
                 bins = np.empty([nD, nBins+1])
                 for i in range(nD):
                     tmp = nStd * np.sqrt(self.variance[i])
-                    bins[i, :] = np.linspace(self.mean[i] - tmp, self.mean[i] + tmp, nBins+1)
-                return StatArray.StatArray(np.squeeze(bins))
+                    bins[i, :] = np.linspace(self._mean[i] - tmp, self._mean[i] + tmp, nBins+1)
+                values = np.squeeze(bins)
             else:
                 bins = np.empty(nBins+1)
                 tmp = nStd * np.sqrt(self.variance[axis])
-                bins[:] = np.linspace(self.mean[axis] - tmp, self.mean[axis] + tmp, nBins+1)
-                return StatArray.StatArray(np.squeeze(bins))
+                bins[:] = np.linspace(self._mean[axis] - tmp, self._mean[axis] + tmp, nBins+1)
+                values = np.squeeze(bins)
 
-        tmp = nStd * np.sqrt(self.variance)
-        return StatArray.StatArray(np.squeeze(np.linspace(self.mean - tmp, self.mean + tmp, nBins+1)))
+        else:
+            tmp = nStd * np.sqrt(self.variance)
+            values = np.squeeze(np.linspace(self._mean - tmp, self._mean + tmp, nBins+1))
+
+        return StatArray.StatArray(np.exp(values)) if self.log else StatArray.StatArray(values)

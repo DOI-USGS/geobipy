@@ -62,10 +62,6 @@ class Results(myObject):
         Name of the parameters if they are reciprocated.
     reciprocateUnits : str, optional
         Units of the parameters if they are reciprocated.
-    priMu : float, optional
-        Initial prior mean for the halfspace parameter.  Usually set to the numpy.log of the initial halfspace parameter value.
-    priStd : float, optional
-        Initial prior standard deviation for the halfspace parameter. Usually set to numpy.log(11)   
     
     """
 
@@ -93,8 +89,6 @@ class Results(myObject):
         plotEvery = kwargs.pop('plotEvery', nMarkovChains / 20)
         parameterDisplayLimits = kwargs.pop('parameterDisplayLimits', [0.0, 1.0])
         reciprocateParameter = kwargs.pop('reciprocateParameters', False)
-        priMu = kwargs.pop('priMu', 1.0)
-        priStd = kwargs.pop('priStd', np.log(11))
 
         verbose = kwargs.pop('verbose', False)
 
