@@ -32,7 +32,7 @@ class Categorical(baseDistribution):
 
         baseDistribution.__init__(self, prng)
         self._probabilities = probabilities/np.sum(probabilities)
-        self._probabilityMassFunction = np.cumsum(probabilities)
+        self._probabilityMassFunction = np.cumsum(self._probabilities)
         self._events = events
 
 
@@ -100,7 +100,8 @@ class Categorical(baseDistribution):
             Event index, 0 to nEvents - 1
 
         """
-        return np.searchsorted(self._probabilityMassFunction, self.prng.rand(size))
+        r = self.prng.rand(size)
+        return np.searchsorted(self._probabilityMassFunction, r)
 
 
     def bins(self):
