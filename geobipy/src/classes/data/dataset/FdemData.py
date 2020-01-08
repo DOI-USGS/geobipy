@@ -1017,11 +1017,11 @@ class FdemData(Data):
 
         item = grp.get('relErr')
         obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp.relErr = obj.fromHdf(item)
+        tmp._relErr = obj.fromHdf(item)
 
         item = grp.get('addErr')
         obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp.addErr = obj.fromHdf(item)
+        tmp._addErr = obj.fromHdf(item)
 
         item = grp.get('calibration')
         obj = eval(cF.safeEval(item.attrs.get('repr')))

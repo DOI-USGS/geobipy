@@ -207,9 +207,9 @@ class FdemDataPoint(EmDataPoint):
         
         tmp = FdemDataPoint(self.x, self.y, self.z, self.elevation, self._data, self._std, self._predictedData, self.system, self.lineNumber, self.fiducial)
         # StatArray of Relative Errors
-        tmp.relErr = self.relErr.deepcopy()
+        tmp._relErr = self.relErr.deepcopy()
         # StatArray of Additive Errors
-        tmp.addErr = self.addErr.deepcopy()
+        tmp._addErr = self.addErr.deepcopy()
         # StatArray of calibration parameters
         # The four columns are Bias,Variance,InphaseBias,QuadratureBias.
         tmp.calibration = self.calibration.deepcopy()
@@ -351,11 +351,11 @@ class FdemDataPoint(EmDataPoint):
 
         item = grp.get('relErr')
         obj = eval(cf.safeEval(item.attrs.get('repr')))
-        _aPoint.relErr = obj.fromHdf(item, index=index)
+        _aPoint._relErr = obj.fromHdf(item, index=index)
 
         item = grp.get('addErr')
         obj = eval(cf.safeEval(item.attrs.get('repr')))
-        _aPoint.addErr = obj.fromHdf(item, index=index)
+        _aPoint._addErr = obj.fromHdf(item, index=index)
 
         item = grp.get('calibration')
         obj = eval(cf.safeEval(item.attrs.get('repr')))

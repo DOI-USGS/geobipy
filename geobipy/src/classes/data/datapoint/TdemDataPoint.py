@@ -159,9 +159,9 @@ class TdemDataPoint(EmDataPoint):
     def __deepcopy__(self, memo):
         out = TdemDataPoint(self.x, self.y, self.z, self.elevation, self._data, self._std, self._predictedData, self.system, self.T, self.R, self.loopOffset, self.lineNumber, self.fiducial)
         # StatArray of Relative Errors
-        out.relErr = self.relErr.deepcopy()
+        out._relErr = self.relErr.deepcopy()
         # StatArray of Additive Errors
-        out.addErr = self.addErr.deepcopy()
+        out._addErr = self.addErr.deepcopy()
         # Initialize the sensitivity matrix
         out.J = deepcopy(self.J)
 
@@ -293,10 +293,10 @@ class TdemDataPoint(EmDataPoint):
             slic = index
         item = grp.get('relErr')
         obj = eval(cf.safeEval(item.attrs.get('repr')))
-        _aPoint.relErr = obj.fromHdf(item, index=slic)
+        _aPoint._relErr = obj.fromHdf(item, index=slic)
         item = grp.get('addErr')
         obj = eval(cf.safeEval(item.attrs.get('repr')))
-        _aPoint.addErr = obj.fromHdf(item, index=slic)
+        _aPoint._addErr = obj.fromHdf(item, index=slic)
         item = grp.get('T')
         obj = eval(cf.safeEval(item.attrs.get('repr')))
         _aPoint.T = obj.fromHdf(item, index=index)
@@ -494,7 +494,7 @@ class TdemDataPoint(EmDataPoint):
             P_relative = self.relErr.probability(log=True)
             errProbability += P_relative
         if aErr:  # Additive Errors
-            P_additive = self.addErr.probability(x=np.log(self.addErr), log=True)
+            P_additive = self.addErr.probability(log=True)
             errProbability += P_additive
 
         probability += errProbability
@@ -512,18 +512,18 @@ class TdemDataPoint(EmDataPoint):
         return probability
 
 
-    def perturbAdditiveError(self):
+    # def perturbAdditiveError(self):
 
-        # Generate a new error
-        tmp = self.addErr.proposal.rng(1)
-        if self.addErr.hasPrior:
-            p = self.addErr.probability(x=tmp, log=True)
-            while p == -np.inf:
-                tmp = self.addErr.proposal.rng(1)
-                p = self.addErr.probability(x=tmp, log=True)
-        # Update the mean of the proposed errors
-        self.addErr.proposal.mean[:] = tmp
-        self.addErr[:] = np.exp(tmp)
+    #     # Generate a new error
+    #     tmp = self.addErr.proposal.rng(1)
+    #     if self.addErr.hasPrior:
+    #         p = self.addErr.probability(x=tmp, log=True)
+    #         while p == -np.inf:
+    #             tmp = self.addErr.proposal.rng(1)
+    #             p = self.addErr.probability(x=tmp, log=True)
+    #     # Update the mean of the proposed errors
+    #     self.addErr.proposal.mean[:] = tmp
+    #     self.addErr[:] = np.exp(tmp)
 
 
     def setAdditiveErrorPosterior(self):
@@ -550,7 +550,7 @@ class TdemDataPoint(EmDataPoint):
         maximum = np.atleast_1d(maximum)
         assert maximum.size == self.nSystems, ValueError("maximum must have {} entries".format(self.nSystems))
         assert np.all(maximum > 0.0), ValueError("maximum values must be in linear space i.e. > 0.0")
-        self.addErr.setPrior('Uniform', np.log(minimum), np.log(maximum), prng=prng)
+        self.addErr.setPrior('Uniform', minimum, maximum, log=True, prng=prng)
 
     
     def setAdditiveErrorProposal(self, means, variances, prng=None):
@@ -558,7 +558,7 @@ class TdemDataPoint(EmDataPoint):
         assert means.size == self.nSystems, ValueError("means must have {} entries".format(self.nSystems))
         variances = np.atleast_1d(variances)
         assert variances.size == self.nSystems, ValueError("variances must have {} entries".format(self.nSystems))
-        self.addErr.setProposal('MvNormal', np.log(means), variances, prng=prng)
+        self.addErr.setProposal('MvNormal', means, variances, log=True, prng=prng)
 
 
     def updateErrors(self, relativeErr, additiveErr):

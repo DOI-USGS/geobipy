@@ -26,14 +26,33 @@ class EmDataPoint(DataPoint):
         DataPoint.__init__(self, nChannelsPerSystem, x, y, z, elevation, data, std, predictedData, dataUnits, channelNames)
 
         # StatArray of Relative Errors
-        self.relErr = StatArray.StatArray(self.nSystems, '$\epsilon_{Relative}x10^{2}$', '%')
+        self._relErr = StatArray.StatArray(self.nSystems, '$\epsilon_{Relative}x10^{2}$', '%')
         # StatArray of Additive Errors
-        self.addErr = StatArray.StatArray(self.nSystems, '$\epsilon_{Additive}$', self._data.units)
+        self._addErr = StatArray.StatArray(self.nSystems, '$\epsilon_{Additive}$', self._data.units)
         # Initialize the sensitivity matrix
         self.J = None
 
         self.fiducial = fiducial
         self.lineNumber = lineNumber
+
+
+    @property
+    def relErr(self):
+        return self._relErr
+
+    @relErr.setter
+    def relErr(self, values):
+        assert np.size(values) == self.nSystems, ValueError("relativeError must have length {}".format(self.nSystems))
+        self._relErr[:] = values
+    
+    @property
+    def addErr(self):
+        return self._addErr
+
+    @addErr.setter
+    def addErr(self, values):
+        assert np.size(values) == self.nSystems, ValueError("additiveError must have length {}".format(self.nSystems))
+        self._addErr[:] = values
 
 
     def FindBestHalfSpace(self, minConductivity=-4.0, maxConductivity=2.0, nSamples=100):
@@ -184,38 +203,23 @@ class EmDataPoint(DataPoint):
 
     def perturbAdditiveError(self):
         # Generate a new error
-        self.addErr[:] = self.addErr.proposal.rng(1)
-        if self.addErr.hasPrior:
-            p = self.addErr.probability(log=True)
-            while p == -np.inf:
-                self.addErr[:] = self.addErr.proposal.rng(1)
-                p = self.addErr.probability(log=True)
+        self.addErr.perturb(imposePrior=True, log=True)
         # Update the mean of the proposed errors
-        self.addErr.proposal.mean[:] = self.addErr
+        self.addErr.proposal.mean = self.addErr
 
     
     def perturbHeight(self):
         # Generate a new elevation
-        self.z[:] = self.z.proposal.rng(1)
-        if self.z.hasPrior:
-            p = self.z.probability(log=True)
-            while p == -np.inf:
-                self.z[:] = self.z.proposal.rng(1)
-                p = self.z.probability(log=True)
+        self.z.perturb(imposePrior=True, log=True)
         # Update the mean of the proposed elevation
-        self.z.proposal.mean[:] = self.z
+        self.z.proposal.mean = self.z
 
     
     def perturbRelativeError(self):
         # Generate a new error
-        self.relErr[:] = self.relErr.proposal.rng(1)
-        if self.relErr.hasPrior:
-            p = self.relErr.probability(log=True)
-            while p == -np.inf:
-                self.relErr[:] = self.relErr.proposal.rng(1)
-                p = self.relErr.probability(log=True)
+        self.relErr.perturb(imposePrior=True, log=True)
         # Update the mean of the proposed errors
-        self.relErr.proposal.mean[:] = self.relErr
+        self.relErr.proposal.mean = self.relErr
 
 
     def plotHalfSpaceResponses(self, minConductivity=-4.0, maxConductivity=2.0, nSamples=100, **kwargs):
@@ -247,11 +251,9 @@ class EmDataPoint(DataPoint):
     def setAdditiveErrorPosterior(self):
 
         assert self.addErr.hasPrior, Exception("Must set a prior on the additive error")
-
         aBins = self.addErr.prior.bins()
 
         binsMidpoint = 0.5 * aBins.max(axis=-1) + aBins.min(axis=-1)
-
         ab = np.atleast_2d(aBins)
         binsMidpoint = np.atleast_1d(binsMidpoint)
 
