@@ -789,9 +789,8 @@ class TdemDataPoint(EmDataPoint):
 
 
     def Isend(self, dest, world, systems=None):
-        tmp = np.empty(7, dtype=np.float64)
-        tmp[:] = np.asarray([self.x, self.y, self.z, self.elevation, self.nSystems, self.lineNumber, self.fiducial])
-        myMPI.Isend(tmp, dest=dest, world=world)
+        tmp = np.asarray([self.x, self.y, self.z, self.elevation, self.nSystems, self.lineNumber, self.fiducial, *self.loopOffset], dtype=np.float64)
+        myMPI.Isend(tmp, dest=dest, ndim=1, shape=(10, ), dtype=np.float64, world=world)
         if systems is None:
             for i in range(self.nSystems):
                 world.isend(self.system[i].fileName, dest=dest)
@@ -800,14 +799,12 @@ class TdemDataPoint(EmDataPoint):
         self._predictedData.Isend(dest, world)
         self.T.Isend(dest, world)
         self.R.Isend(dest, world)
-        self.loopOffset.Isend(dest, world)
 
 
 
     def Irecv(self, source, world, systems=None):
 
-        tmp = np.empty(7, dtype=np.float64)
-        tmp = myMPI.Irecv(source=source, world=world)
+        tmp = myMPI.Irecv(source=source, ndim=1, shape=(10, ), dtype=np.float64, world=world)
 
         if systems is None:
             nSystems = np.int32(tmp[4])
@@ -823,6 +820,5 @@ class TdemDataPoint(EmDataPoint):
         c = CircularLoop()
         T = c.Irecv(source, world)
         R = c.Irecv(source, world)
-        loopOffset = s.Irecv(source, world)
-
+        loopOffset  = tmp[-3:]
         return TdemDataPoint(tmp[0], tmp[1], tmp[2], tmp[3], data=d, std=s, predictedData=p, system=systems, T=T, R=R, loopOffset=loopOffset, lineNumber=tmp[5], fiducial=tmp[6])
