@@ -19,7 +19,9 @@ rank = world.rank
 master = rank == 0
 size = world.size
 
-assert size == 4, Exception("Please use 4 cores to test")
+#assert size == 4, Exception("Please use 4 cores to test")
+
+dataPath = "..//documentation_source//source//examples//supplementary//Data//" 
 
 x = 1
 # Set up array sizes for consistency and chunk lengths per core
@@ -207,7 +209,6 @@ else:
 assert np.all(y.data == dSave[rank, :]) and np.all(y.std == sSave[rank, :]) and np.all(y.predictedData == pSave[rank, :]), Exception("Could not use Data.Isend/Irecv. Rank {}".format(rank))
 
 ### Test Frequency Domain Data
-dataPath = "..//examples//supplementary//Data//" 
 fdSave = FdemData()
 fdSave.read(dataPath+"Resolve2.txt", dataPath+"FdemSystem2.stm")
 if master:
