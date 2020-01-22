@@ -32,25 +32,24 @@ class CircularLoop(EmLoop):
 
     """
 
-    def __init__(self, orient="z", moment=1, x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0):
+    def __init__(self, orient="z", moment=1.0, x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0):
         """ Initialize a loop in an EM system """
         # Orientation of the loop dipole
         self._orient = orient
         # Dipole moment of the loop
-        self._moment = np.int32(moment)
-        self.data = np.hstack([x, y, z, pitch, roll, yaw])
+        self._moment = moment
         # Not sure yet
-        self._x = self.data[0]
+        self._x = x
         # Not sure yet
-        self._y = self.data[1]
+        self._y = y
         # Not sure yet
-        self._z = self.data[2]
+        self._z = z
         # Pitch of the loop
-        self._pitch = self.data[3]
+        self._pitch = pitch
         # Roll of the loop
-        self._roll = self.data[4]
+        self._roll = roll
         # Yaw of the loop
-        self._yaw = self.data[5]
+        self._yaw = yaw
         # Radius of the loop
         self._radius = radius
 
@@ -94,6 +93,30 @@ class CircularLoop(EmLoop):
     def z(self):
         return self._z   
 
+
+    @property
+    def orient(self):
+        if self._orient == 0.0:
+            return 'x'
+        elif self._orient == 1.0:
+            return 'y'
+        else:
+            return 'z'
+
+    @orient.setter
+    def orient(self, value):
+        if isinstance(value, str):
+            assert value in ['x', 'y', 'z'], ValueError("orientation must be 'x', 'y', or 'z'")
+            if value == 'x':
+                self._orient = 0.0
+            elif value == 'y':
+                self._orient = 1.0
+            else:
+                self._orient = 2.0
+        else:
+            assert value in [0, 0.0, 1, 1.0, 2, 2.0], ValueError("orientation must be 0, 1, or 2")
+            self._orient = np.float64(value)
+
     
     def deepcopy(self):
         return deepcopy(self)
@@ -130,15 +153,9 @@ class CircularLoop(EmLoop):
         grp.attrs["repr"] = self.hdfName()
 
         if (not nRepeats is None):
-            grp.create_dataset('orientation', [nRepeats],    dtype="S1")
-            grp.create_dataset('moment',      [nRepeats],    dtype=np.int32,   fillvalue=fillvalue)
-            grp.create_dataset('data',        [nRepeats, 6], dtype=np.float64, fillvalue=fillvalue)
-            grp.create_dataset('radius',      [nRepeats],    dtype=np.float64, fillvalue=fillvalue)
+            grp.create_dataset('data', [nRepeats, 9], dtype=np.float64, fillvalue=fillvalue)
         else:
-            grp.create_dataset('orientation', [1], dtype="S1")
-            grp.create_dataset('moment',      [1], dtype=np.int32,   fillvalue=fillvalue)
-            grp.create_dataset('data',        [6], dtype=np.float64, fillvalue=fillvalue)
-            grp.create_dataset('radius',      [1], dtype=np.float64, fillvalue=fillvalue)
+            grp.create_dataset('data', [9], dtype=np.float64, fillvalue=fillvalue)
 
 
     def writeHdf(self, parent, myName, index=None):
@@ -147,13 +164,8 @@ class CircularLoop(EmLoop):
         myName: object hdf name. Assumes createHdf has already been called
         create: optionally create the data set as well before writing
         """
-        if (index is None):
-            parent[myName+'/orientation'][0] = np.string_(self.orient)
-        else:
-            parent[myName+'/orientation'][index] = np.string_(self.orient)
-        writeNumpy(self.moment, parent, myName+'/moment', index=index)
-        writeNumpy(self.data,   parent, myName+'/data',   index=index)
-        writeNumpy(self.radius, parent, myName+'/radius', index=index)
+        data = np.asarray([self._orient, self.moment, self.x, self.y, self.z, self.pitch, self.roll, self.yaw, self.radius], dtype=np.float64)
+        writeNumpy(data, parent, myName+'/data', index=index)
 
     def toHdf(self, parent, myName):
 
@@ -161,10 +173,8 @@ class CircularLoop(EmLoop):
         grp = parent.create_group(myName)
         grp.attrs["repr"] = self.hdfName()
 
-        grp.create_dataset('orientation', data = np.string_(self.orient))
-        grp.create_dataset('moment',      data = self.moment)
-        grp.create_dataset('data',        data = self.data)
-        grp.create_dataset('radius',      data = self.radius)
+        data = np.asarray([self._orient, self.moment, self.x, self.y, self.z, self.pitch, self.roll, self.yaw, self.radius], dtype=np.float64)
+        grp.create_dataset('data', data = data)
 
 
     def fromHdf(self, h5grp, index=None):
@@ -172,28 +182,14 @@ class CircularLoop(EmLoop):
 
         if (index is None):
             try:
-                o = np.array(h5grp.get('orientation'))
-                m = np.array(h5grp.get('moment'))
-                d = np.array(h5grp.get('data'))
-                try:
-                    r = np.array(h5grp.get('radius')[index])
-                except:
-                    r = 1.0
+                d = np.squeeze(np.array(h5grp.get('data')))
             except:
                 assert False, ValueError("HDF data was created as a larger array, specify the row index to read from")
 
-            return CircularLoop(o, m, d[:, 0], d[:, 1], d[:, 2], d[:, 3], d[:, 4], d[:, 5], r)
+            return CircularLoop(*d)
         else:
-            o = np.array(h5grp.get('orientation')[index])
-            m = np.array(h5grp.get('moment')[index])
             d = np.array(h5grp.get('data')[index])
-            try:
-                r = np.array(h5grp.get('radius')[index])
-            except:
-                r = 1.0
-            return CircularLoop(o, m, d[0], d[1], d[2], d[3], d[4], d[5], r)
-
-        
+            return CircularLoop(*d)
 
 
     def Bcast(self, world, root=0):
@@ -211,36 +207,20 @@ class CircularLoop(EmLoop):
         
         """
 
-        o = myMPI.Bcast(self.orient,      world, root=root)
-        m = myMPI.Bcast(self.moment,      world, root=root)
-        x = myMPI.Bcast(self.x,           world, root=root)
-        y = myMPI.Bcast(self.y,           world, root=root)
-        z = myMPI.Bcast(self.z,           world, root=root)
-        pitch = myMPI.Bcast(self.pitch,   world, root=root)
-        roll = myMPI.Bcast(self.roll,     world, root=root)
-        yaw = myMPI.Bcast(self.yaw,       world, root=root)
-        radius = myMPI.Bcast(self.radius, world, root=root)
+        data = np.asarray([self._orient, self.moment, self.x, self.y, self.z, self.pitch, self.roll, self.yaw, self.radius], dtype=np.float64)
+        tData = myMPI.Bcast(data, world, root=root)
 
-        return CircularLoop(o, m, x, y, z, pitch, roll, yaw, radius)
+        return CircularLoop(*tData)
 
 
     def Isend(self, dest, world):
-        req = world.isend(self.orient, dest=dest)
-        req.wait()
-        myMPI.Isend(self.moment, dest=dest, world=world)
-        tmp = np.empty(7, np.float64)
-        tmp[:] = np.asarray([self.x, self.y, self.z, self.pitch, self.roll, self.yaw, self.radius])
-        req = world.Isend(tmp, dest=dest)
+        data = np.asarray([self._orient, self.moment, self.x, self.y, self.z, self.pitch, self.roll, self.yaw, self.radius], dtype=np.float64)
+        myMPI.Isend(data, dest=dest, ndim=1, shape=(9, ), dtype=np.float64, world=world)
 
 
     def Irecv(self, source, world):
-        req = world.irecv(source=source)
-        o = req.wait()
-        m = myMPI.Irecv(source, world)
-        tmp = np.empty(7, np.float64)
-        req = world.Irecv(tmp, source=source)
-        req.Wait()
-        return CircularLoop(o, m, tmp[0], tmp[1], tmp[2], tmp[3], tmp[4], tmp[5], tmp[6])
+        data = myMPI.Irecv(source=source, ndim=1, shape=(9, ), dtype=np.float64, world=world)
+        return CircularLoop(*data)
 
 
     def __str__(self):

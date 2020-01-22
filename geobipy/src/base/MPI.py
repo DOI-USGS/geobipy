@@ -297,7 +297,7 @@ def _isendDtype(value, dest, world):
         tmp = str(value.dtype)  # Try to get the dtype attribute
     except:
         tmp = str(value.__class__.__name__)  # Otherwise use the type finder
-    world.isend(tmp, dest=dest)
+    world.send(tmp, dest=dest)
     return tmp
 
 
@@ -325,78 +325,71 @@ def _irecvDtype(source, world):
         The data type.
 
     """
-    req = world.irecv(source=source)
-    tmp = req.wait()
+    tmp = world.recv(source=source)
 
     if (tmp == 'list'):
         return 'list'
     return eval('np.{}'.format(tmp))  # Return the evaluated string
 
 
-def Isend(self, dest, world, dType=None, nDim=None, shape=None):
+def Isend(self, dest, world, dtype=None, ndim=None, shape=None):
     """Isend a numpy array. Auto determines data type and shape. Must be accompanied by Irecv on the dest rank.
 
     """
 
     # Send the data type
-    if dType is None:
-        dType = _isendDtype(self, dest=dest, world=world)
+    if dtype is None:
+        dtype = _isendDtype(self, dest=dest, world=world)
 
-    assert (not dType == 'list'), TypeError("Cannot Send/Recv a list")
+    assert (not dtype == 'list'), TypeError("Cannot Send/Recv a list")
 
     # Broadcast the number of dimensions
-    if nDim is None:
-        nDim = Isend_1int(np.ndim(self), dest=dest, world=world)
+    if ndim is None:
+        ndim = Isend_1int(np.ndim(self), dest=dest, world=world)
 
-    if (nDim == 0):  # For a single number
-        this = np.full(1, self, dtype=dType)  # Initialize on each worker
-        req = world.Isend(this, dest=dest)  # Broadcast
+    if (ndim == 0):  # For a single number
+        this = np.full(1, self, dtype=dtype)  # Initialize on each worker
+        world.Send(this, dest=dest)  # Broadcast
 
-    elif (nDim == 1):  # For a 1D array
+    elif (ndim == 1):  # For a 1D array
         if shape is None:
             shape = Isend_1int(np.size(self), dest=dest, world=world)  # Broadcast the array size
-        req = world.Isend(self, dest=dest)  # Broadcast
+        world.Send(self, dest=dest)  # Broadcast
 
-    elif (nDim > 1):  # nD Array
+    elif (ndim > 1):  # nD Array
         if shape is None:
-            world.Isend(np.asarray(self.shape), dest=dest)  # Broadcast the shape
-        req = world.Isend(self, dest=dest)  # Broadcast
-
-    return req
+            world.Send(np.asarray(self.shape), dest=dest)  # Broadcast the shape
+        world.Send(self, dest=dest)  # Broadcast
 
 
-def Irecv(source, world, dType=None, nDim=None, shape=None):
+def Irecv(source, world, dtype=None, ndim=None, shape=None):
     """Irecv a numpy array. Auto determines data type and shape. Must be accompanied by Isend on the source rank.
 
     """
 
-    if dType is None:
-        dType = _irecvDtype(source, world)
+    if dtype is None:
+        dtype = _irecvDtype(source, world)
 
-    assert not dType == 'list', TypeError("Cannot Send/Recv a list")
+    assert not dtype == 'list', TypeError("Cannot Send/Recv a list")
 
-    if nDim is None:
-        nDim = Irecv_1int(source, world)
+    if ndim is None:
+        ndim = Irecv_1int(source, world)
 
-    if (nDim == 0):  # For a single number
-        this = np.empty(1, dtype=dType)  # Initialize on each worker
-        req = world.Irecv(this, source=source)  # Broadcast
-        req.Wait()
+    if (ndim == 0):  # For a single number
+        this = np.empty(1, dtype=dtype)  # Initialize on each worker
+        world.Recv(this, source=source)  # Broadcast
         this = this[0]
-    elif (nDim == 1): # For a 1D array
+    elif (ndim == 1): # For a 1D array
         if shape is None:
             shape = Irecv_1int(source=source, world=world)
-        this = np.empty(shape, dtype=dType)
-        req = world.Irecv(this, source=source)
-        req.Wait()
-    elif (nDim > 1): # Nd Array
+        this = np.empty(shape, dtype=dtype)
+        world.Recv(this, source=source)
+    elif (ndim > 1): # Nd Array
         if shape is None:
-            shape = np.empty(nDim, dtype=np.int)
-            req = world.Irecv(shape, source=source)
-            req.Wait()
-        this = np.empty(shape, dtype=dType)
-        req = world.Irecv(this, source=source)
-        req.Wait()
+            shape = np.empty(ndim, dtype=np.int)
+            world.Recv(shape, source=source)
+        this = np.empty(shape, dtype=dtype)
+        world.Recv(this, source=source)
 
     return this
 
@@ -437,7 +430,7 @@ def Isend_1int(self, dest, world):
 
     #"""
     this = np.full(1, self, np.int64)
-    world.Isend(this, dest=dest)
+    world.Send(this, dest=dest)
     return this[0]
 
 
@@ -460,8 +453,7 @@ def Irecv_1int(source, world):
 
     """
     this = np.empty(1, np.int64)
-    req = world.Irecv(this, source=source)
-    req.Wait()
+    req = world.Recv(this, source=source)
     return this[0]
 
 
@@ -500,7 +492,7 @@ def IrecvFromLeft(world, wrap=True):
      
     
 
-def Bcast(self, world, root=0, dType=None, nDim=None, shape=None):
+def Bcast(self, world, root=0, dtype=None, ndim=None, shape=None):
     """Broadcast a string or a numpy array
 
     Broadcast a string or a numpy array from a root rank to all ranks in an MPI communicator. Must be called collectively.
@@ -556,35 +548,35 @@ def Bcast(self, world, root=0, dType=None, nDim=None, shape=None):
         return this
 
     # Broadcast the data type
-    if dType is None:
-        dType = bcastType(self, world, root=root)
+    if dtype is None:
+        dtype = bcastType(self, world, root=root)
 
-    assert dType != 'list', TypeError("Use MPI.Bcast_list for lists")
+    assert dtype != 'list', TypeError("Use MPI.Bcast_list for lists")
 
     # Broadcast the number of dimensions
-    if nDim is None:
-        nDim = Bcast_1int(np.ndim(self), world, root=root)
+    if ndim is None:
+        ndim = Bcast_1int(np.ndim(self), world, root=root)
 
-    if (nDim == 0):  # For a single number
-        this = np.empty(1, dtype=dType)  # Initialize on each worker
+    if (ndim == 0):  # For a single number
+        this = np.empty(1, dtype=dtype)  # Initialize on each worker
         if (world.rank == root):
             this[0] = self  # Assign on the master
         world.Bcast(this)  # Broadcast
         return this[0]
 
-    if (nDim == 1):  # For a 1D array
+    if (ndim == 1):  # For a 1D array
         if shape is None:
             shape = Bcast_1int(np.size(self), world, root=root)  # Broadcast the array size
-        this = np.empty(shape, dtype=dType)
+        this = np.empty(shape, dtype=dtype)
         if (world.rank == root):  # Assign on the root
             this[:] = self
         world.Bcast(this, root=root)  # Broadcast
         return this
 
-    if (nDim > 1):  # nD Array
+    if (ndim > 1):  # nD Array
         if shape is None:
             shape = Bcast(np.asarray(self.shape), world, root=root)  # Broadcast the shape
-        this = np.empty(shape, dtype=dType)
+        this = np.empty(shape, dtype=dtype)
         if (world.rank == root):  # Assign on the root
             this[:] = self
         world.Bcast(this, root=root)  # Broadcast
@@ -737,11 +729,11 @@ def Scatterv(self, starts, chunks, world, axis=0, root=0):
 
     """
     # Brodacast the type
-    dType = bcastType(self, world, root=root)
+    dtype = bcastType(self, world, root=root)
 
-    assert dType != 'list', TypeError("Use Scatterv_list for lists!")
+    assert dtype != 'list', TypeError("Use Scatterv_list for lists!")
 
-    return Scatterv_numpy(self, starts, chunks, dType, world, axis, root)
+    return Scatterv_numpy(self, starts, chunks, dtype, world, axis, root)
 
 
 def Scatterv_list(self, starts, chunks, world, root=0):
@@ -778,7 +770,7 @@ def Scatterv_list(self, starts, chunks, world, root=0):
         return self[:chunks[root]]
 
 
-def Scatterv_numpy(self, starts, chunks, dType, world, axis=0, root=0):
+def Scatterv_numpy(self, starts, chunks, dtype, world, axis=0, root=0):
     """ScatterV a numpy array to all ranks in an MPI communicator.
 
     Each rank gets a chunk defined by a starting index and chunk size. Must be called collectively. The 'starts' and 'chunks' must be available on every MPI rank. See the example for more details. Must be called collectively.
@@ -791,7 +783,7 @@ def Scatterv_numpy(self, starts, chunks, dType, world, axis=0, root=0):
         1D array of ints with size equal to the number of MPI ranks. Each element gives the starting index for a chunk to be sent to that core. e.g. starts[0] is the starting index for rank = 0.
     chunks : array of ints
         1D array of ints with size equal to the number of MPI ranks. Each element gives the size of a chunk to be sent to that core. e.g. chunks[0] is the chunk size for rank = 0.
-    dType : type
+    dtype : type
         The type of the numpy array being scattered. Must exist on all ranks.
     world : mpi4py.MPI.Comm
         MPI parallel communicator.
@@ -807,15 +799,15 @@ def Scatterv_numpy(self, starts, chunks, dType, world, axis=0, root=0):
 
     """
     # Broadcast the number of dimensions
-    nDim = Bcast_1int(np.ndim(self), world, root=root)
-    if (nDim == 1):  # For a 1D Array
-        this = np.empty(chunks[world.rank], dtype=dType)
+    ndim = Bcast_1int(np.ndim(self), world, root=root)
+    if (ndim == 1):  # For a 1D Array
+        this = np.empty(chunks[world.rank], dtype=dtype)
         world.Scatterv([self, chunks, starts, None], this[:], root=root)
         return this
 
     # For a 2D Array
     # MPI cannot send and receive arrays of more than one dimension.  Therefore higher dimensional arrays must be unpacked to 1D, and then repacked on the other side.
-    if (nDim == 2):
+    if (ndim == 2):
         s = Bcast_1int(np.size(self, 1 - axis), world, root=root)
         tmpChunks = chunks * s
         tmpStarts = starts * s
@@ -825,7 +817,7 @@ def Scatterv_numpy(self, starts, chunks, dType, world, axis=0, root=0):
                 self_unpk = np.reshape(self, np.size(self))
             else:
                 self_unpk = np.reshape(self.T, np.size(self))
-        this_unpk = np.empty(tmpChunks[world.rank], dtype=dType)
+        this_unpk = np.empty(tmpChunks[world.rank], dtype=dtype)
         world.Scatterv([self_unpk, tmpChunks, tmpStarts, None], this_unpk, root=root)
         this = np.reshape(this_unpk, [chunks[world.rank], s])
         

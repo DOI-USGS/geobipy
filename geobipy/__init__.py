@@ -10,6 +10,7 @@ from importlib import import_module
 import sys
 from shutil import copy
 import time
+from datetime import timedelta
 
 import h5py
 import numpy as np
@@ -102,7 +103,7 @@ def singleCore(inputFile, outputDir, seed=None):
 
 
     # Import the script from the input file
-    UP = import_module(inputFile, package=None)
+    UP = import_module(inputFile, package='geobipy')
 
     # Make data and system filenames lists of str.
     if isinstance(UP.dataFilename, str):
@@ -172,7 +173,7 @@ def singleCore(inputFile, outputDir, seed=None):
         H5Files[i] = h5py.File(join(outputDir, '{}.h5'.format(line)), 'w')
         LR[i] = LineResults()
         LR[i].createHdf(H5Files[i], fiducials[fiducialsForLine], Res)
-        print('Time to create line {} with {} data points: {:.3f} s'.format(line, nFids, time.time()-t0))
+        print('Time to create line {} with {} data points: {} h:m:s'.format(line, nFids, str(timedelta(seconds=time.time()-t0))))
 
     # Loop through data points in the file.
     for i in range(Dataset.nPoints):
@@ -207,7 +208,7 @@ def multipleCore(inputFile, outputDir, skipHDF5):
     t0 = MPI.Wtime()
     t1 = t0
 
-    UP = import_module(inputFile, package=None)
+    UP = import_module(inputFile, package='geobipy')
 
     # Make data and system filenames lists of str.
     if isinstance(UP.dataFilename, str):
@@ -293,7 +294,7 @@ def multipleCore(inputFile, outputDir, skipHDF5):
                 with h5py.File(fName, 'w', driver='mpio', comm=masterComm) as f:
                     LR = LineResults()
                     LR.createHdf(f, tmp[fiducialsForLine, 1], Res)
-                myMPI.rankPrint(world,'Time to create the line with {} data points: {:.3f} s'.format(nFids, MPI.Wtime()-t0))
+                myMPI.rankPrint(world,'Time to create line {} with {} data points: {} h:m:s'.format(line, nFids, str(timedelta(seconds=MPI.Wtime()-t0))))
                 t0 = MPI.Wtime()
 
             myMPI.print('Initialized results for writing.')
@@ -317,7 +318,7 @@ def multipleCore(inputFile, outputDir, skipHDF5):
         LR[i] = LineResults(fName, UP.systemFilename, hdfFile = h5py.File(fName, 'a', driver='mpio', comm=world))
 
     world.barrier()
-    myMPI.rankPrint(world,'Files created in {:.3f} s'.format(MPI.Wtime()-t1))
+    myMPI.rankPrint(world,'Files created in {} h:m:s'.format(str(timedelta(seconds=MPI.Wtime()-t1))))
     t0 = MPI.Wtime()
 
     # Carryout the master-worker tasks
@@ -347,8 +348,8 @@ def masterTask(Dataset, world):
 
   nFinished = 0
   nSent = 0
-  continueRunning = np.empty(1, dtype=np.int32)
-  rankRecv = np.zeros(3, dtype = np.float64)
+#   continueRunning = np.empty(1, dtype=np.int32)
+#   rankRecv = np.zeros(3, dtype = np.float64)
 
   # Send out the first indices to the workers
   for iWorker in range(1, world.size):
@@ -358,11 +359,13 @@ def masterTask(Dataset, world):
     # If DataPoint is None, then we reached the end of the file and no more points can be read in.
     if DataPoint is None:
         # Send the kill switch to the worker to shut down.
-        continueRunning[0] = 0 # Do not continue running
-        world.Isend(continueRunning, dest=iWorker)
+        # continueRunning[0] = 0 # Do not continue running
+        continueRunning =False
+        world.send(continueRunning, dest=iWorker)
     else:
-        continueRunning[0] = 1 # Yes, continue with the next point.
-        world.Isend(continueRunning, dest=iWorker)
+        # continueRunning[0] = 1 # Yes, continue with the next point.
+        continueRunning = True
+        world.send(continueRunning, dest=iWorker)
         DataPoint.Isend(dest=iWorker, world=world)
 
     nSent += 1
@@ -375,9 +378,11 @@ def masterTask(Dataset, world):
   # Now wait to send indices out to the workers as they finish until the entire data set is finished
   while nFinished < nPoints:
     # Wait for a worker to request the next data point
-    world.Recv(rankRecv, source = MPI.ANY_SOURCE, tag = MPI.ANY_TAG, status = MPI.Status())
-    requestingRank = np.int(rankRecv[0])
-    dataPointProcessed = rankRecv[1]
+    status = MPI.Status()
+    dummy = world.recv(source = MPI.ANY_SOURCE, tag = MPI.ANY_TAG, status = status)
+    requestingRank = status.Get_source()
+    # requestingRank = np.int(rankRecv[0])
+    # dataPointProcessed = rankRecv[1]
 
     nFinished += 1
 
@@ -387,16 +392,23 @@ def masterTask(Dataset, world):
     # If DataPoint is None, then we reached the end of the file and no more points can be read in.
     if DataPoint is None:
         # Send the kill switch to the worker to shut down.
-        continueRunning[0] = 0 # Do not continue running
-        world.Isend(continueRunning, dest=requestingRank)
+        # continueRunning[0] = 0 # Do not continue running
+        continueRunning = False
+        world.send(continueRunning, dest=requestingRank)
     else:
-        continueRunning[0] = 1 # Yes, continue with the next point.
-        world.Isend(continueRunning, dest=requestingRank)
+        # continueRunning[0] = 1 # Yes, continue with the next point.
+        continueRunning = True
+        world.send(continueRunning, dest=requestingRank)
         DataPoint.Isend(dest=requestingRank, world=world, systems=DataPoint.system)
 
-    elapsed = MPI.Wtime() - t0
-    eta = (nPoints / nFinished-1) * elapsed
-    myMPI.print('Inverted data point {} in {:.3f}s  ||  Time: {:.3f}s  ||  QueueLength: {}/{}  ||  ETA: {:.3f}s'.format(dataPointProcessed, rankRecv[2], elapsed, nPoints-nFinished, nPoints, eta))
+    report = (nFinished % (world.size - 1)) == 0 or nFinished == nPoints
+
+    if report:
+        e = MPI.Wtime() - t0
+        elapsed = str(timedelta(seconds=e))
+        eta = str(timedelta(seconds=(nPoints / nFinished-1) * e))
+        myMPI.print("Remaining Points {}/{} || Elapsed Time: {} h:m:s || ETA {} h:m:s".format(nPoints-nFinished, nPoints, elapsed, eta))
+        # myMPI.print('Inverted data point {} in {:.3f}s  ||  Time: {:.3f}s  ||  QueueLength: {}/{}  ||  ETA: {:.3f}s'.format(dataPointProcessed, rankRecv[2], elapsed, nPoints-nFinished, nPoints, eta))
 
 
 def workerTask(_DataPoint, UP, prng, world, lineNumbers, LineResults):
@@ -405,54 +417,46 @@ def workerTask(_DataPoint, UP, prng, world, lineNumbers, LineResults):
     # Import here so serial code still works...
     from mpi4py import MPI
     from geobipy.src.base import MPI as myMPI
-    
+   
     # Initialize the worker process to go
     Go = True
 
-    # Initialize communicating variables.
-    continueRunning = np.empty(1, dtype=np.int32)
-    myRank = np.empty(3, dtype=np.float64)
-
     # Wait till you are told what to process next
-    req = world.Irecv(continueRunning, source=0)
-    req.Wait()
-
+    continueRunning = world.recv(source=0)
     # If we continue running, receive the next DataPoint. Otherwise, shutdown the rank
-    if continueRunning[0]:
+    if continueRunning:
         DataPoint = _DataPoint.Irecv(source=0, world=world)
     else:
         Go = False
 
+    communicationTime = 0.0
+
     while Go:
-        t0 = MPI.Wtime()
-        # Get the data point for the given index
-        # DataPoint = myData.getDataPoint(iDataPoint)
+        # initialize the parameters
         paras = UP.userParameters(DataPoint)
 
         # Pass through the line results file object if a parallel file system is in use.
         iLine = lineNumbers.searchsorted(DataPoint.lineNumber)
         failed = Inv_MCMC(paras, DataPoint, prng=prng, rank=world.rank, LineResults=LineResults[iLine])
         
-        # Send information back to the master
-        # The current rank, in order to obtain the next point
-        # The fiducial that was just inverted
-        # The time to invert
-        myRank[:] = (world.rank, DataPoint.fiducial, MPI.Wtime() - t0)
+        # Ping the Master to request a new index
+        t0 = MPI.Wtime()
+        world.send(1, dest=0)
 
-        # With the Data Point inverted, Ping the Master to request a new index
-        world.Send(myRank, dest = 0)
-
-        # Wait till you are told what to process next
-        req = world.Irecv(continueRunning, source=0)
-        req.Wait()
+        # Wait till you are told whether to continue or not
+        continueRunning = world.recv(source=0)
 
         if failed:
             print("Datapoint {} failed to converge".format(DataPoint.fiducial))
 
         # If we continue running, receive the next DataPoint. Otherwise, shutdown the rank
-        if continueRunning[0]:
+        if continueRunning:
             DataPoint = _DataPoint.Irecv(source=0, world=world, systems=DataPoint.system)
+            communicationTime += MPI.Wtime() - t0
         else:
+            communicationTime += MPI.Wtime() - t0
+            s = str(timedelta(seconds = communicationTime))
+            print('Communicaton Time on Rank {} {} h:m:s'.format(world.rank, s))
             Go = False
 
 

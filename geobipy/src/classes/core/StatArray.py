@@ -1742,8 +1742,11 @@ class StatArray(np.ndarray, myObject):
             The broadcast StatArray on every rank in the MPI communicator.
 
         """
-        name = world.bcast(self.name, root=root)
-        units = world.bcast(self.units, root=root)
+        name = " " + self.getName()
+        units = " " + self.getUnits()
+        tmp = name + ',' + units
+        nameUnits = world.bcast(tmp)
+        name, units = nameUnits.split(',')
         tmp = myMPI.Bcast(self, world, root=root)
         return StatArray(tmp, name, units, dtype=tmp.dtype)
 
@@ -1772,25 +1775,27 @@ class StatArray(np.ndarray, myObject):
             The StatArray distributed amongst ranks.
 
         """
-
-        name = world.bcast(self.name)
-        units = world.bcast(self.units)
+        name = " " + self.getName()
+        units = " " + self.getUnits()
+        tmp = name + ',' + units
+        nameUnits = world.bcast(tmp)
+        name, units = nameUnits.split(',')
         tmp = myMPI.Scatterv(self, starts, chunks, world, axis, root)
         return StatArray(tmp, name, units, dtype=tmp.dtype)
 
 
-    def Isend(self, dest, world):
-        
-        world.isend(self.name, dest=dest)
-        world.isend(self.units, dest=dest)
-        req = myMPI.Isend(self, dest=dest, world=world)
-        return req
+    def Isend(self, dest, world, ndim=None, shape=None, dtype=None):
+        name = " " + self.getName()
+        units = " " + self.getUnits()
+        tmp = name + ',' + units
+        world.send(tmp, dest=dest)
+        myMPI.Isend(self, dest=dest, world=world, ndim=ndim, shape=shape, dtype=dtype)
 
 
-    def Irecv(self, source, world):
-        name = world.irecv(source=source).wait()
-        units = world.irecv(source=source).wait()
-        tmp = myMPI.Irecv(source=source, world=world)
+    def Irecv(self, source, world, ndim=None, shape=None, dtype=None):
+        nameUnits = world.recv(source=source)
+        name, units = nameUnits.split(',')
+        tmp = myMPI.Irecv(source=source, world=world, ndim=ndim, shape=shape, dtype=dtype)
         return StatArray(tmp, name, units)
 
 
