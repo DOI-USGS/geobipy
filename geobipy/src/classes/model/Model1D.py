@@ -305,13 +305,13 @@ class Model1D(Model):
         """
         assert self.par.hasPrior or self.dpar.hasPrior, Exception("Model must have either a parameter prior or gradient prior, use self.setPriors()")
         # Compute the sensitivity of the data to the perturbed model
-        dataPoint.sensitivity(self, scale=False)
+        dataPoint.sensitivity(self)
         Wd = dataPoint.weightingMatrix(power=1.0)
         WdJ = np.dot(Wd, dataPoint.J)
         WdJTWdJ = np.dot(WdJ.T, WdJ)
 
         # Propose new layer conductivities
-        self._inverseHessian = np.linalg.inv(2.0*WdJTWdJ + 2.0*(np.eye(self.nCells[0]) * priStd**-2.0))
+        self._inverseHessian = np.linalg.inv(WdJTWdJ + self.par.prior.derivative(x=None, order=2))
         
         return self._inverseHessian
 
@@ -335,13 +335,13 @@ class Model1D(Model):
         # Compute a new parameter variance matrix if the structure of the model changed.
         if (self.action[0] in ['birth', 'death']):
             # Compute the sensitivity of the data to the perturbed model
-            dataPoint.updateSensitivity(self, scale=False)
+            dataPoint.updateSensitivity(self)
             Wd = dataPoint.weightingMatrix(power=1.0)
             WdJ = np.dot(Wd, dataPoint.J)
             WdJTWdJ = np.dot(WdJ.T, WdJ)
 
             # Propose new layer conductivities
-            self._inverseHessian = np.linalg.inv(2.0*WdJTWdJ + 2.0*(np.eye(self.nCells[0]) * priStd**-2.0))
+            self._inverseHessian = np.linalg.inv(WdJTWdJ + self.par.prior.derivative(x=None, order=2))
                 
         else:  # There was no change in the model
 
@@ -749,11 +749,11 @@ class Model1D(Model):
         # Create a multivariate normal distribution centered on the shifted parameter values, and with variance computed from the forward step.
         # We don't recompute the variance using the perturbed parameters, because we need to check that we could in fact step back from 
         # our perturbed parameters to the unperturbed parameters. This is the crux of the reversible jump.
-        tmp = Distribution('MvNormal', np.exp(np.log(self.par) - SN_step_from_perturbed), self.inverseHessian, log=True, prng=prng)
+        tmp = Distribution('MvLogNormal', np.exp(np.log(self.par) - SN_step_from_perturbed), self.inverseHessian, linearSpace=True, prng=prng)
         # Probability of jumping from our perturbed parameter values to the unperturbed values.
         proposal = tmp.probability(x=remappedModel.par, log=True)  # CUR.prop
 
-        tmp = Distribution('MvNormal', remappedModel.par, self.inverseHessian, log=True, prng=prng)
+        tmp = Distribution('MvLogNormal', remappedModel.par, self.inverseHessian, linearSpace=True, prng=prng)
         proposal1 = tmp.probability(x=self.par, log=True)
 
         if self.action[0] == 'birth':
@@ -840,7 +840,8 @@ class Model1D(Model):
 
         # print((priStd**-2.0) * (remappedModel.par - np.exp(remappedModel._halfSpaceParameter)))
 
-        gradient = np.dot(Wd2J.T, dataPoint.deltaD[dataPoint.iActive]) + ((priStd**-2.0) * (np.log(remappedModel.par) - np.log(remappedModel._halfSpaceParameter)))
+        gradient = np.dot(dataPoint.J.T, dataPoint.predictedData.priorDerivative(order=1, i=dataPoint.iActive)) + remappedModel.par.priorDerivative(order=1)
+        # gradient = np.dot(Wd2J.T, dataPoint.deltaD[dataPoint.iActive]) + ((priStd**-2.0) * (np.log(remappedModel.par) - np.log(remappedModel._halfSpaceParameter)))
 
         # scaling = parameterCovarianceScaling * ((2.0 * np.float64(Mod1.nCells[0])) - 1)**(-1.0 / 3.0)
 
@@ -857,7 +858,7 @@ class Model1D(Model):
         perturbedModel = remappedModel.deepcopy()
 
         # Assign a proposal distribution for the parameter using the mean and variance.
-        perturbedModel.par.setProposal('MvNormal', np.exp(mean), inverseHessian, log=True, prng=perturbedModel.par.proposal.prng)
+        perturbedModel.par.setProposal('MvLogNormal', np.exp(mean), inverseHessian, linearSpace=True, prng=perturbedModel.par.proposal.prng)
 
         # Generate new conductivities
         perturbedModel.par.perturb()
@@ -954,7 +955,7 @@ class Model1D(Model):
 
         # if parameterPrior:
         # Assign the initial prior to the parameters
-        self.par.setPrior('MvNormal', self._halfSpaceParameter, np.log(1.0 + factor)**2.0, ndim=self.nCells, log=True, prng=prng)
+        self.par.setPrior('MvLogNormal', self._halfSpaceParameter, np.log(1.0 + factor)**2.0, ndim=self.nCells, linearSpace=True, prng=prng)
 
         # if gradientPrior:
         # Assign the prior on the parameter gradient

@@ -7,6 +7,7 @@ from .baseDistribution import baseDistribution
 from .CategoricalDistribution import Categorical
 from .NormalDistribution import Normal
 from .MvNormalDistribution import MvNormal
+from .MvLogNormalDistribution import MvLogNormal
 from .UniformDistribution import Uniform
 from .GammaDistribution import Gamma
 from .OrderStatistics import Order
@@ -65,11 +66,14 @@ def Distribution(distributionType, *args, **kwargs):
     if (tName == 'uniform'):
         return Uniform(*args, **kwargs)
 
-    elif (tName == 'normal' or tName == 'gaussian'):
+    elif (tName == 'normal'):
         return Normal(*args, **kwargs)
     
-    elif (tName == 'mvnormal' or tName == 'mvgaussian'):
+    elif (tName == 'mvnormal'):
         return MvNormal(*args, **kwargs)
+
+    elif (tName == 'mvlognormal'):
+        return MvLogNormal(*args, **kwargs)
     
     elif (tName == 'studentt'):
         return StudentT(*args, **kwargs)

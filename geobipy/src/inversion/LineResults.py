@@ -1839,6 +1839,7 @@ class LineResults(myObject):
 
         nPoints = fiducials.size
         self._fiducials = StatArray.StatArray(np.sort(fiducials), "fiducials")
+        assert not np.any(np.isnan(self._fiducials)), ValueError("Cannot have fiducials == NaN")
 
         # Initialize and write the attributes that won't change
         # hdfFile.create_dataset('ids',data=self.fiducials)

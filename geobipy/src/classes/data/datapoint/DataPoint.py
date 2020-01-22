@@ -120,6 +120,10 @@ class DataPoint(Point):
         return self._elevation
 
     @property
+    def nActiveChannels(self):
+        return self.iActive.size
+
+    @property
     def nChannels(self):
         return np.sum(self.nChannelsPerSystem)
 
@@ -228,7 +232,7 @@ class DataPoint(Point):
             If the number of rows in Jin do not match the number of active channels in the datapoint
 
         """
-        assert Jin.shape[0] == self.iActive.size, ValueError("Number of rows of Jin must match the number of active channels in the datapoint {}".format(self.iActive.size))
+        assert Jin.shape[0] == self.nActiveChannels, ValueError("Number of rows of Jin must match the number of active channels in the datapoint {}".format(self.nActiveChannels))
 
         Jout = np.zeros(Jin.shape)
         Jout[:, :] = Jin * (np.repeat(self._std[self.iActive, np.newaxis]**-power, Jout.shape[1], 1))
@@ -244,7 +248,7 @@ class DataPoint(Point):
                'z: {} \n'
                'elevation: {} \n'
                'Number of active channels: {} \n'
-               '{} {} {}').format(self._channelNames, self.x, self.y, self.z, self.elevation, self.iActive.size, self._data[self.iActive].summary(True), self._predictedData[self.iActive].summary(True), self._std[self.iActive].summary(True))
+               '{} {} {}').format(self._channelNames, self.x, self.y, self.z, self.elevation, self.nActiveChannels, self._data[self.iActive].summary(True), self._predictedData[self.iActive].summary(True), self._std[self.iActive].summary(True))
         if (out):
             return msg
         print(msg)
@@ -282,12 +286,11 @@ class DataPoint(Point):
         assert all(relativeErr > 0.0), ValueError("relativeErr must be > 0.0")
         assert all(additiveErr > 0.0), ValueError("additiveErr must be > 0.0")
 
-        tmp = (relativeErr * self._data)**2.0 + additiveErr**2.0
+        tmp = (relativeErr * self.data)**2.0 + additiveErr**2.0
+        self._std[:] = np.sqrt(tmp)
 
         if self._predictedData.hasPrior:
-            self._predictedData.prior.variance[:] = tmp[self.iActive]
-
-        self._std[:] = np.sqrt(tmp)
+            self._predictedData.prior.variance[np.diag_indices(self.nActiveChannels)] = tmp[self.iActive]
 
 
     def Isend(self, dest, world):

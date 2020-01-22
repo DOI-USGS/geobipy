@@ -23,7 +23,7 @@ class EmDataPoint(DataPoint):
 
     def __init__(self, nChannelsPerSystem=1, x=0.0, y=0.0, z=0.0, elevation=None, data=None, std=None, predictedData=None, dataUnits=None, channelNames=None, lineNumber=0.0, fiducial=0.0):
 
-        DataPoint.__init__(self, nChannelsPerSystem, x, y, z, elevation, data, std, predictedData, dataUnits, channelNames)
+        super().__init__(nChannelsPerSystem, x, y, z, elevation, data, std, predictedData, dataUnits, channelNames)
 
         # StatArray of Relative Errors
         self._relErr = StatArray.StatArray(self.nSystems, '$\epsilon_{Relative}x10^{2}$', '%')

@@ -276,7 +276,7 @@ class TdemData(Data):
         self.system = np.ndarray(nSys, dtype=TdemSystem)
 
         for i in range(nSys):
-            self.system[i] = TdemSystem(systemFilename[i])
+            self.system[i] = TdemSystem().read(systemFilename[i])
         
         self.nSystems = nSys
         self.nChannelsPerSystem = np.asarray([np.int32(x.nwindows()) for x in self.system])

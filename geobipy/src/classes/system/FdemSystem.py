@@ -1,6 +1,7 @@
 """ @FdemSystem_Class
 Module describing a frequency domain EM acquisition system
 """
+from cached_property import cached_property
 from copy import deepcopy
 from ...classes.core.myObject import myObject
 import numpy as np
@@ -70,9 +71,32 @@ class FdemSystem(myObject):
         self._lamda12 = None
 
 
-    def set_lamdas(self):
+    @property
+    def frequencies(self):
+        return self._frequencies
+
+
+    @cached_property
+    def lamda0(self):
         a0 = np.float64(-8.3885)
         s0 = np.float64(9.04226468670e-2)
+
+        tmp = np.arange(120, dtype = np.float64)
+
+        r = 1.0 / self.loopSeparation
+
+        lamda0 = np.empty([self.nFrequencies, 120], dtype=np.float64)
+
+        l0 = (10.0 ** ((tmp * s0) + a0))
+
+        for i in range(self.nFrequencies):
+            lamda0[i, :] = l0 * r[i]
+
+        return lamda0
+
+
+    @cached_property
+    def lamda1(self):
         a1 = np.float64(-7.91001919)
         s1 = np.float64(8.7967143957e-2)
 
@@ -80,50 +104,24 @@ class FdemSystem(myObject):
 
         r = 1.0 / self.loopSeparation
 
-        self._lamda0 = np.empty([self.nFrequencies, 120], dtype=np.float64)
-        self._lamda1 = np.empty([self.nFrequencies, 140], dtype=np.float64)
+        lamda1 = np.empty([self.nFrequencies, 140], dtype=np.float64)
 
-        l0 = (10.0 ** ((tmp[:120] * s0) + a0))
         l1 = (10.0 ** ((tmp * s1) + a1))
 
         for i in range(self.nFrequencies):
-            self._lamda0[i, :] = l0 * r[i]
-            self._lamda1[i, :] = l1 * r[i]
+            lamda1[i, :] = l1 * r[i]
 
-        self._lamda02 = self.lamda0**2.0
-        self._lamda12 = self.lamda1**2.0
-
-        self._w0 = self.set_w0()
-        self._w1 = self.set_w1()
+        return lamda1
 
 
-    @property
-    def frequencies(self):
-        return self._frequencies
-
-    @property
-    def lamda0(self):
-        return self._lamda0
-
-    @property
-    def lamda1(self):
-        return self._lamda1
-
-    @property
+    @cached_property
     def lamda02(self):
-        return self._lamda02
+        return self.lamda0**2.0
 
-    @property
+    @cached_property
     def lamda12(self):
-        return self._lamda12
+        return self.lamda1**2.0
 
-    @property
-    def w0(self):
-        return self._w0
-
-    @property
-    def w1(self):
-        return self._w1
 
     @property
     def nFrequencies(self):
@@ -332,7 +330,8 @@ class FdemSystem(myObject):
         return out
 
 
-    def set_w0(self):
+    @cached_property
+    def w0(self):
         return np.asarray([
         9.62801364263e-07, -5.02069203805e-06, 1.25268783953e-05, -1.99324417376e-05, 2.29149033546e-05,
         -2.04737583809e-05, 1.49952002937e-05, -9.37502840980e-06, 5.20156955323e-06, -2.62939890538e-06,
@@ -359,8 +358,8 @@ class FdemSystem(myObject):
         -4.69798719697e-03, 2.12587632706e-03, -9.81986734159e-04, 4.44992546836e-04, -1.89983519162e-04,
         7.31024164292e-05, -2.40057837293e-05, 6.23096824846e-06, -1.12363896552e-06, 1.04470606055e-07], dtype=np.float64)
 
-
-    def set_w1(self):
+    @cached_property
+    def w1(self):
         return np.asarray([
         -6.76671159511e-14, 3.39808396836e-13, -7.43411889153e-13, 8.93613024469e-13, -5.47341591896e-13,
         -5.84920181906e-14, 5.20780672883e-13, -6.92656254606e-13, 6.88908045074e-13, -6.39910528298e-13,

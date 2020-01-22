@@ -139,7 +139,7 @@ def Initialize(userParameters, DataPoint, prng):
     # Set the priors on the data point
     # ---------------------------------------
     # Set the prior on the data
-    DataPoint.predictedData.setPrior('MvNormal', DataPoint.data[DataPoint.iActive], DataPoint.std[DataPoint.iActive]**2.0, prng=prng)
+    DataPoint.predictedData.setPrior('MvLogNormal', DataPoint.data[DataPoint.iActive], DataPoint.std[DataPoint.iActive]**2.0, linearSpace=False, prng=prng)
     # Set the prior on the height
     DataPoint.z.setPrior('Uniform', np.float64(DataPoint.z) - userParameters.maximumElevationChange, np.float64(DataPoint.z) + userParameters.maximumElevationChange)
     # Set the prior on the relative Errors
@@ -177,6 +177,7 @@ def Initialize(userParameters, DataPoint, prng):
     # Update the data errors based on user given parameters
     # if userParameters.solveRelativeError or userParameters.solveAdditiveError:
     DataPoint.updateErrors(userParameters.initialRelativeError, userParameters.initialAdditiveError)
+
 
     # Initialize the calibration parameters
     if (userParameters.solveCalibration):
@@ -223,7 +224,7 @@ def Initialize(userParameters, DataPoint, prng):
     inverseHessian = Mod.generateLocalParameterVariance(DataPoint, userParameters.priStd)
 
     # Instantiate the proposal for the parameters.
-    parameterProposal = Distribution('MvNormal', np.log(Mod.par), inverseHessian, prng=prng)
+    parameterProposal = Distribution('MvLogNormal', Mod.par, inverseHessian, linearSpace=True, prng=prng)
 
     probabilities = [userParameters.pBirth, userParameters.pDeath, userParameters.pPerturb, userParameters.pNochange]
     Mod.setProposals(probabilities, parameterProposal=parameterProposal, prng=prng)

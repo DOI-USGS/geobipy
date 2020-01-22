@@ -37,6 +37,10 @@ class Normal(baseDistribution):
     def mean(self):
         return np.exp(self._mean) if self.log else self._mean
 
+    @mean.setter
+    def mean(self, value):
+        self._mean = np.log(value) if self.log else value
+
     @property
     def ndim(self):
         return 1
