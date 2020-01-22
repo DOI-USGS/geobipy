@@ -4,10 +4,10 @@ Leon Foks
 June 2015
 """
 import numpy as np
-from .fdem1d_numba import (pyFdem1dfwd, pyFdem1dsen)
-from .ipforward1d_fortran import ipforward1d
+from .fdem1d_numba import (nbFdem1dfwd, nbFdem1dsen)
+from ...ipforward1d_fortran import ipforward1d
 
-def fdem1dfwd(system, model1d, altitude, f=False):
+def fdem1dfwd(system, model1d, altitude):
     """Wrapper to freqeuency domain EM forward modellers
 
     Parameters
@@ -26,9 +26,6 @@ def fdem1dfwd(system, model1d, altitude, f=False):
 
     """
     assert altitude >= model1d.top, "Sensor altitude must be above the top of the model"
-
-    if system.lamda0 is None:
-        system.set_lamdas()
 
     # Create the indices of the coil orientations for the frequencies.
     tid = system.getTensorID()
@@ -52,7 +49,7 @@ def fdem1dfwd(system, model1d, altitude, f=False):
     thickness = np.asarray(model1d.thk)
     loopSeparation = np.asarray(system.loopSeparation)
 
-    return pyFdem1dfwd(tid, frequencies, tHeight, rHeight, tMom, rx, loopSeparation, system.w0, system.lamda0, system.lamda02, system.w1, system.lamda1, system.lamda12, scl, conductivity, thickness)
+    return nbFdem1dfwd(tid, frequencies, tHeight, rHeight, tMom, rx, loopSeparation, system.w0, system.lamda0, system.lamda02, system.w1, system.lamda1, system.lamda12, scl, conductivity, thickness)
 
 
 def ip1dfwd(S, mod, z0):
@@ -108,9 +105,6 @@ def fdem1dsen(system, model1d, altitude):
 
     assert altitude >= model1d.top, "Sensor altitude must be above the top of the model"
 
-    if system.lamda0 is None:
-        system.set_lamdas()
-
     # Create the indices of the coil orientations for the frequencies.
     tid = system.getTensorID()
 
@@ -132,5 +126,5 @@ def fdem1dsen(system, model1d, altitude):
     thickness = np.asarray(model1d.thk)
     loopSeparation = np.asarray(system.loopSeparation)
 
-    return pyFdem1dsen(tid, frequencies, tHeight, rHeight, tMom, rx, loopSeparation, system.w0, system.lamda0, system.lamda02, system.w1, system.lamda1, system.lamda12, scl, conductivity, thickness)
+    return nbFdem1dsen(tid, frequencies, tHeight, rHeight, tMom, rx, loopSeparation, system.w0, system.lamda0, system.lamda02, system.w1, system.lamda1, system.lamda12, scl, conductivity, thickness)
     
