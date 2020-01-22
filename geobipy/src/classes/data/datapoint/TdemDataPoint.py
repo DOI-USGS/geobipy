@@ -2,21 +2,18 @@ from copy import deepcopy
 from ....classes.core import StatArray
 from ...model.Model import Model
 from .EmDataPoint import EmDataPoint
+from ...forwardmodelling.Electromagnetic.TD.tdem1d import (tdem1dfwd, tdem1dsen)
 from ...system.EmLoop import EmLoop
+from ...system.SquareLoop import SquareLoop
 from ...system.CircularLoop import CircularLoop
 from ....base.logging import myLogger
 from ...system.TdemSystem import TdemSystem
+from ...system.butterworth import butterworth
+from ...system.Waveform import Waveform
 from ...statistics.Histogram1D import Histogram1D
-
-try:
-    from gatdaem1d import Earth
-    from gatdaem1d import Geometry
-except:
-    h=("Could not find a Time Domain forward modeller. \n"
-       "Please see the package's README for instructions on how to install one")
-    print(Warning(h))
 import matplotlib.pyplot as plt
 import numpy as np
+
 #from ....base import Error as Err
 from ....base import fileIO as fIO
 from ....base import customFunctions as cf
@@ -98,22 +95,31 @@ class TdemDataPoint(EmDataPoint):
             elif isinstance(sys, TdemSystem):
                 systems.append(sys)
             # Number of time gates
-            nTimes[j] = systems[j].nwindows()
+            nTimes[j] = systems[j].nTimes
 
         nChannels = np.sum(nTimes)
 
         if not data is None:
+            if isinstance(data, list):
+                assert len(data) == nSystems, ValueError("Must have {} arrays of data values".format(nSystems))
+                data = np.hstack(data)
             assert data.size == nChannels, ValueError("Size of data must equal total number of time channels {}".format(nChannels))
             # Mask invalid data values less than 0.0 to NaN
             i = np.where(~np.isnan(data))[0]
             i1 = np.where(data[i] <= 0.0)[0]
             data[i[i1]] = np.nan
         if not std is None:
+            if isinstance(std, list):
+                assert len(std) == nSystems, ValueError("Must have {} arrays of std values".format(nSystems))
+                std = np.hstack(std)
             assert std.size == nChannels, ValueError("Size of std must equal total number of time channels {}".format(nChannels))
         if not predictedData is None:
+            if isinstance(predictedData, list):
+                assert len(predictedData) == nSystems, ValueError("Must have {} arrays of predictedData values".format(nSystems))
+                predictedData = np.hstack(predictedData)
             assert predictedData.size == nChannels, ValueError("Size of predictedData must equal total number of time channels {}".format(nChannels))
 
-        EmDataPoint.__init__(self, nChannelsPerSystem=nTimes, x=x, y=y, z=z, elevation=elevation, data=data, std=std, predictedData=predictedData, dataUnits=r'$\frac{V}{Am^{4}}$', lineNumber=lineNumber, fiducial=fiducial)
+        super().__init__(nChannelsPerSystem=nTimes, x=x, y=y, z=z, elevation=elevation, data=data, std=std, predictedData=predictedData, dataUnits=r'$\frac{V}{Am^{4}}$', lineNumber=lineNumber, fiducial=fiducial)
 
         self._data.name = "Time domain data"
 
@@ -133,7 +139,7 @@ class TdemDataPoint(EmDataPoint):
         for i in range(self.nSystems):
             # Set the channel names
             for iTime in range(self.nTimes[i]):
-                self._channelNames[k] = 'Time {:.3e} s'.format(self.system[i].windows.centre[iTime])
+                self._channelNames[k] = 'Time {:.3e} s'.format(self.system[i].times[iTime])
                 k += 1
 
 
@@ -182,6 +188,213 @@ class TdemDataPoint(EmDataPoint):
         """ Returns True if the number of systems is > 1 """
         return len(self.system) > 1
 
+
+    def read(self, dataFileName):
+        """Read in a time domain data point from a file.
+
+        Parameters
+        ----------
+        dataFileName : str or list of str
+            File names of the data point.  Multiple can be given for multiple moments at the same location.
+
+        Returns
+        -------
+        out : geobipy.TdemDataPoint
+            Time domain data point
+
+        """
+
+        self._read_aarhus(dataFileName)
+
+    
+    def _read_aarhus(self, dataFileName):
+
+        if isinstance(dataFileName, str):
+            dataFileName = [dataFileName]
+
+        system = []
+        data = []
+        std = []
+
+        
+        for fName in dataFileName:
+            with open(fName, 'r') as f:
+                # Header line
+                dtype, x, y, z, elevation, fiducial, lineNumber, current = self.__aarhus_header(f)
+                # Source type
+                source, polarization = self.__aarhus_source(f)
+                # Offset
+                loopOffset = self.__aarhus_positions(f)
+                # Loop Dimensions
+                transmitterLoop, receiverLoop = self.__aarhus_loop_dimensions(f, source)
+                # Data transforms
+                transform = self.__aarhus_data_transforms(f)
+                # Waveform
+                time, amplitude = self.__aarhus_waveform(f)
+                waveform = Waveform(time, amplitude, current)
+                # Frontgate
+                nPreFilters, frontGate, damping = self.__aarhus_frontgate(f)
+                # Filter
+                onTimeFilters = self.__aarhus_filters(f, nPreFilters)
+
+                if frontGate:
+                    # frontGate time
+                    frontGateTime = np.float64(f.readline().strip())
+                    offTimeFilters = self.__aarhus_filters(f, 1)
+
+                # Data and standard deviation
+                times, d, s = self.__aarhus_data(f)
+                data.append(d)
+                std.append(s)
+
+                system.append(TdemSystem(offTimes=times, 
+                                         transmitterLoop=transmitterLoop, 
+                                         receiverLoop=receiverLoop, 
+                                         loopOffset=loopOffset, 
+                                         waveform=waveform, 
+                                         offTimeFilters=offTimeFilters))
+                        
+        TdemDataPoint.__init__(self, x, y, 0.0, elevation, data, std, system=system, lineNumber=lineNumber, fiducial=fiducial)
+
+
+    def __aarhus_header(self, f):
+        line = f.readline().strip().split(';')
+        dtype = x = y = z = elevation = current = None
+        fiducial = lineNumber = 0.0
+        for item in line:
+            item = item.split("=")
+            tag = item[0].lower()
+            value = item[-1]
+
+            if tag == "datatypestring":
+                dtype = value
+            elif tag == "xutm":
+                x = np.float(value)
+            elif tag == "yutm":
+                y = np.float(value)
+            elif tag == "elevation":
+                elevation = np.float(value)
+            elif tag == "stationnumber":
+                fiducial = np.float(value)
+            elif tag == "linenumber":
+                lineNumber = np.float(value)
+            elif tag == "current":
+                current = np.float(value)
+
+        assert not np.any([x, y, elevation, current] is None), ValueError("Aarhus file header line must contain 'XUTM', 'YUTM', 'Elevation', 'current'")
+
+        return dtype, x, y, z, elevation, fiducial, lineNumber, current
+
+
+    def __aarhus_source(self, f):
+        line = f.readline().strip().split()
+        source = np.int32(line[0])
+        polarization = np.int32(line[1])
+
+        assert source == 7, ValueError("Have only incorporated source == 7 so far.")
+        assert polarization == 3, ValueError("Have only incorporated polarization == 3 so far.")
+
+        return source, polarization
+
+
+    def __aarhus_positions(self, f):
+        line = f.readline().strip().split()
+        tx, ty, tz, rx, ry, rz = [np.float(x) for x in line]
+        return np.asarray([rx - tx, ry - ty, rz - tz]) # loopOffset
+
+
+    def __aarhus_loop_dimensions(self, f, source):
+
+        if source <= 6:
+            return
+        if source in [10, 11]:
+            return
+
+        line = f.readline().strip().split()
+        if source == 7:
+            dx, dy = [np.float(x) for x in line]
+            assert dx == dy, ValueError("Only handling square loops at the moment")
+            transmitter = SquareLoop(sideLength = dx)
+            receiver = CircularLoop() # Dummy.
+            return transmitter, receiver
+
+
+    def __aarhus_data_transforms(self, f):
+        line = f.readline().strip().split()
+        a, b, c = [np.int32(x) for x in line]
+        assert a == 3, ValueError("Can only handle data transform 3.  dB/dT")
+
+        return a
+
+
+    def __aarhus_waveform(self, f):
+        line = f.readline().strip().split()
+        typ, nWaveforms = [np.int32(x) for x in line]
+
+        assert typ == 3, ValueError("Can only handle user defined waveforms, option 3")
+
+        time = np.empty(0)
+        amplitude = np.empty(0)
+        for i in range(nWaveforms):
+            line = f.readline().strip().split()
+            nSegments = np.int32(line[0])
+            tmp = np.asarray([np.float(x) for x in line[1:]])
+            time = np.append(time, np.hstack([tmp[:2], tmp[5::4]]))
+            amplitude = np.append(amplitude, np.hstack([tmp[2:4], tmp[6::5]]))
+
+        return time, amplitude
+
+        
+    def __aarhus_frontgate(self, f):
+        line = f.readline().strip().split()
+        nFilters = np.int(line[0])
+        frontGate = np.bool(np.int(line[1]))
+        damping = np.float64(line[2])
+
+        return nFilters, frontGate, damping
+
+
+    def __aarhus_filters(self, f, nFilters):
+        
+        filters = []
+
+        for i in range(nFilters):
+            # Low Pass Filter
+            line = f.readline().strip().split()
+            nLowPass = np.int(line[0])
+            for j in range(nLowPass):
+                order = np.int(np.float(line[(2*j)+1]))
+                frequency = np.float64(line[(2*j)+2])
+                b = butterworth(order, frequency, btype='low', analog=True)
+                filters.append(b)
+
+            # High Pass Filter
+            line = f.readline().strip().split()
+            nHighPass = np.int(line[0])
+            for j in range(nHighPass):
+                order = np.int(np.floate(line[(2*j)+1]))
+                frequency = np.float64(line[(2*j)+2])
+                filters.append(butterworth(order, frequency, btype='high', analog=True))
+
+        return filters
+
+    
+    def __aarhus_data(self, f):
+
+        time = []
+        data = []
+        std = []
+        while True:
+            line = f.readline().strip().replace('%', '').split()
+            if not line:
+                break
+            time.append(np.float64(line[0]))
+            tmp = np.float64(line[1])
+            data.append(np.nan if tmp == 999 else tmp)
+            std.append(np.float64(line[2]))
+
+        return np.asarray(time), np.asarray(data), np.asarray(std)
+            
 
     def hdfName(self):
         """ Reprodicibility procedure """
@@ -390,7 +603,7 @@ class TdemDataPoint(EmDataPoint):
                 markerfacecolor=mfc[j],
                 label='System: {}'.format(j+1),
                 **kwargs)
-            iJ0 += self.system[j].nwindows()
+            iJ0 += self.system[j].nTimes
 
 
         plt.xscale(xscale)
@@ -512,35 +725,15 @@ class TdemDataPoint(EmDataPoint):
         return probability
 
 
-    # def perturbAdditiveError(self):
-
-    #     # Generate a new error
-    #     tmp = self.addErr.proposal.rng(1)
-    #     if self.addErr.hasPrior:
-    #         p = self.addErr.probability(x=tmp, log=True)
-    #         while p == -np.inf:
-    #             tmp = self.addErr.proposal.rng(1)
-    #             p = self.addErr.probability(x=tmp, log=True)
-    #     # Update the mean of the proposed errors
-    #     self.addErr.proposal.mean[:] = tmp
-    #     self.addErr[:] = np.exp(tmp)
-
-
     def setAdditiveErrorPosterior(self):
 
         assert self.addErr.hasPrior, Exception("Must set a prior on the additive error")
 
         aBins = self.addErr.prior.bins()
-
-        log = 10
-        aBins = np.exp(aBins)
         binsMidpoint = 0.5 * aBins.max(axis=-1) + aBins.min(axis=-1)
-
         ab = np.atleast_2d(aBins)
         binsMidpoint = np.atleast_1d(binsMidpoint)
-
-        self.addErr.setPosterior([Histogram1D(bins = StatArray.StatArray(ab[i, :], name=self.addErr.name, units=self.data.units), log=log, relativeTo=binsMidpoint[i]) for i in range(self.nSystems)])
-
+        self.addErr.setPosterior([Histogram1D(bins = StatArray.StatArray(ab[i, :], name=self.addErr.name, units=self.data.units), log=10, relativeTo=binsMidpoint[i]) for i in range(self.nSystems)])
 
 
     def setAdditiveErrorPrior(self, minimum, maximum, prng=None):
@@ -558,7 +751,7 @@ class TdemDataPoint(EmDataPoint):
         assert means.size == self.nSystems, ValueError("means must have {} entries".format(self.nSystems))
         variances = np.atleast_1d(variances)
         assert variances.size == self.nSystems, ValueError("variances must have {} entries".format(self.nSystems))
-        self.addErr.setProposal('MvNormal', means, variances, log=True, prng=prng)
+        self.addErr.setProposal('MvLogNormal', means, variances, linearSpace=True, prng=prng)
 
 
     def updateErrors(self, relativeErr, additiveErr):
@@ -611,10 +804,10 @@ class TdemDataPoint(EmDataPoint):
 
         # Update the variance of the predicted data prior
         if self._predictedData.hasPrior:
-            self._predictedData.prior.variance[:] = self._std[self.iActive]**2.0
+            self._predictedData.prior.variance[np.diag_indices(self.iActive.size)] = self._std[self.iActive]**2.0
 
 
-    def updateSensitivity(self, mod, scale=False):
+    def updateSensitivity(self, mod):
         """ Compute an updated sensitivity matrix using a new model based on an existing matrix """
 
         J1 = np.zeros([np.size(self.iActive), mod.nCells[0]])
@@ -627,19 +820,19 @@ class TdemDataPoint(EmDataPoint):
         elif (mod.action[0] == 'birth'):  # Created a layer
             J1[:, :perturbedLayer] = self.J[:, :perturbedLayer]
             J1[:, perturbedLayer + 2:] = self.J[:, perturbedLayer + 1:]
-            tmp = self.sensitivity(mod, ix=[perturbedLayer, perturbedLayer + 1], scale=scale, modelChanged=True)
+            tmp = self.sensitivity(mod, ix=[perturbedLayer, perturbedLayer + 1], modelChanged=True)
             J1[:, perturbedLayer:perturbedLayer + 2] = tmp
 
         elif(mod.action[0] == 'death'):  # Deleted a layer
             J1[:, :perturbedLayer] = self.J[:, :perturbedLayer]
             J1[:, perturbedLayer + 1:] = self.J[:, perturbedLayer + 2:]
-            tmp = self.sensitivity(mod, ix=[perturbedLayer], scale=scale, modelChanged=True)
+            tmp = self.sensitivity(mod, ix=[perturbedLayer], modelChanged=True)
             J1[:, perturbedLayer] = tmp[:, 0]
 
         elif(mod.action[0] == 'perturb'):  # Perturbed a layer
             J1[:, :perturbedLayer] = self.J[:, :perturbedLayer]
             J1[:, perturbedLayer + 1:] = self.J[:, perturbedLayer + 1:]
-            tmp = self.sensitivity(mod, ix=[perturbedLayer], scale=scale, modelChanged=True)
+            tmp = self.sensitivity(mod, ix=[perturbedLayer], modelChanged=True)
             J1[:, perturbedLayer] = tmp[:, 0]
 
         self.J = J1
@@ -650,142 +843,81 @@ class TdemDataPoint(EmDataPoint):
 
         assert isinstance(mod, Model), TypeError("Invalid model class for forward modeling [1D]")
 
-        self._forward1D(mod)
+        tdem1dfwd(self, mod)
 
 
-    def sensitivity(self, mod, ix=None, scale=False, modelChanged=True):
+    def sensitivity(self, mod, ix=None, modelChanged=True):
         """ Compute the sensitivty matrix for the given model """
 
         assert isinstance(mod, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
-
-        self.J = StatArray.StatArray(self._sensitivity1D(mod, ix, scale, modelChanged), 'Sensitivity', '$\\frac{V}{ASm^{3}}$')
-        return self.J
+        return tdem1dsen(self, mod, ix, modelChanged)
 
 
-    def _forward1D(self, mod):
-        """ Forward model the data from a 1D layered earth model """
-        heightTolerance = 0.0
-        if (self.z > heightTolerance):
-            self._BrodieForward(mod)
-        else:
-            self._simPEGForward(mod)
+    def _empymodForward(self, mod):
 
+        print('stuff')
 
-    def _BrodieForward(self, mod):
-        # Generate the Brodie Earth class
-        E = Earth(mod.par[:], mod.thk[:-1])
-        # Generate the Brodie Geometry class
-        G = Geometry(self.z[0], self.T.roll, self.T.pitch, self.T.yaw, 
-                     self.loopOffset[0], self.loopOffset[1], self.loopOffset[2],
-                     self.R.roll, self.R.pitch, self.R.yaw)
-
-        # Forward model the data for each system
-        for i in range(self.nSystems):
-            iSys = self._systemIndices(i)
-            fm = self.system[i].forwardmodel(G, E)
-            self._predictedData[iSys] = -fm.SZ[:]  # Store the necessary component
-
-
-    def _simPEGForward(self, mod):
+    # def _simPEGForward(self, mod):
         
-        from SimPEG import Maps
-        from simpegEM1D import (EM1DSurveyTD, EM1D, set_mesh_1d)
+    #     from SimPEG import Maps
+    #     from simpegEM1D import (EM1DSurveyTD, EM1D, set_mesh_1d)
 
-        mesh1D = set_mesh_1d(mod.depth)
-        expmap = Maps.ExpMap(mesh1D)
-        prob = EM1D(mesh1D, sigmaMap = expmap, chi = mod.chim)
+    #     mesh1D = set_mesh_1d(mod.depth)
+    #     expmap = Maps.ExpMap(mesh1D)
+    #     prob = EM1D(mesh1D, sigmaMap = expmap, chi = mod.chim)
 
-        if (self.dualMoment()):
+    #     if (self.dualMoment()):
 
-            print(self.system[0].loopRadius(), self.system[0].peakCurrent())
+    #         print(self.system[0].loopRadius(), self.system[0].peakCurrent())
 
-            simPEG_survey = EM1DSurveyTD(
-                rx_location=np.array([0., 0., 0.]),
-                src_location=np.array([0., 0., 0.]),
-                topo=np.r_[0., 0., 0.],
-                depth=-mod.depth,
-                rx_type='dBzdt',
-                wave_type='general',
-                src_type='CircularLoop',
-                a=self.system[0].loopRadius(),
-                I=self.system[0].peakCurrent(),
-                time=self.system[0].windows.centre,
-                time_input_currents=self.system[0].waveform.transmitterTime,
-                input_currents=self.system[0].waveform.transmitterCurrent,
-                n_pulse=2,
-                base_frequency=self.system[0].baseFrequency(),
-                use_lowpass_filter=True,
-                high_cut_frequency=450000,
-                moment_type='dual',
-                time_dual_moment=self.system[1].windows.centre,
-                time_input_currents_dual_moment=self.system[1].waveform.transmitterTime,
-                input_currents_dual_moment=self.system[1].waveform.transmitterCurrent,
-                base_frequency_dual_moment=self.system[1].baseFrequency(),
-            )
-        else:
+    #         simPEG_survey = EM1DSurveyTD(
+    #             rx_location=np.array([0., 0., 0.]),
+    #             src_location=np.array([0., 0., 0.]),
+    #             topo=np.r_[0., 0., 0.],
+    #             depth=-mod.depth,
+    #             rx_type='dBzdt',
+    #             wave_type='general',
+    #             src_type='CircularLoop',
+    #             a=self.system[0].loopRadius(),
+    #             I=self.system[0].peakCurrent(),
+    #             time=self.system[0].windows.centre,
+    #             time_input_currents=self.system[0].waveform.transmitterTime,
+    #             input_currents=self.system[0].waveform.transmitterCurrent,
+    #             n_pulse=2,
+    #             base_frequency=self.system[0].baseFrequency(),
+    #             use_lowpass_filter=True,
+    #             high_cut_frequency=450000,
+    #             moment_type='dual',
+    #             time_dual_moment=self.system[1].windows.centre,
+    #             time_input_currents_dual_moment=self.system[1].waveform.transmitterTime,
+    #             input_currents_dual_moment=self.system[1].waveform.transmitterCurrent,
+    #             base_frequency_dual_moment=self.system[1].baseFrequency(),
+    #         )
+    #     else:
 
-            simPEG_survey = EM1DSurveyTD(
-                rx_location=np.array([0., 0., 0.]),
-                src_location=np.array([0., 0., 0.]),
-                topo=np.r_[0., 0., 0.],
-                depth=-mod.depth,
-                rx_type='dBzdt',
-                wave_type='general',
-                src_type='CircularLoop',
-                a=self.system[0].loopRadius(),
-                I=self.system[0].peakCurrent(),
-                time=self.system[0].windows.centre,
-                time_input_currents=self.system[0].waveform.transmitterTime,
-                input_currents=self.system[0].waveform.transmitterCurrent,
-                n_pulse=1,
-                base_frequency=self.system[0].baseFrequency(),
-                use_lowpass_filter=True,
-                high_cut_frequency=7e4,
-                moment_type='single',
-            )
+    #         simPEG_survey = EM1DSurveyTD(
+    #             rx_location=np.array([0., 0., 0.]),
+    #             src_location=np.array([0., 0., 0.]),
+    #             topo=np.r_[0., 0., 0.],
+    #             depth=-mod.depth,
+    #             rx_type='dBzdt',
+    #             wave_type='general',
+    #             src_type='CircularLoop',
+    #             a=self.system[0].loopRadius(),
+    #             I=self.system[0].peakCurrent(),
+    #             time=self.system[0].windows.centre,
+    #             time_input_currents=self.system[0].waveform.transmitterTime,
+    #             input_currents=self.system[0].waveform.transmitterCurrent,
+    #             n_pulse=1,
+    #             base_frequency=self.system[0].baseFrequency(),
+    #             use_lowpass_filter=True,
+    #             high_cut_frequency=7e4,
+    #             moment_type='single',
+    #         )
 
-        prob.pair(simPEG_survey)
+    #     prob.pair(simPEG_survey)
             
-        self._predictedData[:] = -simPEG_survey.dpred(mod.par)
-
-
-    def _sensitivity1D(self, mod, ix=None, scale=False, modelChanged=True):
-        """ Compute the sensitivty matrix for a 1D layered earth model, optionally compute the responses for only the layers in ix """
-        # Unfortunately the code requires forward modelled data to compute the
-        # sensitivity if the model has changed since last time
-        if modelChanged:
-            E = Earth(mod.par[:], mod.thk[:-1])
-            G = Geometry(self.z[0], self.T.roll, self.T.pitch, self.T.yaw, 
-                         self.loopOffset[0], self.loopOffset[1], self.loopOffset[2],
-                         self.R.roll, self.R.pitch, self.R.yaw)
-
-            for i in range(self.nSystems):
-                self.system[i].forwardmodel(G, E)
-
-        if (ix is None):  # Generate a full matrix if the layers are not specified
-            ix = range(mod.nCells[0])
-            J = np.zeros([self.nWindows, mod.nCells[0]])
-        else:  # Partial matrix for specified layers
-            J = np.zeros([self.nWindows, len(ix)])
-
-        for j in range(self.nSystems):  # For each system
-            iSys = self._systemIndices(j)
-            for i in range(len(ix)):  # For the specified layers
-                tmp = self.system[j].derivative(
-                    self.system[j].CONDUCTIVITYDERIVATIVE, ix[i] + 1)
-                # Store the necessary component
-                J[iSys, i] = -mod.par[ix[i]] * tmp.SZ[:]
-
-        if scale:
-            for j in range(self.nSystems):  # For each system
-                iSys = self._systemIndices(j)
-                for i in range(len(ix)):  # For the specified layers
-                    # Scale the sensitivity matix rows by the data weights if
-                    # required
-                    J[iSys, i] /= self._std[ISYS]
-
-        J = J[self.iActive, :]
-        return J
+    #     self._predictedData[:] = -simPEG_survey.dpred(mod.par)
 
 
     def Isend(self, dest, world, systems=None):

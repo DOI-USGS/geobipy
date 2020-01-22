@@ -3,8 +3,7 @@ Module describing a frequency domain EMData Point that contains a single measure
 """
 from copy import copy, deepcopy
 from ....classes.core import StatArray
-#from ...forwardmodelling.EMfor1D_F import fdem1dfwd
-from ...forwardmodelling.EMfor1D_F import fdem1dfwd, fdem1dsen
+from ...forwardmodelling.Electromagnetic.FD.fdem1d import fdem1dfwd, fdem1dsen
 from .EmDataPoint import EmDataPoint
 from ...model.Model import Model
 from ...model.Model1D import Model1D
