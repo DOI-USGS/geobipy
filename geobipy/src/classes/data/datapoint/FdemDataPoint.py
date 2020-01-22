@@ -568,9 +568,8 @@ class FdemDataPoint(EmDataPoint):
 
     
     def Isend(self, dest, world, systems=None):
-        tmp = np.empty(7, dtype=np.float64)
-        tmp[:] = np.asarray([self.x, self.y, self.z, self.elevation, self.nSystems, self.lineNumber, self.fiducial])
-        myMPI.Isend(tmp, dest=dest, world=world)
+        tmp = np.asarray([self.x, self.y, self.z, self.elevation, self.nSystems, self.lineNumber, self.fiducial], dtype=np.float64)
+        myMPI.Isend(tmp, dest=dest, ndim=1, shape=(7, ), dtype=np.float64, world=world)
 
         if systems is None:
             for i in range(self.nSystems):
@@ -582,7 +581,7 @@ class FdemDataPoint(EmDataPoint):
 
     def Irecv(self, source, world, systems=None):
 
-        tmp = myMPI.Irecv(source=source, world=world)
+        tmp = myMPI.Irecv(source=source, ndim=1, shape=(7, ), dtype=np.float64, world=world)
 
         if systems is None:
             nSystems = np.int32(tmp[4])
