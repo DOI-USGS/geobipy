@@ -7,7 +7,7 @@ from .EmLoop import EmLoop
 class CircularLoop(EmLoop):
     """Defines a circular loop for EM acquisition systems
 
-    CircularLoop('z', 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0)
+    CircularLoop(orient, moment, x, y, z, pitch, roll, yaw, radius)
 
     Parameters
     ----------
@@ -35,24 +35,64 @@ class CircularLoop(EmLoop):
     def __init__(self, orient="z", moment=1, x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0):
         """ Initialize a loop in an EM system """
         # Orientation of the loop dipole
-        self.orient = orient
+        self._orient = orient
         # Dipole moment of the loop
-        self.moment = np.int32(moment)
+        self._moment = np.int32(moment)
         self.data = np.hstack([x, y, z, pitch, roll, yaw])
         # Not sure yet
-        self.x = self.data[0]
+        self._x = self.data[0]
         # Not sure yet
-        self.y = self.data[1]
+        self._y = self.data[1]
         # Not sure yet
-        self.z = self.data[2]
+        self._z = self.data[2]
         # Pitch of the loop
-        self.pitch = self.data[3]
+        self._pitch = self.data[3]
         # Roll of the loop
-        self.roll = self.data[4]
+        self._roll = self.data[4]
         # Yaw of the loop
-        self.yaw = self.data[5]
+        self._yaw = self.data[5]
         # Radius of the loop
-        self.radius = radius
+        self._radius = radius
+
+    @property
+    def area(self):
+        return np.pi * self.radius * self.radius
+
+    @property
+    def moment(self):
+        return self._moment
+
+    @property
+    def orient(self):
+        return self._orient
+
+    @property
+    def pitch(self):
+        return self._pitch
+
+    @property
+    def radius(self):
+        return self._radius
+    
+    @property
+    def roll(self):
+        return self._roll
+
+    @property
+    def x(self):
+        return self._x
+
+    @property
+    def y(self):
+        return self._y
+
+    @property
+    def yaw(self):
+        return self._yaw
+
+    @property
+    def z(self):
+        return self._z   
 
     
     def deepcopy(self):
