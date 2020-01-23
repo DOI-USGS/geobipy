@@ -91,9 +91,11 @@ class TdemDataPoint(EmDataPoint):
         systems = []
         for j, sys in enumerate(system):
             if isinstance(sys, str):
-                systems.append(TdemSystem(sys))
+                td = TdemSystem().read(sys)
+                systems.append(td)
             elif isinstance(sys, TdemSystem):
                 systems.append(sys)
+
             # Number of time gates
             nTimes[j] = systems[j].nTimes
 
@@ -923,9 +925,11 @@ class TdemDataPoint(EmDataPoint):
     def Isend(self, dest, world, systems=None):
         tmp = np.asarray([self.x, self.y, self.z, self.elevation, self.nSystems, self.lineNumber, self.fiducial, *self.loopOffset], dtype=np.float64)
         myMPI.Isend(tmp, dest=dest, ndim=1, shape=(10, ), dtype=np.float64, world=world)
+
         if systems is None:
             for i in range(self.nSystems):
-                world.isend(self.system[i].fileName, dest=dest)
+                world.send(self.system[i].fileName, dest=dest)
+                
         self._data.Isend(dest, world)
         self._std.Isend(dest, world)
         self._predictedData.Isend(dest, world)
@@ -943,7 +947,8 @@ class TdemDataPoint(EmDataPoint):
 
             systems = []
             for i in range(nSystems):
-                systems.append(world.irecv(source=source).wait())
+                sys = world.recv(source=source)
+                systems.append(sys)
 
         s = StatArray.StatArray(0)
         d = s.Irecv(source, world)
