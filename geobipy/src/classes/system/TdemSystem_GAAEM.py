@@ -71,8 +71,9 @@ try:
                     
                     if (get):
                         x = fIO.getRealNumbersfromLine(line)
-                        time.append(x[0])
-                        current.append(x[1])
+                        if len(x) > 0:
+                            time.append(x[0])
+                            current.append(x[1])
                         
                     if ('WaveFormCurrent Begin' in line):
                         get = True
