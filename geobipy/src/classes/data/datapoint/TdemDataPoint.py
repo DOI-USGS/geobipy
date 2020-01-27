@@ -8,7 +8,7 @@ from ...system.SquareLoop import SquareLoop
 from ...system.CircularLoop import CircularLoop
 from ....base.logging import myLogger
 from ...system.TdemSystem import TdemSystem
-from ...system.butterworth import butterworth
+from ...system.filters.butterworth import butterworth
 from ...system.Waveform import Waveform
 from ...statistics.Histogram1D import Histogram1D
 import matplotlib.pyplot as plt
@@ -450,7 +450,7 @@ class TdemDataPoint(EmDataPoint):
         self.T.writeHdf(grp, 'T', index=index)
         self.R.writeHdf(grp, 'R', index=index)
         self.loopOffset.writeHdf(grp, 'loop_offset', index=index)
-        #writeNumpy(self.iActive, grp, 'iActive')
+        #writeNumpy(self.active, grp, 'iActive')
 
 #    def toHdf(self, parent, myName):
 #        """ Write the TdemDataPoint to an HDF object
@@ -524,7 +524,7 @@ class TdemDataPoint(EmDataPoint):
         except:
             pass
 
-        _aPoint.iActive = _aPoint.getActiveData()
+        # _aPoint.active = _aPoint.getActiveData()
 
         _aPoint.getIplotActive()
 
@@ -804,13 +804,13 @@ class TdemDataPoint(EmDataPoint):
 
         # Update the variance of the predicted data prior
         if self._predictedData.hasPrior:
-            self._predictedData.prior.variance[np.diag_indices(self.iActive.size)] = self._std[self.iActive]**2.0
+            self._predictedData.prior.variance[np.diag_indices(self.active.size)] = self._std[self.active]**2.0
 
 
     def updateSensitivity(self, mod):
         """ Compute an updated sensitivity matrix using a new model based on an existing matrix """
 
-        J1 = np.zeros([np.size(self.iActive), mod.nCells[0]])
+        J1 = np.zeros([np.size(self.active), mod.nCells[0]])
 
         perturbedLayer = mod.action[1]
 
@@ -846,11 +846,11 @@ class TdemDataPoint(EmDataPoint):
         tdem1dfwd(self, mod)
 
 
-    def sensitivity(self, mod, ix=None, modelChanged=True):
+    def sensitivity(self, model, ix=None, modelChanged=True):
         """ Compute the sensitivty matrix for the given model """
 
-        assert isinstance(mod, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
-        return tdem1dsen(self, mod, ix, modelChanged)
+        assert isinstance(model, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
+        return tdem1dsen(self, model, ix, modelChanged)
 
 
     def _empymodForward(self, mod):
