@@ -35,12 +35,13 @@ class TdemSystem(myObject):
         self.loopOffset = loopOffset
         self.waveform = waveform
         self.offTimeFilters = offTimeFilters
+        self.delayTime = 1.8e-7
 
 
         self.modellingTimes, self.modellingFrequencies, self.ft, self.ftarg = empymod.utils.check_time(
             time=self.get_modellingTimes,          # Required times
-            signal=1,           # Switch-on response
-            ft='sin',           # Use DLF
+            signal=-1,           # Switch-off response
+            ft='cos',           # Use DLF
             ftarg={'fftfilt': 'key_81_CosSin_2009'},
             verb=0)
 
@@ -75,6 +76,10 @@ class TdemSystem(myObject):
         else:
             assert isinstance(value, EmLoop), TypeError("transmitterLoop must have type geobipy.EmLoop")
             self._receiverLoop = value.deepcopy()
+
+    def summary(self, out=False):
+        msg = ("TdemSystem: ")
+        return msg if out else print(msg)
 
     @property
     def times(self):
@@ -156,6 +161,7 @@ class TdemSystem(myObject):
             Times spanning both the waveform and measrement times
 
         """
-        tmin = np.log10(max(np.min(self.times) - np.max(self.waveform.time), 1e-10))
-        tmax = np.log10(np.max(self.times) - np.min(self.waveform.time))
+
+        tmin = np.log10(np.maximum(np.min(self.times) - np.max(self.waveform.time-self.delayTime), 1e-10))
+        tmax = np.log10(np.max(self.times) - np.min(self.waveform.time-self.delayTime))
         return np.logspace(tmin, tmax, self.nTimes+2)

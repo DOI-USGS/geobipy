@@ -1,3 +1,4 @@
+from cached_property import cached_property
 from ...pointcloud.Point import Point
 from ....classes.core import StatArray
 from ....base import customFunctions as cf
@@ -57,35 +58,35 @@ class DataPoint(Point):
         # StatArray of data
         if not elevation is None:
             # assert np.size(elevation) == 1, ValueError("elevation must be single float")
-            self._elevation = StatArray.StatArray(elevation, "Elevation", "m", order='F')
+            self._elevation = StatArray.StatArray(elevation, "Elevation", "m")
         else:
             self._elevation = StatArray.StatArray(1, "Elevation", "m")
 
         # StatArray of data
         if not data is None:
             assert np.size(data) == self.nChannels, ValueError("data must have size {}".format(self.nChannels))
-            self._data = StatArray.StatArray(data, "Data", dataUnits, order='F')
+            self._data = StatArray.StatArray(data, "Data", dataUnits)
         else:
-            self._data = StatArray.StatArray(self.nChannels, "Data", dataUnits, order='F')
+            self._data = StatArray.StatArray(self.nChannels, "Data", dataUnits)
 
-        # Index to non NaN values
-        self.iActive = self.getActiveData()
+        # # Index to non NaN values
+        # self.active = self.getActiveData()
 
         # StatArray of Standard Deviations
         if not std is None:
             assert np.size(std) == self.nChannels, ValueError("std must have size {}".format(self.nChannels))
-            assert np.all(std[self.iActive] > 0.0), ValueError("Cannot assign standard deviations that are <= 0.0.")
-            self._std = StatArray.StatArray(std, "Standard Deviation", dataUnits, order='F')
+            assert np.all(std[self.active] > 0.0), ValueError("Cannot assign standard deviations that are <= 0.0.")
+            self._std = StatArray.StatArray(std, "Standard Deviation", dataUnits)
         else:
-            self._std = StatArray.StatArray(np.ones(self.nChannels), "Standard Deviation", dataUnits, order='F')
+            self._std = StatArray.StatArray(np.ones(self.nChannels), "Standard Deviation", dataUnits)
         
         
         # Create predicted data
         if not predictedData is None:
             assert np.size(predictedData) == self.nChannels, ValueError("predictedData must have size {}".format(self.nChannels))
-            self._predictedData = StatArray.StatArray(predictedData, "Predicted Data", dataUnits, order='F')
+            self._predictedData = StatArray.StatArray(predictedData, "Predicted Data", dataUnits)
         else:
-            self._predictedData = StatArray.StatArray(self.nChannels, "Predicted Data", dataUnits, order='F')
+            self._predictedData = StatArray.StatArray(self.nChannels, "Predicted Data", dataUnits)
         
         # Assign the channel names
         if channelNames is None:
@@ -98,6 +99,11 @@ class DataPoint(Point):
     @property
     def data(self):
         return self._data
+
+    @data.setter
+    def data(self, values):
+        assert np.size(values) == self.nChannelsPerSystem, ValueError("data must have size {}".format(self.nChannelsPerSystem))
+        self._data[:] = values
 
     @property
     def deltaD(self):
@@ -121,7 +127,7 @@ class DataPoint(Point):
 
     @property
     def nActiveChannels(self):
-        return self.iActive.size
+        return self.active.size
 
     @property
     def nChannels(self):
@@ -135,10 +141,16 @@ class DataPoint(Point):
     def std(self):
         return self._std
 
+    @std.setter
+    def std(self, values):
+        assert np.size(values) == self.nChannels, ValueError("std must have size {}".format(self.nChannels))
+        assert np.all(values[self.active] > 0.0), ValueError("Cannot assign standard deviations that are <= 0.0.")
+        self._std[:] = values
+
 
     def weightingMatrix(self, power=1.0):
         """Return a diagonal data weighting matrix of the reciprocated data standard deviations."""
-        return np.diag(self.std[self.iActive]**-power)    
+        return np.diag(self.std[self.active]**-power)    
 
 
     def _systemIndices(self, system=0):
@@ -160,7 +172,8 @@ class DataPoint(Point):
         return np.s_[self._systemOffset[system]:self._systemOffset[system+1]]
 
 
-    def getActiveData(self):
+    @cached_property
+    def active(self):
         """Gets the indices to the observed data values that are not NaN
 
         Returns
@@ -181,7 +194,7 @@ class DataPoint(Point):
             Likelihood of the data point
 
         """
-        return self._predictedData.probability(i=self.iActive, log=log)
+        return self._predictedData.probability(i=self.active, log=log)
 
 
     def dataMisfit(self, squared=False):
@@ -203,9 +216,9 @@ class DataPoint(Point):
             The misfit value.
 
         """
-        assert not any(self._std[self.iActive] == 0.0), ValueError('Cannot compute the misfit when the data standard deviations are zero.')
-        tmp2 = self._std[self.iActive]**-1.0
-        PhiD = np.float64(np.sum((cf.Ax(tmp2, self.deltaD[self.iActive]))**2.0, dtype=np.float64))
+        assert not any(self._std[self.active] == 0.0), ValueError('Cannot compute the misfit when the data standard deviations are zero.')
+        tmp2 = self._std[self.active]**-1.0
+        PhiD = np.float64(np.sum((cf.Ax(tmp2, self.deltaD[self.active]))**2.0, dtype=np.float64))
         return PhiD if squared else np.sqrt(PhiD)
 
     
@@ -235,7 +248,7 @@ class DataPoint(Point):
         assert Jin.shape[0] == self.nActiveChannels, ValueError("Number of rows of Jin must match the number of active channels in the datapoint {}".format(self.nActiveChannels))
 
         Jout = np.zeros(Jin.shape)
-        Jout[:, :] = Jin * (np.repeat(self._std[self.iActive, np.newaxis]**-power, Jout.shape[1], 1))
+        Jout[:, :] = Jin * (np.repeat(self._std[self.active, np.newaxis]**-power, Jout.shape[1], 1))
         return Jout
 
 
@@ -248,7 +261,7 @@ class DataPoint(Point):
                'z: {} \n'
                'elevation: {} \n'
                'Number of active channels: {} \n'
-               '{} {} {}').format(self._channelNames, self.x, self.y, self.z, self.elevation, self.nActiveChannels, self._data[self.iActive].summary(True), self._predictedData[self.iActive].summary(True), self._std[self.iActive].summary(True))
+               '{} {} {}').format(self._channelNames, self.x, self.y, self.z, self.elevation, self.nActiveChannels, self._data[self.active].summary(True), self._predictedData[self.active].summary(True), self._std[self.active].summary(True))
         if (out):
             return msg
         print(msg)
@@ -290,7 +303,7 @@ class DataPoint(Point):
         self._std[:] = np.sqrt(tmp)
 
         if self._predictedData.hasPrior:
-            self._predictedData.prior.variance[np.diag_indices(self.nActiveChannels)] = tmp[self.iActive]
+            self._predictedData.prior.variance[np.diag_indices(self.nActiveChannels)] = tmp[self.active]
 
 
     def Isend(self, dest, world):

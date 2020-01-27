@@ -91,7 +91,7 @@ class FdemData(Data):
         # Data Class containing xyz and channel values
         Data.__init__(self, nPoints=nPoints, nChannelsPerSystem=2*nFrequencies, dataUnits="ppm", **kwargs)
         # StatArray of the line number for flight line data
-        self._line = StatArray.StatArray(nPoints, 'Line Number')
+        self._lineNumber = StatArray.StatArray(nPoints, 'Line Number')
         # StatArray of the id number
         self._fiducial = StatArray.StatArray(nPoints, 'Fiducial')
         # StatArray of the elevation
@@ -108,8 +108,6 @@ class FdemData(Data):
                 for iFrequency in range(2*self.nFrequencies[i]):
                     self.channelNames[k] = '{} {} (Hz)'.format(self.getMeasurementType(iFrequency, i), self.getFrequency(iFrequency, i))
                     k += 1
-
-        self.iActive = self.getActiveChannels()
 
         self._magnetic = None
         self._powerline = None
@@ -153,12 +151,41 @@ class FdemData(Data):
 
     def fileInformation(self):
         """Description of the data file."""
-        tmp = 'The data file is structured using columns with the first line containing a header line.\n'\
-              'The header should contain the following entries \n'\
-              'Line [ID or FID] [X or N or northing] [Y or E or easting] [Z or DTM or dem_elev] '\
-              '[Alt or Laser or bheight] [I Q] ... [I Q] \n'\
-              'Do not include brackets [], [I Q] are the in-phase and quadrature values for each measurement frequency.\n'
-        return tmp
+        s =('\nThe data columns are read in according to the column names in the first line \n'
+            'The header line should contain at least the following column names. Extra columns may exist, but will be ignored \n'
+            'In this description, the column name or its alternatives are given followed by what the name represents \n'
+            'Optional columns are also described \n'
+            'Required columns'
+            'line \n'
+            '    Line number for the data point\n'
+            'id or fid \n'
+            '    Id number of the data point, these be unique\n'
+            'x or northing or n \n'
+            '    Northing co-ordinate of the data point, (m)\n'
+            'y or easting or e \n'
+            '    Easting co-ordinate of the data point, (m)\n'
+            'z or alt or laser or bheight \n'
+            '    Altitude of the transmitter coil above ground level (m)\n'
+            'dtm or dem_elev or dem_np \n'
+            '    Elevation of the ground at the data point (m)\n'
+            'TxPitch \n'
+            '    Pitch of the transmitter loop\n'
+            'TxRoll \n'
+            '    Roll of the transmitter loop\n'
+            'TxYaw \n'
+            '    Yaw of the transmitter loop\n'
+            'RxPitch \n'
+            '    Pitch of the receiver loop\n'
+            'RxRoll \n'
+            '    Roll of the receiver loop\n'
+            'RxYaw \n'
+            '    Yaw of the receiver loop\n'
+            'Inphase[0] Quadrature[0] ... Inphase[nFrequencies] Quadrature[nFrequencies]  - with the number and square brackets\n'
+            '    The measurements for each frequency specified in the accompanying system file. \n'
+            'Optional columns\n'
+            'InphaseErr[0] QuadratureErr[0] ... InphaseErr[nFrequencies] QuadratureErr[nFrequencies]\n'
+            '    Estimates of standard deviation for each inphase and quadrature measurement.')
+        return s
             
 
     @property
@@ -183,8 +210,8 @@ class FdemData(Data):
 
         i1 = self.nPoints
 
-        out._line[:i1] = self.line
-        out._line[i1:] = other.line
+        out._lineNumber[:i1] = self.lineNumber
+        out._lineNumber[i1:] = other.lineNumber
 
         out._fiducial[:i1] = self.fiducial
         out._fiducial[i1:] = other.fiducial
@@ -288,23 +315,23 @@ class FdemData(Data):
         return self.system[system].frequencies[channel%self.nFrequencies[system]]
 
 
-    def getLine(self, line):
-        """Gets the data in the given line number 
+    # def getLine(self, line):
+    #     """Gets the data in the given line number 
         
-        Parameters
-        ----------
-        line : float
-            A line number from the data file
+    #     Parameters
+    #     ----------
+    #     line : float
+    #         A line number from the data file
 
-        Returns
-        -------
-        out : geobipy.FdemData
-            A data class containing only the data in the line
+    #     Returns
+    #     -------
+    #     out : geobipy.FdemData
+    #         A data class containing only the data in the line
         
-        """
-        i = np.where(self.line == line)[0]
-        assert (i.size > 0), 'Could not get line with number {}'.format(line)
-        return self[i]
+    #     """
+    #     i = np.where(self.line == line)[0]
+    #     assert (i.size > 0), 'Could not get line with number {}'.format(line)
+    #     return self[i]
 
 
     def __getitem__(self, i):
@@ -321,9 +348,9 @@ class FdemData(Data):
         tmp._data[:, :] = self._data[i, :]
         tmp._std[:, :] = self._std[i, :]
         tmp._predictedData[:, :] = self._predictedData[i, :]
-        tmp.line[:] = self.line[i]
-        tmp.fiducial[:] = self.fiducial[i]
-        tmp.elevation[:] = self.elevation[i]
+        tmp._lineNumber[:] = self.lineNumber[i]
+        tmp._fiducial[:] = self.fiducial[i]
+        tmp._elevation[:] = self.elevation[i]
         tmp.system = self.system
         tmp.nSystems = self.nSystems
         
@@ -334,7 +361,7 @@ class FdemData(Data):
         return tmp
 
 
-    def getDataPoint(self, index=None, fiducial=None):
+    def datapoint(self, index=None, fiducial=None):
         """Get the ith data point from the data set 
         
         Parameters
@@ -363,7 +390,7 @@ class FdemData(Data):
         if not fNone:
             index = self.fiducial.searchsorted(fiducial)
 
-        return FdemDataPoint(self.x[index], self.y[index], self.z[index], self.elevation[index], self._data[index, :], self._std[index, :], system=self.system, lineNumber=self.line[index], fiducial=self.fiducial[index])
+        return FdemDataPoint(self.x[index], self.y[index], self.z[index], self.elevation[index], self._data[index, :], self._std[index, :], system=self.system, lineNumber=self.lineNumber[index], fiducial=self.fiducial[index])
 
 
     # def mapChannel(self, channel, *args, system=0, **kwargs):
@@ -428,7 +455,7 @@ class FdemData(Data):
     def plotLine(self, line, system=0, xAxis='index', **kwargs):
         """ Plot the specified line """
 
-        l = self.getLine(line)
+        l = self.line(line)
         kwargs['log'] = kwargs.pop('log', None)
 
         x = self.getXAxis(xAxis)
@@ -526,8 +553,8 @@ class FdemData(Data):
         values = fIO.read_columns(dataFilename[0], indicesForFile, 1, nPoints)
 
         # Assign columns to variables
-        self.line[:] = values[:, 0]
-        self.fiducial[:] = values[:, 1]
+        self._lineNumber[:] = values[:, 0]
+        self._fiducial[:] = values[:, 1]
         self.x[:] = values[:, 2]
         self.y[:] = values[:, 3]
         self.z[:] = values[:, 4]
@@ -569,8 +596,6 @@ class FdemData(Data):
                 self._std[:, iSys] = values[:, nBase + 2 * self.nFrequencies[i]:]
             else:
                 self._std[:, iSys] = 0.1 * self._data[:, iSys]
-
-        self.iActive = self.getActiveChannels()
 
         self.check()
 
@@ -873,8 +898,8 @@ class FdemData(Data):
         values = fIO.read_columns(dataFilename[0], indicesForFile, nHeaderLines, nPoints)
 
         # Assign columns to variables
-        self.line[:] = values[:, 0]
-        self.fiducial[:] = values[:, 1]
+        self._lineNumber[:] = values[:, 0]
+        self._fiducial[:] = values[:, 1]
         self.x[:] = values[:, 2]
         self.y[:] = values[:, 3]
         self.z[:] = values[:, 4]
@@ -1085,7 +1110,7 @@ class FdemData(Data):
         out._std = self._std.Bcast(world, root=root)
         out._predictedData = self._predictedData.Bcast(world, root=root)
         out._fiducial = self.fiducial.Bcast(world, root=root)
-        out._line = self.line.Bcast(world, root=root)
+        out._lineNumber = self.lineNumber.Bcast(world, root=root)
         return out
 
 
@@ -1152,7 +1177,7 @@ class FdemData(Data):
         out._std = self._std.Scatterv(starts, chunks, world, root=root)
         out._predictedData = self._predictedData.Scatterv(starts, chunks, world, root=root)
         out._fiducial = self.fiducial.Scatterv(starts, chunks, world, root=root)
-        out._line = self.line.Scatterv(starts, chunks, world, root=root)
+        out._lineNumber = self.lineNumber.Scatterv(starts, chunks, world, root=root)
         
         return out
 
@@ -1188,7 +1213,7 @@ class FdemData(Data):
                 with np.printoptions(formatter={'float': '{: 0.15g}'.format}, suppress=True):
                     for j in range(self.nPoints):
 
-                        x = np.asarray([self.line[j], self.fiducial[j], self.x[j], self.y[j], self.elevation[j], self.z[j]])
+                        x = np.asarray([self.lineNumber[j], self.fiducial[j], self.x[j], self.y[j], self.elevation[j], self.z[j]])
 
                         if predictedData:
                             d[0::2] = self.predictedData[j, :sys.nFrequencies]

@@ -5,6 +5,7 @@ June 2020
 """
 import numpy as np
 from ....system.TdemSystem_GAAEM import TdemSystem_GAAEM
+from .empymod_walktem import empymod_walktem
 
 def tdem1dfwd(datapoint, model1d):
     """Wrapper to freqeuency domain EM forward modellers
@@ -31,7 +32,7 @@ def tdem1dfwd(datapoint, model1d):
         return gaTdem1dfwd(datapoint, model1d)
 
     else:
-        return
+        return empymod_tdem1dfwd(datapoint, model1d)
 
     
 def tdem1dsen(datapoint, model1d, ix=None, modelChanged=True):
@@ -41,10 +42,12 @@ def tdem1dsen(datapoint, model1d, ix=None, modelChanged=True):
     else:
         return
 
-
 def empymod_tdem1dfwd(datapoint, model1d):
 
-    print('a')
+    for i in range(datapoint.nSystems):
+        iSys = datapoint._systemIndices(i)
+        fm = empymod_walktem(datapoint.system[i], model1d)
+        datapoint._predictedData[iSys] = fm
 
 
 def empymod_tdem1dsen(datapoint, model1d):
@@ -70,6 +73,7 @@ try:
             iSys = datapoint._systemIndices(i)
             fm = datapoint.system[i].forwardmodel(G, E)
             datapoint._predictedData[iSys] = -fm.SZ[:]  # Store the necessary component
+
 
     def gaTdem1dsen(datapoint, model1d, ix=None, modelChanged=True):
         """ Compute the sensitivty matrix for a 1D layered earth model, optionally compute the responses for only the layers in ix """
@@ -99,7 +103,7 @@ try:
                 # Store the necessary component
                 J[iSys, i] = -model1d.par[ix[i]] * tmp.SZ[:]
 
-        datapoint.J = J[datapoint.iActive,:]
+        datapoint.J = J[datapoint.active,:]
         return datapoint.J
     
 except:

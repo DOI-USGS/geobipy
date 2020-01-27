@@ -55,7 +55,7 @@ class EmDataPoint(DataPoint):
         self._addErr[:] = values
 
 
-    def FindBestHalfSpace(self, minConductivity=-4.0, maxConductivity=2.0, nSamples=100):
+    def FindBestHalfSpace(self, minConductivity=1e-4, maxConductivity=1e2, nSamples=100):
         """Computes the best value of a half space that fits the data.
 
         Carries out a brute force search of the halfspace conductivity that best fits the data.
@@ -64,11 +64,11 @@ class EmDataPoint(DataPoint):
         Parameters
         ----------
         minConductivity : float, optional
-            The minimum log10 conductivity to search over
+            The minimum conductivity to search over
         maxConductivity : float, optional
-            The maximum log10 conductivity to search over
-        nInc : int, optional
-            The number of increments between the min and max
+            The maximum conductivity to search over
+        nSamples : int, optional
+            The number of values between the min and max
 
         Returns
         -------
@@ -77,17 +77,19 @@ class EmDataPoint(DataPoint):
 
         """
         assert maxConductivity > minConductivity, ValueError("Maximum conductivity must be greater than the minimum")
-        # ####lg.myLogger("Global"); ####lg.indent()
+        minConductivity = np.log10(minConductivity)
+        maxConductivity = np.log10(maxConductivity)
         c = np.logspace(minConductivity, maxConductivity, nSamples)
         PhiD = np.zeros(nSamples)
-        Mod = Model1D(1)
+        p = StatArray.StatArray(1, 'Conductivity', r'$\frac{S}{m}$')
+        model = Model1D(1, parameters=p)
         for i in range(nSamples):
-            Mod.par[0] = c[i]
-            self.forward(Mod)
+            model._par[0] = c[i]
+            self.forward(model)
             PhiD[i] = self.dataMisfit(squared=True)
         i = np.argmin(PhiD)
-        # ####lg.dedent()
-        return c[i]
+        model._par[0] = c[i]
+        return model
 
 
     def priorProbability(self, rErr, aErr, height, calibration, verbose=False):
@@ -237,13 +239,13 @@ class EmDataPoint(DataPoint):
         """
 
         c = StatArray.StatArray(np.logspace(minConductivity, maxConductivity, nSamples), 'Conductivity', '$S/m$')
-        PhiD = StatArray.StatArray(c.size, 'Data Misfit', '')
+        PhiD = StatArray.StatArray(c.size, 'Normalized Data Misfit', '')
         mod = Model1D(1)
         for i in range(c.size):
             mod.par[0] = c[i]
             self.forward(mod)
             PhiD[i] = self.dataMisfit()
-        plt.loglog(c, PhiD, **kwargs)
+        plt.loglog(c, PhiD/self.nActiveChannels, **kwargs)
         cP.xlabel(c.getNameUnits())
         cP.ylabel('Data misfit')
 

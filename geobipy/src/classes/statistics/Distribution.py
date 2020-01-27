@@ -6,6 +6,7 @@ from numpy.random import RandomState
 from .baseDistribution import baseDistribution
 from .CategoricalDistribution import Categorical
 from .NormalDistribution import Normal
+from .LogNormalDistribution import LogNormal
 from .MvNormalDistribution import MvNormal
 from .MvLogNormalDistribution import MvLogNormal
 from .UniformDistribution import Uniform
@@ -68,6 +69,9 @@ def Distribution(distributionType, *args, **kwargs):
 
     elif (tName == 'normal'):
         return Normal(*args, **kwargs)
+    
+    elif (tName == 'lognormal'):
+        return LogNormal(*args, **kwargs)
     
     elif (tName == 'mvnormal'):
         return MvNormal(*args, **kwargs)
