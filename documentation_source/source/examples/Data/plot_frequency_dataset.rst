@@ -311,7 +311,8 @@ Take a look at the line numbers in the dataset
 
  .. code-block:: none
 
-    [30010. 30020. 30030. ... 30100. 39010. 39020.]
+    [30010. 30020. 30030. 30040. 30050. 30060. 30070. 30080. 30090. 30100.
+     39010. 39020.]
 
 
 
@@ -466,19 +467,17 @@ File Format for frequency domain data
 +++++++++++++++++++++++++++++++++++++
 Here we describe the file format for frequency domain data.
 
-The data columns are read in according to the column names in the first line
-The header line should contain at least the following column names. 
-Extra columns may exist, but will be ignored.
+The data columns are read in according to the column names in the first line.
 
-In this description, the column name or its alternatives are given followed by what the name represents 
-Optional columns are also described 
+In this description, the column name or its alternatives are given followed by what the name represents.
+Optional columns are also described.
 
 Required columns
 ________________
 line 
     Line number for the data point
 fid
-    Fiducial of the data point, these be unique
+    Unique identification number of the data point
 x or northing or n 
     Northing co-ordinate of the data point, (m)
 y or easting or e 
@@ -499,7 +498,7 @@ InphaseErr[0] QuadratureErr[0] ... InphaseErr[nFrequencies] QuadratureErr[nFrequ
 
 Example Header
 ______________
-Line fid Easting Northing elevation height I_380 Q_380 ... ... I_129550 Q_129550
+Line fid easting northing elevation height I_380 Q_380 ... ... I_129550 Q_129550
 
 File Format for a frequency domain system
 +++++++++++++++++++++++++++++++++++++++++
@@ -536,7 +535,7 @@ ___________________
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  14.919 seconds)
+   **Total running time of the script:** ( 0 minutes  14.838 seconds)
 
 
 .. _sphx_glr_download_examples_Data_plot_frequency_dataset.py:

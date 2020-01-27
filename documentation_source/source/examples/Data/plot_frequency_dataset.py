@@ -137,7 +137,7 @@ dp = FD1.dataPoint(0)
 # line 
 #     Line number for the data point
 # fid
-#     Fiducial of the data point, these be unique
+#     Unique identification number of the data point
 # x or northing or n 
 #     Northing co-ordinate of the data point, (m)
 # y or easting or e 
@@ -158,7 +158,7 @@ dp = FD1.dataPoint(0)
 #
 # Example Header
 # ______________
-# Line fid Easting Northing elevation height I_380 Q_380 ... ... I_129550 Q_129550
+# Line fid easting northing elevation height I_380 Q_380 ... ... I_129550 Q_129550
 
 ################################################################################
 # File Format for a frequency domain system
