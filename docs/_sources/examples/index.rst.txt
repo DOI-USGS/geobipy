@@ -14,6 +14,37 @@ Examples
 
 
 
+.. _sphx_glr_examples_Distributions:
+
+Distributions
+=============
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Handles the initialization of different statistical distribution">
+
+.. only:: html
+
+ .. figure:: /examples/Distributions/images/thumb/sphx_glr_plot_distributions_thumb.png
+
+     :ref:`sphx_glr_examples_Distributions_plot_distributions.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/Distributions/plot_distributions
+.. raw:: html
+
+    <div class="sphx-glr-clear"></div>
+
+
+
 .. _sphx_glr_examples_Statistics:
 
 Statistics
@@ -182,47 +213,27 @@ Models
    :hidden:
 
    /examples/Models/plot_model_1d
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="1D Model without an infinite halfspace">
-
-.. only:: html
-
- .. figure:: /examples/Models/images/thumb/sphx_glr_plot_model_1d_no_hs_thumb.png
-
-     :ref:`sphx_glr_examples_Models_plot_model_1d_no_hs.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/Models/plot_model_1d_no_hs
 .. raw:: html
 
     <div class="sphx-glr-clear"></div>
 
 
 
-.. _sphx_glr_examples_Distributions:
+.. _sphx_glr_examples_Data:
 
-Distributions
-=============
+Data
+====
 
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Handles the initialization of different statistical distribution">
+    <div class="sphx-glr-thumbcontainer" tooltip="Time Domain Data Set">
 
 .. only:: html
 
- .. figure:: /examples/Distributions/images/thumb/sphx_glr_plot_distributions_thumb.png
+ .. figure:: /examples/Data/images/thumb/sphx_glr_plot_time_domain_dataset_thumb.png
 
-     :ref:`sphx_glr_examples_Distributions_plot_distributions.py`
+     :ref:`sphx_glr_examples_Data_plot_time_domain_dataset.py`
 
 .. raw:: html
 
@@ -232,7 +243,58 @@ Distributions
 .. toctree::
    :hidden:
 
-   /examples/Distributions/plot_distributions
+   /examples/Data/plot_time_domain_dataset
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Frequency domain dataset">
+
+.. only:: html
+
+ .. figure:: /examples/Data/images/thumb/sphx_glr_plot_frequency_dataset_thumb.png
+
+     :ref:`sphx_glr_examples_Data_plot_frequency_dataset.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/Data/plot_frequency_dataset
+.. raw:: html
+
+    <div class="sphx-glr-clear"></div>
+
+
+
+.. _sphx_glr_examples_Datapoints:
+
+Datapoints
+==========
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Frequency domain datapoint">
+
+.. only:: html
+
+ .. figure:: /examples/Datapoints/images/thumb/sphx_glr_plot_frequency_datapoint_thumb.png
+
+     :ref:`sphx_glr_examples_Datapoints_plot_frequency_datapoint.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/Datapoints/plot_frequency_datapoint
 .. raw:: html
 
     <div class="sphx-glr-clear"></div>

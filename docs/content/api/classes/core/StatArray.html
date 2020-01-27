@@ -285,7 +285,7 @@ unless a copy is required, in which case it will be C-contiguous. Only used when
 
 <dl class="method">
 <dt id="geobipy.src.classes.core.StatArray.StatArray.Irecv">
-<code class="sig-name descname">Irecv</code><span class="sig-paren">(</span><em class="sig-param">source</em>, <em class="sig-param">world</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.Irecv" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">Irecv</code><span class="sig-paren">(</span><em class="sig-param">source</em>, <em class="sig-param">world</em>, <em class="sig-param">ndim=None</em>, <em class="sig-param">shape=None</em>, <em class="sig-param">dtype=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.Irecv" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -302,7 +302,7 @@ unless a copy is required, in which case it will be C-contiguous. Only used when
 
 <dl class="method">
 <dt id="geobipy.src.classes.core.StatArray.StatArray.Isend">
-<code class="sig-name descname">Isend</code><span class="sig-paren">(</span><em class="sig-param">dest</em>, <em class="sig-param">world</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.Isend" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">Isend</code><span class="sig-paren">(</span><em class="sig-param">dest</em>, <em class="sig-param">world</em>, <em class="sig-param">ndim=None</em>, <em class="sig-param">shape=None</em>, <em class="sig-param">dtype=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.Isend" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -1023,6 +1023,17 @@ Values in c that are &lt;= 0 are masked.</p></li>
 </dd></dl>
 
 <dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.priorDerivative">
+<code class="sig-name descname">priorDerivative</code><span class="sig-paren">(</span><em class="sig-param">order</em>, <em class="sig-param">i=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.priorDerivative" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the derivative of the prior.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>order</strong> (<em>int</em>) – 1 or 2 for first or second order derivative</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
 <dt id="geobipy.src.classes.core.StatArray.StatArray.probability">
 <code class="sig-name descname">probability</code><span class="sig-paren">(</span><em class="sig-param">log</em>, <em class="sig-param">x=None</em>, <em class="sig-param">i=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.probability" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate the probability of the values in self using the attached prior distribution</p>
@@ -1049,6 +1060,17 @@ Values in c that are &lt;= 0 are masked.</p></li>
 <dt id="geobipy.src.classes.core.StatArray.StatArray.proposal">
 <em class="property">property </em><code class="sig-name descname">proposal</code><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.proposal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the prior if available.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.core.StatArray.StatArray.proposalDerivative">
+<code class="sig-name descname">proposalDerivative</code><span class="sig-paren">(</span><em class="sig-param">order</em>, <em class="sig-param">i=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.proposalDerivative" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the derivative of the proposal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>order</strong> (<em>int</em>) – 1 or 2 for first or second order derivative</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">

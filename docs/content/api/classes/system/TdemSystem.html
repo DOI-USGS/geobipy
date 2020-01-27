@@ -182,12 +182,13 @@
             
   <div class="section" id="time-domain-system">
 <h1>Time domain system<a class="headerlink" href="#time-domain-system" title="Permalink to this headline">¶</a></h1>
-<div class="graphviz"><img src="../../../../_images/inheritance-aa37208894b72a23665ed33c5a14bdee6e0e8480.png" alt="Inheritance diagram of geobipy.src.classes.system.TdemSystem" usemap="#inheritance997b7fa283" class="inheritance graphviz" /></div>
+<div class="graphviz"><img src="../../../../_images/inheritance-13898534dfaf414e90619e6d004020bd40cf9df4.png" alt="Inheritance diagram of geobipy.src.classes.system.TdemSystem" usemap="#inheritance997b7fa283" class="inheritance graphviz" /></div>
 <map id="inheritance997b7fa283" name="inheritance997b7fa283">
-<area shape="rect" id="node2" href="#geobipy.src.classes.system.TdemSystem.TdemSystem" target="_top" title="Initialize a Time domain system class" alt="" coords="166,5,266,29"/>
+<area shape="rect" id="node1" href="#geobipy.src.classes.system.TdemSystem.TdemSystem" target="_top" title="Initialize a Time domain system class" alt="" coords="131,5,231,29"/>
+<area shape="rect" id="node2" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="5,5,83,29"/>
 </map><span class="target" id="module-geobipy.src.classes.system.TdemSystem"></span><dl class="class">
 <dt id="geobipy.src.classes.system.TdemSystem.TdemSystem">
-<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.system.TdemSystem.</code><code class="sig-name descname">TdemSystem</code><span class="sig-paren">(</span><em class="sig-param">systemFilename</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.TdemSystem.TdemSystem" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.system.TdemSystem.</code><code class="sig-name descname">TdemSystem</code><span class="sig-paren">(</span><em class="sig-param">offTimes=None</em>, <em class="sig-param">transmitterLoop=None</em>, <em class="sig-param">receiverLoop=None</em>, <em class="sig-param">loopOffset=None</em>, <em class="sig-param">waveform=None</em>, <em class="sig-param">offTimeFilters=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.TdemSystem.TdemSystem" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize a Time domain system class</p>
 <p>TdemSystem(systemFileName)</p>
 <dl class="field-list simple">
@@ -202,9 +203,23 @@
 </dd>
 </dl>
 <dl class="method">
-<dt id="geobipy.src.classes.system.TdemSystem.TdemSystem.times">
-<em class="property">property </em><code class="sig-name descname">times</code><a class="headerlink" href="#geobipy.src.classes.system.TdemSystem.TdemSystem.times" title="Permalink to this definition">¶</a></dt>
-<dd><p>Time windows.</p>
+<dt id="geobipy.src.classes.system.TdemSystem.TdemSystem.get_modellingTimes">
+<em class="property">property </em><code class="sig-name descname">get_modellingTimes</code><a class="headerlink" href="#geobipy.src.classes.system.TdemSystem.TdemSystem.get_modellingTimes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates regularly log spaced times that covers both the waveform and measurment times.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>waveformTimes</strong> (<em>array_like</em>) – Times of the waveform change points</p></li>
+<li><p><strong>measurementTimes</strong> (<em>array_like</em>) – Measurement times for the system</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – Times spanning both the waveform and measrement times</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array_like</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

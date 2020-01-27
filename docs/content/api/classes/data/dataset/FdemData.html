@@ -323,20 +323,8 @@ t/rx,y,z are the loop offsets from the observation locations in the data file.</
 </dd></dl>
 
 <dl class="method">
-<dt id="geobipy.src.classes.data.dataset.FdemData.FdemData.fileInformation">
-<code class="sig-name descname">fileInformation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.fileInformation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Description of the data file.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="geobipy.src.classes.data.dataset.FdemData.FdemData.fromHdf">
-<code class="sig-name descname">fromHdf</code><span class="sig-paren">(</span><em class="sig-param">grp</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.fromHdf" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reads the object from a HDF group</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="geobipy.src.classes.data.dataset.FdemData.FdemData.getDataPoint">
-<code class="sig-name descname">getDataPoint</code><span class="sig-paren">(</span><em class="sig-param">index=None</em>, <em class="sig-param">fiducial=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.getDataPoint" title="Permalink to this definition">¶</a></dt>
+<dt id="geobipy.src.classes.data.dataset.FdemData.FdemData.datapoint">
+<code class="sig-name descname">datapoint</code><span class="sig-paren">(</span><em class="sig-param">index=None</em>, <em class="sig-param">fiducial=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.datapoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the ith data point from the data set</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -358,6 +346,18 @@ t/rx,y,z are the loop offsets from the observation locations in the data file.</
 </dd></dl>
 
 <dl class="method">
+<dt id="geobipy.src.classes.data.dataset.FdemData.FdemData.fileInformation">
+<code class="sig-name descname">fileInformation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.fileInformation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description of the data file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.dataset.FdemData.FdemData.fromHdf">
+<code class="sig-name descname">fromHdf</code><span class="sig-paren">(</span><em class="sig-param">grp</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.fromHdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the object from a HDF group</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="geobipy.src.classes.data.dataset.FdemData.FdemData.getFrequency">
 <code class="sig-name descname">getFrequency</code><span class="sig-paren">(</span><em class="sig-param">channel</em>, <em class="sig-param">system=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.getFrequency" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the measurement frequency of the channel</p>
@@ -373,23 +373,6 @@ t/rx,y,z are the loop offsets from the observation locations in the data file.</
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="geobipy.src.classes.data.dataset.FdemData.FdemData.getLine">
-<code class="sig-name descname">getLine</code><span class="sig-paren">(</span><em class="sig-param">line</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.getLine" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the data in the given line number</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>line</strong> (<em>float</em>) – A line number from the data file</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>out</strong> – A data class containing only the data in the line</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>geobipy.FdemData</p>
 </dd>
 </dl>
 </dd></dl>

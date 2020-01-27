@@ -229,6 +229,29 @@
 </dd></dl>
 
 <dl class="method">
+<dt id="geobipy.src.classes.data.dataset.TdemData.TdemData.datapoint">
+<code class="sig-name descname">datapoint</code><span class="sig-paren">(</span><em class="sig-param">index=None</em>, <em class="sig-param">fiducial=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.datapoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the ith data point from the data set</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> (<em>int</em><em>, </em><em>optional</em>) – Index of the data point to get.</p></li>
+<li><p><strong>fiducial</strong> (<em>float</em><em>, </em><em>optional</em>) – Fiducial of the data point to get.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – The data point.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>geobipy.FdemDataPoint</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>Exception</strong> – If neither an index or fiducial are given.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
 <dt id="geobipy.src.classes.data.dataset.TdemData.TdemData.estimateAdditiveError">
 <code class="sig-name descname">estimateAdditiveError</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.estimateAdditiveError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Uses the late times after 1ms to estimate the additive errors and error bounds in the data.</p>
@@ -252,18 +275,6 @@
 <dt id="geobipy.src.classes.data.dataset.TdemData.TdemData.fromHdf">
 <code class="sig-name descname">fromHdf</code><span class="sig-paren">(</span><em class="sig-param">grp</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.fromHdf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads the object from a HDF group</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="geobipy.src.classes.data.dataset.TdemData.TdemData.getDataPoint">
-<code class="sig-name descname">getDataPoint</code><span class="sig-paren">(</span><em class="sig-param">i</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.getDataPoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the ith data point from the data set</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="geobipy.src.classes.data.dataset.TdemData.TdemData.getLine">
-<code class="sig-name descname">getLine</code><span class="sig-paren">(</span><em class="sig-param">line</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.getLine" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the data in the given line number</p>
 </dd></dl>
 
 <dl class="method">

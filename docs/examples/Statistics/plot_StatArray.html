@@ -91,6 +91,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../content/getting_started/getting_started.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../content/api/api.html">API</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#distributions">Distributions</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html#statistics">Statistics</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="plot_histogram_1d.html">Histogram 1D</a></li>
 <li class="toctree-l3"><a class="reference internal" href="plot_histogram_2d.html">Histogram 2D</a></li>
@@ -107,7 +108,8 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#meshes">Meshes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../index.html#distributions">Distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#data">Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#datapoints">Datapoints</a></li>
 </ul>
 </li>
 </ul>
@@ -205,7 +207,7 @@ The name and units of the variable can be assigned to the StatArray.</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: Density
      Units: $\frac{g}{cc}$
      Shape: (1,)
-     Values: [-1.78582282]
+     Values: [-1.3668906]
 </pre></div>
 </div>
 </div>
@@ -250,7 +252,7 @@ sample when we wish to perturb the variable
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: Density
      Units: $\frac{g}{cc}$
      Shape: (1,)
-     Values: [-1.78582282]
+     Values: [-1.3668906]
 Prior:
      Uniform Distribution:
   Min: :-2.0
@@ -279,7 +281,7 @@ Therefore each element is evaluated to get 3 probabilities, one for each element
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>-0.18202958893220814
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>1.7152340979206393
 </pre></div>
 </div>
 <p>From a sampling stand point we can either sample using only the proposal
@@ -288,7 +290,7 @@ Or we can only generate samples that simultaneously satisfy the prior.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[-1.33762956]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[-1.1294916]
 </pre></div>
 </div>
 <p>We can perturb the variable by drawing from the attached proposal distribution.</p>
@@ -300,7 +302,7 @@ Or we can only generate samples that simultaneously satisfy the prior.</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: Density
      Units: $\frac{g}{cc}$
      Shape: (1,)
-     Values: [-1.20100922]
+     Values: [-0.61832714]
 Prior:
      Uniform Distribution:
   Min: :-2.0
@@ -355,7 +357,7 @@ This produces a single probability.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>0.1300835201082144
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>0.2083490998673292
 </pre></div>
 </div>
 <p>Attach the multivariate proposal</p>
@@ -373,15 +375,15 @@ This produces a single probability.</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: Density
      Units: $\frac{g}{cc}$
      Shape: (1,)
-     Values: [-0.38547039]
+     Values: [-0.50396056]
 Prior:
      MV Normal Distribution:
-    Mean: [1.35036815]
-    Variance: [1.]
+    Mean: [-0.37227652]
+    Variance: [[1.]]
 Proposal:
 MV Normal Distribution:
-    Mean: [-0.70953006]
-    Variance: [1.]
+    Mean: [1.06546388]
+    Variance: [[1.]]
 Posterior:
 &lt;class &#39;geobipy.src.classes.statistics.Histogram1D.Histogram1D&#39;&gt;
 Bins:
@@ -398,7 +400,7 @@ Counts:
 Name: Frequency
      Units:
      Shape: (100,)
-     Values: [3 2 1 ... 4 1 0]
+     Values: [2 3 0 ... 1 6 1]
 Values are logged to base None
 Relative to: None
 </pre></div>
@@ -780,7 +782,7 @@ Here x is a new variable, that is read in from the hdf5 file we just wrote.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">hdfRead</span><span class="o">.</span><span class="n">readKeyFromFiles</span><span class="p">(</span><span class="s1">&#39;1Dtest.h5&#39;</span><span class="p">,</span><span class="s1">&#39;/&#39;</span><span class="p">,</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;x has the same values as Density? &#39;</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">x</span> <span class="o">==</span> <span class="n">Density</span><span class="p">))</span>
 <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">5.0</span> <span class="c1"># Change one of the values in x</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;x has its own memory allocated (not a reference/pointer)? &#39;</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">x</span> <span class="o">==</span> <span class="n">Density</span><span class="p">)</span> <span class="o">==</span> <span class="kc">False</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;x has its own memory allocated (not a reference/pointer)? &#39;</span><span class="p">,</span> <span class="nb">id</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">id</span><span class="p">(</span><span class="n">Density</span><span class="p">))</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
@@ -797,19 +799,19 @@ x has its own memory allocated (not a reference/pointer)?  True
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: Density
      Units: $\frac{g}{cc}$
      Shape: (50, 100)
-     Values: [[ 0.93086274 -0.23452262 -0.39548999 ... -1.77457573 -0.59190863
-   0.38720698]
- [ 0.90731836  1.31181291 -0.65440119 ... -1.14402084  0.9666266
-   0.35062989]
- [-0.00475169  1.05844704 -0.58677181 ... -0.42828661  0.13430066
-   0.12910916]
+     Values: [[-1.02185333  0.0764024   0.30802494 ... -1.0960928   0.4562974
+  -0.14501831]
+ [ 1.33069842 -1.52421278  1.66985993 ...  2.20341486  0.98628737
+   0.51596217]
+ [-1.97371101  0.68703975 -0.44291096 ...  0.03436172 -0.37907208
+   0.15585545]
  ...
- [ 1.95783267 -0.58488051 -0.45933394 ...  0.38304206 -0.34271281
-  -0.11256415]
- [-0.12176328  2.10456355 -0.10022661 ... -1.39656847 -0.54014559
-   1.20310483]
- [-1.0321643   0.49540948 -0.44440532 ...  2.30997649 -0.06236417
-  -0.17748218]]
+ [ 0.06806889  0.92554339 -0.73785471 ...  1.44330499 -2.68247145
+   1.03640365]
+ [-0.09989437  0.15657618 -1.11088502 ...  0.688795    0.13306229
+   0.5156951 ]
+ [-0.24049048  0.49649917 -0.27505995 ...  0.03535032  0.48336258
+   1.71040532]]
 </pre></div>
 </div>
 <p>The StatArray Class’s functions work whether it is 1D or 2D</p>
@@ -903,7 +905,7 @@ ends of whatever you are plotting</p>
 </pre></div>
 </div>
 <img alt="../../_images/sphx_glr_plot_StatArray_022.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_022.png" />
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  3.509 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  3.591 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-statistics-plot-statarray-py">
 <div class="sphx-glr-download docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/53dc65a717762d4693b891c0caabbde0/plot_StatArray.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_StatArray.py</span></code></a></p>

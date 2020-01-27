@@ -1,0 +1,526 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Frequency domain dataset &mdash; GeoBIPy 1.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Time Domain Data Set" href="plot_time_domain_dataset.html" />
+    <link rel="prev" title="1D Model with an infinite halfspace" href="../Models/plot_model_1d.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> GeoBIPy
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../content/getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../content/api/api.html">API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#distributions">Distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#statistics">Statistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#meshes">Meshes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#data">Data</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Frequency domain dataset</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#reading-in-the-data">Reading in the Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#obtain-a-line-from-the-data-set">Obtain a line from the data set</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#obtain-a-single-datapoint-from-the-data-set">Obtain a single datapoint from the data set</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#file-format-for-frequency-domain-data">File Format for frequency domain data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#file-format-for-a-frequency-domain-system">File Format for a frequency domain system</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="plot_time_domain_dataset.html">Time Domain Data Set</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#datapoints">Datapoints</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GeoBIPy</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Examples</a> &raquo;</li>
+        
+      <li>Frequency domain dataset</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/examples/Data/plot_frequency_dataset.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-data-plot-frequency-dataset-py"><span class="std std-ref">here</span></a> to download the full example code</p>
+</div>
+<div class="sphx-glr-example-title section" id="frequency-domain-dataset">
+<span id="sphx-glr-examples-data-plot-frequency-dataset-py"></span><h1>Frequency domain dataset<a class="headerlink" href="#frequency-domain-dataset" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">FdemData</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+<div class="section" id="reading-in-the-data">
+<h2>Reading in the Data<a class="headerlink" href="#reading-in-the-data" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dataFolder</span> <span class="o">=</span> <span class="s2">&quot;..//supplementary//Data//&quot;</span>
+<span class="c1"># The data file name</span>
+<span class="n">dataFile</span> <span class="o">=</span> <span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;Resolve2.txt&#39;</span>
+<span class="c1"># The EM system file name</span>
+<span class="n">systemFile</span> <span class="o">=</span> <span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;FdemSystem2.stm&#39;</span>
+</pre></div>
+</div>
+<p>Read in a data set from file.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FD1</span> <span class="o">=</span> <span class="n">FdemData</span><span class="p">()</span>
+<span class="n">FD1</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">dataFile</span><span class="p">,</span> <span class="n">systemFile</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Take a look at the channel names</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">FD1</span><span class="o">.</span><span class="n">channelNames</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>In-Phase 380.0 (Hz)
+In-Phase 1776.0 (Hz)
+In-Phase 3345.0 (Hz)
+In-Phase 8171.0 (Hz)
+In-Phase 41020.0 (Hz)
+In-Phase 129550.0 (Hz)
+Quadrature 380.0 (Hz)
+Quadrature 1776.0 (Hz)
+Quadrature 3345.0 (Hz)
+Quadrature 8171.0 (Hz)
+Quadrature 41020.0 (Hz)
+Quadrature 129550.0 (Hz)
+</pre></div>
+</div>
+<p>Plot the locations of the data points</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">FD1</span><span class="o">.</span><span class="n">scatter2D</span><span class="p">();</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_frequency_dataset_001.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_001.png" />
+<p>Plot all the data along the specified line</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">FD1</span><span class="o">.</span><span class="n">plotLine</span><span class="p">(</span><span class="mf">30010.0</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">);</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_frequency_dataset_002.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_002.png" />
+<p>Or, plot specific channels in the data</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">FD1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">channels</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">11</span><span class="p">,</span><span class="mi">8</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">);</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_frequency_dataset_003.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_003.png" />
+<p>Read in a second data set</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FD2</span> <span class="o">=</span> <span class="n">FdemData</span><span class="p">()</span>
+<span class="n">FD2</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">dataFilename</span><span class="o">=</span><span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;Resolve1.txt&#39;</span><span class="p">,</span> <span class="n">systemFilename</span><span class="o">=</span><span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;FdemSystem1.stm&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Warning: Your data contains values that are &lt;= 0.0
+</pre></div>
+</div>
+<p>We can create maps of the elevations in two separate figures</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">FD1</span><span class="o">.</span><span class="n">mapPlot</span><span class="p">(</span><span class="n">dx</span><span class="o">=</span><span class="mf">50.0</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="mf">50.0</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="mf">200.0</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_frequency_dataset_004.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_004.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(584519.0671621622, 590166.7428378379, 4639079.207593819, 4661808.632406181)
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">FD2</span><span class="o">.</span><span class="n">mapPlot</span><span class="p">(</span><span class="n">dx</span><span class="o">=</span><span class="mf">50.0</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="mf">50.0</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="mf">200.0</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_frequency_dataset_005.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_005.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(662847.3094082569, 668366.7995917432, 4560053.628459876, 4600646.676540123)
+</pre></div>
+</div>
+<p>Or, we can plot both data sets in one figure to see their positions relative
+to each other.</p>
+<p>In this case, I use a 2D scatter plot of the data point co-ordinates, and pass
+one of the channels as the colour.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">FD1</span><span class="o">.</span><span class="n">scatter2D</span><span class="p">(</span><span class="n">s</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">FD1</span><span class="o">.</span><span class="n">dataChannel</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">FD2</span><span class="o">.</span><span class="n">scatter2D</span><span class="p">(</span><span class="n">s</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">FD2</span><span class="o">.</span><span class="n">dataChannel</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;jet&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_frequency_dataset_006.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_006.png" />
+<p>Or, interpolate the values to create a gridded “map”. mapChannel will
+interpolate the specified channel number.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">FD1</span><span class="o">.</span><span class="n">mapData</span><span class="p">(</span><span class="n">channel</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">system</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="mi">250</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_frequency_dataset_007.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_007.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(584518.405, 590167.405, 4639078.6625, 4661809.1775)
+</pre></div>
+</div>
+<p>Export the data to VTK</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># FD1.toVTK(&#39;FD_one&#39;)</span>
+<span class="c1"># FD2.toVTK(&#39;FD_two&#39;)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="obtain-a-line-from-the-data-set">
+<h2>Obtain a line from the data set<a class="headerlink" href="#obtain-a-line-from-the-data-set" title="Permalink to this headline">¶</a></h2>
+<p>Take a look at the line numbers in the dataset</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">FD1</span><span class="o">.</span><span class="n">lineNumber</span><span class="p">))</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[30010. 30020. 30030. ... 30100. 39010. 39020.]
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">L</span> <span class="o">=</span> <span class="n">FD1</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="mf">30010.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>A summary will now show the properties of the line.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>3D Point Cloud:
+Number of Points: : 6710
+ Name: Easting
+     Units: m
+     Shape: (6710,)
+     Values: [586852.29 586852.23 586852.17 ... 586123.57 586123.2  586122.82]
+ Name: Northing
+     Units: m
+     Shape: (6710,)
+     Values: [4639119.38 4639122.68 4639125.98 ... 4661765.26 4661768.84 4661772.42]
+ Name: Height
+     Units: m
+     Shape: (6710,)
+     Values: [36.629 37.012 37.349 ... 28.313 28.218 28.115]
+ Name: Elevation
+     Units: m
+     Shape: (6710,)
+     Values: [1246.84 1246.71 1246.61 ... 1337.94 1337.96 1338.02]
+Data:          :
+# of Channels: 12
+# of Total Data: 80520
+Name: Fdem Data
+     Units: ppm
+     Shape: (6710, 12)
+     Values: [[145.3 435.8 260.6 ... 516.5 405.7 255.7]
+ [145.7 436.5 257.9 ... 513.6 403.2 252. ]
+ [146.4 437.4 255.8 ... 511.2 400.9 248.8]
+ ...
+ [ 70.7 314.1 220.2 ... 743.3 960.8 910.7]
+ [ 71.3 315.3 220.5 ... 745.9 968.3 919.1]
+ [ 72.1 316.6 220.7 ... 749.2 976.5 928.3]]
+
+ Name: Standard Deviation
+     Units: ppm
+     Shape: (6710, 12)
+     Values: [[14.53 43.58 26.06 ... 51.65 40.57 25.57]
+ [14.57 43.65 25.79 ... 51.36 40.32 25.2 ]
+ [14.64 43.74 25.58 ... 51.12 40.09 24.88]
+ ...
+ [ 7.07 31.41 22.02 ... 74.33 96.08 91.07]
+ [ 7.13 31.53 22.05 ... 74.59 96.83 91.91]
+ [ 7.21 31.66 22.07 ... 74.92 97.65 92.83]]
+
+ Name: Predicted Data
+     Units: ppm
+     Shape: (6710, 12)
+     Values: [[0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ ...
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]]
+</pre></div>
+</div>
+<p>And we can scatter2D the points in the line.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">L</span><span class="o">.</span><span class="n">scatter2D</span><span class="p">();</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_frequency_dataset_008.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_008.png" />
+<p>We can specify the axis along which to plot.
+xAxis can be index, x, y, z, r2d, r3d</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">FD1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">channels</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">11</span><span class="p">,</span><span class="mi">8</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">);</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_frequency_dataset_009.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_009.png" />
+</div>
+<div class="section" id="obtain-a-single-datapoint-from-the-data-set">
+<h2>Obtain a single datapoint from the data set<a class="headerlink" href="#obtain-a-single-datapoint-from-the-data-set" title="Permalink to this headline">¶</a></h2>
+<p>Checkout <a class="reference internal" href="../Datapoints/plot_frequency_datapoint.html#frequency-domain-datapoint"><span class="std std-ref">Frequency domain datapoint</span></a> for an example
+about how to use a datapoint once it is instantiated.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dp</span> <span class="o">=</span> <span class="n">FD1</span><span class="o">.</span><span class="n">dataPoint</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="file-format-for-frequency-domain-data">
+<h2>File Format for frequency domain data<a class="headerlink" href="#file-format-for-frequency-domain-data" title="Permalink to this headline">¶</a></h2>
+<p>Here we describe the file format for frequency domain data.</p>
+<p>The data columns are read in according to the column names in the first line
+The header line should contain at least the following column names.
+Extra columns may exist, but will be ignored.</p>
+<p>In this description, the column name or its alternatives are given followed by what the name represents
+Optional columns are also described</p>
+<div class="section" id="required-columns">
+<h3>Required columns<a class="headerlink" href="#required-columns" title="Permalink to this headline">¶</a></h3>
+<dl class="simple">
+<dt>line</dt><dd><p>Line number for the data point</p>
+</dd>
+<dt>fid</dt><dd><p>Fiducial of the data point, these be unique</p>
+</dd>
+<dt>x or northing or n</dt><dd><p>Northing co-ordinate of the data point, (m)</p>
+</dd>
+<dt>y or easting or e</dt><dd><p>Easting co-ordinate of the data point, (m)</p>
+</dd>
+<dt>z or alt</dt><dd><p>Altitude of the transmitter coil above ground level (m)</p>
+</dd>
+<dt>elevation</dt><dd><p>Elevation of the ground at the data point (m)</p>
+</dd>
+<dt>I_&lt;frequency[0]&gt; Q_&lt;frequency[0]&gt; … I_&lt;frequency[last]&gt; Q_&lt;frequency[last]&gt;  - with the number and square brackets</dt><dd><p>The measurements for each frequency specified in the accompanying system file.
+I is the real inphase measurement in (ppm)
+Q is the imaginary quadrature measurement in (ppm)</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="optional-columns">
+<h3>Optional columns<a class="headerlink" href="#optional-columns" title="Permalink to this headline">¶</a></h3>
+<dl class="simple">
+<dt>InphaseErr[0] QuadratureErr[0] … InphaseErr[nFrequencies] QuadratureErr[nFrequencies]</dt><dd><p>Estimates of standard deviation for each inphase and quadrature measurement.
+These must appear after the data colums.</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="example-header">
+<h3>Example Header<a class="headerlink" href="#example-header" title="Permalink to this headline">¶</a></h3>
+<p>Line fid Easting Northing elevation height I_380 Q_380 … … I_129550 Q_129550</p>
+</div>
+</div>
+<div class="section" id="file-format-for-a-frequency-domain-system">
+<h2>File Format for a frequency domain system<a class="headerlink" href="#file-format-for-a-frequency-domain-system" title="Permalink to this headline">¶</a></h2>
+<p>The system file is structured using columns with the first line containing header information</p>
+<p>Each subsequent row contains the information for each measurement frequency</p>
+<dl class="simple">
+<dt>freq</dt><dd><p>Frequency of the channel</p>
+</dd>
+<dt>tor</dt><dd><p>Orientation of the transmitter loop ‘x’, or ‘z’</p>
+</dd>
+<dt>tmom</dt><dd><p>Transmitter moment</p>
+</dd>
+<dt>tx, ty, tx</dt><dd><p>Offset of the transmitter with respect to the observation locations</p>
+</dd>
+<dt>ror</dt><dd><p>Orientation of the receiver loop ‘x’, or ‘z’</p>
+</dd>
+<dt>rmom</dt><dd><p>Receiver moment</p>
+</dd>
+<dt>rx, ry, rz</dt><dd><p>Offset of the receiver with respect to the transmitter location</p>
+</dd>
+</dl>
+<div class="section" id="example-system-file">
+<h3>Example System File<a class="headerlink" href="#example-system-file" title="Permalink to this headline">¶</a></h3>
+<p><span class="raw-html">freq  tor  tmom  tx   ty   tz   ror rmom  rx   ry   rz  <br /></span>
+<span class="raw-html">378   z    1     0.0  0.0  0.0  z   1     7.93 0.0  0.0 <br /></span>
+<span class="raw-html">1776  z    1     0.0  0.0  0.0  z   1     7.91 0.0  0.0 <br /></span>
+<span class="raw-html">...</span></p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  14.919 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-data-plot-frequency-dataset-py">
+<div class="sphx-glr-download docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/8a8596f0390404145eca225a8f310218/plot_frequency_dataset.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_frequency_dataset.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/ffa7a17936c32d098025040a94f8af46/plot_frequency_dataset.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_frequency_dataset.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="plot_time_domain_dataset.html" class="btn btn-neutral float-right" title="Time Domain Data Set" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../Models/plot_model_1d.html" class="btn btn-neutral float-left" title="1D Model with an infinite halfspace" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright None
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

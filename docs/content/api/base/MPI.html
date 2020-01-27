@@ -176,7 +176,7 @@
 <p>Module containing custom MPI functions</p>
 <dl class="function">
 <dt id="geobipy.src.base.MPI.Bcast">
-<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">Bcast</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">world</em>, <em class="sig-param">root=0</em>, <em class="sig-param">dType=None</em>, <em class="sig-param">nDim=None</em>, <em class="sig-param">shape=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Bcast" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">Bcast</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">world</em>, <em class="sig-param">root=0</em>, <em class="sig-param">dtype=None</em>, <em class="sig-param">ndim=None</em>, <em class="sig-param">shape=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Bcast" title="Permalink to this definition">¶</a></dt>
 <dd><p>Broadcast a string or a numpy array</p>
 <p>Broadcast a string or a numpy array from a root rank to all ranks in an MPI communicator. Must be called collectively.
 In order to call this function collectively, the variable ‘self’ must be instantiated on every rank. See the example section for more details.</p>
@@ -280,7 +280,7 @@ In order to call this function collectively, the variable ‘self’ must be ins
 
 <dl class="function">
 <dt id="geobipy.src.base.MPI.Irecv">
-<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">Irecv</code><span class="sig-paren">(</span><em class="sig-param">source</em>, <em class="sig-param">world</em>, <em class="sig-param">dType=None</em>, <em class="sig-param">nDim=None</em>, <em class="sig-param">shape=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Irecv" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">Irecv</code><span class="sig-paren">(</span><em class="sig-param">source</em>, <em class="sig-param">world</em>, <em class="sig-param">dtype=None</em>, <em class="sig-param">ndim=None</em>, <em class="sig-param">shape=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Irecv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Irecv a numpy array. Auto determines data type and shape. Must be accompanied by Isend on the source rank.</p>
 </dd></dl>
 
@@ -319,7 +319,7 @@ In order to call this function collectively, the variable ‘self’ must be ins
 
 <dl class="function">
 <dt id="geobipy.src.base.MPI.Isend">
-<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">Isend</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">dest</em>, <em class="sig-param">world</em>, <em class="sig-param">dType=None</em>, <em class="sig-param">nDim=None</em>, <em class="sig-param">shape=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Isend" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">Isend</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">dest</em>, <em class="sig-param">world</em>, <em class="sig-param">dtype=None</em>, <em class="sig-param">ndim=None</em>, <em class="sig-param">shape=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Isend" title="Permalink to this definition">¶</a></dt>
 <dd><p>Isend a numpy array. Auto determines data type and shape. Must be accompanied by Irecv on the dest rank.</p>
 </dd></dl>
 
@@ -424,7 +424,7 @@ In order to call this function collectively, the variable ‘self’ must be ins
 
 <dl class="function">
 <dt id="geobipy.src.base.MPI.Scatterv_numpy">
-<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">Scatterv_numpy</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">starts</em>, <em class="sig-param">chunks</em>, <em class="sig-param">dType</em>, <em class="sig-param">world</em>, <em class="sig-param">axis=0</em>, <em class="sig-param">root=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Scatterv_numpy" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">Scatterv_numpy</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">starts</em>, <em class="sig-param">chunks</em>, <em class="sig-param">dtype</em>, <em class="sig-param">world</em>, <em class="sig-param">axis=0</em>, <em class="sig-param">root=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Scatterv_numpy" title="Permalink to this definition">¶</a></dt>
 <dd><p>ScatterV a numpy array to all ranks in an MPI communicator.</p>
 <p>Each rank gets a chunk defined by a starting index and chunk size. Must be called collectively. The ‘starts’ and ‘chunks’ must be available on every MPI rank. See the example for more details. Must be called collectively.</p>
 <dl class="field-list simple">
@@ -433,7 +433,7 @@ In order to call this function collectively, the variable ‘self’ must be ins
 <li><p><strong>self</strong> (<em>numpy.ndarray</em>) – A numpy array to broadcast from root.</p></li>
 <li><p><strong>starts</strong> (<em>array of ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the starting index for a chunk to be sent to that core. e.g. starts[0] is the starting index for rank = 0.</p></li>
 <li><p><strong>chunks</strong> (<em>array of ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the size of a chunk to be sent to that core. e.g. chunks[0] is the chunk size for rank = 0.</p></li>
-<li><p><strong>dType</strong> (<em>type</em>) – The type of the numpy array being scattered. Must exist on all ranks.</p></li>
+<li><p><strong>dtype</strong> (<em>type</em>) – The type of the numpy array being scattered. Must exist on all ranks.</p></li>
 <li><p><strong>world</strong> (<em>mpi4py.MPI.Comm</em>) – MPI parallel communicator.</p></li>
 <li><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – Axis along which to Scatterv to the ranks if self is a 2D numpy array. Default is 0</p></li>
 <li><p><strong>root</strong> (<em>int</em><em>, </em><em>optional</em>) – The MPI rank to broadcast from. Default is 0.</p></li>

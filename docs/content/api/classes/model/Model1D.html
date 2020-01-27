@@ -386,23 +386,6 @@ the overhead when creating the file metadata can become very cumbersome if done 
 </dd></dl>
 
 <dl class="method">
-<dt id="geobipy.src.classes.model.Model1D.Model1D.generateLocalParameterVariance">
-<code class="sig-name descname">generateLocalParameterVariance</code><span class="sig-paren">(</span><em class="sig-param">dataPoint</em>, <em class="sig-param">priStd</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.generateLocalParameterVariance" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate a localized Hessian matrix using a dataPoint and the current realization of the Model1D.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>dataPoint</strong> (<em>geobipy.DataPoint</em>) – The data point to use when computing the local estimate of the variance.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>out</strong> – Hessian matrix</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>array_like</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.getParMeshXIndex">
 <code class="sig-name descname">getParMeshXIndex</code><span class="sig-paren">(</span><em class="sig-param">mesh</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.getParMeshXIndex" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interpolate the model parameters to a 2D rectilinear mesh.</p>
@@ -423,7 +406,7 @@ Then the indices into the mesh x axis for those interpolated values are returned
 
 <dl class="method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.gradientProbability">
-<code class="sig-name descname">gradientProbability</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.gradientProbability" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">gradientProbability</code><span class="sig-paren">(</span><em class="sig-param">log=True</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.gradientProbability" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate the prior for the gradient of the parameter with depth</p>
 <p><strong>Prior on the gradient of the physical parameter with depth</strong></p>
 <p>If instead we wish to apply a multivariate normal distribution to the gradient of the parameter with depth we get</p>
@@ -474,7 +457,8 @@ and then reading the hdf contents via the object’s methods.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>z</strong> (<em>numpy.float64</em>) – Depth at which to insert a new interface</p></li>
-<li><p><strong>par</strong> (<em>numpy.float64</em><em>, </em><em>optional</em>) – Value of the parameter for the new layer</p></li>
+<li><p><strong>par</strong> (<em>numpy.float64</em><em>, </em><em>optional</em>) – Value of the parameter for the new layer
+If None, The value of the split layer is duplicated.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -526,6 +510,23 @@ and then reading the hdf contents via the object’s methods.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.model.Model1D.Model1D.localParameterVariance">
+<code class="sig-name descname">localParameterVariance</code><span class="sig-paren">(</span><em class="sig-param">dataPoint</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.localParameterVariance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a localized inverse Hessian matrix using a dataPoint and the current realization of the Model1D.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dataPoint</strong> (<em>geobipy.DataPoint</em>) – The data point to use when computing the local estimate of the variance.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – Inverse Hessian matrix</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array_like</p>
 </dd>
 </dl>
 </dd></dl>
@@ -588,14 +589,14 @@ Values in c that are &lt;= 0 are masked.</p></li>
 
 <dl class="method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.perturb">
-<code class="sig-name descname">perturb</code><span class="sig-paren">(</span><em class="sig-param">dataPoint</em>, <em class="sig-param">priStd</em>, <em class="sig-param">burnedIn</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.perturb" title="Permalink to this definition">¶</a></dt>
-<dd><p>Perturb a model using the Stochastic Newton approach.</p>
+<code class="sig-name descname">perturb</code><span class="sig-paren">(</span><em class="sig-param">datapoint=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.perturb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perturb a model’s structure and parameter values.</p>
+<p>Uses a stochastic newtown approach if a datapoint is provided.
+Otherwise, uses the existing proposal distribution attached to
+self.par to generate new values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>currentDatapoint</strong> (<em>geobipy.DataPoint</em>) – The Datapoint before perturbation that self was generated from.</p></li>
-<li><p><strong>perturbedDatapoint</strong> (<em>geobipy.DataPoint</em>) – The perturbed Datapoint with possibly new error levels.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>dataPoint</strong> (<em>geobipy.DataPoint</em><em>, </em><em>optional</em>) – The datapoint to use to perturb using a stochastic Newton approach.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><ul class="simple">
@@ -659,7 +660,7 @@ such that a death, or no change is possible thus preventing any neverending cycl
 
 <dl class="method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.priorProbability">
-<code class="sig-name descname">priorProbability</code><span class="sig-paren">(</span><em class="sig-param">pPrior</em>, <em class="sig-param">gPrior</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.priorProbability" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">priorProbability</code><span class="sig-paren">(</span><em class="sig-param">pPrior</em>, <em class="sig-param">gPrior</em>, <em class="sig-param">log=True</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.priorProbability" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate the prior probability for the 1D Model.</p>
 <p>The following equation describes the components of the prior that correspond to the Model1D,</p>
 <div class="math notranslate nohighlight">
@@ -772,7 +773,7 @@ such that a death, or no change is possible thus preventing any neverending cycl
 
 <dl class="method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.setProposals">
-<code class="sig-name descname">setProposals</code><span class="sig-paren">(</span><em class="sig-param">probabilities</em>, <em class="sig-param">prng=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.setProposals" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">setProposals</code><span class="sig-paren">(</span><em class="sig-param">probabilities</em>, <em class="sig-param">parameterProposal</em>, <em class="sig-param">prng=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.setProposals" title="Permalink to this definition">¶</a></dt>
 <dd><p>Setup the proposals of a 1D model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -780,6 +781,7 @@ such that a death, or no change is possible thus preventing any neverending cycl
 <li><p><strong>halfSpaceValue</strong> (<em>float</em>) – Value of the parameter for the halfspace.</p></li>
 <li><p><strong>probabilities</strong> (<em>array_like</em>) – Probability of birth, death, perturb, and no change for the model
 e.g. pWheel = [0.5, 0.25, 0.15, 0.1]</p></li>
+<li><p><strong>parameterProposal</strong> (<em>geobipy.Distribution</em>) – The proposal  distribution for the parameter.</p></li>
 <li><p><strong>prng</strong> (<em>numpy.random.RandomState</em><em>(</em><em>)</em><em>, </em><em>optional</em>) – Random number generator, if none is given, will use numpy’s global generator.</p></li>
 </ul>
 </dd>
@@ -840,7 +842,7 @@ should not be used in a parallel environment.</p>
 
 <dl class="method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.updateLocalParameterVariance">
-<code class="sig-name descname">updateLocalParameterVariance</code><span class="sig-paren">(</span><em class="sig-param">dataPoint</em>, <em class="sig-param">priStd</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.updateLocalParameterVariance" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">updateLocalParameterVariance</code><span class="sig-paren">(</span><em class="sig-param">dataPoint</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.updateLocalParameterVariance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a localized Hessian matrix using
 a dataPoint and the current realization of the Model1D.</p>
 <dl class="field-list simple">
@@ -852,6 +854,18 @@ a dataPoint and the current realization of the Model1D.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>array_like</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.model.Model1D.Model1D.updatePosteriors">
+<code class="sig-name descname">updatePosteriors</code><span class="sig-paren">(</span><em class="sig-param">minimumRatio=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.updatePosteriors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update any attached posterior distributions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>minimumRatio</strong> (<em>float</em>) – Only update the depth posterior if the layer parameter ratio
+is greater than this number.</p>
 </dd>
 </dl>
 </dd></dl>
