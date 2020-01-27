@@ -7,7 +7,7 @@
 .. _sphx_glr_examples_Data_plot_time_domain_dataset.py:
 
 
-Time Domain Data Set
+Time domain dataset
 --------------------
 
 
@@ -201,6 +201,8 @@ Obtain a line from the data set
     _ = line.plot(xAxis='x', log=10)
 
 
+
+
 .. image:: /examples/Data/images/sphx_glr_plot_time_domain_dataset_007.png
     :class: sphx-glr-single-img
 
@@ -217,10 +219,68 @@ Obtain a line from the data set
 
 
 
+File Format for time domain data
+++++++++++++++++++++++++++++++++
+Here we describe the file format for time domain data.
+
+The data columns are read in according to the column names in the first line
+
+In this description, the column name or its alternatives are given followed by what the name represents 
+Optional columns are also described.
+
+Required columns
+________________
+line 
+    Line number for the data point
+fid
+    Unique identification number of the data point
+x or northing or n 
+    Northing co-ordinate of the data point, (m)
+y or easting or e 
+    Easting co-ordinate of the data point, (m)
+z or alt
+    Altitude of the transmitter coil above ground level (m)
+elevation
+    Elevation of the ground at the data point (m)
+txrx_dx 
+    Distance in x between transmitter and reciever (m)
+txrx_dy 
+    Distance in y between transmitter and reciever (m)
+txrx_dz 
+    Distance in z between transmitter and reciever (m)
+TxPitch 
+    Pitch of the transmitter loop
+TxRoll 
+    Roll of the transmitter loop
+TxYaw 
+    Yaw of the transmitter loop
+RxPitch 
+    Pitch of the receiver loop
+RxRoll 
+    Roll of the receiver loop
+RxYaw 
+    Yaw of the receiver loop
+Off[0] Off[1] ... Off[last]  - with the number and square brackets
+    The measurements for each time gate specified in the accompanying system file under Receiver Window Times 
+Optional columns
+________________
+OffErr[0] OffErr[1] ... OffErr[last]
+    Estimates of standard deviation for each off time measurement
+Example Header
+______________
+Line fid easting northing elevation height txrx_dx txrx_dy txrx_dz TxPitch TxRoll TxYaw RxPitch RxRoll RxYaw Off[0] Off[1]
+
+File Format for a time domain system
+++++++++++++++++++++++++++++++++++++
+
+
+.. role:: raw-html(raw)
+   :format: html
+
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  6.449 seconds)
+   **Total running time of the script:** ( 0 minutes  7.337 seconds)
 
 
 .. _sphx_glr_download_examples_Data_plot_time_domain_dataset.py:

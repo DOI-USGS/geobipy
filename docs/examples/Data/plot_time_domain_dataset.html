@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Time Domain Data Set &mdash; GeoBIPy 1.0.0 documentation</title>
+  <title>Time domain dataset &mdash; GeoBIPy 1.0.0 documentation</title>
   
 
   
@@ -96,9 +96,11 @@
 <li class="toctree-l2"><a class="reference internal" href="../index.html#meshes">Meshes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html#data">Data</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Time Domain Data Set</a><ul>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Time domain dataset</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#reading-in-the-data">Reading in the Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#obtain-a-line-from-the-data-set">Obtain a line from the data set</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#file-format-for-time-domain-data">File Format for time domain data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#file-format-for-a-time-domain-system">File Format for a time domain system</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="plot_frequency_dataset.html">Frequency domain dataset</a></li>
@@ -154,7 +156,7 @@
         
           <li><a href="../index.html">Examples</a> &raquo;</li>
         
-      <li>Time Domain Data Set</li>
+      <li>Time domain dataset</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -177,8 +179,8 @@
 <p class="admonition-title">Note</p>
 <p>Click <a class="reference internal" href="#sphx-glr-download-examples-data-plot-time-domain-dataset-py"><span class="std std-ref">here</span></a> to download the full example code</p>
 </div>
-<div class="sphx-glr-example-title section" id="time-domain-data-set">
-<span id="sphx-glr-examples-data-plot-time-domain-dataset-py"></span><h1>Time Domain Data Set<a class="headerlink" href="#time-domain-data-set" title="Permalink to this headline">¶</a></h1>
+<div class="sphx-glr-example-title section" id="time-domain-dataset">
+<span id="sphx-glr-examples-data-plot-time-domain-dataset-py"></span><h1>Time domain dataset<a class="headerlink" href="#time-domain-dataset" title="Permalink to this headline">¶</a></h1>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">customPlots</span> <span class="k">as</span> <span class="n">cP</span>
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -259,7 +261,65 @@
   if (np.nanmin(values) &lt;= 0.0):
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  6.449 seconds)</p>
+</div>
+<div class="section" id="file-format-for-time-domain-data">
+<h2>File Format for time domain data<a class="headerlink" href="#file-format-for-time-domain-data" title="Permalink to this headline">¶</a></h2>
+<p>Here we describe the file format for time domain data.</p>
+<p>The data columns are read in according to the column names in the first line</p>
+<p>In this description, the column name or its alternatives are given followed by what the name represents
+Optional columns are also described.</p>
+<div class="section" id="required-columns">
+<h3>Required columns<a class="headerlink" href="#required-columns" title="Permalink to this headline">¶</a></h3>
+<dl class="simple">
+<dt>line</dt><dd><p>Line number for the data point</p>
+</dd>
+<dt>fid</dt><dd><p>Unique identification number of the data point</p>
+</dd>
+<dt>x or northing or n</dt><dd><p>Northing co-ordinate of the data point, (m)</p>
+</dd>
+<dt>y or easting or e</dt><dd><p>Easting co-ordinate of the data point, (m)</p>
+</dd>
+<dt>z or alt</dt><dd><p>Altitude of the transmitter coil above ground level (m)</p>
+</dd>
+<dt>elevation</dt><dd><p>Elevation of the ground at the data point (m)</p>
+</dd>
+<dt>txrx_dx</dt><dd><p>Distance in x between transmitter and reciever (m)</p>
+</dd>
+<dt>txrx_dy</dt><dd><p>Distance in y between transmitter and reciever (m)</p>
+</dd>
+<dt>txrx_dz</dt><dd><p>Distance in z between transmitter and reciever (m)</p>
+</dd>
+<dt>TxPitch</dt><dd><p>Pitch of the transmitter loop</p>
+</dd>
+<dt>TxRoll</dt><dd><p>Roll of the transmitter loop</p>
+</dd>
+<dt>TxYaw</dt><dd><p>Yaw of the transmitter loop</p>
+</dd>
+<dt>RxPitch</dt><dd><p>Pitch of the receiver loop</p>
+</dd>
+<dt>RxRoll</dt><dd><p>Roll of the receiver loop</p>
+</dd>
+<dt>RxYaw</dt><dd><p>Yaw of the receiver loop</p>
+</dd>
+<dt>Off[0] Off[1] … Off[last]  - with the number and square brackets</dt><dd><p>The measurements for each time gate specified in the accompanying system file under Receiver Window Times</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="optional-columns">
+<h3>Optional columns<a class="headerlink" href="#optional-columns" title="Permalink to this headline">¶</a></h3>
+<dl class="simple">
+<dt>OffErr[0] OffErr[1] … OffErr[last]</dt><dd><p>Estimates of standard deviation for each off time measurement</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="example-header">
+<h3>Example Header<a class="headerlink" href="#example-header" title="Permalink to this headline">¶</a></h3>
+<p>Line fid easting northing elevation height txrx_dx txrx_dy txrx_dz TxPitch TxRoll TxYaw RxPitch RxRoll RxYaw Off[0] Off[1]</p>
+</div>
+</div>
+<div class="section" id="file-format-for-a-time-domain-system">
+<h2>File Format for a time domain system<a class="headerlink" href="#file-format-for-a-time-domain-system" title="Permalink to this headline">¶</a></h2>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  7.337 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-data-plot-time-domain-dataset-py">
 <div class="sphx-glr-download docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/030d9288f2a570db74101e8a74392a6c/plot_time_domain_dataset.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_time_domain_dataset.py</span></code></a></p>

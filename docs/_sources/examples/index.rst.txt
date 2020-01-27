@@ -227,7 +227,7 @@ Data
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Time Domain Data Set">
+    <div class="sphx-glr-thumbcontainer" tooltip="Time domain dataset">
 
 .. only:: html
 

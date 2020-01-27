@@ -38,8 +38,8 @@
   <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Time Domain Data Set" href="plot_time_domain_dataset.html" />
-    <link rel="prev" title="1D Model with an infinite halfspace" href="../Models/plot_model_1d.html" /> 
+    <link rel="next" title="Frequency domain datapoint" href="../Datapoints/plot_frequency_datapoint.html" />
+    <link rel="prev" title="Time domain dataset" href="plot_time_domain_dataset.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -96,6 +96,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../index.html#meshes">Meshes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html#data">Data</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="plot_time_domain_dataset.html">Time domain dataset</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Frequency domain dataset</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#reading-in-the-data">Reading in the Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#obtain-a-line-from-the-data-set">Obtain a line from the data set</a></li>
@@ -104,7 +105,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#file-format-for-a-frequency-domain-system">File Format for a frequency domain system</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="plot_time_domain_dataset.html">Time Domain Data Set</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#datapoints">Datapoints</a></li>
@@ -304,7 +304,8 @@ interpolate the specified channel number.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[30010. 30020. 30030. ... 30100. 39010. 39020.]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[30010. 30020. 30030. 30040. 30050. 30060. 30070. 30080. 30090. 30100.
+ 39010. 39020.]
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">L</span> <span class="o">=</span> <span class="n">FD1</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="mf">30010.0</span><span class="p">)</span>
@@ -395,17 +396,15 @@ about how to use a datapoint once it is instantiated.</p>
 <div class="section" id="file-format-for-frequency-domain-data">
 <h2>File Format for frequency domain data<a class="headerlink" href="#file-format-for-frequency-domain-data" title="Permalink to this headline">¶</a></h2>
 <p>Here we describe the file format for frequency domain data.</p>
-<p>The data columns are read in according to the column names in the first line
-The header line should contain at least the following column names.
-Extra columns may exist, but will be ignored.</p>
-<p>In this description, the column name or its alternatives are given followed by what the name represents
-Optional columns are also described</p>
+<p>The data columns are read in according to the column names in the first line.</p>
+<p>In this description, the column name or its alternatives are given followed by what the name represents.
+Optional columns are also described.</p>
 <div class="section" id="required-columns">
 <h3>Required columns<a class="headerlink" href="#required-columns" title="Permalink to this headline">¶</a></h3>
 <dl class="simple">
 <dt>line</dt><dd><p>Line number for the data point</p>
 </dd>
-<dt>fid</dt><dd><p>Fiducial of the data point, these be unique</p>
+<dt>fid</dt><dd><p>Unique identification number of the data point</p>
 </dd>
 <dt>x or northing or n</dt><dd><p>Northing co-ordinate of the data point, (m)</p>
 </dd>
@@ -431,7 +430,7 @@ These must appear after the data colums.</p>
 </div>
 <div class="section" id="example-header">
 <h3>Example Header<a class="headerlink" href="#example-header" title="Permalink to this headline">¶</a></h3>
-<p>Line fid Easting Northing elevation height I_380 Q_380 … … I_129550 Q_129550</p>
+<p>Line fid easting northing elevation height I_380 Q_380 … … I_129550 Q_129550</p>
 </div>
 </div>
 <div class="section" id="file-format-for-a-frequency-domain-system">
@@ -460,7 +459,7 @@ These must appear after the data colums.</p>
 <span class="raw-html">378   z    1     0.0  0.0  0.0  z   1     7.93 0.0  0.0 <br /></span>
 <span class="raw-html">1776  z    1     0.0  0.0  0.0  z   1     7.91 0.0  0.0 <br /></span>
 <span class="raw-html">...</span></p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  14.919 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  14.838 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-data-plot-frequency-dataset-py">
 <div class="sphx-glr-download docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/8a8596f0390404145eca225a8f310218/plot_frequency_dataset.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_frequency_dataset.py</span></code></a></p>
@@ -482,10 +481,10 @@ These must appear after the data colums.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="plot_time_domain_dataset.html" class="btn btn-neutral float-right" title="Time Domain Data Set" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../Datapoints/plot_frequency_datapoint.html" class="btn btn-neutral float-right" title="Frequency domain datapoint" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../Models/plot_model_1d.html" class="btn btn-neutral float-left" title="1D Model with an infinite halfspace" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="plot_time_domain_dataset.html" class="btn btn-neutral float-left" title="Time domain dataset" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

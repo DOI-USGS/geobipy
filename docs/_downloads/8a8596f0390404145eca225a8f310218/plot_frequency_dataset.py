@@ -127,19 +127,17 @@ dp = FD1.dataPoint(0)
 # +++++++++++++++++++++++++++++++++++++
 # Here we describe the file format for frequency domain data.
 #
-# The data columns are read in according to the column names in the first line
-# The header line should contain at least the following column names. 
-# Extra columns may exist, but will be ignored.
+# The data columns are read in according to the column names in the first line.
 #
-# In this description, the column name or its alternatives are given followed by what the name represents 
-# Optional columns are also described 
+# In this description, the column name or its alternatives are given followed by what the name represents.
+# Optional columns are also described.
 #
 # Required columns
 # ________________
 # line 
 #     Line number for the data point
 # fid
-#     Fiducial of the data point, these be unique
+#     Unique identification number of the data point
 # x or northing or n 
 #     Northing co-ordinate of the data point, (m)
 # y or easting or e 
@@ -160,7 +158,7 @@ dp = FD1.dataPoint(0)
 #
 # Example Header
 # ______________
-# Line fid Easting Northing elevation height I_380 Q_380 ... ... I_129550 Q_129550
+# Line fid easting northing elevation height I_380 Q_380 ... ... I_129550 Q_129550
 
 ################################################################################
 # File Format for a frequency domain system
