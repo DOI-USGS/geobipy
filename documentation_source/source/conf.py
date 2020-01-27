@@ -362,12 +362,14 @@ from sphinx_gallery.sorting import ExplicitOrder
 sphinx_gallery_conf = {
     'examples_dirs': 'examples',   # path to your example scripts
     'gallery_dirs': 'examples',  # path to where to save gallery generated output
-    'subsection_order': ExplicitOrder(['examples/Statistics/',
+    'subsection_order': ExplicitOrder(['examples/Distributions/',
+                                    'examples/Statistics/',
                                     'examples/Meshes/',
                                     'examples/Models/',
-                                    'examples/Distributions/',
+                                    
 #                                     '../../examples/Pointclouds/',
-#                                     '../../examples/Data/',
+                                    'examples/Data/',
+                                    'examples/Datapoints/',
 #                                     '../../examples/Inversion/',
                                     ]),
     "image_scrapers": ('matplotlib'),

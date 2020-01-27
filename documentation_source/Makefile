@@ -20,6 +20,9 @@ help:
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 	cp -r $(BUILDDIR)/$@/* ../docs
 
-cleanGallery:
+clean:
+	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	find ./source/examples -name "*.md5" -type f -delete
 
+cleanGallery:
 	find ./source/examples -name "*.md5" -type f -delete
