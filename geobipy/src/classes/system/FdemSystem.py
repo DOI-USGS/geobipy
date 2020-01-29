@@ -6,6 +6,7 @@ from copy import deepcopy
 from ...classes.core.myObject import myObject
 import numpy as np
 from ...classes.core import StatArray
+from .EmLoop import EmLoop
 from .CircularLoop import CircularLoop
 from ...base import fileIO as fIO
 from ...base import MPI as myMPI
@@ -16,50 +17,23 @@ from ...base import customFunctions as cF
 class FdemSystem(myObject):
     """ Defines a Frequency Domain ElectroMagnetic acquisition system """
 
-    def __init__(self, nFrequencies=0, frequencies=None, transmitterLoops = None, receiverLoops=None, loopSeparation=None, systemFilename=None):
+    def __init__(self, frequencies=None, transmitterLoops = None, receiverLoops=None, systemFilename=None):
         """ Initialize an FdemSystem """
-
-        if (not systemFilename is None):
-            assert (isinstance(systemFilename, str)), TypeError("systemFilename must a file to read the Fdem system information from")
-            self.read(systemFilename)
-            return
-
-        # Number of Frequencies
-        self._nFrequencies = np.int64(nFrequencies)
+        
         # StatArray of frequencies
         if frequencies is None:
-            self._frequencies = StatArray.StatArray(self._nFrequencies, "Frequencies", "Hz")
-        else:
-            assert np.size(frequencies) == self._nFrequencies, ValueError("frequencies must have size {}".format(self._nFrequencies))
-            self._frequencies = StatArray.StatArray(frequencies, "Frequencies", "Hz")
+            return
 
-        # StatArray of Transmitter loops
-        self.T = StatArray.StatArray(self._nFrequencies, "Transmitter Loops", dtype=CircularLoop)
-        if transmitterLoops is None:
-            for i in range(self._nFrequencies):
-                self.T[i] = CircularLoop()
-        else:
-            assert np.size(frequencies) == self._nFrequencies, ValueError("transmitterLoops must have size {}".format(self._nFrequencies))
-            assert all([isinstance(x, CircularLoop) for x in transmitterLoops]), TypeError("transmitterLoops must have type geobipy.CircularLoop")
-            for i in range(self._nFrequencies):
-                self.T[i] = transmitterLoops[i].deepcopy()
-
-        # StatArray of Reciever loops
-        self.R = StatArray.StatArray(self._nFrequencies, "Receiver Loops", dtype=CircularLoop)
-        if receiverLoops is None:
-            for i in range(self._nFrequencies):
-                self.R[i] = CircularLoop()
-        else:
-            assert np.size(frequencies) == self._nFrequencies, ValueError("receiverLoops must have size {}".format(self._nFrequencies))
-            assert all([isinstance(x, CircularLoop) for x in transmitterLoops]), TypeError("receiverLoops must have type geobipy.CircularLoop")
-            for i in range(self._nFrequencies):
-                self.R[i] = receiverLoops[i].deepcopy()
+        self.frequencies = frequencies
+        self.transmitterLoops = transmitterLoops
+        self.receiverLoops = receiverLoops
 
         # StatArray of Loop Separations
-        if loopSeparation is None:
-            self.loopSeparation = StatArray.StatArray(np.ones(self._nFrequencies), "Loop Separations", "m")
-        else:
-            self.loopSeparation = StatArray.StatArray(loopSeparation, "Loop Separations", "m")
+        loopOffsets = StatArray.StatArray([self.nFrequencies, 3], "loopOffsets", "m")
+        for i, (t, r) in enumerate(zip(transmitterLoops, receiverLoops)):
+            loopOffsets[i, :] = [r.x - t.x, r.y - t.y, r.z - t.z]
+        self.loopOffsets = loopOffsets
+
 
         self._fileName = systemFilename
 
@@ -74,6 +48,28 @@ class FdemSystem(myObject):
     @property
     def frequencies(self):
         return self._frequencies
+
+    @frequencies.setter
+    def frequencies(self, values):
+        self._frequencies = StatArray.StatArray(values, "Frequencies", "Hz", dtype=np.float64)
+
+    @property
+    def loopOffsets(self):
+        return self._loopOffsets
+
+    @loopOffsets.setter
+    def loopOffsets(self, values):
+        assert np.ndim(values) == 2, ValueError("loopOffsets must be 2D with shape (nFrequencies, 3) for offsets in x, y, and z.")
+        assert np.size(values, 0) == self.nFrequencies and np.size(values, 1) == 3 , ValueError("loopOffsets must be 2D with shape (nFrequencies, 3) for offsets in x, y, and z.")
+        self._loopOffsets = StatArray.StatArray(values, "loopOffsets", "m")
+
+    @property
+    def loopSeparation(self):
+        return np.linalg.norm(self.loopOffsets, axis=1)
+      
+    @property
+    def nFrequencies(self):
+        return np.size(self.frequencies)
 
 
     @cached_property
@@ -122,10 +118,29 @@ class FdemSystem(myObject):
     def lamda12(self):
         return self.lamda1**2.0
 
+    @property
+    def receiverLoops(self):
+        return self._receiverLoops
+
+    @receiverLoops.setter
+    def receiverLoops(self, values):
+        assert np.size(values) == self.nFrequencies, ValueError("receiverLoops must have size {}".format(self.nFrequencies))
+        assert all([isinstance(x, EmLoop) for x in values]), TypeError("receiverLoops must have type geobipy.EmLoop")
+        self._receiverLoops = []
+        for i in range(self.nFrequencies):
+            self._receiverLoops.append(values[i].deepcopy())
 
     @property
-    def nFrequencies(self):
-        return self._nFrequencies
+    def transmitterLoops(self):
+        return self._transmitterLoops
+
+    @transmitterLoops.setter
+    def transmitterLoops(self, values):
+        assert np.size(values) == self.nFrequencies, ValueError("transmitterLoops must have size {}".format(self.nFrequencies))
+        assert all([isinstance(x, EmLoop) for x in values]), TypeError("transmitterLoops must have type geobipy.EmLoop")
+        self._transmitterLoops = []
+        for i in range(self.nFrequencies):
+            self._transmitterLoops.append(values[i].deepcopy())
 
 
     def deepcopy(self):
@@ -133,13 +148,7 @@ class FdemSystem(myObject):
 
 
     def __deepcopy__(self, memo):
-        tmp = FdemSystem(nFrequencies = self._nFrequencies)
-        tmp._frequencies[:] = self._frequencies
-        tmp.loopSeparation[:] = self.loopSeparation
-        for i in range(self._nFrequencies):
-            tmp.T[i] = self.T[i].deepcopy()
-            tmp.R[i] = self.R[i].deepcopy()
-        return tmp
+        return FdemSystem(self.frequencies, self.transmitterLoops, self.receiverLoops, self.loopSeparation, self.fileName)
 
 
     def read(self, fileName):
@@ -158,7 +167,10 @@ class FdemSystem(myObject):
 
         """
 
-        self.__init__(fIO.getNlines(fileName, 1))
+        nFrequencies = fIO.getNlines(fileName, 1)
+        frequencies = np.empty(nFrequencies)
+        transmitters = []
+        receivers = []
         with open(fileName) as f:
             tmp = f.readline().lower().split()
 
@@ -166,21 +178,22 @@ class FdemSystem(myObject):
                                    '\nFirst line of system file should contain\nfreq tor tmom  tx ty tzoff ror rmom  rx   ry rzoff')
             for j, line in enumerate(f):  # For each line in the file
                 line = fIO.parseString(line)
-                self._frequencies[j] = np.float64(line[0])
-                self.T[j] = CircularLoop(
-                        line[1], np.int(
-                        line[2]), np.int(
-                        line[3]), np.float64(
-                        line[4]), np.float64(
-                        line[5]))
-                self.R[j] = CircularLoop(
-                        line[6], np.int(
-                        line[7]), np.float64(
-                        line[8]), np.float64(
-                        line[9]), np.float64(
-                        line[10]))
-                self.loopSeparation[j] = np.sqrt(np.power((self.T[j].x - self.R[j].x), 2.0) + np.power((self.T[j].y - self.R[j].y), 2.0))
-        self.fileName = fileName
+                frequencies[j] = np.float64(line[0])
+                T = (CircularLoop(
+                        line[1], 
+                        np.int(line[2]), 
+                        np.int(line[3]), 
+                        np.float64(line[4]), 
+                        np.float64(line[5])))
+                R = (CircularLoop(
+                        line[6], 
+                        np.int(line[7]), 
+                        np.float64(line[8]), 
+                        np.float64(line[9]), 
+                        np.float64(line[10])))
+                transmitters.append(T)
+                receivers.append(R)
+        self.__init__(frequencies, transmitters, receivers, fileName)
 
 
     def fileInformation(self):
@@ -201,25 +214,25 @@ class FdemSystem(myObject):
     def getTensorID(self):
         """ For each coil orientation pair, adds the index of the frequency to the appropriate list
         e.g. two coils at the i$^{th}$ frequency with 'x' as their orientation cause i to be added to the 'xx' list."""
-        tid = np.zeros(self._nFrequencies, dtype=np.int32)
-        for i in range(self._nFrequencies):
-            if ((self.T[i].orient == 'x') and self.R[i].orient == 'x'):
+        tid = np.zeros(self.nFrequencies, dtype=np.int32)
+        for i in range(self.nFrequencies):
+            if ((self.transmitterLoops[i].orient == 'x') and self.receiverLoops[i].orient == 'x'):
                 tid[i] = 1
-            if ((self.T[i].orient == 'x') and self.R[i].orient == 'y'):
+            if ((self.transmitterLoops[i].orient == 'x') and self.receiverLoops[i].orient == 'y'):
                 tid[i] = 2
-            if ((self.T[i].orient == 'x') and self.R[i].orient == 'z'):
+            if ((self.transmitterLoops[i].orient == 'x') and self.receiverLoops[i].orient == 'z'):
                 tid[i] = 3
-            if ((self.T[i].orient == 'y') and self.R[i].orient == 'x'):
+            if ((self.transmitterLoops[i].orient == 'y') and self.receiverLoops[i].orient == 'x'):
                 tid[i] = 4
-            if ((self.T[i].orient == 'y') and self.R[i].orient == 'y'):
+            if ((self.transmitterLoops[i].orient == 'y') and self.receiverLoops[i].orient == 'y'):
                 tid[i] = 5
-            if ((self.T[i].orient == 'y') and self.R[i].orient == 'z'):
+            if ((self.transmitterLoops[i].orient == 'y') and self.receiverLoops[i].orient == 'z'):
                 tid[i] = 6
-            if ((self.T[i].orient == 'z') and self.R[i].orient == 'x'):
+            if ((self.transmitterLoops[i].orient == 'z') and self.receiverLoops[i].orient == 'x'):
                 tid[i] = 7
-            if ((self.T[i].orient == 'z') and self.R[i].orient == 'y'):
+            if ((self.transmitterLoops[i].orient == 'z') and self.receiverLoops[i].orient == 'y'):
                 tid[i] = 8
-            if ((self.T[i].orient == 'z') and self.R[i].orient == 'z'):
+            if ((self.transmitterLoops[i].orient == 'z') and self.receiverLoops[i].orient == 'z'):
                 tid[i] = 9
         return tid
 
@@ -228,24 +241,24 @@ class FdemSystem(myObject):
         """ For each coil orientation pair, adds the index of the frequency to the appropriate list
         e.g. two coils at the i$^{th}$ frequency with 'x' as their orientation cause i to be added to the 'xx' list."""
         xx, xy, xz, yx, yy, yz, zx, zy, zz = ([] for i in range(9))
-        for i in range(self._nFrequencies):
-            if ((self.T[i].orient == 'x') and self.R[i].orient == 'x'):
+        for i in range(self.nFrequencies):
+            if ((self.transmitterLoops[i].orient == 'x') and self.receiverLoops[i].orient == 'x'):
                 xx.append(i)
-            if ((self.T[i].orient == 'x') and self.R[i].orient == 'y'):
+            if ((self.transmitterLoops[i].orient == 'x') and self.receiverLoops[i].orient == 'y'):
                 xy.append(i)
-            if ((self.T[i].orient == 'x') and self.R[i].orient == 'z'):
+            if ((self.transmitterLoops[i].orient == 'x') and self.receiverLoops[i].orient == 'z'):
                 xz.append(i)
-            if ((self.T[i].orient == 'y') and self.R[i].orient == 'x'):
+            if ((self.transmitterLoops[i].orient == 'y') and self.receiverLoops[i].orient == 'x'):
                 yx.append(i)
-            if ((self.T[i].orient == 'y') and self.R[i].orient == 'y'):
+            if ((self.transmitterLoops[i].orient == 'y') and self.receiverLoops[i].orient == 'y'):
                 yy.append(i)
-            if ((self.T[i].orient == 'y') and self.R[i].orient == 'z'):
+            if ((self.transmitterLoops[i].orient == 'y') and self.receiverLoops[i].orient == 'z'):
                 yz.append(i)
-            if ((self.T[i].orient == 'z') and self.R[i].orient == 'x'):
+            if ((self.transmitterLoops[i].orient == 'z') and self.receiverLoops[i].orient == 'x'):
                 zx.append(i)
-            if ((self.T[i].orient == 'z') and self.R[i].orient == 'y'):
+            if ((self.transmitterLoops[i].orient == 'z') and self.receiverLoops[i].orient == 'y'):
                 zy.append(i)
-            if ((self.T[i].orient == 'z') and self.R[i].orient == 'z'):
+            if ((self.transmitterLoops[i].orient == 'z') and self.receiverLoops[i].orient == 'z'):
                 zz.append(i)
         return np.asarray(xx), np.asarray(xy), np.asarray(xz), np.asarray(yx), np.asarray(yy), np.asarray(yz), np.asarray(zx), np.asarray(zy), np.asarray(zz)
 
@@ -255,7 +268,7 @@ class FdemSystem(myObject):
         msg = ("FdemSystem: \n"
                "{} \n"
                "{} \n"
-               "{} \n").format(self._fileName, self._frequencies.summary(True), self.loopSeparation.summary(True))
+               "{} \n").format(self._fileName, self.frequencies.summary(True), self.loopOffsets.summary(True))
         return msg if out else print(msg)
 
 
@@ -268,14 +281,14 @@ class FdemSystem(myObject):
         # Create a new group inside h5obj
         grp = h5obj.create_group(myName)
         grp.attrs["repr"] = self.hdfName()
-        grp.create_dataset('nFreq', data=self._nFrequencies)
+        grp.create_dataset('nFreq', data=self.nFrequencies)
         self._frequencies.toHdf(grp, 'freq')
-        self.loopSeparation.toHdf(grp, 'dist')
+        self.loopOffsets.toHdf(grp, 'loopoffsets')
         T = grp.create_group('T')
         R = grp.create_group('R')
-        for i in range(self._nFrequencies):
-            self.T[i].toHdf(T, 'T' + str(i))
-            self.R[i].toHdf(R, 'R' + str(i))
+        for i in range(self.nFrequencies):
+            self.transmitterLoops[i].toHdf(T, 'T' + str(i))
+            self.receiverLoops[i].toHdf(R, 'R' + str(i))
 
 
     def fromHdf(self, grp):
@@ -285,48 +298,48 @@ class FdemSystem(myObject):
         item = grp.get('freq')
         obj = eval(cF.safeEval(item.attrs.get('repr')))
         tmp._frequencies = obj.fromHdf(item)
-        item = grp.get('dist')
+        item = grp.get('loopoffsets')
         obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp.loopSeparation = obj.fromHdf(item)
+        tmp.loopOffsets = obj.fromHdf(item)
         for i in range(nFreq):
             item = grp.get('T/T' + str(i))
-            tmp.T[i] = eval(cF.safeEval(item.attrs.get('repr')))
+            tmp.transmitterLoops[i] = eval(cF.safeEval(item.attrs.get('repr')))
             item = grp.get('R/R' + str(i))
-            tmp.R[i] = eval(cF.safeEval(item.attrs.get('repr')))
+            tmp.receiverLoops[i] = eval(cF.safeEval(item.attrs.get('repr')))
         return tmp
 
 
     def Bcast(self, world, root=0):
         """ Broadcast the FdemSystem using MPI """
-        nFreq = myMPI.Bcast(self._nFrequencies, world, root=root)
+        nFreq = myMPI.Bcast(self.nFrequencies, world, root=root)
         if (world.rank > 0):
             self = FdemSystem(nFreq)
         this = FdemSystem(nFreq)
         this._frequencies = self._frequencies.Bcast(world, root=root)
         this.loopSeparation = self.loopSeparation.Bcast(world, root=root)
-        for i in range(self._nFrequencies):
-            this.T[i] = self.T[i].Bcast(world, root=root)
-            this.R[i] = self.R[i].Bcast(world, root=root)
+        for i in range(self.nFrequencies):
+            this.transmitterLoops[i] = self.transmitterLoops[i].Bcast(world, root=root)
+            this.receiverLoops[i] = self.receiverLoops[i].Bcast(world, root=root)
         return this
 
 
     def Isend(self, dest, world):
-        myMPI.Isend(self._nFrequencies, dest=dest, world=world)
+        myMPI.Isend(self.nFrequencies, dest=dest, world=world)
         self._frequencies.Isend(dest=dest, world=world)
-        self.loopSeparation.Isend(dest=dest, world=world)
-        for i in range(self._nFrequencies):
-            self.T[i].Isend(dest=dest, world=world)
-            self.R[i].Isend(dest=dest, world=world)
+        self.loopOffsets.Isend(dest=dest, world=world)
+        for i in range(self.nFrequencies):
+            self.transmitterLoops[i].Isend(dest=dest, world=world)
+            self.receiverLoops[i].Isend(dest=dest, world=world)
 
 
     def Irecv(self, source, world):
         nFreq = myMPI.Irecv(source=source, world=world)
         out = FdemSystem(nFreq)
         out._frequencies = out._frequencies.Irecv(source=source, world=world)
-        out.loopSeparation = out.loopSeparation.Irecv(source=source, world=world)
+        out.loopOffsets = out.loopOffsets.Irecv(source=source, world=world)
         for i in range(nFreq):
-            out.T[i] = out.T[i].Irecv(source=source, world=world)
-            out.R[i] = out.R[i].Irecv(source=source, world=world)
+            out.transmitterLoops[i] = out.transmitterLoops[i].Irecv(source=source, world=world)
+            out.receiverLoops[i] = out.receiverLoops[i].Irecv(source=source, world=world)
         return out
 
 
@@ -389,14 +402,3 @@ class FdemSystem(myObject):
         -8.33741579804e-08, 8.31065906136e-08, -7.53457009758e-08, 6.48057680299e-08, -5.37558016587e-08,
         4.32436265303e-08, -3.37262648712e-08, 2.53558687098e-08, -1.81287021528e-08, 1.20228328586e-08,
         -7.10898040664e-09, 3.53667004588e-09, -1.36030600198e-09, 3.52544249042e-10, -4.53719284366e-11], dtype=np.float64)
-
-
-
-
-
-
-
-
-
-
-

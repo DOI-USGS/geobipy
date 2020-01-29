@@ -8,7 +8,7 @@ from ...system.SquareLoop import SquareLoop
 from ...system.CircularLoop import CircularLoop
 from ....base.logging import myLogger
 from ...system.TdemSystem import TdemSystem
-from ...system.butterworth import butterworth
+from ...system.filters.butterworth import butterworth
 from ...system.Waveform import Waveform
 from ...statistics.Histogram1D import Histogram1D
 import matplotlib.pyplot as plt
@@ -91,9 +91,11 @@ class TdemDataPoint(EmDataPoint):
         systems = []
         for j, sys in enumerate(system):
             if isinstance(sys, str):
-                systems.append(TdemSystem(sys))
+                td = TdemSystem().read(sys)
+                systems.append(td)
             elif isinstance(sys, TdemSystem):
                 systems.append(sys)
+
             # Number of time gates
             nTimes[j] = systems[j].nTimes
 
@@ -450,7 +452,7 @@ class TdemDataPoint(EmDataPoint):
         self.T.writeHdf(grp, 'T', index=index)
         self.R.writeHdf(grp, 'R', index=index)
         self.loopOffset.writeHdf(grp, 'loop_offset', index=index)
-        #writeNumpy(self.iActive, grp, 'iActive')
+        #writeNumpy(self.active, grp, 'iActive')
 
 #    def toHdf(self, parent, myName):
 #        """ Write the TdemDataPoint to an HDF object
@@ -524,7 +526,7 @@ class TdemDataPoint(EmDataPoint):
         except:
             pass
 
-        _aPoint.iActive = _aPoint.getActiveData()
+        # _aPoint.active = _aPoint.getActiveData()
 
         _aPoint.getIplotActive()
 
@@ -804,13 +806,13 @@ class TdemDataPoint(EmDataPoint):
 
         # Update the variance of the predicted data prior
         if self._predictedData.hasPrior:
-            self._predictedData.prior.variance[np.diag_indices(self.iActive.size)] = self._std[self.iActive]**2.0
+            self._predictedData.prior.variance[np.diag_indices(self.active.size)] = self._std[self.active]**2.0
 
 
     def updateSensitivity(self, mod):
         """ Compute an updated sensitivity matrix using a new model based on an existing matrix """
 
-        J1 = np.zeros([np.size(self.iActive), mod.nCells[0]])
+        J1 = np.zeros([np.size(self.active), mod.nCells[0]])
 
         perturbedLayer = mod.action[1]
 
@@ -846,11 +848,11 @@ class TdemDataPoint(EmDataPoint):
         tdem1dfwd(self, mod)
 
 
-    def sensitivity(self, mod, ix=None, modelChanged=True):
+    def sensitivity(self, model, ix=None, modelChanged=True):
         """ Compute the sensitivty matrix for the given model """
 
-        assert isinstance(mod, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
-        return tdem1dsen(self, mod, ix, modelChanged)
+        assert isinstance(model, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
+        return tdem1dsen(self, model, ix, modelChanged)
 
 
     def _empymodForward(self, mod):
@@ -923,9 +925,11 @@ class TdemDataPoint(EmDataPoint):
     def Isend(self, dest, world, systems=None):
         tmp = np.asarray([self.x, self.y, self.z, self.elevation, self.nSystems, self.lineNumber, self.fiducial, *self.loopOffset], dtype=np.float64)
         myMPI.Isend(tmp, dest=dest, ndim=1, shape=(10, ), dtype=np.float64, world=world)
+
         if systems is None:
             for i in range(self.nSystems):
-                world.isend(self.system[i].fileName, dest=dest)
+                world.send(self.system[i].fileName, dest=dest)
+                
         self._data.Isend(dest, world)
         self._std.Isend(dest, world)
         self._predictedData.Isend(dest, world)
@@ -943,7 +947,8 @@ class TdemDataPoint(EmDataPoint):
 
             systems = []
             for i in range(nSystems):
-                systems.append(world.irecv(source=source).wait())
+                sys = world.recv(source=source)
+                systems.append(sys)
 
         s = StatArray.StatArray(0)
         d = s.Irecv(source, world)

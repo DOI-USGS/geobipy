@@ -37,11 +37,11 @@ def fdem1dfwd(system, model1d, altitude):
     rx = np.empty(system.nFrequencies, dtype=np.float64)
 
     for i in range(system.nFrequencies):
-        tHeight[i] = altitude + system.T[i].z
-        rHeight[i] = -altitude + system.R[i].z
-        tMom[i] = system.T[i].moment
-        rMom[i] = system.R[i].moment
-        rx[i] = system.R[i].x
+        tHeight[i] = altitude + system.transmitterLoops[i].z
+        rHeight[i] = -altitude + system.receiverLoops[i].z
+        tMom[i] = system.transmitterLoops[i].moment
+        rMom[i] = system.receiverLoops[i].moment
+        rx[i] = system.loopOffsets[i, 0]
     scl = tMom * rMom
 
     frequencies = np.asarray(system.frequencies)
@@ -114,11 +114,11 @@ def fdem1dsen(system, model1d, altitude):
     rMom = np.zeros(system.nFrequencies)
     rx = np.zeros(system.nFrequencies)
     for i in range(system.nFrequencies):
-        tHeight[i] = altitude + system.T[i].z
-        rHeight[i] = -altitude + system.R[i].z
-        tMom[i] = system.T[i].moment
-        rMom[i] = system.R[i].moment
-        rx[i] = system.R[i].x
+        tHeight[i] = altitude + system.transmitterLoops[i].z
+        rHeight[i] = -altitude + system.transmitterLoops[i].z
+        tMom[i] = system.transmitterLoops[i].moment
+        rMom[i] = system.receiverLoops[i].moment
+        rx[i] = system.loopOffsets[i, 0]
     scl = tMom * rMom
 
     frequencies = np.asarray(system.frequencies)

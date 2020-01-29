@@ -14,6 +14,69 @@ from ...classes.system.CircularLoop import CircularLoop
 from ...base import customFunctions as cf
 #from .. import Error as Err
 
+
+def find(filename, tag):
+    """Find the locations of all groups with 'tag' in their path.
+
+    Parameters
+    ----------
+    filename : str
+        HDF5 file name
+    tag : str
+        Sub string that appears in the group name.
+
+    Returns
+    -------
+    out : list
+        List of paths into the HDF5 file.
+
+    """
+    def find_inner(hdf_file, tag):
+        def h5py_iterator(g, tag, prefix=''):
+            for key in g.keys():
+                item = g[key]
+                path = f'{prefix}/{key}'
+                if tag in path: # test for dataset
+                    yield item, path
+                else:
+                    if isinstance(item, h5py.Group): # test for group (go down)
+                        yield from h5py_iterator(item, tag, path)
+
+        for item, path in h5py_iterator(f, tag):
+            yield path
+        
+    locs = []
+    with h5py.File(filename, 'r') as f:
+        for path in find_inner(f, tag):
+            locs.append(path)
+    return locs
+
+
+def read_groups_with_tag(filename, tag, index=None, **kwargs):
+    """Reads all groups with 'tag' in their path into memory.
+
+    Parameters
+    ----------
+    filename : str
+        HDF5 file name
+    tag : str
+        Sub string that appears in the group name.
+
+    Returns
+    -------
+    out : list
+        List of geobipy classes.
+
+    """
+    locs = find(filename, tag)
+    classes = []
+    with h5py.File(filename, 'r') as f:
+        for loc in locs:
+            classes.append(read_item(f[loc], index=index, **kwargs))
+    return classes
+            
+
+
 def read_all(fName):
     """Reads all the entries written to a HDF file
 

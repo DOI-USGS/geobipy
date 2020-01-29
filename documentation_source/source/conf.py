@@ -362,12 +362,14 @@ from sphinx_gallery.sorting import ExplicitOrder
 sphinx_gallery_conf = {
     'examples_dirs': 'examples',   # path to your example scripts
     'gallery_dirs': 'examples',  # path to where to save gallery generated output
-    'subsection_order': ExplicitOrder(['examples/Statistics/',
+    'subsection_order': ExplicitOrder(['examples/Distributions/',
+                                    'examples/Statistics/',
                                     'examples/Meshes/',
                                     'examples/Models/',
-                                    'examples/Distributions/',
+                                    
 #                                     '../../examples/Pointclouds/',
-#                                     '../../examples/Data/',
+                                    'examples/Data/',
+                                    'examples/Datapoints/',
 #                                     '../../examples/Inversion/',
                                     ]),
     "image_scrapers": ('matplotlib'),
@@ -376,33 +378,3 @@ sphinx_gallery_conf = {
     'abort_on_example_error': True,
     'remove_config_comments': True,
 }
-#     # path to your examples scripts
-#     "examples_dirs": [
-#         "../../examples/",
-#         "../../examples/Data/",
-#     ],
-#    'subsection_order': ExplicitOrder(['../../examples/Statistics/',
-#                                     '../../examples/Meshes/',
-#                                     '../../examples/Models/',
-#                                     '../../examples/Pointclouds/',
-#                                     '../../examples/Data/',
-#                                     '../../examples/Inversion/',
-#                                     ]),
-#     # path where to save gallery generated examples
-#     "gallery_dirs": ["examples"],
-#     # Pattern to search for example files
-
-#     # Remove the "Download all examples" button from the top level gallery
-#     "download_all_examples": False,
-#     # Sort gallery example by file name instead of number of lines (default)
-#     "within_subsection_order": FileNameSortKey,
-#     # directory where function granular galleries are stored
-#     "backreferences_dir": ".",
-#     # Modules for which function level galleries are created.  In
-#     "doc_module": "geobipy",
-#     "image_scrapers": ('matplotlib'),
-#     "thumbnail_size": (350, 350),
-#     'first_notebook_cell': ("%matplotlib inline\n"),
-#     'abort_on_example_error': True,
-#     'remove_config_comments': True,
-# }

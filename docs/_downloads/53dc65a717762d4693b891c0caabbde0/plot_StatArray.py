@@ -475,7 +475,7 @@ with h5py.File('1Dtest.h5','w') as f:
 x = hdfRead.readKeyFromFiles('1Dtest.h5','/','test')
 print('x has the same values as Density? ',np.all(x == Density))
 x[2] = 5.0 # Change one of the values in x
-print('x has its own memory allocated (not a reference/pointer)? ',np.all(x == Density) == False)
+print('x has its own memory allocated (not a reference/pointer)? ', id(x) != id(Density))
 
 
 ################################################################################

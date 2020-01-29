@@ -2,6 +2,7 @@
 Module describing a Data Set where values are associated with an xyz co-ordinate
 """
 import numpy as np
+from cached_property import cached_property
 from ....classes.core import StatArray
 from ....base import fileIO as fIO
 from ....base import customFunctions as cf
@@ -102,7 +103,7 @@ class Data(PointCloud3D):
 
 
         self._fiducial = None
-        self._line = None
+        self._lineNumber = None
     
     
     def _systemIndices(self, system=0):
@@ -154,8 +155,8 @@ class Data(PointCloud3D):
         return self._fiducial
 
     @property
-    def line(self):
-        return self._line
+    def lineNumber(self):
+        return self._lineNumber
 
     @property
     def nChannels(self):
@@ -163,7 +164,7 @@ class Data(PointCloud3D):
 
     @property
     def nLines(self):
-        return np.unique(self.line).size
+        return np.unique(self.lineNumber).size
 
     @property
     def predictedData(self):
@@ -247,7 +248,8 @@ class Data(PointCloud3D):
         return out
 
 
-    def getActiveChannels(self):
+    @cached_property
+    def active(self):
         """Logical array whether the channel is active or not.
 
         An inactive channel is one where channel values are NaN for all points.
@@ -261,7 +263,7 @@ class Data(PointCloud3D):
         return np.where(np.sum(np.isnan(self._data), 0) != self.nPoints)[0]
 
 
-    def getDataChannel(self, channel, system=None):
+    def dataChannel(self, channel, system=None):
         """Gets the data in the specified channel
         
         Parameters
@@ -286,7 +288,7 @@ class Data(PointCloud3D):
             return StatArray.StatArray(self._data[:, self._systemOffset[system] + channel], self._channelNames[self._systemOffset[system] + channel], self._data.units)
 
 
-    def getDataPoint(self, i):
+    def dataPoint(self, i):
         """Get the ith data point from the data set 
         
         Parameters
@@ -305,13 +307,14 @@ class Data(PointCloud3D):
         return DataPoint(self.nChannelsPerSystem, self.x[i], self.y[i], self.z[i], self.elevation[i], self._data[i, :], self._std[i, :], self._predictedData[i, :], channelNames=self.channelNames)
 
 
-    def getLine(self, line):
+    def line(self, line):
         """ Get the data from the given line number """
-        i = np.where(self.line == line)[0]
+        i = np.where(self.lineNumber == line)[0]
+        assert (i.size > 0), 'Could not get line with number {}'.format(line)
         return self[i]
 
 
-    def getNumberPointsPerLine(self):
+    def nPointsPerLine(self):
         """Gets the number of points in each line.
         
         Returns
@@ -320,14 +323,14 @@ class Data(PointCloud3D):
             Number of points in each line
             
         """
-        nPoints = np.zeros(np.unique(self.line).size)
-        lines = np.unique(self.line)
+        nPoints = np.zeros(np.unique(self.lineNumber).size)
+        lines = np.unique(self.lineNumber)
         for i, line in enumerate(lines):
-            nPoints[i] = np.sum(self.line == line)
+            nPoints[i] = np.sum(self.lineNumber == line)
         return nPoints
 
 
-    def getPredictedDataChannel(self, channel, system=None):
+    def predictedDataChannel(self, channel, system=None):
         """Gets the predicted data in the specified channel
         
         Parameters
@@ -352,7 +355,7 @@ class Data(PointCloud3D):
             return StatArray.StatArray(self._predictedData[:, self._systemOffset[system] + channel], "Predicted data {}".format(self._channelNames[self._systemOffset[system] + channel]), self._predictedData.units)
 
     
-    def getStdChannel(self, channel, system=None):
+    def stdChannel(self, channel, system=None):
         """Gets the uncertainty in the specified channel
         
         Parameters
@@ -412,7 +415,7 @@ class Data(PointCloud3D):
             assert 0 <= channel < self.nChannelsPerSystem[system], ValueError('Requested channel must be 0 <= channel {}'.format(self.nChannelsPerSystem[system]))
             channel = self._systemOffset[system] + channel
 
-        kwargs['c'] = self.getDataChannel(channel)
+        kwargs['c'] = self.dataChannel(channel)
 
         self.mapPlot(*args, **kwargs)
 
@@ -439,7 +442,7 @@ class Data(PointCloud3D):
             assert 0 >= channel < self.nChannelsPerSystem[system], ValueError('Requested channel must be 0 <= channel {}'.format(self.nChannelsPerSystem[system]))
             channel = self._systemOffset[system] + channel
 
-        kwargs['c'] = self.getPredictedDataChannel(channel)
+        kwargs['c'] = self.predictedDataChannel(channel)
 
         self.mapPlot(*args, **kwargs)
 

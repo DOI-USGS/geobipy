@@ -263,6 +263,21 @@ Module describing a Data Set where values are associated with an xyz co-ordinate
 </dl>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.active">
+<code class="sig-name descname">active</code><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.active" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logical array whether the channel is active or not.</p>
+<p>An inactive channel is one where channel values are NaN for all points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>out</strong> – Indices of non-NaN columns.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bools</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="method">
 <dt id="geobipy.src.classes.data.dataset.Data.Data.addToVTK">
 <code class="sig-name descname">addToVTK</code><span class="sig-paren">(</span><em class="sig-param">vtk, prop=['data', 'predicted', 'std'], system=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.addToVTK" title="Permalink to this definition">¶</a></dt>
@@ -285,6 +300,27 @@ Module describing a Data Set where values are associated with an xyz co-ordinate
 </dd></dl>
 
 <dl class="method">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.dataChannel">
+<code class="sig-name descname">dataChannel</code><span class="sig-paren">(</span><em class="sig-param">channel</em>, <em class="sig-param">system=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.dataChannel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the data in the specified channel</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>channel</strong> (<em>int</em>) – Index of the channel to return
+* If system is None, 0 &lt;= channel &lt; self.nChannels else 0 &lt;= channel &lt; self.nChannelsPerSystem[system]</p></li>
+<li><p><strong>system</strong> (<em>int</em><em>, </em><em>optional</em>) – The system to obtain the channel from.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – The data channel</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>geobipy.StatArray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
 <dt id="geobipy.src.classes.data.dataset.Data.Data.dataMisfit">
 <code class="sig-name descname">dataMisfit</code><span class="sig-paren">(</span><em class="sig-param">squared=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.dataMisfit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the <span class="math notranslate nohighlight">\(L_{2}\)</span> norm squared misfit between the observed and predicted data</p>
@@ -300,6 +336,23 @@ Module describing a Data Set where values are associated with an xyz co-ordinate
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>np.float64</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.dataPoint">
+<code class="sig-name descname">dataPoint</code><span class="sig-paren">(</span><em class="sig-param">i</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.dataPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the ith data point from the data set</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>i</strong> (<em>int</em>) – The data point to get</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – The data point</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>geobipy.DataPoint</p>
 </dd>
 </dl>
 </dd></dl>
@@ -327,118 +380,9 @@ Module describing a Data Set where values are associated with an xyz co-ordinate
 </dd></dl>
 
 <dl class="method">
-<dt id="geobipy.src.classes.data.dataset.Data.Data.getActiveChannels">
-<code class="sig-name descname">getActiveChannels</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.getActiveChannels" title="Permalink to this definition">¶</a></dt>
-<dd><p>Logical array whether the channel is active or not.</p>
-<p>An inactive channel is one where channel values are NaN for all points.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>out</strong> – Indices of non-NaN columns.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>bools</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="geobipy.src.classes.data.dataset.Data.Data.getDataChannel">
-<code class="sig-name descname">getDataChannel</code><span class="sig-paren">(</span><em class="sig-param">channel</em>, <em class="sig-param">system=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.getDataChannel" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the data in the specified channel</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>channel</strong> (<em>int</em>) – Index of the channel to return
-* If system is None, 0 &lt;= channel &lt; self.nChannels else 0 &lt;= channel &lt; self.nChannelsPerSystem[system]</p></li>
-<li><p><strong>system</strong> (<em>int</em><em>, </em><em>optional</em>) – The system to obtain the channel from.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>out</strong> – The data channel</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>geobipy.StatArray</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="geobipy.src.classes.data.dataset.Data.Data.getDataPoint">
-<code class="sig-name descname">getDataPoint</code><span class="sig-paren">(</span><em class="sig-param">i</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.getDataPoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the ith data point from the data set</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>i</strong> (<em>int</em>) – The data point to get</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>out</strong> – The data point</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>geobipy.DataPoint</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="geobipy.src.classes.data.dataset.Data.Data.getLine">
-<code class="sig-name descname">getLine</code><span class="sig-paren">(</span><em class="sig-param">line</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.getLine" title="Permalink to this definition">¶</a></dt>
+<dt id="geobipy.src.classes.data.dataset.Data.Data.line">
+<code class="sig-name descname">line</code><span class="sig-paren">(</span><em class="sig-param">line</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.line" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the data from the given line number</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="geobipy.src.classes.data.dataset.Data.Data.getNumberPointsPerLine">
-<code class="sig-name descname">getNumberPointsPerLine</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.getNumberPointsPerLine" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the number of points in each line.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>out</strong> – Number of points in each line</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>ints</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="geobipy.src.classes.data.dataset.Data.Data.getPredictedDataChannel">
-<code class="sig-name descname">getPredictedDataChannel</code><span class="sig-paren">(</span><em class="sig-param">channel</em>, <em class="sig-param">system=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.getPredictedDataChannel" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the predicted data in the specified channel</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>channel</strong> (<em>int</em>) – Index of the channel to return
-* If system is None, 0 &lt;= channel &lt; self.nChannels else 0 &lt;= channel &lt; self.nChannelsPerSystem[system]</p></li>
-<li><p><strong>system</strong> (<em>int</em><em>, </em><em>optional</em>) – The system to obtain the channel from.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>out</strong> – The predicted data channel</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>geobipy.StatArray</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="geobipy.src.classes.data.dataset.Data.Data.getStdChannel">
-<code class="sig-name descname">getStdChannel</code><span class="sig-paren">(</span><em class="sig-param">channel</em>, <em class="sig-param">system=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.getStdChannel" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the uncertainty in the specified channel</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>channel</strong> (<em>int</em>) – Index of the channel to return
-* If system is None, 0 &lt;= channel &lt; self.nChannels else 0 &lt;= channel &lt; self.nChannelsPerSystem[system]</p></li>
-<li><p><strong>system</strong> (<em>int</em><em>, </em><em>optional</em>) – The system to obtain the channel from.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>out</strong> – The uncertainty channel</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>geobipy.StatArray</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="method">
@@ -473,6 +417,20 @@ Module describing a Data Set where values are associated with an xyz co-ordinate
 * If system is None, 0 &lt;= channel &lt; self.nChannels else 0 &lt;= channel &lt; self.nChannelsPerSystem[system]</p></li>
 <li><p><strong>system</strong> (<em>int</em><em>, </em><em>optional</em>) – The system to obtain the channel from.</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.nPointsPerLine">
+<code class="sig-name descname">nPointsPerLine</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.nPointsPerLine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the number of points in each line.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>out</strong> – Number of points in each line</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ints</p>
 </dd>
 </dl>
 </dd></dl>
@@ -558,6 +516,27 @@ If xAxis is ‘r3d’, returns cumulative distance along the line in 3D using x,
 </dd></dl>
 
 <dl class="method">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.predictedDataChannel">
+<code class="sig-name descname">predictedDataChannel</code><span class="sig-paren">(</span><em class="sig-param">channel</em>, <em class="sig-param">system=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.predictedDataChannel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the predicted data in the specified channel</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>channel</strong> (<em>int</em>) – Index of the channel to return
+* If system is None, 0 &lt;= channel &lt; self.nChannels else 0 &lt;= channel &lt; self.nChannelsPerSystem[system]</p></li>
+<li><p><strong>system</strong> (<em>int</em><em>, </em><em>optional</em>) – The system to obtain the channel from.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – The predicted data channel</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>geobipy.StatArray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
 <dt id="geobipy.src.classes.data.dataset.Data.Data.read">
 <code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param">fname</em>, <em class="sig-param">columnIndex</em>, <em class="sig-param">nHeaders=0</em>, <em class="sig-param">nChannels=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read the specified columns from an ascii file
@@ -568,6 +547,27 @@ cols[0,1,2,…] should be the indices of the x,y,z co-ordinates</p>
 <dt id="geobipy.src.classes.data.dataset.Data.Data.std">
 <em class="property">property </em><code class="sig-name descname">std</code><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.std" title="Permalink to this definition">¶</a></dt>
 <dd><p>The standard deviation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.stdChannel">
+<code class="sig-name descname">stdChannel</code><span class="sig-paren">(</span><em class="sig-param">channel</em>, <em class="sig-param">system=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.stdChannel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the uncertainty in the specified channel</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>channel</strong> (<em>int</em>) – Index of the channel to return
+* If system is None, 0 &lt;= channel &lt; self.nChannels else 0 &lt;= channel &lt; self.nChannelsPerSystem[system]</p></li>
+<li><p><strong>system</strong> (<em>int</em><em>, </em><em>optional</em>) – The system to obtain the channel from.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – The uncertainty channel</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>geobipy.StatArray</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">

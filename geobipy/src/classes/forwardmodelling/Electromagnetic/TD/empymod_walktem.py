@@ -1,3 +1,8 @@
+import numpy as np
+from empymod.model import (bipole, tem)
+from scipy.integrate.quadrature import _cached_roots_legendre
+from scipy.interpolate import InterpolatedUnivariateSpline as iuSpline
+
 def empymod_walktem(system, model1d):
     """Custom wrapper of empymod.model.bipole.
 
@@ -30,22 +35,27 @@ def empymod_walktem(system, model1d):
         WalkTEM response (dB/dt).
 
     """
+
+    depth = np.r_[0.0, model1d.depth[:-1]]
+    res = np.r_[2e14, model1d.par]
     # === CALCULATE FREQUENCY-DOMAIN RESPONSE ===
     # We only define a few parameters here. You could extend this for any
     # parameter possible to provide to empymod.model.bipole.
     length = 0.5 * system.transmitterLoop.sideLength
-    EM = empymod.model.bipole(
+
+    EM = bipole(
         src=[0.0, length,  length, length, 0.0, 0.0],  # El. bipole source; half of one side.
         rec=[0, 0, 0, 0, 90],         # Receiver at the origin, vertical.
-        depth=np.r_[0, depth],        # Depth-model, adding air-interface.
-        res=np.r_[2e14, res],         # Provided resistivity model, adding air.
+        depth = depth,        # Depth-model, adding air-interface.
+        res = res,         # Provided resistivity model, adding air.
         # aniso=aniso,                # Here you could implement anisotropy...
         #                             # ...or any parameter accepted by bipole.
-        freqtime=system.modellingFrequencies,                # Required frequencies.
-        mrec=True,                    # It is an el. source, but a magn. rec.
-        strength=1,                   # To account for 4 sides of square loop.
-        srcpts=3,                     # Approx. the finite dip. with 3 points.
-        htarg={'fhtfilt': 'key_101_2009'},  # Short filter, so fast.
+        freqtime = system.modellingFrequencies,                # Required frequencies.
+        mrec = True,                    # It is an el. source, but a magn. rec.
+        strength = 8,                   # To account for 4 sides of square loop.
+        srcpts = 5,                     # Approx. the finite dip. with 3 points.
+        htarg = {'fhtfilt': 'key_101_2009'}, 
+        verb=0,# Short filter, so fast.
     )
 
     # Multiply the frequecny-domain result with
@@ -56,13 +66,18 @@ def empymod_walktem(system, model1d):
     for filt in system.offTimeFilters:
         EM *= filt.frequencyResponse(system.modellingFrequencies)
 
-    # === CONVERT TO TIME DOMAIN ===
-    delay_rst = 1.8e-7               # As stated in the WalkTEM manual
-    EM, _ = np.squeeze(empymod.model.tem(EM[:, None], np.array([1]),
-                       system.modellingFrequencies, system.modellingTimes+delay_rst, 1, system.ft, system.ftarg))
 
+    # === CONVERT TO TIME DOMAIN ===
+    EM, _ = np.squeeze(tem(EM[:, None], 
+                       np.array([1]),
+                       system.modellingFrequencies, 
+                       system.modellingTimes, 
+                       -1,
+                       system.ft, 
+                       system.ftarg))
+                
     # === APPLY WAVEFORM ===
-    return waveform(time, EM, system.times, system.waveform.time, waveform.amplitude)
+    return waveform(system.modellingTimes, EM, system.times, system.waveform.time-system.delayTime, system.waveform.amplitude)
 
 
 def waveform(times, resp, times_wanted, wave_time, wave_amp, nquad=3):

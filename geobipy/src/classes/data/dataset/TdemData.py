@@ -82,7 +82,7 @@ class TdemData(Data):
         Data.__init__(self, nPoints, nTimes, dataUnits=r"$\frac{V}{m^{2}}$")
 
         # StatArray of the line number for flight line data
-        self._line = StatArray.StatArray(self.nPoints, 'Line Number')
+        self._lineNumber = StatArray.StatArray(self.nPoints, 'Line Number')
         # StatArray of the id number
         self._fiducial = StatArray.StatArray(self.nPoints, 'ID Number')
         # StatArray of the elevation
@@ -107,7 +107,7 @@ class TdemData(Data):
                     self.channelNames[k] = 'Time {:.3e} s'.format(self.system[i].windows.centre[iTime])
                     k += 1
 
-        self.iActive = self.getActiveChannels()
+        # self.iActive = self.getActiveChannels()
 
 
     @property
@@ -209,7 +209,7 @@ class TdemData(Data):
         values = fIO.read_columns(dataFilename[0], indicesForFile, 1, nPoints)
 
         # Assign columns to variables
-        self._line[:] = values[:, 0]
+        self._lineNumber[:] = values[:, 0]
         self._fiducial[:] = values[:, 1]
         self.x[:] = values[:, 2]
         self.y[:] = values[:, 3]
@@ -261,7 +261,7 @@ class TdemData(Data):
             else:
                 self._std[:, iSys] = values[:, self.nTimes[i]:]
 
-        self.iActive = self.getActiveChannels()
+        # self.iActive = self.getActiveChannels()
 
         self.check()
   
@@ -637,19 +637,44 @@ class TdemData(Data):
 
 
 
-    def getDataPoint(self, i):
-        """ Get the ith data point from the data set """
+    def datapoint(self, index=None, fiducial=None):
+        """Get the ith data point from the data set 
+        
+        Parameters
+        ----------
+        index : int, optional
+            Index of the data point to get.
+        fiducial : float, optional
+            Fiducial of the data point to get.
+            
+        Returns
+        -------
+        out : geobipy.FdemDataPoint
+            The data point.
+        
+        Raises
+        ------
+        Exception
+            If neither an index or fiducial are given.
+            
+        """
+        iNone = index is None
+        fNone = fiducial is None
+        
+        assert not (iNone and fNone) ^ (not iNone and not fNone), Exception("Must specify either an index OR a fiducial.")
 
-        assert 0 <= i < self.nPoints, ValueError("Requested data point must have index (0, "+str(self.nPoints) + ']')
+        if not fNone:
+            index = self.fiducial.searchsorted(fiducial)
 
-        return TdemDataPoint(self.x[i], self.y[i], self.z[i], self.elevation[i], self._data[i, :], self.std[i, :], self._predictedData[i, :], self.system, self.T[i], self.R[i], self.loopOffset[i, :], self.line[i], self.fiducial[i])
+        i = index
+        return TdemDataPoint(self.x[i], self.y[i], self.z[i], self.elevation[i], self._data[i, :], self.std[i, :], self._predictedData[i, :], self.system, self.T[i], self.R[i], self.loopOffset[i, :], self.lineNumber[i], self.fiducial[i])
 
 
-    def getLine(self, line):
-        """ Gets the data in the given line number """
-        assert line in self.line, ValueError("No line available in data with number {}".format(line))
-        i = np.where(self.line == line)[0]
-        return self[i]
+    # def getLine(self, line):
+    #     """ Gets the data in the given line number """
+    #     assert line in self.lineNumber, ValueError("No line available in data with number {}".format(line))
+    #     i = np.where(self.lineNumber == line)[0]
+    #     return self[i]
 
 
     def times(self, system=0):
@@ -666,7 +691,7 @@ class TdemData(Data):
         tmp.x[:] = self.x[i]
         tmp.y[:] = self.y[i]
         tmp.z[:] = self.z[i]
-        tmp.line[:] = self.line[i]
+        tmp._lineNumber[:] = self.lineNumber[i]
         tmp._fiducial[:] = self.fiducial[i]
         tmp.elevation[:] = self.elevation[i]
         tmp.T[:] = self.T[i]
@@ -691,19 +716,19 @@ class TdemData(Data):
             'id or fid \n'
             '    Id number of the data point, these be unique\n'
             'x or northing or n \n'
-            '    Northing co-ordinate of the data point\n'
+            '    Northing co-ordinate of the data point, (m)\n'
             'y or easting or e \n'
-            '    Easting co-ordinate of the data point\n'
+            '    Easting co-ordinate of the data point, (m)\n'
             'z or alt or laser or bheight \n'
-            '    Altitude of the transmitter coil\n'
+            '    Altitude of the transmitter coil above ground level (m)\n'
             'dtm or dem_elev or dem_np \n'
-            '    Elevation of the ground at the data point\n'
+            '    Elevation of the ground at the data point (m)\n'
             'txrx_dx \n'
-            '    Distance in x between transmitter and reciever\n'
+            '    Distance in x between transmitter and reciever (m)\n'
             'txrx_dy \n'
-            '    Distance in y between transmitter and reciever\n'
+            '    Distance in y between transmitter and reciever (m)\n'
             'txrx_dz \n'
-            '    Distance in z between transmitter and reciever\n'
+            '    Distance in z between transmitter and reciever (m)\n'
             'TxPitch \n'
             '    Pitch of the transmitter loop\n'
             'TxRoll \n'
@@ -716,9 +741,9 @@ class TdemData(Data):
             '    Roll of the receiver loop\n'
             'RxYaw \n'
             '    Yaw of the receiver loop\n'
-            'Off[0] Off[1] ... Off[nWindows]  - with the number and brackets\n'
+            'Off[0] Off[1] ... Off[nWindows]  - with the number and square brackets\n'
             '    The measurements for each time specified in the accompanying system file under Receiver Window Times \n'
-            'Optional columns for off time uncertainty estimates. These should be estimates of the data standard deviation. \n'
+            'Optional columns\n'
             'OffErr[0] OffErr[1] ... Off[nWindows]\n'
             '    Estimates of standard deviation for each off time measurement.')
         return s
@@ -772,7 +797,7 @@ class TdemData(Data):
 
     def plotLine(self, line, xAxis='index', **kwargs):
 
-        line = self.getLine(line)
+        line = self.line(line)
 
         x = self.getXAxis(xAxis)
 
@@ -805,7 +830,7 @@ class TdemData(Data):
         msg = PointCloud3D.summary(self, out=out)
         msg = "Tdem Data: \n"
         msg += "Number of Systems: :" + str(self.nSystems) + '\n'
-        msg += self.line.summary(True)
+        msg += self.lineNumber.summary(True)
         msg += self.id.summary(True)
         msg += self.elevation.summary(True)
         if (out):
@@ -866,7 +891,7 @@ class TdemData(Data):
         obj = eval(cF.safeEval(item.attrs.get('repr')))
         tmp.R = obj.fromHdf(item)
 
-        tmp.iActive = tmp.getActiveChannels()
+        # tmp.iActive = tmp.getActiveChannels()
 
         return tmp
 
@@ -944,7 +969,7 @@ class TdemData(Data):
 
         # Broadcast the Data point id, line numbers and elevations
         this._fiducial = self.fiducial.Bcast(world, root=root)
-        this._line = self.line.Bcast(world, root=root)
+        this._lineNumber = self.lineNumber.Bcast(world, root=root)
         this._x = self.x.Bcast(world, root=root)
         this._y = self.y.Bcast(world, root=root)
         this._z = self.z.Bcast(world, root=root)
@@ -981,7 +1006,7 @@ class TdemData(Data):
             for i in range(this.nPoints):
                 this.R[i] = eval(cF.safeEval(lTmp[i]))
 
-        this.iActive = this.getActiveChannels()
+        # this.iActive = this.getActiveChannels()
 
         return this
 
@@ -998,7 +1023,7 @@ class TdemData(Data):
 
         # Broadcast the Data point id, line numbers and elevations
         this._fiducial = self.fiducial.Scatterv(starts, chunks, world, root=root)
-        this._line = self.line.Scatterv(starts, chunks, world, root=root)
+        this._lineNumber = self.lineNumber.Scatterv(starts, chunks, world, root=root)
         this._x = self.x.Scatterv(starts, chunks, world, root=root)
         this._y = self.y.Scatterv(starts, chunks, world, root=root)
         this._z = self.z.Scatterv(starts, chunks, world, root=root)
@@ -1035,7 +1060,7 @@ class TdemData(Data):
             for i in range(this.nPoints):
                 this.R[i] = eval(lTmp[i])
 
-        this.iActive = this.getActiveChannels()
+        # this.iActive = this.getActiveChannels()
 
         return this
 
@@ -1068,7 +1093,7 @@ class TdemData(Data):
                 with np.printoptions(formatter={'float': '{: 0.15g}'.format}, suppress=True):
                     for j in range(self.nPoints):
 
-                        x = np.asarray([self.line[j], self.id[j], self.x[j], self.y[j], self.elevation[j], self.z[j],
+                        x = np.asarray([self.lineNumber[j], self.id[j], self.x[j], self.y[j], self.elevation[j], self.z[j],
                                         self.loopOffset[j, 0], self.loopOffset[j, 1], self.loopOffset[j, 2],
                                         self.T.pitch, self.T.roll, self.T.yaw,
                                         self.R.pitch, self.R.roll, self.R.yaw])

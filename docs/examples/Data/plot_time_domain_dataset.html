@@ -1,0 +1,384 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Time domain dataset &mdash; GeoBIPy 1.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Frequency domain dataset" href="plot_frequency_dataset.html" />
+    <link rel="prev" title="1D Model with an infinite halfspace" href="../Models/plot_model_1d.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> GeoBIPy
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../content/getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../content/api/api.html">API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#distributions">Distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#statistics">Statistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#meshes">Meshes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#data">Data</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Time domain dataset</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#reading-in-the-data">Reading in the Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#obtain-a-line-from-the-data-set">Obtain a line from the data set</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#file-format-for-time-domain-data">File Format for time domain data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#file-format-for-a-time-domain-system">File Format for a time domain system</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="plot_frequency_dataset.html">Frequency domain dataset</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#datapoints">Datapoints</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GeoBIPy</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Examples</a> &raquo;</li>
+        
+      <li>Time domain dataset</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/examples/Data/plot_time_domain_dataset.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-data-plot-time-domain-dataset-py"><span class="std std-ref">here</span></a> to download the full example code</p>
+</div>
+<div class="sphx-glr-example-title section" id="time-domain-dataset">
+<span id="sphx-glr-examples-data-plot-time-domain-dataset-py"></span><h1>Time domain dataset<a class="headerlink" href="#time-domain-dataset" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">customPlots</span> <span class="k">as</span> <span class="n">cP</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">geobipy.src.classes.core.StatArray</span> <span class="kn">import</span> <span class="n">StatArray</span>
+<span class="kn">from</span> <span class="nn">geobipy.src.classes.data.dataset.TdemData</span> <span class="kn">import</span> <span class="n">TdemData</span>
+</pre></div>
+</div>
+<div class="section" id="reading-in-the-data">
+<h2>Reading in the Data<a class="headerlink" href="#reading-in-the-data" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dataFolder</span> <span class="o">=</span> <span class="s2">&quot;..//supplementary//Data//&quot;</span>
+<span class="c1"># The data file name</span>
+<span class="n">dataFiles</span><span class="o">=</span><span class="p">[</span><span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;Skytem_High.txt&#39;</span><span class="p">,</span> <span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;Skytem_Low.txt&#39;</span><span class="p">]</span>
+<span class="c1"># The EM system file name</span>
+<span class="n">systemFiles</span><span class="o">=</span><span class="p">[</span><span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;SkytemHM-SLV.stm&#39;</span><span class="p">,</span> <span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;SkytemLM-SLV.stm&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Read in the data from file</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">TD</span> <span class="o">=</span> <span class="n">TdemData</span><span class="p">()</span>
+<span class="n">TD</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">dataFiles</span><span class="p">,</span> <span class="n">systemFiles</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Plot the locations of the data points</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">TD</span><span class="o">.</span><span class="n">scatter2D</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_time_domain_dataset_001.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_domain_dataset_001.png" />
+<p>Plot all the data along the specified line</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">TD</span><span class="o">.</span><span class="n">plotLine</span><span class="p">(</span><span class="mf">100101.0</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_time_domain_dataset_002.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_domain_dataset_002.png" />
+<p>Or, plot specific channels in the data</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">TD</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">system</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="n">TD</span><span class="o">.</span><span class="n">active</span><span class="p">[:</span><span class="mi">3</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_time_domain_dataset_003.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_domain_dataset_003.png" />
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">TD</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">system</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">xscale</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">TD</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">system</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">xscale</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_time_domain_dataset_004.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_domain_dataset_004.png" />
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">TD</span><span class="o">.</span><span class="n">scatter2D</span><span class="p">(</span><span class="n">s</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">TD</span><span class="o">.</span><span class="n">dataChannel</span><span class="p">(</span><span class="n">system</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="mi">23</span><span class="p">),</span> <span class="n">equalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_time_domain_dataset_005.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_domain_dataset_005.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(429026.55879032257, 454054.24120967736, 4160661.9983766237, 4200460.001623377)
+</pre></div>
+</div>
+<p>TD.toVTK(‘TD1’, format=’binary’)</p>
+</div>
+<div class="section" id="obtain-a-line-from-the-data-set">
+<h2>Obtain a line from the data set<a class="headerlink" href="#obtain-a-line-from-the-data-set" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">line</span> <span class="o">=</span> <span class="n">TD</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="mf">100601.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">scatter2D</span><span class="p">(</span><span class="n">c</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">dataChannel</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">system</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_time_domain_dataset_006.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_domain_dataset_006.png" />
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xAxis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_time_domain_dataset_007.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_domain_dataset_007.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:663: RuntimeWarning: All-NaN axis encountered
+  if (np.nanmin(values) &lt;= 0.0):
+</pre></div>
+</div>
+</div>
+<div class="section" id="file-format-for-time-domain-data">
+<h2>File Format for time domain data<a class="headerlink" href="#file-format-for-time-domain-data" title="Permalink to this headline">¶</a></h2>
+<p>Here we describe the file format for time domain data.</p>
+<p>The data columns are read in according to the column names in the first line</p>
+<p>In this description, the column name or its alternatives are given followed by what the name represents
+Optional columns are also described.</p>
+<div class="section" id="required-columns">
+<h3>Required columns<a class="headerlink" href="#required-columns" title="Permalink to this headline">¶</a></h3>
+<dl class="simple">
+<dt>line</dt><dd><p>Line number for the data point</p>
+</dd>
+<dt>fid</dt><dd><p>Unique identification number of the data point</p>
+</dd>
+<dt>x or northing or n</dt><dd><p>Northing co-ordinate of the data point, (m)</p>
+</dd>
+<dt>y or easting or e</dt><dd><p>Easting co-ordinate of the data point, (m)</p>
+</dd>
+<dt>z or alt</dt><dd><p>Altitude of the transmitter coil above ground level (m)</p>
+</dd>
+<dt>elevation</dt><dd><p>Elevation of the ground at the data point (m)</p>
+</dd>
+<dt>txrx_dx</dt><dd><p>Distance in x between transmitter and reciever (m)</p>
+</dd>
+<dt>txrx_dy</dt><dd><p>Distance in y between transmitter and reciever (m)</p>
+</dd>
+<dt>txrx_dz</dt><dd><p>Distance in z between transmitter and reciever (m)</p>
+</dd>
+<dt>TxPitch</dt><dd><p>Pitch of the transmitter loop</p>
+</dd>
+<dt>TxRoll</dt><dd><p>Roll of the transmitter loop</p>
+</dd>
+<dt>TxYaw</dt><dd><p>Yaw of the transmitter loop</p>
+</dd>
+<dt>RxPitch</dt><dd><p>Pitch of the receiver loop</p>
+</dd>
+<dt>RxRoll</dt><dd><p>Roll of the receiver loop</p>
+</dd>
+<dt>RxYaw</dt><dd><p>Yaw of the receiver loop</p>
+</dd>
+<dt>Off[0] Off[1] … Off[last]  - with the number and square brackets</dt><dd><p>The measurements for each time gate specified in the accompanying system file under Receiver Window Times</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="optional-columns">
+<h3>Optional columns<a class="headerlink" href="#optional-columns" title="Permalink to this headline">¶</a></h3>
+<dl class="simple">
+<dt>OffErr[0] OffErr[1] … OffErr[last]</dt><dd><p>Estimates of standard deviation for each off time measurement</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="example-header">
+<h3>Example Header<a class="headerlink" href="#example-header" title="Permalink to this headline">¶</a></h3>
+<p>Line fid easting northing elevation height txrx_dx txrx_dy txrx_dz TxPitch TxRoll TxYaw RxPitch RxRoll RxYaw Off[0] Off[1]</p>
+</div>
+</div>
+<div class="section" id="file-format-for-a-time-domain-system">
+<h2>File Format for a time domain system<a class="headerlink" href="#file-format-for-a-time-domain-system" title="Permalink to this headline">¶</a></h2>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  7.337 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-data-plot-time-domain-dataset-py">
+<div class="sphx-glr-download docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/030d9288f2a570db74101e8a74392a6c/plot_time_domain_dataset.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_time_domain_dataset.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/da44568c6be498fbf775fe1f5b4dc744/plot_time_domain_dataset.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_time_domain_dataset.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="plot_frequency_dataset.html" class="btn btn-neutral float-right" title="Frequency domain dataset" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../Models/plot_model_1d.html" class="btn btn-neutral float-left" title="1D Model with an infinite halfspace" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright None
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

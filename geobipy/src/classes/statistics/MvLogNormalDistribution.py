@@ -77,7 +77,6 @@ class MvLogNormal(MvNormal):
         elif order == 2:
             return self.inverseVariance
 
-
     def rng(self, size = 1):
         return np.exp(super().rng(size)) if self.linearSpace else super().rng(size)
 

@@ -139,7 +139,7 @@ def Initialize(userParameters, DataPoint, prng):
     # Set the priors on the data point
     # ---------------------------------------
     # Set the prior on the data
-    DataPoint.predictedData.setPrior('MvLogNormal', DataPoint.data[DataPoint.iActive], DataPoint.std[DataPoint.iActive]**2.0, linearSpace=False, prng=prng)
+    DataPoint.predictedData.setPrior('MvLogNormal', DataPoint.data[DataPoint.active], DataPoint.std[DataPoint.active]**2.0, linearSpace=False, prng=prng)
     # Set the prior on the height
     DataPoint.z.setPrior('Uniform', np.float64(DataPoint.z) - userParameters.maximumElevationChange, np.float64(DataPoint.z) + userParameters.maximumElevationChange)
     # Set the prior on the relative Errors
@@ -198,30 +198,29 @@ def Initialize(userParameters, DataPoint, prng):
     # ---------------------------------
 
     # Find the conductivity of a half space model that best fits the data
-    halfspaceValue = DataPoint.FindBestHalfSpace()
+    halfspace = DataPoint.FindBestHalfSpace()
 
     # Create an initial model for the first iteration of the inversion
     # Initialize a 1D model with the half space conductivity
-    parameter = StatArray.StatArray(np.full(2, halfspaceValue), name='Conductivity', units=r'$\frac{S}{m}$')
+    # parameter = StatArray.StatArray(np.full(2, halfspaceValue), name='Conductivity', units=r'$\frac{S}{m}$')
     # Assign the depth to the interface as half the bounds
-    thk = np.asarray([0.5 * (userParameters.maximumDepth + userParameters.minimumDepth)])
-    Mod = Model1D(2, parameters = parameter, thickness=thk)
+    Mod = halfspace.insertLayer(z = 0.5 * (userParameters.maximumDepth + userParameters.minimumDepth))
+
+    # thk = np.asarray([0.5 * (userParameters.maximumDepth + userParameters.minimumDepth)])
+    # Mod = Model1D(2, parameters = parameter, thickness=thk)
 
     # Setup the model for perturbation
-    Mod.setPriors(halfspaceValue, userParameters.minimumDepth, userParameters.maximumDepth, userParameters.maximumNumberofLayers, userParameters.solveParameter, userParameters.solveGradient, parameterLimits=userParameters.parameterLimits, minThickness=userParameters.minimumThickness, factor=userParameters.factor, prng=prng)
+    Mod.setPriors(halfspace.par[0], userParameters.minimumDepth, userParameters.maximumDepth, userParameters.maximumNumberofLayers, userParameters.solveParameter, userParameters.solveGradient, parameterLimits=userParameters.parameterLimits, minThickness=userParameters.minimumThickness, factor=userParameters.factor, prng=prng)
 
 
     # Assign a Hitmap as a prior if one is given
     # if (not userParameters.referenceHitmap is None):
     #     Mod.setReferenceHitmap(userParameters.referenceHitmap)
 
-    userParameters.priMu = Mod.par.prior.mean[0]
-    userParameters.priStd = np.sqrt(Mod.par.prior.variance[0])
-
     # Compute the predicted data
     DataPoint.forward(Mod)
 
-    inverseHessian = Mod.generateLocalParameterVariance(DataPoint, userParameters.priStd)
+    inverseHessian = Mod.localParameterVariance(DataPoint)
 
     # Instantiate the proposal for the parameters.
     parameterProposal = Distribution('MvLogNormal', Mod.par, inverseHessian, linearSpace=True, prng=prng)
@@ -263,7 +262,7 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
     perturbedDatapoint = DataPoint.deepcopy()
 
     # Perturb the current model
-    remappedModel, perturbedModel = Mod.perturb(perturbedDatapoint, userParameters.priStd, Res.burnedIn)
+    remappedModel, perturbedModel = Mod.perturb(perturbedDatapoint)
 
     # Propose a new data point, using assigned proposal distributions
     perturbedDatapoint.perturb(userParameters.solveElevation, userParameters.solveRelativeError, userParameters.solveAdditiveError, userParameters.solveCalibration)

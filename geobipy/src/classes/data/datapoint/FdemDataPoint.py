@@ -143,58 +143,32 @@ class FdemDataPoint(EmDataPoint):
         return np.s_[self._systemOffset[system] + self.nFrequencies[system]: self._systemOffset[system+1]]
 
 
-    @property
-    def data(self):
-        return self._data
-
-
     def frequencies(self, system=0):
         """ Return the frequencies in an StatArray """
         return StatArray.StatArray(self.system[system].frequencies, name='Frequency', units='Hz')
 
-    
     def inphase(self, system=0):
-        return self._data[self._inphaseIndices(system)]
+        return self.data[self._inphaseIndices(system)]
 
     
     def inphaseStd(self, system=0):
-        return self._std[self._inphaseIndices(system)]
-
-    # @property
-    # def nChannels(self):
-    #     return np.sum(2*self.nFrequencies)
+        return self.std[self._inphaseIndices(system)]
 
     @property
     def nFrequencies(self):
         return np.int32(0.5*self.nChannelsPerSystem)
-
-    # @property
-    # def nTotalFrequencies(self):
-    #     return np.int32(np.sum(self.nFrequencies))
-
-    @property
-    def predictedData(self):
-        return self._predictedData
-
     
     def predictedInphase(self, system=0):
-        return self._predictedData[self._inphaseIndices(system)]
-
+        return self.predictedData[self._inphaseIndices(system)]
     
     def predictedQuadrature(self, system=0):
-        return self._predictedData[self._quadratureIndices(system)]
+        return self.predictedData[self._quadratureIndices(system)]
 
-    
     def quadrature(self, system=0):
-        return self._data[self._quadratureIndices(system)]
+        return self.data[self._quadratureIndices(system)]
 
-    
     def quadratureStd(self, system=0):
-        return self._std[self._quadratureIndices(system)]
-
-    @property
-    def std(self):
-        return self._std
+        return self.std[self._quadratureIndices(system)]
 
 
     def deepcopy(self):
@@ -360,7 +334,6 @@ class FdemDataPoint(EmDataPoint):
         obj = eval(cf.safeEval(item.attrs.get('repr')))
         _aPoint.calibration = obj.fromHdf(item, index=slic)
 
-        _aPoint.iActive = _aPoint.getActiveData()
         return _aPoint
         
 
@@ -397,14 +370,26 @@ class FdemDataPoint(EmDataPoint):
 
 
     def plot(self, title='Frequency Domain EM Data', system=0,  with_error_bars=True, **kwargs):
-        """ Plot the Inphase and Quadrature Data for an EM measurement
-        if plotPredicted then the predicted data are plotted as a line, with points for the observed data
-        else the observed data with error bars and linear interpolation are shown.
-        Additional options
-        incolor
-        inmarker
-        quadcolor
-        quadmarker
+        """ Plot the Inphase and Quadrature Data
+        
+        Parameters
+        ----------
+        title : str
+            Title of the plot
+        system : int
+            If multiple system are present, select which one
+        with_error_bars : bool
+            Plot vertical lines representing 1 standard deviation
+
+        See Also
+        --------
+        matplotlib.pyplot.errorbar : For more keyword arguements
+
+        Returns
+        -------
+        out : matplotlib.pyplot.ax
+            Figure axis
+
         """
 
         ax = plt.gca()
@@ -451,7 +436,25 @@ class FdemDataPoint(EmDataPoint):
 
 
     def plotPredicted(self, title='Frequency Domain EM Data', system=0, **kwargs):
+        """ Plot the predicted Inphase and Quadrature Data
+        
+        Parameters
+        ----------
+        title : str
+            Title of the plot
+        system : int
+            If multiple system are present, select which one
 
+        See Also
+        --------
+        matplotlib.pyplot.semilogx : For more keyword arguements
+
+        Returns
+        -------
+        out : matplotlib.pyplot.ax
+            Figure axis
+            
+        """
         ax = plt.gca()
         cp.pretty(ax)
 
@@ -462,9 +465,9 @@ class FdemDataPoint(EmDataPoint):
             cp.ylabel('Data (ppm)')
             cp.title(title)
 
-        c = kwargs.pop('color',cp.wellSeparated[3])
-        lw = kwargs.pop('linewidth',2)
-        a = kwargs.pop('alpha',0.7)
+        c = kwargs.pop('color', cp.wellSeparated[3])
+        lw = kwargs.pop('linewidth', 2)
+        a = kwargs.pop('alpha', 0.7)
 
         xscale = kwargs.pop('xscale','log')
         yscale = kwargs.pop('yscale','log')
@@ -478,49 +481,64 @@ class FdemDataPoint(EmDataPoint):
         return ax
 
 
-    def updateSensitivity(self, mod, scale=False):
+    def updateSensitivity(self, model):
         """ Compute an updated sensitivity matrix based on the one already containined in the FdemDataPoint object  """
-        self.J = self.sensitivity(mod, scale=scale)
+        self.J = self.sensitivity(model)
 
 
-    def FindBestHalfSpace(self):
-        """ Uses the bisection approach to find a half space conductivity that best matches the EM data by minimizing the data misfit """
-        # ####lg.myLogger('Global');####lg.indent()
-        ####lg.info('Finding Best Half Space Model')
-        c1 = 2.0
-        c2 = -6.0
-        cnew = 0.5 * (c1 + c2)
+    def FindBestHalfSpace(self, minConductivity=1e-6, maxConductivity=1e2, percentThreshold=1.0, maxIterations=100):
+        """Uses the bisection approach to find a half space conductivity that best matches the EM data by minimizing the data misfit 
+        
+        Parameters
+        ----------
+        minConductivity : float
+            Minimum conductivity to start the search
+        maxConductivity : float
+            Maximum conductivity to start the search
+        percentThreshold : float, optional
+            Stopping criteria for the relative change in data fit
+        maxIterations : int, optional
+            Stop after this number of iterations
+
+        Returns
+        -------
+        out : geobipy.Model1D
+            Best fitting halfspace model
+        
+        """
+        percentThreshold = 0.01 * percentThreshold
+        c0 = np.log10(minConductivity)
+        c1 = np.log10(maxConductivity)
+        cnew = 0.5 * (c0 + c1)
         # Initialize a single layer model
-        mod = Model1D(1)
+        p = StatArray.StatArray(1, 'Conductivity', r'$\frac{S}{m}$')
+        model = Model1D(1, parameters=p)
         # Initialize the first conductivity
-        mod.par[0] = 10.0**c1
-        self.forward(mod)  # Forward model the EM data
+        model._par[0] = 10.0**c0
+        self.forward(model)  # Forward model the EM data
         PhiD1 = self.dataMisfit(squared=True)  # Compute the measure between observed and predicted data
         # Initialize the second conductivity
-        mod.par[0] = 10.0**c2
-        self.forward(mod)  # Forward model the EM data
+        model._par[0] = 10.0**c1
+        self.forward(model)  # Forward model the EM data
         PhiD2 = self.dataMisfit(squared=True)  # Compute the measure between observed and predicted data
         # Compute a relative change in the data misfit
         dPhiD = abs(PhiD2 - PhiD1) / PhiD2
         i = 1
-        ####lg.debug('Entering Bisection')
         # Continue until there is less than 1% change
-        while (dPhiD > 0.01 and i < 100):
-            ####lg.debug('c1,c2,cnew: '+str([c1,c2,cnew]))
-            cnew = 0.5 * (c1 + c2)  # Bisect the conductivities
-            mod.par[0] = 10.0**cnew
-            self.forward(mod)  # Forward model the EM data
+        while (dPhiD > percentThreshold and i < maxIterations):
+            cnew = 0.5 * (c0 + c1)  # Bisect the conductivities
+            model._par[0] = 10.0**cnew
+            self.forward(model)  # Forward model the EM data
             PhiDnew = self.dataMisfit(squared=True)
             if (PhiD2 > PhiDnew):
-                c2 = cnew
+                c1 = cnew
                 PhiD2 = PhiDnew
             elif (PhiD1 > PhiDnew):
-                c1 = cnew
+                c0 = cnew
                 PhiD1 = PhiDnew
             dPhiD = abs(PhiD2 - PhiD1) / PhiD2
             i += 1
-        # ####lg.dedent()
-        return np.float64(10.0**cnew)
+        return model
 
 
     def forward(self, mod):
@@ -531,12 +549,12 @@ class FdemDataPoint(EmDataPoint):
         self._forward1D(mod)
 
 
-    def sensitivity(self, mod, scale=False):
+    def sensitivity(self, mod):
         """ Compute the sensitivty matrix for the given model """
 
         assert isinstance(mod, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
 
-        return StatArray.StatArray(self._sensitivity1D(mod, scale), 'Sensitivity', '$\\frac{ppm.m}{S}$')
+        return StatArray.StatArray(self._sensitivity1D(mod), 'Sensitivity', '$\\frac{ppm.m}{S}$')
 
 
     def _forward1D(self, mod):
@@ -547,7 +565,7 @@ class FdemDataPoint(EmDataPoint):
             self._predictedData[self.nFrequencies[i]:] = tmp.imag
 
 
-    def _sensitivity1D(self, mod, scale=False):
+    def _sensitivity1D(self, mod):
         """ Compute the sensitivty matrix for a 1D layered earth model """
         # Re-arrange the sensitivity matrix to Real:Imaginary vertical
         # concatenation
@@ -558,11 +576,7 @@ class FdemDataPoint(EmDataPoint):
             J[:self.nFrequencies[j], :] = Jtmp.real
             J[self.nFrequencies[j]:, :] = Jtmp.imag
 
-        # Scale the sensitivity matrix rows by the data weights if required
-        if scale:
-            J *= (np.repeat(self._std[:, np.newaxis]**-1.0, np.size(J, 1), 1))
-
-        self.J = J[self.iActive, :]
+        self.J = J[self.active, :]
         return self.J
 
     

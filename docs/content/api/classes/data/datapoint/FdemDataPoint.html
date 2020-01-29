@@ -217,8 +217,24 @@ Module describing a frequency domain EMData Point that contains a single measure
 </dl>
 <dl class="method">
 <dt id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.FindBestHalfSpace">
-<code class="sig-name descname">FindBestHalfSpace</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.FindBestHalfSpace" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">FindBestHalfSpace</code><span class="sig-paren">(</span><em class="sig-param">minConductivity=1e-06</em>, <em class="sig-param">maxConductivity=100.0</em>, <em class="sig-param">percentThreshold=1.0</em>, <em class="sig-param">maxIterations=100</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.FindBestHalfSpace" title="Permalink to this definition">¶</a></dt>
 <dd><p>Uses the bisection approach to find a half space conductivity that best matches the EM data by minimizing the data misfit</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>minConductivity</strong> (<em>float</em>) – Minimum conductivity to start the search</p></li>
+<li><p><strong>maxConductivity</strong> (<em>float</em>) – Maximum conductivity to start the search</p></li>
+<li><p><strong>percentThreshold</strong> (<em>float</em><em>, </em><em>optional</em>) – Stopping criteria for the relative change in data fit</p></li>
+<li><p><strong>maxIterations</strong> (<em>int</em><em>, </em><em>optional</em>) – Stop after this number of iterations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – Best fitting halfspace model</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>geobipy.Model1D</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -302,25 +318,71 @@ myName: Name of the group</p>
 <dl class="method">
 <dt id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.plot">
 <code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param">title='Frequency Domain EM Data'</em>, <em class="sig-param">system=0</em>, <em class="sig-param">with_error_bars=True</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.plot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plot the Inphase and Quadrature Data for an EM measurement
-if plotPredicted then the predicted data are plotted as a line, with points for the observed data
-else the observed data with error bars and linear interpolation are shown.
-Additional options
-incolor
-inmarker
-quadcolor
-quadmarker</p>
+<dd><p>Plot the Inphase and Quadrature Data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>title</strong> (<em>str</em>) – Title of the plot</p></li>
+<li><p><strong>system</strong> (<em>int</em>) – If multiple system are present, select which one</p></li>
+<li><p><strong>with_error_bars</strong> (<em>bool</em>) – Plot vertical lines representing 1 standard deviation</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">matplotlib.pyplot.errorbar()</span></code></dt><dd><p>For more keyword arguements</p>
+</dd>
+</dl>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>out</strong> – Figure axis</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>matplotlib.pyplot.ax</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.plotPredicted">
+<code class="sig-name descname">plotPredicted</code><span class="sig-paren">(</span><em class="sig-param">title='Frequency Domain EM Data'</em>, <em class="sig-param">system=0</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.plotPredicted" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the predicted Inphase and Quadrature Data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>title</strong> (<em>str</em>) – Title of the plot</p></li>
+<li><p><strong>system</strong> (<em>int</em>) – If multiple system are present, select which one</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-meth docutils literal notranslate"><span class="pre">matplotlib.pyplot.semilogx()</span></code></dt><dd><p>For more keyword arguements</p>
+</dd>
+</dl>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>out</strong> – Figure axis</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>matplotlib.pyplot.ax</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.sensitivity">
-<code class="sig-name descname">sensitivity</code><span class="sig-paren">(</span><em class="sig-param">mod</em>, <em class="sig-param">scale=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.sensitivity" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">sensitivity</code><span class="sig-paren">(</span><em class="sig-param">mod</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.sensitivity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the sensitivty matrix for the given model</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.updateSensitivity">
-<code class="sig-name descname">updateSensitivity</code><span class="sig-paren">(</span><em class="sig-param">mod</em>, <em class="sig-param">scale=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.updateSensitivity" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">updateSensitivity</code><span class="sig-paren">(</span><em class="sig-param">model</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.updateSensitivity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute an updated sensitivity matrix based on the one already containined in the FdemDataPoint object</p>
 </dd></dl>
 

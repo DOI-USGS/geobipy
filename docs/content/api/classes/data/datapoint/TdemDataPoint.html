@@ -304,8 +304,25 @@ myName: Name of the group</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.read">
+<code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param">dataFileName</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read in a time domain data point from a file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dataFileName</strong> (<em>str</em><em> or </em><em>list of str</em>) – File names of the data point.  Multiple can be given for multiple moments at the same location.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – Time domain data point</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>geobipy.TdemDataPoint</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
 <dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.sensitivity">
-<code class="sig-name descname">sensitivity</code><span class="sig-paren">(</span><em class="sig-param">mod</em>, <em class="sig-param">ix=None</em>, <em class="sig-param">scale=False</em>, <em class="sig-param">modelChanged=True</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.sensitivity" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">sensitivity</code><span class="sig-paren">(</span><em class="sig-param">model</em>, <em class="sig-param">ix=None</em>, <em class="sig-param">modelChanged=True</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.sensitivity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the sensitivty matrix for the given model</p>
 </dd></dl>
 
@@ -341,7 +358,7 @@ V0 is assumed to be ln(Error &#64; 1ms)</p>
 
 <dl class="method">
 <dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.updateSensitivity">
-<code class="sig-name descname">updateSensitivity</code><span class="sig-paren">(</span><em class="sig-param">mod</em>, <em class="sig-param">scale=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.updateSensitivity" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">updateSensitivity</code><span class="sig-paren">(</span><em class="sig-param">mod</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.updateSensitivity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute an updated sensitivity matrix using a new model based on an existing matrix</p>
 </dd></dl>
 

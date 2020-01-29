@@ -104,6 +104,8 @@ class Model1D(Model):
         # Keep track of actions made to the Model.
         self.action = ['none', 0, 0.0]
 
+        self.parameterBounds = None
+        self._halfSpaceParameter = None
         self.Hitmap = None
         self._inverseHessian = None
 
@@ -230,7 +232,7 @@ class Model1D(Model):
         other._dpar = self.dpar.deepcopy()
         other.chie = self.chie.deepcopy() #StatArray(other.nCells[0], "Electric Susceptibility", r"$\kappa$")
         other.chim = self.chim.deepcopy() #StatArray(other.nCells[0], "Magnetic Susceptibility", "$\frac{H}{m}$")
-        other.eventProposal = self.eventProposal.deepcopy()
+        other.eventProposal = self.eventProposal
         other.action = self.action.copy()
         other.Hitmap = self.Hitmap
         other.hasHalfspace = self.hasHalfspace
@@ -289,8 +291,8 @@ class Model1D(Model):
             self._thk[-1] = np.inf
 
         
-    def generateLocalParameterVariance(self, dataPoint, priStd):
-        """Generate a localized Hessian matrix using a dataPoint and the current realization of the Model1D.
+    def localParameterVariance(self, dataPoint):
+        """Generate a localized inverse Hessian matrix using a dataPoint and the current realization of the Model1D.
 
         Parameters
         ----------
@@ -300,7 +302,7 @@ class Model1D(Model):
         Returns
         -------
         out : array_like
-            Hessian matrix
+            Inverse Hessian matrix
 
         """
         assert self.par.hasPrior or self.dpar.hasPrior, Exception("Model must have either a parameter prior or gradient prior, use self.setPriors()")
@@ -316,7 +318,7 @@ class Model1D(Model):
         return self._inverseHessian
 
 
-    def updateLocalParameterVariance(self, dataPoint, priStd):
+    def updateLocalParameterVariance(self, dataPoint):
         """Generate a localized Hessian matrix using 
         a dataPoint and the current realization of the Model1D.
 
@@ -333,20 +335,22 @@ class Model1D(Model):
 
         """
         # Compute a new parameter variance matrix if the structure of the model changed.
+
         if (self.action[0] in ['birth', 'death']):
             # Compute the sensitivity of the data to the perturbed model
-            dataPoint.updateSensitivity(self)
-            Wd = dataPoint.weightingMatrix(power=1.0)
-            WdJ = np.dot(Wd, dataPoint.J)
-            WdJTWdJ = np.dot(WdJ.T, WdJ)
+            # dataPoint.updateSensitivity(self)
+            # Wd = dataPoint.weightingMatrix(power=1.0)
+            # WdJ = np.dot(Wd, dataPoint.J)
+            # WdJTWdJ = np.dot(WdJ.T, WdJ)
 
-            # Propose new layer conductivities
-            self._inverseHessian = np.linalg.inv(WdJTWdJ + self.par.prior.derivative(x=None, order=2))
+            # # Propose new layer conductivities
+            # self._inverseHessian = np.linalg.inv(WdJTWdJ + self.par.prior.derivative(x=None, order=2))
+            self.localParameterVariance(dataPoint)
                 
         else:  # There was no change in the model
 
             if self.inverseHessian is None:
-                self.generateLocalParameterVariance(dataPoint, priStd)
+                self.localParameterVariance(dataPoint)
         
         return self.inverseHessian
 
@@ -361,6 +365,7 @@ class Model1D(Model):
             Depth at which to insert a new interface
         par : numpy.float64, optional 
             Value of the parameter for the new layer
+            If None, The value of the split layer is duplicated.
             
         Returns
         -------
@@ -521,13 +526,20 @@ class Model1D(Model):
                         newThicknessBiggerThanMinimum = True # just to exit.
                         tryAgain = True
                 if (not tryAgain):
-                    return self.insertLayer(newDepth)
+                    out = self.insertLayer(newDepth)
+                    # Update the dimensions of any priors.
+                    out.par.prior.ndim = out.nCells[0]
+                    out.dpar.prior.ndim = np.maximum(1, out.nCells[0]-1)
+                    return out
 
             if (event == 1):
                 # Get the layer to remove
                 iDeleted = np.int64(prng.uniform(0, self.nCells - 1, 1)[0])
                 # Remove the layer and return
-                return self.deleteLayer(iDeleted)
+                out = self.deleteLayer(iDeleted)
+                out.par.prior.ndim = out.nCells[0]
+                out.dpar.prior.ndim = np.maximum(1, out.nCells[0]-1)
+                return out
 
             if (event == 2):
                 newThicknessBiggerThanMinimum = False
@@ -562,7 +574,7 @@ class Model1D(Model):
         assert False, Exception("Should not be here, file a bug report....")
 
 
-    def priorProbability(self, pPrior, gPrior, verbose=False):
+    def priorProbability(self, pPrior, gPrior, log=True, verbose=False):
         """Evaluate the prior probability for the 1D Model.
 
         The following equation describes the components of the prior that correspond to the Model1D,
@@ -651,23 +663,17 @@ class Model1D(Model):
 
         """
 
-        P_parameter = np.float64(0.0)
-        P_gradient = np.float64(0.0)
-        probability = np.float64(0.0)
-
         # Check that the parameters are within the limits if they are bound
         if not self.parameterBounds is None:
-            pInBounds = self.parameterBounds.probability(x=self.par, log=True)
+            pInBounds = self.parameterBounds.probability(x=self.par, log=log)
             if np.any(np.isinf(pInBounds)):
                 return -np.inf
 
         # Probability of the number of layers
-        P_nCells = self.nCells.probability(log=True)
-        probability += P_nCells
+        P_nCells = self.nCells.probability(log=log)
 
         # Probability of depth given nCells
-        P_depthcells = self.depth.probability(x=self.nCells-1, log=True)
-        probability += P_depthcells
+        P_depthcells = self.depth.probability(x=self.nCells-1, log=log)
 
         # Evaluate the prior based on the assigned hitmap
         if (not self.Hitmap is None):
@@ -675,15 +681,20 @@ class Model1D(Model):
 
         # Probability of parameter
         # if self.par.hasPrior:
+        P_parameter = 1.0 if log else 0.0
         if pPrior:
-            P_parameter = self.par.probability(log=True)
-            probability += P_parameter
+            P_parameter = self.par.probability(log=log)
 
         # Probability of model gradient
         # if self.dpar.hasPrior:
+        P_gradient = 1.0 if log else 0.0
         if gPrior:
-            P_gradient = self.gradientProbability()
-            probability += P_gradient
+            P_gradient = self.gradientProbability(log=log)
+
+        if log:
+            probability = np.sum(np.r_[P_nCells, P_depthcells, P_parameter, P_gradient])
+        else:
+            probability = np.prod(np.r_[P_nCells, P_depthcells, P_parameter, P_gradient])
 
         if verbose:
             return probability, np.asarray([P_nCells, P_depthcells, P_parameter, P_gradient])
@@ -735,7 +746,7 @@ class Model1D(Model):
         # the data residual using the perturbed parameter values.
 
         # Compute the gradient according to the perturbed parameters and data residual
-        gradient = np.dot(dataPoint.J.T, dataPoint.predictedData.priorDerivative(order=1, i=dataPoint.iActive)) + self.par.priorDerivative(order=1)
+        gradient = np.dot(dataPoint.J.T, dataPoint.predictedData.priorDerivative(order=1, i=dataPoint.active)) + self.par.priorDerivative(order=1)
 
         # if (not burnedIn):
         #     SN_step_from_perturbed = 0.0
@@ -803,16 +814,17 @@ class Model1D(Model):
     #     return Pforward, Preverse
 
 
-    def perturb(self, dataPoint, priStd, burnedIn):
-        """Perturb a model using the Stochastic Newton approach.
+    def perturb(self, datapoint=None):
+        """Perturb a model's structure and parameter values.
+        
+        Uses a stochastic newtown approach if a datapoint is provided.
+        Otherwise, uses the existing proposal distribution attached to 
+        self.par to generate new values.
 
         Parameters
         ----------
-        currentDatapoint : geobipy.DataPoint
-            The Datapoint before perturbation that self was generated from.
-        perturbedDatapoint : geobipy.DataPoint
-            The perturbed Datapoint with possibly new error levels.
-
+        dataPoint : geobipy.DataPoint, optional
+            The datapoint to use to perturb using a stochastic Newton approach.
 
         Returns
         -------
@@ -821,27 +833,37 @@ class Model1D(Model):
         perturbedModel : geobipy.Model1D
             The model with perturbed structure and parameter values.
         
-
         """
+
+        if datapoint is None:
+            # Perturb the structure of the model
+            remappedModel = self.perturbStructure()
+            perturbedModel = remappedModel.deepcopy()
+            # Generate new conductivities
+            perturbedModel.par.perturb()
+            return remappedModel, perturbedModel
+        else:
+            return self.stochasticNewtonPerturbation(datapoint)
+        
+
+
+    def stochasticNewtonPerturbation(self, datapoint):
+
         # Perturb the structure of the model
         remappedModel = self.perturbStructure()
         
-        # Update the dimensions of any priors.
-        remappedModel.par.prior.ndim = remappedModel.nCells[0]
-        remappedModel.dpar.prior.ndim = np.maximum(1, remappedModel.nCells[0]-1)
-
         # Update the local Hessian around the current model.
-        inverseHessian = remappedModel.updateLocalParameterVariance(dataPoint, priStd)
+        inverseHessian = remappedModel.updateLocalParameterVariance(datapoint)
 
         ### Proposing new parameter values
         # Compute the gradient of the "deterministic" objective function using the unperturbed, remapped, parameter values.
-        Wd2 = dataPoint.weightingMatrix(power=2.0)
-        Wd2J = np.dot(Wd2, dataPoint.J)
+        Wd2 = datapoint.weightingMatrix(power=2.0)
+        Wd2J = np.dot(Wd2, datapoint.J)
 
         # print((priStd**-2.0) * (remappedModel.par - np.exp(remappedModel._halfSpaceParameter)))
 
-        gradient = np.dot(dataPoint.J.T, dataPoint.predictedData.priorDerivative(order=1, i=dataPoint.iActive)) + remappedModel.par.priorDerivative(order=1)
-        # gradient = np.dot(Wd2J.T, dataPoint.deltaD[dataPoint.iActive]) + ((priStd**-2.0) * (np.log(remappedModel.par) - np.log(remappedModel._halfSpaceParameter)))
+        gradient = np.dot(datapoint.J.T, datapoint.predictedData.priorDerivative(order=1, i=datapoint.active)) + remappedModel.par.priorDerivative(order=1)
+        # gradient = np.dot(Wd2J.T, dataPoint.deltaD[dataPoint.active]) + ((priStd**-2.0) * (np.log(remappedModel.par) - np.log(remappedModel._halfSpaceParameter)))
 
         # scaling = parameterCovarianceScaling * ((2.0 * np.float64(Mod1.nCells[0])) - 1)**(-1.0 / 3.0)
 
@@ -990,7 +1012,7 @@ class Model1D(Model):
         self.par.setProposal(parameterProposal)
 
 
-    def gradientProbability(self):
+    def gradientProbability(self, log=True):
         """Evaluate the prior for the gradient of the parameter with depth
 
         **Prior on the gradient of the physical parameter with depth**
@@ -1034,11 +1056,11 @@ class Model1D(Model):
         if self.nCells[0] == 1:
             tmp = self.insertLayer(np.log(self.minDepth) + (0.5 * (self.maxDepth - self.minDepth)))
             tmp.dpar[:] = (np.diff(np.log(tmp.par))) / (np.log(tmp.thk[:-1]) - np.log(self.minThickness))
-            probability = tmp.dpar.probability(log=True)
+            probability = tmp.dpar.probability(log=log)
 
         else:
             self.dpar[:] = (np.diff(np.log(self.par))) / (np.log(self.thk[:-1]) - np.log(self.minThickness))
-            probability = self.dpar.probability(log=True)
+            probability = self.dpar.probability(log=log)
         return probability
 
 
@@ -1135,7 +1157,7 @@ class Model1D(Model):
         if self.hasHalfspace:
             h = 0.99*d[-1]
             if (self.nCells == 1):
-                h = 0.99
+                h = 0.99*self.maxDepth
             plt.text(0, h, s=r'$\downarrow \infty$', fontsize=12)
 
         return ax
@@ -1515,8 +1537,8 @@ class Model1D(Model):
         grp = parent.create_group(myName)
         grp.attrs["repr"] = self.hdfName()
 
-        self.nCells.createHdf(grp, 'nCells', nRepeats=nRepeats)
-        self.top.createHdf(grp, 'top', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.nCells.createHdf(grp, 'nCells', withPosterior=withPosterior, nRepeats=nRepeats)
+        self.top.createHdf(grp, 'top', nRepeats=nRepeats, fillvalue=fillvalue)
         self.depth.createHdf(grp, 'depth', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self.thk.createHdf(grp, 'thk', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self.par.createHdf(grp, 'par', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
@@ -1604,17 +1626,17 @@ class Model1D(Model):
         grp = h5obj.get(myName)
 
         self.nCells.writeHdf(grp, 'nCells',  withPosterior=withPosterior, index=index)
-        self.top.writeHdf(grp, 'top',  withPosterior=withPosterior, index=index)
+        self.top.writeHdf(grp, 'top', index=index)
         nCells = self.nCells[0]
 
         if (index is None):
-            i = np.s_[0:nCells]
+            i = np.s_[:nCells]
         else:
-            i = np.s_[index, 0:nCells]
+            i = np.s_[index, :nCells]
 
-        self.depth.writeHdf(grp, 'depth',  withPosterior=withPosterior, index=i)
-        self.thk.writeHdf(grp, 'thk',  withPosterior=withPosterior, index=i)
-        self.par.writeHdf(grp, 'par',  withPosterior=withPosterior, index=i)
+        self.depth.writeHdf(grp, 'depth',  withPosterior=withPosterior, index=index)
+        self.thk.writeHdf(grp, 'thk',  withPosterior=withPosterior, index=index)
+        self.par.writeHdf(grp, 'par',  withPosterior=withPosterior, index=index)
         #self.chie.writeHdf(grp, 'chie',  withPosterior=withPosterior, index=i)
         #self.chim.writeHdf(grp, 'chim',  withPosterior=withPosterior, index=i)
 
@@ -1645,38 +1667,8 @@ class Model1D(Model):
 
         """
         # Create a new group inside h5obj
-        grp = hObj.create_group(myName)
-        grp.attrs["repr"] = self.hdfName()
-        self.nCells.toHdf(grp, 'nCells')
-        self.top.toHdf(grp,'top')
-        self.depth.toHdf(grp, 'depth')
-        self.thk.toHdf(grp, 'thk')
-
-        try:
-            grp.create_dataset('pWheel', data=self.pWheel)
-        except:
-            pass
-        try:
-            grp.create_dataset('zmin', data=self.minDepth)
-        except:
-            pass
-        try:
-            grp.create_dataset('zmax', data=self.maxDepth)
-        except:
-            pass
-        try:
-            grp.create_dataset('kmax', data=self.maxLayers)
-        except:
-            pass
-        try:
-            grp.create_dataset('hmin', data=self.minThickness)
-        except:
-            pass
-
-        self.par.toHdf(grp, 'par')
-        self.chie.toHdf(grp, 'chie')
-        self.chim.toHdf(grp, 'chim')
-        grp.create_dataset('hasHalfspace', data=self.hasHalfspace)
+        self.createHdf(hObj, myName, withPosterior=True)
+        self.writeHdf(hObj, myName, withPosterior=True)
 
 
     def fromHdf(self, grp, index=None):
@@ -1725,7 +1717,7 @@ class Model1D(Model):
         tmp._nCells = obj.fromHdf(item, index=index)
 
         if grp['par/data'].ndim == 1:
-            i = np.s_[:tmp.nCells[0]]
+            i = index
         else:
             i = np.s_[index, :tmp.nCells[0]]
 

@@ -38,7 +38,7 @@
   <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Histogram 1D" href="Statistics/plot_histogram_1d.html" />
+    <link rel="next" title="Distribution Class" href="Distributions/plot_distributions.html" />
     <link rel="prev" title="Time domain system" href="../content/api/classes/system/TdemSystem.html" /> 
 </head>
 
@@ -91,6 +91,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../content/getting_started/getting_started.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../content/api/api.html">API</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#distributions">Distributions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Distributions/plot_distributions.html">Distribution Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Distributions/plot_distributions.html#univariate-normal-distribution">Univariate Normal Distribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Distributions/plot_distributions.html#multivariate-normal-distribution">Multivariate Normal Distribution</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#statistics">Statistics</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="Statistics/plot_histogram_1d.html">Histogram 1D</a></li>
 <li class="toctree-l3"><a class="reference internal" href="Statistics/plot_histogram_2d.html">Histogram 2D</a></li>
@@ -105,13 +111,15 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#models">Models</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="Models/plot_model_1d.html">1D Model with an infinite halfspace</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Models/plot_model_1d_no_hs.html">1D Model without an infinite halfspace</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#distributions">Distributions</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="Distributions/plot_distributions.html">Distribution Class</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Distributions/plot_distributions.html#univariate-normal-distribution">Univariate Normal Distribution</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Distributions/plot_distributions.html#multivariate-normal-distribution">Multivariate Normal Distribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data">Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Data/plot_time_domain_dataset.html">Time domain dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Data/plot_frequency_dataset.html">Frequency domain dataset</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#datapoints">Datapoints</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Datapoints/plot_frequency_datapoint.html">Frequency domain datapoint</a></li>
 </ul>
 </li>
 </ul>
@@ -182,68 +190,86 @@
             
   <div class="section" id="examples">
 <span id="sphx-glr-examples"></span><h1>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h1>
-<div class="sphx-glr-clear"></div><div class="section" id="statistics">
+<div class="sphx-glr-clear"></div><div class="section" id="distributions">
+<span id="sphx-glr-examples-distributions"></span><h2>Distributions<a class="headerlink" href="#distributions" title="Permalink to this headline">¶</a></h2>
+<div class="sphx-glr-thumbcontainer" tooltip="Handles the initialization of different statistical distribution"><div class="figure align-default" id="id1">
+<img alt="../_images/sphx_glr_plot_distributions_thumb.png" src="../_images/sphx_glr_plot_distributions_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="Distributions/plot_distributions.html#sphx-glr-examples-distributions-plot-distributions-py"><span class="std std-ref">Distribution Class</span></a></span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-clear"></div></div>
+<div class="section" id="statistics">
 <span id="sphx-glr-examples-statistics"></span><h2>Statistics<a class="headerlink" href="#statistics" title="Permalink to this headline">¶</a></h2>
-<div class="sphx-glr-thumbcontainer" tooltip="This histogram class allows efficient updating of histograms, plotting and saving as HDF5"><div class="figure align-default" id="id1">
+<div class="sphx-glr-thumbcontainer" tooltip="This histogram class allows efficient updating of histograms, plotting and saving as HDF5"><div class="figure align-default" id="id2">
 <img alt="../_images/sphx_glr_plot_histogram_1d_thumb.png" src="../_images/sphx_glr_plot_histogram_1d_thumb.png" />
-<p class="caption"><span class="caption-text"><a class="reference internal" href="Statistics/plot_histogram_1d.html#sphx-glr-examples-statistics-plot-histogram-1d-py"><span class="std std-ref">Histogram 1D</span></a></span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+<p class="caption"><span class="caption-text"><a class="reference internal" href="Statistics/plot_histogram_1d.html#sphx-glr-examples-statistics-plot-histogram-1d-py"><span class="std std-ref">Histogram 1D</span></a></span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
 </div>
 </div><div class="toctree-wrapper compound">
 </div>
-<div class="sphx-glr-thumbcontainer" tooltip="This 2D histogram class allows efficient updating of histograms, plotting and saving as HDF5."><div class="figure align-default" id="id2">
+<div class="sphx-glr-thumbcontainer" tooltip="This 2D histogram class allows efficient updating of histograms, plotting and saving as HDF5."><div class="figure align-default" id="id3">
 <img alt="../_images/sphx_glr_plot_histogram_2d_thumb.png" src="../_images/sphx_glr_plot_histogram_2d_thumb.png" />
-<p class="caption"><span class="caption-text"><a class="reference internal" href="Statistics/plot_histogram_2d.html#sphx-glr-examples-statistics-plot-histogram-2d-py"><span class="std std-ref">Histogram 2D</span></a></span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+<p class="caption"><span class="caption-text"><a class="reference internal" href="Statistics/plot_histogram_2d.html#sphx-glr-examples-statistics-plot-histogram-2d-py"><span class="std std-ref">Histogram 2D</span></a></span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
 </div>
 </div><div class="toctree-wrapper compound">
 </div>
-<div class="sphx-glr-thumbcontainer" tooltip="Extends the numpy ndarray class to add extra attributes such as names, and units, and allows us..."><div class="figure align-default" id="id3">
+<div class="sphx-glr-thumbcontainer" tooltip="Extends the numpy ndarray class to add extra attributes such as names, and units, and allows us..."><div class="figure align-default" id="id4">
 <img alt="../_images/sphx_glr_plot_StatArray_thumb.png" src="../_images/sphx_glr_plot_StatArray_thumb.png" />
-<p class="caption"><span class="caption-text"><a class="reference internal" href="Statistics/plot_StatArray.html#sphx-glr-examples-statistics-plot-statarray-py"><span class="std std-ref">StatArray Class</span></a></span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+<p class="caption"><span class="caption-text"><a class="reference internal" href="Statistics/plot_StatArray.html#sphx-glr-examples-statistics-plot-statarray-py"><span class="std std-ref">StatArray Class</span></a></span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
 </div>
 </div><div class="toctree-wrapper compound">
 </div>
 <div class="sphx-glr-clear"></div></div>
 <div class="section" id="meshes">
 <span id="sphx-glr-examples-meshes"></span><h2>Meshes<a class="headerlink" href="#meshes" title="Permalink to this headline">¶</a></h2>
-<div class="sphx-glr-thumbcontainer" tooltip="1D Rectilinear Mesh"><div class="figure align-default" id="id4">
+<div class="sphx-glr-thumbcontainer" tooltip="1D Rectilinear Mesh"><div class="figure align-default" id="id5">
 <img alt="../_images/sphx_glr_plot_rectilinear_mesh_1d_thumb.png" src="../_images/sphx_glr_plot_rectilinear_mesh_1d_thumb.png" />
-<p class="caption"><span class="caption-text"><a class="reference internal" href="Meshes/plot_rectilinear_mesh_1d.html#sphx-glr-examples-meshes-plot-rectilinear-mesh-1d-py"><span class="std std-ref">1D Rectilinear Mesh</span></a></span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+<p class="caption"><span class="caption-text"><a class="reference internal" href="Meshes/plot_rectilinear_mesh_1d.html#sphx-glr-examples-meshes-plot-rectilinear-mesh-1d-py"><span class="std std-ref">1D Rectilinear Mesh</span></a></span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>
 </div>
 </div><div class="toctree-wrapper compound">
 </div>
-<div class="sphx-glr-thumbcontainer" tooltip="It can be instantiated in two ways.  "><div class="figure align-default" id="id5">
+<div class="sphx-glr-thumbcontainer" tooltip="It can be instantiated in two ways.  "><div class="figure align-default" id="id6">
 <img alt="../_images/sphx_glr_plot_rectilinear_mesh_2d_thumb.png" src="../_images/sphx_glr_plot_rectilinear_mesh_2d_thumb.png" />
-<p class="caption"><span class="caption-text"><a class="reference internal" href="Meshes/plot_rectilinear_mesh_2d.html#sphx-glr-examples-meshes-plot-rectilinear-mesh-2d-py"><span class="std std-ref">2D Rectilinear Mesh</span></a></span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>
+<p class="caption"><span class="caption-text"><a class="reference internal" href="Meshes/plot_rectilinear_mesh_2d.html#sphx-glr-examples-meshes-plot-rectilinear-mesh-2d-py"><span class="std std-ref">2D Rectilinear Mesh</span></a></span><a class="headerlink" href="#id6" title="Permalink to this image">¶</a></p>
 </div>
 </div><div class="toctree-wrapper compound">
 </div>
-<div class="sphx-glr-thumbcontainer" tooltip="Topo Rectilinear Mesh 2D"><div class="figure align-default" id="id6">
+<div class="sphx-glr-thumbcontainer" tooltip="Topo Rectilinear Mesh 2D"><div class="figure align-default" id="id7">
 <img alt="../_images/sphx_glr_plot_topo_rectilinear_mesh_2d_thumb.png" src="../_images/sphx_glr_plot_topo_rectilinear_mesh_2d_thumb.png" />
-<p class="caption"><span class="caption-text"><a class="reference internal" href="Meshes/plot_topo_rectilinear_mesh_2d.html#sphx-glr-examples-meshes-plot-topo-rectilinear-mesh-2d-py"><span class="std std-ref">Topo Rectilinear Mesh 2D</span></a></span><a class="headerlink" href="#id6" title="Permalink to this image">¶</a></p>
+<p class="caption"><span class="caption-text"><a class="reference internal" href="Meshes/plot_topo_rectilinear_mesh_2d.html#sphx-glr-examples-meshes-plot-topo-rectilinear-mesh-2d-py"><span class="std std-ref">Topo Rectilinear Mesh 2D</span></a></span><a class="headerlink" href="#id7" title="Permalink to this image">¶</a></p>
 </div>
 </div><div class="toctree-wrapper compound">
 </div>
 <div class="sphx-glr-clear"></div></div>
 <div class="section" id="models">
 <span id="sphx-glr-examples-models"></span><h2>Models<a class="headerlink" href="#models" title="Permalink to this headline">¶</a></h2>
-<div class="sphx-glr-thumbcontainer" tooltip="1D Model with an infinite halfspace"><div class="figure align-default" id="id7">
+<div class="sphx-glr-thumbcontainer" tooltip="1D Model with an infinite halfspace"><div class="figure align-default" id="id8">
 <img alt="../_images/sphx_glr_plot_model_1d_thumb.png" src="../_images/sphx_glr_plot_model_1d_thumb.png" />
-<p class="caption"><span class="caption-text"><a class="reference internal" href="Models/plot_model_1d.html#sphx-glr-examples-models-plot-model-1d-py"><span class="std std-ref">1D Model with an infinite halfspace</span></a></span><a class="headerlink" href="#id7" title="Permalink to this image">¶</a></p>
-</div>
-</div><div class="toctree-wrapper compound">
-</div>
-<div class="sphx-glr-thumbcontainer" tooltip="1D Model without an infinite halfspace"><div class="figure align-default" id="id8">
-<img alt="../_images/sphx_glr_plot_model_1d_no_hs_thumb.png" src="../_images/sphx_glr_plot_model_1d_no_hs_thumb.png" />
-<p class="caption"><span class="caption-text"><a class="reference internal" href="Models/plot_model_1d_no_hs.html#sphx-glr-examples-models-plot-model-1d-no-hs-py"><span class="std std-ref">1D Model without an infinite halfspace</span></a></span><a class="headerlink" href="#id8" title="Permalink to this image">¶</a></p>
+<p class="caption"><span class="caption-text"><a class="reference internal" href="Models/plot_model_1d.html#sphx-glr-examples-models-plot-model-1d-py"><span class="std std-ref">1D Model with an infinite halfspace</span></a></span><a class="headerlink" href="#id8" title="Permalink to this image">¶</a></p>
 </div>
 </div><div class="toctree-wrapper compound">
 </div>
 <div class="sphx-glr-clear"></div></div>
-<div class="section" id="distributions">
-<span id="sphx-glr-examples-distributions"></span><h2>Distributions<a class="headerlink" href="#distributions" title="Permalink to this headline">¶</a></h2>
-<div class="sphx-glr-thumbcontainer" tooltip="Handles the initialization of different statistical distribution"><div class="figure align-default" id="id9">
-<img alt="../_images/sphx_glr_plot_distributions_thumb.png" src="../_images/sphx_glr_plot_distributions_thumb.png" />
-<p class="caption"><span class="caption-text"><a class="reference internal" href="Distributions/plot_distributions.html#sphx-glr-examples-distributions-plot-distributions-py"><span class="std std-ref">Distribution Class</span></a></span><a class="headerlink" href="#id9" title="Permalink to this image">¶</a></p>
+<div class="section" id="data">
+<span id="sphx-glr-examples-data"></span><h2>Data<a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h2>
+<div class="sphx-glr-thumbcontainer" tooltip="Time domain dataset"><div class="figure align-default" id="id9">
+<img alt="../_images/sphx_glr_plot_time_domain_dataset_thumb.png" src="../_images/sphx_glr_plot_time_domain_dataset_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="Data/plot_time_domain_dataset.html#sphx-glr-examples-data-plot-time-domain-dataset-py"><span class="std std-ref">Time domain dataset</span></a></span><a class="headerlink" href="#id9" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="Frequency domain dataset"><div class="figure align-default" id="id10">
+<img alt="../_images/sphx_glr_plot_frequency_dataset_thumb.png" src="../_images/sphx_glr_plot_frequency_dataset_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="Data/plot_frequency_dataset.html#sphx-glr-examples-data-plot-frequency-dataset-py"><span class="std std-ref">Frequency domain dataset</span></a></span><a class="headerlink" href="#id10" title="Permalink to this image">¶</a></p>
+</div>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-clear"></div></div>
+<div class="section" id="datapoints">
+<span id="sphx-glr-examples-datapoints"></span><h2>Datapoints<a class="headerlink" href="#datapoints" title="Permalink to this headline">¶</a></h2>
+<div class="sphx-glr-thumbcontainer" tooltip="Frequency domain datapoint"><div class="figure align-default" id="id11">
+<img alt="../_images/sphx_glr_plot_frequency_datapoint_thumb.png" src="../_images/sphx_glr_plot_frequency_datapoint_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="Datapoints/plot_frequency_datapoint.html#sphx-glr-examples-datapoints-plot-frequency-datapoint-py"><span class="std std-ref">Frequency domain datapoint</span></a></span><a class="headerlink" href="#id11" title="Permalink to this image">¶</a></p>
 </div>
 </div><div class="toctree-wrapper compound">
 </div>
@@ -267,7 +293,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="Statistics/plot_histogram_1d.html" class="btn btn-neutral float-right" title="Histogram 1D" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="Distributions/plot_distributions.html" class="btn btn-neutral float-right" title="Distribution Class" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="../content/api/classes/system/TdemSystem.html" class="btn btn-neutral float-left" title="Time domain system" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

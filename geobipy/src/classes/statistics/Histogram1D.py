@@ -510,16 +510,16 @@ class Histogram1D(RectilinearMesh1D):
         grp = parent.create_group(myName)
         grp.attrs["repr"] = self.hdfName()
 
-        self._counts.createHdf(grp, 'counts', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self._counts.createHdf(grp, 'counts', nRepeats=nRepeats, fillvalue=fillvalue)
 
         if not self.log is None:
             grp.create_dataset('log', data = self.log)
 
         if self.isRelative:
             self.bins.toHdf(grp, 'bins')
-            self.relativeTo.createHdf(grp, 'relativeTo', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+            self.relativeTo.createHdf(grp, 'relativeTo', nRepeats=nRepeats, fillvalue=fillvalue)
         else:
-            self.bins.createHdf(grp, 'bins', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+            self.bins.createHdf(grp, 'bins', nRepeats=nRepeats, fillvalue=fillvalue)
 
 
     def writeHdf(self, parent, myName, withPosterior=True, index=None):
@@ -528,12 +528,12 @@ class Histogram1D(RectilinearMesh1D):
         myName: object hdf name. Assumes createHdf has already been called
         create: optionally create the data set as well before writing
         """
-        self._counts.writeHdf(parent, myName+'/counts', withPosterior=withPosterior, index=index)
+        self._counts.writeHdf(parent, myName+'/counts', index=index)
 
         if self.isRelative:
-            self.relativeTo.writeHdf(parent, myName+'/relativeTo', withPosterior=withPosterior, index=index)
+            self.relativeTo.writeHdf(parent, myName+'/relativeTo', index=index)
         else:
-            self.bins.writeHdf(parent, myName+'/bins', withPosterior=withPosterior, index=index)
+            self.bins.writeHdf(parent, myName+'/bins', index=index)
 
 
     def toHdf(self, h5obj, myName):
