@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import h5py
 #import numpy.ma as ma
+from cached_property import cached_property
 from ..classes.core.myObject import myObject
 from ..classes.core import StatArray
 from ..base.fileIO import fileExists
@@ -47,8 +48,8 @@ class DataSetResults(myObject):
             self._h5files = self._get_h5Files_from_directory(directory)
         else:
             self._h5files = self._get_h5Files_from_list(directory, files)
-            
-        self._lines=[]
+
+        self._lines = []
         self._lineNumbers = np.empty(self.nLines)
         for i in range(self.nLines):
             fName = self.h5files[i]
@@ -56,19 +57,12 @@ class DataSetResults(myObject):
             self._lines.append(LR)
             self._lineNumbers[i] = LR.line
 
-        self._lineIndices = None
-        self._pointcloud = None
-        self._additiveError = None
-        self._relativeError = None
         self.kdtree = None
-        self._meanParameters = None
-        self._bestParameters = None
         self.doi = None
         self.doi2D = None
         self.mean3D = None
         self.best3D = None
         self._facies = None
-        self._interfaces = None
 
 
     def open(self):
@@ -119,47 +113,65 @@ class DataSetResults(myObject):
             fName = join(directory, file)
             fileExists(fName)
             h5files.append(fName)
-            
+
         h5files = sorted(h5files)
-        
+
         assert len(h5files) > 0, 'Could not find .h5 files in directory {}'.format(directory)
 
         return h5files
 
 
-    @property
+    @cached_property
     def additiveError(self):
 
-        if self._additiveError is None:
-            self._additiveError = StatArray.StatArray([self.nSystems, self.nPoints], name=self.lines[0].additiveError.name, units=self.lines[0].additiveError.units, order = 'F')
+        additiveError = StatArray.StatArray([self.nSystems, self.nPoints], name=self.lines[0].additiveError.name, units=self.lines[0].additiveError.units, order = 'F')
 
-            Bar = progressbar.ProgressBar()
-            for i in Bar(range(self.nLines), "Reading Additive Errors Posteriors \n"):
-                self._additiveError[:, self.lineIndices[i]] = self.lines[i].additiveError.T
-                self.lines[i]._additiveError = None # Free memory
+        print("Reading Additive Errors Posteriors", flush=True)
+        Bar = progressbar.ProgressBar()
+        for i in Bar(range(self.nLines)):
+            additiveError[:, self.lineIndices[i]] = self.lines[i].additiveError.T
+            del self.lines[i].__dict__['additiveError'] # Free memory
+        return additiveError
 
-        return self._additiveError
 
+    @cached_property
+    def bestData(self):
 
-    @property
+        bestData = self.lines[0].bestData
+        del self.lines[0].__dict__['bestData']
+
+        print("Reading Most Probable Data", flush=True)
+        Bar = progressbar.ProgressBar()
+
+        for i in Bar(range(1, self.nLines)):
+            bestData = bestData + self.lines[i].bestData
+            del self.lines[i].__dict__['bestData']
+
+        return bestData
+
+    @cached_property
     def bestParameters(self):
 
-        if (self._bestParameters is None):
 
-            self._bestParameters = StatArray.StatArray([self.zGrid.nCells, self.nPoints], name=self.lines[0].bestParameters.name, units=self.lines[0].bestParameters.units, order = 'F')
+        bestParameters = StatArray.StatArray([self.zGrid.nCells, self.nPoints], name=self.lines[0].bestParameters.name, units=self.lines[0].bestParameters.units, order = 'F')
 
-            print('Reading best parameters')
-            Bar=progressbar.ProgressBar()
-            for i in Bar(range(self.nLines), "Reading Most Probable Parameters"):
-                self._bestParameters[:, self.lineIndices[i]] = self.lines[i].bestParameters.T
-                self.lines[i]._bestParameters = None # Free memory
+        print('Reading best parameters', flush=True)
+        Bar=progressbar.ProgressBar()
+        for i in Bar(range(self.nLines)):
+            bestParameters[:, self.lineIndices[i]] = self.lines[i].bestParameters.T
+            del self.lines[i].__dict__['bestParameters'] # Free memory
 
-        return self._bestParameters
+        return bestParameters
 
 
     def computeMarginalProbability(self, fractions, distributions, **kwargs):
         for line in self.lines:
             line.computeMarginalProbability(fractions, distributions, **kwargs)
+
+
+    @cached_property
+    def dataMisfit(self):
+        return self.bestData.dataMisfit()
 
 
     @property
@@ -173,13 +185,13 @@ class DataSetResults(myObject):
     def elevation(self):
         return self.pointcloud.elevation
 
-    
+
     @property
     def facies(self):
         assert not self._facies is None, Exception("Facies must be set using self.setFaciesProbabilities()")
         return self._facies
 
-    
+
     @property
     def height(self):
         return self.pointcloud.z
@@ -202,62 +214,68 @@ class DataSetResults(myObject):
 
         out = self.lines[0].identifyPeaks(depths, nBins, width, limits)
         for line in self.lines[1:]:
-            out = np.vstack([out, line.identifyPeaks(depths, nBins, width, limits)])        
+            out = np.vstack([out, line.identifyPeaks(depths, nBins, width, limits)])
 
         return out
 
-    
-    @property
+
+    @cached_property
     def interfaces(self):
-        if (self._interfaces is None):
+        interfaces = StatArray.StatArray([self.zGrid.nCells, self.nPoints], name=self.lines[0].interfaces.name, units=self.lines[0].interfaces.units)
 
-            self._interfaces = StatArray.StatArray([self.zGrid.nCells, self.nPoints], name=self.lines[0].interfaces.name, units=self.lines[0].interfaces.units)
+        print("Reading Depth Posteriors", flush=True)
+        Bar=progressbar.ProgressBar()
+        for i in Bar(range(self.nLines)):
+            interfaces[:, self.lineIndices[i]] = self.lines[i].interfaces.T
+            del self.lines[i].__dict__['interfaces'] # Free memory
 
-            Bar=progressbar.ProgressBar()
-            for i in Bar(range(self.nLines), "Reading Depth Posteriors"):
-                self._interfaces[:, self.lineIndices[i]] = self.lines[i].interfaces.T
-                self.lines[i]._interfaces = None # Free memory
-
-        return self._interfaces
+        return interfaces
 
 
-    @property
+    @cached_property
     def lineIndices(self):
-        
-        if self._lineIndices is None:
-            self._lineIndices = []
-            i0 = 0
-            for i in range(self.nLines):
-                i1 = i0 + self.lines[i].nPoints
-                self._lineIndices.append(np.s_[i0:i1])
-                i0 = i1
-        return self._lineIndices
+
+        lineIndices = []
+        i0 = 0
+        for i in range(self.nLines):
+            i1 = i0 + self.lines[i].nPoints
+            lineIndices.append(np.s_[i0:i1])
+            i0 = i1
+
+        return lineIndices
 
 
-    @property
+    @cached_property
     def meanParameters(self):
 
-        if (self._meanParameters is None):
+        meanParameters = StatArray.StatArray([self.zGrid.nCells, self.nPoints], name=self.lines[0].meanParameters.name, units=self.lines[0].meanParameters.units, order = 'F')
 
-            self._meanParameters = StatArray.StatArray([self.zGrid.nCells, self.nPoints], name=self.lines[0].meanParameters.name, units=self.lines[0].meanParameters.units, order = 'F')
+        print("Reading Mean Parameters", flush=True)
+        Bar = progressbar.ProgressBar()
+        for i in Bar(range(self.nLines)):
+            meanParameters[:, self.lineIndices[i]] = self.lines[i].meanParameters
+            del self.lines[i].__dict__['meanParameters'] # Free memory
 
-            print("Reading Mean Parameters", flush=True)
-            Bar=progressbar.ProgressBar()
-            for i in Bar(range(self.nLines)):
-                self._meanParameters[:, self.lineIndices[i]] = self.lines[i].meanParameters
-                self.lines[i]._meanParameters = None # Free memory
+        return meanParameters
 
-        return self._meanParameters
 
-        
-    @property
+    @cached_property
+    def nActive(self):
+        nActive = np.empty(self.nPoint, dtype=np.int)
+        Bar = progressbar.ProgressBar()
+        for i in Bar(range(self.nLines)):
+            nActive[self.lineIndices[i]] = self.lines[i].bestData.nActiveChannels
+            del self.lines[i].__dict__['bestData'] # Free memory
+
+        return nActive
+
+
+    @cached_property
     def nPoints(self):
         """ Get the total number of data points """
-        if (self._nPoints is None):
-            tmp = np.asarray([this.nPoints for this in self.lines])
-            self._cumNpoints = np.cumsum(tmp)
-            self._nPoints = np.sum(tmp)
-        return self._nPoints
+        tmp = np.asarray([this.nPoints for this in self.lines])
+        self._cumNpoints = np.cumsum(tmp)
+        return np.sum(tmp)
 
 
     @property
@@ -265,7 +283,7 @@ class DataSetResults(myObject):
         """ Get the number of systems """
         return self.lines[0].nSystems
 
-    
+
     def parameterHistogram(self, nBins, depth = None, depth2 = None, log=None):
         """ Compute a histogram of all the parameter values, optionally show the histogram for given depth ranges instead """
 
@@ -276,73 +294,70 @@ class DataSetResults(myObject):
             out._counts += tmp.counts
 
         return out
-        
 
-    @property
+
+    @cached_property
     def pointcloud(self):
 
-        if self._pointcloud is None:
-            x = StatArray.StatArray(self.nPoints, name=self.lines[0].x.name, units=self.lines[0].x.units)
-            y = StatArray.StatArray(self.nPoints, name=self.lines[0].y.name, units=self.lines[0].y.units)
-            z = StatArray.StatArray(self.nPoints, name=self.lines[0].height.name, units=self.lines[0].height.units)
-            e = StatArray.StatArray(self.nPoints, name=self.lines[0].elevation.name, units=self.lines[0].elevation.units)
-            # Loop over the lines in the data set and get the attributes
-            print('Reading co-ordinates')
-            Bar = progressbar.ProgressBar()
-            for i in Bar(range(self.nLines)):
-                indices = self.lineIndices[i]
-                x[indices] = self.lines[i].x
-                y[indices] = self.lines[i].y
-                z[indices] = self.lines[i].height
-                e[indices] = self.lines[i].elevation
+        x = StatArray.StatArray(self.nPoints, name=self.lines[0].x.name, units=self.lines[0].x.units)
+        y = StatArray.StatArray(self.nPoints, name=self.lines[0].y.name, units=self.lines[0].y.units)
+        z = StatArray.StatArray(self.nPoints, name=self.lines[0].height.name, units=self.lines[0].height.units)
+        e = StatArray.StatArray(self.nPoints, name=self.lines[0].elevation.name, units=self.lines[0].elevation.units)
+        # Loop over the lines in the data set and get the attributes
+        print('Reading co-ordinates', flush=True)
+        Bar = progressbar.ProgressBar()
+        for i in Bar(range(self.nLines)):
+            indices = self.lineIndices[i]
+            x[indices] = self.lines[i].x
+            y[indices] = self.lines[i].y
+            z[indices] = self.lines[i].height
+            e[indices] = self.lines[i].elevation
 
-                self.lines[i]._x = None
-                self.lines[i]._y = None
-                self.lines[i]._height = None
-                self.lines[i]._elevation = None
+            del self.lines[i].__dict__['x'] # Free memory
+            del self.lines[i].__dict__['y'] # Free memory
+            del self.lines[i].__dict__['height'] # Free memory
+            del self.lines[i].__dict__['elevation'] # Free memory
 
-            self._pointcloud = PointCloud3D(self.nPoints, x, y, z, e)
-        return self._pointcloud
+        return PointCloud3D(self.nPoints, x, y, z, e)
 
 
-    @property
+    @cached_property
     def relativeError(self):
 
-        if self._relativeError is None:
-            self._relativeError = StatArray.StatArray([self.nSystems, self.nPoints], name=self.lines[0].relativeError.name, units=self.lines[0].relativeError.units, order = 'F')
+        relativeError = StatArray.StatArray([self.nSystems, self.nPoints], name=self.lines[0].relativeError.name, units=self.lines[0].relativeError.units, order = 'F')
 
-            print('Reading Relative Error Posteriors', flush=True)
-            Bar=progressbar.ProgressBar()
-            for i in Bar(range(self.nLines)):
-                self._relativeError[:, self.lineIndices[i]] = self.lines[i].relativeError.T
-                self.lines[i]._relativeError = None # Free memory
+        print('Reading Relative Error Posteriors', flush=True)
+        Bar = progressbar.ProgressBar()
+        for i in Bar(range(self.nLines)):
+            relativeError[:, self.lineIndices[i]] = self.lines[i].relativeError.T
+            del self.lines[i].__dict__['relativeError'] # Free memory
 
-        return self._relativeError
+        return relativeError
 
 
     @property
     def x(self):
         return self.pointcloud.x
-            
+
 
     @property
     def y(self):
         return self.pointcloud.y
 
-    
+
     def dataPointResults(self, fiducial=None, index=None):
-        """Get the inversion results for the given fiducial. 
-        
+        """Get the inversion results for the given fiducial.
+
         Parameters
         ----------
         fiducial : float
             Unique fiducial of the data point.
-            
+
         Returns
         -------
         out : geobipy.Results
             The inversion results for the data point.
-            
+
         """
         tmp = np.sum([x is None for x in [fiducial, index]])
         assert tmp == 1, Exception("Please specify one argument, fiducial, or index")
@@ -352,10 +367,10 @@ class DataSetResults(myObject):
 
         index = self.fiducialIndex(fiducial)
         lineIndex = index[0][0]
-        fidIndex = index[1][0]            
+        fidIndex = index[1][0]
 
         return self.lines[lineIndex].getResults(fidIndex)
-       
+
 
     def lineIndex(self, lineNumber=None, fiducial=None, index=None):
         """ Get the line index for the given data point index """
@@ -380,10 +395,10 @@ class DataSetResults(myObject):
             index -= self.cumNpoints[iLine-1]
         return self.lines[iLine].fiducials[index]
 
-    
+
     def fiducialIndex(self, fiducial):
         """Get the line number and index for the specified fiducial.
-        
+
         Parameters
         ----------
         fiducial : float
@@ -397,7 +412,7 @@ class DataSetResults(myObject):
             Index of each fiducial in their respective line
 
         """
-        
+
         lineIndex = []
         index = []
 
@@ -513,7 +528,7 @@ class DataSetResults(myObject):
     #         # Get the number of cells
     #         nz = self.zGrid.nCells
 
-        
+
     #     if (doi):
     #         self.opacity=np.zeros([nz,self.nPoints], order = 'F')
     #         self.doi = StatArray.StatArray(np.zeros(self.nPoints),'Depth of Investigation','m')
@@ -523,7 +538,7 @@ class DataSetResults(myObject):
     #             self.relErr = StatArray.StatArray([self.nPoints, self.nSys],name=self.lines[0].relErr.name,units=self.lines[0].relErr.units, order = 'F')
     #         else:
     #             self.relErr = StatArray.StatArray(self.nPoints,name=self.lines[0].relErr.name,units=self.lines[0].relErr.units, order = 'F')
-            
+
     #     # Loop over the lines in the data set and get the attributes
     #     print('Reading attributes from dataset results')
     #     Bar=progressbar.ProgressBar()
@@ -549,12 +564,12 @@ class DataSetResults(myObject):
 
     #     if (xy):
     #         self.points.getBounds() # Get the bounding box
-            
+
 
     def getMean3D(self, dx, dy, mask = False, clip = False, force=False, method='ct'):
         """ Interpolate each depth slice to create a 3D volume """
         if (not self.mean3D is None and not force): return
-           
+
         # Test for an existing file, created with the same parameters.
         # Read it and return if it exists.
         file = 'mean3D.h5'
@@ -563,8 +578,8 @@ class DataSetResults(myObject):
             if (dx == variables['dx'] and dy == variables['dy'] and mask == variables['mask'] and clip == variables['clip'] and method == variables['method']):
                 self.mean3D = variables['mean3d']
                 return
-            
-           
+
+
         method = method.lower()
         if method == 'ct':
             self.__getMean3D_CloughTocher(dx=dx, dy=dy, mask=mask, clip=clip, force=force)
@@ -572,7 +587,7 @@ class DataSetResults(myObject):
             self.__getMean3D_minimumCurvature(dx=dx, dy=dy, mask=mask, clip=clip)
         else:
             assert False, ValueError("method must be either 'ct' or 'mc' ")
-            
+
         with h5py.File('mean3D.h5','w') as f:
             f.create_dataset(name = 'dx', data = dx)
             f.create_dataset(name = 'dy', data = dy)
@@ -580,11 +595,11 @@ class DataSetResults(myObject):
             f.create_dataset(name = 'clip', data = clip)
             f.create_dataset(name = 'method', data = method)
             self.mean3D.toHdf(f,'mean3d')
-            
-        
+
+
     def __getMean3D_minimumCurvature(self, dx, dy, mask=None, clip=False):
-               
-        
+
+
         x = self.pointcloud.x.deepcopy()
         y = self.pointcloud.y.deepcopy()
 
@@ -594,7 +609,7 @@ class DataSetResults(myObject):
         # Initialize 3D volume
         mean3D = StatArray.StatArray(np.zeros([self.zGrid.nCells, y1.size+1, x1.size+1], order = 'F'),name = 'Conductivity', units = '$Sm^{-1}$')
         mean3D[0, :, :] = vals
-        
+
         # Interpolate for each depth
         print('Interpolating using minimum curvature')
         Bar=progressbar.ProgressBar()
@@ -604,24 +619,24 @@ class DataSetResults(myObject):
             dum1, dum2, vals = interpolation.minimumCurvature(x, y, values, self.pointcloud.bounds, dx=dx, dy=dy, mask=mask, clip=clip, iterations=2000, tension=0.25, accuracy=0.01)
             # Add values to the 3D array
             mean3D[i, :, :] = vals
-                  
-        self.mean3D = mean3D 
 
-    
+        self.mean3D = mean3D
+
+
     def __getMean3D_CloughTocher(self, dx, dy, mask=None, clip=False, force=False):
-        
+
         # Get the discretization
         if (dx is None):
             tmp = self.pointcloud.bounds[1]-self.pointcloud.bounds[0]
             dx = 0.01 * tmp
         assert dx > 0.0, "dx must be positive!"
-        
+
         # Get the discretization
         if (dy is None):
             tmp = self.pointcloud.bounds[3]-self.pointcloud.bounds[2]
             dy = 0.01 * tmp
         assert dy > 0.0, "dy must be positive!"
-        
+
         tmp = np.column_stack((self.pointcloud.x, self.points.y))
 
         # Get the points to interpolate to
@@ -675,10 +690,10 @@ class DataSetResults(myObject):
 
         return self.pointcloud.interpolate(dx=dx, dy=dy, values=values, method=method, mask=mask, clip=clip, **kwargs)
 
-    
+
     def map(self, dx, dy, values, method='ct', mask = None, clip = True, **kwargs):
         """ Create a map of a parameter """
-        
+
         assert values.size == self.nPoints, ValueError("values must have size {}".format(self.nPoints))
 
         # x, y, z = self.interpolate(50.0, 50.0, values=self.depthSlice(10.0, variable='mean'))
@@ -701,7 +716,7 @@ class DataSetResults(myObject):
             self.pointcloud.mapPlot(dx = dx, dy = dy, c = self.marginalProbability[i, :, cell1], **kwargs)
 
 
-    def percentageParameter(self, value, depth, depth2=None):  
+    def percentageParameter(self, value, depth, depth2=None):
 
         percentage = StatArray.StatArray(np.empty(self.nPoints), name="Probability of {} > {:0.2f}".format(self.meanParameters.name, value), units = self.meanParameters.units)
 
@@ -709,22 +724,22 @@ class DataSetResults(myObject):
         Bar=progressbar.ProgressBar()
         for i in Bar(range(self.nLines)):
             percentage[self.lineIndices[i]] = self.lines[i].percentageParameter(value, depth, depth2)
-        
+
         return percentage
-            
+
 
     def depthSlice(self, depth, variable, reciprocateParameter=False, **kwargs):
 
         out = np.empty(self.nPoints)
         for i, line in enumerate(self.lines):
-            p = line._get(variable, reciprocateParameter=reciprocateParameter, **kwargs)    
+            p = line._get(variable, reciprocateParameter=reciprocateParameter, **kwargs)
             tmp = line.depthSlice(depth, p, **kwargs)
 
             out[self.lineIndices[i]] = tmp
 
         return StatArray.StatArray(out, p.name, p.units)
 
-    
+
     def getElevationSlice(self, depth, depth2=None, reciprocateParameter=False, bestModel=False, force=False):
 
         # Get the depth grid
@@ -749,7 +764,7 @@ class DataSetResults(myObject):
             vals1D = np.mean(model[cell1:cell2+1,:], axis = 0)
 
         if (reciprocateParameter):
-            vals1D = StatArray.StatArray(1.0/vals1D, name = 'Resistivity', units = '$\Omega m$')
+            vals1D = StatArray.StatArray(1.0 / vals1D, name = 'Resistivity', units = '$\Omega m$')
         else:
             vals1D = StatArray.StatArray(vals1D, name = 'Conductivity', units = '$Sm^{-1}$')
         return vals1D
@@ -774,19 +789,10 @@ class DataSetResults(myObject):
         return self.map(dx, dy, vals1D, method=method, mask = mask, clip = clip, **kwargs)
 
 
-
     def mapElevation(self,dx, dy, mask = None, clip = True, extrapolate=None, **kwargs):
         """ Create a map of a parameter """
         return self.map(dx = dx, dy = dy, mask = mask, clip = clip, extrapolate=extrapolate, values = self.elevation, **kwargs)
-        
 
-
-    # def mapDoi(self, dx, dy, mask = None, clip = True, extrapolate=None, force=False, **kwargs):
-    #     """ Create a map of a parameter """
-    #     self.getAttribute(xy=True, doi=True, force=force)
-    #     self.points.mapPlot(dx = dx, dy = dy, mask = mask, clip = clip, extrapolate=extrapolate, c = self.doi, **kwargs)
-    #     cP.xlabel('Easting (m)')
-    #     cP.ylabel('Northing (m)')
 
     def mapRelativeError(self,dx, dy, system=0, mask = None, clip = True, extrapolate=None, **kwargs):
         """ Create a map of a parameter """
@@ -808,11 +814,21 @@ class DataSetResults(myObject):
             kwargs['s'] = 10.0
 
         return self.pointcloud.scatter2D(**kwargs)
-    
+
 
     def plotAdditiveError(self, system=0, **kwargs):
         """ Plot the observation locations """
         return self.scatter2D(c=self.additiveError[system, :], **kwargs)
+
+
+    def plotDataMisfit(self, normalized=True, **kwargs):
+        """ Plot the observation locations """
+        x = self.dataMisfit
+        if normalized:
+            x = x / self.bestData.nActiveChannels
+            x._name = "Normalized data misfit"
+
+        return self.scatter2D(c=x, **kwargs)
 
 
     def plotInterfaceProbability(self, depth, lowerThreshold=0.0, **kwargs):
@@ -922,7 +938,7 @@ class DataSetResults(myObject):
         mx = x.size
         my = y.size
         mz = z.nCells
-        
+
         nPoints = mx * my * mz
         nCells = (mx-1)*(my-1)*(mz-1)
 
@@ -931,7 +947,7 @@ class DataSetResults(myObject):
             tx,ty, vals, k = self.pointcloud.interpCloughTocher(dx = dx,dy=dy, values=self.elevation, mask = mask, clip = clip, extrapolate='nearest')
         elif (method == 'mc'):
             tx,ty, vals, k = self.pointcloud.interpMinimumCurvature(dx = dx, dy=dy, values=self.elevation, mask = mask, clip = clip)
-            
+
         vals = vals[:my,:mx]
         vals = vals.reshape(mx*my)
 
@@ -971,7 +987,7 @@ class DataSetResults(myObject):
         pointCon = Scalars(tmp1, name = 'log10(Conductivity) (S/m)')
 
         print(nPoints, tmp.size)
-        
+
         PData = PointData(pointID, pointElev, pointRes)#, pointCon)
         CData = CellData(Scalars(np.arange(nCells),name='Cell iD'))
         vtk = VtkData(
