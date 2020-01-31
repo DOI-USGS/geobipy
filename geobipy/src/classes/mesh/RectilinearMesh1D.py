@@ -24,11 +24,11 @@ class RectilinearMesh1D(myObject):
     cellEdges : geobipy.StatArray, optional
         The locations of the edges of each cell, including the outermost edges. Only cellCentres or cellEdges can be given.
     edgesMin : float, optional
-        Only used if instantiated with cellCentres. 
+        Only used if instantiated with cellCentres.
         Normally the 'left' edge is calucated by centres[0] - 0.5 * (centres[1] - centres[0]).
         Instead, force the leftmost edge to be edgesMin.
     edgesMax : float, optional
-        Only used if instantiated with cellCentres. 
+        Only used if instantiated with cellCentres.
         Normally the 'right' edge is calucated by centres[-1] - 0.5 * (centres[-1] - centres[-2]).
         Instead, force the rightmost edge to be edgesMax.
 
@@ -53,12 +53,12 @@ class RectilinearMesh1D(myObject):
         """ Initialize a 1D Rectilinear Mesh"""
         self._cellCentres = None
         self._cellEdges = None
-        
+
         if (cellCentres is None and cellEdges is None):
             self._cellEdges = StatArray.StatArray(0)
             self._cellCentres = StatArray.StatArray(0)
             return
-        
+
         assert (not(not cellCentres is None and not cellEdges is None)), Exception('Cannot instantiate with both centres and edges values')
 
         if not cellCentres is None:
@@ -92,13 +92,13 @@ class RectilinearMesh1D(myObject):
         out._cellEdges = self._cellEdges.deepcopy()
         out.isRegular = self.isRegular
         out.dx = self.dx
-        
+
         return out
 
 
     def __getitem__(self, slic):
         """Slice into the class. """
-        
+
         assert np.shape(slic) == (), ValueError("slic must have one dimension.")
 
         s2stop = None
@@ -113,7 +113,7 @@ class RectilinearMesh1D(myObject):
     def __add__(self, other):
 
         return RectilinearMesh1D(cellEdges=self.cellCentres + other)
-    
+
     def __sub__(self, other):
 
         return RectilinearMesh1D(cellEdges=self.cellCentres - other)
@@ -141,7 +141,7 @@ class RectilinearMesh1D(myObject):
             if not isinstance(values, StatArray.StatArray):
                 values = StatArray.StatArray(values)
 
-            assert np.ndim(values) == 1, ValueError("cellCentres must be 1D")
+            # assert np.ndim(values) == 1, ValueError("cellCentres must be 1D")
             ## StatArray of the x axis values
             self._cellCentres = values.deepcopy()
             self._cellEdges = self._cellCentres.edges()
@@ -160,7 +160,7 @@ class RectilinearMesh1D(myObject):
         else:
             if not isinstance(values, StatArray.StatArray):
                 values = StatArray.StatArray(values)
-            assert np.ndim(values) == 1, ValueError("cellEdges must be 1D")
+            # assert np.ndim(values) == 1, ValueError("cellEdges must be 1D")
             self._cellEdges = values.deepcopy()
             self._cellCentres = values.internalEdges()
 
@@ -189,7 +189,7 @@ class RectilinearMesh1D(myObject):
     @property
     def nEdges(self):
         return 0 if self._cellEdges is None else self._cellEdges.size
-    
+
     @property
     def nNodes(self):
         return self.nEdges
@@ -219,7 +219,7 @@ class RectilinearMesh1D(myObject):
             A negative index which would normally wrap will clip to 0 and self.bins.size instead.
         trim : bool
             Do not include out of axis indices. Negates clip, since they wont be included in the output.
-    
+
         Returns
         -------
         out : array_like
@@ -234,7 +234,7 @@ class RectilinearMesh1D(myObject):
             iBin = self._cellEdges.searchsorted(values, side='right') - 1
 
         iBin = np.atleast_1d(iBin)
-        
+
         # Remove indices that are out of bounds
         if trim:
             iBin = iBin[(values >= self._cellEdges[0]) & (values < self._cellEdges[-1])]
@@ -259,17 +259,17 @@ class RectilinearMesh1D(myObject):
 
     def inBounds(self, values):
         """Return whether values are inside the cell edges
-        
+
         Parameters
         ----------
         values : array_like
             Check if these are inside left <= values < right.
-            
+
         Returns
         -------
         out : bools
             Are the values inside.
-            
+
         """
         return (values >= self._cellEdges[0]) & (values < self._cellEdges[-1])
 
@@ -307,9 +307,9 @@ class RectilinearMesh1D(myObject):
         grid : bool, optional
             Plot the grid
         noColorbar : bool, optional
-            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.   
+            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
         trim : bool, optional
-            Set the x and y limits to the first and last non zero values along each axis. 
+            Set the x and y limits to the first and last non zero values along each axis.
 
         See Also
         --------
@@ -324,13 +324,13 @@ class RectilinearMesh1D(myObject):
         kwargs['y'] = kwargs.pop('y', self.cellEdges)
 
         ax = values.pcolor(**kwargs)
-        
+
         return ax
 
 
     def plotGrid(self, **kwargs):
         """ Plot the grid lines of the mesh.
-        
+
         See Also
         --------
         geobipy.StatArray.pcolor : For additional plotting arguments
