@@ -26,7 +26,7 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
     ID: Datapoint label for saving results
     pHDFfile: Optional HDF5 file opened using h5py.File('name.h5','w',driver='mpio', comm=world) before calling Inv_MCMC
     """
-    
+
     # Check the user input parameters against the datapoint
     userParameters.check(DataPoint)
 
@@ -53,9 +53,8 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
     bestPosterior = -np.inf #posterior#.copy()
 
     # Initialize the Chain
-    iBurn = 0
     i = 0
-    iBest = 1
+    iBest = 0
     multiplier = 1.0
 
     if userParameters.ignoreLikelihood:
@@ -99,12 +98,12 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
         Res.update(i, Mod, DataPoint, iBest, bestData, bestModel, multiplier, PhiD, posterior, posteriorComponents, ratioComponents, accepted, dimensionChange, userParameters.clipRatio)
 
         if Res.plotMe:
-            Res.plot("Fiducial {}".format(DataPoint.fiducial))
+            Res.plot("Fiducial {}".format(DataPoint.fiducial), increment=userParameters.plotEvery)
 
         i += 1
-        
+
         Go = i <= userParameters.nMarkovChains + Res.iBurn
-        
+
         if not Res.burnedIn:
             Go = i < userParameters.nMarkovChains
             if not Go:
@@ -129,11 +128,11 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
 
     return failed
 
-   
+
 def Initialize(userParameters, DataPoint, prng):
     """Initialize the transdimensional Markov chain Monte Carlo inversion.
-    
-    
+
+
     """
     # ---------------------------------------
     # Set the priors on the data point
@@ -164,7 +163,7 @@ def Initialize(userParameters, DataPoint, prng):
     # ---------------------------------
     # Create a histogram to set the height posterior.
     H = Histogram1D(bins = StatArray.StatArray(DataPoint.z.prior.bins(), name=DataPoint.z.name, units=DataPoint.z.units), relativeTo=DataPoint.z)
-    DataPoint.z.setPosterior(H)  
+    DataPoint.z.setPosterior(H)
     # Initialize the histograms for the relative errors
     rBins = DataPoint.relErr.prior.bins()
     if DataPoint.nSystems > 1:
@@ -319,7 +318,7 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
         ratioComponents = np.squeeze(np.asarray([prior1, prior, likelihood1, likelihood, proposal, proposal1, log_acceptanceRatio]))
     else:
         ratioComponents = None
-        
+
     # If we accept the model
     accepted = acceptanceProbability > prng.uniform()
 
@@ -332,5 +331,5 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
 
     clk.stop()
 
-    
+
     #%%
