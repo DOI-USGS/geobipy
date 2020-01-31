@@ -328,228 +328,222 @@ class Results(myObject):
         if (self.fig is None):
             self.initFigure()
 
-        
-        
         plt.figure(self.fig.number)
 
+        # Update the acceptance plot
+        plt.sca(self.ax[0])
+        plt.cla()
+        self._plotAcceptanceVsIteration()
+        
+        # Update the data misfit vs iteration
+        plt.sca(self.ax[1])
+        plt.cla()
+        self._plotMisfitVsIteration()
 
-        if (np.mod(self.i, self.iPlot) == 0):
+        # If the Best Data have changed, update the plot
+        plt.sca(self.ax[4])
+        plt.cla()
+        self._plotObservedPredictedData()
 
-            # Update the acceptance plot
-            plt.sca(self.ax[0])
+        # Update the model plot
+        plt.sca(self.ax[5])
+        plt.cla()
+        self._plotParameterPosterior(reciprocateX=self.reciprocateParameter, noColorbar=True)
+
+        if (self.burnedIn):
+
+            # Histogram of the data point elevation
+            plt.sca(self.ax[2])
             plt.cla()
-            self._plotAcceptanceVsIteration()
+            self._plotHeightPosterior()
+
+
+            # Update the histogram of the number of layers
+            plt.sca(self.ax[3])
+            plt.cla()
+            self._plotNumberOfLayersPosterior()
+            self.ax[3].xaxis.set_major_locator(MaxNLocator(integer=True))
+
             
-            # Update the data misfit vs iteration
-            plt.sca(self.ax[1])
+
+            j = 5
+            relativeAxes = []
+            additiveAxes = []
+            # Get the axes for the relative and additive errors
+            for i in range(self.nSystems):
+                # Update the histogram of relative data errors
+                relativeAxes.append(self.ax[j+1])
+                additiveAxes.append(self.ax[j+2])
+                j += 2
+
+            self._plotRelativeErrorPosterior(axes=relativeAxes)
+            self._plotAdditiveErrorPosterior(axes=additiveAxes)
+
+            # Update the layer depth histogram
+            plt.sca(self.ax[(2 * self.nSystems) + 6])
             plt.cla()
-            self._plotMisfitVsIteration()
+            self._plotLayerDepthPosterior()
 
-            # If the Best Data have changed, update the plot
-            plt.sca(self.ax[4])
+            
+        cP.suptitle(title)
+
+
+        if self.verbose & self.burnedIn:
+
+            plt.figure(self.verboseFigs[0].number)
+            plt.sca(self.verboseAxs[0])
             plt.cla()
-            self._plotObservedPredictedData()
-
-            # Update the model plot
-            plt.sca(self.ax[5])
+            self.allRelErr[0, :].plot(self.iRange, i=np.s_[:self.i], c='k')
+            plt.sca(self.verboseAxs[1])
             plt.cla()
-            self._plotParameterPosterior(reciprocateX=self.reciprocateParameter, noColorbar=True)
+            self.allAddErr[0, :].plot(self.iRange, i=np.s_[:self.i], axis=1, c='k')
+            plt.sca(self.verboseAxs[2])
+            plt.cla()
+            self.allZ.plot(x=self.iRange, i=np.s_[:self.i], marker='o', linestyle='none', markersize=2, alpha=0.3, markeredgewidth=1)
 
-            if (self.burnedIn):
 
-                # Histogram of the data point elevation
-                plt.sca(self.ax[2])
+            # Posterior components plot Figure 1
+            labels=['nCells','depth','parameter','gradient','relative','additive','height','calibration']
+            plt.figure(self.verboseFigs[1].number)
+            for i in range(8):
+                plt.sca(self.verboseAxs[3 + i])
                 plt.cla()
-                self._plotHeightPosterior()
+                self.posteriorComponents[i, :].plot(linewidth=0.5)
+                plt.ylabel('')
+                plt.title(labels[i])
+                if labels[i] == 'gradient':
+                    plt.ylim([-30.0, 1.0])
 
 
-                # Update the histogram of the number of layers
-                plt.sca(self.ax[3])
-                plt.cla()
-                self._plotNumberOfLayersPosterior()
-                self.ax[3].xaxis.set_major_locator(MaxNLocator(integer=True))
+            ira = self.iRange[:np.int(1.2*self.nMC)][self.accepted]
+            irna = self.iRange[:np.int(1.2*self.nMC)][~self.accepted]
 
-                
+            plt.figure(self.verboseFigs[3].number)
+            # Number of layers vs iteration
+            plt.sca(self.verboseAxs[15])
+            plt.cla()
+            self.allK[~self.accepted].plot(x = irna, marker='o', markersize=1,  linestyle='None', alpha=0.3, color='k')
+            self.allK[self.accepted].plot(x = ira, marker='o', markersize=1, linestyle='None', alpha=0.3)
+            plt.title('black = rejected')
 
-                j = 5
-                relativeAxes = []
-                additiveAxes = []
-                # Get the axes for the relative and additive errors
-                for i in range(self.nSystems):
-                    # Update the histogram of relative data errors
-                    relativeAxes.append(self.ax[j+1])
-                    additiveAxes.append(self.ax[j+2])
-                    j += 2
+            
+            plt.figure(self.verboseFigs[2].number)
+            # Cross plot of current vs candidate prior
+            plt.sca(self.verboseAxs[11])
+            plt.cla()
+            x = StatArray.StatArray(self.ratioComponents[0, :], 'Candidate Prior')
+            y = StatArray.StatArray(self.ratioComponents[1, :], 'Current Prior')
 
-                self._plotRelativeErrorPosterior(axes=relativeAxes)
-                self._plotAdditiveErrorPosterior(axes=additiveAxes)
+            x[x == -np.inf] = np.nan
+            y[y == -np.inf] = np.nan
+            x[~self.accepted].plot(x = y[~self.accepted], linestyle='', marker='.', color='k', alpha=0.3)
+            x[self.accepted].plot(x = y[self.accepted], linestyle='', marker='.', alpha=0.3)
+            # v1 = np.maximum(np.minimum(np.nanmin(x), np.nanmin(y)), -20.0)
+            v2 = np.maximum(np.nanmax(x), np.nanmax(y))
+            v1 = v2 - 25.0
+            plt.xlim([v1, v2])
+            plt.ylim([v1, v2])
+            plt.plot([v1,v2], [v1,v2])
 
-                # Update the layer depth histogram
-                plt.sca(self.ax[(2 * self.nSystems) + 6])
-                plt.cla()
-                self._plotLayerDepthPosterior()
+            # Prior ratio vs iteration              
+            plt.figure(self.verboseFigs[3].number)
+            plt.sca(self.verboseAxs[16])
+            plt.cla()
+            r = x - y
+            r[~self.accepted].plot(x = irna, marker='o', markersize=1, linestyle='None', alpha=0.3, color='k')
+            r[self.accepted].plot(x = ira, marker='o', markersize=1, linestyle='None', alpha=0.3)
+            plt.ylim([v1, 5.0])
+            cP.ylabel('Prior Ratio')
 
-                
-            cP.suptitle(title)
+            
 
+            plt.figure(self.verboseFigs[2].number)
+            # Cross plot of the likelihood ratios
+            plt.sca(self.verboseAxs[12])
+            plt.cla()
+            x = StatArray.StatArray(self.ratioComponents[2, :], 'Candidate Likelihood')
+            y = StatArray.StatArray(self.ratioComponents[3, :], 'Current Likelihood')
+            x[~self.accepted].plot(x = y[~self.accepted], linestyle='', marker='.', color='k', alpha=0.3)
+            x[self.accepted].plot(x = y[self.accepted], linestyle='', marker='.', alpha=0.3)
+            
+            v2 = np.maximum(np.nanmax(x), np.nanmax(y)) + 5.0
+            v1 = v2 - 200.0
+            # v1 = -100.0
+            # v2 = -55.0
+            plt.xlim([v1, v2])
+            plt.ylim([v1, v2])
+            plt.plot([v1, v2], [v1, v2])
+            plt.title('black = rejected')
 
-            if self.verbose & self.burnedIn:
-
-                plt.figure(self.verboseFigs[0].number)
-                plt.sca(self.verboseAxs[0])
-                plt.cla()
-                self.allRelErr[0, :].plot(self.iRange, i=np.s_[:self.i], c='k')
-                plt.sca(self.verboseAxs[1])
-                plt.cla()
-                self.allAddErr[0, :].plot(self.iRange, i=np.s_[:self.i], axis=1, c='k')
-                plt.sca(self.verboseAxs[2])
-                plt.cla()
-                self.allZ.plot(x=self.iRange, i=np.s_[:self.i], marker='o', linestyle='none', markersize=2, alpha=0.3, markeredgewidth=1)
-
-
-                # Posterior components plot Figure 1
-                labels=['nCells','depth','parameter','gradient','relative','additive','height','calibration']
-                plt.figure(self.verboseFigs[1].number)
-                for i in range(8):
-                    plt.sca(self.verboseAxs[3 + i])
-                    plt.cla()
-                    self.posteriorComponents[i, :].plot(linewidth=0.5)
-                    plt.ylabel('')
-                    plt.title(labels[i])
-                    if labels[i] == 'gradient':
-                        plt.ylim([-30.0, 1.0])
-
-
-                ira = self.iRange[:np.int(1.2*self.nMC)][self.accepted]
-                irna = self.iRange[:np.int(1.2*self.nMC)][~self.accepted]
-
-                plt.figure(self.verboseFigs[3].number)
-                # Number of layers vs iteration
-                plt.sca(self.verboseAxs[15])
-                plt.cla()
-                self.allK[~self.accepted].plot(x = irna, marker='o', markersize=1,  linestyle='None', alpha=0.3, color='k')
-                self.allK[self.accepted].plot(x = ira, marker='o', markersize=1, linestyle='None', alpha=0.3)
-                plt.title('black = rejected')
-
-                
-                plt.figure(self.verboseFigs[2].number)
-                # Cross plot of current vs candidate prior
-                plt.sca(self.verboseAxs[11])
-                plt.cla()
-                x = StatArray.StatArray(self.ratioComponents[0, :], 'Candidate Prior')
-                y = StatArray.StatArray(self.ratioComponents[1, :], 'Current Prior')
-
-                x[x == -np.inf] = np.nan
-                y[y == -np.inf] = np.nan
-                x[~self.accepted].plot(x = y[~self.accepted], linestyle='', marker='.', color='k', alpha=0.3)
-                x[self.accepted].plot(x = y[self.accepted], linestyle='', marker='.', alpha=0.3)
-                # v1 = np.maximum(np.minimum(np.nanmin(x), np.nanmin(y)), -20.0)
-                v2 = np.maximum(np.nanmax(x), np.nanmax(y))
-                v1 = v2 - 25.0
-                plt.xlim([v1, v2])
-                plt.ylim([v1, v2])
-                plt.plot([v1,v2], [v1,v2])
-
-                # Prior ratio vs iteration              
-                plt.figure(self.verboseFigs[3].number)
-                plt.sca(self.verboseAxs[16])
-                plt.cla()
-                r = x - y
-                r[~self.accepted].plot(x = irna, marker='o', markersize=1, linestyle='None', alpha=0.3, color='k')
-                r[self.accepted].plot(x = ira, marker='o', markersize=1, linestyle='None', alpha=0.3)
-                plt.ylim([v1, 5.0])
-                cP.ylabel('Prior Ratio')
-
-                
-
-                plt.figure(self.verboseFigs[2].number)
-                # Cross plot of the likelihood ratios
-                plt.sca(self.verboseAxs[12])
-                plt.cla()
-                x = StatArray.StatArray(self.ratioComponents[2, :], 'Candidate Likelihood')
-                y = StatArray.StatArray(self.ratioComponents[3, :], 'Current Likelihood')
-                x[~self.accepted].plot(x = y[~self.accepted], linestyle='', marker='.', color='k', alpha=0.3)
-                x[self.accepted].plot(x = y[self.accepted], linestyle='', marker='.', alpha=0.3)
-                
-                v2 = np.maximum(np.nanmax(x), np.nanmax(y)) + 5.0
-                v1 = v2 - 200.0
-                # v1 = -100.0
-                # v2 = -55.0
-                plt.xlim([v1, v2])
-                plt.ylim([v1, v2])
-                plt.plot([v1, v2], [v1, v2])
-                plt.title('black = rejected')
-
-                plt.figure(self.verboseFigs[3].number)
-                # Likelihood ratio vs iteration
-                plt.sca(self.verboseAxs[17])
-                plt.cla()
-                r = x - y
-                r[~self.accepted].plot(x = irna, marker='o', markersize=1, linestyle='None', alpha=0.3, color='k')
-                r[self.accepted].plot(x = ira, marker='o', markersize=1, linestyle='None', alpha=0.3)
-                cP.ylabel('Likelihood Ratio')
-                plt.ylim([-20.0, 20.0])
-                
-                plt.figure(self.verboseFigs[2].number)
-                # Cross plot of the proposal ratios
-                plt.sca(self.verboseAxs[13])
-                plt.cla()
-                y = StatArray.StatArray(self.ratioComponents[4, :], 'Current Proposal')
-                x = StatArray.StatArray(self.ratioComponents[5, :], 'Candidate Proposal')
-                x[~self.accepted].plot(x = y[~self.accepted], linestyle='', marker='.', color='k', alpha=0.3)
-                x[self.accepted].plot(x = y[self.accepted], linestyle='', marker='.', alpha=0.3)
-                # v1 = np.maximum(np.minimum(np.nanmin(x), np.nanmin(y)), -200.0)
-                v2 = np.maximum(np.nanmax(x), np.nanmax(y)) + 10.0
-                v1 = v2 - 60.0
-                v1 = -20.0
-                v2 = 20.0
-                # plt.plot([v1,v2], [v1,v2])
-                plt.xlim([v1, v2])
-                plt.ylim([v1, v2])
+            plt.figure(self.verboseFigs[3].number)
+            # Likelihood ratio vs iteration
+            plt.sca(self.verboseAxs[17])
+            plt.cla()
+            r = x - y
+            r[~self.accepted].plot(x = irna, marker='o', markersize=1, linestyle='None', alpha=0.3, color='k')
+            r[self.accepted].plot(x = ira, marker='o', markersize=1, linestyle='None', alpha=0.3)
+            cP.ylabel('Likelihood Ratio')
+            plt.ylim([-20.0, 20.0])
+            
+            plt.figure(self.verboseFigs[2].number)
+            # Cross plot of the proposal ratios
+            plt.sca(self.verboseAxs[13])
+            plt.cla()
+            y = StatArray.StatArray(self.ratioComponents[4, :], 'Current Proposal')
+            x = StatArray.StatArray(self.ratioComponents[5, :], 'Candidate Proposal')
+            x[~self.accepted].plot(x = y[~self.accepted], linestyle='', marker='.', color='k', alpha=0.3)
+            x[self.accepted].plot(x = y[self.accepted], linestyle='', marker='.', alpha=0.3)
+            # v1 = np.maximum(np.minimum(np.nanmin(x), np.nanmin(y)), -200.0)
+            v2 = np.maximum(np.nanmax(x), np.nanmax(y)) + 10.0
+            v1 = v2 - 60.0
+            v1 = -20.0
+            v2 = 20.0
+            # plt.plot([v1,v2], [v1,v2])
+            plt.xlim([v1, v2])
+            plt.ylim([v1, v2])
 
 
-                plt.figure(self.verboseFigs[2].number)
-                # Cross plot of the proposal ratios coloured by a change in dimension
-                plt.sca(self.verboseAxs[14])
-                plt.cla()
-                y = StatArray.StatArray(self.ratioComponents[4, :], 'Current Proposal')
-                x = StatArray.StatArray(self.ratioComponents[5, :], 'Candidate Proposal')
-                x[~self.dimensionChange].plot(x = y[~self.dimensionChange], linestyle='', marker='.', color='k', alpha=0.3)
-                x[self.dimensionChange].plot(x = y[self.dimensionChange], linestyle='', marker='.', alpha=0.3)
-                # v1 = np.maximum(np.minimum(np.nanmin(x), np.nanmin(y)), -200.0)
-                # v2 = np.maximum(np.nanmax(x), np.nanmax(y)) + 10.0
-                # v1 = v2 - 60.0
-                
-                # plt.plot([v1,v2], [v1,v2])
-                plt.xlim([v1, v2])
-                plt.ylim([v1, v2])
-                plt.title('black = no dimension change')
+            plt.figure(self.verboseFigs[2].number)
+            # Cross plot of the proposal ratios coloured by a change in dimension
+            plt.sca(self.verboseAxs[14])
+            plt.cla()
+            y = StatArray.StatArray(self.ratioComponents[4, :], 'Current Proposal')
+            x = StatArray.StatArray(self.ratioComponents[5, :], 'Candidate Proposal')
+            x[~self.dimensionChange].plot(x = y[~self.dimensionChange], linestyle='', marker='.', color='k', alpha=0.3)
+            x[self.dimensionChange].plot(x = y[self.dimensionChange], linestyle='', marker='.', alpha=0.3)
+            # v1 = np.maximum(np.minimum(np.nanmin(x), np.nanmin(y)), -200.0)
+            # v2 = np.maximum(np.nanmax(x), np.nanmax(y)) + 10.0
+            # v1 = v2 - 60.0
+            
+            # plt.plot([v1,v2], [v1,v2])
+            plt.xlim([v1, v2])
+            plt.ylim([v1, v2])
+            plt.title('black = no dimension change')
 
-                plt.figure(self.verboseFigs[3].number)
-                # Proposal ratio vs iteration
-                plt.sca(self.verboseAxs[18])
-                plt.cla()
-                r = x - y
-                r[~self.accepted].plot(x = irna, marker='o', markersize=1, linestyle='None', alpha=0.3, color='k')
-                r[self.accepted].plot(x = ira, marker='o', markersize=1, linestyle='None', alpha=0.3)
-                cP.ylabel('Proposal Ratio')
-                plt.ylim([v1, v2])
+            plt.figure(self.verboseFigs[3].number)
+            # Proposal ratio vs iteration
+            plt.sca(self.verboseAxs[18])
+            plt.cla()
+            r = x - y
+            r[~self.accepted].plot(x = irna, marker='o', markersize=1, linestyle='None', alpha=0.3, color='k')
+            r[self.accepted].plot(x = ira, marker='o', markersize=1, linestyle='None', alpha=0.3)
+            cP.ylabel('Proposal Ratio')
+            plt.ylim([v1, v2])
 
-                # Acceptance ratio vs iteration
-                plt.sca(self.verboseAxs[19])
-                plt.cla()
-                x = StatArray.StatArray(self.ratioComponents[6, :], 'Acceptance Ratio')
-                x[~self.accepted].plot(x = irna, marker='o', markersize=1, linestyle='None', alpha=0.3, color='k')
-                x[self.accepted].plot(x = ira, marker='o', markersize=1, linestyle='None', alpha=0.3)
-                plt.ylim([-20.0, 20.0])
-                
+            # Acceptance ratio vs iteration
+            plt.sca(self.verboseAxs[19])
+            plt.cla()
+            x = StatArray.StatArray(self.ratioComponents[6, :], 'Acceptance Ratio')
+            x[~self.accepted].plot(x = irna, marker='o', markersize=1, linestyle='None', alpha=0.3, color='k')
+            x[self.accepted].plot(x = ira, marker='o', markersize=1, linestyle='None', alpha=0.3)
+            plt.ylim([-20.0, 20.0])
+            
 
-                self.fig.canvas.draw()
-                self.fig.canvas.flush_events()
-                for fig in self.verboseFigs:
-                    fig.canvas.draw()
-                    fig.canvas.flush_events()
-
+            self.fig.canvas.draw()
+            self.fig.canvas.flush_events()
+            for fig in self.verboseFigs:
+                fig.canvas.draw()
+                fig.canvas.flush_events()
             cP.pause(1e-9)
 
 
@@ -584,7 +578,10 @@ class Results(myObject):
         plt.axhline(dum, color='#C92641', linestyle='dashed', linewidth=lw)
         if (self.burnedIn):
             plt.axvline(self.iBurn, color='#C92641', linestyle='dashed', linewidth=lw)
-            plt.axvline(self.iBest, color=cP.wellSeparated[3])
+            try:
+                plt.axvline(self.iBest, color=cP.wellSeparated[3])
+            except:
+                pass
         plt.yscale('log')
         ax.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
         plt.xlim([0, self.iRange[self.i]])
@@ -663,9 +660,12 @@ class Results(myObject):
         ax.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
 
     
-    def _plotParameterPosterior(self, reciprocateX=False, credibleInterval = 95.0, opacityPercentage = 67.0, xlim=None, **kwargs):
+    def _plotParameterPosterior(self, reciprocateX=False, credibleInterval = 95.0, opacityPercentage = 67.0, **kwargs):
         """ Plot the hitmap posterior of conductivity with depth """
 
+
+        xlim = kwargs.pop('xlim', None)
+        ylim = kwargs.pop('ylim', None)
 
         hm = self.currentModel.par.posterior
 
@@ -715,6 +715,11 @@ class Results(myObject):
 
         ax = plt.gca()
         lim = ax.get_ylim()
+
+        if not ylim is None:
+            ax.set_ylim(ylim)
+            lim = ax.get_ylim()
+
         if (lim[1] > lim[0]):
             ax.set_ylim(lim[::-1])
         plt.xscale('log')
