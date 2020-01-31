@@ -68,7 +68,7 @@ class CircularLoop(EmLoop):
     @property
     def radius(self):
         return self._radius
-    
+
     @property
     def roll(self):
         return self._roll
@@ -87,7 +87,7 @@ class CircularLoop(EmLoop):
 
     @property
     def z(self):
-        return self._z   
+        return self._z
 
 
     @property
@@ -113,7 +113,7 @@ class CircularLoop(EmLoop):
             assert value in [0, 0.0, 1, 1.0, 2, 2.0], ValueError("orientation must be 0, 1, or 2")
             self._orient = np.float64(value)
 
-    
+
     def deepcopy(self):
         return deepcopy(self)
 
@@ -182,7 +182,10 @@ class CircularLoop(EmLoop):
             except:
                 assert False, ValueError("HDF data was created as a larger array, specify the row index to read from")
 
-            return CircularLoop(*d)
+            out = []
+            for i in range(d.shape[0]):
+                out.append(CircularLoop(*d[i, :]))
+            return out
         else:
             d = np.array(h5grp.get('data')[index])
             return CircularLoop(*d)
@@ -190,7 +193,7 @@ class CircularLoop(EmLoop):
 
     def Bcast(self, world, root=0):
         """Broadcast using MPI
-        
+
         Parameters
         ----------
         world : mpi4py.MPI.COMM_WORLD
@@ -200,7 +203,7 @@ class CircularLoop(EmLoop):
         -------
         out : CircularLoop
             A CircularLoop on each core
-        
+
         """
 
         data = np.asarray([self._orient, self.moment, self.x, self.y, self.z, self.pitch, self.roll, self.yaw, self.radius], dtype=np.float64)
@@ -222,8 +225,8 @@ class CircularLoop(EmLoop):
     def __str__(self):
         """ Define print(self) """
         return 'CircularLoop("{0}",{1},{2},{3},{4},{5},{6},{7},{8})'.format(
-            self.orient, self.moment, 
-            self.x,      self.y,    self.z, 
+            self.orient, self.moment,
+            self.x,      self.y,    self.z,
             self.pitch,  self.roll, self.yaw, self.radius)
 
 
