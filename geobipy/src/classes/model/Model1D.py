@@ -1146,7 +1146,7 @@ class Model1D(Model):
         if self.hasHalfspace:
             if (self.maxDepth is None):
                 if (self.nCells > 1):
-                    d[-1] = 1.1 * self.depth[-2]
+                    d[-1] = 1.1 * z[-2]
                 else:
                     d[0] = 1.0               
             else:
@@ -1199,21 +1199,17 @@ class Model1D(Model):
         z = self.depth.prepend(0.0)
         if self.hasHalfspace:
             if (self.maxDepth is None):
-                z[-1] = 1.1 * self.depth[-2]
+                z[-1] = 1.1 * z[-2]
             else:
-                z[-1] = 1.1 * self.maxDepth
+                z[-1] = 1.1 * np.exp(self.maxDepth)
 
         cP.step(x=par, y=z, **kwargs)
 
         if self.hasHalfspace:
+            h = 0.99*z[-1]
             if (self.nCells == 1):
-                h = np.maximum(0.99, 0.75*np.max(ax.get_ylim()))
-                p = par[-1]
-            else:
-                h = z[-2] + 0.75 * (z[-1] - z[-2])
-                p = par[-1]
-
-            plt.text(p, h, s=r'$\downarrow \infty$', fontsize=12)
+                h = 0.99*self.maxDepth
+            plt.text(0, h, s=r'$\downarrow \infty$', fontsize=12)
 
 
     def evaluateHitmapPrior(self, Hitmap):
