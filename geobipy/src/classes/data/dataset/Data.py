@@ -22,7 +22,7 @@ except:
 class Data(PointCloud3D):
     """Class defining a set of Data.
 
-    
+
     Data(nPoints, nChannelsPerSystem, x, y, z, data, std, predictedData, dataUnits, channelNames)
 
     Parameters
@@ -72,28 +72,24 @@ class Data(PointCloud3D):
 
         dataShape = [nPoints, self.nChannels]
         # StatArray of data
-        if not data is None:
-            assert np.allclose(np.shape(data), dataShape) or np.size(data) == nPoints, ValueError("data must have shape {}".format(dataShape))
-            self._data = StatArray.StatArray(data, order='F')
-        else:
-            self._data = StatArray.StatArray([nPoints, self.nChannels], "Data", dataUnits, order='F')
+        self.data = data
 
         # StatArray of Standard Deviations
         if not std is None:
             assert np.allclose(np.shape(std), dataShape), ValueError("std must have shape {}".format(dataShape))
             assert np.all(std > 0.0), ValueError("Cannot assign standard deviations that are <= 0.0.")
-            self._std = StatArray.StatArray(std, order='F')
+            self._std = StatArray.StatArray(std)
         else:
-            self._std = StatArray.StatArray(np.ones([nPoints, self.nChannels]), "Standard Deviation", dataUnits, order='F')
-        
-        
+            self._std = StatArray.StatArray(np.ones([nPoints, self.nChannels]), "Standard Deviation", dataUnits)
+
+
         # Create predicted data
         if not predictedData is None:
             assert np.allclose(np.shape(predictedData), dataShape), ValueError("predictedData must have shape {}".format(dataShape))
-            self._predictedData = StatArray.StatArray(predictedData, order='F')
+            self._predictedData = StatArray.StatArray(predictedData)
         else:
-            self._predictedData = StatArray.StatArray([nPoints, self.nChannels], "Predicted Data", dataUnits, order='F')
-        
+            self._predictedData = StatArray.StatArray([nPoints, self.nChannels], "Predicted Data", dataUnits)
+
         # Assign the channel names
         if channelNames is None:
             self._channelNames = ['Channel {}'.format(i) for i in range(self.nChannels)]
@@ -104,31 +100,40 @@ class Data(PointCloud3D):
 
         self._fiducial = None
         self._lineNumber = None
-    
-    
+
+
     def _systemIndices(self, system=0):
         """The slice indices for the requested system.
-        
+
         Parameters
         ----------
         system : int
             Requested system index.
-            
+
         Returns
         -------
         out : numpy.slice
             The slice pertaining to the requested system.
-            
+
         """
 
         assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
 
         return np.s_[self._systemOffset[system]:self._systemOffset[system+1]]
 
-    @property    
+    @property
     def data(self):
         """The data. """
         return self._data
+
+    @data.setter
+    def data(self, values):
+        shp = [self.nPoints, self.nChannels]
+        if values is None:
+            self._data = StatArray.StatArray(shp, "Data")
+        else:
+            assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("data must have shape {}".format(shp))
+            self._data = StatArray.StatArray(values)
 
     @property
     def deltaD(self):
@@ -157,6 +162,10 @@ class Data(PointCloud3D):
     @property
     def lineNumber(self):
         return self._lineNumber
+
+    @property
+    def nActiveChannels(self):
+        return np.sum(self.active, axis=1)
 
     @property
     def nChannels(self):
@@ -216,7 +225,7 @@ class Data(PointCloud3D):
 
             for i in r:
                 vtk.point_data.append(Scalars(tmp[:, i], "{} {}".format(self.channelNames[i], tmp.getNameUnits())))
-                    
+
 
     def dataMisfit(self, squared=False):
         """Compute the :math:`L_{2}` norm squared misfit between the observed and predicted data
@@ -237,8 +246,9 @@ class Data(PointCloud3D):
             The misfit value.
 
         """
-        PhiD = np.float64(np.sum((self.deltaD / self.std)**2.0, dtype=np.float64))
-        return PhiD if squared else np.sqrt(PhiD)
+        x = np.ma.MaskedArray((self.deltaD / self.std)**2.0, mask=~self.active)
+        dataMisfit = StatArray.StatArray(np.sum(x, axis=1), "Data misfit")
+        return dataMisfit if squared else np.sqrt(dataMisfit)
 
 
     def __getitem__(self, i):
@@ -260,12 +270,12 @@ class Data(PointCloud3D):
             Indices of non-NaN columns.
 
         """
-        return np.where(np.sum(np.isnan(self._data), 0) != self.nPoints)[0]
+        return ~np.isnan(self.data)
 
 
     def dataChannel(self, channel, system=None):
         """Gets the data in the specified channel
-        
+
         Parameters
         ----------
         channel : int
@@ -278,7 +288,7 @@ class Data(PointCloud3D):
         -------
         out : geobipy.StatArray
             The data channel
-            
+
         """
 
         if system is None:
@@ -289,18 +299,18 @@ class Data(PointCloud3D):
 
 
     def dataPoint(self, i):
-        """Get the ith data point from the data set 
-        
+        """Get the ith data point from the data set
+
         Parameters
         ----------
         i : int
             The data point to get
-            
+
         Returns
         -------
         out : geobipy.DataPoint
             The data point
-            
+
         """
         assert np.size(i) == 1, ValueError("i must be a single integer")
         assert 0 <= i <= self.nPoints, ValueError("Must have 0 <= i <= {}".format(self.nPoints))
@@ -316,12 +326,12 @@ class Data(PointCloud3D):
 
     def nPointsPerLine(self):
         """Gets the number of points in each line.
-        
+
         Returns
         -------
         out : ints
             Number of points in each line
-            
+
         """
         nPoints = np.zeros(np.unique(self.lineNumber).size)
         lines = np.unique(self.lineNumber)
@@ -332,7 +342,7 @@ class Data(PointCloud3D):
 
     def predictedDataChannel(self, channel, system=None):
         """Gets the predicted data in the specified channel
-        
+
         Parameters
         ----------
         channel : int
@@ -345,7 +355,7 @@ class Data(PointCloud3D):
         -------
         out : geobipy.StatArray
             The predicted data channel
-            
+
         """
 
         if system is None:
@@ -354,10 +364,10 @@ class Data(PointCloud3D):
             assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
             return StatArray.StatArray(self._predictedData[:, self._systemOffset[system] + channel], "Predicted data {}".format(self._channelNames[self._systemOffset[system] + channel]), self._predictedData.units)
 
-    
+
     def stdChannel(self, channel, system=None):
         """Gets the uncertainty in the specified channel
-        
+
         Parameters
         ----------
         channel : int
@@ -370,7 +380,7 @@ class Data(PointCloud3D):
         -------
         out : geobipy.StatArray
             The uncertainty channel
-            
+
         """
 
         if system is None:
@@ -378,7 +388,7 @@ class Data(PointCloud3D):
         else:
             assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
             return StatArray.StatArray(self._std[:, self._systemOffset[system] + channel], "Std {}".format(self._channelNames[self._systemOffset[system] + channel]), self._std.units)
-        
+
 
     def maketest(self, nPoints, nChannels):
         """ Create a test example """
@@ -397,7 +407,7 @@ class Data(PointCloud3D):
 
     def mapData(self, channel, system=None, *args, **kwargs):
         """Interpolate the data channel between the x, y co-ordinates.
-        
+
         Parameters
         ----------
         channel : int
@@ -421,10 +431,10 @@ class Data(PointCloud3D):
 
         cP.title(self.channelNames[channel])
 
-    
+
     def mapPredictedData(self, channel, system=None, *args, **kwargs):
         """Interpolate the predicted data channel between the x, y co-ordinates.
-        
+
         Parameters
         ----------
         channel : int
@@ -453,7 +463,7 @@ class Data(PointCloud3D):
         """Plots the specifed channels as a line plot.
 
         Plots the channels along a specified co-ordinate e.g. 'x'. A legend is auto generated.
-        
+
         Parameters
         ----------
         xAxis : str
@@ -493,10 +503,10 @@ class Data(PointCloud3D):
             rTmp = self._systemOffset[system] + channels
 
         ax = plt.gca()
-        
+
         for i in rTmp:
             super().plot(values=self.data[:, i], xAxis=xAxis, label=self.channelNames[i], **kwargs)
-    
+
         legend = None
         if not noLegend:
             box = ax.get_position()
@@ -513,7 +523,7 @@ class Data(PointCloud3D):
         """Plots the specifed predicted data channels as a line plot.
 
         Plots the channels along a specified co-ordinate e.g. 'x'. A legend is auto generated.
-        
+
         Parameters
         ----------
         xAxis : str
@@ -553,10 +563,10 @@ class Data(PointCloud3D):
             rTmp = self._systemOffset[system] + channels
 
         ax = plt.gca()
-        
+
         for i in rTmp:
             super().plot(values=self._predictedData[:, i], xAxis=xAxis, label=self.channelNames[i], **kwargs)
-    
+
         legend = None
         if not noLegend:
             box = ax.get_position()
@@ -568,7 +578,7 @@ class Data(PointCloud3D):
 
         return ax, legend
 
-    
+
     def read(self, fname, columnIndex, nHeaders=0, nChannels=0):
         """ Read the specified columns from an ascii file
         cols[0,1,2,...] should be the indices of the x,y,z co-ordinates """
@@ -618,11 +628,11 @@ class Data(PointCloud3D):
 
         .. math::
             \sqrt{(\mathbf{\epsilon}_{rel} \mathbf{d}^{obs})^{2} + \mathbf{\epsilon}^{2}_{add}},
-            
+
         where :math:`\mathbf{\epsilon}_{rel}` is the relative error, a percentage fraction and :math:`\mathbf{\epsilon}_{add}` is the additive error.
-        
+
         Parameters
-        ----------  
+        ----------
         relativeErr : float
             A fraction percentage that is multiplied by the observed data.
         additiveErr : float
@@ -632,7 +642,7 @@ class Data(PointCloud3D):
         ------
         ValueError
             If any relative or additive errors are <= 0.0
-        """    
+        """
 
         relativeErr = np.atleast_1d(relativeErr)
         additiveErr = np.atleast_1d(additiveErr)
@@ -674,13 +684,13 @@ class Data(PointCloud3D):
             The system to obtain the channel from.
         format : str, optional
             "ascii" or "binary" format. Ascii is readable, binary is not but results in smaller files.
-            
+
         """
 
         vtk = super().vtkStructure()
 
         self.addToVTK(vtk, prop, system=system)
-        
+
         vtk.tofile(fileName, format=format)
 
 
@@ -698,7 +708,7 @@ class Data(PointCloud3D):
         -------
         out : geobipy.Data
             Data broadcast to each core in the communicator
-        
+
         """
 
         pc3d = PointCloud3D.Bcast(self, world, root=root)
@@ -716,8 +726,8 @@ class Data(PointCloud3D):
 
 
     def Scatterv(self, starts, chunks, world, root=0):
-        """Scatterv a Data object using MPI 
-        
+        """Scatterv a Data object using MPI
+
         Parameters
         ----------
         starts : array of ints
@@ -733,7 +743,7 @@ class Data(PointCloud3D):
         -------
         out : geobipy.Data
             The Data distributed amongst ranks.
-            
+
         """
         ncps = myMPI.Bcast(self.nChannelsPerSystem, world, root=root)
         x = self.x.Scatterv(starts, chunks, world, root=root)

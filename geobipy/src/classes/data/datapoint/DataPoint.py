@@ -19,7 +19,7 @@ class DataPoint(Point):
     nChannelsPerSystem : int or array_like
         Number of data channels in the data
         * If int, a single acquisition system is assumed.
-        * If array_like, each entry is the number of channels for each system.        
+        * If array_like, each entry is the number of channels for each system.
     x : float
         Easting co-ordinate of the data point
     y : float
@@ -79,15 +79,15 @@ class DataPoint(Point):
             self._std = StatArray.StatArray(std, "Standard Deviation", dataUnits)
         else:
             self._std = StatArray.StatArray(np.ones(self.nChannels), "Standard Deviation", dataUnits)
-        
-        
+
+
         # Create predicted data
         if not predictedData is None:
             assert np.size(predictedData) == self.nChannels, ValueError("predictedData must have size {}".format(self.nChannels))
             self._predictedData = StatArray.StatArray(predictedData, "Predicted Data", dataUnits)
         else:
             self._predictedData = StatArray.StatArray(self.nChannels, "Predicted Data", dataUnits)
-        
+
         # Assign the channel names
         if channelNames is None:
             self._channelNames = ['Channel {}'.format(i) for i in range(self.nChannels)]
@@ -115,7 +115,7 @@ class DataPoint(Point):
         Returns
         -------
         out : StatArray
-            The residual between the active observed and predicted data 
+            The residual between the active observed and predicted data
             with size equal to the number of active channels.
 
         """
@@ -150,22 +150,22 @@ class DataPoint(Point):
 
     def weightingMatrix(self, power=1.0):
         """Return a diagonal data weighting matrix of the reciprocated data standard deviations."""
-        return np.diag(self.std[self.active]**-power)    
+        return np.diag(self.std[self.active]**-power)
 
 
     def _systemIndices(self, system=0):
         """The slice indices for the requested system.
-        
+
         Parameters
         ----------
         system : int
             Requested system index.
-            
+
         Returns
         -------
         out : numpy.slice
             The slice pertaining to the requested system.
-            
+
         """
 
         assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
@@ -182,7 +182,7 @@ class DataPoint(Point):
             Indices into the observed data that are not NaN
 
         """
-        return cf.findNotNans(self._data)
+        return cf.findNotNans(self.data)
 
 
     def likelihood(self, log):
@@ -221,7 +221,7 @@ class DataPoint(Point):
         PhiD = np.float64(np.sum((cf.Ax(tmp2, self.deltaD[self.active]))**2.0, dtype=np.float64))
         return PhiD if squared else np.sqrt(PhiD)
 
-    
+
     def scaleJ(self, Jin, power=1.0):
         """ Scales a matrix by the errors in the given data
 
@@ -274,7 +274,7 @@ class DataPoint(Point):
 
         .. math::
             \sqrt{(\mathbf{\epsilon}_{rel} \mathbf{d}^{obs})^{2} + \mathbf{\epsilon}^{2}_{add}},
-            
+
         where :math:`\mathbf{\epsilon}_{rel}` is the relative error, a percentage fraction and :math:`\mathbf{\epsilon}_{add}` is the additive error.
 
         If the predicted data have been assigned a multivariate normal distribution, the variance of that distribution is also updated as the squared standard deviations.
@@ -314,9 +314,9 @@ class DataPoint(Point):
         self._std.Isend(dest, world)
         self._predictedData.Isend(dest, world)
         world.isend(self._channelNames, dest=dest)
-        
-        
-        
+
+
+
     def Irecv(self, source, world):
         ncps = myMPI.Irecv(source=source, world=world)
         tmp = myMPI.Irecv(source=source, world=world)
@@ -324,7 +324,7 @@ class DataPoint(Point):
         d = x.Irecv(source, world)
         s = x.Irecv(source, world)
         p = x.Irecv(source, world)
-        cn = world.irecv(source = 0).wait()      
+        cn = world.irecv(source = 0).wait()
 
         return DataPoint(ncps, tmp[0], tmp[1], tmp[2], tmp[3], d, s, p, channelNames=cn)
 
