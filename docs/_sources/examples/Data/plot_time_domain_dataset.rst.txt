@@ -272,15 +272,21 @@ Line fid easting northing elevation height txrx_dx txrx_dy txrx_dz TxPitch TxRol
 
 File Format for a time domain system
 ++++++++++++++++++++++++++++++++++++
+Please see Page 13 of Ross Brodie's `instructions`_
 
+.. _instructions: https://github.com/GeoscienceAustralia/ga-aem/blob/master/docs/GA%20AEM%20Programs%20User%20Manual.pdf
 
-.. role:: raw-html(raw)
-   :format: html
+We use GA-AEM for our airborne time domain forward modeller.
+
+Example system files are contained in 
+`the supplementary folder`_ in this repository
+
+.. _the supplementary folder: https://github.com/usgs/geobipy/tree/master/documentation_source/source/examples/supplementary/Data
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  7.337 seconds)
+   **Total running time of the script:** ( 0 minutes  6.074 seconds)
 
 
 .. _sphx_glr_download_examples_Data_plot_time_domain_dataset.py:

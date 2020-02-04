@@ -131,7 +131,7 @@ perturbed = mod.perturbStructure()
  .. code-block:: none
 
 
-    <matplotlib.axes._subplots.AxesSubplot object at 0x12917cc50>
+    <matplotlib.axes._subplots.AxesSubplot object at 0x1282188d0>
 
 
 
@@ -239,14 +239,14 @@ The proposal for the parameter values is fixed and centred around a single value
  .. code-block:: none
 
 
-    <matplotlib.axes._subplots.AxesSubplot object at 0x128c5b750>
+    <matplotlib.axes._subplots.AxesSubplot object at 0x128609150>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.804 seconds)
+   **Total running time of the script:** ( 0 minutes  1.701 seconds)
 
 
 .. _sphx_glr_download_examples_Models_plot_model_1d.py:
