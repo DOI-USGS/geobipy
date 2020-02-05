@@ -29,12 +29,13 @@ def tdem1dfwd(datapoint, model1d):
 
     heightTolerance = 0.0
     if (datapoint.z > heightTolerance):
+        assert isinstance(datapoint.system[0], TdemSystem_GAAEM), TypeError("For airborne data, system must be type TdemSystem_GAAEM")
         return gaTdem1dfwd(datapoint, model1d)
 
     else:
         return empymod_tdem1dfwd(datapoint, model1d)
 
-    
+
 def tdem1dsen(datapoint, model1d, ix=None, modelChanged=True):
 
     if isinstance(datapoint.system[0], TdemSystem_GAAEM):
@@ -105,7 +106,7 @@ try:
 
         datapoint.J = J[datapoint.active,:]
         return datapoint.J
-    
+
 except:
     def gaTdem1dfwd(*args, **kwargs):
         raise Exception("gatdaem1d is not installed. Please see instructions")
