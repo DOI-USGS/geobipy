@@ -26,7 +26,7 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
     ID: Datapoint label for saving results
     pHDFfile: Optional HDF5 file opened using h5py.File('name.h5','w',driver='mpio', comm=world) before calling Inv_MCMC
     """
-    
+
     # Check the user input parameters against the datapoint
     userParameters.check(DataPoint)
 
@@ -102,9 +102,9 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
             Res.plot("Fiducial {}".format(DataPoint.fiducial))
 
         i += 1
-        
+
         Go = i <= userParameters.nMarkovChains + Res.iBurn
-        
+
         if not Res.burnedIn:
             Go = i < userParameters.nMarkovChains
             if not Go:
@@ -129,50 +129,43 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
 
     return failed
 
-   
+
 def Initialize(userParameters, DataPoint, prng):
     """Initialize the transdimensional Markov chain Monte Carlo inversion.
-    
-    
+
+
     """
     # ---------------------------------------
     # Set the priors on the data point
     # ---------------------------------------
     # Set the prior on the data
     DataPoint.predictedData.setPrior('MvLogNormal', DataPoint.data[DataPoint.active], DataPoint.std[DataPoint.active]**2.0, linearSpace=False, prng=prng)
-    # Set the prior on the height
-    DataPoint.z.setPrior('Uniform', np.float64(DataPoint.z) - userParameters.maximumElevationChange, np.float64(DataPoint.z) + userParameters.maximumElevationChange)
-    # Set the prior on the relative Errors
     DataPoint.relErr = userParameters.initialRelativeError
-    DataPoint.setRelativeErrorPrior(userParameters.minimumRelativeError, userParameters.maximumRelativeError, prng=prng)
-    # Set the prior on the additive Errors
     DataPoint.addErr = userParameters.initialAdditiveError
-    DataPoint.setAdditiveErrorPrior(userParameters.minimumAdditiveError, userParameters.maximumAdditiveError, prng=prng)
+
+    z = np.float64(DataPoint.z)
+    dz = userParameters.maximumElevationChange
+    heightPrior = Distribution('Uniform', z - dz, z + dz, prng=prng)
+    relativePrior = Distribution('Uniform', userParameters.minimumRelativeError, userParameters.maximumRelativeError, prng=prng)
+
+    log = isinstance(DataPoint, TdemDataPoint)
+
+    additivePrior = Distribution('Uniform', userParameters.minimumAdditiveError, userParameters.maximumAdditiveError, log=log, prng=prng)
+
+    DataPoint.setPriors(heightPrior, relativePrior, additivePrior)
 
     # ------------------------------------
     # Set the proposal distributions for the data point
     # ------------------------------------
-    # Set the proposal for height
-    DataPoint.z.setProposal('Normal', DataPoint.z, userParameters.elevationProposalVariance, prng=prng)
-    # Set the proposal distribution for the relative errors
-    DataPoint.setRelativeErrorProposal(userParameters.initialRelativeError, userParameters.relativeErrorProposalVariance, prng=prng)
-    # Set the proposal distribution for the additive errors
-    DataPoint.setAdditiveErrorProposal(userParameters.initialAdditiveError, userParameters.additiveErrorProposalVariance, prng=prng)
+    heightProposal = Distribution('Normal', DataPoint.z, userParameters.elevationProposalVariance, prng=prng)
+    relativeProposal = Distribution('MvNormal', DataPoint.relErr, userParameters.relativeErrorProposalVariance, prng=prng)
+    additiveProposal = Distribution('MvLogNormal', DataPoint.addErr, userParameters.additiveErrorProposalVariance, linearSpace=log, prng=prng)
+    DataPoint.setProposals(heightProposal, relativeProposal, additiveProposal)
 
     # ---------------------------------
     # Set the posterior histograms for the data point
     # ---------------------------------
-    # Create a histogram to set the height posterior.
-    H = Histogram1D(bins = StatArray.StatArray(DataPoint.z.prior.bins(), name=DataPoint.z.name, units=DataPoint.z.units), relativeTo=DataPoint.z)
-    DataPoint.z.setPosterior(H)  
-    # Initialize the histograms for the relative errors
-    rBins = DataPoint.relErr.prior.bins()
-    if DataPoint.nSystems > 1:
-        DataPoint.relErr.setPosterior([Histogram1D(bins = StatArray.StatArray(rBins[0, :], name='$\epsilon_{Relative}x10^{2}$', units='%')) for i in range(DataPoint.nSystems)])
-    else:
-        DataPoint.relErr.setPosterior(Histogram1D(bins = StatArray.StatArray(rBins, name='$\epsilon_{Relative}x10^{2}$', units='%')))
-    # Set the posterior for the data point.
-    DataPoint.setAdditiveErrorPosterior()
+    DataPoint.setPosteriors()
 
     # Update the data errors based on user given parameters
     # if userParameters.solveRelativeError or userParameters.solveAdditiveError:
@@ -319,7 +312,7 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
         ratioComponents = np.squeeze(np.asarray([prior1, prior, likelihood1, likelihood, proposal, proposal1, log_acceptanceRatio]))
     else:
         ratioComponents = None
-        
+
     # If we accept the model
     accepted = acceptanceProbability > prng.uniform()
 
@@ -332,5 +325,5 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
 
     clk.stop()
 
-    
+
     #%%

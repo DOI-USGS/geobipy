@@ -26,7 +26,7 @@ from ..base.HDF import hdfRead
 
 class Results(myObject):
     """Define the results for the Bayesian MCMC Inversion.
-    
+
     Contains histograms and inversion related variables that can be updated as the Bayesian inversion progresses.
 
     Results(saveMe, plotMe, savePNG, dataPoint, model, ID, \*\*kwargs)
@@ -62,7 +62,7 @@ class Results(myObject):
         Name of the parameters if they are reciprocated.
     reciprocateUnits : str, optional
         Units of the parameters if they are reciprocated.
-    
+
     """
 
     def __init__(self, dataPoint=None, model=None, fiducial=0.0, **kwargs):
@@ -205,10 +205,7 @@ class Results(myObject):
             model.updatePosteriors(clipRatio)
 
             # Update the height posterior
-            dataPoint.z.updatePosterior()
-            dataPoint.relErr.updatePosterior()
-            
-            dataPoint.addErr.updatePosterior()
+            dataPoint.updatePosteriors()
 
             if (self.verbose):
                 iTmp = self.i - self.iBurn
@@ -221,7 +218,7 @@ class Results(myObject):
                 self.ratioComponents[:, iTmp] = ratioComponents
                 self.accepted[iTmp] = accepted
                 self.dimensionChange[iTmp] = dimensionChange
-                
+
 
         if (np.mod(i, 1000) == 0):
             ratePercent = 100.0 * (np.float64(self.acceptance) / np.float64(1000))
@@ -269,7 +266,7 @@ class Results(myObject):
         self.ax[3] = plt.subplot(gs[9:12, :self.nSystems]) # Histogram of # of layers
         self.ax[4] = plt.subplot(gs[:6,self.nSystems:2 * self.nSystems]) # Data fit plot
         self.ax[5] = plt.subplot(gs[6:12,self.nSystems:2 * self.nSystems]) # 1D layer plot
-        # Histogram of data errors 
+        # Histogram of data errors
         j = 5
         for i in range(self.nSystems):
             self.ax[j+1] = plt.subplot(gs[:3, 2 * self.nSystems + i]) # Relative Errors
@@ -292,7 +289,7 @@ class Results(myObject):
             self.verboseAxs.append(fig.add_subplot(511))
             self.verboseAxs.append(fig.add_subplot(512))
             self.verboseAxs.append(fig.add_subplot(513))
-                        
+
             fig = plt.figure(facecolor='white', figsize=(10,7))
             self.verboseFigs.append(fig)
             for i in range(8):
@@ -312,7 +309,7 @@ class Results(myObject):
 
             for ax in self.verboseAxs:
                 cP.pretty(ax)
-            
+
 
         if self.plotMe:
             plt.show(block=False)
@@ -328,8 +325,8 @@ class Results(myObject):
         if (self.fig is None):
             self.initFigure()
 
-        
-        
+
+
         plt.figure(self.fig.number)
 
 
@@ -339,7 +336,7 @@ class Results(myObject):
             plt.sca(self.ax[0])
             plt.cla()
             self._plotAcceptanceVsIteration()
-            
+
             # Update the data misfit vs iteration
             plt.sca(self.ax[1])
             plt.cla()
@@ -369,7 +366,7 @@ class Results(myObject):
                 self._plotNumberOfLayersPosterior()
                 self.ax[3].xaxis.set_major_locator(MaxNLocator(integer=True))
 
-                
+
 
                 j = 5
                 relativeAxes = []
@@ -389,7 +386,7 @@ class Results(myObject):
                 plt.cla()
                 self._plotLayerDepthPosterior()
 
-                
+
             cP.suptitle(title)
 
 
@@ -431,7 +428,7 @@ class Results(myObject):
                 self.allK[self.accepted].plot(x = ira, marker='o', markersize=1, linestyle='None', alpha=0.3)
                 plt.title('black = rejected')
 
-                
+
                 plt.figure(self.verboseFigs[2].number)
                 # Cross plot of current vs candidate prior
                 plt.sca(self.verboseAxs[11])
@@ -450,7 +447,7 @@ class Results(myObject):
                 plt.ylim([v1, v2])
                 plt.plot([v1,v2], [v1,v2])
 
-                # Prior ratio vs iteration              
+                # Prior ratio vs iteration
                 plt.figure(self.verboseFigs[3].number)
                 plt.sca(self.verboseAxs[16])
                 plt.cla()
@@ -460,7 +457,7 @@ class Results(myObject):
                 plt.ylim([v1, 5.0])
                 cP.ylabel('Prior Ratio')
 
-                
+
 
                 plt.figure(self.verboseFigs[2].number)
                 # Cross plot of the likelihood ratios
@@ -470,7 +467,7 @@ class Results(myObject):
                 y = StatArray.StatArray(self.ratioComponents[3, :], 'Current Likelihood')
                 x[~self.accepted].plot(x = y[~self.accepted], linestyle='', marker='.', color='k', alpha=0.3)
                 x[self.accepted].plot(x = y[self.accepted], linestyle='', marker='.', alpha=0.3)
-                
+
                 v2 = np.maximum(np.nanmax(x), np.nanmax(y)) + 5.0
                 v1 = v2 - 200.0
                 # v1 = -100.0
@@ -489,7 +486,7 @@ class Results(myObject):
                 r[self.accepted].plot(x = ira, marker='o', markersize=1, linestyle='None', alpha=0.3)
                 cP.ylabel('Likelihood Ratio')
                 plt.ylim([-20.0, 20.0])
-                
+
                 plt.figure(self.verboseFigs[2].number)
                 # Cross plot of the proposal ratios
                 plt.sca(self.verboseAxs[13])
@@ -519,7 +516,7 @@ class Results(myObject):
                 # v1 = np.maximum(np.minimum(np.nanmin(x), np.nanmin(y)), -200.0)
                 # v2 = np.maximum(np.nanmax(x), np.nanmax(y)) + 10.0
                 # v1 = v2 - 60.0
-                
+
                 # plt.plot([v1,v2], [v1,v2])
                 plt.xlim([v1, v2])
                 plt.ylim([v1, v2])
@@ -542,7 +539,7 @@ class Results(myObject):
                 x[~self.accepted].plot(x = irna, marker='o', markersize=1, linestyle='None', alpha=0.3, color='k')
                 x[self.accepted].plot(x = ira, marker='o', markersize=1, linestyle='None', alpha=0.3)
                 plt.ylim([-20.0, 20.0])
-                
+
 
                 self.fig.canvas.draw()
                 self.fig.canvas.flush_events()
@@ -599,7 +596,7 @@ class Results(myObject):
             self.bestDataPoint.plotPredicted(color=cP.wellSeparated[3], **kwargs)
         else:
             self.currentDataPoint.plotPredicted(color='g', **kwargs)
-            
+
 
     def _plotNumberOfLayersPosterior(self, **kwargs):
         """ Plot the histogram of the number of layers """
@@ -617,7 +614,7 @@ class Results(myObject):
             plt.axvline(self.bestDataPoint.z, color=cP.wellSeparated[3], linewidth=1)
         ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 
-    
+
     def _plotRelativeErrorPosterior(self, axes, **kwargs):
         """ Plots the histogram of the relative errors """
         self.currentDataPoint.relErr.plotPosteriors(axes=axes, **kwargs)
@@ -628,7 +625,7 @@ class Results(myObject):
                 plt.sca(a)
                 plt.axvline(self.bestDataPoint.relErr[i], color=cP.wellSeparated[3], linewidth=1)
                 a.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
-        
+
 
     def _plotAdditiveErrorPosterior(self, axes, **kwargs):
         """ Plot the histogram of the additive errors """
@@ -643,8 +640,8 @@ class Results(myObject):
         if self.burnedIn:
             log = p.log
             if (self.bestDataPoint.addErr[0] > p.bins[-1]):
-                log = 10 
-            
+                log = 10
+
             loc, dum = cF._log(self.bestDataPoint.addErr, log=log)
             for i, a in enumerate(axes):
                 plt.sca(a)
@@ -662,7 +659,7 @@ class Results(myObject):
         ax = self.currentModel.depth.posterior.plot(rotate=r, flipY=fY, trim=tr, **kwargs)
         ax.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
 
-    
+
     def _plotParameterPosterior(self, reciprocateX=False, credibleInterval = 95.0, opacityPercentage = 67.0, xlim=None, **kwargs):
         """ Plot the hitmap posterior of conductivity with depth """
 
@@ -942,7 +939,7 @@ class Results(myObject):
 #         self.bestDataPoint.writeHdf(grp, 'bestd')
 
 #         self.currentModel.writeHdf(grp, 'currentmodel')
-        
+
 #         # Write the Best Model
 #         self.bestModel.nCells._posterior = None
 #         self.bestModel.writeHdf(grp, 'bestmodel')
@@ -977,7 +974,7 @@ class Results(myObject):
 
         R.plotMe = True
         return R
-          
+
 
     def read_fromH5Obj(self, h5obj, fName, grpName, systemFilepath = ''):
         """ Reads a data points results from HDF5 file """
@@ -990,14 +987,14 @@ class Results(myObject):
 
         iNone = index is None
         fNone = fiducial is None
-        
+
         assert not (iNone and fNone) ^ (not iNone and not fNone), Exception("Must specify either an index OR a fiducial.")
 
         fiducials = StatArray.StatArray().fromHdf(hdfFile['fiducials'])
-        
+
         if not fNone:
             index = fiducials.searchsorted(fiducial)
-    
+
         s = np.s_[index, :]
 
         self.fiducial = np.float64(fiducials[index])
@@ -1027,12 +1024,12 @@ class Results(myObject):
             self.currentDataPoint = self.bestDataPoint
             p = hdfRead.readKeyFromFile(hdfFile,'','/','dzhist', index=index)
             self.currentDataPoint.z.setPosterior(p)
-        
-        
+
+
         # try:
         self.currentModel = hdfRead.readKeyFromFile(hdfFile,'','/','currentmodel', index=index)
         self.Hitmap = self.currentModel.par.posterior
-        self.currentModel.maxDepth = np.log(self.Hitmap.y.cellCentres[-1])            
+        self.currentModel.maxDepth = np.log(self.Hitmap.y.cellCentres[-1])
         # except:
         #     self.Hitmap = hdfRead.readKeyFromFile(hdfFile,'','/','hitmap', index=index)
 
@@ -1040,7 +1037,7 @@ class Results(myObject):
         self.bestModel = hdfRead.readKeyFromFile(hdfFile,'','/','bestmodel', index=index)
         self.bestModel.maxDepth = np.log(self.Hitmap.y.cellCentres[-1])
 
-        
+
 
         # self.kHist = hdfRead.readKeyFromFile(hdfFile,'','/','khist', index=i)
         # self.DzHist = hdfRead.readKeyFromFile(hdfFile,'','/','dzhist', index=i)
