@@ -3,7 +3,7 @@ Welcome to GeoBIPy: Geophysical Bayesian Inference in Python
 
 Citation:
 
-Foks, N. L., and Minsley, B. J. 2020. Geophysical Bayesian Inference in Python. https://doi.org/10.5066/P9K3YH9O
+Foks, N. L., and Minsley, B. J. 2020. Geophysical Bayesian Inference in Python (GeoBIPy). 10.5066/P9K3YH9O
 
 Background scientific references
 ::::::::::::::::::::::::::::::::
