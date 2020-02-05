@@ -53,9 +53,8 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
     bestPosterior = -np.inf #posterior#.copy()
 
     # Initialize the Chain
-    iBurn = 0
     i = 0
-    iBest = 1
+    iBest = 0
     multiplier = 1.0
 
     if userParameters.ignoreLikelihood:
@@ -99,7 +98,7 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
         Res.update(i, Mod, DataPoint, iBest, bestData, bestModel, multiplier, PhiD, posterior, posteriorComponents, ratioComponents, accepted, dimensionChange, userParameters.clipRatio)
 
         if Res.plotMe:
-            Res.plot("Fiducial {}".format(DataPoint.fiducial))
+            Res.plot("Fiducial {}".format(DataPoint.fiducial), increment=userParameters.plotEvery)
 
         i += 1
 

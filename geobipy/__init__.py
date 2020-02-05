@@ -456,11 +456,11 @@ def workerTask(_DataPoint, UP, prng, world, lineNumbers, LineResults):
         # If we continue running, receive the next DataPoint. Otherwise, shutdown the rank
         if continueRunning:
             DataPoint = _DataPoint.Irecv(source=0, world=world, systems=DataPoint.system)
-            communicationTime += MPI.Wtime() - t0
+#            communicationTime += MPI.Wtime() - t0
         else:
-            communicationTime += MPI.Wtime() - t0
-            s = str(timedelta(seconds = communicationTime))
-            print('Communicaton Time on Rank {} {} h:m:s'.format(world.rank, s))
+#            communicationTime += MPI.Wtime() - t0
+#            s = str(timedelta(seconds = communicationTime))
+#            print('Communicaton Time on Rank {} {} h:m:s'.format(world.rank, s))
             Go = False
 
 

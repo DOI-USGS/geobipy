@@ -316,7 +316,7 @@ class Results(myObject):
         # plt.draw()
 
 
-    def plot(self, title=""):
+    def plot(self, title="", increment=None):
         """ Updates the figures for MCMC Inversion """
         # Plots that change with every iteration
         if self.i == 0:
@@ -325,13 +325,14 @@ class Results(myObject):
         if (self.fig is None):
             self.initFigure()
 
-
-
         plt.figure(self.fig.number)
 
+        plot = True
+        if not increment is None:
+            if (np.mod(self.i, increment) != 0):
+                plot = False
 
-        if (np.mod(self.i, self.iPlot) == 0):
-
+        if plot:
             # Update the acceptance plot
             plt.sca(self.ax[0])
             plt.cla()
@@ -546,8 +547,7 @@ class Results(myObject):
                 for fig in self.verboseFigs:
                     fig.canvas.draw()
                     fig.canvas.flush_events()
-
-            cP.pause(1e-9)
+                cP.pause(1e-9)
 
 
     def _plotAcceptanceVsIteration(self, **kwargs):
@@ -581,7 +581,10 @@ class Results(myObject):
         plt.axhline(dum, color='#C92641', linestyle='dashed', linewidth=lw)
         if (self.burnedIn):
             plt.axvline(self.iBurn, color='#C92641', linestyle='dashed', linewidth=lw)
-            plt.axvline(self.iBest, color=cP.wellSeparated[3])
+            try:
+                plt.axvline(self.iBest, color=cP.wellSeparated[3])
+            except:
+                pass
         plt.yscale('log')
         ax.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
         plt.xlim([0, self.iRange[self.i]])
@@ -660,9 +663,12 @@ class Results(myObject):
         ax.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
 
 
-    def _plotParameterPosterior(self, reciprocateX=False, credibleInterval = 95.0, opacityPercentage = 67.0, xlim=None, **kwargs):
+    def _plotParameterPosterior(self, reciprocateX=False, credibleInterval = 95.0, opacityPercentage = 67.0, **kwargs):
         """ Plot the hitmap posterior of conductivity with depth """
 
+
+        xlim = kwargs.pop('xlim', None)
+        ylim = kwargs.pop('ylim', None)
 
         hm = self.currentModel.par.posterior
 
@@ -712,6 +718,11 @@ class Results(myObject):
 
         ax = plt.gca()
         lim = ax.get_ylim()
+
+        if not ylim is None:
+            ax.set_ylim(ylim)
+            lim = ax.get_ylim()
+
         if (lim[1] > lim[0]):
             ax.set_ylim(lim[::-1])
         plt.xscale('log')

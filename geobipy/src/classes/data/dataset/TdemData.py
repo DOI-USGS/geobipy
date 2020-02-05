@@ -109,6 +109,50 @@ class TdemData(Data):
 
         # self.iActive = self.getActiveChannels()
 
+    def __add__(self, other):
+
+        out = TdemData(self.nPoints + other.nPoints, self.nTimes, systems=self.system)
+
+        i1 = self.nPoints
+
+        out._lineNumber[:i1] = self.lineNumber
+        out._lineNumber[i1:] = other.lineNumber
+
+        out._fiducial[:i1] = self.fiducial
+        out._fiducial[i1:] = other.fiducial
+
+        out._x[:i1] = self.x
+        out._x[i1:] = other.x
+
+        out._y[:i1] = self.y
+        out._y[i1:] = other.y
+
+        out._z[:i1] = self.z
+        out._z[i1:] = other.z
+
+        out._elevation[:i1] = self.elevation
+        out._elevation[i1:] = other.elevation
+
+        out._data[:i1, :] = self.data
+        out._data[i1:, :] = other.data
+
+        out._predictedData[:i1, :] = self.predictedData
+        out._predictedData[i1:, :] = other.predictedData
+
+        out._std[:i1, :] = self.std
+        out._std[i1:, :] = other.std
+
+        out.T[:i1] = self.T
+        out.T[i1:] = other.T
+        # StatArray of Receiever loops
+        out.R[:i1] = self.R
+        out.R[i1:] = other.R
+        # Loop Offsets
+        out.loopOffset[:i1, :] = self.loopOffset
+        out.loopOffset[i1:, :] = other.loopOffset
+
+        return out
+
 
     @property
     def nTimes(self):
@@ -195,7 +239,7 @@ class TdemData(Data):
 
         self.readSystemFile(systemFilename)
         nPoints, iC, iR, iT, iOffset, iD, iS = self.__readColumnIndices(dataFilename, self.system)
-    
+
 
         TdemData.__init__(self, nPoints, systems=self.system)
 
@@ -264,7 +308,7 @@ class TdemData(Data):
         # self.iActive = self.getActiveChannels()
 
         self.check()
-  
+
 
     def readSystemFile(self, systemFilename):
         """ Reads in the C++ system handler using the system file name """
@@ -277,7 +321,7 @@ class TdemData(Data):
 
         for i in range(nSys):
             self.system[i] = TdemSystem().read(systemFilename[i])
-        
+
         self.nSystems = nSys
         self.nChannelsPerSystem = np.asarray([np.int32(x.nwindows()) for x in self.system])
 
@@ -286,7 +330,7 @@ class TdemData(Data):
 
     def __readColumnIndices(self, dataFilename, system):
         """Reads the column indices for the co-ordinates, loop orientations, and data from the TdemData file.
-        
+
         Parameters
         ----------
         dataFilename : str or list of str
@@ -318,13 +362,13 @@ class TdemData(Data):
 
         if isinstance(dataFilename, str):
             dataFilename = [dataFilename]
-        
+
         nSystems = len(system) if isinstance(system, list) else 1
         assert all(isinstance(s, TdemSystem) for s in system), TypeError("system must contain geobipy.TdemSystem classes.")
 
         # First get the number of points in each data file. They should be equal.
         nPoints = self._readNpoints(dataFilename)
-        
+
 
         for k, f in enumerate(dataFilename):
 
@@ -391,7 +435,7 @@ class TdemData(Data):
 
             i1 = -1
             i2 = -1
-            
+
             for j, channel in enumerate(channels):
                 if (channel in ['line']):
                     _indices[0] = j
@@ -447,7 +491,7 @@ class TdemData(Data):
 
         return nPoints, indices, rLoopIndices, tLoopIndices, offsetIndices, offdataIndices, offerrIndices
 
-    
+
     def _readNpoints(self, dataFilename):
         """Read the number of points in a data file
 
@@ -485,7 +529,7 @@ class TdemData(Data):
 
         # Read in the EM System file
         self.readSystemFile(systemFilename)
-        
+
         self._nPoints, self._iC, self._iR, self._iT, self._iOffset, self._iD, self._iS = self.__readColumnIndices(dataFileName, self.system)
 
         if isinstance(dataFileName, str):
@@ -499,7 +543,7 @@ class TdemData(Data):
 
         # Get all readable column indices for the first file.
         self._indicesForFile = []
-        
+
         for i in range(self.nSystems):
             tmp = [self._iC[i], self._iR[i], self._iT[i], self._iOffset[i], self._iD[i]]
             if not self._iS[i] is None:
@@ -625,7 +669,7 @@ class TdemData(Data):
                 while np.all(np.isnan(d)) and j > 0:
                     j -= 1
                     d = D[:, j]
-            
+
             s = np.nanstd(d)
             h +=    '  Minimum: {} \n'\
                     '  Maximum: {} \n'\
@@ -638,29 +682,29 @@ class TdemData(Data):
 
 
     def datapoint(self, index=None, fiducial=None):
-        """Get the ith data point from the data set 
-        
+        """Get the ith data point from the data set
+
         Parameters
         ----------
         index : int, optional
             Index of the data point to get.
         fiducial : float, optional
             Fiducial of the data point to get.
-            
+
         Returns
         -------
         out : geobipy.FdemDataPoint
             The data point.
-        
+
         Raises
         ------
         Exception
             If neither an index or fiducial are given.
-            
+
         """
         iNone = index is None
         fNone = fiducial is None
-        
+
         assert not (iNone and fNone) ^ (not iNone and not fNone), Exception("Must specify either an index OR a fiducial.")
 
         if not fNone:
@@ -761,15 +805,15 @@ class TdemData(Data):
 
 
     def plot(self, system=0, channels=None, xAxis='index', **kwargs):
-        """ Plots the data 
-        
+        """ Plots the data
+
         Parameters
         ----------
         system : int
             System to plot
         channels : sequence of ints
             Channels to plot
-        
+
         """
 
         x = self.getXAxis(xAxis)
@@ -784,7 +828,7 @@ class TdemData(Data):
             channels = np.atleast_1d(channels)
             for j, i in enumerate(channels):
                 cP.plot(x, self._data[:, i], label=self._channelNames[i], **kwargs)
-    
+
         box = ax.get_position()
         ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
 
@@ -793,7 +837,7 @@ class TdemData(Data):
         leg.set_title(self._data.getNameUnits())
 
         plt.xlabel(cF.getNameUnits(x))
-        
+
 
     def plotLine(self, line, xAxis='index', **kwargs):
 
@@ -850,7 +894,9 @@ class TdemData(Data):
         systems = []
         for i in range(nSystems):
             # Get the system file name. h5py has to encode strings using utf-8, so decode it!
-            systems.append(TdemSystem(join(systemFilepath, str(np.asarray(grp.get('System{}'.format(i))), 'utf-8'))))
+            filename = str(np.asarray(grp.get('System{}'.format(i))), 'utf-8')
+            td = TdemSystem().read(join(systemFilepath, filename))
+            systems.append(td)
 
         s = grp['d/data'].shape
 
@@ -907,7 +953,7 @@ class TdemData(Data):
             Colour values of the points, default is the height of the points
         i : sequence of ints, optional
             Plot a subset of x, y, c, using the indices in i
-            
+
         See Also
         --------
         geobipy.customPlots.Scatter2D : For additional keyword arguments you may use.
@@ -915,7 +961,7 @@ class TdemData(Data):
         """
 
         return Data.scatter2D(self, **kwargs)
-        
+
 
     def _BcastSystem(self, world, root=0, system=None):
         """Broadcast the TdemSystems.
@@ -931,7 +977,7 @@ class TdemData(Data):
         # So instead, Broadcast the list of system file names saved in the TdemData Class and read the system files in on each worker.
         # This is cumbersome, but only done once at the beginning of the MPI
         # code.
- 
+
         if system is None:
             if world.rank == root:
                 sfnTmp = []
@@ -940,7 +986,7 @@ class TdemData(Data):
             else:
                 sfnTmp = None
             systemFilename = world.bcast(sfnTmp, root=root)
-     
+
             nSystems = len(systemFilename)
 
             system = np.ndarray(nSystems, dtype=TdemSystem)
@@ -948,12 +994,12 @@ class TdemData(Data):
                     system[i] = TdemSystem(systemFilename[i])
 
         return system
-        
+
 
 
     def Bcast(self, world, root=0, system=None):
         """Broadcast the TdemData using MPI
-        
+
         Parameters
         ----------
 
@@ -963,7 +1009,7 @@ class TdemData(Data):
         nTimes = myMPI.Bcast(self.nTimes, world, root=root)
 
         systems = self._BcastSystem(world, root=root, system=system)
-        
+
         # Instantiate a new Time Domain Data set on each worker
         this = TdemData(nPoints, nTimes, systems)
 
@@ -1102,7 +1148,7 @@ class TdemData(Data):
                             d[:] = self.predictedData[j, iSys]
                         else:
                             d[:] = self.data[j, iSys]
-                        
+
                         if std:
                             s[:] = self.std[j, iSys]
                             x = np.hstack([x, d, s])

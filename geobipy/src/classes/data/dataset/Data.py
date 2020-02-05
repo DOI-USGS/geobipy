@@ -72,27 +72,22 @@ class Data(PointCloud3D):
 
         dataShape = [nPoints, self.nChannels]
         # StatArray of data
-        if not data is None:
-            assert np.allclose(np.shape(data), dataShape) or np.size(data) == nPoints, ValueError("data must have shape {}".format(dataShape))
-            self._data = StatArray.StatArray(data, order='F')
-        else:
-            self._data = StatArray.StatArray([nPoints, self.nChannels], "Data", dataUnits, order='F')
+        self.data = data
 
         # StatArray of Standard Deviations
         if not std is None:
             assert np.allclose(np.shape(std), dataShape), ValueError("std must have shape {}".format(dataShape))
             assert np.all(std > 0.0), ValueError("Cannot assign standard deviations that are <= 0.0.")
-            self._std = StatArray.StatArray(std, order='F')
+            self._std = StatArray.StatArray(std)
         else:
-            self._std = StatArray.StatArray(np.ones([nPoints, self.nChannels]), "Standard Deviation", dataUnits, order='F')
-
+            self._std = StatArray.StatArray(np.ones([nPoints, self.nChannels]), "Standard Deviation", dataUnits)
 
         # Create predicted data
         if not predictedData is None:
             assert np.allclose(np.shape(predictedData), dataShape), ValueError("predictedData must have shape {}".format(dataShape))
-            self._predictedData = StatArray.StatArray(predictedData, order='F')
+            self._predictedData = StatArray.StatArray(predictedData)
         else:
-            self._predictedData = StatArray.StatArray([nPoints, self.nChannels], "Predicted Data", dataUnits, order='F')
+            self._predictedData = StatArray.StatArray([nPoints, self.nChannels], "Predicted Data", dataUnits)
 
         # Assign the channel names
         if channelNames is None:
@@ -130,6 +125,15 @@ class Data(PointCloud3D):
         """The data. """
         return self._data
 
+    @data.setter
+    def data(self, values):
+        shp = [self.nPoints, self.nChannels]
+        if values is None:
+            self._data = StatArray.StatArray(shp, "Data")
+        else:
+            assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("data must have shape {}".format(shp))
+            self._data = StatArray.StatArray(values)
+
     @property
     def deltaD(self):
         """Get the difference between the predicted and observed data,
@@ -157,6 +161,10 @@ class Data(PointCloud3D):
     @property
     def lineNumber(self):
         return self._lineNumber
+
+    @property
+    def nActiveChannels(self):
+        return np.sum(self.active, axis=1)
 
     @property
     def nChannels(self):
@@ -237,8 +245,9 @@ class Data(PointCloud3D):
             The misfit value.
 
         """
-        PhiD = np.float64(np.sum((self.deltaD / self.std)**2.0, dtype=np.float64))
-        return PhiD if squared else np.sqrt(PhiD)
+        x = np.ma.MaskedArray((self.deltaD / self.std)**2.0, mask=~self.active)
+        dataMisfit = StatArray.StatArray(np.sum(x, axis=1), "Data misfit")
+        return dataMisfit if squared else np.sqrt(dataMisfit)
 
 
     def __getitem__(self, i):
@@ -260,7 +269,7 @@ class Data(PointCloud3D):
             Indices of non-NaN columns.
 
         """
-        return np.where(np.sum(np.isnan(self._data), 0) != self.nPoints)[0]
+        return ~np.isnan(self.data)
 
 
     def dataChannel(self, channel, system=None):

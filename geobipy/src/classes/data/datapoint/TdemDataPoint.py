@@ -486,7 +486,9 @@ class TdemDataPoint(EmDataPoint):
         systems = []
         for i in range(nSystems):
             # Get the system file name. h5py has to encode strings using utf-8, so decode it!
-            systems.append(TdemSystem(join(systemFilepath, str(np.asarray(grp.get('System{}'.format(i))), 'utf-8'))))
+            filename = join(systemFilepath, str(np.asarray(grp.get('System{}'.format(i))), 'utf-8'))
+            td = TdemSystem().read(filename)
+            systems.append(td)
 
         _aPoint = TdemDataPoint(x, y, z, e, system=systems)
 

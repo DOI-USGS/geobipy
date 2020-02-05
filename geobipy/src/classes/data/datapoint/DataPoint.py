@@ -182,7 +182,7 @@ class DataPoint(Point):
             Indices into the observed data that are not NaN
 
         """
-        return cf.findNotNans(self._data)
+        return cf.findNotNans(self.data)
 
 
     def likelihood(self, log):
