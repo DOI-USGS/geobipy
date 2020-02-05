@@ -44,7 +44,7 @@ class EmDataPoint(DataPoint):
     def relErr(self, values):
         assert np.size(values) == self.nSystems, ValueError("relativeError must have length {}".format(self.nSystems))
         self._relErr[:] = values
-    
+
     @property
     def addErr(self):
         return self._addErr
@@ -145,7 +145,7 @@ class EmDataPoint(DataPoint):
         if calibration:  # Calibration parameters
             P_calibration = self.calibration.probability(log=True)
             probability += P_calibration
-        
+
         if verbose:
             return probability, np.asarray([P_relative, P_additive, P_height, P_calibration])
         return probability
@@ -162,7 +162,7 @@ class EmDataPoint(DataPoint):
             Propose a new relative error.
         newAdditiveError : bool
             Propose a new additive error.
-        
+
         newCalibration : bool
             Propose new calibration parameters.
 
@@ -183,10 +183,10 @@ class EmDataPoint(DataPoint):
         """
         if (height):  # Update the candidate data elevation (if required)
             self.perturbHeight()
-            
+
         if (relativeError):
             self.perturbRelativeError()
-            
+
         if (additiveError):
             self.perturbAdditiveError()
 
@@ -209,14 +209,14 @@ class EmDataPoint(DataPoint):
         # Update the mean of the proposed errors
         self.addErr.proposal.mean = self.addErr
 
-    
+
     def perturbHeight(self):
         # Generate a new elevation
         self.z.perturb(imposePrior=True, log=True)
         # Update the mean of the proposed elevation
         self.z.proposal.mean = self.z
 
-    
+
     def perturbRelativeError(self):
         # Generate a new error
         self.relErr.perturb(imposePrior=True, log=True)
@@ -250,6 +250,78 @@ class EmDataPoint(DataPoint):
         cP.ylabel('Data misfit')
 
 
+    def setPriors(self, heightPrior=None, relativeErrorPrior=None, additiveErrorPrior=None):
+        """Set the priors on the datapoint's perturbable parameters
+
+        Parameters
+        ----------
+        heightPrior : geobipy.baseDistribution, optional
+            The prior to attach to the height. Must be univariate
+        relativeErrorPrior : geobipy.baseDistribution, optional
+            The prior to attach to the relative error.
+            If the datapoint has only one system, relativeErrorPrior is univariate.
+            If there are more than one system, relativeErrorPrior is multivariate.
+        additiveErrorPrior : geobipy.baseDistribution, optional
+            The prior to attach to the relative error.
+            If the datapoint has only one system, additiveErrorPrior is univariate.
+            If there are more than one system, additiveErrorPrior is multivariate.
+
+        """
+
+        if not heightPrior is None:
+            self.z.setPrior(heightPrior)
+
+        if not relativeErrorPrior is None:
+            self.relErr.setPrior(relativeErrorPrior)
+
+        if not additiveErrorPrior is None:
+            self.addErr.setPrior(additiveErrorPrior)
+
+
+    def setProposals(self, heightProposal, relativeErrorProposal, additiveErrorProposal):
+        """Set the proposals on the datapoint's perturbable parameters
+
+        Parameters
+        ----------
+        heightProposal : geobipy.baseDistribution, optional
+            The proposal to attach to the height. Must be univariate
+        relativeErrorProposal : geobipy.baseDistribution, optional
+            The proposal to attach to the relative error.
+            If the datapoint has only one system, relativeErrorProposal is univariate.
+            If there are more than one system, relativeErrorProposal is multivariate.
+        additiveErrorProposal : geobipy.baseDistribution, optional
+            The proposal to attach to the relative error.
+            If the datapoint has only one system, additiveErrorProposal is univariate.
+            If there are more than one system, additiveErrorProposal is multivariate.
+
+        """
+
+        if not heightProposal is None:
+            self.z.setProposal(heightProposal)
+
+        if not relativeErrorProposal is None:
+            self.relErr.setProposal(relativeErrorProposal)
+
+        if not additiveErrorProposal is None:
+            self.addErr.setProposal(additiveErrorProposal)
+
+
+    def setPosteriors(self):
+        # Create a histogram to set the height posterior.
+        self.setHeightPosterior()
+        # Initialize the histograms for the relative errors
+        self.setRelativeErrorPosterior()
+        # Set the posterior for the data point.
+        self.setAdditiveErrorPosterior()
+
+
+    def setHeightPosterior(self):
+
+        assert self.z.hasPrior, Exception("Must set a prior on the height")
+        H = Histogram1D(bins = StatArray.StatArray(self.z.prior.bins(), name=self.z.name, units=self.z.units), relativeTo=self.z)
+        self.z.setPosterior(H)
+
+
     def setAdditiveErrorPosterior(self):
 
         assert self.addErr.hasPrior, Exception("Must set a prior on the additive error")
@@ -262,43 +334,13 @@ class EmDataPoint(DataPoint):
         self.addErr.setPosterior([Histogram1D(bins = StatArray.StatArray(ab[i, :], name=self.addErr.name, units=self.data.units), relativeTo=binsMidpoint[i]) for i in range(self.nSystems)])
 
 
+    def setRelativeErrorPosterior(self):
 
-    def setAdditiveErrorPrior(self, minimum, maximum, prng=None):
-        minimum = np.atleast_1d(minimum)
-        assert minimum.size == self.nSystems, ValueError("minimum must have {} entries".format(self.nSystems))
-        assert np.all(minimum > 0.0), ValueError("minimum values must be > 0.0")
-        maximum = np.atleast_1d(maximum)
-        assert maximum.size == self.nSystems, ValueError("maximum must have {} entries".format(self.nSystems))
-        assert np.all(maximum > 0.0), ValueError("maximum values must be > 0.0")
-
-        self.addErr.setPrior('Uniform', minimum, maximum, prng=prng)
-
-    
-    def setAdditiveErrorProposal(self, means, variances, prng=None):
-        means = np.atleast_1d(means)
-        assert means.size == self.nSystems, ValueError("means must have {} entries".format(self.nSystems))
-        variances = np.atleast_1d(variances)
-        assert variances.size == self.nSystems, ValueError("variances must have {} entries".format(self.nSystems))
-        self.addErr.setProposal('MvNormal', means, variances, prng=prng)
-
-
-    def setRelativeErrorPrior(self, minimum, maximum, prng=None):
-
-        minimum = np.atleast_1d(minimum)
-        assert minimum.size == self.nSystems, ValueError("minimum must have {} entries".format(self.nSystems))
-        assert np.all(minimum > 0.0), ValueError("minimum values must be > 0.0")
-        maximum = np.atleast_1d(maximum)
-        assert maximum.size == self.nSystems, ValueError("maximum must have {} entries".format(self.nSystems))
-        assert np.all(maximum > 0.0), ValueError("maximum values must be > 0.0")
-        self.relErr.setPrior('Uniform', minimum, maximum, prng=prng)
-
-
-    def setRelativeErrorProposal(self, means, variances, prng=None):
-        means = np.atleast_1d(means)
-        assert means.size == self.nSystems, ValueError("means must have {} entries".format(self.nSystems))
-        variances = np.atleast_1d(variances)
-        assert variances.size == self.nSystems, ValueError("variances must have {} entries".format(self.nSystems))
-        self.relErr.setProposal('MvNormal', means, variances, prng=prng)
+        rBins = self.relErr.prior.bins()
+        if self.nSystems > 1:
+            self.relErr.setPosterior([Histogram1D(bins = StatArray.StatArray(rBins[i, :], name='$\epsilon_{Relative}x10^{2}$', units='%')) for i in range(self.nSystems)])
+        else:
+            self.relErr.setPosterior(Histogram1D(bins = StatArray.StatArray(rBins, name='$\epsilon_{Relative}x10^{2}$', units='%')))
 
 
     def summary(self, out=False):

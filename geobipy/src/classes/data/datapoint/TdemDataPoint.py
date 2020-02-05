@@ -63,9 +63,9 @@ class TdemDataPoint(EmDataPoint):
 
     Notes
     -----
-    The data argument is a set of lists with length equal to the number of systems.  
-    These data are unpacked and vertically concatenated in this class. 
-    The parameter self._data will have length equal to the sum of the number of time gates in each system.  
+    The data argument is a set of lists with length equal to the number of systems.
+    These data are unpacked and vertically concatenated in this class.
+    The parameter self._data will have length equal to the sum of the number of time gates in each system.
     The same is true for the errors, and the predicted data vector.
 
     """
@@ -129,7 +129,7 @@ class TdemDataPoint(EmDataPoint):
         self.system = systems
 
         self.getIplotActive()
-                
+
         # EmLoop Transnmitter
         self.T = deepcopy(T)
         # EmLoop Reciever
@@ -208,7 +208,7 @@ class TdemDataPoint(EmDataPoint):
 
         self._read_aarhus(dataFileName)
 
-    
+
     def _read_aarhus(self, dataFileName):
 
         if isinstance(dataFileName, str):
@@ -218,7 +218,7 @@ class TdemDataPoint(EmDataPoint):
         data = []
         std = []
 
-        
+
         for fName in dataFileName:
             with open(fName, 'r') as f:
                 # Header line
@@ -247,15 +247,15 @@ class TdemDataPoint(EmDataPoint):
                 # Data and standard deviation
                 times, d, s = self.__aarhus_data(f)
                 data.append(d)
-                std.append(s)
+                std.append(s*d)
 
-                system.append(TdemSystem(offTimes=times, 
-                                         transmitterLoop=transmitterLoop, 
-                                         receiverLoop=receiverLoop, 
-                                         loopOffset=loopOffset, 
-                                         waveform=waveform, 
+                system.append(TdemSystem(offTimes=times,
+                                         transmitterLoop=transmitterLoop,
+                                         receiverLoop=receiverLoop,
+                                         loopOffset=loopOffset,
+                                         waveform=waveform,
                                          offTimeFilters=offTimeFilters))
-                        
+
         TdemDataPoint.__init__(self, x, y, 0.0, elevation, data, std, system=system, lineNumber=lineNumber, fiducial=fiducial)
 
 
@@ -339,14 +339,13 @@ class TdemDataPoint(EmDataPoint):
         amplitude = np.empty(0)
         for i in range(nWaveforms):
             line = f.readline().strip().split()
-            nSegments = np.int32(line[0])
             tmp = np.asarray([np.float(x) for x in line[1:]])
             time = np.append(time, np.hstack([tmp[:2], tmp[5::4]]))
             amplitude = np.append(amplitude, np.hstack([tmp[2:4], tmp[6::5]]))
 
         return time, amplitude
 
-        
+
     def __aarhus_frontgate(self, f):
         line = f.readline().strip().split()
         nFilters = np.int(line[0])
@@ -357,7 +356,7 @@ class TdemDataPoint(EmDataPoint):
 
 
     def __aarhus_filters(self, f, nFilters):
-        
+
         filters = []
 
         for i in range(nFilters):
@@ -380,7 +379,7 @@ class TdemDataPoint(EmDataPoint):
 
         return filters
 
-    
+
     def __aarhus_data(self, f):
 
         time = []
@@ -396,7 +395,7 @@ class TdemDataPoint(EmDataPoint):
             std.append(np.float64(line[2]))
 
         return np.asarray(time), np.asarray(data), np.asarray(std)
-            
+
 
     def hdfName(self):
         """ Reprodicibility procedure """
@@ -613,12 +612,12 @@ class TdemDataPoint(EmDataPoint):
         cp.xlabel('Time (s)')
         cp.ylabel(cf.getNameUnits(self._data))
         cp.title(title)
-        
+
         if self.nSystems > 1:
             plt.legend()
 
         return ax
-    
+
 
     def plotPredicted(self, title='Time Domain EM Data', **kwargs):
 
@@ -628,7 +627,7 @@ class TdemDataPoint(EmDataPoint):
             cp.xlabel('Time (s)')
             cp.ylabel(cf.getNameUnits(self._predictedData))
             cp.title(title)
-        
+
         kwargs['color'] = kwargs.pop('color', cp.wellSeparated[3])
         kwargs['linewidth'] = kwargs.pop('linewidth', 2)
         kwargs['alpha'] = kwargs.pop('alpha', 0.7)
@@ -646,26 +645,16 @@ class TdemDataPoint(EmDataPoint):
 
     def plotDataResidual(self, title='', **kwargs):
 
-        
-        lw = kwargs.pop('linewidth',2)
-        a = kwargs.pop('alpha',0.7)
-
-        xscale = kwargs.pop('xscale','linear')
-        yscale = kwargs.pop('yscale','linear')
-
         for i in range(self.nSystems):
             iAct = self.iplotActive[i]
             dD = self.deltaD[self._systemIndices(i)]
             np.abs(dD[iAct]).plot(x=self.times(i)[iAct], **kwargs)
 
-        plt.xscale(xscale)
-        plt.yscale(yscale)
-
         plt.ylabel("|{}| ({})".format(dD.getName(), dD.getUnits()))
 
         cp.title(title)
 
-    
+
     def priorProbability(self, rErr, aErr, height, calibration, verbose=False):
         """Evaluate the probability for the EM data point given the specified attached priors
 
@@ -705,23 +694,25 @@ class TdemDataPoint(EmDataPoint):
         P_height = np.float64(0.0)
         P_calibration = np.float64(0.0)
 
-        if rErr:  # Relative Errors
-            P_relative = self.relErr.probability(log=True)
-            errProbability += P_relative
-        if aErr:  # Additive Errors
-            P_additive = self.addErr.probability(log=True)
-            errProbability += P_additive
-
         probability += errProbability
         if height:  # Elevation
             P_height = (self.z.probability(log=True))
             probability += P_height
+
+        if rErr:  # Relative Errors
+            P_relative = self.relErr.probability(log=True)
+            errProbability += P_relative
+
+        if aErr:  # Additive Errors
+            P_additive = self.addErr.probability(log=True)
+            errProbability += P_additive
+
         if calibration:  # Calibration parameters
             P_calibration = self.calibration.probability(log=True)
             probability += P_calibration
 
         probability = np.float64(probability)
-        
+
         if verbose:
             return probability, np.asarray([P_relative, P_additive, P_height, P_calibration])
         return probability
@@ -738,22 +729,22 @@ class TdemDataPoint(EmDataPoint):
         self.addErr.setPosterior([Histogram1D(bins = StatArray.StatArray(ab[i, :], name=self.addErr.name, units=self.data.units), log=10, relativeTo=binsMidpoint[i]) for i in range(self.nSystems)])
 
 
-    def setAdditiveErrorPrior(self, minimum, maximum, prng=None):
-        minimum = np.atleast_1d(minimum)
-        assert minimum.size == self.nSystems, ValueError("minimum must have {} entries".format(self.nSystems))
-        assert np.all(minimum > 0.0), ValueError("minimum values must be in linear space i.e. > 0.0")
-        maximum = np.atleast_1d(maximum)
-        assert maximum.size == self.nSystems, ValueError("maximum must have {} entries".format(self.nSystems))
-        assert np.all(maximum > 0.0), ValueError("maximum values must be in linear space i.e. > 0.0")
-        self.addErr.setPrior('Uniform', minimum, maximum, log=True, prng=prng)
+    # def setAdditiveErrorPrior(self, minimum, maximum, prng=None):
+    #     minimum = np.atleast_1d(minimum)
+    #     assert minimum.size == self.nSystems, ValueError("minimum must have {} entries".format(self.nSystems))
+    #     assert np.all(minimum > 0.0), ValueError("minimum values must be in linear space i.e. > 0.0")
+    #     maximum = np.atleast_1d(maximum)
+    #     assert maximum.size == self.nSystems, ValueError("maximum must have {} entries".format(self.nSystems))
+    #     assert np.all(maximum > 0.0), ValueError("maximum values must be in linear space i.e. > 0.0")
+    #     self.addErr.setPrior('Uniform', minimum, maximum, log=True, prng=prng)
 
-    
-    def setAdditiveErrorProposal(self, means, variances, prng=None):
-        means = np.atleast_1d(means)
-        assert means.size == self.nSystems, ValueError("means must have {} entries".format(self.nSystems))
-        variances = np.atleast_1d(variances)
-        assert variances.size == self.nSystems, ValueError("variances must have {} entries".format(self.nSystems))
-        self.addErr.setProposal('MvLogNormal', means, variances, linearSpace=True, prng=prng)
+
+    # def setAdditiveErrorProposal(self, means, variances, prng=None):
+    #     means = np.atleast_1d(means)
+    #     assert means.size == self.nSystems, ValueError("means must have {} entries".format(self.nSystems))
+    #     variances = np.atleast_1d(variances)
+    #     assert variances.size == self.nSystems, ValueError("variances must have {} entries".format(self.nSystems))
+    #     self.addErr.setProposal('MvLogNormal', means, variances, linearSpace=True, prng=prng)
 
 
     def updateErrors(self, relativeErr, additiveErr):
@@ -763,7 +754,7 @@ class TdemDataPoint(EmDataPoint):
         V0 is assumed to be ln(Error @ 1ms)
 
         Parameters
-        ----------  
+        ----------
         relativeErr : list of scalars or list of array_like
             A fraction percentage that is multiplied by the observed data. The list should have length equal to the number of systems. The entries in each item can be scalar or array_like.
         additiveErr : list of scalars or list of array_like
@@ -797,7 +788,7 @@ class TdemDataPoint(EmDataPoint):
             assert (np.all(relativeErr[i] > 0.0)), ValueError("relativeErr for system {} cannot contain values <= 0.0.".format(i+1))
             assert (np.all(additiveErr[i] > 0.0)), ValueError("additiveErr for system {} should contain values > 0.0. Make sure the values are in linear space".format(i+1))
             iSys = self._systemIndices(system=i)
-            
+
             # Compute the relative error
             rErr = relativeErr[i] * self._data[iSys]
             aErr = np.exp(np.log(additiveErr[i]) - 0.5 * np.log(self.times(i)) + t0)
@@ -817,7 +808,7 @@ class TdemDataPoint(EmDataPoint):
         perturbedLayer = mod.action[1]
 
         if(mod.action[0] == 'none'):  # Do Nothing!
-            J1[:, :] = self.J[:, :]      
+            J1[:, :] = self.J[:, :]
 
         elif (mod.action[0] == 'birth'):  # Created a layer
             J1[:, :perturbedLayer] = self.J[:, :perturbedLayer]
@@ -852,7 +843,7 @@ class TdemDataPoint(EmDataPoint):
         """ Compute the sensitivty matrix for the given model """
 
         assert isinstance(model, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
-        return tdem1dsen(self, model, ix, modelChanged)
+        return StatArray.StatArray(tdem1dsen(self, model, ix, modelChanged), 'Sensitivity', '$\\frac{V}{SAm^{3}}$')
 
 
     def _empymodForward(self, mod):
@@ -860,7 +851,7 @@ class TdemDataPoint(EmDataPoint):
         print('stuff')
 
     # def _simPEGForward(self, mod):
-        
+
     #     from SimPEG import Maps
     #     from simpegEM1D import (EM1DSurveyTD, EM1D, set_mesh_1d)
 
@@ -918,7 +909,7 @@ class TdemDataPoint(EmDataPoint):
     #         )
 
     #     prob.pair(simPEG_survey)
-            
+
     #     self._predictedData[:] = -simPEG_survey.dpred(mod.par)
 
 
@@ -929,7 +920,7 @@ class TdemDataPoint(EmDataPoint):
         if systems is None:
             for i in range(self.nSystems):
                 world.send(self.system[i].fileName, dest=dest)
-                
+
         self._data.Isend(dest, world)
         self._std.Isend(dest, world)
         self._predictedData.Isend(dest, world)
