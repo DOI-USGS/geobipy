@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>GeoBIPy - Geophysical Bayesian Inference in Python &mdash; GeoBIPy 1.0.0 documentation</title>
+  <title>Welcome to GeoBIPy: Geophysical Bayesian Inference in Python &mdash; GeoBIPy 1.0.0 documentation</title>
   
 
   
@@ -135,7 +135,7 @@
     
       <li><a href="#">Docs</a> &raquo;</li>
         
-      <li>GeoBIPy - Geophysical Bayesian Inference in Python</li>
+      <li>Welcome to GeoBIPy: Geophysical Bayesian Inference in Python</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -154,133 +154,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="geobipy-geophysical-bayesian-inference-in-python">
-<h1>GeoBIPy - Geophysical Bayesian Inference in Python<a class="headerlink" href="#geobipy-geophysical-bayesian-inference-in-python" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="welcome-to-geobipy-geophysical-bayesian-inference-in-python">
+<h1>Welcome to GeoBIPy: Geophysical Bayesian Inference in Python<a class="headerlink" href="#welcome-to-geobipy-geophysical-bayesian-inference-in-python" title="Permalink to this headline">¶</a></h1>
+<p>This package uses a Bayesian formulation and Markov chain Monte Carlo sampling methods to
+derive posterior distributions of subsurface and measured data properties.
+The current implementation is applied to time and frequency domain electromagnetic data.
+Application outside of these data types is in development.</p>
+<p>Currently there are two types of data that we have implemented; frequency domain electromagnetic data,
+and time domain electromagnetic data.
+The package comes with a frequency domain forward modeller, but it does not come with a time domain forward modeller.
+See the section <a class="reference internal" href="content/getting_started/installation.html#installing-time-domain-forward-modeller"><span class="std std-ref">Installing the time domain forward modeller</span></a> for more information.</p>
+<div class="section" id="using-geobipy-on-yeti">
+<h2>Using GeoBIPy on Yeti<a class="headerlink" href="#using-geobipy-on-yeti" title="Permalink to this headline">¶</a></h2>
+<p>There is no need to install GeoBIPy on Yeti.
+Simply type “module load python/geobipy” for the serial version of the code, mainly used for plotting results,
+or “module load python/pGeobipy” for a parallel enabled version.</p>
+<p><a class="reference external" href="https://github.com/usgs/geobipy/">Codebase is here!</a></p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="content/getting_started/getting_started.html">Getting Started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="content/getting_started/documentation.html">Documentation</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="content/getting_started/documentation.html#publication">Publication</a></li>
-<li class="toctree-l3"><a class="reference internal" href="content/getting_started/documentation.html#source-code-html-pages">Source code HTML pages</a></li>
-<li class="toctree-l3"><a class="reference internal" href="content/getting_started/documentation.html#jupyter-notebooks-to-illustrate-the-classes">Jupyter notebooks to illustrate the classes</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="content/getting_started/installation.html">Installing GeoBIPy</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="content/getting_started/installation.html#installing-a-serial-version-of-geobipy">Installing a serial version of GeoBIPy</a></li>
-<li class="toctree-l3"><a class="reference internal" href="content/getting_started/installation.html#installing-a-parallel-version-of-geobipy">Installing a parallel version of GeoBIPy</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="content/getting_started/installation.html#installing-mpi-and-mpi4py">Installing MPI and mpi4py</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="content/getting_started/installation.html#mpi">MPI</a></li>
-<li class="toctree-l5"><a class="reference internal" href="content/getting_started/installation.html#mpi4py">mpi4py</a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="content/getting_started/installation.html#installing-parallel-hdf5-and-h5py">Installing parallel HDF5 and h5py</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="content/getting_started/installation.html#hdf5">HDF5</a></li>
-<li class="toctree-l5"><a class="reference internal" href="content/getting_started/installation.html#h5py">h5py</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="content/getting_started/installation.html#installing-the-time-domain-forward-modeller">Installing the time domain forward modeller</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="content/getting_started/installation.html#prerequisites">Prerequisites</a></li>
-<li class="toctree-l4"><a class="reference internal" href="content/getting_started/installation.html#compile-the-gatdaem1d-shared-library">Compile the gatdaem1d shared library</a></li>
-<li class="toctree-l4"><a class="reference internal" href="content/getting_started/installation.html#installing-the-python-bindings">Installing the Python Bindings</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="content/getting_started/installation.html">Installing GeoBIPy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="content/getting_started/running_geobipy.html">Running GeoBIPy</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="content/api/api.html">API</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="content/api/base/base.html">Core routines needed for GeoBIPy</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="content/api/base/customFunctions.html">customFunctions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="content/api/base/customPlots.html">customPlots</a></li>
-<li class="toctree-l3"><a class="reference internal" href="content/api/base/fileIO.html">fileIO</a></li>
-<li class="toctree-l3"><a class="reference internal" href="content/api/base/interpolation.html">Interpolation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="content/api/base/HDF.html">Heirarchical Data Format (HDF)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="content/api/base/MPI.html">MPI wrapper functions</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="content/api/classes/classes.html">Classes used in GeoBIPy</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="content/api/classes/core/core.html">Core classes</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="content/api/classes/core/myObject.html">Core object class</a></li>
-<li class="toctree-l4"><a class="reference internal" href="content/api/classes/core/StatArray.html">StatArray</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="content/api/classes/data/data.html">Data classes</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="content/api/classes/data/dataset/dataset.html">Dataset classes</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="content/api/classes/data/dataset/Data.html">Data</a></li>
-<li class="toctree-l5"><a class="reference internal" href="content/api/classes/data/dataset/FdemData.html">FdemData</a></li>
-<li class="toctree-l5"><a class="reference internal" href="content/api/classes/data/dataset/TdemData.html">TemData</a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="content/api/classes/data/datapoint/datapointrst.html">Datapoint classes</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="content/api/classes/data/datapoint/datapoint.html">DataPoint</a></li>
-<li class="toctree-l5"><a class="reference internal" href="content/api/classes/data/datapoint/EmDataPoint.html">EmDataPoint</a></li>
-<li class="toctree-l5"><a class="reference internal" href="content/api/classes/data/datapoint/FdemDataPoint.html">FdemDataPoint</a></li>
-<li class="toctree-l5"><a class="reference internal" href="content/api/classes/data/datapoint/TdemDataPoint.html">TdemDataPoint</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="content/api/classes/mesh/mesh.html">Mesh classes</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="content/api/classes/mesh/RectilinearMesh1D.html">RectilinearMesh1D</a></li>
-<li class="toctree-l4"><a class="reference internal" href="content/api/classes/mesh/RectilinearMesh2D.html">RectilinearMesh2D</a></li>
-<li class="toctree-l4"><a class="reference internal" href="content/api/classes/mesh/TopoRectilinearMesh2D.html">TopoRectilinearMesh2D</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="content/api/classes/model/model.html">Model classes</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="content/api/classes/model/Model_.html">Model</a></li>
-<li class="toctree-l4"><a class="reference internal" href="content/api/classes/model/Model1D.html">Model1D</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="content/api/classes/pointcloud/pointcloud.html">Pointcloud classes</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="content/api/classes/pointcloud/Point.html">Point</a></li>
-<li class="toctree-l4"><a class="reference internal" href="content/api/classes/pointcloud/PointCloud3D.html">PointCloud3D</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="content/api/classes/statistics/statistics.html">Statistics classes</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="content/api/classes/statistics/Distribution.html">Distribution Wrapper</a></li>
-<li class="toctree-l4"><a class="reference internal" href="content/api/classes/statistics/Histogram1D.html">Histogram1D</a></li>
-<li class="toctree-l4"><a class="reference internal" href="content/api/classes/statistics/Histogram2D.html">Histogram2D</a></li>
-<li class="toctree-l4"><a class="reference internal" href="content/api/classes/statistics/Hitmap2D.html">Hitmap2D</a></li>
-<li class="toctree-l4"><a class="reference internal" href="content/api/classes/statistics/baseDistribution.html">baseDistribution</a></li>
-<li class="toctree-l4"><a class="reference internal" href="content/api/classes/statistics/NormalDistribution.html">Normal distribution</a></li>
-<li class="toctree-l4"><a class="reference internal" href="content/api/classes/statistics/MvNormalDistribution.html">MvNormal</a></li>
-<li class="toctree-l4"><a class="reference internal" href="content/api/classes/statistics/UniformDistribution.html">Uniform distribution</a></li>
-<li class="toctree-l4"><a class="reference internal" href="content/api/classes/statistics/GammaDistribution.html">Gamma Distribution</a></li>
-<li class="toctree-l4"><a class="reference internal" href="content/api/classes/statistics/OrderStatistics.html">Order Statistics</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="content/api/classes/system/system.html">System classes</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="content/api/classes/system/EmLoop.html">EmLoop</a></li>
-<li class="toctree-l4"><a class="reference internal" href="content/api/classes/system/CircularLoop.html">Circular Loop</a></li>
-<li class="toctree-l4"><a class="reference internal" href="content/api/classes/system/FdemSystem.html">Frequency domain system</a></li>
-<li class="toctree-l4"><a class="reference internal" href="content/api/classes/system/TdemSystem.html">Time domain system</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="content/api/base/base.html">Core routines needed for GeoBIPy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="content/api/classes/classes.html">Classes used in GeoBIPy</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="examples/index.html#distributions">Distributions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples/index.html#statistics">Statistics</a><ul>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="examples/index.html#meshes">Meshes</a><ul>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="examples/index.html#statistics">Statistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/index.html#meshes">Meshes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="examples/index.html#models">Models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples/index.html#data">Data</a><ul>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="examples/index.html#datapoints">Datapoints</a><ul>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="examples/index.html#data">Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/index.html#datapoints">Datapoints</a></li>
 </ul>
 </li>
 </ul>
+</div>
 </div>
 </div>
 
