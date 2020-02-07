@@ -501,7 +501,7 @@ Plot the posterior distributions
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  10.177 seconds)
+   **Total running time of the script:** ( 0 minutes  9.760 seconds)
 
 
 .. _sphx_glr_download_examples_Datapoints_plot_frequency_datapoint.py:
