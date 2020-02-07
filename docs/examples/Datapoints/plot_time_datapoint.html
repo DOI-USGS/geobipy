@@ -103,6 +103,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#obtaining-a-datapoint-from-a-dataset">Obtaining a datapoint from a dataset</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#using-a-time-domain-datapoint">Using a time domain datapoint</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#attaching-statistical-descriptors-to-the-datapoint">Attaching statistical descriptors to the datapoint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#file-format-for-a-time-domain-datapoint">File Format for a time domain datapoint</a></li>
 </ul>
 </li>
 </ul>
@@ -264,7 +265,7 @@
 </div>
 <img alt="../../_images/sphx_glr_plot_time_datapoint_001.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_001.png" />
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend object at 0x1290982d0&gt;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend object at 0x127d7cd50&gt;
 </pre></div>
 </div>
 <p>Define the transmitter and reciever loops</p>
@@ -306,7 +307,7 @@
 </div>
 <img alt="../../_images/sphx_glr_plot_time_datapoint_002.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_002.png" />
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.axes._subplots.AxesSubplot object at 0x129013590&gt;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.axes._subplots.AxesSubplot object at 0x126be60d0&gt;
 </pre></div>
 </div>
 </div>
@@ -324,7 +325,7 @@ AarhusInv data format.</p>
 </div>
 <img alt="../../_images/sphx_glr_plot_time_datapoint_003.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_003.png" />
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.axes._subplots.AxesSubplot object at 0x1296d1110&gt;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.axes._subplots.AxesSubplot object at 0x12a98e1d0&gt;
 </pre></div>
 </div>
 </div>
@@ -352,7 +353,7 @@ We can read in a dataset and pull datapoints from it.</p>
 </div>
 <img alt="../../_images/sphx_glr_plot_time_datapoint_004.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_004.png" />
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.axes._subplots.AxesSubplot object at 0x130565d10&gt;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.axes._subplots.AxesSubplot object at 0x12f95fe90&gt;
 </pre></div>
 </div>
 </div>
@@ -485,7 +486,66 @@ the relative error multiplier, and the additive error noise floor</p>
 </pre></div>
 </div>
 <img alt="../../_images/sphx_glr_plot_time_datapoint_012.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_012.png" />
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  8.762 seconds)</p>
+</div>
+<div class="section" id="file-format-for-a-time-domain-datapoint">
+<h2>File Format for a time domain datapoint<a class="headerlink" href="#file-format-for-a-time-domain-datapoint" title="Permalink to this headline">¶</a></h2>
+<p>Here we describe the file format for a time domain datapoint.</p>
+<p>For individual datapoints we are using the AarhusInv data format.</p>
+<p>Here we take the description for the AarhusInv TEM data file, modified to reflect what we can
+currently handle in GeoBIPy.</p>
+<dl class="simple">
+<dt>Line 1 :: string</dt><dd><p>User-defined label describing the TEM datapoint.
+This line must contain the following, separated by semicolons.
+XUTM=
+YUTM=
+Elevation=
+StationNumber=
+LineNumber=
+Current=</p>
+</dd>
+<dt>Line 2 :: first integer, sourceType</dt><dd><p>7 = Rectangular loop source parallel to the x - y plane</p>
+</dd>
+<dt>Line 2 :: second integer, polarization</dt><dd><p>3 = Vertical magnetic field</p>
+</dd>
+<dt>Line 3 :: 6 floats, transmitter and receiver offsets relative to X/Y UTM location.</dt><dd><p>If sourceType = 7, Position of the center loop sounding.</p>
+</dd>
+<dt>Line 4 :: Transmitter loop dimensions</dt><dd><p>If sourceType = 7, 2 floats.  Loop side length in the x and y directions</p>
+</dd>
+<dt>Line 5 :: Fixed</dt><dd><p>3 3 3</p>
+</dd>
+<dt>Line 6 :: first integer, transmitter waveform type. Fixed</dt><dd><p>3 = User defined waveform.</p>
+</dd>
+<dt>Line 6 :: second integer, number of transmitter waveforms. Fixed</dt><dd><p>1</p>
+</dd>
+<dt>Line 7 :: transmitter waveform definition</dt><dd><p>A user-defined waveform with piecewise linear segments.
+A full transmitter waveform definition consists of a number of linear segments
+This line contains an integer as the first entry, which specifies the number of
+segments, followed by each segment with 4 floats each. The 4 floats per segment
+are the start and end times, and start and end amplitudes of the waveform. e.g.
+3  -8.333e-03 -8.033e-03 0.0 1.0 -8.033e-03 0.0 1.0 1.0 0.0 5.4e-06 1.0 0.0</p>
+</dd>
+<dt>Line 8 :: On time information. Not used but needs specifying.</dt><dd><p>1 1 1</p>
+</dd>
+<dt>Line 9 :: On time low-pass filters.  Not used but need specifying.</dt><dd><p>0</p>
+</dd>
+<dt>Line 10 :: On time high-pass filters. Not used but need specifying.</dt><dd><p>0</p>
+</dd>
+<dt>Line 11 :: Front-gate time. Not used but need specifying.</dt><dd><p>0.0</p>
+</dd>
+<dt>Line 12 :: first integer, Number of off time filters</dt><dd><p>Number of filters</p>
+</dd>
+<dt>Line 12 :: second integer, Order of the butterworth filter</dt><dd><p>1 or 2</p>
+</dd>
+<dt>Line 12 :: cutoff frequencies Hz, one per the number of filters</dt><dd><p>e.g. 4.5e5</p>
+</dd>
+<dt>Line 13 :: Off time high pass filters.</dt><dd><p>See Line 12</p>
+</dd>
+</dl>
+<p>Lines after 13 contain 3 columns that pertain to
+Measurement Time, Data Value, Estimated Standard Deviation</p>
+<p>Example data files are contained in
+<a class="reference external" href="https://github.com/usgs/geobipy/tree/master/documentation_source/source/examples/supplementary/Data">the supplementary folder</a> in this repository</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  7.377 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-datapoints-plot-time-datapoint-py">
 <div class="sphx-glr-download docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/0e3aeb04e3a0e72a0de3fde32e818345/plot_time_datapoint.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_time_datapoint.py</span></code></a></p>

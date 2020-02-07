@@ -217,10 +217,15 @@
 <img alt="../../_images/sphx_glr_plot_time_domain_dataset_002.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_domain_dataset_002.png" />
 <p>Or, plot specific channels in the data</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
-<span class="n">_</span> <span class="o">=</span> <span class="n">TD</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">system</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="n">TD</span><span class="o">.</span><span class="n">active</span><span class="p">[:</span><span class="mi">3</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">TD</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">system</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
 <img alt="../../_images/sphx_glr_plot_time_domain_dataset_003.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_domain_dataset_003.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:663: RuntimeWarning: All-NaN axis encountered
+  if (np.nanmin(values) &lt;= 0.0):
+</pre></div>
+</div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">TD</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">system</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">xscale</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
@@ -256,11 +261,6 @@
 </pre></div>
 </div>
 <img alt="../../_images/sphx_glr_plot_time_domain_dataset_007.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_domain_dataset_007.png" />
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:663: RuntimeWarning: All-NaN axis encountered
-  if (np.nanmin(values) &lt;= 0.0):
-</pre></div>
-</div>
 </div>
 <div class="section" id="file-format-for-time-domain-data">
 <h2>File Format for time domain data<a class="headerlink" href="#file-format-for-time-domain-data" title="Permalink to this headline">¶</a></h2>
@@ -323,7 +323,7 @@ Optional columns are also described.</p>
 <p>We use GA-AEM for our airborne time domain forward modeller.</p>
 <p>Example system files are contained in
 <a class="reference external" href="https://github.com/usgs/geobipy/tree/master/documentation_source/source/examples/supplementary/Data">the supplementary folder</a> in this repository</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  6.074 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  7.215 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-data-plot-time-domain-dataset-py">
 <div class="sphx-glr-download docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/030d9288f2a570db74101e8a74392a6c/plot_time_domain_dataset.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_time_domain_dataset.py</span></code></a></p>
