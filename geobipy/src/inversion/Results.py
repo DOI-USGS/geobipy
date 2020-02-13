@@ -120,6 +120,7 @@ class Results(myObject):
         # Initialize the current iteration number
         # Current iteration number
         self.i = np.int64(0)
+        self.iBest = np.int64(0)
         # Initialize the vectors to save results
         # StatArray of the data misfit
         self.PhiDs = StatArray.StatArray(2 * self.nMC, name = 'Data Misfit')
@@ -136,7 +137,6 @@ class Results(myObject):
         self.iBurn = self.nMC
         self.burnedIn = False
         # Initialize the index for the best model
-        self.iBest = 0
         self.iBestV = StatArray.StatArray(2*self.nMC, name='Iteration of best model')
 
         self.iz = np.arange(model.par.posterior.y.nCells)
