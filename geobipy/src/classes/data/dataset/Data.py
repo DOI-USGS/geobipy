@@ -83,7 +83,6 @@ class Data(PointCloud3D):
         else:
             self._std = StatArray.StatArray(np.ones([nPoints, self.nChannels]), "Standard Deviation", dataUnits)
 
-
         # Create predicted data
         if not predictedData is None:
             assert np.allclose(np.shape(predictedData), dataShape), ValueError("predictedData must have shape {}".format(dataShape))
@@ -299,7 +298,7 @@ class Data(PointCloud3D):
             return StatArray.StatArray(self._data[:, self._systemOffset[system] + channel], self._channelNames[self._systemOffset[system] + channel], self._data.units)
 
 
-    def dataPoint(self, i):
+    def datapoint(self, i):
         """Get the ith data point from the data set
 
         Parameters

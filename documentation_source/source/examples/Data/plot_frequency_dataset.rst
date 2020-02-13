@@ -454,7 +454,7 @@ about how to use a datapoint once it is instantiated.
 
 .. code-block:: default
 
-    dp = FD1.dataPoint(0)
+    dp = FD1.datapoint(0)
 
 
 
@@ -474,13 +474,13 @@ Optional columns are also described.
 
 Required columns
 ________________
-line 
+line
     Line number for the data point
 fid
     Unique identification number of the data point
-x or northing or n 
+x or northing or n
     Northing co-ordinate of the data point, (m)
-y or easting or e 
+y or easting or e
     Easting co-ordinate of the data point, (m)
 z or alt
     Altitude of the transmitter coil above ground level (m)
@@ -524,18 +524,17 @@ rmom
 rx, ry, rz
     Offset of the receiver with respect to the transmitter location
 
-Example System File
-___________________
+Example system files are contained in
+`the supplementary folder`_ in this repository
 
-:raw-html:`freq  tor  tmom  tx   ty   tz   ror rmom  rx   ry   rz  <br />`
-:raw-html:`378   z    1     0.0  0.0  0.0  z   1     7.93 0.0  0.0 <br />`
-:raw-html:`1776  z    1     0.0  0.0  0.0  z   1     7.91 0.0  0.0 <br />`
-:raw-html:`...`
+.. _the supplementary folder: https://github.com/usgs/geobipy/tree/master/documentation_source/source/examples/supplementary/Data
+
+See the Resolve.stm files.
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  14.838 seconds)
+   **Total running time of the script:** ( 0 minutes  15.869 seconds)
 
 
 .. _sphx_glr_download_examples_Data_plot_frequency_dataset.py:

@@ -59,7 +59,7 @@ The name and units of the variable can be assigned to the StatArray.
     Name: Density
          Units: $\frac{g}{cc}$
          Shape: (1,)
-         Values: [-1.3668906]
+         Values: [0.04833848]
 
 
 
@@ -126,7 +126,7 @@ We can also attach a proposal distribution
     Name: Density
          Units: $\frac{g}{cc}$
          Shape: (1,)
-         Values: [-1.3668906]
+         Values: [0.04833848]
     Prior: 
          Uniform Distribution: 
       Min: :-2.0
@@ -183,7 +183,7 @@ The univariate proposal distribution can generate random samples from itself.
 
  .. code-block:: none
 
-    1.7152340979206393
+    -0.16258560484662074
 
 
 
@@ -206,7 +206,7 @@ Or we can only generate samples that simultaneously satisfy the prior.
 
  .. code-block:: none
 
-    [-1.1294916]
+    [-2.4914143]
 
 
 
@@ -233,7 +233,7 @@ We can perturb the variable by drawing from the attached proposal distribution.
     Name: Density
          Units: $\frac{g}{cc}$
          Shape: (1,)
-         Values: [-0.61832714]
+         Values: [0.34233591]
     Prior: 
          Uniform Distribution: 
       Min: :-2.0
@@ -356,7 +356,7 @@ This produces a single probability.
 
  .. code-block:: none
 
-    0.2083490998673292
+    0.3887585002949721
 
 
 
@@ -402,14 +402,14 @@ Perturb the variables using the multivariate proposal.
     Name: Density
          Units: $\frac{g}{cc}$
          Shape: (1,)
-         Values: [-0.50396056]
+         Values: [-0.95129238]
     Prior: 
          MV Normal Distribution: 
-        Mean: [-0.37227652]
+        Mean: [0.58724982]
         Variance: [[1.]]
     Proposal: 
     MV Normal Distribution: 
-        Mean: [1.06546388]
+        Mean: [-0.2890274]
         Variance: [[1.]]
     Posterior: 
     <class 'geobipy.src.classes.statistics.Histogram1D.Histogram1D'>
@@ -427,7 +427,7 @@ Perturb the variables using the multivariate proposal.
     Name: Frequency
          Units: 
          Shape: (100,)
-         Values: [2 3 0 ... 1 6 1]
+         Values: [5 1 2 ... 1 2 1]
     Values are logged to base None
     Relative to: None
 
@@ -1511,19 +1511,19 @@ We can also define a 2D array
     Name: Density
          Units: $\frac{g}{cc}$
          Shape: (50, 100)
-         Values: [[-1.02185333  0.0764024   0.30802494 ... -1.0960928   0.4562974
-      -0.14501831]
-     [ 1.33069842 -1.52421278  1.66985993 ...  2.20341486  0.98628737
-       0.51596217]
-     [-1.97371101  0.68703975 -0.44291096 ...  0.03436172 -0.37907208
-       0.15585545]
+         Values: [[-0.76262567 -0.17556843  1.2098995  ... -0.2198543   0.04722925
+      -1.27520348]
+     [ 0.87908492  1.63600464  0.25059843 ...  0.45418674 -0.73050834
+       0.38176816]
+     [-0.99129689  0.9949903  -0.06647767 ... -1.30740983  0.30287877
+       0.37163589]
      ...
-     [ 0.06806889  0.92554339 -0.73785471 ...  1.44330499 -2.68247145
-       1.03640365]
-     [-0.09989437  0.15657618 -1.11088502 ...  0.688795    0.13306229
-       0.5156951 ]
-     [-0.24049048  0.49649917 -0.27505995 ...  0.03535032  0.48336258
-       1.71040532]]
+     [-0.78199343  1.12307188  0.4910513  ...  0.52124272 -0.422361
+       0.09574152]
+     [ 0.1803172   0.93884976  0.13458922 ...  1.04561263 -0.0720353
+       0.71376766]
+     [ 2.24390028  0.29312725  0.0026816  ...  0.95824103  0.2827294
+      -0.00553283]]
 
 
 
@@ -1769,7 +1769,7 @@ Create a stacked area plot of a 2D StatArray
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.591 seconds)
+   **Total running time of the script:** ( 0 minutes  3.589 seconds)
 
 
 .. _sphx_glr_download_examples_Statistics_plot_StatArray.py:

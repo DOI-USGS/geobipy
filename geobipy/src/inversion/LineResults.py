@@ -126,7 +126,7 @@ class LineResults(myObject):
 
     @property
     def additiveErrorPosteriors(self):
-        return self.data.addErr.posterior
+        return self.data._addErr.posterior
 
 
     @cached_property
@@ -695,7 +695,7 @@ class LineResults(myObject):
             return self.computeOpacity()
 
 
-    def computeOpacity(self, percent=95.0, log=10, multiplier=0.5, useDOI=True):
+    def computeOpacity(self, percent=95.0, log=10, multiplier=0.5):
 
 
         if 'opacity' in self.__dict__:
@@ -707,13 +707,6 @@ class LineResults(myObject):
         mx = np.nanmax(tmp)
 
         opacity = 1.0 - StatArray.StatArray(tmp, "Opacity", "").normalize(axis=0)
-
-        if useDOI:
-            indices = self.mesh.z.cellIndex(self.doi)
-
-            for i in range(self.nPoints):
-                opacity[:indices[i], i] = 1.0
-
 
         if 'opacity' in self.hdfFile.keys():
             del self.hdfFile['opacity']
@@ -779,7 +772,7 @@ class LineResults(myObject):
     @property
     def relativeErrorPosteriors(self):
         """ Get the Relative error of the best data points """
-        return self.data.relErr.posterior
+        return self.data._relErr.posterior
 
 
     def getResults(self, index=None, fiducial=None, reciprocateParameter=False):
@@ -1365,11 +1358,19 @@ class LineResults(myObject):
         return self.plotXsection(values = values, useVariance = useVariance, **kwargs)
 
 
-    def plotXsection(self, values, useVariance=False, **kwargs):
+    def plotXsection(self, values, useVariance=False, cutoffDOI=True, **kwargs):
         """ Plot a cross-section of the parameters """
 
         if useVariance:
-            kwargs['alpha'] = self.opacity
+            opacity = self.opacity.copy()
+
+            if cutoffDOI:
+                indices = self.mesh.z.cellIndex(self.doi)
+
+                for i in range(self.nPoints):
+                    opacity[:indices[i], i] = 1.0
+
+            kwargs['alpha'] = opacity
 
         ax, pm, cb = self.mesh.pcolor(values = values, **kwargs)
         return ax, pm, cb

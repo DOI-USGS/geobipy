@@ -294,6 +294,44 @@ The profile of data misfit vs halfspace conductivity is not quadratic, so a bise
 </dd></dl>
 
 <dl class="method">
+<dt id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setPriors">
+<code class="sig-name descname">setPriors</code><span class="sig-paren">(</span><em class="sig-param">heightPrior=None</em>, <em class="sig-param">relativeErrorPrior=None</em>, <em class="sig-param">additiveErrorPrior=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setPriors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the priors on the datapoint’s perturbable parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>heightPrior</strong> (<em>geobipy.baseDistribution</em><em>, </em><em>optional</em>) – The prior to attach to the height. Must be univariate</p></li>
+<li><p><strong>relativeErrorPrior</strong> (<em>geobipy.baseDistribution</em><em>, </em><em>optional</em>) – The prior to attach to the relative error.
+If the datapoint has only one system, relativeErrorPrior is univariate.
+If there are more than one system, relativeErrorPrior is multivariate.</p></li>
+<li><p><strong>additiveErrorPrior</strong> (<em>geobipy.baseDistribution</em><em>, </em><em>optional</em>) – The prior to attach to the relative error.
+If the datapoint has only one system, additiveErrorPrior is univariate.
+If there are more than one system, additiveErrorPrior is multivariate.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setProposals">
+<code class="sig-name descname">setProposals</code><span class="sig-paren">(</span><em class="sig-param">heightProposal</em>, <em class="sig-param">relativeErrorProposal</em>, <em class="sig-param">additiveErrorProposal</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setProposals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the proposals on the datapoint’s perturbable parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>heightProposal</strong> (<em>geobipy.baseDistribution</em><em>, </em><em>optional</em>) – The proposal to attach to the height. Must be univariate</p></li>
+<li><p><strong>relativeErrorProposal</strong> (<em>geobipy.baseDistribution</em><em>, </em><em>optional</em>) – The proposal to attach to the relative error.
+If the datapoint has only one system, relativeErrorProposal is univariate.
+If there are more than one system, relativeErrorProposal is multivariate.</p></li>
+<li><p><strong>additiveErrorProposal</strong> (<em>geobipy.baseDistribution</em><em>, </em><em>optional</em>) – The proposal to attach to the relative error.
+If the datapoint has only one system, additiveErrorProposal is univariate.
+If there are more than one system, additiveErrorProposal is multivariate.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
 <dt id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.summary">
 <code class="sig-name descname">summary</code><span class="sig-paren">(</span><em class="sig-param">out=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.summary" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print a summary of the EMdataPoint</p>

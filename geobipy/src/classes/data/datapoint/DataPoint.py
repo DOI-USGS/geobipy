@@ -119,7 +119,7 @@ class DataPoint(Point):
             with size equal to the number of active channels.
 
         """
-        return StatArray.StatArray(self._predictedData - self._data, name="Data residual", units=self._data.units)
+        return StatArray.StatArray(self._predictedData - self._data, name="$\\mathbf{Fm} - \\mathbf{d}_{obs}$", units=self._data.units)
 
     @property
     def elevation(self):
@@ -221,7 +221,6 @@ class DataPoint(Point):
         PhiD = np.float64(np.sum((cf.Ax(tmp2, self.deltaD[self.active]))**2.0, dtype=np.float64))
         return PhiD if squared else np.sqrt(PhiD)
 
-
     def scaleJ(self, Jin, power=1.0):
         """ Scales a matrix by the errors in the given data
 
@@ -304,6 +303,19 @@ class DataPoint(Point):
 
         if self._predictedData.hasPrior:
             self._predictedData.prior.variance[np.diag_indices(self.nActiveChannels)] = tmp[self.active]
+
+
+    def updatePosteriors(self):
+        """Update any attached posteriors"""
+
+        if self.z.hasPosterior:
+            self.z.updatePosterior()
+
+        if self.relErr.hasPosterior:
+            self.relErr.updatePosterior()
+
+        if self.addErr.hasPosterior:
+            self.addErr.updatePosterior()
 
 
     def Isend(self, dest, world):

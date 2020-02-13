@@ -205,10 +205,7 @@ class Results(myObject):
             model.updatePosteriors(clipRatio)
 
             # Update the height posterior
-            dataPoint.z.updatePosterior()
-            dataPoint.relErr.updatePosterior()
-
-            dataPoint.addErr.updatePosterior()
+            dataPoint.updatePosteriors()
 
             if (self.verbose):
                 iTmp = self.i - self.iBurn
