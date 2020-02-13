@@ -71,6 +71,7 @@ class Data(PointCloud3D):
         PointCloud3D.__init__(self, nPoints, x, y, z, elevation)
 
         dataShape = [nPoints, self.nChannels]
+
         # StatArray of data
         self.data = data
 

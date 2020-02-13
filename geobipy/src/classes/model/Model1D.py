@@ -18,7 +18,7 @@ from copy import deepcopy
 class Model1D(Model):
     """Class extension to geobipy.Model
 
-    Class creates a representation of the 1D layered earth. 
+    Class creates a representation of the 1D layered earth.
     The class contains parameters that describe the physical property of each layer, as well as the layer
     thicknesses and interface depths. The model maintains a half space as the lowest layer with infinite extent.
     This class allows a probability wheel to be assigned such that the 1D layered earth can be peturbed. i.e.
@@ -38,7 +38,7 @@ class Model1D(Model):
         Depths to the lower interface of each layer above the halfspace. Do not provide if thickness is given.
     thickness : geobipy.StatArray, optional
         Thickness of each layer above the halfspace. Do not provide if depths are given.
-        
+
     Returns
     -------
     out : Model1D
@@ -74,7 +74,7 @@ class Model1D(Model):
             self._nCells[0] = nCells
 
         # Depth to the top of the model
-        if top is None: 
+        if top is None:
             top = 0.0
         self._top = StatArray.StatArray(top, "Depth to top", "m")
 
@@ -109,7 +109,7 @@ class Model1D(Model):
         self.Hitmap = None
         self._inverseHessian = None
 
-    
+
     @property
     def nCells(self):
         return self._nCells
@@ -146,7 +146,7 @@ class Model1D(Model):
             self._depth[:-1] = depth
             self._depth[-1] = np.inf
             self.thicknessFromDepth()
-            
+
 
         if (not thickness is None):
             if nCells is None:
@@ -212,7 +212,7 @@ class Model1D(Model):
 
     def deepcopy(self):
         """Create a deepcopy
-        
+
         Returns
         -------
         out : geobipy.Model1D
@@ -244,7 +244,7 @@ class Model1D(Model):
 
     def pad(self, size):
         """Copies the properties of a model including all priors or proposals, but pads memory to the given size
-        
+
         Parameters
         ----------
         size : int
@@ -290,7 +290,7 @@ class Model1D(Model):
         if self.hasHalfspace:
             self._thk[-1] = np.inf
 
-        
+
     def localParameterVariance(self, dataPoint):
         """Generate a localized inverse Hessian matrix using a dataPoint and the current realization of the Model1D.
 
@@ -314,12 +314,12 @@ class Model1D(Model):
 
         # Propose new layer conductivities
         self._inverseHessian = np.linalg.inv(WdJTWdJ + self.par.prior.derivative(x=None, order=2))
-        
+
         return self._inverseHessian
 
 
     def updateLocalParameterVariance(self, dataPoint):
-        """Generate a localized Hessian matrix using 
+        """Generate a localized Hessian matrix using
         a dataPoint and the current realization of the Model1D.
 
 
@@ -346,12 +346,12 @@ class Model1D(Model):
             # # Propose new layer conductivities
             # self._inverseHessian = np.linalg.inv(WdJTWdJ + self.par.prior.derivative(x=None, order=2))
             self.localParameterVariance(dataPoint)
-                
+
         else:  # There was no change in the model
 
             if self.inverseHessian is None:
                 self.localParameterVariance(dataPoint)
-        
+
         return self.inverseHessian
 
 
@@ -363,10 +363,10 @@ class Model1D(Model):
         ----------
         z : numpy.float64
             Depth at which to insert a new interface
-        par : numpy.float64, optional 
+        par : numpy.float64, optional
             Value of the parameter for the new layer
             If None, The value of the split layer is duplicated.
-            
+
         Returns
         -------
         out : geobipy.Model1D
@@ -405,7 +405,7 @@ class Model1D(Model):
 
     def deleteLayer(self, i):
         """Remove a layer from the model
-        
+
         Parameters
         ----------
         i : int
@@ -415,7 +415,7 @@ class Model1D(Model):
         -------
         out : geobipy.Model1D
             Model with layer removed.
-        
+
         """
 
         if (self.nCells == 0):
@@ -465,11 +465,11 @@ class Model1D(Model):
         -------
         out[0] : Model1D
             The perturbed model
-            
+
         See Also
         --------
         geobipy.Model1D.makePerturbable : Must be used before calling self.perturb
-        
+
         """
         assert (not self.eventProposal is None), ValueError('Please set the proposals of the model1D with model1D.addProposals()')
         prng = self.nCells.prior.prng
@@ -593,7 +593,7 @@ class Model1D(Model):
         .. math::
             :label: layers
 
-            p(k | I) = 
+            p(k | I) =
             \\begin{cases}
             \\frac{1}{k_{max} - 1} & \\quad 1 \leq k \leq k_{max} \\newline
             0 & \\quad otherwise
@@ -608,7 +608,7 @@ class Model1D(Model):
 
             p(\\boldsymbol{z} | k, I) = \\frac{(k -1)!}{\prod_{i=0}^{k-1} \Delta z_{i}},
 
-        where the numerator describes the number of ways that :math:`(k - 1)` interfaces can be ordered and 
+        where the numerator describes the number of ways that :math:`(k - 1)` interfaces can be ordered and
         :math:`\Delta z_{i} = (z_{max} - z_{min}) - 2 i h_{min}` describes the depth interval that is available to place a layer when there are already i interfaces in the model
 
         **Prior on the physical parameter**
@@ -617,7 +617,7 @@ class Model1D(Model):
 
         .. math::
             :label: parameter
-            
+
             p(\\boldsymbol{\sigma} | k, I) = \\left[(2\pi)^{k} |\\boldsymbol{C}_{\\boldsymbol{\sigma}0}|\\right]^{-\\frac{1}{2}} e ^{-\\frac{1}{2}(\\boldsymbol{\sigma} - \\boldsymbol{\sigma}_{0})^{T} \\boldsymbol{C}_{\\boldsymbol{\sigma} 0}^{-1} (\\boldsymbol{\sigma} - \\boldsymbol{\sigma}_{0})}
 
         **Prior on the gradient of the physical parameter with depth**
@@ -644,7 +644,7 @@ class Model1D(Model):
             h_{min} = \\frac{z_{max} - z_{min}}{2 k_{max}}
 
         where :math:`k_{max}` is a maximum number of layers, set to be far greater than the expected final solution.
-        
+
         Parameters
         ----------
         sPar : bool
@@ -715,7 +715,7 @@ class Model1D(Model):
 
             q(k, \\boldsymbol{z} | \\boldsymbol{m}^{'})
 
-        and 
+        and
 
         .. math::
             :label: proposal denominator
@@ -758,7 +758,7 @@ class Model1D(Model):
         prng = self.par.proposal.prng
 
         # Create a multivariate normal distribution centered on the shifted parameter values, and with variance computed from the forward step.
-        # We don't recompute the variance using the perturbed parameters, because we need to check that we could in fact step back from 
+        # We don't recompute the variance using the perturbed parameters, because we need to check that we could in fact step back from
         # our perturbed parameters to the unperturbed parameters. This is the crux of the reversible jump.
         tmp = Distribution('MvLogNormal', np.exp(np.log(self.par) - SN_step_from_perturbed), self.inverseHessian, linearSpace=True, prng=prng)
         # Probability of jumping from our perturbed parameter values to the unperturbed values.
@@ -786,7 +786,7 @@ class Model1D(Model):
             proposal1 += reverse.probability(1, log=True)
 
         return proposal, proposal1
-            
+
 
     # def reversibleJumpProbabilities(self):
 
@@ -816,9 +816,9 @@ class Model1D(Model):
 
     def perturb(self, datapoint=None):
         """Perturb a model's structure and parameter values.
-        
+
         Uses a stochastic newtown approach if a datapoint is provided.
-        Otherwise, uses the existing proposal distribution attached to 
+        Otherwise, uses the existing proposal distribution attached to
         self.par to generate new values.
 
         Parameters
@@ -832,7 +832,7 @@ class Model1D(Model):
             The current model remapped onto the perturbed dimension.
         perturbedModel : geobipy.Model1D
             The model with perturbed structure and parameter values.
-        
+
         """
 
         if datapoint is None:
@@ -844,14 +844,14 @@ class Model1D(Model):
             return remappedModel, perturbedModel
         else:
             return self.stochasticNewtonPerturbation(datapoint)
-        
+
 
 
     def stochasticNewtonPerturbation(self, datapoint):
 
         # Perturb the structure of the model
         remappedModel = self.perturbStructure()
-        
+
         # Update the local Hessian around the current model.
         inverseHessian = remappedModel.updateLocalParameterVariance(datapoint)
 
@@ -887,7 +887,7 @@ class Model1D(Model):
 
         return remappedModel, perturbedModel
 
-        
+
     def setPosteriors(self):
 
         assert not self.maxLayers is None, ValueError("No priors are set, user Model1D.setPriors() to do so.")
@@ -903,7 +903,7 @@ class Model1D(Model):
         else:
             tmp = 4.0 * np.log(11.0)
             p = np.linspace(self._halfSpaceParameter - tmp, self._halfSpaceParameter + tmp, 251)
-        
+
         pGrd = StatArray.StatArray(p, self.par.name, self.par.units)
 
         # Set the posterior hitmap for conductivity vs depth
@@ -938,7 +938,7 @@ class Model1D(Model):
             Tuning parameter used in the std of the parameter prior.
         prng : numpy.random.RandomState(), optional
             Random number generator, if none is given, will use numpy's global generator.
-               
+
         See Also
         --------
         geobipy.Model1D.perturb : For a description of the perturbation cycle.
@@ -947,13 +947,13 @@ class Model1D(Model):
         assert minDepth > 0.0, ValueError("minDepth must be > 0.0")
         assert maxDepth > 0.0, ValueError("maxDepth must be > 0.0")
         assert maxLayers > 0.0, ValueError("maxLayers must be > 0.0")
-        
+
         if (minThickness is None):
             # Assign a minimum possible thickness
             self.minThickness = (maxDepth - minDepth) / (2 * maxLayers)
         else:
             self.minThickness = minThickness
-            
+
         self.minDepth = minDepth  # Assign the log of the min depth
         self.maxDepth = maxDepth  # Assign the log of the max depth
         self.maxLayers = np.int32(maxLayers)
@@ -998,7 +998,7 @@ class Model1D(Model):
             The proposal  distribution for the parameter.
         prng : numpy.random.RandomState(), optional
             Random number generator, if none is given, will use numpy's global generator.
-               
+
         See Also
         --------
         geobipy.Model1D.perturb : For a description of the perturbation cycle.
@@ -1006,7 +1006,7 @@ class Model1D(Model):
         """
         assert np.size(probabilities) == 4, ValueError('pWheel must have size 4')
         # assert not self.maxLayers is None, Exception("Please set the priors on the model with setPriors()")
-        
+
         self.eventProposal = Distribution('Categorical', np.asarray(probabilities), ['birth', 'death', 'perturb', 'noChange'], prng=prng)
 
         self.par.setProposal(parameterProposal)
@@ -1039,7 +1039,7 @@ class Model1D(Model):
             h_{min} = \\frac{z_{max} - z_{min}}{2 k_{max}}
 
         where :math:`k_{max}` is a maximum number of layers, set to be far greater than the expected final solution.
-        
+
         Parameters
         ----------
         hmin : float64
@@ -1049,7 +1049,7 @@ class Model1D(Model):
         -------
         out : numpy.float64
             The probability given the prior on the gradient of the parameters with depth.
-        
+
         """
         assert (self.dpar.hasPrior), TypeError('No prior defined on parameter gradient. Use Model1D.dpar.addPrior() to set the prior.')
 
@@ -1125,7 +1125,7 @@ class Model1D(Model):
         grid : bool, optional
             Plot the grid
         noColorbar : bool, optional
-            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.   
+            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
         trim : bool, optional
             Set the x and y limits to the first and last non zero values along each axis.
 
@@ -1148,12 +1148,12 @@ class Model1D(Model):
                 if (self.nCells > 1):
                     d[-1] = 1.1 * z[-2]
                 else:
-                    d[0] = 1.0               
+                    d[0] = 1.0
             else:
                 d[-1] = 1.1 * self.maxDepth
 
         ax = self.par.pcolor(*args, y = d + self.top, **kwargs)
-        
+
         if self.hasHalfspace:
             h = 0.99*d[-1]
             if (self.nCells == 1):
@@ -1190,12 +1190,12 @@ class Model1D(Model):
         flipY = kwargs.pop('flipY', True)
         kwargs['flipY'] = flipY
         kwargs['xscale'] = kwargs.pop('xscale', 'linear')
-        
+
         # Repeat the last entry
         par = self.par.append(self.par[-1])
         if (reciprocateX):
             par = 1.0 / par
-            
+
         z = self.depth.prepend(0.0)
         if self.hasHalfspace:
             if (self.maxDepth is None):
@@ -1228,7 +1228,7 @@ class Model1D(Model):
             The probability of the model given the hitmap.
 
         """
-         
+
         iM = self.par2mesh(Hitmap)
         tmp = np.sum(Hitmap.arr[:, iM])
         return tmp / np.sum(Hitmap.arr)
@@ -1237,7 +1237,7 @@ class Model1D(Model):
     def asHistogram2D(self, variance, Hist):
         """ Creates a Hitmap from the model given the variance of each layer.
 
-        For each depth, creates a normal distribution with a mean equal to the interpolated parameter 
+        For each depth, creates a normal distribution with a mean equal to the interpolated parameter
         at that depth and variance specified with variance.
 
         Parameters
@@ -1245,7 +1245,7 @@ class Model1D(Model):
         variance : array_like
             The variance of each layer
         Hitmap : geobipy.Hitmap
-            Hitmap to convert the model to.  
+            Hitmap to convert the model to.
             Must be instantiated before calling so that the model can be interpolated correctly
 
         """
@@ -1283,15 +1283,15 @@ class Model1D(Model):
 
 
     def addToHitMap(self, Hitmap):
-        """ Imposes a model's parameters with depth onto a 2D Hitmap. 
-        
+        """ Imposes a model's parameters with depth onto a 2D Hitmap.
+
         The cells that the parameter-depth profile passes through are accumulated by 1.
 
         Parameters
         ----------
         Hitmap : geobipy.Hitmap
             The hitmap to add to
-        
+
         """
         iM = self.getParMeshXIndex(Hitmap)
         if self.hasHalfspace:
@@ -1299,7 +1299,7 @@ class Model1D(Model):
         else:
             i = Hitmap.y.cellIndex(self.depth[-1], clip=True)
             iz = np.arange(i)
-        
+
         Hitmap._counts[iz, iM] += 1
 
 
@@ -1311,7 +1311,7 @@ class Model1D(Model):
 
     def getParMeshXIndex(self, mesh):
         """ Interpolate the model parameters to a 2D rectilinear mesh.
-        
+
         Uses piece wise constant interpolation of the parameter-depth profile to the y axis of the mesh.
         Then the indices into the mesh x axis for those interpolated values are returned.
 
@@ -1333,7 +1333,7 @@ class Model1D(Model):
 
     def interpPar2Mesh(self, par, mesh, matchTop=False, bound=False):
         """ Interpolate the model parameters to a 2D rectilinear mesh.
-        
+
         Uses piece wise constant interpolation of the parameter-depth profile to the y axis of the mesh.
 
         Parameters
@@ -1421,7 +1421,7 @@ class Model1D(Model):
         par = self.interpPar2Mesh(self.par, Hitmap)
 
         return np.all(par > sLow) and np.all(par < sHigh)
-        
+
 
     def updatePosteriors(self, minimumRatio=0.5):
         """Update any attached posterior distributions.
@@ -1455,8 +1455,8 @@ class Model1D(Model):
     def hdfName(self):
         """Create a string that describes class instantiation
 
-        Returns a string that should be used as an attr['repr'] in a HDF group.  
-        This allows reading of the attribute from the hdf file, evaluating it to return an object, 
+        Returns a string that should be used as an attr['repr'] in a HDF group.
+        This allows reading of the attribute from the hdf file, evaluating it to return an object,
         and then reading the hdf contents via the object's methods.
 
         Returns
@@ -1471,13 +1471,13 @@ class Model1D(Model):
     def createHdf(self, parent, myName, withPosterior=True, nRepeats=None, fillvalue=None):
         """Create the Metadata for a Model1D in a HDF file
 
-        Creates a new group in a HDF file under h5obj. 
-        A nested heirarchy will be created. 
-        This method can be used in an MPI parallel environment, if so however, 
-        a) the hdf file must have been opened with the mpio driver, and 
-        b) createHdf must be called collectively, 
-        i.e., called by every core in the MPI communicator that was used to open the file. 
-        In order to create large amounts of empty space before writing to it in parallel, 
+        Creates a new group in a HDF file under h5obj.
+        A nested heirarchy will be created.
+        This method can be used in an MPI parallel environment, if so however,
+        a) the hdf file must have been opened with the mpio driver, and
+        b) createHdf must be called collectively,
+        i.e., called by every core in the MPI communicator that was used to open the file.
+        In order to create large amounts of empty space before writing to it in parallel,
         the nRepeats parameter will extend the memory in the first dimension.
 
         Parameters
@@ -1487,17 +1487,17 @@ class Model1D(Model):
         myName : str
             The name of the group to create.
         nRepeats : int, optional
-            Inserts a first dimension into the first dimension of each attribute of the Model1D of length nRepeats. 
-            This can be used to extend the available memory of the Model1D so that multiple MPI ranks can write to 
+            Inserts a first dimension into the first dimension of each attribute of the Model1D of length nRepeats.
+            This can be used to extend the available memory of the Model1D so that multiple MPI ranks can write to
             their respective parts in the extended memory.
         fillvalue : number, optional
             Initializes the memory in file with the fill value
 
         Notes
         -----
-        This method can be used in serial and MPI. As an example in MPI. 
-        Given 10 MPI ranks, each with a 10 length array, it is faster to create a 10x10 empty array, 
-        and have each rank write its row. Rather than creating 10 separate length 10 arrays because 
+        This method can be used in serial and MPI. As an example in MPI.
+        Given 10 MPI ranks, each with a 10 length array, it is faster to create a 10x10 empty array,
+        and have each rank write its row. Rather than creating 10 separate length 10 arrays because
         the overhead when creating the file metadata can become very cumbersome if done too many times.
 
         Example
@@ -1516,7 +1516,7 @@ class Model1D(Model):
         >>> tmp.createHdf(f, 'models', nRepeats=world.size)
 
         >>> world.barrier()
-        
+
         >>> # In a non collective region, we can write to different sections of x in the file
         >>> # Fake a non collective region
         >>> def noncollectivewrite(model, file, world):
@@ -1567,11 +1567,11 @@ class Model1D(Model):
     def writeHdf(self, h5obj, myName, withPosterior=True, index=None):
         """Create the Metadata for a Model1D in a HDF file
 
-        Creates a new group in a HDF file under h5obj. 
-        A nested heirarchy will be created. 
-        This method can be used in an MPI parallel environment, if so however, a) the hdf file must have been opened with the mpio driver, 
-        and b) createHdf must be called collectively, i.e., called by every core in the MPI communicator that was used to open the file. 
-        In order to create large amounts of empty space before writing to it in parallel, the nRepeats parameter will extend the memory 
+        Creates a new group in a HDF file under h5obj.
+        A nested heirarchy will be created.
+        This method can be used in an MPI parallel environment, if so however, a) the hdf file must have been opened with the mpio driver,
+        and b) createHdf must be called collectively, i.e., called by every core in the MPI communicator that was used to open the file.
+        In order to create large amounts of empty space before writing to it in parallel, the nRepeats parameter will extend the memory
         in the first dimension.
 
         Parameters
@@ -1585,9 +1585,9 @@ class Model1D(Model):
 
         Notes
         -----
-        This method can be used in serial and MPI. As an example in MPI. 
-        Given 10 MPI ranks, each with a 10 length array, it is faster to create a 10x10 empty array, and have each rank write its row.  
-        Rather than creating 10 separate length 10 arrays because the overhead when creating the file metadata can become very 
+        This method can be used in serial and MPI. As an example in MPI.
+        Given 10 MPI ranks, each with a 10 length array, it is faster to create a 10x10 empty array, and have each rank write its row.
+        Rather than creating 10 separate length 10 arrays because the overhead when creating the file metadata can become very
         cumbersome if done too many times.
 
         Example
@@ -1606,7 +1606,7 @@ class Model1D(Model):
         >>> tmp.createHdf(f, 'models', nRepeats=world.size)
 
         >>> world.barrier()
-        
+
         >>> # In a non collective region, we can write to different sections of x in the file
         >>> # Fake a non collective region
         >>> def noncollectivewrite(model, file, world):
@@ -1626,9 +1626,9 @@ class Model1D(Model):
         nCells = self.nCells[0]
 
         if (index is None):
-            i = np.s_[:nCells]
+            index = np.s_[:nCells]
         else:
-            i = np.s_[index, :nCells]
+            index = np.s_[index, :nCells]
 
         self.depth.writeHdf(grp, 'depth',  withPosterior=withPosterior, index=index)
         self.thk.writeHdf(grp, 'thk',  withPosterior=withPosterior, index=index)
@@ -1640,9 +1640,9 @@ class Model1D(Model):
     def toHdf(self, hObj, myName):
         """Write the Model1D to an HDF object
 
-        Creates and writes a new group in a HDF file under h5obj. 
-        A nested heirarchy will be created.  
-        This function modifies the file metadata and writes the contents at the same time and 
+        Creates and writes a new group in a HDF file under h5obj.
+        A nested heirarchy will be created.
+        This function modifies the file metadata and writes the contents at the same time and
         should not be used in a parallel environment.
 
         Parameters
