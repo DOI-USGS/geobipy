@@ -128,7 +128,13 @@ _ = line.plot(xAxis='x', log=10)
 ################################################################################
 # File Format for a time domain system
 # ++++++++++++++++++++++++++++++++++++
+# Please see Page 13 of Ross Brodie's `instructions`_
+# 
+# .. _instructions: https://github.com/GeoscienceAustralia/ga-aem/blob/master/docs/GA%20AEM%20Programs%20User%20Manual.pdf
 #
+# We use GA-AEM for our airborne time domain forward modeller.
 #
-# .. role:: raw-html(raw)
-#    :format: html
+# Example system files are contained in 
+# `the supplementary folder`_ in this repository
+#
+# .. _the supplementary folder: https://github.com/usgs/geobipy/tree/master/documentation_source/source/examples/supplementary/Data

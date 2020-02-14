@@ -120,6 +120,7 @@ class Results(myObject):
         # Initialize the current iteration number
         # Current iteration number
         self.i = np.int64(0)
+        self.iBest = np.int64(0)
         # Initialize the vectors to save results
         # StatArray of the data misfit
         self.PhiDs = StatArray.StatArray(2 * self.nMC, name = 'Data Misfit')
@@ -136,7 +137,7 @@ class Results(myObject):
         self.iBurn = self.nMC
         self.burnedIn = False
         # Initialize the index for the best model
-        self.iBest = 0
+        self.iBest = np.int32(0)
         self.iBestV = StatArray.StatArray(2*self.nMC, name='Iteration of best model')
 
         self.iz = np.arange(model.par.posterior.y.nCells)
@@ -194,8 +195,8 @@ class Results(myObject):
 
     def update(self, i, model, dataPoint, iBest, bestDataPoint, bestModel, multiplier, PhiD, posterior, posteriorComponents, ratioComponents, accepted, dimensionChange, clipRatio):
         """Update the posteriors of the McMC algorithm. """
-        self.i = np.int64(i)
-        self.iBest = np.int64(iBest)
+        self.i = np.int32(i)
+        self.iBest = np.int32(iBest)
         self.PhiDs[self.i - 1] = PhiD.copy()  # Store the data misfit
         self.multiplier = np.float64(multiplier)
 
@@ -205,10 +206,7 @@ class Results(myObject):
             model.updatePosteriors(clipRatio)
 
             # Update the height posterior
-            dataPoint.z.updatePosterior()
-            dataPoint.relErr.updatePosterior()
-
-            dataPoint.addErr.updatePosterior()
+            dataPoint.updatePosteriors()
 
             if (self.verbose):
                 iTmp = self.i - self.iBurn
@@ -261,23 +259,19 @@ class Results(myObject):
 
         gs = gridspec.GridSpec(nRows, nCols)
         gs.update(wspace=0.3 * self.nSystems, hspace=6.0)
-        self.ax = [None]*(7 + (2 * self.nSystems))
+        self.ax = []
 
-        self.ax[0] = plt.subplot(gs[:3, :self.nSystems]) # Acceptance Rate
-        self.ax[1] = plt.subplot(gs[3:6, :self.nSystems]) # Data misfit vs iteration
-        self.ax[2] = plt.subplot(gs[6:9, :self.nSystems]) # Histogram of data point elevations
-        self.ax[3] = plt.subplot(gs[9:12, :self.nSystems]) # Histogram of # of layers
-        self.ax[4] = plt.subplot(gs[:6,self.nSystems:2 * self.nSystems]) # Data fit plot
-        self.ax[5] = plt.subplot(gs[6:12,self.nSystems:2 * self.nSystems]) # 1D layer plot
+        self.ax.append(plt.subplot(gs[:3, :self.nSystems])) # Acceptance Rate 0
+        self.ax.append(plt.subplot(gs[3:6, :self.nSystems])) # Data misfit vs iteration 1
+        self.ax.append(plt.subplot(gs[6:9, :self.nSystems])) # Histogram of data point elevations 2
+        self.ax.append(plt.subplot(gs[9:12, :self.nSystems])) # Histogram of # of layers 3
+        self.ax.append(plt.subplot(gs[:6,self.nSystems:2 * self.nSystems])) # Data fit plot 4
+        self.ax.append(plt.subplot(gs[6:12,self.nSystems:2 * self.nSystems])) # 1D layer plot 5
+        self.ax.append(plt.subplot(gs[6:12, 2 * self.nSystems:])) # Histogram of layer depths 6
         # Histogram of data errors
-        j = 5
         for i in range(self.nSystems):
-            self.ax[j+1] = plt.subplot(gs[:3, 2 * self.nSystems + i]) # Relative Errors
-            self.ax[j+2] = plt.subplot(gs[3:6,2 * self.nSystems + i]) # Additive Errors
-            j += 2
-
-        # Histogram of layer depths
-        self.ax[(2*self.nSystems)+6] = plt.subplot(gs[6:12, 2 * self.nSystems:])
+            self.ax.append(plt.subplot(gs[1:5, 2 * self.nSystems + i])) # Relative Errors
+            # self.ax[j+2] = plt.subplot(gs[3:6,2 * self.nSystems + i]) # Additive Errors
 
         for ax in self.ax:
             cP.pretty(ax)
@@ -357,7 +351,6 @@ class Results(myObject):
             self._plotParameterPosterior(reciprocateX=self.reciprocateParameter, noColorbar=True)
 
             if (self.burnedIn):
-
                 # Histogram of the data point elevation
                 plt.sca(self.ax[2])
                 plt.cla()
@@ -370,28 +363,22 @@ class Results(myObject):
                 self._plotNumberOfLayersPosterior()
                 self.ax[3].xaxis.set_major_locator(MaxNLocator(integer=True))
 
-
-
-                j = 5
-                relativeAxes = []
-                additiveAxes = []
-                # Get the axes for the relative and additive errors
-                for i in range(self.nSystems):
-                    # Update the histogram of relative data errors
-                    relativeAxes.append(self.ax[j+1])
-                    additiveAxes.append(self.ax[j+2])
-                    j += 2
-
-                self._plotRelativeErrorPosterior(axes=relativeAxes)
-                self._plotAdditiveErrorPosterior(axes=additiveAxes)
-
                 # Update the layer depth histogram
-                plt.sca(self.ax[(2 * self.nSystems) + 6])
+                plt.sca(self.ax[6])
                 plt.cla()
                 self._plotLayerDepthPosterior()
 
+                j = 7
+                self._plotErrorPosterior(axes=self.ax[7:])
+
+                # self._plotRelativeErrorPosterior(axes=relativeAxes)
+                # self._plotAdditiveErrorPosterior(axes=additiveAxes)
+
 
             cP.suptitle(title)
+
+            self.fig.canvas.draw()
+            self.fig.canvas.flush_events()
 
 
             if self.verbose & self.burnedIn:
@@ -545,12 +532,10 @@ class Results(myObject):
                 plt.ylim([-20.0, 20.0])
 
 
-                self.fig.canvas.draw()
-                self.fig.canvas.flush_events()
                 for fig in self.verboseFigs:
                     fig.canvas.draw()
                     fig.canvas.flush_events()
-                cP.pause(1e-9)
+            cP.pause(1e-9)
 
 
     def _plotAcceptanceVsIteration(self, **kwargs):
@@ -595,8 +580,6 @@ class Results(myObject):
 
     def _plotObservedPredictedData(self, **kwargs):
         """ Plot the observed and predicted data """
-
-
         self.currentDataPoint.plot(**kwargs)
         if self.burnedIn:
             self.bestDataPoint.plotPredicted(color=cP.wellSeparated[3], **kwargs)
@@ -621,38 +604,60 @@ class Results(myObject):
         ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 
 
-    def _plotRelativeErrorPosterior(self, axes, **kwargs):
-        """ Plots the histogram of the relative errors """
-        self.currentDataPoint.relErr.plotPosteriors(axes=axes, **kwargs)
+    def _plotErrorPosterior(self, axes, **kwargs):
 
-        if self.burnedIn:
-            plt.locator_params(axis='x', nbins=4)
-            for i, a in enumerate(axes):
-                plt.sca(a)
-                plt.axvline(self.bestDataPoint.relErr[i], color=cP.wellSeparated[3], linewidth=1)
-                a.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+        tmp = self.currentDataPoint.errorPosterior[0].x
+        log = tmp.log
+        if (self.bestDataPoint.addErr[0] > tmp.cellEdges[-1]):
+            log = 10
+        loc, _ = cF._log(self.bestDataPoint.addErr, log=log)
+
+        for i in range(self.nSystems):
+            ax = axes[i]
+            ax.cla()
+            self.currentDataPoint.errorPosterior[i].plot(ax=ax, cmap='gray_r', noColorbar=True)
+            plt.sca(ax)
+            plt.axhline(self.bestDataPoint.relErr[i], color=cP.wellSeparated[3], linewidth=1)
+            plt.axvline(loc[i], color=cP.wellSeparated[3], linewidth=1)
+
+            if i > 0:
+                plt.ylabel('')
+
+    # def _plotRelativeErrorPosterior(self, axes, **kwargs):
+    #     """ Plots the histogram of the relative errors """
+
+    #     for i in range(self.currentDataPoint.nSystems):
+    #         axes[i].cla()
+    #         p = self.currentDataPoint.errorPosterior[i]
+    #         p.marginalHistogram(axis=1).plot(ax=axes[i], **kwargs)
+
+    #     if self.burnedIn:
+    #         plt.locator_params(axis='x', nbins=4)
+    #         for i, a in enumerate(axes):
+    #             plt.sca(a)
+    #             plt.axvline(self.bestDataPoint.relErr[i], color=cP.wellSeparated[3], linewidth=1)
+    #             a.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 
 
-    def _plotAdditiveErrorPosterior(self, axes, **kwargs):
-        """ Plot the histogram of the additive errors """
-        self.currentDataPoint.addErr.plotPosteriors(axes=axes, **kwargs)
-        plt.locator_params(axis='x', nbins=4)
+    # def _plotAdditiveErrorPosterior(self, axes, **kwargs):
+    #     """ Plot the histogram of the additive errors """
+    #     # self.currentDataPoint.addErr.plotPosteriors(axes=axes, **kwargs)
+    #     for i in range(self.currentDataPoint.nSystems):
+    #         axes[i].cla()
+    #         p = self.currentDataPoint.errorPosterior[i]
+    #         p.marginalHistogram(axis=0).plot(ax=axes[i], **kwargs)
+    #         plt.locator_params(axis='x', nbins=4)
 
-        if self.currentDataPoint.addErr.nPosteriors == 1:
-            p = self.currentDataPoint.addErr.posterior
-        else:
-            p = self.currentDataPoint.addErr.posterior[0]
+    #     if self.burnedIn:
+    #         log = p.x.log
+    #         if (self.bestDataPoint.addErr[0] > p.xBins[-1]):
+    #             log = 10
 
-        if self.burnedIn:
-            log = p.log
-            if (self.bestDataPoint.addErr[0] > p.bins[-1]):
-                log = 10
-
-            loc, dum = cF._log(self.bestDataPoint.addErr, log=log)
-            for i, a in enumerate(axes):
-                plt.sca(a)
-                plt.axvline(loc[i], color=cP.wellSeparated[3], linewidth=1)
-                a.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+    #         loc, _ = cF._log(self.bestDataPoint.addErr, log=log)
+    #         for i, a in enumerate(axes):
+    #             plt.sca(a)
+    #             plt.axvline(loc[i], color=cP.wellSeparated[3], linewidth=1)
+    #             a.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 
 
     def _plotLayerDepthPosterior(self, **kwargs):
@@ -746,10 +751,9 @@ class Results(myObject):
 
     def toPNG(self, directory, fiducial, dpi=300):
        """ save a png of the results """
-       fig = plt.figure(0)
-       fig.set_size_inches(19, 11)
+       self.fig.set_size_inches(19, 11)
        figName = join(directory, '{}.png'.format(fiducial))
-       plt.savefig(figName, dpi=dpi)
+       self.fig.savefig(figName, dpi=dpi)
 
        if (self.verbose):
            fig = plt.figure(1)

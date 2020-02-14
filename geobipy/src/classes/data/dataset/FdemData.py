@@ -22,7 +22,7 @@ except:
 
 class FdemData(Data):
     """Class extension to geobipy.Data defining a Fourier domain electro magnetic data set
-    
+
     FdemData(nPoints, nFrequencies, system)
 
     Parameters
@@ -45,7 +45,7 @@ class FdemData(Data):
     FdemData.read() requires a data filename and a system class or system filename to be specified.
     The data file is structured using columns with the first line containing header information.
     The header should contain the following entries
-    Line [ID or FID] [X or N or northing] [Y or E or easting] [Z or DTM or dem_elev] [Alt or Laser or bheight] [I Q] ... [I Q] 
+    Line [ID or FID] [X or N or northing] [Y or E or easting] [Z or DTM or dem_elev] [Alt or Laser or bheight] [I Q] ... [I Q]
     Do not include brackets []
     [I Q] are the in-phase and quadrature values for each measurement frequency.
 
@@ -117,11 +117,6 @@ class FdemData(Data):
         return np.int32(0.5 * self.nChannelsPerSystem)
 
     @property
-    def data(self):
-        """The data"""
-        return self._data
-
-    @property
     def magnetic(self):
         return self._magnetic
 
@@ -130,20 +125,10 @@ class FdemData(Data):
         return self._powerline
 
     @property
-    def predictedData(self):
-        """The predicted data"""
-        return self._predictedData
-
-    @property
-    def std(self):
-        """The standard deviation"""
-        return self._std
-
-    @property
     def channelNames(self):
         return self._channelNames
 
-    
+
     def check(self):
         if (np.any(self._data[~np.isnan(self._data)] <= 0.0)):
             print("Warning: Your data contains values that are <= 0.0")
@@ -186,7 +171,7 @@ class FdemData(Data):
             'InphaseErr[0] QuadratureErr[0] ... InphaseErr[nFrequencies] QuadratureErr[nFrequencies]\n'
             '    Estimates of standard deviation for each inphase and quadrature measurement.')
         return s
-            
+
 
     @property
     def nActiveData(self):
@@ -200,7 +185,7 @@ class FdemData(Data):
             Number of active data
 
         """
-        
+
         return np.sum(~np.isnan(self._data, 1))
 
 
@@ -252,8 +237,8 @@ class FdemData(Data):
 
 
     # def getChannel(self, channel):
-    #     """Gets the data in the specified channel 
-        
+    #     """Gets the data in the specified channel
+
     #     Parameters
     #     ----------
     #     channel : int
@@ -291,7 +276,7 @@ class FdemData(Data):
         -------
         out : str
             Either "In-Phase " or "Quadrature "
-        
+
         """
         return 'In-Phase' if channel < self.nFrequencies[system] else 'Quadrature'
 
@@ -316,8 +301,8 @@ class FdemData(Data):
 
 
     # def getLine(self, line):
-    #     """Gets the data in the given line number 
-        
+    #     """Gets the data in the given line number
+
     #     Parameters
     #     ----------
     #     line : float
@@ -327,7 +312,7 @@ class FdemData(Data):
     #     -------
     #     out : geobipy.FdemData
     #         A data class containing only the data in the line
-        
+
     #     """
     #     i = np.where(self.line == line)[0]
     #     assert (i.size > 0), 'Could not get line with number {}'.format(line)
@@ -335,10 +320,10 @@ class FdemData(Data):
 
 
     def __getitem__(self, i):
-        """Define item getter for Data 
+        """Define item getter for Data
 
-        Allows slicing into the data FdemData[i]        
-        
+        Allows slicing into the data FdemData[i]
+
         """
         i = np.unique(i)
         tmp = FdemData(np.size(i), self.nFrequencies)
@@ -353,7 +338,7 @@ class FdemData(Data):
         tmp._elevation[:] = self.elevation[i]
         tmp.system = self.system
         tmp.nSystems = self.nSystems
-        
+
         if not self.powerline is None:
             tmp.powerline = self.powerline[i].deepcopy()
         if not self.magnetic is None:
@@ -362,29 +347,29 @@ class FdemData(Data):
 
 
     def datapoint(self, index=None, fiducial=None):
-        """Get the ith data point from the data set 
-        
+        """Get the ith data point from the data set
+
         Parameters
         ----------
         index : int, optional
             Index of the data point to get.
         fiducial : float, optional
             Fiducial of the data point to get.
-            
+
         Returns
         -------
         out : geobipy.FdemDataPoint
             The data point.
-        
+
         Raises
         ------
         Exception
             If neither an index or fiducial are given.
-            
+
         """
         iNone = index is None
         fNone = fiducial is None
-        
+
         assert not (iNone and fNone) ^ (not iNone and not fNone), Exception("Must specify either an index OR a fiducial.")
 
         if not fNone:
@@ -414,7 +399,7 @@ class FdemData(Data):
         """Plots the specifed channels as a line plot.
 
         Plots the channels along a specified co-ordinate e.g. 'x'. A legend is auto generated.
-        
+
         Parameters
         ----------
         xAxis : str
@@ -501,10 +486,10 @@ class FdemData(Data):
 
     def read(self, dataFilename, systemFilename):
         """Read in both the Fdem data and FDEM system files
-        
+
         The data file is structured using columns with the first line containing header information.
         The header should contain the following entries
-        Line [ID or FID] [X or N or northing] [Y or E or easting] [Z or DTM or dem_elev] [Alt or Laser or bheight] [I Q] ... [I Q] 
+        Line [ID or FID] [X or N or northing] [Y or E or easting] [Z or DTM or dem_elev] [Alt or Laser or bheight] [I Q] ... [I Q]
         Do not include brackets []
         [I Q] are the in-phase and quadrature values for each measurement frequency.
 
@@ -578,7 +563,7 @@ class FdemData(Data):
             self._std[:, iSys] = values[:, nBase + (2 * self.nFrequencies[0]):]
         else:
             self._std[:, iSys] = 0.1 * self._data[:, iSys]
-                    
+
         # Read in the data for the other systems.  Only read in the data and, if available, the errors
         for i in range(1, self.nSystems):
             # Get all readable column indices for the file.
@@ -612,7 +597,7 @@ class FdemData(Data):
         for i in range(nSys):
             self.system[i] = FdemSystem()
             self.system[i].read(systemFilename[i])
-        
+
         self.nSystems = nSys
         self.nChannelsPerSystem = np.asarray([np.int32(2*x.nFrequencies) for x in self.system])
         self._systemOffset = np.append(0, np.cumsum(self.nChannelsPerSystem))
@@ -642,8 +627,8 @@ class FdemData(Data):
 
 
     # Section contains routines for opening a data file, and reading data points one at a time
-    # when requested.  These are used for a parallel implementation so that data points can be read 
-    # by a master rank and sent individually to worker ranks.  Removes the need to read the entire 
+    # when requested.  These are used for a parallel implementation so that data points can be read
+    # by a master rank and sent individually to worker ranks.  Removes the need to read the entire
     # dataset on all cores and minimizes RAM requirements.
     def __readColumnIndices(self, dataFilename, system):
         """Read in the header information for an FdemData file.
@@ -672,7 +657,7 @@ class FdemData(Data):
             dataFilename = [dataFilename]
         if isinstance(system, FdemSystem):
             system = [system]
-        
+
         assert all(isinstance(s, FdemSystem) for s in system), TypeError("system must contain geobipy.FdemSystem classes.")
 
         nPoints = self._readNpoints(dataFilename)
@@ -711,7 +696,7 @@ class FdemData(Data):
             assert nCoordinates >= 6, Exception("Data file must contain columns for easting, northing, height, elevation, line, and fid. \n {}".format(self.fileInformation()))
 
             nData = nChannels - nCoordinates
-            
+
             if nData > 2*system[k].nFrequencies:
                 _hasErrors = True
                 assert nData == 4*system[k].nFrequencies, Exception("Data file must have {0} data channels and {0} uncertainty channels each for in-phase and quadrature data.".format(system[k].nFrequencies))
@@ -752,10 +737,10 @@ class FdemData(Data):
                 elif 'i_' in channel:
                     inPhase.append(j)
                 elif 'q_' in channel:
-                    quadrature.append(j)           
-            
+                    quadrature.append(j)
+
             _dataIndices = np.hstack([inPhase, quadrature])
-            
+
             _errIndices = np.hstack([inPhase + 2*system[k].nFrequencies, quadrature + 2*system[k].nFrequencies]) if _hasErrors else None
 
             indices.append(_columnIndex)
@@ -883,7 +868,7 @@ class FdemData(Data):
         tmp.append(iD)
         # if not iS[0] is None:
         #     tmp.append(iS[0])
-        
+
         if not iP is None:
             tmp.append(iP)
         if not iM is None:
@@ -914,7 +899,7 @@ class FdemData(Data):
             if not iP is None:
                 iM += 1
             self.magnetic = StatArray.StatArray(values[:, iM])
-            
+
 
 
     def _readAarhusHeader(self, dataFilename):
@@ -961,11 +946,11 @@ class FdemData(Data):
                 if "coil separations" in line:
                     line = f.readline().strip('/').split()
                     nHeaderLines += 1
-                    loopSeparation = np.asarray([np.float64(x) for x in line])                    
+                    loopSeparation = np.asarray([np.float64(x) for x in line])
                     go = False
                     channels = f.readline().strip('/')
                     nHeaderLines += 1
-                
+
 
         system = FdemSystem(nFrequencies, frequencies, transmitterLoops, receiverLoops, loopSeparation)
 
@@ -997,9 +982,9 @@ class FdemData(Data):
 
 
         nPoints = self._readNpoints([dataFilename]) - nHeaderLines + 1
-        
+
         return system, nPoints, _columnIndex, _dataIndices, nHeaderLines, _powerline, _magnetic
-        
+
 
     def fromHdf(self, grp, **kwargs):
         """ Reads the object from a HDF group """
@@ -1027,7 +1012,7 @@ class FdemData(Data):
         item = grp.get('e')
         obj = eval(cF.safeEval(item.attrs.get('repr')))
         tmp._elevation = obj.fromHdf(item)
-        
+
         item = grp.get('d')
         obj = eval(cF.safeEval(item.attrs.get('repr')))
         tmp._data = obj.fromHdf(item)
@@ -1056,8 +1041,8 @@ class FdemData(Data):
         return tmp
 
     def Bcast(self, world, root=0):
-        """Broadcast the FdemData using MPI 
-        
+        """Broadcast the FdemData using MPI
+
         Parameters
         ----------
         world : mpi4py.MPI.COMM_WORLD
@@ -1084,7 +1069,7 @@ class FdemData(Data):
         >>>     D = FdemData() # Must instantiate an empty object to Bcast
 
         >>> D2 = D.Bcast(world)
-        
+
         """
 
         npoints = myMPI.Bcast(self.nPoints, world, root=root)
@@ -1093,14 +1078,14 @@ class FdemData(Data):
         if world.rank != root:
             sys = np.ndarray(ns, dtype=FdemSystem)
             for i in range(ns):
-                sys[i] = FdemSystem() 
+                sys[i] = FdemSystem()
         else:
             sys = self.system
 
         sysTmp = []
         for i in range(ns):
-            sysTmp.append(sys[i].Bcast(world, root=root))           
-            
+            sysTmp.append(sys[i].Bcast(world, root=root))
+
         out = FdemData(npoints, nf, sysTmp)
         out._x = self.x.Bcast(world, root=root)
         out._y = self.y.Bcast(world, root=root)
@@ -1115,8 +1100,8 @@ class FdemData(Data):
 
 
     def Scatterv(self, starts, chunks, world, root=0):
-        """Distributes the FdemData between all cores using MPI 
-        
+        """Distributes the FdemData between all cores using MPI
+
         Parameters
         ----------
         starts : array of ints
@@ -1178,7 +1163,7 @@ class FdemData(Data):
         out._predictedData = self._predictedData.Scatterv(starts, chunks, world, root=root)
         out._fiducial = self.fiducial.Scatterv(starts, chunks, world, root=root)
         out._lineNumber = self.lineNumber.Scatterv(starts, chunks, world, root=root)
-        
+
         return out
 
 
@@ -1200,7 +1185,7 @@ class FdemData(Data):
                 header += 'Power_line '
             if not self.magnetic is None:
                 header += 'Magnetic'
-                
+
             d = np.empty(2*sys.nFrequencies)
 
             if std:
@@ -1221,7 +1206,7 @@ class FdemData(Data):
                         else:
                             d[0::2] = self.data[j, :sys.nFrequencies]
                             d[1::2] = self.data[j, sys.nFrequencies:]
-                        
+
                         if std:
                             s[0::2] = self.std[j, :sys.nFrequencies]
                             s[1::2] = self.std[j, sys.nFrequencies:]

@@ -295,6 +295,26 @@ Datapoints
    :hidden:
 
    /examples/Datapoints/plot_frequency_datapoint
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Time Domain Datapoint Class">
+
+.. only:: html
+
+ .. figure:: /examples/Datapoints/images/thumb/sphx_glr_plot_time_datapoint_thumb.png
+
+     :ref:`sphx_glr_examples_Datapoints_plot_time_datapoint.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/Datapoints/plot_time_datapoint
 .. raw:: html
 
     <div class="sphx-glr-clear"></div>

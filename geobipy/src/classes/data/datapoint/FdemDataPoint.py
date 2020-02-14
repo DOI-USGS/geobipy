@@ -83,7 +83,7 @@ class FdemDataPoint(EmDataPoint):
             assert np.size(std) == nChannels, ValueError("Size of std {}, must equal 2 * total number of frequencies {}".format(np.size(std), nChannels))
         if not predictedData is None:
             assert np.size(predictedData) == nChannels, ValueError("Size of predictedData {}, must equal 2 * total number of frequencies {}".format(np.size(predictedData), nChannels))
-    
+
         EmDataPoint.__init__(self, nChannelsPerSystem=2*nFrequencies, x=x, y=y, z=z, elevation=elevation, data=data, std=std, predictedData=predictedData, dataUnits="ppm", lineNumber=lineNumber, fiducial=fiducial)
 
         self._data.name = 'Frequency domain data'
@@ -105,17 +105,17 @@ class FdemDataPoint(EmDataPoint):
 
     def _inphaseIndices(self, system=0):
         """The slice indices for the requested in-phase data.
-        
+
         Parameters
         ----------
         system : int
             Requested system index.
-            
+
         Returns
         -------
         out : numpy.slice
             The slice pertaining to the requested system.
-            
+
         """
 
         assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
@@ -125,17 +125,17 @@ class FdemDataPoint(EmDataPoint):
 
     def _quadratureIndices(self, system=0):
         """The slice indices for the requested in-phase data.
-        
+
         Parameters
         ----------
         system : int
             Requested system index.
-            
+
         Returns
         -------
         out : numpy.slice
             The slice pertaining to the requested system.
-            
+
         """
 
         assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
@@ -150,17 +150,17 @@ class FdemDataPoint(EmDataPoint):
     def inphase(self, system=0):
         return self.data[self._inphaseIndices(system)]
 
-    
+
     def inphaseStd(self, system=0):
         return self.std[self._inphaseIndices(system)]
 
     @property
     def nFrequencies(self):
         return np.int32(0.5*self.nChannelsPerSystem)
-    
+
     def predictedInphase(self, system=0):
         return self.predictedData[self._inphaseIndices(system)]
-    
+
     def predictedQuadrature(self, system=0):
         return self.predictedData[self._quadratureIndices(system)]
 
@@ -174,10 +174,10 @@ class FdemDataPoint(EmDataPoint):
     def deepcopy(self):
         return self.__deepcopy__()
 
-    
+
     def __deepcopy__(self):
         """ Define a deepcopy routine """
-        
+
         tmp = FdemDataPoint(self.x, self.y, self.z, self.elevation, self._data, self._std, self._predictedData, self.system, self.lineNumber, self.fiducial)
         # StatArray of Relative Errors
         tmp._relErr = self.relErr.deepcopy()
@@ -191,7 +191,7 @@ class FdemDataPoint(EmDataPoint):
 
         return tmp
 
-    
+
     def getMeasurementType(self, channel, system=0):
         """Returns the measurement type of the channel
 
@@ -206,7 +206,7 @@ class FdemDataPoint(EmDataPoint):
         -------
         out : str
             Either "In-Phase " or "Quadrature "
-        
+
         """
         return 'In-Phase' if channel < self.nFrequencies[system] else 'Quadrature'
 
@@ -335,7 +335,7 @@ class FdemDataPoint(EmDataPoint):
         _aPoint.calibration = obj.fromHdf(item, index=slic)
 
         return _aPoint
-        
+
 
     def calibrate(self, Predicted=True):
         """ Apply calibration factors to the data point """
@@ -371,7 +371,7 @@ class FdemDataPoint(EmDataPoint):
 
     def plot(self, title='Frequency Domain EM Data', system=0,  with_error_bars=True, **kwargs):
         """ Plot the Inphase and Quadrature Data
-        
+
         Parameters
         ----------
         title : str
@@ -437,7 +437,7 @@ class FdemDataPoint(EmDataPoint):
 
     def plotPredicted(self, title='Frequency Domain EM Data', system=0, **kwargs):
         """ Plot the predicted Inphase and Quadrature Data
-        
+
         Parameters
         ----------
         title : str
@@ -453,7 +453,7 @@ class FdemDataPoint(EmDataPoint):
         -------
         out : matplotlib.pyplot.ax
             Figure axis
-            
+
         """
         ax = plt.gca()
         cp.pretty(ax)
@@ -487,8 +487,8 @@ class FdemDataPoint(EmDataPoint):
 
 
     def FindBestHalfSpace(self, minConductivity=1e-6, maxConductivity=1e2, percentThreshold=1.0, maxIterations=100):
-        """Uses the bisection approach to find a half space conductivity that best matches the EM data by minimizing the data misfit 
-        
+        """Uses the bisection approach to find a half space conductivity that best matches the EM data by minimizing the data misfit
+
         Parameters
         ----------
         minConductivity : float
@@ -504,7 +504,7 @@ class FdemDataPoint(EmDataPoint):
         -------
         out : geobipy.Model1D
             Best fitting halfspace model
-        
+
         """
         percentThreshold = 0.01 * percentThreshold
         c0 = np.log10(minConductivity)
@@ -579,7 +579,7 @@ class FdemDataPoint(EmDataPoint):
         self.J = J[self.active, :]
         return self.J
 
-    
+
     def Isend(self, dest, world, systems=None):
         tmp = np.asarray([self.x, self.y, self.z, self.elevation, self.nSystems, self.lineNumber, self.fiducial], dtype=np.float64)
         myMPI.Isend(tmp, dest=dest, ndim=1, shape=(7, ), dtype=np.float64, world=world)
@@ -610,5 +610,5 @@ class FdemDataPoint(EmDataPoint):
         p = s.Irecv(source, world)
 
         return FdemDataPoint(tmp[0], tmp[1], tmp[2], tmp[3], data=d, std=s, predictedData=p, system=systems, lineNumber=tmp[5], fiducial=tmp[6])
-       
+
 

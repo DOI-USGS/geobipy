@@ -24,10 +24,10 @@ class TdemSystem(myObject):
     """
 
     def __init__(self, offTimes=None, transmitterLoop = None, receiverLoop=None, loopOffset=None, waveform=None, offTimeFilters=None):
-        """Instantiate""" 
+        """Instantiate"""
 
         if offTimes is None:
-            return          
+            return
 
         self.offTimes = StatArray.StatArray(offTimes, 'Time', 's')
         self.transmitterLoop = transmitterLoop
@@ -114,38 +114,11 @@ class TdemSystem(myObject):
 
         self.readCurrentWaveform(systemFilename)
         return self
-    
-    # def readCurrentWaveform(self, systemFname):
-    #     get = False
-    #     time = []
-    #     current = []
-        
-    #     with open(systemFname, 'r') as f:
-    #         for i, line in enumerate(f):
-                
-    #             if ('WaveFormCurrent End' in line):
-    #                 self.waveform.transmitterTime = np.asarray(time[:-1])
-    #                 self.waveform.transmitterCurrent = np.asarray(current[:-1])
-    #                 return
-                
-    #             if (get):
-    #                 x = fIO.getRealNumbersfromLine(line)
-    #                 time.append(x[0])
-    #                 current.append(x[1])
-                    
-    #             if ('WaveFormCurrent Begin' in line):
-    #                 get = True
-
-    # def summary(self, out=False):
-    #     msg = ("TdemSystem: \n"
-    #             "{}\n"
-    #             "{}\n").format(self.fileName, self.times.summary(True))
-    #     return msg if out else print(msg)
 
 
     @property
     def get_modellingTimes(self):
-        """Generates regularly log spaced times that covers both the waveform and measurment times.     
+        """Generates regularly log spaced times that covers both the waveform and measurment times.
 
         Parameters
         ----------

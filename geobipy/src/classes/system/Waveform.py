@@ -38,5 +38,5 @@ class Waveform(object):
     def current(self):
         return self._current
 
-    def plot(self):
-        self.amplitude.plot(x = self.time)
+    def plot(self, **kwargs):
+        self.amplitude.plot(x = self.time, **kwargs)

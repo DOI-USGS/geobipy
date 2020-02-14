@@ -177,7 +177,7 @@ Or Pcolor the mesh showing. An array of cell values is used as the colour.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.174 seconds)
+   **Total running time of the script:** ( 0 minutes  0.169 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_1d.py:
