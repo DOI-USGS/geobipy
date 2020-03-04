@@ -378,6 +378,27 @@ class LineResults(myObject):
             return StatArray.StatArray(np.asarray(self.hdfFile.get('ids')), "fiducials")
 
 
+    def fit_gaussian_mixture(self, intervals, **kwargs):
+
+        distributions = []
+
+        hm = self.hitMap.deepcopy()
+        counts = np.asarray(self.hdfFile['currentmodel/par/posterior/arr/data'])
+
+        # Bar = progressbar.ProgressBar()
+        for i in range(self.nPoints):
+
+            try:
+                dpDistributions = hm.fitMajorPeaks(intervals, **kwargs)
+                distributions.append(dpDistributions)
+            except:
+                pass
+
+            hm._counts = counts[i, :, :]
+
+        return distributions
+
+
     def fitMajorPeaks(self, intervals, **kwargs):
         """Fit distributions to the major peaks in each hitmap along the line.
 
@@ -547,7 +568,6 @@ class LineResults(myObject):
             return self.computeLineHitmap()
 
 
-
     def computeLineHitmap(self, nBins=250, log=10):
 
         if 'lineHitmap' in self.__dict__:
@@ -582,6 +602,7 @@ class LineResults(myObject):
         lineHitmap.toHdf(self.hdfFile, 'line_hitmap')
 
         return lineHitmap
+
 
     @property
     def maxParameter(self):
