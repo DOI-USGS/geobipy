@@ -154,7 +154,8 @@ class LineResults(myObject):
         if "credible_lower" in self.hdfFile.keys():
             return StatArray.StatArray().fromHdf(self.hdfFile['credible_lower'])
         else:
-            return self.computeCredibleInterval(log=10)
+            cl, _ = self.computeCredibleInterval(log=10)
+            return cl
 
     @cached_property
     def credibleUpper(self):
@@ -162,15 +163,16 @@ class LineResults(myObject):
         if "credible_upper" in self.hdfFile.keys():
             return StatArray.StatArray().fromHdf(self.hdfFile['credible_upper'])
         else:
-            return self.computeCredibleInterval(log=10)
+            _, cu = self.computeCredibleInterval(log=10)
+            return cu
 
 
     def computeCredibleInterval(self, percent=95.0, log=None):
 
         s = 'percent={}'.format(percent)
 
-        self.credibleLower = StatArray.StatArray(np.zeros(self.mesh.shape), '{}% Credible Interval'.format(100.0 - percent), self.parameterUnits)
-        self.credibleUpper = StatArray.StatArray(np.zeros(self.mesh.shape), '{}% Credible Interval'.format(percent), self.parameterUnits)
+        credibleLower = StatArray.StatArray(np.zeros(self.mesh.shape), '{}% Credible Interval'.format(100.0 - percent), self.parameterUnits)
+        credibleUpper = StatArray.StatArray(np.zeros(self.mesh.shape), '{}% Credible Interval'.format(percent), self.parameterUnits)
 
         loc = 'currentmodel/par/posterior'
         a = np.asarray(self.hdfFile[loc+'/arr/data'])
@@ -187,27 +189,28 @@ class LineResults(myObject):
         h = Hitmap2D(xBinCentres = StatArray.StatArray(b[0, :]), yBinCentres = StatArray.StatArray(c[0, :]))
         h._counts[:, :] = a[0, :, :]
         m, l, u = h.credibleIntervals(percent=percent, log=log)
-        self.credibleLower[:, 0] = l
-        self.credibleUpper[:, 0] = u
+        credibleLower[:, 0] = l
+        credibleUpper[:, 0] = u
 
         print('Computing {}% Credible Intervals'.format(percent), flush=True)
         for i in progressbar.progressbar(range(1, self.nPoints)):
             h.x.xBinCentres = b[i, :]
             h._counts[:, :] = a[i, :, :]
             m, l, u = h.credibleIntervals(percent=percent, log=log)
-            self.credibleLower[:, i] = l
-            self.credibleUpper[:, i] = u
-
+            credibleLower[:, i] = l
+            credibleUpper[:, i] = u
 
         key = 'credible_lower'
         if key in self.hdfFile.keys():
             del self.hdfFile[key]
-        self.credibleLower.toHdf(self.hdfFile, key)
+        credibleLower.toHdf(self.hdfFile, key)
 
         key = 'credible_upper'
         if key in self.hdfFile.keys():
             del self.hdfFile[key]
-        self.credibleUpper.toHdf(self.hdfFile, key)
+        credibleUpper.toHdf(self.hdfFile, key)
+
+        return credibleLower, credibleUpper
 
 
     @property
@@ -977,9 +980,11 @@ class LineResults(myObject):
         ax2 = ax1.twinx()
 
         c = cP.wellSeparated[0]
-        post.relativeTo.plot(xtmp.internalEdges(), c=c, ax=ax2)
-        ax2.set_ylabel(ax2.get_ylabel(), color=c)
+        post.relativeTo.plot(xtmp.internalEdges(), c=c, ax=ax2, label=self.bestData.z.getNameUnits())
+
+        ax2.set_ylabel(self.bestData.z.getNameUnits(), color=c)
         ax2.tick_params(axis='y', labelcolor=c)
+        plt.legend()
 
         cP.title('Data height posterior distributions')
 
