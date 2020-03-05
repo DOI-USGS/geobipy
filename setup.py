@@ -26,8 +26,8 @@ setup(name='geobipy',
     url = 'https://github.com/usgs/geobipy',
     classifiers=[
         'Development Status :: 0 - Alpha',
-        'License :: OSI Approved :: CC0 and GPLv2',
-        'Programming Language :: Python :: 3.5',
+        'License :: OSI Approved :: CC0 and GPLv2 and BSD3',
+        'Programming Language :: Python :: 3.x',
         'Topic :: Geophysical Inversion :: Bayesian :: McMC',
     ],
     author='Leon Foks',
@@ -41,7 +41,9 @@ setup(name='geobipy',
         'pyvtk',
         'sphinx',
         'progressbar2',
-        'numba'
+        'numba',
+        'cached-property',
+        'empymod'
     ],
     ext_modules=[Extension(name='geobipy.src.classes.forwardmodelling.ipforward1d_fortran',
                 extra_f90_compile_args = ['-ffree-line-length-none','-O3', '-finline-functions', '-funroll-all-loops'],
@@ -51,11 +53,9 @@ setup(name='geobipy',
                  ],
     entry_points = {
         'console_scripts':[
-            'geobipySerial=geobipy:runSerial',
-            'geobipyParallel=geobipy:runParallel',
+            'geobipy=geobipy:geobipy',
+            'geobipy_mpi=geobipy:geobipy_mpi',
         ],
     }
 )
-#      url='http://www.')
-#      ext_modules=[])
 
