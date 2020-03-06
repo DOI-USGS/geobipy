@@ -1,6 +1,8 @@
 """ @DataSetResults
 Class to handle the HDF5 result files for a full data set.
  """
+import time
+from datetime import timedelta
 from ..base import Error as Err
 import matplotlib.pyplot as plt
 import numpy as np
@@ -9,13 +11,19 @@ import h5py
 from cached_property import cached_property
 from ..classes.core.myObject import myObject
 from ..classes.core import StatArray
-from ..base.fileIO import fileExists
+from ..base import fileIO
 
 from ..classes.statistics.Histogram1D import Histogram1D
 from ..classes.statistics.Hitmap2D import Hitmap2D
 from ..classes.pointcloud.PointCloud3D import PointCloud3D
 from ..base import interpolation as interpolation
+from .Inv_MCMC import Initialize
 from .LineResults import LineResults
+from .Results import Results
+
+from ..classes.data.dataset.Data import Data
+from ..classes.data.datapoint.DataPoint import DataPoint
+
 #from ..classes.statistics.Distribution import Distribution
 from ..base.HDF import hdfRead
 from ..base import customPlots as cP
@@ -77,6 +85,79 @@ class DataSetResults(myObject):
             line.close()
 
 
+    def createHDF5(self, data, userParameters):
+        """Create HDF5 files based on the data
+
+        Parameters
+        ----------
+        data : geobipy.Data or geobipy.DataPoint
+            Data to create the HDF5 file(s) for
+        userParameters : geobipy.userParameters
+            Input parameters for geobipy
+
+        Returns
+        -------
+        out : list of H5py.File
+            HDF5 files
+
+        """
+
+        if isinstance(data, Data):
+            return self._createHDF5_dataset(data, userParameters)
+        else:
+            return self._createHDF5_datapoint(data, userParameters)
+
+
+    def _createHDF5_dataset(self, dataset, userParameters):
+
+        t0 = time.time()
+
+        dataset.readSystemFile(userParameters.systemFilename)
+
+        # Prepare the dataset so that we can read a point at a time.
+        dataset._initLineByLineRead(userParameters.dataFilename, userParameters.systemFilename)
+        # Get a datapoint from the file.
+        DataPoint = dataset._readSingleDatapoint()
+        dataset._closeDatafiles()
+
+        # Initialize the user parameters
+        options = userParameters.userParameters(DataPoint)
+
+        # While preparing the file, we need access to the line numbers and fiducials in the data file
+        tmp = fileIO.read_columns(options.dataFilename[0], dataset._indicesForFile[0][:2], 1, dataset.nPoints)
+
+        dataset._openDatafiles(options.dataFilename)
+
+        # Get the line numbers in the data
+        self._lineNumbers = np.sort(np.unique(tmp[:, 0]))
+        fiducials = tmp[:, 1]
+
+        # Initialize the inversion to obtain the sizes of everything
+        options, Mod, DataPoint, _, _, _, _ = Initialize(options, DataPoint)
+
+        # Create the results template
+        Res = Results(DataPoint, Mod,
+                      save=options.save, plot=options.plot, savePNG=options.savePNG,
+                      nMarkovChains=options.nMarkovChains, plotEvery=options.plotEvery,
+                      reciprocateParameters=options.reciprocateParameters, verbose=options.verbose)
+
+        print('Creating HDF5 files, this may take a few minutes...')
+        print('Files are being created for data files {} and system files {}'.format(options.dataFilename, options.systemFilename))
+
+        # No need to create and close the files like in parallel, so create and keep them open
+        self._lines = []
+        for line in self.lineNumbers:
+            fiducialsForLine = np.where(tmp[:, 0] == line)[0]
+            H5File = h5py.File(join(self.directory, '{}.h5'.format(line)), 'w')
+            lr = LineResults()
+            lr.createHdf(H5File, fiducials[fiducialsForLine], Res)
+            self._lines.append(lr)
+            print('Time to create line {} with {} data points: {} h:m:s'.format(line, fiducialsForLine.size, str(timedelta(seconds=time.time()-t0))))
+
+    def _createHDF5_datapoint(self, datapoint, userParameters):
+
+        print('stuff')
+
     @property
     def h5files(self):
         """ Get the list of line result files for the dataset """
@@ -102,7 +183,7 @@ class DataSetResults(myObject):
         h5files = []
         for f in files:
             fName = join(directory, f)
-            assert fileExists(fName), Exception("File {} does not exist".format(fName))
+            assert fileIO.fileExists(fName), Exception("File {} does not exist".format(fName))
             h5files.append(fName)
         return h5files
 
@@ -111,12 +192,12 @@ class DataSetResults(myObject):
         h5files = []
         for file in [f for f in listdir(directory) if f.endswith('.h5')]:
             fName = join(directory, file)
-            fileExists(fName)
+            fileIO.fileExists(fName)
             h5files.append(fName)
 
         h5files = sorted(h5files)
 
-        assert len(h5files) > 0, 'Could not find .h5 files in directory {}'.format(directory)
+        # assert len(h5files) > 0, 'Could not find .h5 files in directory {}'.format(directory)
 
         return h5files
 
@@ -148,6 +229,7 @@ class DataSetResults(myObject):
             del self.lines[i].__dict__['bestData']
 
         return bestData
+
 
     @cached_property
     def bestParameters(self):
@@ -373,13 +455,13 @@ class DataSetResults(myObject):
 
 
     def lineIndex(self, lineNumber=None, fiducial=None, index=None):
-        """ Get the line index for the given data point index """
+        """Get the line index """
         tmp = np.sum([not x is None for x in [lineNumber, fiducial, index]])
         assert tmp == 1, Exception("Please specify one argument, lineNumber, fiducial, or index")
 
 
         if not lineNumber is None:
-            return np.where(self.lineNumbers == lineNumber)[0]
+            return np.squeeze(np.where(self.lineNumbers == lineNumber)[0])
 
         if not fiducial is None:
             return self.fiducialIndex(fiducial)[0]
@@ -425,6 +507,108 @@ class DataSetResults(myObject):
 
         if np.size(index) > 0:
             return np.hstack(lineIndex), np.hstack(index)
+
+
+    def fit_mixture(self, intervals, **kwargs):
+        """Uses Mixture modelling to fit disrtibutions to the hitmaps for the specified intervals.
+
+        The non-mpi version fits a aggregated hitmap for the entire line.
+        This can lose detail in the fits, but the time savings in serial are enormous.
+
+        If more precision is required, fit_mixture_mpi should be used instead.
+
+        Parameters
+        ----------
+        intervals : array_like
+            Depth intervals between which the marginal histogram is computed before fitting.
+
+        See Also
+        --------
+        geobipy.Histogram1D.fit_mixture
+            For details on the fitting arguments.
+
+        """
+        distributions = []
+        active = []
+        for line in self.lines:
+            d, a = line.lineHitmap.fit_mixture(intervals, **kwargs)
+            distributions.append(d)
+            active.append(a)
+
+        line = np.empty(0)
+        depths = np.empty(0)
+        means = np.empty(0)
+        variances = np.empty(0)
+        for i in range(0, self.nLines, 1):
+            dl = distributions[i]
+            al = active[i]
+            for j in range(len(dl)):
+                d = 0.5 * (intervals[j] + intervals[j+1])
+                means = np.squeeze(dl[j].means_[al[j]])
+                line = np.hstack([line, np.full(means.size, fill_value=self.lineNumbers[i])])
+                depths = np.hstack([depths, np.full(means.size, fill_value=d)])
+                means = np.hstack([means, means])
+                variances = np.hstack([variances, np.squeeze(dl[j].covariances_[al[j]])])
+
+        line = StatArray.StatArray(line, 'Line Number')
+        depths = StatArray.StatArray(depths, self.lines[0].mesh.z.name, self.lines[0].mesh.z.units)
+        means = StatArray.StatArray(means, "Mean "+ self.lines[0].parameterName, self.lines[0].parameterUnits)
+        variances = StatArray.StatArray(variances, "Variance", "("+self.lines[0].parameterUnits+")$^{2}$")
+
+        return line, depths, means, variances
+
+
+    def fit_mixture_mpi(self, intervals, world, **kwargs):
+        """Uses Mixture modelling to fit disrtibutions to the hitmaps for the specified intervals.
+
+        This mpi version fits all hitmaps individually throughout the data set.
+        This provides detailed fits, but requires a lot of compute, hence the mpi enabled version.
+
+        Parameters
+        ----------
+        intervals : array_like
+            Depth intervals between which the marginal histogram is computed before fitting.
+
+        See Also
+        --------
+        geobipy.Histogram1D.fit_mixture
+            For details on the fitting arguments.
+
+        """
+
+        print('here')
+
+        print(world.size)
+
+        # distributions = []
+        # active = []
+        # for line in self.lines:
+        #     d, a = line.lineHitmap.fit_mixture(intervals, **kwargs)
+        #     distributions.append(d)
+        #     active.append(a)
+
+        # line = np.empty(0)
+        # depths = np.empty(0)
+        # means = np.empty(0)
+        # variances = np.empty(0)
+        # for i in range(0, self.nLines, 1):
+        #     dl = distributions[i]
+        #     al = active[i]
+        #     for j in range(len(dl)):
+        #         d = 0.5 * (intervals[j] + intervals[j+1])
+        #         means = np.squeeze(dl[j].means_[al[j]])
+        #         line = np.hstack([line, np.full(means.size, fill_value=self.lineNumbers[i])])
+        #         depths = np.hstack([depths, np.full(means.size, fill_value=d)])
+        #         means = np.hstack([means, means])
+        #         variances = np.hstack([variances, np.squeeze(dl[j].covariances_[al[j]])])
+
+        # line = StatArray.StatArray(line, 'Line Number')
+        # depths = StatArray.StatArray(depths, self.lines[0].mesh.z.name, self.lines[0].mesh.z.units)
+        # means = StatArray.StatArray(means, "Mean "+ self.lines[0].parameterName, self.lines[0].parameterUnits)
+        # variances = StatArray.StatArray(variances, "Variance", "("+self.lines[0].parameterUnits+")$^{2}$")
+
+        # return line, depths, means, variances
+
 
 
     def fitMajorPeaks(self, intervals, **kwargs):
@@ -573,7 +757,7 @@ class DataSetResults(myObject):
         # Test for an existing file, created with the same parameters.
         # Read it and return if it exists.
         file = 'mean3D.h5'
-        if fileExists(file):
+        if fileIO.fileExists(file):
             variables = hdfRead.read_all(file)
             if (dx == variables['dx'] and dy == variables['dy'] and mask == variables['mask'] and clip == variables['clip'] and method == variables['method']):
                 self.mean3D = variables['mean3d']
