@@ -46,10 +46,12 @@ def fdem1dfwd(system, model1d, altitude):
 
     frequencies = np.asarray(system.frequencies)
     conductivity = np.asarray(model1d.par)
+    kappa = np.asarray(model1d.magnetic_susceptibility)
+    perm = np.asarray(model1d.magnetic_permeability)
     thickness = np.asarray(model1d.thk)
     loopSeparation = np.asarray(system.loopSeparation)
 
-    return nbFdem1dfwd(tid, frequencies, tHeight, rHeight, tMom, rx, loopSeparation, system.w0, system.lamda0, system.lamda02, system.w1, system.lamda1, system.lamda12, scl, conductivity, thickness)
+    return nbFdem1dfwd(tid, frequencies, tHeight, rHeight, tMom, rx, loopSeparation, system.w0, system.lamda0, system.lamda02, system.w1, system.lamda1, system.lamda12, scl, conductivity, kappa, perm, thickness)
 
 
 def ip1dfwd(S, mod, z0):
@@ -123,8 +125,10 @@ def fdem1dsen(system, model1d, altitude):
 
     frequencies = np.asarray(system.frequencies)
     conductivity = np.asarray(model1d.par)
+    kappa = np.asarray(model1d.magnetic_susceptibility)
+    perm = np.asarray(model1d.magnetic_permeability)
     thickness = np.asarray(model1d.thk)
     loopSeparation = np.asarray(system.loopSeparation)
 
-    return nbFdem1dsen(tid, frequencies, tHeight, rHeight, tMom, rx, loopSeparation, system.w0, system.lamda0, system.lamda02, system.w1, system.lamda1, system.lamda12, scl, conductivity, thickness)
-    
+    return nbFdem1dsen(tid, frequencies, tHeight, rHeight, tMom, rx, loopSeparation, system.w0, system.lamda0, system.lamda02, system.w1, system.lamda1, system.lamda12, scl, conductivity, kappa, perm, thickness)
+

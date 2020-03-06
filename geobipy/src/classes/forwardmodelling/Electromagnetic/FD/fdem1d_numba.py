@@ -8,6 +8,8 @@ from numpy import (empty, zeros, ones, asarray)
 from numpy import (sqrt, exp)
 from numpy import pi
 
+import numpy as np
+
 pi2 = float64(2.0 * pi)
 pi4 = float64(4.0 * pi)
 mu0 = float64(4.e-7 * pi)
@@ -20,7 +22,7 @@ from numba import jit
 _numba_settings = {'nopython': True, 'nogil': False, 'fastmath': True, 'cache': False}
 
 @jit(**_numba_settings)
-def nbFdem1dfwd(tid, frequencies, tHeight, rHeight, moments, rx, separation, w0, lamda0, lamda02, w1, lamda1, lamda12, scale, conductivity, thickness):
+def nbFdem1dfwd(tid, frequencies, tHeight, rHeight, moments, rx, separation, w0, lamda0, lamda02, w1, lamda1, lamda12, scale, conductivity, susceptibility, permeability, thickness):
 
     nFrequencies = int64(len(frequencies))
     nLayers = int64(len(conductivity))
@@ -29,6 +31,12 @@ def nbFdem1dfwd(tid, frequencies, tHeight, rHeight, moments, rx, separation, w0,
 
     par = zeros(nL1, dtype=float64)
     par[1:] = conductivity
+
+    kappa = zeros(nL1, dtype=float64)
+    kappa[1:] = susceptibility
+
+    perm = zeros(nL1, dtype=float64)
+    perm[1:] = permeability
 
     thk = zeros(nL1, dtype=float64)
     thk[1:] = thickness
@@ -41,14 +49,10 @@ def nbFdem1dfwd(tid, frequencies, tHeight, rHeight, moments, rx, separation, w0,
         if tid[i] in [1, 2, 4, 5, 9]:
             useJ0 = True
 
-    # Compute the angular frequencies from the system frequencies
-    omega = empty(nFrequencies, dtype=complex128)
-    for i in range(nFrequencies):
-        omega[i] = 0.0 + (2.0 * pi * frequencies[i] * mu0)*1j
-
-    rTEj1, u0j1 = calcFdemforward1D(nLayers, nFrequencies, nC1, frequencies, omega, lamda1, lamda12, par, thk)
     if (useJ0):
-        rTEj0, u0j0 = calcFdemforward1D(nLayers, nFrequencies, nC0, frequencies, omega, lamda0, lamda02, par, thk)
+        rTEj0, u0j0 = calcFdemforward1D(nLayers, nFrequencies, nC0, frequencies, lamda0, lamda02, par, kappa, perm, thk)
+    rTEj1, u0j1 = calcFdemforward1D(nLayers, nFrequencies, nC1, frequencies, lamda1, lamda12, par, kappa, perm, thk)
+
 
     for i in range(len(tid)):
         id = tid[i]
@@ -65,7 +69,7 @@ def nbFdem1dfwd(tid, frequencies, tHeight, rHeight, moments, rx, separation, w0,
 
 
 @jit(**_numba_settings)
-def nbFdem1dsen(tid, frequencies, tHeight, rHeight, moments, rx, separation, w0, lamda0, lamda02, w1, lamda1, lamda12, scale, conductivity, thickness):
+def nbFdem1dsen(tid, frequencies, tHeight, rHeight, moments, rx, separation, w0, lamda0, lamda02, w1, lamda1, lamda12, scale, conductivity, susceptibility, permeability, thickness):
 
     nFrequencies = int64(len(frequencies))
     nLayers = int64(len(conductivity))
@@ -74,6 +78,12 @@ def nbFdem1dsen(tid, frequencies, tHeight, rHeight, moments, rx, separation, w0,
 
     par = zeros(nL1, dtype=float64)
     par[1:] = conductivity
+
+    kappa = zeros(nL1, dtype=float64)
+    kappa[1:] = susceptibility
+
+    perm = zeros(nL1, dtype=float64)
+    perm[1:] = permeability
 
     thk = zeros(nL1, dtype=float64)
     thk[1:] = thickness
@@ -86,14 +96,9 @@ def nbFdem1dsen(tid, frequencies, tHeight, rHeight, moments, rx, separation, w0,
         if tid[i] in [1, 2, 4, 5, 9]:
             useJ0 = True
 
-    # Compute the angular frequencies from the system frequencies
-    omega = empty(nFrequencies, dtype=complex128)
-    for i in range(nFrequencies):
-        omega[i] = 0.0 + (2.0 * pi * frequencies[i] * mu0)*1j
-
-    u0j1, sens1 = calcFdemSensitivity1D(nLayers, nFrequencies, nC1, frequencies, omega, lamda1, lamda12, par, thk)
     if (useJ0):
-        u0j0, sens0 = calcFdemSensitivity1D(nLayers, nFrequencies, nC0, frequencies, omega, lamda0, lamda02, par, thk)
+        u0j0, sens0 = calcFdemSensitivity1D(nLayers, nFrequencies, nC0, frequencies, lamda0, lamda02, par, kappa, perm, thk)
+    u0j1, sens1 = calcFdemSensitivity1D(nLayers, nFrequencies, nC1, frequencies, lamda1, lamda12, par, kappa, perm, thk)
 
     for k in range(nLayers):
         for i in range(nFrequencies):
@@ -115,17 +120,17 @@ def nbFdem1dsen(tid, frequencies, tHeight, rHeight, moments, rx, separation, w0,
 
     return J
 
-    
+
 @jit(**_numba_settings)
-def calcFdemforward1D(nLayers, nFrequencies, nCoefficients, frequencies, omega, lamda, lamda2, par, thk):
-    Y, Yn, un = initCoefficients(nLayers, nFrequencies, nCoefficients, frequencies, omega, lamda, lamda2, par)
+def calcFdemforward1D(nLayers, nFrequencies, nCoefficients, frequencies, lamda, lamda2, par, kappa, perm, thk):
+    Y, Yn, un = initCoefficients(nLayers, nFrequencies, nCoefficients, frequencies, lamda, lamda2, par, kappa, perm)
     return M1_0(nLayers, nFrequencies, nCoefficients, Yn, Y, un, thk)
 
 
 @jit(**_numba_settings)
-def calcFdemSensitivity1D(nLayers, nFrequencies, nCoefficients, frequencies, omega, lamda, lamda2, par, thk):
+def calcFdemSensitivity1D(nLayers, nFrequencies, nCoefficients, frequencies, lamda, lamda2, par, kappa, perm, thk):
 
-    Y, Yn, un = initCoefficients(nLayers, nFrequencies, nCoefficients, frequencies, omega, lamda, lamda2, par)
+    Y, Yn, un = initCoefficients(nLayers, nFrequencies, nCoefficients, frequencies, lamda, lamda2, par, kappa, perm)
 
     if (nLayers == 1):
         u0 = zeros((nFrequencies, nCoefficients), dtype=complex128)
@@ -144,13 +149,13 @@ def calcFdemSensitivity1D(nLayers, nFrequencies, nCoefficients, frequencies, ome
                 a2 = 1.0 / (a0 + a1)
                 sens[0, i, jc] = -2.0 * a0 * sens[0, i, jc] * a2**2.0
     else:
-        u0, sens = M1_1(nLayers, nFrequencies, nCoefficients, Yn, Y, un, omega, thk, par)
+        u0, sens = M1_1(nLayers, nFrequencies, nCoefficients, frequencies, Yn, Y, un, thk, par, kappa, perm)
 
     return u0, sens
 
 
 @jit(**_numba_settings)
-def initCoefficients(nLayers, nFrequencies, nCoefficients, frequencies, omega, lamda, lamda2, par):
+def initCoefficients(nLayers, nFrequencies, nCoefficients, frequencies, lamda, lamda2, par, kappa, perm):
 
     nL1 = nLayers + 1
 
@@ -158,27 +163,26 @@ def initCoefficients(nLayers, nFrequencies, nCoefficients, frequencies, omega, l
     Y = empty((nL1, nFrequencies, nCoefficients), dtype=complex128)
     Yn = empty((nL1, nFrequencies, nCoefficients), dtype=complex128)
 
+    # Compute the angular frequencies from the system frequencies
+    omega = empty(nFrequencies, dtype=float64)
+    for i in range(nFrequencies):
+        omega[i] = 2.0 * pi * frequencies[i]
+
     # Compute the Admitivity, yn=j*omega*eps+sigma
-    for i in range(nFrequencies):
-        oTmp = 1.0 / omega[i]
-        for jc in range(nCoefficients):
-            Y[0, i, jc] = oTmp
-
-    p = par[0]
-    for i in range(nFrequencies):
-        tTmp = (omega[i] * eps0 + p) * omega[i]
-        for jc in range(nCoefficients):
-            unTmp = sqrt(tTmp + lamda2[i, jc])
-            un[0, i, jc] = unTmp
-            Yn[0, i, jc] = unTmp * Y[0, i, jc]
-
-    for k in range(1, nL1):
+    for k in range(nL1):
         p = par[k]
+        mu = mu0 * (1.0 + kappa[k])
+        eps = eps0 * (1.0 + perm[k])
         for i in range(nFrequencies):
-            tTmp = (omega[i] * eps0 + p) * omega[i]
+            yn = p + (omega[i]* eps)*1j
+            zn = (omega[i] * mu)*1j
+            ynzn = yn * zn
+            zn1 = 1.0 / zn
+
             for  jc in range(nCoefficients):
-                un[k, i, jc] = sqrt(tTmp + lamda2[i, jc])
-                Yn[k, i, jc] = un[k, i, jc] * Y[0, i, jc]
+                tmp = sqrt(ynzn + lamda2[i, jc])
+                un[k, i, jc] = tmp
+                Yn[k, i, jc] = tmp * zn1
 
     for i in range(nFrequencies):
         for jc in range(nCoefficients):
@@ -199,34 +203,32 @@ def M1_0(nLayers, nFrequencies, nCoefficients, Yn, Y, un, thk):
 
         for i in range(nFrequencies):
             for jc in range(nCoefficients):
-                a3 = Yn[k, i, jc]
-                a4 = Y[k1, i, jc]
+                Yn_ = Yn[k, i, jc]
+                Y_ = Y[k1, i, jc]
                 z = un[k, i, jc] * t
-                a0 = cTanh1(z)
-                a1 = a4 + (a3 * a0)
-                a2 = 1.0 / (a3 + (a4 * a0))
-                Y[k, i, jc] = a3 * a1 * a2
+                a0 = cTanh(z)
+                Y[k, i, jc] = Yn_ * (Y_ + (Yn_ * a0)) / (Yn_ + (Y_ * a0))
 
     for i in range(nFrequencies):
         for jc in range(nCoefficients):
             u0[i, jc] = un[0, i, jc]
-            a2 = Yn[0, i, jc]
-            a1 = Y[1, i, jc]
-            rTE[i, jc] = (a2 - a1) / (a2 + a1)
+            Yn_ = Yn[0, i, jc]
+            Y_ = Y[1, i, jc]
+            rTE[i, jc] = (Yn_ - Y_) / (Yn_ + Y_)
 
     return rTE, u0
-  
+
 
 @jit(**_numba_settings)
-def M1_1(nLayers, nFrequencies, nCoefficients, Yn, Y, un, omega, thk, par):
+def M1_1(nLayers, nFrequencies, nCoefficients, frequencies, Yn, Y, un, thk, par, kappa, perm):
 
     u0 = empty((nFrequencies, nCoefficients), dtype=complex128)
     sens = empty((nLayers, nFrequencies, nCoefficients), dtype=complex128)
 
-    p = par[-1]
+    # Compute the angular frequencies from the system frequencies
+    omega = empty(nFrequencies, dtype=float64)
     for i in range(nFrequencies):
-        for jc in range(nCoefficients):
-            sens[-1, i, jc] = p / (2.0 * un[-1, i, jc])
+        omega[i] = 2.0 * pi * frequencies[i]
 
     accumulate = empty((nLayers-1, nFrequencies, nCoefficients), dtype=complex128)
 
@@ -235,46 +237,50 @@ def M1_1(nLayers, nFrequencies, nCoefficients, Yn, Y, un, omega, thk, par):
         k2 = k - 1
         p = par[k]
         t = thk[k]
+        mu = mu0 * (1.0 + kappa[k])
+
         for i in range(nFrequencies):
-            oTmp = omega[i]
-            for jc in range(nCoefficients):              
+            oTmp = (omega[i] * mu * t) * 1j
+            for jc in range(nCoefficients):
                 Yn_ = Yn[k, i, jc]
+                Yn_2 = Yn_**2.0
+                Yn_3 = Yn_**3.0
+
                 Y_ = Y[k1, i, jc]
+                Y_2 = Y_**2.0
+
                 un_ = un[k, i, jc]
+
                 z = un_ * t
-                b4 = cTanh1(z)
-                b5 = b4**2.0
-                b8 = (2.0 * Yn_ * Y_ * b5)
-                b6 = Y_ + (Yn_ * b4)
-                b7 = Yn_ + (Y_ * b4)
-                b2 = Y_**2.0
+                tanuh = cTanh(z)
+                tanuh2 = tanuh**2.0
 
-                Y[k, i, jc] = Yn_ * (b6 / b7)
+                num = Y_ + (Yn_ * tanuh)
+                den = Yn_ + (Y_ * tanuh)
 
-                b6 = Yn_**2.0
+                Y[k, i, jc] = Yn_ * num / den
 
-                b9 = (p / (2.0 * un_ * (b7**2.0)))
+                accumulate[k2, i, jc] = (Yn_2 * (1.0 - tanuh2)) * den**-2.0
 
-                b7 = b7**(-2.0)
-                b8 += ((b2 - b6) * b4) + 2.0 * b6
-                b4 = b6 * (1.0 - b5)
-                b6 = Yn_**3.0
-                accumulate[k2, i, jc] = b4 * b7
-                b4 = b2 * Yn_
-                b7 = b4 - b6
-                b1 = oTmp * t * b7
-                b8 += (b1 * b5) - b1
+                kappaFactor = (oTmp * ((Y_2 * Yn_) - Yn_3))
+                sens[k2, i, jc] = (p / (2.0 * un_ * (den**2.0))) * \
+                                  ((2.0 * Yn_ * Y_ * tanuh2) + \
+                                   (kappaFactor * tanuh2 - kappaFactor) + \
+                                   ((Y_2 - Yn_2) * tanuh) + (2.0 * Yn_2))
 
-                sens[k2, i, jc] = b8 * b9
+    p = par[-1]
+    for i in range(nFrequencies):
+        for jc in range(nCoefficients):
+            sens[-1, i, jc] = p / (2.0 * un[-1, i, jc])
 
     for k in range(1, nLayers-1):
         k1 = k - 1
         for i in range(nFrequencies):
-            for jc in range(nCoefficients):         
+            for jc in range(nCoefficients):
                 accumulate[k, i, jc] = accumulate[k, i, jc] * accumulate[k1, i, jc]
-    
+
     for i in range(nFrequencies):
-        for jc in range(nCoefficients):         
+        for jc in range(nCoefficients):
             u0[i, jc] = un[0, i, jc]
 
             a0 = Yn[0, i, jc]
@@ -285,13 +291,13 @@ def M1_1(nLayers, nFrequencies, nCoefficients, Yn, Y, un, omega, thk, par):
             Yn[0, i, jc] = -2.0 * a0 * Y[1, i, jc]
 
     for i in range(nFrequencies):
-        for jc in range(nCoefficients): 
+        for jc in range(nCoefficients):
             sens[0,  i, jc] *= Yn[0, i, jc]
 
     for k in range(1, nLayers):
         k2 = k - 1
         for i in range(nFrequencies):
-            for jc in range(nCoefficients): 
+            for jc in range(nCoefficients):
                 sens[k,  i, jc] *= Yn[0, i, jc] * accumulate[k2, i, jc]
 
     return u0, sens
@@ -318,7 +324,7 @@ def Hxx(tHeight, rHeight, moments, rx, separation, rTEj0, w0, lamda0, lamda02, r
         a1 = lamda02[jc]
         # Temporary variables
         a0 = exp(-J0_ * (hSum))
-    
+
         k = (a0 - (rTE0_ * exp(J0_ * hDiff))) * a1
 
         H += k * w0_ # First bessel contribution
@@ -371,9 +377,9 @@ def Hxz(tHeight, rHeight, moments, rx, separation, rTE1, w1, lamda1, lamda12):
         H += k * w1_
         k = b0 * a1
         H0 += k * w1_
-    
+
     return H, H0
-    
+
 
 @jit(**_numba_settings)
 def Hzx(tHeight, rHeight, moments, rx, separation, rTE1, u1, w1, lamda1, lamda12):
@@ -433,7 +439,7 @@ def Hzz(tHeight, rHeight, moments, separation, rTE, u0, w0, lamda0):
 
 
 @jit(**_numba_settings)
-def cTanh1(z):
+def cTanh(z):
     if (real(z) > 0.0):
         tmp = exp(-2.0 * z)
         return (1.0 - tmp) / (1.0 + tmp)
