@@ -18,9 +18,9 @@ import matplotlib.gridspec as gridspec
 class StatArray(np.ndarray, myObject):
     """Class extension to numpy.ndarray
 
-    This subclass to a numpy array contains extra attributes that can describe the parameters it represents.  
-    One can also attach prior and proposal distributions so that it may be used in an MCMC algorithm easily. 
-    Because this is a subclass to numpy, the StatArray contains all numpy array methods and when passed to an 
+    This subclass to a numpy array contains extra attributes that can describe the parameters it represents.
+    One can also attach prior and proposal distributions so that it may be used in an MCMC algorithm easily.
+    Because this is a subclass to numpy, the StatArray contains all numpy array methods and when passed to an
     in-place numpy function will return a StatArray.  See the example section for more information.
 
     StatArray(shape, name=None, units=None, \*\*kwargs)
@@ -53,7 +53,7 @@ class StatArray(np.ndarray, myObject):
         will be in C-contiguous order (rightmost-index varies the fastest).
         If order is 'F', then the returned array will be in
         Fortran-contiguous order (leftmost-index varies the fastest).
-        If order is 'A' (default), then the returned array may be in any order (either C-, Fortran-contiguous, or even discontiguous), 
+        If order is 'A' (default), then the returned array may be in any order (either C-, Fortran-contiguous, or even discontiguous),
         unless a copy is required, in which case it will be C-contiguous. Only used when shape is int or sequence of ints.
 
     Returns
@@ -121,7 +121,7 @@ class StatArray(np.ndarray, myObject):
         if isinstance(shape, StatArray):
             shp = np.shape(shape)
             self = StatArray(shp, name=cf.getName(shape), units=cf.getUnits(shape)) + shape
-        
+
             if (shape.hasPrior):
                 self._prior = shape._prior.deepcopy()
             if (shape.hasProposal):
@@ -159,7 +159,7 @@ class StatArray(np.ndarray, myObject):
         except:
             self._name = None
             self._units = None
-        
+
 
 
     def __array_wrap__(self, out_arr, context = None):
@@ -170,7 +170,7 @@ class StatArray(np.ndarray, myObject):
     @property
     def name(self):
         return self._name
-        
+
 
     @name.setter
     def name(self, values):
@@ -195,7 +195,7 @@ class StatArray(np.ndarray, myObject):
             return self._posterior
         else:
             return None
-    
+
 
     @property
     def prior(self):
@@ -226,7 +226,7 @@ class StatArray(np.ndarray, myObject):
             assert isinstance(values, str)
             self._units = values
 
-    
+
     def setPosterior(self, posterior):
         """Add a posterior for the StatArray.
 
@@ -240,12 +240,12 @@ class StatArray(np.ndarray, myObject):
         nP = np.size(posterior)
         if nP > 1:
             assert nP == self.shape[0], ValueError("Number of posteriors must match size of StatArray's first dimension")
-        
+
         if nP == 1:
             if isinstance(posterior, list):
                 posterior = posterior[0]
 
-        self._posterior = posterior#deepcopy(posterior)
+        self._posterior = posterior #deepcopy(posterior)
 
 
     def setPrior(self, distributionType, *args, **kwargs):
@@ -297,17 +297,17 @@ class StatArray(np.ndarray, myObject):
     def hasLabels(self):
         return not self.getNameUnits() == ""
 
-    
+
     def abs(self):
-        """Take the absolute value.  In-place operation. 
-        
+        """Take the absolute value.  In-place operation.
+
         Returns
         -------
         out : StatArray
             Absolute value
-            
+
         """
-        
+
         out = np.abs(self)
         out.name = "|{}|".format(out.name)
 
@@ -357,7 +357,7 @@ class StatArray(np.ndarray, myObject):
         return mx
 
 
-    def copy(self, order='F'):       
+    def copy(self, order='F'):
         return StatArray(self)
 
 
@@ -367,7 +367,7 @@ class StatArray(np.ndarray, myObject):
         # if self.hasProposal:
         #     other._proposal = self._proposal.deepcopy()
         if self.hasPosterior:
-            other._posterior = self._posterior.deepcopy()
+            other._posterior = self._posterior
 
 
     def deepcopy(self):
@@ -398,7 +398,7 @@ class StatArray(np.ndarray, myObject):
             other._proposal = self._proposal.deepcopy()
         if (self.hasPosterior):
             other._posterior = self._posterior #deepcopy(self._posterior)
-        
+
         return other
 
 
@@ -430,7 +430,7 @@ class StatArray(np.ndarray, myObject):
     def edges(self, min=None, max=None, axis=-1):
         """Get the midpoint values between elements in the StatArray
 
-        Returns an size(self) + 1 length StatArray of the midpoints between each element. 
+        Returns an size(self) + 1 length StatArray of the midpoints between each element.
         The first and last element are projected edges based on the difference between first two and last two elements in self.
         edges[0] = self[0] - 0.5 * (self[1]-self[0])
         edges[-1] = self[-1] + 0.5 * (self[-1] - self[-2])
@@ -461,7 +461,7 @@ class StatArray(np.ndarray, myObject):
         x0 = self.take(indices=0, axis=axis)
         x1 = self.take(indices=-1, axis=axis)
         x2 = self.take(indices=np.arange(self.shape[axis]-1), axis=axis)
-        
+
         e0 = np.expand_dims(x0 - d.take(indices=0, axis=axis), axis)
         e1 = x2 + d
         e2 = np.expand_dims(x1 + d.take(indices=-1, axis=axis), axis)
@@ -485,7 +485,7 @@ class StatArray(np.ndarray, myObject):
             Axis along which to find first non zeros.
         invalid_val : int, optional
             When zero is not available, return this index.
-        
+
         Returns
         -------
         out : array_like
@@ -670,7 +670,7 @@ class StatArray(np.ndarray, myObject):
             i = np.s_[:]
         return self.proposal.derivative(self[i], order)
 
-        
+
     def lastNonZero(self, axis=0, invalid_val=-1):
         """Find the indices of the first non zero values along the axis.
 
@@ -678,7 +678,7 @@ class StatArray(np.ndarray, myObject):
         ----------
         axis : int
             Axis along which to find first non zeros.
-        
+
         Returns
         -------
         out : array_like
@@ -744,7 +744,7 @@ class StatArray(np.ndarray, myObject):
         numpy.resize : For more information.
 
         """
-        
+
         if (np.all(np.shape(self) == new_shape)):
             return self.deepcopy()
         out = StatArray(np.resize(self, new_shape), self.name, self.units)
@@ -786,7 +786,7 @@ class StatArray(np.ndarray, myObject):
         msg += "     Values: " + str(self[:]) + '\n'
         if self.hasPrior:
             msg += "Prior: \n     {}".format(self.prior.summary(True))
-        
+
         if self.hasProposal:
             msg += "Proposal: \n{}".format(self.proposal.summary(True))
 
@@ -823,9 +823,9 @@ class StatArray(np.ndarray, myObject):
         cP.title("Posterior")
         cP.xlabel(self.getNameUnits())
 
-        
 
-        
+
+
 
     def verbose(self):
         """Explicit print of every element """
@@ -843,6 +843,8 @@ class StatArray(np.ndarray, myObject):
             Is regularly changing.
 
         """
+        if np.size(self) == 1:
+            return True
         tmp = np.diff(self, axis=axis)
         return np.allclose(tmp, tmp[0])
 
@@ -877,7 +879,7 @@ class StatArray(np.ndarray, myObject):
 
     def pad(self, N):
         """ Copies the properties of a StatArray including all priors or proposals, but pads everything to the given size
-        
+
         Parameters
         ----------
         N : int
@@ -887,7 +889,7 @@ class StatArray(np.ndarray, myObject):
         -------
         out
             StatArray
-        
+
         """
         tmp = StatArray(N, name=self.name, units=self.units)
         try:
@@ -959,17 +961,17 @@ class StatArray(np.ndarray, myObject):
 
         return self.prior.probability(x=samples, log=log)
 
-    
+
     def propose(self, i=np.s_[:], relative=False, imposePrior = False, log=False):
         """Propose new values using the attached proposal distribution
-        
+
         Parameters
         ----------
         i : ints, optional
             Only propose values for these indices.
         relative : bool, optional
             Use the proposal distribution as a relative change to the parameter values.
-        imposePrior : bool, optional 
+        imposePrior : bool, optional
             Continue to propose new values until the prior probability is non-zero or -infinity.
         log : bool, required if imposePrior is True.
             Use log probability when imposing the prior.
@@ -982,7 +984,7 @@ class StatArray(np.ndarray, myObject):
         """
 
         assert (self.hasProposal), TypeError('No proposal defined on variable {}. Use StatArray.setProposal()'.format(self.name))
-       
+
         mv = self.proposal.multivariate
 
         if mv:
@@ -990,7 +992,7 @@ class StatArray(np.ndarray, myObject):
             assert self.proposal.ndim == self.size, ValueError("Trying to generate {} samples from an {}-dimensional distribution. Proposal dimensions must match self.size.".format(self.size, self.proposal.ndim))
         else:
             nSamples = self.size
-            
+
         # Generate new values
         proposed = self.proposal.rng(nSamples)
 
@@ -1005,7 +1007,7 @@ class StatArray(np.ndarray, myObject):
         num = -np.inf if log else 0.0
         while p == num:
             proposed = self.proposal.rng(nSamples)
-        
+
             if relative:
                 proposed = self + proposed
 
@@ -1013,23 +1015,24 @@ class StatArray(np.ndarray, myObject):
 
         return proposed[i] if mv else proposed
 
-        
+
     def rolling(self, numpyFunction, window=1):
         wd = cf.rolling_window(self, window)
         return StatArray(numpyFunction(wd, -1), self.name, self.units)
 
 
-    def updatePosterior(self):
+    def updatePosterior(self, **kwargs):
         """Adds the current values of the StatArray to the attached posterior. """
-        
+
         assert (self.hasPosterior), TypeError('No posterior defined on variable {}. Use StatArray.setPosterior()'.format(self.name))
 
         if self.nPosteriors > 1:
             for i in range(self.nPosteriors):
-                self._posterior[i].update(self.take(indices=i, axis=0))
+
+                self._posterior[i].update(self.take(indices=i, axis=0), **kwargs)
 
         else:
-            self.posterior.update(self)
+            self.posterior.update(self, **kwargs)
 
 
     ### Plotting Routines
@@ -1100,7 +1103,7 @@ class StatArray(np.ndarray, myObject):
         grid : bool, optional
             Plot the grid
         noColorbar : bool, optional
-            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.   
+            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
         trim : bool, optional
             Set the x and y limits to the first and last non zero values along each axis.
         classes : dict, optional
@@ -1196,7 +1199,7 @@ class StatArray(np.ndarray, myObject):
 
         return cP.plot(x[j],self[i],**kwargs)
 
-    
+
     def plotPosteriors(self, axes=None, **kwargs):
         """Plot the posteriors of the StatArray.
 
@@ -1247,7 +1250,7 @@ class StatArray(np.ndarray, myObject):
             Vertical locations of the points to plot, if y = None, then y = c.
         i : sequence of ints, optional
             Plot a subset of x, y, c, using the indices in i.
-            
+
         See Also
         --------
         geobipy.customPlots.Scatter2D : For additional keyword arguments you may use.
@@ -1278,7 +1281,7 @@ class StatArray(np.ndarray, myObject):
             The abcissa.
         i : sequence of ints, optional
             Plot a subset of x, y, c, using the indices in i.
-        
+
         Other Parameters
         ----------------
         axis : int
@@ -1290,7 +1293,7 @@ class StatArray(np.ndarray, myObject):
         xscale : str, optional
             Scale the x axis? e.g. xscale = 'linear' or 'log'.
         yscale : str, optional
-            Scale the y axis? e.g. yscale = 'linear' or 'log'.     
+            Scale the y axis? e.g. yscale = 'linear' or 'log'.
 
         Returns
         -------
@@ -1304,7 +1307,7 @@ class StatArray(np.ndarray, myObject):
         """
 
         assert (self.ndim == 2), TypeError('stackedAreaPlot only works with 2D arrays')
-        if (not i is None): 
+        if (not i is None):
             assert (isinstance(i,(slice,tuple))), TypeError("i must be a slice, use np.s_[]")
 
         if (x is None):
@@ -1334,8 +1337,8 @@ class StatArray(np.ndarray, myObject):
     def hdfName(self):
         """Create a string that describes class instantiation
 
-        Returns a string that should be used as an attr['repr'] in a HDF group.  
-        This allows reading of the attribute from the hdf file, evaluating it to return an object, 
+        Returns a string that should be used as an attr['repr'] in a HDF group.
+        This allows reading of the attribute from the hdf file, evaluating it to return an object,
         and then reading the hdf contents via the object's methods.
 
         Returns
@@ -1361,9 +1364,9 @@ class StatArray(np.ndarray, myObject):
     def toHdf(self, h5obj, myName):
         """Write the StatArray to an HDF object
 
-        Creates and writes a new group in a HDF file under h5obj. 
-        A nested heirarchy will be created e.g., myName\data, myName\prior, and myName\proposal.  
-        This function modifies the file metadata and writes the contents at the same time and 
+        Creates and writes a new group in a HDF file under h5obj.
+        A nested heirarchy will be created e.g., myName\data, myName\prior, and myName\proposal.
+        This function modifies the file metadata and writes the contents at the same time and
         should not be used in a parallel environment.
 
         Parameters
@@ -1409,11 +1412,11 @@ class StatArray(np.ndarray, myObject):
     def createHdf(self, h5obj, myName, withPosterior=True, nRepeats=None, fillvalue=None):
         """Create the Metadata for a StatArray in a HDF file
 
-        Creates a new group in a HDF file under h5obj. 
-        A nested heirarchy will be created e.g., myName\data, myName\prior, and myName\proposal. 
-        This method can be used in an MPI parallel environment, if so however, a) the hdf file must have been opened with the mpio driver, 
-        and b) createHdf must be called collectively, i.e., called by every core in the MPI communicator that was used to open the file. 
-        In order to create large amounts of empty space before writing to it in parallel, the nRepeats parameter will extend the memory 
+        Creates a new group in a HDF file under h5obj.
+        A nested heirarchy will be created e.g., myName\data, myName\prior, and myName\proposal.
+        This method can be used in an MPI parallel environment, if so however, a) the hdf file must have been opened with the mpio driver,
+        and b) createHdf must be called collectively, i.e., called by every core in the MPI communicator that was used to open the file.
+        In order to create large amounts of empty space before writing to it in parallel, the nRepeats parameter will extend the memory
         in the first dimension.
 
         Parameters
@@ -1425,16 +1428,16 @@ class StatArray(np.ndarray, myObject):
         withPosterior : bool, optional
             Include the creation of space for any attached posterior.
         nRepeats : int, optional
-            Inserts a first dimension into the shape of the StatArray of size nRepeats. This can be used to extend the available memory of 
+            Inserts a first dimension into the shape of the StatArray of size nRepeats. This can be used to extend the available memory of
             the StatArray so that multiple MPI ranks can write to their respective parts in the extended memory.
         fillvalue : number, optional
             Initializes the memory in file with the fill value
 
         Notes
         -----
-        This method can be used in serial and MPI. As an example in MPI. 
-        Given 10 MPI ranks, each with a 10 length array, it is faster to create a 10x10 empty array, and have each rank write its row.  
-        Rather than creating 10 separate length 10 arrays because the overhead when creating the file metadata can become very 
+        This method can be used in serial and MPI. As an example in MPI.
+        Given 10 MPI ranks, each with a 10 length array, it is faster to create a 10x10 empty array, and have each rank write its row.
+        Rather than creating 10 separate length 10 arrays because the overhead when creating the file metadata can become very
         cumbersome if done too many times.
 
         Example
@@ -1454,7 +1457,7 @@ class StatArray(np.ndarray, myObject):
         >>> x.createHdf(f, 'x', nRepeats=world.size)
 
         >>> world.barrier()
-        
+
         >>> # In a non collective region, we can write to different sections of x in the file
         >>> # Fake a non collective region
         >>> def noncollectivewrite(x, file, world):
@@ -1487,14 +1490,14 @@ class StatArray(np.ndarray, myObject):
                         self.posterior[i].createHdf(grp, 'posterior{}'.format(i), nRepeats=nRepeats, fillvalue=fillvalue)
                 else:
                     self.posterior.createHdf(grp, 'posterior', nRepeats=nRepeats, fillvalue=fillvalue)
-     
+
 
     def writeHdf(self, h5obj, myName, withPosterior=True, index=None):
         """Write the values of a StatArray to a HDF file
 
-        Writes the contents of the StatArray to an already created group in a HDF file under h5obj. 
-        This method can be used in an MPI parallel environment, if so however, the hdf file must have been opened with the mpio driver. 
-        Unlike createHdf, writeHdf does not have to be called collectively, each rank can call writeHdf independently, 
+        Writes the contents of the StatArray to an already created group in a HDF file under h5obj.
+        This method can be used in an MPI parallel environment, if so however, the hdf file must have been opened with the mpio driver.
+        Unlike createHdf, writeHdf does not have to be called collectively, each rank can call writeHdf independently,
         so long as they do not try to write to the same index.
 
         Parameters
@@ -1525,7 +1528,7 @@ class StatArray(np.ndarray, myObject):
         >>> x.createHdf(f, 'x', nRepeats=world.size)
 
         >>> world.barrier()
-        
+
         >>> # In a non collective region, we can write to different sections of x in the file
         >>> # Fake a non collective region
         >>> def noncollectivewrite(x, file, world):
@@ -1573,10 +1576,9 @@ class StatArray(np.ndarray, myObject):
 
         """
 
-        try:
+        nPosteriors = 0
+        if 'nPosteriors' in h5grp:
             nPosteriors = np.asarray(h5grp['nPosteriors'])
-        except:
-            nPosteriors = 0
 
         posterior = None
         iTmp = index
@@ -1618,7 +1620,7 @@ class StatArray(np.ndarray, myObject):
 #        except:
 #            pass
         # try:
-        
+
         # except:
         #     pass
 
@@ -1814,7 +1816,7 @@ class StatArray(np.ndarray, myObject):
         dest = 0 if world.rank == world.size - 1 else world.rank + 1
         self.Isend(dest=dest, world=world)
 
-    
+
     def IrecvFromRight(self, world, wrap=True):
         """IRecv an array from the rank right of world.rank.
 
@@ -1825,7 +1827,7 @@ class StatArray(np.ndarray, myObject):
 
     def IrecvFromLeft(self, world, wrap=True):
         """Irecv an array from the rank left of world.rank.
- 
+
         """
         source = world.size - 1 if world.rank == 0 else world.rank - 1
         return self.Irecv(source=source, world=world)
