@@ -2,6 +2,7 @@ from .DataPoint import DataPoint
 from ...model.Model1D import Model1D
 from ....classes.core import StatArray
 from ...statistics.Histogram1D import Histogram1D
+from ...statistics.Histogram2D import Histogram2D
 from ....base import customFunctions as cf
 from ....base import customPlots as cP
 import numpy as np
@@ -34,6 +35,7 @@ class EmDataPoint(DataPoint):
 
         self.fiducial = fiducial
         self.lineNumber = lineNumber
+        self.errorPosterior = None
 
 
     @property
@@ -55,7 +57,7 @@ class EmDataPoint(DataPoint):
         self._addErr[:] = values
 
 
-    def FindBestHalfSpace(self, minConductivity=1e-4, maxConductivity=1e2, nSamples=100):
+    def FindBestHalfSpace(self, minConductivity=1e-4, maxConductivity=1e4, nSamples=100):
         """Computes the best value of a half space that fits the data.
 
         Carries out a brute force search of the halfspace conductivity that best fits the data.
@@ -278,7 +280,7 @@ class EmDataPoint(DataPoint):
             self.addErr.setPrior(additiveErrorPrior)
 
 
-    def setProposals(self, heightProposal, relativeErrorProposal, additiveErrorProposal):
+    def setProposals(self, heightProposal=None, relativeErrorProposal=None, additiveErrorProposal=None):
         """Set the proposals on the datapoint's perturbable parameters
 
         Parameters
@@ -306,41 +308,76 @@ class EmDataPoint(DataPoint):
             self.addErr.setProposal(additiveErrorProposal)
 
 
-    def setPosteriors(self):
+    def setPosteriors(self, log=None):
+        """ Set the posteriors based on the attached priors
+
+        Parameters
+        ----------
+        log :
+
+        """
         # Create a histogram to set the height posterior.
         self.setHeightPosterior()
-        # Initialize the histograms for the relative errors
-        self.setRelativeErrorPosterior()
-        # Set the posterior for the data point.
-        self.setAdditiveErrorPosterior()
+        # # Initialize the histograms for the relative errors
+        # self.setRelativeErrorPosterior()
+        # # Set the posterior for the data point.
+        # self.setAdditiveErrorPosterior(log=log)
+        self.setErrorPosterior(log=log)
 
 
     def setHeightPosterior(self):
+        """
 
-        assert self.z.hasPrior, Exception("Must set a prior on the height")
-        H = Histogram1D(bins = StatArray.StatArray(self.z.prior.bins(), name=self.z.name, units=self.z.units), relativeTo=self.z)
-        self.z.setPosterior(H)
-
-
-    def setAdditiveErrorPosterior(self):
-
-        assert self.addErr.hasPrior, Exception("Must set a prior on the additive error")
-        aBins = self.addErr.prior.bins()
-
-        binsMidpoint = 0.5 * aBins.max(axis=-1) + aBins.min(axis=-1)
-        ab = np.atleast_2d(aBins)
-        binsMidpoint = np.atleast_1d(binsMidpoint)
-
-        self.addErr.setPosterior([Histogram1D(bins = StatArray.StatArray(ab[i, :], name=self.addErr.name, units=self.data.units), relativeTo=binsMidpoint[i]) for i in range(self.nSystems)])
+        """
+        if self.z.hasPrior:
+            H = Histogram1D(bins = StatArray.StatArray(self.z.prior.bins(), name=self.z.name, units=self.z.units), relativeTo=self.z)
+            self.z.setPosterior(H)
 
 
-    def setRelativeErrorPosterior(self):
+    def setErrorPosterior(self, log=None):
+        """
 
-        rBins = self.relErr.prior.bins()
-        if self.nSystems > 1:
-            self.relErr.setPosterior([Histogram1D(bins = StatArray.StatArray(rBins[i, :], name='$\epsilon_{Relative}x10^{2}$', units='%')) for i in range(self.nSystems)])
-        else:
-            self.relErr.setPosterior(Histogram1D(bins = StatArray.StatArray(rBins, name='$\epsilon_{Relative}x10^{2}$', units='%')))
+        """
+        if (not self.relErr.hasPrior) and (not self.addErr.hasPrior):
+            return
+
+        if self.relErr.hasPrior:
+            rb = StatArray.StatArray(np.atleast_2d(self.relErr.prior.bins()), name=self.relErr.name, units=self.relErr.units)
+            if not self.addErr.hasPrior:
+                self.relErr.setPosterior([Histogram1D(bins = rb[i, :]) for i in range(self.nSystems)])
+                return
+
+        if self.addErr.hasPrior:
+            ab = StatArray.StatArray(np.atleast_2d(self.addErr.prior.bins()), name=self.addErr.name, units=self.data.units)
+            if not self.relErr.hasPrior:
+                self.addErr.setPosterior([Histogram1D(bins = ab[i, :], log=log) for i in range(self.nSystems)])
+                return
+
+        self.errorPosterior = [Histogram2D(xBins=ab[i, :], yBins=rb[i, :], xlog=log) for i in range(self.nSystems)]
+
+        # self.relErr.setPosterior([self.errorPosterior[i].marginalHistogram(axis=1) for i in range(self.nSystems)])
+        # self.addErr.setPosterior([self.errorPosterior[i].marginalHistogram(axis=0) for i in range(self.nSystems)])
+
+
+    # def setAdditiveErrorPosterior(self, log=None):
+
+    #     assert self.addErr.hasPrior, Exception("Must set a prior on the additive error")
+
+    #     aBins = self.addErr.prior.bins()
+    #     binsMidpoint = 0.5 * aBins.max(axis=-1) + aBins.min(axis=-1)
+    #     ab = np.atleast_2d(aBins)
+    #     binsMidpoint = np.atleast_1d(binsMidpoint)
+
+    #     self.addErr.setPosterior([Histogram1D(bins = StatArray.StatArray(ab[i, :], name=self.addErr.name, units=self.data.units), log=log, relativeTo=binsMidpoint[i]) for i in range(self.nSystems)])
+
+
+    # def setRelativeErrorPosterior(self):
+
+    #     rBins = self.relErr.prior.bins()
+    #     if self.nSystems > 1:
+    #         self.relErr.setPosterior([Histogram1D(bins = StatArray.StatArray(rBins[i, :], name='$\epsilon_{Relative}x10^{2}$', units='%')) for i in range(self.nSystems)])
+    #     else:
+    #         self.relErr.setPosterior(Histogram1D(bins = StatArray.StatArray(rBins, name='$\epsilon_{Relative}x10^{2}$', units='%')))
 
 
     def summary(self, out=False):
@@ -349,10 +386,27 @@ class EmDataPoint(DataPoint):
                 "Fiducial: {}\n"
                 "Relative Error {}\n"
                 "Additive Error {}\n").format(super().summary(True), self.lineNumber, self.fiducial, self.relErr.summary(True), self.addErr.summary(True))
-        for s in self.system:
+        for s in self.systems:
             msg += s.summary(True)
 
         return msg if out else print(msg)
+
+
+    def updatePosteriors(self):
+        """Update any attached posteriors"""
+
+        if self.z.hasPosterior:
+            self.z.updatePosterior()
+
+        if not self.errorPosterior is None:
+            for i in range(self.nSystems):
+                self.errorPosterior[i].update(xValues=self.addErr[i], yValues=self.relErr[i])
+        else:
+            if self.relErr.hasPosterior:
+                self.relErr.updatePosterior()
+
+            if self.addErr.hasPosterior:
+                self.addErr.updatePosterior()
 
 
 

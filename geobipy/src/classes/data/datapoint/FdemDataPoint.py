@@ -184,6 +184,7 @@ class FdemDataPoint(EmDataPoint):
         # StatArray of Additive Errors
         tmp._addErr = self.addErr.deepcopy()
         # StatArray of calibration parameters
+        tmp.errorPosterior = self.errorPosterior
         # The four columns are Bias,Variance,InphaseBias,QuadratureBias.
         tmp.calibration = self.calibration.deepcopy()
         # Initialize the sensitivity matrix
@@ -250,6 +251,11 @@ class FdemDataPoint(EmDataPoint):
         self._data.createHdf(grp, 'd', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self._std.createHdf(grp, 's', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self._predictedData.createHdf(grp, 'p', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+
+        if not self.errorPosterior is None:
+            self.relErr.setPosterior([self.errorPosterior[i].marginalHistogram(axis=1) for i in range(self.nSystems)])
+            self.addErr.setPosterior([self.errorPosterior[i].marginalHistogram(axis=0) for i in range(self.nSystems)])
+
         self.relErr.createHdf(grp, 'relErr', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self.addErr.createHdf(grp, 'addErr', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self.calibration.createHdf(grp, 'calibration', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
@@ -272,6 +278,11 @@ class FdemDataPoint(EmDataPoint):
         self._data.writeHdf(grp, 'd',  withPosterior=withPosterior, index=index)
         self._std.writeHdf(grp, 's',  withPosterior=withPosterior, index=index)
         self._predictedData.writeHdf(grp, 'p',  withPosterior=withPosterior, index=index)
+
+        if not self.errorPosterior is None:
+            self.relErr.setPosterior([self.errorPosterior[i].marginalHistogram(axis=1) for i in range(self.nSystems)])
+            self.addErr.setPosterior([self.errorPosterior[i].marginalHistogram(axis=0) for i in range(self.nSystems)])
+
         self.relErr.writeHdf(grp, 'relErr',  withPosterior=withPosterior, index=index)
         self.addErr.writeHdf(grp, 'addErr',  withPosterior=withPosterior, index=index)
         self.calibration.writeHdf(grp, 'calibration',  withPosterior=withPosterior, index=index)
@@ -300,7 +311,8 @@ class FdemDataPoint(EmDataPoint):
         e = obj.fromHdf(item, index=index)
 
         item = grp.get('sys')
-        obj = eval(cf.safeEval(item.attrs.get('repr')))
+
+        obj = FdemSystem()
         system = obj.fromHdf(item)
 
         _aPoint = FdemDataPoint(x, y, z, e, system=system)

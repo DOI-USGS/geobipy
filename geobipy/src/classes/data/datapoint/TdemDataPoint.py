@@ -170,6 +170,7 @@ class TdemDataPoint(EmDataPoint):
         out._relErr = self.relErr.deepcopy()
         # StatArray of Additive Errors
         out._addErr = self.addErr.deepcopy()
+        out.errorPosterior = self.errorPosterior
         # Initialize the sensitivity matrix
         out.J = deepcopy(self.J)
 
@@ -188,7 +189,7 @@ class TdemDataPoint(EmDataPoint):
 
     def dualMoment(self):
         """ Returns True if the number of systems is > 1 """
-        return len(self.system) > 1
+        return len(self.system) == 2
 
 
     def read(self, dataFileName):
@@ -420,6 +421,11 @@ class TdemDataPoint(EmDataPoint):
         self._data.createHdf(grp, 'd', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self._std.createHdf(grp, 's', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self._predictedData.createHdf(grp, 'p', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+
+        if not self.errorPosterior is None:
+            self.relErr.setPosterior([self.errorPosterior[i].marginalHistogram(axis=1) for i in range(self.nSystems)])
+            self.addErr.setPosterior([self.errorPosterior[i].marginalHistogram(axis=0) for i in range(self.nSystems)])
+
         self.relErr.createHdf(grp, 'relErr', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self.addErr.createHdf(grp, 'addErr', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self.T.createHdf(grp, 'T', nRepeats=nRepeats, fillvalue=fillvalue)
@@ -446,6 +452,11 @@ class TdemDataPoint(EmDataPoint):
         self._data.writeHdf(grp, 'd',  withPosterior=withPosterior, index=index)
         self._std.writeHdf(grp, 's',  withPosterior=withPosterior, index=index)
         self._predictedData.writeHdf(grp, 'p',  withPosterior=withPosterior, index=index)
+
+        if not self.errorPosterior is None:
+            self.relErr.setPosterior([self.errorPosterior[i].marginalHistogram(axis=1) for i in range(self.nSystems)])
+            self.addErr.setPosterior([self.errorPosterior[i].marginalHistogram(axis=0) for i in range(self.nSystems)])
+
         self.relErr.writeHdf(grp, 'relErr',  withPosterior=withPosterior, index=index)
         self.addErr.writeHdf(grp, 'addErr',  withPosterior=withPosterior, index=index)
         self.T.writeHdf(grp, 'T', index=index)
@@ -720,33 +731,8 @@ class TdemDataPoint(EmDataPoint):
         return probability
 
 
-    def setAdditiveErrorPosterior(self):
-
-        assert self.addErr.hasPrior, Exception("Must set a prior on the additive error")
-
-        aBins = self.addErr.prior.bins()
-        binsMidpoint = 0.5 * aBins.max(axis=-1) + aBins.min(axis=-1)
-        ab = np.atleast_2d(aBins)
-        binsMidpoint = np.atleast_1d(binsMidpoint)
-        self.addErr.setPosterior([Histogram1D(bins = StatArray.StatArray(ab[i, :], name=self.addErr.name, units=self.data.units), log=10, relativeTo=binsMidpoint[i]) for i in range(self.nSystems)])
-
-
-    # def setAdditiveErrorPrior(self, minimum, maximum, prng=None):
-    #     minimum = np.atleast_1d(minimum)
-    #     assert minimum.size == self.nSystems, ValueError("minimum must have {} entries".format(self.nSystems))
-    #     assert np.all(minimum > 0.0), ValueError("minimum values must be in linear space i.e. > 0.0")
-    #     maximum = np.atleast_1d(maximum)
-    #     assert maximum.size == self.nSystems, ValueError("maximum must have {} entries".format(self.nSystems))
-    #     assert np.all(maximum > 0.0), ValueError("maximum values must be in linear space i.e. > 0.0")
-    #     self.addErr.setPrior('Uniform', minimum, maximum, log=True, prng=prng)
-
-
-    # def setAdditiveErrorProposal(self, means, variances, prng=None):
-    #     means = np.atleast_1d(means)
-    #     assert means.size == self.nSystems, ValueError("means must have {} entries".format(self.nSystems))
-    #     variances = np.atleast_1d(variances)
-    #     assert variances.size == self.nSystems, ValueError("variances must have {} entries".format(self.nSystems))
-    #     self.addErr.setProposal('MvLogNormal', means, variances, linearSpace=True, prng=prng)
+    def setPosteriors(self, log=10):
+        return super().setPosteriors(log=10)
 
 
     def updateErrors(self, relativeErr, additiveErr):
