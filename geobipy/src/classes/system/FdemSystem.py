@@ -19,7 +19,7 @@ class FdemSystem(myObject):
 
     def __init__(self, frequencies=None, transmitterLoops = None, receiverLoops=None, systemFilename=None):
         """ Initialize an FdemSystem """
-        
+
         # StatArray of frequencies
         if frequencies is None:
             return
@@ -66,7 +66,7 @@ class FdemSystem(myObject):
     @property
     def loopSeparation(self):
         return np.linalg.norm(self.loopOffsets, axis=1)
-      
+
     @property
     def nFrequencies(self):
         return np.size(self.frequencies)
@@ -153,7 +153,7 @@ class FdemSystem(myObject):
 
     def read(self, fileName):
         """ Read in a file containing the system information
-        
+
         The system file is structured using columns with the first line containing header information
         Each subsequent row contains the information for each measurement frequency
         freq  tor  tmom  tx ty tz ror rmom  rx   ry rz
@@ -180,16 +180,16 @@ class FdemSystem(myObject):
                 line = fIO.parseString(line)
                 frequencies[j] = np.float64(line[0])
                 T = (CircularLoop(
-                        line[1], 
-                        np.int(line[2]), 
-                        np.int(line[3]), 
-                        np.float64(line[4]), 
+                        line[1],
+                        np.int(line[2]),
+                        np.int(line[3]),
+                        np.float64(line[4]),
                         np.float64(line[5])))
                 R = (CircularLoop(
-                        line[6], 
-                        np.int(line[7]), 
-                        np.float64(line[8]), 
-                        np.float64(line[9]), 
+                        line[6],
+                        np.int(line[7]),
+                        np.float64(line[8]),
+                        np.float64(line[9]),
                         np.float64(line[10])))
                 transmitters.append(T)
                 receivers.append(R)
@@ -273,7 +273,7 @@ class FdemSystem(myObject):
 
 
     def hdfName(self):
-        return('FdemSystem(0)')
+        return('FdemSystem()')
 
 
     def toHdf(self, h5obj, myName):
@@ -294,19 +294,25 @@ class FdemSystem(myObject):
     def fromHdf(self, grp):
         """ Reads the object from a HDF file """
         nFreq = np.int(np.array(grp.get('nFreq')))
-        tmp = FdemSystem(nFreq)
         item = grp.get('freq')
         obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp._frequencies = obj.fromHdf(item)
-        item = grp.get('loopoffsets')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp.loopOffsets = obj.fromHdf(item)
+        frequencies = obj.fromHdf(item)
+        try:
+            item = grp.get('loopoffsets')
+            obj = eval(cF.safeEval(item.attrs.get('repr')))
+        except:
+            item = grp.get('dist')
+            obj = eval(cF.safeEval(item.attrs.get('repr')))
+        loopOffsets = obj.fromHdf(item)
+
+        transmitterLoops = []
+        receiverLoops = []
         for i in range(nFreq):
             item = grp.get('T/T' + str(i))
-            tmp.transmitterLoops[i] = eval(cF.safeEval(item.attrs.get('repr')))
+            transmitterLoops.append(eval(cF.safeEval(item.attrs.get('repr'))))
             item = grp.get('R/R' + str(i))
-            tmp.receiverLoops[i] = eval(cF.safeEval(item.attrs.get('repr')))
-        return tmp
+            receiverLoops.append(eval(cF.safeEval(item.attrs.get('repr'))))
+        return FdemSystem.__init__(self, frequencies, transmitterLoops, receiverLoops)
 
 
     def Bcast(self, world, root=0):
