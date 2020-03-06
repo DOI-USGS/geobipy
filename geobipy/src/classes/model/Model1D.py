@@ -87,8 +87,8 @@ class Model1D(Model):
         self._dpar = StatArray.StatArray(self.nCells[0] - 1, 'Derivative', r"$\frac{"+self.par.getUnits()+"}{m}$")
 
         # StatArray of magnetic properties.
-        self.chie = StatArray.StatArray(self.nCells[0], "Magnetic Susceptibility", r"$\kappa$")
-        self.chim = StatArray.StatArray(self.nCells[0], "Magnetic Permeability", "$\frac{H}{m}$")
+        self._magnetic_susceptibility = StatArray.StatArray(self.nCells[0], "Magnetic Susceptibility", r"$\kappa$")
+        self._magnetic_permeability = StatArray.StatArray(self.nCells[0], "Magnetic Permeability", "$\frac{H}{m}$")
 
         # Instantiate extra parameters for Markov chain perturbations.
         # Minimum cell thickness
@@ -202,6 +202,14 @@ class Model1D(Model):
         return self._depth
 
     @property
+    def magnetic_permeability(self):
+        return self._magnetic_permeability
+
+    @property
+    def magnetic_susceptibility(self):
+        return self._magnetic_susceptibility
+
+    @property
     def thk(self):
         return self._thk
 
@@ -230,8 +238,8 @@ class Model1D(Model):
         other.maxLayers = self.maxLayers
         other._par = self.par.deepcopy()
         other._dpar = self.dpar.deepcopy()
-        other.chie = self.chie.deepcopy() #StatArray(other.nCells[0], "Electric Susceptibility", r"$\kappa$")
-        other.chim = self.chim.deepcopy() #StatArray(other.nCells[0], "Magnetic Susceptibility", "$\frac{H}{m}$")
+        other._magnetic_permeability = self.magnetic_permeability.deepcopy() #StatArray(other.nCells[0], "Electric Susceptibility", r"$\kappa$")
+        other._magnetic_susceptibility = self.magnetic_susceptibility.deepcopy() #StatArray(other.nCells[0], "Magnetic Susceptibility", "$\frac{H}{m}$")
         other.eventProposal = self.eventProposal
         other.action = self.action.copy()
         other.Hitmap = self.Hitmap
@@ -261,8 +269,8 @@ class Model1D(Model):
         tmp._depth = self.depth.pad(size)
         tmp._thk = self.thk.pad(size)
         tmp._par = self.par.pad(size)
-        tmp.chie = self.chie.pad(size)
-        tmp.chim = self.chim.pad(size)
+        tmp._magnetic_permeability = self.magnetic_permeability.pad(size)
+        tmp._magnetic_susceptibility = self.magnetic_susceptibility.pad(size)
         tmp._dpar=self.dpar.pad(size-1)
         if (not self.minDepth is None): tmp.minDepth=self.minDepth
         if (not self.maxDepth is None): tmp.maxDepth=self.maxDepth
@@ -291,13 +299,14 @@ class Model1D(Model):
             self._thk[-1] = np.inf
 
 
-    def localParameterVariance(self, dataPoint):
+    def localParameterVariance(self, dataPoint=None):
         """Generate a localized inverse Hessian matrix using a dataPoint and the current realization of the Model1D.
 
         Parameters
         ----------
-        dataPoint : geobipy.DataPoint
+        dataPoint : geobipy.DataPoint, optional
             The data point to use when computing the local estimate of the variance.
+            If None, only the prior derivative is used.
 
         Returns
         -------
@@ -306,26 +315,30 @@ class Model1D(Model):
 
         """
         assert self.par.hasPrior or self.dpar.hasPrior, Exception("Model must have either a parameter prior or gradient prior, use self.setPriors()")
-        # Compute the sensitivity of the data to the perturbed model
-        dataPoint.sensitivity(self)
-        Wd = dataPoint.weightingMatrix(power=1.0)
-        WdJ = np.dot(Wd, dataPoint.J)
-        WdJTWdJ = np.dot(WdJ.T, WdJ)
 
-        # Propose new layer conductivities
-        self._inverseHessian = np.linalg.inv(WdJTWdJ + self.par.prior.derivative(x=None, order=2))
+        if not dataPoint is None:
+            # Compute the sensitivity of the data to the perturbed model
+            dataPoint.sensitivity(self)
+            Wd = dataPoint.weightingMatrix(power=1.0)
+            WdJ = np.dot(Wd, dataPoint.J)
+            WdJTWdJ = np.dot(WdJ.T, WdJ)
+
+            # Propose new layer conductivities
+            self._inverseHessian = np.linalg.inv(WdJTWdJ + self.par.prior.derivative(x=None, order=2))
+        else:
+            self._inverseHessian = self.par.prior.derivative(x=None, order=2)
 
         return self._inverseHessian
 
 
-    def updateLocalParameterVariance(self, dataPoint):
+    def updateLocalParameterVariance(self, dataPoint=None):
         """Generate a localized Hessian matrix using
         a dataPoint and the current realization of the Model1D.
 
 
         Parameters
         ----------
-        dataPoint : geobipy.DataPoint
+        dataPoint : geobipy.DataPoint, optional
             The data point to use when computing the local estimate of the variance.
 
         Returns
@@ -353,7 +366,6 @@ class Model1D(Model):
                 self.localParameterVariance(dataPoint)
 
         return self.inverseHessian
-
 
 
     def insertLayer(self, z, par=None):
@@ -395,8 +407,8 @@ class Model1D(Model):
         # Get the new thicknesses
         other.thicknessFromDepth()
         # Reset ChiE and ChiM
-        other.chie = StatArray.StatArray(other.nCells[0], "Electric Susceptibility", r"$\kappa$")
-        other.chim = StatArray.StatArray(other.nCells[0], "Magnetic Susceptibility", r"$\frac{H}{m}$")
+        other._magnetic_permeability = StatArray.StatArray(other.nCells[0], "Electric Susceptibility", r"$\kappa$")
+        other._magnetic_susceptibility = StatArray.StatArray(other.nCells[0], "Magnetic Susceptibility", r"$\frac{H}{m}$")
         # Resize the parameter gradient
         other._dpar = other.dpar.resize(other.par.size - 1)
         other.action = ['birth', np.int(i), z]
@@ -435,8 +447,8 @@ class Model1D(Model):
         other._par = other.par.delete(i)
         other._par[i] = 0.5 * (self.par[i] + self.par[i + 1])
         # Reset ChiE and ChiM
-        other.chie = other.chie.delete(i)
-        other.chim = other.chim.delete(i)
+        other._magnetic_permeability = other.magnetic_permeability.delete(i)
+        other._magnetic_susceptibility = other.magnetic_susceptibility.delete(i)
         # Resize the parameter gradient
         other._dpar = other.dpar.resize(other.par.size - 1)
         other.action = ['death', np.int(i), self.depth[i]]
@@ -705,7 +717,7 @@ class Model1D(Model):
         return (self.maxDepth - self.minDepth) - nLayers * self.minThickness
 
 
-    def proposalProbabilities(self, dataPoint, remappedModel, burnedIn):
+    def proposalProbabilities(self, remappedModel, dataPoint=None):
         """Return the forward and reverse proposal probabilities for the model
 
         Returns the denominator and numerator for the model's components of the proposal ratio.
@@ -726,10 +738,10 @@ class Model1D(Model):
 
         Parameters
         ----------
-        datapoint : geobipy.DataPoint
-            The perturbed datapoint that was used to generate self.
         remappedModel : geobipy.Model1D
             The current model, remapped onto the dimension of self.
+        datapoint : geobipy.DataPoint
+            The perturbed datapoint that was used to generate self.
 
         Returns
         -------
@@ -746,7 +758,9 @@ class Model1D(Model):
         # the data residual using the perturbed parameter values.
 
         # Compute the gradient according to the perturbed parameters and data residual
-        gradient = np.dot(dataPoint.J.T, dataPoint.predictedData.priorDerivative(order=1, i=dataPoint.active)) + self.par.priorDerivative(order=1)
+        gradient = self.par.priorDerivative(order=1)
+        if not dataPoint is None:
+            gradient += np.dot(dataPoint.J.T, dataPoint.predictedData.priorDerivative(order=1, i=dataPoint.active))
 
         # if (not burnedIn):
         #     SN_step_from_perturbed = 0.0
@@ -834,20 +848,11 @@ class Model1D(Model):
             The model with perturbed structure and parameter values.
 
         """
-
-        if datapoint is None:
-            # Perturb the structure of the model
-            remappedModel = self.perturbStructure()
-            perturbedModel = remappedModel.deepcopy()
-            # Generate new conductivities
-            perturbedModel.par.perturb()
-            return remappedModel, perturbedModel
-        else:
-            return self.stochasticNewtonPerturbation(datapoint)
+        return self.stochasticNewtonPerturbation(datapoint)
 
 
 
-    def stochasticNewtonPerturbation(self, datapoint):
+    def stochasticNewtonPerturbation(self, datapoint=None):
 
         # Perturb the structure of the model
         remappedModel = self.perturbStructure()
@@ -857,13 +862,9 @@ class Model1D(Model):
 
         ### Proposing new parameter values
         # Compute the gradient of the "deterministic" objective function using the unperturbed, remapped, parameter values.
-        Wd2 = datapoint.weightingMatrix(power=2.0)
-        Wd2J = np.dot(Wd2, datapoint.J)
-
-        # print((priStd**-2.0) * (remappedModel.par - np.exp(remappedModel._halfSpaceParameter)))
-
-        gradient = np.dot(datapoint.J.T, datapoint.predictedData.priorDerivative(order=1, i=datapoint.active)) + remappedModel.par.priorDerivative(order=1)
-        # gradient = np.dot(Wd2J.T, dataPoint.deltaD[dataPoint.active]) + ((priStd**-2.0) * (np.log(remappedModel.par) - np.log(remappedModel._halfSpaceParameter)))
+        gradient = remappedModel.par.priorDerivative(order=1)
+        if not datapoint is None:
+            gradient += np.dot(datapoint.J.T, datapoint.predictedData.priorDerivative(order=1, i=datapoint.active))
 
         # scaling = parameterCovarianceScaling * ((2.0 * np.float64(Mod1.nCells[0])) - 1)**(-1.0 / 3.0)
 
@@ -1146,7 +1147,7 @@ class Model1D(Model):
         if self.hasHalfspace:
             if (self.maxDepth is None):
                 if (self.nCells > 1):
-                    d[-1] = 1.1 * z[-2]
+                    d[-1] = 1.1 * d[-2]
                 else:
                     d[0] = 1.0
             else:
@@ -1538,8 +1539,8 @@ class Model1D(Model):
         self.depth.createHdf(grp, 'depth', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self.thk.createHdf(grp, 'thk', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self.par.createHdf(grp, 'par', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        #self.chie.createHdf(grp, 'chie', nRepeats=nRepeats, fillvalue=fillvalue)
-        #self.chim.createHdf(grp, 'chim', nRepeats=nRepeats, fillvalue=fillvalue)
+        #self.magnetic_permeability.createHdf(grp, 'magnetic_permeability', nRepeats=nRepeats, fillvalue=fillvalue)
+        #self.magnetic_susceptibility.createHdf(grp, 'magnetic_susceptibility', nRepeats=nRepeats, fillvalue=fillvalue)
 
         try:
             grp.create_dataset('pWheel', data=self.pWheel)
@@ -1633,8 +1634,8 @@ class Model1D(Model):
         self.depth.writeHdf(grp, 'depth',  withPosterior=withPosterior, index=index)
         self.thk.writeHdf(grp, 'thk',  withPosterior=withPosterior, index=index)
         self.par.writeHdf(grp, 'par',  withPosterior=withPosterior, index=index)
-        #self.chie.writeHdf(grp, 'chie',  withPosterior=withPosterior, index=i)
-        #self.chim.writeHdf(grp, 'chim',  withPosterior=withPosterior, index=i)
+        #self.magnetic_permeability.writeHdf(grp, 'magnetic_permeability',  withPosterior=withPosterior, index=i)
+        #self.magnetic_susceptibility.writeHdf(grp, 'magnetic_susceptibility',  withPosterior=withPosterior, index=i)
 
 
     def toHdf(self, hObj, myName):
@@ -1736,11 +1737,11 @@ class Model1D(Model):
         obj = obj.resize(tmp.nCells[0])
         tmp._thk = obj.fromHdf(item, index=i)
 
-        #item = grp.get('chie'); obj = eval(cF.safeEval(item.attrs.get('repr')));
-        #obj = obj.resize(tmp.nCells[0]); tmp.chie = obj.fromHdf(item, index=i)
+        #item = grp.get('magnetic_permeability'); obj = eval(cF.safeEval(item.attrs.get('repr')));
+        #obj = obj.resize(tmp.nCells[0]); tmp.magnetic_permeability = obj.fromHdf(item, index=i)
 
-        #item = grp.get('chim'); obj = eval(cF.safeEval(item.attrs.get('repr')));
-        #obj = obj.resize(tmp.nCells[0]); tmp.chim = obj.fromHdf(item, index=i)
+        #item = grp.get('magnetic_susceptibility'); obj = eval(cF.safeEval(item.attrs.get('repr')));
+        #obj = obj.resize(tmp.nCells[0]); tmp.magnetic_susceptibility = obj.fromHdf(item, index=i)
 
         if (tmp.nCells[0] > 0):
             tmp._dpar = StatArray.StatArray(tmp.nCells[0] - 1, 'Derivative', tmp.par.units + '/m')
