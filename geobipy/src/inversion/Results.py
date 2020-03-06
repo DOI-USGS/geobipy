@@ -360,7 +360,7 @@ class Results(myObject):
                 # Update the histogram of the number of layers
                 plt.sca(self.ax[3])
                 plt.cla()
-                self._plotNumberOfLayersPosterior()
+                self._plotNumberOfLayersPosterior(normalize=True)
                 self.ax[3].xaxis.set_major_locator(MaxNLocator(integer=True))
 
                 # Update the layer depth histogram
@@ -541,12 +541,12 @@ class Results(myObject):
     def _plotAcceptanceVsIteration(self, **kwargs):
         """ Plots the acceptance percentage against iteration. """
 
-        m = kwargs.pop('marker', 'o')
-        a = kwargs.pop('alpha', 0.7)
-        ls = kwargs.pop('linestyle', 'none')
-        mec = kwargs.pop('markeredgecolor', 'k')
+        kwargs['marker'] = kwargs.pop('marker', 'o')
+        kwargs['alpha'] = kwargs.pop('alpha', 0.7)
+        kwargs['linestyle'] = kwargs.pop('linestyle', 'none')
+        kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor', 'k')
 
-        ax = self.rate.plot(self.ratex, i=np.s_[:np.int64(self.i / 1000)], marker=m, markeredgecolor=mec, linestyle=ls, **kwargs)
+        ax = self.rate.plot(self.ratex, i=np.s_[:np.int64(self.i / 1000)], **kwargs)
         cP.xlabel('Iteration #')
         cP.ylabel('% Acceptance')
         cP.title('Acceptance rate')
@@ -597,81 +597,93 @@ class Results(myObject):
 
     def _plotHeightPosterior(self, **kwargs):
         """ Plot the histogram of the height """
-        # self.DzHist.plot(**kwargs)
-        ax = self.currentDataPoint.z.posterior.plot(**kwargs)
-        if self.burnedIn:
-            plt.axvline(self.bestDataPoint.z, color=cP.wellSeparated[3], linewidth=1)
-        ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+        if self.currentDataPoint.z.hasPosterior:
+            ax = self.currentDataPoint.z.posterior.plot(**kwargs)
+            if self.burnedIn:
+                plt.axvline(self.bestDataPoint.z, color=cP.wellSeparated[3], linewidth=1)
+            ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+
+        else:
+            plt.text(0.1, 0.5, "{} = {} {}".format(self.currentDataPoint.z.name, self.currentDataPoint.z[0], self.currentDataPoint.z.units))
 
 
     def _plotErrorPosterior(self, axes, **kwargs):
+        if not self.currentDataPoint.errorPosterior is None:
+            log = self.currentDataPoint.errorPosterior[0].x.log
+            loc, _ = cF._log(self.bestDataPoint.addErr, log=log)
 
-        tmp = self.currentDataPoint.errorPosterior[0].x
-        log = tmp.log
-        if (self.bestDataPoint.addErr[0] > tmp.cellEdges[-1]):
-            log = 10
-        loc, _ = cF._log(self.bestDataPoint.addErr, log=log)
+            for i in range(self.nSystems):
+                ax = axes[i]
+                ax.cla()
+                self.currentDataPoint.errorPosterior[i].plot(ax=ax, cmap='gray_r', noColorbar=True, **kwargs)
+                plt.sca(ax)
+                plt.axhline(self.bestDataPoint.relErr[i], color=cP.wellSeparated[3], linewidth=1)
+                plt.axvline(loc[i], color=cP.wellSeparated[3], linewidth=1)
+
+                if i > 0:
+                    plt.ylabel('')
+
+            return
+
+        if self.currentDataPoint.relErr.hasPosterior:
+            self._plotRelativeErrorPosterior(axes, **kwargs)
+            return
+
+        if self.currentDataPoint.addErr.hasPosterior:
+            self._plotAdditiveErrorPosterior(axes, **kwargs)
+            return
 
         for i in range(self.nSystems):
-            ax = axes[i]
-            ax.cla()
-            self.currentDataPoint.errorPosterior[i].plot(ax=ax, cmap='gray_r', noColorbar=True)
-            plt.sca(ax)
-            plt.axhline(self.bestDataPoint.relErr[i], color=cP.wellSeparated[3], linewidth=1)
-            plt.axvline(loc[i], color=cP.wellSeparated[3], linewidth=1)
-
-            if i > 0:
-                plt.ylabel('')
-
-    # def _plotRelativeErrorPosterior(self, axes, **kwargs):
-    #     """ Plots the histogram of the relative errors """
-
-    #     for i in range(self.currentDataPoint.nSystems):
-    #         axes[i].cla()
-    #         p = self.currentDataPoint.errorPosterior[i]
-    #         p.marginalHistogram(axis=1).plot(ax=axes[i], **kwargs)
-
-    #     if self.burnedIn:
-    #         plt.locator_params(axis='x', nbins=4)
-    #         for i, a in enumerate(axes):
-    #             plt.sca(a)
-    #             plt.axvline(self.bestDataPoint.relErr[i], color=cP.wellSeparated[3], linewidth=1)
-    #             a.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+                ax = axes[i]
+                ax.cla()
+                ax.text(0.1, 0.5,
+                         " {} = {} {} \n {} = {} {}".format(
+                          self.bestDataPoint.relErr.name, self.bestDataPoint.relErr[i], self.bestDataPoint.relErr.units,
+                          self.bestDataPoint.addErr.name, self.bestDataPoint.addErr[i], self.bestDataPoint.addErr.units))
 
 
-    # def _plotAdditiveErrorPosterior(self, axes, **kwargs):
-    #     """ Plot the histogram of the additive errors """
-    #     # self.currentDataPoint.addErr.plotPosteriors(axes=axes, **kwargs)
-    #     for i in range(self.currentDataPoint.nSystems):
-    #         axes[i].cla()
-    #         p = self.currentDataPoint.errorPosterior[i]
-    #         p.marginalHistogram(axis=0).plot(ax=axes[i], **kwargs)
-    #         plt.locator_params(axis='x', nbins=4)
+    def _plotRelativeErrorPosterior(self, axes, **kwargs):
+        """ Plots the histogram of the relative errors """
 
-    #     if self.burnedIn:
-    #         log = p.x.log
-    #         if (self.bestDataPoint.addErr[0] > p.xBins[-1]):
-    #             log = 10
+        self.currentDataPoint.relErr.plotPosteriors(axes, **kwargs)
 
-    #         loc, _ = cF._log(self.bestDataPoint.addErr, log=log)
-    #         for i, a in enumerate(axes):
-    #             plt.sca(a)
-    #             plt.axvline(loc[i], color=cP.wellSeparated[3], linewidth=1)
-    #             a.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+        if self.burnedIn:
+            plt.locator_params(axis='x', nbins=4)
+            for i, a in enumerate(axes):
+                plt.sca(a)
+                plt.axvline(self.bestDataPoint.relErr[i], color=cP.wellSeparated[3], linewidth=1)
+                a.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+                cP.title("{} = {} {}".format(self.bestDataPoint.addErr.name, self.bestDataPoint.addErr[i], self.bestDataPoint.addErr.units))
+
+
+    def _plotAdditiveErrorPosterior(self, axes, **kwargs):
+        """ Plot the histogram of the additive errors """
+        self.currentDataPoint.addErr.plotPosteriors(axes=axes, **kwargs)
+        plt.locator_params(axis='x', nbins=4)
+
+        if self.burnedIn:
+            log = np.atleast_1d(self.currentDataPoint.addErr.posterior)[0].log
+            loc, _ = cF._log(self.bestDataPoint.addErr, log=log)
+            for i, a in enumerate(axes):
+                plt.sca(a)
+                plt.axvline(loc[i], color=cP.wellSeparated[3], linewidth=1)
+                a.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+                cP.title("{} = {} {}".format(self.bestDataPoint.relErr.name, self.bestDataPoint.relErr[i], self.bestDataPoint.relErr.units))
 
 
     def _plotLayerDepthPosterior(self, **kwargs):
         """ Plot the histogram of layer interface depths """
 
-        r = kwargs.pop('rotate', True)
-        fY = kwargs.pop('flipY', True)
-        tr = kwargs.pop('trim', False)
+        kwargs['rotate'] = kwargs.pop('rotate', True)
+        kwargs['flipY'] = kwargs.pop('flipY', True)
+        kwargs['trim'] = kwargs.pop('trim', False)
+        kwargs['normalize'] = kwargs.pop('normalize', True)
 
-        ax = self.currentModel.depth.posterior.plot(rotate=r, flipY=fY, trim=tr, **kwargs)
+        ax = self.currentModel.depth.posterior.plot(**kwargs)
         ax.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
 
 
-    def _plotParameterPosterior(self, reciprocateX=False, credibleInterval = 95.0, opacityPercentage = 67.0, **kwargs):
+    def _plotParameterPosterior(self, reciprocateX=False, credibleInterval = 95.0, opacityPercentage = 67.0, overlayModel=True, **kwargs):
         """ Plot the hitmap posterior of conductivity with depth """
 
 
@@ -709,10 +721,11 @@ class Results(myObject):
             plt.axhline(self.doi(), **CI_kw)
 
         # Plot the best model
-        if self.burnedIn:
-            self.bestModel.plot(flipY=False, reciprocateX=reciprocateX, noLabels=True, linewidth=1, color=cP.wellSeparated[3])
-        else:
-            self.currentModel.plot(flipY=False, reciprocateX=reciprocateX, noLabels=True, linewidth=1, color='g')
+        if overlayModel:
+            if self.burnedIn:
+                self.bestModel.plot(flipY=False, reciprocateX=reciprocateX, noLabels=True, linewidth=1, color=cP.wellSeparated[3])
+            else:
+                self.currentModel.plot(flipY=False, reciprocateX=reciprocateX, noLabels=True, linewidth=1, color='g')
 
         # Set parameter limits on the hitmap
         if xlim is None:
@@ -1036,12 +1049,11 @@ class Results(myObject):
         self.PhiDs = hdfRead.readKeyFromFile(hdfFile,'','/','phids', index=s)
 
         self.bestDataPoint = hdfRead.readKeyFromFile(hdfFile,'','/','bestd', index=index, systemFilepath=systemFilePath)
-        try:
-            self.currentDataPoint = hdfRead.readKeyFromFile(hdfFile,'','/','currentdatapoint', index=index, systemFilepath=systemFilePath)
-        except:
-            self.currentDataPoint = self.bestDataPoint
-            p = hdfRead.readKeyFromFile(hdfFile,'','/','dzhist', index=index)
-            self.currentDataPoint.z.setPosterior(p)
+        self.currentDataPoint = hdfRead.readKeyFromFile(hdfFile,'','/','currentdatapoint', index=index, systemFilepath=systemFilePath)
+        # except:
+        #     self.currentDataPoint = self.bestDataPoint
+        #     p = hdfRead.readKeyFromFile(hdfFile,'','/','dzhist', index=index)
+        #     self.currentDataPoint.z.setPosterior(p)
 
 
         # try:
