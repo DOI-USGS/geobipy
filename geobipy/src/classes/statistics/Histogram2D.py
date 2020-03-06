@@ -17,7 +17,7 @@ import progressbar
 
 class Histogram2D(RectilinearMesh2D):
     """ 2D Histogram class that can update and plot efficiently.
-    
+
     Class extension to the RectilinearMesh2D.  The mesh defines the x and y axes, while the Histogram2D manages the counts.
 
     Histogram2D(x, y, name, units)
@@ -37,22 +37,19 @@ class Histogram2D(RectilinearMesh2D):
     -------
     out : Histogram2D
         2D histogram
-    
+
     """
 
-    def __init__(self, xBins=None, xBinCentres=None, yBins=None, yBinCentres=None, zBins=None, zBinCentres=None, values=None):
+    def __init__(self, xBins=None, xBinCentres=None, yBins=None, yBinCentres=None, **kwargs):
         """ Instantiate a 2D histogram """
         if (xBins is None and xBinCentres is None):
             return
+
         # Instantiate the parent class
-        RectilinearMesh2D.__init__(self, xCentres=xBinCentres, xEdges=xBins, yCentres=yBinCentres, yEdges=yBins, zCentres=zBinCentres, zEdges=zBins)
+        RectilinearMesh2D.__init__(self, xCentres=xBinCentres, xEdges=xBins, yCentres=yBinCentres, yEdges=yBins, **kwargs)
 
         # Point counts to self.arr to make variable names more intuitive
         self._counts = StatArray.StatArray([self.y.nCells, self.x.nCells], name='Frequency', dtype=np.int64)
-
-        # Add the incoming values as counts to the histogram
-        if (not values is None):
-            self.update(values)
 
 
     @property
@@ -66,7 +63,7 @@ class Histogram2D(RectilinearMesh2D):
     @property
     def yBins(self):
         return self.y.cellEdges
-    
+
     @property
     def yBinCentres(self):
         return self.y.cellCentres
@@ -74,7 +71,7 @@ class Histogram2D(RectilinearMesh2D):
     @property
     def zBins(self):
         return self.z.cellEdges
-    
+
     @property
     def zBinCentres(self):
         return self.z.cellCentres
@@ -107,7 +104,7 @@ class Histogram2D(RectilinearMesh2D):
 
     def credibleIntervals(self, percent=95.0, log=None, axis=0):
         """Gets the credible intervals for the specified axis.
-        
+
         Parameters
         ----------
         percent : float
@@ -162,7 +159,7 @@ class Histogram2D(RectilinearMesh2D):
 
     def credibleRange(self, percent=95.0, log=None, axis=0):
         """ Get the range of credibility with depth
-        
+
         Parameters
         ----------
         percent : float
@@ -173,7 +170,7 @@ class Histogram2D(RectilinearMesh2D):
         axis : int
             Axis along which to get the marginal histogram.
 
-        
+
         """
         sMed, sLow, sHigh = self.credibleIntervals(percent, log=log, axis=axis)
 
@@ -214,15 +211,15 @@ class Histogram2D(RectilinearMesh2D):
             else:
                 iBins = self.x.cellCentres.searchsorted(intervals)
                 s = np.sum(self._counts[:, iBins[0]:iBins[1]], axis=axis)
-                
+
         out = Histogram1D(bins = bins.cellEdges, log=log)
         out._counts += s
         return out
 
-    
+
     def mean(self, log=None, axis=0):
         """Gets the mean along the given axis.
-        
+
         This is not the true mean of the original samples. It is the best estimated mean using the binned counts multiplied by the axis bin centres.
 
         Parameters
@@ -236,9 +233,9 @@ class Histogram2D(RectilinearMesh2D):
         -------
         out : geobipy.StatArray
             The means along the axis.
-        
+
         """
-        
+
         if axis == 0:
             t = np.sum(np.repeat(self.x.cellCentres[np.newaxis, :], self.y.nCells, 0) * self._counts, 1)
         else:
@@ -248,16 +245,16 @@ class Histogram2D(RectilinearMesh2D):
         i = np.where(s > 0.0)[0]
         tmp = np.zeros(t.size)
         tmp[i] = t[i] / s[i]
-        
+
         if log:
             tmp, dum = cF._log(tmp, log=log)
 
         return tmp
 
 
-    def median(self, log=None, axis=0): 
+    def median(self, log=None, axis=0):
         """Gets the median for the specified axis.
-        
+
         Parameters
         ----------
         log : 'e' or float, optional
@@ -273,10 +270,10 @@ class Histogram2D(RectilinearMesh2D):
         """
         return super().median(self._counts, log, axis)
 
-    
+
     def mode(self, log=None, axis=0):
         """Gets the mode for the specified axis.
-        
+
         Parameters
         ----------
         log : 'e' or float, optional
@@ -292,7 +289,7 @@ class Histogram2D(RectilinearMesh2D):
         """
 
         iMode = np.argmax(self._counts, axis = 1-axis)
-    
+
         if axis == 0:
             mode = self.x.cellCentres[iMode]
         else:
@@ -308,7 +305,7 @@ class Histogram2D(RectilinearMesh2D):
         """Return an opacity between 0 and 1 based on the difference between credible invervals of the hitmap.
 
         Higher ranges in credibility map to less opaqueness.
-        
+
         Parameters
         ----------
         percent : float, optional.
@@ -356,7 +353,7 @@ class Histogram2D(RectilinearMesh2D):
 
     def percentage(self, percent, log=None, axis=0):
         """Gets the percentage of the CDF for the specified axis.
-        
+
         Parameters
         ----------
         percent : float
@@ -394,7 +391,7 @@ class Histogram2D(RectilinearMesh2D):
         """Return a transparency value between 0 and 1 based on the difference between credible invervals of the hitmap.
 
         Higher ranges in credibility are mapped to more transparency.
-        
+
         Parameters
         ----------
         percent : float
@@ -447,8 +444,8 @@ class Histogram2D(RectilinearMesh2D):
 
     def create2DjointProbabilityDistribution(self, H1, H2):
         """Create 2D joint distribution from two Histograms.
-        
-        Given two histograms each of a single variable, regrid them to the 
+
+        Given two histograms each of a single variable, regrid them to the
         same number of bins if necessary and take their outer product to obtain
         a 2D joint probability density.
 
@@ -458,7 +455,7 @@ class Histogram2D(RectilinearMesh2D):
             First histogram.
         H2 : geobipy.Histogram1D
             Second histogram.
-         
+
         """
         assert H1.bins.size == H2.bins.size, "Cannot do unequal bins yet"
         assert isinstance(H1, Histogram1D), TypeError("H1 must be a Histogram1D")
@@ -467,7 +464,7 @@ class Histogram2D(RectilinearMesh2D):
         self.__init__(x=H1.bins, y=H2.bins)
         self._counts[:,:] = np.outer(H1.counts, H2.counts)
 
-    
+
     def deepcopy(self):
         return deepcopy(self)
 
@@ -484,24 +481,50 @@ class Histogram2D(RectilinearMesh2D):
         return out
 
 
-    # def divideBySum(self, axis):
-    #     """Divide by the sum along an axis.
-        
-    #     Parameters
-    #     ----------
-    #     axis : int
-    #         Axis to sum along and then divide by.
-                
-    #     """
-    #     s = np.sum(self._counts, axis)
-    #     if (axis == 0):
-    #         self._counts /= np.repeat(s[np.newaxis, :], np.size(self._counts, axis), axis)
-    #     else:
-    #         self._counts /= np.repeat(s[:, np.newaxis], np.size(self._counts, axis), axis)
-
-
     def estimatePdf(self):
         return self._counts / np.sum(self._counts)
+
+
+    def fit_mixture(self, intervals, axis=0, **kwargs):
+        """Find peaks in the histogram along an axis.
+
+        Parameters
+        ----------
+        intervals : array_like, optional
+            Accumulate the histogram between these invervals before finding peaks
+        axis : int, optional
+            Axis along which to find peaks.
+
+        """
+        counts, intervals = super().intervalStatistic(self._counts, intervals, axis, 'sum')
+
+        distributions = []
+        active = []
+        if axis == 0:
+            h = Histogram1D(bins = self.xBins)
+
+            Bar = progressbar.ProgressBar()
+            print('Fitting Peaks', flush=True)
+            for i in Bar(range(np.size(intervals) - 1)):
+                h._counts[:] = counts[i, :]
+                try:
+                    d, a = h.fit_mixture(**kwargs)
+                    distributions.append(d)
+                    active.append(a)
+                except:
+                    pass
+
+        else:
+            h = Histogram1D(bins = self.yBins)
+            Bar = progressbar.ProgressBar()
+            print('Fitting Peaks', flush=True)
+            for i in Bar(range(np.size(intervals) - 1)):
+                h._counts[:] = counts[:, i]
+                d, a = h.fit_mixture(**kwargs)
+                distributions.append(d)
+                active.append(a)
+
+        return distributions, active
 
 
     def fitMajorPeaks(self, intervals, axis=0, **kwargs):
@@ -553,7 +576,7 @@ class Histogram2D(RectilinearMesh2D):
         -------
         out : geobipy.Histogram2D
             2D histogram with the new intervals.
-        
+
         See Also
         --------
         geobipy.RectilinearMesh2D.intervalMean : for parameter information
@@ -577,8 +600,8 @@ class Histogram2D(RectilinearMesh2D):
 
         .. math::
             :label: marginal
-            
-            p(distribution_{i} | \\boldsymbol{v}) = 
+
+            p(distribution_{i} | \\boldsymbol{v}) =
 
 
         """
@@ -603,7 +626,7 @@ class Histogram2D(RectilinearMesh2D):
 
 
     def _marginalProbability_1D(self, fractions, distributions, axis=0, reciprocateParameter=False, log=None):
-        
+
         assert axis < 2, ValueError("Must have 0 <= axis < 2")
         nDistributions = np.size(distributions)
         assert np.size(fractions) == nDistributions, ValueError("Fractions must have same size as number of distributions")
@@ -621,7 +644,7 @@ class Histogram2D(RectilinearMesh2D):
         # Compute the probabilities along the hitmap axis, using each distribution
         pdfs = np.zeros([nDistributions, ax.size])
         for i in range(nDistributions):
-            pdfs[i, :] = fractions[i] * distributions[i].probability(ax)
+            pdfs[i, :] = fractions[i] * distributions[i].probability(ax, log=False)
 
         # Normalize by the sum of the pdfs
         normalizedPdfs = pdfs / np.sum(pdfs, axis=0)
@@ -660,66 +683,30 @@ class Histogram2D(RectilinearMesh2D):
 
         if reciprocateParameter[0]:
             ax0 = 1.0 / ax0[::-1]
-        
+
         ax0, dum = cF._log(ax0, log[0])
 
         ax1 = self.x.cellCentres
 
         if reciprocateParameter[1]:
             ax1 = 1.0 / ax1[::-1]
-        
+
         ax1, dum = cF._log(ax1, log[1])
 
         # Compute the 2D joint probability density function for each distribution
         class_xPdfs = np.zeros([nDistributions, self.shape[1]])
         class_yPdfs = np.zeros([nDistributions, self.shape[0]])
         for i, d in enumerate(distributions):
-            class_yPdfs[i, :] = fractions[i] * d.probability(ax0, axis=0)
-            class_xPdfs[i, :] = fractions[i] * d.probability(ax1, axis=1)
+            class_yPdfs[i, :] = fractions[i] * d.probability(ax0, log=False, axis=0)
+            class_xPdfs[i, :] = fractions[i] * d.probability(ax1, log=False, axis=1)
 
 
         histogram_xPdf = StatArray.StatArray(self.pdf(axis=1))
         histogram_yPdf = StatArray.StatArray(self.pdf(axis=0))
 
-        if verbose:
-            plt.figure(figsize=(6.67, 6.0))
-            ax = plt.subplot(2, 1, 1)
-            histogram_yPdf.pcolor(x=ax1, y=ax0, cmap='gray_r', equalize=False, flipY=True)
-            ax.set_xticklabels([])
-            plt.xlabel('')
-            plt.subplot(2, 1, 2)
-            histogram_xPdf.pcolor(x=ax1, y=ax0, cmap='gray_r', flipY=True)
-            plt.tight_layout()
-            plt.suptitle("Hitmap marginal PDFs")
-            plt.savefig("Hitmap_marginal_PDFs.png", dpi=300, figsize=(6.67, 3.0))
-
-
-            plt.figure(figsize=(6.67, 6.0))
-            for j in range(nDistributions):
-                plt.subplot(nDistributions, 2, (2*j)+1)
-                (class_xPdfs[j, :] * histogram_xPdf).pcolor(x=ax1, flipY=True, cmap='plasma')
-                if j == 0:
-                    cP.title("P(class | conductivity) * P(conductivity)")
-                plt.subplot(nDistributions, 2, (2*j)+2)
-                (class_yPdfs[j, :] * histogram_yPdf.T).T.pcolor(x=ax1, flipY=True, cmap='plasma')
-                if j == 0:
-                    cP.title("P(class | depth) * P(depth)")
-                plt.tight_layout()
-                
-                plt.savefig("Intermediate_step.png", dpi=300, figsize=(6.67, 6.0))
-
         P_class_given_v1v2 = StatArray.StatArray([nDistributions, self.shape[0] ,self.shape[1]], 'Marginal probability')
         for j in range(nDistributions):
             P_class_given_v1v2[j, :, :] = (class_xPdfs[j, :] * histogram_xPdf) * (class_yPdfs[j, :] * histogram_yPdf.T).T
-
-        if verbose:
-            plt.figure(figsize=(6.67, 6.0))
-            for i in range(nDistributions):
-                plt.subplot(nDistributions, 1, i+1)
-                tmp = StatArray.StatArray(P_class_given_v1v2[i, :, :])
-                tmp.pcolor(x=ax1, y=ax0, equalize=False, flipY=True)
-            plt.suptitle("P(class | conductivity ^ depth) * P(conductivity ^ depth)")
-            plt.savefig("Hitmap_marginal_join_probabily.png", dpi=300, figsize=(6.67, 6.0))
 
         if axis is None:
             denominator = np.sum(P_class_given_v1v2, axis=0)
@@ -732,9 +719,13 @@ class Histogram2D(RectilinearMesh2D):
         return marginalProbability
 
 
+    def plot(self, **kwargs):
+        return self.pcolor(**kwargs)
+
+
     def pcolor(self, **kwargs):
-        """Plot the Histogram2D as an image 
-        
+        """Plot the Histogram2D as an image
+
         Other Parameters
         ----------------
         alpha : scalar or array_like, optional
@@ -758,12 +749,16 @@ class Histogram2D(RectilinearMesh2D):
         grid : bool, optional
             Plot the grid
         noColorbar : bool, optional
-            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.   
+            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
         trim : bool, optional
             Set the x and y limits to the first and last non zero values along each axis.
-        
+
         """
-        ax = StatArray.StatArray(self.counts).pcolor(x=self.x.cellEdges, y=self.y.cellEdges, **kwargs)
+        kwargs['trim'] = kwargs.pop('trim',  0.0)
+        x = self.x.cellEdges
+        y = self.y.cellEdges
+
+        ax = StatArray.StatArray(self.counts).pcolor(x=x, y=y, **kwargs)
         return ax
 
 
@@ -783,7 +778,7 @@ class Histogram2D(RectilinearMesh2D):
             cP.plot(self.x.cellCentres, low, color=c, linestyle=ls, linewidth=lw, alpha=a, **kwargs)
             cP.plot(self.x.cellCentres, high, color=c, linestyle=ls, linewidth=lw, alpha=a, **kwargs)
 
-    
+
     def plotMean(self, log=None, axis=0, **kwargs):
 
         m = self.mean(log=log, axis=axis)
@@ -806,7 +801,7 @@ class Histogram2D(RectilinearMesh2D):
 
     def update(self, xValues, yValues=None, trim=False):
         """Update the histogram by counting the entry of values into the bins of the histogram.
-        
+
         Parameters
         ----------
         xValues : array_like
@@ -817,7 +812,7 @@ class Histogram2D(RectilinearMesh2D):
             Ignored if xValues is 2D.
         clip : bool
             Values outside the histogram axes are clipped to the upper and lower bins.
-        
+
         """
 
         if yValues is None:
@@ -827,10 +822,13 @@ class Histogram2D(RectilinearMesh2D):
             yValues = xValues[1, :]
             xValues = xValues[0, :]
 
-      
         iBin = self.cellIndices(xValues, yValues, clip=True, trim=trim)
 
-        unique, counts = np.unique(iBin, axis=1, return_counts=True)
+        if np.ndim(iBin) == 1:
+            unique = iBin
+            counts = 1
+        else:
+            unique, counts = np.unique(iBin, axis=1, return_counts=True)
 
         self._counts[unique[0], unique[1]] += counts
 
