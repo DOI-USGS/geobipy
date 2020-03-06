@@ -157,6 +157,7 @@ class LineResults(myObject):
             cl, _ = self.computeCredibleInterval(log=10)
             return cl
 
+
     @cached_property
     def credibleUpper(self):
         # Read in the opacity if present
@@ -797,6 +798,22 @@ class LineResults(myObject):
     def relativeErrorPosteriors(self):
         """ Get the Relative error of the best data points """
         return self.data._relErr.posterior
+
+
+    def get_hitmap(self, index=None, fiducial=None):
+
+        assert not (index is None and fiducial is None), Exception("Please specify either an integer index or a fiducial.")
+        assert index is None or fiducial is None, Exception("Only specify either an integer index or a fiducial.")
+
+        if not fiducial is None:
+            assert fiducial in self.fiducials, ValueError("This fiducial {} is not available from this HDF5 file. The min max fids are {} to {}.".format(fiducial, self.fiducials.min(), self.fiducials.max()))
+            # Get the point index
+            i = self.fiducials.searchsorted(fiducial)
+        else:
+            i = index
+            fiducial = self.fiducials[index]
+
+        return self.getAttribute('Hit map', index = i)
 
 
     def getResults(self, index=None, fiducial=None, reciprocateParameter=False):
