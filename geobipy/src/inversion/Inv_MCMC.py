@@ -61,6 +61,7 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
         Res.burnedIn = True
         Res.iBurn = 0
 
+
     Res.clk.start()
 
     Go = True
@@ -129,41 +130,47 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
     return failed
 
 
-def Initialize(userParameters, DataPoint, prng):
+def Initialize(userParameters, DataPoint, prng=None):
     """Initialize the transdimensional Markov chain Monte Carlo inversion.
 
 
     """
     # ---------------------------------------
-    # Set the priors on the data point
+    # Set the statistical properties of the datapoint
     # ---------------------------------------
     # Set the prior on the data
     DataPoint.predictedData.setPrior('MvLogNormal', DataPoint.data[DataPoint.active], DataPoint.std[DataPoint.active]**2.0, linearSpace=False, prng=prng)
     DataPoint.relErr = userParameters.initialRelativeError
     DataPoint.addErr = userParameters.initialAdditiveError
 
-    z = np.float64(DataPoint.z)
-    dz = userParameters.maximumElevationChange
-    heightPrior = Distribution('Uniform', z - dz, z + dz, prng=prng)
-    relativePrior = Distribution('Uniform', userParameters.minimumRelativeError, userParameters.maximumRelativeError, prng=prng)
+    # Define prior, proposal, posterior for height
+    heightPrior = None
+    heightProposal = None
+    if userParameters.solveHeight:
+        z = np.float64(DataPoint.z)
+        dz = userParameters.maximumElevationChange
+        heightPrior = Distribution('Uniform', z - dz, z + dz, prng=prng)
+        heightProposal = Distribution('Normal', DataPoint.z, userParameters.elevationProposalVariance, prng=prng)
 
-    log = isinstance(DataPoint, TdemDataPoint)
+    # Define prior, proposal, posterior for relative error
+    relativePrior = None
+    relativeProposal = None
+    if userParameters.solveRelativeError:
+        relativePrior = Distribution('Uniform', userParameters.minimumRelativeError, userParameters.maximumRelativeError, prng=prng)
+        relativeProposal = Distribution('MvNormal', DataPoint.relErr, userParameters.relativeErrorProposalVariance, prng=prng)
 
-    additivePrior = Distribution('Uniform', userParameters.minimumAdditiveError, userParameters.maximumAdditiveError, log=log, prng=prng)
+    # Define prior, proposal, posterior for additive error
+    additivePrior = None
+    additiveProposal = None
+    if userParameters.solveAdditiveError:
+        log = isinstance(DataPoint, TdemDataPoint)
+        additivePrior = Distribution('Uniform', userParameters.minimumAdditiveError, userParameters.maximumAdditiveError, log=log, prng=prng)
+        additiveProposal = Distribution('MvLogNormal', DataPoint.addErr, userParameters.additiveErrorProposalVariance, linearSpace=log, prng=prng)
 
-    DataPoint.setPriors(heightPrior, relativePrior, additivePrior)
 
-    # ------------------------------------
-    # Set the proposal distributions for the data point
-    # ------------------------------------
-    heightProposal = Distribution('Normal', DataPoint.z, userParameters.elevationProposalVariance, prng=prng)
-    relativeProposal = Distribution('MvNormal', DataPoint.relErr, userParameters.relativeErrorProposalVariance, prng=prng)
-    additiveProposal = Distribution('MvLogNormal', DataPoint.addErr, userParameters.additiveErrorProposalVariance, linearSpace=log, prng=prng)
-    DataPoint.setProposals(heightProposal, relativeProposal, additiveProposal)
-
-    # ---------------------------------
-    # Set the posterior histograms for the data point
-    # ---------------------------------
+    # Set the priors, proposals, and posteriors.
+    DataPoint.setPriors(heightPrior=heightPrior, relativeErrorPrior=relativePrior, additiveErrorPrior=additivePrior)
+    DataPoint.setProposals(heightProposal=heightProposal, relativeErrorProposal=relativeProposal, additiveErrorProposal=additiveProposal)
     DataPoint.setPosteriors()
 
     # Update the data errors based on user given parameters
@@ -171,19 +178,14 @@ def Initialize(userParameters, DataPoint, prng):
     DataPoint.updateErrors(userParameters.initialRelativeError, userParameters.initialAdditiveError)
 
 
-    # Initialize the calibration parameters
-    if (userParameters.solveCalibration):
-        DataPoint.calibration.setPrior('Normal',
-                               np.reshape(userParameters.calMean, np.size(userParameters.calMean), order='F'),
-                               np.reshape(userParameters.calVar, np.size(userParameters.calVar), order='F'), prng=prng)
-        DataPoint.calibration[:] = DataPoint.calibration.prior.mean
-        # Initialize the calibration proposal
-        DataPoint.calibration.setProposal('Normal', DataPoint.calibration, np.reshape(userParameters.propCal, np.size(userParameters.propCal), order='F'), prng=prng)
-
-
-    DataPoint.relErr.updatePosterior()
-    DataPoint.addErr.updatePosterior()
-
+    # # Initialize the calibration parameters
+    # if (userParameters.solveCalibration):
+    #     DataPoint.calibration.setPrior('Normal',
+    #                            np.reshape(userParameters.calMean, np.size(userParameters.calMean), order='F'),
+    #                            np.reshape(userParameters.calVar, np.size(userParameters.calVar), order='F'), prng=prng)
+    #     DataPoint.calibration[:] = DataPoint.calibration.prior.mean
+    #     # Initialize the calibration proposal
+    #     DataPoint.calibration.setProposal('Normal', DataPoint.calibration, np.reshape(userParameters.propCal, np.size(userParameters.propCal), order='F'), prng=prng)
 
     # ---------------------------------
     # Set the earth model properties
@@ -212,7 +214,13 @@ def Initialize(userParameters, DataPoint, prng):
     # Compute the predicted data
     DataPoint.forward(Mod)
 
-    inverseHessian = Mod.localParameterVariance(DataPoint)
+
+    if userParameters.ignoreLikelihood:
+        inverseHessian = Mod.localParameterVariance()
+    else:
+        inverseHessian = Mod.localParameterVariance(DataPoint)
+
+
 
     # Instantiate the proposal for the parameters.
     parameterProposal = Distribution('MvLogNormal', Mod.par, inverseHessian, linearSpace=True, prng=prng)
@@ -233,7 +241,7 @@ def Initialize(userParameters, DataPoint, prng):
     p = Mod.priorProbability(userParameters.solveParameter, userParameters.solveGradient)
     prior = p
     # Evaluate the prior for the current data
-    p = DataPoint.priorProbability(userParameters.solveRelativeError, userParameters.solveAdditiveError, userParameters.solveElevation, userParameters.solveCalibration)
+    p = DataPoint.priorProbability(userParameters.solveRelativeError, userParameters.solveAdditiveError, userParameters.solveHeight, userParameters.solveCalibration)
     prior += p
 
     # Add the likelihood function to the prior
@@ -254,10 +262,13 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
     perturbedDatapoint = DataPoint.deepcopy()
 
     # Perturb the current model
-    remappedModel, perturbedModel = Mod.perturb(perturbedDatapoint)
+    if userParameters.ignoreLikelihood:
+        remappedModel, perturbedModel = Mod.perturb()
+    else:
+        remappedModel, perturbedModel = Mod.perturb(perturbedDatapoint)
 
     # Propose a new data point, using assigned proposal distributions
-    perturbedDatapoint.perturb(userParameters.solveElevation, userParameters.solveRelativeError, userParameters.solveAdditiveError, userParameters.solveCalibration)
+    perturbedDatapoint.perturb(userParameters.solveHeight, userParameters.solveRelativeError, userParameters.solveAdditiveError, userParameters.solveCalibration)
 
     # Forward model the data from the candidate model
     perturbedDatapoint.forward(perturbedModel)
@@ -269,7 +280,7 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
         posteriorComponents = np.zeros(8, dtype=np.float64)
         prior1, posteriorComponents[:4] = perturbedModel.priorProbability(userParameters.solveParameter, userParameters.solveGradient, verbose=True)
 
-        tmp, posteriorComponents[4:] = perturbedDatapoint.priorProbability(userParameters.solveRelativeError, userParameters.solveAdditiveError, userParameters.solveElevation, userParameters.solveCalibration, verbose=True)
+        tmp, posteriorComponents[4:] = perturbedDatapoint.priorProbability(userParameters.solveRelativeError, userParameters.solveAdditiveError, userParameters.solveHeight, userParameters.solveCalibration, verbose=True)
         prior1 += tmp
 
     else:
@@ -279,23 +290,27 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
         # Evaluate the prior for the current model
         prior1 = perturbedModel.priorProbability(userParameters.solveParameter, userParameters.solveGradient)
         # Evaluate the prior for the current data
-        prior1 += perturbedDatapoint.priorProbability(userParameters.solveRelativeError, userParameters.solveAdditiveError, userParameters.solveElevation, userParameters.solveCalibration)
+        prior1 += perturbedDatapoint.priorProbability(userParameters.solveRelativeError, userParameters.solveAdditiveError, userParameters.solveHeight, userParameters.solveCalibration)
 
     # Test for early rejection
     if (prior1 == -np.inf):
         return(Mod, DataPoint, prior, likelihood, posterior, PhiD, posteriorComponents, ratioComponents, False, Mod.nCells[0] != perturbedModel.nCells[0])
 
     # Compute the components of each acceptance ratio
-    likelihood1 = perturbedDatapoint.likelihood(log=True)
+    likelihood1 = 1.0
+    if not userParameters.ignoreLikelihood:
+        likelihood1 = perturbedDatapoint.likelihood(log=True)
+        proposal, proposal1 = perturbedModel.proposalProbabilities(remappedModel, perturbedDatapoint)
+    else:
+        proposal, proposal1 = perturbedModel.proposalProbabilities(remappedModel)
 
     posterior1 = prior1 + likelihood1
 
-    proposal, proposal1 = perturbedModel.proposalProbabilities(perturbedDatapoint, remappedModel, Res.burnedIn)
 
     priorRatio = prior1 - prior
+
     likelihoodRatio = likelihood1 - likelihood
-    if userParameters.ignoreLikelihood:
-        likelihoodRatio = 0.0
+
     proposalRatio = proposal - proposal1
 
 
@@ -326,3 +341,6 @@ def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, P
 
 
     #%%
+
+
+# %%
