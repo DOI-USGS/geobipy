@@ -5,10 +5,9 @@ from ...classes.core.myObject import myObject
 from ...classes.core import StatArray
 from copy import deepcopy
 import numpy as np
-from ...base import customFunctions as cf
+from ...base import customFunctions as cF
 from ...base import customPlots as cp
 from scipy.sparse import diags
-
 
 class RectilinearMesh1D(myObject):
     """Class defining a 1D rectilinear mesh with cell centres and edges.
@@ -31,6 +30,11 @@ class RectilinearMesh1D(myObject):
         Only used if instantiated with cellCentres.
         Normally the 'right' edge is calucated by centres[-1] - 0.5 * (centres[-1] - centres[-2]).
         Instead, force the rightmost edge to be edgesMax.
+    log : 'e' or float, optional
+        Entries are given in linear space, but internally cells are logged.
+        Plotting is in log space.
+    relativeTo : float, optional
+        If a float is given, updates will be relative to this value.
 
     Returns
     -------
@@ -48,11 +52,13 @@ class RectilinearMesh1D(myObject):
 
     """
 
-
-    def __init__(self, cellCentres=None, cellEdges=None, edgesMin=None, edgesMax=None):
+    def __init__(self, cellCentres=None, cellEdges=None, edgesMin=None, edgesMax=None, log=None, relativeTo=0.0):
         """ Initialize a 1D Rectilinear Mesh"""
         self._cellCentres = None
         self._cellEdges = None
+
+        self.log = log
+        self.relativeTo = relativeTo
 
         if (cellCentres is None and cellEdges is None):
             self._cellEdges = StatArray.StatArray(0)
@@ -67,7 +73,6 @@ class RectilinearMesh1D(myObject):
         if not cellEdges is None:
             self.cellEdges = cellEdges
 
-        # Set some extra variables for speed
         # Is the discretization regular
         self.isRegular = self._cellCentres.isRegular
         # Get the increment
@@ -92,6 +97,7 @@ class RectilinearMesh1D(myObject):
         out._cellEdges = self._cellEdges.deepcopy()
         out.isRegular = self.isRegular
         out.dx = self.dx
+        out._relativeTo = self._relativeTo
 
         return out
 
@@ -110,8 +116,8 @@ class RectilinearMesh1D(myObject):
         assert tmp.size > 1, ValueError("slic must contain at least one cell.")
         return type(self)(cellEdges=tmp)
 
-    def __add__(self, other):
 
+    def __add__(self, other):
         return RectilinearMesh1D(cellEdges=self.cellCentres + other)
 
     def __sub__(self, other):
@@ -129,7 +135,7 @@ class RectilinearMesh1D(myObject):
 
     @property
     def cellCentres(self):
-        return self._cellCentres
+        return self._cellCentres + self.relativeTo
 
 
     @cellCentres.setter
@@ -141,6 +147,11 @@ class RectilinearMesh1D(myObject):
             if not isinstance(values, StatArray.StatArray):
                 values = StatArray.StatArray(values)
 
+            values, _ = cF._log(values, log=self.log)
+            values -= self.relativeTo
+
+            values.name = cF._logLabel(self.log) + values.getName()
+
             # assert np.ndim(values) == 1, ValueError("cellCentres must be 1D")
             ## StatArray of the x axis values
             self._cellCentres = values.deepcopy()
@@ -149,7 +160,7 @@ class RectilinearMesh1D(myObject):
 
     @property
     def cellEdges(self):
-        return self._cellEdges
+        return self._cellEdges + self.relativeTo
 
 
     @cellEdges.setter
@@ -160,10 +171,23 @@ class RectilinearMesh1D(myObject):
         else:
             if not isinstance(values, StatArray.StatArray):
                 values = StatArray.StatArray(values)
+
+            values, _ = cF._log(values, log=self.log)
+            values -= self.relativeTo
+
+            values.name = cF._logLabel(self.log) + values.getName()
             # assert np.ndim(values) == 1, ValueError("cellEdges must be 1D")
             self._cellEdges = values.deepcopy()
             self._cellCentres = values.internalEdges()
 
+
+    @property
+    def cellWidths(self):
+        return np.abs(np.diff(self._cellEdges))
+
+    @property
+    def centreTocentre(self):
+        return np.diff(self.cellCentres)
 
     @property
     def displayLimits(self):
@@ -173,14 +197,6 @@ class RectilinearMesh1D(myObject):
     @property
     def internalCellEdges(self):
         return self._cellEdges[1:-1]
-
-    @property
-    def cellWidths(self):
-        return np.abs(np.diff(self._cellEdges))
-
-    @property
-    def centreTocentre(self):
-        return np.diff(self.cellCentres)
 
     @property
     def nCells(self):
@@ -202,6 +218,17 @@ class RectilinearMesh1D(myObject):
     def range(self):
         """Get the difference between end edges."""
         return np.abs(self._cellEdges[-1] - self._cellEdges[0])
+
+    @property
+    def relativeTo(self):
+        return self._relativeTo
+
+    @relativeTo.setter
+    def relativeTo(self, value):
+        if value > 0.0:
+            value, _ = cF._log(value, self.log)
+        self._relativeTo = StatArray.StatArray(value)
+
 
     @property
     def units(self):
@@ -226,6 +253,10 @@ class RectilinearMesh1D(myObject):
             The cell indices
 
         """
+
+        values, dum = cF._log(values.flatten(), self.log)
+
+        values = values - self.relativeTo
 
         # Get the bin indices for all values
         if self.isRegular():
@@ -379,7 +410,7 @@ class RectilinearMesh1D(myObject):
     def fromHdf(self, grp, index=None):
         """ Reads in the object froma HDF file """
         item = grp.get('x')
-        obj = eval(cf.safeEval(item.attrs.get('repr')))
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
         x = obj.fromHdf(item, index=index)
         res = RectilinearMesh1D(x)
         return res

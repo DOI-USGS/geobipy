@@ -21,13 +21,13 @@ class RectilinearMesh2D(myObject):
     """Class defining a 2D rectilinear mesh with cell centres and edges.
 
     Contains a simple 2D mesh with cell edges, widths, and centre locations.
-    There are two ways of instantiating the RectilinearMesh2D.  
-    The first is by specifying the x and y cell centres or edges. In this case, 
+    There are two ways of instantiating the RectilinearMesh2D.
+    The first is by specifying the x and y cell centres or edges. In this case,
     the abscissa is the standard x axis, and y is the ordinate. The z co-ordinates are None.
     The second is by specifyin the x, y, and z cell centres or edges. In this case,
     The mesh is a 2D plane with the ordinate parallel to z, and the "horizontal" locations
     have co-ordinates (x, y).
-    This allows you to, for example, create a vertical 2D mesh that is not parallel to either the 
+    This allows you to, for example, create a vertical 2D mesh that is not parallel to either the
     x or y axis, like a typical line of data.
     If x, y, and z are specified, plots can be made against distance which calculated cumulatively between points.
 
@@ -48,6 +48,17 @@ class RectilinearMesh2D(myObject):
     zEdges : geobipy.StatArray, optional
         The locations of the edges of each cell, including the outermost edges, in the "z" direction. Only zCentres or zEdges can be given.
 
+    Other Parameters
+    ----------------
+    [x, y, z]edgesMin : float, optional
+        See geobipy.RectilinearMesh1D for edgesMin description.
+    [x, y, z]edgesMax : float, optional
+        See geobipy.RectilinearMesh1D for edgesMax description.
+    [x, y, z]log : 'e' or float, optional
+        See geobipy.RectilinearMesh1D for log description.
+    [x, y, z]relativeTo : float, optional
+        See geobipy.RectilinearMesh1D for relativeTo description.
+
     Returns
     -------
     out : RectilinearMesh2D
@@ -56,7 +67,7 @@ class RectilinearMesh2D(myObject):
     """
 
 
-    def __init__(self, xCentres=None, xEdges=None, yCentres=None, yEdges=None, zCentres=None, zEdges=None):
+    def __init__(self, xCentres=None, xEdges=None, yCentres=None, yEdges=None, zCentres=None, zEdges=None, **kwargs):
         """ Initialize a 2D Rectilinear Mesh"""
 
         self._x = None
@@ -68,17 +79,19 @@ class RectilinearMesh2D(myObject):
         if (all(x is None for x in [xCentres, yCentres, zCentres, xEdges, yEdges, zEdges])):
             return
 
-        # RectilinearMesh1D of the x axis values
-        self._x = RectilinearMesh1D(cellCentres=xCentres, cellEdges=xEdges)
-        # StatArray of the y axis values
-        self._y = RectilinearMesh1D(cellCentres=yCentres, cellEdges=yEdges)
+        xExtras = dict((k[1:], kwargs.pop(k, None)) for k in ('xedgesMin', 'xedgesMax', 'xlog'))
+        self._x = RectilinearMesh1D(cellCentres=xCentres, cellEdges=xEdges, relativeTo=kwargs.pop('xrelativeTo', 0.0), **xExtras)
+
+        yExtras = dict((k[1:], kwargs.pop(k, None)) for k in ('yedgesMin', 'yedgesMax', 'ylog'))
+        self._y = RectilinearMesh1D(cellCentres=yCentres, cellEdges=yEdges, relativeTo=kwargs.pop('xrelativeTo', 0.0),  **yExtras)
 
         if (not zCentres is None or not zEdges is None):
             assert self._x.nCells == self._y.nCells, Exception("x and y axes must have the same number of cells.")
-            # StatArray of third axis
-            self._z = RectilinearMesh1D(cellCentres=zCentres, cellEdges=zEdges)
+
+            zExtras = dict((k[1:], kwargs.pop(k, None)) for k in ('zedgesMin', 'zedgesMax', 'zlog'))
+            self._z = RectilinearMesh1D(cellCentres=zCentres, cellEdges=zEdges, relativeTo=kwargs.pop('xrelativeTo', 0.0), **zExtras)
             self.xyz = True
-            
+
         else:
             self._xyz = False
             self._z = self._y
@@ -93,7 +106,6 @@ class RectilinearMesh2D(myObject):
             return RectilinearMesh2D(xEdges=self._x[slic[1]], yEdges=self._y[slic[1]], zEdges=self._z[slic[0]])
         else:
             return RectilinearMesh2D(xEdges=self._x[slic[1]], yEdges=self._y[slic[0]])
-        
 
 
     @property
@@ -109,7 +121,7 @@ class RectilinearMesh2D(myObject):
 
             distance = StatArray.StatArray(np.zeros(self.x.nEdges), 'Distance', self.x.cellCentres.units)
             distance[1:] = np.cumsum(np.sqrt(dx**2.0 + dy**2.0))
-            
+
             self._distance = RectilinearMesh1D(cellEdges = distance)
         return self._distance
 
@@ -167,12 +179,12 @@ class RectilinearMesh2D(myObject):
     @property
     def z(self):
         return self._z
-    
+
 
 
     def median(self, arr, log=None, axis=0):
         """Gets the median for the specified axis.
-        
+
         Parameters
         ----------
         arr : array_like
@@ -226,7 +238,7 @@ class RectilinearMesh2D(myObject):
         """ Gets the cell edges in the given dimension """
         return self.z.cellEdges if axis == 0 else self.x.cellEdges
 
-    
+
     def getXAxis(self, axis='x', centres=False):
         assert axis in ['x', 'y', 'r'], Exception("axis must be either 'x', 'y' or 'r'")
         if axis == 'x':
@@ -242,8 +254,8 @@ class RectilinearMesh2D(myObject):
     def xGradientMatrix(self):
         tmp = self.x.gradientMatrix()
         return kron(np.diag(np.sqrt(self.z.cellWidths)), tmp)
-    
-    
+
+
     def zGradientMatrix(self):
         nx = self.x.nCells
         nz = self.z.nCells
@@ -265,7 +277,7 @@ class RectilinearMesh2D(myObject):
 
     def intervalStatistic(self, arr, intervals, axis=0, statistic='mean'):
         """Compute a statistic of the array between the intervals given along dimension dim.
-        
+
         Parameters
         ----------
         arr : array_like
@@ -277,7 +289,7 @@ class RectilinearMesh2D(myObject):
         statistic : string or callable, optional
             The statistic to compute (default is 'mean').
             The following statistics are available:
-    
+
           * 'mean' : compute the mean of values for points within each bin.
             Empty bins will be represented by NaN.
           * 'median' : compute the median of values for points within each
@@ -365,7 +377,7 @@ class RectilinearMesh2D(myObject):
         ----------
         ixy : tuple of array_like
             A tuple of integer arrays, one array for each dimension.
-        
+
         Returns
         -------
         out : int
@@ -375,7 +387,7 @@ class RectilinearMesh2D(myObject):
 
         return np.ravel_multi_index(ixy, self.shape, order=order)
 
-    
+
     def unravelIndex(self, indices, order='C'):
         """Return a global index into a 1D array given the two cell indices in x and z.
 
@@ -384,7 +396,7 @@ class RectilinearMesh2D(myObject):
         indices : array_like
             An integer array whose elements are indices into the flattened
             version of an array.
-        
+
         Returns
         -------
         unraveled_coords : tuple of ndarray
@@ -432,10 +444,10 @@ class RectilinearMesh2D(myObject):
         grid : bool, optional
             Plot the grid
         noColorbar : bool, optional
-            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.   
+            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
         trim : bool, optional
             Set the x and y limits to the first and last non zero values along each axis.
-        
+
         See Also
         --------
         geobipy.customPlots.pcolor : For non matplotlib keywords.
@@ -448,20 +460,20 @@ class RectilinearMesh2D(myObject):
         xtmp = self.getXAxis(xAxis)
 
         ax, pm, cb = cP.pcolor(values, x = xtmp, y = self.z.cellEdges, **kwargs)
-        
+
         return ax, pm, cb
 
 
     def plotGrid(self, xAxis='x', **kwargs):
-        """Plot the mesh grid lines. 
-        
+        """Plot the mesh grid lines.
+
         Parameters
         ----------
         xAxis : str
             If xAxis is 'x', the horizontal axis uses self.x
             If xAxis is 'y', the horizontal axis uses self.y
             If xAxis is 'r', the horizontal axis uses sqrt(self.x^2 + self.y^2)
-        
+
         """
 
         tmp = StatArray.StatArray(np.full([self.z.nCells, self.x.nCells], fill_value=np.nan))
@@ -470,7 +482,7 @@ class RectilinearMesh2D(myObject):
 
         tmp.pcolor(x=xtmp, y=self.z.cellEdges, grid=True, noColorbar=True, **kwargs)
 
-    
+
     def summary(self, out=False):
         return
 
@@ -587,7 +599,7 @@ class RectilinearMesh2D(myObject):
 
         return self.z.range
 
-    
+
     def vtkStructure(self):
         """Generates a vtk mesh structure that can be used in a vtk file.
 
@@ -630,10 +642,10 @@ class RectilinearMesh2D(myObject):
         fileName : str
             Filename to save to.
         pointData : geobipy.StatArray or list of geobipy.StatArray, optional
-            Data at each node in the mesh. Each entry is saved as a separate 
+            Data at each node in the mesh. Each entry is saved as a separate
             vtk attribute.
         cellData : geobipy.StatArray or list of geobipy.StatArray, optional
-            Data at each cell in the mesh. Each entry is saved as a separate 
+            Data at each cell in the mesh. Each entry is saved as a separate
             vtk attribute.
         format : str, optional
             "ascii" or "binary" format. Ascii is readable, binary is not but results in smaller files.
@@ -646,7 +658,7 @@ class RectilinearMesh2D(myObject):
             If any pointData (cellData) entry does not have size equal to the number of points (cells).
         ValueError
             If any StatArray does not have a name or units. This is needed for the vtk attribute.
-            
+
         """
 
         vtk = self.vtkStructure()
