@@ -14,10 +14,12 @@ from scipy.signal import find_peaks
 from scipy.optimize import curve_fit
 from scipy.stats import norm
 
+from copy import deepcopy
+
 
 class Histogram1D(RectilinearMesh1D):
     """1D Histogram class that updates efficiently.
-    
+
     Fast updating relies on knowing the bins ahead of time.
 
     Histogram1D(values, bins, binCentres, log, relativeTo)
@@ -38,10 +40,10 @@ class Histogram1D(RectilinearMesh1D):
     -------
     out : Histogram1D
         1D histogram
-    
+
     """
 
-    def __init__(self, bins=None, binCentres=None, log=None, relativeTo=None):
+    def __init__(self, bins=None, binCentres=None, log=None, relativeTo=0.0, values=None):
         """ Initialize a histogram """
 
         # Allow an null instantiation
@@ -49,69 +51,58 @@ class Histogram1D(RectilinearMesh1D):
             self._counts = None
             return
 
-        # assert not (not log is None and not relativeTo is None), ValueError("Cannot use log option when histogram is relative.")
-
-        if not bins is None:
-            assert isinstance(bins, StatArray.StatArray), TypeError("bins must be a geobpiy.StatArray")
-            if relativeTo:
-                relativeTo, label = cF._log(relativeTo, log=log)
-                bins, label = cF._log(bins, log=log)
-                bins -= relativeTo
-            else:
-                bins, label = cF._log(bins, log=log)
-
-            bins.name = cF._logLabel(log) + bins.getName()
-            
-        if not binCentres is None:
-            assert isinstance(binCentres, StatArray.StatArray), TypeError("binCentres must be a geobpiy.StatArray")
-            if relativeTo:
-                relativeTo, label = cF._log(relativeTo, log=log)
-                binCentres, label = cF._log(binCentres, log=log)
-                binCentres -= relativeTo
-            else:
-                binCentres, label = cF._log(binCentres, log=log)
-
-            binCentres.name = cF._logLabel(log) + binCentres.getName()
-
         # Initialize the parent class
-        super().__init__(cellEdges=bins, cellCentres=binCentres)
+        super().__init__(cellEdges=bins, cellCentres=binCentres, log=log, relativeTo=relativeTo)
 
         self._counts = StatArray.StatArray(self.nCells, 'Frequency', dtype=np.int64)
 
-        self.log = log
-        self.relativeTo = None if relativeTo is None else StatArray.StatArray(relativeTo)
+        if not values is None:
+            self.update(values)
 
 
     def __getitem__(self, slic):
         """Slice into the class. """
-        
+
         assert np.shape(slic) == (), ValueError("slic must have one dimension.")
 
 
         bins = super().__getitem__(slic).cellEdges
 
         out = Histogram1D()
-        
+
         out._cellEdges = bins
         out.log = self.log
-        out.relativeTo = self.relativeTo
+        out._relativeTo = self._relativeTo
 
         out._counts = self.counts[slic]
         return out
 
 
+    @property
+    def cdf(self):
+        out = np.cumsum(self.counts)
+        out = out / out[-1]
+        return out
 
     @property
     def counts(self):
         return self._counts
-    
+
     @property
     def bins(self):
         return self.cellEdges
 
+    @bins.setter
+    def bins(self, values):
+        self.cellEdges = values
+
     @property
     def binCentres(self):
         return self.cellCentres
+
+    @binCentres.setter
+    def binCentres(self, values):
+        self.cellCentres = values
 
     @property
     def nBins(self):
@@ -120,26 +111,6 @@ class Histogram1D(RectilinearMesh1D):
     @property
     def nSamples(self):
         return self._counts.sum()
-
-    @property
-    def isRelative(self):
-        return not self.relativeTo is None
-
-
-    @property
-    def linearAbsoluteBinCentres(self):
-        tmp = cF._power(self.log, self.binCentres)
-        if self.relativeTo:
-            tmp = tmp + self.relativeTo
-        return tmp
-
-
-    @property
-    def linearAbsoluteBins(self):
-        tmp = cF._power(self.log, self.bins)
-        if self.relativeTo:
-            tmp = tmp + self.relativeTo
-        return tmp
 
 
     def __deepcopy__(self, memo):
@@ -150,21 +121,11 @@ class Histogram1D(RectilinearMesh1D):
         out.dx = self.dx
         out._counts = self._counts.deepcopy()
         out.log = self.log
-        out.relativeTo = self.relativeTo
-        
+        out._relativeTo = self._relativeTo
+
         return out
 
 
-    def cellIndex(self, values, **kwargs):
-
-        cc, dum = cF._log(values.flatten(), self.log)
-
-        if self.isRelative:
-            cc = cc - self.relativeTo
-
-        return super().cellIndex(cc, **kwargs)
-
-    
     def combine(self, other):
         """Combine two histograms together.
 
@@ -178,15 +139,8 @@ class Histogram1D(RectilinearMesh1D):
         """
 
         cc = other.cellCentres
-        if other.relativeTo:
-            cc = other.cellCentres + other.relativeTo
-            
+
         cc = cF._power(cc, other.log)
-
-        cc, dum = cF._log(cc, self.log)
-
-        if self.isRelative:
-            cc = cc - self.relativeTo
 
         iBin = self.cellIndex(cc, clip=True)
         self._counts[iBin] = self._counts[iBin] + other.counts
@@ -194,7 +148,7 @@ class Histogram1D(RectilinearMesh1D):
 
     def credibleIntervals(self, percent=95.0, log=None):
         """Gets the credible intervals.
-        
+
         Parameters
         ----------
         percent : float
@@ -235,7 +189,7 @@ class Histogram1D(RectilinearMesh1D):
 
 
     def estimatePdf(self):
-        return np.divide(self._counts, np.sum(self._counts))
+        return StatArray.StatArray(np.divide(self._counts, np.sum(self._counts)), name='Density')
 
 
     def findPeaks(self, width, **kwargs):
@@ -246,7 +200,7 @@ class Histogram1D(RectilinearMesh1D):
         scipy.spatial.find_peaks
 
         """
-        
+
         return find_peaks(self.estimatePdf(),  width=width, **kwargs)
 
 
@@ -258,18 +212,101 @@ class Histogram1D(RectilinearMesh1D):
         for i in range(nG):
             i1 = i*3
             y += params[i1 + 2] * norm.pdf(x, params[i1], params[i1+1])
-        
+
         return y
 
-        
-    def fitMajorPeaks(self, log=None, loc_bounds=None, constrain_loc = True, variance_upper_bound=None, maxDistributions = None, tolerance=0.05):
+
+    def fit_mixture(self, mixture_type='gaussian', nSamples=100000, log=None, mean_bounds=None, variance_bounds=None, k=[1, 10], tolerance=0.05):
+        """Uses Gaussian mixture models to fit the histogram.
+
+        Starts at the minimum number of clusters and adds clusters until the BIC decreases less than the tolerance.
+
+        Parameters
+        ----------
+        nSamples
+
+        log
+
+        mean_bounds
+
+        variance_bounds
+
+        k : ints
+            Two ints with starting and ending # of clusters
+
+        tolerance
+
+        """
+
+        from sklearn.mixture import GaussianMixture
+        from smm import SMM
+
+        if mixture_type.lower() == 'gaussian':
+            mod = GaussianMixture
+        else:
+            mod = SMM
+
+        # Samples the histogram
+        X = self.sample(nSamples)[:, None]
+        X, _ = cF._log(X, log)
+
+        # of clusters
+        k_ = k[0]
+
+        best = mod(n_components=k_).fit(X)
+        # best = GaussianMixture(k_).fit(X)
+        BIC0 = best.bic(X)
+
+        k_ += 1
+        go = k_ < k[1]
+
+        while go:
+            model = mod(n_components=k_).fit(X)
+            # model = GaussianMixture(k_).fit(X)
+            BIC1 = model.bic(X)
+
+            percent_reduction = np.abs((BIC1 - BIC0)/BIC0)
+
+            go = True
+            if BIC1 < BIC0:
+                best = model
+                BIC0 = BIC1
+
+            else:
+                go = False
+
+            if (percent_reduction < tolerance):
+                go = False
+
+            k_ += 1
+            go = go & (k_ < k[1])
+
+
+        active = np.ones(best.n_components, dtype=np.bool)
+
+        means = np.squeeze(best.means_)
+        try:
+            variances = np.squeeze(best.covariances_)
+        except:
+            variances = np.squeeze(best.covariances)
+
+        if not mean_bounds is None:
+            active = (mean_bounds[0] <= means) & (means <= mean_bounds[1])
+
+        if not variance_bounds is None:
+            active = (variance_bounds[0] <= variances) & (variances <= variance_bounds[1]) & active
+
+        return best, np.atleast_1d(active)
+
+
+    def fitMajorPeaks(self, log=None, mean_bounds=None, constrain_loc = True, variance_upper_bound=None, maxDistributions = None, tolerance=0.05):
         """Iteratively fits the histogram with an increasing number of distributions until the fit changes by less than a tolerance.
 
         """
 
-        if not loc_bounds is None:
-            assert np.size(loc_bounds) == 2, ValueError("loc_bounds must have size 2")
-            
+        if not mean_bounds is None:
+            assert np.size(mean_bounds) == 2, ValueError("mean_bounds must have size 2")
+
         x, dum = cF._log(self.binCentres, log)
         yData = self.estimatePdf()
 
@@ -281,8 +318,8 @@ class Histogram1D(RectilinearMesh1D):
             width -= 1
             iPeaks = self.findPeaks(width=width)[0]
 
-            if not loc_bounds is None:
-                keepPeaks = np.where((loc_bounds[0] < x[iPeaks]) & (x[iPeaks] < loc_bounds[1]))[0]
+            if not mean_bounds is None:
+                keepPeaks = np.where((mean_bounds[0] < x[iPeaks]) & (x[iPeaks] < mean_bounds[1]))[0]
                 iPeaks = iPeaks[keepPeaks]
             nPeaks = np.size(iPeaks)
             go = nPeaks == 0
@@ -297,7 +334,7 @@ class Histogram1D(RectilinearMesh1D):
         if constrain_loc:
             lowerBounds[i] = x[iPeaks] - 1e-6
             upperBounds[i] = x[iPeaks] + 1e-6
-        
+
         if not variance_upper_bound is None:
             upperBounds[1::3] = variance_upper_bound
             guess[1::3] = 0.5 * (lowerBounds[1::3] + upperBounds[1::3])
@@ -325,8 +362,8 @@ class Histogram1D(RectilinearMesh1D):
             while no_new_peaks and width > 1:
                 width -= 1
                 iPeaks = self.findPeaks(width=width)[0]
-                if not loc_bounds is None:
-                    keepPeaks = np.where((loc_bounds[0] < x[iPeaks]) & (x[iPeaks] < loc_bounds[1]))[0]
+                if not mean_bounds is None:
+                    keepPeaks = np.where((mean_bounds[0] < x[iPeaks]) & (x[iPeaks] < mean_bounds[1]))[0]
                     iPeaks = iPeaks[keepPeaks]
                 n_new_peaks = np.size(iPeaks)
                 no_new_peaks = nPeaks == n_new_peaks
@@ -383,7 +420,7 @@ class Histogram1D(RectilinearMesh1D):
     def sample(self, nSamples):
         """Generates samples from the histogram.
 
-        A uniform distribution is used for each bin to generate samples.  
+        A uniform distribution is used for each bin to generate samples.
         The number of samples generated per bin is scaled by the count for that bin using the requested number of samples.
 
         parameters
@@ -397,15 +434,8 @@ class Histogram1D(RectilinearMesh1D):
             The samples.
 
         """
-        samplesPerBin = np.ceil(self.counts / self.counts.sum() * nSamples)
-        samplesPerBin[self.counts == 0] = 0
-        samples = StatArray.StatArray(np.empty(np.int(np.sum(samplesPerBin))), self.bins.name, self.bins.units)
-        i0 = 0
-        for i in range(self.nBins):
-            i1 = i0 + np.int(samplesPerBin[i])
-            samples[i0:i1] = np.random.uniform(low=self.bins[i], high=self.bins[i+1], size=np.int(samplesPerBin[i]))
-            i0 = i1
-        return samples
+        values = np.random.rand(np.int(nSamples)) * self.cdf[-1]
+        return np.interp(values, np.hstack([0, self.cdf]), self.bins)
 
 
     def update(self, values, clip=True, trim=False):
@@ -414,7 +444,7 @@ class Histogram1D(RectilinearMesh1D):
         Updates the bin counts in the histogram using fast methods.
         The values are clipped so that values outside the bins are forced inside.
         Optionally, one can trim the values so that those outside the bins are not counted.
-        
+
         Parameters
         ----------
         values : array_like
@@ -423,14 +453,9 @@ class Histogram1D(RectilinearMesh1D):
             A negative index which would normally wrap will clip to 0 and self.bins.size instead.
 
         """
-        # tmp, dum = cF._log(values, self.log)
-
-        # if self.isRelative:
-        #     tmp = tmp - self.relativeTo
-
         iBin = np.atleast_1d(self.cellIndex(values, clip=clip, trim=trim))
         tmp = np.bincount(iBin, minlength = self.nBins)
-        
+
         self._counts += tmp
 
 
@@ -460,7 +485,7 @@ class Histogram1D(RectilinearMesh1D):
         grid : bool, optional
             Plot the grid
         noColorbar : bool, optional
-            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.   
+            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
         trim : bool, optional
             Set the x and y limits to the first and last non zero values along each axis.
 
@@ -469,29 +494,20 @@ class Histogram1D(RectilinearMesh1D):
         geobipy.customPlots.pcolor : For additional keywords
 
         """
-        if self.isRelative:
-            kwargs['y'] = self.bins + self.relativeTo
+        kwargs['y'] = self.bins
         return super().pcolor(self._counts, **kwargs)
-        
+
 
     def plot(self, rotate=False, flipX=False, flipY=False, trim=True, normalize=False, **kwargs):
         """ Plots the histogram """
 
-        if self.isRelative:
-            bins = self.bins + self.relativeTo
-        else:
-            bins = self.bins
-
-        ax = cP.hist(self.counts, bins, rotate=rotate, flipX=flipX, flipY=flipY, trim=trim, normalize=normalize, **kwargs)
+        ax = cP.hist(self.counts, self.bins, rotate=rotate, flipX=flipX, flipY=flipY, trim=trim, normalize=normalize, **kwargs)
         return ax
 
 
     def plot_as_line(self, rotate=False, flipX=False, flipY=False, trim=True, normalize=False, **kwargs):
 
-        if self.isRelative:
-            x = self.binCentres + self.relativeTo
-        else:
-            x = self.binCentres
+        x = self.binCentres
 
         ax = self.counts.plot(x=x, **kwargs)
 
@@ -515,11 +531,8 @@ class Histogram1D(RectilinearMesh1D):
         if not self.log is None:
             grp.create_dataset('log', data = self.log)
 
-        if self.isRelative:
-            self.bins.toHdf(grp, 'bins')
-            self.relativeTo.createHdf(grp, 'relativeTo', nRepeats=nRepeats, fillvalue=fillvalue)
-        else:
-            self.bins.createHdf(grp, 'bins', nRepeats=nRepeats, fillvalue=fillvalue)
+        self._cellEdges.toHdf(grp, 'bins')
+        self.relativeTo.createHdf(grp, 'relativeTo', nRepeats=nRepeats, fillvalue=fillvalue)
 
 
     def writeHdf(self, parent, myName, withPosterior=True, index=None):
@@ -530,10 +543,8 @@ class Histogram1D(RectilinearMesh1D):
         """
         self._counts.writeHdf(parent, myName+'/counts', index=index)
 
-        if self.isRelative:
-            self.relativeTo.writeHdf(parent, myName+'/relativeTo', index=index)
-        else:
-            self.bins.writeHdf(parent, myName+'/bins', index=index)
+        self.relativeTo.writeHdf(parent, myName+'/relativeTo', index=index)
+        # self._cellEdges.writeHdf(parent, myName+'/bins', index=index)
 
 
     def toHdf(self, h5obj, myName):
@@ -543,12 +554,11 @@ class Histogram1D(RectilinearMesh1D):
         # Create a new group inside h5obj
         grp = h5obj.create_group(myName)
         grp.attrs["repr"] = self.hdfName()
-        self.bins.toHdf(grp, 'bins')
+        self._cellEdges.toHdf(grp, 'bins')
         self._counts.toHdf(grp, 'counts')
         if not self.log is None:
             grp.create_dataset('log', data = self.log)
-        if not self.relativeTo is None:
-            self.relativeTo.toHdf(grp, 'relativeTo')
+        self.relativeTo.toHdf(grp, 'relativeTo')
 
 
     def fromHdf(self, grp, index=None):
@@ -559,21 +569,14 @@ class Histogram1D(RectilinearMesh1D):
             obj = eval(cF.safeEval(item.attrs.get('repr')))
             relativeTo = obj.fromHdf(item, index=index)
         except:
-            relativeTo = None
+            relativeTo = 0.0
 
         item = grp.get('bins')
         obj = eval(cF.safeEval(item.attrs.get('repr')))
+        bins = obj.fromHdf(item)
 
-        
-        if relativeTo is None:
-            if index is None:
-                bins = obj.fromHdf(item)
-            else:
-                # slic = np.s_[index, :]
-                bins = obj.fromHdf(item, index=index)
-        else:
-            bins = obj.fromHdf(item)
-
+        if np.ndim(bins) == 2:
+            bins = bins[0, :]
 
         item = grp.get('counts')
         obj = eval(cF.safeEval(item.attrs.get('repr')))
@@ -581,7 +584,6 @@ class Histogram1D(RectilinearMesh1D):
         if (index is None):
             counts = obj.fromHdf(item)
         else:
-            slic = np.s_[index, :]
             counts = obj.fromHdf(item, index=index)
 
         try:
@@ -610,5 +612,4 @@ class Histogram1D(RectilinearMesh1D):
               "Relative to: {}").format(type(self), RectilinearMesh1D.summary(self, True), self.counts.summary(True), self.log, self.relativeTo)
 
         return msg if out else print(msg)
-        
-        
+
