@@ -186,7 +186,7 @@ def findFirstLastNotValue(this, values, invalid_val=-1):
         val = this.shape[i] - np.flip(mask, axis=i).argmax(axis=i) - 1
         x = np.where(mask.any(axis=i), val, invalid_val)
         out[i, 1] = np.max(x[x != invalid_val])
-    
+
     return out
 
 
@@ -359,7 +359,7 @@ def Ax(A, x):
     ndim = np.ndim(A)
 
     assert ndim <= 2, TypeError('The number of dimesions of A must be <= 2')
-        
+
     if (ndim == 2):
         return np.dot(A, x)
 
@@ -553,7 +553,7 @@ def _logLabel(log=None):
 
 def _log(values, log=None):
     """Take the log of something with the given base.
-    
+
     Uses mask arrays for robustness and warns when masking occurs
     Also returns a LateX string of log_{base} so that auto labeling is easier.
 
@@ -577,11 +577,11 @@ def _log(values, log=None):
     else:
         return _logArray(values, log)
 
-    
+
 
 def _logScalar(value, log=None):
     """Take the log of a number with the given base.
-    
+
     Uses mask arrays for robustness and warns when masking occurs
     Also returns a LateX string of log_{base} so that auto labeling is easier.
 
@@ -629,13 +629,13 @@ def _logScalar(value, log=None):
         tmp = np.log10(value)/np.log10(log)
         label = 'log$_{'+str(log)+'}$'
         return tmp, label
-    
+
     assert False, ValueError("log must be 'e' or a positive number")
 
-    
+
 def _logArray(values, log=None):
     """Take the log of an array with the given base.
-    
+
     Uses mask arrays for robustness and warns when masking occurs
     Also returns a LateX string of log_{base} so that auto labeling is easier.
 
@@ -653,6 +653,7 @@ def _logArray(values, log=None):
         The logged values
 
     """
+
     if log is None:
         return values, ''
 
@@ -688,10 +689,10 @@ def _logArray(values, log=None):
         tmp[i] = np.log10(values[i])/np.log10(log)
         label = 'log$_{'+str(log)+'}$'
         return tmp, label
-    
+
     assert False, ValueError("log must be 'e' or a positive number")
 
-    
+
 def histogramEqualize(values, nBins=256):
     """Equalize the histogram of the values so that all colours have an equal amount
 
@@ -733,27 +734,53 @@ def histogramEqualize(values, nBins=256):
 
     # Scale back the equalized image to the bounds of the histogram
     a1 = np.nanmin(equalized)
+    a2 = np.nanmax(equalized)
     b1 = tmp.min()
     b2 = tmp.max()
 
     # Shifting the vector so that min(x) == 0
-    equalized -= a1
-    # Scaling to the range of [0, 1]
-    equalized /= np.nanmax(equalized)
+    equalized = (equalized - a1) / (a2 - a1)
 
     # Scaling to the needed amplitude
-    equalized *= (b2 - b1)
-    # Shifting to the needed level
-    equalized += b1
+    equalized = (equalized * (b2 - b1)) + b1
 
     res = StatArray.StatArray(equalized.reshape(values.shape), getName(values), getUnits(values))
 
     return res, cdf
 
+def trim_by_percentile(values, percent):
+    """Trim an array by a given percentile from either end
+
+    Parameters
+    ----------
+    values : array_like
+        Values to trim
+    percent : float
+        Percent from 0.0 to 100.0
+
+    Returns
+    -------
+    out : array_like
+        Trimmed values
+
+    """
+
+    low = np.nanpercentile(values, percent)
+    high = np.nanpercentile(values, 100 - percent)
+
+    tmp = values.copy()
+
+    i = np.where(tmp > high)
+    tmp[i] = high
+    i = np.where(tmp < low)
+    tmp[i] = low
+
+    return tmp
+
 
 def _power(values, exponent=None):
     """Take values to a power.
-    
+
     Uses mask arrays for robustness and warns when masking occurs
     Also returns a LateX string of log_{base} so that auto labeling is easier.
 
@@ -781,7 +808,7 @@ def _power(values, exponent=None):
 
 
 def safeEval(string):
-    
+
     # Backwards compatibility
     if ('NdArray' in string):
         string = string.replace('NdArray', 'StatArray')
@@ -792,8 +819,8 @@ def safeEval(string):
     if ('EmLoop' in string):
         string = string.replace('EmLoop', 'CircularLoop')
         return string
-    
-    allowed = ('Histogram', 'Model1D', 'Hitmap', 'TdemData', 'FdemData', 'TdemDataPoint', 'FdemDataPoint', 'TdemSystem', 'FdemSystem', 'CircularLoop', 'RectilinearMesh')  
+
+    allowed = ('Histogram', 'Model1D', 'Hitmap', 'TdemData', 'FdemData', 'TdemDataPoint', 'FdemDataPoint', 'TdemSystem', 'FdemSystem', 'CircularLoop', 'RectilinearMesh')
 
     if (any(x in string for x in allowed)):
         return string
