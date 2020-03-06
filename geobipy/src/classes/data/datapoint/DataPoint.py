@@ -267,7 +267,7 @@ class DataPoint(Point):
 
 
     def updateErrors(self, relativeErr, additiveErr):
-        """Updates the data errors
+        """Updates the data errors.
 
         Updates the standard deviation of the data errors using the following model
 
@@ -303,19 +303,6 @@ class DataPoint(Point):
 
         if self._predictedData.hasPrior:
             self._predictedData.prior.variance[np.diag_indices(self.nActiveChannels)] = tmp[self.active]
-
-
-    def updatePosteriors(self):
-        """Update any attached posteriors"""
-
-        if self.z.hasPosterior:
-            self.z.updatePosterior()
-
-        if self.relErr.hasPosterior:
-            self.relErr.updatePosterior()
-
-        if self.addErr.hasPosterior:
-            self.addErr.updatePosterior()
 
 
     def Isend(self, dest, world):
