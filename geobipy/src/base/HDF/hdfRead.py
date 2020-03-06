@@ -42,9 +42,9 @@ def find(filename, tag):
                     if isinstance(item, h5py.Group): # test for group (go down)
                         yield from h5py_iterator(item, tag, path)
 
-        for item, path in h5py_iterator(f, tag):
+        for _, path in h5py_iterator(f, tag):
             yield path
-        
+
     locs = []
     with h5py.File(filename, 'r') as f:
         for path in find_inner(f, tag):
@@ -74,7 +74,7 @@ def read_groups_with_tag(filename, tag, index=None, **kwargs):
         for loc in locs:
             classes.append(read_item(f[loc], index=index, **kwargs))
     return classes
-            
+
 
 
 def read_all(fName):
