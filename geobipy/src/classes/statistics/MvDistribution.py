@@ -9,7 +9,7 @@ class MvDistribution(baseDistribution):
     ----------
     distributions : (list of) geobipy.baseDistribution
         Single or list of univariate distributions, one per dimension.
-    
+
     Returns
     -------
     out : geobipy.MvDistribution
@@ -24,7 +24,7 @@ class MvDistribution(baseDistribution):
 
         for i, d in enumerate(distributions):
             assert not d.multivariate, TypeError("distribution {} must be univariate".format(i))
-        
+
         self._distributions = distributions
 
     @property
@@ -39,8 +39,8 @@ class MvDistribution(baseDistribution):
     def multivariate(self):
         return True
 
-    
-    def probability(self, axes, axis=None):
+
+    def probability(self, axes, log, axis=None):
 
         if not isinstance(axes, list):
             axes = [axes]
@@ -48,13 +48,13 @@ class MvDistribution(baseDistribution):
 
         if not axis is None:
             assert axis < self.ndim, ValueError("Axis must be less than number of dimensions {}".format(self.ndim))
-        else:        
+        else:
             assert len(axes) == self.ndim, ValueError("Number of axes {} must equal the number of dimensions {}".format(len(axes), self.ndim))
 
         if axis is None:
-            return StatArray.StatArray(np.outer(self.distributions[0].probability(axes[0]), self.distributions[1].probability(axes[1])), "Probability density")
+            return StatArray.StatArray(np.outer(self.distributions[0].probability(axes[0], log), self.distributions[1].probability(axes[1], log)), "Probability density")
         else:
-            return StatArray.StatArray(self.distributions[axis].probability(axes[0]), "Probability density")
+            return StatArray.StatArray(self.distributions[axis].probability(axes[0], log), "Probability density")
 
 
     def rng(self, size = 1):
