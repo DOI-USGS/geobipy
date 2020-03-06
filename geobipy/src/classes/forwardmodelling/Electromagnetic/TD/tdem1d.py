@@ -38,10 +38,12 @@ def tdem1dfwd(datapoint, model1d):
 
 def tdem1dsen(datapoint, model1d, ix=None, modelChanged=True):
 
-    if isinstance(datapoint.system[0], TdemSystem_GAAEM):
+    heightTolerance = 0.0
+    if (datapoint.z > heightTolerance):
+        assert isinstance(datapoint.system[0], TdemSystem_GAAEM), TypeError("For airborne data, system must be type TdemSystem_GAAEM")
         return gaTdem1dsen(datapoint, model1d, ix, modelChanged)
     else:
-        return
+        return empymod_tdem1dsen(datapoint, model1d, ix)
 
 def empymod_tdem1dfwd(datapoint, model1d):
 
@@ -51,9 +53,31 @@ def empymod_tdem1dfwd(datapoint, model1d):
         datapoint._predictedData[iSys] = fm
 
 
-def empymod_tdem1dsen(datapoint, model1d):
+def empymod_tdem1dsen(datapoint, model1d, ix=None):
 
-    print('b')
+    if (ix is None):  # Generate a full matrix if the layers are not specified
+        ix = range(model1d.nCells[0])
+        J = np.zeros([datapoint.nWindows, model1d.nCells[0]])
+    else:  # Partial matrix for specified layers
+        J = np.zeros([datapoint.nWindows, np.size(ix)])
+
+    for j in range(datapoint.nSystems):  # For each system
+        iSys = datapoint._systemIndices(j)
+
+        d0 = empymod_walktem(datapoint.system[j], model1d)
+        m1 = model1d.deepcopy()
+
+        for i in range(np.size(ix)):  # For the specified layers
+            iLayer = ix[i]
+            dSigma = 0.02 * model1d.par[iLayer]
+            m1.par[:] = model1d.par[:]
+            m1.par[iLayer] += dSigma
+            d1 = empymod_walktem(datapoint.system[j], m1)
+            # Store the necessary component
+            J[iSys, i] = (d1 - d0) / dSigma
+
+    datapoint.J = J[datapoint.active, :]
+    return datapoint.J
 
 
 try:
@@ -64,8 +88,8 @@ try:
         # Generate the Brodie Earth class
         E = Earth(model1d.par[:], model1d.thk[:-1])
         # Generate the Brodie Geometry class
-        G = Geometry(datapoint.z[0], 
-                    datapoint.T.roll, datapoint.T.pitch, datapoint.T.yaw, 
+        G = Geometry(datapoint.z[0],
+                    datapoint.T.roll, datapoint.T.pitch, datapoint.T.yaw,
                     datapoint.loopOffset[0], datapoint.loopOffset[1], datapoint.loopOffset[2],
                     datapoint.R.roll, datapoint.R.pitch, datapoint.R.yaw)
 
@@ -82,8 +106,8 @@ try:
         # sensitivity if the model has changed since last time
         if modelChanged:
             E = Earth(model1d.par[:], model1d.thk[:-1])
-            G = Geometry(datapoint.z[0], 
-                        datapoint.T.roll, datapoint.T.pitch, datapoint.T.yaw, 
+            G = Geometry(datapoint.z[0],
+                        datapoint.T.roll, datapoint.T.pitch, datapoint.T.yaw,
                         datapoint.loopOffset[0], datapoint.loopOffset[1], datapoint.loopOffset[2],
                         datapoint.R.roll, datapoint.R.pitch, datapoint.R.yaw)
 
@@ -104,7 +128,7 @@ try:
                 # Store the necessary component
                 J[iSys, i] = -model1d.par[ix[i]] * tmp.SZ[:]
 
-        datapoint.J = J[datapoint.active,:]
+        datapoint.J = J[datapoint.active, :]
         return datapoint.J
 
 except:

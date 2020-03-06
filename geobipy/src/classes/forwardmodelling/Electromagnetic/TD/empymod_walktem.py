@@ -27,7 +27,7 @@ def empymod_walktem(system, model1d):
 
     Parameters
     ----------
-    
+
 
     Returns
     -------
@@ -54,13 +54,13 @@ def empymod_walktem(system, model1d):
         mrec = True,                    # It is an el. source, but a magn. rec.
         strength = 8,                   # To account for 4 sides of square loop.
         srcpts = 5,                     # Approx. the finite dip. with 3 points.
-        htarg = {'fhtfilt': 'key_101_2009'}, 
+        htarg = {'fhtfilt': 'key_101_2009'},
         verb=0,# Short filter, so fast.
     )
 
     # Multiply the frequecny-domain result with
     # \mu for H->B, and i\omega for B->dB/dt.
-    EM *= 2j*np.pi*system.modellingFrequencies*4e-7*np.pi
+    EM *= 2j * np.pi * system.modellingFrequencies * 4e-7 * np.pi
 
     # Apply filters the data for the given system
     for filt in system.offTimeFilters:
@@ -68,14 +68,14 @@ def empymod_walktem(system, model1d):
 
 
     # === CONVERT TO TIME DOMAIN ===
-    EM, _ = np.squeeze(tem(EM[:, None], 
+    EM, _ = np.squeeze(tem(EM[:, None],
                        np.array([1]),
-                       system.modellingFrequencies, 
-                       system.modellingTimes, 
+                       system.modellingFrequencies,
+                       system.modellingTimes,
                        -1,
-                       system.ft, 
+                       system.ft,
                        system.ftarg))
-                
+
     # === APPLY WAVEFORM ===
     return waveform(system.modellingTimes, EM, system.times, system.waveform.time-system.delayTime, system.waveform.amplitude)
 
