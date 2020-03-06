@@ -5,6 +5,7 @@
 from os import getcwd
 from os import makedirs
 from os.path import join
+import pathlib
 import argparse
 from importlib import import_module
 import sys
@@ -85,120 +86,91 @@ def checkCommandArguments():
     # warnings.filterwarnings('error')
 
     Parser = argparse.ArgumentParser(description="GeoBIPy",
-                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     Parser.add_argument('inputFile', help='User input file')
-    Parser.add_argument('outputDir', help='Output directory for results')
+    Parser.add_argument('output_directory', help='Output directory for results')
     Parser.add_argument('--skipHDF5', dest='skipHDF5', default=False, help='Skip the creation of the HDF5 files.  Only do this if you know they have been created.')
     Parser.add_argument('--seed', dest='seed', type=int, default=None, help='Specify a single integer to fix the seed of the random number generator. Only used in serial mode.')
-    
+
     args = Parser.parse_args()
 
-    # Strip .py from the input file name
-    inputFile = args.inputFile.replace('.py','')
+    inputFile = pathlib.Path(args.inputFile)
+    assert inputFile.exists(), Exception("Cannot find input file {}".format(inputFile))
 
-    return inputFile, args.outputDir, args.skipHDF5, args.seed
+    output_directory = pathlib.Path(args.output_directory)
+
+    return inputFile, output_directory, args.skipHDF5, args.seed
 
 
-def singleCore(inputFile, outputDir, seed=None):
+def serial_geobipy(inputFile, output_directory, seed=None):
 
     print('Running GeoBIPy in serial mode')
     print('Using user input file {}'.format(inputFile))
-    print('Output files will be produced at {}'.format(outputDir))
+    print('Output files will be produced at {}'.format(output_directory))
 
+    # Make sure the results folders exist
+    makedirs(output_directory, exist_ok=True)
+
+    # Copy the input file to the output directory for reference.
+    copy(inputFile, output_directory)
 
     # Import the script from the input file
-    UP = import_module(inputFile, package='geobipy')
+    userParameters = import_module(str(inputFile.with_suffix('')), package='geobipy')
 
-    # Make data and system filenames lists of str.
-    if isinstance(UP.dataFilename, str):
-            UP.dataFilename = [UP.dataFilename]
-    if isinstance(UP.systemFilename, str):
-            UP.systemFilename = [UP.systemFilename]
+    # Everyone needs the system classes read in early.
+    Dataset = type(userParameters.data_type)()
 
-    t0 = time.time()
+    if isinstance(Dataset, DataPoint):
+        serial_datapoint(userParameters, output_directory, seed=seed)
+    else:
+        serial_dataset(userParameters, output_directory, seed=seed)
+
+
+def serial_datapoint(userParameters, output_directory, seed=None):
+
+    datapoint = type(userParameters.data_type)()
+    datapoint.read(userParameters.dataFilename)
 
     # Get the random number generator
     prng = np.random.RandomState(seed)
 
-    # Everyone needs the system classes read in early.
-    Dataset = eval(customFunctions.safeEval(UP.dataInit))
-    Dataset.readSystemFile(UP.systemFilename)
+    options = userParameters.userParameters(datapoint)
+    options.output_directory = output_directory
 
-    # Make sure the results folders exist
-    try:
-        makedirs(outputDir)
-    except:
-        pass
+    Inv_MCMC(options, datapoint, prng=prng)
 
-    # Copy the input file to the output directory for book keeping.
-    copy(inputFile+'.py', outputDir)
 
-    # Prepare the dataset so that we can read a point at a time.
-    Dataset._initLineByLineRead(UP.dataFilename, UP.systemFilename)
-    # Get a datapoint from the file.
-    DataPoint = Dataset._readSingleDatapoint()
-    Dataset._closeDatafiles()
+def serial_dataset(userParameters, output_directory, seed=None):
 
-    # While preparing the file, we need access to the line numbers and fiducials in the data file
-    tmp = fileIO.read_columns(UP.dataFilename[0], Dataset._indicesForFile[0][:2], 1, Dataset.nPoints)
+    Dataset = type(userParameters.data_type)()
 
-    Dataset._openDatafiles(UP.dataFilename)
+    results = DataSetResults(output_directory, userParameters.systemFilename)
+    results.createHDF5(Dataset, userParameters)
 
-    # Get the line numbers in the data
-    lineNumbers = np.unique(tmp[:, 0])
-    lineNumbers.sort()
-    nLines = lineNumbers.size
-    fiducials = tmp[:, 1]
-
-    # Read in the user parameters
-    paras = UP.userParameters(DataPoint)
-
-    # Check the parameters
-    paras.check(DataPoint)
-
-    # Initialize the inversion to obtain the sizes of everything
-    paras, Mod, DataPoint, prior, likelihood, posterior, PhiD = Initialize(paras, DataPoint, prng = prng)
-
-    # Create the results template
-    Res = Results(DataPoint, Mod,
-        save=paras.save, plot=paras.plot, savePNG=paras.savePNG,
-        nMarkovChains=paras.nMarkovChains, plotEvery=paras.plotEvery,
-        reciprocateParameters=paras.reciprocateParameters, verbose=paras.verbose)
-
-    print('Creating HDF5 files, this may take a few minutes...')
-    print('Files are being created for data files {} and system files {}'.format(UP.dataFilename, UP.systemFilename))
-
-    # No need to create and close the files like in parallel, so create and keep them open
-    LR = [None] * nLines
-    H5Files = [None] * nLines
-    for i, line in enumerate(lineNumbers):
-        fiducialsForLine = np.where(tmp[:, 0] == line)[0]
-        nFids = fiducialsForLine.size
-        H5Files[i] = h5py.File(join(outputDir, '{}.h5'.format(line)), 'w')
-        LR[i] = LineResults()
-        LR[i].createHdf(H5Files[i], fiducials[fiducialsForLine], Res)
-        print('Time to create line {} with {} data points: {} h:m:s'.format(line, nFids, str(timedelta(seconds=time.time()-t0))))
+    # Get the random number generator
+    prng = np.random.RandomState(seed)
 
     # Loop through data points in the file.
-    for i in range(Dataset.nPoints):
-        DataPoint = Dataset._readSingleDatapoint()
-        paras = UP.userParameters(DataPoint)
+    for _ in range(Dataset.nPoints):
+        datapoint = Dataset._readSingleDatapoint()
+        options = userParameters.userParameters(datapoint)
 
-        iLine = lineNumbers.searchsorted(DataPoint.lineNumber)
-        Inv_MCMC(paras, DataPoint, prng=prng, LineResults=LR[iLine])
+        iLine = results.lineIndex(lineNumber=datapoint.lineNumber)
+        Inv_MCMC(options, datapoint, prng=prng, LineResults=results.lines[iLine])
 
-    # Close all the files.
-    for i in range(nLines):
-        LR[i].close()
-
+    results.close()
     Dataset._closeDatafiles()
 
 
-def multipleCore(inputFile, outputDir, skipHDF5):
-    
+def parallel_geobipy(inputFile, outputDir, skipHDF5):
+
+    parallel_mpi(inputFile, outputDir, skipHDF5)
+
+def parallel_mpi(inputFile, outputDir, skipHDF5):
+
     from mpi4py import MPI
     from geobipy.src.base import MPI as myMPI
-    
+
     world = MPI.COMM_WORLD
     rank = world.rank
     nRanks = world.size
@@ -212,7 +184,7 @@ def multipleCore(inputFile, outputDir, skipHDF5):
     t0 = MPI.Wtime()
     t1 = t0
 
-    UP = import_module(inputFile, package='geobipy')
+    UP = import_module(str(inputFile.with_suffix('')), package='geobipy')
 
     # Make data and system filenames lists of str.
     if isinstance(UP.dataFilename, str):
@@ -221,7 +193,7 @@ def multipleCore(inputFile, outputDir, skipHDF5):
             UP.systemFilename = [UP.systemFilename]
 
     # Everyone needs the system classes read in early.
-    Dataset = eval(customFunctions.safeEval(UP.dataInit))
+    Dataset = type(UP.data_type)()
     Dataset.readSystemFile(UP.systemFilename)
 
     # Get the number of points in the file.
@@ -244,12 +216,9 @@ def multipleCore(inputFile, outputDir, skipHDF5):
     if (masterComm != MPI.COMM_NULL):
 
         # Make sure the results folders exist
-        try:
-            makedirs(outputDir)
-        except:
-            pass
+        makedirs(outputDir, exist_ok=True)
 
-        copy(inputFile+'.py', outputDir)
+        copy(inputFile, outputDir)
 
         # Prepare the dataset so that we can read a point at a time.
         Dataset._initLineByLineRead(UP.dataFilename, UP.systemFilename)
@@ -283,7 +252,7 @@ def multipleCore(inputFile, outputDir, skipHDF5):
             save=paras.save, plot=paras.plot, savePNG=paras.savePNG,
             nMarkovChains=paras.nMarkovChains, plotEvery=paras.plotEvery,
             reciprocateParameters=paras.reciprocateParameters)
-            
+
 
         # For each line. Get the fiducials, and create a HDF5 for the Line results.
         # A line results file needs an initialized Results class for a single data point.
@@ -343,10 +312,10 @@ def multipleCore(inputFile, outputDir, skipHDF5):
 
 def masterTask(Dataset, world):
   """ Define a Send Recv Send procedure on the master """
-  
+
   from mpi4py import MPI
   from geobipy.src.base import MPI as myMPI
-  
+
   # Set the total number of data points
   nPoints = Dataset.nPoints
 
@@ -417,11 +386,11 @@ def masterTask(Dataset, world):
 
 def workerTask(_DataPoint, UP, prng, world, lineNumbers, LineResults):
     """ Define a wait run ping procedure for each worker """
-    
+
     # Import here so serial code still works...
     from mpi4py import MPI
     from geobipy.src.base import MPI as myMPI
-   
+
     # Initialize the worker process to go
     Go = True
 
@@ -433,7 +402,7 @@ def workerTask(_DataPoint, UP, prng, world, lineNumbers, LineResults):
     else:
         Go = False
 
-    communicationTime = 0.0
+    # communicationTime = 0.0
 
     while Go:
         # initialize the parameters
@@ -442,7 +411,7 @@ def workerTask(_DataPoint, UP, prng, world, lineNumbers, LineResults):
         # Pass through the line results file object if a parallel file system is in use.
         iLine = lineNumbers.searchsorted(DataPoint.lineNumber)
         failed = Inv_MCMC(paras, DataPoint, prng=prng, rank=world.rank, LineResults=LineResults[iLine])
-        
+
         # Ping the Master to request a new index
         t0 = MPI.Wtime()
         world.send(1, dest=0)
@@ -464,20 +433,20 @@ def workerTask(_DataPoint, UP, prng, world, lineNumbers, LineResults):
             Go = False
 
 
-def runSerial():
+def geobipy():
     """Run the serial implementation of GeoBIPy. """
-        
-    inputFile, outputDir, skipHDF5, seed = checkCommandArguments()    
+
+    inputFile, output_directory, _, seed = checkCommandArguments()
     sys.path.append(getcwd())
 
-    R = singleCore(inputFile, outputDir, seed)
+    serial_geobipy(inputFile, output_directory, seed)
 
 
-def runParallel():
+def geobipy_mpi():
     """Run the parallel implementation of GeoBIPy. """
 
-    inputFile, outputDir, skipHDF5, seed = checkCommandArguments()    
+    inputFile, output_directory, skipHDF5, _ = checkCommandArguments()
     sys.path.append(getcwd())
 
-    R = multipleCore(inputFile, outputDir, skipHDF5)
+    parallel_geobipy(inputFile, output_directory, skipHDF5)
 
