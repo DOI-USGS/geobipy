@@ -16,12 +16,12 @@ class _userParameters(myObject):
     """ Handler class to user defined parameters. Allows us to check a users input parameters in the backend """
 
     def __init__(self, Datapoint):
-        
+
         if isinstance(self.dataFilename , str):
             self.dataFilename = [self.dataFilename]
         if isinstance(self.systemFilename , str):
             self.systemFilename = [self.systemFilename]
-        
+
 
         self.nMarkovChains = np.int32(self.nMarkovChains)
         self.maximumNumberofLayers = np.int32(self.maximumNumberofLayers)
@@ -77,7 +77,7 @@ class _userParameters(myObject):
         except:
             self.parameterCovarianceScaling = np.float64(1.65)
 
-            
+
         # Scaling factor for data misfit
         self.multiplier = np.float64(1.02) if self.multiplier is None else np.float64(self.multiplier)
 
@@ -90,25 +90,26 @@ class _userParameters(myObject):
         self.refID = None
         self.referenceHitmap = None
 
+        # ## Prior Means for gain, phase, InPhase Bias and Quadrature Bias
+        # if (self.solveCalibration):
+        #     tmp = StatArray.StatArray(4)
+        #     tmp += [1.0,0.0,0.0,0.0]
+        #     self.calMean = StatArray.StatArray([N,4],'prior calibration means')
+        #     for i in range(N):
+        #         self.calMean[i,:] = tmp
+        #     ## Prior variance for gain, phase, InPhase Bias and Quadrature Bias
+        #     tmp = StatArray.StatArray(4)
+        #     tmp += [.0225,.0019,19025.0,19025.0]
+        #     self.calVar = StatArray.StatArray([N,4],'prior calibration variance')
+        #     for i in range(N):
+        #         self.calVar[i,:] = tmp
 
-        ## Prior Means for gain, phase, InPhase Bias and Quadrature Bias
-        if (self.solveCalibration):
-            tmp = StatArray.StatArray(4)
-            tmp += [1.0,0.0,0.0,0.0]
-            self.calMean = StatArray.StatArray([N,4],'prior calibration means')
-            for i in range(N):
-                self.calMean[i,:] = tmp
-            ## Prior variance for gain, phase, InPhase Bias and Quadrature Bias
-            tmp = StatArray.StatArray(4)
-            tmp += [.0225,.0019,19025.0,19025.0]
-            self.calVar = StatArray.StatArray([N,4],'prior calibration variance')
-            for i in range(N):
-                self.calVar[i,:] = tmp
-        
         try:
             self.ignoreLikelihood = False if self.ignoreLikelihood is None else self.ignoreLikelihood
         except:
             self.ignoreLikelihood = False
+
+        self.check(Datapoint)
 
 
     def check(self, DataPoint):
@@ -165,11 +166,11 @@ class _userParameters(myObject):
         # Check the range allowed on the data point elevation
         assert isinstance(self.maximumElevationChange, float), TypeError('Elevation range must be a float (preferably np.float64)')
 
-        # Check the calibration errors if they are used
-        if (self.solveCalibration):
-            assert self.calMean.shape == [N1, nCalibration], ValueError('Calibration mean must have shape {}'.format([N1, nCalibration]))
+        # # Check the calibration errors if they are used
+        # if (self.solveCalibration):
+        #     assert self.calMean.shape == [N1, nCalibration], ValueError('Calibration mean must have shape {}'.format([N1, nCalibration]))
 
-            assert self.calVar.shape == [N1, nCalibration], ValueError('Calibration variance must have shape {}'.format([N1, nCalibration]))
+        #     assert self.calVar.shape == [N1, nCalibration], ValueError('Calibration variance must have shape {}'.format([N1, nCalibration]))
 
         # Checking Proposal Variables
         # Check the elevation proposal variance
@@ -182,8 +183,8 @@ class _userParameters(myObject):
         assert self.additiveErrorProposalVariance.size == DataPoint.nSystems, ValueError('Proposal additive error variance must be size {}'.format(DataPoint.nSystems))
 
         # Check the calibration proposal variance if they are used
-        if (self.solveCalibration):
-            assert self.propCal.shape == [N1, nCalibration], ValueError('Proposal Calibration variance must have shape {}'.forma([N1, nCalibration]))
+        # if (self.solveCalibration):
+        #     assert self.propCal.shape == [N1, nCalibration], ValueError('Proposal Calibration variance must have shape {}'.forma([N1, nCalibration]))
 
         # Check the covariance scaling parameter
         assert isinstance(self.parameterCovarianceScaling, float), TypeError('Covariance scaling must be a float (preferably np.float64)')
