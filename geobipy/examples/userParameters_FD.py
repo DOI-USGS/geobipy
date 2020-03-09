@@ -15,7 +15,8 @@ from geobipy.src.inversion._userParameters import _userParameters
 
 # -------------------------------------------------------
 # Define whether this parameter file uses time domain or frequency domain data!
-timeDomain = False
+from geobipy import FdemData
+data_type = FdemData()
 # -------------------------------------------------------
 
 # -------------------------------------------------------
@@ -52,7 +53,7 @@ class userParameters(_userParameters):
     self.savePNG = False
     # Save the results of the McMC inversion to HDF5 files. (Generally always True)
     self.save = True
-    
+
     # -------------------------------------------------------
     # Turning on or off different solvable parameters.
     # -------------------------------------------------------
@@ -73,7 +74,7 @@ class userParameters(_userParameters):
     # Use the prior on the additive data errors
     self.solveAdditiveError = True
     # Use the prior on the data elevation
-    self.solveElevation = True
+    self.solveHeight = True
     # Use the prior on the calibration parameters for the data
     self.solveCalibration = False
 
@@ -89,7 +90,7 @@ class userParameters(_userParameters):
     self.minimumDepth = 1.0
     # Maximum layer depth in metres
     self.maximumDepth = 150.0
-    # Minimum layer thickness. 
+    # Minimum layer thickness.
     # If minimumThickness = None, it will be autocalculated.
     self.minimumThickness = None
 
@@ -98,15 +99,15 @@ class userParameters(_userParameters):
 
     # Data prior details
     # ------------------
-    # The data priors are imposed on three different aspects of the data.  
+    # The data priors are imposed on three different aspects of the data.
     # The relative and additive error and the elevation of the data point.
     # Data uncertainty priors are used if solveRelativeError or solveAdditiveError are True.
-    # If the data file contains columns of the estimated standard deviations, they are used as the initial values 
+    # If the data file contains columns of the estimated standard deviations, they are used as the initial values
     # when starting an McMC inversion. If the file does not contain these estimates, then the initial
     # values are used below as sqrt((relative * data)^2 + (additive)^2).
 
     # Assign an initial percentage relative Error
-    # If the file contains no standard deviations, this will be used 
+    # If the file contains no standard deviations, this will be used
     # to assign the initial data uncertainties.
     self.initialRelativeError = 0.05
     ## Relative Error Prior Details
@@ -114,9 +115,9 @@ class userParameters(_userParameters):
     self.minimumRelativeError = 0.001
     # Maximum Relative Error
     self.maximumRelativeError = 0.5
-    
+
     # Assign an initial additivr error level.
-    # If the file contains no standard deviations, this will be used 
+    # If the file contains no standard deviations, this will be used
     # to assign the initial data uncertainties.
     self.initialAdditiveError = 5.0
     # Additive Error Prior Details
@@ -140,7 +141,7 @@ class userParameters(_userParameters):
     # model. If this is turned on (and generally it should be) you will notice
     # less variance in the parameter posterior once the inversion finishes.
     self.stochasticNewton = True
-    # The relative, additive, and elevation proposal variances are assigned to 
+    # The relative, additive, and elevation proposal variances are assigned to
     # normal distributions with a mean equal to its value in the current model (of the Markov chain)
     # These variances are used when we randomly choose a new value for that given variable.
     # Proposal variance for the relative error
@@ -181,7 +182,7 @@ class userParameters(_userParameters):
 
     # Display the resistivity?
     self.reciprocateParameters = True
-    
+
 
     # Don't change these.
     self.dataDirectory = dataDirectory
@@ -191,9 +192,3 @@ class userParameters(_userParameters):
     self.verbose = False
 
     _userParameters.__init__(self, DataPoint)
-
-# Don't change this.
-if (timeDomain):
-  dataInit = 'TdemData()'
-else:
-  dataInit = 'FdemData()'
