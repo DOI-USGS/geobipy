@@ -148,7 +148,7 @@ class FdemSystem(myObject):
 
 
     def __deepcopy__(self, memo):
-        return FdemSystem(self.frequencies, self.transmitterLoops, self.receiverLoops, self.loopSeparation, self.fileName)
+        return FdemSystem(self.frequencies, self.transmitterLoops, self.receiverLoops, self.fileName)
 
 
     def read(self, fileName):
@@ -331,8 +331,8 @@ class FdemSystem(myObject):
 
     def Isend(self, dest, world):
         myMPI.Isend(self.nFrequencies, dest=dest, world=world)
-        self._frequencies.Isend(dest=dest, world=world)
-        self.loopOffsets.Isend(dest=dest, world=world)
+        self.frequencies.Isend(dest=dest, world=world)
+        # self.loopOffsets.Isend(dest=dest, world=world)
         for i in range(self.nFrequencies):
             self.transmitterLoops[i].Isend(dest=dest, world=world)
             self.receiverLoops[i].Isend(dest=dest, world=world)
@@ -340,13 +340,18 @@ class FdemSystem(myObject):
 
     def Irecv(self, source, world):
         nFreq = myMPI.Irecv(source=source, world=world)
-        out = FdemSystem(nFreq)
-        out._frequencies = out._frequencies.Irecv(source=source, world=world)
-        out.loopOffsets = out.loopOffsets.Irecv(source=source, world=world)
+
+        x = StatArray.StatArray()
+        frequencies = x.Irecv(source=source, world=world)
+        # out.loopOffsets = out.loopOffsets.Irecv(source=source, world=world)
+        transmitterLoops = []
+        receiverLoops = []
+        x = CircularLoop()
         for i in range(nFreq):
-            out.transmitterLoops[i] = out.transmitterLoops[i].Irecv(source=source, world=world)
-            out.receiverLoops[i] = out.receiverLoops[i].Irecv(source=source, world=world)
-        return out
+            transmitterLoops.append(x.Irecv(source=source, world=world))
+            receiverLoops.append(x.Irecv(source=source, world=world))
+
+        return FdemSystem(frequencies, transmitterLoops, receiverLoops)
 
 
     @cached_property
