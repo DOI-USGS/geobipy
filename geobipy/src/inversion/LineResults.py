@@ -1,7 +1,3 @@
-""" @LineResults
-Class to handle the HDF5 result files for a line of data.
- """
-#from ..base import Error as Err
 import os
 import numpy as np
 import numpy.ma as ma
@@ -35,33 +31,40 @@ except:
 
 class LineResults(myObject):
     """ Class to define results from EMinv1D_MCMC for a line of data """
-    def __init__(self, fName=None, systemFilepath=None, hdfFile=None):
+    def __init__(self, hdf5_file_path=None, system_file_path=None, hdfFile=None, world=None):
         """ Initialize the lineResults """
-        if (fName is None): return
+        if (hdf5_file_path is None): return
 
-        assert not systemFilepath is None, Exception("Please also specify the path to the system file")
+        assert not system_file_path is None, Exception("Please also specify the path to the system file")
 
         self._burnedIn = None
         self._marginalProbability = None
         self.range = None
-        self.systemFilepath = systemFilepath
+        self.systemFilepath = system_file_path
         self._zPosterior = None
 
-        self.fName = fName
-        self.line = np.float64(os.path.splitext(split(fName)[1])[0])
+        self.fName = hdf5_file_path
+        self.line = np.float64(os.path.splitext(split(hdf5_file_path)[1])[0])
+
+        self._world = None
         self.hdfFile = None
-        if (hdfFile is None): # Open the file for serial read access
-            self.open()
+        if (hdfFile is None): # Open the file
+            self.open(world)
         else:
             self.hdfFile = hdfFile
 
 
-    def open(self):
+    def open(self, world=None):
         """ Check whether the file is open """
         try:
             self.hdfFile.attrs
         except:
-            self.hdfFile = h5py.File(self.fName, 'r+')
+
+            if world is None:
+                self.hdfFile = h5py.File(self.fName, 'r+')
+            else:
+                self._world = world
+                self.hdfFile = h5py.File(self.fName, 'r+', driver='mpio', comm=world)
 
 
     def close(self):
@@ -816,7 +819,7 @@ class LineResults(myObject):
         return self.getAttribute('Hit map', index = i)
 
 
-    def getResults(self, index=None, fiducial=None, reciprocateParameter=False):
+    def datapointResults(self, index=None, fiducial=None, reciprocateParameter=False):
         """ Obtain the results for the given iD number """
 
         assert not (index is None and fiducial is None), Exception("Please specify either an integer index or a fiducial.")
