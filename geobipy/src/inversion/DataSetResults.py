@@ -12,6 +12,7 @@ from cached_property import cached_property
 from ..classes.core.myObject import myObject
 from ..classes.core import StatArray
 from ..base import fileIO
+from ..base.MPI import loadBalance1D_shrinkingArrays
 
 from ..classes.statistics.Histogram1D import Histogram1D
 from ..classes.statistics.Hitmap2D import Hitmap2D
@@ -32,9 +33,7 @@ from os.path import join
 from scipy.spatial import Delaunay
 from scipy.interpolate import CloughTocher2DInterpolator
 from scipy.interpolate.interpnd import _ndim_coords_from_arrays
-#from ..base import fileIO as fIO
-#from os.path import split
-#from pyvtk import VtkData, UnstructuredGrid, CellData, Scalars
+
 
 from os import listdir
 import progressbar
@@ -42,7 +41,7 @@ import progressbar
 class DataSetResults(myObject):
     """ Class to define results from Inv_MCMC for a full data set """
 
-    def __init__(self, directory, systemFilepath, files = None):
+    def __init__(self, directory, system_file_path, files=None, world=None):
         """ Initialize the lineResults
         directory = directory containing folders for each line of data results
         """
@@ -59,9 +58,10 @@ class DataSetResults(myObject):
 
         self._lines = []
         self._lineNumbers = np.empty(self.nLines)
+        self._world = world
         for i in range(self.nLines):
             fName = self.h5files[i]
-            LR = LineResults(fName, systemFilepath=systemFilepath)
+            LR = LineResults(fName, system_file_path=system_file_path, world=world)
             self._lines.append(LR)
             self._lineNumbers[i] = LR.line
 
@@ -73,10 +73,19 @@ class DataSetResults(myObject):
         self._facies = None
 
 
-    def open(self):
+    @property
+    def world(self):
+        return self._world
+
+    @property
+    def parallel_access(self):
+        return not self.world is None
+
+
+    def open(self, world=None):
         """ Check whether the file is open """
         for line in self.lines:
-            line.open()
+            line.open(world=world)
 
 
     def close(self):
@@ -355,7 +364,7 @@ class DataSetResults(myObject):
     @cached_property
     def nPoints(self):
         """ Get the total number of data points """
-        tmp = np.asarray([this.nPoints for this in self.lines])
+        tmp = np.asarray([line.nPoints for line in self.lines])
         self._cumNpoints = np.cumsum(tmp)
         return np.sum(tmp)
 
@@ -427,7 +436,7 @@ class DataSetResults(myObject):
         return self.pointcloud.y
 
 
-    def dataPointResults(self, fiducial=None, index=None):
+    def datapointResults(self, fiducial=None, index=None):
         """Get the inversion results for the given fiducial.
 
         Parameters
@@ -451,7 +460,7 @@ class DataSetResults(myObject):
         lineIndex = index[0][0]
         fidIndex = index[1][0]
 
-        return self.lines[lineIndex].getResults(fidIndex)
+        return self.lines[lineIndex].datapointResults(fidIndex)
 
 
     def lineIndex(self, lineNumber=None, fiducial=None, index=None):
@@ -466,16 +475,26 @@ class DataSetResults(myObject):
         if not fiducial is None:
             return self.fiducialIndex(fiducial)[0]
 
-        if index > self.nPoints-1: raise IndexError('index {} is out of bounds for data point index with size {}'.format(index, self.nPoints))
-        return self._cumNpoints.searchsorted(index)
+        assert np.all(index <= self.nPoints-1), IndexError('index {} is out of bounds for data point index with size {}'.format(index, self.nPoints))
+
+        cumPoints = self._cumNpoints - 1
+
+        iLine = cumPoints.searchsorted(index)
+        i = np.where(iLine > 0)
+        index[i] -= self._cumNpoints[iLine[i]-1]
+
+        return iLine, index
 
 
     def fiducial(self, index):
         """ Get the fiducial of the given data point """
-        iLine = self.lineIndex(index=index)
-        if (iLine > 0):
-            index -= self.cumNpoints[iLine-1]
-        return self.lines[iLine].fiducials[index]
+        iLine, index = self.lineIndex(index=index)
+
+        out = np.empty(np.size(index))
+        for i in range(np.size(index)):
+            out[i] = self.lines[iLine[i]].fiducials[index[i]]
+
+        return out
 
 
     def fiducialIndex(self, fiducial):
@@ -510,6 +529,14 @@ class DataSetResults(myObject):
 
 
     def fit_mixture(self, intervals, **kwargs):
+
+        if self.parallel_access:
+            return self.fit_mixture_mpi(intervals, **kwargs)
+        else:
+            return self.fit_mixture_serial(intervals, **kwargs)
+
+
+    def fit_mixture_serial(self, intervals, **kwargs):
         """Uses Mixture modelling to fit disrtibutions to the hitmaps for the specified intervals.
 
         The non-mpi version fits a aggregated hitmap for the entire line.
@@ -558,7 +585,7 @@ class DataSetResults(myObject):
         return line, depths, means, variances
 
 
-    def fit_mixture_mpi(self, intervals, world, **kwargs):
+    def fit_mixture_mpi(self, intervals, **kwargs):
         """Uses Mixture modelling to fit disrtibutions to the hitmaps for the specified intervals.
 
         This mpi version fits all hitmaps individually throughout the data set.
@@ -576,39 +603,52 @@ class DataSetResults(myObject):
 
         """
 
-        print('here')
+        kwargs['k'] = kwargs.pop('k', [1, 5])
+        k = kwargs['k']
 
-        print(world.size)
+        maxClusters = (k[1] - k[0]) + 1
+        nIntervals = np.size(intervals) - 1
 
-        # distributions = []
-        # active = []
-        # for line in self.lines:
-        #     d, a = line.lineHitmap.fit_mixture(intervals, **kwargs)
-        #     distributions.append(d)
-        #     active.append(a)
+        for i in range(self.nLines):
 
-        # line = np.empty(0)
-        # depths = np.empty(0)
-        # means = np.empty(0)
-        # variances = np.empty(0)
-        # for i in range(0, self.nLines, 1):
-        #     dl = distributions[i]
-        #     al = active[i]
-        #     for j in range(len(dl)):
-        #         d = 0.5 * (intervals[j] + intervals[j+1])
-        #         means = np.squeeze(dl[j].means_[al[j]])
-        #         line = np.hstack([line, np.full(means.size, fill_value=self.lineNumbers[i])])
-        #         depths = np.hstack([depths, np.full(means.size, fill_value=d)])
-        #         means = np.hstack([means, means])
-        #         variances = np.hstack([variances, np.squeeze(dl[j].covariances_[al[j]])])
+            means = StatArray.StatArray([self.lines[i].nPoints, nIntervals, maxClusters], "fit means")
+            variances = StatArray.StatArray([self.lines[i].nPoints, nIntervals, maxClusters], "fit variances")
 
-        # line = StatArray.StatArray(line, 'Line Number')
-        # depths = StatArray.StatArray(depths, self.lines[0].mesh.z.name, self.lines[0].mesh.z.units)
-        # means = StatArray.StatArray(means, "Mean "+ self.lines[0].parameterName, self.lines[0].parameterUnits)
-        # variances = StatArray.StatArray(variances, "Variance", "("+self.lines[0].parameterUnits+")$^{2}$")
+            if 'fits' in self.lines[i].hdfFile:
+                del self.lines[i].hdfFile['fits']
+            if 'mixture_fits' in self.lines[i].hdfFile:
+                del self.lines[i].hdfFile['mixture_fits']
 
-        # return line, depths, means, variances
+            means.createHdf(self.lines[i].hdfFile, "/mixture_fits/means")
+            variances.createHdf(self.lines[i].hdfFile, "/mixture_fits/variances")
 
+        starts, chunks = loadBalance1D_shrinkingArrays(self.nPoints, self.world.size)
+
+        chunk = chunks[self.world.rank]
+        i0 = starts[self.world.rank]
+        i1 = i0 + chunk
+
+        iLine, index = self.lineIndex(index=np.arange(i0, i1))
+
+        if self.world.rank == 0:
+            Bar = progressbar.ProgressBar()
+            r  = Bar(range(chunk))
+        else:
+            r = range(chunk)
+
+        for i in r:
+            hm = self.lines[iLine[i]].get_hitmap(index[i])
+
+            d, a = hm.fit_mixture(intervals, **kwargs)
+
+            for j in range(nIntervals):
+                dm = np.squeeze(d[j].means_[a[j]])
+                dv = np.squeeze(d[j].covariances_[a[j]])
+
+                nD = np.size(dm)
+
+                self.lines[iLine[i]].hdfFile['/mixture_fits/means/data'][index[i], j, :nD] = dm
+                self.lines[iLine[i]].hdfFile['/mixture_fits/variances/data'][index[i], j, :nD] = dv
 
 
     def fitMajorPeaks(self, intervals, **kwargs):
@@ -682,72 +722,6 @@ class DataSetResults(myObject):
     def zGrid(self):
         """ Gets the discretization in depth """
         return self.lines[0].mesh.z
-
-
-    # def getAttribute(self,  mean=False, best=False, opacity=False, doi=False, relErr=False, addErr=False, percent=67.0, force=False):
-    #     """ Get a subsurface property """
-
-    #     assert (not all([not mean, not best, not opacity, not doi, not relErr, not addErr])), 'Please choose at least one attribute' + help(self.getAttrubute)
-
-    #     # Turn off attributes that are already loaded
-    #     if (mean):
-    #         mean=self.mean is None
-    #     if (best):
-    #         best=self.best is None
-    #     if (relErr):
-    #         relErr=self.relErr is None
-    #     # Getting the doi is cheap, so always ask for it even if opacity is requested
-    #     doi = opacity or doi
-    #     if (doi):
-    #         doi=self.doi is None
-
-    #     if (all([not mean, not best, not opacity, not doi, not relErr, not addErr])):
-    #         return
-
-    #     # Get the number of systems
-    #     if (relErr or addErr):
-    #         self.getNsys()
-
-    #     if (mean or best or doi):
-    #         # Get the number of cells
-    #         nz = self.zGrid.nCells
-
-
-    #     if (doi):
-    #         self.opacity=np.zeros([nz,self.nPoints], order = 'F')
-    #         self.doi = StatArray.StatArray(np.zeros(self.nPoints),'Depth of Investigation','m')
-    #     if (relErr):
-    #         self.lines[0].getRelativeError()
-    #         if (self.nSys > 1):
-    #             self.relErr = StatArray.StatArray([self.nPoints, self.nSys],name=self.lines[0].relErr.name,units=self.lines[0].relErr.units, order = 'F')
-    #         else:
-    #             self.relErr = StatArray.StatArray(self.nPoints,name=self.lines[0].relErr.name,units=self.lines[0].relErr.units, order = 'F')
-
-    #     # Loop over the lines in the data set and get the attributes
-    #     print('Reading attributes from dataset results')
-    #     Bar=progressbar.ProgressBar()
-    #     for i in Bar(range(self.nLines)):
-
-    #         # Perform line getters
-    #         if (mean):
-    #             self.mean = StatArray.StatArray([nz,self.nPoints], name=self.lines[0].meanParameters.name, units=self.lines[0].meanParameters.units, order = 'F')
-    #             self.mean[:, self.lineIndices[i]] = self.lines[i].meanParameters.T
-    #             self.lines[i].mean = None # Free memory
-    #         if (best):
-    #             self.best[:, self.lineIndices[i]] = self.lines[i].bestParameters.T
-    #             self.lines[i].best = None # Free memory
-    #         if (doi):
-    #             # Get the DOI for this line
-    #             self.lines[i].getDOI(percent)
-    #             self.opacity[:, self.lineIndices[i]] = self.lines[i].opacity.T
-    #             self.doi[self.lineIndices[i]] = self.lines[i].doi
-    #             self.lines[i].opacity = None # Free memory
-    #             self.lines[i].doi = None # Free memory
-    #         # Deallocate line attributes to save space
-    #         self.lines[i]._hitMap = None
-
-    #     if (xy):
-    #         self.points.getBounds() # Get the bounding box
 
 
     def getMean3D(self, dx, dy, mask = False, clip = False, force=False, method='ct'):
