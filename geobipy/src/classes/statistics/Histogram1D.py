@@ -216,7 +216,7 @@ class Histogram1D(RectilinearMesh1D):
         return y
 
 
-    def fit_mixture(self, mixture_type='gaussian', nSamples=100000, log=None, mean_bounds=None, variance_bounds=None, k=[1, 10], tolerance=0.05):
+    def fit_mixture(self, mixture_type='gaussian', nSamples=1e5, log=None, mean_bounds=None, variance_bounds=None, k=[1, 5], tolerance=0.05):
         """Uses Gaussian mixture models to fit the histogram.
 
         Starts at the minimum number of clusters and adds clusters until the BIC decreases less than the tolerance.
@@ -239,7 +239,7 @@ class Histogram1D(RectilinearMesh1D):
         """
 
         from sklearn.mixture import GaussianMixture
-        from smm import SMM
+        # from smm import SMM
 
         if mixture_type.lower() == 'gaussian':
             mod = GaussianMixture
@@ -258,7 +258,7 @@ class Histogram1D(RectilinearMesh1D):
         BIC0 = best.bic(X)
 
         k_ += 1
-        go = k_ < k[1]
+        go = k_ <= k[1]
 
         while go:
             model = mod(n_components=k_).fit(X)
@@ -279,7 +279,7 @@ class Histogram1D(RectilinearMesh1D):
                 go = False
 
             k_ += 1
-            go = go & (k_ < k[1])
+            go = go & (k_ <= k[1])
 
 
         active = np.ones(best.n_components, dtype=np.bool)

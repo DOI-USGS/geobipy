@@ -503,22 +503,15 @@ class Histogram2D(RectilinearMesh2D):
         if axis == 0:
             h = Histogram1D(bins = self.xBins)
 
-            Bar = progressbar.ProgressBar()
-            print('Fitting Peaks', flush=True)
-            for i in Bar(range(np.size(intervals) - 1)):
+            for i in range(np.size(intervals) - 1):
                 h._counts[:] = counts[i, :]
-                try:
-                    d, a = h.fit_mixture(**kwargs)
-                    distributions.append(d)
-                    active.append(a)
-                except:
-                    pass
+                d, a = h.fit_mixture(**kwargs)
+                distributions.append(d)
+                active.append(a)
 
         else:
             h = Histogram1D(bins = self.yBins)
-            Bar = progressbar.ProgressBar()
-            print('Fitting Peaks', flush=True)
-            for i in Bar(range(np.size(intervals) - 1)):
+            for i in range(np.size(intervals) - 1):
                 h._counts[:] = counts[:, i]
                 d, a = h.fit_mixture(**kwargs)
                 distributions.append(d)
@@ -546,7 +539,6 @@ class Histogram2D(RectilinearMesh2D):
             h = Histogram1D(bins = self.xBins)
 
             Bar = progressbar.ProgressBar()
-            print('Fitting Peaks', flush=True)
             for i in Bar(range(np.size(new_intervals) - 1)):
                 h._counts[:] = counts[i, :]
                 try:
@@ -559,7 +551,6 @@ class Histogram2D(RectilinearMesh2D):
         else:
             h = Histogram1D(bins = self.yBins)
             Bar = progressbar.ProgressBar()
-            print('Fitting Peaks', flush=True)
             for i in Bar(range(np.size(new_intervals) - 1)):
                 h._counts[:] = counts[:, i]
                 d, a = h.fitMajorPeaks(**kwargs)
