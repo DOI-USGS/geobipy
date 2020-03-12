@@ -31,7 +31,7 @@ except:
 
 class LineResults(myObject):
     """ Class to define results from EMinv1D_MCMC for a line of data """
-    def __init__(self, hdf5_file_path=None, system_file_path=None, hdfFile=None, world=None):
+    def __init__(self, hdf5_file_path=None, system_file_path=None, hdfFile=None, mode='r+', world=None):
         """ Initialize the lineResults """
         if (hdf5_file_path is None): return
 
@@ -49,22 +49,22 @@ class LineResults(myObject):
         self._world = None
         self.hdfFile = None
         if (hdfFile is None): # Open the file
-            self.open(world)
+            self.open(mode, world)
         else:
             self.hdfFile = hdfFile
 
 
-    def open(self, world=None):
+    def open(self, mode='r+', world=None):
         """ Check whether the file is open """
         try:
             self.hdfFile.attrs
         except:
 
             if world is None:
-                self.hdfFile = h5py.File(self.fName, 'r+')
+                self.hdfFile = h5py.File(self.fName, mode)
             else:
                 self._world = world
-                self.hdfFile = h5py.File(self.fName, 'r+', driver='mpio', comm=world)
+                self.hdfFile = h5py.File(self.fName, mode, driver='mpio', comm=world)
 
 
     def close(self):

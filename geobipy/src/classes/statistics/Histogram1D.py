@@ -313,6 +313,9 @@ class Histogram1D(RectilinearMesh1D):
         # First find the maximum width that finds a peak
         width = self.nBins + 1
 
+        iPeaks = np.argmax(yData)
+        nPeaks = 1
+
         go = True
         while go:
             width -= 1
@@ -323,6 +326,10 @@ class Histogram1D(RectilinearMesh1D):
                 iPeaks = iPeaks[keepPeaks]
             nPeaks = np.size(iPeaks)
             go = nPeaks == 0
+
+        if not maxDistributions is None:
+            if nPeaks > maxDistributions:
+                return [], []
 
         # Carry out the first fitting.
         guess = np.ones(nPeaks * 3)
