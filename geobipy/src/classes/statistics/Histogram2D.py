@@ -496,14 +496,24 @@ class Histogram2D(RectilinearMesh2D):
             Axis along which to find peaks.
 
         """
+
+        track = kwargs.pop('track', True)
+
         counts, intervals = super().intervalStatistic(self._counts, intervals, axis, 'sum')
 
         distributions = []
         active = []
+
+        if track:
+            bar = progressbar.ProgressBar()
+            r = bar(range(np.size(intervals) - 1))
+        else:
+            r = range(np.size(intervals) - 1)
+
         if axis == 0:
             h = Histogram1D(bins = self.xBins)
 
-            for i in range(np.size(intervals) - 1):
+            for i in r:
                 h._counts[:] = counts[i, :]
                 d, a = h.fit_mixture(**kwargs)
                 distributions.append(d)
@@ -511,7 +521,7 @@ class Histogram2D(RectilinearMesh2D):
 
         else:
             h = Histogram1D(bins = self.yBins)
-            for i in range(np.size(intervals) - 1):
+            for i in r:
                 h._counts[:] = counts[:, i]
                 d, a = h.fit_mixture(**kwargs)
                 distributions.append(d)
