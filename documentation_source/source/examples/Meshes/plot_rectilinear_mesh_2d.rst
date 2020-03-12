@@ -286,7 +286,7 @@ rm.toVTK('test', cellData=StatArray(np.random.randn(z.size, x.size), "Name"))
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.357 seconds)
+   **Total running time of the script:** ( 0 minutes  0.370 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_2d.py:

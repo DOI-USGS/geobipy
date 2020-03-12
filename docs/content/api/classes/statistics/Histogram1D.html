@@ -197,7 +197,7 @@
 Module describing an efficient histogram class</p>
 <dl class="class">
 <dt id="geobipy.src.classes.statistics.Histogram1D.Histogram1D">
-<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.statistics.Histogram1D.</code><code class="sig-name descname">Histogram1D</code><span class="sig-paren">(</span><em class="sig-param">bins=None</em>, <em class="sig-param">binCentres=None</em>, <em class="sig-param">log=None</em>, <em class="sig-param">relativeTo=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.statistics.Histogram1D.</code><code class="sig-name descname">Histogram1D</code><span class="sig-paren">(</span><em class="sig-param">bins=None</em>, <em class="sig-param">binCentres=None</em>, <em class="sig-param">log=None</em>, <em class="sig-param">relativeTo=0.0</em>, <em class="sig-param">values=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D" title="Permalink to this definition">¶</a></dt>
 <dd><p>1D Histogram class that updates efficiently.</p>
 <p>Fast updating relies on knowing the bins ahead of time.</p>
 <p>Histogram1D(values, bins, binCentres, log, relativeTo)</p>
@@ -272,8 +272,27 @@ myName: Name of the group</p>
 
 <dl class="method">
 <dt id="geobipy.src.classes.statistics.Histogram1D.Histogram1D.fitMajorPeaks">
-<code class="sig-name descname">fitMajorPeaks</code><span class="sig-paren">(</span><em class="sig-param">log=None</em>, <em class="sig-param">loc_bounds=None</em>, <em class="sig-param">constrain_loc=True</em>, <em class="sig-param">variance_upper_bound=None</em>, <em class="sig-param">maxDistributions=None</em>, <em class="sig-param">tolerance=0.05</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.fitMajorPeaks" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fitMajorPeaks</code><span class="sig-paren">(</span><em class="sig-param">log=None</em>, <em class="sig-param">mean_bounds=None</em>, <em class="sig-param">constrain_loc=True</em>, <em class="sig-param">variance_upper_bound=None</em>, <em class="sig-param">maxDistributions=None</em>, <em class="sig-param">tolerance=0.05</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.fitMajorPeaks" title="Permalink to this definition">¶</a></dt>
 <dd><p>Iteratively fits the histogram with an increasing number of distributions until the fit changes by less than a tolerance.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.statistics.Histogram1D.Histogram1D.fit_mixture">
+<code class="sig-name descname">fit_mixture</code><span class="sig-paren">(</span><em class="sig-param">mixture_type='gaussian', nSamples=100000.0, log=None, mean_bounds=None, variance_bounds=None, k=[1, 5], tolerance=0.05</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.fit_mixture" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses Gaussian mixture models to fit the histogram.</p>
+<p>Starts at the minimum number of clusters and adds clusters until the BIC decreases less than the tolerance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nSamples</strong> – </p></li>
+<li><p><strong>log</strong> – </p></li>
+<li><p><strong>mean_bounds</strong> – </p></li>
+<li><p><strong>variance_bounds</strong> – </p></li>
+<li><p><strong>k</strong> (<em>ints</em>) – Two ints with starting and ending # of clusters</p></li>
+<li><p><strong>tolerance</strong> – </p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">

@@ -517,7 +517,9 @@ For lists, the data type will be list</p></li>
 <dt id="geobipy.src.base.MPI.loadBalance1D_shrinkingArrays">
 <code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">loadBalance1D_shrinkingArrays</code><span class="sig-paren">(</span><em class="sig-param">N</em>, <em class="sig-param">nChunks</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.loadBalance1D_shrinkingArrays" title="Permalink to this definition">¶</a></dt>
 <dd><p>Splits the length of an array into a number of chunks. Load balances the chunks in a shrinking arrays fashion.</p>
-<p>Given a length N, split N up into nChunks and return the starting index and size of each chunk. After being split equally among the chunks, the remainder is split so that the first remainder chunks get +1 in size. e.g. N=10, nChunks=3 would return starts=[0,4,7] chunks=[4,3,3]</p>
+<p>Given a length N, split N up into nChunks and return the starting index and size of each chunk.
+After being split equally among the chunks, the remainder is split so that the first remainder
+chunks get +1 in size. e.g. N=10, nChunks=3 would return starts=[0,4,7] chunks=[4,3,3]</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

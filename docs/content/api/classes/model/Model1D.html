@@ -516,11 +516,12 @@ If None, The value of the split layer is duplicated.</p></li>
 
 <dl class="method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.localParameterVariance">
-<code class="sig-name descname">localParameterVariance</code><span class="sig-paren">(</span><em class="sig-param">dataPoint</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.localParameterVariance" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">localParameterVariance</code><span class="sig-paren">(</span><em class="sig-param">dataPoint=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.localParameterVariance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a localized inverse Hessian matrix using a dataPoint and the current realization of the Model1D.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>dataPoint</strong> (<em>geobipy.DataPoint</em>) – The data point to use when computing the local estimate of the variance.</p>
+<dd class="field-odd"><p><strong>dataPoint</strong> (<em>geobipy.DataPoint</em><em>, </em><em>optional</em>) – The data point to use when computing the local estimate of the variance.
+If None, only the prior derivative is used.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><strong>out</strong> – Inverse Hessian matrix</p>
@@ -716,7 +717,7 @@ such that a death, or no change is possible thus preventing any neverending cycl
 
 <dl class="method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.proposalProbabilities">
-<code class="sig-name descname">proposalProbabilities</code><span class="sig-paren">(</span><em class="sig-param">dataPoint</em>, <em class="sig-param">remappedModel</em>, <em class="sig-param">burnedIn</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.proposalProbabilities" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">proposalProbabilities</code><span class="sig-paren">(</span><em class="sig-param">remappedModel</em>, <em class="sig-param">dataPoint=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.proposalProbabilities" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the forward and reverse proposal probabilities for the model</p>
 <p>Returns the denominator and numerator for the model’s components of the proposal ratio.</p>
 <div class="math notranslate nohighlight" id="equation-proposal-numerator">
@@ -728,8 +729,8 @@ such that a death, or no change is possible thus preventing any neverending cycl
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>datapoint</strong> (<em>geobipy.DataPoint</em>) – The perturbed datapoint that was used to generate self.</p></li>
 <li><p><strong>remappedModel</strong> (<em>geobipy.Model1D</em>) – The current model, remapped onto the dimension of self.</p></li>
+<li><p><strong>datapoint</strong> (<em>geobipy.DataPoint</em>) – The perturbed datapoint that was used to generate self.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -842,12 +843,12 @@ should not be used in a parallel environment.</p>
 
 <dl class="method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.updateLocalParameterVariance">
-<code class="sig-name descname">updateLocalParameterVariance</code><span class="sig-paren">(</span><em class="sig-param">dataPoint</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.updateLocalParameterVariance" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">updateLocalParameterVariance</code><span class="sig-paren">(</span><em class="sig-param">dataPoint=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.updateLocalParameterVariance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a localized Hessian matrix using
 a dataPoint and the current realization of the Model1D.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>dataPoint</strong> (<em>geobipy.DataPoint</em>) – The data point to use when computing the local estimate of the variance.</p>
+<dd class="field-odd"><p><strong>dataPoint</strong> (<em>geobipy.DataPoint</em><em>, </em><em>optional</em>) – The data point to use when computing the local estimate of the variance.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><strong>out</strong> – Hessian matrix</p>
