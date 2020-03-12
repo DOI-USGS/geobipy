@@ -9,7 +9,7 @@ from time import time
 class world3D(object):
 
     def __init__(self, shape, world):
-        
+
         assert world.size >= 8, ValueError("Must have at least 8 chunks for 3D load balancing.")
 
         target = shape / np.linalg.norm(shape)
@@ -20,7 +20,7 @@ class world3D(object):
                 k = int(world.size/(i*j))
                 nBlocks = np.asarray([i, j, k])
                 total = np.prod(nBlocks)
-                
+
                 if total == world.size:
                     fraction = nBlocks / np.linalg.norm(nBlocks)
                     fit = np.linalg.norm(fraction - target)
@@ -40,7 +40,7 @@ class world3D(object):
 
         self.world = world
 
-    
+
     @property
     def xIndices(self):
         index = self.chunksIndex[2]
@@ -48,7 +48,7 @@ class world3D(object):
         i1 = i0 + self.xChunkSizes[index]
         return np.s_[i0:i1]
 
-    
+
     @property
     def yIndices(self):
         index = self.chunksIndex[1]
@@ -56,14 +56,14 @@ class world3D(object):
         i1 = i0 + self.yChunkSizes[index]
         return np.s_[i0:i1]
 
-    
+
     @property
     def zIndices(self):
         index = self.chunksIndex[0]
         i0 = self.zStarts[index]
         i1 = i0 + self.zChunkSizes[index]
         return np.s_[i0:i1]
-    
+
 
 def print(aStr='', end='\n'):
     """Prints the str to sys.stdout and flushes the buffer so that printing is immediate
@@ -128,8 +128,8 @@ def banner(world, aStr=None, end='\n', rank=0):
 def orderedPrint(world, this, title=None):
     """Prints numbers from each rank in order of rank
 
-    This routine will print an item from each rank in order of rank.  
-    This routine is SLOW due to lots of communication, but is useful for illustration purposes, or debugging. 
+    This routine will print an item from each rank in order of rank.
+    This routine is SLOW due to lots of communication, but is useful for illustration purposes, or debugging.
     Do not use this in production code!  The title is used in a banner
 
     Parameters
@@ -188,7 +188,9 @@ def getParallelPrng(world, timeFunction):
 def loadBalance1D_shrinkingArrays(N, nChunks):
     """Splits the length of an array into a number of chunks. Load balances the chunks in a shrinking arrays fashion.
 
-    Given a length N, split N up into nChunks and return the starting index and size of each chunk. After being split equally among the chunks, the remainder is split so that the first remainder chunks get +1 in size. e.g. N=10, nChunks=3 would return starts=[0,4,7] chunks=[4,3,3]
+    Given a length N, split N up into nChunks and return the starting index and size of each chunk.
+    After being split equally among the chunks, the remainder is split so that the first remainder
+    chunks get +1 in size. e.g. N=10, nChunks=3 would return starts=[0,4,7] chunks=[4,3,3]
 
     Parameters
     ----------
@@ -216,9 +218,9 @@ def loadBalance1D_shrinkingArrays(N, nChunks):
 
 
 def loadBalance3D_shrinkingArrays(shape, nChunks):
-    """Splits three dimensions among nChunks. 
-    
-    The number of chunks honours the relative difference in the values of shape. e.g. if shape is [600, 600, 300], then the number of chunks will be larger for the 
+    """Splits three dimensions among nChunks.
+
+    The number of chunks honours the relative difference in the values of shape. e.g. if shape is [600, 600, 300], then the number of chunks will be larger for the
     first two dimensions, and less for the third.
     Once the chunks are obtained, the start indices and chunk sizes for each dimension are returned.
 
@@ -237,7 +239,7 @@ def loadBalance3D_shrinkingArrays(shape, nChunks):
         The size of each chunk.
 
     """
-    
+
     # Find the "optimal" three product whose prod equals nChunks
     # and whose relative amounts match as closely to shape as possible.
 
@@ -251,7 +253,7 @@ def loadBalance3D_shrinkingArrays(shape, nChunks):
             k = int(nChunks/(i*j))
             nBlocks = np.asarray([i, j, k])
             total = np.prod(nBlocks)
-            
+
             if total == nChunks:
                 fraction = nBlocks / np.linalg.norm(nBlocks)
                 fit = np.linalg.norm(fraction - target)
@@ -270,15 +272,15 @@ def loadBalance3D_shrinkingArrays(shape, nChunks):
 
 
 def _isendDtype(value, dest, world):
-    """Gets the data type of an object and sends it. 
+    """Gets the data type of an object and sends it.
 
-    Must be used within an if statement. 
+    Must be used within an if statement.
     if (world.rank == source): _sendDtype()
     Must be accompanied by _irecvDtype on the dest rank.
 
     Parameters
     ----------
-    value : object 
+    value : object
         For numpy arrays and numpy scalars, a numpy data type will be sent.
         For arbitrary objects, the attached __class__.__name__ will be sent.
         For lists, the data type will be list
@@ -302,9 +304,9 @@ def _isendDtype(value, dest, world):
 
 
 def _irecvDtype(source, world):
-    """Receives a data type. 
+    """Receives a data type.
 
-    Must be used within an if statement. 
+    Must be used within an if statement.
     if (world.rank == dest): _recvDtype()
     Must be accompanied by _isendDtype on the source rank.
 
@@ -489,8 +491,8 @@ def IrecvFromLeft(world, wrap=True):
     """
     source = world.size - 1 if world.rank == 0 else world.rank - 1
     return Irecv(source=source, world=world)
-     
-    
+
+
 
 def Bcast(self, world, root=0, dtype=None, ndim=None, shape=None):
     """Broadcast a string or a numpy array
@@ -820,5 +822,5 @@ def Scatterv_numpy(self, starts, chunks, dtype, world, axis=0, root=0):
         this_unpk = np.empty(tmpChunks[world.rank], dtype=dtype)
         world.Scatterv([self_unpk, tmpChunks, tmpStarts, None], this_unpk, root=root)
         this = np.reshape(this_unpk, [chunks[world.rank], s])
-        
+
         return this.T if axis == 1 else this
