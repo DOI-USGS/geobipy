@@ -54,8 +54,6 @@ Here we use edges
 
 
 
-Access property describing the mesh
-
 
 .. code-block:: default
 
@@ -71,7 +69,7 @@ Access property describing the mesh
 
  .. code-block:: none
 
-    [ 0.5  2.   4.5 ... 24.5 32.  40.5]
+    [ 0.5  2.   4.5  8.  12.5 18.  24.5 32.  40.5]
 
 
 
@@ -91,7 +89,7 @@ Access property describing the mesh
 
  .. code-block:: none
 
-    [ 0.  1.  3. ... 28. 36. 45.]
+    [ 0.  1.  3.  6. 10. 15. 21. 28. 36. 45.]
 
 
 
@@ -111,7 +109,7 @@ Access property describing the mesh
 
  .. code-block:: none
 
-    [ 1.  3.  6. ... 21. 28. 36.]
+    [ 1.  3.  6. 10. 15. 21. 28. 36.]
 
 
 
@@ -125,6 +123,27 @@ Access property describing the mesh
 
 
 
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [1. 2. 3. 4. 5. 6. 7. 8. 9.]
+
+
+
+
+Get the cell indices
+
+
+.. code-block:: default
+
+    print(rm.cellIndex(np.r_[1.0, 5.0, 20.0]))
+
+
+
+
 
 .. rst-class:: sphx-glr-script-out
 
@@ -132,7 +151,7 @@ Access property describing the mesh
 
  .. code-block:: none
 
-    [1. 2. 3. ... 7. 8. 9.]
+    [1 2 5]
 
 
 
@@ -143,7 +162,7 @@ We can plot the grid of the mesh
 .. code-block:: default
 
     plt.figure()
-    _ = rm.plotGrid()
+    _ = rm.plotGrid(flipY=True)
 
 
 
@@ -167,7 +186,184 @@ Or Pcolor the mesh showing. An array of cell values is used as the colour.
 
 
 
+
+
 .. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_002.png
+    :class: sphx-glr-single-img
+
+
+
+
+
+Instantiate a new 1D rectilinear mesh by specifying cell centres or edges.
+Here we use edges
+
+
+.. code-block:: default
+
+    x = StatArray(np.logspace(-3, 3, 10), 'Depth', 'm')
+
+
+
+
+
+
+
+
+
+.. code-block:: default
+
+    rm = RectilinearMesh1D(cellEdges=x, log=10)
+
+
+
+
+
+
+
+
+
+Access property describing the mesh
+
+
+.. code-block:: default
+
+    print(rm.cellCentres)
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [-2.66666667e+00 -2.00000000e+00 -1.33333333e+00 -6.66666667e-01
+     -2.22044605e-16  6.66666667e-01  1.33333333e+00  2.00000000e+00
+      2.66666667e+00]
+
+
+
+
+
+.. code-block:: default
+
+    print(rm.cellEdges)
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [-3.         -2.33333333 -1.66666667 -1.         -0.33333333  0.33333333
+      1.          1.66666667  2.33333333  3.        ]
+
+
+
+
+
+.. code-block:: default
+
+    print(rm.internalCellEdges)
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [-2.33333333 -1.66666667 -1.         -0.33333333  0.33333333  1.
+      1.66666667  2.33333333]
+
+
+
+
+
+.. code-block:: default
+
+    print(rm.cellWidths)
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [0.66666667 0.66666667 0.66666667 0.66666667 0.66666667 0.66666667
+     0.66666667 0.66666667 0.66666667]
+
+
+
+
+Get the cell indices
+
+
+.. code-block:: default
+
+    print(rm.cellIndex(np.r_[0.03, 5.0, 200.0]))
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [1 5 7]
+
+
+
+
+We can plot the grid of the mesh
+
+
+.. code-block:: default
+
+    plt.figure()
+    _ = rm.plotGrid(flipY=True)
+
+
+
+
+
+.. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_003.png
+    :class: sphx-glr-single-img
+
+
+
+
+
+Or Pcolor the mesh showing. An array of cell values is used as the colour.
+
+
+.. code-block:: default
+
+    plt.figure()
+    arr = StatArray(np.random.randn(rm.nCells), "Name", "Units")
+    _ = rm.pcolor(arr, grid=True, flipY=True)
+
+
+
+
+.. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_004.png
     :class: sphx-glr-single-img
 
 
@@ -177,7 +373,7 @@ Or Pcolor the mesh showing. An array of cell values is used as the colour.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.169 seconds)
+   **Total running time of the script:** ( 0 minutes  0.474 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_1d.py:

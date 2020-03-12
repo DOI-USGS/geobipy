@@ -42,12 +42,6 @@ Once instantiated, see :ref:`Using a time domain datapoint`
     # dataFolder = "source//examples//supplementary//Data//"
 
 
-
-
-
-
-
-
 Instantiating a time domain datapoint
 +++++++++++++++++++++++++++++++++++++
 
@@ -78,12 +72,6 @@ Define some time gates
     ])
 
 
-
-
-
-
-
-
 Define some observed data values for each time gate.
 
 
@@ -106,12 +94,6 @@ Define some observed data values for each time gate.
     ])
 
 
-
-
-
-
-
-
 Create a Waveform
 
 The Waveform class defines a half waveform
@@ -132,23 +114,6 @@ The Waveform class defines a half waveform
     plt.legend()
 
 
-
-
-.. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_001.png
-    :class: sphx-glr-single-img
-
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-
-    <matplotlib.legend.Legend object at 0x1290982d0>
-
-
-
 Define the transmitter and reciever loops
 
 
@@ -158,24 +123,12 @@ Define the transmitter and reciever loops
     receiver = CircularLoop()
 
 
-
-
-
-
-
-
 Define two butterworth filters to be applied to the off-time data.
 
 
 .. code-block:: default
 
     filters = [butterworth(1, 4.5e5, btype='low'), butterworth(1, 3.e5, btype='low')]
-
-
-
-
-
-
 
 
 Create the time domain systems for both moments
@@ -200,12 +153,6 @@ Create the time domain systems for both moments
     systems = [lm_system, hm_system]
 
 
-
-
-
-
-
-
 Instantiate the time domain datapoint
 
 
@@ -217,33 +164,10 @@ Instantiate the time domain datapoint
 
 
 
-
-
-
-
-
-
 .. code-block:: default
 
     plt.figure()
     tdp.plot(with_error_bars=False)
-
-
-
-
-
-.. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_002.png
-    :class: sphx-glr-single-img
-
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-
-    <matplotlib.axes._subplots.AxesSubplot object at 0x129013590>
 
 
 
@@ -260,33 +184,10 @@ AarhusInv data format.
 
 
 
-
-
-
-
-
-
 .. code-block:: default
 
     plt.figure()
     tdp.plot()
-
-
-
-
-.. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_003.png
-    :class: sphx-glr-single-img
-
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-
-    <matplotlib.axes._subplots.AxesSubplot object at 0x1296d1110>
-
 
 
 Obtaining a datapoint from a dataset
@@ -306,12 +207,6 @@ For more information about the time domain data set, see :ref:`Time domain datas
     systemFile=[dataFolder + 'SkytemHM-SLV.stm', dataFolder + 'SkytemLM-SLV.stm']
 
 
-
-
-
-
-
-
 Initialize and read an EM data set
 
 
@@ -319,12 +214,6 @@ Initialize and read an EM data set
 
     D = TdemData()
     D.read(dataFile, systemFile)
-
-
-
-
-
-
 
 
 Get a datapoint from the dataset
@@ -335,23 +224,6 @@ Get a datapoint from the dataset
     tdp = D.datapoint(0)
     plt.figure()
     tdp.plot()
-
-
-
-
-.. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_004.png
-    :class: sphx-glr-single-img
-
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-
-    <matplotlib.axes._subplots.AxesSubplot object at 0x130565d10>
-
 
 
 Using a time domain datapoint
@@ -366,24 +238,12 @@ We can define a 1D layered earth model, and use it to predict some data
     mod = Model1D(depth=np.r_[75.0], parameters=par)
 
 
-
-
-
-
-
-
 Forward model the data
 
 
 .. code-block:: default
 
     tdp.forward(mod)
-
-
-
-
-
-
 
 
 
@@ -399,28 +259,10 @@ Forward model the data
 
 
 
-
-.. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_005.png
-    :class: sphx-glr-single-img
-
-
-
-
-
-
 .. code-block:: default
 
     plt.figure()
     tdp.plotDataResidual(xscale='log', log=10)
-
-
-
-
-.. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_006.png
-    :class: sphx-glr-single-img
-
-
-
 
 
 Compute the sensitivity matrix for a given model
@@ -431,15 +273,6 @@ Compute the sensitivity matrix for a given model
     J = tdp.sensitivity(mod)
     plt.figure()
     _ = np.abs(J).pcolor(equalize=True, log=10, flipY=True)
-
-
-
-
-.. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_007.png
-    :class: sphx-glr-single-img
-
-
-
 
 
 Attaching statistical descriptors to the datapoint
@@ -453,12 +286,6 @@ Define a multivariate log normal distribution as the prior on the predicted data
     tdp.predictedData.setPrior('MvLogNormal', tdp.data[tdp.active], tdp.std[tdp.active]**2.0)
 
 
-
-
-
-
-
-
 This allows us to evaluate the likelihood of the predicted data
 
 
@@ -467,21 +294,6 @@ This allows us to evaluate the likelihood of the predicted data
     print(tdp.likelihood(log=True))
     # Or the misfit
     print(tdp.dataMisfit())
-
-
-
-
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-    -19707.246512951275
-    201.7577916092427
-
-
 
 
 We can perform a quick search for the best fitting half space
@@ -496,43 +308,12 @@ We can perform a quick search for the best fitting half space
     _ = tdp.plotPredicted()
 
 
-
-
-.. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_008.png
-    :class: sphx-glr-single-img
-
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-    Best half space conductivity is [0.02009233] $S/m$
-
-
-
-
 Compute the misfit between observed and predicted data
 
 
 .. code-block:: default
 
     print(tdp.dataMisfit())
-
-
-
-
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-    452.4915367942427
-
-
 
 
 Plot the misfits for a range of half space conductivities
@@ -543,23 +324,6 @@ Plot the misfits for a range of half space conductivities
     plt.figure()
     _ = tdp.plotHalfSpaceResponses(-6.0, 4.0, 200)
     plt.title("Halfspace responses")
-
-
-
-
-.. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_009.png
-    :class: sphx-glr-single-img
-
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-
-    Text(0.5, 1.0, 'Halfspace responses')
-
 
 
 We can attach priors to the height of the datapoint,
@@ -580,12 +344,6 @@ the relative error multiplier, and the additive error noise floor
     tdp.setPriors(heightPrior, relativePrior, additivePrior)
 
 
-
-
-
-
-
-
 In order to perturb our solvable parameters, we need to attach proposal distributions
 
 
@@ -597,24 +355,12 @@ In order to perturb our solvable parameters, we need to attach proposal distribu
     tdp.setProposals(heightProposal, relativeProposal, additiveProposal)
 
 
-
-
-
-
-
-
 With priorss set we can auto generate the posteriors
 
 
 .. code-block:: default
 
     tdp.setPosteriors()
-
-
-
-
-
-
 
 
 Perturb the datapoint and record the perturbations
@@ -627,12 +373,6 @@ Perturb the datapoint and record the perturbations
         tdp.updatePosteriors()
 
 
-
-
-
-
-
-
 Plot the posterior distributions
 
 
@@ -643,28 +383,10 @@ Plot the posterior distributions
 
 
 
-
-.. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_010.png
-    :class: sphx-glr-single-img
-
-
-
-
-
-
 .. code-block:: default
 
     plt.figure()
     _ = tdp.relErr.plotPosteriors()
-
-
-
-
-.. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_011.png
-    :class: sphx-glr-single-img
-
-
-
 
 
 
@@ -674,24 +396,89 @@ Plot the posterior distributions
     _ = tdp.addErr.plotPosteriors()
 
 
+File Format for a time domain datapoint
++++++++++++++++++++++++++++++++++++++++
+Here we describe the file format for a time domain datapoint.
 
+For individual datapoints we are using the AarhusInv data format.
 
+Here we take the description for the AarhusInv TEM data file, modified to reflect what we can
+currently handle in GeoBIPy.
 
+Line 1 :: string
+  User-defined label describing the TEM datapoint.
+  This line must contain the following, separated by semicolons.
+  XUTM=
+  YUTM=
+  Elevation=
+  StationNumber=
+  LineNumber=
+  Current=
 
+Line 2 :: first integer, sourceType
+  7 = Rectangular loop source parallel to the x - y plane
+Line 2 :: second integer, polarization
+  3 = Vertical magnetic field
 
+Line 3 :: 6 floats, transmitter and receiver offsets relative to X/Y UTM location.
+  If sourceType = 7, Position of the center loop sounding.
 
+Line 4 :: Transmitter loop dimensions
+  If sourceType = 7, 2 floats.  Loop side length in the x and y directions
 
-.. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_012.png
-    :class: sphx-glr-single-img
+Line 5 :: Fixed
+  3 3 3
 
+Line 6 :: first integer, transmitter waveform type. Fixed
+  3 = User defined waveform.
 
+Line 6 :: second integer, number of transmitter waveforms. Fixed
+  1
 
+Line 7 :: transmitter waveform definition
+  A user-defined waveform with piecewise linear segments.
+  A full transmitter waveform definition consists of a number of linear segments
+  This line contains an integer as the first entry, which specifies the number of
+  segments, followed by each segment with 4 floats each. The 4 floats per segment
+  are the start and end times, and start and end amplitudes of the waveform. e.g.
+  3  -8.333e-03 -8.033e-03 0.0 1.0 -8.033e-03 0.0 1.0 1.0 0.0 5.4e-06 1.0 0.0
 
+Line 8 :: On time information. Not used but needs specifying.
+  1 1 1
+
+Line 9 :: On time low-pass filters.  Not used but need specifying.
+  0
+
+Line 10 :: On time high-pass filters. Not used but need specifying.
+  0
+
+Line 11 :: Front-gate time. Not used but need specifying.
+  0.0
+
+Line 12 :: first integer, Number of off time filters
+  Number of filters
+
+Line 12 :: second integer, Order of the butterworth filter
+  1 or 2
+
+Line 12 :: cutoff frequencies Hz, one per the number of filters
+  e.g. 4.5e5
+
+Line 13 :: Off time high pass filters.
+  See Line 12
+
+Lines after 13 contain 3 columns that pertain to
+Measurement Time, Data Value, Estimated Standard Deviation
+
+Example data files are contained in
+`the supplementary folder`_ in this repository
+
+.. _the supplementary folder: https://github.com/usgs/geobipy/tree/master/documentation_source/source/examples/supplementary/Data
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  8.762 seconds)
+   **Total running time of the script:** ( 0 minutes  0.000 seconds)
 
 
 .. _sphx_glr_download_examples_Datapoints_plot_time_datapoint.py:

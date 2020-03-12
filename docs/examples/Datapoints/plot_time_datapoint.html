@@ -263,11 +263,6 @@
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_time_datapoint_001.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_001.png" />
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend object at 0x127d7cd50&gt;
-</pre></div>
-</div>
 <p>Define the transmitter and reciever loops</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">transmitter</span> <span class="o">=</span> <span class="n">SquareLoop</span><span class="p">(</span><span class="n">sideLength</span><span class="o">=</span><span class="mf">40.0</span><span class="p">)</span>
 <span class="n">receiver</span> <span class="o">=</span> <span class="n">CircularLoop</span><span class="p">()</span>
@@ -305,11 +300,6 @@
 <span class="n">tdp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">with_error_bars</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_time_datapoint_002.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_002.png" />
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.axes._subplots.AxesSubplot object at 0x126be60d0&gt;
-</pre></div>
-</div>
 </div>
 <div class="section" id="reading-a-datapoint-from-a-file">
 <h2>Reading a datapoint from a file<a class="headerlink" href="#reading-a-datapoint-from-a-file" title="Permalink to this headline">¶</a></h2>
@@ -321,11 +311,6 @@ AarhusInv data format.</p>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">tdp</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
-</pre></div>
-</div>
-<img alt="../../_images/sphx_glr_plot_time_datapoint_003.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_003.png" />
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.axes._subplots.AxesSubplot object at 0x12a98e1d0&gt;
 </pre></div>
 </div>
 </div>
@@ -351,11 +336,6 @@ We can read in a dataset and pull datapoints from it.</p>
 <span class="n">tdp</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_time_datapoint_004.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_004.png" />
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.axes._subplots.AxesSubplot object at 0x12f95fe90&gt;
-</pre></div>
-</div>
 </div>
 <div class="section" id="using-a-time-domain-datapoint">
 <h2>Using a time domain datapoint<a class="headerlink" href="#using-a-time-domain-datapoint" title="Permalink to this headline">¶</a></h2>
@@ -377,19 +357,16 @@ We can read in a dataset and pull datapoints from it.</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_time_datapoint_005.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_005.png" />
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">tdp</span><span class="o">.</span><span class="n">plotDataResidual</span><span class="p">(</span><span class="n">xscale</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_time_datapoint_006.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_006.png" />
 <p>Compute the sensitivity matrix for a given model</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">J</span> <span class="o">=</span> <span class="n">tdp</span><span class="o">.</span><span class="n">sensitivity</span><span class="p">(</span><span class="n">mod</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">J</span><span class="p">)</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">equalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">flipY</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_time_datapoint_007.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_007.png" />
 </div>
 <div class="section" id="attaching-statistical-descriptors-to-the-datapoint">
 <h2>Attaching statistical descriptors to the datapoint<a class="headerlink" href="#attaching-statistical-descriptors-to-the-datapoint" title="Permalink to this headline">¶</a></h2>
@@ -403,11 +380,6 @@ We can read in a dataset and pull datapoints from it.</p>
 <span class="nb">print</span><span class="p">(</span><span class="n">tdp</span><span class="o">.</span><span class="n">dataMisfit</span><span class="p">())</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>-19707.246512951275
-201.7577916092427
-</pre></div>
-</div>
 <p>We can perform a quick search for the best fitting half space</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">halfspace</span> <span class="o">=</span> <span class="n">tdp</span><span class="o">.</span><span class="n">FindBestHalfSpace</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Best half space conductivity is </span><span class="si">{}</span><span class="s1"> $S/m$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">halfspace</span><span class="o">.</span><span class="n">par</span><span class="p">))</span>
@@ -416,28 +388,14 @@ We can read in a dataset and pull datapoints from it.</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">tdp</span><span class="o">.</span><span class="n">plotPredicted</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_time_datapoint_008.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_008.png" />
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Best half space conductivity is [0.02009233] $S/m$
-</pre></div>
-</div>
 <p>Compute the misfit between observed and predicted data</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">tdp</span><span class="o">.</span><span class="n">dataMisfit</span><span class="p">())</span>
-</pre></div>
-</div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>452.4915367942427
 </pre></div>
 </div>
 <p>Plot the misfits for a range of half space conductivities</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">tdp</span><span class="o">.</span><span class="n">plotHalfSpaceResponses</span><span class="p">(</span><span class="o">-</span><span class="mf">6.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Halfspace responses&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<img alt="../../_images/sphx_glr_plot_time_datapoint_009.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_009.png" />
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Text(0.5, 1.0, &#39;Halfspace responses&#39;)
 </pre></div>
 </div>
 <p>We can attach priors to the height of the datapoint,
@@ -475,17 +433,14 @@ the relative error multiplier, and the additive error noise floor</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">tdp</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">plotPosteriors</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_time_datapoint_010.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_010.png" />
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">tdp</span><span class="o">.</span><span class="n">relErr</span><span class="o">.</span><span class="n">plotPosteriors</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_time_datapoint_011.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_011.png" />
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">tdp</span><span class="o">.</span><span class="n">addErr</span><span class="o">.</span><span class="n">plotPosteriors</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_time_datapoint_012.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_012.png" />
 </div>
 <div class="section" id="file-format-for-a-time-domain-datapoint">
 <h2>File Format for a time domain datapoint<a class="headerlink" href="#file-format-for-a-time-domain-datapoint" title="Permalink to this headline">¶</a></h2>
@@ -545,7 +500,7 @@ are the start and end times, and start and end amplitudes of the waveform. e.g.
 Measurement Time, Data Value, Estimated Standard Deviation</p>
 <p>Example data files are contained in
 <a class="reference external" href="https://github.com/usgs/geobipy/tree/master/documentation_source/source/examples/supplementary/Data">the supplementary folder</a> in this repository</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  7.377 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.000 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-datapoints-plot-time-datapoint-py">
 <div class="sphx-glr-download docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/0e3aeb04e3a0e72a0de3fde32e818345/plot_time_datapoint.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_time_datapoint.py</span></code></a></p>

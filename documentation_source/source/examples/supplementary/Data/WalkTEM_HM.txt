@@ -1,4 +1,4 @@
-DataTypeString=DTTEM;XUTM=750620.94;YUTM=3812641.40;DataSet=1;Elevation=59.34;StationNumber=4;LineNumber=0;TemSegCount=6;TemSegNo=2;TxArea=1600;Current=1;AveRes=NAN
+DataTypeString=DTTEM;XUTM=750620.94;YUTM=3812641.40;DataSet=1;Elevation=59.34;StationNumber=4;LineNumber=0;TemSegCount=6;TemSegNo=2;TxArea=1600;Current=1.4;AveRes=NAN
 7 3
 0.00 0.00 0.00 0.00 0.00 0.00 
 40.00 40.00 

@@ -18,12 +18,6 @@ Frequency domain dataset
     import numpy as np
 
 
-
-
-
-
-
-
 Reading in the Data
 +++++++++++++++++++
 
@@ -37,12 +31,6 @@ Reading in the Data
     systemFile = dataFolder + 'FdemSystem2.stm'
 
 
-
-
-
-
-
-
 Read in a data set from file.
 
 
@@ -50,12 +38,6 @@ Read in a data set from file.
 
     FD1 = FdemData()
     FD1.read(dataFile, systemFile)
-
-
-
-
-
-
 
 
 Take a look at the channel names
@@ -67,31 +49,6 @@ Take a look at the channel names
         print(name)
 
 
-
-
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-    In-Phase 380.0 (Hz)
-    In-Phase 1776.0 (Hz)
-    In-Phase 3345.0 (Hz)
-    In-Phase 8171.0 (Hz)
-    In-Phase 41020.0 (Hz)
-    In-Phase 129550.0 (Hz)
-    Quadrature 380.0 (Hz)
-    Quadrature 1776.0 (Hz)
-    Quadrature 3345.0 (Hz)
-    Quadrature 8171.0 (Hz)
-    Quadrature 41020.0 (Hz)
-    Quadrature 129550.0 (Hz)
-
-
-
-
 Plot the locations of the data points
 
 
@@ -99,15 +56,6 @@ Plot the locations of the data points
 
     plt.figure(figsize=(8,6))
     _ = FD1.scatter2D();
-
-
-
-
-.. image:: /examples/Data/images/sphx_glr_plot_frequency_dataset_001.png
-    :class: sphx-glr-single-img
-
-
-
 
 
 Plot all the data along the specified line
@@ -119,15 +67,6 @@ Plot all the data along the specified line
     _ = FD1.plotLine(30010.0, log=10);
 
 
-
-
-.. image:: /examples/Data/images/sphx_glr_plot_frequency_dataset_002.png
-    :class: sphx-glr-single-img
-
-
-
-
-
 Or, plot specific channels in the data
 
 
@@ -137,15 +76,6 @@ Or, plot specific channels in the data
     _ = FD1.plot(channels=[0,11,8], log=10, linewidth=0.5);
 
 
-
-
-.. image:: /examples/Data/images/sphx_glr_plot_frequency_dataset_003.png
-    :class: sphx-glr-single-img
-
-
-
-
-
 Read in a second data set
 
 
@@ -153,20 +83,6 @@ Read in a second data set
 
     FD2 = FdemData()
     FD2.read(dataFilename=dataFolder + 'Resolve1.txt', systemFilename=dataFolder + 'FdemSystem1.stm')
-
-
-
-
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-    Warning: Your data contains values that are <= 0.0
-
-
 
 
 We can create maps of the elevations in two separate figures
@@ -180,46 +96,12 @@ We can create maps of the elevations in two separate figures
 
 
 
-
-.. image:: /examples/Data/images/sphx_glr_plot_frequency_dataset_004.png
-    :class: sphx-glr-single-img
-
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-
-    (584519.0671621622, 590166.7428378379, 4639079.207593819, 4661808.632406181)
-
-
-
-
 .. code-block:: default
 
 
     plt.figure(figsize=(8,6))
     _ = FD2.mapPlot(dx=50.0, dy=50.0, mask = 200.0)
     plt.axis('equal');
-
-
-
-
-.. image:: /examples/Data/images/sphx_glr_plot_frequency_dataset_005.png
-    :class: sphx-glr-single-img
-
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-
-    (662847.3094082569, 668366.7995917432, 4560053.628459876, 4600646.676540123)
-
 
 
 Or, we can plot both data sets in one figure to see their positions relative
@@ -237,15 +119,6 @@ one of the channels as the colour.
     _ = FD2.scatter2D(s=1.0, c=FD2.dataChannel(0), cmap='jet');
 
 
-
-
-.. image:: /examples/Data/images/sphx_glr_plot_frequency_dataset_006.png
-    :class: sphx-glr-single-img
-
-
-
-
-
 Or, interpolate the values to create a gridded "map". mapChannel will
 interpolate the specified channel number.
 
@@ -258,23 +131,6 @@ interpolate the specified channel number.
     plt.axis('equal');
 
 
-
-
-.. image:: /examples/Data/images/sphx_glr_plot_frequency_dataset_007.png
-    :class: sphx-glr-single-img
-
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-
-    (584518.405, 590167.405, 4639078.6625, 4661809.1775)
-
-
-
 Export the data to VTK
 
 
@@ -283,12 +139,6 @@ Export the data to VTK
 
     # FD1.toVTK('FD_one')
     # FD2.toVTK('FD_two')
-
-
-
-
-
-
 
 
 Obtain a line from the data set
@@ -303,30 +153,9 @@ Take a look at the line numbers in the dataset
 
 
 
-
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-    [30010. 30020. 30030. 30040. 30050. 30060. 30070. 30080. 30090. 30100.
-     39010. 39020.]
-
-
-
-
-
 .. code-block:: default
 
     L = FD1.line(30010.0)
-
-
-
-
-
-
 
 
 A summary will now show the properties of the line.
@@ -338,74 +167,6 @@ A summary will now show the properties of the line.
     L.summary()
 
 
-
-
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-    3D Point Cloud: 
-    Number of Points: : 6710 
-     Name: Easting
-         Units: m
-         Shape: (6710,)
-         Values: [586852.29 586852.23 586852.17 ... 586123.57 586123.2  586122.82]
-     Name: Northing
-         Units: m
-         Shape: (6710,)
-         Values: [4639119.38 4639122.68 4639125.98 ... 4661765.26 4661768.84 4661772.42]
-     Name: Height
-         Units: m
-         Shape: (6710,)
-         Values: [36.629 37.012 37.349 ... 28.313 28.218 28.115]
-     Name: Elevation
-         Units: m
-         Shape: (6710,)
-         Values: [1246.84 1246.71 1246.61 ... 1337.94 1337.96 1338.02]
-    Data:          : 
-    # of Channels: 12 
-    # of Total Data: 80520 
-    Name: Fdem Data
-         Units: ppm
-         Shape: (6710, 12)
-         Values: [[145.3 435.8 260.6 ... 516.5 405.7 255.7]
-     [145.7 436.5 257.9 ... 513.6 403.2 252. ]
-     [146.4 437.4 255.8 ... 511.2 400.9 248.8]
-     ...
-     [ 70.7 314.1 220.2 ... 743.3 960.8 910.7]
-     [ 71.3 315.3 220.5 ... 745.9 968.3 919.1]
-     [ 72.1 316.6 220.7 ... 749.2 976.5 928.3]]
-
-     Name: Standard Deviation
-         Units: ppm
-         Shape: (6710, 12)
-         Values: [[14.53 43.58 26.06 ... 51.65 40.57 25.57]
-     [14.57 43.65 25.79 ... 51.36 40.32 25.2 ]
-     [14.64 43.74 25.58 ... 51.12 40.09 24.88]
-     ...
-     [ 7.07 31.41 22.02 ... 74.33 96.08 91.07]
-     [ 7.13 31.53 22.05 ... 74.59 96.83 91.91]
-     [ 7.21 31.66 22.07 ... 74.92 97.65 92.83]]
-
-     Name: Predicted Data
-         Units: ppm
-         Shape: (6710, 12)
-         Values: [[0. 0. 0. ... 0. 0. 0.]
-     [0. 0. 0. ... 0. 0. 0.]
-     [0. 0. 0. ... 0. 0. 0.]
-     ...
-     [0. 0. 0. ... 0. 0. 0.]
-     [0. 0. 0. ... 0. 0. 0.]
-     [0. 0. 0. ... 0. 0. 0.]]
-
-
-
-
-
-
 And we can scatter2D the points in the line.
 
 
@@ -414,15 +175,6 @@ And we can scatter2D the points in the line.
 
     plt.figure(figsize=(8,6))
     _ = L.scatter2D();
-
-
-
-
-.. image:: /examples/Data/images/sphx_glr_plot_frequency_dataset_008.png
-    :class: sphx-glr-single-img
-
-
-
 
 
 We can specify the axis along which to plot.
@@ -436,15 +188,6 @@ xAxis can be index, x, y, z, r2d, r3d
 
 
 
-
-
-.. image:: /examples/Data/images/sphx_glr_plot_frequency_dataset_009.png
-    :class: sphx-glr-single-img
-
-
-
-
-
 Obtain a single datapoint from the data set
 +++++++++++++++++++++++++++++++++++++++++++
 
@@ -455,12 +198,6 @@ about how to use a datapoint once it is instantiated.
 .. code-block:: default
 
     dp = FD1.datapoint(0)
-
-
-
-
-
-
 
 
 File Format for frequency domain data
@@ -534,7 +271,7 @@ See the Resolve.stm files.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  15.869 seconds)
+   **Total running time of the script:** ( 0 minutes  0.000 seconds)
 
 
 .. _sphx_glr_download_examples_Data_plot_frequency_dataset.py:

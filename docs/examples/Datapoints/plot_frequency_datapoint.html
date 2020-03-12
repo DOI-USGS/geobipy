@@ -239,7 +239,6 @@ deviations of those observed data.</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">fdp</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_frequency_datapoint_001.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_datapoint_001.png" />
 </div>
 <div class="section" id="obtaining-a-datapoint-from-a-dataset">
 <h2>Obtaining a datapoint from a dataset<a class="headerlink" href="#obtaining-a-datapoint-from-a-dataset" title="Permalink to this headline">¶</a></h2>
@@ -265,7 +264,6 @@ We can read in a dataset and pull datapoints from it.</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">fdp</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_frequency_datapoint_002.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_datapoint_002.png" />
 </div>
 <div class="section" id="using-a-datapoint">
 <h2>Using a datapoint<a class="headerlink" href="#using-a-datapoint" title="Permalink to this headline">¶</a></h2>
@@ -288,14 +286,12 @@ We can read in a dataset and pull datapoints from it.</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_frequency_datapoint_003.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_datapoint_003.png" />
 <p>Compute the sensitivity matrix for a given model</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">J</span> <span class="o">=</span> <span class="n">fdp</span><span class="o">.</span><span class="n">sensitivity</span><span class="p">(</span><span class="n">mod</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">J</span><span class="p">)</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">equalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">flipY</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_frequency_datapoint_004.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_datapoint_004.png" />
 </div>
 <div class="section" id="attaching-statistical-descriptors-to-the-datapoint">
 <h2>Attaching statistical descriptors to the datapoint<a class="headerlink" href="#attaching-statistical-descriptors-to-the-datapoint" title="Permalink to this headline">¶</a></h2>
@@ -309,11 +305,6 @@ We can read in a dataset and pull datapoints from it.</p>
 <span class="nb">print</span><span class="p">(</span><span class="n">fdp</span><span class="o">.</span><span class="n">dataMisfit</span><span class="p">())</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>-316.19118049547296
-22.819882232476
-</pre></div>
-</div>
 <p>We can perform a quick search for the best fitting half space</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">halfspace</span> <span class="o">=</span> <span class="n">fdp</span><span class="o">.</span><span class="n">FindBestHalfSpace</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Best half space conductivity is </span><span class="si">{}</span><span class="s1"> $S/m$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">halfspace</span><span class="o">.</span><span class="n">par</span><span class="p">))</span>
@@ -322,28 +313,14 @@ We can read in a dataset and pull datapoints from it.</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">fdp</span><span class="o">.</span><span class="n">plotPredicted</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_frequency_datapoint_005.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_datapoint_005.png" />
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Best half space conductivity is [0.00982172] $S/m$
-</pre></div>
-</div>
 <p>Compute the misfit between observed and predicted data</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">fdp</span><span class="o">.</span><span class="n">dataMisfit</span><span class="p">())</span>
-</pre></div>
-</div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>26.18321050483556
 </pre></div>
 </div>
 <p>Plot the misfits for a range of half space conductivities</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">fdp</span><span class="o">.</span><span class="n">plotHalfSpaceResponses</span><span class="p">(</span><span class="o">-</span><span class="mf">6.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Halfspace responses&quot;</span><span class="p">);</span>
-</pre></div>
-</div>
-<img alt="../../_images/sphx_glr_plot_frequency_datapoint_006.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_datapoint_006.png" />
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Text(0.5, 1.0, &#39;Halfspace responses&#39;)
 </pre></div>
 </div>
 <p>We can attach priors to the height of the datapoint,
@@ -381,18 +358,15 @@ the relative error multiplier, and the additive error noise floor</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">fdp</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">plotPosteriors</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_frequency_datapoint_007.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_datapoint_007.png" />
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">fdp</span><span class="o">.</span><span class="n">relErr</span><span class="o">.</span><span class="n">plotPosteriors</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_frequency_datapoint_008.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_datapoint_008.png" />
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">fdp</span><span class="o">.</span><span class="n">addErr</span><span class="o">.</span><span class="n">plotPosteriors</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_frequency_datapoint_009.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_datapoint_009.png" />
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  9.760 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.000 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-datapoints-plot-frequency-datapoint-py">
 <div class="sphx-glr-download docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/247a416d19dc2e10bf9efc1d5dad114c/plot_frequency_datapoint.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_frequency_datapoint.py</span></code></a></p>

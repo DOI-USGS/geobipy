@@ -219,27 +219,6 @@ Plotting is in log space.</p></li>
 </dd>
 </dl>
 <dl class="method">
-<dt id="geobipy.src.classes.statistics.Histogram1D.Histogram1D.cellIndex">
-<code class="sig-name descname">cellIndex</code><span class="sig-paren">(</span><em class="sig-param">values</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.cellIndex" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the index to the cell that each value in values falls in.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>values</strong> (<em>array_like</em>) – The values to find the cell indices for</p></li>
-<li><p><strong>clip</strong> (<em>bool</em>) – A negative index which would normally wrap will clip to 0 and self.bins.size instead.</p></li>
-<li><p><strong>trim</strong> (<em>bool</em>) – Do not include out of axis indices. Negates clip, since they wont be included in the output.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>out</strong> – The cell indices</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>array_like</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
 <dt id="geobipy.src.classes.statistics.Histogram1D.Histogram1D.combine">
 <code class="sig-name descname">combine</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.combine" title="Permalink to this definition">¶</a></dt>
 <dd><p>Combine two histograms together.</p>

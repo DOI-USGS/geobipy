@@ -235,20 +235,10 @@ perturbed = mod.perturbStructure()</p>
 <span class="n">perturbed</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_model_1d_001.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_model_1d_001.png" />
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.axes._subplots.AxesSubplot object at 0x1292c3b50&gt;
-</pre></div>
-</div>
 <p>We can evaluate the prior of the model using depths only</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Log probability of the Model given its priors: &#39;</span><span class="p">,</span> <span class="n">mod</span><span class="o">.</span><span class="n">priorProbability</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 <span class="c1"># Or with priors on its parameters, and parameter gradient with depth.</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Log probability of the Model given its priors: &#39;</span><span class="p">,</span> <span class="n">mod</span><span class="o">.</span><span class="n">priorProbability</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-</pre></div>
-</div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Log probability of the Model given its priors:  -11.358381323561012
-Log probability of the Model given its priors:  -20.111609194656108
 </pre></div>
 </div>
 </div>
@@ -292,12 +282,7 @@ The proposal for the parameter values is fixed and centred around a single value
 <span class="n">mod</span><span class="o">.</span><span class="n">depth</span><span class="o">.</span><span class="n">posterior</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">rotate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flipY</span><span class="o">=</span><span class="kc">True</span><span class="p">);</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_model_1d_002.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_model_1d_002.png" />
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.axes._subplots.AxesSubplot object at 0x12882c0d0&gt;
-</pre></div>
-</div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  1.733 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.000 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-models-plot-model-1d-py">
 <div class="sphx-glr-download docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/f48e5c05cfcaf1411cc06bb7a0ed1eb0/plot_model_1d.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_model_1d.py</span></code></a></p>

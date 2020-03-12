@@ -180,7 +180,7 @@ Compute the mean over an interval for the mesh.
  .. code-block:: none
 
 
-    (array([[ 1.,  2.,  3., ...,  8.,  9., 10.]]), [6.8, 12.4])
+    (array([[ 1.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9., 10.]]), [6.8, 12.4])
 
 
 
@@ -203,9 +203,9 @@ Compute the mean over multiple intervals for the mesh.
  .. code-block:: none
 
 
-    (array([[ 1.,  2.,  3., ...,  8.,  9., 10.],
-           [ 1.,  2.,  3., ...,  8.,  9., 10.],
-           [ 1.,  2.,  3., ...,  8.,  9., 10.]]), [6.8, 12.4, 20.0, 40.0])
+    (array([[ 1.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9., 10.],
+           [ 1.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9., 10.],
+           [ 1.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9., 10.]]), [6.8, 12.4, 20.0, 40.0])
 
 
 
@@ -231,7 +231,15 @@ We can specify either axis
     (array([[4.5],
            [4.5],
            [4.5],
-           ...,
+           [4.5],
+           [4.5],
+           [4.5],
+           [4.5],
+           [4.5],
+           [4.5],
+           [4.5],
+           [4.5],
+           [4.5],
            [4.5],
            [4.5],
            [4.5]]), [2.8, 4.2])
@@ -258,7 +266,15 @@ We can specify either axis
     (array([[4.5, 6. , 8. ],
            [4.5, 6. , 8. ],
            [4.5, 6. , 8. ],
-           ...,
+           [4.5, 6. , 8. ],
+           [4.5, 6. , 8. ],
+           [4.5, 6. , 8. ],
+           [4.5, 6. , 8. ],
+           [4.5, 6. , 8. ],
+           [4.5, 6. , 8. ],
+           [4.5, 6. , 8. ],
+           [4.5, 6. , 8. ],
+           [4.5, 6. , 8. ],
            [4.5, 6. , 8. ],
            [4.5, 6. , 8. ],
            [4.5, 6. , 8. ]]), [2.8, 4.2, 5.1, 8.4])
@@ -270,7 +286,7 @@ rm.toVTK('test', cellData=StatArray(np.random.randn(z.size, x.size), "Name"))
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.325 seconds)
+   **Total running time of the script:** ( 0 minutes  0.357 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_2d.py:
