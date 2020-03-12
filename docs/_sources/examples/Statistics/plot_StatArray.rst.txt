@@ -26,6 +26,12 @@ The direct extension to numpy maintains speed and functionality of numpy arrays.
 
 
 
+
+
+
+
+
+
 Instantiating a new StatArray class
 +++++++++++++++++++++++++++++++++++
 
@@ -38,6 +44,24 @@ The name and units of the variable can be assigned to the StatArray.
 
     Density = StatArray(np.random.randn(1), name="Density", units="$\frac{g}{cc}$")
     Density.summary()
+
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Name: Density
+         Units: $\frac{g}{cc}$
+         Shape: (1,)
+         Values: [-1.33998888]
+
+
 
 
 
@@ -72,6 +96,12 @@ Two types of distributions can be attached to the StatArray.
     Density.setPrior('Uniform', -2.0, 2.0, prng=prng)
 
 
+
+
+
+
+
+
 We can also attach a proposal distribution
 
 
@@ -81,6 +111,34 @@ We can also attach a proposal distribution
     Density.summary()
     print("Class type of the prior: ",type(Density.prior))
     print("Class type of the proposal: ",type(Density.proposal))
+
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Name: Density
+         Units: $\frac{g}{cc}$
+         Shape: (1,)
+         Values: [-1.33998888]
+    Prior: 
+         Uniform Distribution: 
+      Min: :-2.0
+      Max: :2.0
+    Proposal: 
+    Normal Distribution: 
+        Mean: :0.0
+    Variance: :1.0
+
+    Class type of the prior:  <class 'geobipy.src.classes.statistics.UniformDistribution.Uniform'>
+    Class type of the proposal:  <class 'geobipy.src.classes.statistics.NormalDistribution.Normal'>
+
 
 
 
@@ -94,12 +152,40 @@ Therefore each element is evaluated to get 3 probabilities, one for each element
     print(Density.probability(log=False))
 
 
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    0.25
+
+
+
+
 The univariate proposal distribution can generate random samples from itself.
 
 
 .. code-block:: default
 
     print(Density.propose())
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    -1.4678009163054377
+
+
 
 
 From a sampling stand point we can either sample using only the proposal
@@ -111,6 +197,20 @@ Or we can only generate samples that simultaneously satisfy the prior.
     print(Density.propose(relative=True))
 
 
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [-2.21061136]
+
+
+
+
 We can perturb the variable by drawing from the attached proposal distribution.
 
 
@@ -119,6 +219,32 @@ We can perturb the variable by drawing from the attached proposal distribution.
 
     Density.perturb()
     Density.summary()
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Name: Density
+         Units: $\frac{g}{cc}$
+         Shape: (1,)
+         Values: [0.51560658]
+    Prior: 
+         Uniform Distribution: 
+      Min: :-2.0
+      Max: :2.0
+    Proposal: 
+    Normal Distribution: 
+        Mean: :0.0
+    Variance: :1.0
+
+
+
 
 
 Attaching a Histogram to capture the posterior distribution
@@ -134,12 +260,24 @@ As an example, lets create a Histogram class with bins generated from the prior.
     post = Histogram1D(bins=bins)
 
 
+
+
+
+
+
+
 Attach the histogram
 
 
 .. code-block:: default
 
     Density.setPosterior(post)
+
+
+
+
+
+
 
 
 In an iterative sense, we can propose and evaluate new values, and update the posterior
@@ -156,10 +294,25 @@ In an iterative sense, we can propose and evaluate new values, and update the po
 
 
 
+
+
+
+
+
+
 .. code-block:: default
 
     plt.figure()
     Density.summaryPlot()
+
+
+
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_001.png
+    :class: sphx-glr-single-img
+
+
+
 
 
 Attach a multivariate normal distribution as the prior and proposal
@@ -177,6 +330,12 @@ Attach the multivariate prior
 
 
 
+
+
+
+
+
+
 Since the prior is multivariate, the appropriate equations are used to
 evaluate the probability for all elements in the StatArray.
 This produces a single probability.
@@ -186,6 +345,20 @@ This produces a single probability.
 
 
     print(Density.probability(log=False))
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    0.37986736760586076
+
+
 
 
 Attach the multivariate proposal
@@ -200,6 +373,12 @@ Attach the multivariate proposal
 
 
 
+
+
+
+
+
+
 Perturb the variables using the multivariate proposal.
 
 
@@ -208,6 +387,50 @@ Perturb the variables using the multivariate proposal.
 
     Density.perturb()
     Density.summary()
+
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Name: Density
+         Units: $\frac{g}{cc}$
+         Shape: (1,)
+         Values: [1.84988304]
+    Prior: 
+         MV Normal Distribution: 
+        Mean: [0.19428018]
+        Variance: [[1.]]
+    Proposal: 
+    MV Normal Distribution: 
+        Mean: [1.60757496]
+        Variance: [[1.]]
+    Posterior: 
+    <class 'geobipy.src.classes.statistics.Histogram1D.Histogram1D'>
+    Bins: 
+    Cell Centres 
+    Name: 
+         Units: 
+         Shape: (100,)
+         Values: [-1.98 -1.94 -1.9  ...  1.9   1.94  1.98]
+    Cell EdgesName: 
+         Units: 
+         Shape: (101,)
+         Values: [-2.   -1.96 -1.92 ...  1.92  1.96  2.  ]
+    Counts:
+    Name: Frequency
+         Units: 
+         Shape: (100,)
+         Values: [2 3 2 ... 3 2 3]
+    Values are logged to base None
+    Relative to: [0.]
+
 
 
 
@@ -232,11 +455,39 @@ __________
 
 
 
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [ -0.  -1.  -3. ... -28. -36. -45.]
+
+
+
+
+
 .. code-block:: default
 
 
 
     print(x.insert(i=[0, 9], values=[999.0, 999.0]))
+
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [999.  -0.  -1. ... -36. 999. -45.]
+
 
 
 
@@ -250,11 +501,39 @@ __________
 
 
 
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [999.  -0.  -1. ... -28. -36. -45.]
+
+
+
+
+
 .. code-block:: default
 
 
 
     print(x.prepend([998.0, 999.0]))
+
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [998. 999.  -0. ... -28. -36. -45.]
+
 
 
 
@@ -268,11 +547,39 @@ __________
 
 
 
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [ -0.  -1.  -3. ... -45. 998. 999.]
+
+
+
+
+
 .. code-block:: default
 
 
 
     print(x.resize(14))
+
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [-0. -1. -3. ... -1. -3. -6.]
+
 
 
 
@@ -286,11 +593,39 @@ __________
 
 
 
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [ -0.  -1.  -3. ... -21. -28. -45.]
+
+
+
+
+
 .. code-block:: default
 
 
 
     print(x.edges())
+
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [  0.5  -0.5  -2.  ... -32.  -40.5 -49.5]
+
 
 
 
@@ -304,11 +639,39 @@ __________
 
 
 
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [ -0.5  -2.   -4.5 ... -24.5 -32.  -40.5]
+
+
+
+
+
 .. code-block:: default
 
 
 
     print(x.firstNonZero())
+
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    1
+
 
 
 
@@ -322,11 +685,39 @@ __________
 
 
 
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    10
+
+
+
+
+
 .. code-block:: default
 
 
 
     print(x.abs())
+
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [ 0.  1.  3. ... 28. 36. 45.]
+
 
 
 
@@ -343,11 +734,44 @@ __________
 
 
 
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [[ 0 -2  3]
+     [ 3  0 -1]
+     [ 1  2  0]]
+
+
+
+
+
 .. code-block:: default
 
 
 
     print(x.insert(i=0, values=4))
+
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [[ 4  4  4]
+     [ 0 -2  3]
+     [ 3  0 -1]
+     [ 1  2  0]]
+
 
 
 
@@ -361,11 +785,43 @@ __________
 
 
 
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [[ 0 -2  5  3  5]
+     [ 3  0  5 -1  5]
+     [ 1  2  5  0  5]]
+
+
+
+
+
 .. code-block:: default
 
 
 
     print(x.insert(i=2, values=[10, 11, 12], axis=1))
+
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [[ 0 -2 10  3]
+     [ 3  0 11 -1]
+     [ 1  2 12  0]]
+
 
 
 
@@ -379,11 +835,44 @@ __________
 
 
 
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [[999 999 999]
+     [  0  -2   3]
+     [  3   0  -1]
+     [  1   2   0]]
+
+
+
+
+
 .. code-block:: default
 
 
 
     print(x.prepend([999, 998, 997], axis=1))
+
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [[999   0  -2   3]
+     [998   3   0  -1]
+     [997   1   2   0]]
+
 
 
 
@@ -397,11 +886,46 @@ __________
 
 
 
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [[  0  -2   3]
+     [  3   0  -1]
+     [  1   2   0]
+     [999 998 997]]
+
+
+
+
+
 .. code-block:: default
 
 
 
     print(x.resize([5,5]))
+
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [[ 0 -2  3  3  0]
+     [-1  1  2  0  0]
+     [-2  3  3  0 -1]
+     [ 1  2  0  0 -2]
+     [ 3  3  0 -1  1]]
+
 
 
 
@@ -415,11 +939,40 @@ __________
 
 
 
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [ 0 -2  3 ...  1  2  0]
+
+
+
+
+
 .. code-block:: default
 
 
 
     print(x.delete(2, axis=0))
+
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [[ 0 -2  3]
+     [ 3  0 -1]]
+
 
 
 
@@ -433,11 +986,39 @@ __________
 
 
 
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [1 0 0]
+
+
+
+
+
 .. code-block:: default
 
 
 
     print(x.lastNonZero(axis=0))
+
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [3 3 2]
+
 
 
 
@@ -451,6 +1032,20 @@ __________
 
 
 
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [1 0 0]
+
+
+
+
+
 .. code-block:: default
 
 
@@ -460,11 +1055,41 @@ __________
 
 
 
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [3 3 2]
+
+
+
+
+
 .. code-block:: default
 
 
 
     print(x.abs())
+
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    [[0 2 3]
+     [3 0 1]
+     [1 2 0]]
+
 
 
 
@@ -487,12 +1112,27 @@ All plotting functions can take matplotlib keywords
 
 
 
+
+
+
+
+
+
 .. code-block:: default
 
 
 
     plt.figure()
     _ = Density.plot(linewidth=0.5, marker='x', markersize=1.0)
+
+
+
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_002.png
+    :class: sphx-glr-single-img
+
+
+
 
 
 We can quickly plot a bar graph.
@@ -506,6 +1146,15 @@ We can quickly plot a bar graph.
 
 
 
+
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_003.png
+    :class: sphx-glr-single-img
+
+
+
+
+
 We can scatter the contents of the StatArray if it is 1D
 
 
@@ -514,6 +1163,15 @@ We can scatter the contents of the StatArray if it is 1D
 
     plt.figure()
     _ = Density.scatter(alpha=0.7)
+
+
+
+
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_004.png
+    :class: sphx-glr-single-img
+
+
 
 
 
@@ -534,6 +1192,15 @@ ends of whatever you are plotting. Just add the equalize keyword!
 
 
 
+
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_005.png
+    :class: sphx-glr-single-img
+
+
+
+
+
 Take the log base(x) of the data
 
 We can also take the data to a log, log10, log2, or a custom number!
@@ -544,6 +1211,23 @@ We can also take the data to a log, log10, log2, or a custom number!
 
     plt.figure()
     _ = Density.scatter(alpha=0.7,edgecolor='k',log='e') # could also use log='e', log=2, log=x) where x is the base you require
+
+
+
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_006.png
+    :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Values <= 0.0 have been masked before taking their log
+
+
 
 
 X and Y axes
@@ -557,6 +1241,15 @@ We can specify the x axis of the scatter plot.
 
     plt.figure()
     _ = Density.scatter(x=Time, alpha=0.7, edgecolor='k')
+
+
+
+
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_007.png
+    :class: sphx-glr-single-img
+
+
 
 
 
@@ -578,6 +1271,24 @@ In the first subplot, the y axis is the same as the colourbar.
     Density.scatter(x=Time, alpha=0.7, edgecolor='k', log=10)
     plt.subplot(212, sharex=ax1)
     _ = Density.scatter(x=Time, y=Depth, alpha=0.7, edgecolor='k', log=10)
+
+
+
+
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_008.png
+    :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Values <= 0.0 have been masked before taking their log
+    Values <= 0.0 have been masked before taking their log
+
 
 
 
@@ -604,6 +1315,23 @@ Since the plotting functions take matplotlib keywords, I can also specify the si
 
 
 
+
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_009.png
+    :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Values <= 0.0 have been masked before taking their log
+
+
+
+
 Of course we can still take the log, or equalize the colour histogram
 
 
@@ -612,6 +1340,23 @@ Of course we can still take the log, or equalize the colour histogram
 
     plt.figure()
     _ = Density.scatter(x=Time, y=Depth, s=s, alpha=0.7,edgecolor='k',equalize=True,log=10)
+
+
+
+
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_010.png
+    :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Values <= 0.0 have been masked before taking their log
+
 
 
 
@@ -633,6 +1378,23 @@ Typically pcolor only works with 2D arrays. The StatArray has a pcolor method th
 
 
 
+
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_011.png
+    :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Values <= 0.0 have been masked before taking their log
+
+
+
+
 We can add grid lines, and add opacity to each element in the pcolor image
 
 This is useful if the colour values need to be scaled by another variable e.g. variance.
@@ -651,6 +1413,15 @@ This is useful if the colour values need to be scaled by another variable e.g. v
 
 
 
+
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_012.png
+    :class: sphx-glr-single-img
+
+
+
+
+
 We can plot a histogram of the StatArray
 
 
@@ -662,6 +1433,15 @@ We can plot a histogram of the StatArray
 
 
 
+
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_013.png
+    :class: sphx-glr-single-img
+
+
+
+
+
 We can write the StatArray to a HDF5 file.  HDF5 files are binary files that can include compression.  They allow quick and easy access to parts of the file, and can also be written to and read from in parallel!
 
 
@@ -670,6 +1450,12 @@ We can write the StatArray to a HDF5 file.  HDF5 files are binary files that can
 
     with h5py.File('1Dtest.h5','w') as f:
         Density.toHdf(f,'test')
+
+
+
+
+
+
 
 
 
@@ -687,6 +1473,21 @@ Here x is a new variable, that is read in from the hdf5 file we just wrote.
 
 
 
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    x has the same values as Density?  True
+    x has its own memory allocated (not a reference/pointer)?  True
+
+
+
+
 We can also define a 2D array
 
 
@@ -695,6 +1496,36 @@ We can also define a 2D array
 
     Density = StatArray(np.random.randn(50,100),"Density","$\frac{g}{cc}$")
     Density.summary()
+
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Name: Density
+         Units: $\frac{g}{cc}$
+         Shape: (50, 100)
+         Values: [[-2.45493236e-01 -1.64861253e+00  1.23704375e+00 ... -1.66984435e+00
+      -1.77325244e+00  2.29310023e+00]
+     [-2.49625162e+00  1.01438115e+00  6.24105760e-01 ... -9.98185644e-01
+       1.78997046e+00 -7.80196944e-01]
+     [ 2.64593221e-01 -5.14556148e-01 -1.39253497e+00 ...  7.01245846e-01
+       3.17853019e-01  1.08592347e+00]
+     ...
+     [ 6.82178079e-01 -7.71890988e-01 -8.99816526e-01 ... -1.75402830e+00
+      -6.30568764e-01 -1.48916116e+00]
+     [-3.90247992e-01 -6.89167481e-01 -2.41237585e-01 ...  1.07812192e+00
+       4.80766593e-01 -2.70245703e-02]
+     [ 5.81748996e-04  8.17852892e-01  2.54221909e-01 ... -1.08116673e+00
+      -1.26094474e-02 -1.93195355e+00]]
+
+
 
 
 
@@ -711,6 +1542,15 @@ We can still do a histogram
 
 
 
+
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_014.png
+    :class: sphx-glr-single-img
+
+
+
+
+
 And we can use pcolor to plot the 2D array
 
 
@@ -719,6 +1559,15 @@ And we can use pcolor to plot the 2D array
 
     plt.figure()
     _ = Density.pcolor()
+
+
+
+
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_015.png
+    :class: sphx-glr-single-img
+
+
 
 
 
@@ -737,6 +1586,15 @@ Here we specify the x and y axes for the 2D array using two other 1D StatArrays
 
 
 
+
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_016.png
+    :class: sphx-glr-single-img
+
+
+
+
+
 We can plot using a log10 scale, in this case, we have values that are less
 than or equal to 0.0.  Plotting with the log option will by default mask any
 of those values, and will let you know that it has done so!
@@ -747,6 +1605,23 @@ of those values, and will let you know that it has done so!
 
     plt.figure()
     _ = Density.pcolor(x=x,y=y,log=2)
+
+
+
+
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_017.png
+    :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Values <= 0.0 have been masked before taking their log
+
 
 
 
@@ -764,6 +1639,15 @@ ends of whatever you are plotting
 
 
 
+
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_018.png
+    :class: sphx-glr-single-img
+
+
+
+
+
 We can equalize the log10 plot too :)
 
 
@@ -775,6 +1659,23 @@ We can equalize the log10 plot too :)
 
 
 
+
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_019.png
+    :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Values <= 0.0 have been masked before taking their log
+
+
+
+
 We can add opacity to each pixel in the image
 
 
@@ -782,6 +1683,12 @@ We can add opacity to each pixel in the image
 
 
     a = StatArray(np.random.random(Density.shape), 'Opacity from 0.0 to 1.0')
+
+
+
+
+
+
 
 
 
@@ -797,6 +1704,15 @@ We can add opacity to each pixel in the image
     ax = Density.pcolor(x=x, y=y, alpha=a, flipY=True, linewidth=0.1, noColorbar=True)
     plt.subplot(133, sharex=ax1, sharey=ax1)
     _ = a.pcolor(x=x, y=y, flipY=True)
+
+
+
+
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_020.png
+    :class: sphx-glr-single-img
+
+
 
 
 
@@ -818,6 +1734,15 @@ If the array potentially has a lot of white space around the edges, we can trim 
 
 
 
+
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_021.png
+    :class: sphx-glr-single-img
+
+
+
+
+
 Create a stacked area plot of a 2D StatArray
 
 
@@ -833,9 +1758,18 @@ Create a stacked area plot of a 2D StatArray
     _ = A.stackedAreaPlot(x=x, i=np.s_[[1,3,4],:], axis=1, labels=['a','b','c'])
 
 
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_022.png
+    :class: sphx-glr-single-img
+
+
+
+
+
+
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.000 seconds)
+   **Total running time of the script:** ( 0 minutes  3.964 seconds)
 
 
 .. _sphx_glr_download_examples_Statistics_plot_StatArray.py:

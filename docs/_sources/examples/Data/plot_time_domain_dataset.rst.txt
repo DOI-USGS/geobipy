@@ -21,6 +21,12 @@ Time domain dataset
     from geobipy.src.classes.data.dataset.TdemData import TdemData
 
 
+
+
+
+
+
+
 Reading in the Data
 +++++++++++++++++++
 
@@ -34,6 +40,12 @@ Reading in the Data
     systemFiles=[dataFolder + 'SkytemHM-SLV.stm', dataFolder + 'SkytemLM-SLV.stm']
 
 
+
+
+
+
+
+
 Read in the data from file
 
 
@@ -41,6 +53,12 @@ Read in the data from file
 
     TD = TdemData()
     TD.read(dataFiles, systemFiles)
+
+
+
+
+
+
 
 
 
@@ -54,6 +72,15 @@ Plot the locations of the data points
 
 
 
+
+
+.. image:: /examples/Data/images/sphx_glr_plot_time_domain_dataset_001.png
+    :class: sphx-glr-single-img
+
+
+
+
+
 Plot all the data along the specified line
 
 
@@ -63,6 +90,15 @@ Plot all the data along the specified line
     _ = TD.plotLine(100101.0, log=10)
 
 
+
+
+.. image:: /examples/Data/images/sphx_glr_plot_time_domain_dataset_002.png
+    :class: sphx-glr-single-img
+
+
+
+
+
 Or, plot specific channels in the data
 
 
@@ -70,6 +106,24 @@ Or, plot specific channels in the data
 
     plt.figure(figsize=(8,6))
     _ = TD.plot(system=0, channels=[3, 4, 5], log=10)
+
+
+
+
+.. image:: /examples/Data/images/sphx_glr_plot_time_domain_dataset_003.png
+    :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+      if (np.nanmin(values) <= 0.0):
+
+
 
 
 
@@ -83,11 +137,37 @@ Or, plot specific channels in the data
 
 
 
+
+.. image:: /examples/Data/images/sphx_glr_plot_time_domain_dataset_004.png
+    :class: sphx-glr-single-img
+
+
+
+
+
+
 .. code-block:: default
 
     plt.figure()
     ax = TD.scatter2D(s=1.0, c=TD.dataChannel(system=0, channel=23), equalize=True)
     plt.axis('equal')
+
+
+
+
+.. image:: /examples/Data/images/sphx_glr_plot_time_domain_dataset_005.png
+    :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    (429026.55879032257, 454054.24120967736, 4160661.9983766237, 4200460.001623377)
+
 
 
 TD.toVTK('TD1', format='binary')
@@ -102,6 +182,12 @@ Obtain a line from the data set
 
 
 
+
+
+
+
+
+
 .. code-block:: default
 
     plt.figure()
@@ -109,10 +195,28 @@ Obtain a line from the data set
 
 
 
+
+.. image:: /examples/Data/images/sphx_glr_plot_time_domain_dataset_006.png
+    :class: sphx-glr-single-img
+
+
+
+
+
+
 .. code-block:: default
 
     plt.figure()
     _ = line.plot(xAxis='x', log=10)
+
+
+
+
+.. image:: /examples/Data/images/sphx_glr_plot_time_domain_dataset_007.png
+    :class: sphx-glr-single-img
+
+
+
 
 
 File Format for time domain data
@@ -182,7 +286,7 @@ Example system files are contained in
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.000 seconds)
+   **Total running time of the script:** ( 0 minutes  6.187 seconds)
 
 
 .. _sphx_glr_download_examples_Data_plot_time_domain_dataset.py:

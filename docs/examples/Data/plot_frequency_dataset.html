@@ -206,24 +206,46 @@
     <span class="nb">print</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 </pre></div>
 </div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>In-Phase 380.0 (Hz)
+In-Phase 1776.0 (Hz)
+In-Phase 3345.0 (Hz)
+In-Phase 8171.0 (Hz)
+In-Phase 41020.0 (Hz)
+In-Phase 129550.0 (Hz)
+Quadrature 380.0 (Hz)
+Quadrature 1776.0 (Hz)
+Quadrature 3345.0 (Hz)
+Quadrature 8171.0 (Hz)
+Quadrature 41020.0 (Hz)
+Quadrature 129550.0 (Hz)
+</pre></div>
+</div>
 <p>Plot the locations of the data points</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">FD1</span><span class="o">.</span><span class="n">scatter2D</span><span class="p">();</span>
 </pre></div>
 </div>
+<img alt="../../_images/sphx_glr_plot_frequency_dataset_001.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_001.png" />
 <p>Plot all the data along the specified line</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">FD1</span><span class="o">.</span><span class="n">plotLine</span><span class="p">(</span><span class="mf">30010.0</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">);</span>
 </pre></div>
 </div>
+<img alt="../../_images/sphx_glr_plot_frequency_dataset_002.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_002.png" />
 <p>Or, plot specific channels in the data</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">FD1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">channels</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">11</span><span class="p">,</span><span class="mi">8</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">);</span>
 </pre></div>
 </div>
+<img alt="../../_images/sphx_glr_plot_frequency_dataset_003.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_003.png" />
 <p>Read in a second data set</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FD2</span> <span class="o">=</span> <span class="n">FdemData</span><span class="p">()</span>
 <span class="n">FD2</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">dataFilename</span><span class="o">=</span><span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;Resolve1.txt&#39;</span><span class="p">,</span> <span class="n">systemFilename</span><span class="o">=</span><span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;FdemSystem1.stm&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Warning: Your data contains values that are &lt;= 0.0
 </pre></div>
 </div>
 <p>We can create maps of the elevations in two separate figures</p>
@@ -232,9 +254,19 @@
 <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">);</span>
 </pre></div>
 </div>
+<img alt="../../_images/sphx_glr_plot_frequency_dataset_004.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_004.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(584519.0671621622, 590166.7428378379, 4639079.207593819, 4661808.632406181)
+</pre></div>
+</div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">FD2</span><span class="o">.</span><span class="n">mapPlot</span><span class="p">(</span><span class="n">dx</span><span class="o">=</span><span class="mf">50.0</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="mf">50.0</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="mf">200.0</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_frequency_dataset_005.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_005.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(662847.3094082569, 668366.7995917432, 4560053.628459876, 4600646.676540123)
 </pre></div>
 </div>
 <p>Or, we can plot both data sets in one figure to see their positions relative
@@ -246,11 +278,17 @@ one of the channels as the colour.</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">FD2</span><span class="o">.</span><span class="n">scatter2D</span><span class="p">(</span><span class="n">s</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">FD2</span><span class="o">.</span><span class="n">dataChannel</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;jet&#39;</span><span class="p">);</span>
 </pre></div>
 </div>
+<img alt="../../_images/sphx_glr_plot_frequency_dataset_006.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_006.png" />
 <p>Or, interpolate the values to create a gridded “map”. mapChannel will
 interpolate the specified channel number.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">FD1</span><span class="o">.</span><span class="n">mapData</span><span class="p">(</span><span class="n">channel</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">system</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="mi">250</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_frequency_dataset_007.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_007.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(584518.405, 590167.405, 4639078.6625, 4661809.1775)
 </pre></div>
 </div>
 <p>Export the data to VTK</p>
@@ -265,6 +303,10 @@ interpolate the specified channel number.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">FD1</span><span class="o">.</span><span class="n">lineNumber</span><span class="p">))</span>
 </pre></div>
 </div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[30010. 30020. 30030. ... 30100. 39010. 39020.]
+</pre></div>
+</div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">L</span> <span class="o">=</span> <span class="n">FD1</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="mf">30010.0</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -272,17 +314,75 @@ interpolate the specified channel number.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
 </pre></div>
 </div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>3D Point Cloud:
+Number of Points: : 6710
+ Name: Easting
+     Units: m
+     Shape: (6710,)
+     Values: [586852.29 586852.23 586852.17 ... 586123.57 586123.2  586122.82]
+ Name: Northing
+     Units: m
+     Shape: (6710,)
+     Values: [4639119.38 4639122.68 4639125.98 ... 4661765.26 4661768.84 4661772.42]
+ Name: Height
+     Units: m
+     Shape: (6710,)
+     Values: [36.629 37.012 37.349 ... 28.313 28.218 28.115]
+ Name: Elevation
+     Units: m
+     Shape: (6710,)
+     Values: [1246.84 1246.71 1246.61 ... 1337.94 1337.96 1338.02]
+Data:          :
+# of Channels: 12
+# of Total Data: 80520
+Name: Fdem Data
+     Units:
+     Shape: (6710, 12)
+     Values: [[145.3 435.8 260.6 ... 516.5 405.7 255.7]
+ [145.7 436.5 257.9 ... 513.6 403.2 252. ]
+ [146.4 437.4 255.8 ... 511.2 400.9 248.8]
+ ...
+ [ 70.7 314.1 220.2 ... 743.3 960.8 910.7]
+ [ 71.3 315.3 220.5 ... 745.9 968.3 919.1]
+ [ 72.1 316.6 220.7 ... 749.2 976.5 928.3]]
+
+ Name: Standard Deviation
+     Units: ppm
+     Shape: (6710, 12)
+     Values: [[14.53 43.58 26.06 ... 51.65 40.57 25.57]
+ [14.57 43.65 25.79 ... 51.36 40.32 25.2 ]
+ [14.64 43.74 25.58 ... 51.12 40.09 24.88]
+ ...
+ [ 7.07 31.41 22.02 ... 74.33 96.08 91.07]
+ [ 7.13 31.53 22.05 ... 74.59 96.83 91.91]
+ [ 7.21 31.66 22.07 ... 74.92 97.65 92.83]]
+
+ Name: Predicted Data
+     Units: ppm
+     Shape: (6710, 12)
+     Values: [[0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ ...
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]]
+</pre></div>
+</div>
 <p>And we can scatter2D the points in the line.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">L</span><span class="o">.</span><span class="n">scatter2D</span><span class="p">();</span>
 </pre></div>
 </div>
+<img alt="../../_images/sphx_glr_plot_frequency_dataset_008.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_008.png" />
 <p>We can specify the axis along which to plot.
 xAxis can be index, x, y, z, r2d, r3d</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">FD1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">channels</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">11</span><span class="p">,</span><span class="mi">8</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">);</span>
 </pre></div>
 </div>
+<img alt="../../_images/sphx_glr_plot_frequency_dataset_009.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_009.png" />
 </div>
 <div class="section" id="obtain-a-single-datapoint-from-the-data-set">
 <h2>Obtain a single datapoint from the data set<a class="headerlink" href="#obtain-a-single-datapoint-from-the-data-set" title="Permalink to this headline">¶</a></h2>
@@ -355,7 +455,7 @@ These must appear after the data colums.</p>
 <p>Example system files are contained in
 <a class="reference external" href="https://github.com/usgs/geobipy/tree/master/documentation_source/source/examples/supplementary/Data">the supplementary folder</a> in this repository</p>
 <p>See the Resolve.stm files.</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.000 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  15.385 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-data-plot-frequency-dataset-py">
 <div class="sphx-glr-download docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/8a8596f0390404145eca225a8f310218/plot_frequency_dataset.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_frequency_dataset.py</span></code></a></p>

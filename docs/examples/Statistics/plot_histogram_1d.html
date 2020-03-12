@@ -194,7 +194,7 @@ saving as HDF5</p>
 <div class="section" id="histogram-with-regular-bins">
 <h2>Histogram with regular bins<a class="headerlink" href="#histogram-with-regular-bins" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create regularly spaced bins</span>
-<span class="n">bins</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">101</span><span class="p">),</span> <span class="s1">&#39;Regular bins&#39;</span><span class="p">)</span>
+<span class="n">bins</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">3.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mi">101</span><span class="p">),</span> <span class="s1">&#39;Regular bins&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set the histogram using the bins, and update</span>
@@ -210,8 +210,13 @@ saving as HDF5</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
+<img alt="../../_images/sphx_glr_plot_histogram_1d_001.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_histogram_1d_001.png" />
 <p>Get the median, and 95% confidence values</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">H</span><span class="o">.</span><span class="n">credibleIntervals</span><span class="p">(</span><span class="n">percent</span><span class="o">=</span><span class="mf">95.0</span><span class="p">))</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(-0.030000000000000027, -1.71, 1.65)
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># We can write the histogram to a HDF file</span>
@@ -226,11 +231,12 @@ saving as HDF5</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">H1</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
+<img alt="../../_images/sphx_glr_plot_histogram_1d_002.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_histogram_1d_002.png" />
 </div>
 <div class="section" id="histogram-with-irregular-bins">
 <h2>Histogram with irregular bins<a class="headerlink" href="#histogram-with-irregular-bins" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create irregularly spaced bins</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
 <span class="n">irregularBins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="o">-</span><span class="n">x</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">:]])</span>
 </pre></div>
 </div>
@@ -254,12 +260,14 @@ saving as HDF5</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
+<img alt="../../_images/sphx_glr_plot_histogram_1d_003.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_histogram_1d_003.png" />
 <p>We can plot the histogram as a pcolor plot
 .</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">transpose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
+<img alt="../../_images/sphx_glr_plot_histogram_1d_004.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_histogram_1d_004.png" />
 </div>
 <div class="section" id="histogram-with-linear-space-entries-that-are-logged-internally">
 <h2>Histogram with linear space entries that are logged internally<a class="headerlink" href="#histogram-with-linear-space-entries-that-are-logged-internally" title="Permalink to this headline">¶</a></h2>
@@ -268,6 +276,22 @@ saving as HDF5</p>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">positiveBins</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[1.00000000e-05 1.45634848e-05 2.12095089e-05 3.08884360e-05
+ 4.49843267e-05 6.55128557e-05 9.54095476e-05 1.38949549e-04
+ 2.02358965e-04 2.94705170e-04 4.29193426e-04 6.25055193e-04
+ 9.10298178e-04 1.32571137e-03 1.93069773e-03 2.81176870e-03
+ 4.09491506e-03 5.96362332e-03 8.68511374e-03 1.26485522e-02
+ 1.84206997e-02 2.68269580e-02 3.90693994e-02 5.68986603e-02
+ 8.28642773e-02 1.20679264e-01 1.75751062e-01 2.55954792e-01
+ 3.72759372e-01 5.42867544e-01 7.90604321e-01 1.15139540e+00
+ 1.67683294e+00 2.44205309e+00 3.55648031e+00 5.17947468e+00
+ 7.54312006e+00 1.09854114e+01 1.59985872e+01 2.32995181e+01
+ 3.39322177e+01 4.94171336e+01 7.19685673e+01 1.04811313e+02
+ 1.52641797e+02 2.22299648e+02 3.23745754e+02 4.71486636e+02
+ 6.86648845e+02 1.00000000e+03]
 </pre></div>
 </div>
 <p>Instantiate the Histogram with log=10</p>
@@ -286,7 +310,8 @@ saving as HDF5</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.000 seconds)</p>
+<img alt="../../_images/sphx_glr_plot_histogram_1d_005.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_histogram_1d_005.png" />
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.759 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-statistics-plot-histogram-1d-py">
 <div class="sphx-glr-download docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/9570534d71f4f6a00b8f20360000c3ff/plot_histogram_1d.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_histogram_1d.py</span></code></a></p>

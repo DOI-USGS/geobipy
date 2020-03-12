@@ -13,6 +13,15 @@ Time Domain Datapoint Class
 # 3) :ref:`Obtaining a datapoint from a dataset`
 #
 # Once instantiated, see :ref:`Using a time domain datapoint`
+#
+# Credits:
+# We would like to thank Ross Brodie at Geoscience Australia for his airborne time domain forward modeller
+# https://github.com/GeoscienceAustralia/ga-aem
+#
+# For ground-based time domain data, we are using Dieter Werthmuller's python package Empymod
+# https://empymod.github.io/
+#
+# Thanks to Dieter for his help getting Empymod ready for incorporation into GeoBIPy
 
 #%%
 from os.path import join
@@ -271,11 +280,12 @@ _ = tdp.z.plotPosteriors()
 
 ################################################################################
 plt.figure()
-_ = tdp.relErr.plotPosteriors()
+_ = tdp.errorPosterior[0].comboPlot(cmap='gray_r')
+# _ = tdp.relErr.plotPosteriors()
 
-################################################################################
-plt.figure()
-_ = tdp.addErr.plotPosteriors()
+# ################################################################################
+# plt.figure()
+# _ = tdp.addErr.plotPosteriors()
 
 #%%
 # File Format for a time domain datapoint

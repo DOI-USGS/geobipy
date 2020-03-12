@@ -35,6 +35,12 @@ Once instantiated, see :ref:`Using a frequency domain datapoint`
     from geobipy import Distribution
 
 
+
+
+
+
+
+
 Instantiating a frequency domain data point
 +++++++++++++++++++++++++++++++++++++++++++
 
@@ -59,12 +65,24 @@ and the geometery of the loops used for each frequency.
                         CircularLoop(orient='z', x=7.91),    CircularLoop(orient='z', x=7.89)]
 
 
+
+
+
+
+
+
 Now we can instantiate the system.
 
 
 .. code-block:: default
 
     fds = FdemSystem(frequencies, transmitterLoops, receiverLoops)
+
+
+
+
+
+
 
 
 And use the system to instantiate a datapoint
@@ -87,10 +105,25 @@ Define some in-phase then quadrature data for each frequency.
 
 
 
+
+
+
+
+
+
 .. code-block:: default
 
     plt.figure()
     _ = fdp.plot()
+
+
+
+
+.. image:: /examples/Datapoints/images/sphx_glr_plot_frequency_datapoint_001.png
+    :class: sphx-glr-single-img
+
+
+
 
 
 Obtaining a datapoint from a dataset
@@ -113,6 +146,12 @@ Set some paths and file names
     systemFile = dataFolder + 'FdemSystem2.stm'
 
 
+
+
+
+
+
+
 Initialize and read an EM data set
 
 
@@ -120,6 +159,12 @@ Initialize and read an EM data set
 
     D = FdemData()
     D.read(dataFile,systemFile)
+
+
+
+
+
+
 
 
 Get a data point from the dataset
@@ -130,6 +175,15 @@ Get a data point from the dataset
     fdp = D.datapoint(0)
     plt.figure()
     _ = fdp.plot()
+
+
+
+
+.. image:: /examples/Datapoints/images/sphx_glr_plot_frequency_datapoint_002.png
+    :class: sphx-glr-single-img
+
+
+
 
 
 Using a datapoint
@@ -146,12 +200,24 @@ We can define a 1D layered earth model, and use it to predict some data
     mod = Model1D(nCells = nCells, parameters=par, thickness=thk)
 
 
+
+
+
+
+
+
 Forward model the data
 
 
 .. code-block:: default
 
     fdp.forward(mod)
+
+
+
+
+
+
 
 
 
@@ -165,6 +231,15 @@ Forward model the data
     plt.tight_layout()
 
 
+
+
+.. image:: /examples/Datapoints/images/sphx_glr_plot_frequency_datapoint_003.png
+    :class: sphx-glr-single-img
+
+
+
+
+
 Compute the sensitivity matrix for a given model
 
 
@@ -173,6 +248,23 @@ Compute the sensitivity matrix for a given model
     J = fdp.sensitivity(mod)
     plt.figure()
     _ = np.abs(J).pcolor(equalize=True, log=10, flipY=True)
+
+
+
+
+.. image:: /examples/Datapoints/images/sphx_glr_plot_frequency_datapoint_004.png
+    :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Values <= 0.0 have been masked before taking their log
+
+
 
 
 Attaching statistical descriptors to the datapoint
@@ -186,6 +278,12 @@ Define a multivariate log normal distribution as the prior on the predicted data
     fdp.predictedData.setPrior('MvLogNormal', fdp.data[fdp.active], fdp.std[fdp.active]**2.0)
 
 
+
+
+
+
+
+
 This allows us to evaluate the likelihood of the predicted data
 
 
@@ -194,6 +292,21 @@ This allows us to evaluate the likelihood of the predicted data
     print(fdp.likelihood(log=True))
     # Or the misfit
     print(fdp.dataMisfit())
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    -315.66783403599095
+    22.796936903564692
+
+
 
 
 We can perform a quick search for the best fitting half space
@@ -208,12 +321,43 @@ We can perform a quick search for the best fitting half space
     _ = fdp.plotPredicted()
 
 
+
+
+.. image:: /examples/Datapoints/images/sphx_glr_plot_frequency_datapoint_005.png
+    :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Best half space conductivity is [0.00982172] $S/m$
+
+
+
+
 Compute the misfit between observed and predicted data
 
 
 .. code-block:: default
 
     print(fdp.dataMisfit())
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    26.171569657128604
+
+
 
 
 Plot the misfits for a range of half space conductivities
@@ -224,6 +368,23 @@ Plot the misfits for a range of half space conductivities
     plt.figure()
     _ = fdp.plotHalfSpaceResponses(-6.0, 4.0, 200)
     plt.title("Halfspace responses");
+
+
+
+
+.. image:: /examples/Datapoints/images/sphx_glr_plot_frequency_datapoint_006.png
+    :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    Text(0.5, 1.0, 'Halfspace responses')
+
 
 
 We can attach priors to the height of the datapoint,
@@ -244,6 +405,12 @@ the relative error multiplier, and the additive error noise floor
     fdp.setPriors(heightPrior, relativePrior, additivePrior)
 
 
+
+
+
+
+
+
 In order to perturb our solvable parameters, we need to attach proposal distributions
 
 
@@ -255,12 +422,24 @@ In order to perturb our solvable parameters, we need to attach proposal distribu
     fdp.setProposals(heightProposal, relativeProposal, additiveProposal)
 
 
+
+
+
+
+
+
 With priorss set we can auto generate the posteriors
 
 
 .. code-block:: default
 
     fdp.setPosteriors()
+
+
+
+
+
+
 
 
 Perturb the datapoint and record the perturbations
@@ -273,6 +452,12 @@ Perturb the datapoint and record the perturbations
         fdp.updatePosteriors()
 
 
+
+
+
+
+
+
 Plot the posterior distributions
 
 
@@ -283,21 +468,38 @@ Plot the posterior distributions
 
 
 
+
+.. image:: /examples/Datapoints/images/sphx_glr_plot_frequency_datapoint_007.png
+    :class: sphx-glr-single-img
+
+
+
+
+
+
 .. code-block:: default
 
     plt.figure()
-    _ = fdp.relErr.plotPosteriors()
+    _ = fdp.errorPosterior[0].comboPlot(cmap='gray_r')
+    # _ = fdp.relErr.plotPosteriors()
 
 
 
-.. code-block:: default
 
-    plt.figure()
-    _ = fdp.addErr.plotPosteriors()
+.. image:: /examples/Datapoints/images/sphx_glr_plot_frequency_datapoint_008.png
+    :class: sphx-glr-single-img
+
+
+
+
+
+plt.figure()
+_ = fdp.addErr.plotPosteriors()
+
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.000 seconds)
+   **Total running time of the script:** ( 0 minutes  10.205 seconds)
 
 
 .. _sphx_glr_download_examples_Datapoints_plot_frequency_datapoint.py:

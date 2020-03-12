@@ -20,6 +20,15 @@ There are three ways in which to create a time domain datapoint
 
 Once instantiated, see :ref:`Using a time domain datapoint`
 
+Credits:
+We would like to thank Ross Brodie at Geoscience Australia for his airborne time domain forward modeller
+https://github.com/GeoscienceAustralia/ga-aem
+
+For ground-based time domain data, we are using Dieter Werthmuller's python package Empymod
+https://empymod.github.io/
+
+Thanks to Dieter for his help getting Empymod ready for incorporation into GeoBIPy
+
 
 .. code-block:: default
 
@@ -40,6 +49,12 @@ Once instantiated, see :ref:`Using a time domain datapoint`
 
     dataFolder = "..//supplementary//Data//"
     # dataFolder = "source//examples//supplementary//Data//"
+
+
+
+
+
+
 
 
 Instantiating a time domain datapoint
@@ -72,6 +87,12 @@ Define some time gates
     ])
 
 
+
+
+
+
+
+
 Define some observed data values for each time gate.
 
 
@@ -94,6 +115,12 @@ Define some observed data values for each time gate.
     ])
 
 
+
+
+
+
+
+
 Create a Waveform
 
 The Waveform class defines a half waveform
@@ -114,6 +141,23 @@ The Waveform class defines a half waveform
     plt.legend()
 
 
+
+
+.. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_001.png
+    :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    <matplotlib.legend.Legend object at 0x12b6b6150>
+
+
+
 Define the transmitter and reciever loops
 
 
@@ -123,12 +167,24 @@ Define the transmitter and reciever loops
     receiver = CircularLoop()
 
 
+
+
+
+
+
+
 Define two butterworth filters to be applied to the off-time data.
 
 
 .. code-block:: default
 
     filters = [butterworth(1, 4.5e5, btype='low'), butterworth(1, 3.e5, btype='low')]
+
+
+
+
+
+
 
 
 Create the time domain systems for both moments
@@ -153,6 +209,12 @@ Create the time domain systems for both moments
     systems = [lm_system, hm_system]
 
 
+
+
+
+
+
+
 Instantiate the time domain datapoint
 
 
@@ -164,10 +226,33 @@ Instantiate the time domain datapoint
 
 
 
+
+
+
+
+
+
 .. code-block:: default
 
     plt.figure()
     tdp.plot(with_error_bars=False)
+
+
+
+
+
+.. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_002.png
+    :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    <matplotlib.axes._subplots.AxesSubplot object at 0x12b635150>
 
 
 
@@ -184,10 +269,33 @@ AarhusInv data format.
 
 
 
+
+
+
+
+
+
 .. code-block:: default
 
     plt.figure()
     tdp.plot()
+
+
+
+
+.. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_003.png
+    :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    <matplotlib.axes._subplots.AxesSubplot object at 0x12bb45610>
+
 
 
 Obtaining a datapoint from a dataset
@@ -207,6 +315,12 @@ For more information about the time domain data set, see :ref:`Time domain datas
     systemFile=[dataFolder + 'SkytemHM-SLV.stm', dataFolder + 'SkytemLM-SLV.stm']
 
 
+
+
+
+
+
+
 Initialize and read an EM data set
 
 
@@ -214,6 +328,12 @@ Initialize and read an EM data set
 
     D = TdemData()
     D.read(dataFile, systemFile)
+
+
+
+
+
+
 
 
 Get a datapoint from the dataset
@@ -224,6 +344,23 @@ Get a datapoint from the dataset
     tdp = D.datapoint(0)
     plt.figure()
     tdp.plot()
+
+
+
+
+.. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_004.png
+    :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    <matplotlib.axes._subplots.AxesSubplot object at 0x12fb56d50>
+
 
 
 Using a time domain datapoint
@@ -238,12 +375,24 @@ We can define a 1D layered earth model, and use it to predict some data
     mod = Model1D(depth=np.r_[75.0], parameters=par)
 
 
+
+
+
+
+
+
 Forward model the data
 
 
 .. code-block:: default
 
     tdp.forward(mod)
+
+
+
+
+
+
 
 
 
@@ -259,10 +408,28 @@ Forward model the data
 
 
 
+
+.. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_005.png
+    :class: sphx-glr-single-img
+
+
+
+
+
+
 .. code-block:: default
 
     plt.figure()
     tdp.plotDataResidual(xscale='log', log=10)
+
+
+
+
+.. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_006.png
+    :class: sphx-glr-single-img
+
+
+
 
 
 Compute the sensitivity matrix for a given model
@@ -273,6 +440,15 @@ Compute the sensitivity matrix for a given model
     J = tdp.sensitivity(mod)
     plt.figure()
     _ = np.abs(J).pcolor(equalize=True, log=10, flipY=True)
+
+
+
+
+.. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_007.png
+    :class: sphx-glr-single-img
+
+
+
 
 
 Attaching statistical descriptors to the datapoint
@@ -286,6 +462,12 @@ Define a multivariate log normal distribution as the prior on the predicted data
     tdp.predictedData.setPrior('MvLogNormal', tdp.data[tdp.active], tdp.std[tdp.active]**2.0)
 
 
+
+
+
+
+
+
 This allows us to evaluate the likelihood of the predicted data
 
 
@@ -294,6 +476,21 @@ This allows us to evaluate the likelihood of the predicted data
     print(tdp.likelihood(log=True))
     # Or the misfit
     print(tdp.dataMisfit())
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    -19707.246512951275
+    201.7577916092427
+
+
 
 
 We can perform a quick search for the best fitting half space
@@ -308,12 +505,43 @@ We can perform a quick search for the best fitting half space
     _ = tdp.plotPredicted()
 
 
+
+
+.. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_008.png
+    :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Best half space conductivity is [0.01830738] $S/m$
+
+
+
+
 Compute the misfit between observed and predicted data
 
 
 .. code-block:: default
 
     print(tdp.dataMisfit())
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    48.247662254424135
+
+
 
 
 Plot the misfits for a range of half space conductivities
@@ -324,6 +552,23 @@ Plot the misfits for a range of half space conductivities
     plt.figure()
     _ = tdp.plotHalfSpaceResponses(-6.0, 4.0, 200)
     plt.title("Halfspace responses")
+
+
+
+
+.. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_009.png
+    :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    Text(0.5, 1.0, 'Halfspace responses')
+
 
 
 We can attach priors to the height of the datapoint,
@@ -344,6 +589,12 @@ the relative error multiplier, and the additive error noise floor
     tdp.setPriors(heightPrior, relativePrior, additivePrior)
 
 
+
+
+
+
+
+
 In order to perturb our solvable parameters, we need to attach proposal distributions
 
 
@@ -355,12 +606,24 @@ In order to perturb our solvable parameters, we need to attach proposal distribu
     tdp.setProposals(heightProposal, relativeProposal, additiveProposal)
 
 
+
+
+
+
+
+
 With priorss set we can auto generate the posteriors
 
 
 .. code-block:: default
 
     tdp.setPosteriors()
+
+
+
+
+
+
 
 
 Perturb the datapoint and record the perturbations
@@ -373,6 +636,12 @@ Perturb the datapoint and record the perturbations
         tdp.updatePosteriors()
 
 
+
+
+
+
+
+
 Plot the posterior distributions
 
 
@@ -383,17 +652,33 @@ Plot the posterior distributions
 
 
 
+
+.. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_010.png
+    :class: sphx-glr-single-img
+
+
+
+
+
+
 .. code-block:: default
 
     plt.figure()
-    _ = tdp.relErr.plotPosteriors()
+    _ = tdp.errorPosterior[0].comboPlot(cmap='gray_r')
+    # _ = tdp.relErr.plotPosteriors()
+
+    # ################################################################################
+    # plt.figure()
+    # _ = tdp.addErr.plotPosteriors()
 
 
 
-.. code-block:: default
 
-    plt.figure()
-    _ = tdp.addErr.plotPosteriors()
+.. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_011.png
+    :class: sphx-glr-single-img
+
+
+
 
 
 File Format for a time domain datapoint
@@ -478,7 +763,7 @@ Example data files are contained in
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.000 seconds)
+   **Total running time of the script:** ( 0 minutes  6.687 seconds)
 
 
 .. _sphx_glr_download_examples_Datapoints_plot_time_datapoint.py:

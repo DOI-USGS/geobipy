@@ -24,6 +24,12 @@ saving as HDF5.
 
 
 
+
+
+
+
+
+
 Create some histogram bins in x and y
 
 
@@ -33,12 +39,24 @@ Create some histogram bins in x and y
     y = StatArray(np.linspace(-4.0, 4.0, 101), 'Variable 2')
 
 
+
+
+
+
+
+
 Instantiate
 
 
 .. code-block:: default
 
     H = Histogram2D(xBins=x, yBins=y)
+
+
+
+
+
+
 
 
 
@@ -53,12 +71,24 @@ Generate some random numbers
 
 
 
+
+
+
+
+
+
 Update the histogram counts
 
 
 .. code-block:: default
 
     H.update(x)
+
+
+
+
+
+
 
 
 
@@ -70,6 +100,15 @@ Update the histogram counts
 
 
 
+
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_histogram_2d_001.png
+    :class: sphx-glr-single-img
+
+
+
+
+
 Generate marginal histograms along an axis
 
 
@@ -77,6 +116,12 @@ Generate marginal histograms along an axis
 
     h1 = H.marginalHistogram(axis=0)
     h2 = H.marginalHistogram(axis=1)
+
+
+
+
+
+
 
 
 
@@ -93,6 +138,15 @@ Note that the names of the variables are automatically displayed
 
 
 
+
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_histogram_2d_002.png
+    :class: sphx-glr-single-img
+
+
+
+
+
 Create a combination plot with marginal histograms.
 sphinx_gallery_thumbnail_number = 3
 
@@ -101,6 +155,15 @@ sphinx_gallery_thumbnail_number = 3
 
     plt.figure()
     _ = H.comboPlot(cmap='gray_r')
+
+
+
+
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_histogram_2d_003.png
+    :class: sphx-glr-single-img
+
+
 
 
 
@@ -116,6 +179,15 @@ We can overlay the histogram with its credible intervals
 
 
 
+
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_histogram_2d_004.png
+    :class: sphx-glr-single-img
+
+
+
+
+
 Take the mean or median estimates from the histogram
 
 
@@ -123,6 +195,12 @@ Take the mean or median estimates from the histogram
 
     mean = H.mean()
     median = H.median()
+
+
+
+
+
+
 
 
 
@@ -136,6 +214,23 @@ Or plot the mean and median
     H.plotMean()
     H.plotMedian()
     plt.legend()
+
+
+
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_histogram_2d_005.png
+    :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    <matplotlib.legend.Legend object at 0x12bba0910>
+
 
 
 
@@ -157,6 +252,15 @@ Or plot the mean and median
 
 
 
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_histogram_2d_006.png
+    :class: sphx-glr-single-img
+
+
+
+
+
+
 .. code-block:: default
 
     plt.figure(figsize=(9.5, 5))
@@ -171,12 +275,44 @@ Or plot the mean and median
 
 
 
+
+
+.. image:: /examples/Statistics/images/sphx_glr_plot_histogram_2d_007.png
+    :class: sphx-glr-single-img
+
+
+
+
+
 Get the range between credible intervals
 
 
 .. code-block:: default
 
     H.credibleRange(percent=95.0)
+
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    StatArray([3.44, 3.12, 3.2 , 2.8 , 3.52, 3.44, 4.16, 2.88, 2.8 , 3.44,
+               3.36, 3.28, 3.2 , 3.28, 3.36, 3.28, 3.36, 3.36, 3.36, 3.28,
+               3.36, 3.2 , 3.2 , 3.28, 3.36, 3.28, 3.28, 3.28, 3.2 , 3.36,
+               3.28, 3.28, 3.36, 3.28, 3.28, 3.28, 3.28, 3.28, 3.36, 3.28,
+               3.36, 3.28, 3.28, 3.36, 3.28, 3.28, 3.28, 3.28, 3.36, 3.28,
+               3.36, 3.28, 3.28, 3.36, 3.28, 3.28, 3.2 , 3.28, 3.2 , 3.28,
+               3.36, 3.36, 3.28, 3.28, 3.2 , 3.36, 3.28, 3.28, 3.36, 3.28,
+               3.2 , 3.2 , 3.36, 3.36, 3.28, 3.28, 3.28, 3.36, 3.36, 3.36,
+               3.28, 3.12, 3.28, 3.44, 3.36, 3.36, 3.36, 3.36, 2.96, 3.28,
+               2.88, 3.36, 3.6 , 2.72, 3.12, 3.44, 4.08, 5.2 , 4.24, 3.6 ])
 
 
 
@@ -189,9 +325,42 @@ We can map the credible range to an opacity or transparency
     H.transparency()
 
 
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    StatArray([0.29032258, 0.16129032, 0.19354839, 0.03225806, 0.32258065,
+               0.29032258, 0.58064516, 0.06451613, 0.03225806, 0.29032258,
+               0.25806452, 0.22580645, 0.19354839, 0.22580645, 0.25806452,
+               0.22580645, 0.25806452, 0.25806452, 0.25806452, 0.22580645,
+               0.25806452, 0.19354839, 0.19354839, 0.22580645, 0.25806452,
+               0.22580645, 0.22580645, 0.22580645, 0.19354839, 0.25806452,
+               0.22580645, 0.22580645, 0.25806452, 0.22580645, 0.22580645,
+               0.22580645, 0.22580645, 0.22580645, 0.25806452, 0.22580645,
+               0.25806452, 0.22580645, 0.22580645, 0.25806452, 0.22580645,
+               0.22580645, 0.22580645, 0.22580645, 0.25806452, 0.22580645,
+               0.25806452, 0.22580645, 0.22580645, 0.25806452, 0.22580645,
+               0.22580645, 0.19354839, 0.22580645, 0.19354839, 0.22580645,
+               0.25806452, 0.25806452, 0.22580645, 0.22580645, 0.19354839,
+               0.25806452, 0.22580645, 0.22580645, 0.25806452, 0.22580645,
+               0.19354839, 0.19354839, 0.25806452, 0.25806452, 0.22580645,
+               0.22580645, 0.22580645, 0.25806452, 0.25806452, 0.25806452,
+               0.22580645, 0.16129032, 0.22580645, 0.29032258, 0.25806452,
+               0.25806452, 0.25806452, 0.25806452, 0.09677419, 0.22580645,
+               0.06451613, 0.25806452, 0.35483871, 0.        , 0.16129032,
+               0.29032258, 0.5483871 , 1.        , 0.61290323, 0.35483871])
+
+
+
+
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.000 seconds)
+   **Total running time of the script:** ( 0 minutes  2.191 seconds)
 
 
 .. _sphx_glr_download_examples_Statistics_plot_histogram_2d.py:

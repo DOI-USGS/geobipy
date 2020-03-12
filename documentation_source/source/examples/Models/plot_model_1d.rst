@@ -23,6 +23,12 @@
     from geobipy import hdfRead
 
 
+
+
+
+
+
+
 Instantiate the 1D Model with a Half Space
 ++++++++++++++++++++++++++++++++++++++++++
 
@@ -35,6 +41,12 @@ Instantiate the 1D Model with a Half Space
     par = StatArray(np.linspace(0.001, 0.02, nLayers), "Conductivity", "$\\frac{S}{m}$")
     thk = StatArray(np.full(nLayers-1, fill_value=10.0))
     mod = Model1D(parameters=par, thickness=thk)
+
+
+
+
+
+
 
 
 Randomness and Model Perturbations
@@ -59,6 +71,12 @@ The halfSpaceValue is used as a reference value for the parameter prior.
                   prng = prng)
 
 
+
+
+
+
+
+
 To propose new models, we specify the probabilities of creating, removing, perturbing, and not changing
 a layer interface
 
@@ -67,6 +85,12 @@ a layer interface
 
     pProposal = Distribution('LogNormal', 0.01, np.log(2.0)**2.0, linearSpace=True, prng=prng)
     mod.setProposals(probabilities = [0.25, 0.25, 0.25, 0.25], parameterProposal=pProposal, prng=prng)
+
+
+
+
+
+
 
 
 We can then perturb the layers of the model
@@ -79,6 +103,12 @@ perturbed = mod.perturbStructure()
 
 
 
+
+
+
+
+
+
 .. code-block:: default
 
     fig = plt.figure(figsize=(8,6))
@@ -86,6 +116,23 @@ perturbed = mod.perturbStructure()
     mod.pcolor(grid=True)
     ax = plt.subplot(122)
     perturbed.pcolor(grid=True)
+
+
+
+
+.. image:: /examples/Models/images/sphx_glr_plot_model_1d_001.png
+    :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    <matplotlib.axes._subplots.AxesSubplot object at 0x12705afd0>
+
 
 
 We can evaluate the prior of the model using depths only
@@ -96,6 +143,21 @@ We can evaluate the prior of the model using depths only
     print('Log probability of the Model given its priors: ', mod.priorProbability(False, False, log=True))
     # Or with priors on its parameters, and parameter gradient with depth.
     print('Log probability of the Model given its priors: ', mod.priorProbability(True, True, log=True))
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Log probability of the Model given its priors:  -11.358381323561012
+    Log probability of the Model given its priors:  -20.111609194656108
+
+
 
 
 Perturbing a model multiple times
@@ -121,6 +183,12 @@ based on bins from from the priors.
     mod0 = mod.deepcopy()
 
 
+
+
+
+
+
+
 Now we randomly perturb the model, and update its posteriors.
 
 
@@ -134,6 +202,12 @@ Now we randomly perturb the model, and update its posteriors.
         perturbed.updatePosteriors()
 
         mod = perturbed
+
+
+
+
+
+
 
 
 We can now plot the posteriors of the model.
@@ -153,9 +227,26 @@ The proposal for the parameter values is fixed and centred around a single value
     mod.depth.posterior.plot(rotate=True, flipY=True);
 
 
+
+.. image:: /examples/Models/images/sphx_glr_plot_model_1d_002.png
+    :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    <matplotlib.axes._subplots.AxesSubplot object at 0x1276df0d0>
+
+
+
+
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.000 seconds)
+   **Total running time of the script:** ( 0 minutes  2.096 seconds)
 
 
 .. _sphx_glr_download_examples_Models_plot_model_1d.py:

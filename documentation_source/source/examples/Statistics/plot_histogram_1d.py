@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 # +++++++++++++++++++++++++++
 
 # Create regularly spaced bins
-bins = StatArray(np.linspace(-3, 3, 101), 'Regular bins')
+bins = StatArray(np.linspace(-3.0, 3.0, 101), 'Regular bins')
 
 ################################################################################
 
@@ -60,8 +60,8 @@ _ = H1.plot()
 # +++++++++++++++++++++++++++++
 
 # Create irregularly spaced bins
-x = np.cumsum(np.arange(10))
-irregularBins = np.hstack([-x[::-1], x[1:]]) 
+x = np.cumsum(np.arange(10, dtype=np.float64))
+irregularBins = np.hstack([-x[::-1], x[1:]])
 
 
 ################################################################################

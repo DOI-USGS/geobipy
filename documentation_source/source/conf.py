@@ -362,7 +362,7 @@ from sphinx_gallery.sorting import ExplicitOrder
 sphinx_gallery_conf = {
     'examples_dirs': 'examples',   # path to your example scripts
     'gallery_dirs': 'examples',  # path to where to save gallery generated output
-    'filename_pattern': 'plot_rectilinear*',
+    # 'filename_pattern': 'plot_rectilinear*',
     'subsection_order': ExplicitOrder(['examples/Distributions/',
                                     'examples/Statistics/',
                                     'examples/Meshes/',

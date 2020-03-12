@@ -69,7 +69,7 @@ Here we use edges
 
  .. code-block:: none
 
-    [ 0.5  2.   4.5  8.  12.5 18.  24.5 32.  40.5]
+    [ 0.5  2.   4.5 ... 24.5 32.  40.5]
 
 
 
@@ -89,7 +89,7 @@ Here we use edges
 
  .. code-block:: none
 
-    [ 0.  1.  3.  6. 10. 15. 21. 28. 36. 45.]
+    [ 0.  1.  3. ... 28. 36. 45.]
 
 
 
@@ -109,7 +109,7 @@ Here we use edges
 
  .. code-block:: none
 
-    [ 1.  3.  6. 10. 15. 21. 28. 36.]
+    [ 1.  3.  6. ... 21. 28. 36.]
 
 
 
@@ -129,7 +129,7 @@ Here we use edges
 
  .. code-block:: none
 
-    [1. 2. 3. 4. 5. 6. 7. 8. 9.]
+    [1. 2. 3. ... 7. 8. 9.]
 
 
 
@@ -240,9 +240,8 @@ Access property describing the mesh
 
  .. code-block:: none
 
-    [-2.66666667e+00 -2.00000000e+00 -1.33333333e+00 -6.66666667e-01
-     -2.22044605e-16  6.66666667e-01  1.33333333e+00  2.00000000e+00
-      2.66666667e+00]
+    [-2.66666667 -2.         -1.33333333 ...  1.33333333  2.
+      2.66666667]
 
 
 
@@ -262,8 +261,8 @@ Access property describing the mesh
 
  .. code-block:: none
 
-    [-3.         -2.33333333 -1.66666667 -1.         -0.33333333  0.33333333
-      1.          1.66666667  2.33333333  3.        ]
+    [-3.         -2.33333333 -1.66666667 ...  1.66666667  2.33333333
+      3.        ]
 
 
 
@@ -283,8 +282,8 @@ Access property describing the mesh
 
  .. code-block:: none
 
-    [-2.33333333 -1.66666667 -1.         -0.33333333  0.33333333  1.
-      1.66666667  2.33333333]
+    [-2.33333333 -1.66666667 -1.         ...  1.          1.66666667
+      2.33333333]
 
 
 
@@ -304,8 +303,7 @@ Access property describing the mesh
 
  .. code-block:: none
 
-    [0.66666667 0.66666667 0.66666667 0.66666667 0.66666667 0.66666667
-     0.66666667 0.66666667 0.66666667]
+    [0.66666667 0.66666667 0.66666667 ... 0.66666667 0.66666667 0.66666667]
 
 
 
@@ -373,7 +371,7 @@ Or Pcolor the mesh showing. An array of cell values is used as the colour.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.534 seconds)
+   **Total running time of the script:** ( 0 minutes  0.362 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_1d.py:
