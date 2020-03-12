@@ -353,22 +353,23 @@ class Histogram1D(RectilinearMesh1D):
         yFit = self._sum_of_gaussians(x, *model)
         fit0 = np.linalg.norm((yData - yFit))
 
-        go = True
+
+        # Find the next width that produces more peaks.
+        no_new_peaks = True
+        n_new_peaks = nPeaks
+        while no_new_peaks and width > 1:
+            width -= 1
+            iPeaks = self.findPeaks(width=width)[0]
+            if not mean_bounds is None:
+                keepPeaks = np.where((mean_bounds[0] < x[iPeaks]) & (x[iPeaks] < mean_bounds[1]))[0]
+                iPeaks = iPeaks[keepPeaks]
+            n_new_peaks = np.size(iPeaks)
+            no_new_peaks = nPeaks == n_new_peaks
+
+        nPeaks = n_new_peaks
+
+        go = nPeaks <= maxDistributions
         while go:
-
-            # Find the next width that produces more peaks.
-            no_new_peaks = True
-            n_new_peaks = nPeaks
-            while no_new_peaks and width > 1:
-                width -= 1
-                iPeaks = self.findPeaks(width=width)[0]
-                if not mean_bounds is None:
-                    keepPeaks = np.where((mean_bounds[0] < x[iPeaks]) & (x[iPeaks] < mean_bounds[1]))[0]
-                    iPeaks = iPeaks[keepPeaks]
-                n_new_peaks = np.size(iPeaks)
-                no_new_peaks = nPeaks == n_new_peaks
-
-            nPeaks = n_new_peaks
 
             # Perform the new fit
             guess = np.ones(nPeaks * 3)
@@ -387,6 +388,7 @@ class Histogram1D(RectilinearMesh1D):
                 guess[1::3] = 0.5 * (lowerBounds[1::3] + upperBounds[1::3])
 
             bounds = (lowerBounds, upperBounds)
+
             new_model, pcov = curve_fit(self._sum_of_gaussians, xdata=xd, ydata=yd, p0=guess, bounds=bounds)
             new_model = np.asarray(new_model)
 
@@ -400,6 +402,20 @@ class Histogram1D(RectilinearMesh1D):
 
             width_gt_one = width > 1
             good_change = percentChange > tolerance
+
+            # Find the next width that produces more peaks.
+            no_new_peaks = True
+            n_new_peaks = nPeaks
+            while no_new_peaks and width > 1:
+                width -= 1
+                iPeaks = self.findPeaks(width=width)[0]
+                if not mean_bounds is None:
+                    keepPeaks = np.where((mean_bounds[0] < x[iPeaks]) & (x[iPeaks] < mean_bounds[1]))[0]
+                    iPeaks = iPeaks[keepPeaks]
+                n_new_peaks = np.size(iPeaks)
+                no_new_peaks = nPeaks == n_new_peaks
+
+            nPeaks = n_new_peaks
 
             # Continue if we have a width > 1, and the change is still good
             go = width_gt_one and good_change
