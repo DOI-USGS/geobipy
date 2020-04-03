@@ -530,7 +530,7 @@ class Histogram2D(RectilinearMesh2D):
         return distributions, active
 
 
-    def fitMajorPeaks(self, intervals, axis=0, **kwargs):
+    def fitMajorPeaks(self, intervals, axis=0, method='gaussian', verbose=False, **kwargs):
         """Find peaks in the histogram along an axis.
 
         Parameters
@@ -543,7 +543,12 @@ class Histogram2D(RectilinearMesh2D):
         """
 
         track = kwargs.pop('track', True)
-        counts, new_intervals = super().intervalStatistic(self._counts, intervals, axis, 'sum')
+        fid = kwargs.pop('fiducial', None)
+
+        if verbose:
+            print('fid', fid, flush=True)
+
+        counts, new_intervals = super().intervalStatistic(self.counts, intervals, axis, 'sum')
 
         distributions = []
         amplitudes = []
@@ -557,16 +562,13 @@ class Histogram2D(RectilinearMesh2D):
         if axis == 0:
             h = Histogram1D(bins = self.xBins)
 
-            Bar = progressbar.ProgressBar()
             for i in r:
+                if verbose:
+                    print('interval', new_intervals[i])
                 h._counts[:] = counts[i, :]
-                try:
-                    d, a = h.fitMajorPeaks(**kwargs)
-                    distributions.append(d)
-                    amplitudes.append(a)
-                except:
-                    distributions.append([])
-                    amplitudes.append([])
+                d, a = h.fitMajorPeaks(verbose=verbose, method=method, **kwargs)
+                distributions.append(d)
+                amplitudes.append(a)
 
         else:
             h = Histogram1D(bins = self.yBins)

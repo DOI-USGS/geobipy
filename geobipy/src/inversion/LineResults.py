@@ -3,6 +3,7 @@ import numpy as np
 import numpy.ma as ma
 import h5py
 from cached_property import cached_property
+from datetime import timedelta
 from ..classes.core.myObject import myObject
 from ..classes.core import StatArray
 from ..classes.statistics.Distribution import Distribution
@@ -17,10 +18,11 @@ from ..classes.model.Model1D import Model1D
 from ..base.HDF import hdfRead
 from ..base import customPlots as cP
 from ..base import customFunctions as cF
-import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
-from os.path import split
 from ..base import fileIO as fIO
+from ..base.MPI import loadBalance1D_shrinkingArrays
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspecA
+from os.path import split
 from geobipy.src.inversion.Results import Results
 import progressbar
 
@@ -53,6 +55,9 @@ class LineResults(myObject):
         else:
             self.hdfFile = hdfFile
 
+    @property
+    def world(self):
+        return self._world
 
     def open(self, mode='r+', world=None):
         """ Check whether the file is open """
@@ -432,6 +437,101 @@ class LineResults(myObject):
             hm._counts = counts[i, :, :]
 
         return distributions
+
+
+    def fitMajorPeaks_mpi(self, intervals, **kwargs):
+        """Uses Mixture modelling to fit disrtibutions to the hitmaps for the specified intervals.
+
+        This mpi version fits all hitmaps individually throughout the data set.
+        This provides detailed fits, but requires a lot of compute, hence the mpi enabled version.
+
+        Parameters
+        ----------
+        intervals : array_like
+            Depth intervals between which the marginal histogram is computed before fitting.
+
+        See Also
+        --------
+        geobipy.Histogram1D.fit_mixture
+            For details on the fitting arguments.
+
+        """
+
+        from mpi4py import MPI
+
+        world = self.world
+
+        max_distributions = kwargs.get('max_distributions', 5)
+        nIntervals = np.size(intervals) - 1
+
+        tmp = locals()
+        for key in ['self', 'MPI', 'world', 'k']:
+            tmp.pop(key, None)
+        command = str(tmp)
+
+        location = '/fits_0'
+
+        means = StatArray.StatArray([self.nPoints, nIntervals, max_distributions], "fit means")
+        variances = StatArray.StatArray([self.nPoints, nIntervals, max_distributions], "fit variances")
+        amplitudes = StatArray.StatArray([self.nPoints, nIntervals, max_distributions], "fit amplitudes")
+        df = StatArray.StatArray([self.nPoints, nIntervals, max_distributions], "fit df")
+
+        if not location in self.hdfFile:
+            means.createHdf(self.hdfFile, location+"/means", fillvalue=np.nan)
+            variances.createHdf(self.hdfFile, location+"/variances", fillvalue=np.nan)
+            df.createHdf(self.hdfFile, location+"/df", fillvalue=np.nan)
+            amplitudes.createHdf(self.hdfFile, location+"/amplitudes", fillvalue=np.nan)
+
+
+        # Distribute the points amongst cores.
+        starts, chunks = loadBalance1D_shrinkingArrays(self.nPoints, world.size)
+
+        chunk = chunks[world.rank]
+        i0 = starts[world.rank]
+        i1 = i0 + chunk
+
+        tBase = MPI.Wtime()
+        t0 = tBase
+
+        nUpdate = 1
+        counter = 0
+
+        nI = intervals.size - 1
+
+        for i in range(i0, i1):
+
+            hm = self.get_hitmap(i)
+
+            distributions, amplitudes = hm.fitMajorPeaks(intervals, method='studentt', track=False, fiducial=self.fiducials[i], **kwargs)
+
+            for j in range(nI):
+                dist = distributions[j]
+
+                nd = len(dist)
+
+                tmp = np.full(max_distributions, fill_value=np.nan)
+                for k in range(nd):
+                    tmp[k] = dist[k].mean
+                self.hdfFile[location+'/means/data'][i, j, :] = tmp
+
+                for k in range(nd):
+                    tmp[k] = dist[k].variance
+                self.hdfFile[location+'/variances/data'][i, j, :] = tmp
+
+                for k in range(nd):
+                    tmp[k] = dist[k].degrees
+                self.hdfFile[location+'/df/data'][i, j, :] = tmp
+
+                tmp[:nd] = amplitudes[j]
+                self.hdfFile[location+'/amplitudes/data'][i, j, :] = tmp
+
+            counter += 1
+            if counter == nUpdate:
+                print('rank {}, line/fiducial {}/{}, iteration {}/{},  time/dp {} h:m:s'.format(world.rank, self.line, self.fiducials[i], i-i0+1, chunk, str(timedelta(seconds=MPI.Wtime()-t0)/nUpdate)), flush=True)
+                t0 = MPI.Wtime()
+                counter = 0
+
+        print('rank {} finished in {} h:m:s'.format(world.rank, str(timedelta(seconds=MPI.Wtime()-tBase))), flush=True)
 
 
     def depthSlice(self, depth, values, **kwargs):
