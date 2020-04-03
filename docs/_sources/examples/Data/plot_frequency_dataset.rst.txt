@@ -311,8 +311,7 @@ Take a look at the line numbers in the dataset
 
  .. code-block:: none
 
-    [30010. 30020. 30030. 30040. 30050. 30060. 30070. 30080. 30090. 30100.
-     39010. 39020.]
+    [30010. 30020. 30030. ... 30100. 39010. 39020.]
 
 
 
@@ -534,7 +533,7 @@ See the Resolve.stm files.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  16.076 seconds)
+   **Total running time of the script:** ( 0 minutes  15.385 seconds)
 
 
 .. _sphx_glr_download_examples_Data_plot_frequency_dataset.py:

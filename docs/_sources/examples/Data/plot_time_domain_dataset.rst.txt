@@ -120,7 +120,7 @@ Or, plot specific channels in the data
 
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:663: RuntimeWarning: All-NaN axis encountered
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
       if (np.nanmin(values) <= 0.0):
 
 
@@ -286,7 +286,7 @@ Example system files are contained in
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  7.215 seconds)
+   **Total running time of the script:** ( 0 minutes  6.187 seconds)
 
 
 .. _sphx_glr_download_examples_Data_plot_time_domain_dataset.py:

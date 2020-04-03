@@ -184,7 +184,7 @@
 <p>There are two ways in which to create a frequency domain datapoint,</p>
 <ol class="arabic simple">
 <li><p><a class="reference internal" href="#instantiating-a-frequency-domain-data-point"><span class="std std-ref">Instantiating a frequency domain data point</span></a></p></li>
-<li><p><a class="reference internal" href="plot_time_datapoint.html#obtaining-a-datapoint-from-a-dataset"><span class="std std-ref">Obtaining a datapoint from a dataset</span></a></p></li>
+<li><p><a class="reference internal" href="#obtaining-a-datapoint-from-a-dataset"><span class="std std-ref">Obtaining a datapoint from a dataset</span></a></p></li>
 </ol>
 <p>Once instantiated, see <span class="xref std std-ref">Using a frequency domain datapoint</span></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span>
@@ -296,6 +296,10 @@ We can read in a dataset and pull datapoints from it.</p>
 </pre></div>
 </div>
 <img alt="../../_images/sphx_glr_plot_frequency_datapoint_004.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_datapoint_004.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Values &lt;= 0.0 have been masked before taking their log
+</pre></div>
+</div>
 </div>
 <div class="section" id="attaching-statistical-descriptors-to-the-datapoint">
 <h2>Attaching statistical descriptors to the datapoint<a class="headerlink" href="#attaching-statistical-descriptors-to-the-datapoint" title="Permalink to this headline">¶</a></h2>
@@ -310,8 +314,8 @@ We can read in a dataset and pull datapoints from it.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>-316.19118049547296
-22.819882232476
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>-315.66783403599095
+22.796936903564692
 </pre></div>
 </div>
 <p>We can perform a quick search for the best fitting half space</p>
@@ -332,7 +336,7 @@ We can read in a dataset and pull datapoints from it.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>26.18321050483556
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>26.171569657128604
 </pre></div>
 </div>
 <p>Plot the misfits for a range of half space conductivities</p>
@@ -383,16 +387,14 @@ the relative error multiplier, and the additive error noise floor</p>
 </div>
 <img alt="../../_images/sphx_glr_plot_frequency_datapoint_007.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_datapoint_007.png" />
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">_</span> <span class="o">=</span> <span class="n">fdp</span><span class="o">.</span><span class="n">relErr</span><span class="o">.</span><span class="n">plotPosteriors</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">fdp</span><span class="o">.</span><span class="n">errorPosterior</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">comboPlot</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">)</span>
+<span class="c1"># _ = fdp.relErr.plotPosteriors()</span>
 </pre></div>
 </div>
 <img alt="../../_images/sphx_glr_plot_frequency_datapoint_008.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_datapoint_008.png" />
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">_</span> <span class="o">=</span> <span class="n">fdp</span><span class="o">.</span><span class="n">addErr</span><span class="o">.</span><span class="n">plotPosteriors</span><span class="p">()</span>
-</pre></div>
-</div>
-<img alt="../../_images/sphx_glr_plot_frequency_datapoint_009.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_datapoint_009.png" />
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  9.760 seconds)</p>
+<p>plt.figure()
+_ = fdp.addErr.plotPosteriors()</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  10.205 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-datapoints-plot-frequency-datapoint-py">
 <div class="sphx-glr-download docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/247a416d19dc2e10bf9efc1d5dad114c/plot_frequency_datapoint.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_frequency_datapoint.py</span></code></a></p>

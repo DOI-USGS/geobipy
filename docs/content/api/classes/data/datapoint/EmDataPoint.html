@@ -198,7 +198,7 @@
 </div>
 <dl class="method">
 <dt id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.FindBestHalfSpace">
-<code class="sig-name descname">FindBestHalfSpace</code><span class="sig-paren">(</span><em class="sig-param">minConductivity=0.0001</em>, <em class="sig-param">maxConductivity=100.0</em>, <em class="sig-param">nSamples=100</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.FindBestHalfSpace" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">FindBestHalfSpace</code><span class="sig-paren">(</span><em class="sig-param">minConductivity=0.0001</em>, <em class="sig-param">maxConductivity=10000.0</em>, <em class="sig-param">nSamples=100</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.FindBestHalfSpace" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the best value of a half space that fits the data.</p>
 <p>Carries out a brute force search of the halfspace conductivity that best fits the data.
 The profile of data misfit vs halfspace conductivity is not quadratic, so a bisection will not work.</p>
@@ -294,6 +294,27 @@ The profile of data misfit vs halfspace conductivity is not quadratic, so a bise
 </dd></dl>
 
 <dl class="method">
+<dt id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setErrorPosterior">
+<code class="sig-name descname">setErrorPosterior</code><span class="sig-paren">(</span><em class="sig-param">log=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setErrorPosterior" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setHeightPosterior">
+<code class="sig-name descname">setHeightPosterior</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setHeightPosterior" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setPosteriors">
+<code class="sig-name descname">setPosteriors</code><span class="sig-paren">(</span><em class="sig-param">log=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setPosteriors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the posteriors based on the attached priors</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>log</strong> – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
 <dt id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setPriors">
 <code class="sig-name descname">setPriors</code><span class="sig-paren">(</span><em class="sig-param">heightPrior=None</em>, <em class="sig-param">relativeErrorPrior=None</em>, <em class="sig-param">additiveErrorPrior=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setPriors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the priors on the datapoint’s perturbable parameters</p>
@@ -314,7 +335,7 @@ If there are more than one system, additiveErrorPrior is multivariate.</p></li>
 
 <dl class="method">
 <dt id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setProposals">
-<code class="sig-name descname">setProposals</code><span class="sig-paren">(</span><em class="sig-param">heightProposal</em>, <em class="sig-param">relativeErrorProposal</em>, <em class="sig-param">additiveErrorProposal</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setProposals" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">setProposals</code><span class="sig-paren">(</span><em class="sig-param">heightProposal=None</em>, <em class="sig-param">relativeErrorProposal=None</em>, <em class="sig-param">additiveErrorProposal=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setProposals" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the proposals on the datapoint’s perturbable parameters</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -335,6 +356,12 @@ If there are more than one system, additiveErrorProposal is multivariate.</p></l
 <dt id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.summary">
 <code class="sig-name descname">summary</code><span class="sig-paren">(</span><em class="sig-param">out=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.summary" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print a summary of the EMdataPoint</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.updatePosteriors">
+<code class="sig-name descname">updatePosteriors</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.updatePosteriors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update any attached posteriors</p>
 </dd></dl>
 
 </dd></dl>

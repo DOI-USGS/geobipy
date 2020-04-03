@@ -5,10 +5,10 @@
 
 Computation times
 =================
-**00:15.869** total execution time for **examples_Data** files:
+**00:21.572** total execution time for **examples_Data** files:
 
 +---------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Data_plot_frequency_dataset.py` (``plot_frequency_dataset.py``)     | 00:15.869 | 0.0 MB |
+| :ref:`sphx_glr_examples_Data_plot_frequency_dataset.py` (``plot_frequency_dataset.py``)     | 00:15.385 | 0.0 MB |
 +---------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Data_plot_time_domain_dataset.py` (``plot_time_domain_dataset.py``) | 00:00.000 | 0.0 MB |
+| :ref:`sphx_glr_examples_Data_plot_time_domain_dataset.py` (``plot_time_domain_dataset.py``) | 00:06.187 | 0.0 MB |
 +---------------------------------------------------------------------------------------------+-----------+--------+

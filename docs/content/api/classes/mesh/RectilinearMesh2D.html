@@ -189,7 +189,7 @@
 Module describing a 2D Rectilinear Mesh class with x and y axes specified</p>
 <dl class="class">
 <dt id="geobipy.src.classes.mesh.RectilinearMesh2D.RectilinearMesh2D">
-<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.mesh.RectilinearMesh2D.</code><code class="sig-name descname">RectilinearMesh2D</code><span class="sig-paren">(</span><em class="sig-param">xCentres=None</em>, <em class="sig-param">xEdges=None</em>, <em class="sig-param">yCentres=None</em>, <em class="sig-param">yEdges=None</em>, <em class="sig-param">zCentres=None</em>, <em class="sig-param">zEdges=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh2D.RectilinearMesh2D" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.mesh.RectilinearMesh2D.</code><code class="sig-name descname">RectilinearMesh2D</code><span class="sig-paren">(</span><em class="sig-param">xCentres=None</em>, <em class="sig-param">xEdges=None</em>, <em class="sig-param">yCentres=None</em>, <em class="sig-param">yEdges=None</em>, <em class="sig-param">zCentres=None</em>, <em class="sig-param">zEdges=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh2D.RectilinearMesh2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class defining a 2D rectilinear mesh with cell centres and edges.</p>
 <p>Contains a simple 2D mesh with cell edges, widths, and centre locations.
 There are two ways of instantiating the RectilinearMesh2D.
@@ -213,11 +213,19 @@ If x, y, and z are specified, plots can be made against distance which calculate
 <li><p><strong>zEdges</strong> (<em>geobipy.StatArray</em><em>, </em><em>optional</em>) – The locations of the edges of each cell, including the outermost edges, in the “z” direction. Only zCentres or zEdges can be given.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>out</strong> – The 2D mesh.</p>
+<dt class="field-even">Other Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>[x, y, z]edgesMin</strong> (<em>float, optional</em>) – See geobipy.RectilinearMesh1D for edgesMin description.</p></li>
+<li><p><strong>[x, y, z]edgesMax</strong> (<em>float, optional</em>) – See geobipy.RectilinearMesh1D for edgesMax description.</p></li>
+<li><p><strong>[x, y, z]log</strong> (<em>‘e’ or float, optional</em>) – See geobipy.RectilinearMesh1D for log description.</p></li>
+<li><p><strong>[x, y, z]relativeTo</strong> (<em>float, optional</em>) – See geobipy.RectilinearMesh1D for relativeTo description.</p></li>
+</ul>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#geobipy.src.classes.mesh.RectilinearMesh2D.RectilinearMesh2D" title="geobipy.src.classes.mesh.RectilinearMesh2D.RectilinearMesh2D">RectilinearMesh2D</a></p>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>out</strong> – The 2D mesh.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#geobipy.src.classes.mesh.RectilinearMesh2D.RectilinearMesh2D" title="geobipy.src.classes.mesh.RectilinearMesh2D.RectilinearMesh2D">RectilinearMesh2D</a></p>
 </dd>
 </dl>
 <dl class="method">

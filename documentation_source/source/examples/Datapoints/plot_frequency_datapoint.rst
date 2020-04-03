@@ -256,6 +256,14 @@ Compute the sensitivity matrix for a given model
     :class: sphx-glr-single-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Values <= 0.0 have been masked before taking their log
+
 
 
 
@@ -295,8 +303,8 @@ This allows us to evaluate the likelihood of the predicted data
 
  .. code-block:: none
 
-    -316.19118049547296
-    22.819882232476
+    -315.66783403599095
+    22.796936903564692
 
 
 
@@ -347,7 +355,7 @@ Compute the misfit between observed and predicted data
 
  .. code-block:: none
 
-    26.18321050483556
+    26.171569657128604
 
 
 
@@ -472,7 +480,8 @@ Plot the posterior distributions
 .. code-block:: default
 
     plt.figure()
-    _ = fdp.relErr.plotPosteriors()
+    _ = fdp.errorPosterior[0].comboPlot(cmap='gray_r')
+    # _ = fdp.relErr.plotPosteriors()
 
 
 
@@ -484,24 +493,13 @@ Plot the posterior distributions
 
 
 
-
-.. code-block:: default
-
-    plt.figure()
-    _ = fdp.addErr.plotPosteriors()
-
-
-.. image:: /examples/Datapoints/images/sphx_glr_plot_frequency_datapoint_009.png
-    :class: sphx-glr-single-img
-
-
-
-
+plt.figure()
+_ = fdp.addErr.plotPosteriors()
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  10.177 seconds)
+   **Total running time of the script:** ( 0 minutes  10.205 seconds)
 
 
 .. _sphx_glr_download_examples_Datapoints_plot_frequency_datapoint.py:

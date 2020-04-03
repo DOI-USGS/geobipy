@@ -190,7 +190,6 @@ Here we use edges</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rm</span> <span class="o">=</span> <span class="n">RectilinearMesh1D</span><span class="p">(</span><span class="n">cellEdges</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Access property describing the mesh</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">rm</span><span class="o">.</span><span class="n">cellCentres</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -219,9 +218,17 @@ Here we use edges</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[1. 2. 3. ... 7. 8. 9.]
 </pre></div>
 </div>
+<p>Get the cell indices</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">rm</span><span class="o">.</span><span class="n">cellIndex</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="mf">20.0</span><span class="p">]))</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[1 2 5]
+</pre></div>
+</div>
 <p>We can plot the grid of the mesh</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">_</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">(</span><span class="n">flipY</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 <img alt="../../_images/sphx_glr_plot_rectilinear_mesh_1d_001.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_1d_001.png" />
@@ -232,7 +239,68 @@ Here we use edges</p>
 </pre></div>
 </div>
 <img alt="../../_images/sphx_glr_plot_rectilinear_mesh_1d_002.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_1d_002.png" />
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.169 seconds)</p>
+<p>Instantiate a new 1D rectilinear mesh by specifying cell centres or edges.
+Here we use edges</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="s1">&#39;Depth&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rm</span> <span class="o">=</span> <span class="n">RectilinearMesh1D</span><span class="p">(</span><span class="n">cellEdges</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Access property describing the mesh</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">rm</span><span class="o">.</span><span class="n">cellCentres</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[-2.66666667 -2.         -1.33333333 ...  1.33333333  2.
+  2.66666667]
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">rm</span><span class="o">.</span><span class="n">cellEdges</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[-3.         -2.33333333 -1.66666667 ...  1.66666667  2.33333333
+  3.        ]
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">rm</span><span class="o">.</span><span class="n">internalCellEdges</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[-2.33333333 -1.66666667 -1.         ...  1.          1.66666667
+  2.33333333]
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">rm</span><span class="o">.</span><span class="n">cellWidths</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[0.66666667 0.66666667 0.66666667 ... 0.66666667 0.66666667 0.66666667]
+</pre></div>
+</div>
+<p>Get the cell indices</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">rm</span><span class="o">.</span><span class="n">cellIndex</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mf">0.03</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="mf">200.0</span><span class="p">]))</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[1 5 7]
+</pre></div>
+</div>
+<p>We can plot the grid of the mesh</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">(</span><span class="n">flipY</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_rectilinear_mesh_1d_003.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_1d_003.png" />
+<p>Or Pcolor the mesh showing. An array of cell values is used as the colour.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">arr</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">rm</span><span class="o">.</span><span class="n">nCells</span><span class="p">),</span> <span class="s2">&quot;Name&quot;</span><span class="p">,</span> <span class="s2">&quot;Units&quot;</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flipY</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_rectilinear_mesh_1d_004.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_1d_004.png" />
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.362 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-meshes-plot-rectilinear-mesh-1d-py">
 <div class="sphx-glr-download docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/553c44c8f0a927032d89154ad011db0e/plot_rectilinear_mesh_1d.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_rectilinear_mesh_1d.py</span></code></a></p>

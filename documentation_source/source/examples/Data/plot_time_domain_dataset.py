@@ -42,7 +42,7 @@ _ = TD.plotLine(100101.0, log=10)
 ################################################################################
 # Or, plot specific channels in the data
 plt.figure(figsize=(8,6))
-_ = TD.plot(system=0, channels=TD.active[:3], log=10)
+_ = TD.plot(system=0, channels=[3, 4, 5], log=10)
 
 ################################################################################
 plt.figure()
@@ -80,43 +80,43 @@ _ = line.plot(xAxis='x', log=10)
 #
 # The data columns are read in according to the column names in the first line
 #
-# In this description, the column name or its alternatives are given followed by what the name represents 
+# In this description, the column name or its alternatives are given followed by what the name represents
 # Optional columns are also described.
 #
 # Required columns
 # ________________
-# line 
+# line
 #     Line number for the data point
 # fid
 #     Unique identification number of the data point
-# x or northing or n 
+# x or northing or n
 #     Northing co-ordinate of the data point, (m)
-# y or easting or e 
+# y or easting or e
 #     Easting co-ordinate of the data point, (m)
 # z or alt
 #     Altitude of the transmitter coil above ground level (m)
 # elevation
 #     Elevation of the ground at the data point (m)
-# txrx_dx 
+# txrx_dx
 #     Distance in x between transmitter and reciever (m)
-# txrx_dy 
+# txrx_dy
 #     Distance in y between transmitter and reciever (m)
-# txrx_dz 
+# txrx_dz
 #     Distance in z between transmitter and reciever (m)
-# TxPitch 
+# TxPitch
 #     Pitch of the transmitter loop
-# TxRoll 
+# TxRoll
 #     Roll of the transmitter loop
-# TxYaw 
+# TxYaw
 #     Yaw of the transmitter loop
-# RxPitch 
+# RxPitch
 #     Pitch of the receiver loop
-# RxRoll 
+# RxRoll
 #     Roll of the receiver loop
-# RxYaw 
+# RxYaw
 #     Yaw of the receiver loop
 # Off[0] Off[1] ... Off[last]  - with the number and square brackets
-#     The measurements for each time gate specified in the accompanying system file under Receiver Window Times 
+#     The measurements for each time gate specified in the accompanying system file under Receiver Window Times
 # Optional columns
 # ________________
 # OffErr[0] OffErr[1] ... OffErr[last]
@@ -129,12 +129,12 @@ _ = line.plot(xAxis='x', log=10)
 # File Format for a time domain system
 # ++++++++++++++++++++++++++++++++++++
 # Please see Page 13 of Ross Brodie's `instructions`_
-# 
+#
 # .. _instructions: https://github.com/GeoscienceAustralia/ga-aem/blob/master/docs/GA%20AEM%20Programs%20User%20Manual.pdf
 #
 # We use GA-AEM for our airborne time domain forward modeller.
 #
-# Example system files are contained in 
+# Example system files are contained in
 # `the supplementary folder`_ in this repository
 #
 # .. _the supplementary folder: https://github.com/usgs/geobipy/tree/master/documentation_source/source/examples/supplementary/Data

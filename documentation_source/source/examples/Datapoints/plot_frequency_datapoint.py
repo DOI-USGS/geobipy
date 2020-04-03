@@ -195,8 +195,9 @@ _ = fdp.z.plotPosteriors()
 
 ################################################################################
 plt.figure()
-_ = fdp.relErr.plotPosteriors()
+_ = fdp.errorPosterior[0].comboPlot(cmap='gray_r')
+# _ = fdp.relErr.plotPosteriors()
 
 ################################################################################
-plt.figure()
-_ = fdp.addErr.plotPosteriors()
+# plt.figure()
+# _ = fdp.addErr.plotPosteriors()

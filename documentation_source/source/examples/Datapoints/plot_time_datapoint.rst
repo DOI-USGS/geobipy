@@ -20,6 +20,15 @@ There are three ways in which to create a time domain datapoint
 
 Once instantiated, see :ref:`Using a time domain datapoint`
 
+Credits:
+We would like to thank Ross Brodie at Geoscience Australia for his airborne time domain forward modeller
+https://github.com/GeoscienceAustralia/ga-aem
+
+For ground-based time domain data, we are using Dieter Werthmuller's python package Empymod
+https://empymod.github.io/
+
+Thanks to Dieter for his help getting Empymod ready for incorporation into GeoBIPy
+
 
 .. code-block:: default
 
@@ -145,7 +154,7 @@ The Waveform class defines a half waveform
  .. code-block:: none
 
 
-    <matplotlib.legend.Legend object at 0x1290982d0>
+    <matplotlib.legend.Legend object at 0x12b6b6150>
 
 
 
@@ -243,7 +252,7 @@ Instantiate the time domain datapoint
  .. code-block:: none
 
 
-    <matplotlib.axes._subplots.AxesSubplot object at 0x129013590>
+    <matplotlib.axes._subplots.AxesSubplot object at 0x12b635150>
 
 
 
@@ -285,7 +294,7 @@ AarhusInv data format.
  .. code-block:: none
 
 
-    <matplotlib.axes._subplots.AxesSubplot object at 0x1296d1110>
+    <matplotlib.axes._subplots.AxesSubplot object at 0x12bb45610>
 
 
 
@@ -350,7 +359,7 @@ Get a datapoint from the dataset
  .. code-block:: none
 
 
-    <matplotlib.axes._subplots.AxesSubplot object at 0x130565d10>
+    <matplotlib.axes._subplots.AxesSubplot object at 0x12fb56d50>
 
 
 
@@ -508,7 +517,7 @@ We can perform a quick search for the best fitting half space
 
  .. code-block:: none
 
-    Best half space conductivity is [0.02009233] $S/m$
+    Best half space conductivity is [0.01830738] $S/m$
 
 
 
@@ -530,7 +539,7 @@ Compute the misfit between observed and predicted data
 
  .. code-block:: none
 
-    452.4915367942427
+    48.247662254424135
 
 
 
@@ -655,7 +664,12 @@ Plot the posterior distributions
 .. code-block:: default
 
     plt.figure()
-    _ = tdp.relErr.plotPosteriors()
+    _ = tdp.errorPosterior[0].comboPlot(cmap='gray_r')
+    # _ = tdp.relErr.plotPosteriors()
+
+    # ################################################################################
+    # plt.figure()
+    # _ = tdp.addErr.plotPosteriors()
 
 
 
@@ -667,31 +681,89 @@ Plot the posterior distributions
 
 
 
+File Format for a time domain datapoint
++++++++++++++++++++++++++++++++++++++++
+Here we describe the file format for a time domain datapoint.
 
-.. code-block:: default
+For individual datapoints we are using the AarhusInv data format.
 
-    plt.figure()
-    _ = tdp.addErr.plotPosteriors()
+Here we take the description for the AarhusInv TEM data file, modified to reflect what we can
+currently handle in GeoBIPy.
 
+Line 1 :: string
+  User-defined label describing the TEM datapoint.
+  This line must contain the following, separated by semicolons.
+  XUTM=
+  YUTM=
+  Elevation=
+  StationNumber=
+  LineNumber=
+  Current=
 
+Line 2 :: first integer, sourceType
+  7 = Rectangular loop source parallel to the x - y plane
+Line 2 :: second integer, polarization
+  3 = Vertical magnetic field
 
+Line 3 :: 6 floats, transmitter and receiver offsets relative to X/Y UTM location.
+  If sourceType = 7, Position of the center loop sounding.
 
+Line 4 :: Transmitter loop dimensions
+  If sourceType = 7, 2 floats.  Loop side length in the x and y directions
 
+Line 5 :: Fixed
+  3 3 3
 
+Line 6 :: first integer, transmitter waveform type. Fixed
+  3 = User defined waveform.
 
+Line 6 :: second integer, number of transmitter waveforms. Fixed
+  1
 
+Line 7 :: transmitter waveform definition
+  A user-defined waveform with piecewise linear segments.
+  A full transmitter waveform definition consists of a number of linear segments
+  This line contains an integer as the first entry, which specifies the number of
+  segments, followed by each segment with 4 floats each. The 4 floats per segment
+  are the start and end times, and start and end amplitudes of the waveform. e.g.
+  3  -8.333e-03 -8.033e-03 0.0 1.0 -8.033e-03 0.0 1.0 1.0 0.0 5.4e-06 1.0 0.0
 
-.. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_012.png
-    :class: sphx-glr-single-img
+Line 8 :: On time information. Not used but needs specifying.
+  1 1 1
 
+Line 9 :: On time low-pass filters.  Not used but need specifying.
+  0
 
+Line 10 :: On time high-pass filters. Not used but need specifying.
+  0
 
+Line 11 :: Front-gate time. Not used but need specifying.
+  0.0
 
+Line 12 :: first integer, Number of off time filters
+  Number of filters
+
+Line 12 :: second integer, Order of the butterworth filter
+  1 or 2
+
+Line 12 :: cutoff frequencies Hz, one per the number of filters
+  e.g. 4.5e5
+
+Line 13 :: Off time high pass filters.
+  See Line 12
+
+Lines after 13 contain 3 columns that pertain to
+Measurement Time, Data Value, Estimated Standard Deviation
+
+Example data files are contained in
+`the supplementary folder`_ in this repository
+
+.. _the supplementary folder: https://github.com/usgs/geobipy/tree/master/documentation_source/source/examples/supplementary/Data
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  8.762 seconds)
+   **Total running time of the script:** ( 0 minutes  6.687 seconds)
 
 
 .. _sphx_glr_download_examples_Datapoints_plot_time_datapoint.py:

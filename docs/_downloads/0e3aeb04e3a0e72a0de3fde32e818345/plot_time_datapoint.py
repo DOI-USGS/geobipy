@@ -13,6 +13,15 @@ Time Domain Datapoint Class
 # 3) :ref:`Obtaining a datapoint from a dataset`
 #
 # Once instantiated, see :ref:`Using a time domain datapoint`
+#
+# Credits:
+# We would like to thank Ross Brodie at Geoscience Australia for his airborne time domain forward modeller
+# https://github.com/GeoscienceAustralia/ga-aem
+#
+# For ground-based time domain data, we are using Dieter Werthmuller's python package Empymod
+# https://empymod.github.io/
+#
+# Thanks to Dieter for his help getting Empymod ready for incorporation into GeoBIPy
 
 #%%
 from os.path import join
@@ -271,14 +280,89 @@ _ = tdp.z.plotPosteriors()
 
 ################################################################################
 plt.figure()
-_ = tdp.relErr.plotPosteriors()
+_ = tdp.errorPosterior[0].comboPlot(cmap='gray_r')
+# _ = tdp.relErr.plotPosteriors()
 
-################################################################################
-plt.figure()
-_ = tdp.addErr.plotPosteriors()
+# ################################################################################
+# plt.figure()
+# _ = tdp.addErr.plotPosteriors()
 
-
-
-
-
-
+#%%
+# File Format for a time domain datapoint
+# +++++++++++++++++++++++++++++++++++++++
+# Here we describe the file format for a time domain datapoint.
+#
+# For individual datapoints we are using the AarhusInv data format.
+#
+# Here we take the description for the AarhusInv TEM data file, modified to reflect what we can
+# currently handle in GeoBIPy.
+#
+# Line 1 :: string
+#   User-defined label describing the TEM datapoint.
+#   This line must contain the following, separated by semicolons.
+#   XUTM=
+#   YUTM=
+#   Elevation=
+#   StationNumber=
+#   LineNumber=
+#   Current=
+#
+# Line 2 :: first integer, sourceType
+#   7 = Rectangular loop source parallel to the x - y plane
+# Line 2 :: second integer, polarization
+#   3 = Vertical magnetic field
+#
+# Line 3 :: 6 floats, transmitter and receiver offsets relative to X/Y UTM location.
+#   If sourceType = 7, Position of the center loop sounding.
+#
+# Line 4 :: Transmitter loop dimensions
+#   If sourceType = 7, 2 floats.  Loop side length in the x and y directions
+#
+# Line 5 :: Fixed
+#   3 3 3
+#
+# Line 6 :: first integer, transmitter waveform type. Fixed
+#   3 = User defined waveform.
+#
+# Line 6 :: second integer, number of transmitter waveforms. Fixed
+#   1
+#
+# Line 7 :: transmitter waveform definition
+#   A user-defined waveform with piecewise linear segments.
+#   A full transmitter waveform definition consists of a number of linear segments
+#   This line contains an integer as the first entry, which specifies the number of
+#   segments, followed by each segment with 4 floats each. The 4 floats per segment
+#   are the start and end times, and start and end amplitudes of the waveform. e.g.
+#   3  -8.333e-03 -8.033e-03 0.0 1.0 -8.033e-03 0.0 1.0 1.0 0.0 5.4e-06 1.0 0.0
+#
+# Line 8 :: On time information. Not used but needs specifying.
+#   1 1 1
+#
+# Line 9 :: On time low-pass filters.  Not used but need specifying.
+#   0
+#
+# Line 10 :: On time high-pass filters. Not used but need specifying.
+#   0
+#
+# Line 11 :: Front-gate time. Not used but need specifying.
+#   0.0
+#
+# Line 12 :: first integer, Number of off time filters
+#   Number of filters
+#
+# Line 12 :: second integer, Order of the butterworth filter
+#   1 or 2
+#
+# Line 12 :: cutoff frequencies Hz, one per the number of filters
+#   e.g. 4.5e5
+#
+# Line 13 :: Off time high pass filters.
+#   See Line 12
+#
+# Lines after 13 contain 3 columns that pertain to
+# Measurement Time, Data Value, Estimated Standard Deviation
+#
+# Example data files are contained in
+# `the supplementary folder`_ in this repository
+#
+# .. _the supplementary folder: https://github.com/usgs/geobipy/tree/master/documentation_source/source/examples/supplementary/Data

@@ -113,8 +113,8 @@ Compute the mean over an interval for the mesh.
  .. code-block:: none
 
 
-    (array([[0.45990442, 0.43924989, 0.5563779 , ..., 0.62162269, 0.40900975,
-            0.501367  ]]), [6.8, 12.4])
+    (array([[0.46256476, 0.52214324, 0.63906246, ..., 0.39589818, 0.47467693,
+            0.53935111]]), [6.8, 12.4])
 
 
 
@@ -137,8 +137,8 @@ Compute the mean over multiple intervals for the mesh.
  .. code-block:: none
 
 
-    (array([[0.45990442, 0.43924989, 0.5563779 , ..., 0.62162269, 0.40900975,
-            0.501367  ]]), [6.8, 12.4])
+    (array([[0.46256476, 0.52214324, 0.63906246, ..., 0.39589818, 0.47467693,
+            0.53935111]]), [6.8, 12.4])
 
 
 
@@ -161,13 +161,13 @@ We can apply the interval statistics to either axis
  .. code-block:: none
 
 
-    (array([[0.81264427],
-           [0.77049678],
-           [0.8639198 ],
+    (array([[0.69082797],
+           [0.82774567],
+           [0.83813853],
            ...,
-           [0.25895463],
-           [0.14491   ],
-           [0.63033245]]), [2.8, 4.2])
+           [0.55792657],
+           [0.52460693],
+           [0.54501891]]), [2.8, 4.2])
 
 
 
@@ -188,13 +188,13 @@ We can apply the interval statistics to either axis
  .. code-block:: none
 
 
-    (array([[0.81264427, 0.31286889, 0.44391968],
-           [0.77049678, 0.23958338, 0.41894884],
-           [0.8639198 , 0.24823744, 0.39651941],
+    (array([[0.69082797, 0.67636966, 0.4841188 ],
+           [0.82774567, 0.71365898, 0.6536987 ],
+           [0.83813853, 0.3395561 , 0.37579465],
            ...,
-           [0.25895463, 0.27372923, 0.54950231],
-           [0.14491   , 0.01308904, 0.44460325],
-           [0.63033245, 0.83726262, 0.30314827]]), [2.8, 4.2, 5.1, 8.4])
+           [0.55792657, 0.9471549 , 0.41871764],
+           [0.52460693, 0.92245187, 0.64562256],
+           [0.54501891, 0.26570289, 0.26764122]]), [2.8, 4.2, 5.1, 8.4])
 
 
 
@@ -315,7 +315,7 @@ The pcolor function can now be plotted against distance
  .. code-block:: none
 
 
-    (<matplotlib.axes._subplots.AxesSubplot object at 0x124c75390>, <matplotlib.collections.QuadMesh object at 0x124ad5a10>, <matplotlib.colorbar.Colorbar object at 0x124acd7d0>)
+    (<matplotlib.axes._subplots.AxesSubplot object at 0x1275dbd10>, <matplotlib.collections.QuadMesh object at 0x12c849210>, <matplotlib.colorbar.Colorbar object at 0x12c532290>)
 
 
 
@@ -324,7 +324,7 @@ rm.toVTK('test', cellData=values)
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.450 seconds)
+   **Total running time of the script:** ( 0 minutes  0.451 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_topo_rectilinear_mesh_2d.py:

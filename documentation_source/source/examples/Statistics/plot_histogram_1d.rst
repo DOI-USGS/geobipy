@@ -38,7 +38,7 @@ Histogram with regular bins
 
 
     # Create regularly spaced bins
-    bins = StatArray(np.linspace(-3, 3, 101), 'Regular bins')
+    bins = StatArray(np.linspace(-3.0, 3.0, 101), 'Regular bins')
 
 
 
@@ -100,7 +100,7 @@ Get the median, and 95% confidence values
 
  .. code-block:: none
 
-    (0.030000000000000027, -1.53, 1.65)
+    (-0.030000000000000027, -1.71, 1.65)
 
 
 
@@ -149,8 +149,8 @@ Histogram with irregular bins
 
 
     # Create irregularly spaced bins
-    x = np.cumsum(np.arange(10))
-    irregularBins = np.hstack([-x[::-1], x[1:]]) 
+    x = np.cumsum(np.arange(10, dtype=np.float64))
+    irregularBins = np.hstack([-x[::-1], x[1:]])
 
 
 
@@ -365,7 +365,7 @@ The update takes in the numbers in linear space and takes their log=10
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.742 seconds)
+   **Total running time of the script:** ( 0 minutes  0.759 seconds)
 
 
 .. _sphx_glr_download_examples_Statistics_plot_histogram_1d.py:

@@ -189,6 +189,12 @@
 <li><p><a class="reference internal" href="#obtaining-a-datapoint-from-a-dataset"><span class="std std-ref">Obtaining a datapoint from a dataset</span></a></p></li>
 </ol>
 <p>Once instantiated, see <a class="reference internal" href="#using-a-time-domain-datapoint"><span class="std std-ref">Using a time domain datapoint</span></a></p>
+<p>Credits:
+We would like to thank Ross Brodie at Geoscience Australia for his airborne time domain forward modeller
+<a class="reference external" href="https://github.com/GeoscienceAustralia/ga-aem">https://github.com/GeoscienceAustralia/ga-aem</a></p>
+<p>For ground-based time domain data, we are using Dieter Werthmuller’s python package Empymod
+<a class="reference external" href="https://empymod.github.io/">https://empymod.github.io/</a></p>
+<p>Thanks to Dieter for his help getting Empymod ready for incorporation into GeoBIPy</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">h5py</span>
@@ -265,7 +271,7 @@
 </div>
 <img alt="../../_images/sphx_glr_plot_time_datapoint_001.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_001.png" />
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend object at 0x127d7cd50&gt;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend object at 0x12b6b6150&gt;
 </pre></div>
 </div>
 <p>Define the transmitter and reciever loops</p>
@@ -307,7 +313,7 @@
 </div>
 <img alt="../../_images/sphx_glr_plot_time_datapoint_002.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_002.png" />
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.axes._subplots.AxesSubplot object at 0x126be60d0&gt;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.axes._subplots.AxesSubplot object at 0x12b635150&gt;
 </pre></div>
 </div>
 </div>
@@ -325,7 +331,7 @@ AarhusInv data format.</p>
 </div>
 <img alt="../../_images/sphx_glr_plot_time_datapoint_003.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_003.png" />
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.axes._subplots.AxesSubplot object at 0x12a98e1d0&gt;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.axes._subplots.AxesSubplot object at 0x12bb45610&gt;
 </pre></div>
 </div>
 </div>
@@ -353,7 +359,7 @@ We can read in a dataset and pull datapoints from it.</p>
 </div>
 <img alt="../../_images/sphx_glr_plot_time_datapoint_004.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_004.png" />
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.axes._subplots.AxesSubplot object at 0x12f95fe90&gt;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.axes._subplots.AxesSubplot object at 0x12fb56d50&gt;
 </pre></div>
 </div>
 </div>
@@ -418,7 +424,7 @@ We can read in a dataset and pull datapoints from it.</p>
 </div>
 <img alt="../../_images/sphx_glr_plot_time_datapoint_008.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_008.png" />
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Best half space conductivity is [0.02009233] $S/m$
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Best half space conductivity is [0.01830738] $S/m$
 </pre></div>
 </div>
 <p>Compute the misfit between observed and predicted data</p>
@@ -426,7 +432,7 @@ We can read in a dataset and pull datapoints from it.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>452.4915367942427
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>48.247662254424135
 </pre></div>
 </div>
 <p>Plot the misfits for a range of half space conductivities</p>
@@ -477,15 +483,15 @@ the relative error multiplier, and the additive error noise floor</p>
 </div>
 <img alt="../../_images/sphx_glr_plot_time_datapoint_010.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_010.png" />
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">_</span> <span class="o">=</span> <span class="n">tdp</span><span class="o">.</span><span class="n">relErr</span><span class="o">.</span><span class="n">plotPosteriors</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">tdp</span><span class="o">.</span><span class="n">errorPosterior</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">comboPlot</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">)</span>
+<span class="c1"># _ = tdp.relErr.plotPosteriors()</span>
+
+<span class="c1"># ################################################################################</span>
+<span class="c1"># plt.figure()</span>
+<span class="c1"># _ = tdp.addErr.plotPosteriors()</span>
 </pre></div>
 </div>
 <img alt="../../_images/sphx_glr_plot_time_datapoint_011.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_011.png" />
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">_</span> <span class="o">=</span> <span class="n">tdp</span><span class="o">.</span><span class="n">addErr</span><span class="o">.</span><span class="n">plotPosteriors</span><span class="p">()</span>
-</pre></div>
-</div>
-<img alt="../../_images/sphx_glr_plot_time_datapoint_012.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_012.png" />
 </div>
 <div class="section" id="file-format-for-a-time-domain-datapoint">
 <h2>File Format for a time domain datapoint<a class="headerlink" href="#file-format-for-a-time-domain-datapoint" title="Permalink to this headline">¶</a></h2>
@@ -545,7 +551,7 @@ are the start and end times, and start and end amplitudes of the waveform. e.g.
 Measurement Time, Data Value, Estimated Standard Deviation</p>
 <p>Example data files are contained in
 <a class="reference external" href="https://github.com/usgs/geobipy/tree/master/documentation_source/source/examples/supplementary/Data">the supplementary folder</a> in this repository</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  7.377 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  6.687 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-datapoints-plot-time-datapoint-py">
 <div class="sphx-glr-download docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/0e3aeb04e3a0e72a0de3fde32e818345/plot_time_datapoint.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_time_datapoint.py</span></code></a></p>
