@@ -356,10 +356,10 @@ class Histogram1D(RectilinearMesh1D):
         yData = self.estimatePdf()
         fit_denominator = np.linalg.norm(yData, ord=norm)
 
-        if verbose:
-            print('centres', binCentres.__repr__())
-            print('bins', bins.__repr__())
-            print('counts ', self.counts.__repr__())
+        # if verbose:
+            # print('centres', binCentres.__repr__())
+            # print('bins', bins.__repr__())
+            # print('counts ', self.counts.__repr__())
 
         # Only fit the non-zero counts otherwise heavy tails can dominate
         iPeaks = np.argmax(yData)
@@ -392,14 +392,20 @@ class Histogram1D(RectilinearMesh1D):
 
             new_peak = np.argmax(yData - yFit)
 
-            separations = np.r_[[np.int(np.sqrt(x) / bin_width) for x in model[2::nParameters]]]
-            keep = np.hstack([keep, np.all(np.abs(iPeaks - new_peak) > separations)])
-            iPeaks = np.hstack([iPeaks, new_peak])
-
-            nPeaks += 1
+            currentMeans = model[1::nParameters]
+            currentStd = np.sqrt(model[2::nParameters])
+            keep = np.hstack([keep, np.all(np.abs(currentMeans - binCentres[new_peak]) > 0.67*currentStd)])
 
             if verbose:
                 print('New Peaks ', binCentres[iPeaks], flush=True)
+                print('diff', np.abs(currentMeans - binCentres[new_peak]))
+                print('currentStd', currentStd)
+
+
+                print('keep', keep, flush=True)
+
+            iPeaks = np.hstack([iPeaks, new_peak])
+            nPeaks += 1
 
             model = self._single_fit(function, nParameters, iPeaks, **kwargs)
 
@@ -437,15 +443,16 @@ class Histogram1D(RectilinearMesh1D):
         dists = []
         amp = []
         nG = np.int(len(model)/nParameters)
+
         if not maxDistribuions is None:
             nG = np.minimum(nG, maxDistribuions)
+
         for i in range(nG):
-            if keep[i]:
-                i1 = nParameters*i
-                a = model[i1]
-                d = Distribution(dist, *model[i1+1:i1+nParameters])
-                dists.append(d)
-                amp.append(a)
+            i1 = nParameters*i
+            a = model[i1]
+            d = Distribution(dist, *model[i1+1:i1+nParameters])
+            dists.append(d)
+            amp.append(a)
 
         if verbose:
             print('return model ', model)
@@ -496,13 +503,13 @@ class Histogram1D(RectilinearMesh1D):
 
         bounds = (lowerBounds, upperBounds)
 
-        if verbose:
-            print('    log', log, flush=True)
-            print('    binCentres', binCentres, flush=True)
-            print('    yData', yData, flush=True)
-            print('    guess', guess, flush=True)
-            print('    lowerBounds', lowerBounds, flush=True)
-            print('    upperBounds', upperBounds, flush=True)
+        # if verbose:
+        #     print('    log', log, flush=True)
+        #     print('    binCentres', binCentres, flush=True)
+        #     print('    yData', yData, flush=True)
+        #     print('    guess', guess, flush=True)
+        #     print('    lowerBounds', lowerBounds, flush=True)
+        #     print('    upperBounds', upperBounds, flush=True)
 
 
         model, pcov = curve_fit(function, xdata=xd, ydata=yd, p0=guess, bounds=bounds, ftol=1e-3, **kwargs)
