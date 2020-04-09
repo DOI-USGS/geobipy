@@ -530,7 +530,7 @@ class Histogram2D(RectilinearMesh2D):
         return distributions, active
 
 
-    def fitMajorPeaks(self, intervals, axis=0, method='gaussian', verbose=False, **kwargs):
+    def fitMajorPeaks(self, intervals, axis=0, method='studentt', verbose=False, **kwargs):
         """Find peaks in the histogram along an axis.
 
         Parameters
