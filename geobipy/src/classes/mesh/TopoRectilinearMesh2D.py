@@ -23,11 +23,11 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
 
     Contains a simple 2D mesh with cell edges, widths, and centre locations.
     In the instantiation, there are three cartesian co-ordinates, x, y, z, specified for the cell centres or edges.
-    This allows you to, for example, create a vertical 2D mesh that is not parallel to either the 
+    This allows you to, for example, create a vertical 2D mesh that is not parallel to either the
     x or y axis, like a collection line of data.
-    The mesh lies in the x-z plane.  The y axis can be used to compute the distance sqrt(x^2 + y^2), 
+    The mesh lies in the x-z plane.  The y axis can be used to compute the distance sqrt(x^2 + y^2),
     which can then be used for plotting.
-    A height profile can also be given that specifies the height of the upper most cell. 
+    A height profile can also be given that specifies the height of the upper most cell.
     The cell locations in z are then added to the height profile.
 
     TopoRectilinearMesh2D(xCentres, xEdges, yCentres, yEdges, zCentres, zEdges, heightCentres, heightEdges)
@@ -75,7 +75,7 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
         self._xMesh = self.xMesh()
         self._zMesh = self.zMesh()
 
-    
+
     def __getitem__(self, slic):
         """Slice into the mesh. """
 
@@ -94,7 +94,7 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
 
     def xMesh(self, xAxis='x'):
         """Creates an array suitable for plt.pcolormesh for the abscissa.
-        
+
         Parameters
         ----------
         xAxis : str
@@ -168,9 +168,9 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
         grid : bool, optional
             Plot the grid
         noColorbar : bool, optional
-            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.   
+            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
         trim : bool, optional
-            Set the x and y limits to the first and last non zero values along each axis.    
+            Set the x and y limits to the first and last non zero values along each axis.
 
         Returns
         -------
@@ -183,7 +183,7 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
 
         """
         # assert isinstance(values, StatArray), TypeError("values must be a StatArray")
-        assert np.all(values.shape == self.shape), ValueError("values must have shape {}".format(self.shape))
+        assert np.all(values.shape == self.shape), ValueError("values must have shape {} but have shape {}".format(self.shape, values.shape))
 
         xm = self.xMesh(xAxis=xAxis)
         zm = self.zMesh(zAxis=zAxis)
@@ -196,7 +196,7 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
 
         return ax, pm, cb
 
-    
+
     def plotGrid(self, xAxis='x', **kwargs):
         """Plot the grid lines of the mesh. """
 
@@ -228,7 +228,7 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
         plt.yscale(yscale)
         cP.xlabel(xtmp.getNameUnits())
         cP.ylabel(self.y._cellCentres.getNameUnits())
-        
+
         if flipX:
             ax.set_xlim(ax.get_xlim()[::-1])
 
@@ -248,7 +248,7 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
             self.height.cellCentres.plot(xtmp, **kwargs)
         else:
             self.height.cellEdges.plot(xtmp, **kwargs)
-                
+
 
     def vtkStructure(self):
         """Generates a vtk mesh structure that can be used in a vtk file.
