@@ -6,13 +6,11 @@ from ...classes.core import StatArray
 from ...base import customFunctions as cF
 from ...base import customPlots as cP
 from .Distribution import Distribution
+from .mixNormal import mixNormal
+from .mixStudentT import mixStudentT
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
-
-from scipy.signal import find_peaks
-from scipy.optimize import curve_fit
-from scipy.stats import (norm, t)
 
 from copy import deepcopy
 
@@ -192,6 +190,15 @@ class Histogram1D(RectilinearMesh1D):
         return StatArray.StatArray(np.divide(self.counts, np.sum(self.counts)), name='Density')
 
 
+    def estimateStd(self, nSamples, **kwargs):
+        return np.sqrt(self.estimateVariance(nSamples, **kwargs))
+
+
+    def estimateVariance(self, nSamples, **kwargs):
+        X = self.sample(nSamples, **kwargs)
+        return np.var(X)
+
+
     def findPeaks(self, width, **kwargs):
         """Identify peaks in the histogram.
 
@@ -204,33 +211,9 @@ class Histogram1D(RectilinearMesh1D):
         return find_peaks(self.estimatePdf(),  width=width, **kwargs)
 
 
-    def _sum_of_gaussians(self, x, *params):
-        y = np.zeros_like(x)
-
-        nG = np.int(len(params)/3)
-
-        for i in range(nG):
-            i1 = i*3
-            amp, mean, var = params[i1:i1+3]
-            y += amp * norm.pdf(x, mean, var)
-
-        return y
-
-    def _sum_of_studentT(self, x, *params):
-        y = np.zeros_like(x)
-
-        nG = np.int(len(params)/4)
-
-        for i in range(nG):
-            i1 = i*4
-            amp, mean, var, df = params[i1:i1+4]
-            y += amp * t.pdf(x, df, mean, var)
-
-        return y
-
 
     def fit_mixture(self, mixture_type='gaussian', nSamples=1e5, log=None, mean_bounds=None, variance_bounds=None, k=[1, 5], tolerance=0.05):
-        """Uses Gaussian mixture models to fit the histogram.
+        """Uses Gaussian or StudentT mixture models to fit the histogram.
 
         Starts at the minimum number of clusters and adds clusters until the BIC decreases less than the tolerance.
 
@@ -251,268 +234,25 @@ class Histogram1D(RectilinearMesh1D):
 
         """
 
-        from sklearn.mixture import GaussianMixture
-        # from smm import SMM
-
-        if mixture_type.lower() == 'gaussian':
-            mod = GaussianMixture
-        else:
-            mod = SMM
-
-        # Samples the histogram
         X = self.sample(nSamples)[:, None]
-        X, _ = cF._log(X, log)
 
-        # of clusters
-        k_ = k[0]
-
-        best = mod(n_components=k_).fit(X)
-        # best = GaussianMixture(k_).fit(X)
-        BIC0 = best.bic(X)
-
-        k_ += 1
-        go = k_ <= k[1]
-
-        while go:
-            model = mod(n_components=k_).fit(X)
-            # model = GaussianMixture(k_).fit(X)
-            BIC1 = model.bic(X)
-
-            percent_reduction = np.abs((BIC1 - BIC0)/BIC0)
-
-            go = True
-            if BIC1 < BIC0:
-                best = model
-                BIC0 = BIC1
-
-            else:
-                go = False
-
-            if (percent_reduction < tolerance):
-                go = False
-
-            k_ += 1
-            go = go & (k_ <= k[1])
+        return X.fit_mixture(mixture_type, log, mean_bounds, variance_bounds, k, tolerance)
 
 
-        active = np.ones(best.n_components, dtype=np.bool)
-
-        means = np.squeeze(best.means_)
-        try:
-            variances = np.squeeze(best.covariances_)
-        except:
-            variances = np.squeeze(best.covariances)
-
-        if not mean_bounds is None:
-            active = (mean_bounds[0] <= means) & (means <= mean_bounds[1])
-
-        if not variance_bounds is None:
-            active = (variance_bounds[0] <= variances) & (variances <= variance_bounds[1]) & active
-
-        return best, np.atleast_1d(active)
-
-
-    def fitMajorPeaks(self, method='gaussian', **kwargs):
-        method = method.lower()
-        if method == 'gaussian':
-            return self._fitMajorPeaks(self._sum_of_gaussians, 3, **kwargs)
-        elif method == 'studentt':
-            return self._fitMajorPeaks(self._sum_of_studentT, 4, **kwargs)
+    def fit_estimated_pdf(self, mixture='student_t', **kwargs):
+        mixture = mixture.lower()
+        if mixture == 'gaussian':
+            mixture = mixNormal()
+        elif mixture == 'student_t':
+            mixture = mixStudentT()
         else:
-            assert False, ValueError("method must be either 'gaussian' or 'studentt' ")
+            assert False, ValueError("method must be either 'gaussian' or 'student_t' ")
+
+        mixture.fit_to_curve(x=self.binCentres, y=self.estimatePdf(), **kwargs)
+        return mixture
 
 
-    def _fitMajorPeaks(self, function, nParameters, **kwargs):
-        """Iteratively fits the histogram with an increasing number of distributions until the fit changes by less than a tolerance.
-
-        """
-
-        if np.all(self.counts == 0):
-            return [], []
-
-        bin_separation = kwargs.pop('bin_separation', None)
-        norm = kwargs.pop('norm', 2)
-        tolerance = kwargs.pop('tolerance', 0.05)
-        log = kwargs.get('log', None)
-        verbose = kwargs.get('verbose', False)
-        plot = kwargs.pop('plot', False)
-        maxDistribuions = kwargs.pop('max_distributions', None)
-
-        binCentres, dum = cF._log(self.binCentres, log)
-        bins, dum = cF._log(self.bins, log)
-        bin_width = binCentres[1] - binCentres[0]
-
-        # if 'variance_upper_bound' in kwargs and bin_separation is None:
-        #     print(kwargs['variance_upper_bound'])
-        #     print(binCentres[1] - binCentres[0])
-        #     bin_separation = np.int(np.sqrt(kwargs['variance_upper_bound']) / bin_width)
-
-        if bin_separation is None:
-            bin_separation = 1
-
-        if plot:
-            fig = plt.figure()
-
-        yData = self.estimatePdf()
-        fit_denominator = np.linalg.norm(yData, ord=norm)
-
-        if verbose:
-            print('centres', binCentres.__repr__())
-            print('bins', bins.__repr__())
-            print('counts ', self.counts.__repr__())
-
-        # Only fit the non-zero counts otherwise heavy tails can dominate
-        iPeaks = np.argmax(yData)
-        keep = np.ones(1, dtype=np.bool)
-        nPeaks = 1
-
-        model = self._single_fit(function, nParameters, iPeaks, **kwargs)
-
-        yFit = function(binCentres, *model)
-        fit = np.linalg.norm((yData - yFit), ord=norm) / fit_denominator
-
-        if verbose:
-            print('first Model: ', model, flush=True)
-            print('fit: ', fit)
-
-
-        if plot:
-            plt.plot(binCentres, yData)
-            plt.plot(binCentres, yFit)
-            plt.plot(binCentres, yData - yFit)
-            fig.canvas.draw()
-            input('help')
-
-        go = fit > tolerance
-
-        while go:
-
-            if verbose:
-                print('\n    looping', iPeaks)
-
-            new_peak = np.argmax(yData - yFit)
-
-            separations = np.r_[[np.int(np.sqrt(x) / bin_width) for x in model[2::nParameters]]]
-            keep = np.hstack([keep, np.all(np.abs(iPeaks - new_peak) > separations)])
-            iPeaks = np.hstack([iPeaks, new_peak])
-
-            nPeaks += 1
-
-            if verbose:
-                print('New Peaks ', binCentres[iPeaks], flush=True)
-
-            model = self._single_fit(function, nParameters, iPeaks, **kwargs)
-
-            yFit = function(binCentres, *model)
-            fit0 = fit
-            fit = np.linalg.norm((yData - yFit), ord=norm) / fit_denominator
-
-            go = fit > tolerance and (fit0 - fit > 0.05)
-
-            if verbose:
-                print('    fit', fit)
-
-            if plot:
-                plt.clf()
-                plt.plot(binCentres, yData)
-                plt.plot(binCentres, yFit)
-                plt.plot(binCentres, yData - yFit)
-                fig.canvas.draw()
-                input('help')
-
-        if verbose:
-            print('Exiting normally ', flush=True)
-
-        if np.any(~keep):
-            model = self._single_fit(function, nParameters, iPeaks[keep], **kwargs)
-
-        if verbose:
-            print('keep', keep)
-
-        if nParameters == 3:
-            dist = 'normal'
-        else:
-            dist = 'studentt'
-
-        dists = []
-        amp = []
-        nG = np.int(len(model)/nParameters)
-        if not maxDistribuions is None:
-            nG = np.minimum(nG, maxDistribuions)
-        for i in range(nG):
-            if keep[i]:
-                i1 = nParameters*i
-                a = model[i1]
-                d = Distribution(dist, *model[i1+1:i1+nParameters])
-                dists.append(d)
-                amp.append(a)
-
-        if verbose:
-            print('return model ', model)
-
-        return dists, amp
-
-
-    def _single_fit(self, function, nParameters, iPeaks, constrain_loc = True, variance_upper_bound=np.inf, tolerance=0.05, verbose=False, **kwargs):
-
-        if verbose:
-            print('    single fit', flush=True)
-        log = kwargs.pop('log', None)
-
-        binCentres, dum = cF._log(self.binCentres, log)
-        bins, dum = cF._log(self.bins, log)
-        yData = self.estimatePdf()
-
-        iWhere = np.where(yData > 0.0)[0]
-        xd = binCentres[iWhere]
-        yd = yData[iWhere]
-
-        nPeaks = np.size(iPeaks)
-        # Carry out the first fitting.
-        guess = np.ones(nPeaks * nParameters)
-        lowerBounds = np.zeros(nPeaks * nParameters)
-        upperBounds = np.full(nPeaks * nParameters, np.inf)
-
-        # Set the mean bounds
-        guess[1::nParameters] = binCentres[iPeaks]
-        if constrain_loc:
-            lowerBounds[1::nParameters] = bins[iPeaks]
-            upperBounds[1::nParameters] = bins[iPeaks+1]
-        else:
-            lowerBounds[1::nParameters] = -1e20
-            upperBounds[1::nParameters] = 1e20
-
-        # Set the variance bounds
-        upperBounds[2::nParameters] = variance_upper_bound
-        if np.isinf(variance_upper_bound):
-            guess[2::nParameters] = 1.0
-        else:
-            guess[2::nParameters] = 0.5 * (lowerBounds[2::nParameters] + upperBounds[2::nParameters])
-
-        if nParameters > 3:
-            dfGuess = 1e4
-            # Set the degrees of freedom bounds
-            guess[3::nParameters] = dfGuess
-
-        bounds = (lowerBounds, upperBounds)
-
-        if verbose:
-            print('    log', log, flush=True)
-            print('    binCentres', binCentres, flush=True)
-            print('    yData', yData, flush=True)
-            print('    guess', guess, flush=True)
-            print('    lowerBounds', lowerBounds, flush=True)
-            print('    upperBounds', upperBounds, flush=True)
-
-
-        model, pcov = curve_fit(function, xdata=xd, ydata=yd, p0=guess, bounds=bounds, ftol=1e-3, **kwargs)
-        model = np.asarray(model)
-
-        return model
-
-
-
-    def sample(self, nSamples):
+    def sample(self, nSamples, log=None):
         """Generates samples from the histogram.
 
         A uniform distribution is used for each bin to generate samples.
@@ -530,7 +270,9 @@ class Histogram1D(RectilinearMesh1D):
 
         """
         values = np.random.rand(np.int(nSamples)) * self.cdf[-1]
-        return np.interp(values, np.hstack([0, self.cdf]), self.bins)
+        values = np.interp(values, np.hstack([0, self.cdf]), self.bins)
+        values, dum = cF._log(values, log)
+        return values
 
 
     def update(self, values, clip=True, trim=False):
@@ -548,6 +290,7 @@ class Histogram1D(RectilinearMesh1D):
             A negative index which would normally wrap will clip to 0 and self.bins.size instead.
 
         """
+        values = values[~np.isnan(values)]
         iBin = np.atleast_1d(self.cellIndex(values, clip=clip, trim=trim))
         tmp = np.bincount(iBin, minlength = self.nBins)
 

@@ -8,6 +8,7 @@ from ...classes.core import StatArray
 from ...base import customPlots as cP
 from ...base import customFunctions as cF
 from .baseDistribution import baseDistribution
+from .Mixture import Mixture
 import numpy as np
 from scipy.stats import binned_statistic
 import matplotlib.pyplot as plt
@@ -339,7 +340,12 @@ class Histogram2D(RectilinearMesh2D):
         return cdf
 
 
-    def pdf(self, axis=0):
+    def estimatePdf(self, axis=None):
+
+        if axis is None:
+            out = StatArray.StatArray(np.divide(self._counts, np.sum(self._counts)), 'Probability density')
+            out[np.isnan(out)] = 0.0
+            return out
 
         total = self._counts.sum(axis=1-axis)
 
@@ -481,10 +487,6 @@ class Histogram2D(RectilinearMesh2D):
         return out
 
 
-    def estimatePdf(self):
-        return self._counts / np.sum(self._counts)
-
-
     def fit_mixture(self, intervals, axis=0, **kwargs):
         """Find peaks in the histogram along an axis.
 
@@ -530,7 +532,7 @@ class Histogram2D(RectilinearMesh2D):
         return distributions, active
 
 
-    def fitMajorPeaks(self, intervals, axis=0, method='gaussian', verbose=False, **kwargs):
+    def fit_estimated_pdf(self, intervals=None, axis=0, mixture='student_t', bound_by_variance=True, **kwargs):
         """Find peaks in the histogram along an axis.
 
         Parameters
@@ -543,43 +545,29 @@ class Histogram2D(RectilinearMesh2D):
         """
 
         track = kwargs.pop('track', True)
-        fid = kwargs.pop('fiducial', None)
+        variance_bounds = kwargs.pop('variance_bounds', [0.0, np.inf])
+        if intervals is None:
+            intervals = self.yBins if axis==0 else self.xBins
+        else:
+            assert np.size(intervals) >= 2, ValueError('intervals must have size >= 2')
 
-        if verbose:
-            print('fid', fid, flush=True)
-
-        counts, new_intervals = super().intervalStatistic(self.counts, intervals, axis, 'sum')
-
-        distributions = []
-        amplitudes = []
+        mixtures = []
 
         if track:
             Bar = progressbar.ProgressBar()
-            r = Bar(range(np.size(new_intervals) - 1))
+            r = Bar(range(np.size(intervals) - 1))
         else:
-            r = range(np.size(new_intervals) - 1)
+            r = range(np.size(intervals) - 1)
 
-        if axis == 0:
-            h = Histogram1D(bins = self.xBins)
+        for i in r:
+            h = self.marginalHistogram(intervals=intervals[i:i+2], axis=axis)
+            if bound_by_variance:
+                variance_bounds[1] = h.estimateVariance(1000, log=kwargs.get('log', None))
+                kwargs['variance_bounds'] = variance_bounds
+            ms = h.fit_estimated_pdf(mixture = mixture, **kwargs)
+            mixtures.append(ms)
 
-            for i in r:
-                if verbose:
-                    print('interval', new_intervals[i])
-                h._counts[:] = counts[i, :]
-                d, a = h.fitMajorPeaks(verbose=verbose, method=method, **kwargs)
-                distributions.append(d)
-                amplitudes.append(a)
-
-        else:
-            h = Histogram1D(bins = self.yBins)
-
-            for i in r:
-                h._counts[:] = counts[:, i]
-                d, a = h.fitMajorPeaks(**kwargs)
-                distributions.append(d)
-                amplitudes.append(a)
-
-        return distributions, amplitudes
+        return mixtures
 
 
     def intervalStatistic(self, intervals, axis=0, statistic='mean'):
@@ -608,7 +596,7 @@ class Histogram2D(RectilinearMesh2D):
         return out
 
 
-    def marginalProbability(self, fractions, distributions, axis=0, reciprocateParameter=None, log=None, verbose=False):
+    def marginalProbability(self, fractions, distributions, axis=0, reciprocateParameter=None, log=None, verbose=False, **kwargs):
         """Compute the marginal (joint) probability between the Histogram and a set of distributions.
 
         .. math::
@@ -623,8 +611,10 @@ class Histogram2D(RectilinearMesh2D):
             distributions = [distributions]
 
         # If the distributions are univariate, and there is only one per class, its a '1D' problem
+        assert isinstance(distributions[0], (baseDistribution, Mixture)), TypeError("Distributions must be geobipy distributions.")
 
-        assert isinstance(distributions[0], baseDistribution), TypeError("Distributions must be geobipy distributions.")
+        if isinstance(distributions[0], Mixture):
+            return self._marginalProbability_1D_mixtures(mixtures=distributions, axis=axis, reciprocateParameter=reciprocateParameter, log=log, **kwargs)
 
         if distributions[0].multivariate:
             if reciprocateParameter is None:
@@ -635,7 +625,7 @@ class Histogram2D(RectilinearMesh2D):
         else:
             if reciprocateParameter is None:
                 reciprocateParameter = False
-            return self._marginalProbability_1D(fractions, distributions, axis=axis, reciprocateParameter=reciprocateParameter, log=log)
+                return self._marginalProbability_1D(fractions, distributions, axis=axis, reciprocateParameter=reciprocateParameter, log=log)
 
 
     def _marginalProbability_1D(self, fractions, distributions, axis=0, reciprocateParameter=False, log=None):
@@ -676,6 +666,47 @@ class Histogram2D(RectilinearMesh2D):
             marginalProbability[j, :] = np.sum(axisPdf * normalizedPdfs[j, :], axis=1-axis)
 
         return np.squeeze(marginalProbability)
+
+
+    def _marginalProbability_1D_mixtures(self, mixtures, axis=0, reciprocateParameter=False, log=None, **kwargs):
+
+        assert axis < 2, ValueError("Must have 0 <= axis < 2")
+        nMixtures = np.size(mixtures)
+        # assert np.size(fractions) == nDistributions, ValueError("Fractions must have same size as number of distributions")
+
+        maxDistributions = kwargs.pop('maxDistributions', np.max([mm.n_mixtures for mm in mixtures]))
+
+        if axis == 0:
+            ax = self.x.cellCentres
+        else:
+            ax = self.y.cellCentres
+
+        if reciprocateParameter:
+            ax = 1.0 / ax[::-1]
+
+        ax, dum = cF._log(ax, log)
+
+        # Compute the probabilities along the hitmap axis, using each distribution
+        pdfs = np.zeros([maxDistributions, nMixtures, ax.size])
+
+        if nMixtures != 1:
+            for i in range(nMixtures):
+                if mixtures[i].n_mixtures > 0:
+                    pdfs[:mixtures[i].n_mixtures, i, :] = mixtures[i].probability(ax, log=False).T
+
+        # Normalize by the sum of the pdfs
+        normalizedPdfs = pdfs / np.sum(pdfs, axis=0)
+
+        # Initialize the facies Model
+        axisPdf = self.estimatePdf(axis=axis)[:-1, :]
+
+        marginalProbability = StatArray.StatArray([nMixtures, maxDistributions], 'Marginal probability')
+        marginalProbability[:, :] = np.sum(axisPdf * normalizedPdfs, axis=2-axis).T
+
+        # for in range(nMixtures):
+        #     marginalProbability[j, :] = np.sum(axisPdf * normalizedPdfs[i, :, j], axis=1-axis)
+
+        return marginalProbability
 
 
     def _marginalProbability_2D(self, fractions, distributions, axis=None, reciprocateParameter=[False, False], log=[None, None], verbose=False):
