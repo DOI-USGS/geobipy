@@ -174,6 +174,24 @@ class DataSetResults(myObject):
         """ Get the list of line result files for the dataset """
         return self._h5files
 
+
+    def line(self, line_number):
+        """Get the inversion results for the given line.
+
+        Parameters
+        ----------
+        fiducial : float
+            Unique fiducial of the data point.
+
+        Returns
+        -------
+        out : geobipy.Results
+            The inversion results for the line.
+
+        """
+        index = self.lineIndex(lineNumber=line_number)
+        return self.lines[index]
+
     @property
     def lines(self):
         return self._lines
