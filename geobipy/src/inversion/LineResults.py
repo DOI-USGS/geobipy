@@ -687,16 +687,16 @@ class LineResults(myObject):
     def lineHitmap(self):
         """ """
         # Read in the opacity if present
-        if "line_hitmap" in self.hdfFile.keys():
-            return Hitmap2D().fromHdf(self.hdfFile['line_hitmap'])
-        else:
-            return self.computeLineHitmap()
+        # if "line_hitmap" in self.hdfFile.keys():
+        #     return Hitmap2D().fromHdf(self.hdfFile['line_hitmap'])
+        # else:
+        return self.computeLineHitmap()
 
 
     def computeLineHitmap(self, nBins=250, log=10):
 
-        if 'lineHitmap' in self.__dict__:
-            del self.__dict__['lineHitmap']
+        # if 'lineHitmap' in self.__dict__:
+        #     del self.__dict__['lineHitmap']
 
         # First get the min max of the parameter hitmaps
         x0 = np.log10(self.minParameter)
@@ -721,10 +721,10 @@ class LineResults(myObject):
 
             lineHitmap._counts[:, pj] += cTmp
 
-        if 'line_hitmap' in self.hdfFile.keys():
-            del self.hdfFile['line_hitmap']
+        # if 'line_hitmap' in self.hdfFile.keys():
+        #     del self.hdfFile['line_hitmap']
 
-        lineHitmap.toHdf(self.hdfFile, 'line_hitmap')
+        # lineHitmap.toHdf(self.hdfFile, 'line_hitmap')
 
         return lineHitmap
 

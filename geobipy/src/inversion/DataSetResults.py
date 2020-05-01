@@ -699,6 +699,53 @@ class DataSetResults(myObject):
         print('rank {} finished in {} h:m:s'.format(world.rank, str(timedelta(seconds=MPI.Wtime()-tBase))))
 
 
+    def fitMajorPeaks_lineHitmap(self, intervals, **kwargs):
+
+        max_distributions = kwargs.get('max_distributions', 5)
+
+        intervals = self.lines[0].lineHitmap._reconcile_intervals(intervals)
+        nIntervals = np.size(intervals) - 1
+
+        means = StatArray.StatArray([self.nLines, nIntervals, max_distributions], "fit means")
+        variances = StatArray.StatArray([self.nLines, nIntervals, max_distributions], "fit variances")
+        amplitudes = StatArray.StatArray([self.nLines, nIntervals, max_distributions], "fit amplitudes")
+        df = StatArray.StatArray([self.nLines, nIntervals, max_distributions], "fit df")
+
+        output_file = h5py.File('lineHitmap_fits.h5', 'w')
+
+        means.createHdf(output_file, "/means", fillvalue=np.nan)
+        variances.createHdf(output_file, "/variances", fillvalue=np.nan)
+        df.createHdf(output_file, "/df", fillvalue=np.nan)
+        amplitudes.createHdf(output_file, "/amplitudes", fillvalue=np.nan)
+
+        for i, line in enumerate(self.lines):
+            print('Fitting line hitmap for line {}'.format(line.line))
+            distributions, amplitudes = line.lineHitmap.fitMajorPeaks(intervals, **kwargs)
+
+            for j in range(nIntervals):
+                dist = distributions[j]
+
+                nd = len(dist)
+
+                tmp = np.full(max_distributions, fill_value=np.nan)
+                for k in range(nd):
+                    tmp[k] = dist[k].mean
+                output_file['/means/data'][i, j, :] = tmp
+
+                for k in range(nd):
+                    tmp[k] = dist[k].variance
+                output_file['/variances/data'][i, j, :] = tmp
+
+                for k in range(nd):
+                    tmp[k] = dist[k].degrees
+                output_file['/df/data'][i, j, :] = tmp
+
+                tmp[:nd] = amplitudes[j]
+                output_file['/amplitudes/data'][i, j, :] = tmp
+
+        output_file.close()
+
+
     def fitMajorPeaks(self, intervals, **kwargs):
 
         distributions = []
