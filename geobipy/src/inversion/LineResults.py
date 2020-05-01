@@ -7,6 +7,7 @@ from datetime import timedelta
 from ..classes.core.myObject import myObject
 from ..classes.core import StatArray
 from ..classes.statistics.Distribution import Distribution
+from ..classes.statistics.mixStudentT import mixStudentT
 from ..classes.statistics.Histogram1D import Histogram1D
 from ..classes.statistics.Histogram2D import Histogram2D
 from ..classes.statistics.Hitmap2D import Hitmap2D
@@ -22,7 +23,7 @@ from ..base import fileIO as fIO
 from ..base.MPI import loadBalance1D_shrinkingArrays
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspecA
-from os.path import split
+from os.path import (split, join)
 from geobipy.src.inversion.Results import Results
 import progressbar
 
@@ -46,6 +47,7 @@ class LineResults(myObject):
         self._zPosterior = None
 
         self.fName = hdf5_file_path
+        self.directory = split(hdf5_file_path)[0]
         self.line = np.float64(os.path.splitext(split(hdf5_file_path)[1])[0])
 
         self._world = None
@@ -154,6 +156,11 @@ class LineResults(myObject):
     def bestParameters(self):
         """ Get the best model of the parameters """
         return StatArray.StatArray(self.getAttribute('bestinterp'), dtype=np.float64, name=self.parameterName, units=self.parameterUnits).T
+
+
+    @cached_property
+    def burned_in(self):
+        return StatArray.StatArray(self.getAttribute('burned in'))
 
 
     @cached_property
@@ -287,6 +294,18 @@ class LineResults(myObject):
         doiOut.toHdf(self.hdfFile, 'doi')
 
         return doiOut
+
+    @property
+    def easting(self):
+        return self.mesh.x.cellCentres
+
+    @property
+    def northing(self):
+        return self.mesh.y.cellCentres
+
+    @property
+    def depth(self):
+        return self.mesh.z.cellCentres
 
 
     @cached_property
@@ -439,7 +458,7 @@ class LineResults(myObject):
         return distributions
 
 
-    def fitMajorPeaks_mpi(self, intervals, **kwargs):
+    def fit_estimated_pdf_mpi(self, intervals=None, **kwargs):
         """Uses Mixture modelling to fit disrtibutions to the hitmaps for the specified intervals.
 
         This mpi version fits all hitmaps individually throughout the data set.
@@ -462,14 +481,11 @@ class LineResults(myObject):
         world = self.world
 
         max_distributions = kwargs.get('max_distributions', 5)
+
+        if intervals is None:
+            intervals = self.hitMap.yBins
+
         nIntervals = np.size(intervals) - 1
-
-        tmp = locals()
-        for key in ['self', 'MPI', 'world', 'k']:
-            tmp.pop(key, None)
-        command = str(tmp)
-
-        location = '/fits_0'
 
         means = StatArray.StatArray([self.nPoints, nIntervals, max_distributions], "fit means")
         variances = StatArray.StatArray([self.nPoints, nIntervals, max_distributions], "fit variances")
@@ -477,10 +493,10 @@ class LineResults(myObject):
         df = StatArray.StatArray([self.nPoints, nIntervals, max_distributions], "fit df")
 
         if not location in self.hdfFile:
-            means.createHdf(self.hdfFile, location+"/means", fillvalue=np.nan)
-            variances.createHdf(self.hdfFile, location+"/variances", fillvalue=np.nan)
-            df.createHdf(self.hdfFile, location+"/df", fillvalue=np.nan)
-            amplitudes.createHdf(self.hdfFile, location+"/amplitudes", fillvalue=np.nan)
+            means.createHdf(self.hdfFile, "/means", fillvalue=np.nan)
+            variances.createHdf(self.hdfFile, "/variances", fillvalue=np.nan)
+            df.createHdf(self.hdfFile, "/degrees", fillvalue=np.nan)
+            amplitudes.createHdf(self.hdfFile, "/amplitudes", fillvalue=np.nan)
 
 
         # Distribute the points amongst cores.
@@ -498,32 +514,34 @@ class LineResults(myObject):
 
         nI = intervals.size - 1
 
+        buffer = np.empty(nI, max_distributions))
+
         for i in range(i0, i1):
 
             hm = self.get_hitmap(i)
 
-            distributions, amplitudes = hm.fitMajorPeaks(intervals, method='studentt', track=False, fiducial=self.fiducials[i], **kwargs)
+            mixtures = hm.fit_estimated_pdf(**kwargs)
+
+            buffer[:, :] = np.nan
+            for j in range(nI):
+                mix = mixture[j]
+                buffer[j, :mix.n_mixtures] = mix.means
+            self.hdfFile['/means/data'][i, :, :] = buffer
 
             for j in range(nI):
-                dist = distributions[j]
+                mix = mixture[j]
+                buffer[j, :mix.n_mixtures] = mix.variances
+            self.hdfFile['/variances/data'][i, :, :] = buffer
 
-                nd = len(dist)
+            for j in range(nI):
+                mix = mixture[j]
+                buffer[j, :mix.n_mixtures] = mix.dfs
+            self.hdfFile['/df/data'][i, :, :] = buffer
 
-                tmp = np.full(max_distributions, fill_value=np.nan)
-                for k in range(nd):
-                    tmp[k] = dist[k].mean
-                self.hdfFile[location+'/means/data'][i, j, :] = tmp
-
-                for k in range(nd):
-                    tmp[k] = dist[k].variance
-                self.hdfFile[location+'/variances/data'][i, j, :] = tmp
-
-                for k in range(nd):
-                    tmp[k] = dist[k].degrees
-                self.hdfFile[location+'/df/data'][i, j, :] = tmp
-
-                tmp[:nd] = amplitudes[j]
-                self.hdfFile[location+'/amplitudes/data'][i, j, :] = tmp
+            for j in range(nI):
+                mix = mixture[j]
+                buffer[j, :mix.n_mixtures] = mix.amplitudes
+            self.hdfFile['/amplitudes/data'][i, :, :] = buffer
 
             counter += 1
             if counter == nUpdate:
@@ -957,6 +975,10 @@ class LineResults(myObject):
             x.units = 'm'
 
         return x
+
+
+    def x_axis(self, axis, centres=False):
+        return self.mesh.getXAxis(axis, centres=centres)
 
 
     @cached_property
@@ -1574,102 +1596,181 @@ class LineResults(myObject):
     #     cP.clabel(cb, 'Facies')
 
 
-    def marginalProbability(self, i=None):
+    @cached_property
+    def marginalProbability(self):
 
-        if self._marginalProbability is None:
-
-            assert 'marginal_probability' in self.hdfFile.keys() or 'facies_probability' in self.hdfFile.keys(), Exception("Marginal probabilities need computing, use LineResults.computeMarginalProbability()")
-
-            if 'marginal_probability' in self.hdfFile.keys():
-                self._marginalProbability = StatArray.StatArray().fromHdf(self.hdfFile['marginal_probability'])
-            elif 'facies_probability' in self.hdfFile.keys():
-                self._marginalProbability = StatArray.StatArray().fromHdf(self.hdfFile['facies_probability'])
-
-        if i is None:
-            return self._marginalProbability
-
-        else:
-            nClasses = self._marginalProbability.shape[0]
-            return StatArray.StatArray(self._marginalProbability[i, :, :], name = "$\frac{P_{" + str(i+1) + "}}{\sum_{i=1}^{" + str(nClasses) + "}P_{i}}$")
-
-
-    def computeMarginalProbability(self, fractions, distributions, **kwargs):
-
-        print("Computing marginal probabilities. This can take a while. \n",
-        "Once you have done this, and you no longer need to change the input parameters, simply use LineResults.marginalProbability to access.")
-
-        assert isinstance(distributions, list), TypeError("distributions must be a list")
-        assert np.size(fractions) == np.size(distributions), ValueError("fractions and distributions must have the same length")
-
-        if distributions[0].multivariate:
-            self._computeMarginalProbability_2D(fractions, distributions, **kwargs)
-        else:
-            self._computeMarginalProbability_1D(fractions, distributions, **kwargs)
-
-
-    def _computeMarginalProbability_1D(self, fractions, distributions, **kwargs):
-
-        nFacies = np.size(distributions)
-
-        self._marginalProbability = StatArray.StatArray(np.empty([nFacies, self.hitMap.y.nCells, self.nPoints]), name='Marginal probability')
-
-        counts = self.hdfFile['currentmodel/par/posterior/arr/data']
-        parameters = RectilinearMesh1D().fromHdf(self.hdfFile['currentmodel/par/posterior/x'])
-
-        hm = self.getAttribute('hit map', index=0)
-
-        Bar = progressbar.ProgressBar()
-        print('Computing 1D Marginal', flush=True)
-        for i in Bar(range(self.nPoints)):
-            hm._counts = counts[i, :, :]
-            hm._x = RectilinearMesh1D(cellEdges=parameters.cellEdges[i, :])
-            self._marginalProbability[:, :, i] = hm.marginalProbability(fractions, distributions, axis=0, **kwargs)
+        assert 'marginal_probability' in self.hdfFile.keys(), Exception("Marginal probabilities need computing, use LineResults.computeMarginalProbability_X()")
 
         if 'marginal_probability' in self.hdfFile.keys():
-            del self.hdfFile['marginal_probability']
-        if 'facies_probability' in self.hdfFile.keys():
-            del self.hdfFile['facies_probability']
+            marginal_probability = StatArray.StatArray().fromHdf(self.hdfFile['marginal_probability'])
 
-        self._marginalProbability.toHdf(self.hdfFile, 'marginal_probability')
+        return marginal_probability
 
-        return self.marginalProbability
+        # else:
+        #     nClasses = self._marginalProbability.shape[0]
+        #     return StatArray.StatArray(self._marginalProbability[i, :, :], name = "$\frac{P_{" + str(i+1) + "}}{\sum_{i=1}^{" + str(nClasses) + "}P_{i}}$")
+
+    def read_fit_distributions(self, fit_file, mask_by_doi=True):
+
+        # Get the fits for the given line
+        # Define the depth intervals and plotting axis
+        with h5py.File(fit_file, 'r') as f:
+            means = StatArray.StatArray(np.asarray(f['means/data']), 'Conductivity', '$\\frac{S}{m}$')
+            amplitudes = StatArray.StatArray(np.asarray(f['amplitudes/data']), 'Amplitude')
+            variances = StatArray.StatArray(np.asarray(f['variances/data']), 'Variance')
+            degrees = StatArray.StatArray(np.asarray(f['df/data']), 'Degrees of freedom')
+
+        intervals = self.mesh.z.cellCentres
+
+        indices = intervals.searchsorted(self.doi)
+        if mask_by_doi:
+            for i in range(self.nPoints):
+                amplitudes[i, indices[i]:, :] = np.nan
+                means[i, indices[i]:, :] = np.nan
+                variances[i, indices[i]:, :] = np.nan
+                degrees[i, indices[i]:, :] = np.nan
+
+        iWhere = np.argsort(means, axis=-1)
+        for i in range(means.shape[0]):
+            for j in range(means.shape[1]):
+                tmp = iWhere[i, j, :]
+                m = means[i, j, tmp]
+                means[i, j, :] = m
+                a = amplitudes[i, j, tmp]
+                amplitudes[i, j, :] = a
+                v = variances[i, j, tmp]
+                variances[i, j, :] = v
+                d = degrees[i, j, tmp]
+                degrees[i, j, :] = d
+
+        return amplitudes, means, variances, degrees
 
 
-    def _computeMarginalProbability_2D(self, fractions, distributions, **kwargs):
+    def compute_marginal_probability_from_fits(self, fit_file, mask_by_doi=True):
 
-        nFacies = np.size(distributions)
+        amplitudes, means, variances, degrees = self.read_fit_distributions(fit_file, mask_by_doi)
 
-        self._marginalProbability = StatArray.StatArray(np.empty([nFacies, self.hitMap.y.nCells, self.nPoints]), name='Marginal probability')
+        self._marginal_probability = StatArray.StatArray(np.zeros([self.nPoints, self.mesh.z.nCells+1, means.shape[-1]]), 'Marginal probability')
 
-        counts = self.hdfFile['currentmodel/par/posterior/arr/data']
-        parameters = RectilinearMesh1D().fromHdf(self.hdfFile['currentmodel/par/posterior/x'])
+        print('Computing marginal probability', flush=True)
+        for i in progressbar.progressbar(range(self.nPoints)):
+            hm = self.get_hitmap(i)
+            mixtures = []
+            for j in range(means.shape[1]):
+                a = amplitudes[i, j, :]
+                m = means[i, j, :]
+                v = variances[i, j, :]
+                df = degrees[i, j, :]
 
-        hm = self.getAttribute('hit map', index=0)
+                inan = ~np.isnan(m)
+                mixtures.append(mixStudentT(m[inan], v[inan], df[inan], a[inan]))
 
-        print("Computing 2D Marginal", flush=True)
-        Bar = progressbar.ProgressBar()
-        for i in Bar(range(self.nPoints)):
-            hm._counts = counts[i, :, :]
-            hm._x = RectilinearMesh1D(cellEdges=parameters.cellEdges[i, :])
-            self._marginalProbability[:, :, i] = hm.marginalProbability(fractions, distributions, axis=2, **kwargs)
+            mp = hm.marginalProbability(1.0, distributions=mixtures, log=10, maxDistributions=means.shape[-1])
+            self._marginal_probability[i, :mp.shape[0], :] = mp
 
-        if 'marginal_probability' in self.hdfFile.keys():
-            del self.hdfFile['marginal_probability']
-        if 'facies_probability' in self.hdfFile.keys():
-            del self.hdfFile['facies_probability']
+        # if 'marginal_probability' in self.hdfFile.keys():
+        #     del self.hdfFile['marginal_probability']
 
-        self._marginalProbability.toHdf(self.hdfFile, 'marginal_probability')
-
-        return self.marginalProbability
+            # self._marginal_probability.writeHdf(self.hdfFile, 'marginal_probability')
+        # else:
+        # self._marginal_probability.toHdf(self.hdfFile, 'marginal_probability')
+        self._marginal_probability.toHdf(join(self.directory, 'line_{}_marginal_probability.h5'.format(self.line)), 'marginal_probability')
 
 
-    @property
+    def reorder_marginal_probability_by_labels(self, labels):
+
+        # assert np.all([labels.shape[i] == self.marginalProbability.shape[i] for i in range(self.marginalProbability.shape[-1])])
+
+        out = np.zeros_like(self.marginalProbability)
+
+        for i in range(self.nPoints):
+            for j in range(self.depth.size):
+                l = labels[i, j, :]
+                for k in range(np.sum(~np.isnan(l))):
+                    out[i, j, np.int(l[k])] = self.marginalProbability[i, j, k]
+
+        self.marginalProbability = out
+
+
+
+
+
+    # def computeMarginalProbability(self, fractions, distributions, **kwargs):
+
+    #     print("Computing marginal probabilities. This can take a while. \n",
+    #     "Once you have done this, and you no longer need to change the input parameters, simply use LineResults.marginalProbability to access.")
+
+    #     assert isinstance(distributions, list), TypeError("distributions must be a list")
+    #     assert np.size(fractions) == np.size(distributions), ValueError("fractions and distributions must have the same length")
+
+    #     if distributions[0].multivariate:
+    #         self._computeMarginalProbability_2D(fractions, distributions, **kwargs)
+    #     else:
+    #         self._computeMarginalProbability_1D(fractions, distributions, **kwargs)
+
+
+    # def _computeMarginalProbability_1D(self, fractions, distributions, **kwargs):
+
+    #     nFacies = np.size(distributions)
+
+    #     self._marginalProbability = StatArray.StatArray(np.empty([nFacies, self.hitMap.y.nCells, self.nPoints]), name='Marginal probability')
+
+    #     counts = self.hdfFile['currentmodel/par/posterior/arr/data']
+    #     parameters = RectilinearMesh1D().fromHdf(self.hdfFile['currentmodel/par/posterior/x'])
+
+    #     hm = self.getAttribute('hit map', index=0)
+
+    #     Bar = progressbar.ProgressBar()
+    #     print('Computing 1D Marginal', flush=True)
+    #     for i in Bar(range(self.nPoints)):
+    #         hm._counts = counts[i, :, :]
+    #         hm._x = RectilinearMesh1D(cellEdges=parameters.cellEdges[i, :])
+    #         self._marginalProbability[:, :, i] = hm.marginalProbability(fractions, distributions, axis=0, **kwargs)
+
+    #     if 'marginal_probability' in self.hdfFile.keys():
+    #         del self.hdfFile['marginal_probability']
+    #     if 'facies_probability' in self.hdfFile.keys():
+    #         del self.hdfFile['facies_probability']
+
+    #     self._marginalProbability.toHdf(self.hdfFile, 'marginal_probability')
+
+    #     return self.marginalProbability
+
+
+    # def _computeMarginalProbability_2D(self, fractions, distributions, **kwargs):
+
+    #     nFacies = np.size(distributions)
+
+    #     self._marginalProbability = StatArray.StatArray(np.empty([nFacies, self.hitMap.y.nCells, self.nPoints]), name='Marginal probability')
+
+    #     counts = self.hdfFile['currentmodel/par/posterior/arr/data']
+    #     parameters = RectilinearMesh1D().fromHdf(self.hdfFile['currentmodel/par/posterior/x'])
+
+    #     hm = self.getAttribute('hit map', index=0)
+
+    #     print("Computing 2D Marginal", flush=True)
+    #     Bar = progressbar.ProgressBar()
+    #     for i in Bar(range(self.nPoints)):
+    #         hm._counts = counts[i, :, :]
+    #         hm._x = RectilinearMesh1D(cellEdges=parameters.cellEdges[i, :])
+    #         self._marginalProbability[:, :, i] = hm.marginalProbability(fractions, distributions, axis=2, **kwargs)
+
+    #     if 'marginal_probability' in self.hdfFile.keys():
+    #         del self.hdfFile['marginal_probability']
+    #     if 'facies_probability' in self.hdfFile.keys():
+    #         del self.hdfFile['facies_probability']
+
+    #     self._marginalProbability.toHdf(self.hdfFile, 'marginal_probability')
+
+    #     return self.marginalProbability
+
+
+    @cached_property
     def highestMarginal(self):
 
-        out = StatArray.StatArray(self.mesh.shape, "Most probable class")
-        mp = self.marginalProbability()
-        for i in range(self.nPoints):
-            out[:, i] = np.argmax(mp[:, :, i], axis=0)
+        # out = StatArray.StatArray(self.mesh.shape, "Most probable class")
+        mp = self.marginalProbability
+        out = np.argmax(self.marginalProbability, axis=-1)
 
         return out
 
