@@ -31,11 +31,11 @@ class Hitmap2D(Histogram2D):
     def varianceCutoff(self, percent=67.0):
         """ Get the cutoff value along y axis from the bottom up where the variance is percent*max(variance) """
         p = 0.01*percent
-        s = (np.repeat(self.x[np.newaxis,:],np.size(self.arr,0),0) * self.arr).std(axis = 1)
+        s = (np.repeat(self.xBinCentres[np.newaxis,:],np.size(self.counts,0),0) * self.counts).std(axis = 1)
         mS = s.max()
         iC = s.searchsorted(p*mS,side='right')-1
 
-        return self.y[iC]
+        return self.yBinCentres[iC]
 
 
     def getOpacityLevel(self, percent):
@@ -52,7 +52,7 @@ class Hitmap2D(Histogram2D):
     def hdfName(self):
         """ Reprodicibility procedure """
         return('Hitmap2D()')
-        
+
 
     def fromHdf(self, grp, index=None):
         """ Reads in the object froma HDF file """
