@@ -62,6 +62,8 @@ from .src.classes.statistics.MvDistribution import MvDistribution
 from .src.classes.statistics.Histogram1D import Histogram1D
 from .src.classes.statistics.Histogram2D import Histogram2D
 from .src.classes.statistics.Hitmap2D import Hitmap2D
+from .src.classes.statistics.mixStudentT import mixStudentT
+from .src.classes.statistics.mixNormal import mixNormal
 # McMC Inersion
 from .src.inversion.Results import Results
 from .src.inversion.LineResults import LineResults
