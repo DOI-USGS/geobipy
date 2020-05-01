@@ -1,5 +1,6 @@
 from copy import copy, deepcopy
 import numpy as np
+import h5py
 
 from ...base import customFunctions as cf
 from ...base import customPlots as cP
@@ -383,11 +384,7 @@ class StatArray(np.ndarray, myObject):
 
 
     def __deepcopy__(self, memo):
-        other = StatArray(self.shape, dtype=self.dtype)
-        if (np.ndim(self) == 1):
-            other[:] = self[:]
-        elif (np.ndim(self) == 2):
-            other[:, :] = self[:, :]
+        other = StatArray(self, dtype=self.dtype)
 
         other._name = self._name
         other._units = self._units
@@ -763,6 +760,11 @@ class StatArray(np.ndarray, myObject):
         std = np.std(self, axis=axis)
 
         return (self - mn) / std
+
+
+    def strip_nan(self):
+        i = ~np.isnan(self)
+        return self[i]
 
 
     def summary(self, out=False):
@@ -1387,6 +1389,12 @@ class StatArray(np.ndarray, myObject):
 
         """
 
+        if isinstance(h5obj, str):
+            with h5py.File(h5obj, 'w') as f:
+                self.createHdf(f, myName)
+                self.writeHdf(f, myName)
+                return
+
         self.createHdf(h5obj, myName)
         self.writeHdf(h5obj, myName)
 
@@ -1650,6 +1658,91 @@ class StatArray(np.ndarray, myObject):
                 raise NotImplementedError
 
         return clusterID, kmeans
+
+
+    def fit_mixture(self, mixture_type='gaussian', log=None, mean_bounds=None, variance_bounds=None, k=[1, 5], tolerance=0.05):
+        """Uses Gaussian mixture models to fit the histogram.
+
+        Starts at the minimum number of clusters and adds clusters until the BIC decreases less than the tolerance.
+
+        Parameters
+        ----------
+        nSamples
+
+        log
+
+        mean_bounds
+
+        variance_bounds
+
+        k : ints
+            Two ints with starting and ending # of clusters
+
+        tolerance
+
+        """
+
+        from sklearn.mixture import GaussianMixture
+        # from smm import SMM
+
+        if mixture_type.lower() == 'gaussian':
+            mod = GaussianMixture
+        else:
+            mod = SMM
+
+        # Samples the histogram
+        X = self.strip_nan()
+        X = X.flatten()[:, None]
+        X, _ = cf._log(X, log)
+
+        # of clusters
+        k_ = k[0]
+
+        best = mod(n_components=k_).fit(X)
+        BIC0 = best.bic(X)
+        all_models = []
+        all_models.append(best)
+
+        k_ += 1
+        go = k_ <= k[1]
+
+        while go:
+            model = mod(n_components=k_).fit(X)
+            BIC1 = model.bic(X)
+            all_models.append(model)
+
+            percent_reduction = np.abs((BIC1 - BIC0)/BIC0)
+
+            go = True
+            if BIC1 < BIC0:
+                best = model
+                BIC0 = BIC1
+
+            else:
+                go = False
+
+            if (percent_reduction < tolerance):
+                go = False
+
+            k_ += 1
+            go = go & (k_ <= k[1])
+
+
+        active = np.ones(best.n_components, dtype=np.bool)
+
+        means = np.squeeze(best.means_)
+        try:
+            variances = np.squeeze(best.covariances_)
+        except:
+            variances = np.squeeze(best.covariances)
+
+        if not mean_bounds is None:
+            active = (mean_bounds[0] <= means) & (means <= mean_bounds[1])
+
+        if not variance_bounds is None:
+            active = (variance_bounds[0] <= variances) & (variances <= variance_bounds[1]) & active
+
+        return best, np.atleast_1d(active), all_models
 
 
     def gaussianMixture(self, clusterID, trainPercent=75.0, covType=['spherical'], plot=True):
