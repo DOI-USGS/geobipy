@@ -177,13 +177,6 @@ class Results(myObject):
             self.dimensionChange = StatArray.StatArray(np.zeros(n, dtype=bool), name='Dimensions were changed')
 
 
-#         Initialize and save the first figure
-#        if self.savePNG:
-#            figName = 'PNG/_tmp' + \
-#                fIO.getFileNameInteger(self.i, np.int(np.log10(self.nMC))) + '.png'
-#            plt.savefig(figName)
-
-
     @property
     def hitmap(self):
         return self.currentModel.par.posterior
@@ -269,6 +262,7 @@ class Results(myObject):
         self.ax.append(plt.subplot(gs[6:12,self.nSystems:2 * self.nSystems])) # 1D layer plot 5
         self.ax.append(plt.subplot(gs[6:12, 2 * self.nSystems:])) # Histogram of layer depths 6
         # Histogram of data errors
+
         for i in range(self.nSystems):
             self.ax.append(plt.subplot(gs[1:5, 2 * self.nSystems + i])) # Relative Errors
             # self.ax[j+2] = plt.subplot(gs[3:6,2 * self.nSystems + i]) # Additive Errors
@@ -608,6 +602,7 @@ class Results(myObject):
 
 
     def _plotErrorPosterior(self, axes, **kwargs):
+
         if not self.currentDataPoint.errorPosterior is None:
             log = self.currentDataPoint.errorPosterior[0].x.log
             loc, _ = cF._log(self.bestDataPoint.addErr, log=log)
@@ -645,6 +640,9 @@ class Results(myObject):
     def _plotRelativeErrorPosterior(self, axes, **kwargs):
         """ Plots the histogram of the relative errors """
 
+        if not isinstance(axes, list):
+            axes = [axes]
+
         self.currentDataPoint.relErr.plotPosteriors(axes, **kwargs)
 
         if self.burnedIn:
@@ -658,6 +656,9 @@ class Results(myObject):
 
     def _plotAdditiveErrorPosterior(self, axes, **kwargs):
         """ Plot the histogram of the additive errors """
+        if not isinstance(axes, list):
+            axes = [axes]
+
         self.currentDataPoint.addErr.plotPosteriors(axes=axes, **kwargs)
         plt.locator_params(axis='x', nbins=4)
 
@@ -679,8 +680,11 @@ class Results(myObject):
         kwargs['trim'] = kwargs.pop('trim', False)
         kwargs['normalize'] = kwargs.pop('normalize', True)
 
+
         ax = self.currentModel.depth.posterior.plot(**kwargs)
         ax.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
+
+        return ax
 
 
     def _plotParameterPosterior(self, reciprocateX=False, credibleInterval = 95.0, opacityPercentage = 67.0, overlayModel=True, **kwargs):
