@@ -241,13 +241,15 @@ class LineResults(myObject):
 
         key = 'credible_lower'
         if key in self.hdfFile.keys():
-            del self.hdfFile[key]
-        credibleLower.toHdf(self.hdfFile, key)
+            credibleLower.writeHdf(self.hdfFile, key)
+        else:
+            credibleLower.toHdf(self.hdfFile, key)
 
         key = 'credible_upper'
         if key in self.hdfFile.keys():
-            del self.hdfFile[key]
-        credibleUpper.toHdf(self.hdfFile, key)
+            credibleUpper.writeHdf(self.hdfFile, key)
+        else:
+            credibleUpper.toHdf(self.hdfFile, key)
 
         return credibleLower, credibleUpper
 
@@ -273,7 +275,10 @@ class LineResults(myObject):
 
     @cached_property
     def doi(self):
-        return self.computeDOI()
+        if 'doi' in self.hdfFile.keys():
+            return StatArray.StatArray(np.asarray(self.getAttribute('doi')), 'Depth of investigation', 'm')
+        else:
+            self.computeDOI()
 
 
     def computeDOI(self, percent=67.0, window=1):
@@ -312,9 +317,9 @@ class LineResults(myObject):
             doiOut[-buffer:] = tmp[-1]
 
         if 'doi' in self.hdfFile.keys():
-            del self.hdfFile['doi']
-
-        doiOut.toHdf(self.hdfFile, 'doi')
+            doiOut.writeHdf(self.hdfFile, 'doi')
+        else:
+            doiOut.toHdf(self.hdfFile, 'doi')
 
         return doiOut
 
@@ -400,7 +405,7 @@ class LineResults(myObject):
             return self.highestMarginal
         if variable == 'marginalprobability':
             assert not index is None, ValueError('Please specify keyword "index" when requesting marginalProbability')
-            return self.marginalProbability(index)
+            return self.marginalProbability[:, :, index].T
 
 
     @cached_property
@@ -537,7 +542,7 @@ class LineResults(myObject):
 
         nI = intervals.size - 1
 
-        buffer = np.empty(nI, max_distributions))
+        buffer = np.empty(nI, max_distributions)
 
         for i in range(i0, i1):
 
@@ -601,7 +606,7 @@ class LineResults(myObject):
         else:
             assert depth < self.mesh.z.cellEdges[-1], 'Depth must be lees than max depth {}'.format(self.mesh.z.cellEdges[-1])
 
-        assert np.all(np.shape(values)[-2:] == self.mesh.shape), ValueError("values must have shape {}".fomat(self.mesh.shape))
+        assert np.all(np.shape(values)[-2:] == self.mesh.shape), ValueError("values must have shape {} but have shape {}".format(self.mesh.shape, np.shape(values)))
 
         if np.size(depth) > 1:
             cell1 = self.mesh.z.cellIndex(depth[0])
@@ -704,6 +709,11 @@ class LineResults(myObject):
     @cached_property
     def interfacePosterior(self):
         return self.getAttribute('layer depth posterior')
+
+
+    @cached_property
+    def labels(self):
+        return self.getAttribute('labels')
 
 
     @cached_property
@@ -832,9 +842,9 @@ class LineResults(myObject):
 
 
         if 'mode_parameter' in self.hdfFile.keys():
-            del self.hdfFile['mode_parameter']
-
-        modeParameter.toHdf(self.hdfFile, 'mode_parameter')
+            modeParameter.writeHdf(self.hdfFile, 'mode_parameter')
+        else:
+            modeParameter.toHdf(self.hdfFile, 'mode_parameter')
 
         return modeParameter
 
@@ -878,9 +888,10 @@ class LineResults(myObject):
         opacity = 1.0 - StatArray.StatArray(tmp, "Opacity", "").normalize(axis=0)
 
         if 'opacity' in self.hdfFile.keys():
-            del self.hdfFile['opacity']
+            opacity.writeHdf(self.hdfFile, 'opacity')
+        else:
+            opacity.toHdf(self.hdfFile, 'opacity')
 
-        opacity.toHdf(self.hdfFile, 'opacity')
 
         return opacity
 
@@ -976,6 +987,7 @@ class LineResults(myObject):
 
         hdfFile = self.hdfFile
 
+        print(self.systemFilepath)
         R = Results(reciprocateParameter=reciprocateParameter).fromHdf(hdfFile, index=i, systemFilePath=self.systemFilepath)
 
         return R
@@ -1157,7 +1169,7 @@ class LineResults(myObject):
     def plotHighlightedObservationLocations(self, iDs, **kwargs):
 
         labels = kwargs.pop('labels', True)
-        kwargs['marker'] = kwargs.pop('marker','*') # Downward pointing arrow
+        kwargs['marker'] = kwargs.pop('marker','*')
         kwargs['color'] = kwargs.pop('color',cP.wellSeparated[1])
         kwargs['linestyle'] = kwargs.pop('linestyle','none')
         kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor','k')
@@ -1255,13 +1267,13 @@ class LineResults(myObject):
         c = post.counts.T
         c = np.divide(c, np.max(c, 0), casting='unsafe')
 
-        if post.isRelative:
-            if np.all(post.relativeTo == post.relativeTo[0]):
-                y = post.binCentres + post.relativeTo[0]
-            else:
-                stuff = 2
-        else:
-            y = post.binCentres[0, :]
+        # if post.isRelative:
+        #     if np.all(post.relativeTo == post.relativeTo[0]):
+        #         y = post.binCentres + post.relativeTo[0]
+        #     else:
+        #         stuff = 2
+        # else:
+        y = post._cellCentres
         c.pcolor(xtmp, y=y, **kwargs)
         cP.title('Additive error posterior distributions for system {}'.format(system))
 
@@ -1322,13 +1334,13 @@ class LineResults(myObject):
         c = post.counts.T
         c = np.divide(c, np.max(c,0), casting='unsafe')
 
-        if post.isRelative:
-            if np.all(post.relativeTo == post.relativeTo[0]):
-                y = post.binCentres + post.relativeTo[0]
-            else:
-                stuff = 2
-        else:
-            y = post.binCentres[0, :]
+        # if post.isRelative:
+        #     if np.all(post.relativeTo == post.relativeTo[0]):
+        #         y = post.binCentres + post.relativeTo[0]
+        #     else:
+        #         stuff = 2
+        # else:
+        y = post._cellCentres #[0, :]
         c.pcolor(xtmp, y=y, **kwargs)
 
         cP.title('Relative error posterior distributions for system {}'.format(system))
@@ -1527,6 +1539,13 @@ class LineResults(myObject):
         return self.plotXsection(values = values, useVariance = useVariance, **kwargs)
 
 
+    def plotHighestMarginal(self, useVariance=True, **kwargs):
+
+        values = self.highestMarginal
+        return self.plotXsection(values = values, useVariance = useVariance, **kwargs)
+
+
+
     def plotMeanModel(self, reciprocateParameter = False, useVariance=True, **kwargs):
 
         values = self.meanParameters
@@ -1633,47 +1652,123 @@ class LineResults(myObject):
         #     nClasses = self._marginalProbability.shape[0]
         #     return StatArray.StatArray(self._marginalProbability[i, :, :], name = "$\frac{P_{" + str(i+1) + "}}{\sum_{i=1}^{" + str(nClasses) + "}P_{i}}$")
 
-    def read_fit_distributions(self, fit_file, mask_by_doi=True):
+
+    def read_fit_distributions(self, fit_file, mask_by_doi=True, components='amvd'):
 
         # Get the fits for the given line
         # Define the depth intervals and plotting axis
+        means = None
+        amplitudes = None
+        variances = None
+        degrees = None
         with h5py.File(fit_file, 'r') as f:
-            means = StatArray.StatArray(np.asarray(f['means/data']), 'Conductivity', '$\\frac{S}{m}$')
-            amplitudes = StatArray.StatArray(np.asarray(f['amplitudes/data']), 'Amplitude')
-            variances = StatArray.StatArray(np.asarray(f['variances/data']), 'Variance')
-            degrees = StatArray.StatArray(np.asarray(f['df/data']), 'Degrees of freedom')
+            if 'm' in components:
+                means = StatArray.StatArray(np.asarray(f['means/data']), 'Conductivity', '$\\frac{S}{m}$')
+            if 'a' in components:
+                amplitudes = StatArray.StatArray(np.asarray(f['amplitudes/data']), 'Amplitude')
+            if 'v' in components:
+                variances = StatArray.StatArray(np.asarray(f['variances/data']), 'Variance')
+            if 'd' in components:
+                degrees = StatArray.StatArray(np.asarray(f['degrees/data']), 'Degrees of freedom')
 
         intervals = self.mesh.z.cellCentres
 
-        indices = intervals.searchsorted(self.doi)
         if mask_by_doi:
-            for i in range(self.nPoints):
-                amplitudes[i, indices[i]:, :] = np.nan
-                means[i, indices[i]:, :] = np.nan
-                variances[i, indices[i]:, :] = np.nan
-                degrees[i, indices[i]:, :] = np.nan
+            indices = intervals.searchsorted(self.doi)
+            if 'a' in components:
+                for i in range(self.nPoints):
+                    amplitudes[i, indices[i]:, :] = np.nan
+            if 'm' in components:
+                for i in range(self.nPoints):
+                    means[i, indices[i]:, :] = np.nan
+            if 'v' in components:
+                for i in range(self.nPoints):
+                    variances[i, indices[i]:, :] = np.nan
+            if 'd' in components:
+                for i in range(self.nPoints):
+                    degrees[i, indices[i]:, :] = np.nan
 
         iWhere = np.argsort(means, axis=-1)
         for i in range(means.shape[0]):
             for j in range(means.shape[1]):
                 tmp = iWhere[i, j, :]
-                m = means[i, j, tmp]
-                means[i, j, :] = m
-                a = amplitudes[i, j, tmp]
-                amplitudes[i, j, :] = a
-                v = variances[i, j, tmp]
-                variances[i, j, :] = v
-                d = degrees[i, j, tmp]
-                degrees[i, j, :] = d
+                if 'm' in components:
+                    m = means[i, j, tmp]
+                    means[i, j, :] = m
+
+                if 'a' in components:
+                    a = amplitudes[i, j, tmp]
+                    amplitudes[i, j, :] = a
+
+                if 'v' in components:
+                    v = variances[i, j, tmp]
+                    variances[i, j, :] = v
+
+                if 'd' in components:
+                    d = degrees[i, j, tmp]
+                    degrees[i, j, :] = d
 
         return amplitudes, means, variances, degrees
+
+
+    def compute_marginal_probability_from_labelled_mixtures(self, fit_file, gmm, labels):
+
+        amplitudes, means, variances, degrees = self.read_fit_distributions(fit_file, mask_by_doi=False)
+
+        # self.marginalProbability = StatArray.StatArray(np.zeros([self.nPoints, self.mesh.z.nCells, gmm.n_components]), 'Marginal probability')
+
+        iSort = np.argsort(np.squeeze(gmm.means_))
+
+        print('Computing marginal probability', flush=True)
+        for i in progressbar.progressbar(range(self.nPoints)):
+            hm = self.get_hitmap(i)
+            for j in range(self.mesh.z.nCells):
+                m = means[i, j, :]
+                inan = ~np.isnan(m)
+                m = m[inan]
+
+                if np.size(m) > 0:
+                    a = amplitudes[i, j, inan]
+
+                    v = variances[i, j, inan]
+                    df = degrees[i, j, inan]
+                    l = labels[i, j, inan].astype(np.int)
+
+                    fit_mixture = mixStudentT(m, v, df, a, labels=l)
+                    fit_pdfs = fit_mixture.probability(np.log10(hm.xBinCentres), log=False)
+
+                    # gmm_pdfs = np.zeros([gmm.n_components, self.hitMap.x.nCells])
+
+                    # for k_gmm in range(gmm.n_components):
+                    #     # Term 1: Get the weight of the labelled fit from the classification
+                    #     relative_fraction = gmm.weights_[iSort[k_gmm]]
+
+                    #     for k_mix in range(fit_mixture.n_mixtures):
+                    #         # Term 2: Get the probability of each mixture given the mean of the student T.
+                    #         pMixture = np.squeeze(gmm.predict_proba(m[k_mix].reshape(-1, 1)))[iSort[k_gmm]] / np.float(fit_mixture.n_mixtures)
+
+                    #         gmm_pdfs[k_gmm, :] += relative_fraction * pMixture * fit_pdfs[:, k_mix]
+
+
+                    a = gmm.weights_[iSort]
+                    b = gmm.predict_proba(m.reshape(-1, 1))[:, iSort] / np.float(fit_mixture.n_mixtures)
+                    gmm_pdfs = np.dot(fit_pdfs, a*b).T
+
+                    h = hm.marginalHistogram(index = j)
+                    self.marginalProbability[i, j, :] = h._marginal_probability_pdfs(gmm_pdfs)
+                else:
+                    self.marginalProbability[i, j, :] = np.nan
+
+        if 'marginal_probability' in self.hdfFile.keys():
+            self.marginalProbability.writeHdf(self.hdfFile, 'marginal_probability')
+        else:
+            self.marginalProbability.toHdf(self.hdfFile, 'marginal_probability')
 
 
     def compute_marginal_probability_from_fits(self, fit_file, mask_by_doi=True):
 
         amplitudes, means, variances, degrees = self.read_fit_distributions(fit_file, mask_by_doi)
-
-        self._marginal_probability = StatArray.StatArray(np.zeros([self.nPoints, self.mesh.z.nCells+1, means.shape[-1]]), 'Marginal probability')
+        self.marginalProbability = StatArray.StatArray(np.zeros([self.nPoints, self.mesh.z.nCells, means.shape[-1]]), 'Marginal probability')
 
         print('Computing marginal probability', flush=True)
         for i in progressbar.progressbar(range(self.nPoints)):
@@ -1689,22 +1784,28 @@ class LineResults(myObject):
                 mixtures.append(mixStudentT(m[inan], v[inan], df[inan], a[inan]))
 
             mp = hm.marginalProbability(1.0, distributions=mixtures, log=10, maxDistributions=means.shape[-1])
-            self._marginal_probability[i, :mp.shape[0], :] = mp
+            self.marginalProbability[i, :mp.shape[0], :] = mp
 
-        # if 'marginal_probability' in self.hdfFile.keys():
-        #     del self.hdfFile['marginal_probability']
-
-            # self._marginal_probability.writeHdf(self.hdfFile, 'marginal_probability')
-        # else:
-        # self._marginal_probability.toHdf(self.hdfFile, 'marginal_probability')
-        self._marginal_probability.toHdf(join(self.directory, 'line_{}_marginal_probability.h5'.format(self.line)), 'marginal_probability')
+        if 'marginal_probability' in self.hdfFile.keys():
+            self.marginalProbability.writeHdf(self.hdfFile, 'marginal_probability')
+        else:
+            self.marginalProbability.toHdf(self.hdfFile, 'marginal_probability')
+        # self.marginalProbability.toHdf('line_{}_marginal_probability.h5'.format(self.line), 'marginal_probability')
 
 
-    def reorder_marginal_probability_by_labels(self, labels):
+    def reorder_marginal_probability_by_labels(self, labels=None):
 
+
+        # if 'reordered_marginal' in self.hdfFile.keys():
+        #     self.marginalProbability = StatArray.StatArray().fromHdf(self.hdfFile['reordered_marginal'])
+        #     return
         # assert np.all([labels.shape[i] == self.marginalProbability.shape[i] for i in range(self.marginalProbability.shape[-1])])
 
+        self.__dict__.pop('marginalProbability', None)
         out = np.zeros_like(self.marginalProbability)
+
+        if labels is None:
+            labels = self.labels
 
         for i in range(self.nPoints):
             for j in range(self.depth.size):
@@ -1713,6 +1814,11 @@ class LineResults(myObject):
                     out[i, j, np.int(l[k])] = self.marginalProbability[i, j, k]
 
         self.marginalProbability = out
+
+        if 'reordered_marginal' in self.hdfFile.keys():
+            self.marginalProbability.writeHdf(self.hdfFile, 'reordered_marginal')
+        else:
+            self.marginalProbability.toHdf(self.hdfFile, 'reordered_marginal')
 
 
 
@@ -1791,9 +1897,17 @@ class LineResults(myObject):
     @cached_property
     def highestMarginal(self):
 
-        # out = StatArray.StatArray(self.mesh.shape, "Most probable class")
         mp = self.marginalProbability
-        out = np.argmax(self.marginalProbability, axis=-1)
+        out = np.argmax(mp, axis=-1)
+
+        # mp2 = np.empty(out.shape)
+        # for i in range(mp.shape[0]):
+        #     for j in range(mp.shape[1]):
+        #         mp2[i, j] = mp[i, j, out[i, j]]
+        # mask = np.where(np.isnan(mp2))
+
+        # out = out.astype(np.float64)
+        # out[mask] = np.nan
 
         return out
 
@@ -1941,6 +2055,8 @@ class LineResults(myObject):
                 res.append('currentdatapoint/z/posterior')
             elif (low == 'fiducials'):
                 res.append('fiducials')
+            elif (low == 'labels'):
+                res.append('labels')
             elif (low == 'layer posterior'):
                 res.append('currentmodel/nCells/posterior')
             elif (low == 'layer depth posterior'):
@@ -2038,6 +2154,8 @@ class LineResults(myObject):
               "additive error posterior\n" +
               "inversion time\n" +
               "saving time\n"+
+              "labels"+
+              "marginal_probability"+
               "====================================================\n")
 
 
