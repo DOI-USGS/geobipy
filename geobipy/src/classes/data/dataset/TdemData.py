@@ -894,8 +894,8 @@ class TdemData(Data):
         systems = []
         for i in range(nSystems):
             # Get the system file name. h5py has to encode strings using utf-8, so decode it!
-            filename = str(np.asarray(grp.get('System{}'.format(i))), 'utf-8')
-            td = TdemSystem().read(join(systemFilepath, filename))
+            # filename = str(np.asarray(grp.get('System{}'.format(i))), 'utf-8')
+            td = TdemSystem().read(systemFilepath)
             systems.append(td)
 
         s = grp['d/data'].shape
