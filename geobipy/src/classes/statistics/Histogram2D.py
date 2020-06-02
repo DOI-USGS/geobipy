@@ -179,7 +179,7 @@ class Histogram2D(RectilinearMesh2D):
 
 
 
-    def marginalHistogram(self, intervals=None, log=None, axis=0):
+    def marginalHistogram(self, intervals=None, index=None, log=None, axis=0):
         """Get the marginal histogram along an axis
 
         Parameters
@@ -199,19 +199,28 @@ class Histogram2D(RectilinearMesh2D):
         """
         assert 0 <= axis <= 1, ValueError("0 <= axis <= 1")
 
+
         bins = self.x if axis == 0 else self.y
 
-        if intervals is None:
+        if intervals is None and index is None:
             s = np.sum(self._counts, axis=axis)
         else:
-            assert np.size(intervals) == 2, ValueError("intervals must have size equal to 2")
-            assert intervals[1] > intervals[0], ValueError("intervals must be monotonically increasing")
-            if axis == 0:
-                iBins = self.y.cellCentres.searchsorted(intervals)
-                s = np.sum(self._counts[iBins[0]:iBins[1], :], axis=axis)
+            assert (intervals is None) or (index is None), ValueError("Cannot provide both intervals and an index")
+
+            if not intervals is None:
+                assert np.size(intervals) == 2, ValueError("intervals must have size equal to 2")
+                assert intervals[1] > intervals[0], ValueError("intervals must be monotonically increasing")
+                if axis == 0:
+                    indices = self.y.cellCentres.searchsorted(intervals)
+                else:
+                    indices = self.x.cellCentres.searchsorted(intervals)
             else:
-                iBins = self.x.cellCentres.searchsorted(intervals)
-                s = np.sum(self._counts[:, iBins[0]:iBins[1]], axis=axis)
+                indices = np.asarray([index, index+1])
+
+            if axis == 0:
+                s = np.sum(self._counts[indices[0]:indices[1], :], axis=axis)
+            else:
+                s = np.sum(self._counts[:, indices[0]:indices[1]], axis=axis)
 
         out = Histogram1D(bins = bins.cellEdges, log=log)
         out._counts += s
@@ -698,7 +707,7 @@ class Histogram2D(RectilinearMesh2D):
         normalizedPdfs = pdfs / np.sum(pdfs, axis=0)
 
         # Initialize the facies Model
-        axisPdf = self.estimatePdf(axis=axis)[:-1, :]
+        axisPdf = self.estimatePdf(axis=axis)
 
         marginalProbability = StatArray.StatArray([nMixtures, maxDistributions], 'Marginal probability')
         marginalProbability[:, :] = np.sum(axisPdf * normalizedPdfs, axis=2-axis).T
