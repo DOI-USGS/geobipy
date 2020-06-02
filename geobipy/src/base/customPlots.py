@@ -106,9 +106,6 @@ except:
     assert not Err.isIpython(), 'Please use %matplotlib inline for ipython notebook on the very first line'
 
 myFonts = {'fontsize': 8}
-# mpl.rcParams['title.labelsize'] = 14
-#mpl.rcParams['xtick.labelsize'] = label_size
-#mpl.rcParams['ytick.labelsize'] = label_size
 mpl.rc('axes', labelsize=label_size)
 mpl.rc('xtick', labelsize=label_size)
 mpl.rc('ytick', labelsize=label_size)
@@ -740,6 +737,8 @@ def _pcolormesh(X, Y, values, **kwargs):
 def alpha_to_colour(pcmesh, alphaArray, colour):
     plt.savefig('tmp.png')
     for cellColour, alpha in zip(pcmesh.get_facecolors(), alphaArray.flatten()):
+        if np.isnan(alpha):
+            alpha = 0.0
         cellColour[3] = 1.0
         cellColour[:3] = alpha * cellColour[:3] + (1.0 - alpha) * colour
 
