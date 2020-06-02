@@ -5,13 +5,15 @@ Module defining a multivariate normal distribution with statistical procedures
 import numpy as np
 from ...base  import customFunctions as cf
 from .baseDistribution import baseDistribution
+from .NormalDistribution import Normal
 from ..core import StatArray
 from scipy.stats import multivariate_normal
+
 
 class MvNormal(baseDistribution):
     """Class extension to geobipy.baseDistribution
 
-    Handles a multivariate normal distribution.  Uses Scipy to evaluate probabilities, 
+    Handles a multivariate normal distribution.  Uses Scipy to evaluate probabilities,
     but Numpy to generate random samples since scipy is slow.
 
     MvNormal(mean, variance, ndim, prng)
@@ -27,7 +29,7 @@ class MvNormal(baseDistribution):
         Only used if mean and variance are scalars that are constant for all dimensions
     prng : numpy.random.RandomState, optional
         A random state to generate random numbers. Required for parallel instantiation.
-        
+
     Returns
     -------
     out : MvNormal
@@ -69,7 +71,7 @@ class MvNormal(baseDistribution):
             assert np.size(mean) == 1, ValueError("When specifying ndim, mean must be a scalar.")
             assert np.size(variance) == 1, ValueError("When specifying ndim, variance must be a scalar.")
 
-            ndim = np.maximum(1, ndim)
+            ndim = np.int(np.maximum(1, ndim))
             self._constant = True
             self._mean = np.full(ndim, fill_value=mean)
             self._variance = np.diag(np.full(ndim, fill_value=variance))
@@ -93,6 +95,7 @@ class MvNormal(baseDistribution):
 
     @ndim.setter
     def ndim(self, newDimension):
+        newDimension = np.int(newDimension)
         if newDimension == self.ndim:
             return
         assert newDimension > 0, ValueError("Cannot have zero dimensions.")
@@ -146,8 +149,12 @@ class MvNormal(baseDistribution):
         return np.atleast_1d(np.squeeze(self.prng.multivariate_normal(self._mean, self.variance, size)))
 
 
-    def probability(self, x, log):
+    def probability(self, x, log, axis=None):
         """ For a realization x, compute the probability """
+
+        if not axis is None:
+            d = Normal(mean = self.mean[axis], variance=self.variance[axis, axis])
+            return d.probability(x, log)
 
         if log:
 
@@ -168,10 +175,10 @@ class MvNormal(baseDistribution):
             tmp = 0.5 * np.dot(xMu, np.dot(self.inverseVariance, xMu))
             # Probability Density Function
             return -(0.5 * N) * np.log(2.0 * np.pi) - dv - tmp
-            
+
 
         else:
-            
+
             N = x.size
             nD = self.mean.size
 
@@ -195,9 +202,9 @@ class MvNormal(baseDistribution):
         msg = 'MV Normal Distribution: \n'
         msg += '    Mean: ' + str(self.mean) + '\n'
         msg += '    Variance: ' + str(self.variance) + '\n'
-        
+
         return msg if out else print(msg)
-    
+
 
     def pad(self, N):
         """ Pads the mean and variance to the given size
@@ -210,8 +217,8 @@ class MvNormal(baseDistribution):
 
 
     def bins(self, nBins=100, nStd=4.0, axis=None):
-        """Discretizes a range given the mean and variance of the distribution 
-        
+        """Discretizes a range given the mean and variance of the distribution
+
         Parameters
         ----------
         nBins : int, optional
@@ -220,14 +227,14 @@ class MvNormal(baseDistribution):
             The bin edges = mean +- nStd * variance.
         dim : int, optional
             Get the bins of this dimension, if None, returns bins for all dimensions.
-        
+
         Returns
         -------
         bins : geobipy.StatArray
             The bin edges.
 
         """
-        
+
         nStd = np.float64(nStd)
         nD = self.ndim
         if (nD > 1):
