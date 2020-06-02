@@ -84,11 +84,11 @@ class Model1D(Model):
             self._init_withoutHalfspace(nCells, top, parameters, depth, thickness)
 
         # StatArray of the change in physical parameters
-        self._dpar = StatArray.StatArray(self.nCells[0] - 1, 'Derivative', r"$\frac{"+self.par.getUnits()+"}{m}$")
+        self._dpar = StatArray.StatArray(np.int(self.nCells[0]) - 1, 'Derivative', r"$\frac{"+self.par.getUnits()+"}{m}$")
 
         # StatArray of magnetic properties.
-        self._magnetic_susceptibility = StatArray.StatArray(self.nCells[0], "Magnetic Susceptibility", r"$\kappa$")
-        self._magnetic_permeability = StatArray.StatArray(self.nCells[0], "Magnetic Permeability", "$\frac{H}{m}$")
+        self._magnetic_susceptibility = StatArray.StatArray(np.int(self.nCells[0]), "Magnetic Susceptibility", r"$\kappa$")
+        self._magnetic_permeability = StatArray.StatArray(np.int(self.nCells[0]), "Magnetic Permeability", "$\frac{H}{m}$")
 
         # Instantiate extra parameters for Markov chain perturbations.
         # Minimum cell thickness
@@ -135,13 +135,13 @@ class Model1D(Model):
         if (not thickness is None and nCells is None):
             self._nCells[0] = thickness.size + 1
 
-        self._depth = StatArray.StatArray(self.nCells[0], 'Depth', 'm')
-        self._thk = StatArray.StatArray(self.nCells[0], 'Thickness', 'm')
-        self._par = StatArray.StatArray(self.nCells[0])
+        self._depth = StatArray.StatArray(np.int(self.nCells[0]), 'Depth', 'm')
+        self._thk = StatArray.StatArray(np.int(self.nCells[0]), 'Thickness', 'm')
+        self._par = StatArray.StatArray(np.int(self.nCells[0]))
 
         if (not depth is None):
             if (self.nCells > 1):
-                assert depth.size == self.nCells-1, ValueError('Size of depth must equal {}'.format(self.nCells[0]-1))
+                assert depth.size == self.nCells-1, ValueError('Size of depth must equal {}'.format(np.int(self.nCells[0])-1))
                 assert np.all(np.diff(depth) > 0.0), ValueError('Depths must monotonically increase')
             self._depth[:-1] = depth
             self._depth[-1] = np.inf
@@ -152,7 +152,7 @@ class Model1D(Model):
             if nCells is None:
                 self.nCells[0] = thickness.size + 1
             if (self.nCells > 1):
-                assert thickness.size == self.nCells-1, ValueError('Size of thickness must equal {}'.format(self.nCells[0]-1))
+                assert thickness.size == self.nCells-1, ValueError('Size of thickness must equal {}'.format(np.int(self.nCells[0])-1))
                 assert np.all(thickness > 0.0), ValueError('Thicknesses must be positive')
             self._thk[:-1] = thickness
             self._thk[-1] = np.inf
@@ -160,7 +160,7 @@ class Model1D(Model):
 
         # StatArray of the physical parameters
         if (not parameters is None):
-            assert parameters.size == self.nCells, ValueError('Size of parameters must equal {}'.format(self.nCells[0]))
+            assert parameters.size == self.nCells, ValueError('Size of parameters must equal {}'.format(np.int(self.nCells[0])))
             self._par = StatArray.StatArray(parameters)
 
 
@@ -172,13 +172,13 @@ class Model1D(Model):
         if (not thickness is None and nCells is None):
             self.nCells[0] = thickness.size
 
-        self._depth = StatArray.StatArray(self.nCells[0], 'Depth', 'm')
-        self._thk = StatArray.StatArray(self.nCells[0], 'Thickness', 'm')
-        self._par = StatArray.StatArray(self.nCells[0])
+        self._depth = StatArray.StatArray(np.int(self.nCells[0]), 'Depth', 'm')
+        self._thk = StatArray.StatArray(np.int(self.nCells[0]), 'Thickness', 'm')
+        self._par = StatArray.StatArray(np.int(self.nCells[0]))
 
         if (not depth is None):
             if (self.nCells > 1):
-                assert depth.size == self.nCells, ValueError('Size of depth must equal {}'.format(self.nCells[0]))
+                assert depth.size == self.nCells, ValueError('Size of depth must equal {}'.format(np.int(self.nCells[0])))
                 assert np.all(np.diff(depth) > 0.0), ValueError('Depths must monotonically increase')
             self._depth[:] = depth
             self.thicknessFromDepth()
@@ -187,14 +187,14 @@ class Model1D(Model):
             if nCells is None:
                 self.nCells[0] = thickness.size
             if (self.nCells > 1):
-                assert thickness.size == self.nCells, ValueError('Size of thickness must equal {}'.format(self.nCells[0]))
+                assert thickness.size == self.nCells, ValueError('Size of thickness must equal {}'.format(np.int(self.nCells[0])))
                 assert np.all(thickness > 0.0), ValueError('Thicknesses must be positive')
             self._thk[:] = thickness
             self.depthFromThickness()
 
         # StatArray of the physical parameters
         if (not parameters is None):
-            assert parameters.size == self.nCells, ValueError('Size of parameters must equal {}'.format(self.nCells[0]))
+            assert parameters.size == self.nCells, ValueError('Size of parameters must equal {}'.format(np.int(self.nCells[0])))
             self._par = StatArray.StatArray(parameters)
 
     @property
@@ -290,9 +290,9 @@ class Model1D(Model):
 
     def thicknessFromDepth(self):
         """Given the depths to each interface, compute the layer thicknesses. The last thickness is nan for the halfspace."""
-        self._thk = self.thk.resize(self.nCells[0])
+        self._thk = self.thk.resize(np.int(self.nCells[0]))
         self._thk[0] = self.depth[0]
-        for i in range(1, self.nCells[0]):
+        for i in range(1, np.int(self.nCells[0])):
             self._thk[i] = self.depth[i] - self.depth[i - 1]
 
         if self.hasHalfspace:
@@ -407,8 +407,8 @@ class Model1D(Model):
         # Get the new thicknesses
         other.thicknessFromDepth()
         # Reset ChiE and ChiM
-        other._magnetic_permeability = StatArray.StatArray(other.nCells[0], "Electric Susceptibility", r"$\kappa$")
-        other._magnetic_susceptibility = StatArray.StatArray(other.nCells[0], "Magnetic Susceptibility", r"$\frac{H}{m}$")
+        other._magnetic_permeability = StatArray.StatArray(np.int(other.nCells[0]), "Electric Susceptibility", r"$\kappa$")
+        other._magnetic_susceptibility = StatArray.StatArray(np.int(other.nCells[0]), "Magnetic Susceptibility", r"$\frac{H}{m}$")
         # Resize the parameter gradient
         other._dpar = other.dpar.resize(other.par.size - 1)
         other.action = ['birth', np.int(i), z]
@@ -433,7 +433,7 @@ class Model1D(Model):
         if (self.nCells == 0):
             return self
 
-        assert i < self.nCells[0] - 1, ValueError("i must be less than the number of cells - 1{}".format(self.nCells[0]-1))
+        assert i < np.int(self.nCells[0]) - 1, ValueError("i must be less than the number of cells - 1{}".format(np.int(self.nCells[0])-1))
 
         # Deepcopy the 1D Model to ensure priors and proposals are passed
         other = self.deepcopy()
@@ -505,9 +505,9 @@ class Model1D(Model):
                 # Get a random probability from 0-1
                 event = self.eventProposal.rng()
 
-                if (self.nCells == 1 and (event == 1 or event == 2)):
+                if (np.int(self.nCells[0]) == 1 and (event == 1 or event == 2)):
                     goodAction = False
-                elif (self.nCells == self.nCells.prior.max and event == 0):
+                elif (np.int(self.nCells[0]) == self.nCells.prior.max and event == 0):
                     goodAction = False
 
             # Return if no change
@@ -522,8 +522,7 @@ class Model1D(Model):
                 tries = 0
                 while (not newThicknessBiggerThanMinimum):  # Continue while the new layer is smaller than the minimum
                     # Get the new depth
-                    newDepth = np.float64(prng.uniform(self.minDepth, self.maxDepth, 1))
-                    # newDepth = np.exp(tmp)
+                    newDepth = np.exp(np.float64(prng.uniform(np.log(self.minDepth), np.log(self.maxDepth), 1)))
                     z = self.depth[:-1]
                     # Insert the new depth
                     i = z.searchsorted(newDepth)
@@ -555,7 +554,7 @@ class Model1D(Model):
 
             if (event == 2):
                 newThicknessBiggerThanMinimum = False
-                k = self.nCells[0] - 1
+                k = np.int(self.nCells[0]) - 1
                 tries = 0
                 while (not newThicknessBiggerThanMinimum):  # Continue while the perturbed layer is suitable
                     z = self.depth[:-1]
@@ -898,6 +897,7 @@ class Model1D(Model):
 
         # Discretize the parameter values
         zGrd = StatArray.StatArray(np.arange(0.5 * self.minDepth, 1.1 * self.maxDepth, 0.5 * self.minThickness), self.depth.name, self.depth.units)
+        # zGrd = StatArray.StatArray(np.logspace(np.log10(self.minDepth), np.log10(self.maxDepth), zGrd.size), self.depth.name, self.depth.units)
 
         if self.par.hasPrior:
             p = self.par.prior.bins(nBins = 250, nStd=4.0, axis=0)
@@ -911,7 +911,7 @@ class Model1D(Model):
         self.par.setPosterior(Hitmap2D(xBins = pGrd, yBinCentres = zGrd))
 
         # Initialize the interface Depth Histogram
-        self.depth.setPosterior(Histogram1D(binCentres = zGrd))
+        self.depth.setPosterior(Histogram1D(bins = zGrd))
 
 
     def setPriors(self, halfSpaceValue, minDepth, maxDepth, maxLayers, parameterPrior, gradientPrior, parameterLimits=None, minThickness=None, factor=10.0, dzVariance=1.5, prng=None):
@@ -1054,7 +1054,7 @@ class Model1D(Model):
         """
         assert (self.dpar.hasPrior), TypeError('No prior defined on parameter gradient. Use Model1D.dpar.addPrior() to set the prior.')
 
-        if self.nCells[0] == 1:
+        if np.int(self.nCells[0]) == 1:
             tmp = self.insertLayer(np.log(self.minDepth) + (0.5 * (self.maxDepth - self.minDepth)))
             tmp.dpar[:] = (np.diff(np.log(tmp.par))) / (np.log(tmp.thk[:-1]) - np.log(self.minThickness))
             probability = tmp.dpar.probability(log=log)
@@ -1354,7 +1354,7 @@ class Model1D(Model):
             The interpolated model parameters at each y axis value of the mesh.
 
         """
-        assert (np.size(par) == self.nCells[0]), 'par must have length nCells'
+        assert (np.size(par) == np.int(self.nCells[0])), 'par must have length nCells'
         assert (isinstance(mesh, RectilinearMesh2D.RectilinearMesh2D)), TypeError('mesh must be a RectilinearMesh2D')
 
         if self.hasHalfspace:
@@ -1378,7 +1378,7 @@ class Model1D(Model):
             i = mesh.y.cellIndex(depth[-1], clip=True)
             y = mesh.y.cellCentres[:i]
 
-        if (self.nCells[0] == 1):
+        if (np.int(self.nCells[0]) == 1):
             mint = np.interp(y, bounds, np.kron(par[:], [1, 1]))
         else:
             xp = np.kron(np.asarray(depth), [1, 1.001])
@@ -1624,7 +1624,7 @@ class Model1D(Model):
 
         self.nCells.writeHdf(grp, 'nCells',  withPosterior=withPosterior, index=index)
         self.top.writeHdf(grp, 'top', index=index)
-        nCells = self.nCells[0]
+        nCells = np.int(self.nCells[0])
 
         if (index is None):
             index = np.s_[:nCells]
@@ -1716,7 +1716,7 @@ class Model1D(Model):
         if grp['par/data'].ndim == 1:
             i = index
         else:
-            i = np.s_[index, :tmp.nCells[0]]
+            i = np.s_[index, :np.int(tmp.nCells[0])]
 
         item = grp.get('top')
         obj = eval(cF.safeEval(item.attrs.get('repr')))
@@ -1724,17 +1724,17 @@ class Model1D(Model):
 
         item = grp.get('par')
         obj = eval(cF.safeEval(item.attrs.get('repr')))
-        obj = obj.resize(tmp.nCells[0])
+        obj = obj.resize(np.int(tmp.nCells[0]))
         tmp._par = obj.fromHdf(item, index=i)
 
         item = grp.get('depth')
         obj = eval(cF.safeEval(item.attrs.get('repr')))
-        obj = obj.resize(tmp.nCells[0])
+        obj = obj.resize(np.int(tmp.nCells[0]))
         tmp._depth = obj.fromHdf(item, index=i)
 
         item = grp.get('thk')
         obj = eval(cF.safeEval(item.attrs.get('repr')))
-        obj = obj.resize(tmp.nCells[0])
+        obj = obj.resize(np.int(tmp.nCells[0]))
         tmp._thk = obj.fromHdf(item, index=i)
 
         #item = grp.get('magnetic_permeability'); obj = eval(cF.safeEval(item.attrs.get('repr')));
@@ -1744,7 +1744,7 @@ class Model1D(Model):
         #obj = obj.resize(tmp.nCells[0]); tmp.magnetic_susceptibility = obj.fromHdf(item, index=i)
 
         if (tmp.nCells[0] > 0):
-            tmp._dpar = StatArray.StatArray(tmp.nCells[0] - 1, 'Derivative', tmp.par.units + '/m')
+            tmp._dpar = StatArray.StatArray(np.int(tmp.nCells[0]) - 1, 'Derivative', tmp.par.units + '/m')
         else:
             tmp._dpar = None
 

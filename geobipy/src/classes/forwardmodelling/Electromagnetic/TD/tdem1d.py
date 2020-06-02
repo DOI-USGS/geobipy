@@ -115,8 +115,8 @@ try:
                 datapoint.system[i].forwardmodel(G, E)
 
         if (ix is None):  # Generate a full matrix if the layers are not specified
-            ix = range(model1d.nCells[0])
-            J = np.zeros([datapoint.nWindows, model1d.nCells[0]])
+            ix = range(np.int(model1d.nCells[0]))
+            J = np.zeros([datapoint.nWindows, np.int(model1d.nCells[0])])
         else:  # Partial matrix for specified layers
             J = np.zeros([datapoint.nWindows, np.size(ix)])
 
