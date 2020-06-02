@@ -18,7 +18,7 @@ except:
 
 class PointCloud3D(myObject):
     """3D Point Cloud with x,y,z co-ordinates
-    
+
     PointCloud3D(N, x, y, z)
 
     Parameters
@@ -37,8 +37,8 @@ class PointCloud3D(myObject):
     Returns
     -------
     out : geobipy.PointCloud3D
-        The 3D point cloud    
-    
+        The 3D point cloud
+
     """
 
     def __init__(self, nPoints=0, x=None, y=None, z=None, elevation=None, units="m"):
@@ -66,7 +66,7 @@ class PointCloud3D(myObject):
                 self._y = y.deepcopy()
             else:
                 self._y = StatArray.StatArray(y, "Northing", units)
-                
+
         # StatArray of the z co-ordinates
         if (z is None):
             self._z = StatArray.StatArray(self._nPoints, "Height", units)
@@ -102,7 +102,7 @@ class PointCloud3D(myObject):
 
     def __getitem__(self, i):
         """Define get item
-        
+
         Parameters
         ----------
         i : ints or slice
@@ -122,7 +122,7 @@ class PointCloud3D(myObject):
     @property
     def y(self):
         return self._y
-    
+
     @property
     def z(self):
         return self._z
@@ -131,7 +131,7 @@ class PointCloud3D(myObject):
     def elevation(self):
         return self._elevation
 
-    
+
     @property
     def nPoints(self):
         """Get the number of points"""
@@ -154,12 +154,12 @@ class PointCloud3D(myObject):
         Returns
         -------
         out : geobipy.Point
-            A point 
+            A point
 
         Raises
         ------
         ValueError : If i is not a single int
-            
+
         """
         assert np.size(i) == 1, ValueError("i must be a single integer")
         assert 0 <= i <= self.nPoints, ValueError("Must have 0 <= i <= {}".format(self.nPoints))
@@ -209,7 +209,7 @@ class PointCloud3D(myObject):
             return distance
 
 
-    def interpolate(self, dx, dy, values, method='ct', mask = False, clip = None, i=None, **kwargs):
+    def interpolate(self, dx, dy, values, method='ct', mask = False, clip = True, i=None, **kwargs):
 
         if method.lower() == 'ct':
             return self.interpCloughTocher(dx, dy, values, mask, clip, i, **kwargs)
@@ -247,10 +247,10 @@ class PointCloud3D(myObject):
         y = StatArray.StatArray(yc, name=self.y.name, units=self.y.units)
 
         return x, y, vals, kwargs
-    
-    
+
+
     def interpMinimumCurvature(self, dx, dy, values, mask=False, clip=True, i=None, **kwargs):
-    
+
 
         iterations = kwargs.pop('iterations', 2000)
         tension = kwargs.pop('tension', 0.25)
@@ -262,7 +262,7 @@ class PointCloud3D(myObject):
         # Get the discretization
         assert dx > 0.0, ValueError("dx must be positive!")
         assert dy > 0.0, ValueError("dy must be positive!")
-                
+
         x, y, vals = interpolation.minimumCurvature(self.x, self.y, values, self.bounds, dx, dy, mask=mask, clip=clip, iterations=iterations, tension=tension, accuracy=accuracy)
         x = StatArray.StatArray(x, name=self.x.name, units=self.x.units)
         y = StatArray.StatArray(y, name=self.y.name, units=self.y.units)
@@ -273,23 +273,23 @@ class PointCloud3D(myObject):
         """ Create a map of a parameter """
 
         cTmp = kwargs.pop('c', self.z)
-        
+
         mask = kwargs.pop('mask', False)
-        
+
         clip = kwargs.pop('clip', True)
-        
+
         method = kwargs.pop('method', "ct").lower()
-              
-        
+
+
         if method == 'ct':
             x, y, vals, kwargs = self.interpCloughTocher(dx=dx, dy=dy, values=cTmp, mask=mask, clip=clip, i=i, **kwargs)
         elif method == 'mc':
             x, y, vals, kwargs = self.interpMinimumCurvature(dx, dy, values=cTmp, mask=mask, clip=clip, i=i, **kwargs)
         else:
-            assert False, ValueError("method must be either 'ct' or 'mc' ")  
-                        
+            assert False, ValueError("method must be either 'ct' or 'mc' ")
+
         return cP.pcolor(vals, x.edges(), y.edges(), **kwargs)
-        
+
 
 
     def maketest(self, nPoints):
@@ -354,7 +354,7 @@ class PointCloud3D(myObject):
             Number of header line to skips at the top.
         columnIndices : ints, optional
             Size of 3, each int corresponds to the column containing x, y, z.
-        
+
         """
 
         assert np.size(columnIndices) == 3, ValueError('size of columnIndices must equal 3')
@@ -379,18 +379,18 @@ class PointCloud3D(myObject):
 
     def fileInformation(self):
         """Description of PointCloud3D file.
-        
+
         Returns
         -------
         out : str
             File description.
-            
+
         """
 
         tmp = ("The file is structured using columns with the first line containing a header line.\n"
                 "When reading, the columnIndices are used to read the x, y, z co-ordinates.\n"
                 "The corresponding entries in the header are used to give the co-ordinates their label. ")
-              
+
         return tmp
 
 
@@ -405,7 +405,7 @@ class PointCloud3D(myObject):
             Colour values of the points, default is the height of the points
         i : sequence of ints, optional
             Plot a subset of x, y, c, using the indices in i.
-        
+
         See Also
         --------
         geobipy.customPlots.Scatter2D : For additional keyword arguments you may use.
@@ -420,12 +420,12 @@ class PointCloud3D(myObject):
 
     def setKdTree(self, nDims=3):
         """Creates a k-d tree of the point co-ordinates
-        
+
         Parameters
         ----------
         nDims : int
             Either 2 or 3 to exclude or include the vertical co-ordinate
-        
+
         """
         self.kdtree = None
         if (nDims == 2):
@@ -471,7 +471,7 @@ class PointCloud3D(myObject):
         -------
         out : pyvtk.VtkData
             Vtk data structure
-        
+
        """
 
         nodes = np.vstack([self.x, self.y, self.z]).T
@@ -489,7 +489,7 @@ class PointCloud3D(myObject):
         fileName : str
             Filename to save to.
         pointData : geobipy.StatArray or list of geobipy.StatArray, optional
-            Data at each point in the point cloud. Each entry is saved as a separate 
+            Data at each point in the point cloud. Each entry is saved as a separate
             vtk attribute.
         format : str, optional
             "ascii" or "binary" format. Ascii is readable, binary is not but results in smaller files.
@@ -521,11 +521,11 @@ class PointCloud3D(myObject):
                 vtk.point_data.append(Scalars(pointData, pointData.getNameUnits()))
 
         vtk.tofile(fileName, format=format)
-        
+
 
     def Bcast(self, world, root=0):
-        """Broadcast a PointCloud3D using MPI 
-        
+        """Broadcast a PointCloud3D using MPI
+
         Parameters
         ----------
         world : mpi4py.MPI.COMM_WORLD
@@ -539,7 +539,7 @@ class PointCloud3D(myObject):
             PointCloud3D broadcast to each rank
 
         """
-        
+
         x = self.x.Bcast(world, root=root)
         y = self.y.Bcast(world, root=root)
         z = self.z.Bcast(world, root=root)
@@ -549,8 +549,8 @@ class PointCloud3D(myObject):
 
 
     def Scatterv(self, starts, chunks, world, root=0):
-        """ScatterV a PointCloud3D using MPI 
-        
+        """ScatterV a PointCloud3D using MPI
+
         Parameters
         ----------
         myStart : sequence of ints
@@ -566,7 +566,7 @@ class PointCloud3D(myObject):
         -------
         out : geobipy.PointCloud3D
             The PointCloud3D distributed amongst ranks.
-            
+
         """
 
         N = chunks[world.rank]
