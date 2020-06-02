@@ -459,7 +459,7 @@ class Data(PointCloud3D):
         cP.title(self.channelNames[channel])
 
 
-    def plot(self, xAxis='index', channels=None, system=None, **kwargs):
+    def plot(self, xAxis='index', channels=None, values=None, system=None, **kwargs):
         """Plots the specifed channels as a line plot.
 
         Plots the channels along a specified co-ordinate e.g. 'x'. A legend is auto generated.
@@ -476,10 +476,12 @@ class Data(PointCloud3D):
         channels : ints, optional
             Indices of the channels to plot.  All are plotted if None
             * If system is None, 0 <= channel < self.nChannels else 0 <= channel < self.nChannelsPerSystem[system]
+        values : arraylike, optional
+            Specifies values to plot against the chosen axis. Takes precedence over channels.
         system : int, optional
             The system to obtain the channel from.
-        noLegend : bool
-            Do not attach a legend to the plot.  Default is False, a legend is attached.
+        legend : bool
+            Attach a legend to the plot.  Default is True.
 
         Returns
         -------
@@ -494,29 +496,33 @@ class Data(PointCloud3D):
 
         """
 
-        noLegend = kwargs.pop('noLegend', False)
+        legend = kwargs.pop('legend', True)
+        ax = kwargs.pop('ax', plt.gca())
 
-        if system is None:
-            rTmp = range(self.nChannels) if channels is None else channels
+        if not values is None:
+            legend = False
+            ax = super().plot(values=values, xAxis=xAxis, label=cf.getName(values), **kwargs)
+
         else:
-            assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-            rTmp = self._systemOffset[system] + channels
+            if system is None:
+                rTmp = range(self.nChannels) if channels is None else channels
+            else:
+                assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+                rTmp = self._systemOffset[system] + channels
 
-        ax = plt.gca()
+            for i in rTmp:
+                super().plot(values=self.data[:, i], xAxis=xAxis, label=self.channelNames[i], **kwargs)
 
-        for i in rTmp:
-            super().plot(values=self.data[:, i], xAxis=xAxis, label=self.channelNames[i], **kwargs)
-
-        legend = None
-        if not noLegend:
+        leg = None
+        if legend:
             box = ax.get_position()
             ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
 
             # Put a legend to the right of the current axis
-            legend = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5),fancybox=True)
-            legend.set_title(self._data.getNameUnits())
+            leg = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5),fancybox=True)
+            leg.set_title(self._data.getNameUnits())
 
-        return ax, legend
+        return ax, leg
 
 
     def plotPredicted(self, xAxis='index', channels=None, system=None, **kwargs):

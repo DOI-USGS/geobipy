@@ -340,9 +340,9 @@ class FdemData(Data):
         tmp.nSystems = self.nSystems
 
         if not self.powerline is None:
-            tmp.powerline = self.powerline[i].deepcopy()
+            tmp._powerline = self.powerline[i].deepcopy()
         if not self.magnetic is None:
-            tmp.magnetic = self.magnetic[i].deepcopy()
+            tmp._magnetic = self.magnetic[i].deepcopy()
         return tmp
 
 
@@ -395,7 +395,7 @@ class FdemData(Data):
     #     # cP.title(self._channelNames[channel])
 
 
-    def plot(self, xAxis='index', channels=None, **kwargs):
+    def plot(self, xAxis='index', channels=None, values=None, **kwargs):
         """Plots the specifed channels as a line plot.
 
         Plots the channels along a specified co-ordinate e.g. 'x'. A legend is auto generated.
@@ -411,8 +411,8 @@ class FdemData(Data):
             If xAxis is 'r3d', returns cumulative distance along the line in 3D using x, y, and z.
         channels : ints, optional
             The indices of the channels to plot. All are plotted if channels is None.
-        noLegend : bool
-            Do not attach a legend to the plot.  Default is False, a legend is attached.
+        legend : bool
+            Attach a legend to the plot.  Default is True.
 
         Returns
         -------
@@ -427,11 +427,10 @@ class FdemData(Data):
 
         """
 
-        noLegend = kwargs.pop('noLegend', False)
-        kwargs['noLegend'] = noLegend
-        ax, legend = super().plot(xAxis, channels, **kwargs)
+        kwargs['legend'] = kwargs.pop('legend', True)
+        ax, legend = super().plot(xAxis, channels=channels, values=values, **kwargs)
 
-        if not noLegend:
+        if not legend is None:
             legend.set_title('Frequency (Hz)')
 
         return ax, legend
@@ -1037,7 +1036,7 @@ class FdemData(Data):
         obj = eval(cF.safeEval(item.attrs.get('repr')))
         tmp.calibration = obj.fromHdf(item)
 
-        tmp.getActiveChannels()
+        # tmp.getActiveChannels()
         return tmp
 
     def Bcast(self, world, root=0):
