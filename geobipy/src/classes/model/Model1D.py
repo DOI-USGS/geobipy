@@ -122,6 +122,10 @@ class Model1D(Model):
     def dpar(self):
         return self._dpar
 
+    def doi(self, percentage=67.0):
+        if self.par.hasPosterior:
+            return self.par.posterior.getOpacityLevel(percentage)
+
     @property
     def inverseHessian(self):
         return self._inverseHessian
