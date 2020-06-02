@@ -257,6 +257,33 @@ class Histogram1D(RectilinearMesh1D):
         return mixture
 
 
+    def _marginal_probability_pdfs(self, pdfs):
+        """
+
+        Parameters
+        ----------
+        pdfs : array_like
+            nPdfs x nBins.
+
+        """
+
+        nDistributions = pdfs.shape[0]
+
+        # Normalize by the sum of the pdfs
+        s = np.sum(pdfs, axis=0)
+        i = np.where(s > 0.0)
+        normalizedPdfs = pdfs
+        normalizedPdfs[:, i] = normalizedPdfs[:, i] / s[i]
+
+        # Initialize the facies Model
+        axisPdf = self.estimatePdf()
+
+        marginalProbability = StatArray.StatArray(nDistributions, 'Marginal probability')
+        marginalProbability = np.sum(axisPdf * normalizedPdfs, axis=1)
+
+        return marginalProbability
+
+
     def sample(self, nSamples, log=None):
         """Generates samples from the histogram.
 
