@@ -113,6 +113,7 @@ class Mixture(object):
             dfGuess = 1e4
             # Set the degrees of freedom bounds
             guess[3::self.n_solvable_parameters] = dfGuess
+            lowerBounds[3::self.n_solvable_parameters] = 2
 
         bounds = (lowerBounds, upperBounds)
 
@@ -186,8 +187,11 @@ class Mixture(object):
         if not variance_bounds is None:
             active = (variance_bounds[0] <= variances) & (variances <= variance_bounds[1]) & active
 
+        self._assign_from_mixture(best)
         return best, np.atleast_1d(active)
 
 
     def fit_single_mixture(self , X, k, **kwargs):
-        return self.mixture_model_class(n_components=k, **kwargs).fit(X)
+        mixture = self.mixture_model_class(n_components=k, **kwargs).fit(X)
+        self._assign_from_mixture(mixture)
+        return mixture
