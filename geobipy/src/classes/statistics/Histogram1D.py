@@ -186,6 +186,11 @@ class Histogram1D(RectilinearMesh1D):
         return (med, low, high)
 
 
+    def credibleRange(self, percent=95.0, log=None):
+        m, l, h = self.credibleIntervals(percent, log)
+        return h - l
+
+
     def estimatePdf(self):
         return StatArray.StatArray(np.divide(self.counts, np.sum(self.counts)), name='Density')
 
