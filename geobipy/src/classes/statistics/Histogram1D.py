@@ -378,8 +378,19 @@ class Histogram1D(RectilinearMesh1D):
     def plot_as_line(self, rotate=False, flipX=False, flipY=False, trim=True, normalize=False, **kwargs):
 
         x = self.binCentres
+        x1 = x
+        if kwargs['xscale'] == 'log':
+            x1 = np.log10(x1)
 
-        ax = self.counts.plot(x=x, **kwargs)
+        if normalize:
+            cnts = self.counts / np.trapz(self.counts, x = x1)
+        else:
+            cnts = self.counts
+
+        ax = cnts.plot(x=x, **kwargs)
+
+        if normalize:
+            cP.ylabel('Density')
 
 
     def hdfName(self):
