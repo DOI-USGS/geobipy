@@ -488,6 +488,8 @@ class DataSetResults(myObject):
         tmp = np.sum([not x is None for x in [lineNumber, fiducial, index]])
         assert tmp == 1, Exception("Please specify one argument, lineNumber, fiducial, or index")
 
+        index = np.atleast_1d(index)
+
 
         if not lineNumber is None:
             return np.squeeze(np.where(self.lineNumbers == lineNumber)[0])
@@ -500,7 +502,7 @@ class DataSetResults(myObject):
         cumPoints = self._cumNpoints - 1
 
         iLine = cumPoints.searchsorted(index)
-        i = np.where(iLine > 0)
+        i = np.squeeze(np.where(iLine > 0))
         index[i] -= self._cumNpoints[iLine[i]-1]
 
         return iLine, index
@@ -1044,11 +1046,11 @@ class DataSetResults(myObject):
 
         assert values.size == self.nPoints, ValueError("values must have size {}".format(self.nPoints))
 
-        # x, y, z = self.interpolate(50.0, 50.0, values=self.depthSlice(10.0, variable='mean'))
-        # print(np.linalg.norm(values - self.depthSlice(10.0, variable='mean')))
-        # print(dx, dy, method, mask, clip, extrapolate)
-
         x, y, z, kwargs = self.interpolate(dx=dx, dy=dy, values=values, method=method, mask=mask, clip=clip, **kwargs)
+
+        if 'alpha' in kwargs:
+            x, y, a, kwargs = self.interpolate(dx=dx, dy=dy, values=kwargs['alpha'], method=method, mask=mask, clip=clip, **kwargs)
+            kwargs['alpha'] = a
 
         return z.pcolor(x=x.edges(), y=y.edges(), **kwargs)
 
@@ -1118,9 +1120,16 @@ class DataSetResults(myObject):
         return vals1D
 
 
-    def mapAdditiveError(self,dx, dy, system=0, mask = None, clip = True, extrapolate=None, **kwargs):
+    def mapAdditiveError(self,dx, dy, system=0, mask = None, clip = True, useVariance=False, **kwargs):
         """ Create a map of a parameter """
-        return self.map(dx = dx, dy = dy, mask = mask, clip = clip, extrapolate=extrapolate, values = self.additiveError[system, :], **kwargs)
+
+        if useVariance:
+            for line in self.lines:
+                line.compute_additive_error_opacity()
+            alpha = np.hstack([line.addErr_opacity for line in self.lines])
+            kwargs['alpha'] = alpha
+
+        return self.map(dx = dx, dy = dy, mask = mask, clip = clip, values = self.additiveError[system, :], **kwargs)
 
 
     def mapDepthSlice(self, dx, dy, depth, variable, method='ct', mask = None, clip = True, reciprocateParameter=False, useVariance=False, **kwargs):
@@ -1137,14 +1146,21 @@ class DataSetResults(myObject):
         return self.map(dx, dy, vals1D, method=method, mask = mask, clip = clip, **kwargs)
 
 
-    def mapElevation(self,dx, dy, mask = None, clip = True, extrapolate=None, **kwargs):
+    def mapElevation(self,dx, dy, mask = None, clip = True, **kwargs):
         """ Create a map of a parameter """
-        return self.map(dx = dx, dy = dy, mask = mask, clip = clip, extrapolate=extrapolate, values = self.elevation, **kwargs)
+        return self.map(dx = dx, dy = dy, mask = mask, clip = clip, values = self.elevation, **kwargs)
 
 
-    def mapRelativeError(self,dx, dy, system=0, mask = None, clip = True, extrapolate=None, **kwargs):
+    def mapRelativeError(self,dx, dy, system=0, mask = None, clip = True, useVariance=False, **kwargs):
         """ Create a map of a parameter """
-        return  self.map(dx = dx, dy = dy, mask = mask, clip = clip, extrapolate=extrapolate, values = self.relativeError[system, :], **kwargs)
+
+        if useVariance:
+            for line in self.lines:
+                line.compute_relative_error_opacity()
+            alpha = np.hstack([line.relErr_opacity for line in self.lines])
+            kwargs['alpha'] = alpha
+
+        return  self.map(dx = dx, dy = dy, mask = mask, clip = clip, values = self.relativeError[system, :], **kwargs)
 
 
     def plotDepthSlice(self, depth, variable, mask = None, clip = True, **kwargs):
