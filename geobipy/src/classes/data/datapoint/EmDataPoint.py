@@ -386,7 +386,7 @@ class EmDataPoint(DataPoint):
                 "Fiducial: {}\n"
                 "Relative Error {}\n"
                 "Additive Error {}\n").format(super().summary(True), self.lineNumber, self.fiducial, self.relErr.summary(True), self.addErr.summary(True))
-        for s in self.systems:
+        for s in self.system:
             msg += s.summary(True)
 
         return msg if out else print(msg)
