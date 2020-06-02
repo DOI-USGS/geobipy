@@ -139,6 +139,29 @@ class LineResults(myObject):
         return self.data._addErr.posterior
 
 
+    def compute_additive_error_opacity(self, percent=95.0, log=None):
+
+        self.addErr_opacity = self.compute_posterior_opacity(self.additiveErrorPosteriors, percent, log)
+
+
+    def compute_relative_error_opacity(self, percent=95.0, log=None):
+
+        self.relErr_opacity = self.compute_posterior_opacity(self.relativeErrorPosteriors, percent, log)
+
+
+    def compute_posterior_opacity(self, posterior, percent=95.0, log=None):
+        opacity = StatArray.StatArray(np.zeros(self.nPoints))
+
+        for i in range(self.nPoints):
+            h = Histogram1D(bins = self.additiveErrorPosteriors._cellEdges + self.additiveErrorPosteriors.relativeTo[i])
+            h._counts[:] = self.additiveErrorPosteriors.counts[i, :]
+            opacity[i] = h.credibleRange(percent, log)
+
+        opacity = opacity.normalize()
+        return 1.0 - opacity
+
+
+
     @cached_property
     def bestData(self):
         """ Get the best data """
