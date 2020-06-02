@@ -1,7 +1,7 @@
 
 import numpy as np
 from ...classes.core import StatArray
-from scipy.stats import norm
+from scipy.stats import (multivariate_normal, norm)
 import matplotlib.pyplot as plt
 from .Mixture import Mixture
 from sklearn.mixture import GaussianMixture
@@ -10,7 +10,7 @@ class mixNormal(Mixture):
 
     def __init__(self, means=None, variances=None, amplitudes=1.0):
 
-        if np.all([means, variances,] is None):
+        if np.all([means, variances] is None):
             return
 
         assert np.size(means) == np.size(variances), ValueError("means and variance must have same size")
@@ -24,9 +24,19 @@ class mixNormal(Mixture):
     def amplitudes(self):
         return self._params[0::3]
 
+    @amplitudes.setter
+    def amplitudes(self, values):
+        assert np.size(values) == self.n_mixtures, ValueError("Must provide {} amplitudes".format(self.n_mixtures))
+        self._params[0::3] = values
+
     @property
     def means(self):
         return self._params[1::3]
+
+    @means.setter
+    def means(self, values):
+        assert np.size(values) == self.n_mixtures, ValueError("Must provide {} means".format(self.n_mixtures))
+        self._params[1::3] = values
 
     @property
     def moments(self):
@@ -35,6 +45,11 @@ class mixNormal(Mixture):
     @property
     def variances(self):
         return self._params[2::3]
+
+    @variances.setter
+    def variances(self, values):
+        assert np.size(values) == self.n_mixtures, ValueError("Must provide {} variances".format(self.n_mixtures))
+        self._params[2::3] = values
 
     @property
     def mixture_model_class(self):
@@ -96,6 +111,10 @@ class mixNormal(Mixture):
             out += amp * norm.pdf(x, mean, var)
 
         return out
+
+
+    def _assign_from_mixture(self, mixture):
+        self.__init__(np.squeeze(mixture.means_), np.squeeze(mixture.covariances_), amplitudes=np.squeeze(mixture.weights_))
 
 
 
