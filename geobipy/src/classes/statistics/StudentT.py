@@ -31,11 +31,11 @@ class StudentT(baseDistribution):
         # assert np.size(mean) == 1, 'Univariate Normal mean must have size = 1'
         # assert np.size(variance) == 1, 'Univariate Normal variance must have size = 1'
         super().__init__(prng)
-        self.mean = np.asarray(mean)
-        self.variance = np.asarray(variance)
-        self.degrees = np.asarray(degrees)
+        self._mean = np.asarray(mean)
+        self._variance = np.asarray(variance)
+        self._degrees = np.asarray(degrees)
 
-    
+
     @property
     def ndim(self):
         return 1
@@ -44,6 +44,17 @@ class StudentT(baseDistribution):
     def multivariate(self):
         return True
 
+    @property
+    def mean(self):
+        return self._mean
+
+    @property
+    def variance(self):
+        return self._variance
+
+    @property
+    def degrees(self):
+        return self._degrees
 
     def deepcopy(self):
         """Create a deepcopy
@@ -54,7 +65,6 @@ class StudentT(baseDistribution):
             Normal
 
         """
-        # return deepcopy(self)
         return StudentT(self.mean, self.variance, self.degrees, self.prng)
 
 
@@ -76,6 +86,9 @@ class StudentT(baseDistribution):
         return np.squeeze(self.prng.standard_t(df=self.degrees, size=size, loc=self.mean, scale=self.variance))
 
 
-    def probability(self, x):
+    def probability(self, x, log):
         """ For a realization x, compute the probability """
-        return StatArray.StatArray(t.pdf(x, df=self.degrees, loc = self.mean, scale = self.variance))
+        if log:
+            return StatArray.StatArray(t.logpdf(x, self.degrees, loc = self._mean, scale = self.variance), "Probability Density")
+        else:
+            return StatArray.StatArray(t.pdf(x, self.degrees, loc = self._mean, scale = self.variance), "Probability Density")
