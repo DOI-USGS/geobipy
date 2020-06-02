@@ -225,7 +225,7 @@ class RectilinearMesh1D(myObject):
 
     @relativeTo.setter
     def relativeTo(self, value):
-        if value > 0.0:
+        if np.all(value > 0.0):
             value, _ = cF._log(value, self.log)
         self._relativeTo = StatArray.StatArray(value)
 
@@ -254,7 +254,7 @@ class RectilinearMesh1D(myObject):
 
         """
 
-        values, dum = cF._log(values.flatten(), self.log)
+        values, dum = cF._log(np.atleast_1d(values).flatten(), self.log)
 
         values = values - self.relativeTo
 
