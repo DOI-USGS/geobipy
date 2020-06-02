@@ -311,9 +311,8 @@ class FdemDataPoint(EmDataPoint):
         e = obj.fromHdf(item, index=index)
 
         item = grp.get('sys')
-
-        obj = FdemSystem()
-        system = obj.fromHdf(item)
+        system = FdemSystem()
+        system.fromHdf(item)
 
         _aPoint = FdemDataPoint(x, y, z, e, system=system)
 
