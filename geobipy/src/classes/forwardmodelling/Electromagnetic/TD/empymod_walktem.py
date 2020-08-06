@@ -1,6 +1,6 @@
 import numpy as np
 from empymod.model import (bipole, tem)
-from scipy.integrate.quadrature import _cached_roots_legendre
+from scipy.integrate._quadrature import _cached_roots_legendre
 from scipy.interpolate import InterpolatedUnivariateSpline as iuSpline
 
 def empymod_walktem(system, model1d):
