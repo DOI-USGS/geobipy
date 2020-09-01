@@ -10,7 +10,7 @@ Application outside of these data types is in development.
 Citation
 ~~~~~~~~
 
-Foks, N. L., and Minsley, B. J. 2020. Geophysical Bayesian Inference in Python (GeoBIPy). 10.5066/P9K3YH9O
+Foks, N. L., and Minsley, B. J. 2020. GeoBIPy - Geophysical Bayesian Inference in Python. 10.5066/P9K3YH9O
 
 Background scientific references
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
