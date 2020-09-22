@@ -355,8 +355,8 @@ class EmDataPoint(DataPoint):
 
         self.errorPosterior = [Histogram2D(xBins=ab[i, :], yBins=rb[i, :], xlog=log) for i in range(self.nSystems)]
 
-        # self.relErr.setPosterior([self.errorPosterior[i].marginalHistogram(axis=1) for i in range(self.nSystems)])
-        # self.addErr.setPosterior([self.errorPosterior[i].marginalHistogram(axis=0) for i in range(self.nSystems)])
+        # self.relErr.setPosterior([self.errorPosterior[i].marginalize(axis=1) for i in range(self.nSystems)])
+        # self.addErr.setPosterior([self.errorPosterior[i].marginalize(axis=0) for i in range(self.nSystems)])
 
 
     # def setAdditiveErrorPosterior(self, log=None):
