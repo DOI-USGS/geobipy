@@ -182,8 +182,8 @@ class Results(myObject):
         return self.currentModel.par.posterior
 
 
-    def doi(self, percentage = 67.0):
-        return self.hitmap.getOpacityLevel(percentage)
+    def doi(self, percentage = 67.0, log=None):
+        return self.hitmap.getOpacityLevel(percentage, log=log)
 
 
     def update(self, i, model, dataPoint, iBest, bestDataPoint, bestModel, multiplier, PhiD, posterior, posteriorComponents, ratioComponents, accepted, dimensionChange, clipRatio):
@@ -722,7 +722,7 @@ class Results(myObject):
             plt.plot(sh, hm.y.cellCentres, **CI_kw)
 
             # Plot the DOI cutoff based on percentage variance
-            plt.axhline(self.doi(), **CI_kw)
+            plt.axhline(self.doi(log=10), **CI_kw)
 
         # Plot the best model
         if overlayModel:

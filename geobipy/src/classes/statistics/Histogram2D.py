@@ -179,7 +179,7 @@ class Histogram2D(RectilinearMesh2D):
 
 
 
-    def marginalHistogram(self, intervals=None, index=None, log=None, axis=0):
+    def marginalize(self, intervals=None, index=None, log=None, axis=0):
         """Get the marginal histogram along an axis
 
         Parameters
@@ -541,7 +541,7 @@ class Histogram2D(RectilinearMesh2D):
         return distributions, active
 
 
-    def fit_estimated_pdf(self, intervals=None, axis=0, mixture='student_t', bound_by_variance=True, **kwargs):
+    def fit_estimated_pdf(self, intervals=None, axis=0, mixture='student_t', **kwargs):
         """Find peaks in the histogram along an axis.
 
         Parameters
@@ -554,7 +554,6 @@ class Histogram2D(RectilinearMesh2D):
         """
 
         track = kwargs.pop('track', True)
-        variance_bounds = kwargs.pop('variance_bounds', [0.0, np.inf])
         if intervals is None:
             intervals = self.yBins if axis==0 else self.xBins
         else:
@@ -569,10 +568,7 @@ class Histogram2D(RectilinearMesh2D):
             r = range(np.size(intervals) - 1)
 
         for i in r:
-            h = self.marginalHistogram(intervals=intervals[i:i+2], axis=axis)
-            if bound_by_variance:
-                variance_bounds[1] = h.estimateVariance(1000, log=kwargs.get('log', None))
-                kwargs['variance_bounds'] = variance_bounds
+            h = self.marginalize(intervals=intervals[i:i+2], axis=axis)
             ms = h.fit_estimated_pdf(mixture = mixture, **kwargs)
             mixtures.append(ms)
 
