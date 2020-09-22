@@ -1754,7 +1754,7 @@ class LineResults(myObject):
                     b = gmm.predict_proba(m.reshape(-1, 1))[:, iSort] / np.float(fit_mixture.n_mixtures)
                     gmm_pdfs = np.dot(fit_pdfs, a*b).T
 
-                    h = hm.marginalHistogram(index = j)
+                    h = hm.marginalize(index = j)
                     self.marginalProbability[i, j, :] = h._marginal_probability_pdfs(gmm_pdfs)
                 else:
                     self.marginalProbability[i, j, :] = np.nan

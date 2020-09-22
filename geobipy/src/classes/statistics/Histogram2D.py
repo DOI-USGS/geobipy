@@ -445,13 +445,13 @@ class Histogram2D(RectilinearMesh2D):
         self.pcolor(noColorbar = True, **kwargs)
 
         ax.append(plt.subplot(self.gs[:1, :4]))
-        h = self.marginalHistogram(axis=0).plot()
+        h = self.marginalize(axis=0).plot()
         plt.xlabel(''); plt.ylabel('')
         plt.xticks([]); plt.yticks([])
         ax[-1].spines["left"].set_visible(False)
 
         ax.append(plt.subplot(self.gs[1:, 4:]))
-        h = self.marginalHistogram(axis=0).plot(rotate=True)
+        h = self.marginalize(axis=0).plot(rotate=True)
         plt.ylabel(''); plt.xlabel('')
         plt.yticks([]); plt.xticks([])
         ax[-1].spines["bottom"].set_visible(False)

@@ -253,8 +253,8 @@ class FdemDataPoint(EmDataPoint):
         self._predictedData.createHdf(grp, 'p', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
 
         if not self.errorPosterior is None:
-            self.relErr.setPosterior([self.errorPosterior[i].marginalHistogram(axis=1) for i in range(self.nSystems)])
-            self.addErr.setPosterior([self.errorPosterior[i].marginalHistogram(axis=0) for i in range(self.nSystems)])
+            self.relErr.setPosterior([self.errorPosterior[i].marginalize(axis=1) for i in range(self.nSystems)])
+            self.addErr.setPosterior([self.errorPosterior[i].marginalize(axis=0) for i in range(self.nSystems)])
 
         self.relErr.createHdf(grp, 'relErr', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self.addErr.createHdf(grp, 'addErr', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
@@ -280,8 +280,8 @@ class FdemDataPoint(EmDataPoint):
         self._predictedData.writeHdf(grp, 'p',  withPosterior=withPosterior, index=index)
 
         if not self.errorPosterior is None:
-            self.relErr.setPosterior([self.errorPosterior[i].marginalHistogram(axis=1) for i in range(self.nSystems)])
-            self.addErr.setPosterior([self.errorPosterior[i].marginalHistogram(axis=0) for i in range(self.nSystems)])
+            self.relErr.setPosterior([self.errorPosterior[i].marginalize(axis=1) for i in range(self.nSystems)])
+            self.addErr.setPosterior([self.errorPosterior[i].marginalize(axis=0) for i in range(self.nSystems)])
 
         self.relErr.writeHdf(grp, 'relErr',  withPosterior=withPosterior, index=index)
         self.addErr.writeHdf(grp, 'addErr',  withPosterior=withPosterior, index=index)
