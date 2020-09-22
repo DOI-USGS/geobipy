@@ -97,11 +97,9 @@ class mixStudentT(Mixture):
         if not ax is None:
             plt.sca(ax)
 
-        probability = self.amplitudes * self.probability(x, log)
+        probability = np.squeeze(self.amplitudes * self.probability(x, log))
 
-        p = probability.plot(x=x, c=self.labels, **kwargs)
-
-        return p
+        return probability.plot(x=x, c=self.labels, **kwargs)
 
 
     def probability(self, x, log, component=None):

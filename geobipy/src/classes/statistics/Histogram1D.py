@@ -253,6 +253,9 @@ class Histogram1D(RectilinearMesh1D):
         else:
             assert False, ValueError("method must be either 'gaussian' or 'student_t' ")
 
+        log = kwargs.get('log', None)
+        kwargs['variance_bound'] = self.estimateVariance(10000, log=log)
+
         mixture.fit_to_curve(x=self.binCentres, y=self.estimatePdf(), **kwargs)
         return mixture
 
@@ -322,7 +325,7 @@ class Histogram1D(RectilinearMesh1D):
             A negative index which would normally wrap will clip to 0 and self.bins.size instead.
 
         """
-        values = values[~np.isnan(values)]
+        values = np.ravel(values[~np.isnan(values)])
         iBin = np.atleast_1d(self.cellIndex(values, clip=clip, trim=trim))
         tmp = np.bincount(iBin, minlength = self.nBins)
 
