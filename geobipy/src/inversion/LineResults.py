@@ -206,7 +206,7 @@ class LineResults(myObject):
             return cu
 
 
-    def computeCredibleInterval(self, percent=95.0, log=None):
+    def computeCredibleInterval(self, percent=95.0, log=None, progress=False):
 
         s = 'percent={}'.format(percent)
 
@@ -389,6 +389,7 @@ class LineResults(myObject):
                 return vals
             else:
                 return self.meanParameters
+
         elif variable == 'best':
             if reciprocateParameter:
                 vals = 1.0 / self.meanParameters
@@ -397,12 +398,16 @@ class LineResults(myObject):
                 return vals
             else:
                 return self.bestParameters
+
         if variable == 'interfaces':
             return self.interfaces
+
         if variable == 'opacity':
             return self.opacity
+
         if variable == 'highestmarginal':
             return self.highestMarginal
+
         if variable == 'marginalprobability':
             assert not index is None, ValueError('Please specify keyword "index" when requesting marginalProbability')
             return self.marginalProbability[:, :, index].T
@@ -422,7 +427,7 @@ class LineResults(myObject):
         return zPosterior
 
 
-    @cached_property
+    @property
     def hitMap(self):
         """ Get the hitmaps for each data point """
         return self.getAttribute('Hit Map', index=0)
@@ -702,7 +707,9 @@ class LineResults(myObject):
     def interfaces(self):
         """ Get the layer interfaces from the layer depth histograms """
         maxCount = self.interfacePosterior.counts.max()
-        return StatArray.StatArray(self.interfacePosterior.counts.T / np.float64(maxCount), "interfaces", "")
+        values = np.vstack([self.interfacePosterior.counts.T, self.interfacePosterior.counts.T[-1, :]])
+        print(values)
+        return StatArray.StatArray(values / np.float64(maxCount), "interfaces", "")
 
 
 
@@ -908,7 +915,7 @@ class LineResults(myObject):
         return self.hitMap.x.cellCentres.units
 
 
-    def percentageParameter(self, value, depth=None, depth2=None):
+    def percentageParameter(self, value, depth=None, depth2=None, progress=False):
 
         # Get the depth grid
         if (not depth is None):
