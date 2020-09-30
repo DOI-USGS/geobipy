@@ -491,7 +491,7 @@ class LineResults(myObject):
         return distributions
 
 
-    def fit_estimated_pdf_mpi(self, intervals=None, **kwargs):
+    def fit_estimated_pdf_mpi(self, intervals=None, external_files=True, **kwargs):
         """Uses Mixture modelling to fit disrtibutions to the hitmaps for the specified intervals.
 
         This mpi version fits all hitmaps individually throughout the data set.
@@ -525,12 +525,19 @@ class LineResults(myObject):
         amplitudes = StatArray.StatArray([self.nPoints, nIntervals, max_distributions], "fit amplitudes")
         df = StatArray.StatArray([self.nPoints, nIntervals, max_distributions], "fit df")
 
-        if not location in self.hdfFile:
-            means.createHdf(self.hdfFile, "/means", fillvalue=np.nan)
-            variances.createHdf(self.hdfFile, "/variances", fillvalue=np.nan)
-            df.createHdf(self.hdfFile, "/degrees", fillvalue=np.nan)
-            amplitudes.createHdf(self.hdfFile, "/amplitudes", fillvalue=np.nan)
+        if external_files:
+            hdfFile = h5py.File("Line_{}_fits.h5".format(self.line), 'w', driver='mpio', comm=world)
 
+        else:
+            hdfFile = self.hdfFile
+
+        try:
+            means.createHdf(hdfFile, "/means", fillvalue=np.nan)
+            variances.createHdf(hdfFile, "/variances", fillvalue=np.nan)
+            df.createHdf(hdfFile, "/degrees", fillvalue=np.nan)
+            amplitudes.createHdf(hdfFile, "/amplitudes", fillvalue=np.nan)
+        except:
+            pass
 
         # Distribute the points amongst cores.
         starts, chunks = loadBalance1D_shrinkingArrays(self.nPoints, world.size)
@@ -547,34 +554,36 @@ class LineResults(myObject):
 
         nI = intervals.size - 1
 
-        buffer = np.empty(nI, max_distributions)
+        buffer = np.empty((nI, max_distributions))
 
         for i in range(i0, i1):
 
             hm = self.get_hitmap(i)
 
-            mixtures = hm.fit_estimated_pdf(**kwargs)
+            if not np.all(hm.counts == 0):
 
-            buffer[:, :] = np.nan
-            for j in range(nI):
-                mix = mixture[j]
-                buffer[j, :mix.n_mixtures] = mix.means
-            self.hdfFile['/means/data'][i, :, :] = buffer
+                mixtures = hm.fit_estimated_pdf(**kwargs)
 
-            for j in range(nI):
-                mix = mixture[j]
-                buffer[j, :mix.n_mixtures] = mix.variances
-            self.hdfFile['/variances/data'][i, :, :] = buffer
+                buffer[:, :] = np.nan
+                for j in range(nI):
+                    mix = mixtures[j]
+                    buffer[j, :mix.n_mixtures] = mix.means
+                hdfFile['/means/data'][i, :, :] = buffer
 
-            for j in range(nI):
-                mix = mixture[j]
-                buffer[j, :mix.n_mixtures] = mix.dfs
-            self.hdfFile['/df/data'][i, :, :] = buffer
+                for j in range(nI):
+                    mix = mixtures[j]
+                    buffer[j, :mix.n_mixtures] = mix.variances
+                hdfFile['/variances/data'][i, :, :] = buffer
+    
+                for j in range(nI):
+                    mix = mixtures[j]
+                    buffer[j, :mix.n_mixtures] = mix.degrees
+                hdfFile['/degrees/data'][i, :, :] = buffer
 
-            for j in range(nI):
-                mix = mixture[j]
-                buffer[j, :mix.n_mixtures] = mix.amplitudes
-            self.hdfFile['/amplitudes/data'][i, :, :] = buffer
+                for j in range(nI):
+                    mix = mixtures[j]
+                    buffer[j, :mix.n_mixtures] = mix.amplitudes
+                hdfFile['/amplitudes/data'][i, :, :] = buffer
 
             counter += 1
             if counter == nUpdate:
@@ -583,6 +592,9 @@ class LineResults(myObject):
                 counter = 0
 
         print('rank {} finished in {} h:m:s'.format(world.rank, str(timedelta(seconds=MPI.Wtime()-tBase))), flush=True)
+
+        if external_files:
+            hdfFile.close()
 
 
     def depthSlice(self, depth, values, **kwargs):
