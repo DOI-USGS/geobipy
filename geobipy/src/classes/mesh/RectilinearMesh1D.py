@@ -108,10 +108,13 @@ class RectilinearMesh1D(myObject):
         assert np.shape(slic) == (), ValueError("slic must have one dimension.")
 
         s2stop = None
-        if not slic.stop is None:
-            s2stop = slic.stop + 1 if slic.stop > 0 else slic.stop
+        if isinstance(slic, slice):
+            if not slic.stop is None:
+                s2stop = slic.stop + 1 if slic.stop > 0 else slic.stop
+            s2 = slice(slic.start, s2stop, slic.step)
+        else:
+            s2 = slice(slic, slic + 2, 1)
 
-        s2 = slice(slic.start, s2stop, slic.step)
         tmp = self._cellEdges[s2]
         assert tmp.size > 1, ValueError("slic must contain at least one cell.")
         return type(self)(cellEdges=tmp)

@@ -24,7 +24,7 @@ from ..base.MPI import loadBalance1D_shrinkingArrays
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspecA
 from os.path import (split, join)
-from geobipy.src.inversion.Results import Results
+from geobipy.src.inversion.Inference1D import Inference1D
 import progressbar
 
 try:
@@ -32,7 +32,7 @@ try:
 except:
     pass
 
-class LineResults(myObject):
+class Inference2D(myObject):
     """ Class to define results from EMinv1D_MCMC for a line of data """
     def __init__(self, hdf5_file_path=None, system_file_path=None, hdfFile=None, mode='r+', world=None):
         """ Initialize the lineResults """
@@ -574,7 +574,7 @@ class LineResults(myObject):
                     mix = mixtures[j]
                     buffer[j, :mix.n_mixtures] = mix.variances
                 hdfFile['/variances/data'][i, :, :] = buffer
-    
+
                 for j in range(nI):
                     mix = mixtures[j]
                     buffer[j, :mix.n_mixtures] = mix.degrees
@@ -719,9 +719,8 @@ class LineResults(myObject):
     def interfaces(self):
         """ Get the layer interfaces from the layer depth histograms """
         maxCount = self.interfacePosterior.counts.max()
-        values = np.vstack([self.interfacePosterior.counts.T, self.interfacePosterior.counts.T[-1, :]])
-        print(values)
-        return StatArray.StatArray(values / np.float64(maxCount), "interfaces", "")
+        # values = np.vstack([self.interfacePosterior.counts.T, self.interfacePosterior.counts.T[-1, :]])
+        return StatArray.StatArray(self.interfacePosterior.counts.T / np.float64(maxCount), "interfaces", "")
 
 
 
@@ -990,7 +989,7 @@ class LineResults(myObject):
         return self.getAttribute('Hit map', index = i)
 
 
-    def datapointResults(self, index=None, fiducial=None, reciprocateParameter=False):
+    def inference_1d(self, index=None, fiducial=None, reciprocateParameter=False):
         """ Obtain the results for the given iD number """
 
         assert not (index is None and fiducial is None), Exception("Please specify either an integer index or a fiducial.")
@@ -1006,8 +1005,7 @@ class LineResults(myObject):
 
         hdfFile = self.hdfFile
 
-        print(self.systemFilepath)
-        R = Results(reciprocateParameter=reciprocateParameter).fromHdf(hdfFile, index=i, systemFilePath=self.systemFilepath)
+        R = Inference1D(reciprocateParameter=reciprocateParameter).fromHdf(hdfFile, index=i, systemFilePath=self.systemFilepath)
 
         return R
 
@@ -1185,7 +1183,7 @@ class LineResults(myObject):
         cP.title('Data height posterior distributions')
 
 
-    def plotHighlightedObservationLocations(self, iDs, **kwargs):
+    def plotHighlightedObservationLocations(self, fiducial, **kwargs):
 
         labels = kwargs.pop('labels', True)
         kwargs['marker'] = kwargs.pop('marker','*')
@@ -1197,7 +1195,7 @@ class LineResults(myObject):
 
         xtmp = self.mesh.getXAxis(xAxis)
 
-        i = self.fiducials.searchsorted(iDs)
+        i = self.fiducials.searchsorted(fiducial)
 
         tmp = self.height.reshape(self.height.size) + self.elevation
 
@@ -1297,13 +1295,22 @@ class LineResults(myObject):
         cP.title('Additive error posterior distributions for system {}'.format(system))
 
 
-    def plotError2DJointProbabilityDistribution(self, datapoint, system=0, **kwargs):
-        """ For a given datapoint, obtains the posterior distributions of relative and additive error and creates the 2D joint probability distribution """
+    def plotConfidence(self, **kwargs):
+        """ Plot the opacity """
+        kwargs['cmap'] = kwargs.get('cmap', 'plasma')
+        ax, pm, cb = self.plotXsection(values = self.opacity, **kwargs)
+
+        cb.ax.set_yticklabels(['Less', '', '', '', '', 'More'])
+        cb.set_label("Confidence")
+
+
+    def plotError2DJointProbabilityDistribution(self, index, system=0, **kwargs):
+        """ For a given index, obtains the posterior distributions of relative and additive error and creates the 2D joint probability distribution """
 
         # Read in the histogram of relative error for the data point
-        rel = self.getAttribute('Relative error histogram', index=datapoint)
+        rel = self.getAttribute('Relative error histogram', index=index)
         # Read in the histogram of additive error for the data point
-        add = self.getAttribute('Additive error histogram', index=datapoint)
+        add = self.getAttribute('Additive error histogram', index=index)
 
         joint = Histogram2D()
         joint.create2DjointProbabilityDistribution(rel[system],add[system])
@@ -1547,53 +1554,53 @@ class LineResults(myObject):
         return out
 
 
-    def plotBestModel(self, reciprocateParameter = False, useVariance=True, **kwargs):
+    def plotBestModel(self, **kwargs):
 
         values = self.bestParameters
-        if (reciprocateParameter):
+        if (kwargs.pop('reciprocateParameter', False)):
             values = 1.0 / values
             values.name = 'Resistivity'
             values.units = '$\Omega m$'
 
-        return self.plotXsection(values = values, useVariance = useVariance, **kwargs)
+        return self.plotXsection(values = values, **kwargs)
 
 
     def plotHighestMarginal(self, useVariance=True, **kwargs):
 
         values = self.highestMarginal
-        return self.plotXsection(values = values, useVariance = useVariance, **kwargs)
+        return self.plotXsection(values = values, **kwargs)
 
 
 
-    def plotMeanModel(self, reciprocateParameter = False, useVariance=True, **kwargs):
+    def plotMeanModel(self, **kwargs):
 
         values = self.meanParameters
-        if (reciprocateParameter):
+        if (kwargs.pop('reciprocateParameter', False)):
             values = 1.0 / values
             values.name = 'Resistivity'
             values.units = '$\Omega m$'
 
-        return self.plotXsection(values = values, useVariance = useVariance, **kwargs)
+        return self.plotXsection(values = values, **kwargs)
 
 
-    def plotModeModel(self, reciprocateParameter = False, useVariance=True, **kwargs):
+    def plotModeModel(self, **kwargs):
 
         values = self.modeParameter
-        if (reciprocateParameter):
+        if (kwargs.pop('reciprocateParameter', False)):
             values = 1.0 / values
             values.name = 'Resistivity'
             values.units = '$\Omega m$'
 
-        return self.plotXsection(values = values, useVariance = useVariance, **kwargs)
+        return self.plotXsection(values = values, **kwargs)
 
 
-    def plotXsection(self, values, useVariance=False, cutoffDOI=True, **kwargs):
+    def plotXsection(self, values, **kwargs):
         """ Plot a cross-section of the parameters """
 
-        if useVariance:
+        if kwargs.pop('useVariance', False):
             opacity = self.opacity.copy()
 
-            if cutoffDOI:
+            if kwargs.pop('only_below_doi', False):
                 indices = self.mesh.z.cellIndex(self.doi)
 
                 for i in range(self.nPoints):
@@ -1660,7 +1667,7 @@ class LineResults(myObject):
     @cached_property
     def marginalProbability(self):
 
-        assert 'marginal_probability' in self.hdfFile.keys(), Exception("Marginal probabilities need computing, use LineResults.computeMarginalProbability_X()")
+        assert 'marginal_probability' in self.hdfFile.keys(), Exception("Marginal probabilities need computing, use Inference_2D.computeMarginalProbability_X()")
 
         if 'marginal_probability' in self.hdfFile.keys():
             marginal_probability = StatArray.StatArray().fromHdf(self.hdfFile['marginal_probability'])
@@ -1948,16 +1955,16 @@ class LineResults(myObject):
         return out
 
 
-    def plotDataPointResults(self, fiducial):
+    def plot_inference_1d(self, fiducial):
         """ Plot the geobipy results for the given data point """
-        R = self.getResults(fiducial=fiducial)
+        R = self.inference_1d(fiducial=fiducial)
         R.initFigure(forcePlot=True)
         R.plot(forcePlot=True)
 
 
     def plotSummary(self, data, fiducial, **kwargs):
 
-        R = self.getResults(fiducial=fiducial)
+        R = self.inference_1d(fiducial=fiducial)
 
         cWidth = 3
 

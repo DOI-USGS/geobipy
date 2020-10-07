@@ -498,10 +498,8 @@ class TdemDataPoint(EmDataPoint):
         for i in range(nSystems):
             # Get the system file name. h5py has to encode strings using utf-8, so decode it!
             # filename = join(systemFilepath, str(np.asarray(grp.get('System{}'.format(i))), 'utf-8'))
-            td = TdemSystem().read(systemFilepath)
+            td = TdemSystem().read(systemFilepath[i])
             systems.append(td)
-
-        print(systems)
 
         _aPoint = TdemDataPoint(x, y, z, e, system=systems)
 
@@ -543,8 +541,6 @@ class TdemDataPoint(EmDataPoint):
         # _aPoint.active = _aPoint.getActiveData()
 
         _aPoint.getIplotActive()
-
-        print(_aPoint.system)
 
         return _aPoint
 

@@ -65,11 +65,13 @@ from .src.classes.statistics.Hitmap2D import Hitmap2D
 from .src.classes.statistics.mixStudentT import mixStudentT
 from .src.classes.statistics.mixNormal import mixNormal
 # McMC Inersion
-from .src.inversion.Results import Results
-from .src.inversion.LineResults import LineResults
-from .src.inversion.DataSetResults import DataSetResults
+from .src.inversion.Inference1D import Inference1D
+from .src.inversion.Inference2D import Inference2D
+from .src.inversion.Inference3D import Inference3D
 
 from .src.inversion.Inv_MCMC import Initialize, Inv_MCMC
+
+from .src.example_path import example_path
 
 
 # Set an MPI failed tag
@@ -146,7 +148,7 @@ def serial_dataset(userParameters, output_directory, seed=None):
 
     Dataset = type(userParameters.data_type)()
 
-    results = DataSetResults(output_directory, userParameters.systemFilename)
+    results = Inference3D(output_directory, userParameters.systemFilename)
     results.createHDF5(Dataset, userParameters)
 
     # Get the random number generator
@@ -250,7 +252,7 @@ def parallel_mpi(inputFile, outputDir, skipHDF5):
         paras, Mod, DataPoint, prior, likelihood, posterior, PhiD = Initialize(paras, DataPoint, prng = prng)
 
         # Create the results template
-        Res = Results(DataPoint, Mod,
+        Res = Inference1D(DataPoint, Mod,
             save=paras.save, plot=paras.plot, savePNG=paras.savePNG,
             nMarkovChains=paras.nMarkovChains, plotEvery=paras.plotEvery,
             reciprocateParameters=paras.reciprocateParameters)
@@ -267,8 +269,7 @@ def parallel_mpi(inputFile, outputDir, skipHDF5):
                 # Open a HDF5 file in parallel mode.
 
                 with h5py.File(fName, 'w', driver='mpio', comm=masterComm) as f:
-                    LR = LineResults()
-                    LR.createHdf(f, tmp[fiducialsForLine, 1], Res)
+                    LR = Inference2D().createHdf(f, tmp[fiducialsForLine, 1], Res)
                 myMPI.rankPrint(world,'Time to create line {} with {} data points: {} h:m:s'.format(line, nFids, str(timedelta(seconds=MPI.Wtime()-t0))))
                 t0 = MPI.Wtime()
 
@@ -290,7 +291,7 @@ def parallel_mpi(inputFile, outputDir, skipHDF5):
     LR = [None] * nLines
     for i, line in enumerate(lineNumbers):
         fName = join(outputDir, '{}.h5'.format(line))
-        LR[i] = LineResults(fName, UP.systemFilename, hdfFile = h5py.File(fName, 'a', driver='mpio', comm=world))
+        LR[i] = Inference2D(fName, UP.systemFilename, hdfFile = h5py.File(fName, 'a', driver='mpio', comm=world))
 
     world.barrier()
     myMPI.rankPrint(world,'Files created in {} h:m:s'.format(str(timedelta(seconds=MPI.Wtime()-t1))))

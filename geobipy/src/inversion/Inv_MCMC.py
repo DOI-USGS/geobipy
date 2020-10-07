@@ -14,7 +14,7 @@ from ..classes.statistics.Histogram1D import Histogram1D
 from ..base.customFunctions import expReal as mExp
 from scipy import sparse
 import numpy as np
-from .Results import Results
+from .Inference1D import Inference1D
 from ..base.MPI import print
 import matplotlib.pyplot as plt
 
@@ -33,7 +33,7 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
     # Initialize the MCMC parameters and perform the initial iteration
     [userParameters, Mod, DataPoint, prior, likelihood, posterior, PhiD] = Initialize(userParameters, DataPoint, prng=prng)
 
-    Res = Results(DataPoint, Mod,
+    Res = Inference1D(DataPoint, Mod,
                 save = userParameters.save,
                 plot = userParameters.plot,
                 savePNG = userParameters.savePNG,

@@ -41,63 +41,23 @@ class PointCloud3D(myObject):
 
     """
 
-    def __init__(self, nPoints=0, x=None, y=None, z=None, elevation=None, units="m"):
+    def __init__(self, x=None, y=None, z=None, elevation=None):
         """ Initialize the class """
 
         # Number of points in the cloud
-        self._nPoints = nPoints
+        self.nPoints = 0
 
         # StatArray of the x co-ordinates
-        if (x is None):
-            self._x = StatArray.StatArray(self._nPoints, "Easting", units)
-        else:
-            assert np.size(x) == nPoints, ValueError("x must have size {}".format(nPoints))
-            if (isinstance(x, StatArray.StatArray)):
-                self._x = x.deepcopy()
-            else:
-                self._x = StatArray.StatArray(x, "Easting", units)
+        self.x = x
 
         # StatArray of the y co-ordinates
-        if (y is None):
-            self._y = StatArray.StatArray(self._nPoints, "Northing", units)
-        else:
-            assert np.size(y) == nPoints, ValueError("y must have size {}".format(nPoints))
-            if isinstance(y, StatArray.StatArray):
-                self._y = y.deepcopy()
-            else:
-                self._y = StatArray.StatArray(y, "Northing", units)
+        self.y = y
 
         # StatArray of the z co-ordinates
-        if (z is None):
-            self._z = StatArray.StatArray(self._nPoints, "Height", units)
-        else:
-            assert np.size(z) == nPoints, ValueError("z must have size {}".format(nPoints))
-            if isinstance(z, StatArray.StatArray):
-                self._z = z.deepcopy()
-            else:
-                self._z = StatArray.StatArray(z, "Height", units)
-
+        self.z = z
 
         # StatArray of elevation
-        if (elevation is None):
-            self._elevation = StatArray.StatArray(self._nPoints, "Elevation", units)
-        else:
-            assert np.size(elevation) == nPoints, ValueError("elevation must have size {}".format(nPoints))
-            if isinstance(elevation, StatArray.StatArray):
-                self._elevation = elevation.deepcopy()
-            else:
-                self._elevation = StatArray.StatArray(elevation, "Elevation", units)
-
-
-        if nPoints == 0:
-            return
-
-        # KdTree
-        self.kdtree = None
-        # Bounding Box
-        self.bounds = None
-
-        self.getBounds()
+        self.elevation = elevation
 
 
     def __getitem__(self, i):
@@ -113,23 +73,86 @@ class PointCloud3D(myObject):
 
         """
         i = np.unique(i)
-        return PointCloud3D(np.size(i), x=self.x[i], y=self.y[i], z=self.z[i])
+        return PointCloud3D(self.x[i],
+                            self.y[i],
+                            self.z[i],
+                            self.elevation[i])
+
 
     @property
     def x(self):
         return self._x
 
+
+    @x.setter
+    def x(self, values):
+        if (values is None):
+            self._x = StatArray.StatArray(self.nPoints, "Easting", "m")
+        else:
+            if self.nPoints == 0:
+                self.nPoints = np.size(values)
+            assert np.size(values) == self.nPoints, ValueError("x must have size {}".format(self.nPoints))
+            if (isinstance(values, StatArray.StatArray)):
+                self._x = values.deepcopy()
+            else:
+                self._x = StatArray.StatArray(values, "Easting", "m")
+
+
     @property
     def y(self):
         return self._y
+
+
+    @y.setter
+    def y(self, values):
+        if (values is None):
+            self._y = StatArray.StatArray(self.nPoints, "Northing", "m")
+        else:
+            if self.nPoints == 0:
+                self.nPoints = np.size(values)
+            assert np.size(values) == self.nPoints, ValueError("y must have size {}".format(self.nPoints))
+            if (isinstance(values, StatArray.StatArray)):
+                self._y = values.deepcopy()
+            else:
+                self._y = StatArray.StatArray(values, "Northing", "m")
+
 
     @property
     def z(self):
         return self._z
 
+
+    @z.setter
+    def z(self, values):
+        if (values is None):
+            self._z = StatArray.StatArray(self.nPoints, "Height", "m")
+        else:
+            if self.nPoints == 0:
+                self.nPoints = np.size(values)
+            assert np.size(values) == self.nPoints, ValueError("z must have size {}".format(self.nPoints))
+            if (isinstance(values, StatArray.StatArray)):
+                self._z = values.deepcopy()
+            else:
+                self._z = StatArray.StatArray(values, "Height", "m")
+
+
     @property
     def elevation(self):
         return self._elevation
+
+
+    @elevation.setter
+    def elevation(self, values):
+        if (values is None):
+            self._elevation = StatArray.StatArray(self.nPoints, "Elevation", "m")
+        else:
+            if self.nPoints == 0:
+                self.nPoints = np.size(values)
+            assert np.size(values) == self.nPoints, ValueError("elevation must have size {}".format(self.nPoints))
+            if (isinstance(values, StatArray.StatArray)):
+                self._elevation = values.deepcopy()
+            else:
+                self._elevation = StatArray.StatArray(values, "Elevation", "m")
 
 
     @property
@@ -138,9 +161,39 @@ class PointCloud3D(myObject):
         return self._nPoints
 
 
-    def getBounds(self):
+    @nPoints.setter
+    def nPoints(self, value):
+        assert isinstance(value, np.int), TypeError("nPoints must be an integer")
+        self._nPoints = value
+
+
+    @property
+    def scalar(self):
+        assert self.size == 1, ValueError("Cannot return array as scalar")
+        return self[0]
+
+
+    def append(self, other):
+        """Append pointclouds together
+
+        Parameters
+        ----------
+        other : geobipy.PointCloud3D
+            3D pointcloud
+
+        """
+
+        self.nPoints = self.nPoints + other.nPoints
+        self.x = np.hstack([self.x, other.x])
+        self.y = np.hstack([self.y, other.y])
+        self.z = np.hstack([self.z, other.z])
+        self.elevation = np.hstack([self.elevation, other.elevation])
+
+
+    @property
+    def bounds(self):
         """Gets the bounding box of the data set """
-        self.bounds = np.asarray([np.min(self.x), np.max(self.x), np.min(self.y), np.max(self.y)])
+        return np.asarray([np.nanmin(self.x), np.nanmax(self.x), np.nanmin(self.y), np.nanmax(self.y)])
 
 
     def getPoint(self, i):
@@ -221,7 +274,6 @@ class PointCloud3D(myObject):
 
         extrapolate = kwargs.pop('extrapolate', None)
         # Get the bounding box
-        self.getBounds()
 
         assert dx > 0.0, ValueError("dx must be positive!")
         assert dy > 0.0, ValueError("dy must be positive!")
@@ -256,9 +308,6 @@ class PointCloud3D(myObject):
         tension = kwargs.pop('tension', 0.25)
         accuracy = kwargs.pop('accuracy', 0.01)
 
-        # Get the bounding box
-        self.getBounds()
-
         # Get the discretization
         assert dx > 0.0, ValueError("dx must be positive!")
         assert dy > 0.0, ValueError("dy must be positive!")
@@ -269,7 +318,7 @@ class PointCloud3D(myObject):
         return x, y, vals, kwargs
 
 
-    def mapPlot(self, dx=None, dy=None, i=None, **kwargs):
+    def mapPlot(self, dx, dy, i=None, **kwargs):
         """ Create a map of a parameter """
 
         cTmp = kwargs.pop('c', self.z)
@@ -282,22 +331,13 @@ class PointCloud3D(myObject):
 
 
         if method == 'ct':
-            x, y, vals, kwargs = self.interpCloughTocher(dx=dx, dy=dy, values=cTmp, mask=mask, clip=clip, i=i, **kwargs)
+            x, y, vals, kwargs = self.interpCloughTocher(dx, dy, values=cTmp, mask=mask, clip=clip, i=i, **kwargs)
         elif method == 'mc':
             x, y, vals, kwargs = self.interpMinimumCurvature(dx, dy, values=cTmp, mask=mask, clip=clip, i=i, **kwargs)
         else:
             assert False, ValueError("method must be either 'ct' or 'mc' ")
 
         return cP.pcolor(vals, x.edges(), y.edges(), **kwargs)
-
-
-
-    def maketest(self, nPoints):
-        """ Creates a small test of random points """
-        PointCloud3D.__init__(self, nPoints)
-        self.x[:] = (2.0 * np.random.rand(nPoints)) - 1.0
-        self.y[:] = (2.0 * np.random.rand(nPoints)) - 1.0
-        self.z[:] = cf.cosSin1(self.x, self.y, 1.0, 1.0)
 
 
     def nearest(self, x, k=1, eps=0, p=2, radius=np.inf):
@@ -343,38 +383,113 @@ class PointCloud3D(myObject):
         return ax
 
 
-    def read(self, fileName, nHeaderLines=0, columnIndices=range(3)):
+    def _readNpoints(self, filename):
+        """Read the number of points in a data file
+
+        Parameters
+        ----------
+        filename : list of str.
+            Path to the data files.
+
+        Returns
+        -------
+        nPoints : int
+            Number of observations.
+
+        """
+        if isinstance(filename, str):
+            filename = (filename)
+        nSystems = len(filename)
+        nPoints = np.empty(nSystems, dtype=np.int64)
+        for i in range(nSystems):
+            nPoints[i] = fIO.getNlines(filename[i], 1)
+        for i in range(1, nSystems):
+            assert nPoints[i] == nPoints[0], Exception('Number of data points {} in file {} does not match {} in file {}'.format(nPoints[i], filename[i], nPoints[0], filename[0]))
+        return nPoints[0]
+
+
+    def __readColumnIndices(self, filename):
+        """Read in the header information for an FdemData file.
+
+        Parameters
+        ----------
+        fileName : str
+            Path to the data file.
+
+        Returns
+        -------
+        nPoints : int
+            Number of measurements.
+        columnIndex : ints
+            The column indices for line, id, x, y, z, elevation, data, uncertainties.
+        hasErrors : bool
+            Whether the file contains uncertainties or not.
+
+        """
+
+        indices = []
+
+        # Get the column headers of the data file
+        channels = [channel.lower() for channel in fIO.getHeaderNames(filename)]
+        nChannels = len(channels)
+
+        x_names = ('e', 'x','easting')
+        y_names = ('n', 'y', 'northing')
+        z_names = ('alt', 'laser', 'bheight', 'height')
+        e_names = ('z','dtm','dem_elev','dem_np','topo', 'elev', 'elevation')
+
+        # Check for each aspect of the data file and the number of columns
+        nCoordinates = 0
+        for channel in channels:
+            if (channel in x_names):
+                nCoordinates += 1
+            elif (channel in y_names):
+                nCoordinates += 1
+            elif (channel in z_names):
+                nCoordinates += 1
+            elif(channel in e_names):
+                nCoordinates += 1
+
+        assert nCoordinates >= 3, Exception("File must contain columns for easting, northing, height. May also have an elevation column \n {}".format(self.fileInformation()))
+
+        # To grab the EM data, skip the following header names. (More can be added to this)
+        # Initialize a column identifier for x y z
+        index = np.zeros(nCoordinates, dtype=np.int32)
+        for j, channel in enumerate(channels):
+            if (channel in x_names):
+                index[0] = j
+            elif (channel in y_names):
+                index[1] = j
+            elif (channel in z_names):
+                index[2] = j
+            elif(channel in e_names):
+                index[3] = j
+
+        return index
+
+
+    def read(self, fileName):
         """Reads x y z co-ordinates from an ascii csv file.
 
         Parameters
         ----------
         fileName : str
             Path to the file to read from.
-        nHeaderLines : int, optional
-            Number of header line to skips at the top.
-        columnIndices : ints, optional
-            Size of 3, each int corresponds to the column containing x, y, z.
 
         """
+        indices = self.__readColumnIndices(fileName)
+        values = fIO.read_columns(fileName, nHeaders=1, indices=indices)
 
-        assert np.size(columnIndices) == 3, ValueError('size of columnIndices must equal 3')
+        tmp = fIO.getHeaderNames(fileName, indices)
 
-        nLines = fIO.getNlines(fileName, nHeaderLines)
-        # Initialize the Data
-        self.__init__(nLines)
-        # Read each line assign the values to the class
-        tmp = fIO.getHeaderNames(fileName, columnIndices)
+        self.__init__(*np.hsplit(values, np.size(indices)))
         self.x.name = tmp[0]
         self.y.name = tmp[1]
         self.z.name = tmp[2]
-        with open(fileName) as f:
-            fIO.skipLines(f, nHeaderLines)  # Skip header lines
-            for j, line in enumerate(f):
-                values = fIO.getRealNumbersfromLine(line, columnIndices)  # grab the requested entries
-                # Assign values into object
-                self.x[j] = values[0]
-                self.y[j] = values[1]
-                self.z[j] = values[2]
+        if np.size(indices) > 3:
+            self.elevation.name = tmp[3]
+
+        return self
 
 
     def fileInformation(self):
@@ -544,8 +659,8 @@ class PointCloud3D(myObject):
         y = self.y.Bcast(world, root=root)
         z = self.z.Bcast(world, root=root)
         e = self.elevation.Bcast(world, root=root)
-        N = MPI.Bcast(self._nPoints, world, root=root)
-        return PointCloud3D(N, x=x, y=y, z=z, elevation=e)
+        # N = MPI.Bcast(self._nPoints, world, root=root)
+        return PointCloud3D(x=x, y=y, z=z, elevation=e)
 
 
     def Scatterv(self, starts, chunks, world, root=0):
@@ -569,9 +684,9 @@ class PointCloud3D(myObject):
 
         """
 
-        N = chunks[world.rank]
+        # N = chunks[world.rank]
         x = self.x.Scatterv(starts, chunks, world, root=root)
         y = self.y.Scatterv(starts, chunks, world, root=root)
         z = self.z.Scatterv(starts, chunks, world, root=root)
         e = self.elevation.Scatterv(starts, chunks, world, root=root)
-        return PointCloud3D(N, x=x, y=y, z=z, elevation=e)
+        return PointCloud3D(x=x, y=y, z=z, elevation=e)

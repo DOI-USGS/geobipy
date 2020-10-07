@@ -854,6 +854,17 @@ class Model1D(Model):
         return self.stochasticNewtonPerturbation(datapoint)
 
 
+    def squeeze(self, thickness, parameters, hasHalfspace=False):
+
+        i = np.hstack([np.where(np.diff(parameters) != 0)[0], -1])
+
+        depth = np.cumsum(thickness)
+
+        Model1D.__init__(self, depth=depth[i], parameters=parameters[i], hasHalfspace=hasHalfspace)
+
+        return self
+
+
 
     def stochasticNewtonPerturbation(self, datapoint=None):
 

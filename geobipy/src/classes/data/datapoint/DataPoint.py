@@ -53,7 +53,7 @@ class DataPoint(Point):
 
         # Number of Channels
         self.nChannelsPerSystem = np.atleast_1d(np.asarray(nChannelsPerSystem))
-        self._systemOffset = np.append(0, np.cumsum(self.nChannelsPerSystem))
+        self._systemOffset = np.concatenate([[0], np.cumsum(self.nChannelsPerSystem)])
 
         # StatArray of data
         if not elevation is None:

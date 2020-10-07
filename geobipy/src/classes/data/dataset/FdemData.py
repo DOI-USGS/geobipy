@@ -63,74 +63,119 @@ class FdemData(Data):
 
     """
 
-    def __init__(self, nPoints=1, nFrequencies=1, systems=None, **kwargs):
+    def __init__(self, systems=None, **kwargs):
         """Instantiate the FdemData class. """
 
-        if (not systems is None):
-            if isinstance(systems, (str, FdemSystem)):
-                systems = [systems]
-            nSystems = len(systems)
-            # Make sure that list contains strings or TdemSystem classes
-            assert all([isinstance(x, (str, FdemSystem)) for x in systems]), TypeError("systems must be str or list of either str or geobipy.FdemSystem")
+        if (systems is None):
+            return
 
-            system = np.ndarray(nSystems, dtype=FdemSystem)
-
-            nFrequencies = np.empty(nSystems, dtype=np.int32)
-            for i, s in enumerate(systems):
-                if isinstance(s, str):
-                    system[i] = FdemSystem()
-                    system[i].read(systems[i])
-                else:
-                    system[i] = systems[i]
-                nFrequencies[i] = system[i].nFrequencies
-        else:
-            nFrequencies = np.int32(np.atleast_1d(nFrequencies))
-            nSystems = nFrequencies.size
-            system = np.ndarray(nSystems, dtype=FdemSystem)
+        self.system = systems
 
         # Data Class containing xyz and channel values
-        Data.__init__(self, nPoints=nPoints, nChannelsPerSystem=2*nFrequencies, dataUnits="ppm", **kwargs)
-        # StatArray of the line number for flight line data
-        self._lineNumber = StatArray.StatArray(nPoints, 'Line Number')
-        # StatArray of the id number
-        self._fiducial = StatArray.StatArray(nPoints, 'Fiducial')
-        # StatArray of the elevation
+        Data.__init__(self, nChannelsPerSystem=2*self.nFrequencies, dataUnits="ppm", **kwargs)
+
         # Assign data names
         self._data.name = 'Fdem Data'
 
-        self.system = system
-        self.nSystems = nSystems
+        self.channelNames = kwargs.get('channel_names', None)
 
-        k = 0
-        for i in range(self.nSystems):
-            # Set the channel names
-            if not self.system[i] is None:
-                for iFrequency in range(2*self.nFrequencies[i]):
-                    self.channelNames[k] = '{} {} (Hz)'.format(self.getMeasurementType(iFrequency, i), self.getFrequency(iFrequency, i))
-                    k += 1
+        self.powerline = kwargs.get('powerline', None)
+        self.magnetic = kwargs.get('magnetic', None)
 
-        self._magnetic = None
-        self._powerline = None
 
     @property
     def nFrequencies(self):
-        return np.int32(0.5 * self.nChannelsPerSystem)
+        return np.asarray([s.nFrequencies for s in self.system])
+
+
+    @property
+    def nSystems(self):
+        return np.size(self.system)
+
 
     @property
     def magnetic(self):
         return self._magnetic
 
+
+    @magnetic.setter
+    def magnetic(self, values):
+        if (values is None):
+            self._magnetic = StatArray.StatArray(self.nPoints, "Magnetic", "nT")
+        else:
+            if self.nPoints == 0:
+                self.nPoints = np.size(values)
+            assert np.size(values) == self.nPoints, ValueError("magnetic must have size {}".format(self.nPoints))
+            if (isinstance(values, StatArray.StatArray)):
+                self._magnetic = values.deepcopy()
+            else:
+                self._magnetic = StatArray.StatArray(values, "Magnetic", "nT")
+
+
     @property
     def powerline(self):
         return self._powerline
+
+
+    @powerline.setter
+    def powerline(self, values):
+        if (values is None):
+            self._powerline = StatArray.StatArray(self.nPoints, "Powerline")
+        else:
+            if self.nPoints == 0:
+                self.nPoints = np.size(values)
+            assert np.size(values) == self.nPoints, ValueError("powerline must have size {}".format(self.nPoints))
+            if (isinstance(values, StatArray.StatArray)):
+                self._powerline = values.deepcopy()
+            else:
+                self._powerline = StatArray.StatArray(values, "Powerline")
+
+
+    @property
+    def system(self):
+        return self._system
+
+
+    @system.setter
+    def system(self, values):
+
+        if isinstance(values, (str, FdemSystem)):
+            values = [values]
+        nSystems = len(values)
+        # Make sure that list contains strings or TdemSystem classes
+        assert all([isinstance(x, (str, FdemSystem)) for x in values]), TypeError("system must be str or list of either str or geobipy.FdemSystem")
+
+        self._system = np.ndarray(nSystems, dtype=FdemSystem)
+
+        for i, s in enumerate(values):
+            if isinstance(s, str):
+                self._system[i] = FdemSystem().read(s)
+            else:
+                self._system[i] = s
+
 
     @property
     def channelNames(self):
         return self._channelNames
 
 
+    @channelNames.setter
+    def channelNames(self, values):
+        if values is None:
+            self._channelNames = []
+            for i in range(self.nSystems):
+                # Set the channel names
+                if not self.system[i] is None:
+                    for iFrequency in range(2*self.nFrequencies[i]):
+                        self._channelNames.append('{} {} (Hz)'.format(self.getMeasurementType(iFrequency, i), self.getFrequency(iFrequency, i)))
+        else:
+            assert all((isinstance(x, str) for x in values))
+            assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
+            self._channelNames = values
+
+
     def check(self):
-        if (np.any(self._data[~np.isnan(self._data)] <= 0.0)):
+        if (np.nanmin(self.data) <= 0.0):
             print("Warning: Your data contains values that are <= 0.0")
 
 
@@ -189,51 +234,12 @@ class FdemData(Data):
         return np.sum(~np.isnan(self._data, 1))
 
 
-    def __add__(self, other):
+    def append(self, other):
 
-        out = FdemData(self.nPoints + other.nPoints, self.nFrequencies, systems=self.system)
+        super().append(other)
 
-        i1 = self.nPoints
-
-        out._lineNumber[:i1] = self.lineNumber
-        out._lineNumber[i1:] = other.lineNumber
-
-        out._fiducial[:i1] = self.fiducial
-        out._fiducial[i1:] = other.fiducial
-
-        out._x[:i1] = self.x
-        out._x[i1:] = other.x
-
-        out._y[:i1] = self.y
-        out._y[i1:] = other.y
-
-        out._z[:i1] = self.z
-        out._z[i1:] = other.z
-
-        out._elevation[:i1] = self.elevation
-        out._elevation[i1:] = other.elevation
-
-        out._data[:i1, :] = self.data
-        out._data[i1:, :] = other.data
-
-        out._predictedData[:i1, :] = self.predictedData
-        out._predictedData[i1:, :] = other.predictedData
-
-        out._std[:i1, :] = self.std
-        out._std[i1:, :] = other.std
-
-        if not self.powerline is None:
-            out._powerline = StatArray.StatArray(out.nPoints, name='Powerline')
-            out._powerline[:i1] = self.powerline
-            out._powerline[i1:] = other.powerline
-
-        if not self.magnetic is None:
-            out._magnetic = StatArray.StatArray(out.nPoints, name='Magnetic', units='$nT$')
-            out._magnetic[:i1] = self.magnetic
-            out._magnetic[i1:] = other.magnetic
-
-
-        return out
+        self.powerline = np.hstack([self.powerline, other.powerline])
+        self.magnetic = np.hstack([self.magnetic, other.magnetic])
 
 
     # def getChannel(self, channel):
@@ -325,25 +331,21 @@ class FdemData(Data):
         Allows slicing into the data FdemData[i]
 
         """
-        i = np.unique(i)
-        tmp = FdemData(np.size(i), self.nFrequencies)
-        tmp.x[:] = self.x[i]
-        tmp.y[:] = self.y[i]
-        tmp.z[:] = self.z[i]
-        tmp._data[:, :] = self._data[i, :]
-        tmp._std[:, :] = self._std[i, :]
-        tmp._predictedData[:, :] = self._predictedData[i, :]
-        tmp._lineNumber[:] = self.lineNumber[i]
-        tmp._fiducial[:] = self.fiducial[i]
-        tmp._elevation[:] = self.elevation[i]
-        tmp.system = self.system
-        tmp.nSystems = self.nSystems
 
-        if not self.powerline is None:
-            tmp._powerline = self.powerline[i].deepcopy()
-        if not self.magnetic is None:
-            tmp._magnetic = self.magnetic[i].deepcopy()
-        return tmp
+        if not isinstance(i, slice):
+            i = np.unique(i)
+        return FdemData(self.system,
+                       x=self.x[i],
+                       y=self.y[i],
+                       z=self.z[i],
+                       elevation=self.elevation[i],
+                       data=self.data[i, :],
+                       std=self.std[i, :],
+                       predictedData=self.predictedData[i, :],
+                       lineNumber=self.lineNumber[i],
+                       fiducial=self.fiducial[i],
+                       powerline=self.powerline[i],
+                       magnetic=self.magnetic[i])
 
 
     def datapoint(self, index=None, fiducial=None):
@@ -516,7 +518,8 @@ class FdemData(Data):
 
         assert nDatafiles == nSystems, Exception("Number of data files must match number of system files.")
 
-        self.readSystemFile(systemFilename)
+        self.system = systemFilename
+        # self.readSystemFile(systemFilename)
 
         nPoints, iC, iD, iS, powerline, magnetic = self.__readColumnIndices(dataFilename, self.system)
 
@@ -531,23 +534,28 @@ class FdemData(Data):
 
 
         # Initialize the EMData Class
-        FdemData.__init__(self, nPoints, systems=self.system)
+        FdemData.__init__(self, systems=self.system)
 
         # Read in the columns from the first data file
         values = fIO.read_columns(dataFilename[0], indicesForFile, 1, nPoints)
 
         # Assign columns to variables
-        self._lineNumber[:] = values[:, 0]
-        self._fiducial[:] = values[:, 1]
-        self.x[:] = values[:, 2]
-        self.y[:] = values[:, 3]
-        self.z[:] = values[:, 4]
-        self.elevation[:] = values[:, 5]
+        self.lineNumber = values[:, 0]
+        self.fiducial = values[:, 1]
+        self.x = values[:, 2]
+        self.y = values[:, 3]
+        self.z = values[:, 4]
+        self.elevation = values[:, 5]
 
         if not powerline is None:
-            self._powerline = StatArray.StatArray(values[:, powerline], name='Powerline')
+            self.powerline = values[:, powerline]
+        else:
+            self.powerline = None
+
         if not magnetic is None:
-            self._magnetic = StatArray.StatArray(values[:, magnetic], name='Magnetic', units='$nT$')
+            self.magnetic = values[:, magnetic]
+        else:
+            self.magnetic = None
 
         # EM data columns are in the following order
         # I1 Q1 I2 Q2 .... IN QN ErrI1 ErrQ1 ... ErrIN ErrQN
@@ -555,74 +563,51 @@ class FdemData(Data):
         # I1 I2 ... IN Q1 Q2 ... QN and
         # ErrI1 ErrI2 ... ErrIN ErrQ1 ErrQ2 ... ErrQN
 
-        v = values[0, :]
-        iSys = self._systemIndices(0)
-        self._data[:, iSys] = values[:, nBase:nBase + (2 * self.nFrequencies[0])]
+        self.data = values[:, nBase:nBase + (2 * self.nFrequencies[0])]
         if (iS[0]):
-            self._std[:, iSys] = values[:, nBase + (2 * self.nFrequencies[0]):]
+            self.std = values[:, nBase + (2 * self.nFrequencies[0]):]
         else:
-            self._std[:, iSys] = 0.1 * self._data[:, iSys]
+            self.std = 0.1 * self.data
 
-        # Read in the data for the other systems.  Only read in the data and, if available, the errors
-        for i in range(1, self.nSystems):
-            # Get all readable column indices for the file.
-            tmp = [iD[i]]
-            if not iS[i] is None:
-                tmp.append(iS[i])
-            indicesForFile = np.hstack(tmp)
+        # # Read in the data for the other systems.  Only read in the data and, if available, the errors
+        # for i in range(1, self.nSystems):
+        #     # Get all readable column indices for the file.
+        #     tmp = [iD[i]]
+        #     if not iS[i] is None:
+        #         tmp.append(iS[i])
+        #     indicesForFile = np.hstack(tmp)
 
-            # Read the columns
-            values = fIO.read_columns(dataFilename[i], indicesForFile[i], 1, nPoints)
-            # Assign the data
-            iSys = self._systemIndices(i)
-            self._data[:, iSys] = values[:, nBase:nBase + 2 * self.nFrequencies[i]]
-            if (iS[i]):
-                self._std[:, iSys] = values[:, nBase + 2 * self.nFrequencies[i]:]
-            else:
-                self._std[:, iSys] = 0.1 * self._data[:, iSys]
+        #     # Read the columns
+        #     values = fIO.read_columns(dataFilename[i], indicesForFile[i], 1, nPoints)
+        #     # Assign the data
+        #     iSys = self._systemIndices(i)
+        #     self.data[:, iSys] = values[:, nBase:nBase + 2 * self.nFrequencies[i]]
+        #     if (iS[i]):
+        #         self.std[:, iSys] = values[:, nBase + 2 * self.nFrequencies[i]:]
+        #     else:
+        #         self.std[:, iSys] = 0.1 * self.data[:, iSys]
 
         self.check()
 
-
-    def readSystemFile(self, systemFilename):
-        """ Reads in the system handler using the system file name """
-
-        if isinstance(systemFilename, str):
-            systemFilename = [systemFilename]
-
-        nSys = len(systemFilename)
-        self.system = np.ndarray(nSys, dtype=FdemSystem)
-
-        for i in range(nSys):
-            self.system[i] = FdemSystem()
-            self.system[i].read(systemFilename[i])
-
-        self.nSystems = nSys
-        self.nChannelsPerSystem = np.asarray([np.int32(2*x.nFrequencies) for x in self.system])
-        self._systemOffset = np.append(0, np.cumsum(self.nChannelsPerSystem))
+        return self
 
 
-    def _readNpoints(self, dataFilename):
-        """Read the number of points in a data file
+    # def readSystemFile(self, systemFilename):
+    #     """ Reads in the system handler using the system file name """
 
-        Parameters
-        ----------
-        dataFilename : list of str.
-            Path to the data files.
+    #     if isinstance(systemFilename, str):
+    #         systemFilename = [systemFilename]
 
-        Returns
-        -------
-        nPoints : int
-            Number of observations.
+    #     nSys = len(systemFilename)
+    #     self.system = np.ndarray(nSys, dtype=FdemSystem)
 
-        """
-        nSystems = len(dataFilename)
-        nPoints = np.empty(nSystems, dtype=np.int64)
-        for i in range(nSystems):
-            nPoints[i] = fIO.getNlines(dataFilename[i], 1)
-        for i in range(1, nSystems):
-            assert nPoints[i] == nPoints[0], Exception('Number of data points {} in file {} does not match {} in file {}'.format(nPoints[i], dataFilename[i], nPoints[0], dataFilename[0]))
-        return nPoints[0]
+    #     for i in range(nSys):
+    #         self.system[i] = FdemSystem()
+    #         self.system[i].read(systemFilename[i])
+
+    #     self.nSystems = nSys
+    #     self.nChannelsPerSystem = np.asarray([np.int32(2*x.nFrequencies) for x in self.system])
+    #     self._systemOffset = np.append(0, np.cumsum(self.nChannelsPerSystem))
 
 
     # Section contains routines for opening a data file, and reading data points one at a time
@@ -762,7 +747,8 @@ class FdemData(Data):
         """
 
         # Read in the EM System file
-        self.readSystemFile(systemFilename)
+        self.system = systemFilename
+        # self.readSystemFile(systemFilename)
         self._nPoints, self._iC, self._iD, self._iS, iP, iM = self.__readColumnIndices(dataFilename, self.system)
 
         if isinstance(dataFilename, str):
