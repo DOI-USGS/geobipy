@@ -1,10 +1,12 @@
-.. note::
-    :class: sphx-glr-download-link-note
+.. only:: html
 
-    Click :ref:`here <sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_2d.py>` to download the full example code
-.. rst-class:: sphx-glr-example-title
+    .. note::
+        :class: sphx-glr-download-link-note
 
-.. _sphx_glr_examples_Meshes_plot_rectilinear_mesh_2d.py:
+        Click :ref:`here <sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_2d.py>`     to download the full example code
+    .. rst-class:: sphx-glr-example-title
+
+    .. _sphx_glr_examples_Meshes_plot_rectilinear_mesh_2d.py:
 
 
 2D Rectilinear Mesh
@@ -67,6 +69,7 @@ We can plot the grid lines of the mesh.
 
 
 .. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_001.png
+    :alt: plot rectilinear mesh 2d
     :class: sphx-glr-single-img
 
 
@@ -101,6 +104,7 @@ Plot the x-y coordinates of the mesh
 
 
 .. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_002.png
+    :alt: plot rectilinear mesh 2d
     :class: sphx-glr-single-img
 
 
@@ -119,6 +123,7 @@ Again, plot the grid. This time the z-coordinate dominates the plot.
 
 
 .. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_003.png
+    :alt: plot rectilinear mesh 2d
     :class: sphx-glr-single-img
 
 
@@ -139,6 +144,7 @@ We can pcolor the mesh by providing cell values.
 
 
 .. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_004.png
+    :alt: plot rectilinear mesh 2d
     :class: sphx-glr-single-img
 
 
@@ -270,7 +276,7 @@ rm.toVTK('test', cellData=StatArray(np.random.randn(z.size, x.size), "Name"))
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.351 seconds)
+   **Total running time of the script:** ( 0 minutes  0.367 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_2d.py:
@@ -283,13 +289,13 @@ rm.toVTK('test', cellData=StatArray(np.random.randn(z.size, x.size), "Name"))
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-python
 
      :download:`Download Python source code: plot_rectilinear_mesh_2d.py <plot_rectilinear_mesh_2d.py>`
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-jupyter
 
      :download:`Download Jupyter notebook: plot_rectilinear_mesh_2d.ipynb <plot_rectilinear_mesh_2d.ipynb>`
 

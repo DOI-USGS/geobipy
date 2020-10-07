@@ -1,10 +1,12 @@
-.. note::
-    :class: sphx-glr-download-link-note
+.. only:: html
 
-    Click :ref:`here <sphx_glr_download_examples_Statistics_plot_histogram_1d.py>` to download the full example code
-.. rst-class:: sphx-glr-example-title
+    .. note::
+        :class: sphx-glr-download-link-note
 
-.. _sphx_glr_examples_Statistics_plot_histogram_1d.py:
+        Click :ref:`here <sphx_glr_download_examples_Statistics_plot_histogram_1d.py>`     to download the full example code
+    .. rst-class:: sphx-glr-example-title
+
+    .. _sphx_glr_examples_Statistics_plot_histogram_1d.py:
 
 
 Histogram 1D
@@ -77,6 +79,7 @@ Histogram with regular bins
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_001.png
+    :alt: plot histogram 1d
     :class: sphx-glr-single-img
 
 
@@ -100,7 +103,7 @@ Get the median, and 95% confidence values
 
  .. code-block:: none
 
-    (-0.030000000000000027, -1.71, 1.65)
+    (-0.030000000000000027, -1.6500000000000001, 1.65)
 
 
 
@@ -135,6 +138,7 @@ Get the median, and 95% confidence values
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_002.png
+    :alt: plot histogram 1d
     :class: sphx-glr-single-img
 
 
@@ -231,6 +235,7 @@ Update the histogram
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_003.png
+    :alt: plot histogram 1d
     :class: sphx-glr-single-img
 
 
@@ -251,6 +256,7 @@ We can plot the histogram as a pcolor plot
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_004.png
+    :alt: plot histogram 1d
     :class: sphx-glr-single-img
 
 
@@ -356,6 +362,7 @@ The update takes in the numbers in linear space and takes their log=10
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_005.png
+    :alt: plot histogram 1d
     :class: sphx-glr-single-img
 
 
@@ -365,7 +372,7 @@ The update takes in the numbers in linear space and takes their log=10
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.759 seconds)
+   **Total running time of the script:** ( 0 minutes  0.748 seconds)
 
 
 .. _sphx_glr_download_examples_Statistics_plot_histogram_1d.py:
@@ -378,13 +385,13 @@ The update takes in the numbers in linear space and takes their log=10
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-python
 
      :download:`Download Python source code: plot_histogram_1d.py <plot_histogram_1d.py>`
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-jupyter
 
      :download:`Download Jupyter notebook: plot_histogram_1d.ipynb <plot_histogram_1d.ipynb>`
 

@@ -371,7 +371,7 @@ sphinx_gallery_conf = {
 #                                     '../../examples/Pointclouds/',
                                     'examples/Data/',
                                     'examples/Datapoints/',
-#                                     '../../examples/Inversion/',
+                                    'examples/Inference'
                                     ]),
     "image_scrapers": ('matplotlib'),
     "thumbnail_size": (350, 350),

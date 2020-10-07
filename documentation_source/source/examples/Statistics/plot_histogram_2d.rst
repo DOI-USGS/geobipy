@@ -1,10 +1,12 @@
-.. note::
-    :class: sphx-glr-download-link-note
+.. only:: html
 
-    Click :ref:`here <sphx_glr_download_examples_Statistics_plot_histogram_2d.py>` to download the full example code
-.. rst-class:: sphx-glr-example-title
+    .. note::
+        :class: sphx-glr-download-link-note
 
-.. _sphx_glr_examples_Statistics_plot_histogram_2d.py:
+        Click :ref:`here <sphx_glr_download_examples_Statistics_plot_histogram_2d.py>`     to download the full example code
+    .. rst-class:: sphx-glr-example-title
+
+    .. _sphx_glr_examples_Statistics_plot_histogram_2d.py:
 
 
 Histogram 2D
@@ -103,6 +105,7 @@ Update the histogram counts
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_histogram_2d_001.png
+    :alt: plot histogram 2d
     :class: sphx-glr-single-img
 
 
@@ -114,8 +117,8 @@ Generate marginal histograms along an axis
 
 .. code-block:: default
 
-    h1 = H.marginalHistogram(axis=0)
-    h2 = H.marginalHistogram(axis=1)
+    h1 = H.marginalize(axis=0)
+    h2 = H.marginalize(axis=1)
 
 
 
@@ -141,6 +144,7 @@ Note that the names of the variables are automatically displayed
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_histogram_2d_002.png
+    :alt: plot histogram 2d
     :class: sphx-glr-single-img
 
 
@@ -161,6 +165,7 @@ sphinx_gallery_thumbnail_number = 3
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_histogram_2d_003.png
+    :alt: plot histogram 2d
     :class: sphx-glr-single-img
 
 
@@ -182,6 +187,7 @@ We can overlay the histogram with its credible intervals
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_histogram_2d_004.png
+    :alt: plot histogram 2d
     :class: sphx-glr-single-img
 
 
@@ -219,6 +225,7 @@ Or plot the mean and median
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_histogram_2d_005.png
+    :alt: plot histogram 2d
     :class: sphx-glr-single-img
 
 
@@ -229,7 +236,7 @@ Or plot the mean and median
  .. code-block:: none
 
 
-    <matplotlib.legend.Legend object at 0x12bba0910>
+    <matplotlib.legend.Legend object at 0x12760e950>
 
 
 
@@ -254,6 +261,7 @@ Or plot the mean and median
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_histogram_2d_006.png
+    :alt: plot histogram 2d
     :class: sphx-glr-single-img
 
 
@@ -278,6 +286,7 @@ Or plot the mean and median
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_histogram_2d_007.png
+    :alt: plot histogram 2d
     :class: sphx-glr-single-img
 
 
@@ -303,16 +312,16 @@ Get the range between credible intervals
  .. code-block:: none
 
 
-    StatArray([3.44, 3.12, 3.2 , 2.8 , 3.52, 3.44, 4.16, 2.88, 2.8 , 3.44,
-               3.36, 3.28, 3.2 , 3.28, 3.36, 3.28, 3.36, 3.36, 3.36, 3.28,
-               3.36, 3.2 , 3.2 , 3.28, 3.36, 3.28, 3.28, 3.28, 3.2 , 3.36,
-               3.28, 3.28, 3.36, 3.28, 3.28, 3.28, 3.28, 3.28, 3.36, 3.28,
-               3.36, 3.28, 3.28, 3.36, 3.28, 3.28, 3.28, 3.28, 3.36, 3.28,
-               3.36, 3.28, 3.28, 3.36, 3.28, 3.28, 3.2 , 3.28, 3.2 , 3.28,
-               3.36, 3.36, 3.28, 3.28, 3.2 , 3.36, 3.28, 3.28, 3.36, 3.28,
-               3.2 , 3.2 , 3.36, 3.36, 3.28, 3.28, 3.28, 3.36, 3.36, 3.36,
-               3.28, 3.12, 3.28, 3.44, 3.36, 3.36, 3.36, 3.36, 2.96, 3.28,
-               2.88, 3.36, 3.6 , 2.72, 3.12, 3.44, 4.08, 5.2 , 4.24, 3.6 ])
+    StatArray([2.72, 4.32, 3.6 , 4.  , 3.28, 3.68, 2.96, 3.44, 3.12, 3.28,
+               3.36, 3.36, 3.2 , 3.28, 3.28, 3.28, 3.2 , 3.28, 3.28, 3.28,
+               3.2 , 3.28, 3.28, 3.2 , 3.36, 3.28, 3.36, 3.36, 3.28, 3.36,
+               3.28, 3.36, 3.36, 3.28, 3.28, 3.28, 3.36, 3.28, 3.28, 3.36,
+               3.36, 3.36, 3.28, 3.28, 3.28, 3.36, 3.36, 3.2 , 3.36, 3.28,
+               3.28, 3.36, 3.28, 3.36, 3.28, 3.2 , 3.36, 3.28, 3.36, 3.36,
+               3.36, 3.36, 3.28, 3.36, 3.36, 3.28, 3.36, 3.28, 3.28, 3.36,
+               3.36, 3.28, 3.36, 3.36, 3.36, 3.36, 3.28, 3.28, 3.28, 3.28,
+               3.36, 3.36, 3.2 , 3.28, 3.44, 3.04, 3.12, 3.04, 3.12, 3.68,
+               2.88, 3.36, 3.6 , 3.36, 3.36, 2.96, 3.44, 2.72, 5.12, 4.16])
 
 
 
@@ -334,33 +343,33 @@ We can map the credible range to an opacity or transparency
  .. code-block:: none
 
 
-    StatArray([0.29032258, 0.16129032, 0.19354839, 0.03225806, 0.32258065,
-               0.29032258, 0.58064516, 0.06451613, 0.03225806, 0.29032258,
-               0.25806452, 0.22580645, 0.19354839, 0.22580645, 0.25806452,
-               0.22580645, 0.25806452, 0.25806452, 0.25806452, 0.22580645,
-               0.25806452, 0.19354839, 0.19354839, 0.22580645, 0.25806452,
-               0.22580645, 0.22580645, 0.22580645, 0.19354839, 0.25806452,
-               0.22580645, 0.22580645, 0.25806452, 0.22580645, 0.22580645,
-               0.22580645, 0.22580645, 0.22580645, 0.25806452, 0.22580645,
-               0.25806452, 0.22580645, 0.22580645, 0.25806452, 0.22580645,
-               0.22580645, 0.22580645, 0.22580645, 0.25806452, 0.22580645,
-               0.25806452, 0.22580645, 0.22580645, 0.25806452, 0.22580645,
-               0.22580645, 0.19354839, 0.22580645, 0.19354839, 0.22580645,
-               0.25806452, 0.25806452, 0.22580645, 0.22580645, 0.19354839,
-               0.25806452, 0.22580645, 0.22580645, 0.25806452, 0.22580645,
-               0.19354839, 0.19354839, 0.25806452, 0.25806452, 0.22580645,
-               0.22580645, 0.22580645, 0.25806452, 0.25806452, 0.25806452,
-               0.22580645, 0.16129032, 0.22580645, 0.29032258, 0.25806452,
-               0.25806452, 0.25806452, 0.25806452, 0.09677419, 0.22580645,
-               0.06451613, 0.25806452, 0.35483871, 0.        , 0.16129032,
-               0.29032258, 0.5483871 , 1.        , 0.61290323, 0.35483871])
+    StatArray([0.        , 0.66666667, 0.36666667, 0.53333333, 0.23333333,
+               0.4       , 0.1       , 0.3       , 0.16666667, 0.23333333,
+               0.26666667, 0.26666667, 0.2       , 0.23333333, 0.23333333,
+               0.23333333, 0.2       , 0.23333333, 0.23333333, 0.23333333,
+               0.2       , 0.23333333, 0.23333333, 0.2       , 0.26666667,
+               0.23333333, 0.26666667, 0.26666667, 0.23333333, 0.26666667,
+               0.23333333, 0.26666667, 0.26666667, 0.23333333, 0.23333333,
+               0.23333333, 0.26666667, 0.23333333, 0.23333333, 0.26666667,
+               0.26666667, 0.26666667, 0.23333333, 0.23333333, 0.23333333,
+               0.26666667, 0.26666667, 0.2       , 0.26666667, 0.23333333,
+               0.23333333, 0.26666667, 0.23333333, 0.26666667, 0.23333333,
+               0.2       , 0.26666667, 0.23333333, 0.26666667, 0.26666667,
+               0.26666667, 0.26666667, 0.23333333, 0.26666667, 0.26666667,
+               0.23333333, 0.26666667, 0.23333333, 0.23333333, 0.26666667,
+               0.26666667, 0.23333333, 0.26666667, 0.26666667, 0.26666667,
+               0.26666667, 0.23333333, 0.23333333, 0.23333333, 0.23333333,
+               0.26666667, 0.26666667, 0.2       , 0.23333333, 0.3       ,
+               0.13333333, 0.16666667, 0.13333333, 0.16666667, 0.4       ,
+               0.06666667, 0.26666667, 0.36666667, 0.26666667, 0.26666667,
+               0.1       , 0.3       , 0.        , 1.        , 0.6       ])
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.191 seconds)
+   **Total running time of the script:** ( 0 minutes  2.004 seconds)
 
 
 .. _sphx_glr_download_examples_Statistics_plot_histogram_2d.py:
@@ -373,13 +382,13 @@ We can map the credible range to an opacity or transparency
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-python
 
      :download:`Download Python source code: plot_histogram_2d.py <plot_histogram_2d.py>`
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-jupyter
 
      :download:`Download Jupyter notebook: plot_histogram_2d.ipynb <plot_histogram_2d.ipynb>`
 

@@ -1,10 +1,12 @@
-.. note::
-    :class: sphx-glr-download-link-note
+.. only:: html
 
-    Click :ref:`here <sphx_glr_download_examples_Models_plot_model_1d.py>` to download the full example code
-.. rst-class:: sphx-glr-example-title
+    .. note::
+        :class: sphx-glr-download-link-note
 
-.. _sphx_glr_examples_Models_plot_model_1d.py:
+        Click :ref:`here <sphx_glr_download_examples_Models_plot_model_1d.py>`     to download the full example code
+    .. rst-class:: sphx-glr-example-title
+
+    .. _sphx_glr_examples_Models_plot_model_1d.py:
 
 
 1D Model with an infinite halfspace
@@ -121,6 +123,7 @@ perturbed = mod.perturbStructure()
 
 
 .. image:: /examples/Models/images/sphx_glr_plot_model_1d_001.png
+    :alt: plot model 1d
     :class: sphx-glr-single-img
 
 
@@ -131,7 +134,7 @@ perturbed = mod.perturbStructure()
  .. code-block:: none
 
 
-    <matplotlib.axes._subplots.AxesSubplot object at 0x12705afd0>
+    <matplotlib.axes._subplots.AxesSubplot object at 0x126e16910>
 
 
 
@@ -229,6 +232,7 @@ The proposal for the parameter values is fixed and centred around a single value
 
 
 .. image:: /examples/Models/images/sphx_glr_plot_model_1d_002.png
+    :alt: plot model 1d
     :class: sphx-glr-single-img
 
 
@@ -239,14 +243,14 @@ The proposal for the parameter values is fixed and centred around a single value
  .. code-block:: none
 
 
-    <matplotlib.axes._subplots.AxesSubplot object at 0x1276df0d0>
+    <matplotlib.axes._subplots.AxesSubplot object at 0x126ed8b50>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.096 seconds)
+   **Total running time of the script:** ( 0 minutes  2.357 seconds)
 
 
 .. _sphx_glr_download_examples_Models_plot_model_1d.py:
@@ -259,13 +263,13 @@ The proposal for the parameter values is fixed and centred around a single value
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-python
 
      :download:`Download Python source code: plot_model_1d.py <plot_model_1d.py>`
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-jupyter
 
      :download:`Download Jupyter notebook: plot_model_1d.ipynb <plot_model_1d.ipynb>`
 

@@ -1,10 +1,12 @@
-.. note::
-    :class: sphx-glr-download-link-note
+.. only:: html
 
-    Click :ref:`here <sphx_glr_download_examples_Meshes_plot_topo_rectilinear_mesh_2d.py>` to download the full example code
-.. rst-class:: sphx-glr-example-title
+    .. note::
+        :class: sphx-glr-download-link-note
 
-.. _sphx_glr_examples_Meshes_plot_topo_rectilinear_mesh_2d.py:
+        Click :ref:`here <sphx_glr_download_examples_Meshes_plot_topo_rectilinear_mesh_2d.py>`     to download the full example code
+    .. rst-class:: sphx-glr-example-title
+
+    .. _sphx_glr_examples_Meshes_plot_topo_rectilinear_mesh_2d.py:
 
 
 Topo Rectilinear Mesh 2D
@@ -59,6 +61,7 @@ Plot only the grid lines of the mesh
 
 
 .. image:: /examples/Meshes/images/sphx_glr_plot_topo_rectilinear_mesh_2d_001.png
+    :alt: plot topo rectilinear mesh 2d
     :class: sphx-glr-single-img
 
 
@@ -89,6 +92,7 @@ Create some cell values
 
 
 .. image:: /examples/Meshes/images/sphx_glr_plot_topo_rectilinear_mesh_2d_002.png
+    :alt: plot topo rectilinear mesh 2d
     :class: sphx-glr-single-img
 
 
@@ -113,8 +117,8 @@ Compute the mean over an interval for the mesh.
  .. code-block:: none
 
 
-    (array([[0.46256476, 0.52214324, 0.63906246, ..., 0.39589818, 0.47467693,
-            0.53935111]]), [6.8, 12.4])
+    (array([[0.58031717, 0.68855959, 0.90321275, ..., 0.54503006, 0.28437739,
+            0.39784212]]), [6.8, 12.4])
 
 
 
@@ -137,8 +141,8 @@ Compute the mean over multiple intervals for the mesh.
  .. code-block:: none
 
 
-    (array([[0.46256476, 0.52214324, 0.63906246, ..., 0.39589818, 0.47467693,
-            0.53935111]]), [6.8, 12.4])
+    (array([[0.58031717, 0.68855959, 0.90321275, ..., 0.54503006, 0.28437739,
+            0.39784212]]), [6.8, 12.4])
 
 
 
@@ -161,13 +165,13 @@ We can apply the interval statistics to either axis
  .. code-block:: none
 
 
-    (array([[0.69082797],
-           [0.82774567],
-           [0.83813853],
+    (array([[0.49608581],
+           [0.77738368],
+           [0.31056761],
            ...,
-           [0.55792657],
-           [0.52460693],
-           [0.54501891]]), [2.8, 4.2])
+           [0.6716477 ],
+           [0.87011383],
+           [0.45830656]]), [2.8, 4.2])
 
 
 
@@ -188,13 +192,13 @@ We can apply the interval statistics to either axis
  .. code-block:: none
 
 
-    (array([[0.69082797, 0.67636966, 0.4841188 ],
-           [0.82774567, 0.71365898, 0.6536987 ],
-           [0.83813853, 0.3395561 , 0.37579465],
+    (array([[0.49608581, 0.91888169, 0.79171364],
+           [0.77738368, 0.14095243, 0.60168541],
+           [0.31056761, 0.74316927, 0.5439071 ],
            ...,
-           [0.55792657, 0.9471549 , 0.41871764],
-           [0.52460693, 0.92245187, 0.64562256],
-           [0.54501891, 0.26570289, 0.26764122]]), [2.8, 4.2, 5.1, 8.4])
+           [0.6716477 , 0.99151903, 0.41651871],
+           [0.87011383, 0.71749039, 0.15719683],
+           [0.45830656, 0.11261209, 0.78954891]]), [2.8, 4.2, 5.1, 8.4])
 
 
 
@@ -268,6 +272,7 @@ We can apply the interval statistics to either axis
 
 
 .. image:: /examples/Meshes/images/sphx_glr_plot_topo_rectilinear_mesh_2d_003.png
+    :alt: plot topo rectilinear mesh 2d
     :class: sphx-glr-single-img
 
 
@@ -286,6 +291,7 @@ Plot the x-y co-ordinates
 
 
 .. image:: /examples/Meshes/images/sphx_glr_plot_topo_rectilinear_mesh_2d_004.png
+    :alt: plot topo rectilinear mesh 2d
     :class: sphx-glr-single-img
 
 
@@ -305,6 +311,7 @@ The pcolor function can now be plotted against distance
 
 
 .. image:: /examples/Meshes/images/sphx_glr_plot_topo_rectilinear_mesh_2d_005.png
+    :alt: plot topo rectilinear mesh 2d
     :class: sphx-glr-single-img
 
 
@@ -315,7 +322,7 @@ The pcolor function can now be plotted against distance
  .. code-block:: none
 
 
-    (<matplotlib.axes._subplots.AxesSubplot object at 0x1275dbd10>, <matplotlib.collections.QuadMesh object at 0x12c849210>, <matplotlib.colorbar.Colorbar object at 0x12c532290>)
+    (<matplotlib.axes._subplots.AxesSubplot object at 0x1281d19d0>, <matplotlib.collections.QuadMesh object at 0x127d45dd0>, <matplotlib.colorbar.Colorbar object at 0x126e16c50>)
 
 
 
@@ -324,7 +331,7 @@ rm.toVTK('test', cellData=values)
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.451 seconds)
+   **Total running time of the script:** ( 0 minutes  0.469 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_topo_rectilinear_mesh_2d.py:
@@ -337,13 +344,13 @@ rm.toVTK('test', cellData=values)
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-python
 
      :download:`Download Python source code: plot_topo_rectilinear_mesh_2d.py <plot_topo_rectilinear_mesh_2d.py>`
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-jupyter
 
      :download:`Download Jupyter notebook: plot_topo_rectilinear_mesh_2d.ipynb <plot_topo_rectilinear_mesh_2d.ipynb>`
 
