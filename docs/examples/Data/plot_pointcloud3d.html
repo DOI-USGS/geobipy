@@ -42,7 +42,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Frequency domain dataset" href="plot_frequency_dataset.html" />
-    <link rel="prev" title="Time domain dataset" href="plot_time_domain_dataset.html" /> 
+    <link rel="prev" title="1D Model with an infinite halfspace" href="../Models/plot_model_1d.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -100,9 +100,9 @@
 <li class="toctree-l2"><a class="reference internal" href="../index.html#meshes">Meshes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html#data">Data</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="plot_time_domain_dataset.html">Time domain dataset</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">3D Point Cloud class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="plot_frequency_dataset.html">Frequency domain dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_time_domain_dataset.html">Time domain dataset</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#datapoints">Datapoints</a></li>
@@ -219,18 +219,18 @@ Number of Points: : 20000
  Name: Easting
      Units: m
      Shape: (20000,)
-     Values: [-0.99448593 -0.39678632 -0.86955265 ...  0.59091853  0.1661156
-  0.11010979]
+     Values: [-0.49955817 -0.93368476 -0.69809349 ...  0.7588914   0.36178379
+  0.09533399]
  Name: Northing
      Units: m
      Shape: (20000,)
-     Values: [-0.27582965 -0.32641953 -0.60480729 ...  0.1752431   0.2276944
-  0.11170805]
+     Values: [-0.06031532 -0.4436347  -0.16737524 ...  0.26017353  0.62756379
+  0.47234696]
  Name: Height
      Units: m
      Shape: (20000,)
-     Values: [-1.51138185  0.15096743 -1.41096354 ... -0.03563233  0.07875754
-  0.03169026]
+     Values: [ 1.95854160e-04 -1.73879019e+00 -3.46841568e-01 ... -9.69631853e-02
+  8.94419868e-02  8.20953454e-02]
  Name: Elevation
      Units: m
      Shape: (20000,)
@@ -244,7 +244,7 @@ Number of Points: : 20000
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;geobipy.src.classes.pointcloud.Point.Point object at 0x12561fd30&gt;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;geobipy.src.classes.pointcloud.Point.Point object at 0x12b674f70&gt;
 </pre></div>
 </div>
 <p>Plot the locations with Height as colour</p>
@@ -254,7 +254,7 @@ Number of Points: : 20000
 </div>
 <img alt="plot pointcloud3d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_pointcloud3d_001.png" />
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;AxesSubplot:xlabel=&#39;Easting (m)&#39;, ylabel=&#39;Northing (m)&#39;&gt;, &lt;matplotlib.collections.PathCollection object at 0x1258571c0&gt;, &lt;matplotlib.colorbar.Colorbar object at 0x1258e1a90&gt;)
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;AxesSubplot:xlabel=&#39;Easting (m)&#39;, ylabel=&#39;Northing (m)&#39;&gt;, &lt;matplotlib.collections.PathCollection object at 0x12744e6d0&gt;, &lt;matplotlib.colorbar.Colorbar object at 0x12ba8c910&gt;)
 </pre></div>
 </div>
 <p>Plotting routines take matplotlib arguments for customization</p>
@@ -280,7 +280,7 @@ Interpolating with gmt surface tmp.txt -I0.1/0.1 -R-1.04997/1.05003/-1.04988/1.0
 /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap(&quot;viridis&quot;))
   kwargs[&#39;cmap&#39;].set_bad(color=&#39;white&#39;)
 
-(&lt;AxesSubplot:xlabel=&#39;Easting (m)&#39;, ylabel=&#39;Northing (m)&#39;&gt;, &lt;matplotlib.collections.QuadMesh object at 0x12616ceb0&gt;, &lt;matplotlib.colorbar.Colorbar object at 0x12648b850&gt;)
+(&lt;AxesSubplot:xlabel=&#39;Easting (m)&#39;, ylabel=&#39;Northing (m)&#39;&gt;, &lt;matplotlib.collections.QuadMesh object at 0x126fa0f10&gt;, &lt;matplotlib.colorbar.Colorbar object at 0x127972190&gt;)
 </pre></div>
 </div>
 <p>We can perform spatial searches on the 3D point cloud</p>
@@ -290,8 +290,8 @@ Interpolating with gmt surface tmp.txt -I0.1/0.1 -R-1.04997/1.05003/-1.04988/1.0
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(array([0.01168093, 0.01697917, 0.02077223, ..., 0.11492745, 0.11503209,
-       0.11537124]), array([ 2873,  1262, 18630, ...,  9035, 17625,  3159]))
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(array([0.00420115, 0.00640944, 0.00971474, ..., 0.11054256, 0.11103671,
+       0.11139794]), array([16626, 16568, 10093, ...,  7117, 17037,   409]))
 </pre></div>
 </div>
 <p>.nearest returns the distances and indices into the point cloud of the nearest points.
@@ -310,7 +310,7 @@ We can then obtain those points as another point cloud</p>
 </div>
 <img alt="plot pointcloud3d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_pointcloud3d_004.png" />
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[&lt;matplotlib.lines.Line2D object at 0x1265e6910&gt;]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[&lt;matplotlib.lines.Line2D object at 0x1272f8fa0&gt;]
 </pre></div>
 </div>
 <p>Read in the xyz co-ordinates in columns 2,3,4 from a file. Skip 1 header line.</p>
@@ -320,7 +320,7 @@ We can then obtain those points as another point cloud</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D object at 0x12561fdf0&gt;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D object at 0x12b674b80&gt;
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
@@ -334,7 +334,7 @@ when opened in Paraview (or other software)</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># PC3D.toVTK(&#39;testPoints&#39;, format=&#39;binary&#39;)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  5.828 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  5.513 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-data-plot-pointcloud3d-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/6c96ba056672a7e415f479abafdaf81d/plot_pointcloud3d.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_pointcloud3d.py</span></code></a></p>
@@ -357,7 +357,7 @@ when opened in Paraview (or other software)</p>
         <a href="plot_frequency_dataset.html" class="btn btn-neutral float-right" title="Frequency domain dataset" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="plot_time_domain_dataset.html" class="btn btn-neutral float-left" title="Time domain dataset" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../Models/plot_model_1d.html" class="btn btn-neutral float-left" title="1D Model with an infinite halfspace" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

@@ -9,7 +9,7 @@
     .. _sphx_glr_examples_Inference_plot_inference_3d.py:
 
 
-Posterior analysis of the 3D Bayesian inference
+3D Posterior analysis of the Bayesian inference
 -----------------------------------------------
 
 All plotting in GeoBIPy can be carried out using the 3D inference class

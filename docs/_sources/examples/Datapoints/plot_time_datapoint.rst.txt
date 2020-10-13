@@ -157,7 +157,7 @@ The Waveform class defines a half waveform
  .. code-block:: none
 
 
-    <matplotlib.legend.Legend object at 0x123fc4640>
+    <matplotlib.legend.Legend object at 0x12a392a90>
 
 
 
@@ -345,7 +345,7 @@ Initialize and read an EM data set
  .. code-block:: none
 
 
-    <geobipy.src.classes.data.dataset.TdemData.TdemData object at 0x124563b50>
+    <geobipy.src.classes.data.dataset.TdemData.TdemData object at 0x12b144970>
 
 
 
@@ -522,8 +522,8 @@ This allows us to evaluate the likelihood of the predicted data
 
  .. code-block:: none
 
-    -19707.246512951282
-    201.75779160924273
+    -19707.246512951326
+    201.75779160924293
 
 
 
@@ -575,7 +575,7 @@ Compute the misfit between observed and predicted data
 
  .. code-block:: none
 
-    48.247662254424036
+    48.24766225442447
 
 
 
@@ -809,7 +809,7 @@ Example data files are contained in
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  8.458 seconds)
+   **Total running time of the script:** ( 0 minutes  7.521 seconds)
 
 
 .. _sphx_glr_download_examples_Datapoints_plot_time_datapoint.py:

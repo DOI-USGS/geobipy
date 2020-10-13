@@ -126,8 +126,8 @@ Compute the mean over an interval for the mesh.
  .. code-block:: none
 
 
-    (array([[0.78315553, 0.33442031, 0.38602889, ..., 0.42741869, 0.40200121,
-            0.2320227 ]]), [6.8, 12.4])
+    (array([[0.48639386, 0.33467686, 0.41584371, ..., 0.33687169, 0.69560755,
+            0.50365016]]), [6.8, 12.4])
 
 
 
@@ -150,8 +150,8 @@ Compute the mean over multiple intervals for the mesh.
  .. code-block:: none
 
 
-    (array([[0.78315553, 0.33442031, 0.38602889, ..., 0.42741869, 0.40200121,
-            0.2320227 ]]), [6.8, 12.4])
+    (array([[0.48639386, 0.33467686, 0.41584371, ..., 0.33687169, 0.69560755,
+            0.50365016]]), [6.8, 12.4])
 
 
 
@@ -174,13 +174,13 @@ We can apply the interval statistics to either axis
  .. code-block:: none
 
 
-    (array([[0.29165858],
-           [0.47238769],
-           [0.46805781],
+    (array([[0.66094455],
+           [0.80856461],
+           [0.30498609],
            ...,
-           [0.11020739],
-           [0.74450399],
-           [0.76879323]]), [2.8, 4.2])
+           [0.50345135],
+           [0.19122803],
+           [0.52442934]]), [2.8, 4.2])
 
 
 
@@ -201,13 +201,13 @@ We can apply the interval statistics to either axis
  .. code-block:: none
 
 
-    (array([[0.29165858, 0.28923312, 0.44720559],
-           [0.47238769, 0.52651657, 0.58199048],
-           [0.46805781, 0.39987675, 0.67319023],
+    (array([[0.66094455, 0.61444773, 0.40724532],
+           [0.80856461, 0.36102772, 0.25402954],
+           [0.30498609, 0.7744256 , 0.3228217 ],
            ...,
-           [0.11020739, 0.05194109, 0.67322725],
-           [0.74450399, 0.84767753, 0.45868011],
-           [0.76879323, 0.13556021, 0.3152467 ]]), [2.8, 4.2, 5.1, 8.4])
+           [0.50345135, 0.68752073, 0.52562646],
+           [0.19122803, 0.49835393, 0.54645663],
+           [0.52442934, 0.30881261, 0.5413534 ]]), [2.8, 4.2, 5.1, 8.4])
 
 
 
@@ -333,7 +333,7 @@ The pcolor function can now be plotted against distance
     /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
       kwargs['cmap'].set_bad(color='white')
 
-    (<AxesSubplot:xlabel='Distance (m)', ylabel='Height (m)'>, <matplotlib.collections.QuadMesh object at 0x134431a90>, <matplotlib.colorbar.Colorbar object at 0x12fafacd0>)
+    (<AxesSubplot:xlabel='Distance (m)', ylabel='Height (m)'>, <matplotlib.collections.QuadMesh object at 0x126e05d00>, <matplotlib.colorbar.Colorbar object at 0x12776d070>)
 
 
 
@@ -342,7 +342,7 @@ rm.toVTK('test', cellData=values)
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.477 seconds)
+   **Total running time of the script:** ( 0 minutes  0.499 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_topo_rectilinear_mesh_2d.py:

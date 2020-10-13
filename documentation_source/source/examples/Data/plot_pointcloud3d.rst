@@ -93,18 +93,18 @@ Write a summary of the contents of the point cloud
      Name: Easting
          Units: m
          Shape: (20000,)
-         Values: [-0.99448593 -0.39678632 -0.86955265 ...  0.59091853  0.1661156
-      0.11010979]
+         Values: [-0.49955817 -0.93368476 -0.69809349 ...  0.7588914   0.36178379
+      0.09533399]
      Name: Northing
          Units: m
          Shape: (20000,)
-         Values: [-0.27582965 -0.32641953 -0.60480729 ...  0.1752431   0.2276944
-      0.11170805]
+         Values: [-0.06031532 -0.4436347  -0.16737524 ...  0.26017353  0.62756379
+      0.47234696]
      Name: Height
          Units: m
          Shape: (20000,)
-         Values: [-1.51138185  0.15096743 -1.41096354 ... -0.03563233  0.07875754
-      0.03169026]
+         Values: [ 1.95854160e-04 -1.73879019e+00 -3.46841568e-01 ... -9.69631853e-02
+      8.94419868e-02  8.20953454e-02]
      Name: Elevation
          Units: m
          Shape: (20000,)
@@ -134,7 +134,7 @@ Get a single location from the point as a 3x1 vector
 
  .. code-block:: none
 
-    <geobipy.src.classes.pointcloud.Point.Point object at 0x12561fd30>
+    <geobipy.src.classes.pointcloud.Point.Point object at 0x12b674f70>
 
 
 
@@ -163,7 +163,7 @@ Plot the locations with Height as colour
  .. code-block:: none
 
 
-    (<AxesSubplot:xlabel='Easting (m)', ylabel='Northing (m)'>, <matplotlib.collections.PathCollection object at 0x1258571c0>, <matplotlib.colorbar.Colorbar object at 0x1258e1a90>)
+    (<AxesSubplot:xlabel='Easting (m)', ylabel='Northing (m)'>, <matplotlib.collections.PathCollection object at 0x12744e6d0>, <matplotlib.colorbar.Colorbar object at 0x12ba8c910>)
 
 
 
@@ -222,7 +222,7 @@ Grid the points using a triangulated CloughTocher interpolation
     /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
       kwargs['cmap'].set_bad(color='white')
 
-    (<AxesSubplot:xlabel='Easting (m)', ylabel='Northing (m)'>, <matplotlib.collections.QuadMesh object at 0x12616ceb0>, <matplotlib.colorbar.Colorbar object at 0x12648b850>)
+    (<AxesSubplot:xlabel='Easting (m)', ylabel='Northing (m)'>, <matplotlib.collections.QuadMesh object at 0x126fa0f10>, <matplotlib.colorbar.Colorbar object at 0x127972190>)
 
 
 
@@ -247,8 +247,8 @@ We can perform spatial searches on the 3D point cloud
 
  .. code-block:: none
 
-    (array([0.01168093, 0.01697917, 0.02077223, ..., 0.11492745, 0.11503209,
-           0.11537124]), array([ 2873,  1262, 18630, ...,  9035, 17625,  3159]))
+    (array([0.00420115, 0.00640944, 0.00971474, ..., 0.11054256, 0.11103671,
+           0.11139794]), array([16626, 16568, 10093, ...,  7117, 17037,   409]))
 
 
 
@@ -287,7 +287,7 @@ We can then obtain those points as another point cloud
  .. code-block:: none
 
 
-    [<matplotlib.lines.Line2D object at 0x1265e6910>]
+    [<matplotlib.lines.Line2D object at 0x1272f8fa0>]
 
 
 
@@ -313,7 +313,7 @@ Read in the xyz co-ordinates in columns 2,3,4 from a file. Skip 1 header line.
  .. code-block:: none
 
 
-    <geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D object at 0x12561fdf0>
+    <geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D object at 0x12b674b80>
 
 
 
@@ -357,7 +357,7 @@ when opened in Paraview (or other software)
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  5.828 seconds)
+   **Total running time of the script:** ( 0 minutes  5.513 seconds)
 
 
 .. _sphx_glr_download_examples_Data_plot_pointcloud3d.py:

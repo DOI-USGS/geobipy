@@ -235,27 +235,6 @@ Data
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Time domain dataset">
-
-.. only:: html
-
- .. figure:: /examples/Data/images/thumb/sphx_glr_plot_time_domain_dataset_thumb.png
-     :alt: Time domain dataset
-
-     :ref:`sphx_glr_examples_Data_plot_time_domain_dataset.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/Data/plot_time_domain_dataset
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="The 3D Point Cloud class extracts and utilizes the [Point](Point%20Class.ipynb) Class">
 
 .. only:: html
@@ -295,6 +274,27 @@ Data
    :hidden:
 
    /examples/Data/plot_frequency_dataset
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Time domain dataset">
+
+.. only:: html
+
+ .. figure:: /examples/Data/images/thumb/sphx_glr_plot_time_domain_dataset_thumb.png
+     :alt: Time domain dataset
+
+     :ref:`sphx_glr_examples_Data_plot_time_domain_dataset.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/Data/plot_time_domain_dataset
 .. raw:: html
 
     <div class="sphx-glr-clear"></div>
@@ -366,29 +366,8 @@ Posterior Analysis
 
 .. only:: html
 
- .. figure:: /examples/Inference/images/thumb/sphx_glr_plot_inference_3d_thumb.png
-     :alt: Posterior analysis of the 3D Bayesian inference
-
-     :ref:`sphx_glr_examples_Inference_plot_inference_3d.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/Inference/plot_inference_3d
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="All plotting in GeoBIPy can be carried out using the 3D inference class">
-
-.. only:: html
-
  .. figure:: /examples/Inference/images/thumb/sphx_glr_plot_inference_1d_thumb.png
-     :alt: Posterior analysis of the 1D Bayesian inference
+     :alt: 1D Posterior analysis of the Bayesian inference
 
      :ref:`sphx_glr_examples_Inference_plot_inference_1d.py`
 
@@ -409,7 +388,7 @@ Posterior Analysis
 .. only:: html
 
  .. figure:: /examples/Inference/images/thumb/sphx_glr_plot_inference_2d_thumb.png
-     :alt: Posterior analysis of the 2D Bayesian inference
+     :alt: 2D Posterior analysis of the Bayesian inference
 
      :ref:`sphx_glr_examples_Inference_plot_inference_2d.py`
 
@@ -422,6 +401,27 @@ Posterior Analysis
    :hidden:
 
    /examples/Inference/plot_inference_2d
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="All plotting in GeoBIPy can be carried out using the 3D inference class">
+
+.. only:: html
+
+ .. figure:: /examples/Inference/images/thumb/sphx_glr_plot_inference_3d_thumb.png
+     :alt: 3D Posterior analysis of the Bayesian inference
+
+     :ref:`sphx_glr_examples_Inference_plot_inference_3d.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/Inference/plot_inference_3d
 .. raw:: html
 
     <div class="sphx-glr-clear"></div>

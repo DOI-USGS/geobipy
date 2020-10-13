@@ -174,7 +174,7 @@ Initialize and read an EM data set
  .. code-block:: none
 
 
-    <geobipy.src.classes.data.dataset.FdemData.FdemData object at 0x12561f850>
+    <geobipy.src.classes.data.dataset.FdemData.FdemData object at 0x1290c08e0>
 
 
 
@@ -539,7 +539,7 @@ _ = fdp.addErr.plotPosteriors()
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  10.792 seconds)
+   **Total running time of the script:** ( 0 minutes  10.629 seconds)
 
 
 .. _sphx_glr_download_examples_Datapoints_plot_frequency_datapoint.py:

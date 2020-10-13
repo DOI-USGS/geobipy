@@ -277,7 +277,7 @@ sphinx_gallery_thumbnail_number = 3</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap(&quot;gray_r&quot;))
   kwargs[&#39;cmap&#39;].set_bad(color=&#39;white&#39;)
 
-&lt;matplotlib.legend.Legend object at 0x1307aa490&gt;
+&lt;matplotlib.legend.Legend object at 0x1273b7490&gt;
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">9.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
@@ -330,16 +330,16 @@ sphinx_gallery_thumbnail_number = 3</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>StatArray([2.96, 2.56, 2.4 , 2.8 , 2.88, 2.96, 3.68, 3.04, 4.  , 3.44,
-           3.44, 3.28, 3.28, 3.36, 3.2 , 3.28, 3.2 , 3.36, 3.2 , 3.44,
-           3.28, 3.28, 3.28, 3.2 , 3.28, 3.36, 3.28, 3.28, 3.2 , 3.28,
-           3.2 , 3.2 , 3.28, 3.36, 3.36, 3.2 , 3.36, 3.2 , 3.28, 3.2 ,
-           3.28, 3.28, 3.28, 3.2 , 3.36, 3.2 , 3.28, 3.28, 3.36, 3.36,
-           3.28, 3.36, 3.36, 3.36, 3.28, 3.28, 3.36, 3.28, 3.28, 3.36,
-           3.28, 3.36, 3.36, 3.28, 3.36, 3.28, 3.36, 3.36, 3.2 , 3.36,
-           3.2 , 3.28, 3.28, 3.2 , 3.28, 3.36, 3.36, 3.28, 3.28, 3.36,
-           3.28, 3.44, 3.2 , 3.28, 3.12, 3.04, 2.96, 3.44, 3.52, 3.28,
-           3.12, 3.12, 3.68, 3.04, 2.64, 2.64, 3.28, 2.72, 1.36, 3.04])
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>StatArray([3.28, 3.12, 2.96, 3.28, 3.12, 2.8 , 3.36, 3.44, 2.56, 3.12,
+           3.36, 3.12, 3.28, 3.28, 3.36, 3.28, 3.36, 3.28, 3.28, 3.2 ,
+           3.2 , 3.28, 3.36, 3.28, 3.28, 3.36, 3.28, 3.2 , 3.36, 3.2 ,
+           3.28, 3.28, 3.36, 3.36, 3.36, 3.28, 3.28, 3.36, 3.28, 3.36,
+           3.36, 3.28, 3.28, 3.36, 3.36, 3.28, 3.28, 3.36, 3.36, 3.36,
+           3.28, 3.2 , 3.28, 3.2 , 3.28, 3.28, 3.36, 3.28, 3.28, 3.28,
+           3.28, 3.36, 3.28, 3.36, 3.28, 3.28, 3.28, 3.36, 3.28, 3.28,
+           3.28, 3.36, 3.28, 3.2 , 3.28, 3.36, 3.28, 3.44, 3.36, 3.28,
+           3.36, 3.28, 3.36, 3.28, 3.28, 3.12, 3.44, 3.36, 2.96, 3.04,
+           3.12, 3.28, 3.76, 3.28, 3.2 , 2.56, 3.36, 3.28, 5.04, 3.52])
 </pre></div>
 </div>
 <p>We can map the credible range to an opacity or transparency</p>
@@ -348,29 +348,29 @@ sphinx_gallery_thumbnail_number = 3</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>StatArray([0.60606061, 0.45454545, 0.39393939, 0.54545455, 0.57575758,
-           0.60606061, 0.87878788, 0.63636364, 1.        , 0.78787879,
-           0.78787879, 0.72727273, 0.72727273, 0.75757576, 0.6969697 ,
-           0.72727273, 0.6969697 , 0.75757576, 0.6969697 , 0.78787879,
-           0.72727273, 0.72727273, 0.72727273, 0.6969697 , 0.72727273,
-           0.75757576, 0.72727273, 0.72727273, 0.6969697 , 0.72727273,
-           0.6969697 , 0.6969697 , 0.72727273, 0.75757576, 0.75757576,
-           0.6969697 , 0.75757576, 0.6969697 , 0.72727273, 0.6969697 ,
-           0.72727273, 0.72727273, 0.72727273, 0.6969697 , 0.75757576,
-           0.6969697 , 0.72727273, 0.72727273, 0.75757576, 0.75757576,
-           0.72727273, 0.75757576, 0.75757576, 0.75757576, 0.72727273,
-           0.72727273, 0.75757576, 0.72727273, 0.72727273, 0.75757576,
-           0.72727273, 0.75757576, 0.75757576, 0.72727273, 0.75757576,
-           0.72727273, 0.75757576, 0.75757576, 0.6969697 , 0.75757576,
-           0.6969697 , 0.72727273, 0.72727273, 0.6969697 , 0.72727273,
-           0.75757576, 0.75757576, 0.72727273, 0.72727273, 0.75757576,
-           0.72727273, 0.78787879, 0.6969697 , 0.72727273, 0.66666667,
-           0.63636364, 0.60606061, 0.78787879, 0.81818182, 0.72727273,
-           0.66666667, 0.66666667, 0.87878788, 0.63636364, 0.48484848,
-           0.48484848, 0.72727273, 0.51515152, 0.        , 0.63636364])
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>StatArray([0.29032258, 0.22580645, 0.16129032, 0.29032258, 0.22580645,
+           0.09677419, 0.32258065, 0.35483871, 0.        , 0.22580645,
+           0.32258065, 0.22580645, 0.29032258, 0.29032258, 0.32258065,
+           0.29032258, 0.32258065, 0.29032258, 0.29032258, 0.25806452,
+           0.25806452, 0.29032258, 0.32258065, 0.29032258, 0.29032258,
+           0.32258065, 0.29032258, 0.25806452, 0.32258065, 0.25806452,
+           0.29032258, 0.29032258, 0.32258065, 0.32258065, 0.32258065,
+           0.29032258, 0.29032258, 0.32258065, 0.29032258, 0.32258065,
+           0.32258065, 0.29032258, 0.29032258, 0.32258065, 0.32258065,
+           0.29032258, 0.29032258, 0.32258065, 0.32258065, 0.32258065,
+           0.29032258, 0.25806452, 0.29032258, 0.25806452, 0.29032258,
+           0.29032258, 0.32258065, 0.29032258, 0.29032258, 0.29032258,
+           0.29032258, 0.32258065, 0.29032258, 0.32258065, 0.29032258,
+           0.29032258, 0.29032258, 0.32258065, 0.29032258, 0.29032258,
+           0.29032258, 0.32258065, 0.29032258, 0.25806452, 0.29032258,
+           0.32258065, 0.29032258, 0.35483871, 0.32258065, 0.29032258,
+           0.32258065, 0.29032258, 0.32258065, 0.29032258, 0.29032258,
+           0.22580645, 0.35483871, 0.32258065, 0.16129032, 0.19354839,
+           0.22580645, 0.29032258, 0.48387097, 0.29032258, 0.25806452,
+           0.        , 0.32258065, 0.29032258, 1.        , 0.38709677])
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  2.164 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  2.188 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-statistics-plot-histogram-2d-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/066a96b3e7333f9a789eb7e687c45875/plot_histogram_2d.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_histogram_2d.py</span></code></a></p>

@@ -103,7 +103,7 @@ Get the median, and 95% confidence values
 
  .. code-block:: none
 
-    (-0.030000000000000027, -1.71, 1.5299999999999998)
+    (-0.030000000000000027, -1.71, 1.65)
 
 
 
@@ -381,7 +381,7 @@ The update takes in the numbers in linear space and takes their log=10
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.834 seconds)
+   **Total running time of the script:** ( 0 minutes  0.814 seconds)
 
 
 .. _sphx_glr_download_examples_Statistics_plot_histogram_1d.py:

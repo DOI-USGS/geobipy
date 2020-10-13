@@ -293,7 +293,7 @@ Read in a second data set
 
     Warning: Your data contains values that are <= 0.0
 
-    <geobipy.src.classes.data.dataset.FdemData.FdemData object at 0x126ac4ac0>
+    <geobipy.src.classes.data.dataset.FdemData.FdemData object at 0x1279b4490>
 
 
 
@@ -672,7 +672,7 @@ See the Resolve.stm files.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  11.693 seconds)
+   **Total running time of the script:** ( 0 minutes  11.702 seconds)
 
 
 .. _sphx_glr_download_examples_Data_plot_frequency_dataset.py:

@@ -68,7 +68,7 @@ Read in the data from file
  .. code-block:: none
 
 
-    <geobipy.src.classes.data.dataset.TdemData.TdemData object at 0x1304c9a30>
+    <geobipy.src.classes.data.dataset.TdemData.TdemData object at 0x127020f10>
 
 
 
@@ -359,7 +359,7 @@ Example system files are contained in
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  6.550 seconds)
+   **Total running time of the script:** ( 0 minutes  6.465 seconds)
 
 
 .. _sphx_glr_download_examples_Data_plot_time_domain_dataset.py:
