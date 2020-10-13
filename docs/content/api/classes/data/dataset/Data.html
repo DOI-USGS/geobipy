@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,30 +11,34 @@
   
 
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../../../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
-
-    
-
-  
   <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../../../_static/graphviz.css" type="text/css" />
   <link rel="stylesheet" href="../../../../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/gallery-dataframe.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script src="../../../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" />
     <link rel="next" title="FdemData" href="FdemData.html" />
@@ -53,7 +56,7 @@
           
 
           
-            <a href="../../../../../index.html" class="icon icon-home"> GeoBIPy
+            <a href="../../../../../index.html" class="icon icon-home" alt="Documentation Home"> GeoBIPy
           
 
           
@@ -80,6 +83,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -113,6 +117,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -151,7 +156,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../../../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../../../api.html">API</a> &raquo;</li>
         
@@ -182,16 +187,21 @@
             
   <div class="section" id="data">
 <h1>Data<a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h1>
-<div class="graphviz"><img src="../../../../../_images/inheritance-0b5e23707f97bf194612d7ac35c8d7bebc5f3246.png" alt="Inheritance diagram of geobipy.src.classes.data.dataset.Data.Data" usemap="#inheritance6003e78ca1" class="inheritance graphviz" /></div>
-<map id="inheritance6003e78ca1" name="inheritance6003e78ca1">
-<area shape="rect" id="node1" href="#geobipy.src.classes.data.dataset.Data.Data" target="_top" title="Class defining a set of Data." alt="" coords="283,5,355,29"/>
-<area shape="rect" id="node2" href="../../pointcloud/PointCloud3D.html#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D" target="_top" title="3D Point Cloud with x,y,z co&#45;ordinates" alt="" coords="131,5,235,29"/>
-<area shape="rect" id="node3" href="../../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="5,5,83,29"/>
-</map><span class="target" id="module-geobipy.src.classes.data.dataset.Data"></span><p>&#64;Data_Class
+digraph inheritance6003e78ca1 {
+bgcolor=transparent;
+rankdir=LR;
+size=&quot;8.0, 12.0&quot;;
+  &quot;Data&quot; [URL=&quot;#geobipy.src.classes.data.dataset.Data.Data&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defining a set of Data.&quot;];
+  &quot;PointCloud3D&quot; -&gt; &quot;Data&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;PointCloud3D&quot; [URL=&quot;../../pointcloud/PointCloud3D.html#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;3D Point Cloud with x,y,z co-ordinates&quot;];
+  &quot;myObject&quot; -&gt; &quot;PointCloud3D&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;myObject&quot; [URL=&quot;../../core/myObject.html#geobipy.src.classes.core.myObject.myObject&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Abstract base class&quot;];
+}
+<span class="target" id="module-geobipy.src.classes.data.dataset.Data"></span><p>&#64;Data_Class
 Module describing a Data Set where values are associated with an xyz co-ordinate</p>
-<dl class="class">
+<dl class="py class">
 <dt id="geobipy.src.classes.data.dataset.Data.Data">
-<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.data.dataset.Data.</code><code class="sig-name descname">Data</code><span class="sig-paren">(</span><em class="sig-param">nPoints=1</em>, <em class="sig-param">nChannelsPerSystem=1</em>, <em class="sig-param">x=None</em>, <em class="sig-param">y=None</em>, <em class="sig-param">z=None</em>, <em class="sig-param">elevation=None</em>, <em class="sig-param">data=None</em>, <em class="sig-param">std=None</em>, <em class="sig-param">predictedData=None</em>, <em class="sig-param">dataUnits=None</em>, <em class="sig-param">channelNames=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.data.dataset.Data.</code><code class="sig-name descname">Data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">nChannelsPerSystem</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">x</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">y</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">z</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">elevation</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">std</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">predictedData</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fiducial</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">lineNumber</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dataUnits</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">channelNames</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class defining a set of Data.</p>
 <p>Data(nPoints, nChannelsPerSystem, x, y, z, data, std, predictedData, dataUnits, channelNames)</p>
 <dl class="field-list simple">
@@ -221,9 +231,9 @@ Module describing a Data Set where values are associated with an xyz co-ordinate
 <dd class="field-odd"><p><a class="reference internal" href="#geobipy.src.classes.data.dataset.Data.Data" title="geobipy.src.classes.data.dataset.Data.Data">Data</a></p>
 </dd>
 </dl>
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.Data.Data.Bcast">
-<code class="sig-name descname">Bcast</code><span class="sig-paren">(</span><em class="sig-param">world</em>, <em class="sig-param">root=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.Bcast" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">Bcast</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">world</span></em>, <em class="sig-param"><span class="n">root</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.Bcast" title="Permalink to this definition">¶</a></dt>
 <dd><p>Broadcast a Data object using MPI</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -241,9 +251,9 @@ Module describing a Data Set where values are associated with an xyz co-ordinate
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.Data.Data.Scatterv">
-<code class="sig-name descname">Scatterv</code><span class="sig-paren">(</span><em class="sig-param">starts</em>, <em class="sig-param">chunks</em>, <em class="sig-param">world</em>, <em class="sig-param">root=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.Scatterv" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">Scatterv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">starts</span></em>, <em class="sig-param"><span class="n">chunks</span></em>, <em class="sig-param"><span class="n">world</span></em>, <em class="sig-param"><span class="n">root</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.Scatterv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Scatterv a Data object using MPI</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -263,9 +273,9 @@ Module describing a Data Set where values are associated with an xyz co-ordinate
 </dl>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.Data.Data.active">
-<code class="sig-name descname">active</code><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.active" title="Permalink to this definition">¶</a></dt>
+<em class="property">property </em><code class="sig-name descname">active</code><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.active" title="Permalink to this definition">¶</a></dt>
 <dd><p>Logical array whether the channel is active or not.</p>
 <p>An inactive channel is one where channel values are NaN for all points.</p>
 <dl class="field-list simple">
@@ -278,9 +288,9 @@ Module describing a Data Set where values are associated with an xyz co-ordinate
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.Data.Data.addToVTK">
-<code class="sig-name descname">addToVTK</code><span class="sig-paren">(</span><em class="sig-param">vtk, prop=['data', 'predicted', 'std'], system=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.addToVTK" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">addToVTK</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">vtk</span></em>, <em class="sig-param"><span class="n">prop</span><span class="o">=</span><span class="default_value">['data', 'predicted', 'std']</span></em>, <em class="sig-param"><span class="n">system</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.addToVTK" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a member to a VTK handle.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -293,15 +303,26 @@ Module describing a Data Set where values are associated with an xyz co-ordinate
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.append">
+<code class="sig-name descname">append</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">other</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append pointclouds together</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>other</strong> (<em>geobipy.PointCloud3D</em>) – 3D pointcloud</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.Data.Data.data">
 <em class="property">property </em><code class="sig-name descname">data</code><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.data" title="Permalink to this definition">¶</a></dt>
 <dd><p>The data.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.Data.Data.dataChannel">
-<code class="sig-name descname">dataChannel</code><span class="sig-paren">(</span><em class="sig-param">channel</em>, <em class="sig-param">system=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.dataChannel" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">dataChannel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">channel</span></em>, <em class="sig-param"><span class="n">system</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.dataChannel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the data in the specified channel</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -320,9 +341,9 @@ Module describing a Data Set where values are associated with an xyz co-ordinate
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.Data.Data.dataMisfit">
-<code class="sig-name descname">dataMisfit</code><span class="sig-paren">(</span><em class="sig-param">squared=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.dataMisfit" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">dataMisfit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">squared</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.dataMisfit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the <span class="math notranslate nohighlight">\(L_{2}\)</span> norm squared misfit between the observed and predicted data</p>
 <div class="math notranslate nohighlight">
 \[\| \mathbf{W}_{d} (\mathbf{d}^{obs}-\mathbf{d}^{pre})\|_{2}^{2},\]</div>
@@ -340,9 +361,9 @@ Module describing a Data Set where values are associated with an xyz co-ordinate
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.Data.Data.datapoint">
-<code class="sig-name descname">datapoint</code><span class="sig-paren">(</span><em class="sig-param">i</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.datapoint" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">datapoint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.datapoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the ith data point from the data set</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -357,7 +378,7 @@ Module describing a Data Set where values are associated with an xyz co-ordinate
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.Data.Data.deltaD">
 <em class="property">property </em><code class="sig-name descname">deltaD</code><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.deltaD" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the difference between the predicted and observed data,</p>
@@ -373,27 +394,15 @@ Module describing a Data Set where values are associated with an xyz co-ordinate
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="geobipy.src.classes.data.dataset.Data.Data.elevation">
-<em class="property">property </em><code class="sig-name descname">elevation</code><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.elevation" title="Permalink to this definition">¶</a></dt>
-<dd><p>The elevation.</p>
-</dd></dl>
-
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.Data.Data.line">
-<code class="sig-name descname">line</code><span class="sig-paren">(</span><em class="sig-param">line</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.line" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">line</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">line</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.line" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the data from the given line number</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="geobipy.src.classes.data.dataset.Data.Data.maketest">
-<code class="sig-name descname">maketest</code><span class="sig-paren">(</span><em class="sig-param">nPoints</em>, <em class="sig-param">nChannels</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.maketest" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a test example</p>
-</dd></dl>
-
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.Data.Data.mapData">
-<code class="sig-name descname">mapData</code><span class="sig-paren">(</span><em class="sig-param">channel</em>, <em class="sig-param">system=None</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.mapData" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">mapData</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">channel</span></em>, <em class="sig-param"><span class="n">system</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.mapData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interpolate the data channel between the x, y co-ordinates.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -406,9 +415,9 @@ Module describing a Data Set where values are associated with an xyz co-ordinate
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.Data.Data.mapPredictedData">
-<code class="sig-name descname">mapPredictedData</code><span class="sig-paren">(</span><em class="sig-param">channel</em>, <em class="sig-param">system=None</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.mapPredictedData" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">mapPredictedData</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">channel</span></em>, <em class="sig-param"><span class="n">system</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.mapPredictedData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interpolate the predicted data channel between the x, y co-ordinates.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -421,7 +430,22 @@ Module describing a Data Set where values are associated with an xyz co-ordinate
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
+<dt id="geobipy.src.classes.data.dataset.Data.Data.mapStd">
+<code class="sig-name descname">mapStd</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">channel</span></em>, <em class="sig-param"><span class="n">system</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.mapStd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate the standard deviation channel between the x, y co-ordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>channel</strong> (<em>int</em>) – Index of the channel to return
+* If system is None, 0 &lt;= channel &lt; self.nChannels else 0 &lt;= channel &lt; self.nChannelsPerSystem[system]</p></li>
+<li><p><strong>system</strong> (<em>int</em><em>, </em><em>optional</em>) – The system to obtain the channel from.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.Data.Data.nPointsPerLine">
 <code class="sig-name descname">nPointsPerLine</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.nPointsPerLine" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the number of points in each line.</p>
@@ -435,9 +459,9 @@ Module describing a Data Set where values are associated with an xyz co-ordinate
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.Data.Data.plot">
-<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param">xAxis='index'</em>, <em class="sig-param">channels=None</em>, <em class="sig-param">system=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.plot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xAxis</span><span class="o">=</span><span class="default_value">'index'</span></em>, <em class="sig-param"><span class="n">channels</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">values</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">system</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots the specifed channels as a line plot.</p>
 <p>Plots the channels along a specified co-ordinate e.g. ‘x’. A legend is auto generated.</p>
 <dl class="field-list simple">
@@ -451,8 +475,9 @@ If xAxis is ‘r2d’, returns cumulative distance along the line in 2D using x 
 If xAxis is ‘r3d’, returns cumulative distance along the line in 3D using x, y, and z.</p></li>
 <li><p><strong>channels</strong> (<em>ints</em><em>, </em><em>optional</em>) – Indices of the channels to plot.  All are plotted if None
 * If system is None, 0 &lt;= channel &lt; self.nChannels else 0 &lt;= channel &lt; self.nChannelsPerSystem[system]</p></li>
+<li><p><strong>values</strong> (<em>arraylike</em><em>, </em><em>optional</em>) – Specifies values to plot against the chosen axis. Takes precedence over channels.</p></li>
 <li><p><strong>system</strong> (<em>int</em><em>, </em><em>optional</em>) – The system to obtain the channel from.</p></li>
-<li><p><strong>noLegend</strong> (<em>bool</em>) – Do not attach a legend to the plot.  Default is False, a legend is attached.</p></li>
+<li><p><strong>legend</strong> (<em>bool</em>) – Attach a legend to the plot.  Default is True.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -472,9 +497,9 @@ If xAxis is ‘r3d’, returns cumulative distance along the line in 3D using x,
 </div>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.Data.Data.plotPredicted">
-<code class="sig-name descname">plotPredicted</code><span class="sig-paren">(</span><em class="sig-param">xAxis='index'</em>, <em class="sig-param">channels=None</em>, <em class="sig-param">system=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.plotPredicted" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">plotPredicted</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xAxis</span><span class="o">=</span><span class="default_value">'index'</span></em>, <em class="sig-param"><span class="n">channels</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">system</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.plotPredicted" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots the specifed predicted data channels as a line plot.</p>
 <p>Plots the channels along a specified co-ordinate e.g. ‘x’. A legend is auto generated.</p>
 <dl class="field-list simple">
@@ -509,15 +534,15 @@ If xAxis is ‘r3d’, returns cumulative distance along the line in 3D using x,
 </div>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.Data.Data.predictedData">
 <em class="property">property </em><code class="sig-name descname">predictedData</code><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.predictedData" title="Permalink to this definition">¶</a></dt>
 <dd><p>The predicted data.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.Data.Data.predictedDataChannel">
-<code class="sig-name descname">predictedDataChannel</code><span class="sig-paren">(</span><em class="sig-param">channel</em>, <em class="sig-param">system=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.predictedDataChannel" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">predictedDataChannel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">channel</span></em>, <em class="sig-param"><span class="n">system</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.predictedDataChannel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the predicted data in the specified channel</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -536,22 +561,15 @@ If xAxis is ‘r3d’, returns cumulative distance along the line in 3D using x,
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="geobipy.src.classes.data.dataset.Data.Data.read">
-<code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param">fname</em>, <em class="sig-param">columnIndex</em>, <em class="sig-param">nHeaders=0</em>, <em class="sig-param">nChannels=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.read" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read the specified columns from an ascii file
-cols[0,1,2,…] should be the indices of the x,y,z co-ordinates</p>
-</dd></dl>
-
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.Data.Data.std">
 <em class="property">property </em><code class="sig-name descname">std</code><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.std" title="Permalink to this definition">¶</a></dt>
-<dd><p>The standard deviation.</p>
+<dd><p>The data.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.Data.Data.stdChannel">
-<code class="sig-name descname">stdChannel</code><span class="sig-paren">(</span><em class="sig-param">channel</em>, <em class="sig-param">system=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.stdChannel" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">stdChannel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">channel</span></em>, <em class="sig-param"><span class="n">system</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.stdChannel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the uncertainty in the specified channel</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -570,15 +588,15 @@ cols[0,1,2,…] should be the indices of the x,y,z co-ordinates</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.Data.Data.summary">
-<code class="sig-name descname">summary</code><span class="sig-paren">(</span><em class="sig-param">out=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.summary" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">summary</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">out</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.summary" title="Permalink to this definition">¶</a></dt>
 <dd><p>Display a summary of the Data</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.Data.Data.toVTK">
-<code class="sig-name descname">toVTK</code><span class="sig-paren">(</span><em class="sig-param">fileName, prop=['data', 'predicted', 'std'], system=None, format='binary'</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.toVTK" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">toVTK</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fileName</span></em>, <em class="sig-param"><span class="n">prop</span><span class="o">=</span><span class="default_value">['data', 'predicted', 'std']</span></em>, <em class="sig-param"><span class="n">system</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">format</span><span class="o">=</span><span class="default_value">'binary'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.toVTK" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save to a VTK file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -587,7 +605,8 @@ cols[0,1,2,…] should be the indices of the x,y,z co-ordinates</p>
 <li><p><strong>prop</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – List of the members to add to a VTK handle, either “data”, “predicted”, or “std”.</p></li>
 <li><p><strong>channels</strong> (<em>#</em>) – </p></li>
 <li><p><strong>Indices of the channels to plot.  All are plotted if None</strong> (<em>#</em>) – </p></li>
-<li><p><strong>* If system is None</strong><strong>, </strong><strong>0 &lt;= channel &lt; self.nChannels else 0 &lt;= channel &lt; self.nChannelsPerSystem</strong><strong>[</strong><strong>system</strong><strong>]</strong> (<em>#</em>) – </p></li>
+<li><p><strong>* If system is None</strong> (<em>#</em>) – </p></li>
+<li><p><strong>&lt;= channel &lt; self.nChannels else 0 &lt;= channel &lt; self.nChannelsPerSystem</strong><strong>[</strong><strong>system</strong><strong>]</strong> (<em>0</em>) – </p></li>
 <li><p><strong>system</strong> (<em>int</em><em>, </em><em>optional</em>) – The system to obtain the channel from.</p></li>
 <li><p><strong>format</strong> (<em>str</em><em>, </em><em>optional</em>) – “ascii” or “binary” format. Ascii is readable, binary is not but results in smaller files.</p></li>
 </ul>
@@ -595,9 +614,9 @@ cols[0,1,2,…] should be the indices of the x,y,z co-ordinates</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.Data.Data.updateErrors">
-<code class="sig-name descname">updateErrors</code><span class="sig-paren">(</span><em class="sig-param">relativeErr</em>, <em class="sig-param">additiveErr</em>, <em class="sig-param">system=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.updateErrors" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">updateErrors</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">relativeErr</span></em>, <em class="sig-param"><span class="n">additiveErr</span></em>, <em class="sig-param"><span class="n">system</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.Data.Data.updateErrors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Updates the data errors</p>
 <p>Updates the standard deviation of the data errors using the following model</p>
 <div class="math notranslate nohighlight">
@@ -640,11 +659,19 @@ cols[0,1,2,…] should be the indices of the x,y,z co-ordinates</p>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright None
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -655,7 +682,6 @@ cols[0,1,2,…] should be the indices of the x,y,z co-ordinates</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

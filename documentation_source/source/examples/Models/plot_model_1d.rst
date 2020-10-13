@@ -133,8 +133,10 @@ perturbed = mod.perturbStructure()
 
  .. code-block:: none
 
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:873: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
+      pm = ax.pcolormesh(X, Y, v, color=c, **kwargs)
 
-    <matplotlib.axes._subplots.AxesSubplot object at 0x126e16910>
+    <AxesSubplot:ylabel='Depth (m)'>
 
 
 
@@ -242,15 +244,17 @@ The proposal for the parameter values is fixed and centred around a single value
 
  .. code-block:: none
 
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("gray_r"))
+      kwargs['cmap'].set_bad(color='white')
 
-    <matplotlib.axes._subplots.AxesSubplot object at 0x126ed8b50>
+    <AxesSubplot:xlabel='Frequency', ylabel='Depth (m)'>
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.357 seconds)
+   **Total running time of the script:** ( 0 minutes  2.776 seconds)
 
 
 .. _sphx_glr_download_examples_Models_plot_model_1d.py:

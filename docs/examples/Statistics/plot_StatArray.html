@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,30 +11,34 @@
   
 
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
-
-  
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery-dataframe.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="1D Rectilinear Mesh" href="../Meshes/plot_rectilinear_mesh_1d.html" />
@@ -53,7 +56,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home"> GeoBIPy
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> GeoBIPy
           
 
           
@@ -80,6 +83,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -110,6 +114,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#data">Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#datapoints">Datapoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#posterior-analysis">Posterior Analysis</a></li>
 </ul>
 </li>
 </ul>
@@ -117,6 +122,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -155,7 +161,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../index.html">Examples</a> &raquo;</li>
         
@@ -180,7 +186,7 @@
             
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
-<p>Click <a class="reference internal" href="#sphx-glr-download-examples-statistics-plot-statarray-py"><span class="std std-ref">here</span></a> to download the full example code</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-statistics-plot-statarray-py"><span class="std std-ref">here</span></a>     to download the full example code</p>
 </div>
 <div class="sphx-glr-example-title section" id="statarray-class">
 <span id="sphx-glr-examples-statistics-plot-statarray-py"></span><h1>StatArray Class<a class="headerlink" href="#statarray-class" title="Permalink to this headline">¶</a></h1>
@@ -207,7 +213,7 @@ The name and units of the variable can be assigned to the StatArray.</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: Density
      Units: $\frac{g}{cc}$
      Shape: (1,)
-     Values: [-1.33998888]
+     Values: [0.84751261]
 </pre></div>
 </div>
 </div>
@@ -252,7 +258,7 @@ sample when we wish to perturb the variable
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: Density
      Units: $\frac{g}{cc}$
      Shape: (1,)
-     Values: [-1.33998888]
+     Values: [0.84751261]
 Prior:
      Uniform Distribution:
   Min: :-2.0
@@ -281,7 +287,7 @@ Therefore each element is evaluated to get 3 probabilities, one for each element
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>-1.4678009163054377
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>0.7433960126333516
 </pre></div>
 </div>
 <p>From a sampling stand point we can either sample using only the proposal
@@ -290,7 +296,7 @@ Or we can only generate samples that simultaneously satisfy the prior.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[-2.21061136]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[1.52368944]
 </pre></div>
 </div>
 <p>We can perturb the variable by drawing from the attached proposal distribution.</p>
@@ -302,7 +308,7 @@ Or we can only generate samples that simultaneously satisfy the prior.</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: Density
      Units: $\frac{g}{cc}$
      Shape: (1,)
-     Values: [0.51560658]
+     Values: [1.58179214]
 Prior:
      Uniform Distribution:
   Min: :-2.0
@@ -340,7 +346,7 @@ As an example, lets create a Histogram class with bins generated from the prior.
 <span class="n">Density</span><span class="o">.</span><span class="n">summaryPlot</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_StatArray_001.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_001.png" />
+<img alt="Prior, Proposal, Posterior" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_001.png" />
 </div>
 <div class="section" id="attach-a-multivariate-normal-distribution-as-the-prior-and-proposal">
 <h2>Attach a multivariate normal distribution as the prior and proposal<a class="headerlink" href="#attach-a-multivariate-normal-distribution-as-the-prior-and-proposal" title="Permalink to this headline">¶</a></h2>
@@ -357,7 +363,7 @@ This produces a single probability.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>0.37986736760586076
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>0.28297936207859936
 </pre></div>
 </div>
 <p>Attach the multivariate proposal</p>
@@ -375,14 +381,14 @@ This produces a single probability.</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: Density
      Units: $\frac{g}{cc}$
      Shape: (1,)
-     Values: [1.84988304]
+     Values: [-2.00921446]
 Prior:
      MV Normal Distribution:
-    Mean: [0.19428018]
+    Mean: [-0.47177667]
     Variance: [[1.]]
 Proposal:
 MV Normal Distribution:
-    Mean: [1.60757496]
+    Mean: [-0.92993998]
     Variance: [[1.]]
 Posterior:
 &lt;class &#39;geobipy.src.classes.statistics.Histogram1D.Histogram1D&#39;&gt;
@@ -400,7 +406,7 @@ Counts:
 Name: Frequency
      Units:
      Shape: (100,)
-     Values: [2 3 2 ... 3 2 3]
+     Values: [3 3 3 ... 2 2 2]
 Values are logged to base None
 Relative to: [0.]
 </pre></div>
@@ -649,19 +655,19 @@ All plotting functions can take matplotlib keywords</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_StatArray_002.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_002.png" />
+<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_002.png" />
 <p>We can quickly plot a bar graph.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">bar</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_StatArray_003.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_003.png" />
+<img alt="Density" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_003.png" />
 <p>We can scatter the contents of the StatArray if it is 1D</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_StatArray_004.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_004.png" />
+<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_004.png" />
 <div class="section" id="histogram-equalization">
 <h3>Histogram Equalization<a class="headerlink" href="#histogram-equalization" title="Permalink to this headline">¶</a></h3>
 <p>A neat trick with colourmaps is histogram equalization.
@@ -672,14 +678,14 @@ ends of whatever you are plotting. Just add the equalize keyword!</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">equalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_StatArray_005.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_005.png" />
+<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_005.png" />
 <p>Take the log base(x) of the data</p>
 <p>We can also take the data to a log, log10, log2, or a custom number!</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span><span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span><span class="n">log</span><span class="o">=</span><span class="s1">&#39;e&#39;</span><span class="p">)</span> <span class="c1"># could also use log=&#39;e&#39;, log=2, log=x) where x is the base you require</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_StatArray_006.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_006.png" />
+<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_006.png" />
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Values &lt;= 0.0 have been masked before taking their log
 </pre></div>
@@ -690,7 +696,7 @@ ends of whatever you are plotting. Just add the equalize keyword!</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">Time</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_StatArray_007.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_007.png" />
+<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_007.png" />
 <p>Notice that I never specified the y axis, so the y axis defaulted to the values in the StatArray.
 In this case, any operations applied to the colours, are also applied to the y axis, e.g. log=10.
 When I take the values of Density to log base 10, because I do not specify the y plotting locations, those locations are similarly affected.</p>
@@ -704,7 +710,7 @@ In the first subplot, the y axis is the same as the colourbar.</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">Time</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">Depth</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_StatArray_008.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_008.png" />
+<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_008.png" />
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Values &lt;= 0.0 have been masked before taking their log
 Values &lt;= 0.0 have been masked before taking their log
@@ -723,7 +729,7 @@ Values &lt;= 0.0 have been masked before taking their log
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">Time</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">Depth</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span><span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">sizeLegend</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">300</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_StatArray_009.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_009.png" />
+<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_009.png" />
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Values &lt;= 0.0 have been masked before taking their log
 </pre></div>
@@ -733,7 +739,7 @@ Values &lt;= 0.0 have been masked before taking their log
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">Time</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">Depth</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span><span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span><span class="n">equalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_StatArray_010.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_010.png" />
+<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_010.png" />
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Values &lt;= 0.0 have been masked before taking their log
 </pre></div>
@@ -750,9 +756,11 @@ Values &lt;= 0.0 have been masked before taking their log
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">Time</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">equalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_StatArray_011.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_011.png" />
+<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_011.png" />
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Values &lt;= 0.0 have been masked before taking their log
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:873: MatplotlibDeprecationWarning: shading=&#39;flat&#39; when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading=&#39;auto&#39;, &#39;nearest&#39; or &#39;gouraud&#39;, or set rcParams[&#39;pcolor.shading&#39;].  This will become an error two minor releases later.
+  pm = ax.pcolormesh(X, Y, v, color=c, **kwargs)
+Values &lt;= 0.0 have been masked before taking their log
 </pre></div>
 </div>
 <p>We can add grid lines, and add opacity to each element in the pcolor image</p>
@@ -765,13 +773,18 @@ Values &lt;= 0.0 have been masked before taking their log
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">a</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;jet&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_StatArray_012.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_012.png" />
+<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_012.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:873: MatplotlibDeprecationWarning: shading=&#39;flat&#39; when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading=&#39;auto&#39;, &#39;nearest&#39; or &#39;gouraud&#39;, or set rcParams[&#39;pcolor.shading&#39;].  This will become an error two minor releases later.
+  pm = ax.pcolormesh(X, Y, v, color=c, **kwargs)
+</pre></div>
+</div>
 <p>We can plot a histogram of the StatArray</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_StatArray_013.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_013.png" />
+<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_013.png" />
 <p>We can write the StatArray to a HDF5 file.  HDF5 files are binary files that can include compression.  They allow quick and easy access to parts of the file, and can also be written to and read from in parallel!</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;1Dtest.h5&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">Density</span><span class="o">.</span><span class="n">toHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
@@ -799,19 +812,19 @@ x has its own memory allocated (not a reference/pointer)?  True
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: Density
      Units: $\frac{g}{cc}$
      Shape: (50, 100)
-     Values: [[-2.45493236e-01 -1.64861253e+00  1.23704375e+00 ... -1.66984435e+00
-  -1.77325244e+00  2.29310023e+00]
- [-2.49625162e+00  1.01438115e+00  6.24105760e-01 ... -9.98185644e-01
-   1.78997046e+00 -7.80196944e-01]
- [ 2.64593221e-01 -5.14556148e-01 -1.39253497e+00 ...  7.01245846e-01
-   3.17853019e-01  1.08592347e+00]
+     Values: [[ 0.37047736 -0.33133847  0.14159148 ... -0.5989825   0.30047299
+  -1.43727745]
+ [-1.75217731 -1.21086266  0.82568977 ...  1.11993101 -0.5085164
+   0.40186801]
+ [ 0.01630801 -0.89958683 -0.64425274 ...  0.92352146  1.36951314
+  -1.86897988]
  ...
- [ 6.82178079e-01 -7.71890988e-01 -8.99816526e-01 ... -1.75402830e+00
-  -6.30568764e-01 -1.48916116e+00]
- [-3.90247992e-01 -6.89167481e-01 -2.41237585e-01 ...  1.07812192e+00
-   4.80766593e-01 -2.70245703e-02]
- [ 5.81748996e-04  8.17852892e-01  2.54221909e-01 ... -1.08116673e+00
-  -1.26094474e-02 -1.93195355e+00]]
+ [-1.38446438 -1.44644102  0.17817312 ...  0.13222284  0.9464502
+  -0.09475059]
+ [-1.47774587 -1.1286633  -1.66392586 ... -0.70960346  0.77884204
+  -0.3794167 ]
+ [-1.87787599  2.16941499  0.80081956 ...  0.04222221 -1.16760448
+   0.10288085]]
 </pre></div>
 </div>
 <p>The StatArray Class’s functions work whether it is 1D or 2D</p>
@@ -820,13 +833,18 @@ x has its own memory allocated (not a reference/pointer)?  True
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">hist</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_StatArray_014.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_014.png" />
+<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_014.png" />
 <p>And we can use pcolor to plot the 2D array</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_StatArray_015.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_015.png" />
+<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_015.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap(&quot;viridis&quot;))
+  kwargs[&#39;cmap&#39;].set_bad(color=&#39;white&#39;)
+</pre></div>
+</div>
 <p>The StatArray comes with extra plotting options</p>
 <p>Here we specify the x and y axes for the 2D array using two other 1D StatArrays</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
@@ -835,7 +853,12 @@ x has its own memory allocated (not a reference/pointer)?  True
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_StatArray_016.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_016.png" />
+<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_016.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap(&quot;viridis&quot;))
+  kwargs[&#39;cmap&#39;].set_bad(color=&#39;white&#39;)
+</pre></div>
+</div>
 <p>We can plot using a log10 scale, in this case, we have values that are less
 than or equal to 0.0.  Plotting with the log option will by default mask any
 of those values, and will let you know that it has done so!</p>
@@ -843,9 +866,11 @@ of those values, and will let you know that it has done so!</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span><span class="n">log</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_StatArray_017.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_017.png" />
+<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_017.png" />
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Values &lt;= 0.0 have been masked before taking their log
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap(&quot;viridis&quot;))
+  kwargs[&#39;cmap&#39;].set_bad(color=&#39;white&#39;)
+Values &lt;= 0.0 have been masked before taking their log
 </pre></div>
 </div>
 <p>A neat trick with colourmaps is histogram equalization.
@@ -856,15 +881,22 @@ ends of whatever you are plotting</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">equalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_StatArray_018.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_018.png" />
+<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_018.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap(&quot;viridis&quot;))
+  kwargs[&#39;cmap&#39;].set_bad(color=&#39;white&#39;)
+</pre></div>
+</div>
 <p>We can equalize the log10 plot too :)</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span><span class="n">equalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_StatArray_019.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_019.png" />
+<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_019.png" />
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Values &lt;= 0.0 have been masked before taking their log
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap(&quot;viridis&quot;))
+  kwargs[&#39;cmap&#39;].set_bad(color=&#39;white&#39;)
+Values &lt;= 0.0 have been masked before taking their log
 </pre></div>
 </div>
 <p>We can add opacity to each pixel in the image</p>
@@ -880,7 +912,12 @@ ends of whatever you are plotting</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">flipY</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_StatArray_020.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_020.png" />
+<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_020.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap(&quot;viridis&quot;))
+  kwargs[&#39;cmap&#39;].set_bad(color=&#39;white&#39;)
+</pre></div>
+</div>
 <p>If the array potentially has a lot of white space around the edges, we can trim the image</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Density</span><span class="p">[:</span><span class="mi">10</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mf">0.0</span>
 <span class="n">Density</span><span class="p">[</span><span class="o">-</span><span class="mi">10</span><span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mf">0.0</span>
@@ -893,7 +930,14 @@ ends of whatever you are plotting</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">trim</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_StatArray_021.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_021.png" />
+<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_021.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap(&quot;viridis&quot;))
+  kwargs[&#39;cmap&#39;].set_bad(color=&#39;white&#39;)
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:690: MatplotlibDeprecationWarning: shading=&#39;flat&#39; when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading=&#39;auto&#39;, &#39;nearest&#39; or &#39;gouraud&#39;, or set rcParams[&#39;pcolor.shading&#39;].  This will become an error two minor releases later.
+  pm = ax.pcolormesh(X, Y, Zm, alpha = alpha, **kwargs)
+</pre></div>
+</div>
 <p>Create a stacked area plot of a 2D StatArray</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">A</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span><span class="mi">100</span><span class="p">)),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Variable&#39;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;units&quot;</span><span class="p">)</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;x Axis&#39;</span><span class="p">,</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;mm&#39;</span><span class="p">)</span>
@@ -904,13 +948,13 @@ ends of whatever you are plotting</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">stackedAreaPlot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">i</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">s_</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">,</span><span class="s1">&#39;c&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_StatArray_022.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_022.png" />
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  3.964 seconds)</p>
+<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_022.png" />
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  4.060 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-statistics-plot-statarray-py">
-<div class="sphx-glr-download docutils container">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/53dc65a717762d4693b891c0caabbde0/plot_StatArray.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_StatArray.py</span></code></a></p>
 </div>
-<div class="sphx-glr-download docutils container">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/e43324a965564fecaa251424c676fc0e/plot_StatArray.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_StatArray.ipynb</span></code></a></p>
 </div>
 </div>
@@ -939,11 +983,19 @@ ends of whatever you are plotting</p>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright None
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -954,7 +1006,6 @@ ends of whatever you are plotting</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

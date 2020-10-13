@@ -166,8 +166,6 @@ _ = L.scatter2D();
 plt.figure(figsize=(8,6))
 _ = FD1.plot(channels=[0,11,8], log=10, linewidth=0.5);
 
-plt.show()
-
 #%%
 # Obtain a single datapoint from the data set
 # +++++++++++++++++++++++++++++++++++++++++++

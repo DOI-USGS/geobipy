@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,30 +11,34 @@
   
 
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../../../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
-
-    
-
-  
   <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../../../_static/graphviz.css" type="text/css" />
   <link rel="stylesheet" href="../../../../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/gallery-dataframe.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script src="../../../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" />
     <link rel="next" title="Mesh classes" href="../../mesh/mesh.html" />
@@ -53,7 +56,7 @@
           
 
           
-            <a href="../../../../../index.html" class="icon icon-home"> GeoBIPy
+            <a href="../../../../../index.html" class="icon icon-home" alt="Documentation Home"> GeoBIPy
           
 
           
@@ -80,6 +83,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -113,6 +117,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -151,7 +156,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../../../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../../../api.html">API</a> &raquo;</li>
         
@@ -182,15 +187,21 @@
             
   <div class="section" id="tdemdatapoint">
 <h1>TdemDataPoint<a class="headerlink" href="#tdemdatapoint" title="Permalink to this headline">¶</a></h1>
-<div class="graphviz"><img src="../../../../../_images/inheritance-8488942573932715edcd8b9408422cc7e091a156.png" alt="Inheritance diagram of geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint" usemap="#inheritance42929051d3" class="inheritance graphviz" /></div>
-<map id="inheritance42929051d3" name="inheritance42929051d3">
-<area shape="rect" id="node1" href="datapoint.html#geobipy.src.classes.data.datapoint.DataPoint.DataPoint" target="_top" title="Class defines a data point." alt="" coords="125,5,205,29"/>
-<area shape="rect" id="node3" href="EmDataPoint.html#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint" target="_top" title="Abstract EmDataPoint Class" alt="" coords="253,5,353,29"/>
-<area shape="rect" id="node2" href="../../pointcloud/Point.html#geobipy.src.classes.pointcloud.Point.Point" target="_top" title="Class defining a point in 3D Euclidean space" alt="" coords="5,5,77,29"/>
-<area shape="rect" id="node4" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint" target="_top" title="Initialize a Time domain EMData Point" alt="" coords="401,5,515,29"/>
-</map><span class="target" id="module-geobipy.src.classes.data.datapoint.TdemDataPoint"></span><dl class="class">
+digraph inheritance42929051d3 {
+bgcolor=transparent;
+rankdir=LR;
+size=&quot;8.0, 12.0&quot;;
+  &quot;DataPoint&quot; [URL=&quot;datapoint.html#geobipy.src.classes.data.datapoint.DataPoint.DataPoint&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defines a data point.&quot;];
+  &quot;Point&quot; -&gt; &quot;DataPoint&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;EmDataPoint&quot; [URL=&quot;EmDataPoint.html#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Abstract EmDataPoint Class&quot;];
+  &quot;DataPoint&quot; -&gt; &quot;EmDataPoint&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;Point&quot; [URL=&quot;../../pointcloud/Point.html#geobipy.src.classes.pointcloud.Point.Point&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defining a point in 3D Euclidean space&quot;];
+  &quot;TdemDataPoint&quot; [URL=&quot;#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Initialize a Time domain EMData Point&quot;];
+  &quot;EmDataPoint&quot; -&gt; &quot;TdemDataPoint&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+}
+<span class="target" id="module-geobipy.src.classes.data.datapoint.TdemDataPoint"></span><dl class="py class">
 <dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint">
-<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.data.datapoint.TdemDataPoint.</code><code class="sig-name descname">TdemDataPoint</code><span class="sig-paren">(</span><em class="sig-param">x=0.0, y=0.0, z=0.0, elevation=0.0, data=None, std=None, predictedData=None, system=None, T=None, R=None, loopOffset=[0.0, 0.0, 0.0], lineNumber=0.0, fiducial=0.0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.data.datapoint.TdemDataPoint.</code><code class="sig-name descname">TdemDataPoint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">y</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">z</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">elevation</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">std</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">predictedData</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">system</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">T</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">R</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">loopOffset</span><span class="o">=</span><span class="default_value">[0.0, 0.0, 0.0]</span></em>, <em class="sig-param"><span class="n">lineNumber</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">fiducial</span><span class="o">=</span><span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize a Time domain EMData Point</p>
 <p>TdemDataPoint(x, y, z, elevation, data, std, system, T, R, lineNumber, fiducial)</p>
 <dl class="field-list simple">
@@ -223,59 +234,59 @@ The arrays are vertically concatenated inside the TdemDataPoint object</p></li>
 These data are unpacked and vertically concatenated in this class.
 The parameter self._data will have length equal to the sum of the number of time gates in each system.
 The same is true for the errors, and the predicted data vector.</p>
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.createHdf">
-<code class="sig-name descname">createHdf</code><span class="sig-paren">(</span><em class="sig-param">parent</em>, <em class="sig-param">myName</em>, <em class="sig-param">withPosterior=True</em>, <em class="sig-param">nRepeats=None</em>, <em class="sig-param">fillvalue=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.createHdf" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">createHdf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="n">myName</span></em>, <em class="sig-param"><span class="n">withPosterior</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">nRepeats</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fillvalue</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.createHdf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create the hdf group metadata in file
 parent: HDF object to create a group inside
 myName: Name of the group</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.deepcopy">
 <code class="sig-name descname">deepcopy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.deepcopy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Define a deepcopy routine</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.dualMoment">
 <code class="sig-name descname">dualMoment</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.dualMoment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns True if the number of systems is &gt; 1</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.forward">
-<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">mod</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.forward" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mod</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Forward model the data from the given model</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.fromHdf">
-<code class="sig-name descname">fromHdf</code><span class="sig-paren">(</span><em class="sig-param">grp</em>, <em class="sig-param">index=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.fromHdf" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fromHdf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">grp</span></em>, <em class="sig-param"><span class="n">index</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.fromHdf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads the object from a HDF group</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.getIplotActive">
 <code class="sig-name descname">getIplotActive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.getIplotActive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the active data indices per system.  Used for plotting.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.hdfName">
 <code class="sig-name descname">hdfName</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.hdfName" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reprodicibility procedure</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.plot">
-<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param">title='Time Domain EM Data'</em>, <em class="sig-param">with_error_bars=True</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.plot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">'Time Domain EM Data'</span></em>, <em class="sig-param"><span class="n">with_error_bars</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot the Inphase and Quadrature Data for an EM measurement</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.priorProbability">
-<code class="sig-name descname">priorProbability</code><span class="sig-paren">(</span><em class="sig-param">rErr</em>, <em class="sig-param">aErr</em>, <em class="sig-param">height</em>, <em class="sig-param">calibration</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.priorProbability" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">priorProbability</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">rErr</span></em>, <em class="sig-param"><span class="n">aErr</span></em>, <em class="sig-param"><span class="n">height</span></em>, <em class="sig-param"><span class="n">calibration</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.priorProbability" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate the probability for the EM data point given the specified attached priors</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -303,9 +314,9 @@ myName: Name of the group</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.read">
-<code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param">dataFileName</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.read" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataFileName</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read in a time domain data point from a file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -320,15 +331,15 @@ myName: Name of the group</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.sensitivity">
-<code class="sig-name descname">sensitivity</code><span class="sig-paren">(</span><em class="sig-param">model</em>, <em class="sig-param">ix=None</em>, <em class="sig-param">modelChanged=True</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.sensitivity" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">sensitivity</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">ix</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">modelChanged</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.sensitivity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the sensitivty matrix for the given model</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.setPosteriors">
-<code class="sig-name descname">setPosteriors</code><span class="sig-paren">(</span><em class="sig-param">log=10</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.setPosteriors" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">setPosteriors</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">log</span><span class="o">=</span><span class="default_value">10</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.setPosteriors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the posteriors based on the attached priors</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -337,15 +348,15 @@ myName: Name of the group</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.times">
-<code class="sig-name descname">times</code><span class="sig-paren">(</span><em class="sig-param">system=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.times" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">times</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">system</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.times" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the window times in an StatArray</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.updateErrors">
-<code class="sig-name descname">updateErrors</code><span class="sig-paren">(</span><em class="sig-param">relativeErr</em>, <em class="sig-param">additiveErr</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.updateErrors" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">updateErrors</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">relativeErr</span></em>, <em class="sig-param"><span class="n">additiveErr</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.updateErrors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Updates the data errors</p>
 <p>Assumes a t^-0.5 behaviour e.g. logarithmic gate averaging
 V0 is assumed to be ln(Error &#64; 1ms)</p>
@@ -367,15 +378,15 @@ V0 is assumed to be ln(Error &#64; 1ms)</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.updateSensitivity">
-<code class="sig-name descname">updateSensitivity</code><span class="sig-paren">(</span><em class="sig-param">mod</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.updateSensitivity" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">updateSensitivity</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mod</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.updateSensitivity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute an updated sensitivity matrix using a new model based on an existing matrix</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.writeHdf">
-<code class="sig-name descname">writeHdf</code><span class="sig-paren">(</span><em class="sig-param">parent</em>, <em class="sig-param">myName</em>, <em class="sig-param">withPosterior=True</em>, <em class="sig-param">index=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.writeHdf" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">writeHdf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="n">myName</span></em>, <em class="sig-param"><span class="n">withPosterior</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">index</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint.writeHdf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write the StatArray to an HDF object
 parent: Upper hdf file or group
 myName: object hdf name. Assumes createHdf has already been called
@@ -406,11 +417,19 @@ create: optionally create the data set as well before writing</p>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright None
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -421,7 +440,6 @@ create: optionally create the data set as well before writing</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

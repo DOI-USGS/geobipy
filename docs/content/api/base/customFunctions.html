@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,30 +11,34 @@
   
 
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-
-    
-
-  
   <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery-dataframe.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="customPlots" href="customPlots.html" />
@@ -53,7 +56,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> GeoBIPy
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> GeoBIPy
           
 
           
@@ -80,6 +83,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -108,6 +112,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -146,7 +151,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../api.html">API</a> &raquo;</li>
         
@@ -173,9 +178,9 @@
             
   <div class="section" id="module-geobipy.src.base.customFunctions">
 <span id="customfunctions"></span><h1>customFunctions<a class="headerlink" href="#module-geobipy.src.base.customFunctions" title="Permalink to this headline">¶</a></h1>
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customFunctions.Ax">
-<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">Ax</code><span class="sig-paren">(</span><em class="sig-param">A</em>, <em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.Ax" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">Ax</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">A</span></em>, <em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.Ax" title="Permalink to this definition">¶</a></dt>
 <dd><p>Custom matrix vector multiplication for different representations of the matrix.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -196,9 +201,9 @@ If A is 2D, take the dot product.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customFunctions.Det">
-<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">Det</code><span class="sig-paren">(</span><em class="sig-param">A</em>, <em class="sig-param">N=1.0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.Det" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">Det</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">A</span></em>, <em class="sig-param"><span class="n">N</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.Det" title="Permalink to this definition">¶</a></dt>
 <dd><p>Custom function to compute the determinant of a matrix.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -218,9 +223,9 @@ If A is scalar: Take the number to power N, assumes A represents a diagonal matr
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customFunctions.Inv">
-<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">Inv</code><span class="sig-paren">(</span><em class="sig-param">A</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.Inv" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">Inv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">A</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.Inv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Custom matrix inversion upto 2 dimensions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -238,9 +243,9 @@ If A is 2D, invert using linalg.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customFunctions.LogDet">
-<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">LogDet</code><span class="sig-paren">(</span><em class="sig-param">A</em>, <em class="sig-param">N=1.0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.LogDet" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">LogDet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">A</span></em>, <em class="sig-param"><span class="n">N</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.LogDet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Custom function to get the natural logarithm of the determinant.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -260,15 +265,15 @@ If A is scalar: Take the number to power N, assumes A represents a diagonal matr
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customFunctions.cosSin1">
-<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">cosSin1</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">y</em>, <em class="sig-param">a</em>, <em class="sig-param">p</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.cosSin1" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">cosSin1</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">a</span></em>, <em class="sig-param"><span class="n">p</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.cosSin1" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simple function for creating tests.</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customFunctions.expReal">
-<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">expReal</code><span class="sig-paren">(</span><em class="sig-param">this</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.expReal" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">expReal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">this</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.expReal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Custom exponential of a number to allow a large negative exponent, overflow truncates without warning message.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -283,9 +288,9 @@ If A is scalar: Take the number to power N, assumes A represents a diagonal matr
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customFunctions.findFirstLastNotValue">
-<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">findFirstLastNotValue</code><span class="sig-paren">(</span><em class="sig-param">this</em>, <em class="sig-param">values</em>, <em class="sig-param">invalid_val=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.findFirstLastNotValue" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">findFirstLastNotValue</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">this</span></em>, <em class="sig-param"><span class="n">values</span></em>, <em class="sig-param"><span class="n">invalid_val</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.findFirstLastNotValue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the indices to the first and last non zero values along each axis</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -300,9 +305,9 @@ If A is scalar: Take the number to power N, assumes A represents a diagonal matr
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customFunctions.findFirstNonZeros">
-<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">findFirstNonZeros</code><span class="sig-paren">(</span><em class="sig-param">this</em>, <em class="sig-param">axis</em>, <em class="sig-param">invalid_val=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.findFirstNonZeros" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">findFirstNonZeros</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">this</span></em>, <em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">invalid_val</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.findFirstNonZeros" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the indices to the first non zero values</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -321,9 +326,9 @@ If A is scalar: Take the number to power N, assumes A represents a diagonal matr
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customFunctions.findLastNonZeros">
-<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">findLastNonZeros</code><span class="sig-paren">(</span><em class="sig-param">this</em>, <em class="sig-param">axis</em>, <em class="sig-param">invalid_val=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.findLastNonZeros" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">findLastNonZeros</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">this</span></em>, <em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">invalid_val</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.findLastNonZeros" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the indices to the last non zero values</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -342,9 +347,9 @@ If A is scalar: Take the number to power N, assumes A represents a diagonal matr
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customFunctions.findNans">
-<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">findNans</code><span class="sig-paren">(</span><em class="sig-param">this</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.findNans" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">findNans</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">this</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.findNans" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the indicies to NaN values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -359,9 +364,9 @@ If A is scalar: Take the number to power N, assumes A represents a diagonal matr
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customFunctions.findNotNans">
-<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">findNotNans</code><span class="sig-paren">(</span><em class="sig-param">this</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.findNotNans" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">findNotNans</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">this</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.findNotNans" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the indicies to non NaN values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -376,9 +381,9 @@ If A is scalar: Take the number to power N, assumes A represents a diagonal matr
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customFunctions.getName">
-<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">getName</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">default=''</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.getName" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">getName</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.getName" title="Permalink to this definition">¶</a></dt>
 <dd><p>Tries to obtain an attached name to a variable.</p>
 <p>If the variable is an object with a getName() procedure, that function will take precedence.
 If the variable does not have that procedure, a variable called name will be sought.
@@ -396,9 +401,9 @@ If this fails, the specified default will be returned.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customFunctions.getNameUnits">
-<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">getNameUnits</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">defaultName=''</em>, <em class="sig-param">defaultUnits=''</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.getNameUnits" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">getNameUnits</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">defaultName</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">defaultUnits</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.getNameUnits" title="Permalink to this definition">¶</a></dt>
 <dd><p>Tries to obtain any attached name and units to a variable. Any units are surrounded by round brackets.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -413,9 +418,9 @@ If this fails, the specified default will be returned.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customFunctions.getUnits">
-<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">getUnits</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">default=''</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.getUnits" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">getUnits</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.getUnits" title="Permalink to this definition">¶</a></dt>
 <dd><p>Tries to obtain an attached units to a variable.</p>
 <p>If the variable is an object with a getUnits() procedure, that function will take precedence.
 If the variable does not have that procedure, a variable called units will be sought.
@@ -433,9 +438,9 @@ If this fails, the specified default will be returned.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customFunctions.histogramEqualize">
-<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">histogramEqualize</code><span class="sig-paren">(</span><em class="sig-param">values</em>, <em class="sig-param">nBins=256</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.histogramEqualize" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">histogramEqualize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">values</span></em>, <em class="sig-param"><span class="n">nBins</span><span class="o">=</span><span class="default_value">256</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.histogramEqualize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Equalize the histogram of the values so that all colours have an equal amount</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -454,9 +459,9 @@ If this fails, the specified default will be returned.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customFunctions.isInt">
-<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">isInt</code><span class="sig-paren">(</span><em class="sig-param">this</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.isInt" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">isInt</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">this</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.isInt" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check whether an entry is a subtype of an int</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -471,9 +476,9 @@ If this fails, the specified default will be returned.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customFunctions.isIntorSlice">
-<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">isIntorSlice</code><span class="sig-paren">(</span><em class="sig-param">this</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.isIntorSlice" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">isIntorSlice</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">this</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.isIntorSlice" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check whether an entry is a subtype of an int or a slice</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -488,9 +493,9 @@ If this fails, the specified default will be returned.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customFunctions.isNumpy">
-<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">isNumpy</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.isNumpy" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">isNumpy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.isNumpy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Test that the variable is a compatible numpy type with built ins like .ndim</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -505,9 +510,9 @@ If this fails, the specified default will be returned.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customFunctions.mergeComplex">
-<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">mergeComplex</code><span class="sig-paren">(</span><em class="sig-param">this</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.mergeComplex" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">mergeComplex</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">this</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.mergeComplex" title="Permalink to this definition">¶</a></dt>
 <dd><p>Merge a 1D array containing a vertical concatenation of N real then N imaginary components   into an N/2 complex 1D array.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -522,15 +527,15 @@ If this fails, the specified default will be returned.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customFunctions.rosenbrock">
-<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">rosenbrock</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">y</em>, <em class="sig-param">a</em>, <em class="sig-param">b</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.rosenbrock" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">rosenbrock</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">a</span></em>, <em class="sig-param"><span class="n">b</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.rosenbrock" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates values from the Rosenbrock function.</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customFunctions.splitComplex">
-<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">splitComplex</code><span class="sig-paren">(</span><em class="sig-param">this</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.splitComplex" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">splitComplex</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">this</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.splitComplex" title="Permalink to this definition">¶</a></dt>
 <dd><p>Splits a vector of complex numbers into a vertical concatenation of the real and imaginary components.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -545,9 +550,9 @@ If this fails, the specified default will be returned.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customFunctions.str_to_raw">
-<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">str_to_raw</code><span class="sig-paren">(</span><em class="sig-param">s</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.str_to_raw" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">str_to_raw</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">s</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.str_to_raw" title="Permalink to this definition">¶</a></dt>
 <dd><p>Helper function for latex</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -562,15 +567,15 @@ If this fails, the specified default will be returned.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customFunctions.tanh">
-<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">tanh</code><span class="sig-paren">(</span><em class="sig-param">this</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.tanh" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">tanh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">this</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.tanh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Custom hyperbolic tangent, return correct overflow.</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customFunctions.trim_by_percentile">
-<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">trim_by_percentile</code><span class="sig-paren">(</span><em class="sig-param">values</em>, <em class="sig-param">percent</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.trim_by_percentile" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customFunctions.</code><code class="sig-name descname">trim_by_percentile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">values</span></em>, <em class="sig-param"><span class="n">percent</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customFunctions.trim_by_percentile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Trim an array by a given percentile from either end</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -610,11 +615,19 @@ If this fails, the specified default will be returned.</p>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright None
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -625,7 +638,6 @@ If this fails, the specified default will be returned.</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

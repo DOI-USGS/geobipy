@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,30 +11,34 @@
   
 
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
-
-    
-
-  
   <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
   <link rel="stylesheet" href="../../../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/gallery-dataframe.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
     <link rel="next" title="Pointcloud classes" href="../pointcloud/pointcloud.html" />
@@ -53,7 +56,7 @@
           
 
           
-            <a href="../../../../index.html" class="icon icon-home"> GeoBIPy
+            <a href="../../../../index.html" class="icon icon-home" alt="Documentation Home"> GeoBIPy
           
 
           
@@ -80,6 +83,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -113,6 +117,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -151,7 +156,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../../api.html">API</a> &raquo;</li>
         
@@ -180,16 +185,21 @@
             
   <div class="section" id="model1d">
 <h1>Model1D<a class="headerlink" href="#model1d" title="Permalink to this headline">¶</a></h1>
-<div class="graphviz"><img src="../../../../_images/inheritance-a96e45ea8b9143901b60fd92b27ebeaaf5a6e71b.png" alt="Inheritance diagram of geobipy.src.classes.model.Model1D" usemap="#inheritance0303cabe1d" class="inheritance graphviz" /></div>
-<map id="inheritance0303cabe1d" name="inheritance0303cabe1d">
-<area shape="rect" id="node1" href="Model_.html#geobipy.src.classes.model.Model.Model" target="_top" title="Abstract Model Class" alt="" coords="131,5,203,29"/>
-<area shape="rect" id="node3" href="#geobipy.src.classes.model.Model1D.Model1D" target="_top" title="Class extension to geobipy.Model" alt="" coords="251,5,326,29"/>
-<area shape="rect" id="node2" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="5,5,83,29"/>
-</map><span class="target" id="module-geobipy.src.classes.model.Model1D"></span><p>&#64;Model1D_Class
+digraph inheritance0303cabe1d {
+bgcolor=transparent;
+rankdir=LR;
+size=&quot;8.0, 12.0&quot;;
+  &quot;Model&quot; [URL=&quot;Model_.html#geobipy.src.classes.model.Model.Model&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Abstract Model Class&quot;];
+  &quot;myObject&quot; -&gt; &quot;Model&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;Model1D&quot; [URL=&quot;#geobipy.src.classes.model.Model1D.Model1D&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class extension to geobipy.Model&quot;];
+  &quot;Model&quot; -&gt; &quot;Model1D&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;myObject&quot; [URL=&quot;../core/myObject.html#geobipy.src.classes.core.myObject.myObject&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Abstract base class&quot;];
+}
+<span class="target" id="module-geobipy.src.classes.model.Model1D"></span><p>&#64;Model1D_Class
 Module describing a 1 Dimensional layered Model</p>
-<dl class="class">
+<dl class="py class">
 <dt id="geobipy.src.classes.model.Model1D.Model1D">
-<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.model.Model1D.</code><code class="sig-name descname">Model1D</code><span class="sig-paren">(</span><em class="sig-param">nCells=None</em>, <em class="sig-param">top=None</em>, <em class="sig-param">parameters=None</em>, <em class="sig-param">depth=None</em>, <em class="sig-param">thickness=None</em>, <em class="sig-param">hasHalfspace=True</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.model.Model1D.</code><code class="sig-name descname">Model1D</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">nCells</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">top</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">parameters</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">depth</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">thickness</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">hasHalfspace</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class extension to geobipy.Model</p>
 <p>Class creates a representation of the 1D layered earth.
 The class contains parameters that describe the physical property of each layer, as well as the layer
@@ -223,9 +233,9 @@ randomly create, delete, or perturb the layers in the model.  This is a key step
 </ul>
 </dd>
 </dl>
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.addToHitMap">
-<code class="sig-name descname">addToHitMap</code><span class="sig-paren">(</span><em class="sig-param">Hitmap</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.addToHitMap" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">addToHitMap</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Hitmap</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.addToHitMap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Imposes a model’s parameters with depth onto a 2D Hitmap.</p>
 <p>The cells that the parameter-depth profile passes through are accumulated by 1.</p>
 <dl class="field-list simple">
@@ -235,9 +245,9 @@ randomly create, delete, or perturb the layers in the model.  This is a key step
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.asHistogram2D">
-<code class="sig-name descname">asHistogram2D</code><span class="sig-paren">(</span><em class="sig-param">variance</em>, <em class="sig-param">Hist</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.asHistogram2D" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">asHistogram2D</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">variance</span></em>, <em class="sig-param"><span class="n">Hist</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.asHistogram2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a Hitmap from the model given the variance of each layer.</p>
 <p>For each depth, creates a normal distribution with a mean equal to the interpolated parameter
 at that depth and variance specified with variance.</p>
@@ -252,9 +262,9 @@ Must be instantiated before calling so that the model can be interpolated correc
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.createHdf">
-<code class="sig-name descname">createHdf</code><span class="sig-paren">(</span><em class="sig-param">parent</em>, <em class="sig-param">myName</em>, <em class="sig-param">withPosterior=True</em>, <em class="sig-param">nRepeats=None</em>, <em class="sig-param">fillvalue=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.createHdf" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">createHdf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="n">myName</span></em>, <em class="sig-param"><span class="n">withPosterior</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">nRepeats</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fillvalue</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.createHdf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create the Metadata for a Model1D in a HDF file</p>
 <p>Creates a new group in a HDF file under h5obj.
 A nested heirarchy will be created.
@@ -282,26 +292,26 @@ Given 10 MPI ranks, each with a 10 length array, it is faster to create a 10x10 
 and have each rank write its row. Rather than creating 10 separate length 10 arrays because
 the overhead when creating the file metadata can become very cumbersome if done too many times.</p>
 <p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">Model1D</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">Model1D</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">h5py</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">world</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">world</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create a holder for models in memory with more layers than you will expect.</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">tmp</span> <span class="o">=</span> <span class="n">Model1D</span><span class="p">(</span><span class="n">nCells</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># This is a collective open of data in the file</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># This is a collective open of data in the file</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">fName</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s1">&#39;mpio&#39;</span><span class="p">,</span><span class="n">comm</span><span class="o">=</span><span class="n">world</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Collective creation of space(padded by number of mpi ranks)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">tmp</span><span class="o">.</span><span class="n">createHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;models&#39;</span><span class="p">,</span> <span class="n">nRepeats</span><span class="o">=</span><span class="n">world</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">world</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">world</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># In a non collective region, we can write to different sections of x in the file</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># In a non collective region, we can write to different sections of x in the file</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Fake a non collective region</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">noncollectivewrite</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">world</span><span class="p">):</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="c1"># Each rank carries out this code, but it&#39;s not collective.</span>
@@ -309,13 +319,13 @@ the overhead when creating the file metadata can become very cumbersome if done 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">noncollectivewrite</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">world</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">world</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">world</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.deepcopy">
 <code class="sig-name descname">deepcopy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.deepcopy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a deepcopy</p>
@@ -329,9 +339,9 @@ the overhead when creating the file metadata can become very cumbersome if done 
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.deleteLayer">
-<code class="sig-name descname">deleteLayer</code><span class="sig-paren">(</span><em class="sig-param">i</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.deleteLayer" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">deleteLayer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.deleteLayer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove a layer from the model</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -346,15 +356,15 @@ the overhead when creating the file metadata can become very cumbersome if done 
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.depthFromThickness">
 <code class="sig-name descname">depthFromThickness</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.depthFromThickness" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given the thicknesses of each layer, create the depths to each interface. The last depth is inf for the halfspace.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.evaluateHitmapPrior">
-<code class="sig-name descname">evaluateHitmapPrior</code><span class="sig-paren">(</span><em class="sig-param">Hitmap</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.evaluateHitmapPrior" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">evaluateHitmapPrior</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Hitmap</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.evaluateHitmapPrior" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluates the model parameters against a hitmap.</p>
 <p>Given a Hitmap describing the probability of the parameters with depth, evaluate the current model using the grid cells it passes through.</p>
 <dl class="field-list simple">
@@ -370,9 +380,9 @@ the overhead when creating the file metadata can become very cumbersome if done 
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.fromHdf">
-<code class="sig-name descname">fromHdf</code><span class="sig-paren">(</span><em class="sig-param">grp</em>, <em class="sig-param">index=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.fromHdf" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fromHdf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">grp</span></em>, <em class="sig-param"><span class="n">index</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.fromHdf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read the class from a HDF group</p>
 <p>Given the HDF group object, read the contents into an Model1D class.</p>
 <dl class="field-list simple">
@@ -385,9 +395,9 @@ the overhead when creating the file metadata can become very cumbersome if done 
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.getParMeshXIndex">
-<code class="sig-name descname">getParMeshXIndex</code><span class="sig-paren">(</span><em class="sig-param">mesh</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.getParMeshXIndex" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">getParMeshXIndex</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mesh</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.getParMeshXIndex" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interpolate the model parameters to a 2D rectilinear mesh.</p>
 <p>Uses piece wise constant interpolation of the parameter-depth profile to the y axis of the mesh.
 Then the indices into the mesh x axis for those interpolated values are returned.</p>
@@ -404,9 +414,9 @@ Then the indices into the mesh x axis for those interpolated values are returned
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.gradientProbability">
-<code class="sig-name descname">gradientProbability</code><span class="sig-paren">(</span><em class="sig-param">log=True</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.gradientProbability" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">gradientProbability</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">log</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.gradientProbability" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate the prior for the gradient of the parameter with depth</p>
 <p><strong>Prior on the gradient of the physical parameter with depth</strong></p>
 <p>If instead we wish to apply a multivariate normal distribution to the gradient of the parameter with depth we get</p>
@@ -432,7 +442,7 @@ Then the indices into the mesh x axis for those interpolated values are returned
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.hdfName">
 <code class="sig-name descname">hdfName</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.hdfName" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a string that describes class instantiation</p>
@@ -449,9 +459,9 @@ and then reading the hdf contents via the object’s methods.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.insertLayer">
-<code class="sig-name descname">insertLayer</code><span class="sig-paren">(</span><em class="sig-param">z</em>, <em class="sig-param">par=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.insertLayer" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">insertLayer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">z</span></em>, <em class="sig-param"><span class="n">par</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.insertLayer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Insert a new layer into a model at a given depth</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -470,9 +480,9 @@ If None, The value of the split layer is duplicated.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.interpPar2Mesh">
-<code class="sig-name descname">interpPar2Mesh</code><span class="sig-paren">(</span><em class="sig-param">par</em>, <em class="sig-param">mesh</em>, <em class="sig-param">matchTop=False</em>, <em class="sig-param">bound=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.interpPar2Mesh" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">interpPar2Mesh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">par</span></em>, <em class="sig-param"><span class="n">mesh</span></em>, <em class="sig-param"><span class="n">matchTop</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">bound</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.interpPar2Mesh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interpolate the model parameters to a 2D rectilinear mesh.</p>
 <p>Uses piece wise constant interpolation of the parameter-depth profile to the y axis of the mesh.</p>
 <dl class="field-list simple">
@@ -493,9 +503,9 @@ If None, The value of the split layer is duplicated.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.isInsideConfidence">
-<code class="sig-name descname">isInsideConfidence</code><span class="sig-paren">(</span><em class="sig-param">Hitmap</em>, <em class="sig-param">percent=95.0</em>, <em class="sig-param">log=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.isInsideConfidence" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">isInsideConfidence</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Hitmap</span></em>, <em class="sig-param"><span class="n">percent</span><span class="o">=</span><span class="default_value">95.0</span></em>, <em class="sig-param"><span class="n">log</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.isInsideConfidence" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check that the model is insde the specified confidence region of a 2D hitmap</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -514,9 +524,9 @@ If None, The value of the split layer is duplicated.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.localParameterVariance">
-<code class="sig-name descname">localParameterVariance</code><span class="sig-paren">(</span><em class="sig-param">dataPoint=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.localParameterVariance" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">localParameterVariance</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataPoint</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.localParameterVariance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a localized inverse Hessian matrix using a dataPoint and the current realization of the Model1D.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -532,9 +542,9 @@ If None, only the prior derivative is used.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.pad">
-<code class="sig-name descname">pad</code><span class="sig-paren">(</span><em class="sig-param">size</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.pad" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">pad</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.pad" title="Permalink to this definition">¶</a></dt>
 <dd><p>Copies the properties of a model including all priors or proposals, but pads memory to the given size</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -549,9 +559,9 @@ If None, only the prior derivative is used.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.pcolor">
-<code class="sig-name descname">pcolor</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.pcolor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">pcolor</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.pcolor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a pseudocolour plot of the 1D Model.</p>
 <p>Can take any other matplotlib arguments and keyword arguments e.g. cmap etc.</p>
 <dl class="field-list simple">
@@ -588,9 +598,9 @@ Values in c that are &lt;= 0 are masked.</p></li>
 </div>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.perturb">
-<code class="sig-name descname">perturb</code><span class="sig-paren">(</span><em class="sig-param">datapoint=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.perturb" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">perturb</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">datapoint</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.perturb" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perturb a model’s structure and parameter values.</p>
 <p>Uses a stochastic newtown approach if a datapoint is provided.
 Otherwise, uses the existing proposal distribution attached to
@@ -609,7 +619,7 @@ self.par to generate new values.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.perturbStructure">
 <code class="sig-name descname">perturbStructure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.perturbStructure" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perturb a model</p>
@@ -641,9 +651,9 @@ such that a death, or no change is possible thus preventing any neverending cycl
 </div>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.plot">
-<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.plot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots a 1D model parameters as a line against depth</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -659,9 +669,9 @@ such that a death, or no change is possible thus preventing any neverending cycl
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.priorProbability">
-<code class="sig-name descname">priorProbability</code><span class="sig-paren">(</span><em class="sig-param">pPrior</em>, <em class="sig-param">gPrior</em>, <em class="sig-param">log=True</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.priorProbability" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">priorProbability</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pPrior</span></em>, <em class="sig-param"><span class="n">gPrior</span></em>, <em class="sig-param"><span class="n">log</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.priorProbability" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate the prior probability for the 1D Model.</p>
 <p>The following equation describes the components of the prior that correspond to the Model1D,</p>
 <div class="math notranslate nohighlight">
@@ -715,9 +725,9 @@ such that a death, or no change is possible thus preventing any neverending cycl
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.proposalProbabilities">
-<code class="sig-name descname">proposalProbabilities</code><span class="sig-paren">(</span><em class="sig-param">remappedModel</em>, <em class="sig-param">dataPoint=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.proposalProbabilities" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">proposalProbabilities</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">remappedModel</span></em>, <em class="sig-param"><span class="n">dataPoint</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.proposalProbabilities" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the forward and reverse proposal probabilities for the model</p>
 <p>Returns the denominator and numerator for the model’s components of the proposal ratio.</p>
 <div class="math notranslate nohighlight" id="equation-proposal-numerator">
@@ -743,9 +753,9 @@ such that a death, or no change is possible thus preventing any neverending cycl
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.setPriors">
-<code class="sig-name descname">setPriors</code><span class="sig-paren">(</span><em class="sig-param">halfSpaceValue</em>, <em class="sig-param">minDepth</em>, <em class="sig-param">maxDepth</em>, <em class="sig-param">maxLayers</em>, <em class="sig-param">parameterPrior</em>, <em class="sig-param">gradientPrior</em>, <em class="sig-param">parameterLimits=None</em>, <em class="sig-param">minThickness=None</em>, <em class="sig-param">factor=10.0</em>, <em class="sig-param">dzVariance=1.5</em>, <em class="sig-param">prng=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.setPriors" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">setPriors</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">halfSpaceValue</span></em>, <em class="sig-param"><span class="n">minDepth</span></em>, <em class="sig-param"><span class="n">maxDepth</span></em>, <em class="sig-param"><span class="n">maxLayers</span></em>, <em class="sig-param"><span class="n">parameterPrior</span></em>, <em class="sig-param"><span class="n">gradientPrior</span></em>, <em class="sig-param"><span class="n">parameterLimits</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">minThickness</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">factor</span><span class="o">=</span><span class="default_value">10.0</span></em>, <em class="sig-param"><span class="n">dzVariance</span><span class="o">=</span><span class="default_value">1.5</span></em>, <em class="sig-param"><span class="n">prng</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.setPriors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Setup the priors of a 1D model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -772,9 +782,9 @@ such that a death, or no change is possible thus preventing any neverending cycl
 </div>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.setProposals">
-<code class="sig-name descname">setProposals</code><span class="sig-paren">(</span><em class="sig-param">probabilities</em>, <em class="sig-param">parameterProposal</em>, <em class="sig-param">prng=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.setProposals" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">setProposals</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">probabilities</span></em>, <em class="sig-param"><span class="n">parameterProposal</span></em>, <em class="sig-param"><span class="n">prng</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.setProposals" title="Permalink to this definition">¶</a></dt>
 <dd><p>Setup the proposals of a 1D model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -796,21 +806,21 @@ e.g. pWheel = [0.5, 0.25, 0.15, 0.1]</p></li>
 </div>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.summary">
-<code class="sig-name descname">summary</code><span class="sig-paren">(</span><em class="sig-param">out=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.summary" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">summary</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">out</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.summary" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write a summary of the 1D model</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.thicknessFromDepth">
 <code class="sig-name descname">thicknessFromDepth</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.thicknessFromDepth" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given the depths to each interface, compute the layer thicknesses. The last thickness is nan for the halfspace.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.toHdf">
-<code class="sig-name descname">toHdf</code><span class="sig-paren">(</span><em class="sig-param">hObj</em>, <em class="sig-param">myName</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.toHdf" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">toHdf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">hObj</span></em>, <em class="sig-param"><span class="n">myName</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.toHdf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write the Model1D to an HDF object</p>
 <p>Creates and writes a new group in a HDF file under h5obj.
 A nested heirarchy will be created.
@@ -825,7 +835,7 @@ should not be used in a parallel environment.</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">Model1D</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">h5py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">par</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.10</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="s2">&quot;Test&quot;</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">)</span>
@@ -835,15 +845,15 @@ should not be used in a parallel environment.</p>
 </div>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.unperturb">
 <code class="sig-name descname">unperturb</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.unperturb" title="Permalink to this definition">¶</a></dt>
 <dd><p>After a model has had its structure perturbed, remap the model back its previous state. Used for the reversible jump McMC step.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.updateLocalParameterVariance">
-<code class="sig-name descname">updateLocalParameterVariance</code><span class="sig-paren">(</span><em class="sig-param">dataPoint=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.updateLocalParameterVariance" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">updateLocalParameterVariance</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataPoint</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.updateLocalParameterVariance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a localized Hessian matrix using
 a dataPoint and the current realization of the Model1D.</p>
 <dl class="field-list simple">
@@ -859,9 +869,9 @@ a dataPoint and the current realization of the Model1D.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.updatePosteriors">
-<code class="sig-name descname">updatePosteriors</code><span class="sig-paren">(</span><em class="sig-param">minimumRatio=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.updatePosteriors" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">updatePosteriors</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">minimumRatio</span><span class="o">=</span><span class="default_value">0.5</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.updatePosteriors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update any attached posterior distributions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -871,9 +881,9 @@ is greater than this number.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.model.Model1D.Model1D.writeHdf">
-<code class="sig-name descname">writeHdf</code><span class="sig-paren">(</span><em class="sig-param">h5obj</em>, <em class="sig-param">myName</em>, <em class="sig-param">withPosterior=True</em>, <em class="sig-param">index=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.writeHdf" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">writeHdf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">h5obj</span></em>, <em class="sig-param"><span class="n">myName</span></em>, <em class="sig-param"><span class="n">withPosterior</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">index</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.writeHdf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create the Metadata for a Model1D in a HDF file</p>
 <p>Creates a new group in a HDF file under h5obj.
 A nested heirarchy will be created.
@@ -896,26 +906,26 @@ Given 10 MPI ranks, each with a 10 length array, it is faster to create a 10x10 
 Rather than creating 10 separate length 10 arrays because the overhead when creating the file metadata can become very
 cumbersome if done too many times.</p>
 <p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">Model1D</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">Model1D</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">h5py</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">world</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">world</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create a holder for models in memory with more layers than you will expect.</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">tmp</span> <span class="o">=</span> <span class="n">Model1D</span><span class="p">(</span><span class="n">nCells</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># This is a collective open of data in the file</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># This is a collective open of data in the file</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">fName</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s1">&#39;mpio&#39;</span><span class="p">,</span><span class="n">comm</span><span class="o">=</span><span class="n">world</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Collective creation of space(padded by number of mpi ranks)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">tmp</span><span class="o">.</span><span class="n">createHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;models&#39;</span><span class="p">,</span> <span class="n">nRepeats</span><span class="o">=</span><span class="n">world</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">world</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">world</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># In a non collective region, we can write to different sections of x in the file</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># In a non collective region, we can write to different sections of x in the file</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Fake a non collective region</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">noncollectivewrite</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">world</span><span class="p">):</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="c1"># Each rank carries out this code, but it&#39;s not collective.</span>
@@ -923,7 +933,7 @@ cumbersome if done too many times.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">noncollectivewrite</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">world</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">world</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">world</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -953,11 +963,19 @@ cumbersome if done too many times.</p>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright None
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -968,7 +986,6 @@ cumbersome if done too many times.</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,30 +11,34 @@
   
 
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
-
-    
-
-  
   <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
   <link rel="stylesheet" href="../../../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/gallery-dataframe.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
     <link rel="next" title="Model classes" href="../model/model.html" />
@@ -53,7 +56,7 @@
           
 
           
-            <a href="../../../../index.html" class="icon icon-home"> GeoBIPy
+            <a href="../../../../index.html" class="icon icon-home" alt="Documentation Home"> GeoBIPy
           
 
           
@@ -80,6 +83,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -114,6 +118,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -152,7 +157,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../../api.html">API</a> &raquo;</li>
         
@@ -181,16 +186,21 @@
             
   <div class="section" id="toporectilinearmesh2d">
 <h1>TopoRectilinearMesh2D<a class="headerlink" href="#toporectilinearmesh2d" title="Permalink to this headline">¶</a></h1>
-<div class="graphviz"><img src="../../../../_images/inheritance-cd0c778a0a3f03539080c36ef6a61a9f05409316.png" alt="Inheritance diagram of geobipy.src.classes.mesh.TopoRectilinearMesh2D" usemap="#inheritance04c33b28ae" class="inheritance graphviz" /></div>
-<map id="inheritance04c33b28ae" name="inheritance04c33b28ae">
-<area shape="rect" id="node1" href="RectilinearMesh2D.html#geobipy.src.classes.mesh.RectilinearMesh2D.RectilinearMesh2D" target="_top" title="Class defining a 2D rectilinear mesh with cell centres and edges." alt="" coords="131,5,265,29"/>
-<area shape="rect" id="node3" href="#geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D" target="_top" title="Class defining a 2D rectilinear mesh with cell centres and edges and an upper surface that is draped along" alt="" coords="313,5,476,29"/>
-<area shape="rect" id="node2" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="5,5,83,29"/>
-</map><span class="target" id="module-geobipy.src.classes.mesh.TopoRectilinearMesh2D"></span><p>&#64;TopoRectilinearMesh2D_Class
+digraph inheritance04c33b28ae {
+bgcolor=transparent;
+rankdir=LR;
+size=&quot;8.0, 12.0&quot;;
+  &quot;RectilinearMesh2D&quot; [URL=&quot;RectilinearMesh2D.html#geobipy.src.classes.mesh.RectilinearMesh2D.RectilinearMesh2D&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defining a 2D rectilinear mesh with cell centres and edges.&quot;];
+  &quot;myObject&quot; -&gt; &quot;RectilinearMesh2D&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;TopoRectilinearMesh2D&quot; [URL=&quot;#geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defining a 2D rectilinear mesh with cell centres and edges and an upper surface that is draped along&quot;];
+  &quot;RectilinearMesh2D&quot; -&gt; &quot;TopoRectilinearMesh2D&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;myObject&quot; [URL=&quot;../core/myObject.html#geobipy.src.classes.core.myObject.myObject&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Abstract base class&quot;];
+}
+<span class="target" id="module-geobipy.src.classes.mesh.TopoRectilinearMesh2D"></span><p>&#64;TopoRectilinearMesh2D_Class
 Module describing a 2D Rectilinear Mesh class with x and y axes specified.  The upper surface of the mesh can be draped.</p>
-<dl class="class">
+<dl class="py class">
 <dt id="geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D">
-<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.mesh.TopoRectilinearMesh2D.</code><code class="sig-name descname">TopoRectilinearMesh2D</code><span class="sig-paren">(</span><em class="sig-param">xCentres=None</em>, <em class="sig-param">xEdges=None</em>, <em class="sig-param">yCentres=None</em>, <em class="sig-param">yEdges=None</em>, <em class="sig-param">zCentres=None</em>, <em class="sig-param">zEdges=None</em>, <em class="sig-param">heightCentres=None</em>, <em class="sig-param">heightEdges=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.mesh.TopoRectilinearMesh2D.</code><code class="sig-name descname">TopoRectilinearMesh2D</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xCentres</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">xEdges</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">yCentres</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">yEdges</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">zCentres</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">zEdges</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">heightCentres</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">heightEdges</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class defining a 2D rectilinear mesh with cell centres and edges and an upper surface that is draped along
 an elevation profile.</p>
 <p>Contains a simple 2D mesh with cell edges, widths, and centre locations.
@@ -222,9 +232,9 @@ The cell locations in z are then added to the height profile.</p>
 <dd class="field-odd"><p><a class="reference internal" href="#geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D" title="geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D">TopoRectilinearMesh2D</a></p>
 </dd>
 </dl>
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D.pcolor">
-<code class="sig-name descname">pcolor</code><span class="sig-paren">(</span><em class="sig-param">values</em>, <em class="sig-param">xAxis='x'</em>, <em class="sig-param">zAxis='absolute'</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D.pcolor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">pcolor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">values</span></em>, <em class="sig-param"><span class="n">xAxis</span><span class="o">=</span><span class="default_value">'x'</span></em>, <em class="sig-param"><span class="n">zAxis</span><span class="o">=</span><span class="default_value">'absolute'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D.pcolor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a pseudocolour plot of a 2D array using the mesh.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -270,19 +280,19 @@ Values in c that are &lt;= 0 are masked.</p></li>
 </div>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D.plotGrid">
-<code class="sig-name descname">plotGrid</code><span class="sig-paren">(</span><em class="sig-param">xAxis='x'</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D.plotGrid" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">plotGrid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xAxis</span><span class="o">=</span><span class="default_value">'x'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D.plotGrid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot the grid lines of the mesh.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D.plotHeight">
-<code class="sig-name descname">plotHeight</code><span class="sig-paren">(</span><em class="sig-param">xAxis='x'</em>, <em class="sig-param">centres=False</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D.plotHeight" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">plotHeight</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xAxis</span><span class="o">=</span><span class="default_value">'x'</span></em>, <em class="sig-param"><span class="n">centres</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D.plotHeight" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot the height of the mesh as a line.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D.vtkStructure">
 <code class="sig-name descname">vtkStructure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D.vtkStructure" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates a vtk mesh structure that can be used in a vtk file.</p>
@@ -296,9 +306,9 @@ Values in c that are &lt;= 0 are masked.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D.xMesh">
-<code class="sig-name descname">xMesh</code><span class="sig-paren">(</span><em class="sig-param">xAxis='x'</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D.xMesh" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">xMesh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xAxis</span><span class="o">=</span><span class="default_value">'x'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D.xMesh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates an array suitable for plt.pcolormesh for the abscissa.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -309,9 +319,9 @@ If xAxis is ‘r’, the horizontal xAxis uses cumulative distance along the lin
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D.zMesh">
-<code class="sig-name descname">zMesh</code><span class="sig-paren">(</span><em class="sig-param">zAxis='absolute'</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D.zMesh" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">zMesh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">zAxis</span><span class="o">=</span><span class="default_value">'absolute'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.TopoRectilinearMesh2D.TopoRectilinearMesh2D.zMesh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates an array suitable for plt.pcolormesh for the ordinate</p>
 </dd></dl>
 
@@ -339,11 +349,19 @@ If xAxis is ‘r’, the horizontal xAxis uses cumulative distance along the lin
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright None
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -354,7 +372,6 @@ If xAxis is ‘r’, the horizontal xAxis uses cumulative distance along the lin
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

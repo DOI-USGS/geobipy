@@ -103,7 +103,7 @@ Get the median, and 95% confidence values
 
  .. code-block:: none
 
-    (-0.030000000000000027, -1.6500000000000001, 1.65)
+    (-0.030000000000000027, -1.71, 1.5299999999999998)
 
 
 
@@ -260,6 +260,15 @@ We can plot the histogram as a pcolor plot
     :class: sphx-glr-single-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:873: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
+      pm = ax.pcolormesh(X, Y, v, color=c, **kwargs)
+
 
 
 
@@ -372,7 +381,7 @@ The update takes in the numbers in linear space and takes their log=10
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.748 seconds)
+   **Total running time of the script:** ( 0 minutes  0.834 seconds)
 
 
 .. _sphx_glr_download_examples_Statistics_plot_histogram_1d.py:

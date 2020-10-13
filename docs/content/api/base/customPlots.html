@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,30 +11,34 @@
   
 
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-
-    
-
-  
   <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery-dataframe.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="fileIO" href="fileIO.html" />
@@ -53,7 +56,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> GeoBIPy
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> GeoBIPy
           
 
           
@@ -80,6 +83,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -108,6 +112,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -146,7 +151,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../api.html">API</a> &raquo;</li>
         
@@ -173,9 +178,9 @@
             
   <div class="section" id="module-geobipy.src.base.customPlots">
 <span id="customplots"></span><h1>customPlots<a class="headerlink" href="#module-geobipy.src.base.customPlots" title="Permalink to this headline">¶</a></h1>
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customPlots.bar">
-<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">bar</code><span class="sig-paren">(</span><em class="sig-param">values</em>, <em class="sig-param">x=None</em>, <em class="sig-param">i=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.bar" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">bar</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">values</span></em>, <em class="sig-param"><span class="n">x</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">i</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.bar" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot a bar chart.</p>
 <p>Plots a bar chart and auto labels it if x and values have type geobipy.StatArray</p>
 <dl class="field-list simple">
@@ -202,9 +207,9 @@
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customPlots.clabel">
-<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">clabel</code><span class="sig-paren">(</span><em class="sig-param">cb</em>, <em class="sig-param">label</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.clabel" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">clabel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cb</span></em>, <em class="sig-param"><span class="n">label</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.clabel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a colourbar label with default fontsizes</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -216,9 +221,9 @@
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customPlots.hist">
-<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">hist</code><span class="sig-paren">(</span><em class="sig-param">counts</em>, <em class="sig-param">bins</em>, <em class="sig-param">rotate=False</em>, <em class="sig-param">flipX=False</em>, <em class="sig-param">flipY=False</em>, <em class="sig-param">trim=True</em>, <em class="sig-param">normalize=False</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.hist" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">hist</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">counts</span></em>, <em class="sig-param"><span class="n">bins</span></em>, <em class="sig-param"><span class="n">rotate</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">flipX</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">flipY</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">trim</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">normalize</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.hist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot a histogram.</p>
 <p>Plot of histogram of values, if density is 1, a normal is fit to the values.
 If values is an StatArray, the axes are automatically labelled.</p>
@@ -254,9 +259,9 @@ Values in c that are &lt;= 0 are masked.</p></li>
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customPlots.make_colourmap">
-<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">make_colourmap</code><span class="sig-paren">(</span><em class="sig-param">seq</em>, <em class="sig-param">cname</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.make_colourmap" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">make_colourmap</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">seq</span></em>, <em class="sig-param"><span class="n">cname</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.make_colourmap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a Linear Segmented colourmap</p>
 <p>Generates a colourmap from the sequence given and registers the colourmap with matplotlib.</p>
 <dl class="field-list simple">
@@ -275,9 +280,9 @@ Values in c that are &lt;= 0 are masked.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customPlots.pause">
-<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">pause</code><span class="sig-paren">(</span><em class="sig-param">interval</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.pause" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">pause</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">interval</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.pause" title="Permalink to this definition">¶</a></dt>
 <dd><p>Custom pause command to override matplotlib.pyplot.pause
 which keeps the figure on top of all others when using interactve mode.</p>
 <dl class="field-list simple">
@@ -287,9 +292,9 @@ which keeps the figure on top of all others when using interactve mode.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customPlots.pcolor">
-<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">pcolor</code><span class="sig-paren">(</span><em class="sig-param">values</em>, <em class="sig-param">x=None</em>, <em class="sig-param">y=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.pcolor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">pcolor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">values</span></em>, <em class="sig-param"><span class="n">x</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">y</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.pcolor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a pseudocolour plot of a 2D array, Actually uses pcolormesh for speed.</p>
 <p>Create a colour plot of a 2D array.
 If the arrays x, y, and values are geobipy.StatArray classes, the axes can be automatically labelled.
@@ -341,9 +346,9 @@ If classes is provided, alpha is ignored if provided.</p></li>
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customPlots.pcolor_1D">
-<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">pcolor_1D</code><span class="sig-paren">(</span><em class="sig-param">values</em>, <em class="sig-param">y=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.pcolor_1D" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">pcolor_1D</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">values</span></em>, <em class="sig-param"><span class="n">y</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.pcolor_1D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a pseudocolour plot of an array, Actually uses pcolormesh for speed.</p>
 <p>Create a colour plot of an array.
 If the arrays x, y, and values are geobipy.StatArray classes, the axes can be automatically labelled.
@@ -386,9 +391,9 @@ Values in c that are &lt;= 0 are masked.</p></li>
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customPlots.plot">
-<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">y</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.plot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot y against x</p>
 <p>If x and y are StatArrays, the axes are automatically labelled.</p>
 <dl class="field-list simple">
@@ -424,9 +429,9 @@ Values in c that are &lt;= 0 are masked.</p></li>
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customPlots.pretty">
-<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">pretty</code><span class="sig-paren">(</span><em class="sig-param">ax</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.pretty" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">pretty</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ax</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.pretty" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make a plot with nice axes.</p>
 <p>Removes fluff from the axes.</p>
 <dl class="field-list simple">
@@ -436,9 +441,9 @@ Values in c that are &lt;= 0 are masked.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customPlots.scatter2D">
-<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">scatter2D</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">c</em>, <em class="sig-param">y=None</em>, <em class="sig-param">i=None</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.scatter2D" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">scatter2D</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">c</span></em>, <em class="sig-param"><span class="n">y</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">i</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.scatter2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a 2D scatter plot.</p>
 <p>Create a 2D scatter plot, if the y values are not given, the colours are used instead.
 If the arrays x, y, and c are geobipy.StatArray classes, the axes can be automatically labelled.
@@ -480,9 +485,9 @@ Values in c that are &lt;= 0 are masked.</p></li>
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customPlots.setAlphaPerPcolormeshPixel">
-<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">setAlphaPerPcolormeshPixel</code><span class="sig-paren">(</span><em class="sig-param">pcmesh</em>, <em class="sig-param">alphaArray</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.setAlphaPerPcolormeshPixel" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">setAlphaPerPcolormeshPixel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pcmesh</span></em>, <em class="sig-param"><span class="n">alphaArray</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.setAlphaPerPcolormeshPixel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the opacity of each pixel in a pcolormesh</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -494,9 +499,9 @@ Values in c that are &lt;= 0 are masked.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customPlots.sizeLegend">
-<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">sizeLegend</code><span class="sig-paren">(</span><em class="sig-param">values</em>, <em class="sig-param">intervals=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.sizeLegend" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">sizeLegend</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">values</span></em>, <em class="sig-param"><span class="n">intervals</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.sizeLegend" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a legend to a plot if the point sizes have been specified.</p>
 <p>If values is an StatArray, labels are generated automatically.</p>
 <dl class="field-list simple">
@@ -510,9 +515,9 @@ Values in c that are &lt;= 0 are masked.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customPlots.stackplot2D">
-<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">stackplot2D</code><span class="sig-paren">(</span><em class="sig-param">x, y, labels=[], colors=['#000000', '#FFFF00', '#1CE6FF', '#FF34FF', '#FF4A46', '#008941', '#006FA6', '#A30059', '#FFDBE5', '#7A4900', '#0000A6', '#63FFAC', '#B79762', '#004D43', '#8FB0FF', '#997D87', '#5A0007', '#809693', '#FEFFE6', '#1B4400', '#4FC601', '#3B5DFF', '#4A3B53', '#FF2F80', '#61615A', '#BA0900', '#6B7900', '#00C2A0', '#FFAA92', '#FF90C9', '#B903AA', '#D16100', '#DDEFFF', '#000035', '#7B4F4B', '#A1C299', '#300018', '#0AA6D8', '#013349', '#00846F', '#372101', '#FFB500', '#C2FFED', '#A079BF', '#CC0744', '#C0B9B2', '#C2FF99', '#001E09', '#00489C', '#6F0062', '#0CBD66', '#EEC3FF', '#456D75', '#B77B68', '#7A87A1', '#788D66', '#885578', '#FAD09F', '#FF8A9A', '#D157A0', '#BEC459', '#456648', '#0086ED', '#886F4C', '#34362D', '#B4A8BD', '#00A6AA', '#452C2C', '#636375', '#A3C8C9', '#FF913F', '#938A81', '#575329', '#00FECF', '#B05B6F', '#8CD0FF', '#3B9700', '#04F757', '#C8A1A1', '#1E6E00', '#7900D7', '#A77500', '#6367A9', '#A05837', '#6B002C', '#772600', '#D790FF', '#9B9700', '#549E79', '#FFF69F', '#201625', '#72418F', '#BC23FF', '#99ADC0', '#3A2465', '#922329', '#5B4534', '#FDE8DC', '#404E55', '#0089A3', '#CB7E98', '#A4E804', '#324E72', '#6A3A4C'], **kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.stackplot2D" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">stackplot2D</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">labels</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">colors</span><span class="o">=</span><span class="default_value">['#000000', '#FFFF00', '#1CE6FF', '#FF34FF', '#FF4A46', '#008941', '#006FA6', '#A30059', '#FFDBE5', '#7A4900', '#0000A6', '#63FFAC', '#B79762', '#004D43', '#8FB0FF', '#997D87', '#5A0007', '#809693', '#FEFFE6', '#1B4400', '#4FC601', '#3B5DFF', '#4A3B53', '#FF2F80', '#61615A', '#BA0900', '#6B7900', '#00C2A0', '#FFAA92', '#FF90C9', '#B903AA', '#D16100', '#DDEFFF', '#000035', '#7B4F4B', '#A1C299', '#300018', '#0AA6D8', '#013349', '#00846F', '#372101', '#FFB500', '#C2FFED', '#A079BF', '#CC0744', '#C0B9B2', '#C2FF99', '#001E09', '#00489C', '#6F0062', '#0CBD66', '#EEC3FF', '#456D75', '#B77B68', '#7A87A1', '#788D66', '#885578', '#FAD09F', '#FF8A9A', '#D157A0', '#BEC459', '#456648', '#0086ED', '#886F4C', '#34362D', '#B4A8BD', '#00A6AA', '#452C2C', '#636375', '#A3C8C9', '#FF913F', '#938A81', '#575329', '#00FECF', '#B05B6F', '#8CD0FF', '#3B9700', '#04F757', '#C8A1A1', '#1E6E00', '#7900D7', '#A77500', '#6367A9', '#A05837', '#6B002C', '#772600', '#D790FF', '#9B9700', '#549E79', '#FFF69F', '#201625', '#72418F', '#BC23FF', '#99ADC0', '#3A2465', '#922329', '#5B4534', '#FDE8DC', '#404E55', '#0089A3', '#CB7E98', '#A4E804', '#324E72', '#6A3A4C']</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.stackplot2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot a 2D array with column elements stacked on top of each other.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -544,9 +549,9 @@ Values in c that are &lt;= 0 are masked.</p></li>
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customPlots.step">
-<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">step</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">y</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.step" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots y against x as a piecewise constant (step like) function.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -564,9 +569,9 @@ Values in c that are &lt;= 0 are masked.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customPlots.suptitle">
-<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">suptitle</code><span class="sig-paren">(</span><em class="sig-param">label</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.suptitle" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">suptitle</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">label</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.suptitle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a super title above all subplots with default font sizes</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -575,9 +580,9 @@ Values in c that are &lt;= 0 are masked.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customPlots.title">
-<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">title</code><span class="sig-paren">(</span><em class="sig-param">label</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.title" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">title</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">label</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.title" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a title with default fontsizes</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -586,9 +591,9 @@ Values in c that are &lt;= 0 are masked.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customPlots.xlabel">
-<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">xlabel</code><span class="sig-paren">(</span><em class="sig-param">label</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.xlabel" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">xlabel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">label</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.xlabel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create an x label with default fontsizes</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -597,9 +602,9 @@ Values in c that are &lt;= 0 are masked.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.customPlots.ylabel">
-<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">ylabel</code><span class="sig-paren">(</span><em class="sig-param">label</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.ylabel" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.customPlots.</code><code class="sig-name descname">ylabel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">label</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.customPlots.ylabel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a y label with default fontsizes</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -630,11 +635,19 @@ Values in c that are &lt;= 0 are masked.</p></li>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright None
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -645,7 +658,6 @@ Values in c that are &lt;= 0 are masked.</p></li>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

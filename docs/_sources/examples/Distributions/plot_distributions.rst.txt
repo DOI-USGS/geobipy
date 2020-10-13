@@ -1,10 +1,12 @@
-.. note::
-    :class: sphx-glr-download-link-note
+.. only:: html
 
-    Click :ref:`here <sphx_glr_download_examples_Distributions_plot_distributions.py>` to download the full example code
-.. rst-class:: sphx-glr-example-title
+    .. note::
+        :class: sphx-glr-download-link-note
 
-.. _sphx_glr_examples_Distributions_plot_distributions.py:
+        Click :ref:`here <sphx_glr_download_examples_Distributions_plot_distributions.py>`     to download the full example code
+    .. rst-class:: sphx-glr-example-title
+
+    .. _sphx_glr_examples_Distributions_plot_distributions.py:
 
 
 Distribution Class
@@ -52,6 +54,7 @@ Univariate Normal Distribution
 
 
 .. image:: /examples/Distributions/images/sphx_glr_plot_distributions_001.png
+    :alt: plot distributions
     :class: sphx-glr-single-img
 
 
@@ -79,7 +82,7 @@ Multivariate Normal Distribution
  .. code-block:: none
 
 
-    array([0.05344743, 1.44356832, 1.22275504])
+    array([-0.05962194,  0.78280612,  1.64688226])
 
 
 
@@ -118,7 +121,7 @@ Uniform Distribution
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.519 seconds)
+   **Total running time of the script:** ( 0 minutes  0.648 seconds)
 
 
 .. _sphx_glr_download_examples_Distributions_plot_distributions.py:
@@ -131,13 +134,13 @@ Uniform Distribution
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-python
 
      :download:`Download Python source code: plot_distributions.py <plot_distributions.py>`
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-jupyter
 
      :download:`Download Jupyter notebook: plot_distributions.ipynb <plot_distributions.ipynb>`
 

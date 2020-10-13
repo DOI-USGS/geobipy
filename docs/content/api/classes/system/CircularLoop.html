@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,30 +11,34 @@
   
 
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
-
-    
-
-  
   <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
   <link rel="stylesheet" href="../../../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/gallery-dataframe.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
     <link rel="next" title="Frequency domain system" href="FdemSystem.html" />
@@ -53,7 +56,7 @@
           
 
           
-            <a href="../../../../index.html" class="icon icon-home"> GeoBIPy
+            <a href="../../../../index.html" class="icon icon-home" alt="Documentation Home"> GeoBIPy
           
 
           
@@ -80,6 +83,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -115,6 +119,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -153,7 +158,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../../api.html">API</a> &raquo;</li>
         
@@ -182,14 +187,21 @@
             
   <div class="section" id="circular-loop">
 <h1>Circular Loop<a class="headerlink" href="#circular-loop" title="Permalink to this headline">¶</a></h1>
-<div class="graphviz"><img src="../../../../_images/inheritance-e5847cbce4c15da4b2c362279a4f8c524dc83bc1.png" alt="Inheritance diagram of geobipy.src.classes.system.CircularLoop" usemap="#inheritancea1db000af0" class="inheritance graphviz" /></div>
-<map id="inheritancea1db000af0" name="inheritancea1db000af0">
-<area shape="rect" id="node3" href="EmLoop.html#geobipy.src.classes.system.EmLoop.EmLoop" target="_top" title="Defines a loop in an EM system e.g. transmitter or reciever" alt="" coords="131,29,203,53"/>
-<area shape="rect" id="node2" href="#geobipy.src.classes.system.CircularLoop.CircularLoop" target="_top" title="Defines a circular loop for EM acquisition systems" alt="" coords="251,29,348,53"/>
-<area shape="rect" id="node4" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="5,53,83,77"/>
-</map><span class="target" id="module-geobipy.src.classes.system.CircularLoop"></span><dl class="class">
+digraph inheritancea1db000af0 {
+bgcolor=transparent;
+rankdir=LR;
+size=&quot;8.0, 12.0&quot;;
+  &quot;ABC&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Helper class that provides a standard way to create an ABC using&quot;];
+  &quot;CircularLoop&quot; [URL=&quot;#geobipy.src.classes.system.CircularLoop.CircularLoop&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Defines a circular loop for EM acquisition systems&quot;];
+  &quot;EmLoop&quot; -&gt; &quot;CircularLoop&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;EmLoop&quot; [URL=&quot;EmLoop.html#geobipy.src.classes.system.EmLoop.EmLoop&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Defines a loop in an EM system e.g. transmitter or reciever&quot;];
+  &quot;myObject&quot; -&gt; &quot;EmLoop&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;ABC&quot; -&gt; &quot;EmLoop&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;myObject&quot; [URL=&quot;../core/myObject.html#geobipy.src.classes.core.myObject.myObject&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Abstract base class&quot;];
+}
+<span class="target" id="module-geobipy.src.classes.system.CircularLoop"></span><dl class="py class">
 <dt id="geobipy.src.classes.system.CircularLoop.CircularLoop">
-<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.system.CircularLoop.</code><code class="sig-name descname">CircularLoop</code><span class="sig-paren">(</span><em class="sig-param">orient='z'</em>, <em class="sig-param">moment=1.0</em>, <em class="sig-param">x=0.0</em>, <em class="sig-param">y=0.0</em>, <em class="sig-param">z=0.0</em>, <em class="sig-param">pitch=0.0</em>, <em class="sig-param">roll=0.0</em>, <em class="sig-param">yaw=0.0</em>, <em class="sig-param">radius=1.0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.system.CircularLoop.</code><code class="sig-name descname">CircularLoop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">orient</span><span class="o">=</span><span class="default_value">'z'</span></em>, <em class="sig-param"><span class="n">moment</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">x</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">y</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">z</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">pitch</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">roll</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">yaw</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">radius</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines a circular loop for EM acquisition systems</p>
 <p>CircularLoop(orient, moment, x, y, z, pitch, roll, yaw, radius)</p>
 <dl class="field-list simple">
@@ -207,9 +219,9 @@
 </ul>
 </dd>
 </dl>
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.system.CircularLoop.CircularLoop.Bcast">
-<code class="sig-name descname">Bcast</code><span class="sig-paren">(</span><em class="sig-param">world</em>, <em class="sig-param">root=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop.Bcast" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">Bcast</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">world</span></em>, <em class="sig-param"><span class="n">root</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop.Bcast" title="Permalink to this definition">¶</a></dt>
 <dd><p>Broadcast using MPI</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -224,41 +236,41 @@
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.system.CircularLoop.CircularLoop.createHdf">
-<code class="sig-name descname">createHdf</code><span class="sig-paren">(</span><em class="sig-param">parent</em>, <em class="sig-param">myName</em>, <em class="sig-param">nRepeats=None</em>, <em class="sig-param">fillvalue=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop.createHdf" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">createHdf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="n">myName</span></em>, <em class="sig-param"><span class="n">nRepeats</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fillvalue</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop.createHdf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create the hdf group metadata in file
 parent: HDF object to create a group inside
 myName: Name of the group</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.system.CircularLoop.CircularLoop.deepcopy">
 <code class="sig-name descname">deepcopy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop.deepcopy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Required by subclasses</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.system.CircularLoop.CircularLoop.fromHdf">
-<code class="sig-name descname">fromHdf</code><span class="sig-paren">(</span><em class="sig-param">h5grp</em>, <em class="sig-param">index=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop.fromHdf" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fromHdf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">h5grp</span></em>, <em class="sig-param"><span class="n">index</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop.fromHdf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads in the object from a HDF file</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.system.CircularLoop.CircularLoop.hdfName">
 <code class="sig-name descname">hdfName</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop.hdfName" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a reproducibility string that can be instantiated from a hdf file</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.system.CircularLoop.CircularLoop.summary">
 <code class="sig-name descname">summary</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop.summary" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print a summary</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.system.CircularLoop.CircularLoop.writeHdf">
-<code class="sig-name descname">writeHdf</code><span class="sig-paren">(</span><em class="sig-param">parent</em>, <em class="sig-param">myName</em>, <em class="sig-param">index=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop.writeHdf" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">writeHdf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="n">myName</span></em>, <em class="sig-param"><span class="n">index</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop.writeHdf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write the StatArray to an HDF object
 parent: Upper hdf file or group
 myName: object hdf name. Assumes createHdf has already been called
@@ -289,11 +301,19 @@ create: optionally create the data set as well before writing</p>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright None
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -304,7 +324,6 @@ create: optionally create the data set as well before writing</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

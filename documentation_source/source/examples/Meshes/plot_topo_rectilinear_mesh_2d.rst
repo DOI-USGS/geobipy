@@ -96,6 +96,15 @@ Create some cell values
     :class: sphx-glr-single-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
+      kwargs['cmap'].set_bad(color='white')
+
 
 
 
@@ -117,8 +126,8 @@ Compute the mean over an interval for the mesh.
  .. code-block:: none
 
 
-    (array([[0.58031717, 0.68855959, 0.90321275, ..., 0.54503006, 0.28437739,
-            0.39784212]]), [6.8, 12.4])
+    (array([[0.78315553, 0.33442031, 0.38602889, ..., 0.42741869, 0.40200121,
+            0.2320227 ]]), [6.8, 12.4])
 
 
 
@@ -141,8 +150,8 @@ Compute the mean over multiple intervals for the mesh.
  .. code-block:: none
 
 
-    (array([[0.58031717, 0.68855959, 0.90321275, ..., 0.54503006, 0.28437739,
-            0.39784212]]), [6.8, 12.4])
+    (array([[0.78315553, 0.33442031, 0.38602889, ..., 0.42741869, 0.40200121,
+            0.2320227 ]]), [6.8, 12.4])
 
 
 
@@ -165,13 +174,13 @@ We can apply the interval statistics to either axis
  .. code-block:: none
 
 
-    (array([[0.49608581],
-           [0.77738368],
-           [0.31056761],
+    (array([[0.29165858],
+           [0.47238769],
+           [0.46805781],
            ...,
-           [0.6716477 ],
-           [0.87011383],
-           [0.45830656]]), [2.8, 4.2])
+           [0.11020739],
+           [0.74450399],
+           [0.76879323]]), [2.8, 4.2])
 
 
 
@@ -192,13 +201,13 @@ We can apply the interval statistics to either axis
  .. code-block:: none
 
 
-    (array([[0.49608581, 0.91888169, 0.79171364],
-           [0.77738368, 0.14095243, 0.60168541],
-           [0.31056761, 0.74316927, 0.5439071 ],
+    (array([[0.29165858, 0.28923312, 0.44720559],
+           [0.47238769, 0.52651657, 0.58199048],
+           [0.46805781, 0.39987675, 0.67319023],
            ...,
-           [0.6716477 , 0.99151903, 0.41651871],
-           [0.87011383, 0.71749039, 0.15719683],
-           [0.45830656, 0.11261209, 0.78954891]]), [2.8, 4.2, 5.1, 8.4])
+           [0.11020739, 0.05194109, 0.67322725],
+           [0.74450399, 0.84767753, 0.45868011],
+           [0.76879323, 0.13556021, 0.3152467 ]]), [2.8, 4.2, 5.1, 8.4])
 
 
 
@@ -321,8 +330,10 @@ The pcolor function can now be plotted against distance
 
  .. code-block:: none
 
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
+      kwargs['cmap'].set_bad(color='white')
 
-    (<matplotlib.axes._subplots.AxesSubplot object at 0x1281d19d0>, <matplotlib.collections.QuadMesh object at 0x127d45dd0>, <matplotlib.colorbar.Colorbar object at 0x126e16c50>)
+    (<AxesSubplot:xlabel='Distance (m)', ylabel='Height (m)'>, <matplotlib.collections.QuadMesh object at 0x134431a90>, <matplotlib.colorbar.Colorbar object at 0x12fafacd0>)
 
 
 
@@ -331,7 +342,7 @@ rm.toVTK('test', cellData=values)
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.469 seconds)
+   **Total running time of the script:** ( 0 minutes  0.477 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_topo_rectilinear_mesh_2d.py:

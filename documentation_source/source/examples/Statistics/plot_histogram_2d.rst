@@ -109,6 +109,15 @@ Update the histogram counts
     :class: sphx-glr-single-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("gray_r"))
+      kwargs['cmap'].set_bad(color='white')
+
 
 
 
@@ -169,6 +178,15 @@ sphinx_gallery_thumbnail_number = 3
     :class: sphx-glr-single-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("gray_r"))
+      kwargs['cmap'].set_bad(color='white')
+
 
 
 
@@ -190,6 +208,15 @@ We can overlay the histogram with its credible intervals
     :alt: plot histogram 2d
     :class: sphx-glr-single-img
 
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("gray_r"))
+      kwargs['cmap'].set_bad(color='white')
 
 
 
@@ -235,8 +262,10 @@ Or plot the mean and median
 
  .. code-block:: none
 
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("gray_r"))
+      kwargs['cmap'].set_bad(color='white')
 
-    <matplotlib.legend.Legend object at 0x12760e950>
+    <matplotlib.legend.Legend object at 0x1307aa490>
 
 
 
@@ -265,6 +294,17 @@ Or plot the mean and median
     :class: sphx-glr-single-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("gray_r"))
+      kwargs['cmap'].set_bad(color='white')
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("gray_r"))
+      kwargs['cmap'].set_bad(color='white')
+
 
 
 
@@ -290,6 +330,21 @@ Or plot the mean and median
     :class: sphx-glr-single-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("gray_r"))
+      kwargs['cmap'].set_bad(color='white')
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:690: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
+      pm = ax.pcolormesh(X, Y, Zm, alpha = alpha, **kwargs)
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("gray_r"))
+      kwargs['cmap'].set_bad(color='white')
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:690: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
+      pm = ax.pcolormesh(X, Y, Zm, alpha = alpha, **kwargs)
+
 
 
 
@@ -312,16 +367,16 @@ Get the range between credible intervals
  .. code-block:: none
 
 
-    StatArray([2.72, 4.32, 3.6 , 4.  , 3.28, 3.68, 2.96, 3.44, 3.12, 3.28,
-               3.36, 3.36, 3.2 , 3.28, 3.28, 3.28, 3.2 , 3.28, 3.28, 3.28,
-               3.2 , 3.28, 3.28, 3.2 , 3.36, 3.28, 3.36, 3.36, 3.28, 3.36,
-               3.28, 3.36, 3.36, 3.28, 3.28, 3.28, 3.36, 3.28, 3.28, 3.36,
-               3.36, 3.36, 3.28, 3.28, 3.28, 3.36, 3.36, 3.2 , 3.36, 3.28,
-               3.28, 3.36, 3.28, 3.36, 3.28, 3.2 , 3.36, 3.28, 3.36, 3.36,
-               3.36, 3.36, 3.28, 3.36, 3.36, 3.28, 3.36, 3.28, 3.28, 3.36,
-               3.36, 3.28, 3.36, 3.36, 3.36, 3.36, 3.28, 3.28, 3.28, 3.28,
-               3.36, 3.36, 3.2 , 3.28, 3.44, 3.04, 3.12, 3.04, 3.12, 3.68,
-               2.88, 3.36, 3.6 , 3.36, 3.36, 2.96, 3.44, 2.72, 5.12, 4.16])
+    StatArray([2.96, 2.56, 2.4 , 2.8 , 2.88, 2.96, 3.68, 3.04, 4.  , 3.44,
+               3.44, 3.28, 3.28, 3.36, 3.2 , 3.28, 3.2 , 3.36, 3.2 , 3.44,
+               3.28, 3.28, 3.28, 3.2 , 3.28, 3.36, 3.28, 3.28, 3.2 , 3.28,
+               3.2 , 3.2 , 3.28, 3.36, 3.36, 3.2 , 3.36, 3.2 , 3.28, 3.2 ,
+               3.28, 3.28, 3.28, 3.2 , 3.36, 3.2 , 3.28, 3.28, 3.36, 3.36,
+               3.28, 3.36, 3.36, 3.36, 3.28, 3.28, 3.36, 3.28, 3.28, 3.36,
+               3.28, 3.36, 3.36, 3.28, 3.36, 3.28, 3.36, 3.36, 3.2 , 3.36,
+               3.2 , 3.28, 3.28, 3.2 , 3.28, 3.36, 3.36, 3.28, 3.28, 3.36,
+               3.28, 3.44, 3.2 , 3.28, 3.12, 3.04, 2.96, 3.44, 3.52, 3.28,
+               3.12, 3.12, 3.68, 3.04, 2.64, 2.64, 3.28, 2.72, 1.36, 3.04])
 
 
 
@@ -343,33 +398,33 @@ We can map the credible range to an opacity or transparency
  .. code-block:: none
 
 
-    StatArray([0.        , 0.66666667, 0.36666667, 0.53333333, 0.23333333,
-               0.4       , 0.1       , 0.3       , 0.16666667, 0.23333333,
-               0.26666667, 0.26666667, 0.2       , 0.23333333, 0.23333333,
-               0.23333333, 0.2       , 0.23333333, 0.23333333, 0.23333333,
-               0.2       , 0.23333333, 0.23333333, 0.2       , 0.26666667,
-               0.23333333, 0.26666667, 0.26666667, 0.23333333, 0.26666667,
-               0.23333333, 0.26666667, 0.26666667, 0.23333333, 0.23333333,
-               0.23333333, 0.26666667, 0.23333333, 0.23333333, 0.26666667,
-               0.26666667, 0.26666667, 0.23333333, 0.23333333, 0.23333333,
-               0.26666667, 0.26666667, 0.2       , 0.26666667, 0.23333333,
-               0.23333333, 0.26666667, 0.23333333, 0.26666667, 0.23333333,
-               0.2       , 0.26666667, 0.23333333, 0.26666667, 0.26666667,
-               0.26666667, 0.26666667, 0.23333333, 0.26666667, 0.26666667,
-               0.23333333, 0.26666667, 0.23333333, 0.23333333, 0.26666667,
-               0.26666667, 0.23333333, 0.26666667, 0.26666667, 0.26666667,
-               0.26666667, 0.23333333, 0.23333333, 0.23333333, 0.23333333,
-               0.26666667, 0.26666667, 0.2       , 0.23333333, 0.3       ,
-               0.13333333, 0.16666667, 0.13333333, 0.16666667, 0.4       ,
-               0.06666667, 0.26666667, 0.36666667, 0.26666667, 0.26666667,
-               0.1       , 0.3       , 0.        , 1.        , 0.6       ])
+    StatArray([0.60606061, 0.45454545, 0.39393939, 0.54545455, 0.57575758,
+               0.60606061, 0.87878788, 0.63636364, 1.        , 0.78787879,
+               0.78787879, 0.72727273, 0.72727273, 0.75757576, 0.6969697 ,
+               0.72727273, 0.6969697 , 0.75757576, 0.6969697 , 0.78787879,
+               0.72727273, 0.72727273, 0.72727273, 0.6969697 , 0.72727273,
+               0.75757576, 0.72727273, 0.72727273, 0.6969697 , 0.72727273,
+               0.6969697 , 0.6969697 , 0.72727273, 0.75757576, 0.75757576,
+               0.6969697 , 0.75757576, 0.6969697 , 0.72727273, 0.6969697 ,
+               0.72727273, 0.72727273, 0.72727273, 0.6969697 , 0.75757576,
+               0.6969697 , 0.72727273, 0.72727273, 0.75757576, 0.75757576,
+               0.72727273, 0.75757576, 0.75757576, 0.75757576, 0.72727273,
+               0.72727273, 0.75757576, 0.72727273, 0.72727273, 0.75757576,
+               0.72727273, 0.75757576, 0.75757576, 0.72727273, 0.75757576,
+               0.72727273, 0.75757576, 0.75757576, 0.6969697 , 0.75757576,
+               0.6969697 , 0.72727273, 0.72727273, 0.6969697 , 0.72727273,
+               0.75757576, 0.75757576, 0.72727273, 0.72727273, 0.75757576,
+               0.72727273, 0.78787879, 0.6969697 , 0.72727273, 0.66666667,
+               0.63636364, 0.60606061, 0.78787879, 0.81818182, 0.72727273,
+               0.66666667, 0.66666667, 0.87878788, 0.63636364, 0.48484848,
+               0.48484848, 0.72727273, 0.51515152, 0.        , 0.63636364])
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.004 seconds)
+   **Total running time of the script:** ( 0 minutes  2.164 seconds)
 
 
 .. _sphx_glr_download_examples_Statistics_plot_histogram_2d.py:

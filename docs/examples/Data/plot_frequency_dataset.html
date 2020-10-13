@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,34 +11,38 @@
   
 
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
-
-  
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery-dataframe.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Frequency domain datapoint" href="../Datapoints/plot_frequency_datapoint.html" />
-    <link rel="prev" title="Time domain dataset" href="plot_time_domain_dataset.html" /> 
+    <link rel="prev" title="3D Point Cloud class" href="plot_pointcloud3d.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -53,7 +56,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home"> GeoBIPy
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> GeoBIPy
           
 
           
@@ -80,6 +83,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -97,7 +101,9 @@
 <li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html#data">Data</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="plot_time_domain_dataset.html">Time domain dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_pointcloud3d.html">3D Point Cloud class</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Frequency domain dataset</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#defining-data-using-a-frequency-domain-system">Defining data using a frequency domain system</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#reading-in-the-data">Reading in the Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#obtain-a-line-from-the-data-set">Obtain a line from the data set</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#obtain-a-single-datapoint-from-the-data-set">Obtain a single datapoint from the data set</a></li>
@@ -108,6 +114,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#datapoints">Datapoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#posterior-analysis">Posterior Analysis</a></li>
 </ul>
 </li>
 </ul>
@@ -115,6 +122,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -153,7 +161,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../index.html">Examples</a> &raquo;</li>
         
@@ -178,17 +186,59 @@
             
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
-<p>Click <a class="reference internal" href="#sphx-glr-download-examples-data-plot-frequency-dataset-py"><span class="std std-ref">here</span></a> to download the full example code</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-data-plot-frequency-dataset-py"><span class="std std-ref">here</span></a>     to download the full example code</p>
 </div>
 <div class="sphx-glr-example-title section" id="frequency-domain-dataset">
 <span id="sphx-glr-examples-data-plot-frequency-dataset-py"></span><h1>Frequency domain dataset<a class="headerlink" href="#frequency-domain-dataset" title="Permalink to this headline">¶</a></h1>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">CircularLoop</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">FdemSystem</span>
 <span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">FdemData</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 </pre></div>
 </div>
+<div class="section" id="defining-data-using-a-frequency-domain-system">
+<h2>Defining data using a frequency domain system<a class="headerlink" href="#defining-data-using-a-frequency-domain-system" title="Permalink to this headline">¶</a></h2>
+<p>We can start by defining the frequencies, transmitter loops, and receiver loops
+For each frequency we need to define a pair of loops</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">frequencies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="mf">395.0</span><span class="p">,</span> <span class="mf">822.0</span><span class="p">,</span> <span class="mf">3263.0</span><span class="p">,</span> <span class="mf">8199.0</span><span class="p">,</span> <span class="mf">38760.0</span><span class="p">,</span> <span class="mf">128755.0</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Transmitter positions are defined relative to the observation locations in the data
+This is usually a constant offset for all data points.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">transmitters</span> <span class="o">=</span> <span class="p">[</span><span class="n">CircularLoop</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">moment</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>  <span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yaw</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>
+                <span class="n">CircularLoop</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">moment</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>  <span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yaw</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>
+                <span class="n">CircularLoop</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">moment</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yaw</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>
+                <span class="n">CircularLoop</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">moment</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>  <span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yaw</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>
+                <span class="n">CircularLoop</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">moment</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>  <span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yaw</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>
+                <span class="n">CircularLoop</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">moment</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>  <span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yaw</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)]</span>
+</pre></div>
+</div>
+<p>Receiver positions are defined relative to the transmitter</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">receivers</span> <span class="o">=</span> <span class="p">[</span><span class="n">CircularLoop</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">moment</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">7.93</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yaw</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>
+             <span class="n">CircularLoop</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">moment</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">7.91</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yaw</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>
+             <span class="n">CircularLoop</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">moment</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">9.03</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yaw</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>
+             <span class="n">CircularLoop</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">moment</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">7.91</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yaw</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>
+             <span class="n">CircularLoop</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">moment</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">7.91</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yaw</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>
+             <span class="n">CircularLoop</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">moment</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">7.89</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yaw</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)]</span>
+</pre></div>
+</div>
+<p>Instantiate the system for the data</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">system</span> <span class="o">=</span> <span class="n">FdemSystem</span><span class="p">(</span><span class="n">frequencies</span><span class="o">=</span><span class="n">frequencies</span><span class="p">,</span> <span class="n">transmitterLoops</span><span class="o">=</span><span class="n">transmitters</span><span class="p">,</span> <span class="n">receiverLoops</span><span class="o">=</span><span class="n">receivers</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create some data with random co-ordinates</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">FdemData</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=-</span><span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">,</span> <span class="n">systems</span> <span class="o">=</span> <span class="n">system</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="reading-in-the-data">
 <h2>Reading in the Data<a class="headerlink" href="#reading-in-the-data" title="Permalink to this headline">¶</a></h2>
+<p>Of course measured field data is stored on disk. So instead we can read data from file.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dataFolder</span> <span class="o">=</span> <span class="s2">&quot;..//supplementary//Data//&quot;</span>
 <span class="c1"># The data file name</span>
 <span class="n">dataFile</span> <span class="o">=</span> <span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;Resolve2.txt&#39;</span>
@@ -197,8 +247,7 @@
 </pre></div>
 </div>
 <p>Read in a data set from file.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FD1</span> <span class="o">=</span> <span class="n">FdemData</span><span class="p">()</span>
-<span class="n">FD1</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">dataFile</span><span class="p">,</span> <span class="n">systemFile</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FD1</span> <span class="o">=</span> <span class="n">FdemData</span><span class="p">()</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">dataFile</span><span class="p">,</span> <span class="n">systemFile</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Take a look at the channel names</p>
@@ -221,24 +270,33 @@ Quadrature 41020.0 (Hz)
 Quadrature 129550.0 (Hz)
 </pre></div>
 </div>
+<p>Get data points by slicing</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FDa</span> <span class="o">=</span> <span class="n">FD1</span><span class="p">[</span><span class="mi">10</span><span class="p">:]</span>
+<span class="n">FD1</span> <span class="o">=</span> <span class="n">FD1</span><span class="p">[:</span><span class="mi">10</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Append data sets together</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FD1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">FDa</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>Plot the locations of the data points</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">FD1</span><span class="o">.</span><span class="n">scatter2D</span><span class="p">();</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_frequency_dataset_001.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_001.png" />
+<img alt="plot frequency dataset" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_001.png" />
 <p>Plot all the data along the specified line</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">FD1</span><span class="o">.</span><span class="n">plotLine</span><span class="p">(</span><span class="mf">30010.0</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">);</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_frequency_dataset_002.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_002.png" />
+<img alt="Line number 30010.0" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_002.png" />
 <p>Or, plot specific channels in the data</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">FD1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">channels</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">11</span><span class="p">,</span><span class="mi">8</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">);</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_frequency_dataset_003.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_003.png" />
+<img alt="plot frequency dataset" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_003.png" />
 <p>Read in a second data set</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FD2</span> <span class="o">=</span> <span class="n">FdemData</span><span class="p">()</span>
 <span class="n">FD2</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">dataFilename</span><span class="o">=</span><span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;Resolve1.txt&#39;</span><span class="p">,</span> <span class="n">systemFilename</span><span class="o">=</span><span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;FdemSystem1.stm&#39;</span><span class="p">)</span>
@@ -246,6 +304,8 @@ Quadrature 129550.0 (Hz)
 </div>
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Warning: Your data contains values that are &lt;= 0.0
+
+&lt;geobipy.src.classes.data.dataset.FdemData.FdemData object at 0x126ac4ac0&gt;
 </pre></div>
 </div>
 <p>We can create maps of the elevations in two separate figures</p>
@@ -254,9 +314,12 @@ Quadrature 129550.0 (Hz)
 <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">);</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_frequency_dataset_004.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_004.png" />
+<img alt="plot frequency dataset" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_004.png" />
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(584519.0671621622, 590166.7428378379, 4639079.207593819, 4661808.632406181)
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap(&quot;viridis&quot;))
+  kwargs[&#39;cmap&#39;].set_bad(color=&#39;white&#39;)
+
+(584519.0671621622, 590166.7428378379, 4639079.207593819, 4661808.632406181)
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
@@ -264,9 +327,12 @@ Quadrature 129550.0 (Hz)
 <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">);</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_frequency_dataset_005.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_005.png" />
+<img alt="plot frequency dataset" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_005.png" />
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(662847.3094082569, 668366.7995917432, 4560053.628459876, 4600646.676540123)
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap(&quot;viridis&quot;))
+  kwargs[&#39;cmap&#39;].set_bad(color=&#39;white&#39;)
+
+(662847.3094082569, 668366.7995917432, 4560053.628459876, 4600646.676540123)
 </pre></div>
 </div>
 <p>Or, we can plot both data sets in one figure to see their positions relative
@@ -278,7 +344,7 @@ one of the channels as the colour.</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">FD2</span><span class="o">.</span><span class="n">scatter2D</span><span class="p">(</span><span class="n">s</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">FD2</span><span class="o">.</span><span class="n">dataChannel</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;jet&#39;</span><span class="p">);</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_frequency_dataset_006.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_006.png" />
+<img alt="plot frequency dataset" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_006.png" />
 <p>Or, interpolate the values to create a gridded “map”. mapChannel will
 interpolate the specified channel number.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
@@ -286,9 +352,12 @@ interpolate the specified channel number.</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">);</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_frequency_dataset_007.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_007.png" />
+<img alt="In-Phase 8171.0 (Hz)" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_007.png" />
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(584518.405, 590167.405, 4639078.6625, 4661809.1775)
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap(&quot;viridis&quot;))
+  kwargs[&#39;cmap&#39;].set_bad(color=&#39;white&#39;)
+
+(584518.405, 590167.405, 4639078.6625, 4661809.1775)
 </pre></div>
 </div>
 <p>Export the data to VTK</p>
@@ -347,8 +416,8 @@ Name: Fdem Data
  [ 71.3 315.3 220.5 ... 745.9 968.3 919.1]
  [ 72.1 316.6 220.7 ... 749.2 976.5 928.3]]
 
- Name: Standard Deviation
-     Units: ppm
+ Name:
+     Units:
      Shape: (6710, 12)
      Values: [[14.53 43.58 26.06 ... 51.65 40.57 25.57]
  [14.57 43.65 25.79 ... 51.36 40.32 25.2 ]
@@ -358,8 +427,8 @@ Name: Fdem Data
  [ 7.13 31.53 22.05 ... 74.59 96.83 91.91]
  [ 7.21 31.66 22.07 ... 74.92 97.65 92.83]]
 
- Name: Predicted Data
-     Units: ppm
+ Name:
+     Units:
      Shape: (6710, 12)
      Values: [[0. 0. 0. ... 0. 0. 0.]
  [0. 0. 0. ... 0. 0. 0.]
@@ -375,14 +444,14 @@ Name: Fdem Data
 <span class="n">_</span> <span class="o">=</span> <span class="n">L</span><span class="o">.</span><span class="n">scatter2D</span><span class="p">();</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_frequency_dataset_008.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_008.png" />
+<img alt="plot frequency dataset" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_008.png" />
 <p>We can specify the axis along which to plot.
 xAxis can be index, x, y, z, r2d, r3d</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">FD1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">channels</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">11</span><span class="p">,</span><span class="mi">8</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">);</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_frequency_dataset_009.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_009.png" />
+<img alt="plot frequency dataset" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_frequency_dataset_009.png" />
 </div>
 <div class="section" id="obtain-a-single-datapoint-from-the-data-set">
 <h2>Obtain a single datapoint from the data set<a class="headerlink" href="#obtain-a-single-datapoint-from-the-data-set" title="Permalink to this headline">¶</a></h2>
@@ -455,12 +524,12 @@ These must appear after the data colums.</p>
 <p>Example system files are contained in
 <a class="reference external" href="https://github.com/usgs/geobipy/tree/master/documentation_source/source/examples/supplementary/Data">the supplementary folder</a> in this repository</p>
 <p>See the Resolve.stm files.</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  15.385 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  11.693 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-data-plot-frequency-dataset-py">
-<div class="sphx-glr-download docutils container">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/8a8596f0390404145eca225a8f310218/plot_frequency_dataset.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_frequency_dataset.py</span></code></a></p>
 </div>
-<div class="sphx-glr-download docutils container">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/ffa7a17936c32d098025040a94f8af46/plot_frequency_dataset.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_frequency_dataset.ipynb</span></code></a></p>
 </div>
 </div>
@@ -479,7 +548,7 @@ These must appear after the data colums.</p>
         <a href="../Datapoints/plot_frequency_datapoint.html" class="btn btn-neutral float-right" title="Frequency domain datapoint" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="plot_time_domain_dataset.html" class="btn btn-neutral float-left" title="Time domain dataset" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="plot_pointcloud3d.html" class="btn btn-neutral float-left" title="3D Point Cloud class" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -488,11 +557,19 @@ These must appear after the data colums.</p>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright None
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -503,7 +580,6 @@ These must appear after the data colums.</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

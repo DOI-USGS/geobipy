@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,30 +11,34 @@
   
 
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../../../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
-
-    
-
-  
   <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../../../_static/graphviz.css" type="text/css" />
   <link rel="stylesheet" href="../../../../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/gallery-dataframe.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script src="../../../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" />
     <link rel="next" title="FdemDataPoint" href="FdemDataPoint.html" />
@@ -53,7 +56,7 @@
           
 
           
-            <a href="../../../../../index.html" class="icon icon-home"> GeoBIPy
+            <a href="../../../../../index.html" class="icon icon-home" alt="Documentation Home"> GeoBIPy
           
 
           
@@ -80,6 +83,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -113,6 +117,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -151,7 +156,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../../../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../../../api.html">API</a> &raquo;</li>
         
@@ -182,23 +187,28 @@
             
   <div class="section" id="emdatapoint">
 <h1>EmDataPoint<a class="headerlink" href="#emdatapoint" title="Permalink to this headline">¶</a></h1>
-<div class="graphviz"><img src="../../../../../_images/inheritance-69e10bde3743838e11f3d3966dab916afe051fd3.png" alt="Inheritance diagram of geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint" usemap="#inheritance4ab37ba733" class="inheritance graphviz" /></div>
-<map id="inheritance4ab37ba733" name="inheritance4ab37ba733">
-<area shape="rect" id="node1" href="datapoint.html#geobipy.src.classes.data.datapoint.DataPoint.DataPoint" target="_top" title="Class defines a data point." alt="" coords="125,5,205,29"/>
-<area shape="rect" id="node3" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint" target="_top" title="Abstract EmDataPoint Class" alt="" coords="253,5,353,29"/>
-<area shape="rect" id="node2" href="../../pointcloud/Point.html#geobipy.src.classes.pointcloud.Point.Point" target="_top" title="Class defining a point in 3D Euclidean space" alt="" coords="5,5,77,29"/>
-</map><span class="target" id="module-geobipy.src.classes.data.datapoint.EmDataPoint"></span><dl class="class">
+digraph inheritance4ab37ba733 {
+bgcolor=transparent;
+rankdir=LR;
+size=&quot;8.0, 12.0&quot;;
+  &quot;DataPoint&quot; [URL=&quot;datapoint.html#geobipy.src.classes.data.datapoint.DataPoint.DataPoint&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defines a data point.&quot;];
+  &quot;Point&quot; -&gt; &quot;DataPoint&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;EmDataPoint&quot; [URL=&quot;#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Abstract EmDataPoint Class&quot;];
+  &quot;DataPoint&quot; -&gt; &quot;EmDataPoint&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;Point&quot; [URL=&quot;../../pointcloud/Point.html#geobipy.src.classes.pointcloud.Point.Point&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defining a point in 3D Euclidean space&quot;];
+}
+<span class="target" id="module-geobipy.src.classes.data.datapoint.EmDataPoint"></span><dl class="py class">
 <dt id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint">
-<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.data.datapoint.EmDataPoint.</code><code class="sig-name descname">EmDataPoint</code><span class="sig-paren">(</span><em class="sig-param">nChannelsPerSystem=1</em>, <em class="sig-param">x=0.0</em>, <em class="sig-param">y=0.0</em>, <em class="sig-param">z=0.0</em>, <em class="sig-param">elevation=None</em>, <em class="sig-param">data=None</em>, <em class="sig-param">std=None</em>, <em class="sig-param">predictedData=None</em>, <em class="sig-param">dataUnits=None</em>, <em class="sig-param">channelNames=None</em>, <em class="sig-param">lineNumber=0.0</em>, <em class="sig-param">fiducial=0.0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.data.datapoint.EmDataPoint.</code><code class="sig-name descname">EmDataPoint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">nChannelsPerSystem</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">x</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">y</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">z</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">elevation</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">std</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">predictedData</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dataUnits</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">channelNames</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">lineNumber</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">fiducial</span><span class="o">=</span><span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Abstract EmDataPoint Class</p>
 <p>This is an abstract base class for TdemDataPoint and FdemDataPoint classes</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="FdemDataPoint.html#module-geobipy.src.classes.data.datapoint.FdemDataPoint" title="geobipy.src.classes.data.datapoint.FdemDataPoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">geobipy.src.classes.data.datapoint.FdemDataPoint</span></code></a>, <a class="reference internal" href="TdemDataPoint.html#module-geobipy.src.classes.data.datapoint.TdemDataPoint" title="geobipy.src.classes.data.datapoint.TdemDataPoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">geobipy.src.classes.data.datapoint.TdemDataPoint</span></code></a></p>
 </div>
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.FindBestHalfSpace">
-<code class="sig-name descname">FindBestHalfSpace</code><span class="sig-paren">(</span><em class="sig-param">minConductivity=0.0001</em>, <em class="sig-param">maxConductivity=10000.0</em>, <em class="sig-param">nSamples=100</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.FindBestHalfSpace" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">FindBestHalfSpace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">minConductivity</span><span class="o">=</span><span class="default_value">0.0001</span></em>, <em class="sig-param"><span class="n">maxConductivity</span><span class="o">=</span><span class="default_value">10000.0</span></em>, <em class="sig-param"><span class="n">nSamples</span><span class="o">=</span><span class="default_value">100</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.FindBestHalfSpace" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the best value of a half space that fits the data.</p>
 <p>Carries out a brute force search of the halfspace conductivity that best fits the data.
 The profile of data misfit vs halfspace conductivity is not quadratic, so a bisection will not work.</p>
@@ -219,9 +229,9 @@ The profile of data misfit vs halfspace conductivity is not quadratic, so a bise
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.perturb">
-<code class="sig-name descname">perturb</code><span class="sig-paren">(</span><em class="sig-param">height</em>, <em class="sig-param">relativeError</em>, <em class="sig-param">additiveError</em>, <em class="sig-param">calibration</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.perturb" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">perturb</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">height</span></em>, <em class="sig-param"><span class="n">relativeError</span></em>, <em class="sig-param"><span class="n">additiveError</span></em>, <em class="sig-param"><span class="n">calibration</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.perturb" title="Permalink to this definition">¶</a></dt>
 <dd><p>Propose a new EM data point given the specified attached propsal distributions</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -248,9 +258,9 @@ The profile of data misfit vs halfspace conductivity is not quadratic, so a bise
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.plotHalfSpaceResponses">
-<code class="sig-name descname">plotHalfSpaceResponses</code><span class="sig-paren">(</span><em class="sig-param">minConductivity=-4.0</em>, <em class="sig-param">maxConductivity=2.0</em>, <em class="sig-param">nSamples=100</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.plotHalfSpaceResponses" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">plotHalfSpaceResponses</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">minConductivity</span><span class="o">=</span><span class="default_value">- 4.0</span></em>, <em class="sig-param"><span class="n">maxConductivity</span><span class="o">=</span><span class="default_value">2.0</span></em>, <em class="sig-param"><span class="n">nSamples</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.plotHalfSpaceResponses" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots the reponses of different half space models.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -263,9 +273,9 @@ The profile of data misfit vs halfspace conductivity is not quadratic, so a bise
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.priorProbability">
-<code class="sig-name descname">priorProbability</code><span class="sig-paren">(</span><em class="sig-param">rErr</em>, <em class="sig-param">aErr</em>, <em class="sig-param">height</em>, <em class="sig-param">calibration</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.priorProbability" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">priorProbability</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">rErr</span></em>, <em class="sig-param"><span class="n">aErr</span></em>, <em class="sig-param"><span class="n">height</span></em>, <em class="sig-param"><span class="n">calibration</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.priorProbability" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate the probability for the EM data point given the specified attached priors</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -293,19 +303,19 @@ The profile of data misfit vs halfspace conductivity is not quadratic, so a bise
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setErrorPosterior">
-<code class="sig-name descname">setErrorPosterior</code><span class="sig-paren">(</span><em class="sig-param">log=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setErrorPosterior" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">setErrorPosterior</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">log</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setErrorPosterior" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setHeightPosterior">
 <code class="sig-name descname">setHeightPosterior</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setHeightPosterior" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setPosteriors">
-<code class="sig-name descname">setPosteriors</code><span class="sig-paren">(</span><em class="sig-param">log=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setPosteriors" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">setPosteriors</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">log</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setPosteriors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the posteriors based on the attached priors</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -314,9 +324,9 @@ The profile of data misfit vs halfspace conductivity is not quadratic, so a bise
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setPriors">
-<code class="sig-name descname">setPriors</code><span class="sig-paren">(</span><em class="sig-param">heightPrior=None</em>, <em class="sig-param">relativeErrorPrior=None</em>, <em class="sig-param">additiveErrorPrior=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setPriors" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">setPriors</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">heightPrior</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">relativeErrorPrior</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">additiveErrorPrior</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setPriors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the priors on the datapoint’s perturbable parameters</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -333,9 +343,9 @@ If there are more than one system, additiveErrorPrior is multivariate.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setProposals">
-<code class="sig-name descname">setProposals</code><span class="sig-paren">(</span><em class="sig-param">heightProposal=None</em>, <em class="sig-param">relativeErrorProposal=None</em>, <em class="sig-param">additiveErrorProposal=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setProposals" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">setProposals</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">heightProposal</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">relativeErrorProposal</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">additiveErrorProposal</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setProposals" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the proposals on the datapoint’s perturbable parameters</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -352,13 +362,13 @@ If there are more than one system, additiveErrorProposal is multivariate.</p></l
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.summary">
-<code class="sig-name descname">summary</code><span class="sig-paren">(</span><em class="sig-param">out=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.summary" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">summary</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">out</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.summary" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print a summary of the EMdataPoint</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.updatePosteriors">
 <code class="sig-name descname">updatePosteriors</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.updatePosteriors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update any attached posteriors</p>
@@ -388,11 +398,19 @@ If there are more than one system, additiveErrorProposal is multivariate.</p></l
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright None
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -403,7 +421,6 @@ If there are more than one system, additiveErrorProposal is multivariate.</p></l
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

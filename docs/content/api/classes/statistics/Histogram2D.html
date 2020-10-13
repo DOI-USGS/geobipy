@@ -1,74 +1,77 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
-
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  
   <title>Histogram2D &mdash; GeoBIPy 1.0.0 documentation</title>
+  
 
-
-
-
-
-
-
-
-  <script type="text/javascript" src="../../../../_static/js/modernizr.min.js"></script>
-
-
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
-
-
-
-
+  
   <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
   <link rel="stylesheet" href="../../../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/gallery-dataframe.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
     <link rel="next" title="Hitmap2D" href="Hitmap2D.html" />
-    <link rel="prev" title="Histogram1D" href="Histogram1D.html" />
+    <link rel="prev" title="Histogram1D" href="Histogram1D.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
 
-
+   
   <div class="wy-grid-for-nav">
-
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
+          
 
+          
+            <a href="../../../../index.html" class="icon icon-home" alt="Documentation Home"> GeoBIPy
+          
 
-
-            <a href="../../../../index.html" class="icon icon-home"> GeoBIPy
-
-
-
+          
           </a>
 
-
-
-
+          
+            
+            
               <div class="version">
                 1.0.0
               </div>
+            
+          
 
-
-
-
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -77,16 +80,17 @@
   </form>
 </div>
 
-
+          
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-
-
-
-
-
-
+          
+            
+            
+              
+            
+            
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started/getting_started.html">Getting Started</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../../api.html">API</a><ul class="current">
@@ -118,28 +122,29 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/index.html">Examples</a></li>
 </ul>
 
-
-
+            
+          
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
-
+      
       <nav class="wy-nav-top" aria-label="top navigation">
-
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../../index.html">GeoBIPy</a>
-
+        
       </nav>
 
 
       <div class="wy-nav-content">
-
+        
         <div class="rst-content">
-
-
+        
+          
 
 
 
@@ -158,46 +163,51 @@
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
-
-      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
-
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
           <li><a href="../../api.html">API</a> &raquo;</li>
-
+        
           <li><a href="../classes.html">Classes used in GeoBIPy</a> &raquo;</li>
-
+        
           <li><a href="statistics.html">Statistics classes</a> &raquo;</li>
-
+        
       <li>Histogram2D</li>
-
-
+    
+    
       <li class="wy-breadcrumbs-aside">
-
-
+        
+            
             <a href="../../../../_sources/content/api/classes/statistics/Histogram2D.rst.txt" rel="nofollow"> View page source</a>
-
-
+          
+        
       </li>
-
+    
   </ul>
 
-
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-
+            
   <div class="section" id="histogram2d">
 <h1>Histogram2D<a class="headerlink" href="#histogram2d" title="Permalink to this headline">¶</a></h1>
-<div class="graphviz"><img src="../../../../_images/inheritance-54250af07f4fd286bb2afbee2e983db749bfdb55.png" alt="Inheritance diagram of geobipy.src.classes.statistics.Histogram2D" usemap="#inheritancede093050cf" class="inheritance graphviz" /></div>
-<map id="inheritancede093050cf" name="inheritancede093050cf">
-<area shape="rect" id="node1" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D" target="_top" title="2D Histogram class that can update and plot efficiently." alt="" coords="313,5,412,29"/>
-<area shape="rect" id="node2" href="../mesh/RectilinearMesh2D.html#geobipy.src.classes.mesh.RectilinearMesh2D.RectilinearMesh2D" target="_top" title="Class defining a 2D rectilinear mesh with cell centres and edges." alt="" coords="131,5,265,29"/>
-<area shape="rect" id="node3" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="5,5,83,29"/>
-</map><span class="target" id="module-geobipy.src.classes.statistics.Histogram2D"></span><p>&#64;Histogram_Class
+digraph inheritancede093050cf {
+bgcolor=transparent;
+rankdir=LR;
+size=&quot;8.0, 12.0&quot;;
+  &quot;Histogram2D&quot; [URL=&quot;#geobipy.src.classes.statistics.Histogram2D.Histogram2D&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;2D Histogram class that can update and plot efficiently.&quot;];
+  &quot;RectilinearMesh2D&quot; -&gt; &quot;Histogram2D&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;RectilinearMesh2D&quot; [URL=&quot;../mesh/RectilinearMesh2D.html#geobipy.src.classes.mesh.RectilinearMesh2D.RectilinearMesh2D&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defining a 2D rectilinear mesh with cell centres and edges.&quot;];
+  &quot;myObject&quot; -&gt; &quot;RectilinearMesh2D&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;myObject&quot; [URL=&quot;../core/myObject.html#geobipy.src.classes.core.myObject.myObject&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Abstract base class&quot;];
+}
+<span class="target" id="module-geobipy.src.classes.statistics.Histogram2D"></span><p>&#64;Histogram_Class
 Module describing an efficient histogram class</p>
-<dl class="class">
+<dl class="py class">
 <dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D">
-<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.statistics.Histogram2D.</code><code class="sig-name descname">Histogram2D</code><span class="sig-paren">(</span><em class="sig-param">xBins=None</em>, <em class="sig-param">xBinCentres=None</em>, <em class="sig-param">yBins=None</em>, <em class="sig-param">yBinCentres=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.statistics.Histogram2D.</code><code class="sig-name descname">Histogram2D</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xBins</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">xBinCentres</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">yBins</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">yBinCentres</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>2D Histogram class that can update and plot efficiently.</p>
 <p>Class extension to the RectilinearMesh2D.  The mesh defines the x and y axes, while the Histogram2D manages the counts.</p>
 <p>Histogram2D(x, y, name, units)</p>
@@ -217,15 +227,15 @@ Module describing an efficient histogram class</p>
 <dd class="field-odd"><p><a class="reference internal" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D" title="geobipy.src.classes.statistics.Histogram2D.Histogram2D">Histogram2D</a></p>
 </dd>
 </dl>
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.comboPlot">
-<code class="sig-name descname">comboPlot</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.comboPlot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">comboPlot</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.comboPlot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Combination plot using the 2D histogram and two axis histograms</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.create2DjointProbabilityDistribution">
-<code class="sig-name descname">create2DjointProbabilityDistribution</code><span class="sig-paren">(</span><em class="sig-param">H1</em>, <em class="sig-param">H2</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.create2DjointProbabilityDistribution" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">create2DjointProbabilityDistribution</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">H1</span></em>, <em class="sig-param"><span class="n">H2</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.create2DjointProbabilityDistribution" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create 2D joint distribution from two Histograms.</p>
 <p>Given two histograms each of a single variable, regrid them to the
 same number of bins if necessary and take their outer product to obtain
@@ -240,9 +250,9 @@ a 2D joint probability density.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.credibleIntervals">
-<code class="sig-name descname">credibleIntervals</code><span class="sig-paren">(</span><em class="sig-param">percent=95.0</em>, <em class="sig-param">log=None</em>, <em class="sig-param">axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.credibleIntervals" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">credibleIntervals</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">percent</span><span class="o">=</span><span class="default_value">95.0</span></em>, <em class="sig-param"><span class="n">log</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.credibleIntervals" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the credible intervals for the specified axis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -263,9 +273,9 @@ a 2D joint probability density.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.credibleRange">
-<code class="sig-name descname">credibleRange</code><span class="sig-paren">(</span><em class="sig-param">percent=95.0</em>, <em class="sig-param">log=None</em>, <em class="sig-param">axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.credibleRange" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">credibleRange</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">percent</span><span class="o">=</span><span class="default_value">95.0</span></em>, <em class="sig-param"><span class="n">log</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.credibleRange" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the range of credibility with depth</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -279,9 +289,9 @@ If ‘e’ or float: The range is the difference in log space, or ratio in linea
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.fitMajorPeaks">
-<code class="sig-name descname">fitMajorPeaks</code><span class="sig-paren">(</span><em class="sig-param">intervals</em>, <em class="sig-param">axis=0</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.fitMajorPeaks" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.fit_estimated_pdf">
+<code class="sig-name descname">fit_estimated_pdf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">intervals</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">mixture</span><span class="o">=</span><span class="default_value">'student_t'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.fit_estimated_pdf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find peaks in the histogram along an axis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -293,9 +303,9 @@ If ‘e’ or float: The range is the difference in log space, or ratio in linea
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.fit_mixture">
-<code class="sig-name descname">fit_mixture</code><span class="sig-paren">(</span><em class="sig-param">intervals</em>, <em class="sig-param">axis=0</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.fit_mixture" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fit_mixture</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">intervals</span></em>, <em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.fit_mixture" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find peaks in the histogram along an axis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -307,9 +317,9 @@ If ‘e’ or float: The range is the difference in log space, or ratio in linea
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.intervalStatistic">
-<code class="sig-name descname">intervalStatistic</code><span class="sig-paren">(</span><em class="sig-param">intervals</em>, <em class="sig-param">axis=0</em>, <em class="sig-param">statistic='mean'</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.intervalStatistic" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">intervalStatistic</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">intervals</span></em>, <em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">statistic</span><span class="o">=</span><span class="default_value">'mean'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.intervalStatistic" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the statistic of an array between the intervals given along dimension dim.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -330,9 +340,17 @@ If ‘e’ or float: The range is the difference in log space, or ratio in linea
 </div>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
+<dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.marginalProbability">
+<code class="sig-name descname">marginalProbability</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fractions</span></em>, <em class="sig-param"><span class="n">distributions</span></em>, <em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">reciprocateParameter</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">log</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.marginalProbability" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the marginal (joint) probability between the Histogram and a set of distributions.</p>
+<div class="math notranslate nohighlight" id="equation-marginal">
+<span class="eqno">(1)<a class="headerlink" href="#equation-marginal" title="Permalink to this equation">¶</a></span>\[p(distribution_{i} | \boldsymbol{v}) =\]</div>
+</dd></dl>
+
+<dl class="py method">
 <dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.marginalize">
-<code class="sig-name descname">marginalHistogram</code><span class="sig-paren">(</span><em class="sig-param">intervals=None</em>, <em class="sig-param">log=None</em>, <em class="sig-param">axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.marginalize" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">marginalize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">intervals</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">index</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">log</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.marginalize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the marginal histogram along an axis</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -352,17 +370,9 @@ Plotting is in log space.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.marginalProbability">
-<code class="sig-name descname">marginalProbability</code><span class="sig-paren">(</span><em class="sig-param">fractions</em>, <em class="sig-param">distributions</em>, <em class="sig-param">axis=0</em>, <em class="sig-param">reciprocateParameter=None</em>, <em class="sig-param">log=None</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.marginalProbability" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute the marginal (joint) probability between the Histogram and a set of distributions.</p>
-<div class="math notranslate nohighlight" id="equation-marginal">
-<span class="eqno">(1)<a class="headerlink" href="#equation-marginal" title="Permalink to this equation">¶</a></span>\[p(distribution_{i} | \boldsymbol{v}) =\]</div>
-</dd></dl>
-
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.mean">
-<code class="sig-name descname">mean</code><span class="sig-paren">(</span><em class="sig-param">log=None</em>, <em class="sig-param">axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.mean" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">mean</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">log</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.mean" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the mean along the given axis.</p>
 <p>This is not the true mean of the original samples. It is the best estimated mean using the binned counts multiplied by the axis bin centres.</p>
 <dl class="field-list simple">
@@ -381,9 +391,9 @@ Plotting is in log space.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.median">
-<code class="sig-name descname">median</code><span class="sig-paren">(</span><em class="sig-param">log=None</em>, <em class="sig-param">axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.median" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">median</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">log</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.median" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the median for the specified axis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -401,9 +411,9 @@ Plotting is in log space.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.mode">
-<code class="sig-name descname">mode</code><span class="sig-paren">(</span><em class="sig-param">log=None</em>, <em class="sig-param">axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.mode" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">mode</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">log</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.mode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the mode for the specified axis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -421,9 +431,9 @@ Plotting is in log space.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.opacity">
-<code class="sig-name descname">opacity</code><span class="sig-paren">(</span><em class="sig-param">percent=95.0</em>, <em class="sig-param">log=None</em>, <em class="sig-param">axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.opacity" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">opacity</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">percent</span><span class="o">=</span><span class="default_value">95.0</span></em>, <em class="sig-param"><span class="n">log</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.opacity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return an opacity between 0 and 1 based on the difference between credible invervals of the hitmap.</p>
 <p>Higher ranges in credibility map to less opaqueness.</p>
 <dl class="field-list simple">
@@ -444,9 +454,9 @@ Else: Take the ratio of the credible intervals.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.pcolor">
-<code class="sig-name descname">pcolor</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.pcolor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">pcolor</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.pcolor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot the Histogram2D as an image</p>
 <dl class="field-list simple">
 <dt class="field-odd">Other Parameters</dt>
@@ -469,9 +479,9 @@ Values in c that are &lt;= 0 are masked.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.percentage">
-<code class="sig-name descname">percentage</code><span class="sig-paren">(</span><em class="sig-param">percent</em>, <em class="sig-param">log=None</em>, <em class="sig-param">axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.percentage" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">percentage</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">percent</span></em>, <em class="sig-param"><span class="n">log</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.percentage" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the percentage of the CDF for the specified axis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -490,9 +500,9 @@ Values in c that are &lt;= 0 are masked.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.transparency">
-<code class="sig-name descname">transparency</code><span class="sig-paren">(</span><em class="sig-param">percent=95.0</em>, <em class="sig-param">log=None</em>, <em class="sig-param">axis=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.transparency" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">transparency</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">percent</span><span class="o">=</span><span class="default_value">95.0</span></em>, <em class="sig-param"><span class="n">log</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.transparency" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a transparency value between 0 and 1 based on the difference between credible invervals of the hitmap.</p>
 <p>Higher ranges in credibility are mapped to more transparency.</p>
 <dl class="field-list simple">
@@ -513,9 +523,9 @@ Else: Take the ratio of the credible intervals.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.update">
-<code class="sig-name descname">update</code><span class="sig-paren">(</span><em class="sig-param">xValues</em>, <em class="sig-param">yValues=None</em>, <em class="sig-param">trim=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.update" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">update</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xValues</span></em>, <em class="sig-param"><span class="n">yValues</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">trim</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.update" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update the histogram by counting the entry of values into the bins of the histogram.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -539,29 +549,37 @@ Ignored if xValues is 2D.</p></li>
 
 
            </div>
-
+           
           </div>
           <footer>
-
+  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-
+      
         <a href="Hitmap2D.html" class="btn btn-neutral float-right" title="Hitmap2D" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-
-
+      
+      
         <a href="Histogram1D.html" class="btn btn-neutral float-left" title="Histogram1D" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-
+      
     </div>
-
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright None
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -571,8 +589,7 @@ Ignored if xValues is 2D.</p></li>
     </section>
 
   </div>
-
-
+  
 
   <script type="text/javascript">
       jQuery(function () {
@@ -580,10 +597,10 @@ Ignored if xValues is 2D.</p></li>
       });
   </script>
 
-
-
-
-
+  
+  
+    
+   
 
 </body>
 </html>
