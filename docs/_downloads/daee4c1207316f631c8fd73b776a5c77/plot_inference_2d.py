@@ -1,5 +1,5 @@
 """
-2D Posterior analysis of the Bayesian inference
+Posterior analysis of the 2D Bayesian inference
 -----------------------------------------------
 
 All plotting in GeoBIPy can be carried out using the 3D inference class
@@ -47,6 +47,7 @@ kwargs = { "log" : 10, # I want to plot the log conductivity
            "xAxis" : xAxis # Set the axis along which to display attributes
            }
 
+# sphinx_gallery_thumbnail_number = 2
 
 ################################################################################
 # We can show a basic cross-section of the parameter inverted for

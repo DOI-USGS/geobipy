@@ -9,7 +9,7 @@
     .. _sphx_glr_examples_Inference_plot_inference_1d.py:
 
 
-1D Posterior analysis of the Bayesian inference
+Posterior analysis of the 1D Bayesian inference
 -----------------------------------------------
 
 All plotting in GeoBIPy can be carried out using the 3D inference class
@@ -89,7 +89,7 @@ We can grab the results for a single index or fiducial
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.421 seconds)
+   **Total running time of the script:** ( 0 minutes  2.444 seconds)
 
 
 .. _sphx_glr_download_examples_Inference_plot_inference_1d.py:

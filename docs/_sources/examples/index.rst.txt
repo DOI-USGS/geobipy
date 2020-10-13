@@ -367,7 +367,7 @@ Posterior Analysis
 .. only:: html
 
  .. figure:: /examples/Inference/images/thumb/sphx_glr_plot_inference_3d_thumb.png
-     :alt: 3D Posterior analysis of the Bayesian inference
+     :alt: Posterior analysis of the 3D Bayesian inference
 
      :ref:`sphx_glr_examples_Inference_plot_inference_3d.py`
 
@@ -388,7 +388,7 @@ Posterior Analysis
 .. only:: html
 
  .. figure:: /examples/Inference/images/thumb/sphx_glr_plot_inference_1d_thumb.png
-     :alt: 1D Posterior analysis of the Bayesian inference
+     :alt: Posterior analysis of the 1D Bayesian inference
 
      :ref:`sphx_glr_examples_Inference_plot_inference_1d.py`
 
@@ -409,7 +409,7 @@ Posterior Analysis
 .. only:: html
 
  .. figure:: /examples/Inference/images/thumb/sphx_glr_plot_inference_2d_thumb.png
-     :alt: 2D Posterior analysis of the Bayesian inference
+     :alt: Posterior analysis of the 2D Bayesian inference
 
      :ref:`sphx_glr_examples_Inference_plot_inference_2d.py`
 

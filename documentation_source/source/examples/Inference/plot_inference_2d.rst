@@ -9,7 +9,7 @@
     .. _sphx_glr_examples_Inference_plot_inference_2d.py:
 
 
-2D Posterior analysis of the Bayesian inference
+Posterior analysis of the 2D Bayesian inference
 -----------------------------------------------
 
 All plotting in GeoBIPy can be carried out using the 3D inference class
@@ -91,7 +91,7 @@ Plot a location map of the data point locations along the line
  .. code-block:: none
 
 
-    (<AxesSubplot:xlabel='Easting (m)', ylabel='Northing (m)'>, <matplotlib.collections.PathCollection object at 0x128594be0>, <matplotlib.colorbar.Colorbar object at 0x12860d460>)
+    (<AxesSubplot:xlabel='Easting (m)', ylabel='Northing (m)'>, <matplotlib.collections.PathCollection object at 0x128f33a30>, <matplotlib.colorbar.Colorbar object at 0x129dbd190>)
 
 
 
@@ -307,7 +307,7 @@ We can plot the posteriors along the line as a shaded histogram
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  33.859 seconds)
+   **Total running time of the script:** ( 0 minutes  33.308 seconds)
 
 
 .. _sphx_glr_download_examples_Inference_plot_inference_2d.py:
