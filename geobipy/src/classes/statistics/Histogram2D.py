@@ -366,8 +366,14 @@ class Histogram2D(RectilinearMesh2D):
 
         return cdf
 
+    def entropy(self, axis=None):
 
-    def estimatePdf(self, axis=None):
+        pdf = self.pdf(axis=axis)
+        pdf = pdf[pdf > 0.0]
+        return StatArray.StatArray(-(pdf * np.log(np.abs(pdf))).sum(), "Entropy")
+
+
+    def pdf(self, axis=None):
 
         if axis is None:
             out = StatArray.StatArray(np.divide(self._counts, np.sum(self._counts)), 'Probability density')
@@ -469,7 +475,7 @@ class Histogram2D(RectilinearMesh2D):
         ax[-1].spines["left"].set_visible(False)
 
         ax.append(plt.subplot(self.gs[1:, 4:]))
-        h = self.marginalize(axis=0).plot(rotate=True)
+        h = self.marginalize(axis=1).plot(rotate=True)
         plt.ylabel(''); plt.xlabel('')
         plt.yticks([]); plt.xticks([])
         ax[-1].spines["bottom"].set_visible(False)

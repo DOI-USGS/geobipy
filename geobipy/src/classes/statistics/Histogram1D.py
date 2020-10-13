@@ -191,7 +191,14 @@ class Histogram1D(RectilinearMesh1D):
         return h - l
 
 
-    def estimatePdf(self):
+    @property
+    def entropy(self):
+        pdf = self.pdf[self.pdf > 0.0]
+        return StatArray.StatArray(-(pdf * np.log(np.abs(pdf))).sum(), "Entropy")
+
+
+    @property
+    def pdf(self):
         return StatArray.StatArray(np.divide(self.counts, np.sum(self.counts)), name='Density')
 
 
