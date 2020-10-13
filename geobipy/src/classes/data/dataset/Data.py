@@ -356,6 +356,10 @@ class Data(PointCloud3D):
         """
         return ~np.isnan(self.data)
 
+    @property
+    def active_channel(self):
+        return np.any(self.active, axis=0)
+
 
     def dataChannel(self, channel, system=None):
         """Gets the data in the specified channel
