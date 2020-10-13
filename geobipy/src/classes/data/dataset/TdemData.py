@@ -740,7 +740,7 @@ class TdemData(Data):
             index = self.fiducial.searchsorted(fiducial)
 
         i = index
-        return TdemDataPoint(self.x[i], self.y[i], self.z[i], self.elevation[i], self._data[i, :], self.std[i, :], self._predictedData[i, :], self.system, self.T[i], self.R[i], self.loopOffset[i, :], self.lineNumber[i], self.fiducial[i])
+        return TdemDataPoint(self.x[i], self.y[i], self.z[i], self.elevation[i], self.data[i, :], self.std[i, :], self.predictedData[i, :], self.system, self.transmitter[i], self.receiver[i], self.loopOffset[i, :], self.lineNumber[i], self.fiducial[i])
 
 
     # def getLine(self, line):
@@ -850,11 +850,11 @@ class TdemData(Data):
             nCols = self.nTimes[system]
             for i in range(nCols):
                 i1 = self.systemOffset[system] + i
-                cP.plot(x, self.data[:, i1], label=self._channelNames[i1], **kwargs)
+                cP.plot(x, self.data[:, i1], label=self.channelNames[i1], **kwargs)
         else:
             channels = np.atleast_1d(channels)
             for j, i in enumerate(channels):
-                cP.plot(x, self.data[:, i], label=self._channelNames[i], **kwargs)
+                cP.plot(x, self.data[:, i], label=self.channelNames[i], **kwargs)
 
         box = ax.get_position()
         ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
