@@ -509,41 +509,30 @@ class Inference2D(myObject):
 
         """
 
-        from mpi4py import MPI
-
-        world = self.world
-
         max_distributions = kwargs.get('max_distributions', 5)
+        kwargs['track'] = False
 
         if intervals is None:
             intervals = self.hitMap.yBins
 
         nIntervals = np.size(intervals) - 1
 
-        means = StatArray.StatArray([self.nPoints, nIntervals, max_distributions], "fit means")
-        variances = StatArray.StatArray([self.nPoints, nIntervals, max_distributions], "fit variances")
-        amplitudes = StatArray.StatArray([self.nPoints, nIntervals, max_distributions], "fit amplitudes")
-        df = StatArray.StatArray([self.nPoints, nIntervals, max_distributions], "fit df")
-
         if external_files:
-            hdfFile = h5py.File("Line_{}_fits.h5".format(self.line), 'w', driver='mpio', comm=world)
-
+            hdfFile = h5py.File("Line_{}_fits.h5".format(self.line), 'w', driver='mpio', comm=self.world)
         else:
             hdfFile = self.hdfFile
 
+        mixture = Mixture()
         try:
-            means.createHdf(hdfFile, "/means", fillvalue=np.nan)
-            variances.createHdf(hdfFile, "/variances", fillvalue=np.nan)
-            df.createHdf(hdfFile, "/degrees", fillvalue=np.nan)
-            amplitudes.createHdf(hdfFile, "/amplitudes", fillvalue=np.nan)
+            mixture.createHdf(hdfFile, 'fits', shape=(nIntervals, self.nPoints))
         except:
             pass
 
         # Distribute the points amongst cores.
-        starts, chunks = loadBalance1D_shrinkingArrays(self.nPoints, world.size)
+        starts, chunks = loadBalance1D_shrinkingArrays(self.nPoints, self.world.size)
 
-        chunk = chunks[world.rank]
-        i0 = starts[world.rank]
+        chunk = chunks[self.world.rank]
+        i0 = starts[self.world.rank]
         i1 = i0 + chunk
 
         tBase = MPI.Wtime()
@@ -558,40 +547,22 @@ class Inference2D(myObject):
 
         for i in range(i0, i1):
 
-            hm = self.get_hitmap(i)
+            hm = self.hitmap(i)
 
             if not np.all(hm.counts == 0):
-
                 mixtures = hm.fit_estimated_pdf(**kwargs)
 
-                buffer[:, :] = np.nan
-                for j in range(nI):
-                    mix = mixtures[j]
-                    buffer[j, :mix.n_mixtures] = mix.means
-                hdfFile['/means/data'][i, :, :] = buffer
-
-                for j in range(nI):
-                    mix = mixtures[j]
-                    buffer[j, :mix.n_mixtures] = mix.variances
-                hdfFile['/variances/data'][i, :, :] = buffer
-
-                for j in range(nI):
-                    mix = mixtures[j]
-                    buffer[j, :mix.n_mixtures] = mix.degrees
-                hdfFile['/degrees/data'][i, :, :] = buffer
-
-                for j in range(nI):
-                    mix = mixtures[j]
-                    buffer[j, :mix.n_mixtures] = mix.amplitudes
-                hdfFile['/amplitudes/data'][i, :, :] = buffer
+            for j, m in enumerate(mixtures):
+                if not m is None:
+                    m.writeHdf(hdfFile, 'fits', index=np.s_[j, i])
 
             counter += 1
             if counter == nUpdate:
-                print('rank {}, line/fiducial {}/{}, iteration {}/{},  time/dp {} h:m:s'.format(world.rank, self.line, self.fiducials[i], i-i0+1, chunk, str(timedelta(seconds=MPI.Wtime()-t0)/nUpdate)), flush=True)
+                print('rank {}, line/fiducial {}/{}, iteration {}/{},  time/dp {} h:m:s'.format(self.world.rank, self.line, self.fiducials[i], i-i0+1, chunk, str(timedelta(seconds=MPI.Wtime()-t0)/nUpdate)), flush=True)
                 t0 = MPI.Wtime()
                 counter = 0
 
-        print('rank {} finished in {} h:m:s'.format(world.rank, str(timedelta(seconds=MPI.Wtime()-tBase))), flush=True)
+        print('rank {} finished in {} h:m:s'.format(self.world.rank, str(timedelta(seconds=MPI.Wtime()-tBase))), flush=True)
 
         if external_files:
             hdfFile.close()

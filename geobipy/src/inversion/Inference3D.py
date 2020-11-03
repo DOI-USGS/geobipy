@@ -20,7 +20,7 @@ from ..classes.statistics.Histogram1D import Histogram1D
 from ..classes.statistics.Hitmap2D import Hitmap2D
 from ..classes.pointcloud.PointCloud3D import PointCloud3D
 from ..base import interpolation as interpolation
-from .Inv_MCMC import Initialize
+from .inference import initialize
 from .Inference1D import Inference1D
 from .Inference2D import Inference2D
 
@@ -144,7 +144,7 @@ class Inference3D(myObject):
         fiducials = tmp[:, 1]
 
         # Initialize the inversion to obtain the sizes of everything
-        options, Mod, DataPoint, _, _, _, _ = Initialize(options, DataPoint)
+        options, Mod, DataPoint, _, _, _, _ = initialize(options, DataPoint)
 
         # Create the results template
         Res = Inference1D(DataPoint, Mod,
@@ -586,6 +586,12 @@ class Inference3D(myObject):
 
         if np.size(index) > 0:
             return np.hstack(lineIndex), np.hstack(index)
+
+
+    def fit_estimated_pdf_mpi(self, intervals=None, external_files=True, **kwargs):
+
+        for line in self.lines:
+            line.fit_estimated_pdf_mpi(intervals=intervals, external_files=external_files, **kwargs)
 
 
     def fit_mixture(self, intervals, **kwargs):

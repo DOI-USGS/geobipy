@@ -6,11 +6,11 @@ from ...classes.core import StatArray
 from ...base import customFunctions as cF
 from ...base import customPlots as cP
 from .Distribution import Distribution
-from .mixNormal import mixNormal
-from .mixStudentT import mixStudentT
+from .Mixture import Mixture
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
+from lmfit import models
 
 from copy import deepcopy
 
@@ -251,20 +251,18 @@ class Histogram1D(RectilinearMesh1D):
         return X.fit_mixture(mixture_type, log, mean_bounds, variance_bounds, k, tolerance)
 
 
-    def fit_estimated_pdf(self, mixture='student_t', **kwargs):
-        mixture = mixture.lower()
-        if mixture == 'gaussian':
-            mixture = mixNormal()
-        elif mixture == 'student_t':
-            mixture = mixStudentT()
-        else:
-            assert False, ValueError("method must be either 'gaussian' or 'student_t' ")
+    def fit_estimated_pdf(self, mixture_type, **kwargs):
+
+        if np.all(self.counts == 0):
+            return None
+
+        mix = Mixture(mixture_type)
 
         log = kwargs.get('log', None)
-        kwargs['variance_bound'] = self.estimateVariance(10000, log=log)
+        kwargs['variance_bound'] = kwargs.pop('variance_bound', self.estimateStd(1e5, log=log))
 
-        mixture.fit_to_curve(x=self.binCentres, y=self.estimatePdf(), **kwargs)
-        return mixture
+        mix.fit_to_curve(x=self.binCentres, y=self.pdf, **kwargs)
+        return mix
 
 
     def _marginal_probability_pdfs(self, pdfs):
@@ -286,7 +284,7 @@ class Histogram1D(RectilinearMesh1D):
         normalizedPdfs[:, i] = normalizedPdfs[:, i] / s[i]
 
         # Initialize the facies Model
-        axisPdf = self.estimatePdf()
+        axisPdf = self.pdf
 
         marginalProbability = StatArray.StatArray(nDistributions, 'Marginal probability')
         marginalProbability = np.sum(axisPdf * normalizedPdfs, axis=1)

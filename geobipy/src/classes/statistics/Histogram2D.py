@@ -565,7 +565,7 @@ class Histogram2D(RectilinearMesh2D):
         return distributions, active
 
 
-    def fit_estimated_pdf(self, intervals=None, axis=0, mixture='student_t', **kwargs):
+    def fit_estimated_pdf(self, intervals=None, axis=0, mixture_type='pearson', **kwargs):
         """Find peaks in the histogram along an axis.
 
         Parameters
@@ -583,17 +583,16 @@ class Histogram2D(RectilinearMesh2D):
         else:
             assert np.size(intervals) >= 2, ValueError('intervals must have size >= 2')
 
-        mixtures = []
-
         if track:
             Bar = progressbar.ProgressBar()
             r = Bar(range(np.size(intervals) - 1))
         else:
             r = range(np.size(intervals) - 1)
 
+        mixtures = []
         for i in r:
             h = self.marginalize(intervals=intervals[i:i+2], axis=axis)
-            ms = h.fit_estimated_pdf(mixture = mixture, **kwargs)
+            ms = h.fit_estimated_pdf(mixture_type = mixture_type, **kwargs)
             mixtures.append(ms)
 
         return mixtures
