@@ -29,6 +29,10 @@ class mixNormal(Mixture):
         assert np.size(values) == self.n_mixtures, ValueError("Must provide {} amplitudes".format(self.n_mixtures))
         self._params[0::3] = values
 
+    # @property
+    # def lmfit_model(self):
+    #     return Pearson7Model
+
     @property
     def means(self):
         return self._params[1::3]

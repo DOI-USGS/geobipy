@@ -5,6 +5,7 @@ from scipy.stats import t
 import matplotlib.pyplot as plt
 from .Mixture import Mixture
 from smm import SMM
+from lmfit.models import StudentsTModel
 
 class mixStudentT(Mixture):
 
@@ -21,17 +22,17 @@ class mixStudentT(Mixture):
         self._params[2::4] = variances
         self._params[3::4] = degrees
 
-        self._labels = np.zeros(self.n_mixtures)
+        self._labels = np.zeros(self.n_components)
         if not labels is None:
             self.labels = labels
 
     @property
     def amplitudes(self):
-        return self._params[0::4]
+        return StatArray.StatArray(self._params[0::4], "Amplitude")
 
     @amplitudes.setter
     def amplitudes(self, values):
-        assert np.size(values) == self.n_mixtures, ValueError("Must provide {} amplitudes".format(self.n_mixtures))
+        assert np.size(values) == self.n_components, ValueError("Must provide {} amplitudes".format(self.n_components))
         self._params[0::4] = values
 
     @property
@@ -40,38 +41,42 @@ class mixStudentT(Mixture):
 
     @labels.setter
     def labels(self, values):
-        assert np.size(values) == self.n_mixtures, ValueError("Labels must have size {}".format(self.n_mixtures))
+        assert np.size(values) == self.n_components, ValueError("Labels must have size {}".format(self.n_components))
         self._labels[:] = values
 
     @property
+    def lmfit_model(self):
+        return StudentsTModel
+
+    @property
     def means(self):
-        return self._params[1::4]
+        return StatArray.StatArray(self._params[1::4], "means")
 
     @means.setter
     def means(self, values):
-        assert np.size(values) == self.n_mixtures, ValueError("Must provide {} means".format(self.n_mixtures))
+        assert np.size(values) == self.n_components, ValueError("Must provide {} means".format(self.n_components))
         self._params[1::4] = values
 
     @property
     def moments(self):
-        return [self.means, self.variances, self.dfs]
+        return np.hstack([self.means, self.variances, self.dfs])
 
     @property
     def variances(self):
-        return self._params[2::4]
+        return StatArray.StatArray(self._params[2::4], "variance")
 
     @variances.setter
     def variances(self, values):
-        assert np.size(values) == self.n_mixtures, ValueError("Must provide {} variances".format(self.n_mixtures))
+        assert np.size(values) == self.n_components, ValueError("Must provide {} variances".format(self.n_components))
         self._params[2::4] = values
 
     @property
     def degrees(self):
-        return self._params[3::4]
+        return StatArray.StatArray(self._params[3::4], "degrees of freedom")
 
     @degrees.setter
     def degrees(self, values):
-        assert np.size(values) == self.n_mixtures, ValueError("Must provide {} degrees".format(self.n_mixtures))
+        assert np.size(values) == self.n_components, ValueError("Must provide {} degrees".format(self.n_components))
         self._params[3::4] = values
 
     @property
@@ -83,7 +88,7 @@ class mixStudentT(Mixture):
         return 4
 
     @property
-    def n_mixtures(self):
+    def n_components(self):
         return self.means.size
 
 
@@ -105,8 +110,8 @@ class mixStudentT(Mixture):
     def probability(self, x, log, component=None):
 
         if component is None:
-            out = StatArray.StatArray(np.empty([np.size(x), self.n_mixtures]), "Probability Density")
-            for i in range(self.n_mixtures):
+            out = StatArray.StatArray(np.empty([np.size(x), self.n_components]), "Probability Density")
+            for i in range(self.n_components):
                 out[:, i] = self.amplitudes[i] * self._probability(x, log, self.means[i], self.variances[i], self.degrees[i])
             return out
         else:
@@ -133,7 +138,7 @@ class mixStudentT(Mixture):
         for i in range(nm):
             i1 = i*4
             amp, mean, var, df = params[i1:i1+4]
-            out += amp * t.pdf(x, df, mean, var)
+            out += amp * t.pdf(x, df, mean, var)/np.float(nm)
 
         return out
 
