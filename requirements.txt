@@ -11,3 +11,4 @@ h5py>=2.6.0
 matplotlib
 sphinx
 pyvtk
+lmfit
