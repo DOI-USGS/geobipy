@@ -19,7 +19,7 @@ from ..base.MPI import print
 import matplotlib.pyplot as plt
 
 
-def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
+def infer(userParameters, DataPoint, prng, LineResults=None, rank=1):
     """ Markov Chain Monte Carlo approach for inversion of geophysical data
     userParameters: User input parameters object
     DataPoint: Datapoint to invert
@@ -69,7 +69,7 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
     while (Go):
 
         # Accept or reject the new model
-        [Mod, DataPoint, prior, likelihood, posterior, PhiD, posteriorComponents, ratioComponents, accepted, dimensionChange] = AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, PhiD, Res, prng)# ,oF, oD, oRel, oAdd, oP, oA, i)
+        [Mod, DataPoint, prior, likelihood, posterior, PhiD, posteriorComponents, ratioComponents, accepted, dimensionChange] = accept_reject(userParameters, Mod, DataPoint, prior, likelihood, posterior, PhiD, Res, prng)# ,oF, oD, oRel, oAdd, oP, oA, i)
 
         # Determine if we are burning in
         if (not Res.burnedIn):
@@ -130,7 +130,7 @@ def Inv_MCMC(userParameters, DataPoint, prng, LineResults=None, rank=1):
     return failed
 
 
-def Initialize(userParameters, DataPoint, prng=None):
+def initialize(userParameters, DataPoint, prng=None):
     """Initialize the transdimensional Markov chain Monte Carlo inversion.
 
 
@@ -254,7 +254,7 @@ def Initialize(userParameters, DataPoint, prng=None):
     return (userParameters, Mod, DataPoint, prior, likelihood, posterior, PhiD)
 
 
-def AcceptReject(userParameters, Mod, DataPoint, prior, likelihood, posterior, PhiD, Res, prng):# ,oF, oD, oRel, oAdd, oP, oA ,curIter):
+def accept_reject(userParameters, Mod, DataPoint, prior, likelihood, posterior, PhiD, Res, prng):# ,oF, oD, oRel, oAdd, oP, oA ,curIter):
     """ Propose a new random model and accept or reject it """
     clk = Stopwatch()
     clk.start()

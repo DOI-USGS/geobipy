@@ -62,6 +62,7 @@ from .src.classes.statistics.MvDistribution import MvDistribution
 from .src.classes.statistics.Histogram1D import Histogram1D
 from .src.classes.statistics.Histogram2D import Histogram2D
 from .src.classes.statistics.Hitmap2D import Hitmap2D
+from .src.classes.statistics.Mixture import Mixture
 from .src.classes.statistics.mixStudentT import mixStudentT
 from .src.classes.statistics.mixNormal import mixNormal
 # McMC Inersion
@@ -69,7 +70,7 @@ from .src.inversion.Inference1D import Inference1D
 from .src.inversion.Inference2D import Inference2D
 from .src.inversion.Inference3D import Inference3D
 
-from .src.inversion.Inv_MCMC import Initialize, Inv_MCMC
+from .src.inversion.inference import initialize, infer
 
 from .src.example_path import example_path
 
@@ -141,7 +142,7 @@ def serial_datapoint(userParameters, output_directory, seed=None):
     options = userParameters.userParameters(datapoint)
     options.output_directory = output_directory
 
-    Inv_MCMC(options, datapoint, prng=prng)
+    infer(options, datapoint, prng=prng)
 
 
 def serial_dataset(userParameters, output_directory, seed=None):
@@ -160,7 +161,7 @@ def serial_dataset(userParameters, output_directory, seed=None):
         options = userParameters.userParameters(datapoint)
 
         iLine = results.lineIndex(lineNumber=datapoint.lineNumber)
-        Inv_MCMC(options, datapoint, prng=prng, LineResults=results.lines[iLine])
+        infer(options, datapoint, prng=prng, LineResults=results.lines[iLine])
 
     results.close()
     Dataset._closeDatafiles()
@@ -249,7 +250,7 @@ def parallel_mpi(inputFile, outputDir, skipHDF5):
         paras.check(DataPoint)
 
         # Initialize the inversion to obtain the sizes of everything
-        paras, Mod, DataPoint, prior, likelihood, posterior, PhiD = Initialize(paras, DataPoint, prng = prng)
+        paras, Mod, DataPoint, prior, likelihood, posterior, PhiD = initialize(paras, DataPoint, prng = prng)
 
         # Create the results template
         Res = Inference1D(DataPoint, Mod,
@@ -413,7 +414,7 @@ def workerTask(_DataPoint, UP, prng, world, lineNumbers, LineResults):
 
         # Pass through the line results file object if a parallel file system is in use.
         iLine = lineNumbers.searchsorted(DataPoint.lineNumber)
-        failed = Inv_MCMC(paras, DataPoint, prng=prng, rank=world.rank, LineResults=LineResults[iLine])
+        failed = infer(paras, DataPoint, prng=prng, rank=world.rank, LineResults=LineResults[iLine])
 
         # Ping the Master to request a new index
         t0 = MPI.Wtime()
