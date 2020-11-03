@@ -16,10 +16,10 @@ class Order(object):
 
     def __init__(self, denominator, **kwargs):
         """ Initialize the order statistics
-        
+
         """
         if (denominator is None): return
-        
+
         i = np.arange(np.size(denominator))
         self.denominator = deepcopy(denominator)
         tmp = np.cumprod(denominator)

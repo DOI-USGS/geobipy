@@ -11,7 +11,7 @@ class EmLoop(myObject, ABC):
 
     EmLoop()
 
-    
+
     """
 
     def __init__(self):

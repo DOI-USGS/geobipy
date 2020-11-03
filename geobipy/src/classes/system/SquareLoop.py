@@ -69,7 +69,7 @@ class SquareLoop(EmLoop):
     @property
     def pitch(self):
         return self._pitch
-    
+
     @property
     def roll(self):
         return self._roll
@@ -92,9 +92,9 @@ class SquareLoop(EmLoop):
 
     @property
     def z(self):
-        return self._z   
+        return self._z
 
-    
+
     def deepcopy(self):
         return deepcopy(self)
 
@@ -196,7 +196,7 @@ class SquareLoop(EmLoop):
 
     def Bcast(self, world, root=0):
         """Broadcast using MPI
-        
+
         Parameters
         ----------
         world : mpi4py.MPI.COMM_WORLD
@@ -206,7 +206,7 @@ class SquareLoop(EmLoop):
         -------
         out : SquareLoop
             A SquareLoop on each core
-        
+
         """
 
         o = myMPI.Bcast(self.orient,      world, root=root)

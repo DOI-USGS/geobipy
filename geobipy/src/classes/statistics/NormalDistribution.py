@@ -48,12 +48,12 @@ class Normal(baseDistribution):
     def multivariate(self):
         return False
 
-    
+
     @property
     def variance(self):
         return self._variance
 
-    
+
     def cdf(self, x):
         """ For a realization x, compute the probability """
         if self.log:
@@ -68,7 +68,7 @@ class Normal(baseDistribution):
         -------
         out
             Normal
- 
+
         """
         # return deepcopy(self)
         return Normal(self.mean, self.variance, self.log, self.prng)
@@ -79,7 +79,7 @@ class Normal(baseDistribution):
 
         if self.log:
             x = np.log(x)
-        
+
         if moment == 0:
             return ((x - self._mean) / self.variance) * self.probability(x)
         else:
@@ -106,10 +106,10 @@ class Normal(baseDistribution):
 
         return np.exp(values) if self.log else values
 
-    
+
     def plotPDF(self, log=False, **kwargs):
 
-        
+
         bins = self.bins()
         t = r"$\tilde{N}(\mu="+str(self.mean)+", \sigma^{2}="+str(self.variance)+")$"
 

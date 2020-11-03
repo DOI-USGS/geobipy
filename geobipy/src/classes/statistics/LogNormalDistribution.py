@@ -24,12 +24,12 @@ class LogNormal(Normal):
     """
     def __init__(self, mean, variance, linearSpace=False, prng=None):
         """Instantiate a Normal distribution """
-        
+
         if linearSpace:
             mean = np.log(mean)
         super().__init__(mean, variance, prng=prng)
         self.linearSpace = linearSpace
-        
+
 
     @property
     def mean(self):
@@ -48,12 +48,12 @@ class LogNormal(Normal):
     def multivariate(self):
         return False
 
-    
+
     @property
     def variance(self):
         return self._variance
 
-    
+
     def cdf(self, x):
         """ For a realization x, compute the probability """
         if self.linearSpace:
@@ -68,7 +68,7 @@ class LogNormal(Normal):
         -------
         out
             Normal
- 
+
         """
         # return deepcopy(self)
         return Normal(self.mean, self.variance, self.linearSpace, self.prng)
@@ -79,7 +79,7 @@ class LogNormal(Normal):
 
         if self.linearSpace:
             x = np.log(x)
-        
+
         if moment == 0:
             return ((x - self._mean) / self.variance)
         else:
@@ -106,10 +106,10 @@ class LogNormal(Normal):
 
         return np.exp(values) if self.linearSpace else values
 
-    
+
     def plotPDF(self, log=False, **kwargs):
 
-        
+
         bins = self.bins()
         t = r"$\tilde{N}(\mu="+str(self.mean)+", \sigma^{2}="+str(self.variance)+")$"
 

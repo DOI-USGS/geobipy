@@ -845,8 +845,6 @@ class StatArray(np.ndarray, myObject):
 
 
 
-
-
     def verbose(self):
         """Explicit print of every element """
         np.set_printoptions(threshold=self.size)

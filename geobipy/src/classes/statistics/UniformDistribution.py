@@ -30,7 +30,7 @@ class Uniform(baseDistribution):
         self._scale = self._max - self._min
         # Variance
         self._variance = (1.0 / 12.0) * self.scale**2.0
-        
+
 
     @property
     def ndim(self):
