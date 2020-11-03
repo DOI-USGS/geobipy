@@ -1,10 +1,12 @@
-.. note::
-    :class: sphx-glr-download-link-note
+.. only:: html
 
-    Click :ref:`here <sphx_glr_download_examples_Data_plot_time_domain_dataset.py>` to download the full example code
-.. rst-class:: sphx-glr-example-title
+    .. note::
+        :class: sphx-glr-download-link-note
 
-.. _sphx_glr_examples_Data_plot_time_domain_dataset.py:
+        Click :ref:`here <sphx_glr_download_examples_Data_plot_time_domain_dataset.py>`     to download the full example code
+    .. rst-class:: sphx-glr-example-title
+
+    .. _sphx_glr_examples_Data_plot_time_domain_dataset.py:
 
 
 Time domain dataset
@@ -59,6 +61,14 @@ Read in the data from file
 
 
 
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    <geobipy.src.classes.data.dataset.TdemData.TdemData object at 0x127020f10>
 
 
 
@@ -75,6 +85,7 @@ Plot the locations of the data points
 
 
 .. image:: /examples/Data/images/sphx_glr_plot_time_domain_dataset_001.png
+    :alt: plot time domain dataset
     :class: sphx-glr-single-img
 
 
@@ -93,6 +104,7 @@ Plot all the data along the specified line
 
 
 .. image:: /examples/Data/images/sphx_glr_plot_time_domain_dataset_002.png
+    :alt: plot time domain dataset
     :class: sphx-glr-single-img
 
 
@@ -105,23 +117,15 @@ Or, plot specific channels in the data
 .. code-block:: default
 
     plt.figure(figsize=(8,6))
-    _ = TD.plot(system=0, channels=[3, 4, 5], log=10)
+    _ = TD.plot(system=0, channels=[17, 18, 19], log=10)
 
 
 
 
 .. image:: /examples/Data/images/sphx_glr_plot_time_domain_dataset_003.png
+    :alt: plot time domain dataset
     :class: sphx-glr-single-img
 
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
-      if (np.nanmin(values) <= 0.0):
 
 
 
@@ -139,8 +143,18 @@ Or, plot specific channels in the data
 
 
 .. image:: /examples/Data/images/sphx_glr_plot_time_domain_dataset_004.png
+    :alt: plot time domain dataset
     :class: sphx-glr-single-img
 
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
+      kwargs['cmap'].set_bad(color='white')
 
 
 
@@ -156,6 +170,7 @@ Or, plot specific channels in the data
 
 
 .. image:: /examples/Data/images/sphx_glr_plot_time_domain_dataset_005.png
+    :alt: plot time domain dataset
     :class: sphx-glr-single-img
 
 
@@ -166,7 +181,7 @@ Or, plot specific channels in the data
  .. code-block:: none
 
 
-    (429026.55879032257, 454054.24120967736, 4160661.9983766237, 4200460.001623377)
+    (429026.56, 454054.24, 4160662.0, 4200460.0)
 
 
 
@@ -191,12 +206,13 @@ Obtain a line from the data set
 .. code-block:: default
 
     plt.figure()
-    _ = line.scatter2D(c = line.dataChannel(10, system=1))
+    _ = line.scatter2D(c = line.dataChannel(17, system=1))
 
 
 
 
 .. image:: /examples/Data/images/sphx_glr_plot_time_domain_dataset_006.png
+    :alt: plot time domain dataset
     :class: sphx-glr-single-img
 
 
@@ -212,9 +228,66 @@ Obtain a line from the data set
 
 
 
+
 .. image:: /examples/Data/images/sphx_glr_plot_time_domain_dataset_007.png
+    :alt: plot time domain dataset
     :class: sphx-glr-single-img
 
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+      if (np.nanmin(values) <= 0.0):
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+      if (np.nanmin(values) <= 0.0):
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+      if (np.nanmin(values) <= 0.0):
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+      if (np.nanmin(values) <= 0.0):
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+      if (np.nanmin(values) <= 0.0):
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+      if (np.nanmin(values) <= 0.0):
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+      if (np.nanmin(values) <= 0.0):
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+      if (np.nanmin(values) <= 0.0):
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+      if (np.nanmin(values) <= 0.0):
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+      if (np.nanmin(values) <= 0.0):
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+      if (np.nanmin(values) <= 0.0):
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+      if (np.nanmin(values) <= 0.0):
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+      if (np.nanmin(values) <= 0.0):
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+      if (np.nanmin(values) <= 0.0):
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+      if (np.nanmin(values) <= 0.0):
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+      if (np.nanmin(values) <= 0.0):
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+      if (np.nanmin(values) <= 0.0):
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+      if (np.nanmin(values) <= 0.0):
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+      if (np.nanmin(values) <= 0.0):
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+      if (np.nanmin(values) <= 0.0):
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+      if (np.nanmin(values) <= 0.0):
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+      if (np.nanmin(values) <= 0.0):
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+      if (np.nanmin(values) <= 0.0):
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+      if (np.nanmin(values) <= 0.0):
 
 
 
@@ -286,7 +359,7 @@ Example system files are contained in
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  6.187 seconds)
+   **Total running time of the script:** ( 0 minutes  6.465 seconds)
 
 
 .. _sphx_glr_download_examples_Data_plot_time_domain_dataset.py:
@@ -299,13 +372,13 @@ Example system files are contained in
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-python
 
      :download:`Download Python source code: plot_time_domain_dataset.py <plot_time_domain_dataset.py>`
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-jupyter
 
      :download:`Download Jupyter notebook: plot_time_domain_dataset.ipynb <plot_time_domain_dataset.ipynb>`
 

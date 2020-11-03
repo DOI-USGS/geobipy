@@ -1,10 +1,12 @@
-.. note::
-    :class: sphx-glr-download-link-note
+.. only:: html
 
-    Click :ref:`here <sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_1d.py>` to download the full example code
-.. rst-class:: sphx-glr-example-title
+    .. note::
+        :class: sphx-glr-download-link-note
 
-.. _sphx_glr_examples_Meshes_plot_rectilinear_mesh_1d.py:
+        Click :ref:`here <sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_1d.py>`     to download the full example code
+    .. rst-class:: sphx-glr-example-title
+
+    .. _sphx_glr_examples_Meshes_plot_rectilinear_mesh_1d.py:
 
 
 1D Rectilinear Mesh
@@ -169,8 +171,18 @@ We can plot the grid of the mesh
 
 
 .. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_001.png
+    :alt: plot rectilinear mesh 1d
     :class: sphx-glr-single-img
 
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:873: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
+      pm = ax.pcolormesh(X, Y, v, color=c, **kwargs)
 
 
 
@@ -189,8 +201,18 @@ Or Pcolor the mesh showing. An array of cell values is used as the colour.
 
 
 .. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_002.png
+    :alt: plot rectilinear mesh 1d
     :class: sphx-glr-single-img
 
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:873: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
+      pm = ax.pcolormesh(X, Y, v, color=c, **kwargs)
 
 
 
@@ -343,8 +365,18 @@ We can plot the grid of the mesh
 
 
 .. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_003.png
+    :alt: plot rectilinear mesh 1d
     :class: sphx-glr-single-img
 
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:873: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
+      pm = ax.pcolormesh(X, Y, v, color=c, **kwargs)
 
 
 
@@ -362,8 +394,18 @@ Or Pcolor the mesh showing. An array of cell values is used as the colour.
 
 
 .. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_004.png
+    :alt: plot rectilinear mesh 1d
     :class: sphx-glr-single-img
 
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:873: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
+      pm = ax.pcolormesh(X, Y, v, color=c, **kwargs)
 
 
 
@@ -371,7 +413,7 @@ Or Pcolor the mesh showing. An array of cell values is used as the colour.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.362 seconds)
+   **Total running time of the script:** ( 0 minutes  0.380 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_1d.py:
@@ -384,13 +426,13 @@ Or Pcolor the mesh showing. An array of cell values is used as the colour.
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-python
 
      :download:`Download Python source code: plot_rectilinear_mesh_1d.py <plot_rectilinear_mesh_1d.py>`
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-jupyter
 
      :download:`Download Jupyter notebook: plot_rectilinear_mesh_1d.ipynb <plot_rectilinear_mesh_1d.ipynb>`
 

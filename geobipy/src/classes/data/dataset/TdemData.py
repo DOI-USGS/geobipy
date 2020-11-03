@@ -51,112 +51,139 @@ class TdemData(Data):
 
     """
 
-    def __init__(self, nPoints=1, nTimes=1, systems=None):
+    def __init__(self, systems=None, **kwargs):
         """ Initialize the TDEM data """
 
-        # Systems are given
-        if not systems is None:
-            # if its a string, convert to a list
-            if isinstance(systems, str):
-                systems = [systems]
-            nSystems = len(systems)
-            # Make sure that list contains strings or TdemSystem classes
-            assert all([isinstance(x, (str, TdemSystem)) for x in systems]), TypeError("systems must be str or list of either str or geobipy.TdemSystem")
+        if systems is None:
+            return
 
-            system = np.ndarray(nSystems, dtype=TdemSystem)
-
-            nTimes = np.empty(nSystems, dtype=np.int32)
-            for i, s in enumerate(systems):
-                if isinstance(s, str):
-                    system[i] = TdemSystem()
-                    system[i].read(systems[i])
-                else:
-                    system[i] = systems[i]
-                nTimes[i] = system[i].nwindows()
-        else:
-            nTimes = np.int32(np.atleast_1d(nTimes))
-            nSystems = nTimes.size
-            system = None
+        self.system = systems
 
         # Data Class containing xyz and channel values
-        Data.__init__(self, nPoints, nTimes, dataUnits=r"$\frac{V}{m^{2}}$")
-
-        # StatArray of the line number for flight line data
-        self._lineNumber = StatArray.StatArray(self.nPoints, 'Line Number')
-        # StatArray of the id number
-        self._fiducial = StatArray.StatArray(self.nPoints, 'ID Number')
-        # StatArray of the elevation
-        self._elevation = StatArray.StatArray(self.nPoints, 'Elevation', 'm')
+        Data.__init__(self, self.nTimes, units=r"$\frac{V}{m^{2}}$", **kwargs)
 
         # StatArray of Transmitter loops
-        self.T = StatArray.StatArray(self.nPoints, 'Transmitter Loops', dtype=CircularLoop)
+        self.transmitter = kwargs.get('transmitter', None)
         # StatArray of Receiever loops
-        self.R = StatArray.StatArray(self.nPoints, 'Receiver Loops', dtype=CircularLoop)
+        self.receiver = kwargs.get('receiver', None)
         # Loop Offsets
-        self.loopOffset = StatArray.StatArray([self.nPoints, 3], 'Loop Offset', 'm')
+        self.loopOffset = kwargs.get('loopOffset', None)
 
-        self.system = system
-        self.nSystems = nSystems
-        # self.nTimes = nTimes
 
-        k = 0
-        for i in range(self.nSystems):
-            # Set the channel names
-            if not self.system is None:
+        self.channelNames = kwargs.get('channel_names', None)
+
+
+    @property
+    def channelNames(self):
+        return self._channelNames
+
+
+    @channelNames.setter
+    def channelNames(self, values):
+        if values is None:
+            self._channelNames = []
+            for i in range(self.nSystems):
+                # Set the channel names
                 for iTime in range(self.nTimes[i]):
-                    self.channelNames[k] = 'Time {:.3e} s'.format(self.system[i].windows.centre[iTime])
-                    k += 1
+                    self._channelNames.append('Time {:.3e} s'.format(self.system[i].windows.centre[iTime]))
+        else:
+            assert all((isinstance(x, str) for x in values))
+            assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
+            self._channelNames = values
 
-        # self.iActive = self.getActiveChannels()
+    @property
+    def loopOffset(self):
+        return self._loopOffset
 
-    def __add__(self, other):
 
-        out = TdemData(self.nPoints + other.nPoints, self.nTimes, systems=self.system)
+    @loopOffset.setter
+    def loopOffset(self, values):
+        if (values is None):
+            self._loopOffset = StatArray.StatArray((self.nPoints, 3), "Loop Offset")
+        else:
+            if self.nPoints == 0:
+                self.nPoints = np.size(values)
+            assert np.all(np.shape(values) == (self.nPoints, 3)), ValueError("loopOffset must have shape {}".format((self.nPoints, 3)))
+            if (isinstance(values, StatArray.StatArray)):
+                self._loopOffset = values.deepcopy()
+            else:
+                self._loopOffset = StatArray.StatArray(values, "Loop Offset")
 
-        i1 = self.nPoints
 
-        out._lineNumber[:i1] = self.lineNumber
-        out._lineNumber[i1:] = other.lineNumber
+    @property
+    def receiver(self):
+        return self._receiver
 
-        out._fiducial[:i1] = self.fiducial
-        out._fiducial[i1:] = other.fiducial
 
-        out._x[:i1] = self.x
-        out._x[i1:] = other.x
+    @receiver.setter
+    def receiver(self, values):
 
-        out._y[:i1] = self.y
-        out._y[i1:] = other.y
+        if (values is None):
+            self._receiver = StatArray.StatArray(self.nPoints, 'Receiver loops', dtype=CircularLoop)
+        else:
+            if self.nPoints == 0:
+                self.nPoints = np.size(values)
+            assert np.size(values) == self.nPoints, ValueError("receiver must have shape {}".format(self.nPoints))
+            # if (isinstance(values, StatArray.StatArray)):
+            #     self._receiver = values.deepcopy()
+            # else:
+            self._receiver = values #StatArray.StatArray(values, 'Receiver loops', dtype=CircularLoop)
 
-        out._z[:i1] = self.z
-        out._z[i1:] = other.z
 
-        out._elevation[:i1] = self.elevation
-        out._elevation[i1:] = other.elevation
+    @property
+    def system(self):
+        return self._system
 
-        out._data[:i1, :] = self.data
-        out._data[i1:, :] = other.data
 
-        out._predictedData[:i1, :] = self.predictedData
-        out._predictedData[i1:, :] = other.predictedData
+    @system.setter
+    def system(self, values):
 
-        out._std[:i1, :] = self.std
-        out._std[i1:, :] = other.std
+        if isinstance(values, (str, TdemSystem)):
+            values = [values]
+        nSystems = len(values)
+        # Make sure that list contains strings or TdemSystem classes
+        assert all([isinstance(x, (str, TdemSystem)) for x in values]), TypeError("system must be str or list of either str or geobipy.TdemSystem")
 
-        out.T[:i1] = self.T
-        out.T[i1:] = other.T
-        # StatArray of Receiever loops
-        out.R[:i1] = self.R
-        out.R[i1:] = other.R
-        # Loop Offsets
-        out.loopOffset[:i1, :] = self.loopOffset
-        out.loopOffset[i1:, :] = other.loopOffset
+        self._system = np.ndarray(nSystems, dtype=TdemSystem)
 
-        return out
+        for i, s in enumerate(values):
+            if isinstance(s, str):
+                self._system[i] = TdemSystem().read(s)
+            else:
+                self._system[i] = s
+
+    @property
+    def transmitter(self):
+        return self._transmitter
+
+
+    @transmitter.setter
+    def transmitter(self, values):
+
+        if (values is None):
+            self._transmitter = StatArray.StatArray(self.nPoints, 'Transmitter loops', dtype=CircularLoop)
+        else:
+            if self.nPoints == 0:
+                self.nPoints = np.size(values)
+            assert np.size(values) == self.nPoints, ValueError("transmitter must have shape {}".format(self.nPoints))
+            # if (isinstance(values, StatArray.StatArray)):
+            #     self._transmitter = values.deepcopy()
+            # else:
+            self._transmitter = values #StatArray.StatArray(self.nPoi, 'Transmitter loops', dtype=CircularLoop)
+
+
+    def append(self, other):
+
+        super().append(self, other)
+
+        self.loopOffset = np.hstack([self.loopOffset, other.loopOffset])
+        self.T = np.hstack([self.T, other.T])
+        self.R = np.hstack(self.R, other.R)
 
 
     @property
     def nTimes(self):
-        return self.nChannelsPerSystem
+        return np.asarray([s.nwindows() for s in self.system])
 
 
     def read(self, dataFilename, systemFilename):
@@ -237,11 +264,11 @@ class TdemData(Data):
 
         assert nDatafiles == nSystems, Exception("Number of data files must match number of system files.")
 
-        self.readSystemFile(systemFilename)
+        self.system = systemFilename
         nPoints, iC, iR, iT, iOffset, iD, iS = self.__readColumnIndices(dataFilename, self.system)
 
 
-        TdemData.__init__(self, nPoints, systems=self.system)
+        TdemData.__init__(self, systems=self.system)
 
         # Get all readable column indices for the first file.
         tmp = [iC[0], iR[0], iT[0], iOffset[0], iD[0]]
@@ -253,24 +280,26 @@ class TdemData(Data):
         values = fIO.read_columns(dataFilename[0], indicesForFile, 1, nPoints)
 
         # Assign columns to variables
-        self._lineNumber[:] = values[:, 0]
-        self._fiducial[:] = values[:, 1]
-        self.x[:] = values[:, 2]
-        self.y[:] = values[:, 3]
-        self.elevation[:] = values[:, 4]
-        self.z[:] = values[:, 5]
+        self.lineNumber = values[:, 0]
+        self.fiducial = values[:, 1]
+        self.x = values[:, 2]
+        self.y = values[:, 3]
+        self.elevation = values[:, 4]
+        self.z = values[:, 5]
 
         # Assign the orientations of the acquisistion loops
         i0 = 6
+        self.receiver = None
         for i in range(nPoints):
-            self.R[i] = CircularLoop(z=self.z[i], pitch=values[i, i0], roll=values[i, i0+1], yaw=values[i, i0+2], radius=self.system[0].loopRadius())
+            self.receiver[i] = CircularLoop(z=self.z[i], pitch=values[i, i0], roll=values[i, i0+1], yaw=values[i, i0+2], radius=self.system[0].loopRadius())
         i0 += 3
 
+        self.transmitter = None
         for i in range(nPoints):
-            self.T[i] = CircularLoop(z=self.z[i], pitch=values[i, i0], roll=values[i, i0+1], yaw=values[i, i0+2], radius=self.system[0].loopRadius())
+            self.transmitter[i] = CircularLoop(z=self.z[i], pitch=values[i, i0], roll=values[i, i0+1], yaw=values[i, i0+2], radius=self.system[0].loopRadius())
         i0 += 3
 
-        self.loopOffset[:, :] = values[:, i0:i0+3]
+        self.loopOffset = values[:, i0:i0+3]
         i0 += 3
 
         # Assign the data values
@@ -279,53 +308,55 @@ class TdemData(Data):
 
         # Get the data values
         iSys = self._systemIndices(0)
-        self._data[:, iSys] = values[:, iData]
+        self.data[:, iSys] = values[:, iData]
         # If the data error columns are given, assign them
         if (iS[0] is None):
-            self._std[:, iSys] = 0.1 * self._data[:, iSys]
+            self.std[:, iSys] = 0.1 * self.data[:, iSys]
         else:
             i2 = i1 + self.nTimes[0]
             iStd = np.arange(i1, i2)
-            self._std[:, iSys] = values[:, iStd]
+            self.std[:, iSys] = values[:, iStd]
 
         # Read in the data for the other systems.  Only read in the data and, if available, the errors
         for i in range(1, self.nSystems):
             # Assign the columns to read
             indicesForFile = iD[i]
             if (not iS[i] is None): # Append the error columns if they are available
-                indicesForFile = np.append(indicesForFile, iS[i])
+                indicesForFile = np.concatenate(indicesForFile, iS[i])
 
             # Read the columns
             values = fIO.read_columns(dataFilename[i], indicesForFile, 1, nPoints)
             # Assign the data
             iSys = self._systemIndices(i)
-            self._data[:, iSys] = values[:, :self.nTimes[i]]
+            self.data[:, iSys] = values[:, :self.nTimes[i]]
             if (iS[i] is None):
-                self._std[:, iSys] = 0.1 * self._data[:, iSys]
+                self.std[:, iSys] = 0.1 * self.data[:, iSys]
             else:
-                self._std[:, iSys] = values[:, self.nTimes[i]:]
+                self.std[:, iSys] = values[:, self.nTimes[i]:]
 
         # self.iActive = self.getActiveChannels()
 
         self.check()
 
+        return self
 
-    def readSystemFile(self, systemFilename):
-        """ Reads in the C++ system handler using the system file name """
 
-        if isinstance(systemFilename, str):
-            systemFilename = [systemFilename]
+    # def readSystemFile(self, systemFilename):
+    #     """ Reads in the C++ system handler using the system file name """
 
-        nSys = len(systemFilename)
-        self.system = np.ndarray(nSys, dtype=TdemSystem)
+    #     if isinstance(systemFilename, str):
+    #         systemFilename = [systemFilename]
 
-        for i in range(nSys):
-            self.system[i] = TdemSystem().read(systemFilename[i])
+    #     nSys = len(systemFilename)
+    #     self.system = np.ndarray(nSys, dtype=TdemSystem)
 
-        self.nSystems = nSys
-        self.nChannelsPerSystem = np.asarray([np.int32(x.nwindows()) for x in self.system])
+    #     for i in range(nSys):
+    #         self.system[i] = TdemSystem().read(systemFilename[i])
 
-        self._systemOffset = np.append(0, np.cumsum(self.nChannelsPerSystem))
+    #     # self.nSystems = nSys
+    #     self.nChannelsPerSystem = np.asarray([np.int32(x.nwindows()) for x in self.system])
+
+    #     self._systemOffset = np.append(0, np.cumsum(self.nChannelsPerSystem))
 
 
     def __readColumnIndices(self, dataFilename, system):
@@ -422,7 +453,7 @@ class TdemData(Data):
             assert nTloop == 3, Exception('Must have all three TxPitch, TxRoll, and TxYaw headers in data file {} if transmitter orientation is specified. \n {}'.format(f, self.fileInformation()))
             assert nOffset == 3, Exception('Must have all three txrx_dx, txrx_dy, and txrx_dz headers in data file {} if transmitter-reciever loop separation is specified. \n {}'.format(f, self.fileInformation()))
 
-            assert nOffData == system[k].windows.centre.size, Exception("Number of Off time columns in {} does not match number of times in system file {}. \n {}".format(f, system[k].fileName, self.fileInformation()))
+            assert nOffData == system[k].windows.centre.size, Exception("Number of Off time columns {} in {} does not match number of times {} in system file {}. \n {}".format(nOffData, f, system[k].fileName, system[k].windows.centre.size, self.fileInformation()))
             if nOffErr > 0:
                 assert nOffErr == nOffData, Exception("Number of Off time standard deviation estimates does not match number of Off time data columns in file {}. \n {}".format(f, self.fileInformation()))
 
@@ -528,7 +559,7 @@ class TdemData(Data):
         """
 
         # Read in the EM System file
-        self.readSystemFile(systemFilename)
+        self.system = systemFilename
 
         self._nPoints, self._iC, self._iR, self._iT, self._iOffset, self._iD, self._iS = self.__readColumnIndices(dataFileName, self.system)
 
@@ -567,8 +598,6 @@ class TdemData(Data):
             if not self._iS[i] is None:
                 nTmp = self._iS[i].size
                 self._iS[i] = np.arange(nTmp) + offset
-
-        self._systemOffset = np.append(0, np.cumsum(self.nChannelsPerSystem))
 
 
     def _readSingleDatapoint(self):
@@ -711,7 +740,7 @@ class TdemData(Data):
             index = self.fiducial.searchsorted(fiducial)
 
         i = index
-        return TdemDataPoint(self.x[i], self.y[i], self.z[i], self.elevation[i], self._data[i, :], self.std[i, :], self._predictedData[i, :], self.system, self.T[i], self.R[i], self.loopOffset[i, :], self.lineNumber[i], self.fiducial[i])
+        return TdemDataPoint(self.x[i], self.y[i], self.z[i], self.elevation[i], self.data[i, :], self.std[i, :], self.predictedData[i, :], self.system, self.transmitter[i], self.receiver[i], self.loopOffset[i, :], self.lineNumber[i], self.fiducial[i])
 
 
     # def getLine(self, line):
@@ -731,22 +760,20 @@ class TdemData(Data):
         """ Define item getter for TdemData """
         if not isinstance(i, slice):
             i = np.unique(i)
-        tmp = TdemData(np.size(self.x[i]), self.nTimes, self.system)
-        tmp.x[:] = self.x[i]
-        tmp.y[:] = self.y[i]
-        tmp.z[:] = self.z[i]
-        tmp._lineNumber[:] = self.lineNumber[i]
-        tmp._fiducial[:] = self.fiducial[i]
-        tmp.elevation[:] = self.elevation[i]
-        tmp.T[:] = self.T[i]
-        tmp.R[:] = self.R[i]
-        tmp.loopOffset[:, :] = self.loopOffset[i, :]
-        tmp.sys = np.ndarray(self.nSystems, dtype=TdemSystem)
-        tmp._data[:, :] = self._data[i, :]
-        tmp._std[:, :] = self._std[i, :]
-        tmp._predictedData[:, :] = self._predictedData[i, :]
-        tmp._channelNames = self._channelNames
-        return tmp
+        return TdemData(self.system,
+                        x = self.x[i],
+                        y = self.y[i],
+                        z = self.z[i],
+                        elevation = self.elevation[i],
+                        lineNumber = self.lineNumber[i],
+                        fiducial = self.fiducial[i],
+                        transmitter = self.transmitter[i],
+                        receiver = self.receiver[i],
+                        loopOffset = self.loopOffset[i, :],
+                        data = self.data[i, :],
+                        std = self.std[i, :],
+                        predictedData = self.predictedData[i, :],
+                        channelNames = self.channelNames)
 
 
     def fileInformation(self):
@@ -804,7 +831,7 @@ class TdemData(Data):
         cP.title(tmp.name)
 
 
-    def plot(self, system=0, channels=None, xAxis='index', **kwargs):
+    def plot(self, system=0, channels=None, xAxis='x', **kwargs):
         """ Plots the data
 
         Parameters
@@ -822,19 +849,19 @@ class TdemData(Data):
         if channels is None:
             nCols = self.nTimes[system]
             for i in range(nCols):
-                i1 = self._systemOffset[system] + i
-                cP.plot(x, self._data[:, i1], label=self._channelNames[i1], **kwargs)
+                i1 = self.systemOffset[system] + i
+                cP.plot(x, self.data[:, i1], label=self.channelNames[i1], **kwargs)
         else:
             channels = np.atleast_1d(channels)
             for j, i in enumerate(channels):
-                cP.plot(x, self._data[:, i], label=self._channelNames[i], **kwargs)
+                cP.plot(x, self.data[:, i], label=self.channelNames[i], **kwargs)
 
         box = ax.get_position()
         ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
 
         # Put a legend to the right of the current axis
         leg=ax.legend(loc='center left', bbox_to_anchor=(1, 0.5),fancybox=True)
-        leg.set_title(self._data.getNameUnits())
+        leg.set_title(self.data.getNameUnits())
 
         plt.xlabel(cF.getNameUnits(x))
 
@@ -852,7 +879,7 @@ class TdemData(Data):
 
     def plotWaveform(self, **kwargs):
         for i in range(self.nSystems):
-            plt.subplot(2, 1, i + 1)
+            plt.subplot(self.nSystems, 1, i + 1)
             plt.plot(self.system[i].waveform.time, self.system[i].waveform.current, **kwargs)
             if (i == self.nSystems-1): cP.xlabel('Time (s)')
             cP.ylabel('Normalized Current (A)')
@@ -868,18 +895,16 @@ class TdemData(Data):
         ax = D.pcolor(x=times, y=y, **kwargs)
         return ax
 
-
-    def summary(self, out=False):
+    @property
+    def summary(self):
         """ Display a summary of the TdemData """
         msg = PointCloud3D.summary(self, out=out)
         msg = "Tdem Data: \n"
         msg += "Number of Systems: :" + str(self.nSystems) + '\n'
-        msg += self.lineNumber.summary(True)
-        msg += self.id.summary(True)
-        msg += self.elevation.summary(True)
-        if (out):
-            return msg
-        print(msg)
+        msg += self.lineNumber.summary
+        msg += self.id.summary
+        msg += self.elevation.summary
+        return msg
 
 
     def fromHdf(self, grp, **kwargs):
@@ -895,7 +920,8 @@ class TdemData(Data):
         for i in range(nSystems):
             # Get the system file name. h5py has to encode strings using utf-8, so decode it!
             # filename = str(np.asarray(grp.get('System{}'.format(i))), 'utf-8')
-            td = TdemSystem().read(systemFilepath)
+
+            td = TdemSystem().read(systemFilepath[i])
             systems.append(td)
 
         s = grp['d/data'].shape

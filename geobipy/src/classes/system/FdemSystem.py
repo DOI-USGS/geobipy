@@ -11,13 +11,12 @@ from .CircularLoop import CircularLoop
 from ...base import fileIO as fIO
 from ...base import MPI as myMPI
 from ...base import customFunctions as cF
-#from ...base import Error as Err
 
 
 class FdemSystem(myObject):
     """ Defines a Frequency Domain ElectroMagnetic acquisition system """
 
-    def __init__(self, frequencies=None, transmitterLoops = None, receiverLoops=None, systemFilename=None):
+    def __init__(self, frequencies=None, transmitterLoops = None, receiverLoops=None):
         """ Initialize an FdemSystem """
 
         # StatArray of frequencies
@@ -29,13 +28,9 @@ class FdemSystem(myObject):
         self.receiverLoops = receiverLoops
 
         # StatArray of Loop Separations
-        loopOffsets = StatArray.StatArray([self.nFrequencies, 3], "loopOffsets", "m")
+        self.loopOffsets = StatArray.StatArray([self.nFrequencies, 3], "loopOffsets", "m")
         for i, (t, r) in enumerate(zip(transmitterLoops, receiverLoops)):
-            loopOffsets[i, :] = [r.x - t.x, r.y - t.y, r.z - t.z]
-        self.loopOffsets = loopOffsets
-
-
-        self._fileName = systemFilename
+            self.loopOffsets[i, :] = [r.x - t.x, r.y - t.y, r.z - t.z]
 
         self._w0 = None
         self._lamda0 = None
@@ -69,7 +64,7 @@ class FdemSystem(myObject):
 
     @property
     def nFrequencies(self):
-        return np.size(self.frequencies)
+        return self.frequencies.size
 
 
     @cached_property
@@ -193,7 +188,8 @@ class FdemSystem(myObject):
                         np.float64(line[10])))
                 transmitters.append(T)
                 receivers.append(R)
-        self.__init__(frequencies, transmitters, receivers, fileName)
+        self.__init__(frequencies, transmitters, receivers)
+        return self
 
 
     def fileInformation(self):
@@ -262,14 +258,14 @@ class FdemSystem(myObject):
                 zz.append(i)
         return np.asarray(xx), np.asarray(xy), np.asarray(xz), np.asarray(yx), np.asarray(yy), np.asarray(yz), np.asarray(zx), np.asarray(zy), np.asarray(zz)
 
-
-    def summary(self, out=False):
+    @property
+    def summary(self):
         """ print a summary of the FdemSystem """
         msg = ("FdemSystem: \n"
                "{} \n"
                "{} \n"
-               "{} \n").format(self._fileName, self.frequencies.summary(True), self.loopOffsets.summary(True))
-        return msg if out else print(msg)
+               "{} \n").format(self._fileName, self.frequencies.summary, self.loopOffsets.summary)
+        return msg
 
 
     def hdfName(self):

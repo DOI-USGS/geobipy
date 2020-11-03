@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,30 +11,34 @@
   
 
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../../../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
-
-    
-
-  
   <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../../../_static/graphviz.css" type="text/css" />
   <link rel="stylesheet" href="../../../../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/gallery-dataframe.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script src="../../../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" />
     <link rel="next" title="TdemDataPoint" href="TdemDataPoint.html" />
@@ -53,7 +56,7 @@
           
 
           
-            <a href="../../../../../index.html" class="icon icon-home"> GeoBIPy
+            <a href="../../../../../index.html" class="icon icon-home" alt="Documentation Home"> GeoBIPy
           
 
           
@@ -80,6 +83,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -113,6 +117,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -151,7 +156,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../../../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../../../api.html">API</a> &raquo;</li>
         
@@ -182,17 +187,23 @@
             
   <div class="section" id="fdemdatapoint">
 <h1>FdemDataPoint<a class="headerlink" href="#fdemdatapoint" title="Permalink to this headline">¶</a></h1>
-<div class="graphviz"><img src="../../../../../_images/inheritance-c797bd8f44c53dcb073ca95b1a22dabecc453278.png" alt="Inheritance diagram of geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint" usemap="#inheritance205783337d" class="inheritance graphviz" /></div>
-<map id="inheritance205783337d" name="inheritance205783337d">
-<area shape="rect" id="node1" href="datapoint.html#geobipy.src.classes.data.datapoint.DataPoint.DataPoint" target="_top" title="Class defines a data point." alt="" coords="125,5,205,29"/>
-<area shape="rect" id="node3" href="EmDataPoint.html#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint" target="_top" title="Abstract EmDataPoint Class" alt="" coords="253,5,353,29"/>
-<area shape="rect" id="node2" href="../../pointcloud/Point.html#geobipy.src.classes.pointcloud.Point.Point" target="_top" title="Class defining a point in 3D Euclidean space" alt="" coords="5,5,77,29"/>
-<area shape="rect" id="node4" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint" target="_top" title="Class defines a Frequency domain electromagnetic data point." alt="" coords="401,5,515,29"/>
-</map><span class="target" id="module-geobipy.src.classes.data.datapoint.FdemDataPoint"></span><p>&#64;FdemDataPoint_Class
+digraph inheritance205783337d {
+bgcolor=transparent;
+rankdir=LR;
+size=&quot;8.0, 12.0&quot;;
+  &quot;DataPoint&quot; [URL=&quot;datapoint.html#geobipy.src.classes.data.datapoint.DataPoint.DataPoint&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defines a data point.&quot;];
+  &quot;Point&quot; -&gt; &quot;DataPoint&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;EmDataPoint&quot; [URL=&quot;EmDataPoint.html#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Abstract EmDataPoint Class&quot;];
+  &quot;DataPoint&quot; -&gt; &quot;EmDataPoint&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;FdemDataPoint&quot; [URL=&quot;#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defines a Frequency domain electromagnetic data point.&quot;];
+  &quot;EmDataPoint&quot; -&gt; &quot;FdemDataPoint&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;Point&quot; [URL=&quot;../../pointcloud/Point.html#geobipy.src.classes.pointcloud.Point.Point&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defining a point in 3D Euclidean space&quot;];
+}
+<span class="target" id="module-geobipy.src.classes.data.datapoint.FdemDataPoint"></span><p>&#64;FdemDataPoint_Class
 Module describing a frequency domain EMData Point that contains a single measurement.</p>
-<dl class="class">
+<dl class="py class">
 <dt id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint">
-<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.data.datapoint.FdemDataPoint.</code><code class="sig-name descname">FdemDataPoint</code><span class="sig-paren">(</span><em class="sig-param">x=0.0</em>, <em class="sig-param">y=0.0</em>, <em class="sig-param">z=0.0</em>, <em class="sig-param">elevation=0.0</em>, <em class="sig-param">data=None</em>, <em class="sig-param">std=None</em>, <em class="sig-param">predictedData=None</em>, <em class="sig-param">system=None</em>, <em class="sig-param">lineNumber=0.0</em>, <em class="sig-param">fiducial=0.0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.data.datapoint.FdemDataPoint.</code><code class="sig-name descname">FdemDataPoint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">y</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">z</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">elevation</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">std</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">predictedData</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">system</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">lineNumber</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">fiducial</span><span class="o">=</span><span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class defines a Frequency domain electromagnetic data point.</p>
 <p>Contains an easting, northing, height, elevation, observed and predicted data, and uncertainty estimates for the data.</p>
 <p>FdemDataPoint(x, y, z, elevation, data, std, system, lineNumber, fiducial)</p>
@@ -215,9 +226,9 @@ Module describing a frequency domain EMData Point that contains a single measure
 </ul>
 </dd>
 </dl>
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.FindBestHalfSpace">
-<code class="sig-name descname">FindBestHalfSpace</code><span class="sig-paren">(</span><em class="sig-param">minConductivity=1e-06</em>, <em class="sig-param">maxConductivity=100.0</em>, <em class="sig-param">percentThreshold=1.0</em>, <em class="sig-param">maxIterations=100</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.FindBestHalfSpace" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">FindBestHalfSpace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">minConductivity</span><span class="o">=</span><span class="default_value">1e-06</span></em>, <em class="sig-param"><span class="n">maxConductivity</span><span class="o">=</span><span class="default_value">100.0</span></em>, <em class="sig-param"><span class="n">percentThreshold</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">maxIterations</span><span class="o">=</span><span class="default_value">100</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.FindBestHalfSpace" title="Permalink to this definition">¶</a></dt>
 <dd><p>Uses the bisection approach to find a half space conductivity that best matches the EM data by minimizing the data misfit</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -237,41 +248,41 @@ Module describing a frequency domain EMData Point that contains a single measure
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.calibrate">
-<code class="sig-name descname">calibrate</code><span class="sig-paren">(</span><em class="sig-param">Predicted=True</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.calibrate" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">calibrate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Predicted</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.calibrate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply calibration factors to the data point</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.createHdf">
-<code class="sig-name descname">createHdf</code><span class="sig-paren">(</span><em class="sig-param">parent</em>, <em class="sig-param">myName</em>, <em class="sig-param">withPosterior=True</em>, <em class="sig-param">nRepeats=None</em>, <em class="sig-param">fillvalue=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.createHdf" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">createHdf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="n">myName</span></em>, <em class="sig-param"><span class="n">withPosterior</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">nRepeats</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fillvalue</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.createHdf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create the hdf group metadata in file
 parent: HDF object to create a group inside
 myName: Name of the group</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.forward">
-<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">mod</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.forward" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mod</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Forward model the data from the given model</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.frequencies">
-<code class="sig-name descname">frequencies</code><span class="sig-paren">(</span><em class="sig-param">system=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.frequencies" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">frequencies</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">system</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.frequencies" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the frequencies in an StatArray</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.fromHdf">
-<code class="sig-name descname">fromHdf</code><span class="sig-paren">(</span><em class="sig-param">grp</em>, <em class="sig-param">index=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.fromHdf" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fromHdf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">grp</span></em>, <em class="sig-param"><span class="n">index</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.fromHdf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads the object from a HDF group</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.getFrequency">
-<code class="sig-name descname">getFrequency</code><span class="sig-paren">(</span><em class="sig-param">channel</em>, <em class="sig-param">system=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.getFrequency" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">getFrequency</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">channel</span></em>, <em class="sig-param"><span class="n">system</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.getFrequency" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the measurement frequency of the channel</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -289,9 +300,9 @@ myName: Name of the group</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.getMeasurementType">
-<code class="sig-name descname">getMeasurementType</code><span class="sig-paren">(</span><em class="sig-param">channel</em>, <em class="sig-param">system=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.getMeasurementType" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">getMeasurementType</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">channel</span></em>, <em class="sig-param"><span class="n">system</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.getMeasurementType" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the measurement type of the channel</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -309,15 +320,15 @@ myName: Name of the group</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.hdfName">
 <code class="sig-name descname">hdfName</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.hdfName" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reproducibility procedure</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.plot">
-<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param">title='Frequency Domain EM Data'</em>, <em class="sig-param">system=0</em>, <em class="sig-param">with_error_bars=True</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.plot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">'Frequency Domain EM Data'</span></em>, <em class="sig-param"><span class="n">system</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">with_error_bars</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot the Inphase and Quadrature Data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -345,9 +356,9 @@ myName: Name of the group</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.plotPredicted">
-<code class="sig-name descname">plotPredicted</code><span class="sig-paren">(</span><em class="sig-param">title='Frequency Domain EM Data'</em>, <em class="sig-param">system=0</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.plotPredicted" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">plotPredicted</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">'Frequency Domain EM Data'</span></em>, <em class="sig-param"><span class="n">system</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.plotPredicted" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot the predicted Inphase and Quadrature Data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -374,21 +385,21 @@ myName: Name of the group</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.sensitivity">
-<code class="sig-name descname">sensitivity</code><span class="sig-paren">(</span><em class="sig-param">mod</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.sensitivity" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">sensitivity</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mod</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.sensitivity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the sensitivty matrix for the given model</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.updateSensitivity">
-<code class="sig-name descname">updateSensitivity</code><span class="sig-paren">(</span><em class="sig-param">model</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.updateSensitivity" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">updateSensitivity</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.updateSensitivity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute an updated sensitivity matrix based on the one already containined in the FdemDataPoint object</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.writeHdf">
-<code class="sig-name descname">writeHdf</code><span class="sig-paren">(</span><em class="sig-param">parent</em>, <em class="sig-param">myName</em>, <em class="sig-param">withPosterior=True</em>, <em class="sig-param">index=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.writeHdf" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">writeHdf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="n">myName</span></em>, <em class="sig-param"><span class="n">withPosterior</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">index</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.writeHdf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write the StatArray to an HDF object
 parent: Upper hdf file or group
 myName: object hdf name. Assumes createHdf has already been called
@@ -419,11 +430,19 @@ create: optionally create the data set as well before writing</p>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright None
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -434,7 +453,6 @@ create: optionally create the data set as well before writing</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

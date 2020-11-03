@@ -1,10 +1,12 @@
-.. note::
-    :class: sphx-glr-download-link-note
+.. only:: html
 
-    Click :ref:`here <sphx_glr_download_examples_Data_plot_frequency_dataset.py>` to download the full example code
-.. rst-class:: sphx-glr-example-title
+    .. note::
+        :class: sphx-glr-download-link-note
 
-.. _sphx_glr_examples_Data_plot_frequency_dataset.py:
+        Click :ref:`here <sphx_glr_download_examples_Data_plot_frequency_dataset.py>`     to download the full example code
+    .. rst-class:: sphx-glr-example-title
+
+    .. _sphx_glr_examples_Data_plot_frequency_dataset.py:
 
 
 Frequency domain dataset
@@ -14,6 +16,8 @@ Frequency domain dataset
 .. code-block:: default
 
     import matplotlib.pyplot as plt
+    from geobipy import CircularLoop
+    from geobipy import FdemSystem
     from geobipy import FdemData
     import numpy as np
 
@@ -24,8 +28,99 @@ Frequency domain dataset
 
 
 
+
+Defining data using a frequency domain system
++++++++++++++++++++++++++++++++++++++++++++++
+
+We can start by defining the frequencies, transmitter loops, and receiver loops
+For each frequency we need to define a pair of loops
+
+
+.. code-block:: default
+
+    frequencies = np.asarray([395.0, 822.0, 3263.0, 8199.0, 38760.0, 128755.0])
+
+
+
+
+
+
+
+
+Transmitter positions are defined relative to the observation locations in the data
+This is usually a constant offset for all data points.
+
+
+.. code-block:: default
+
+    transmitters = [CircularLoop(orient="z", moment=1.0,  x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
+                    CircularLoop(orient="z", moment=1.0,  x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
+                    CircularLoop(orient="x", moment=-1.0, x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
+                    CircularLoop(orient="z", moment=1.0,  x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
+                    CircularLoop(orient="z", moment=1.0,  x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
+                    CircularLoop(orient="z", moment=1.0,  x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0)]
+
+
+
+
+
+
+
+
+Receiver positions are defined relative to the transmitter
+
+
+.. code-block:: default
+
+    receivers = [CircularLoop(orient="z", moment=1.0, x=7.93, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
+                 CircularLoop(orient="z", moment=1.0, x=7.91, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
+                 CircularLoop(orient="x", moment=1.0, x=9.03, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
+                 CircularLoop(orient="z", moment=1.0, x=7.91, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
+                 CircularLoop(orient="z", moment=1.0, x=7.91, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
+                 CircularLoop(orient="z", moment=1.0, x=7.89, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0)]
+
+
+
+
+
+
+
+
+Instantiate the system for the data
+
+
+.. code-block:: default
+
+    system = FdemSystem(frequencies=frequencies, transmitterLoops=transmitters, receiverLoops=receivers)
+
+
+
+
+
+
+
+
+Create some data with random co-ordinates
+
+
+.. code-block:: default
+
+    x = np.random.randn(100)
+    y = np.random.randn(100)
+    z = np.random.randn(100)
+
+    data = FdemData(x=x, y=-y, z=z, systems = system)
+
+
+
+
+
+
+
+
 Reading in the Data
 +++++++++++++++++++
+Of course measured field data is stored on disk. So instead we can read data from file.
 
 
 .. code-block:: default
@@ -48,8 +143,7 @@ Read in a data set from file.
 
 .. code-block:: default
 
-    FD1 = FdemData()
-    FD1.read(dataFile, systemFile)
+    FD1 = FdemData().read(dataFile, systemFile)
 
 
 
@@ -92,6 +186,36 @@ Take a look at the channel names
 
 
 
+Get data points by slicing
+
+
+.. code-block:: default
+
+    FDa = FD1[10:]
+    FD1 = FD1[:10]
+
+
+
+
+
+
+
+
+Append data sets together
+
+
+.. code-block:: default
+
+    FD1.append(FDa)
+
+
+
+
+
+
+
+
+
 Plot the locations of the data points
 
 
@@ -104,6 +228,7 @@ Plot the locations of the data points
 
 
 .. image:: /examples/Data/images/sphx_glr_plot_frequency_dataset_001.png
+    :alt: plot frequency dataset
     :class: sphx-glr-single-img
 
 
@@ -122,6 +247,7 @@ Plot all the data along the specified line
 
 
 .. image:: /examples/Data/images/sphx_glr_plot_frequency_dataset_002.png
+    :alt: Line number 30010.0
     :class: sphx-glr-single-img
 
 
@@ -140,6 +266,7 @@ Or, plot specific channels in the data
 
 
 .. image:: /examples/Data/images/sphx_glr_plot_frequency_dataset_003.png
+    :alt: plot frequency dataset
     :class: sphx-glr-single-img
 
 
@@ -166,6 +293,7 @@ Read in a second data set
 
     Warning: Your data contains values that are <= 0.0
 
+    <geobipy.src.classes.data.dataset.FdemData.FdemData object at 0x1279b4490>
 
 
 
@@ -182,6 +310,7 @@ We can create maps of the elevations in two separate figures
 
 
 .. image:: /examples/Data/images/sphx_glr_plot_frequency_dataset_004.png
+    :alt: plot frequency dataset
     :class: sphx-glr-single-img
 
 
@@ -191,6 +320,8 @@ We can create maps of the elevations in two separate figures
 
  .. code-block:: none
 
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
+      kwargs['cmap'].set_bad(color='white')
 
     (584519.0671621622, 590166.7428378379, 4639079.207593819, 4661808.632406181)
 
@@ -208,6 +339,7 @@ We can create maps of the elevations in two separate figures
 
 
 .. image:: /examples/Data/images/sphx_glr_plot_frequency_dataset_005.png
+    :alt: plot frequency dataset
     :class: sphx-glr-single-img
 
 
@@ -217,6 +349,8 @@ We can create maps of the elevations in two separate figures
 
  .. code-block:: none
 
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
+      kwargs['cmap'].set_bad(color='white')
 
     (662847.3094082569, 668366.7995917432, 4560053.628459876, 4600646.676540123)
 
@@ -240,6 +374,7 @@ one of the channels as the colour.
 
 
 .. image:: /examples/Data/images/sphx_glr_plot_frequency_dataset_006.png
+    :alt: plot frequency dataset
     :class: sphx-glr-single-img
 
 
@@ -261,6 +396,7 @@ interpolate the specified channel number.
 
 
 .. image:: /examples/Data/images/sphx_glr_plot_frequency_dataset_007.png
+    :alt: In-Phase 8171.0 (Hz)
     :class: sphx-glr-single-img
 
 
@@ -270,6 +406,8 @@ interpolate the specified channel number.
 
  .. code-block:: none
 
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
+      kwargs['cmap'].set_bad(color='white')
 
     (584518.405, 590167.405, 4639078.6625, 4661809.1775)
 
@@ -378,8 +516,8 @@ A summary will now show the properties of the line.
      [ 71.3 315.3 220.5 ... 745.9 968.3 919.1]
      [ 72.1 316.6 220.7 ... 749.2 976.5 928.3]]
 
-     Name: Standard Deviation
-         Units: ppm
+     Name: 
+         Units: 
          Shape: (6710, 12)
          Values: [[14.53 43.58 26.06 ... 51.65 40.57 25.57]
      [14.57 43.65 25.79 ... 51.36 40.32 25.2 ]
@@ -389,8 +527,8 @@ A summary will now show the properties of the line.
      [ 7.13 31.53 22.05 ... 74.59 96.83 91.91]
      [ 7.21 31.66 22.07 ... 74.92 97.65 92.83]]
 
-     Name: Predicted Data
-         Units: ppm
+     Name: 
+         Units: 
          Shape: (6710, 12)
          Values: [[0. 0. 0. ... 0. 0. 0.]
      [0. 0. 0. ... 0. 0. 0.]
@@ -418,6 +556,7 @@ And we can scatter2D the points in the line.
 
 
 .. image:: /examples/Data/images/sphx_glr_plot_frequency_dataset_008.png
+    :alt: plot frequency dataset
     :class: sphx-glr-single-img
 
 
@@ -436,8 +575,8 @@ xAxis can be index, x, y, z, r2d, r3d
 
 
 
-
 .. image:: /examples/Data/images/sphx_glr_plot_frequency_dataset_009.png
+    :alt: plot frequency dataset
     :class: sphx-glr-single-img
 
 
@@ -533,7 +672,7 @@ See the Resolve.stm files.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  15.385 seconds)
+   **Total running time of the script:** ( 0 minutes  11.702 seconds)
 
 
 .. _sphx_glr_download_examples_Data_plot_frequency_dataset.py:
@@ -546,13 +685,13 @@ See the Resolve.stm files.
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-python
 
      :download:`Download Python source code: plot_frequency_dataset.py <plot_frequency_dataset.py>`
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-jupyter
 
      :download:`Download Jupyter notebook: plot_frequency_dataset.ipynb <plot_frequency_dataset.ipynb>`
 

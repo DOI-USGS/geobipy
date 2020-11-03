@@ -34,3 +34,30 @@ class myObject(object):
             return (str(i / (1024**3)) + ' GB')
         if (j < 15):
             return (str(i / (1024**4)) + ' TB')
+
+
+    @property
+    def hdf_name(self):
+        return str(self.__class__)
+
+
+    def toHdf(self, h5obj, myName):
+        """Create and write to HDF.
+
+        Parameters
+        ----------
+        h5obj : h5py._hl.files.File or h5py._hl.group.Group
+            A HDF file or group object to write the contents to.
+        myName : str
+            The name of the group to write the StatArray to.
+
+        """
+
+        if isinstance(h5obj, str):
+            with h5py.File(h5obj, 'w') as f:
+                self.createHdf(f, myName)
+                self.writeHdf(f, myName)
+                return
+
+        self.createHdf(h5obj, myName)
+        self.writeHdf(h5obj, myName)

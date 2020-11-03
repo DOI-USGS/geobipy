@@ -44,8 +44,8 @@ _ = H.pcolor(cmap='gray_r')
 
 ################################################################################
 # Generate marginal histograms along an axis
-h1 = H.marginalHistogram(axis=0)
-h2 = H.marginalHistogram(axis=1)
+h1 = H.marginalize(axis=0)
+h2 = H.marginalize(axis=1)
 
 
 ################################################################################

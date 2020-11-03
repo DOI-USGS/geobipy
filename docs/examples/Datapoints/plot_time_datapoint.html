@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,32 +11,37 @@
   
 
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
-
-  
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery-dataframe.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="1D Posterior analysis of the Bayesian inference" href="../Inference/plot_inference_1d.html" />
     <link rel="prev" title="Frequency domain datapoint" href="plot_frequency_datapoint.html" /> 
 </head>
 
@@ -52,7 +56,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home"> GeoBIPy
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> GeoBIPy
           
 
           
@@ -79,6 +83,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -108,6 +113,7 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#posterior-analysis">Posterior Analysis</a></li>
 </ul>
 </li>
 </ul>
@@ -115,6 +121,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -153,7 +160,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../index.html">Examples</a> &raquo;</li>
         
@@ -178,7 +185,7 @@
             
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
-<p>Click <a class="reference internal" href="#sphx-glr-download-examples-datapoints-plot-time-datapoint-py"><span class="std std-ref">here</span></a> to download the full example code</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-datapoints-plot-time-datapoint-py"><span class="std std-ref">here</span></a>     to download the full example code</p>
 </div>
 <div class="sphx-glr-example-title section" id="time-domain-datapoint-class">
 <span id="sphx-glr-examples-datapoints-plot-time-datapoint-py"></span><h1>Time Domain Datapoint Class<a class="headerlink" href="#time-domain-datapoint-class" title="Permalink to this headline">¶</a></h1>
@@ -211,7 +218,7 @@ We would like to thank Ross Brodie at Geoscience Australia for his airborne time
 <span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">Distribution</span>
 
 <span class="n">dataFolder</span> <span class="o">=</span> <span class="s2">&quot;..//supplementary//Data//&quot;</span>
-<span class="c1"># dataFolder = &quot;source//examples//supplementary//Data//&quot;</span>
+<span class="c1"># dataFolder = &quot;source//examples//supplementary//Data&quot;</span>
 </pre></div>
 </div>
 <div class="section" id="instantiating-a-time-domain-datapoint">
@@ -269,9 +276,9 @@ We would like to thank Ross Brodie at Geoscience Australia for his airborne time
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_time_datapoint_001.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_001.png" />
+<img alt="plot time datapoint" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_001.png" />
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend object at 0x12b6b6150&gt;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend object at 0x12a392a90&gt;
 </pre></div>
 </div>
 <p>Define the transmitter and reciever loops</p>
@@ -311,9 +318,9 @@ We would like to thank Ross Brodie at Geoscience Australia for his airborne time
 <span class="n">tdp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">with_error_bars</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_time_datapoint_002.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_002.png" />
+<img alt="Time Domain EM Data" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_002.png" />
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.axes._subplots.AxesSubplot object at 0x12b635150&gt;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;AxesSubplot:title={&#39;center&#39;:&#39;Time Domain EM Data&#39;}, xlabel=&#39;Time (s)&#39;, ylabel=&#39;Time domain data ($\\frac{V}{Am^{4}}$)&#39;&gt;
 </pre></div>
 </div>
 </div>
@@ -329,9 +336,9 @@ AarhusInv data format.</p>
 <span class="n">tdp</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_time_datapoint_003.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_003.png" />
+<img alt="Time Domain EM Data" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_003.png" />
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.axes._subplots.AxesSubplot object at 0x12bb45610&gt;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;AxesSubplot:title={&#39;center&#39;:&#39;Time Domain EM Data&#39;}, xlabel=&#39;Time (s)&#39;, ylabel=&#39;Time domain data ($\\frac{V}{Am^{4}}$)&#39;&gt;
 </pre></div>
 </div>
 </div>
@@ -351,15 +358,19 @@ We can read in a dataset and pull datapoints from it.</p>
 <span class="n">D</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">dataFile</span><span class="p">,</span> <span class="n">systemFile</span><span class="p">)</span>
 </pre></div>
 </div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;geobipy.src.classes.data.dataset.TdemData.TdemData object at 0x12b144970&gt;
+</pre></div>
+</div>
 <p>Get a datapoint from the dataset</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tdp</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">datapoint</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">tdp</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_time_datapoint_004.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_004.png" />
+<img alt="Time Domain EM Data" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_004.png" />
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.axes._subplots.AxesSubplot object at 0x12fb56d50&gt;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;AxesSubplot:title={&#39;center&#39;:&#39;Time Domain EM Data&#39;}, xlabel=&#39;Time (s)&#39;, ylabel=&#39;Time domain data ($\\frac{V}{Am^{4}}$)&#39;&gt;
 </pre></div>
 </div>
 </div>
@@ -383,19 +394,29 @@ We can read in a dataset and pull datapoints from it.</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_time_datapoint_005.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_005.png" />
+<img alt="Time Domain EM Data" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_005.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:873: MatplotlibDeprecationWarning: shading=&#39;flat&#39; when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading=&#39;auto&#39;, &#39;nearest&#39; or &#39;gouraud&#39;, or set rcParams[&#39;pcolor.shading&#39;].  This will become an error two minor releases later.
+  pm = ax.pcolormesh(X, Y, v, color=c, **kwargs)
+</pre></div>
+</div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">tdp</span><span class="o">.</span><span class="n">plotDataResidual</span><span class="p">(</span><span class="n">xscale</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_time_datapoint_006.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_006.png" />
+<img alt="plot time datapoint" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_006.png" />
 <p>Compute the sensitivity matrix for a given model</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">J</span> <span class="o">=</span> <span class="n">tdp</span><span class="o">.</span><span class="n">sensitivity</span><span class="p">(</span><span class="n">mod</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">J</span><span class="p">)</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">equalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">flipY</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_time_datapoint_007.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_007.png" />
+<img alt="plot time datapoint" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_007.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap(&quot;viridis&quot;))
+  kwargs[&#39;cmap&#39;].set_bad(color=&#39;white&#39;)
+</pre></div>
+</div>
 </div>
 <div class="section" id="attaching-statistical-descriptors-to-the-datapoint">
 <h2>Attaching statistical descriptors to the datapoint<a class="headerlink" href="#attaching-statistical-descriptors-to-the-datapoint" title="Permalink to this headline">¶</a></h2>
@@ -410,8 +431,8 @@ We can read in a dataset and pull datapoints from it.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>-19707.246512951275
-201.7577916092427
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>-19707.246512951326
+201.75779160924293
 </pre></div>
 </div>
 <p>We can perform a quick search for the best fitting half space</p>
@@ -422,7 +443,7 @@ We can read in a dataset and pull datapoints from it.</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">tdp</span><span class="o">.</span><span class="n">plotPredicted</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_time_datapoint_008.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_008.png" />
+<img alt="Time Domain EM Data" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_008.png" />
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Best half space conductivity is [0.01830738] $S/m$
 </pre></div>
@@ -432,7 +453,7 @@ We can read in a dataset and pull datapoints from it.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>48.247662254424135
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>48.24766225442447
 </pre></div>
 </div>
 <p>Plot the misfits for a range of half space conductivities</p>
@@ -441,7 +462,7 @@ We can read in a dataset and pull datapoints from it.</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Halfspace responses&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_time_datapoint_009.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_009.png" />
+<img alt="Halfspace responses" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_009.png" />
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Text(0.5, 1.0, &#39;Halfspace responses&#39;)
 </pre></div>
@@ -461,7 +482,7 @@ the relative error multiplier, and the additive error noise floor</p>
 </div>
 <p>In order to perturb our solvable parameters, we need to attach proposal distributions</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">heightProposal</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;Normal&#39;</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="n">tdp</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="n">variance</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">)</span>
-<span class="n">relativeProposal</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;MvNormal&#39;</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="n">tdp</span><span class="o">.</span><span class="n">relErr</span><span class="p">,</span> <span class="n">variance</span><span class="o">=</span><span class="mf">2.5e-7</span><span class="p">)</span>
+<span class="n">relativeProposal</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;MvNormal&#39;</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="n">tdp</span><span class="o">.</span><span class="n">relErr</span><span class="p">,</span> <span class="n">variance</span><span class="o">=</span><span class="mf">2.5e-4</span><span class="p">)</span>
 <span class="n">additiveProposal</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;MvLogNormal&#39;</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="n">tdp</span><span class="o">.</span><span class="n">addErr</span><span class="p">,</span> <span class="n">variance</span><span class="o">=</span><span class="mf">2.5e-3</span><span class="p">,</span> <span class="n">linearSpace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">tdp</span><span class="o">.</span><span class="n">setProposals</span><span class="p">(</span><span class="n">heightProposal</span><span class="p">,</span> <span class="n">relativeProposal</span><span class="p">,</span> <span class="n">additiveProposal</span><span class="p">)</span>
 </pre></div>
@@ -470,7 +491,8 @@ the relative error multiplier, and the additive error noise floor</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tdp</span><span class="o">.</span><span class="n">setPosteriors</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>Perturb the datapoint and record the perturbations</p>
+<p>Perturb the datapoint and record the perturbations
+Note we are not using the priors to accept or reject perturbations.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000</span><span class="p">):</span>
     <span class="n">tdp</span><span class="o">.</span><span class="n">perturb</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
     <span class="n">tdp</span><span class="o">.</span><span class="n">updatePosteriors</span><span class="p">()</span>
@@ -481,17 +503,19 @@ the relative error multiplier, and the additive error noise floor</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">tdp</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">plotPosteriors</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_time_datapoint_010.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_010.png" />
+<img alt="plot time datapoint" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_010.png" />
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">tdp</span><span class="o">.</span><span class="n">errorPosterior</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">comboPlot</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">)</span>
-<span class="c1"># _ = tdp.relErr.plotPosteriors()</span>
-
-<span class="c1"># ################################################################################</span>
-<span class="c1"># plt.figure()</span>
-<span class="c1"># _ = tdp.addErr.plotPosteriors()</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_time_datapoint_011.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_011.png" />
+<img alt="plot time datapoint" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_time_datapoint_011.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap(&quot;gray_r&quot;))
+  kwargs[&#39;cmap&#39;].set_bad(color=&#39;white&#39;)
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:690: MatplotlibDeprecationWarning: shading=&#39;flat&#39; when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading=&#39;auto&#39;, &#39;nearest&#39; or &#39;gouraud&#39;, or set rcParams[&#39;pcolor.shading&#39;].  This will become an error two minor releases later.
+  pm = ax.pcolormesh(X, Y, Zm, alpha = alpha, **kwargs)
+</pre></div>
+</div>
 </div>
 <div class="section" id="file-format-for-a-time-domain-datapoint">
 <h2>File Format for a time domain datapoint<a class="headerlink" href="#file-format-for-a-time-domain-datapoint" title="Permalink to this headline">¶</a></h2>
@@ -551,12 +575,12 @@ are the start and end times, and start and end amplitudes of the waveform. e.g.
 Measurement Time, Data Value, Estimated Standard Deviation</p>
 <p>Example data files are contained in
 <a class="reference external" href="https://github.com/usgs/geobipy/tree/master/documentation_source/source/examples/supplementary/Data">the supplementary folder</a> in this repository</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  6.687 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  7.521 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-datapoints-plot-time-datapoint-py">
-<div class="sphx-glr-download docutils container">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/0e3aeb04e3a0e72a0de3fde32e818345/plot_time_datapoint.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_time_datapoint.py</span></code></a></p>
 </div>
-<div class="sphx-glr-download docutils container">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/ccf55b0b79361f6ca3e08c0c23361430/plot_time_datapoint.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_time_datapoint.ipynb</span></code></a></p>
 </div>
 </div>
@@ -572,6 +596,8 @@ Measurement Time, Data Value, Estimated Standard Deviation</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
+        <a href="../Inference/plot_inference_1d.html" class="btn btn-neutral float-right" title="1D Posterior analysis of the Bayesian inference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
       
         <a href="plot_frequency_datapoint.html" class="btn btn-neutral float-left" title="Frequency domain datapoint" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
@@ -582,11 +608,19 @@ Measurement Time, Data Value, Estimated Standard Deviation</p>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright None
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -597,7 +631,6 @@ Measurement Time, Data Value, Estimated Standard Deviation</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

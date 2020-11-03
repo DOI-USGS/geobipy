@@ -493,8 +493,8 @@ class RectilinearMesh2D(myObject):
 
         tmp.pcolor(x=xtmp, y=self.z.cellEdges, grid=True, noColorbar=True, **kwargs)
 
-
-    def summary(self, out=False):
+    @property
+    def summary(self):
         return
 
 

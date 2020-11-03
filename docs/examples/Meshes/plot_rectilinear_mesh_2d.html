@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,30 +11,34 @@
   
 
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
-
-  
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery-dataframe.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Topo Rectilinear Mesh 2D" href="plot_topo_rectilinear_mesh_2d.html" />
@@ -53,7 +56,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home"> GeoBIPy
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> GeoBIPy
           
 
           
@@ -80,6 +83,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -105,6 +109,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#data">Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#datapoints">Datapoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#posterior-analysis">Posterior Analysis</a></li>
 </ul>
 </li>
 </ul>
@@ -112,6 +117,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -150,7 +156,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../index.html">Examples</a> &raquo;</li>
         
@@ -175,7 +181,7 @@
             
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
-<p>Click <a class="reference internal" href="#sphx-glr-download-examples-meshes-plot-rectilinear-mesh-2d-py"><span class="std std-ref">here</span></a> to download the full example code</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-meshes-plot-rectilinear-mesh-2d-py"><span class="std std-ref">here</span></a>     to download the full example code</p>
 </div>
 <div class="sphx-glr-example-title section" id="d-rectilinear-mesh">
 <span id="sphx-glr-examples-meshes-plot-rectilinear-mesh-2d-py"></span><h1>2D Rectilinear Mesh<a class="headerlink" href="#d-rectilinear-mesh" title="Permalink to this headline">¶</a></h1>
@@ -204,7 +210,12 @@ do not follow a line that is parallel to either the “x” or “y” axis.</p>
 <span class="n">_</span>  <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_rectilinear_mesh_2d_001.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_001.png" />
+<img alt="plot rectilinear mesh 2d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_001.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap(&quot;viridis&quot;))
+  kwargs[&#39;cmap&#39;].set_bad(color=&#39;white&#39;)
+</pre></div>
+</div>
 <div class="section" id="d-mesh-embedded-in-3d">
 <h2>2D Mesh embedded in 3D<a class="headerlink" href="#d-mesh-embedded-in-3d" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">z</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">15.0</span><span class="p">)),</span> <span class="s1">&#39;Depth&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">)</span>
@@ -216,13 +227,18 @@ do not follow a line that is parallel to either the “x” or “y” axis.</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">plotXY</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_rectilinear_mesh_2d_002.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_002.png" />
+<img alt="plot rectilinear mesh 2d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_002.png" />
 <p>Again, plot the grid. This time the z-coordinate dominates the plot.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">(</span><span class="n">xAxis</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">flipY</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_rectilinear_mesh_2d_003.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_003.png" />
+<img alt="plot rectilinear mesh 2d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_003.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap(&quot;viridis&quot;))
+  kwargs[&#39;cmap&#39;].set_bad(color=&#39;white&#39;)
+</pre></div>
+</div>
 <p>We can pcolor the mesh by providing cell values.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">arr</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">rm</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="s1">&#39;Name&#39;</span><span class="p">,</span> <span class="s1">&#39;Units&#39;</span><span class="p">)</span>
 
@@ -230,7 +246,12 @@ do not follow a line that is parallel to either the “x” or “y” axis.</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">xAxis</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flipY</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../../_images/sphx_glr_plot_rectilinear_mesh_2d_004.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_004.png" />
+<img alt="plot rectilinear mesh 2d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_004.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap(&quot;viridis&quot;))
+  kwargs[&#39;cmap&#39;].set_bad(color=&#39;white&#39;)
+</pre></div>
+</div>
 <p>We can perform some interval statistics on the cell values of the mesh
 Generate some values</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">(</span><span class="n">rm</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">nCells</span><span class="o">+</span><span class="mi">1</span><span class="p">))[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span> <span class="n">rm</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">nCells</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
@@ -282,12 +303,12 @@ Generate some values</p>
 </pre></div>
 </div>
 <p>rm.toVTK(‘test’, cellData=StatArray(np.random.randn(z.size, x.size), “Name”))</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.351 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.377 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-meshes-plot-rectilinear-mesh-2d-py">
-<div class="sphx-glr-download docutils container">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/48c7722b252e7ddf33d95322115dcaf5/plot_rectilinear_mesh_2d.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_rectilinear_mesh_2d.py</span></code></a></p>
 </div>
-<div class="sphx-glr-download docutils container">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/6dec5e41149e94d435270c1dffe803e1/plot_rectilinear_mesh_2d.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_rectilinear_mesh_2d.ipynb</span></code></a></p>
 </div>
 </div>
@@ -315,11 +336,19 @@ Generate some values</p>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright None
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -330,7 +359,6 @@ Generate some values</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

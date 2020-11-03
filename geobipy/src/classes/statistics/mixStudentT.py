@@ -137,9 +137,16 @@ class mixStudentT(Mixture):
 
         return out
 
-    def summary(self, out=False):
+    @property
+    def summary(self):
 
-        h = '{}'
+        msg = ('n_components: {}\n'
+             '{}\n'
+             '{}\n'
+             '{}\n'
+             '{}\n').format(self.n_components, self.amplitudes.summary, self.means.summary, self.variances.summary, self.degrees.summary)
+
+        return msg
 
     def _assign_from_mixture(self, mixture):
         self.__init__(np.squeeze(mixture.means), np.squeeze(mixture.covariances), np.squeeze(mixture.degrees), amplitudes=np.squeeze(mixture.weights))

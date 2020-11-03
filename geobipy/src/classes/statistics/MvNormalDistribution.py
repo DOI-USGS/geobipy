@@ -198,12 +198,13 @@ class MvNormal(baseDistribution):
             return prob
 
 
-    def summary(self, out=False):
+    @property
+    def summary(self):
         msg = 'MV Normal Distribution: \n'
         msg += '    Mean: ' + str(self.mean) + '\n'
         msg += '    Variance: ' + str(self.variance) + '\n'
 
-        return msg if out else print(msg)
+        return msg
 
 
     def pad(self, N):

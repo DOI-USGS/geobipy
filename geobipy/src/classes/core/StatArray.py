@@ -7,7 +7,7 @@ from ...base import customPlots as cP
 from ..statistics.Distribution import Distribution
 from ..statistics.baseDistribution import baseDistribution
 from .myObject import myObject
-from ...base.HDF.hdfWrite import writeNumpy
+from ...base.HDF.hdfWrite import write_nd
 from ...base import MPI as myMPI
 
 from ...base.HDF import hdfRead
@@ -638,6 +638,26 @@ class StatArray(np.ndarray, myObject):
             return False
 
 
+    def index(self, values):
+        """Find the index of values.
+
+        Assumes that self is monotonically increasing!
+
+        Parameters
+        ----------
+        values : scalara or array_like
+            Find the index of these values.
+
+        Returns
+        -------
+        out : ints
+            Indicies into self.
+
+        """
+
+        return self.searchsorted(values, side='right') - 1
+
+
     def priorDerivative(self, order, i=None):
         """ Get the derivative of the prior.
 
@@ -767,7 +787,8 @@ class StatArray(np.ndarray, myObject):
         return self[i]
 
 
-    def summary(self, out=False):
+    @property
+    def summary(self):
         """Write a summary of the StatArray
 
         Parameters
@@ -782,26 +803,23 @@ class StatArray(np.ndarray, myObject):
 
         """
         np.set_printoptions(threshold=5)
-        msg = "Name: " + self.getName() + '\n'
-        msg += "     Units: " + self.getUnits() + '\n'
+        msg = "Name: " + self.getNameUnits() + '\n'
         msg += "     Shape: " + str(self.shape) + '\n'
         msg += "     Values: " + str(self[:]) + '\n'
         if self.hasPrior:
-            msg += "Prior: \n     {}".format(self.prior.summary(True))
+            msg += "Prior: \n     {}".format(self.prior.summary)
 
         if self.hasProposal:
-            msg += "Proposal: \n{}".format(self.proposal.summary(True))
+            msg += "Proposal: \n{}".format(self.proposal.summary)
 
         if self.hasPosterior:
             if self.nPosteriors > 1:
                 for p in self.posterior:
-                    msg += "Posterior: \n{}".format(p.summary(True))
+                    msg += "Posterior: \n{}".format(p.summary)
             else:
-                msg += "Posterior: \n{}".format(self.posterior.summary(True))
+                msg += "Posterior: \n{}".format(self.posterior.summary)
 
-        if (out):
-            return msg
-        print(msg)
+        return msg
 
 
     def summaryPlot(self, **kwargs):
@@ -824,8 +842,6 @@ class StatArray(np.ndarray, myObject):
         self.posterior.plot(**kwargs)
         cP.title("Posterior")
         cP.xlabel(self.getNameUnits())
-
-
 
 
 
@@ -1549,7 +1565,7 @@ class StatArray(np.ndarray, myObject):
 
         """
 
-        writeNumpy(self, h5obj, myName+'/data', index=index)
+        write_nd(self, h5obj, myName+'/data', index=index)
 #        try:
 #            self.prior.writeHdf(h5obj,myName+'/prior',create=False)
 #        except:

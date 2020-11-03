@@ -41,7 +41,7 @@ class TdemSystem(myObject):
         self.modellingTimes, self.modellingFrequencies, self.ft, self.ftarg = empymod.utils.check_time(
             time=self.get_modellingTimes,          # Required times
             signal=-1,           # Switch-off response
-            ft='cos',           # Use DLF
+            ft='dlf',           # Use DLF
             ftarg={'fftfilt': 'key_81_CosSin_2009'},
             verb=0)
 
@@ -77,9 +77,10 @@ class TdemSystem(myObject):
             assert isinstance(value, EmLoop), TypeError("transmitterLoop must have type geobipy.EmLoop")
             self._receiverLoop = value.deepcopy()
 
-    def summary(self, out=False):
+    @property
+    def summary(self):
         msg = ("TdemSystem: ")
-        return msg if out else print(msg)
+        return msg
 
     @property
     def times(self):

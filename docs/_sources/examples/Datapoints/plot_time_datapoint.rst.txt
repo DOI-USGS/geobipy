@@ -1,10 +1,12 @@
-.. note::
-    :class: sphx-glr-download-link-note
+.. only:: html
 
-    Click :ref:`here <sphx_glr_download_examples_Datapoints_plot_time_datapoint.py>` to download the full example code
-.. rst-class:: sphx-glr-example-title
+    .. note::
+        :class: sphx-glr-download-link-note
 
-.. _sphx_glr_examples_Datapoints_plot_time_datapoint.py:
+        Click :ref:`here <sphx_glr_download_examples_Datapoints_plot_time_datapoint.py>`     to download the full example code
+    .. rst-class:: sphx-glr-example-title
+
+    .. _sphx_glr_examples_Datapoints_plot_time_datapoint.py:
 
 
 Time Domain Datapoint Class
@@ -48,7 +50,7 @@ Thanks to Dieter for his help getting Empymod ready for incorporation into GeoBI
     from geobipy import Distribution
 
     dataFolder = "..//supplementary//Data//"
-    # dataFolder = "source//examples//supplementary//Data//"
+    # dataFolder = "source//examples//supplementary//Data"
 
 
 
@@ -144,6 +146,7 @@ The Waveform class defines a half waveform
 
 
 .. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_001.png
+    :alt: plot time datapoint
     :class: sphx-glr-single-img
 
 
@@ -154,7 +157,7 @@ The Waveform class defines a half waveform
  .. code-block:: none
 
 
-    <matplotlib.legend.Legend object at 0x12b6b6150>
+    <matplotlib.legend.Legend object at 0x12a392a90>
 
 
 
@@ -242,6 +245,7 @@ Instantiate the time domain datapoint
 
 
 .. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_002.png
+    :alt: Time Domain EM Data
     :class: sphx-glr-single-img
 
 
@@ -252,7 +256,7 @@ Instantiate the time domain datapoint
  .. code-block:: none
 
 
-    <matplotlib.axes._subplots.AxesSubplot object at 0x12b635150>
+    <AxesSubplot:title={'center':'Time Domain EM Data'}, xlabel='Time (s)', ylabel='Time domain data ($\\frac{V}{Am^{4}}$)'>
 
 
 
@@ -284,6 +288,7 @@ AarhusInv data format.
 
 
 .. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_003.png
+    :alt: Time Domain EM Data
     :class: sphx-glr-single-img
 
 
@@ -294,7 +299,7 @@ AarhusInv data format.
  .. code-block:: none
 
 
-    <matplotlib.axes._subplots.AxesSubplot object at 0x12bb45610>
+    <AxesSubplot:title={'center':'Time Domain EM Data'}, xlabel='Time (s)', ylabel='Time domain data ($\\frac{V}{Am^{4}}$)'>
 
 
 
@@ -333,6 +338,14 @@ Initialize and read an EM data set
 
 
 
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    <geobipy.src.classes.data.dataset.TdemData.TdemData object at 0x12b144970>
 
 
 
@@ -349,6 +362,7 @@ Get a datapoint from the dataset
 
 
 .. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_004.png
+    :alt: Time Domain EM Data
     :class: sphx-glr-single-img
 
 
@@ -359,7 +373,7 @@ Get a datapoint from the dataset
  .. code-block:: none
 
 
-    <matplotlib.axes._subplots.AxesSubplot object at 0x12fb56d50>
+    <AxesSubplot:title={'center':'Time Domain EM Data'}, xlabel='Time (s)', ylabel='Time domain data ($\\frac{V}{Am^{4}}$)'>
 
 
 
@@ -410,8 +424,18 @@ Forward model the data
 
 
 .. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_005.png
+    :alt: Time Domain EM Data
     :class: sphx-glr-single-img
 
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:873: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
+      pm = ax.pcolormesh(X, Y, v, color=c, **kwargs)
 
 
 
@@ -426,6 +450,7 @@ Forward model the data
 
 
 .. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_006.png
+    :alt: plot time datapoint
     :class: sphx-glr-single-img
 
 
@@ -445,8 +470,18 @@ Compute the sensitivity matrix for a given model
 
 
 .. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_007.png
+    :alt: plot time datapoint
     :class: sphx-glr-single-img
 
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
+      kwargs['cmap'].set_bad(color='white')
 
 
 
@@ -487,8 +522,8 @@ This allows us to evaluate the likelihood of the predicted data
 
  .. code-block:: none
 
-    -19707.246512951275
-    201.7577916092427
+    -19707.246512951326
+    201.75779160924293
 
 
 
@@ -508,6 +543,7 @@ We can perform a quick search for the best fitting half space
 
 
 .. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_008.png
+    :alt: Time Domain EM Data
     :class: sphx-glr-single-img
 
 
@@ -539,7 +575,7 @@ Compute the misfit between observed and predicted data
 
  .. code-block:: none
 
-    48.247662254424135
+    48.24766225442447
 
 
 
@@ -557,6 +593,7 @@ Plot the misfits for a range of half space conductivities
 
 
 .. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_009.png
+    :alt: Halfspace responses
     :class: sphx-glr-single-img
 
 
@@ -601,7 +638,7 @@ In order to perturb our solvable parameters, we need to attach proposal distribu
 .. code-block:: default
 
     heightProposal = Distribution('Normal', mean=tdp.z, variance = 0.01)
-    relativeProposal = Distribution('MvNormal', mean=tdp.relErr, variance=2.5e-7)
+    relativeProposal = Distribution('MvNormal', mean=tdp.relErr, variance=2.5e-4)
     additiveProposal = Distribution('MvLogNormal', mean=tdp.addErr, variance=2.5e-3, linearSpace=True)
     tdp.setProposals(heightProposal, relativeProposal, additiveProposal)
 
@@ -627,6 +664,7 @@ With priorss set we can auto generate the posteriors
 
 
 Perturb the datapoint and record the perturbations
+Note we are not using the priors to accept or reject perturbations.
 
 
 .. code-block:: default
@@ -654,6 +692,7 @@ Plot the posterior distributions
 
 
 .. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_010.png
+    :alt: plot time datapoint
     :class: sphx-glr-single-img
 
 
@@ -665,18 +704,25 @@ Plot the posterior distributions
 
     plt.figure()
     _ = tdp.errorPosterior[0].comboPlot(cmap='gray_r')
-    # _ = tdp.relErr.plotPosteriors()
-
-    # ################################################################################
-    # plt.figure()
-    # _ = tdp.addErr.plotPosteriors()
 
 
 
 
 .. image:: /examples/Datapoints/images/sphx_glr_plot_time_datapoint_011.png
+    :alt: plot time datapoint
     :class: sphx-glr-single-img
 
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("gray_r"))
+      kwargs['cmap'].set_bad(color='white')
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:690: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
+      pm = ax.pcolormesh(X, Y, Zm, alpha = alpha, **kwargs)
 
 
 
@@ -763,7 +809,7 @@ Example data files are contained in
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  6.687 seconds)
+   **Total running time of the script:** ( 0 minutes  7.521 seconds)
 
 
 .. _sphx_glr_download_examples_Datapoints_plot_time_datapoint.py:
@@ -776,13 +822,13 @@ Example data files are contained in
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-python
 
      :download:`Download Python source code: plot_time_datapoint.py <plot_time_datapoint.py>`
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-jupyter
 
      :download:`Download Jupyter notebook: plot_time_datapoint.ipynb <plot_time_datapoint.ipynb>`
 

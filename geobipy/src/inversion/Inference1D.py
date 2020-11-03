@@ -1,5 +1,5 @@
-""" @EMinversion1D_MCMC_Results
-Class to store EMinv1D inversion results. Contains plotting and writing to file procedures
+""" @Inference1D
+Class to store inversion results. Contains plotting and writing to file procedures
 """
 from os.path import join
 import matplotlib as mpl
@@ -12,7 +12,7 @@ from ..base import customFunctions as cF
 import numpy as np
 from ..base import fileIO as fIO
 import h5py
-from ..base.HDF.hdfWrite import writeNumpy
+from ..base.HDF.hdfWrite import write_nd
 from ..classes.core import StatArray
 from ..classes.statistics.Hitmap2D import Hitmap2D
 from ..classes.statistics.Histogram1D import Histogram1D
@@ -24,12 +24,12 @@ from ..classes.model.Model1D import Model1D
 from ..classes.core.Stopwatch import Stopwatch
 from ..base.HDF import hdfRead
 
-class Results(myObject):
+class Inference1D(myObject):
     """Define the results for the Bayesian MCMC Inversion.
 
     Contains histograms and inversion related variables that can be updated as the Bayesian inversion progresses.
 
-    Results(saveMe, plotMe, savePNG, dataPoint, model, ID, \*\*kwargs)
+    Inference1D(saveMe, plotMe, savePNG, dataPoint, model, ID, \*\*kwargs)
 
     Parameters
     ----------
@@ -264,8 +264,11 @@ class Results(myObject):
         # Histogram of data errors
 
         for i in range(self.nSystems):
-            self.ax.append(plt.subplot(gs[1:5, 2 * self.nSystems + i])) # Relative Errors
-            # self.ax[j+2] = plt.subplot(gs[3:6,2 * self.nSystems + i]) # Additive Errors
+            if not self.currentDataPoint.errorPosterior is None:
+                self.ax.append(plt.subplot(gs[1:5, 2 * self.nSystems + i])) # 2D Histogram
+            else:
+                self.ax.append(plt.subplot(gs[:3,  2 * self.nSystems + i])) # Relative Errors
+                self.ax.append(plt.subplot(gs[3:6, 2 * self.nSystems + i])) # Additive Errors
 
         for ax in self.ax:
             cP.pretty(ax)
@@ -348,7 +351,7 @@ class Results(myObject):
                 # Histogram of the data point elevation
                 plt.sca(self.ax[2])
                 plt.cla()
-                self._plotHeightPosterior()
+                self._plotHeightPosterior(normalize=True)
 
 
                 # Update the histogram of the number of layers
@@ -360,13 +363,10 @@ class Results(myObject):
                 # Update the layer depth histogram
                 plt.sca(self.ax[6])
                 plt.cla()
-                self._plotLayerDepthPosterior()
+                self._plotLayerDepthPosterior(normalize=True)
 
                 j = 7
-                self._plotErrorPosterior(axes=self.ax[7:])
-
-                # self._plotRelativeErrorPosterior(axes=relativeAxes)
-                # self._plotAdditiveErrorPosterior(axes=additiveAxes)
+                self._plotErrorPosterior(axes=self.ax[7:], normalize=True)
 
 
             cP.suptitle(title)
@@ -620,6 +620,14 @@ class Results(myObject):
 
             return
 
+        if self.currentDataPoint.relErr.hasPosterior and self.currentDataPoint.addErr.hasPosterior:
+            assert len(axes) == 2 * self.nSystems, ValueError("Need {} axes to plot error posteriors".format(2 * self.nSystems))
+            self._plotRelativeErrorPosterior(axes[::2], **kwargs)
+            plt.title('')
+            self._plotAdditiveErrorPosterior(axes[1::2], **kwargs)
+            plt.title('')
+            return
+
         if self.currentDataPoint.relErr.hasPosterior:
             self._plotRelativeErrorPosterior(axes, **kwargs)
             return
@@ -632,9 +640,9 @@ class Results(myObject):
                 ax = axes[i]
                 ax.cla()
                 ax.text(0.1, 0.5,
-                         " {} = {} {} \n {} = {} {}".format(
-                          self.bestDataPoint.relErr.name, self.bestDataPoint.relErr[i], self.bestDataPoint.relErr.units,
-                          self.bestDataPoint.addErr.name, self.bestDataPoint.addErr[i], self.bestDataPoint.addErr.units))
+                        " {} = {} {} \n {} = {} {}".format(
+                        self.bestDataPoint.relErr.name, self.bestDataPoint.relErr[i], self.bestDataPoint.relErr.units,
+                        self.bestDataPoint.addErr.name, self.bestDataPoint.addErr[i], self.bestDataPoint.addErr.units))
 
 
     def _plotRelativeErrorPosterior(self, axes, **kwargs):
@@ -651,7 +659,7 @@ class Results(myObject):
                 plt.sca(a)
                 plt.axvline(self.bestDataPoint.relErr[i], color=cP.wellSeparated[3], linewidth=1)
                 a.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
-                cP.title("{} = {} {}".format(self.bestDataPoint.addErr.name, self.bestDataPoint.addErr[i], self.bestDataPoint.addErr.units))
+                cP.title("Best {} was {:.3e} {}".format(self.bestDataPoint.addErr.name, self.bestDataPoint.addErr[i], self.bestDataPoint.addErr.units))
 
 
     def _plotAdditiveErrorPosterior(self, axes, **kwargs):
@@ -669,7 +677,7 @@ class Results(myObject):
                 plt.sca(a)
                 plt.axvline(loc[i], color=cP.wellSeparated[3], linewidth=1)
                 a.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
-                cP.title("{} = {} {}".format(self.bestDataPoint.relErr.name, self.bestDataPoint.relErr[i], self.bestDataPoint.relErr.units))
+                cP.title("Best {} was {:.3e} {}".format(self.bestDataPoint.relErr.name, self.bestDataPoint.relErr[i], self.bestDataPoint.relErr.units))
 
 
     def _plotLayerDepthPosterior(self, **kwargs):
@@ -1005,10 +1013,10 @@ class Results(myObject):
         """ Reads a data point's results from HDF5 file """
 
         with h5py.File(fileName, 'r')as f:
-            R = Results().fromHdf(f, systemFilePath, index=index, fiducial=fiducial)
+            R = self.fromHdf(f, systemFilePath, index=index, fiducial=fiducial)
 
-        R.plotMe = True
-        return R
+        self.plotMe = True
+        return self
 
 
     def read_fromH5Obj(self, h5obj, fName, grpName, systemFilepath = ''):

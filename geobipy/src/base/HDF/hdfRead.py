@@ -9,7 +9,7 @@ from ...classes.model.Model1D import Model1D
 from ...classes.mesh.RectilinearMesh1D import RectilinearMesh1D
 from ...classes.mesh.RectilinearMesh2D import RectilinearMesh2D
 from ...classes.statistics.Hitmap2D import Hitmap2D
-from ...inversion.Results import Results
+from ...inversion.Inference1D import Inference1D
 from ...classes.system.CircularLoop import CircularLoop
 from ...base import customFunctions as cf
 #from .. import Error as Err

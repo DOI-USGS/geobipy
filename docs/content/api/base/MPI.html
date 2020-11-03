@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,30 +11,34 @@
   
 
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-
-    
-
-  
   <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery-dataframe.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="Classes used in GeoBIPy" href="../classes/classes.html" />
@@ -53,7 +56,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> GeoBIPy
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> GeoBIPy
           
 
           
@@ -80,6 +83,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -108,6 +112,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -146,7 +151,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../api.html">API</a> &raquo;</li>
         
@@ -174,9 +179,9 @@
   <div class="section" id="module-geobipy.src.base.MPI">
 <span id="mpi-wrapper-functions"></span><h1>MPI wrapper functions<a class="headerlink" href="#module-geobipy.src.base.MPI" title="Permalink to this headline">¶</a></h1>
 <p>Module containing custom MPI functions</p>
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.MPI.Bcast">
-<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">Bcast</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">world</em>, <em class="sig-param">root=0</em>, <em class="sig-param">dtype=None</em>, <em class="sig-param">ndim=None</em>, <em class="sig-param">shape=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Bcast" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">Bcast</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">world</span></em>, <em class="sig-param"><span class="n">root</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">dtype</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ndim</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">shape</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Bcast" title="Permalink to this definition">¶</a></dt>
 <dd><p>Broadcast a string or a numpy array</p>
 <p>Broadcast a string or a numpy array from a root rank to all ranks in an MPI communicator. Must be called collectively.
 In order to call this function collectively, the variable ‘self’ must be instantiated on every rank. See the example section for more details.</p>
@@ -200,7 +205,7 @@ In order to call this function collectively, the variable ‘self’ must be ins
 </dl>
 <p class="rubric">Examples</p>
 <p>Given a numpy array instantiated on the master rank 0, in order to broadcast it, I must also instantiate a variable with the same name on all other ranks.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">geobipy.src.base</span> <span class="kn">import</span> <span class="n">MPI</span> <span class="k">as</span> <span class="n">myMPI</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">world</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
@@ -221,9 +226,9 @@ In order to call this function collectively, the variable ‘self’ must be ins
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.MPI.Bcast_1int">
-<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">Bcast_1int</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">world</em>, <em class="sig-param">root=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Bcast_1int" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">Bcast_1int</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">world</span></em>, <em class="sig-param"><span class="n">root</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Bcast_1int" title="Permalink to this definition">¶</a></dt>
 <dd><p>Broadcast a single integer</p>
 <p>In order to broadcast scalar values using the faster numpy approach, the value must cast into a 1D ndarray. Must be called collectively.</p>
 <dl class="field-list simple">
@@ -243,7 +248,7 @@ In order to call this function collectively, the variable ‘self’ must be ins
 </dl>
 <p class="rubric">Examples</p>
 <p>Given an integer instantiated on the master rank 0, in order to broadcast it, I must also instantiate a variable with the same name on all other ranks.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">geobipy.src.base</span> <span class="kn">import</span> <span class="n">MPI</span> <span class="k">as</span> <span class="n">myMPI</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">world</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
@@ -257,9 +262,9 @@ In order to call this function collectively, the variable ‘self’ must be ins
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.MPI.Bcast_list">
-<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">Bcast_list</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">world</em>, <em class="sig-param">root=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Bcast_list" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">Bcast_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">world</span></em>, <em class="sig-param"><span class="n">root</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Bcast_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Broadcast a list by pickling, sending, and unpickling.  This is slower than using numpy arrays and uppercase (Bcast) mpi4py routines. Must be called collectively.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -278,27 +283,27 @@ In order to call this function collectively, the variable ‘self’ must be ins
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.MPI.Irecv">
-<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">Irecv</code><span class="sig-paren">(</span><em class="sig-param">source</em>, <em class="sig-param">world</em>, <em class="sig-param">dtype=None</em>, <em class="sig-param">ndim=None</em>, <em class="sig-param">shape=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Irecv" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">Irecv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">source</span></em>, <em class="sig-param"><span class="n">world</span></em>, <em class="sig-param"><span class="n">dtype</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ndim</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">shape</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Irecv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Irecv a numpy array. Auto determines data type and shape. Must be accompanied by Isend on the source rank.</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.MPI.IrecvFromLeft">
-<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">IrecvFromLeft</code><span class="sig-paren">(</span><em class="sig-param">world</em>, <em class="sig-param">wrap=True</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.IrecvFromLeft" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">IrecvFromLeft</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">world</span></em>, <em class="sig-param"><span class="n">wrap</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.IrecvFromLeft" title="Permalink to this definition">¶</a></dt>
 <dd><p>Irecv an array from the rank left of world.rank.</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.MPI.IrecvFromRight">
-<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">IrecvFromRight</code><span class="sig-paren">(</span><em class="sig-param">world</em>, <em class="sig-param">wrap=True</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.IrecvFromRight" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">IrecvFromRight</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">world</span></em>, <em class="sig-param"><span class="n">wrap</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.IrecvFromRight" title="Permalink to this definition">¶</a></dt>
 <dd><p>IRecv an array from the rank right of world.rank.</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.MPI.Irecv_1int">
-<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">Irecv_1int</code><span class="sig-paren">(</span><em class="sig-param">source</em>, <em class="sig-param">world</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Irecv_1int" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">Irecv_1int</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">source</span></em>, <em class="sig-param"><span class="n">world</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Irecv_1int" title="Permalink to this definition">¶</a></dt>
 <dd><p>Recv a single integer. Must be accompanied by Isend_1int on the source rank.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -317,27 +322,27 @@ In order to call this function collectively, the variable ‘self’ must be ins
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.MPI.Isend">
-<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">Isend</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">dest</em>, <em class="sig-param">world</em>, <em class="sig-param">dtype=None</em>, <em class="sig-param">ndim=None</em>, <em class="sig-param">shape=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Isend" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">Isend</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">dest</span></em>, <em class="sig-param"><span class="n">world</span></em>, <em class="sig-param"><span class="n">dtype</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ndim</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">shape</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Isend" title="Permalink to this definition">¶</a></dt>
 <dd><p>Isend a numpy array. Auto determines data type and shape. Must be accompanied by Irecv on the dest rank.</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.MPI.IsendToLeft">
-<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">IsendToLeft</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">world</em>, <em class="sig-param">wrap=True</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.IsendToLeft" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">IsendToLeft</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">world</span></em>, <em class="sig-param"><span class="n">wrap</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.IsendToLeft" title="Permalink to this definition">¶</a></dt>
 <dd><p>ISend an array to the rank left of world.rank.</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.MPI.IsendToRight">
-<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">IsendToRight</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">world</em>, <em class="sig-param">wrap=True</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.IsendToRight" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">IsendToRight</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">world</span></em>, <em class="sig-param"><span class="n">wrap</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.IsendToRight" title="Permalink to this definition">¶</a></dt>
 <dd><p>ISend an array to the rank left of world.rank.</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.MPI.Isend_1int">
-<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">Isend_1int</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">dest</em>, <em class="sig-param">world</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Isend_1int" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">Isend_1int</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">dest</span></em>, <em class="sig-param"><span class="n">world</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Isend_1int" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send a single integer. Must be accompanied by Irecv_1int on the dest rank.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -356,9 +361,9 @@ In order to call this function collectively, the variable ‘self’ must be ins
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.MPI.Scatterv">
-<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">Scatterv</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">starts</em>, <em class="sig-param">chunks</em>, <em class="sig-param">world</em>, <em class="sig-param">axis=0</em>, <em class="sig-param">root=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Scatterv" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">Scatterv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">starts</span></em>, <em class="sig-param"><span class="n">chunks</span></em>, <em class="sig-param"><span class="n">world</span></em>, <em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">root</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Scatterv" title="Permalink to this definition">¶</a></dt>
 <dd><p>ScatterV an array to all ranks in an MPI communicator.</p>
 <p>Each rank gets a chunk defined by a starting index and chunk size. Must be called collectively. The ‘starts’ and ‘chunks’ must be available on every MPI rank. Must be called collectively. See the example for more details.</p>
 <dl class="field-list simple">
@@ -380,7 +385,7 @@ In order to call this function collectively, the variable ‘self’ must be ins
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">geobipy.src.base</span> <span class="kn">import</span> <span class="n">MPI</span> <span class="k">as</span> <span class="n">myMPI</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">world</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
@@ -399,9 +404,9 @@ In order to call this function collectively, the variable ‘self’ must be ins
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.MPI.Scatterv_list">
-<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">Scatterv_list</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">starts</em>, <em class="sig-param">chunks</em>, <em class="sig-param">world</em>, <em class="sig-param">root=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Scatterv_list" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">Scatterv_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">starts</span></em>, <em class="sig-param"><span class="n">chunks</span></em>, <em class="sig-param"><span class="n">world</span></em>, <em class="sig-param"><span class="n">root</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Scatterv_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Scatterv a list by pickling, sending, receiving, and unpickling.  This is slower than using numpy arrays and uppercase (Scatterv) mpi4py routines. Must be called collectively.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -422,9 +427,9 @@ In order to call this function collectively, the variable ‘self’ must be ins
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.MPI.Scatterv_numpy">
-<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">Scatterv_numpy</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">starts</em>, <em class="sig-param">chunks</em>, <em class="sig-param">dtype</em>, <em class="sig-param">world</em>, <em class="sig-param">axis=0</em>, <em class="sig-param">root=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Scatterv_numpy" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">Scatterv_numpy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">starts</span></em>, <em class="sig-param"><span class="n">chunks</span></em>, <em class="sig-param"><span class="n">dtype</span></em>, <em class="sig-param"><span class="n">world</span></em>, <em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">root</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.Scatterv_numpy" title="Permalink to this definition">¶</a></dt>
 <dd><p>ScatterV a numpy array to all ranks in an MPI communicator.</p>
 <p>Each rank gets a chunk defined by a starting index and chunk size. Must be called collectively. The ‘starts’ and ‘chunks’ must be available on every MPI rank. See the example for more details. Must be called collectively.</p>
 <dl class="field-list simple">
@@ -448,9 +453,9 @@ In order to call this function collectively, the variable ‘self’ must be ins
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.MPI.banner">
-<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">banner</code><span class="sig-paren">(</span><em class="sig-param">world</em>, <em class="sig-param">aStr=None</em>, <em class="sig-param">end='\n'</em>, <em class="sig-param">rank=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.banner" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">banner</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">world</span></em>, <em class="sig-param"><span class="n">aStr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end</span><span class="o">=</span><span class="default_value">'\n'</span></em>, <em class="sig-param"><span class="n">rank</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.banner" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prints a String with Separators above and below</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -464,9 +469,9 @@ In order to call this function collectively, the variable ‘self’ must be ins
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.MPI.bcastType">
-<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">bcastType</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">world</em>, <em class="sig-param">root=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.bcastType" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">bcastType</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">world</span></em>, <em class="sig-param"><span class="n">root</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.bcastType" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the type of an object and broadcasts it to every rank in an MPI communicator.</p>
 <p>Adaptively broadcasts the type of an object. Must be called collectively.</p>
 <dl class="field-list simple">
@@ -488,9 +493,9 @@ For lists, the data type will be list</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.MPI.getParallelPrng">
-<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">getParallelPrng</code><span class="sig-paren">(</span><em class="sig-param">world</em>, <em class="sig-param">timeFunction</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.getParallelPrng" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">getParallelPrng</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">world</span></em>, <em class="sig-param"><span class="n">timeFunction</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.getParallelPrng" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a random seed using time and the process id</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -502,9 +507,9 @@ For lists, the data type will be list</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.MPI.helloWorld">
-<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">helloWorld</code><span class="sig-paren">(</span><em class="sig-param">world</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.helloWorld" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">helloWorld</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">world</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.helloWorld" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print hello from every rank in an MPI communicator</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -513,9 +518,9 @@ For lists, the data type will be list</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.MPI.loadBalance1D_shrinkingArrays">
-<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">loadBalance1D_shrinkingArrays</code><span class="sig-paren">(</span><em class="sig-param">N</em>, <em class="sig-param">nChunks</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.loadBalance1D_shrinkingArrays" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">loadBalance1D_shrinkingArrays</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">N</span></em>, <em class="sig-param"><span class="n">nChunks</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.loadBalance1D_shrinkingArrays" title="Permalink to this definition">¶</a></dt>
 <dd><p>Splits the length of an array into a number of chunks. Load balances the chunks in a shrinking arrays fashion.</p>
 <p>Given a length N, split N up into nChunks and return the starting index and size of each chunk.
 After being split equally among the chunks, the remainder is split so that the first remainder
@@ -537,9 +542,9 @@ chunks get +1 in size. e.g. N=10, nChunks=3 would return starts=[0,4,7] chunks=[
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.MPI.loadBalance3D_shrinkingArrays">
-<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">loadBalance3D_shrinkingArrays</code><span class="sig-paren">(</span><em class="sig-param">shape</em>, <em class="sig-param">nChunks</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.loadBalance3D_shrinkingArrays" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">loadBalance3D_shrinkingArrays</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span></em>, <em class="sig-param"><span class="n">nChunks</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.loadBalance3D_shrinkingArrays" title="Permalink to this definition">¶</a></dt>
 <dd><p>Splits three dimensions among nChunks.</p>
 <p>The number of chunks honours the relative difference in the values of shape. e.g. if shape is [600, 600, 300], then the number of chunks will be larger for the
 first two dimensions, and less for the third.
@@ -561,9 +566,9 @@ Once the chunks are obtained, the start indices and chunk sizes for each dimensi
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.MPI.orderedPrint">
-<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">orderedPrint</code><span class="sig-paren">(</span><em class="sig-param">world</em>, <em class="sig-param">this</em>, <em class="sig-param">title=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.orderedPrint" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">orderedPrint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">world</span></em>, <em class="sig-param"><span class="n">this</span></em>, <em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.orderedPrint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prints numbers from each rank in order of rank</p>
 <p>This routine will print an item from each rank in order of rank.
 This routine is SLOW due to lots of communication, but is useful for illustration purposes, or debugging.
@@ -579,9 +584,9 @@ Do not use this in production code!  The title is used in a banner</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.MPI.print">
-<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">print</code><span class="sig-paren">(</span><em class="sig-param">aStr=''</em>, <em class="sig-param">end='\n'</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.print" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">print</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">aStr</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">end</span><span class="o">=</span><span class="default_value">'\n'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.print" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prints the str to sys.stdout and flushes the buffer so that printing is immediate</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -593,9 +598,9 @@ Do not use this in production code!  The title is used in a banner</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.MPI.rankPrint">
-<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">rankPrint</code><span class="sig-paren">(</span><em class="sig-param">world</em>, <em class="sig-param">aStr=''</em>, <em class="sig-param">end='\n'</em>, <em class="sig-param">rank=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.rankPrint" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.MPI.</code><code class="sig-name descname">rankPrint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">world</span></em>, <em class="sig-param"><span class="n">aStr</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">end</span><span class="o">=</span><span class="default_value">'\n'</span></em>, <em class="sig-param"><span class="n">rank</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.MPI.rankPrint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prints only from the specified MPI rank</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -631,11 +636,19 @@ Do not use this in production code!  The title is used in a banner</p>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright None
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -646,7 +659,6 @@ Do not use this in production code!  The title is used in a banner</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

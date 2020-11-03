@@ -6,7 +6,7 @@ import h5py
 from geobipy.src.classes.data.datapoint.FdemDataPoint import FdemDataPoint
 from geobipy.src.classes.data.datapoint.TdemDataPoint import TdemDataPoint
 from geobipy.src.inversion._userParameters import _userParameters
-from geobipy.src.inversion.Results import Results
+from geobipy.src.inversion.Inference1D import Inference1D
 from geobipy.src.classes.core.StatArray import StatArray
 import numpy as np
 from geobipy.src.base import Error as Err

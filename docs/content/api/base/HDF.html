@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,30 +11,34 @@
   
 
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-
-    
-
-  
   <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/gallery-dataframe.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="MPI wrapper functions" href="MPI.html" />
@@ -53,7 +56,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> GeoBIPy
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> GeoBIPy
           
 
           
@@ -80,6 +83,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -108,6 +112,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -146,7 +151,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../api.html">API</a> &raquo;</li>
         
@@ -173,9 +178,9 @@
             
   <div class="section" id="module-geobipy.src.base.HDF.hdfRead">
 <span id="heirarchical-data-format-hdf"></span><h1>Heirarchical Data Format (HDF)<a class="headerlink" href="#module-geobipy.src.base.HDF.hdfRead" title="Permalink to this headline">¶</a></h1>
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.HDF.hdfRead.find">
-<code class="sig-prename descclassname">geobipy.src.base.HDF.hdfRead.</code><code class="sig-name descname">find</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">tag</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.HDF.hdfRead.find" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.HDF.hdfRead.</code><code class="sig-name descname">find</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">tag</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.HDF.hdfRead.find" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the locations of all groups with ‘tag’ in their path.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -193,9 +198,9 @@
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.HDF.hdfRead.readKeyFromFile">
-<code class="sig-prename descclassname">geobipy.src.base.HDF.hdfRead.</code><code class="sig-name descname">readKeyFromFile</code><span class="sig-paren">(</span><em class="sig-param">h5obj</em>, <em class="sig-param">fName</em>, <em class="sig-param">groupName</em>, <em class="sig-param">key</em>, <em class="sig-param">index=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.HDF.hdfRead.readKeyFromFile" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.HDF.hdfRead.</code><code class="sig-name descname">readKeyFromFile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">h5obj</span></em>, <em class="sig-param"><span class="n">fName</span></em>, <em class="sig-param"><span class="n">groupName</span></em>, <em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">index</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.HDF.hdfRead.readKeyFromFile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads in the keys from a file</p>
 <p>Iterates over group names and keys and reads them from a HDF5 file</p>
 <dl class="field-list simple">
@@ -220,9 +225,9 @@
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.HDF.hdfRead.readKeyFromFiles">
-<code class="sig-prename descclassname">geobipy.src.base.HDF.hdfRead.</code><code class="sig-name descname">readKeyFromFiles</code><span class="sig-paren">(</span><em class="sig-param">fNames</em>, <em class="sig-param">groupName</em>, <em class="sig-param">key</em>, <em class="sig-param">index=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.HDF.hdfRead.readKeyFromFiles" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.HDF.hdfRead.</code><code class="sig-name descname">readKeyFromFiles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fNames</span></em>, <em class="sig-param"><span class="n">groupName</span></em>, <em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">index</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.HDF.hdfRead.readKeyFromFiles" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads in the keys from multiple files</p>
 <p>Iterates over filenames, group names, and keys and reads them from a HDF5 file</p>
 <dl class="field-list simple">
@@ -246,9 +251,9 @@
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.HDF.hdfRead.read_all">
-<code class="sig-prename descclassname">geobipy.src.base.HDF.hdfRead.</code><code class="sig-name descname">read_all</code><span class="sig-paren">(</span><em class="sig-param">fName</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.HDF.hdfRead.read_all" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.HDF.hdfRead.</code><code class="sig-name descname">read_all</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fName</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.HDF.hdfRead.read_all" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads all the entries written to a HDF file</p>
 <p>Iterates through the highest set of keys in the hdf5 file, and reads each one to a list. If each entry has an attached .readHdf procedure, that will be used to read in an object (Those objects imported at the top of this file can be successfully read in using this attached procedure.) If an entry is a numpy array, that will be the return type.  This function will read in the entire file! Use this with caution if you are using large files.</p>
 <dl class="field-list simple">
@@ -264,9 +269,9 @@
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.HDF.hdfRead.read_groups_with_tag">
-<code class="sig-prename descclassname">geobipy.src.base.HDF.hdfRead.</code><code class="sig-name descname">read_groups_with_tag</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">tag</em>, <em class="sig-param">index=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.HDF.hdfRead.read_groups_with_tag" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.HDF.hdfRead.</code><code class="sig-name descname">read_groups_with_tag</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">tag</span></em>, <em class="sig-param"><span class="n">index</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.HDF.hdfRead.read_groups_with_tag" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads all groups with ‘tag’ in their path into memory.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -284,9 +289,9 @@
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="geobipy.src.base.HDF.hdfRead.read_item">
-<code class="sig-prename descclassname">geobipy.src.base.HDF.hdfRead.</code><code class="sig-name descname">read_item</code><span class="sig-paren">(</span><em class="sig-param">hObj</em>, <em class="sig-param">index=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.HDF.hdfRead.read_item" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.HDF.hdfRead.</code><code class="sig-name descname">read_item</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">hObj</span></em>, <em class="sig-param"><span class="n">index</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.HDF.hdfRead.read_item" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read an object from a HDF file</p>
 <p>This function provides a flexible way to read in either a numpy hdf5 entry, or an object in this package.  The objects in this package may have an attached .createHdf and writeHdf procedure.  If so, this function will read in those objects and return that object.  If the entry is instead a numpy array, a numpy array will be returned.</p>
 <dl class="field-list simple">
@@ -308,9 +313,9 @@
 </dl>
 </dd></dl>
 
-<span class="target" id="module-geobipy.src.base.HDF.hdfWrite"></span><dl class="function">
+<span class="target" id="module-geobipy.src.base.HDF.hdfWrite"></span><dl class="py function">
 <dt id="geobipy.src.base.HDF.hdfWrite.writeNumpy">
-<code class="sig-prename descclassname">geobipy.src.base.HDF.hdfWrite.</code><code class="sig-name descname">writeNumpy</code><span class="sig-paren">(</span><em class="sig-param">arr</em>, <em class="sig-param">h5obj</em>, <em class="sig-param">myName</em>, <em class="sig-param">index=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.HDF.hdfWrite.writeNumpy" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">geobipy.src.base.HDF.hdfWrite.</code><code class="sig-name descname">writeNumpy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">arr</span></em>, <em class="sig-param"><span class="n">h5obj</span></em>, <em class="sig-param"><span class="n">myName</span></em>, <em class="sig-param"><span class="n">index</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.HDF.hdfWrite.writeNumpy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes a numpy array to a preallocated dataset in a h5py group object</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -345,11 +350,19 @@
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright None
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -360,7 +373,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

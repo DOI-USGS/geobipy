@@ -21,8 +21,9 @@ from ..classes.statistics.Hitmap2D import Hitmap2D
 from ..classes.pointcloud.PointCloud3D import PointCloud3D
 from ..base import interpolation as interpolation
 from .Inv_MCMC import Initialize
-from .LineResults import LineResults
-from .Results import Results
+from .Inference1D import Inference1D
+from .Inference2D import Inference2D
+
 
 from ..classes.data.dataset.Data import Data
 from ..classes.data.datapoint.DataPoint import DataPoint
@@ -36,15 +37,14 @@ from scipy.spatial import Delaunay
 from scipy.interpolate import CloughTocher2DInterpolator
 from scipy.interpolate.interpnd import _ndim_coords_from_arrays
 
-
 from os import listdir
 import progressbar
 
-class DataSetResults(myObject):
+class Inference3D(myObject):
     """ Class to define results from Inv_MCMC for a full data set """
 
     def __init__(self, directory, system_file_path, files=None, world=None, mode='r+'):
-        """ Initialize the lineResults
+        """ Initialize the 3D inference
         directory = directory containing folders for each line of data results
         """
         self.directory = directory
@@ -63,7 +63,7 @@ class DataSetResults(myObject):
         self._world = world
         for i in range(self.nLines):
             fName = self.h5files[i]
-            LR = LineResults(fName, system_file_path=system_file_path, mode=mode, world=world)
+            LR = Inference2D(fName, system_file_path=system_file_path, mode=mode, world=world)
             self._lines.append(LR)
             self._lineNumbers[i] = LR.line
 
@@ -147,7 +147,7 @@ class DataSetResults(myObject):
         options, Mod, DataPoint, _, _, _, _ = Initialize(options, DataPoint)
 
         # Create the results template
-        Res = Results(DataPoint, Mod,
+        Res = Inference1D(DataPoint, Mod,
                       save=options.save, plot=options.plot, savePNG=options.savePNG,
                       nMarkovChains=options.nMarkovChains, plotEvery=options.plotEvery,
                       reciprocateParameters=options.reciprocateParameters, verbose=options.verbose)
@@ -160,7 +160,7 @@ class DataSetResults(myObject):
         for line in self.lineNumbers:
             fiducialsForLine = np.where(tmp[:, 0] == line)[0]
             H5File = h5py.File(join(self.directory, '{}.h5'.format(line)), 'w')
-            lr = LineResults()
+            lr = Inference_2D()
             lr.createHdf(H5File, fiducials[fiducialsForLine], Res)
             self._lines.append(lr)
             print('Time to create line {} with {} data points: {} h:m:s'.format(line, fiducialsForLine.size, str(timedelta(seconds=time.time()-t0))))
@@ -204,6 +204,43 @@ class DataSetResults(myObject):
     @property
     def nLines(self):
         return np.size(self._h5files)
+
+
+    def _get(self, variable, reciprocateParameter=False, **kwargs):
+
+        variable = variable.lower()
+        assert variable in ['mean', 'best', 'interfaces', 'opacity', 'highestmarginal', 'marginalprobability'], ValueError("variable must be ['mean', 'best', 'interfaces', 'opacity', 'highestMarginal', 'marginalProbability']")
+
+        if variable == 'mean':
+            if reciprocateParameter:
+                vals = np.divide(1.0, self.meanParameters)
+                vals.name = 'Resistivity'
+                vals.units = '$\Omega m$'
+                return vals
+            else:
+                return self.meanParameters
+
+        elif variable == 'best':
+            if reciprocateParameter:
+                vals = 1.0 / self.meanParameters
+                vals.name = 'Resistivity'
+                vals.units = '$\Omega m$'
+                return vals
+            else:
+                return self.bestParameters
+
+        if variable == 'interfaces':
+            return self.interfaces
+
+        if variable == 'opacity':
+            return self.opacity
+
+        if variable == 'highestmarginal':
+            return self.highestMarginal
+
+        if variable == 'marginalprobability':
+            assert not index is None, ValueError('Please specify keyword "index" when requesting marginalProbability')
+            return self.marginalProbability[:, :, index].T
 
 
     def _get_h5Files_from_list(self, directory, files):
@@ -269,7 +306,7 @@ class DataSetResults(myObject):
         print('Reading best parameters', flush=True)
         Bar=progressbar.ProgressBar()
         for i in Bar(range(self.nLines)):
-            bestParameters[:, self.lineIndices[i]] = self.lines[i].bestParameters.T
+            bestParameters[:, self.lineIndices[i]] = self.lines[i].bestParameters
             del self.lines[i].__dict__['bestParameters'] # Free memory
 
         return bestParameters
@@ -456,7 +493,7 @@ class DataSetResults(myObject):
         return self.pointcloud.y
 
 
-    def datapointResults(self, fiducial=None, index=None):
+    def inference_1d(self, fiducial=None, index=None):
         """Get the inversion results for the given fiducial.
 
         Parameters
@@ -480,7 +517,7 @@ class DataSetResults(myObject):
         lineIndex = index[0][0]
         fidIndex = index[1][0]
 
-        return self.lines[lineIndex].datapointResults(fidIndex)
+        return self.lines[lineIndex].inference_1d(fidIndex)
 
 
     def lineIndex(self, lineNumber=None, fiducial=None, index=None):
@@ -492,6 +529,7 @@ class DataSetResults(myObject):
 
 
         if not lineNumber is None:
+            assert lineNumber in self.lineNumbers, ValueError("line {} not found in data set".format(lineNumber))
             return np.squeeze(np.where(self.lineNumbers == lineNumber)[0])
 
         if not fiducial is None:
@@ -855,58 +893,23 @@ class DataSetResults(myObject):
         print('rank {} finished in {} h:m:s'.format(world.rank, str(timedelta(seconds=MPI.Wtime()-tBase))), flush=True)
 
 
-    def histogram(self, nBins, depth1 = None, depth2 = None, reciprocateParameter = False, bestModel = False, withDoi=False, percent=67.0, force = False, **kwargs):
+    def histogram(self, nBins, **kwargs):
         """ Compute a histogram of the model, optionally show the histogram for given depth ranges instead """
 
-        if (depth1 is None):
-            depth1 = self.zGrid.cellCentres[0]
-        if (depth2 is None):
-            depth2 = self.zGrid.cellCentres[-1]
+        log = kwargs.pop('log', False)
 
-        # Ensure order in depth values
-        if (depth1 > depth2):
-            tmp=depth2
-            depth2 = depth1
-            depth1 = tmp
-
-        # Don't need to check for depth being shallower than zGrid[0] since the sortedsearch with return 0
-        if (depth1 > self.zGrid.cellEdges[-1]): Err.Emsg('mapDepthSlice: Depth is greater than max depth - '+str(self.zGrid.cellEdges[-1]))
-        if (depth2 > self.zGrid.cellEdges[-1]): Err.Emsg('mapDepthSlice: Depth2 is greater than max depth - '+str(self.zGrid.cellEdges[-1]))
-
-        if (bestModel):
-            model = self.bestParameters
-        else:
-            model = self.meanParameters
-
-        if withDoi:
-            depth1 = np.minimum(self.doi, depth1)
-            depth2 = np.minimum(self.doi, depth2)
-            z = np.repeat(self.zGrid[:,np.newaxis],self.nPoints,axis=1)
-            vals = model[(z > depth1)&(z < depth2)]
-        else:
-            cell1 = self.zGrid.cellCentres.searchsorted(depth1)
-            cell2 = self.zGrid.cellCentres.searchsorted(depth2)
-
-            vals = model[cell1:cell2+1, :]
-
-        log = kwargs.pop('log',False)
-
-        if (reciprocateParameter):
-            vals = 1.0/vals
-            name = 'Resistivity'
-            units = '$\Omega m$'
-        else:
-            name = 'Conductivity'
-            units = '$Sm^{-1}$'
+        values = self._get(**kwargs)
 
         if (log):
-            vals,logLabel=cF._log(vals,log)
-            name = logLabel + name
-        vals = StatArray.StatArray(vals, name, units)
+            values, logLabel = cF._log(values, log)
+            values.name = logLabel + values.name
 
-        h = Histogram1D(np.linspace(vals.min(),vals.max(),nBins))
-        h.update(vals)
-        h.plot(**kwargs)
+        values = StatArray.StatArray(values, values.name, values.units)
+
+        h = Histogram1D(np.linspace(np.nanmin(values), np.nanmax(values), nBins))
+        h.update(values)
+
+        h.plot()
         return h
 
 
@@ -1090,34 +1093,36 @@ class DataSetResults(myObject):
         return StatArray.StatArray(out, p.name, p.units)
 
 
-    def getElevationSlice(self, depth, depth2=None, reciprocateParameter=False, bestModel=False, force=False):
 
-        # Get the depth grid
-        assert depth <= self.zGrid.cellEdges[-1], 'Depth is greater than max depth '+str(self.zGrid.cellEdges[-1])
-        if (not depth2 is None):
-            assert depth2 <= self.zGrid.cellEdges[-1], 'Depth2 is greater than max depth '+str(self.zGrid.cellEdges[-1])
-            assert depth <= depth2, 'Depth2 must be >= depth'
 
-        if (bestModel):
-            model = self.bestParameters
-        else:
-            model = self.meanParameters
+    # def getElevationSlice(self, depth, depth2=None, reciprocateParameter=False, bestModel=False, force=False):
 
-        model[model == 0.0] = 1.0
+    #     # Get the depth grid
+    #     assert depth <= self.zGrid.cellEdges[-1], 'Depth is greater than max depth '+str(self.zGrid.cellEdges[-1])
+    #     if (not depth2 is None):
+    #         assert depth2 <= self.zGrid.cellEdges[-1], 'Depth2 is greater than max depth '+str(self.zGrid.cellEdges[-1])
+    #         assert depth <= depth2, 'Depth2 must be >= depth'
 
-        cell1 = self.zGrid.cellIndex(depth)
+    #     if (bestModel):
+    #         model = self.bestParameters
+    #     else:
+    #         model = self.meanParameters
 
-        if (depth2 is None):
-            vals1D = model[cell1, :]
-        else:
-            cell2 = self.zGrid.cellIndex(depth2)
-            vals1D = np.mean(model[cell1:cell2+1,:], axis = 0)
+    #     model[model == 0.0] = 1.0
 
-        if (reciprocateParameter):
-            vals1D = StatArray.StatArray(1.0 / vals1D, name = 'Resistivity', units = '$\Omega m$')
-        else:
-            vals1D = StatArray.StatArray(vals1D, name = 'Conductivity', units = '$Sm^{-1}$')
-        return vals1D
+    #     cell1 = self.zGrid.cellIndex(depth)
+
+    #     if (depth2 is None):
+    #         vals1D = model[cell1, :]
+    #     else:
+    #         cell2 = self.zGrid.cellIndex(depth2)
+    #         vals1D = np.mean(model[cell1:cell2+1,:], axis = 0)
+
+    #     if (reciprocateParameter):
+    #         vals1D = StatArray.StatArray(1.0 / vals1D, name = 'Resistivity', units = '$\Omega m$')
+    #     else:
+    #         vals1D = StatArray.StatArray(vals1D, name = 'Conductivity', units = '$Sm^{-1}$')
+    #     return vals1D
 
 
     def mapAdditiveError(self,dx, dy, system=0, mask = None, clip = True, useVariance=False, **kwargs):
@@ -1141,7 +1146,6 @@ class DataSetResults(myObject):
             tmp = self.depthSlice(depth=depth, variable='opacity')
             x, y, a = self.interpolate(dx=dx, dy=dy, values=tmp, method=method, clip=True, **kwargs)
             kwargs['alpha'] = a
-
 
         return self.map(dx, dy, vals1D, method=method, mask = mask, clip = clip, **kwargs)
 

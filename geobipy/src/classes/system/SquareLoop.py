@@ -1,7 +1,7 @@
 from copy import deepcopy
 import numpy as np
 from ...base import MPI as myMPI
-from ...base.HDF.hdfWrite import writeNumpy
+from ...base.HDF.hdfWrite import write_nd
 from .EmLoop import EmLoop
 
 class SquareLoop(EmLoop):
@@ -69,7 +69,7 @@ class SquareLoop(EmLoop):
     @property
     def pitch(self):
         return self._pitch
-    
+
     @property
     def roll(self):
         return self._roll
@@ -92,9 +92,9 @@ class SquareLoop(EmLoop):
 
     @property
     def z(self):
-        return self._z   
+        return self._z
 
-    
+
     def deepcopy(self):
         return deepcopy(self)
 
@@ -151,9 +151,9 @@ class SquareLoop(EmLoop):
             parent[myName+'/orientation'][0] = np.string_(self.orient)
         else:
             parent[myName+'/orientation'][index] = np.string_(self.orient)
-        writeNumpy(self.moment, parent, myName+'/moment', index=index)
-        writeNumpy(self.data,   parent, myName+'/data',   index=index)
-        writeNumpy(self.sideLength, parent, myName+'/sidelength', index=index)
+        write_nd(self.moment, parent, myName+'/moment', index=index)
+        write_nd(self.data,   parent, myName+'/data',   index=index)
+        write_nd(self.sideLength, parent, myName+'/sidelength', index=index)
 
     def toHdf(self, parent, myName):
 
@@ -196,7 +196,7 @@ class SquareLoop(EmLoop):
 
     def Bcast(self, world, root=0):
         """Broadcast using MPI
-        
+
         Parameters
         ----------
         world : mpi4py.MPI.COMM_WORLD
@@ -206,7 +206,7 @@ class SquareLoop(EmLoop):
         -------
         out : SquareLoop
             A SquareLoop on each core
-        
+
         """
 
         o = myMPI.Bcast(self.orient,      world, root=root)
@@ -244,8 +244,8 @@ class SquareLoop(EmLoop):
     def __str__(self):
         """ Define print(self) """
         return 'SquareLoop("{0}",{1},{2},{3},{4},{5},{6},{7},{8})'.format(
-            self.orient, self.moment, 
-            self.x,      self.y,    self.z, 
+            self.orient, self.moment,
+            self.x,      self.y,    self.z,
             self.pitch,  self.roll, self.yaw, self.sideLength)
 
 

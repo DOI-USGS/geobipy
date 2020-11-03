@@ -5,8 +5,6 @@ Module defining a normal distribution with statistical procedures
 import numpy as np
 from ...base.logging import myLogger
 from .baseDistribution import baseDistribution
-from ...base.HDF.hdfWrite import writeNumpy
-#from .MvNormalDistribution import MvNormal
 from scipy.stats import norm
 from ...base import customPlots as cP
 from ..core import StatArray
@@ -50,12 +48,12 @@ class Normal(baseDistribution):
     def multivariate(self):
         return False
 
-    
+
     @property
     def variance(self):
         return self._variance
 
-    
+
     def cdf(self, x):
         """ For a realization x, compute the probability """
         if self.log:
@@ -70,7 +68,7 @@ class Normal(baseDistribution):
         -------
         out
             Normal
- 
+
         """
         # return deepcopy(self)
         return Normal(self.mean, self.variance, self.log, self.prng)
@@ -81,7 +79,7 @@ class Normal(baseDistribution):
 
         if self.log:
             x = np.log(x)
-        
+
         if moment == 0:
             return ((x - self._mean) / self.variance) * self.probability(x)
         else:
@@ -108,10 +106,10 @@ class Normal(baseDistribution):
 
         return np.exp(values) if self.log else values
 
-    
+
     def plotPDF(self, log=False, **kwargs):
 
-        
+
         bins = self.bins()
         t = r"$\tilde{N}(\mu="+str(self.mean)+", \sigma^{2}="+str(self.variance)+")$"
 
@@ -128,15 +126,13 @@ class Normal(baseDistribution):
             return StatArray.StatArray(norm.logpdf(x, loc = self._mean, scale = self.variance), "Probability Density")
         else:
             return StatArray.StatArray(norm.pdf(x, loc = self._mean, scale = self.variance), "Probability Density")
-        
 
-    def summary(self, out=False):
+    @property
+    def summary(self):
         msg = 'Normal Distribution: \n'
         msg += '    Mean: :' + str(self.mean) + '\n'
         msg += 'Variance: :' + str(self.variance) + '\n'
-        if (out):
-            return msg
-        print(msg)
+        return msg
 
 #    def hdfName(self):
 #        """ Create the group name for an HDF file """

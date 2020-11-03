@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,30 +11,34 @@
   
 
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../../../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
-
-    
-
-  
   <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../../../_static/graphviz.css" type="text/css" />
   <link rel="stylesheet" href="../../../../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/gallery-dataframe.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script src="../../../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" />
     <link rel="next" title="Datapoint classes" href="../datapoint/datapointrst.html" />
@@ -53,7 +56,7 @@
           
 
           
-            <a href="../../../../../index.html" class="icon icon-home"> GeoBIPy
+            <a href="../../../../../index.html" class="icon icon-home" alt="Documentation Home"> GeoBIPy
           
 
           
@@ -80,6 +83,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -113,6 +117,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -151,7 +156,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../../../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../../../api.html">API</a> &raquo;</li>
         
@@ -182,15 +187,21 @@
             
   <div class="section" id="temdata">
 <h1>TemData<a class="headerlink" href="#temdata" title="Permalink to this headline">¶</a></h1>
-<div class="graphviz"><img src="../../../../../_images/inheritance-e1b187d0798b947407703d00a41356c6175b12de.png" alt="Inheritance diagram of geobipy.src.classes.data.dataset.TdemData" usemap="#inheritanceeb2965ddb0" class="inheritance graphviz" /></div>
-<map id="inheritanceeb2965ddb0" name="inheritanceeb2965ddb0">
-<area shape="rect" id="node1" href="Data.html#geobipy.src.classes.data.dataset.Data.Data" target="_top" title="Class defining a set of Data." alt="" coords="283,5,355,29"/>
-<area shape="rect" id="node4" href="#geobipy.src.classes.data.dataset.TdemData.TdemData" target="_top" title="Time domain electro magnetic data set" alt="" coords="403,5,486,29"/>
-<area shape="rect" id="node2" href="../../pointcloud/PointCloud3D.html#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D" target="_top" title="3D Point Cloud with x,y,z co&#45;ordinates" alt="" coords="131,5,235,29"/>
-<area shape="rect" id="node3" href="../../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="5,5,83,29"/>
-</map><span class="target" id="module-geobipy.src.classes.data.dataset.TdemData"></span><span class="target" id="module-StatArray"></span><dl class="class">
+digraph inheritanceeb2965ddb0 {
+bgcolor=transparent;
+rankdir=LR;
+size=&quot;8.0, 12.0&quot;;
+  &quot;Data&quot; [URL=&quot;Data.html#geobipy.src.classes.data.dataset.Data.Data&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defining a set of Data.&quot;];
+  &quot;PointCloud3D&quot; -&gt; &quot;Data&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;PointCloud3D&quot; [URL=&quot;../../pointcloud/PointCloud3D.html#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;3D Point Cloud with x,y,z co-ordinates&quot;];
+  &quot;myObject&quot; -&gt; &quot;PointCloud3D&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;TdemData&quot; [URL=&quot;#geobipy.src.classes.data.dataset.TdemData.TdemData&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Time domain electro magnetic data set&quot;];
+  &quot;Data&quot; -&gt; &quot;TdemData&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;myObject&quot; [URL=&quot;../../core/myObject.html#geobipy.src.classes.core.myObject.myObject&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Abstract base class&quot;];
+}
+<span class="target" id="module-geobipy.src.classes.data.dataset.TdemData"></span><span class="target" id="module-StatArray"></span><dl class="py class">
 <dt id="geobipy.src.classes.data.dataset.TdemData.TdemData">
-<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.data.dataset.TdemData.</code><code class="sig-name descname">TdemData</code><span class="sig-paren">(</span><em class="sig-param">nPoints=1</em>, <em class="sig-param">nTimes=1</em>, <em class="sig-param">systems=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.data.dataset.TdemData.</code><code class="sig-name descname">TdemData</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">systems</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Time domain electro magnetic data set</p>
 <p>A time domain data set with easting, northing, height, and elevation values. Each sounding in the data set can be given a receiver and transmitter loop.</p>
 <p>TdemData(nPoints=1, nTimes=[1], nSystems=1)</p>
@@ -216,21 +227,32 @@
 </dd>
 </dl>
 </div>
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.TdemData.TdemData.Bcast">
-<code class="sig-name descname">Bcast</code><span class="sig-paren">(</span><em class="sig-param">world</em>, <em class="sig-param">root=0</em>, <em class="sig-param">system=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.Bcast" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">Bcast</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">world</span></em>, <em class="sig-param"><span class="n">root</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">system</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.Bcast" title="Permalink to this definition">¶</a></dt>
 <dd><p>Broadcast the TdemData using MPI</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.TdemData.TdemData.Scatterv">
-<code class="sig-name descname">Scatterv</code><span class="sig-paren">(</span><em class="sig-param">starts</em>, <em class="sig-param">chunks</em>, <em class="sig-param">world</em>, <em class="sig-param">root=0</em>, <em class="sig-param">system=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.Scatterv" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">Scatterv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">starts</span></em>, <em class="sig-param"><span class="n">chunks</span></em>, <em class="sig-param"><span class="n">world</span></em>, <em class="sig-param"><span class="n">root</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">system</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.Scatterv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Scatterv the TdemData using MPI</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
+<dt id="geobipy.src.classes.data.dataset.TdemData.TdemData.append">
+<code class="sig-name descname">append</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">other</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append pointclouds together</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>other</strong> (<em>geobipy.PointCloud3D</em>) – 3D pointcloud</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.TdemData.TdemData.datapoint">
-<code class="sig-name descname">datapoint</code><span class="sig-paren">(</span><em class="sig-param">index=None</em>, <em class="sig-param">fiducial=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.datapoint" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">datapoint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fiducial</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.datapoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the ith data point from the data set</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -251,13 +273,13 @@
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.TdemData.TdemData.estimateAdditiveError">
 <code class="sig-name descname">estimateAdditiveError</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.estimateAdditiveError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Uses the late times after 1ms to estimate the additive errors and error bounds in the data.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.TdemData.TdemData.fileInformation">
 <code class="sig-name descname">fileInformation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.fileInformation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Description of PointCloud3D file.</p>
@@ -271,27 +293,27 @@
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.TdemData.TdemData.fromHdf">
-<code class="sig-name descname">fromHdf</code><span class="sig-paren">(</span><em class="sig-param">grp</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.fromHdf" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fromHdf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">grp</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.fromHdf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads the object from a HDF group</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.TdemData.TdemData.mapChannel">
-<code class="sig-name descname">mapChannel</code><span class="sig-paren">(</span><em class="sig-param">channel</em>, <em class="sig-param">system=0</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.mapChannel" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">mapChannel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">channel</span></em>, <em class="sig-param"><span class="n">system</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.mapChannel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a map of the specified data channel</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.TdemData.TdemData.pcolor">
-<code class="sig-name descname">pcolor</code><span class="sig-paren">(</span><em class="sig-param">system=0</em>, <em class="sig-param">yAxis='index'</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.pcolor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">pcolor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">system</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">yAxis</span><span class="o">=</span><span class="default_value">'index'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.pcolor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot the data in the given system as a 2D array</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.TdemData.TdemData.plot">
-<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param">system=0</em>, <em class="sig-param">channels=None</em>, <em class="sig-param">xAxis='index'</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.plot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">system</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">channels</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">xAxis</span><span class="o">=</span><span class="default_value">'index'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots the data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -303,9 +325,9 @@
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.TdemData.TdemData.read">
-<code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param">dataFilename</em>, <em class="sig-param">systemFilename</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.read" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dataFilename</span></em>, <em class="sig-param"><span class="n">systemFilename</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads the data and system parameters from file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -359,15 +381,9 @@
 </div>
 </dd></dl>
 
-<dl class="method">
-<dt id="geobipy.src.classes.data.dataset.TdemData.TdemData.readSystemFile">
-<code class="sig-name descname">readSystemFile</code><span class="sig-paren">(</span><em class="sig-param">systemFilename</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.readSystemFile" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reads in the C++ system handler using the system file name</p>
-</dd></dl>
-
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.TdemData.TdemData.scatter2D">
-<code class="sig-name descname">scatter2D</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.scatter2D" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">scatter2D</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.scatter2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a 2D scatter plot using the x, y coordinates.</p>
 <p>Can take any other matplotlib arguments and keyword arguments e.g. markersize etc.</p>
 <dl class="field-list simple">
@@ -387,15 +403,15 @@
 </div>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.TdemData.TdemData.summary">
-<code class="sig-name descname">summary</code><span class="sig-paren">(</span><em class="sig-param">out=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.summary" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">summary</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">out</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.summary" title="Permalink to this definition">¶</a></dt>
 <dd><p>Display a summary of the TdemData</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.dataset.TdemData.TdemData.times">
-<code class="sig-name descname">times</code><span class="sig-paren">(</span><em class="sig-param">system=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.times" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">times</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">system</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.times" title="Permalink to this definition">¶</a></dt>
 <dd><p>Obtain the times from the system file</p>
 </dd></dl>
 
@@ -423,11 +439,19 @@
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright None
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -438,7 +462,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

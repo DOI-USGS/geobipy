@@ -379,17 +379,17 @@ class EmDataPoint(DataPoint):
     #     else:
     #         self.relErr.setPosterior(Histogram1D(bins = StatArray.StatArray(rBins, name='$\epsilon_{Relative}x10^{2}$', units='%')))
 
-
-    def summary(self, out=False):
+    @property
+    def summary(self):
         msg = ("{} \n"
                 "Line number: {} \n"
                 "Fiducial: {}\n"
                 "Relative Error {}\n"
-                "Additive Error {}\n").format(super().summary(True), self.lineNumber, self.fiducial, self.relErr.summary(True), self.addErr.summary(True))
+                "Additive Error {}\n").format(super().summary, self.lineNumber, self.fiducial, self.relErr.summary, self.addErr.summary)
         for s in self.system:
-            msg += s.summary(True)
+            msg += s.summary
 
-        return msg if out else print(msg)
+        return msg
 
 
     def updatePosteriors(self):

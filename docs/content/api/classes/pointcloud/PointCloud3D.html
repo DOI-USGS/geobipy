@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,30 +11,34 @@
   
 
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
-
-    
-
-  
   <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
   <link rel="stylesheet" href="../../../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/gallery-dataframe.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
     <link rel="next" title="Statistics classes" href="../statistics/statistics.html" />
@@ -53,7 +56,7 @@
           
 
           
-            <a href="../../../../index.html" class="icon icon-home"> GeoBIPy
+            <a href="../../../../index.html" class="icon icon-home" alt="Documentation Home"> GeoBIPy
           
 
           
@@ -80,6 +83,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -113,6 +117,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -151,7 +156,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../../api.html">API</a> &raquo;</li>
         
@@ -180,13 +185,17 @@
             
   <div class="section" id="pointcloud3d">
 <h1>PointCloud3D<a class="headerlink" href="#pointcloud3d" title="Permalink to this headline">¶</a></h1>
-<div class="graphviz"><img src="../../../../_images/inheritance-5f7b85e7d83977d77ba065cae2139baaefeee8ba.png" alt="Inheritance diagram of geobipy.src.classes.pointcloud.PointCloud3D" usemap="#inheritanceba93696160" class="inheritance graphviz" /></div>
-<map id="inheritanceba93696160" name="inheritanceba93696160">
-<area shape="rect" id="node1" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D" target="_top" title="3D Point Cloud with x,y,z co&#45;ordinates" alt="" coords="131,5,235,29"/>
-<area shape="rect" id="node2" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="5,5,83,29"/>
-</map><span class="target" id="module-geobipy.src.classes.pointcloud.PointCloud3D"></span><dl class="class">
+digraph inheritanceba93696160 {
+bgcolor=transparent;
+rankdir=LR;
+size=&quot;8.0, 12.0&quot;;
+  &quot;PointCloud3D&quot; [URL=&quot;#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;3D Point Cloud with x,y,z co-ordinates&quot;];
+  &quot;myObject&quot; -&gt; &quot;PointCloud3D&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;myObject&quot; [URL=&quot;../core/myObject.html#geobipy.src.classes.core.myObject.myObject&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Abstract base class&quot;];
+}
+<span class="target" id="module-geobipy.src.classes.pointcloud.PointCloud3D"></span><dl class="py class">
 <dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D">
-<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.pointcloud.PointCloud3D.</code><code class="sig-name descname">PointCloud3D</code><span class="sig-paren">(</span><em class="sig-param">nPoints=0</em>, <em class="sig-param">x=None</em>, <em class="sig-param">y=None</em>, <em class="sig-param">z=None</em>, <em class="sig-param">elevation=None</em>, <em class="sig-param">units='m'</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.pointcloud.PointCloud3D.</code><code class="sig-name descname">PointCloud3D</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">y</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">z</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">elevation</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D" title="Permalink to this definition">¶</a></dt>
 <dd><p>3D Point Cloud with x,y,z co-ordinates</p>
 <p>PointCloud3D(N, x, y, z)</p>
 <dl class="field-list simple">
@@ -206,9 +215,9 @@
 <dd class="field-odd"><p>geobipy.PointCloud3D</p>
 </dd>
 </dl>
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.Bcast">
-<code class="sig-name descname">Bcast</code><span class="sig-paren">(</span><em class="sig-param">world</em>, <em class="sig-param">root=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.Bcast" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">Bcast</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">world</span></em>, <em class="sig-param"><span class="n">root</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.Bcast" title="Permalink to this definition">¶</a></dt>
 <dd><p>Broadcast a PointCloud3D using MPI</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -226,9 +235,9 @@
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.Scatterv">
-<code class="sig-name descname">Scatterv</code><span class="sig-paren">(</span><em class="sig-param">starts</em>, <em class="sig-param">chunks</em>, <em class="sig-param">world</em>, <em class="sig-param">root=0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.Scatterv" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">Scatterv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">starts</span></em>, <em class="sig-param"><span class="n">chunks</span></em>, <em class="sig-param"><span class="n">world</span></em>, <em class="sig-param"><span class="n">root</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.Scatterv" title="Permalink to this definition">¶</a></dt>
 <dd><p>ScatterV a PointCloud3D using MPI</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -248,7 +257,24 @@
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
+<dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.append">
+<code class="sig-name descname">append</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">other</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append pointclouds together</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>other</strong> (<em>geobipy.PointCloud3D</em>) – 3D pointcloud</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.bounds">
+<em class="property">property </em><code class="sig-name descname">bounds</code><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.bounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the bounding box of the data set</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.fileInformation">
 <code class="sig-name descname">fileInformation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.fileInformation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Description of PointCloud3D file.</p>
@@ -262,15 +288,9 @@
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.getBounds">
-<code class="sig-name descname">getBounds</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.getBounds" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the bounding box of the data set</p>
-</dd></dl>
-
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.getPoint">
-<code class="sig-name descname">getPoint</code><span class="sig-paren">(</span><em class="sig-param">i</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.getPoint" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">getPoint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.getPoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a point from the 3D Point Cloud</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -286,9 +306,9 @@
 <p>:raises ValueError : If i is not a single int:</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.getXAxis">
-<code class="sig-name descname">getXAxis</code><span class="sig-paren">(</span><em class="sig-param">xAxis='x'</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.getXAxis" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">getXAxis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xAxis</span><span class="o">=</span><span class="default_value">'x'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.getXAxis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Obtain the xAxis against which to plot values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -308,33 +328,27 @@ If xAxis is ‘r3d’, returns cumulative distance along the line in 3D using x,
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.interpCloughTocher">
-<code class="sig-name descname">interpCloughTocher</code><span class="sig-paren">(</span><em class="sig-param">dx</em>, <em class="sig-param">dy</em>, <em class="sig-param">values</em>, <em class="sig-param">mask=False</em>, <em class="sig-param">clip=None</em>, <em class="sig-param">i=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.interpCloughTocher" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">interpCloughTocher</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dx</span></em>, <em class="sig-param"><span class="n">dy</span></em>, <em class="sig-param"><span class="n">values</span></em>, <em class="sig-param"><span class="n">mask</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">clip</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">i</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.interpCloughTocher" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interpolate values at the points to a grid</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.maketest">
-<code class="sig-name descname">maketest</code><span class="sig-paren">(</span><em class="sig-param">nPoints</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.maketest" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a small test of random points</p>
-</dd></dl>
-
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.mapPlot">
-<code class="sig-name descname">mapPlot</code><span class="sig-paren">(</span><em class="sig-param">dx=None</em>, <em class="sig-param">dy=None</em>, <em class="sig-param">i=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.mapPlot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">mapPlot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dx</span></em>, <em class="sig-param"><span class="n">dy</span></em>, <em class="sig-param"><span class="n">i</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.mapPlot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a map of a parameter</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.nPoints">
 <em class="property">property </em><code class="sig-name descname">nPoints</code><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.nPoints" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the number of points</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.nearest">
-<code class="sig-name descname">nearest</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">k=1</em>, <em class="sig-param">eps=0</em>, <em class="sig-param">p=2</em>, <em class="sig-param">radius=inf</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.nearest" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">nearest</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">k</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">eps</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">p</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">radius</span><span class="o">=</span><span class="default_value">inf</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.nearest" title="Permalink to this definition">¶</a></dt>
 <dd><p>Obtain the k nearest neighbours</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
@@ -342,9 +356,9 @@ If xAxis is ‘r3d’, returns cumulative distance along the line in 3D using x,
 </div>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.plot">
-<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param">values</em>, <em class="sig-param">xAxis='index'</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.plot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">values</span></em>, <em class="sig-param"><span class="n">xAxis</span><span class="o">=</span><span class="default_value">'index'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Line plot of values against a co-ordinate.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -374,24 +388,20 @@ If xAxis is ‘r3d’, returns cumulative distance along the line in 3D using x,
 </div>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.read">
-<code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param">fileName</em>, <em class="sig-param">nHeaderLines=0</em>, <em class="sig-param">columnIndices=range(0</em>, <em class="sig-param">3)</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.read" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fileName</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads x y z co-ordinates from an ascii csv file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>fileName</strong> (<em>str</em>) – Path to the file to read from.</p></li>
-<li><p><strong>nHeaderLines</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of header line to skips at the top.</p></li>
-<li><p><strong>columnIndices</strong> (<em>ints</em><em>, </em><em>optional</em>) – Size of 3, each int corresponds to the column containing x, y, z.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>fileName</strong> (<em>str</em>) – Path to the file to read from.</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.scatter2D">
-<code class="sig-name descname">scatter2D</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.scatter2D" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">scatter2D</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.scatter2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a 2D scatter plot using the x, y coordinates of the point cloud.</p>
 <p>Can take any other matplotlib arguments and keyword arguments e.g. markersize etc.</p>
 <dl class="field-list simple">
@@ -411,9 +421,9 @@ If xAxis is ‘r3d’, returns cumulative distance along the line in 3D using x,
 </div>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.setKdTree">
-<code class="sig-name descname">setKdTree</code><span class="sig-paren">(</span><em class="sig-param">nDims=3</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.setKdTree" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">setKdTree</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">nDims</span><span class="o">=</span><span class="default_value">3</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.setKdTree" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a k-d tree of the point co-ordinates</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -422,15 +432,15 @@ If xAxis is ‘r3d’, returns cumulative distance along the line in 3D using x,
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.summary">
-<code class="sig-name descname">summary</code><span class="sig-paren">(</span><em class="sig-param">out=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.summary" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">summary</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">out</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.summary" title="Permalink to this definition">¶</a></dt>
 <dd><p>Display a summary of the 3D Point Cloud</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.toVTK">
-<code class="sig-name descname">toVTK</code><span class="sig-paren">(</span><em class="sig-param">fileName</em>, <em class="sig-param">pointData=None</em>, <em class="sig-param">format='binary'</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.toVTK" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">toVTK</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fileName</span></em>, <em class="sig-param"><span class="n">pointData</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">format</span><span class="o">=</span><span class="default_value">'binary'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.toVTK" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save the PointCloud3D to a VTK file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -451,7 +461,7 @@ vtk attribute.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.vtkStructure">
 <code class="sig-name descname">vtkStructure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.vtkStructure" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates a vtk mesh structure that can be used in a vtk file.</p>
@@ -489,11 +499,19 @@ vtk attribute.</p></li>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright None
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -504,7 +522,6 @@ vtk attribute.</p></li>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

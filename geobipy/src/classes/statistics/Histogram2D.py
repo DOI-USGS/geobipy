@@ -87,20 +87,38 @@ class Histogram2D(RectilinearMesh2D):
 
         """
         assert np.shape(slic) == (2,), ValueError("slic must be over two dimensions.")
-        if np.any(slic == 1):
-            # 1D Histogram
 
-            print(1)
+        slic0 = slic
+        if isinstance(slic[0], int):
+            if isinstance(slic[1].stop, int):
+                s = slic[1]
+                slic = (slic[0], slice(s.start, s.stop+1, s.step))
+            out = Histogram1D(bins=self._x.cellEdges[slic[1]])
+            out._counts += np.squeeze(self.counts[slic0])
+
+        elif isinstance(slic[1], int):
+            if isinstance(slic[0].stop, int):
+                s = slic[0]
+                slic = (slice(s.start, s.stop+1, s.step), slic[1])
+            out = Histogram1D(bins=self._y.cellEdges[slic[0]])
+            out._counts += np.squeeze(self.counts[slic0])
 
         else:
+            if isinstance(slic[0].stop, int):
+                s = slic[0]
+                slic = (slice(s.start, s.stop+1, s.step), slic[1])
+            if isinstance(slic[1].stop, int):
+                s = slic[1]
+                slic = (slic[0], slice(s.start, s.stop+1, s.step))
             # 2D Histogram
             if self.xyz:
-                out = Histogram2D(xBinCentres=self._x[slic[1]], yBinCentres=self._y[slic[1]], zBinCentres=self._z[slic[0]])
+                out = Histogram2D(xBins=self._x.cellEdges[slic[1]], yBins=self._y.cellEdges[slic[1]], zBins=self._z.cellEdges[slic[0]])
             else:
-                out = Histogram2D(xBinCentres=self._x[slic[1]], yBinCentres=self._y[slic[0]])
-            out._counts += self.counts[slic]
+                out = Histogram2D(xBins=self._x.cellEdges[slic[1]], yBins=self._z.cellEdges[slic[0]])
 
-            return out
+            out._counts += self.counts[slic0]
+
+        return out
 
 
     def credibleIntervals(self, percent=95.0, log=None, axis=0):
@@ -348,8 +366,14 @@ class Histogram2D(RectilinearMesh2D):
 
         return cdf
 
+    def entropy(self, axis=None):
 
-    def estimatePdf(self, axis=None):
+        pdf = self.pdf(axis=axis)
+        pdf = pdf[pdf > 0.0]
+        return StatArray.StatArray(-(pdf * np.log(np.abs(pdf))).sum(), "Entropy")
+
+
+    def pdf(self, axis=None):
 
         if axis is None:
             out = StatArray.StatArray(np.divide(self._counts, np.sum(self._counts)), 'Probability density')
@@ -451,7 +475,7 @@ class Histogram2D(RectilinearMesh2D):
         ax[-1].spines["left"].set_visible(False)
 
         ax.append(plt.subplot(self.gs[1:, 4:]))
-        h = self.marginalize(axis=0).plot(rotate=True)
+        h = self.marginalize(axis=1).plot(rotate=True)
         plt.ylabel(''); plt.xlabel('')
         plt.yticks([]); plt.xticks([])
         ax[-1].spines["bottom"].set_visible(False)

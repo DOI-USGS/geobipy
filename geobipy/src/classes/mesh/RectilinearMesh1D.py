@@ -108,10 +108,13 @@ class RectilinearMesh1D(myObject):
         assert np.shape(slic) == (), ValueError("slic must have one dimension.")
 
         s2stop = None
-        if not slic.stop is None:
-            s2stop = slic.stop + 1 if slic.stop > 0 else slic.stop
+        if isinstance(slic, slice):
+            if not slic.stop is None:
+                s2stop = slic.stop + 1 if slic.stop > 0 else slic.stop
+            s2 = slice(slic.start, s2stop, slic.step)
+        else:
+            s2 = slice(slic, slic + 2, 1)
 
-        s2 = slice(slic.start, s2stop, slic.step)
         tmp = self._cellEdges[s2]
         assert tmp.size > 1, ValueError("slic must contain at least one cell.")
         return type(self)(cellEdges=tmp)
@@ -259,12 +262,7 @@ class RectilinearMesh1D(myObject):
         values = values - self.relativeTo
 
         # Get the bin indices for all values
-        if self.isRegular():
-            iBin = np.int64((values - self._cellCentres[0]) / self.dx)
-        else:
-            iBin = self._cellEdges.searchsorted(values, side='right') - 1
-
-        iBin = np.atleast_1d(iBin)
+        iBin = np.atleast_1d(self._cellEdges.searchsorted(values, side='right') - 1)
 
         # Remove indices that are out of bounds
         if trim:
@@ -415,18 +413,18 @@ class RectilinearMesh1D(myObject):
         res = RectilinearMesh1D(x)
         return res
 
-
-    def summary(self, out=False):
+    @property
+    def summary(self):
         """ Print a summary of self """
         msg = ("Cell Centres \n"
                "{}"
                "Cell Edges"
                "{}").format(
-                   self._cellCentres.summary(True),
-                   self._cellEdges.summary(True)
+                   self._cellCentres.summary,
+                   self._cellEdges.summary
                )
 
-        return msg if out else print(msg)
+        return msg
 
 
     def Bcast(self, world, root=0):

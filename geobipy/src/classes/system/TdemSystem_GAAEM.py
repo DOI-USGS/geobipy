@@ -25,7 +25,7 @@ try:
         """
 
         def __init__(self, systemFilename):
-            """ Nothing needed """            
+            """ Nothing needed """
 
             # Check that the file exists, rBodies class does not handle errors
             assert fIO.fileExists(systemFilename),'Could not open file: ' + systemFilename
@@ -47,7 +47,7 @@ try:
         def times(self):
             """Time windows."""
             return StatArray.StatArray(self.windows.centre, name='Time', units='s')
-            
+
 
         def read(self, systemFilename):
             # Read in the System file
@@ -55,40 +55,41 @@ try:
             assert np.min(np.diff(self.windows.centre)) > 0.0, ValueError("Receiver window times must monotonically increase for system "+systemFilename)
 
             self.readCurrentWaveform(systemFilename)
-        
+
         def readCurrentWaveform(self, systemFname):
             get = False
             time = []
             current = []
-            
+
             with open(systemFname, 'r') as f:
                 for i, line in enumerate(f):
-                    
+
                     if ('WaveFormCurrent End' in line):
                         self.waveform.transmitterTime = np.asarray(time[:-1])
                         self.waveform.transmitterCurrent = np.asarray(current[:-1])
                         return
-                    
+
                     if (get):
                         x = fIO.getRealNumbersfromLine(line)
                         if len(x) > 0:
                             time.append(x[0])
                             current.append(x[1])
-                        
+
                     if ('WaveFormCurrent Begin' in line):
                         get = True
 
-        def summary(self, out=False):
+        @property
+        def summary(self):
             msg = ("TdemSystem: \n"
                    "{}\n"
-                   "{}\n").format(self.fileName, self.times.summary(True))
-            return msg if out else print(msg)
-    
+                   "{}\n").format(self.fileName, self.times.summary)
+            return msg
+
 
 
 except:
     class TdemSystem_GAAEM(object):
-        
+
         def __init__(self, *args, **kwargs):
             h=("Could not import the time domain forward modeller from GA_AEM. \n"
             "Please see the package's README for instructions on how to install it \n"

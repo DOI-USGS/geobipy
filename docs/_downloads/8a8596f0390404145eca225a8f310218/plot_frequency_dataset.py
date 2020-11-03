@@ -4,12 +4,56 @@ Frequency domain dataset
 """
 #%%
 import matplotlib.pyplot as plt
+from geobipy import CircularLoop
+from geobipy import FdemSystem
 from geobipy import FdemData
 import numpy as np
+
+
+#%%
+# Defining data using a frequency domain system
+# +++++++++++++++++++++++++++++++++++++++++++++
+
+################################################################################
+# We can start by defining the frequencies, transmitter loops, and receiver loops
+# For each frequency we need to define a pair of loops
+frequencies = np.asarray([395.0, 822.0, 3263.0, 8199.0, 38760.0, 128755.0])
+
+################################################################################
+# Transmitter positions are defined relative to the observation locations in the data
+# This is usually a constant offset for all data points.
+transmitters = [CircularLoop(orient="z", moment=1.0,  x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
+                CircularLoop(orient="z", moment=1.0,  x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
+                CircularLoop(orient="x", moment=-1.0, x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
+                CircularLoop(orient="z", moment=1.0,  x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
+                CircularLoop(orient="z", moment=1.0,  x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
+                CircularLoop(orient="z", moment=1.0,  x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0)]
+
+################################################################################
+# Receiver positions are defined relative to the transmitter
+receivers = [CircularLoop(orient="z", moment=1.0, x=7.93, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
+             CircularLoop(orient="z", moment=1.0, x=7.91, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
+             CircularLoop(orient="x", moment=1.0, x=9.03, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
+             CircularLoop(orient="z", moment=1.0, x=7.91, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
+             CircularLoop(orient="z", moment=1.0, x=7.91, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
+             CircularLoop(orient="z", moment=1.0, x=7.89, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0)]
+
+##############################################################################
+# Instantiate the system for the data
+system = FdemSystem(frequencies=frequencies, transmitterLoops=transmitters, receiverLoops=receivers)
+
+##############################################################################
+# Create some data with random co-ordinates
+x = np.random.randn(100)
+y = np.random.randn(100)
+z = np.random.randn(100)
+
+data = FdemData(x=x, y=-y, z=z, systems = system)
 
 #%%
 # Reading in the Data
 # +++++++++++++++++++
+# Of course measured field data is stored on disk. So instead we can read data from file.
 
 ################################################################################
 dataFolder = "..//supplementary//Data//"
@@ -20,13 +64,22 @@ systemFile = dataFolder + 'FdemSystem2.stm'
 
 ################################################################################
 # Read in a data set from file.
-FD1 = FdemData()
-FD1.read(dataFile, systemFile)
+FD1 = FdemData().read(dataFile, systemFile)
 
 ################################################################################
 # Take a look at the channel names
 for name in FD1.channelNames:
     print(name)
+
+################################################################################
+# Get data points by slicing
+FDa = FD1[10:]
+FD1 = FD1[:10]
+
+################################################################################
+# Append data sets together
+FD1.append(FDa)
+
 
 ################################################################################
 # Plot the locations of the data points
@@ -112,7 +165,6 @@ _ = L.scatter2D();
 # xAxis can be index, x, y, z, r2d, r3d
 plt.figure(figsize=(8,6))
 _ = FD1.plot(channels=[0,11,8], log=10, linewidth=0.5);
-
 
 #%%
 # Obtain a single datapoint from the data set

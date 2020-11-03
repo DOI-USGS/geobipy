@@ -2,7 +2,6 @@
 Time domain dataset
 --------------------
 """
-
 #%%
 from geobipy import customPlots as cP
 from os.path import join
@@ -42,7 +41,7 @@ _ = TD.plotLine(100101.0, log=10)
 ################################################################################
 # Or, plot specific channels in the data
 plt.figure(figsize=(8,6))
-_ = TD.plot(system=0, channels=[3, 4, 5], log=10)
+_ = TD.plot(system=0, channels=[17, 18, 19], log=10)
 
 ################################################################################
 plt.figure()
@@ -67,11 +66,12 @@ line = TD.line(100601.0)
 
 ################################################################################
 plt.figure()
-_ = line.scatter2D(c = line.dataChannel(10, system=1))
+_ = line.scatter2D(c = line.dataChannel(17, system=1))
 
 ################################################################################
 plt.figure()
 _ = line.plot(xAxis='x', log=10)
+
 
 #%%
 # File Format for time domain data

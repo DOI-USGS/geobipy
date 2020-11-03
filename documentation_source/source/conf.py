@@ -358,6 +358,7 @@ texinfo_documents = [
 # # -- Sphinx Gallery Options
 # from sphinx_gallery.sorting import FileNameSortKey
 from sphinx_gallery.sorting import ExplicitOrder
+from sphinx_gallery.sorting import ExampleTitleSortKey
 
 sphinx_gallery_conf = {
     'examples_dirs': 'examples',   # path to your example scripts
@@ -371,8 +372,9 @@ sphinx_gallery_conf = {
 #                                     '../../examples/Pointclouds/',
                                     'examples/Data/',
                                     'examples/Datapoints/',
-#                                     '../../examples/Inversion/',
+                                    'examples/Inference',
                                     ]),
+    "within_subsection_order": ExampleTitleSortKey,
     "image_scrapers": ('matplotlib'),
     "thumbnail_size": (350, 350),
     'first_notebook_cell': ("%matplotlib inline\n"),

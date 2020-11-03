@@ -854,6 +854,17 @@ class Model1D(Model):
         return self.stochasticNewtonPerturbation(datapoint)
 
 
+    def squeeze(self, thickness, parameters, hasHalfspace=False):
+
+        i = np.hstack([np.where(np.diff(parameters) != 0)[0], -1])
+
+        depth = np.cumsum(thickness)
+
+        Model1D.__init__(self, depth=depth[i], parameters=parameters[i], hasHalfspace=hasHalfspace)
+
+        return self
+
+
 
     def stochasticNewtonPerturbation(self, datapoint=None):
 
@@ -1069,18 +1080,16 @@ class Model1D(Model):
         return probability
 
 
-
-    def summary(self, out=False):
+    @property
+    def summary(self):
         """ Write a summary of the 1D model """
         msg = "1D Model: \n"
-        msg += self.nCells.summary(True)
+        msg += self.nCells.summary
         msg += 'Top of the model: ' + str(self.top) + '\n'
-        msg += self.thk.summary(True)
-        msg += self.par.summary(True)
-        msg += self.depth.summary(True)
-        if (out):
-            return msg
-        print(msg)
+        msg += self.thk.summary
+        msg += self.par.summary
+        msg += self.depth.summary
+        return msg
 
 
     def unperturb(self):

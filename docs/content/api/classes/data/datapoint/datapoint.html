@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,30 +11,34 @@
   
 
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../../../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
-
-    
-
-  
   <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../../../_static/graphviz.css" type="text/css" />
   <link rel="stylesheet" href="../../../../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/gallery-dataframe.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script src="../../../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" />
     <link rel="next" title="EmDataPoint" href="EmDataPoint.html" />
@@ -53,7 +56,7 @@
           
 
           
-            <a href="../../../../../index.html" class="icon icon-home"> GeoBIPy
+            <a href="../../../../../index.html" class="icon icon-home" alt="Documentation Home"> GeoBIPy
           
 
           
@@ -80,6 +83,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -113,6 +117,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -151,7 +156,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../../../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../../../api.html">API</a> &raquo;</li>
         
@@ -182,13 +187,17 @@
             
   <div class="section" id="datapoint">
 <h1>DataPoint<a class="headerlink" href="#datapoint" title="Permalink to this headline">¶</a></h1>
-<div class="graphviz"><img src="../../../../../_images/inheritance-f4a54718d42acfc8114776e4e28672305f570eb5.png" alt="Inheritance diagram of geobipy.src.classes.data.datapoint.DataPoint.DataPoint" usemap="#inheritance476311a242" class="inheritance graphviz" /></div>
-<map id="inheritance476311a242" name="inheritance476311a242">
-<area shape="rect" id="node1" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint" target="_top" title="Class defines a data point." alt="" coords="125,5,205,29"/>
-<area shape="rect" id="node2" href="../../pointcloud/Point.html#geobipy.src.classes.pointcloud.Point.Point" target="_top" title="Class defining a point in 3D Euclidean space" alt="" coords="5,5,77,29"/>
-</map><span class="target" id="module-geobipy.src.classes.data.datapoint.DataPoint"></span><dl class="class">
+digraph inheritance476311a242 {
+bgcolor=transparent;
+rankdir=LR;
+size=&quot;8.0, 12.0&quot;;
+  &quot;DataPoint&quot; [URL=&quot;#geobipy.src.classes.data.datapoint.DataPoint.DataPoint&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defines a data point.&quot;];
+  &quot;Point&quot; -&gt; &quot;DataPoint&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;Point&quot; [URL=&quot;../../pointcloud/Point.html#geobipy.src.classes.pointcloud.Point.Point&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defining a point in 3D Euclidean space&quot;];
+}
+<span class="target" id="module-geobipy.src.classes.data.datapoint.DataPoint"></span><dl class="py class">
 <dt id="geobipy.src.classes.data.datapoint.DataPoint.DataPoint">
-<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.data.datapoint.DataPoint.</code><code class="sig-name descname">DataPoint</code><span class="sig-paren">(</span><em class="sig-param">nChannelsPerSystem=1</em>, <em class="sig-param">x=0.0</em>, <em class="sig-param">y=0.0</em>, <em class="sig-param">z=0.0</em>, <em class="sig-param">elevation=None</em>, <em class="sig-param">data=None</em>, <em class="sig-param">std=None</em>, <em class="sig-param">predictedData=None</em>, <em class="sig-param">dataUnits=None</em>, <em class="sig-param">channelNames=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">geobipy.src.classes.data.datapoint.DataPoint.</code><code class="sig-name descname">DataPoint</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">nChannelsPerSystem</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">x</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">y</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">z</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">elevation</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">std</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">predictedData</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dataUnits</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">channelNames</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class defines a data point.</p>
 <p>Contains an easting, northing, height, elevation, observed and predicted data, and uncertainty estimates for the data.</p>
 <p>DataPoint(x, y, z, elevation, nChannels, data, std, dataUnits)</p>
@@ -213,7 +222,7 @@
 </ul>
 </dd>
 </dl>
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="geobipy.src.classes.data.datapoint.DataPoint.DataPoint.active">
 <code class="sig-name descname">active</code><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.active" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the indices to the observed data values that are not NaN</p>
@@ -227,9 +236,9 @@
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.DataPoint.DataPoint.dataMisfit">
-<code class="sig-name descname">dataMisfit</code><span class="sig-paren">(</span><em class="sig-param">squared=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.dataMisfit" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">dataMisfit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">squared</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.dataMisfit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the <span class="math notranslate nohighlight">\(L_{2}\)</span> norm squared misfit between the observed and predicted data</p>
 <div class="math notranslate nohighlight">
 \[\| \mathbf{W}_{d} (\mathbf{d}^{obs}-\mathbf{d}^{pre})\|_{2}^{2},\]</div>
@@ -247,7 +256,7 @@
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.DataPoint.DataPoint.deltaD">
 <em class="property">property </em><code class="sig-name descname">deltaD</code><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.deltaD" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the difference between the predicted and observed data,</p>
@@ -264,9 +273,9 @@ with size equal to the number of active channels.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.DataPoint.DataPoint.likelihood">
-<code class="sig-name descname">likelihood</code><span class="sig-paren">(</span><em class="sig-param">log</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.likelihood" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">likelihood</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">log</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.likelihood" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the likelihood of the current predicted data given the observed data and assigned errors</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -278,9 +287,9 @@ with size equal to the number of active channels.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.DataPoint.DataPoint.scaleJ">
-<code class="sig-name descname">scaleJ</code><span class="sig-paren">(</span><em class="sig-param">Jin</em>, <em class="sig-param">power=1.0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.scaleJ" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">scaleJ</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Jin</span></em>, <em class="sig-param"><span class="n">power</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.scaleJ" title="Permalink to this definition">¶</a></dt>
 <dd><p>Scales a matrix by the errors in the given data</p>
 <p>Useful if a sensitivity matrix is generated using one data point, but must be scaled by the errors in another.</p>
 <dl class="field-list simple">
@@ -302,15 +311,15 @@ with size equal to the number of active channels.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.DataPoint.DataPoint.summary">
-<code class="sig-name descname">summary</code><span class="sig-paren">(</span><em class="sig-param">out=False</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.summary" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">summary</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">out</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.summary" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print a summary of the EMdataPoint</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.DataPoint.DataPoint.updateErrors">
-<code class="sig-name descname">updateErrors</code><span class="sig-paren">(</span><em class="sig-param">relativeErr</em>, <em class="sig-param">additiveErr</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.updateErrors" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">updateErrors</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">relativeErr</span></em>, <em class="sig-param"><span class="n">additiveErr</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.updateErrors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Updates the data errors.</p>
 <p>Updates the standard deviation of the data errors using the following model</p>
 <div class="math notranslate nohighlight">
@@ -333,9 +342,9 @@ with size equal to the number of active channels.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="geobipy.src.classes.data.datapoint.DataPoint.DataPoint.weightingMatrix">
-<code class="sig-name descname">weightingMatrix</code><span class="sig-paren">(</span><em class="sig-param">power=1.0</em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.weightingMatrix" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">weightingMatrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">power</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.weightingMatrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a diagonal data weighting matrix of the reciprocated data standard deviations.</p>
 </dd></dl>
 
@@ -363,11 +372,19 @@ with size equal to the number of active channels.</p>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright None
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -378,7 +395,6 @@ with size equal to the number of active channels.</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

@@ -40,7 +40,7 @@ from geobipy import StatArray
 from geobipy import Distribution
 
 dataFolder = "..//supplementary//Data//"
-# dataFolder = "source//examples//supplementary//Data//"
+# dataFolder = "source//examples//supplementary//Data"
 
 ################################################################################
 # Instantiating a time domain datapoint
@@ -259,7 +259,7 @@ tdp.setPriors(heightPrior, relativePrior, additivePrior)
 ################################################################################
 # In order to perturb our solvable parameters, we need to attach proposal distributions
 heightProposal = Distribution('Normal', mean=tdp.z, variance = 0.01)
-relativeProposal = Distribution('MvNormal', mean=tdp.relErr, variance=2.5e-7)
+relativeProposal = Distribution('MvNormal', mean=tdp.relErr, variance=2.5e-4)
 additiveProposal = Distribution('MvLogNormal', mean=tdp.addErr, variance=2.5e-3, linearSpace=True)
 tdp.setProposals(heightProposal, relativeProposal, additiveProposal)
 
@@ -269,6 +269,7 @@ tdp.setPosteriors()
 
 ################################################################################
 # Perturb the datapoint and record the perturbations
+# Note we are not using the priors to accept or reject perturbations.
 for i in range(1000):
     tdp.perturb(True, True, True, False)
     tdp.updatePosteriors()
@@ -281,11 +282,6 @@ _ = tdp.z.plotPosteriors()
 ################################################################################
 plt.figure()
 _ = tdp.errorPosterior[0].comboPlot(cmap='gray_r')
-# _ = tdp.relErr.plotPosteriors()
-
-# ################################################################################
-# plt.figure()
-# _ = tdp.addErr.plotPosteriors()
 
 #%%
 # File Format for a time domain datapoint

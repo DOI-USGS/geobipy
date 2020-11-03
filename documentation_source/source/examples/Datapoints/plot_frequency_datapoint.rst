@@ -1,10 +1,12 @@
-.. note::
-    :class: sphx-glr-download-link-note
+.. only:: html
 
-    Click :ref:`here <sphx_glr_download_examples_Datapoints_plot_frequency_datapoint.py>` to download the full example code
-.. rst-class:: sphx-glr-example-title
+    .. note::
+        :class: sphx-glr-download-link-note
 
-.. _sphx_glr_examples_Datapoints_plot_frequency_datapoint.py:
+        Click :ref:`here <sphx_glr_download_examples_Datapoints_plot_frequency_datapoint.py>`     to download the full example code
+    .. rst-class:: sphx-glr-example-title
+
+    .. _sphx_glr_examples_Datapoints_plot_frequency_datapoint.py:
 
 
 Frequency domain datapoint
@@ -120,6 +122,7 @@ Define some in-phase then quadrature data for each frequency.
 
 
 .. image:: /examples/Datapoints/images/sphx_glr_plot_frequency_datapoint_001.png
+    :alt: Frequency Domain EM Data
     :class: sphx-glr-single-img
 
 
@@ -164,6 +167,14 @@ Initialize and read an EM data set
 
 
 
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    <geobipy.src.classes.data.dataset.FdemData.FdemData object at 0x1290c08e0>
 
 
 
@@ -180,6 +191,7 @@ Get a data point from the dataset
 
 
 .. image:: /examples/Datapoints/images/sphx_glr_plot_frequency_datapoint_002.png
+    :alt: Frequency Domain EM Data
     :class: sphx-glr-single-img
 
 
@@ -234,8 +246,18 @@ Forward model the data
 
 
 .. image:: /examples/Datapoints/images/sphx_glr_plot_frequency_datapoint_003.png
+    :alt: Frequency Domain EM Data
     :class: sphx-glr-single-img
 
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:873: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
+      pm = ax.pcolormesh(X, Y, v, color=c, **kwargs)
 
 
 
@@ -253,6 +275,7 @@ Compute the sensitivity matrix for a given model
 
 
 .. image:: /examples/Datapoints/images/sphx_glr_plot_frequency_datapoint_004.png
+    :alt: plot frequency datapoint
     :class: sphx-glr-single-img
 
 
@@ -262,6 +285,8 @@ Compute the sensitivity matrix for a given model
 
  .. code-block:: none
 
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
+      kwargs['cmap'].set_bad(color='white')
     Values <= 0.0 have been masked before taking their log
 
 
@@ -303,8 +328,8 @@ This allows us to evaluate the likelihood of the predicted data
 
  .. code-block:: none
 
-    -315.66783403599095
-    22.796936903564692
+    -315.66783403892055
+    22.7969369036932
 
 
 
@@ -324,6 +349,7 @@ We can perform a quick search for the best fitting half space
 
 
 .. image:: /examples/Datapoints/images/sphx_glr_plot_frequency_datapoint_005.png
+    :alt: Frequency Domain EM Data
     :class: sphx-glr-single-img
 
 
@@ -355,7 +381,7 @@ Compute the misfit between observed and predicted data
 
  .. code-block:: none
 
-    26.171569657128604
+    26.171569657135414
 
 
 
@@ -373,6 +399,7 @@ Plot the misfits for a range of half space conductivities
 
 
 .. image:: /examples/Datapoints/images/sphx_glr_plot_frequency_datapoint_006.png
+    :alt: Halfspace responses
     :class: sphx-glr-single-img
 
 
@@ -470,6 +497,7 @@ Plot the posterior distributions
 
 
 .. image:: /examples/Datapoints/images/sphx_glr_plot_frequency_datapoint_007.png
+    :alt: plot frequency datapoint
     :class: sphx-glr-single-img
 
 
@@ -487,8 +515,20 @@ Plot the posterior distributions
 
 
 .. image:: /examples/Datapoints/images/sphx_glr_plot_frequency_datapoint_008.png
+    :alt: plot frequency datapoint
     :class: sphx-glr-single-img
 
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("gray_r"))
+      kwargs['cmap'].set_bad(color='white')
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:690: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
+      pm = ax.pcolormesh(X, Y, Zm, alpha = alpha, **kwargs)
 
 
 
@@ -499,7 +539,7 @@ _ = fdp.addErr.plotPosteriors()
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  10.205 seconds)
+   **Total running time of the script:** ( 0 minutes  10.629 seconds)
 
 
 .. _sphx_glr_download_examples_Datapoints_plot_frequency_datapoint.py:
@@ -512,13 +552,13 @@ _ = fdp.addErr.plotPosteriors()
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-python
 
      :download:`Download Python source code: plot_frequency_datapoint.py <plot_frequency_datapoint.py>`
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-jupyter
 
      :download:`Download Jupyter notebook: plot_frequency_datapoint.ipynb <plot_frequency_datapoint.ipynb>`
 

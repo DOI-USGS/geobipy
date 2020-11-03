@@ -1,10 +1,12 @@
-.. note::
-    :class: sphx-glr-download-link-note
+.. only:: html
 
-    Click :ref:`here <sphx_glr_download_examples_Statistics_plot_StatArray.py>` to download the full example code
-.. rst-class:: sphx-glr-example-title
+    .. note::
+        :class: sphx-glr-download-link-note
 
-.. _sphx_glr_examples_Statistics_plot_StatArray.py:
+        Click :ref:`here <sphx_glr_download_examples_Statistics_plot_StatArray.py>`     to download the full example code
+    .. rst-class:: sphx-glr-example-title
+
+    .. _sphx_glr_examples_Statistics_plot_StatArray.py:
 
 
 StatArray Class
@@ -59,7 +61,7 @@ The name and units of the variable can be assigned to the StatArray.
     Name: Density
          Units: $\frac{g}{cc}$
          Shape: (1,)
-         Values: [-1.33998888]
+         Values: [0.45753463]
 
 
 
@@ -126,7 +128,7 @@ We can also attach a proposal distribution
     Name: Density
          Units: $\frac{g}{cc}$
          Shape: (1,)
-         Values: [-1.33998888]
+         Values: [0.45753463]
     Prior: 
          Uniform Distribution: 
       Min: :-2.0
@@ -183,7 +185,7 @@ The univariate proposal distribution can generate random samples from itself.
 
  .. code-block:: none
 
-    -1.4678009163054377
+    -0.4824635576370001
 
 
 
@@ -206,7 +208,7 @@ Or we can only generate samples that simultaneously satisfy the prior.
 
  .. code-block:: none
 
-    [-2.21061136]
+    [-0.56073286]
 
 
 
@@ -233,7 +235,7 @@ We can perturb the variable by drawing from the attached proposal distribution.
     Name: Density
          Units: $\frac{g}{cc}$
          Shape: (1,)
-         Values: [0.51560658]
+         Values: [0.83140931]
     Prior: 
          Uniform Distribution: 
       Min: :-2.0
@@ -309,6 +311,7 @@ In an iterative sense, we can propose and evaluate new values, and update the po
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_001.png
+    :alt: Prior, Proposal, Posterior
     :class: sphx-glr-single-img
 
 
@@ -356,7 +359,7 @@ This produces a single probability.
 
  .. code-block:: none
 
-    0.37986736760586076
+    0.3874942160135636
 
 
 
@@ -402,14 +405,14 @@ Perturb the variables using the multivariate proposal.
     Name: Density
          Units: $\frac{g}{cc}$
          Shape: (1,)
-         Values: [1.84988304]
+         Values: [2.23895606]
     Prior: 
          MV Normal Distribution: 
-        Mean: [0.19428018]
+        Mean: [1.33083868]
         Variance: [[1.]]
     Proposal: 
     MV Normal Distribution: 
-        Mean: [1.60757496]
+        Mean: [1.049013]
         Variance: [[1.]]
     Posterior: 
     <class 'geobipy.src.classes.statistics.Histogram1D.Histogram1D'>
@@ -427,7 +430,7 @@ Perturb the variables using the multivariate proposal.
     Name: Frequency
          Units: 
          Shape: (100,)
-         Values: [2 3 2 ... 3 2 3]
+         Values: [5 2 1 ... 1 2 1]
     Values are logged to base None
     Relative to: [0.]
 
@@ -1129,6 +1132,7 @@ All plotting functions can take matplotlib keywords
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_002.png
+    :alt: plot StatArray
     :class: sphx-glr-single-img
 
 
@@ -1149,6 +1153,7 @@ We can quickly plot a bar graph.
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_003.png
+    :alt: Density
     :class: sphx-glr-single-img
 
 
@@ -1169,6 +1174,7 @@ We can scatter the contents of the StatArray if it is 1D
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_004.png
+    :alt: plot StatArray
     :class: sphx-glr-single-img
 
 
@@ -1195,6 +1201,7 @@ ends of whatever you are plotting. Just add the equalize keyword!
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_005.png
+    :alt: plot StatArray
     :class: sphx-glr-single-img
 
 
@@ -1216,6 +1223,7 @@ We can also take the data to a log, log10, log2, or a custom number!
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_006.png
+    :alt: plot StatArray
     :class: sphx-glr-single-img
 
 
@@ -1247,6 +1255,7 @@ We can specify the x axis of the scatter plot.
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_007.png
+    :alt: plot StatArray
     :class: sphx-glr-single-img
 
 
@@ -1277,6 +1286,7 @@ In the first subplot, the y axis is the same as the colourbar.
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_008.png
+    :alt: plot StatArray
     :class: sphx-glr-single-img
 
 
@@ -1318,6 +1328,7 @@ Since the plotting functions take matplotlib keywords, I can also specify the si
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_009.png
+    :alt: plot StatArray
     :class: sphx-glr-single-img
 
 
@@ -1346,6 +1357,7 @@ Of course we can still take the log, or equalize the colour histogram
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_010.png
+    :alt: plot StatArray
     :class: sphx-glr-single-img
 
 
@@ -1381,6 +1393,7 @@ Typically pcolor only works with 2D arrays. The StatArray has a pcolor method th
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_011.png
+    :alt: plot StatArray
     :class: sphx-glr-single-img
 
 
@@ -1390,6 +1403,8 @@ Typically pcolor only works with 2D arrays. The StatArray has a pcolor method th
 
  .. code-block:: none
 
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:873: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
+      pm = ax.pcolormesh(X, Y, v, color=c, **kwargs)
     Values <= 0.0 have been masked before taking their log
 
 
@@ -1416,8 +1431,18 @@ This is useful if the colour values need to be scaled by another variable e.g. v
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_012.png
+    :alt: plot StatArray
     :class: sphx-glr-single-img
 
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:873: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
+      pm = ax.pcolormesh(X, Y, v, color=c, **kwargs)
 
 
 
@@ -1436,6 +1461,7 @@ We can plot a histogram of the StatArray
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_013.png
+    :alt: plot StatArray
     :class: sphx-glr-single-img
 
 
@@ -1511,19 +1537,19 @@ We can also define a 2D array
     Name: Density
          Units: $\frac{g}{cc}$
          Shape: (50, 100)
-         Values: [[-2.45493236e-01 -1.64861253e+00  1.23704375e+00 ... -1.66984435e+00
-      -1.77325244e+00  2.29310023e+00]
-     [-2.49625162e+00  1.01438115e+00  6.24105760e-01 ... -9.98185644e-01
-       1.78997046e+00 -7.80196944e-01]
-     [ 2.64593221e-01 -5.14556148e-01 -1.39253497e+00 ...  7.01245846e-01
-       3.17853019e-01  1.08592347e+00]
+         Values: [[ 0.75918249  0.64151997  0.69716621 ...  1.46981183  1.70228513
+       0.09203775]
+     [-1.32332736  0.18523361  1.57194504 ... -0.73877838  0.54649299
+      -1.49536618]
+     [-0.17477059 -0.1850236   0.03350052 ... -1.22592526  0.34070339
+       0.13016573]
      ...
-     [ 6.82178079e-01 -7.71890988e-01 -8.99816526e-01 ... -1.75402830e+00
-      -6.30568764e-01 -1.48916116e+00]
-     [-3.90247992e-01 -6.89167481e-01 -2.41237585e-01 ...  1.07812192e+00
-       4.80766593e-01 -2.70245703e-02]
-     [ 5.81748996e-04  8.17852892e-01  2.54221909e-01 ... -1.08116673e+00
-      -1.26094474e-02 -1.93195355e+00]]
+     [-0.1363702   0.91702741  0.00545946 ... -1.41568531 -1.20999364
+      -1.25139088]
+     [-1.08374881  2.03776303  0.17409591 ...  0.89003246  0.30416956
+       0.72884199]
+     [ 0.60911283 -0.19306476  2.12427129 ...  0.29275254  0.21026904
+       1.36313787]]
 
 
 
@@ -1545,6 +1571,7 @@ We can still do a histogram
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_014.png
+    :alt: plot StatArray
     :class: sphx-glr-single-img
 
 
@@ -1565,8 +1592,18 @@ And we can use pcolor to plot the 2D array
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_015.png
+    :alt: plot StatArray
     :class: sphx-glr-single-img
 
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
+      kwargs['cmap'].set_bad(color='white')
 
 
 
@@ -1589,8 +1626,18 @@ Here we specify the x and y axes for the 2D array using two other 1D StatArrays
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_016.png
+    :alt: plot StatArray
     :class: sphx-glr-single-img
 
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
+      kwargs['cmap'].set_bad(color='white')
 
 
 
@@ -1611,6 +1658,7 @@ of those values, and will let you know that it has done so!
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_017.png
+    :alt: plot StatArray
     :class: sphx-glr-single-img
 
 
@@ -1620,6 +1668,8 @@ of those values, and will let you know that it has done so!
 
  .. code-block:: none
 
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
+      kwargs['cmap'].set_bad(color='white')
     Values <= 0.0 have been masked before taking their log
 
 
@@ -1642,8 +1692,18 @@ ends of whatever you are plotting
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_018.png
+    :alt: plot StatArray
     :class: sphx-glr-single-img
 
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
+      kwargs['cmap'].set_bad(color='white')
 
 
 
@@ -1662,6 +1722,7 @@ We can equalize the log10 plot too :)
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_019.png
+    :alt: plot StatArray
     :class: sphx-glr-single-img
 
 
@@ -1671,6 +1732,8 @@ We can equalize the log10 plot too :)
 
  .. code-block:: none
 
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
+      kwargs['cmap'].set_bad(color='white')
     Values <= 0.0 have been masked before taking their log
 
 
@@ -1710,8 +1773,18 @@ We can add opacity to each pixel in the image
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_020.png
+    :alt: plot StatArray
     :class: sphx-glr-single-img
 
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
+      kwargs['cmap'].set_bad(color='white')
 
 
 
@@ -1737,8 +1810,20 @@ If the array potentially has a lot of white space around the edges, we can trim 
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_021.png
+    :alt: plot StatArray
     :class: sphx-glr-single-img
 
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
+      kwargs['cmap'].set_bad(color='white')
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:690: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
+      pm = ax.pcolormesh(X, Y, Zm, alpha = alpha, **kwargs)
 
 
 
@@ -1760,6 +1845,7 @@ Create a stacked area plot of a 2D StatArray
 
 
 .. image:: /examples/Statistics/images/sphx_glr_plot_StatArray_022.png
+    :alt: plot StatArray
     :class: sphx-glr-single-img
 
 
@@ -1769,7 +1855,7 @@ Create a stacked area plot of a 2D StatArray
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.964 seconds)
+   **Total running time of the script:** ( 0 minutes  4.116 seconds)
 
 
 .. _sphx_glr_download_examples_Statistics_plot_StatArray.py:
@@ -1782,13 +1868,13 @@ Create a stacked area plot of a 2D StatArray
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-python
 
      :download:`Download Python source code: plot_StatArray.py <plot_StatArray.py>`
 
 
 
-  .. container:: sphx-glr-download
+  .. container:: sphx-glr-download sphx-glr-download-jupyter
 
      :download:`Download Jupyter notebook: plot_StatArray.ipynb <plot_StatArray.ipynb>`
 
