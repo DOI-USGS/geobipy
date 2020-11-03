@@ -6,12 +6,14 @@ major, minor = sys.version_info[0:2]
 if (major, minor) < (3, 5):
     sys.stderr.write('\nPython 3.5 or later is needed to use this package\n')
     sys.exit(1)
-from setuptools import find_packages
-try:
-    from numpy.distutils.core import setup
-    from numpy.distutils.core import Extension
-except ImportError:
-    pass
+from setuptools import find_packages, setup
+from distutils.command.sdist import sdist
+cmdclass={'sdist': sdist}
+#try:
+#    from numpy.distutils.core import setup
+#    from numpy.distutils.core import Extension
+#except ImportError:
+#    pass
 
 def readme():
     with open('README.rst', encoding='utf-8', mode='r') as f:
@@ -20,15 +22,18 @@ def readme():
 setup(name='geobipy',
     packages=find_packages(),
     scripts=[],
-    version=1.0,
+    version="1.0.0",
     description='Markov chain Monte Carlo inversion',
     long_description=readme(),
     url = 'https://github.com/usgs/geobipy',
     classifiers=[
-        'Development Status :: 0 - Alpha',
-        'License :: OSI Approved :: CC0 and GPLv2 and BSD3',
-        'Programming Language :: Python :: 3.x',
-        'Topic :: Geophysical Inversion :: Bayesian :: McMC',
+        'Development Status :: 3 - Alpha',
+        'License :: OSI Approved',
+        'License :: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication',
+        'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
+        'License :: OSI Approved :: BSD License',
+        'Programming Language :: Python :: 3',
+        'Topic :: Scientific/Engineering',
     ],
     author='Leon Foks',
     author_email='nfoks@contractor.usgs.gov',
