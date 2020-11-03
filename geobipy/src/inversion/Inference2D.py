@@ -427,10 +427,10 @@ class Inference2D(myObject):
         return zPosterior
 
 
-    @property
-    def hitMap(self):
-        """ Get the hitmaps for each data point """
-        return self.getAttribute('Hit Map', index=0)
+    # @property
+    # def hitmap(self):
+    #     """ Get the hitmaps for each data point """
+    #     return self.getAttribute('Hit Map', index=0)
 
 
     @cached_property
@@ -973,7 +973,7 @@ class Inference2D(myObject):
         return self.data._relErr.posterior
 
 
-    def get_hitmap(self, index=None, fiducial=None):
+    def hitmap(self, index=None, fiducial=None):
 
         assert not (index is None and fiducial is None), Exception("Please specify either an integer index or a fiducial.")
         assert index is None or fiducial is None, Exception("Only specify either an integer index or a fiducial.")
