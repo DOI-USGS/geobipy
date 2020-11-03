@@ -2,7 +2,6 @@ from copy import deepcopy
 import numpy as np
 from ...base import MPI as myMPI
 from ...classes.core.myObject import myObject
-from ...base.HDF.hdfWrite import writeNumpy
 from abc import ABC, abstractclassmethod
 
 class EmLoop(myObject, ABC):

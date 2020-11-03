@@ -3,7 +3,6 @@ Module defining a uniform distribution with statistical procedures
 """
 from copy import deepcopy
 from .baseDistribution import baseDistribution
-from ...base.HDF.hdfWrite import writeNumpy
 from ...base import customPlots as cP
 import numpy as np
 from scipy.stats import uniform

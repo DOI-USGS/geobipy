@@ -1,6 +1,6 @@
 import numpy as np
 
-def writeNumpy(arr, h5obj, myName, index=None):
+def write_nd(arr, h5obj, myName, index=None):
     """Writes a numpy array to a preallocated dataset in a h5py group object
 
     Parameters
@@ -13,7 +13,7 @@ def writeNumpy(arr, h5obj, myName, index=None):
         Specifies the index'th entry of the data to return. If the group was created using a createHDF procedure in parallel with the nRepeats option, index specifies the index'th entry from which to read the data.
 
     """
-    if (not index is None):        
+    if (not index is None):
             assert isinstance(index,(slice, tuple, int, np.integer)), ValueError('index must be an integer or a numpy slice. e.g. np.s_[0:10]')
 
     nd = np.ndim(arr)
@@ -33,25 +33,19 @@ def writeNumpy(arr, h5obj, myName, index=None):
     # Automatically fills memory from the beginning index in each dimension.
     if (nd == 1):
         h5obj[myName][:arr.size] = arr
-        return
 
     s = arr.shape
     if(nd == 2):
         h5obj[myName][:s[0], :s[1]] = arr
-        return
 
-    if(nd == 3):
+    elif(nd == 3):
         h5obj[myName][:s[0], :s[1], :s[2]] = arr
-        return
 
-    if(nd == 4):
+    elif(nd == 4):
         h5obj[myName][:s[0], :s[1], :s[2], :s[3]] = arr
-        return
 
-    if(nd == 5):
+    elif(nd == 5):
         h5obj[myName][:s[0], :s[1], :s[2], :s[3], :s[4]] = arr
-        return
 
-    if(nd == 6):
+    elif(nd == 6):
         h5obj[myName][:s[0], :s[1], :s[2], :s[3], :s[4], :s[5]] = arr
-        return

@@ -1,7 +1,6 @@
 from copy import deepcopy
 import numpy as np
 from ...base import MPI as myMPI
-from ...base.HDF.hdfWrite import writeNumpy
 from .EmLoop import EmLoop
 
 class CircularLoop(EmLoop):
@@ -161,7 +160,7 @@ class CircularLoop(EmLoop):
         create: optionally create the data set as well before writing
         """
         data = np.asarray([self._orient, self.moment, self.x, self.y, self.z, self.pitch, self.roll, self.yaw, self.radius], dtype=np.float64)
-        writeNumpy(data, parent, myName+'/data', index=index)
+        write_nd(data, parent, myName+'/data', index=index)
 
     def toHdf(self, parent, myName):
 

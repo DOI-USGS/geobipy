@@ -5,8 +5,6 @@ Module defining a normal distribution with statistical procedures
 import numpy as np
 from ...base.logging import myLogger
 from .baseDistribution import baseDistribution
-from ...base.HDF.hdfWrite import writeNumpy
-#from .MvNormalDistribution import MvNormal
 from scipy.stats import t
 from ...base import customPlots as cP
 from ..core import StatArray

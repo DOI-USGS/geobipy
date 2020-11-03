@@ -7,7 +7,7 @@ from ...base import customPlots as cP
 from ..statistics.Distribution import Distribution
 from ..statistics.baseDistribution import baseDistribution
 from .myObject import myObject
-from ...base.HDF.hdfWrite import writeNumpy
+from ...base.HDF.hdfWrite import write_nd
 from ...base import MPI as myMPI
 
 from ...base.HDF import hdfRead
@@ -1549,7 +1549,7 @@ class StatArray(np.ndarray, myObject):
 
         """
 
-        writeNumpy(self, h5obj, myName+'/data', index=index)
+        write_nd(self, h5obj, myName+'/data', index=index)
 #        try:
 #            self.prior.writeHdf(h5obj,myName+'/prior',create=False)
 #        except:

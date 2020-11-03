@@ -12,7 +12,7 @@ from ..base import customFunctions as cF
 import numpy as np
 from ..base import fileIO as fIO
 import h5py
-from ..base.HDF.hdfWrite import writeNumpy
+from ..base.HDF.hdfWrite import write_nd
 from ..classes.core import StatArray
 from ..classes.statistics.Hitmap2D import Hitmap2D
 from ..classes.statistics.Histogram1D import Histogram1D

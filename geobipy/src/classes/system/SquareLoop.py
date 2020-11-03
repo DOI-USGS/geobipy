@@ -1,7 +1,7 @@
 from copy import deepcopy
 import numpy as np
 from ...base import MPI as myMPI
-from ...base.HDF.hdfWrite import writeNumpy
+from ...base.HDF.hdfWrite import write_nd
 from .EmLoop import EmLoop
 
 class SquareLoop(EmLoop):
@@ -151,9 +151,9 @@ class SquareLoop(EmLoop):
             parent[myName+'/orientation'][0] = np.string_(self.orient)
         else:
             parent[myName+'/orientation'][index] = np.string_(self.orient)
-        writeNumpy(self.moment, parent, myName+'/moment', index=index)
-        writeNumpy(self.data,   parent, myName+'/data',   index=index)
-        writeNumpy(self.sideLength, parent, myName+'/sidelength', index=index)
+        write_nd(self.moment, parent, myName+'/moment', index=index)
+        write_nd(self.data,   parent, myName+'/data',   index=index)
+        write_nd(self.sideLength, parent, myName+'/sidelength', index=index)
 
     def toHdf(self, parent, myName):
 
