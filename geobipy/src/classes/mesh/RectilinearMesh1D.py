@@ -262,12 +262,7 @@ class RectilinearMesh1D(myObject):
         values = values - self.relativeTo
 
         # Get the bin indices for all values
-        if self.isRegular():
-            iBin = np.int64((values - self._cellCentres[0]) / self.dx)
-        else:
-            iBin = self._cellEdges.searchsorted(values, side='right') - 1
-
-        iBin = np.atleast_1d(iBin)
+        iBin = np.atleast_1d(self._cellEdges.searchsorted(values, side='right') - 1)
 
         # Remove indices that are out of bounds
         if trim:
