@@ -60,7 +60,7 @@ class TdemData(Data):
         self.system = systems
 
         # Data Class containing xyz and channel values
-        Data.__init__(self, self.nTimes, dataUnits=r"$\frac{V}{m^{2}}$", **kwargs)
+        Data.__init__(self, self.nTimes, units=r"$\frac{V}{m^{2}}$", **kwargs)
 
         # StatArray of Transmitter loops
         self.transmitter = kwargs.get('transmitter', None)

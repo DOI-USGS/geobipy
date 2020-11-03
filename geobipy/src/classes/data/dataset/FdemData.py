@@ -72,7 +72,7 @@ class FdemData(Data):
         self.system = systems
 
         # Data Class containing xyz and channel values
-        Data.__init__(self, nChannelsPerSystem=2*self.nFrequencies, dataUnits="ppm", **kwargs)
+        Data.__init__(self, nChannelsPerSystem=2*self.nFrequencies, units="ppm", **kwargs)
 
         # Assign data names
         self._data.name = 'Fdem Data'
