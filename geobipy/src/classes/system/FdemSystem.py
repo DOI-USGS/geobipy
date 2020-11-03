@@ -258,14 +258,14 @@ class FdemSystem(myObject):
                 zz.append(i)
         return np.asarray(xx), np.asarray(xy), np.asarray(xz), np.asarray(yx), np.asarray(yy), np.asarray(yz), np.asarray(zx), np.asarray(zy), np.asarray(zz)
 
-
-    def summary(self, out=False):
+    @property
+    def summary(self):
         """ print a summary of the FdemSystem """
         msg = ("FdemSystem: \n"
                "{} \n"
                "{} \n"
-               "{} \n").format(self._fileName, self.frequencies.summary(True), self.loopOffsets.summary(True))
-        return msg if out else print(msg)
+               "{} \n").format(self._fileName, self.frequencies.summary, self.loopOffsets.summary)
+        return msg
 
 
     def hdfName(self):

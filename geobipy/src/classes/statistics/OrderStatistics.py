@@ -47,12 +47,11 @@ class Order(object):
         #     return StatArray.StatArray(tmp, "Probability Density")
 
 
-    def summary(self, out=False):
-        msg = 'Order Statistics: \n'
-        msg += str(self.pdf) + '\n'
-        if (out):
-            return msg
-        print(msg)
+    @property
+    def summary(self):
+        msg = ('Order Statistics: \n'
+               '{} \n').format(None)
+        return msg
 
 
     # def hdfName(self):

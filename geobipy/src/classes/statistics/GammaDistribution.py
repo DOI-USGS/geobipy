@@ -39,10 +39,9 @@ class Gamma(object):
         self.pdf = x**self._a * np.exp(x * self._b) * self._c
         return self.pdf
 
-    def summary(self, out=False):
+    @property
+    def summary(self):
         msg = 'Gamma Distribution: \n'
         msg += '  Scale: :' + str(self.shape) + '\n'
         msg += '  Shape:  :' + str(self.shape) + '\n'
-        if (out):
-            return msg
-        print(msg)
+        return msg

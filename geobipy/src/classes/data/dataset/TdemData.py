@@ -895,18 +895,16 @@ class TdemData(Data):
         ax = D.pcolor(x=times, y=y, **kwargs)
         return ax
 
-
-    def summary(self, out=False):
+    @property
+    def summary(self):
         """ Display a summary of the TdemData """
         msg = PointCloud3D.summary(self, out=out)
         msg = "Tdem Data: \n"
         msg += "Number of Systems: :" + str(self.nSystems) + '\n'
-        msg += self.lineNumber.summary(True)
-        msg += self.id.summary(True)
-        msg += self.elevation.summary(True)
-        if (out):
-            return msg
-        print(msg)
+        msg += self.lineNumber.summary
+        msg += self.id.summary
+        msg += self.elevation.summary
+        return msg
 
 
     def fromHdf(self, grp, **kwargs):

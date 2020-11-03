@@ -250,8 +250,8 @@ class DataPoint(Point):
         Jout[:, :] = Jin * (np.repeat(self._std[self.active, np.newaxis]**-power, Jout.shape[1], 1))
         return Jout
 
-
-    def summary(self, out=False):
+    @property
+    def summary(self):
         """ Print a summary of the EMdataPoint """
         msg = ('Data Point: \n'
                'Channel Names {} \n'
@@ -260,10 +260,8 @@ class DataPoint(Point):
                'z: {} \n'
                'elevation: {} \n'
                'Number of active channels: {} \n'
-               '{} {} {}').format(self._channelNames, self.x, self.y, self.z, self.elevation, self.nActiveChannels, self._data[self.active].summary(True), self._predictedData[self.active].summary(True), self._std[self.active].summary(True))
-        if (out):
-            return msg
-        print(msg)
+               '{} {} {}').format(self._channelNames, self.x, self.y, self.z, self.elevation, self.nActiveChannels, self._data[self.active].summary, self._predictedData[self.active].summary, self._std[self.active].summary)
+        return msg
 
 
     def updateErrors(self, relativeErr, additiveErr):

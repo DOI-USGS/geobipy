@@ -418,18 +418,18 @@ class RectilinearMesh1D(myObject):
         res = RectilinearMesh1D(x)
         return res
 
-
-    def summary(self, out=False):
+    @property
+    def summary(self):
         """ Print a summary of self """
         msg = ("Cell Centres \n"
                "{}"
                "Cell Edges"
                "{}").format(
-                   self._cellCentres.summary(True),
-                   self._cellEdges.summary(True)
+                   self._cellCentres.summary,
+                   self._cellEdges.summary
                )
 
-        return msg if out else print(msg)
+        return msg
 
 
     def Bcast(self, world, root=0):

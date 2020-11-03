@@ -100,32 +100,31 @@ class Uniform(baseDistribution):
         return np.exp(values) if self.log else values
 
 
-    def summary(self, out=False):
+    @property
+    def summary(self):
         msg = 'Uniform Distribution: \n'
         msg += '  Min: :' + str(self.min) + '\n'
         msg += '  Max: :' + str(self.max) + '\n'
-        if (out):
-            return msg
-        print(msg)
+        return msg
 
 
     def bins(self, nBins=100, dim=None):
-        """Discretizes a range given the min and max of the distribution 
-        
+        """Discretizes a range given the min and max of the distribution
+
         Parameters
         ----------
         nBins : int, optional
             Number of bins to return.
         dim : int, optional
             Get the bins of this dimension, if None, returns bins for all dimensions.
-        
+
         Returns
         -------
         bins : array_like
             The bin edges.
 
         """
-        
+
         nD = self.ndim
         if (nD > 1):
             if dim is None:

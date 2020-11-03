@@ -121,18 +121,20 @@ class CircularLoop(EmLoop):
         return CircularLoop(self.orient, self.moment, self.x, self.y, self.z, self.pitch, self.roll, self.yaw, self.radius)
 
 
+    @property
     def summary(self):
         """Print a summary"""
-        print("EmLoop:")
-        print("Orientation: :" + str(self.orient))
-        print("Moment:      :" + str(self.moment))
-        print("X:          :"  + str(self.x))
-        print("Y:          :"  + str(self.y))
-        print("Z:          :"  + str(self.z))
-        print("Pitch:       :" + str(self.pitch))
-        print("Roll:        :" + str(self.roll))
-        print("Yaw:         :" + str(self.yaw))
-        print("Radius:      :" + str(self.radius))
+        msg = ("EmLoop: \n"
+               "Orientation: {}\n"
+               "Moment: {}\n"
+               "X: {}\n"
+               "Y: {}\n"
+               "Z: {}\n"
+               "Pitch: {}\n"
+               "Roll: {}\n"
+               "Yaw: {}\n"
+               "Radius: {}\n").format(self.orient, self.moment, self.x, self.y, self.z, self.pitch, self.roll, self.yaw)
+        return msg
 
     def hdfName(self):
         """Create a reproducibility string that can be instantiated from a hdf file """

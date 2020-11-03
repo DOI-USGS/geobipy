@@ -549,12 +549,12 @@ class PointCloud3D(myObject):
             tmp = np.column_stack((self.x, self.y, self.z))
         self.kdtree = cKDTree(tmp)
 
-
-    def summary(self, out=False):
+    @property
+    def summary(self):
         """ Display a summary of the 3D Point Cloud """
         msg = ("3D Point Cloud: \n"
-              "Number of Points: : {} \n {} {} {} {}").format(self._nPoints, self.x.summary(True), self.y.summary(True), self.z.summary(True), self.elevation.summary(True))
-        return msg if out else print(msg)
+              "Number of Points: : {} \n {} {} {} {}").format(self._nPoints, self.x.summary, self.y.summary, self.z.summary, self.elevation.summary)
+        return msg
 
 
 #    def interpRBF(self, values, nDims, dx = None, function = None, epsilon = None, smooth = None, norm = None, **kwargs):

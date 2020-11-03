@@ -77,9 +77,10 @@ class TdemSystem(myObject):
             assert isinstance(value, EmLoop), TypeError("transmitterLoop must have type geobipy.EmLoop")
             self._receiverLoop = value.deepcopy()
 
-    def summary(self, out=False):
+    @property
+    def summary(self):
         msg = ("TdemSystem: ")
-        return msg if out else print(msg)
+        return msg
 
     @property
     def times(self):

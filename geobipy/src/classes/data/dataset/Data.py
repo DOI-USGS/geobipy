@@ -731,15 +731,15 @@ class Data(PointCloud3D):
     #             self.z[j] = values[2]
     #             self._data[j, ] = values[3:]
 
-
-    def summary(self, out=False):
+    @property
+    def summary(self):
         """ Display a summary of the Data """
         msg = ("{}"
               "Data:          : \n"
               "# of Channels: {} \n"
               "# of Total Data: {} \n"
-              "{}\n {}\n {}\n").format(super().summary(True), self.nChannels, self.nPoints * self.nChannels, self.data.summary(True), self.std.summary(True), self.predictedData.summary(True))
-        return msg if out else print(msg)
+              "{}\n {}\n {}\n").format(super().summary, self.nChannels, self.nPoints * self.nChannels, self.data.summary, self.std.summary, self.predictedData.summary)
+        return msg
 
 
     def updateErrors(self, relativeErr, additiveErr, system=None):
