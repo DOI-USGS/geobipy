@@ -767,7 +767,8 @@ class StatArray(np.ndarray, myObject):
         return self[i]
 
 
-    def summary(self, out=False):
+    @property
+    def summary(self):
         """Write a summary of the StatArray
 
         Parameters
@@ -782,26 +783,23 @@ class StatArray(np.ndarray, myObject):
 
         """
         np.set_printoptions(threshold=5)
-        msg = "Name: " + self.getName() + '\n'
-        msg += "     Units: " + self.getUnits() + '\n'
+        msg = "Name: " + self.getNameUnits() + '\n'
         msg += "     Shape: " + str(self.shape) + '\n'
         msg += "     Values: " + str(self[:]) + '\n'
         if self.hasPrior:
-            msg += "Prior: \n     {}".format(self.prior.summary(True))
+            msg += "Prior: \n     {}".format(self.prior.summary)
 
         if self.hasProposal:
-            msg += "Proposal: \n{}".format(self.proposal.summary(True))
+            msg += "Proposal: \n{}".format(self.proposal.summary)
 
         if self.hasPosterior:
             if self.nPosteriors > 1:
                 for p in self.posterior:
-                    msg += "Posterior: \n{}".format(p.summary(True))
+                    msg += "Posterior: \n{}".format(p.summary)
             else:
-                msg += "Posterior: \n{}".format(self.posterior.summary(True))
+                msg += "Posterior: \n{}".format(self.posterior.summary)
 
-        if (out):
-            return msg
-        print(msg)
+        return msg
 
 
     def summaryPlot(self, **kwargs):
