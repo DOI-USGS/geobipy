@@ -831,7 +831,7 @@ class TdemData(Data):
         cP.title(tmp.name)
 
 
-    def plot(self, system=0, channels=None, xAxis='index', **kwargs):
+    def plot(self, system=0, channels=None, xAxis='x', **kwargs):
         """ Plots the data
 
         Parameters
@@ -879,7 +879,7 @@ class TdemData(Data):
 
     def plotWaveform(self, **kwargs):
         for i in range(self.nSystems):
-            plt.subplot(2, 1, i + 1)
+            plt.subplot(self.nSystems, 1, i + 1)
             plt.plot(self.system[i].waveform.time, self.system[i].waveform.current, **kwargs)
             if (i == self.nSystems-1): cP.xlabel('Time (s)')
             cP.ylabel('Normalized Current (A)')
