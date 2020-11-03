@@ -244,8 +244,8 @@ class SquareLoop(EmLoop):
     def __str__(self):
         """ Define print(self) """
         return 'SquareLoop("{0}",{1},{2},{3},{4},{5},{6},{7},{8})'.format(
-            self.orient, self.moment, 
-            self.x,      self.y,    self.z, 
+            self.orient, self.moment,
+            self.x,      self.y,    self.z,
             self.pitch,  self.roll, self.yaw, self.sideLength)
 
 

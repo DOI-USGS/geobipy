@@ -126,15 +126,13 @@ class Normal(baseDistribution):
             return StatArray.StatArray(norm.logpdf(x, loc = self._mean, scale = self.variance), "Probability Density")
         else:
             return StatArray.StatArray(norm.pdf(x, loc = self._mean, scale = self.variance), "Probability Density")
-        
 
-    def summary(self, out=False):
+    @property
+    def summary(self):
         msg = 'Normal Distribution: \n'
         msg += '    Mean: :' + str(self.mean) + '\n'
         msg += 'Variance: :' + str(self.variance) + '\n'
-        if (out):
-            return msg
-        print(msg)
+        return msg
 
 #    def hdfName(self):
 #        """ Create the group name for an HDF file """
