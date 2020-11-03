@@ -638,6 +638,26 @@ class StatArray(np.ndarray, myObject):
             return False
 
 
+    def index(self, values):
+        """Find the index of values.
+
+        Assumes that self is monotonically increasing!
+
+        Parameters
+        ----------
+        values : scalara or array_like
+            Find the index of these values.
+
+        Returns
+        -------
+        out : ints
+            Indicies into self.
+
+        """
+
+        return self.searchsorted(values, side='right') - 1
+
+
     def priorDerivative(self, order, i=None):
         """ Get the derivative of the prior.
 
