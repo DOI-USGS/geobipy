@@ -60,7 +60,7 @@ class Data(PointCloud3D):
 
     """
 
-    def __init__(self, nChannelsPerSystem=1, x=None, y=None, z=None, elevation=None, data=None, std=None, predictedData=None, fiducial=None, lineNumber=None, dataUnits=None, channelNames=None, **kwargs):
+    def __init__(self, nChannelsPerSystem=1, x=None, y=None, z=None, elevation=None, data=None, std=None, predictedData=None, fiducial=None, lineNumber=None, units=None, channelNames=None, **kwargs):
         """ Initialize the Data class """
 
         # Number of Channels
@@ -72,6 +72,7 @@ class Data(PointCloud3D):
 
         self.lineNumber = lineNumber
 
+        self.units = units
         self.data = data
 
         self.std = std
@@ -97,6 +98,18 @@ class Data(PointCloud3D):
     def nSystems(self):
         return np.size(self.nChannelsPerSystem)
 
+    @property
+    def units(self):
+        return self._units
+
+    @units.setter
+    def units(self, values):
+        if values is None:
+            self._units = None
+        else:
+            assert isinstance(values, str)
+            self._units = values
+
     def _systemIndices(self, system=0):
         """The slice indices for the requested system.
 
@@ -121,7 +134,7 @@ class Data(PointCloud3D):
     def data(self):
         """The data. """
         if np.size(self._data, 0) == 0:
-            self._data = StatArray.StatArray((self.nPoints, self.nChannels), "Data")
+            self._data = StatArray.StatArray((self.nPoints, self.nChannels), "Data", self.units)
         return self._data
 
 
@@ -129,7 +142,7 @@ class Data(PointCloud3D):
     def data(self, values):
         shp = [self.nPoints, self.nChannels]
         if values is None:
-            self._data = StatArray.StatArray(shp, "Data")
+            self._data = StatArray.StatArray(shp, "Data", self.units)
         else:
             if self.nPoints == 0:
                 self.nPoints = np.size(values, 0)
@@ -142,7 +155,7 @@ class Data(PointCloud3D):
     def predictedData(self):
         """The predicted data. """
         if np.size(self._predictedData, 0) == 0:
-            self._predictedData = StatArray.StatArray((self.nPoints, self.nChannels), "Predicted Data")
+            self._predictedData = StatArray.StatArray((self.nPoints, self.nChannels), "Predicted Data", self.units)
         return self._predictedData
 
 
@@ -150,7 +163,7 @@ class Data(PointCloud3D):
     def predictedData(self, values):
         shp = (self.nPoints, self.nChannels)
         if values is None:
-            self._predictedData = StatArray.StatArray(shp, "Predicted Data")
+            self._predictedData = StatArray.StatArray(shp, "Predicted Data", self.units)
         else:
             if self.nPoints == 0:
                 self.nPoints = np.size(values, 0)
@@ -163,7 +176,7 @@ class Data(PointCloud3D):
     def std(self):
         """The data. """
         if np.size(self._std, 0) == 0:
-            self._std = StatArray.StatArray((self.nPoints, self.nChannels), "Standard deviation")
+            self._std = StatArray.StatArray((self.nPoints, self.nChannels), "Standard deviation", self.units)
         return self._std
 
 
@@ -171,7 +184,7 @@ class Data(PointCloud3D):
     def std(self, values):
         shp = [self.nPoints, self.nChannels]
         if values is None:
-            self._std = StatArray.StatArray(np.ones(shp), "Standard deviation")
+            self._std = StatArray.StatArray(np.ones(shp), "Standard deviation", self.units)
         else:
             if self.nPoints == 0:
                 self.nPoints = np.size(values, 0)
