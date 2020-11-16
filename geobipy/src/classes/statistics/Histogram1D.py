@@ -199,7 +199,11 @@ class Histogram1D(RectilinearMesh1D):
 
     @property
     def pdf(self):
-        return StatArray.StatArray(np.divide(self.counts, np.sum(self.counts)), name='Density')
+
+        x, dum = cF._log(self.binCentres, self.log)
+        # cnts = self.counts / np.trapz(self.counts, x = x)
+
+        return StatArray.StatArray(np.divide(self.counts, np.trapz(self.counts, x = x)), name='Density')
 
 
     def estimateStd(self, nSamples, **kwargs):
