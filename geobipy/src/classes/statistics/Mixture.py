@@ -71,7 +71,7 @@ class Mixture(myObject):
         cdf = np.cumsum(y) / np.max(np.cumsum(y))
         i05 = cdf.searchsorted(0.1)
         i95 = cdf.searchsorted(0.90)
-        kwargs['variance_bound'] = centres[i95] - centres[i05]
+        kwargs['max_variance'] = np.minimum(1.0, centres[i95] - centres[i05])
 
         fit_denominator = np.r_[np.linalg.norm(y, ord=np.inf), np.linalg.norm(y, ord=2.0)]
 
@@ -81,15 +81,17 @@ class Mixture(myObject):
 
         fit = self._fit_GM_to_cuve(self.model, centres, edges, y, x_guess, **kwargs)
 
+        kwargs['max_variance'] = centres[i95] - centres[i05]
+
+
         residual = y - fit.best_fit
         misfit = np.r_[np.linalg.norm(residual, ord=np.inf), np.linalg.norm(residual, ord=2.0)] / fit_denominator
 
         residual = np.abs(residual)
 
         # Get the location of the next peak
-        for i in range(x_guess.size):
-            s = np.min([fit.params['g{}_fwhm'.format(i)].value, 1.0])
-            residual[np.abs(centres - fit.params['g{}_center'.format(i)].value) < 1.67*s] = 0.0
+        s = fit.params['g0_sigma'].value
+        residual[np.abs(centres - fit.params['g0_center'].value) < 2.0*s] = 0.0
         residual[:i05] = 0.0
         residual[i95:] = 0.0
 
@@ -118,7 +120,7 @@ class Mixture(myObject):
             print('next peak', centres[new_peak])
 
         if plot and verbose:
-            input('here')
+            input('\nNext\n')
 
         while go:
 
@@ -131,29 +133,56 @@ class Mixture(myObject):
             misfit_test = np.r_[np.linalg.norm(residual, ord=np.inf), np.linalg.norm(residual, ord=2.0)] / fit_denominator
             residual = np.abs(residual)
 
+            fwhm = [fit_test.params['g{}_fwhm'.format(i)].value for i in range(x_guess_test.size)]
+            s = np.min(fwhm)
             for i in range(x_guess_test.size):
-                s = np.min([fit_test.params['g{}_fwhm'.format(i)].value, 1.0])
-                residual[np.abs(centres - fit_test.params['g{}_center'.format(i)].value) < 1.67*s] = 0.0
+                residual[np.abs(centres - fit_test.params['g{}_center'.format(i)].value) < s] = 0.0
             residual[:i05] = 0.0
             residual[i95:] = 0.0
 
-            test_is_good = np.all(misfit_test > epsilon) and np.all(np.abs(misfit_test - misfit) > mu) and np.all((misfit_test - misfit) < 0.0)
+            # Conditions to accept new model
+            misfit_decreases = (misfit_test[1] - misfit[1]) < 0.0
+            gradient_substantial = np.any(np.abs(misfit_test - misfit) > mu)
 
-            # Test a new peak if its possible
-            new_peak = np.argmax(residual)
+            accept_model = misfit_decreases and gradient_substantial
 
             if verbose:
                 print('testing peaks', x_guess_test)
-                print('misfit', misfit_test, )
-                print('misfit change', np.abs(misfit_test - misfit), np.any(np.abs(misfit_test - misfit) > mu))
-                print('misfit sign', misfit_test - misfit, np.all(misfit_test - misfit < 0.0))
-                print('fit is accepted', test_is_good)
-                print('next peak', centres[new_peak])
 
-            if test_is_good:
+            go = accept_model
+            if accept_model:
+                # Test a new peak if its possible
+                new_peak = np.argmax(residual)
+
+                # conditions to test the next model
+                above_abs_threshold = np.all(misfit_test > epsilon)
+                gradient_substantial = np.any(np.abs(misfit_test - misfit) > mu)
+                valid_new_peak = residual[new_peak] > 0.0 and (i05 <= new_peak <= i95)
+
+                under_limits = x_guess.size < maxDistributions
+
+                go = valid_new_peak and under_limits and above_abs_threshold and gradient_substantial
+
+                if verbose:
+                    print('\nmodel accepted')
+
+                    print('misfit', misfit_test)
+                    print('misfit change should be negative', misfit_test - misfit)
+                    print('next peak', centres[new_peak])
+
+                    print('above absolute threshold?', above_abs_threshold)
+                    print('valid new peak?', valid_new_peak)
+
                 fit = fit_test
                 misfit = misfit_test
                 x_guess = x_guess_test
+
+            else:
+                if verbose:
+                    print('\ntest not accepted')
+                    print('misfit', misfit_test)
+                    print('misfit change should be negative', misfit_test - misfit)
+
 
             if plot:
                 ax1.clear()
@@ -171,13 +200,9 @@ class Mixture(myObject):
                 fig.canvas.draw()
                 plt.pause(1e-3)
 
-            go = test_is_good and residual[new_peak] > 0.0 and x_guess.size < maxDistributions
 
-            if plot and verbose:
-                print('misfit reached', np.all(misfit > epsilon))
-                print('new guess is good', residual[new_peak] > 0.0)
-                print('can gfit more?', x_guess.size < maxDistributions)
-                input('here')
+            if plot and verbose and go:
+                input('Next')
 
         # if verbose:
         #     print('Final misfit with gaussians', misfit)
@@ -227,7 +252,8 @@ class Mixture(myObject):
             pars.update(guess.make_params())
             mod += guess
 
-        mx = kwargs.pop('variance_bound', None)
+        mn = kwargs.pop('min_variance', 3.0*(edges[1]-edges[0]))
+        mx = kwargs.pop('max_variance', None)
         if mx is None:
             init = 1.0
         else:
@@ -237,8 +263,10 @@ class Mixture(myObject):
             vary = True
             if i == 0:
                 vary = False
+            ix = centres.searchsorted(x_guess[i])
+
             pars['g{}_center'.format(i)].set(value=x_guess[i],vary=vary)#, min=edges[ix], max=edges[ix+1])
-            pars['g{}_sigma'.format(i)].set(value=init, min=0.0, max=mx)
+            pars['g{}_sigma'.format(i)].set(value=init, min=mn, max=mx)
             pars['g{}_amplitude'.format(i)].set(value=1.0, min=1e-3)
 
         init = mod.eval(pars, x=centres)
