@@ -263,7 +263,7 @@ class Histogram1D(RectilinearMesh1D):
         mix = Mixture(mixture_type)
 
         log = kwargs.get('log', None)
-        kwargs['variance_bound'] = kwargs.pop('variance_bound', self.estimateStd(1e5, log=log))
+        kwargs['max_variance'] = kwargs.pop('max_variance', self.estimateStd(1e5, log=log))
 
         mix.fit_to_curve(x=self.binCentres, y=self.pdf, **kwargs)
         return mix
@@ -391,7 +391,7 @@ class Histogram1D(RectilinearMesh1D):
 
         x = self.binCentres
         x1 = x
-        if kwargs['xscale'] == 'log':
+        if kwargs.get('xscale', '') == 'log':
             x1 = np.log10(x1)
 
         if normalize:
