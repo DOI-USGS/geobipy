@@ -327,12 +327,12 @@ class Mixture(myObject):
             so that multiple MPI ranks can write to their respective parts in the extended memory.
 
         """
-
-        dt = h5py.special_dtype(vlen=str)
-
         grp = h5obj.create_group(myName)
         grp.attrs["repr"] = self.hdf_name
-        grp.create_dataset('data', shape, dtype=dt)
+        grp.attrs['shape'] = shape
+        s = ' '
+        asciiList = [s.encode("utf-8", "ignore") for n in range(np.sum(shape))]
+        grp.create_dataset('data', (len(asciiList),1),'S100000', asciiList)
 
         return grp
 
@@ -352,8 +352,11 @@ class Mixture(myObject):
         """
 
 
-        s = self.model.dumps()
-        h5obj[myName + '/data'][index] = s
+        s = self.model.dumps().encode("utf-8", "ignore")
+
+        grp = h5obj[myName]
+
+        grp['data'][(np.ravel_multi_index(index, grp.attrs['shape']), 0)] = s
 
 
     def fromHdf(self, h5grp, index=0):
@@ -367,6 +370,7 @@ class Mixture(myObject):
             If the group was created using the nRepeats option, index specifies the index'th entry from which to read the data.
 
         """
-        s = h5grp['data'][index]
+        shp = h5grp.attrs['shape']
+        s = h5grp['data'][(np.ravel_multi_index(index, shp), 0)]
         self.model = ModelResult(Model(lambda x: x, None), Parameters()).loads(s)
         return self
