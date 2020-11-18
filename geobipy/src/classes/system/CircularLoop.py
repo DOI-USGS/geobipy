@@ -2,6 +2,8 @@ from copy import deepcopy
 import numpy as np
 from ...base import MPI as myMPI
 from .EmLoop import EmLoop
+from ..core import StatArray
+from ...base.HDF.hdfWrite import write_nd
 
 class CircularLoop(EmLoop):
     """Defines a circular loop for EM acquisition systems
@@ -149,10 +151,12 @@ class CircularLoop(EmLoop):
         grp = parent.create_group(myName)
         grp.attrs["repr"] = self.hdfName()
 
-        if (not nRepeats is None):
-            grp.create_dataset('data', [nRepeats, 9], dtype=np.float64, fillvalue=fillvalue)
-        else:
-            grp.create_dataset('data', [9], dtype=np.float64, fillvalue=fillvalue)
+        data = StatArray.StatArray(9).createHdf(grp, 'data', nRepeats=nRepeats, fillvalue=fillvalue)
+
+        # if (not nRepeats is None):
+        #     g'data', [nRepeats, 9], dtype=np.float64, fillvalue=fillvalue)
+        # else:
+        #     grp.create_dataset('data', [9], dtype=np.float64, fillvalue=fillvalue)
 
 
     def writeHdf(self, parent, myName, index=None):
@@ -161,35 +165,18 @@ class CircularLoop(EmLoop):
         myName: object hdf name. Assumes createHdf has already been called
         create: optionally create the data set as well before writing
         """
-        data = np.asarray([self._orient, self.moment, self.x, self.y, self.z, self.pitch, self.roll, self.yaw, self.radius], dtype=np.float64)
-        write_nd(data, parent, myName+'/data', index=index)
-
-    def toHdf(self, parent, myName):
-
-        # create a new group inside h5obj
-        grp = parent.create_group(myName)
-        grp.attrs["repr"] = self.hdfName()
-
-        data = np.asarray([self._orient, self.moment, self.x, self.y, self.z, self.pitch, self.roll, self.yaw, self.radius], dtype=np.float64)
-        grp.create_dataset('data', data = data)
+        data = StatArray.StatArray(np.asarray([self._orient, self.moment, self.x, self.y, self.z, self.pitch, self.roll, self.yaw, self.radius], dtype=np.float64))
+        data.writeHdf(parent, myName+'/data', index=index)
 
 
     def fromHdf(self, h5grp, index=None):
         """ Reads in the object from a HDF file """
 
-        if (index is None):
-            try:
-                d = np.squeeze(np.array(h5grp.get('data')))
-            except:
-                assert False, ValueError("HDF data was created as a larger array, specify the row index to read from")
+        item = h5grp.get('data')
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
+        tmp = obj.fromHdf(item, index=index)
 
-            out = []
-            for i in range(d.shape[0]):
-                out.append(CircularLoop(*d[i, :]))
-            return out
-        else:
-            d = np.array(h5grp.get('data')[index])
-            return CircularLoop(*d)
+        return CircularLoop(*tmp)
 
 
     def Bcast(self, world, root=0):
