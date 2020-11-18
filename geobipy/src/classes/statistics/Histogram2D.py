@@ -827,6 +827,7 @@ class Histogram2D(RectilinearMesh2D):
 
         """
         kwargs['trim'] = kwargs.pop('trim',  0.0)
+        kwargs.pop('normalize', None)
         x = self.x.cellEdges
         y = self.y.cellEdges
 

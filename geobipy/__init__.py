@@ -148,7 +148,7 @@ def serial_datapoint(userParameters, output_directory, seed=None):
 
 def serial_dataset(userParameters, output_directory, seed=None):
 
-    Dataset = type(userParameters.data_type)()
+    Dataset = type(userParameters.data_type)(systems=userParameters.systemFilename)
 
     results = Inference3D(output_directory, userParameters.systemFilename)
     results.createHDF5(Dataset, userParameters)

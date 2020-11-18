@@ -31,7 +31,7 @@ def infer(userParameters, DataPoint, prng, LineResults=None, rank=1):
     userParameters.check(DataPoint)
 
     # Initialize the MCMC parameters and perform the initial iteration
-    [userParameters, Mod, DataPoint, prior, likelihood, posterior, PhiD] = Initialize(userParameters, DataPoint, prng=prng)
+    [userParameters, Mod, DataPoint, prior, likelihood, posterior, PhiD] = initialize(userParameters, DataPoint, prng=prng)
 
     Res = Inference1D(DataPoint, Mod,
                 save = userParameters.save,

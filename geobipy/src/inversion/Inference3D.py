@@ -123,7 +123,7 @@ class Inference3D(myObject):
 
         t0 = time.time()
 
-        dataset.readSystemFile(userParameters.systemFilename)
+        # dataset.readSystemFile(userParameters.systemFilename)
 
         # Prepare the dataset so that we can read a point at a time.
         dataset._initLineByLineRead(userParameters.dataFilename, userParameters.systemFilename)
@@ -160,7 +160,7 @@ class Inference3D(myObject):
         for line in self.lineNumbers:
             fiducialsForLine = np.where(tmp[:, 0] == line)[0]
             H5File = h5py.File(join(self.directory, '{}.h5'.format(line)), 'w')
-            lr = Inference_2D()
+            lr = Inference2D()
             lr.createHdf(H5File, fiducials[fiducialsForLine], Res)
             self._lines.append(lr)
             print('Time to create line {} with {} data points: {} h:m:s'.format(line, fiducialsForLine.size, str(timedelta(seconds=time.time()-t0))))
