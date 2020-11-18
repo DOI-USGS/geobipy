@@ -6,11 +6,13 @@ from ...classes.core import StatArray
 from ...base import customFunctions as cF
 from ...base import customPlots as cP
 from .Distribution import Distribution
-from .Mixture import Mixture
+from .mixNormal import mixNormal
+from .mixPearson import mixPearson
+from .mixStudentT import mixStudentT
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
-from lmfit import models
+from lmfit import model
 
 from copy import deepcopy
 
@@ -260,13 +262,34 @@ class Histogram1D(RectilinearMesh1D):
         if np.all(self.counts == 0):
             return None
 
-        mix = Mixture(mixture_type)
+        mixture = mixture_type.lower()
+        if mixture == 'gaussian':
+            mix = mixNormal()
+        elif mixture == 'lorentzian':
+            lmfit_model = models.LorentzianModel
+        elif mixture == 'splitlorentzian':
+            lmfit_model = models.SplitLorentzianModel
+        elif mixture == 'voigt':
+            lmfit_model = models.VoigtModel
+        elif mixture == 'moffat':
+            lmfit_model = models.MoffatModel
+        elif mixture == 'pearson':
+            mix = mixPearson()
+        elif mixture == 'studentst':
+            mix = mixStudentT()
+        # elif mixture == 'exponentialgaussian':
+        #     from lmfit.models import ExponentialGaussianModel as lmfit_model
+        # elif mixture == 'skewedgaussian':
+        #     from lmfit.models import SkewedGaussianModel as lmfit_model
+        # elif mixture == 'exponential':
+        #     from lmfit.models import ExponentialModel as lmfit_model
+        # elif mixture == 'powerlaw':
+        #     from lmfit.models import PowerLawModel as lmfit_model
 
         log = kwargs.get('log', None)
         kwargs['max_variance'] = kwargs.pop('max_variance', self.estimateStd(1e5, log=log))
 
-        mix.fit_to_curve(x=self.binCentres, y=self.pdf, **kwargs)
-        return mix
+        return mix.fit_to_curve(x=self.binCentres, y=self.pdf, **kwargs)
 
 
     def _marginal_probability_pdfs(self, pdfs):
