@@ -112,6 +112,169 @@ class _userParameters(myObject):
         self.check(Datapoint)
 
 
+    # @property
+    # def dataFilename(self):
+    #     return self._dataFilename
+
+    # @dataFilename.setter
+    # def dataFilename(self, value):
+    #     self._dataFilename = [value] if isinstance(value, str) else value
+
+
+    # @property
+    # def systemFilename(self):
+    #     return self._systemFilename
+
+    # @systemFilename.setter
+    # def systemFilename(self, value):
+    #     self._systemFilename = [value] if isinstance(value , str) else value
+
+
+    # @property
+    # def datapoint(self):
+    #     return self._datapoint
+
+    # @datapoint.setter
+    # def datapoint(self, value):
+    #     assert isinstance(value, (FdemDataPoint, TdemDataPoint)), TypeError('Invalid datapoint type used.  FdemDataPoint, TdemDataPoint available')
+    #     self._datapoint = value
+
+
+    # @property
+    # def nMarkovChains(self):
+    #     return self._n_markov_chains
+
+    # @nMarkovChains.setter
+    # def nMarkovChains(self, value):
+    #     assert value >= 1000, ValueError('Number of Markov chains nMarkovChains must be >= 1000')
+    #     self._n_markov_chains = np.int(value)
+
+
+    # @property
+    # def maximumNumberofLayers(self):
+    #     return self._maximumNumberofLayers
+
+    # @maximumNumberofLayers.setter
+    # def maximumNumberofLayers(self, value):
+    #     self._maximumNumberofLayers = np.int(value)
+
+
+    # @property
+    # def minimumDepth(self):
+    #     return self._minimumDepth
+
+    # @minimumDepth.setter
+    # def minimumDepth(self, value):
+    #     self._minimumDepth = np.float64(value)
+
+
+    # @property
+    # def maximumDepth(self):
+    #     return self._maximumDepth
+
+    # @maximumDepth.setter
+    # def maximumDepth(self, value):
+    #     self._maximumDepth = np.float64(value)
+
+
+    # @property
+    # def minimumThickness(self):
+    #     return self._minimumThickness
+
+    # @minimumThickness.setter
+    # def minimumThickness(self, value):
+    #     self._minimumThickness = np.float64(value) if not value is None else None
+
+
+    # @property
+    # def initialRelativeError(self):
+    #     return self._initialRelativeError
+
+    # @initialRelativeError.setter
+    # def initialRelativeError(self, value):
+    #     assert np.size(value) == self.datapoint.nSystems, ValueError('Initial relative error must have size {}'.format(self.datapoint.nSystems))
+    #     self._initialRelativeError = StatArray.StatArray(self.Datapoint.nSystems, 'Relative Error') + value
+
+
+    # @property
+    # def minimumRelativeError(self):
+    #     return self._minimumRelativeError
+
+    # @minimumRelativeError.setter
+    # def minimumRelativeError(self, value):
+    #     assert np.size(value) == self.datapoint.nSystems, ValueError('Minimum relative error must have size {}'.format(self.datapoint.nSystems))
+    #     self._minimumRelativeError = StatArray.StatArray(self.datapoint.nSystems, 'Minimum Relative Error') + value
+
+
+    # @property
+    # def maximumRelativeError(self):
+    #     return self._maximumRelativeError
+
+    # @maximumRelativeError.setter
+    # def maximumRelativeError(self, value):
+    #     assert np.size(value) == self.datapoint.nSystems, ValueError('Maximum relative error must have size {}'.format(self.datapoint.nSystems))
+    #     self._maximumRelativeError = StatArray.StatArray(self.datapoint.nSystems, 'Maximum Relative Error') + value
+
+
+    # @property
+    # def initialAdditiveError(self):
+    #     return self._initialAdditiveError
+
+    # @initialAdditiveError.setter
+    # def initialAdditiveError(self, value):
+    #     assert np.size(value) == self.datapoint.nSystems, ValueError('Initial additive error must have size {}'.format(self.datapoint.nSystems))
+    #     self._initialAdditiveError = StatArray.StatArray(self.Datapoint.nSystems, 'Additive Error') + value
+
+
+    # @property
+    # def minimumAdditiveError(self):
+    #     return self._minimumAdditiveError
+
+    # @minimumAdditiveError.setter
+    # def minimumAdditiveError(self, value):
+    #     assert np.size(value) == self.datapoint.nSystems, ValueError('Minimum additive error must have size {}'.format(self.datapoint.nSystems))
+    #     self._minimumAdditiveError = StatArray.StatArray(self.datapoint.nSystems, 'Minimum Additive Error') + value
+
+
+    # @property
+    # def maximumAdditiveError(self):
+    #     return self._maximumAdditiveError
+
+    # @maximumAdditiveError.setter
+    # def maximumAdditiveError(self, value):
+    #     assert np.size(value) == self.datapoint.nSystems, ValueError('Maximum additive error must have size {}'.format(self.datapoint.nSystems))
+    #     self._maximumAdditiveError = StatArray.StatArray(self.datapoint.nSystems, 'Maximum Additive Error') + value
+
+
+    # @property
+    # def factor(self):
+    #     return self._factor
+
+    # @factor.setter
+    # def factor(self, value=10.0):
+    #     self._factor = np.float64(value)
+
+
+    # @property
+    # def gradientStd(self):
+    #     return self._gradientStd
+
+    # @gradientStd.setter
+    # def gradientStd(self, value):
+    #     self._gradientStd = np.float64(value)
+
+
+    # @property
+    # def referenceHitmap(self):
+    #     return self._referenceHitmap
+
+    # @referenceHitmap.setter
+    # def referenceHitmap(self, value):
+    #     assert isinstance(value, Hitmap2D), TypeError('referenceHitmap must be of type geobipy.Hitmap2D')
+    #     self._referenceHitmap = None
+
+
+
     def check(self, DataPoint):
         """ Check that the specified input parameters match the type of data point"""
 
