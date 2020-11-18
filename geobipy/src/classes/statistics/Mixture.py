@@ -8,41 +8,50 @@ from lmfit import models
 from lmfit import Parameters
 from lmfit.model import Model, ModelResult
 
+
 class Mixture(myObject):
 
-    def __init__(self, mixture_type=None):
+    # def __init__(self, mixture_type=None):
 
-        if mixture_type is None:
-            return
+    #     if mixture_type is None:
+    #         return
 
-        mixture = mixture_type.lower()
-        if mixture == 'gaussian':
-            lmfit_model = models.GaussianModel
-        elif mixture == 'lorentzian':
-            lmfit_model = models.LorentzianModel
-        elif mixture == 'splitlorentzian':
-            lmfit_model = models.SplitLorentzianModel
-        elif mixture == 'voigt':
-            lmfit_model = models.VoigtModel
-        elif mixture == 'moffat':
-            lmfit_model = models.MoffatModel
-        elif mixture == 'pearson':
-            lmfit_model = models.Pearson7Model
-        elif mixture == 'studentst':
-            lmfit_model = models.StudentsTModel
-        # elif mixture == 'exponentialgaussian':
-        #     from lmfit.models import ExponentialGaussianModel as lmfit_model
-        # elif mixture == 'skewedgaussian':
-        #     from lmfit.models import SkewedGaussianModel as lmfit_model
-        # elif mixture == 'exponential':
-        #     from lmfit.models import ExponentialModel as lmfit_model
-        # elif mixture == 'powerlaw':
-        #     from lmfit.models import PowerLawModel as lmfit_model
+    #     mixture = mixture_type.lower()
+    #     if mixture == 'gaussian':
+    #         lmfit_model = models.GaussianModel
+    #     elif mixture == 'lorentzian':
+    #         lmfit_model = models.LorentzianModel
+    #     elif mixture == 'splitlorentzian':
+    #         lmfit_model = models.SplitLorentzianModel
+    #     elif mixture == 'voigt':
+    #         lmfit_model = models.VoigtModel
+    #     elif mixture == 'moffat':
+    #         lmfit_model = models.MoffatModel
+    #     elif mixture == 'pearson':
+    #         return mixPearson.mixPearson
+    #     elif mixture == 'studentst':
+    #         lmfit_model = models.StudentsTModel
+    #     # elif mixture == 'exponentialgaussian':
+    #     #     from lmfit.models import ExponentialGaussianModel as lmfit_model
+    #     # elif mixture == 'skewedgaussian':
+    #     #     from lmfit.models import SkewedGaussianModel as lmfit_model
+    #     # elif mixture == 'exponential':
+    #     #     from lmfit.models import ExponentialModel as lmfit_model
+    #     # elif mixture == 'powerlaw':
+    #     #     from lmfit.models import PowerLawModel as lmfit_model
 
-        else:
-            raise ValueError("mixture must be one of [gaussian, lorentzian, splitlorentzian, voigt, moffat, pearson, studentst]")
+    #     else:
+    #         raise ValueError("mixture must be one of [gaussian, lorentzian, splitlorentzian, voigt, moffat, pearson, studentst]")
 
-        self.model = lmfit_model
+    #     # self.model = lmfit_model
+
+    @property
+    def params(self):
+        return self._params
+
+    @params.setter
+    def params(self, values):
+        self._params = StatArray.StatArray(values)
 
 
     def fit_to_curve(self, x, y, plot=False, verbose=False, **kwargs):
@@ -144,7 +153,7 @@ class Mixture(myObject):
             misfit_decreases = (misfit_test[1] - misfit[1]) < 0.0
             gradient_substantial = np.any(np.abs(misfit_test - misfit) > mu)
 
-            accept_model = misfit_decreases and gradient_substantial
+            accept_model = misfit_decreases # and gradient_substantial
 
             if verbose:
                 print('testing peaks', x_guess_test)
@@ -161,7 +170,7 @@ class Mixture(myObject):
 
                 under_limits = x_guess.size < maxDistributions
 
-                go = valid_new_peak and under_limits and above_abs_threshold and gradient_substantial
+                go = valid_new_peak and under_limits and above_abs_threshold #and gradient_substantial
 
                 if verbose:
                     print('\nmodel accepted')
@@ -238,7 +247,6 @@ class Mixture(myObject):
 
             plt.ioff()
 
-        self.model = fit
         return fit
 
 
@@ -252,7 +260,7 @@ class Mixture(myObject):
             pars.update(guess.make_params())
             mod += guess
 
-        mn = kwargs.pop('min_variance', 3.0*(edges[1]-edges[0]))
+        mn = kwargs.pop('min_variance', 4.0*(edges[1]-edges[0]))
         mx = kwargs.pop('max_variance', None)
         if mx is None:
             init = 1.0
@@ -313,7 +321,7 @@ class Mixture(myObject):
     #     return np.asarray(model)
 
 
-    def createHdf(self, h5obj, myName, shape=(1, )):
+    def createHdf(self, h5obj, myName, nRepeats=None):
         """Create space in a HDF file for mixtures
 
         Parameters
@@ -329,15 +337,13 @@ class Mixture(myObject):
         """
         grp = h5obj.create_group(myName)
         grp.attrs["repr"] = self.hdf_name
-        grp.attrs['shape'] = shape
-        s = ' '
-        asciiList = [s.encode("utf-8", "ignore") for n in range(np.sum(shape))]
-        grp.create_dataset('data', (len(asciiList),1),'S100000', asciiList)
+
+        self.params.createHdf(grp, 'params', nRepeats=nRepeats)
 
         return grp
 
 
-    def writeHdf(self, h5obj, myName, index=0):
+    def writeHdf(self, h5obj, myName, index=None):
         """Write the mixture to HDF.
 
         Parameters
@@ -350,16 +356,10 @@ class Mixture(myObject):
             If the group was created using the nRepeats option, index specifies the index'th entry at which to write the data
 
         """
+        self.params.writeHdf(h5obj, myName+'/params', index=index)
 
 
-        s = self.model.dumps().encode("utf-8", "ignore")
-
-        grp = h5obj[myName]
-
-        grp['data'][(np.ravel_multi_index(index, grp.attrs['shape']), 0)] = s
-
-
-    def fromHdf(self, h5grp, index=0):
+    def fromHdf(self, h5grp, index=None):
         """Read the mixture from a HDF group
 
         Parameters
@@ -370,7 +370,10 @@ class Mixture(myObject):
             If the group was created using the nRepeats option, index specifies the index'th entry from which to read the data.
 
         """
-        shp = h5grp.attrs['shape']
-        s = h5grp['data'][(np.ravel_multi_index(index, shp), 0)]
-        self.model = ModelResult(Model(lambda x: x, None), Parameters()).loads(s)
+        item = h5grp.get('params')
+        obj = eval(cF.safeEval(item.attrs.get('repr')))
+
+        assert np.size(index) == np.size(item['data'].shape) - 1, ValueError('Need to specify a {}D index'.format(np.size(item['data'].shape)-1))
+
+        self._params = obj.fromHdf(item, index=index)
         return self

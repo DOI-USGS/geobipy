@@ -65,6 +65,7 @@ from .src.classes.statistics.Hitmap2D import Hitmap2D
 from .src.classes.statistics.Mixture import Mixture
 from .src.classes.statistics.mixStudentT import mixStudentT
 from .src.classes.statistics.mixNormal import mixNormal
+from .src.classes.statistics.mixPearson import mixPearson
 # McMC Inersion
 from .src.inversion.Inference1D import Inference1D
 from .src.inversion.Inference2D import Inference2D

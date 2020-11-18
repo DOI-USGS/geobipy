@@ -2,6 +2,7 @@
 import numpy as np
 from ...classes.core import StatArray
 from scipy.stats import t
+from scipy.special import gamma
 import matplotlib.pyplot as plt
 from .Mixture import Mixture
 from smm import SMM
@@ -9,31 +10,27 @@ from lmfit.models import StudentsTModel
 
 class mixStudentT(Mixture):
 
-    def __init__(self, means=None, variances=None, degrees=None, amplitudes=1.0, labels=None):
+    def __init__(self, means=None, sigmas=None, amplitudes=1.0, labels=None):
 
-        if np.all([means, variances, degrees] is None):
+        if np.all([means, sigmas] is None):
             return
 
-        assert np.size(means) == np.size(variances) == np.size(degrees), ValueError("means, variances, degrees, must have same size")
+        self.params = np.zeros(self.n_solvable_parameters * np.size(means))
 
-        self._params = np.zeros(4 * np.size(means))
-        self._params[0::4] = amplitudes
-        self._params[1::4] = means
-        self._params[2::4] = variances
-        self._params[3::4] = degrees
+        self.amplitudes = amplitudes
+        self.means = means
+        self.sigmas = sigmas
+        # self.degrees = degrees
 
-        self._labels = np.zeros(self.n_components)
-        if not labels is None:
-            self.labels = labels
 
     @property
     def amplitudes(self):
-        return StatArray.StatArray(self._params[0::4], "Amplitude")
+        return StatArray.StatArray(self._params[0::self.n_solvable_parameters], "Amplitude")
 
     @amplitudes.setter
     def amplitudes(self, values):
         assert np.size(values) == self.n_components, ValueError("Must provide {} amplitudes".format(self.n_components))
-        self._params[0::4] = values
+        self._params[0::self.n_solvable_parameters] = values
 
     @property
     def labels(self):
@@ -50,42 +47,46 @@ class mixStudentT(Mixture):
 
     @property
     def means(self):
-        return StatArray.StatArray(self._params[1::4], "means")
+        return StatArray.StatArray(self._params[1::self.n_solvable_parameters], "means")
 
     @means.setter
     def means(self, values):
         assert np.size(values) == self.n_components, ValueError("Must provide {} means".format(self.n_components))
-        self._params[1::4] = values
+        self._params[1::self.n_solvable_parameters] = values
 
     @property
     def moments(self):
-        return np.hstack([self.means, self.variances, self.dfs])
+        return np.hstack([self.means, self.variances, self.degrees])
+
+    @property
+    def sigmas(self):
+        return StatArray.StatArray(self._params[2::self.n_solvable_parameters], "standard deviation")
+
+    @sigmas.setter
+    def sigmas(self, values):
+        assert np.size(values) == self.n_components, ValueError("Must provide {} sigmas".format(self.n_components))
+        self._params[2::self.n_solvable_parameters] = values
 
     @property
     def variances(self):
-        return StatArray.StatArray(self._params[2::4], "variance")
+        return StatArray.StatArray(self.sigmas**2.0, "variance")
 
-    @variances.setter
-    def variances(self, values):
-        assert np.size(values) == self.n_components, ValueError("Must provide {} variances".format(self.n_components))
-        self._params[2::4] = values
+    # @property
+    # def degrees(self):
+    #     return StatArray.StatArray(self._params[3::self.n_solvable_parameters], "degrees of freedom")
 
-    @property
-    def degrees(self):
-        return StatArray.StatArray(self._params[3::4], "degrees of freedom")
-
-    @degrees.setter
-    def degrees(self, values):
-        assert np.size(values) == self.n_components, ValueError("Must provide {} degrees".format(self.n_components))
-        self._params[3::4] = values
+    # @degrees.setter
+    # def degrees(self, values):
+    #     assert np.size(values) == self.n_components, ValueError("Must provide {} degrees".format(self.n_components))
+    #     self._params[3::self.n_solvable_parameters] = values
 
     @property
-    def mixture_model_class(self):
-        return SMM
+    def model(self):
+        return StudentsTModel
 
     @property
     def n_solvable_parameters(self):
-        return 4
+        return 3
 
     @property
     def n_components(self):
@@ -95,6 +96,12 @@ class mixStudentT(Mixture):
     def fit_to_data(self, X, mean_bounds=None, variance_bounds=None, k=[1, 5], tolerance=0.05, **kwargs):
         # kwargs['tol'] = 0.001
         return super().fit_to_data(X, mean_bounds, variance_bounds, k, tolerance, **kwargs)
+
+
+    def fit_to_curve(self, *args, **kwargs):
+        fit = super().fit_to_curve(*args, **kwargs)
+        self.params = np.asarray(list(fit.best_values.values()))
+        return self
 
 
     def plot_components(self, x, log, ax=None, **kwargs):
@@ -112,18 +119,22 @@ class mixStudentT(Mixture):
         if component is None:
             out = StatArray.StatArray(np.empty([np.size(x), self.n_components]), "Probability Density")
             for i in range(self.n_components):
-                out[:, i] = self.amplitudes[i] * self._probability(x, log, self.means[i], self.variances[i], self.degrees[i])
+                out[:, i] = self.amplitudes[i] * self._probability(x, log, self.means[i], self.sigmas[i])
             return out
         else:
-            return self.amplitudes[component] * self._probability(x, log, self.means[component], self.variances[component], self.degrees[component])
+            return self.amplitudes[component] * self._probability(x, log, self.means[component], self.sigmas[component])
 
 
-    def _probability(self, x, log, mean, variance, df):
+    def _probability(self, x, log, mean, sigma):
         """ For a realization x, compute the probability """
+
+        tmp = 0.5 * (sigma + 1.0)
+        p = (gamma(tmp) / (np.sqrt(sigma * np.pi) * gamma(0.5 * sigma))) * (1.0 + ((x - mean)**2.0/sigma))**-tmp
+
         if log:
-            return StatArray.StatArray(t.logpdf(x, df, loc = mean, scale = variance), "Probability Density")
+            return StatArray.StatArray(np.log(p), "Probability Density")
         else:
-            return StatArray.StatArray(t.pdf(x, df, loc = mean, scale = variance), "Probability Density")
+            return StatArray.StatArray(p, "Probability Density")
 
 
     def sum(self, x):
@@ -134,7 +145,7 @@ class mixStudentT(Mixture):
 
         out = np.zeros_like(x)
 
-        nm = np.int(len(params) / 4)
+        nm = np.int(len(params) / self.n_solvable_parameters)
         for i in range(nm):
             i1 = i*4
             amp, mean, var, df = params[i1:i1+4]

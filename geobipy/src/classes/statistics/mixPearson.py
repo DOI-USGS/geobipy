@@ -2,16 +2,17 @@
 import numpy as np
 from ...classes.core import StatArray
 from scipy.stats import (multivariate_normal, norm)
+from scipy.special import beta
 import matplotlib.pyplot as plt
 from .Mixture import Mixture
 from sklearn.mixture import GaussianMixture
-from lmfit.models import GaussianModel
+from lmfit.models import Pearson7Model
 
-class mixNormal(Mixture):
+class mixPearson(Mixture):
 
-    def __init__(self, means=None, sigmas=None, amplitudes=1.0):
+    def __init__(self, amplitudes=1.0, means=None, sigmas=None, exponents=1.0):
 
-        if np.all([means, sigmas] is None):
+        if np.all([means, sigmas, exponents] is None):
             return
 
         self.params = np.zeros(self.n_solvable_parameters * np.size(means))
@@ -19,50 +20,67 @@ class mixNormal(Mixture):
         self.amplitudes = amplitudes
         self.means = means
         self.sigmas = sigmas
+        self.exponents = exponents
 
 
     @property
     def amplitudes(self):
         return self._params[0::self.n_solvable_parameters]
 
+
     @amplitudes.setter
     def amplitudes(self, values):
         assert np.size(values) == self.n_components, ValueError("Must provide {} amplitudes".format(self.n_components))
         self._params[0::self.n_solvable_parameters] = values
 
-    # @property
-    # def lmfit_model(self):
-    #     return Pearson7Model
 
     @property
     def means(self):
         return self._params[1::self.n_solvable_parameters]
+
 
     @means.setter
     def means(self, values):
         assert np.size(values) == self.n_components, ValueError("Must provide {} means".format(self.n_components))
         self._params[1::self.n_solvable_parameters] = values
 
+
     @property
     def moments(self):
         return [self.means, self.variances]
 
-    @property
-    def variances(self):
-        return self.sigmas**2.0
 
     @property
     def sigmas(self):
         return self._params[2::self.n_solvable_parameters]
+
+
+    @property
+    def variances(self):
+        return StatArray.StatArray(self.sigmas**2.0, 'Variance')
+
 
     @sigmas.setter
     def sigmas(self, values):
         assert np.size(values) == self.n_components, ValueError("Must provide {} sigmas".format(self.n_components))
         self._params[2::self.n_solvable_parameters] = values
 
+
+    @property
+    def exponents(self):
+        return self._params[3::self.n_solvable_parameters]
+
+
+    @exponents.setter
+    def exponents(self, values):
+        assert np.size(values) == self.n_components, ValueError("Must provide {} exponents".format(self.n_components))
+        self._params[3::self.n_solvable_parameters] = values
+
+
     @property
     def model(self):
-        return GaussianModel
+        return Pearson7Model
+
 
     @property
     def mixture_model_class(self):
@@ -70,7 +88,7 @@ class mixNormal(Mixture):
 
     @property
     def n_solvable_parameters(self):
-        return 3
+        return 4
 
     @property
     def n_components(self):
@@ -100,40 +118,21 @@ class mixNormal(Mixture):
         if component is None:
             out = StatArray.StatArray(np.empty([np.size(x), self.n_components]), "Probability Density")
             for i in range(self.n_components):
-                tmp = self.amplitudes[i] * self._probability(x, log, self.means[i], self.variances[i])
-                out[:, i] = tmp
+                out[:, i] = self.amplitudes[i] * self._probability(x, log, self.means[i], self.variances[i], self.exponents[i])
             return out
         else:
-            return self.amplitudes[component] * self._probability(x, log, self.means[component], self.variances[component])
+            return self.amplitudes[component] * self._probability(x, log, self.means[component], self.variances[component], self.exponents[component])
 
 
-    def _probability(self, x, log, mean, variance):
+    def _probability(self, x, log, mean, sigma, exponent):
         """ For a realization x, compute the probability """
+
+        p = (1.0 / (sigma * beta(exponent - 0.5, 0.5))) * (1 + ((x - mean)**2.0)/(sigma**2.0))**-exponent
+
         if log:
-            return StatArray.StatArray(norm.logpdf(x, loc = mean, scale = variance), "Probability Density")
+            return StatArray.StatArray(np.log(p), "Probability Density")
         else:
-            return StatArray.StatArray(norm.pdf(x, loc = mean, scale = variance), "Probability Density")
-
-
-    def sum(self, x):
-        return self._sum(x, *self._params)
-
-
-    def _sum(self, x, *params):
-
-        out = np.zeros_like(x)
-
-        nm = np.int(len(params) / 3)
-        for i in range(nm):
-            i1 = i*3
-            amp, mean, var = params[i1:i1+3]
-            out += amp * norm.pdf(x, mean, var)
-
-        return out
-
-
-    def _assign_from_mixture(self, mixture):
-        self.__init__(np.squeeze(mixture.means_), np.sqrt(np.squeeze(mixture.covariances_)), amplitudes=np.squeeze(mixture.weights_))
+            return StatArray.StatArray(p, "Probability Density")
 
 
 
