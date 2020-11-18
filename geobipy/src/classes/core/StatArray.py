@@ -1500,10 +1500,11 @@ class StatArray(np.ndarray, myObject):
         if (nRepeats is None):
             grp.create_dataset('data', self.shape, dtype=self.dtype, fillvalue=fillvalue)
         else:
+            nRepeats = np.atleast_1d(nRepeats)
             if (self.size == 1):
-                grp.create_dataset('data', [nRepeats], dtype=self.dtype, fillvalue=fillvalue)
+                grp.create_dataset('data', [*nRepeats], dtype=self.dtype, fillvalue=fillvalue)
             else:
-                grp.create_dataset('data', [nRepeats, *self.shape], dtype=self.dtype, fillvalue=fillvalue)
+                grp.create_dataset('data', [*nRepeats, *self.shape], dtype=self.dtype, fillvalue=fillvalue)
 
 
         if withPosterior:
@@ -1624,9 +1625,9 @@ class StatArray(np.ndarray, myObject):
             except:
                 assert False, ValueError("HDF data was created as a larger array, specify the row index to read from")
         else:
-            assert cf.isIntorSlice(index), TypeError('index must be an int, slice, or tuple with slices. e.g. use index = np.s_[1,4:5,:] ')
+            # assert cf.isIntorSlice(index), TypeError('index must be an int, slice, or tuple with slices. e.g. use index = np.s_[1,4:5,:] ')
             d = h5grp.get('data')
-            out = StatArray(np.atleast_1d(d[index]), self.name, self.units)
+            out = StatArray(np.atleast_1d(d[np.s_[index]]), self.name, self.units)
             out._posterior = posterior
             return out
 #        try:
