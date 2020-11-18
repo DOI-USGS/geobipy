@@ -816,11 +816,12 @@ class FdemData(Data):
         S = np.empty(self.nChannels)
         for j in range(self.nSystems):
             iSys = self._systemIndices(j)
-            D[iSys] = values[j][6:6 + 2*self.nFrequencies[j]]
+            iC = self._iC[j]
+            D[iSys] = values[j][iC.size:iC.size + 2*self.nFrequencies[j]]
             if self._iS[j] is None:
                 S[iSys] = 0.1 * D[iSys]
             else:
-                S[iSys] = values[j][6 + 2*self.nFrequencies[j] : 6 + 4*self.nFrequencies[j]]
+                S[iSys] = values[j][iC.size + 2*self.nFrequencies[j] : iC.size + 4*self.nFrequencies[j]]
 
         values = values[0]
 
@@ -1167,7 +1168,7 @@ class FdemData(Data):
                 header += "I_{0} Q_{0} ".format(x)
 
             if not self.powerline is None:
-                header += 'Power_line '
+                header += 'Powerline '
             if not self.magnetic is None:
                 header += 'Magnetic'
 
