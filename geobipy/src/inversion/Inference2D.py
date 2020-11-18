@@ -7,7 +7,7 @@ from datetime import timedelta
 from ..classes.core.myObject import myObject
 from ..classes.core import StatArray
 from ..classes.statistics.Distribution import Distribution
-from ..classes.statistics.mixStudentT import mixStudentT
+from ..classes.statistics.mixPearson import mixPearson
 from ..classes.statistics.Histogram1D import Histogram1D
 from ..classes.statistics.Histogram2D import Histogram2D
 from ..classes.statistics.Hitmap2D import Hitmap2D
@@ -292,8 +292,8 @@ class Inference2D(myObject):
 
         opacity = self.opacity
 
-        nz = self.hitMap.z.nCells
-        doi = StatArray.StatArray(np.full(self.nPoints, fill_value=self.hitMap.z.cellEdges[-1]), 'Depth of investigation', self.height.units)
+        nz = self.hitmap(0).z.nCells
+        doi = StatArray.StatArray(np.full(self.nPoints, fill_value=self.hitmap(0).z.cellEdges[-1]), 'Depth of investigation', self.height.units)
 
         p = 0.01 * percent
 
@@ -306,7 +306,7 @@ class Inference2D(myObject):
                 iCell -=1
 
             if iCell >= 0:
-                doi[i] = self.hitMap.z.cellCentres[iCell-1]
+                doi[i] = self.hitmap(0).z.cellCentres[iCell-1]
 
         doiOut = doi
         if window > 1:
@@ -446,7 +446,7 @@ class Inference2D(myObject):
 
         distributions = []
 
-        hm = self.hitMap.deepcopy()
+        hm = self.hitmap(0).deepcopy()
         counts = np.asarray(self.hdfFile['currentmodel/par/posterior/arr/data'])
 
         # Bar = progressbar.ProgressBar()
@@ -474,7 +474,7 @@ class Inference2D(myObject):
         """
         distributions = []
 
-        hm = self.hitMap.deepcopy()
+        hm = self.hitmap(0).deepcopy()
         counts = np.asarray(self.hdfFile['currentmodel/par/posterior/arr/data'])
 
         # Bar = progressbar.ProgressBar()
@@ -509,11 +509,13 @@ class Inference2D(myObject):
 
         """
 
+        from mpi4py import MPI
+
         max_distributions = kwargs.get('max_distributions', 5)
         kwargs['track'] = False
 
         if intervals is None:
-            intervals = self.hitMap.yBins
+            intervals = self.hitmap(0).yBins
 
         nIntervals = np.size(intervals) - 1
 
@@ -522,15 +524,15 @@ class Inference2D(myObject):
         else:
             hdfFile = self.hdfFile
 
-        mixture = Mixture()
+        mixture = mixPearson()
         try:
-            mixture.createHdf(hdfFile, 'fits', shape=(nIntervals, self.nPoints))
+            mixture.createHdf(hdfFile, 'fits', nRepeats=(nIntervals, self.nPoints))
         except:
             pass
 
-        # Distribute the points amongst cores.
-        starts, chunks = loadBalance1D_shrinkingArrays(self.nPoints, self.world.size)
 
+        # Distribute the points amongst cores.
+        starts, chunks = loadBalance1D_shrinkingArrays(2, self.world.size)
         chunk = chunks[self.world.rank]
         i0 = starts[self.world.rank]
         i1 = i0 + chunk
@@ -554,7 +556,7 @@ class Inference2D(myObject):
 
             for j, m in enumerate(mixtures):
                 if not m is None:
-                    m.writeHdf(hdfFile, 'fits', index=np.s_[j, i])
+                    m.writeHdf(hdfFile, 'fits', index=(j, i))
 
             counter += 1
             if counter == nUpdate:
@@ -767,14 +769,14 @@ class Inference2D(myObject):
     def mesh(self):
         """Get the 2D topo fitting rectilinear mesh. """
 
-        if (self.hitMap is None):
+        if (self.hitmap(0) is None):
             tmp = self.getAttribute('hitmap/y', index=0)
             try:
                 tmp = RectilinearMesh1D(cellCentres=tmp.cellCentres, edgesMin=0.0)
             except:
                 tmp = RectilinearMesh1D(cellCentres=tmp, edgesMin=0.0)
         else:
-            tmp = self.hitMap.y
+            tmp = self.hitmap(0).y
             try:
                 tmp = RectilinearMesh1D(cellCentres=tmp.cellCentres, edgesMin=0.0)
             except:
@@ -888,13 +890,13 @@ class Inference2D(myObject):
     @property
     def parameterName(self):
 
-        return self.hitMap.x.cellCentres.name
+        return self.hitmap(0).x.cellCentres.name
 
 
     @property
     def parameterUnits(self):
 
-        return self.hitMap.x.cellCentres.units
+        return self.hitmap(0).x.cellCentres.units
 
 
     def percentageParameter(self, value, depth=None, depth2=None, progress=False):
@@ -1734,7 +1736,7 @@ class Inference2D(myObject):
                     fit_mixture = mixStudentT(m, v, df, a, labels=l)
                     fit_pdfs = fit_mixture.probability(np.log10(hm.xBinCentres), log=False)
 
-                    # gmm_pdfs = np.zeros([gmm.n_components, self.hitMap.x.nCells])
+                    # gmm_pdfs = np.zeros([gmm.n_components, self.hitmap(0).x.nCells])
 
                     # for k_gmm in range(gmm.n_components):
                     #     # Term 1: Get the weight of the labelled fit from the classification
@@ -1839,7 +1841,7 @@ class Inference2D(myObject):
 
     #     nFacies = np.size(distributions)
 
-    #     self._marginalProbability = StatArray.StatArray(np.empty([nFacies, self.hitMap.y.nCells, self.nPoints]), name='Marginal probability')
+    #     self._marginalProbability = StatArray.StatArray(np.empty([nFacies, self.hitmap(0).y.nCells, self.nPoints]), name='Marginal probability')
 
     #     counts = self.hdfFile['currentmodel/par/posterior/arr/data']
     #     parameters = RectilinearMesh1D().fromHdf(self.hdfFile['currentmodel/par/posterior/x'])
@@ -1867,7 +1869,7 @@ class Inference2D(myObject):
 
     #     nFacies = np.size(distributions)
 
-    #     self._marginalProbability = StatArray.StatArray(np.empty([nFacies, self.hitMap.y.nCells, self.nPoints]), name='Marginal probability')
+    #     self._marginalProbability = StatArray.StatArray(np.empty([nFacies, self.hitmap(0).y.nCells, self.nPoints]), name='Marginal probability')
 
     #     counts = self.hdfFile['currentmodel/par/posterior/arr/data']
     #     parameters = RectilinearMesh1D().fromHdf(self.hdfFile['currentmodel/par/posterior/x'])
