@@ -10,17 +10,18 @@ from lmfit.models import Pearson7Model
 
 class mixPearson(Mixture):
 
-    def __init__(self, amplitudes=1.0, means=None, sigmas=None, exponents=1.0):
+    def __init__(self, amplitudes=None, means=None, sigmas=None, exponents=None):
 
         if np.all([means, sigmas, exponents] is None):
             return
 
         self.params = np.zeros(self.n_solvable_parameters * np.size(means))
 
-        self.amplitudes = amplitudes
+
         self.means = means
         self.sigmas = sigmas
         self.exponents = exponents
+        self.amplitudes = amplitudes
 
 
     @property

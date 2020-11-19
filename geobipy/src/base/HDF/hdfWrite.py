@@ -14,38 +14,47 @@ def write_nd(arr, h5obj, myName, index=None):
 
     """
     if (not index is None):
-            assert isinstance(index,(slice, tuple, int, np.integer)), ValueError('index must be an integer or a numpy slice. e.g. np.s_[0:10]')
+        assert all([isinstance(x,(slice, tuple, int, np.integer)) for x in index]), ValueError('indices must be an integer or a numpy slice. e.g. np.s_[0:10]')
 
     nd = np.ndim(arr)
     assert nd <= 6, ValueError('The number of dimensions to write must be <= 6')
 
+    # Pull the group
+    grp = h5obj[myName]
+
     # If the user specifies an index, they should already know dimensions etc. so write and return
     if (not index is None):
-        h5obj[myName][index] = arr
-        return
+        ds = grp[index]
+    else:
+        ds = grp
+
+    assert np.size(ds.shape) == nd, ValueError("arr is being written to a dataset of different shape")
 
     # If the value is a scalar, write and return
     if (nd == 0):
-        h5obj[myName][0] = arr
+        ds[0] = arr
         return
 
     # Write the entire array to appropriate locations in memory. No way to combine this into a function for N dimensions
     # Automatically fills memory from the beginning index in each dimension.
+    print('a',arr)
+    print('b',ds)
     if (nd == 1):
-        h5obj[myName][:arr.size] = arr
+        ds[:arr.size] = arr
+    print('c',ds)
 
     s = arr.shape
     if(nd == 2):
-        h5obj[myName][:s[0], :s[1]] = arr
+        ds[:s[0], :s[1]] = arr
 
     elif(nd == 3):
-        h5obj[myName][:s[0], :s[1], :s[2]] = arr
+        ds[:s[0], :s[1], :s[2]] = arr
 
     elif(nd == 4):
-        h5obj[myName][:s[0], :s[1], :s[2], :s[3]] = arr
+        ds[:s[0], :s[1], :s[2], :s[3]] = arr
 
     elif(nd == 5):
-        h5obj[myName][:s[0], :s[1], :s[2], :s[3], :s[4]] = arr
+        ds[:s[0], :s[1], :s[2], :s[3], :s[4]] = arr
 
     elif(nd == 6):
-        h5obj[myName][:s[0], :s[1], :s[2], :s[3], :s[4], :s[5]] = arr
+        ds[:s[0], :s[1], :s[2], :s[3], :s[4], :s[5]] = arr

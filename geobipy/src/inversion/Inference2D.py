@@ -511,7 +511,7 @@ class Inference2D(myObject):
 
         from mpi4py import MPI
 
-        max_distributions = kwargs.get('max_distributions', 5)
+        max_distributions = kwargs.get('max_distributions', 3)
         kwargs['track'] = False
 
         if intervals is None:
@@ -524,9 +524,10 @@ class Inference2D(myObject):
         else:
             hdfFile = self.hdfFile
 
-        mixture = mixPearson()
+        a = np.zeros(max_distributions)
+        mixture = mixPearson(a, a, a, a)
         try:
-            mixture.createHdf(hdfFile, 'fits', nRepeats=(nIntervals, self.nPoints))
+            mixture.createHdf(hdfFile, 'fits', nRepeats=(3,3))#(nIntervals, self.nPoints))
         except:
             pass
 
