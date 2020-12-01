@@ -1636,9 +1636,9 @@ class StatArray(np.ndarray, myObject):
         if np.ndim(d) >= 2:
             d = np.squeeze(d)
 
-        out = StatArray(d, self.name, self.units)
-        out.setPosterior(posterior)
-        return out
+        self.__init__(d, self.name, self.units)
+        self.setPosterior(posterior)
+        return self
 
     ### Classification Routines
 
