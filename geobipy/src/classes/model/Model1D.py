@@ -63,12 +63,12 @@ class Model1D(Model):
         """Instantiate a new Model1D """
 
         self.hasHalfspace = hasHalfspace
+        self._nCells = StatArray.StatArray(1, '# of Cells', dtype=np.int32)
 
         if (all((x is None for x in [nCells, top, parameters, depth, thickness]))): return
         assert (not(not thickness is None and not depth is None)), TypeError('Cannot instantiate with both depth and thickness values')
 
         # Number of Cells in the model
-        self._nCells = StatArray.StatArray(1, '# of Cells', dtype=np.int32)
         if not nCells is None:
             assert (nCells >= 1), ValueError('nCells must >= 1')
             self._nCells[0] = nCells
@@ -113,6 +113,11 @@ class Model1D(Model):
     @property
     def nCells(self):
         return self._nCells
+
+    @nCells.setter
+    def nCells(self, value):
+        # assert isinstance(value, (int, np.integer))
+        self._nCells[0] = np.int32(value)
 
     @property
     def top(self):
@@ -220,6 +225,10 @@ class Model1D(Model):
     @property
     def par(self):
         return self._par
+
+    @par.setter
+    def par(self, values):
+        self._par[:] = values
 
 
     def deepcopy(self):
@@ -389,6 +398,7 @@ class Model1D(Model):
             Model with inserted layer.
 
         """
+
         # Deepcopy the 1D Model
         tmp = self.depth[:-1]
         # Get the index to insert the new layer
@@ -396,7 +406,7 @@ class Model1D(Model):
         # Deepcopy the 1D Model
         other = self.deepcopy()
         # Increase the number of cells
-        other._nCells += 1
+        other.nCells += 1
         # Insert the new layer depth
         other._depth = self.depth.insert(i, z)
         if (par is None):
@@ -1639,46 +1649,11 @@ class Model1D(Model):
         self.top.writeHdf(grp, 'top', index=index)
         nCells = np.int(self.nCells[0])
 
-        if (index is None):
-            index = np.s_[:nCells]
-        else:
-            index = np.s_[index, :nCells]
-
         self.depth.writeHdf(grp, 'depth',  withPosterior=withPosterior, index=index)
         self.thk.writeHdf(grp, 'thk',  withPosterior=withPosterior, index=index)
         self.par.writeHdf(grp, 'par',  withPosterior=withPosterior, index=index)
         #self.magnetic_permeability.writeHdf(grp, 'magnetic_permeability',  withPosterior=withPosterior, index=i)
         #self.magnetic_susceptibility.writeHdf(grp, 'magnetic_susceptibility',  withPosterior=withPosterior, index=i)
-
-
-    def toHdf(self, hObj, myName):
-        """Write the Model1D to an HDF object
-
-        Creates and writes a new group in a HDF file under h5obj.
-        A nested heirarchy will be created.
-        This function modifies the file metadata and writes the contents at the same time and
-        should not be used in a parallel environment.
-
-        Parameters
-        ----------
-        h5obj : h5py._hl.files.File or h5py._hl.group.Group
-            A HDF file or group object to write the contents to.
-        myName : str
-            The name of the group to write to.
-
-        Examples
-        --------
-        >>> import numpy as np
-        >>> from geobipy import Model1D
-        >>> import h5py
-        >>> par = StatArray(np.linspace(0.01, 0.10, 10), "Test", "units")
-        >>> thk = StatArray(np.ones(10) * 10.0)
-        >>> mod = Model1D(nCells = 10, parameters=par, thickness=thk)
-
-        """
-        # Create a new group inside h5obj
-        self.createHdf(hObj, myName, withPosterior=True)
-        self.writeHdf(hObj, myName, withPosterior=True)
 
 
     def fromHdf(self, grp, index=None):
@@ -1696,59 +1671,46 @@ class Model1D(Model):
         """
         tmp = Model1D()
 
-        item = grp.get('minThk')
-        if (not item is None):
-            tmp.minThickness = np.array(item)
-        item = grp.get('hmin')
-        if (not item is None):
-            tmp.minThickness = np.array(item)
 
-        item = grp.get('zmin')
-        if (not item is None):
-            tmp.minDepth = np.array(item)
+        if 'minThk' in grp:
+            tmp.minThickness = np.array(grp.get('minThk'))
 
-        item = grp.get('zmax')
-        if (not item is None):
-            tmp.maxDepth = np.array(item)
+        if 'hmin' in grp:
+            tmp.minThickness = np.array(grp.get('hmin'))
 
-        item = grp.get('pWheel')
-        if (not item is None):
-            tmp.pWheel = np.array(item)
+        if 'zmin' in grp:
+            tmp.minDepth = np.array(grp.get('zmin'))
 
-        item = grp.get('hasHalfspace')
-        if (not item is None):
-            tmp.hasHalfspace = np.array(item)
+        if 'zmax' in grp:
+            tmp.maxDepth = np.array(grp.get('zmax'))
+
+        if 'pWheel' in grp:
+            tmp.pWheel = np.array(grp.get('pWheel'))
+
+        if 'hasHalfspace' in grp:
+            tmp.hasHalfspace = np.array(grp.get('hasHalfspace'))
 
         if grp['par/data'].ndim > 1:
             assert not index is None, ValueError("File was created with multiple Model1Ds, must specify an index")
 
         item = grp.get('nCells')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp._nCells = obj.fromHdf(item, index=index)
+        tmp._nCells = (eval(cF.safeEval(item.attrs.get('repr')))).fromHdf(item, index=index)
 
-        if grp['par/data'].ndim == 1:
-            i = index
-        else:
-            i = np.s_[index, :np.int(tmp.nCells[0])]
+        i = index
+        if grp['par/data'].ndim != 1:
+            i = np.s_[index, :np.int(tmp.nCells)]
 
         item = grp.get('top')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp._top = obj.fromHdf(item, index=index)
+        tmp._top = (eval(cF.safeEval(item.attrs.get('repr')))).fromHdf(item, index=index)
 
         item = grp.get('par')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        obj = obj.resize(np.int(tmp.nCells[0]))
-        tmp._par = obj.fromHdf(item, index=i)
+        tmp._par = (eval(cF.safeEval(item.attrs.get('repr')))).resize(np.int(tmp.nCells)).fromHdf(item, index=i)
 
         item = grp.get('depth')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        obj = obj.resize(np.int(tmp.nCells[0]))
-        tmp._depth = obj.fromHdf(item, index=i)
+        tmp._depth = (eval(cF.safeEval(item.attrs.get('repr')))).resize(np.int(tmp.nCells)).fromHdf(item, index=i)
 
         item = grp.get('thk')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        obj = obj.resize(np.int(tmp.nCells[0]))
-        tmp._thk = obj.fromHdf(item, index=i)
+        tmp._thk = (eval(cF.safeEval(item.attrs.get('repr')))).resize(np.int(tmp.nCells)).fromHdf(item, index=i)
 
         #item = grp.get('magnetic_permeability'); obj = eval(cF.safeEval(item.attrs.get('repr')));
         #obj = obj.resize(tmp.nCells[0]); tmp.magnetic_permeability = obj.fromHdf(item, index=i)
@@ -1756,8 +1718,8 @@ class Model1D(Model):
         #item = grp.get('magnetic_susceptibility'); obj = eval(cF.safeEval(item.attrs.get('repr')));
         #obj = obj.resize(tmp.nCells[0]); tmp.magnetic_susceptibility = obj.fromHdf(item, index=i)
 
-        if (tmp.nCells[0] > 0):
-            tmp._dpar = StatArray.StatArray(np.int(tmp.nCells[0]) - 1, 'Derivative', tmp.par.units + '/m')
+        if (tmp.nCells > 0):
+            tmp._dpar = StatArray.StatArray(np.int(tmp.nCells) - 1, 'Derivative', tmp.par.units + '/m')
         else:
             tmp._dpar = None
 
