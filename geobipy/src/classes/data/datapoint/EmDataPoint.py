@@ -22,39 +22,17 @@ class EmDataPoint(DataPoint):
 
     """
 
-    def __init__(self, nChannelsPerSystem=1, x=0.0, y=0.0, z=0.0, elevation=None, data=None, std=None, predictedData=None, dataUnits=None, channelNames=None, lineNumber=0.0, fiducial=0.0):
+    def __init__(self, nChannelsPerSystem=1, x=0.0, y=0.0, z=0.0, elevation=None, data=None, std=None, predictedData=None, channelNames=None, lineNumber=0.0, fiducial=0.0):
 
-        super().__init__(nChannelsPerSystem, x, y, z, elevation, data, std, predictedData, dataUnits, channelNames)
+        super().__init__(nChannelsPerSystem, x, y, z, elevation, data, std, predictedData, channelNames=channelNames, lineNumber=lineNumber, fiducial=fiducial)
 
-        # StatArray of Relative Errors
-        self._relErr = StatArray.StatArray(self.nSystems, '$\epsilon_{Relative}x10^{2}$', '%')
-        # StatArray of Additive Errors
-        self._addErr = StatArray.StatArray(self.nSystems, '$\epsilon_{Additive}$', self._data.units)
         # Initialize the sensitivity matrix
         self.J = None
-
-        self.fiducial = fiducial
-        self.lineNumber = lineNumber
         self.errorPosterior = None
 
-
     @property
-    def relErr(self):
-        return self._relErr
-
-    @relErr.setter
-    def relErr(self, values):
-        assert np.size(values) == self.nSystems, ValueError("relativeError must have length {}".format(self.nSystems))
-        self._relErr[:] = values
-
-    @property
-    def addErr(self):
-        return self._addErr
-
-    @addErr.setter
-    def addErr(self, values):
-        assert np.size(values) == self.nSystems, ValueError("additiveError must have length {}".format(self.nSystems))
-        self._addErr[:] = values
+    def nSystems(self):
+        return len(self.system)
 
 
     def FindBestHalfSpace(self, minConductivity=1e-4, maxConductivity=1e4, nSamples=100):

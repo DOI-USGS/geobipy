@@ -53,54 +53,71 @@ class FdemDataPoint(EmDataPoint):
 
     def __init__(self, x=0.0, y=0.0, z=0.0, elevation=0.0, data=None, std=None, predictedData=None, system=None, lineNumber=0.0, fiducial=0.0):
         """Define initializer. """
+
         if (system is None):
             return
-        else:
-            if isinstance(system, (str, FdemSystem)):
-                system = [system]
-            assert all((isinstance(sys, (str, FdemSystem)) for sys in system)), TypeError("System must have items of type str or FdemSystem")
 
-        # Assign the number of systems as 1
-        nSystems = len(system)
-        nFrequencies = np.empty(nSystems, dtype=np.int32)
+        self.system = system
 
-        systems = []
-        for j, sys in enumerate(system):
-            # EMSystem Class
-            if (isinstance(sys, str)):
-                tmpsys = FdemSystem()
-                tmpsys.read(sys)
-                systems.append(tmpsys)
-            elif (isinstance(sys, FdemSystem)):
-                systems.append(sys)
-            nFrequencies[j] = systems[j].nFrequencies
+        # if not data is None:
+        #     assert np.size(data) == self.nChannels, ValueError("Size of data {}, must equal 2 * total number of frequencies {}".format(np.size(data), self.nChannels))
+        # if not std is None:
+        #     assert np.size(std) ==self. nChannels, ValueError("Size of std {}, must equal 2 * total number of frequencies {}".format(np.size(std), self.nChannels))
+        # if not predictedData is None:
+        #     assert np.size(predictedData) == self.nChannels, ValueError("Size of predictedData {}, must equal 2 * total number of frequencies {}".format(np.size(predictedData), self.nChannels))
 
-        nChannels = np.sum(2*nFrequencies)
-
-        if not data is None:
-            assert np.size(data) == nChannels, ValueError("Size of data {}, must equal 2 * total number of frequencies {}".format(np.size(data), nChannels))
-        if not std is None:
-            assert np.size(std) == nChannels, ValueError("Size of std {}, must equal 2 * total number of frequencies {}".format(np.size(std), nChannels))
-        if not predictedData is None:
-            assert np.size(predictedData) == nChannels, ValueError("Size of predictedData {}, must equal 2 * total number of frequencies {}".format(np.size(predictedData), nChannels))
-
-        EmDataPoint.__init__(self, nChannelsPerSystem=2*nFrequencies, x=x, y=y, z=z, elevation=elevation, data=data, std=std, predictedData=predictedData, dataUnits="ppm", lineNumber=lineNumber, fiducial=fiducial)
+        super().__init__(nChannelsPerSystem=2*self.nFrequencies, x=x, y=y, z=z, elevation=elevation, data=data, std=std, predictedData=predictedData, lineNumber=lineNumber, fiducial=fiducial)
 
         self._data.name = 'Frequency domain data'
-
-        self.nSystems = nSystems
-        self.system = systems
 
         # StatArray of calibration parameters
         # The four columns are Bias,Variance,InphaseBias,QuadratureBias.
         self.calibration = StatArray.StatArray([self.nChannels * 2], 'Calibration Parameters')
 
-        k = 0
-        for i in range(self.nSystems):
-            # Set the channel names
-            for iFrequency in range(self.nChannelsPerSystem[i]):
-                self._channelNames[k] = '{} {} (Hz)'.format(self.getMeasurementType(iFrequency, i), self.getFrequency(iFrequency, i))
-                k += 1
+        self.channelNames = ["{} {} (Hz)".format(self.getMeasurementType(iF, i), self.getFrequency(iF, i)) for i in range(self.nSystems) for iF in range(self.nChannelsPerSystem[i])]
+
+
+    @property
+    def units(self):
+        return self._units
+
+    @units.setter
+    def units(self, value):
+
+        if value is None:
+            self._units = "ppm"
+        else:
+            assert isinstance(value, str), TypeError("units must have type str")
+            self._units = value
+
+    @property
+    def system(self):
+        return self._system
+
+    @system.setter
+    def system(self, value):
+
+        if isinstance(value, (str, FdemSystem)):
+            value = [value]
+
+        assert all((isinstance(sys, (str, FdemSystem)) for sys in value)), TypeError("System must have items of type str or geobipy.FdemSystem")
+
+        systems = []
+        for j, sys in enumerate(value):
+            if (isinstance(sys, str)):
+                systems.append(FdemSystem().read(sys))
+            elif (isinstance(sys, FdemSystem)):
+                systems.append(sys)
+
+        self._system = systems
+
+    @property
+    def nChannelsPerSystem(self):
+        return 2 * self.nFrequencies
+
+    @property
+    def nFrequencies(self):
+        return np.asarray([x.nFrequencies for x in self.system])
 
 
     def _inphaseIndices(self, system=0):
@@ -154,9 +171,9 @@ class FdemDataPoint(EmDataPoint):
     def inphaseStd(self, system=0):
         return self.std[self._inphaseIndices(system)]
 
-    @property
-    def nFrequencies(self):
-        return np.int32(0.5*self.nChannelsPerSystem)
+    # @property
+    # def nFrequencies(self):
+    #     return np.int32(0.5*self.nChannelsPerSystem)
 
     def predictedInphase(self, system=0):
         return self.predictedData[self._inphaseIndices(system)]
@@ -178,7 +195,7 @@ class FdemDataPoint(EmDataPoint):
     def __deepcopy__(self):
         """ Define a deepcopy routine """
 
-        tmp = FdemDataPoint(self.x, self.y, self.z, self.elevation, self._data, self._std, self._predictedData, self.system, self.lineNumber, self.fiducial)
+        tmp = FdemDataPoint(self.x, self.y, self.z, self.elevation, self.data, self.std, self.predictedData, self.system, self.lineNumber, self.fiducial)
         # StatArray of Relative Errors
         tmp._relErr = self.relErr.deepcopy()
         # StatArray of Additive Errors
@@ -269,7 +286,6 @@ class FdemDataPoint(EmDataPoint):
         create: optionally create the data set as well before writing
         """
         grp = parent.get(myName)
-
         self.x.writeHdf(grp, 'x',  withPosterior=withPosterior, index=index)
         self.y.writeHdf(grp, 'y',  withPosterior=withPosterior, index=index)
         self.z.writeHdf(grp, 'z',  withPosterior=withPosterior, index=index)
@@ -294,58 +310,30 @@ class FdemDataPoint(EmDataPoint):
         if grp['d/data'].ndim > 1:
             assert not index is None, ValueError("File contains multiple FdemDataPoints.  Must specify an index.")
 
-        item = grp.get('x')
-        obj = eval(cf.safeEval(item.attrs.get('repr')))
-        x = obj.fromHdf(item, index=index)
+        x = StatArray.StatArray().fromHdf(grp['x'], index=index)
+        y = StatArray.StatArray().fromHdf(grp['y'], index=index)
+        z = StatArray.StatArray().fromHdf(grp['z'], index=index)
+        e = StatArray.StatArray().fromHdf(grp['e'], index=index)
+        system = FdemSystem().fromHdf(grp['sys'])
 
-        item = grp.get('y')
-        obj = eval(cf.safeEval(item.attrs.get('repr')))
-        y = obj.fromHdf(item, index=index)
+        d = StatArray.StatArray().fromHdf(grp['d'], index=index)
+        s = StatArray.StatArray().fromHdf(grp['s'], index=index)
+        p = StatArray.StatArray().fromHdf(grp['p'], index=index)
 
-        item = grp.get('z')
-        obj = eval(cf.safeEval(item.attrs.get('repr')))
-        z = obj.fromHdf(item, index=index)
+        rErr = StatArray.StatArray().fromHdf(grp['relErr'], index=index)
+        aErr = StatArray.StatArray().fromHdf(grp['addErr'], index=index)
 
-        item = grp.get('e')
-        obj = eval(cf.safeEval(item.attrs.get('repr')))
-        e = obj.fromHdf(item, index=index)
+        self.__init__(x, y, z, e, data=d, std=s, predictedData=p, system=system)
 
-        item = grp.get('sys')
-        system = FdemSystem()
-        system.fromHdf(item)
+        self._relErr = StatArray.StatArray().fromHdf(grp['relErr'], index=index)
+        self._addErr = StatArray.StatArray().fromHdf(grp['addErr'], index=index)
 
-        _aPoint = FdemDataPoint(x, y, z, e, system=system)
 
-        if grp['d/data'].ndim > 1:
-            slic = np.s_[index, :]
-        else:
-            slic = None
+        # item = grp.get('calibration')
+        # obj = eval(cf.safeEval(item.attrs.get('repr')))
+        # _aPoint.calibration = obj.fromHdf(item, index=index)
 
-        item = grp.get('d')
-        obj = eval(cf.safeEval(item.attrs.get('repr')))
-        _aPoint._data = obj.fromHdf(item, index=slic)
-
-        item = grp.get('s')
-        obj = eval(cf.safeEval(item.attrs.get('repr')))
-        _aPoint._std = obj.fromHdf(item, index=slic)
-
-        item = grp.get('p')
-        obj = eval(cf.safeEval(item.attrs.get('repr')))
-        _aPoint._predictedData = obj.fromHdf(item, index=slic)
-
-        item = grp.get('relErr')
-        obj = eval(cf.safeEval(item.attrs.get('repr')))
-        _aPoint._relErr = obj.fromHdf(item, index=index)
-
-        item = grp.get('addErr')
-        obj = eval(cf.safeEval(item.attrs.get('repr')))
-        _aPoint._addErr = obj.fromHdf(item, index=index)
-
-        item = grp.get('calibration')
-        obj = eval(cf.safeEval(item.attrs.get('repr')))
-        _aPoint.calibration = obj.fromHdf(item, index=slic)
-
-        return _aPoint
+        return self
 
 
     def calibrate(self, Predicted=True):
@@ -549,6 +537,7 @@ class FdemDataPoint(EmDataPoint):
                 PhiD1 = PhiDnew
             dPhiD = abs(PhiD2 - PhiD1) / PhiD2
             i += 1
+
         return model
 
 

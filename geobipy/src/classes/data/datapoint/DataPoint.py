@@ -12,7 +12,7 @@ class DataPoint(Point):
 
     Contains an easting, northing, height, elevation, observed and predicted data, and uncertainty estimates for the data.
 
-    DataPoint(x, y, z, elevation, nChannels, data, std, dataUnits)
+    DataPoint(x, y, z, elevation, nChannels, data, std, units)
 
     Parameters
     ----------
@@ -37,22 +37,20 @@ class DataPoint(Point):
     predictedData : geobipy.StatArray or array_like, optional
         Predicted data values to assign the data of length sum(nChannelsPerSystem).
         * If None, initialized with zeros.
-    dataUnits : str, optional
+    units : str, optional
         Units of the data.  Default is "ppm".
     channelNames : list of str, optional
         Names of each channel of length sum(nChannelsPerSystem)
 
     """
 
-    def __init__(self, nChannelsPerSystem=1, x=0.0, y=0.0, z=0.0, elevation=None, data=None, std=None, predictedData=None, dataUnits=None, channelNames=None):
+    def __init__(self, nChannelsPerSystem=1, x=0.0, y=0.0, z=0.0, elevation=None, data=None, std=None, predictedData=None, units="", channelNames=None, lineNumber=0.0, fiducial=0.0):
         """ Initialize the Data class """
 
         Point.__init__(self, x, y, z)
 
-        self.nSystems = np.size(nChannelsPerSystem)
-
         # Number of Channels
-        self.nChannelsPerSystem = np.atleast_1d(np.asarray(nChannelsPerSystem))
+        self._nChannelsPerSystem = np.atleast_1d(np.asarray(nChannelsPerSystem))
         self._systemOffset = np.concatenate([[0], np.cumsum(self.nChannelsPerSystem)])
 
         # StatArray of data
@@ -62,39 +60,83 @@ class DataPoint(Point):
         else:
             self._elevation = StatArray.StatArray(1, "Elevation", "m")
 
+        self.units = units
+
         # StatArray of data
-        if not data is None:
-            assert np.size(data) == self.nChannels, ValueError("data must have size {}".format(self.nChannels))
-            self._data = StatArray.StatArray(data, "Data", dataUnits)
+        self.data = data
+
+        self.std = std
+
+        self.predictedData = predictedData
+
+        self.lineNumber = lineNumber
+
+        self.fiducial = fiducial
+
+        self.channelNames = channelNames
+
+
+    @property
+    def addErr(self):
+        return self._addErr
+
+    @addErr.setter
+    def addErr(self, values):
+        if values is None:
+            self._addErr = StatArray.StatArray(self.nSystems, '$\epsilon_{Additive}$', self.units)
         else:
-            self._data = StatArray.StatArray(self.nChannels, "Data", dataUnits)
+            assert np.size(values) == self.nSystems, ValueError("additiveError must have length {}".format(self.nSystems))
+            self._addErr = StatArray.StatArray(values, '$\epsilon_{Additive}$', self.units)
 
-        # # Index to non NaN values
-        # self.active = self.getActiveData()
+    @property
+    def channelNames(self):
+        return self._channelNames
 
-        # StatArray of Standard Deviations
-        if not std is None:
-            assert np.size(std) == self.nChannels, ValueError("std must have size {}".format(self.nChannels))
-            assert np.all(std[self.active] > 0.0), ValueError("Cannot assign standard deviations that are <= 0.0.")
-            self._std = StatArray.StatArray(std, "Standard Deviation", dataUnits)
-        else:
-            self._std = StatArray.StatArray(np.ones(self.nChannels), "Standard Deviation", dataUnits)
-
-
-        # Create predicted data
-        if not predictedData is None:
-            assert np.size(predictedData) == self.nChannels, ValueError("predictedData must have size {}".format(self.nChannels))
-            self._predictedData = StatArray.StatArray(predictedData, "Predicted Data", dataUnits)
-        else:
-            self._predictedData = StatArray.StatArray(self.nChannels, "Predicted Data", dataUnits)
-
-        # Assign the channel names
-        if channelNames is None:
+    @channelNames.setter
+    def channelNames(self, values):
+        if values is None:
             self._channelNames = ['Channel {}'.format(i) for i in range(self.nChannels)]
         else:
-            assert len(channelNames) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
-            self._channelNames = channelNames
+            assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
+            self._channelNames = values
 
+    @property
+    def fiducial(self):
+        return self._fiducial
+
+
+    @fiducial.setter
+    def fiducial(self, value):
+        assert isinstance(value, (float, np.float)), TypeError("fiducial must have type float.")
+        self._fiducial = value
+
+
+    @property
+    def lineNumber(self):
+        return self._lineNumber
+
+
+    @lineNumber.setter
+    def lineNumber(self, value):
+        assert isinstance(value, (float, np.float)), TypeError("lineNumber must have type float.")
+        self._lineNumber = value
+
+    @property
+    def nChannelsPerSystem(self):
+        return self._nChannelsPerSystem
+
+    @property
+    def nSystems(self):
+        return np.size(self.nChannelsPerSystem)
+
+    @property
+    def units(self):
+        return self._units
+
+    @units.setter
+    def units(self, value):
+        assert isinstance(value, str), TypeError('units must have type str')
+        self._units = value
 
     @property
     def data(self):
@@ -102,8 +144,12 @@ class DataPoint(Point):
 
     @data.setter
     def data(self, values):
-        assert np.size(values) == self.nChannelsPerSystem, ValueError("data must have size {}".format(self.nChannelsPerSystem))
-        self._data[:] = values
+
+        self._data = StatArray.StatArray(self.nChannels, "Data", self.units)
+
+        if not values is None:
+            assert np.size(values) == self.nChannels, ValueError("data must have size {}".format(self.nChannels))
+            self._data[:] = values
 
     @property
     def deltaD(self):
@@ -119,7 +165,7 @@ class DataPoint(Point):
             with size equal to the number of active channels.
 
         """
-        return StatArray.StatArray(self._predictedData - self._data, name="$\\mathbf{Fm} - \\mathbf{d}_{obs}$", units=self._data.units)
+        return StatArray.StatArray(self._predictedData - self._data, name="$\\mathbf{Fm} - \\mathbf{d}_{obs}$", units=self.units)
 
     @property
     def elevation(self):
@@ -133,9 +179,33 @@ class DataPoint(Point):
     def nChannels(self):
         return np.sum(self.nChannelsPerSystem)
 
+
     @property
     def predictedData(self):
+        """The predicted data. """
         return self._predictedData
+
+
+    @predictedData.setter
+    def predictedData(self, values):
+        if values is None:
+            self._predictedData = StatArray.StatArray(self.nChannels, "Predicted Data", self.units)
+        else:
+            assert np.size(values) == self.nChannels, ValueError("predictedData must have size {}".format(self.nChannels))
+            self._predictedData = StatArray.StatArray(values, "Predicted Data", self.units)
+
+    @property
+    def relErr(self):
+        return self._relErr
+
+    @relErr.setter
+    def relErr(self, values):
+        if values is None:
+            self._relErr = StatArray.StatArray(self.nSystems, '$\epsilon_{Relative}x10^{2}$', '%')
+        else:
+            assert np.size(values) == self.nSystems, ValueError("relativeError must have length {}".format(self.nSystems))
+            self._relErr = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
+
 
     @property
     def std(self):
@@ -143,9 +213,14 @@ class DataPoint(Point):
 
     @std.setter
     def std(self, values):
-        assert np.size(values) == self.nChannels, ValueError("std must have size {}".format(self.nChannels))
-        assert np.all(values[self.active] > 0.0), ValueError("Cannot assign standard deviations that are <= 0.0.")
-        self._std[:] = values
+
+        self._std = StatArray.StatArray(np.ones(self.nChannels), "Standard Deviation", self.units)
+
+        if not values is None:
+            assert np.size(values) == self.nChannels, ValueError("std must have size {}".format(self.nChannels))
+            assert np.all(values[self.active] > 0.0), ValueError("Cannot assign standard deviations that are <= 0.0.")
+            self._std[:] = values
+
 
 
     def weightingMatrix(self, power=1.0):
@@ -172,7 +247,7 @@ class DataPoint(Point):
         return np.s_[self._systemOffset[system]:self._systemOffset[system+1]]
 
 
-    @cached_property
+    @property
     def active(self):
         """Gets the indices to the observed data values that are not NaN
 
@@ -194,7 +269,7 @@ class DataPoint(Point):
             Likelihood of the data point
 
         """
-        return self._predictedData.probability(i=self.active, log=log)
+        return self.predictedData.probability(i=self.active, log=log)
 
 
     def dataMisfit(self, squared=False):
