@@ -184,7 +184,7 @@ def readKeyFromFile(h5obj, fName, groupName, key, index=None, **kwargs):
     return items
 
 
-def read_item(hObj, index=None, **kwargs):
+def read_item(h5obj, index=None, **kwargs):
     """Read an object from a HDF file
 
     This function provides a flexible way to read in either a numpy hdf5 entry, or an object in this package.  The objects in this package may have an attached .createHdf and writeHdf procedure.  If so, this function will read in those objects and return that object.  If the entry is instead a numpy array, a numpy array will be returned.
@@ -206,7 +206,7 @@ def read_item(hObj, index=None, **kwargs):
         An object that has a .fromHdf() procedure or a numpy array of the returned variable.
 
     """
-    s = hObj.attrs.get('repr')
+    s = h5obj.attrs.get('repr')
     if (not s is None):
 
         # Put temporary conversions here for items
@@ -217,15 +217,15 @@ def read_item(hObj, index=None, **kwargs):
                 s = s.replace(',np.',',dtype=np.')
 
         item = eval(cf.safeEval(s))
-        tmp = item.fromHdf(hObj, index=index, **kwargs)
+        tmp = item.fromHdf(h5obj, index=index, **kwargs)
         return tmp
     try:
         if (index is None):
-            return np.array(hObj)
+            return np.array(h5obj)
         else:
-            return np.array(hObj)[index]
+            return np.array(h5obj)[index]
     except:
-        raise ValueError("Could not read group "+str(hObj)+" from hdf file. \n Check whether an index must be specified in the read hdf function you are using")
+        raise ValueError("Could not read group "+str(h5obj)+" from hdf file. \n Check whether an index must be specified in the read hdf function you are using")
     return None
 
 
