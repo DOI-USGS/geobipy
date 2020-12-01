@@ -140,6 +140,7 @@ def initialize(userParameters, DataPoint, prng=None):
     # ---------------------------------------
     # Set the prior on the data
     DataPoint.predictedData.setPrior('MvLogNormal', DataPoint.data[DataPoint.active], DataPoint.std[DataPoint.active]**2.0, linearSpace=False, prng=prng)
+
     DataPoint.relErr = userParameters.initialRelativeError
     DataPoint.addErr = userParameters.initialAdditiveError
 
@@ -219,8 +220,6 @@ def initialize(userParameters, DataPoint, prng=None):
         inverseHessian = Mod.localParameterVariance()
     else:
         inverseHessian = Mod.localParameterVariance(DataPoint)
-
-
 
     # Instantiate the proposal for the parameters.
     parameterProposal = Distribution('MvLogNormal', Mod.par, inverseHessian, linearSpace=True, prng=prng)
