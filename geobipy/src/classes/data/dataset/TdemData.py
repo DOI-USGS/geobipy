@@ -644,7 +644,7 @@ class TdemData(Data):
         loopOffset = values[i0:i0+3]
         i0 += 3
 
-        out = TdemDataPoint(x=values[2], y=values[3], z=values[5], elevation=values[4], data=D, std=S, system=self.system, T=T, R=R, loopOffset=loopOffset, lineNumber=values[0], fiducial=values[1])
+        out = TdemDataPoint(x=values[2], y=values[3], z=values[5], elevation=values[4], data=D, std=S, system=self.system, transmitter_loop=T, receiver_loop=R, loopOffset=loopOffset, lineNumber=values[0], fiducial=values[1])
 
         return out
 
