@@ -168,7 +168,7 @@ class Mixture(myObject):
                 gradient_substantial = np.any(np.abs(misfit_test - misfit) > mu)
                 valid_new_peak = residual[new_peak] > 0.0 and (i05 <= new_peak <= i95)
 
-                under_limits = x_guess.size < maxDistributions
+                under_limits = x_guess.size < maxDistributions-1
 
                 go = valid_new_peak and under_limits and above_abs_threshold #and gradient_substantial
 
@@ -338,7 +338,7 @@ class Mixture(myObject):
         grp = h5obj.create_group(myName)
         grp.attrs["repr"] = self.hdf_name
 
-        self.params.createHdf(grp, 'params', nRepeats=nRepeats)
+        grp = self.params.createHdf(grp, 'params', nRepeats=nRepeats)
 
         return grp
 
@@ -375,5 +375,5 @@ class Mixture(myObject):
 
         assert np.size(index) == np.size(item['data'].shape) - 1, ValueError('Need to specify a {}D index'.format(np.size(item['data'].shape)-1))
 
-        self._params = obj.fromHdf(item, index=index)
+        self.params = obj.fromHdf(item, index=index)
         return self
