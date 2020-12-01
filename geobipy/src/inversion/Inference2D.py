@@ -139,6 +139,10 @@ class Inference2D(myObject):
         return self.data._addErr.posterior
 
 
+    def uncache(self, variable):
+        del self.__dict__[variable]
+
+
     def compute_additive_error_opacity(self, percent=95.0, log=None):
 
         self.addErr_opacity = self.compute_posterior_opacity(self.additiveErrorPosteriors, percent, log)
@@ -436,10 +440,10 @@ class Inference2D(myObject):
     @cached_property
     def fiducials(self):
         """ Get the id numbers of the data points in the line results file """
-        try:
-            return self.getAttribute('fiducials')
-        except:
-            return StatArray.StatArray(np.asarray(self.hdfFile.get('ids')), "fiducials")
+        # try:
+        return self.getAttribute('fiducials')
+        # except:
+        #     return StatArray.StatArray(np.asarray(self.hdfFile.get('ids')), "fiducials")
 
 
     def fit_gaussian_mixture(self, intervals, **kwargs):
@@ -770,18 +774,18 @@ class Inference2D(myObject):
     def mesh(self):
         """Get the 2D topo fitting rectilinear mesh. """
 
-        if (self.hitmap(0) is None):
-            tmp = self.getAttribute('hitmap/y', index=0)
-            try:
-                tmp = RectilinearMesh1D(cellCentres=tmp.cellCentres, edgesMin=0.0)
-            except:
-                tmp = RectilinearMesh1D(cellCentres=tmp, edgesMin=0.0)
-        else:
-            tmp = self.hitmap(0).y
-            try:
-                tmp = RectilinearMesh1D(cellCentres=tmp.cellCentres, edgesMin=0.0)
-            except:
-                tmp = RectilinearMesh1D(cellCentres=tmp, edgesMin=0.0)
+        # if (self.hitmap(0) is None):
+        #     tmp = self.getAttribute('hitmap/y', index=0)
+        #     try:
+        #         tmp = RectilinearMesh1D(cellCentres=tmp.cellCentres, edgesMin=0.0)
+        #     except:
+        #         tmp = RectilinearMesh1D(cellCentres=tmp, edgesMin=0.0)
+        # else:
+        tmp = self.hitmap(0).y
+        try:
+            tmp = RectilinearMesh1D(cellCentres=tmp.cellCentres, edgesMin=0.0)
+        except:
+            tmp = RectilinearMesh1D(cellCentres=tmp, edgesMin=0.0)
 
         return TopoRectilinearMesh2D(xCentres=self.x, yCentres=self.y, zEdges=tmp.cellEdges, heightCentres=self.elevation)
 
@@ -2173,8 +2177,8 @@ class Inference2D(myObject):
 
         # Initialize and write the attributes that won't change
         # hdfFile.create_dataset('ids',data=self.fiducials)
-        self.fiducials.createHdf(hdfFile, 'fiducials')
-        self.fiducials.writeHdf(hdfFile, 'fiducials')
+        self.fiducials.toHdf(hdfFile, 'fiducials')
+        # self.fiducials.writeHdf(hdfFile, 'fiducials')
         hdfFile.create_dataset('iplot', data=results.iPlot)
         hdfFile.create_dataset('plotme', data=results.plotMe)
         hdfFile.create_dataset('reciprocateParameter', data=results.reciprocateParameter)
@@ -2212,7 +2216,6 @@ class Inference2D(myObject):
         results.bestDataPoint.createHdf(hdfFile,'bestd', withPosterior=False, nRepeats=nPoints, fillvalue=np.nan)
 
         # Since the 1D models change size adaptively during the inversion, we need to pad the HDF creation to the maximum allowable number of layers.
-
         tmp = results.currentModel.pad(results.currentModel.maxLayers)
 
         tmp.createHdf(hdfFile, 'currentmodel', nRepeats=nPoints, fillvalue=np.nan)
@@ -2285,16 +2288,16 @@ class Inference2D(myObject):
 
         slic = np.s_[i, :]
         # Add the interpolated mean model
-        results.meanInterp.writeHdf(hdfFile, 'meaninterp',  index=slic)
+        results.meanInterp.writeHdf(hdfFile, 'meaninterp',  index=i)
         # Add the interpolated best
-        results.bestInterp.writeHdf(hdfFile, 'bestinterp',  index=slic)
+        results.bestInterp.writeHdf(hdfFile, 'bestinterp',  index=i)
         # Add the interpolated opacity
 
         # Add the acceptance rate
-        results.rate.writeHdf(hdfFile, 'rate', index=slic)
+        results.rate.writeHdf(hdfFile, 'rate', index=i)
 
         # Add the data misfit
-        results.PhiDs.writeHdf(hdfFile,'phids',index=slic)
+        results.PhiDs.writeHdf(hdfFile,'phids',index=i)
 
         results.currentDataPoint.writeHdf(hdfFile,'currentdatapoint',  index=i)
 
