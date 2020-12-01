@@ -89,9 +89,9 @@ try:
         E = Earth(model1d.par[:], model1d.thk[:-1])
         # Generate the Brodie Geometry class
         G = Geometry(datapoint.z[0],
-                    datapoint.T.roll, datapoint.T.pitch, datapoint.T.yaw,
+                    datapoint.transmitter.roll, datapoint.transmitter.pitch, datapoint.transmitter.yaw,
                     datapoint.loopOffset[0], datapoint.loopOffset[1], datapoint.loopOffset[2],
-                    datapoint.R.roll, datapoint.R.pitch, datapoint.R.yaw)
+                    datapoint.receiver.roll, datapoint.receiver.pitch, datapoint.receiver.yaw)
 
         # Forward model the data for each system
         for i in range(datapoint.nSystems):
@@ -107,9 +107,9 @@ try:
         if modelChanged:
             E = Earth(model1d.par[:], model1d.thk[:-1])
             G = Geometry(datapoint.z[0],
-                        datapoint.T.roll, datapoint.T.pitch, datapoint.T.yaw,
+                        datapoint.transmitter.roll, datapoint.transmitter.pitch, datapoint.transmitter.yaw,
                         datapoint.loopOffset[0], datapoint.loopOffset[1], datapoint.loopOffset[2],
-                        datapoint.R.roll, datapoint.R.pitch, datapoint.R.yaw)
+                        datapoint.receiver.roll, datapoint.receiver.pitch, datapoint.receiver.yaw)
 
             for i in range(datapoint.nSystems):
                 datapoint.system[i].forwardmodel(G, E)
