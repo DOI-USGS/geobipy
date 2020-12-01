@@ -534,31 +534,10 @@ class RectilinearMesh2D(myObject):
         myName: object hdf name. Assumes createHdf has already been called
         create: optionally create the data set as well before writing
         """
-
-        ai = None
-        bi = None
-        if not index is None:
-            assert cF.isInt(index), ValueError('index must be an integer')
-            ai = np.s_[index,:,:]
-            bi = np.s_[index,:]
-
-        self._counts.writeHdf(parent, myName+'/arr',  withPosterior=withPosterior, index=ai)
-        self.x.writeHdf(parent, myName+'/x',  withPosterior=withPosterior, index=bi)
-        self.y.writeHdf(parent, myName+'/y',  withPosterior=withPosterior, index=bi)
-        self.z.writeHdf(parent, myName+'/z',  withPosterior=withPosterior, index=bi)
-
-
-    def toHdf(self, h5obj, myName):
-        """ Write the StatArray to an HDF object
-        h5obj: :An HDF File or Group Object.
-        """
-        # Create a new group inside h5obj
-        grp = h5obj.create_group(myName)
-        grp.attrs["repr"] = self.hdfName()
-        self._counts.toHdf(grp, 'arr')
-        self.x.toHdf(grp, 'x')
-        self.y.toHdf(grp, 'y')
-        self.z.toHdf(grp, 'z')
+        self._counts.writeHdf(parent, myName+'/arr',  withPosterior=withPosterior, index=index)
+        self.x.writeHdf(parent, myName+'/x',  withPosterior=withPosterior, index=index)
+        self.y.writeHdf(parent, myName+'/y',  withPosterior=withPosterior, index=index)
+        self.z.writeHdf(parent, myName+'/z',  withPosterior=withPosterior, index=index)
 
 
     def fromHdf(self, grp, index=None):
