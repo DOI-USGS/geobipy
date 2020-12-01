@@ -308,7 +308,9 @@ class FdemSystem(myObject):
             transmitterLoops.append(eval(cF.safeEval(item.attrs.get('repr'))))
             item = grp.get('R/R' + str(i))
             receiverLoops.append(eval(cF.safeEval(item.attrs.get('repr'))))
-        return FdemSystem.__init__(self, frequencies, transmitterLoops, receiverLoops)
+        self.__init__(frequencies, transmitterLoops, receiverLoops)
+
+        return self
 
 
     def Bcast(self, world, root=0):
