@@ -1062,13 +1062,7 @@ class Inference1D(myObject):
 
         self.bestDataPoint = hdfRead.readKeyFromFile(hdfFile,'','/','bestd', index=index, systemFilepath=systemFilePath)
         self.currentDataPoint = hdfRead.readKeyFromFile(hdfFile,'','/','currentdatapoint', index=index, systemFilepath=systemFilePath)
-        # except:
-        #     self.currentDataPoint = self.bestDataPoint
-        #     p = hdfRead.readKeyFromFile(hdfFile,'','/','dzhist', index=index)
-        #     self.currentDataPoint.z.setPosterior(p)
 
-
-        # try:
         self.currentModel = hdfRead.readKeyFromFile(hdfFile,'','/','currentmodel', index=index)
         self.Hitmap = self.currentModel.par.posterior
         self.currentModel.maxDepth = np.log(self.Hitmap.y.cellCentres[-1])
@@ -1078,23 +1072,6 @@ class Inference1D(myObject):
 
         self.bestModel = hdfRead.readKeyFromFile(hdfFile,'','/','bestmodel', index=index)
         self.bestModel.maxDepth = np.log(self.Hitmap.y.cellCentres[-1])
-
-
-
-        # self.kHist = hdfRead.readKeyFromFile(hdfFile,'','/','khist', index=i)
-        # self.DzHist = hdfRead.readKeyFromFile(hdfFile,'','/','dzhist', index=i)
-        # self.MzHist = hdfRead.readKeyFromFile(hdfFile,'','/','mzhist', index=i)
-
-        # Hack to recentre the altitude histogram go this datapoints altitude
-        # self.DzHist._cellEdges -= (self.DzHist.bins[int(self.DzHist.bins.size/2)-1] - self.bestD.z[0])
-        # self.DzHist._cellCentres = self.DzHist._cellEdges[:-1] + 0.5 * np.abs(np.diff(self.DzHist._cellEdges))
-
-        # self.relErr = []
-        # self.addErr = []
-        # for j in range(self.nSystems):
-        #     self.relErself.append(hdfRead.readKeyFromFile(hdfFile,'','/','relerr'+str(j), index=i))
-        #     self.addErself.append(hdfRead.readKeyFromFile(hdfFile,'','/','adderr'+str(j), index=i))
-
 
         self.invTime=np.array(hdfFile.get('invtime')[index])
         self.saveTime=np.array(hdfFile.get('savetime')[index])
