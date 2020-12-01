@@ -116,25 +116,29 @@ class StatArray(np.ndarray, myObject):
             units = cf.str_to_raw(units) # Do some possible LateX checking. some Backslash operatores in LateX do not pass correctly as strings
 
         if shape is None:
-            shape = 1
+            shape = 0
 
         # Copies a StatArray but can reassign the name and units
         if isinstance(shape, StatArray):
-            shp = np.shape(shape)
-            self = StatArray(shp, name=cf.getName(shape), units=cf.getUnits(shape)) + shape
+            if np.ndim(shape) == 0:
+                self = np.ndarray.__new__(subtype, 1, **kwargs)
+                self[:] = shape
+            else:
+                shp = np.shape(shape)
+                self = StatArray(shp, **kwargs) + shape
 
             if (shape.hasPrior):
                 self._prior = shape._prior.deepcopy()
             if (shape.hasProposal):
                 self._proposal = shape._proposal.deepcopy()
             if (shape.hasPosterior):
-                self._posterior = shape._posterior#deepcopy(shape._posterior)
+                self._posterior = shape._posterior #deepcopy(shape._posterior)
 
         # Can pass in a numpy function call like arange(10) as the first argument
         elif isinstance(shape, np.ndarray):
             self = shape.view(StatArray)
 
-        elif isinstance(shape, float):
+        elif isinstance(shape, (float, np.float)):
             self = np.ndarray.__new__(subtype, 1, **kwargs)
             self[:] = shape
 
@@ -143,9 +147,9 @@ class StatArray(np.ndarray, myObject):
             self[:] = 0
 
         # Set the name of the StatArray
-        self._name = name
+        self.name = name
         # Set the Units of the StatArray
-        self._units = units
+        self.units = units
 
         return self
 
@@ -196,6 +200,10 @@ class StatArray(np.ndarray, myObject):
             return self._posterior
         else:
             return None
+
+    @posterior.setter
+    def posterior(self, value):
+        self._posterior = value
 
 
     @property
@@ -269,7 +277,6 @@ class StatArray(np.ndarray, myObject):
 
         """
         self._prior = Distribution(distributionType, *args, **kwargs)
-
 
 
     def setProposal(self, distributionType, *args, **kwargs):
@@ -384,6 +391,7 @@ class StatArray(np.ndarray, myObject):
 
 
     def __deepcopy__(self, memo):
+
         other = StatArray(self, dtype=self.dtype)
 
         other._name = self._name
@@ -1502,7 +1510,7 @@ class StatArray(np.ndarray, myObject):
         else:
             nRepeats = np.atleast_1d(nRepeats)
             if (self.size == 1):
-                grp.create_dataset('data', [*nRepeats], dtype=self.dtype, fillvalue=fillvalue)
+                grp.create_dataset('data', [*nRepeats, 1], dtype=self.dtype, fillvalue=fillvalue)
             else:
                 grp.create_dataset('data', [*nRepeats, *self.shape], dtype=self.dtype, fillvalue=fillvalue)
 
@@ -1565,7 +1573,6 @@ class StatArray(np.ndarray, myObject):
         >>> f.close()
 
         """
-
         write_nd(self, h5obj, myName+'/data', index=index)
 #        try:
 #            self.prior.writeHdf(h5obj,myName+'/prior',create=False)
@@ -1587,7 +1594,7 @@ class StatArray(np.ndarray, myObject):
                     self.posterior.writeHdf(h5obj, myName + '/posterior', index=index)
 
 
-    def fromHdf(self, h5grp, index=None):
+    def fromHdf(self, h5grp, myName=None, index=None):
         """Read the StatArray from a HDF group
 
         Given the HDF group object, read the contents into a StatArray.
@@ -1601,6 +1608,9 @@ class StatArray(np.ndarray, myObject):
 
         """
 
+        if not myName is None:
+            h5grp = h5grp[myName]
+
         nPosteriors = 0
         if 'nPosteriors' in h5grp:
             nPosteriors = np.asarray(h5grp['nPosteriors'])
@@ -1610,6 +1620,7 @@ class StatArray(np.ndarray, myObject):
         if not index is None:
             if np.ndim(index) > 0:
                 iTmp = index[0]
+
         if nPosteriors == 1:
             posterior = hdfRead.read_item(h5grp['posterior'], index = iTmp)
         elif nPosteriors > 1:
@@ -1618,37 +1629,15 @@ class StatArray(np.ndarray, myObject):
                 posterior.append(hdfRead.read_item(h5grp['posterior{}'.format(i)], index = iTmp))
 
         if (index is None):
-            try:
-                out =  StatArray(np.atleast_1d(h5grp.get('data')), self.name, self.units)
-                out._posterior = posterior
-                return out
-            except:
-                assert False, ValueError("HDF data was created as a larger array, specify the row index to read from")
+            d = np.asarray(h5grp.get('data'))
         else:
-            # assert cf.isIntorSlice(index), TypeError('index must be an int, slice, or tuple with slices. e.g. use index = np.s_[1,4:5,:] ')
-            d = h5grp.get('data')
-            out = StatArray(np.atleast_1d(d[np.s_[index]]), self.name, self.units)
-            out._posterior = posterior
-            return out
-#        try:
-#            grp = h5grp.get('prior')
-#            self.prior = eval(grp.attrs.get('repr'))
-#            if (not self.prior is None):
-#                self.prior = self.prior.fromHdf(grp, )
-#        except:
-#            pass
-#        try:
-#            grp = h5grp.get('proposal')
-#            self.proposal = eval(grp.attrs.get('repr'))
-#            if (not self.proposal is None):
-#                self.proposal = self.proposal.fromHdf(grp)
-#        except:
-#            pass
-        # try:
+            d = np.asarray(h5grp.get('data')[np.s_[index]])
 
-        # except:
-        #     pass
+        if np.ndim(d) >= 2:
+            d = np.squeeze(d)
 
+        out = StatArray(d, self.name, self.units)
+        out.setPosterior(posterior)
         return out
 
     ### Classification Routines
