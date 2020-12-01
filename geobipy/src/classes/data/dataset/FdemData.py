@@ -975,21 +975,21 @@ class FdemData(Data):
     def fromHdf(self, grp, **kwargs):
         """ Reads the object from a HDF group """
 
-        s = grp['d/data'].shape
+        # s = grp['d/data'].shape
 
         item = grp.get('sys')
         obj = eval(cF.safeEval(item.attrs.get('repr')))
         system = obj.fromHdf(item)
 
-        tmp = FdemData(nPoints=s[0], nFrequencies=np.int(0.5*s[1]), systems=system)
+        tmp = FdemData(systems=system)
 
         item = grp.get('x')
         obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp._x = obj.fromHdf(item)
+        tmp.x = obj.fromHdf(item)
 
         item = grp.get('y')
         obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp._y = obj.fromHdf(item)
+        tmp.y = obj.fromHdf(item)
 
         item = grp.get('z')
         obj = eval(cF.safeEval(item.attrs.get('repr')))
