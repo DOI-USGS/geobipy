@@ -97,7 +97,7 @@ class mixPearson(Mixture):
 
 
     def fit_to_curve(self, *args, **kwargs):
-        fit = super().fit_to_curve(*args, **kwargs)
+        fit, pars = super().fit_to_curve(*args, **kwargs)
         self.params = np.asarray(list(fit.best_values.values()))
         return self
 

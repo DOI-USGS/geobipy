@@ -54,16 +54,22 @@ class Mixture(myObject):
         self._params = StatArray.StatArray(values)
 
 
-    def fit_to_curve(self, x, y, plot=False, verbose=False, **kwargs):
+    def fit_to_curve(self, x, y, plot=False, debug=False, verbose=False, **kwargs):
         """Iteratively fits the histogram with an increasing number of distributions until the fit changes by less than a tolerance.
 
         """
         if plot:
             import matplotlib.pyplot as plt
-            plt.ion()
-            fig = plt.figure()
-            ax1 = plt.subplot(121)
-            ax2 = plt.subplot(122)
+            if debug:
+                plt.ion()
+                fig = plt.figure()
+
+                ax = plt.subplot(121)
+                ax2 = plt.subplot(122)
+            else:
+                fig = plt.gcf()
+                ax = plt.gca()
+
         norm = kwargs.pop('norm', np.inf)
         epsilon = kwargs.pop('epsilon', 0.05)
         mu = kwargs.pop('mu', 0.1)
@@ -88,7 +94,10 @@ class Mixture(myObject):
         new_peak = np.argmax(y)
         x_guess = np.atleast_1d(centres[new_peak])
 
-        fit = self._fit_GM_to_cuve(self.model, centres, edges, y, x_guess, **kwargs)
+        fit, pars = self._fit_GM_to_cuve(self.model, centres, edges, y, x_guess, **kwargs)
+
+        x_guess = np.asarray([fit.params['g0_center']])
+        sigma_guess = [fit.params['g0_sigma']]
 
         kwargs['max_variance'] = centres[i95] - centres[i05]
 
@@ -99,22 +108,23 @@ class Mixture(myObject):
         residual = np.abs(residual)
 
         # Get the location of the next peak
-        s = fit.params['g0_sigma'].value
-        residual[np.abs(centres - fit.params['g0_center'].value) < 2.0*s] = 0.0
+        s = fit.params['g0_fwhm'].value
+        residual[np.abs(centres - fit.params['g0_center'].value) < 1.67*s] = 0.0
         residual[:i05] = 0.0
         residual[i95:] = 0.0
 
 
-        if plot:
-            ax1.plot(centres, y, '-.')
-            ax1.plot(centres, fit.best_fit)
+        if plot or debug:
+            ax.plot(centres, y, '-.')
+            ax.plot(centres, fit.best_fit)
             comps = fit.eval_components(x=centres)
             for i in range(x_guess.size):
-                ax1.plot(centres, comps['g{}_'.format(i)])
+                ax.plot(centres, comps['g{}_'.format(i)])
 
-            ax2.plot(centres, residual)
-            ax2.vlines(centres[i05], ymin=0.0, ymax=y.max())
-            ax2.vlines(centres[i95], ymin=0.0, ymax=y.max())
+            if debug:
+                ax2.plot(centres, residual)
+                ax2.vlines(centres[i05], ymin=0.0, ymax=y.max())
+                ax2.vlines(centres[i95], ymin=0.0, ymax=y.max())
 
             fig.canvas.flush_events()
             fig.canvas.draw()
@@ -125,6 +135,7 @@ class Mixture(myObject):
 
         if verbose:
             print('first peak at {}'.format(x_guess))
+            print('first params {}'.format(np.asarray(list(fit.best_values.values()))))
             print('misfit', misfit)
             print('next peak', centres[new_peak])
 
@@ -135,17 +146,19 @@ class Mixture(myObject):
 
             x_guess = np.asarray([fit.params['g{}_center'.format(i)] for i in range(x_guess.size)])
             x_guess_test = np.hstack([x_guess, centres[new_peak]])
+            x_guess_test = np.atleast_1d(centres[new_peak])
 
-            fit_test = self._fit_GM_to_cuve(self.model, centres, edges, y, x_guess_test, **kwargs)
+            fit_test, pars_test = self._fit_GM_to_cuve(self.model, centres, edges, y, x_guess_test, previous_fit=fit, previous_pars=pars, **kwargs)
+            n_tests = len(fit_test.components)
 
             residual = y - fit_test.best_fit
             misfit_test = np.r_[np.linalg.norm(residual, ord=np.inf), np.linalg.norm(residual, ord=2.0)] / fit_denominator
             residual = np.abs(residual)
 
-            fwhm = [fit_test.params['g{}_fwhm'.format(i)].value for i in range(x_guess_test.size)]
-            s = np.min(fwhm)
-            for i in range(x_guess_test.size):
-                residual[np.abs(centres - fit_test.params['g{}_center'.format(i)].value) < s] = 0.0
+            fwhm = [fit_test.params['g{}_fwhm'.format(i)].value for i in range(n_tests)]
+            # s = np.min(fwhm)
+            for i in range(n_tests):
+                residual[np.abs(centres - fit_test.params['g{}_center'.format(i)].value) < fwhm[i]] = 0.0
             residual[:i05] = 0.0
             residual[i95:] = 0.0
 
@@ -153,7 +166,7 @@ class Mixture(myObject):
             misfit_decreases = (misfit_test[1] - misfit[1]) < 0.0
             gradient_substantial = np.any(np.abs(misfit_test - misfit) > mu)
 
-            accept_model = misfit_decreases # and gradient_substantial
+            accept_model = misfit_decreases and gradient_substantial
 
             if verbose:
                 print('testing peaks', x_guess_test)
@@ -168,12 +181,13 @@ class Mixture(myObject):
                 gradient_substantial = np.any(np.abs(misfit_test - misfit) > mu)
                 valid_new_peak = residual[new_peak] > 0.0 and (i05 <= new_peak <= i95)
 
-                under_limits = x_guess.size < maxDistributions-1
+                under_limits = len(fit.components) < maxDistributions-1
 
                 go = valid_new_peak and under_limits and above_abs_threshold #and gradient_substantial
 
                 if verbose:
-                    print('\nmodel accepted')
+                    print('\nmodel {}'.format(np.asarray(list(fit_test.best_values.values()))))
+                    print('model accepted')
 
                     print('misfit', misfit_test)
                     print('misfit change should be negative', misfit_test - misfit)
@@ -183,27 +197,30 @@ class Mixture(myObject):
                     print('valid new peak?', valid_new_peak)
 
                 fit = fit_test
+                pars = pars_test
                 misfit = misfit_test
                 x_guess = x_guess_test
 
             else:
                 if verbose:
-                    print('\ntest not accepted')
+                    print('\nmodel {}'.format(np.asarray(list(fit_test.best_values.values()))))
+                    print('test not accepted')
                     print('misfit', misfit_test)
                     print('misfit change should be negative', misfit_test - misfit)
 
 
-            if plot:
-                ax1.clear()
-                ax1.plot(centres, y, '-.')
+            if plot or debug:
+                ax.clear()
+                ax.plot(centres, y, '-.')
                 comps = fit_test.eval_components(x=centres)
-                for i in range(x_guess_test.size):
-                    ax1.plot(centres, comps['g{}_'.format(i)])
+                for i in range(n_tests):
+                    ax.plot(centres, comps['g{}_'.format(i)])
 
-                ax2.clear()
-                ax2.plot(centres, residual)
-                ax2.vlines(centres[i05], ymin=0.0, ymax=y.max())
-                ax2.vlines(centres[i95], ymin=0.0, ymax=y.max())
+                if debug:
+                    ax2.clear()
+                    ax2.plot(centres, residual)
+                    ax2.vlines(centres[i05], ymin=0.0, ymax=y.max())
+                    ax2.vlines(centres[i95], ymin=0.0, ymax=y.max())
 
                 fig.canvas.flush_events()
                 fig.canvas.draw()
@@ -227,60 +244,119 @@ class Mixture(myObject):
         #     if np.any(misfit_test < misfit):
         #         fit = fit_test
 
-        if plot:
-            ax1.clear()
-            ax1.plot(centres, y, '-.')
+        if plot or debug:
+            ax.clear()
+            ax.plot(centres, y, '-.')
             comps = fit.eval_components(x=centres)
-            for i in range(x_guess.size):
-                ax1.plot(centres, comps['g{}_'.format(i)])
+            for i in range(len(fit.components)):
+                ax.plot(centres, comps['g{}_'.format(i)])
 
-            ax2.clear()
-            ax2.plot(centres, residual)
-            ax2.vlines(centres[i05], ymin=0.0, ymax=y.max())
-            ax2.vlines(centres[i95], ymin=0.0, ymax=y.max())
+            if debug:
+                ax2.clear()
+                ax2.plot(centres, residual)
+                ax2.vlines(centres[i05], ymin=0.0, ymax=y.max())
+                ax2.vlines(centres[i95], ymin=0.0, ymax=y.max())
 
-            ax1.plot(centres, fit.best_fit)
+            ax.plot(centres, fit.best_fit)
 
             fig.canvas.flush_events()
             fig.canvas.draw()
             plt.pause(1e-3)
 
-            plt.ioff()
+            if debug:
+                plt.ioff()
 
-        return fit
+        return fit, pars
 
 
-    def _fit_GM_to_cuve(self, model, centres, edges, y, x_guess, **kwargs):
+    def _fit_GM_to_cuve(self, model, centres, edges, y, x_guess, sigma_guess=None, blocking_factor=1.0, previous_fit=None, previous_pars=None, **kwargs):
 
-        guess = model(prefix='g0_')
-        pars = guess.make_params()
-        mod = guess
-        for i in range(1, x_guess.size):
+        if previous_pars is None:
+            return self.__fit_wo_previous(model, centres, edges, y, x_guess, sigma_guess, blocking_factor, **kwargs)
+        else:
+            return self.__fit_w_previous(model, centres, edges, y, x_guess, sigma_guess, blocking_factor, previous_fit, previous_pars, **kwargs)
+
+
+
+    def __fit_w_previous(self, model, centres, edges, y, x_guess, sigma_guess=None, blocking_factor=None, previous_fit=None, previous_pars=None, **kwargs):
+
+
+        mn_var = kwargs.pop('min_variance', (edges[1]-edges[0]))
+        mx_var = kwargs.pop('max_variance', None)
+        if mx_var is None:
+            init = 1.0
+        else:
+            init = np.min([0.5 * mx_var, 1.0])
+
+
+        mod = previous_fit.components[0]
+        n_previous = len(previous_fit.components)
+        for i in range(1, n_previous):
+            mod += previous_fit.components[i]
+        pars = previous_pars
+
+        for j in range(np.size(x_guess)):
+            i = j + n_previous
             guess = model(prefix='g{}_'.format(i))
             pars.update(guess.make_params())
             mod += guess
 
-        mn = kwargs.pop('min_variance', 4.0*(edges[1]-edges[0]))
-        mx = kwargs.pop('max_variance', None)
-        if mx is None:
-            init = 1.0
-        else:
-            init = np.min([0.5 * mx, 1.0])
-
-        for i in range(x_guess.size):
-            vary = True
-            if i == 0:
-                vary = False
-            ix = centres.searchsorted(x_guess[i])
-
-            pars['g{}_center'.format(i)].set(value=x_guess[i],vary=vary)#, min=edges[ix], max=edges[ix+1])
-            pars['g{}_sigma'.format(i)].set(value=init, min=mn, max=mx)
-            pars['g{}_amplitude'.format(i)].set(value=1.0, min=1e-3)
+            pars['g{}_center'.format(i)].set(value=x_guess[j], vary=False)#, min=lower_edge[i], max=upper_edge[i])
+            pars['g{}_sigma'.format(i)].set(value=init, min=mn_var, max=mx_var)
+            pars['g{}_amplitude'.format(i)].set(value=1.0)
 
         init = mod.eval(pars, x=centres)
         out = mod.fit(y, pars, x=centres, **kwargs)
 
-        return out
+        return out, pars
+
+
+    def __fit_wo_previous(self, model, centres, edges, y, x_guess, sigma_guess=None, blocking_factor=1.0, **kwargs):
+
+        n_guesses = np.size(x_guess)
+        # Create the first model
+        guess = model(prefix='g0_')
+        pars = guess.make_params()
+        mod = guess
+        for i in range(1, n_guesses):
+            guess = model(prefix='g{}_'.format(i))
+            pars.update(guess.make_params())
+            mod += guess
+
+        mn_var = kwargs.pop('min_variance', (edges[1]-edges[0]))
+        mx_var = kwargs.pop('max_variance', None)
+        if mx_var is None:
+            init = 1.0
+        else:
+            init = np.min([0.5 * mx_var, 1.0])
+
+        # if sigma_guess is None:
+        #     sigma_guess = blocking_factor * np.full(n_guesses, mn_var)
+
+        # Sort the guesses and sigmas
+        ix = np.argsort(x_guess)
+
+        # lower_edge = np.full(n_guesses, fill_value=edges[0])
+        # upper_edge = np.full(n_guesses, fill_value=edges[-1])
+
+
+        # if n_guesses > 1:
+        #     lower_edge = np.hstack([edges[0], x_guess[ix[:-1]] + sigma_guess[ix[:-1]]])
+        #     upper_guess = np.hstack([x_guess[ix[1:]] - sigma_guess[ix[1:]], edges[-1]])
+
+        #     for i in range(n_guesses):
+        #         print('{} < {} < {}'.format(lower_edge[ix[i]], x_guess[ix[i]], upper_edge[i]))
+
+        for i in range(n_guesses):
+            pars['g{}_center'.format(i)].set(value=x_guess[ix[i]],vary=False)#, min=lower_edge[i], max=upper_edge[i])
+            pars['g{}_sigma'.format(i)].set(value=init, min=mn_var, max=mx_var)
+            pars['g{}_amplitude'.format(i)].set(value=1.0)
+
+
+        init = mod.eval(pars, x=centres)
+        out = mod.fit(y, pars, x=centres, **kwargs)
+
+        return out, pars
 
 
     # def _single_fit_to_curve(self, centres, edges, y, iPeaks, variance_bound, **kwargs):
