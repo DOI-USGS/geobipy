@@ -57,23 +57,21 @@ class Hitmap2D(Histogram2D):
     def fromHdf(self, grp, index=None):
         """ Reads in the object froma HDF file """
 
-        ai=None
-        bi=None
-        if (not index is None):
-            assert cF.isInt(index), TypeError('index must be an integer {}'.format(index))
-            ai = np.s_[index, :, :]
-            bi = np.s_[index, :]
+        # ai=None
+        # bi=None
+        # if (not index is None):
+        #     assert cF.isInt(index), TypeError('index must be an integer {}'.format(index))
+        #     ai = np.s_[index, :, :]
+        #     bi = np.s_[index, :]
 
         item = grp.get('arr')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        arr = obj.fromHdf(item, index=ai)
+        arr = (eval(cF.safeEval(item.attrs.get('repr')))).fromHdf(item, index=index)
 
         item = grp.get('x')
-        this = eval(cF.safeEval(item.attrs.get('repr')))
-        x = this.fromHdf(item, index=bi)
+        x = (eval(cF.safeEval(item.attrs.get('repr')))).fromHdf(item, index=index)
+
         item = grp.get('y')
-        this = eval(cF.safeEval(item.attrs.get('repr')))
-        y = this.fromHdf(item, index=bi)
+        y = (eval(cF.safeEval(item.attrs.get('repr')))).fromHdf(item, index=index)
 
         tmp = Hitmap2D(xBins=x.cellEdges, yBins=y.cellEdges)
         tmp._counts[:, :] = arr
