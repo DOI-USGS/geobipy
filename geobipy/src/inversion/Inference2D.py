@@ -73,7 +73,6 @@ class Inference2D(myObject):
                 self._world = world
                 self.hdfFile = h5py.File(self.fName, mode, driver='mpio', comm=world)
 
-
     def close(self):
         """ Check whether the file is open """
         if (self.hdfFile is None): return
@@ -493,6 +492,68 @@ class Inference2D(myObject):
             hm._counts = counts[i, :, :]
 
         return distributions
+
+    def fit_estimated_pdf(self, intervals=None, external_files=True, **kwargs):
+        """Uses Mixture modelling to fit disrtibutions to the hitmaps for the specified intervals.
+
+        This mpi version fits all hitmaps individually throughout the data set.
+        This provides detailed fits, but requires a lot of compute, hence the mpi enabled version.
+
+        Parameters
+        ----------
+        intervals : array_like
+            Depth intervals between which the marginal histogram is computed before fitting.
+
+        See Also
+        --------
+        geobipy.Histogram1D.fit_mixture
+            For details on the fitting arguments.
+
+        """
+
+        max_distributions = kwargs.get('max_distributions', 3)
+        kwargs['track'] = False
+
+        if intervals is None:
+            intervals = self.hitmap(0).yBins
+
+        nIntervals = np.size(intervals) - 1
+
+        if external_files:
+            hdfFile = h5py.File("Line_{}_fits.h5".format(self.line), 'w')
+        else:
+            hdfFile = self.hdfFile
+
+        a = np.zeros(max_distributions)
+        mixture = mixPearson(a, a, a, a)
+        mixture.createHdf(hdfFile, 'fits', nRepeats=(self.nPoints, nIntervals))
+
+
+        nUpdate = 1
+        counter = 0
+
+        nI = intervals.size - 1
+
+        for i in range(1):
+
+            hm = self.hitmap(i)
+
+            mixtures = hm.fit_estimated_pdf(**kwargs)
+
+            for j, m in enumerate(mixtures):
+                if not m is None:
+                    m.writeHdf(hdfFile, 'fits', index=(i, j))
+
+            # counter += 1
+            # if counter == nUpdate:
+            #     print('rank {}, line/fiducial {}/{}, iteration {}/{},  time/dp {} h:m:s'.format(self.world.rank, self.line, self.fiducials[i], i-i0+1, chunk, str(timedelta(seconds=MPI.Wtime()-t0)/nUpdate)), flush=True)
+            #     t0 = MPI.Wtime()
+            #     counter = 0
+
+        # print('rank {} finished in {} h:m:s'.format(self.world.rank, str(timedelta(seconds=MPI.Wtime()-tBase))), flush=True)
+
+        if external_files:
+            hdfFile.close()
 
 
     def fit_estimated_pdf_mpi(self, intervals=None, external_files=True, **kwargs):
