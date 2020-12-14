@@ -577,9 +577,11 @@ class Histogram2D(RectilinearMesh2D):
 
         """
 
+        if np.all(self.counts == 0):
+            return [None]*np.size(intervals)-1
         track = kwargs.pop('track', True)
         if intervals is None:
-            intervals = self.yBins[:4] if axis==0 else self.xBins
+            intervals = self.yBins if axis==0 else self.xBins
         else:
             assert np.size(intervals) >= 2, ValueError('intervals must have size >= 2')
 
@@ -591,7 +593,6 @@ class Histogram2D(RectilinearMesh2D):
 
         mixtures = []
         for i in r:
-            print(i, flush=True)
             h = self.marginalize(intervals=intervals[i:i+2], axis=axis)
             ms = h.fit_estimated_pdf(mixture_type = mixture_type, **kwargs)
             mixtures.append(ms)
