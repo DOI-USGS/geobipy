@@ -2,6 +2,7 @@ from copy import deepcopy
 import numpy as np
 from ...base import MPI as myMPI
 from .EmLoop import EmLoop
+from ...base import customFunctions as cf
 from ..core import StatArray
 from ...base.HDF.hdfWrite import write_nd
 
@@ -173,8 +174,11 @@ class CircularLoop(EmLoop):
         """ Reads in the object from a HDF file """
 
         item = h5grp.get('data')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp = obj.fromHdf(item, index=index)
+
+        if not 'repr' in item.attrs:
+            tmp = np.asarray(item[index, :])
+        else:
+            tmp = (eval(cf.safeEval(item.attrs.get('repr')))).fromHdf(item, index=index)
 
         return CircularLoop(*tmp)
 

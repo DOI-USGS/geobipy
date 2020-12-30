@@ -1009,24 +1009,24 @@ class Inference1D(myObject):
 #         grp.create_dataset('savetime', data=self.saveTime)
 
 
-    def read(self, fileName, systemFilePath, fiducial=None, index=None):
+    def read(self, fileName, system_file_path, fiducial=None, index=None):
         """ Reads a data point's results from HDF5 file """
 
         with h5py.File(fileName, 'r')as f:
-            R = self.fromHdf(f, systemFilePath, index=index, fiducial=fiducial)
+            R = self.fromHdf(f, system_file_path, index=index, fiducial=fiducial)
 
         self.plotMe = True
         return self
 
 
-    def read_fromH5Obj(self, h5obj, fName, grpName, systemFilepath = ''):
+    def read_fromH5Obj(self, h5obj, fName, grpName, system_file_path = ''):
         """ Reads a data points results from HDF5 file """
         grp = h5obj.get(grpName)
         assert not grp is None, "ID "+str(grpName) + " does not exist in file " + fName
-        self.fromHdf(grp, systemFilepath)
+        self.fromHdf(grp, system_file_path)
 
 
-    def fromHdf(self, hdfFile, systemFilePath, index=None, fiducial=None):
+    def fromHdf(self, hdfFile, system_file_path, index=None, fiducial=None):
 
         iNone = index is None
         fNone = fiducial is None
@@ -1060,8 +1060,8 @@ class Inference1D(myObject):
         self.rate = hdfRead.readKeyFromFile(hdfFile,'','/','rate', index=s)
         self.PhiDs = hdfRead.readKeyFromFile(hdfFile,'','/','phids', index=s)
 
-        self.bestDataPoint = hdfRead.readKeyFromFile(hdfFile,'','/','bestd', index=index, systemFilepath=systemFilePath)
-        self.currentDataPoint = hdfRead.readKeyFromFile(hdfFile,'','/','currentdatapoint', index=index, systemFilepath=systemFilePath)
+        self.bestDataPoint = hdfRead.readKeyFromFile(hdfFile,'','/','bestd', index=index, system_file_path=system_file_path)
+        self.currentDataPoint = hdfRead.readKeyFromFile(hdfFile,'','/','currentdatapoint', index=index, system_file_path=system_file_path)
 
         self.currentModel = hdfRead.readKeyFromFile(hdfFile,'','/','currentmodel', index=index)
         self.Hitmap = self.currentModel.par.posterior

@@ -525,7 +525,7 @@ class Histogram1D(RectilinearMesh1D):
               "Bins: \n{}"
               "Counts:\n{}"
               "Values are logged to base {}\n"
-              "Relative to: {}").format(type(self), RectilinearMesh1D.summary(self, True), self.counts.summary, self.log, self.relativeTo)
+              "Relative to: {}").format(type(self), RectilinearMesh1D.summary, self.counts.summary, self.log, self.relativeTo)
 
         return msg
 

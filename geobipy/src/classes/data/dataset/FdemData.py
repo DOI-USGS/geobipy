@@ -670,7 +670,7 @@ class FdemData(Data):
                     nCoordinates += 1
                 elif (channel in ['alt', 'laser', 'bheight', 'height']):
                     nCoordinates += 1
-                elif(channel in ['z','dtm','dem_elev','dem_np','topo', 'elev', 'elevation']):
+                elif(channel in ['z','dtm','dem_elev', 'dem', 'dem_np','topo', 'elev', 'elevation']):
                     nCoordinates += 1
                 elif(channel in ['powerline']):
                     nCoordinates += 1
@@ -698,7 +698,7 @@ class FdemData(Data):
             for j, channel in enumerate(channels):
                 if(channel in ['line']):
                     _columnIndex[0] = j
-                elif(channel in ['id', 'fid']):
+                elif(channel in ['id', 'fid', 'fiducial']):
                     _columnIndex[1] = j
                 elif (channel in ['e', 'x', 'easting']):
                     _columnIndex[2] = j

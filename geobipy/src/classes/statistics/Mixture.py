@@ -90,8 +90,11 @@ class Mixture(myObject):
 
         fit_denominator = np.r_[np.linalg.norm(y, ord=np.inf), np.linalg.norm(y, ord=2.0)]
 
-        # Only fit the non-zero counts otherwise heavy tails can dominate
-        new_peak = np.argmax(y)
+        # Get the first peak that lies between the confidence intervals
+        tmp = y.copy()
+        tmp[:i05] = 0.0
+        tmp[i95:] = 0.0
+        new_peak = np.argmax(tmp)
         x_guess = np.atleast_1d(centres[new_peak])
 
         fit, pars = self._fit_GM_to_cuve(self.model, centres, edges, y, x_guess, verbose=verbose, **kwargs)
@@ -353,7 +356,7 @@ class Mixture(myObject):
         for i in range(n_guesses):
             pars['g{}_center'.format(i)].set(value=x_guess[ix[i]],vary=False)#, min=lower_edge[i], max=upper_edge[i])
             pars['g{}_sigma'.format(i)].set(value=init, min=mn_var, max=mx_var)
-            pars['g{}_amplitude'.format(i)].set(value=1.0)
+            pars['g{}_amplitude'.format(i)].set(value=1.0, min=0.0)
 
 
         if verbose:

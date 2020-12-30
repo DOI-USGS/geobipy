@@ -73,6 +73,7 @@ class Inference3D(myObject):
         self.mean3D = None
         self.best3D = None
         self._facies = None
+        self.system_file_path = system_file_path
 
 
     @property

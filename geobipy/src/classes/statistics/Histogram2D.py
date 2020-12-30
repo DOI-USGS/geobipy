@@ -837,10 +837,7 @@ class Histogram2D(RectilinearMesh2D):
         """
         kwargs['trim'] = kwargs.pop('trim',  0.0)
         kwargs.pop('normalize', None)
-        x = self.x.cellEdges
-        y = self.y.cellEdges
-
-        ax = StatArray.StatArray(self.counts).pcolor(x=x, y=y, **kwargs)
+        ax = self.counts.pcolor(x=self.x.cellEdges, y=self.y.cellEdges, **kwargs)
         return ax
 
 
@@ -892,7 +889,7 @@ class Histogram2D(RectilinearMesh2D):
         yValues : array_like, optional
             Added to the second dimension of the histogram
             Ignored if xValues is 2D.
-        clip : bool
+        trim : bool
             Values outside the histogram axes are clipped to the upper and lower bins.
 
         """

@@ -41,6 +41,13 @@ class myObject(object):
         return str(self.__class__)
 
 
+    def create_hdf_group(self, h5obj, name):
+        grp = h5obj.create_group(name)
+        grp.attrs["repr"] = self.hdfName()
+
+        return grp
+
+
     def toHdf(self, h5obj, myName):
         """Create and write to HDF.
 

@@ -1,11 +1,12 @@
 """ @Point_Class
 Module describing a Point defined by x,y,z c-ordinates
 """
+from ..core.myObject import myObject
 from ..core import StatArray
 import numpy as np
 
 
-class Point(object):
+class Point(myObject):
     """ Class defining a point in 3D Euclidean space """
 
     def __init__(self, x=0.0, y=0.0, z=0.0):
@@ -15,14 +16,15 @@ class Point(object):
         # x coordinate
         self.x = x
         # y coordinate
-        self._y = StatArray.StatArray(y, 'Northing', 'm')
+        self.y = y
         # z coordinate
-        self._z = StatArray.StatArray(z, 'Height', 'm')
+        self.z = z
 
 
     @property
     def x(self):
         return self._x
+
 
     @x.setter
     def x(self, value):
@@ -33,17 +35,24 @@ class Point(object):
     def y(self):
         return self._y
 
-    @x.setter
+
+    @y.setter
     def y(self, value):
         self._y = StatArray.StatArray(value, 'Northing', 'm')
+
 
     @property
     def z(self):
         return self._z
 
-    @x.setter
+
+    @z.setter
     def z(self, value):
         self._z = StatArray.StatArray(value, 'Height', 'm')
+
+
+    def __deepcopy(self, memo):
+        return Point(self.x, self.y, self.z)
 
 
     def __add__(self, other):
@@ -57,7 +66,7 @@ class Point(object):
 
     def __sub__(self, other):
         """ Subtract two points """
-        P = self.deepcopy()
+        P = deepcopy(self)
         P._x -= other.x
         P._y -= other.y
         P._z -= other.z
@@ -69,13 +78,13 @@ class Point(object):
         return np.linalg.norm(np.asarray([self.x, self.y, self.z])-np.asarray([other.x, other.y, other.z]), **kwargs)
 
 
-    def deepcopy(self):
-        return self.__deepcopy__()
-
-
-    def __deepcopy__(self):
+    def __deepcopy__(self, memo={}):
         """ Define a deepcopy routine """
-        return Point(self.x, self.y, self.z)
+        result = type(self).__new__(type(self))
+        result.x = self.x
+        result.y = self.y
+        result.z = self.z
+        return result
 
 
     def move(self, dx, dy, dz):
