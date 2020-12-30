@@ -13,6 +13,7 @@ from ..classes.statistics.Distribution import Distribution
 from ..classes.statistics.Histogram1D import Histogram1D
 from ..base.customFunctions import expReal as mExp
 from scipy import sparse
+from copy import deepcopy
 import numpy as np
 from .Inference1D import Inference1D
 from ..base.MPI import print
@@ -49,7 +50,7 @@ def infer(userParameters, DataPoint, prng, LineResults=None, rank=1):
 
     # Set the saved best models and data
     bestModel = Mod.deepcopy()
-    bestData = DataPoint.deepcopy()
+    bestData = deepcopy(DataPoint)
     bestPosterior = -np.inf #posterior#.copy()
 
     # Initialize the Chain
@@ -78,13 +79,13 @@ def infer(userParameters, DataPoint, prng, LineResults=None, rank=1):
                 Res.iBurn = i         # Save the burn in iteration to the results
                 iBest = i
                 bestModel = Mod.deepcopy()
-                bestData = DataPoint.deepcopy()
+                bestData = deepcopy(DataPoint)
                 bestPosterior = posterior
 
         if (posterior > bestPosterior):
             iBest = i
             bestModel = Mod.deepcopy()
-            bestData = DataPoint.deepcopy()
+            bestData = deepcopy(DataPoint)
             bestPosterior = posterior
 
         if (np.mod(i, userParameters.plotEvery) == 0):
@@ -258,7 +259,7 @@ def accept_reject(userParameters, Mod, DataPoint, prior, likelihood, posterior, 
     clk = Stopwatch()
     clk.start()
 
-    perturbedDatapoint = DataPoint.deepcopy()
+    perturbedDatapoint = deepcopy(DataPoint)
 
     # Perturb the current model
     if userParameters.ignoreLikelihood:
