@@ -43,7 +43,7 @@ class Inference2D(myObject):
         self._burnedIn = None
         self._marginalProbability = None
         self.range = None
-        self.systemFilepath = system_file_path
+        self.system_file_path = system_file_path
         self._zPosterior = None
 
         self.fName = hdf5_file_path
@@ -174,7 +174,7 @@ class Inference2D(myObject):
         if "FdemDataPoint" in dtype:
             bestData = FdemData().fromHdf(self.hdfFile[attr[0]])
         elif "TdemDataPoint" in dtype:
-            bestData = TdemData().fromHdf(self.hdfFile[attr[0]], systemFilepath = self.systemFilepath)
+            bestData = TdemData().fromHdf(self.hdfFile[attr[0]], system_file_path = self.system_file_path)
         return bestData
 
 
@@ -182,6 +182,12 @@ class Inference2D(myObject):
     def bestParameters(self):
         """ Get the best model of the parameters """
         return StatArray.StatArray(self.getAttribute('bestinterp'), dtype=np.float64, name=self.parameterName, units=self.parameterUnits).T
+
+    @cached_property
+    def best_halfspace(self):
+        a = np.log10(np.asarray(self.hdfFile['currentmodel/par/posterior/x/x/data'][:, 0]))
+        b = np.log10(np.asarray(self.hdfFile['currentmodel/par/posterior/x/x/data'][:, -1]))
+        return 0.5 * (b + a)
 
 
     @cached_property
@@ -272,7 +278,7 @@ class Inference2D(myObject):
         if "FdemDataPoint" in dtype:
             currentData = FdemData().fromHdf(self.hdfFile[attr[0]])
         elif "TdemDataPoint" in dtype:
-            currentData = TdemData().fromHdf(self.hdfFile[attr[0]], systemFilepath = self.systemFilepath)
+            currentData = TdemData().fromHdf(self.hdfFile[attr[0]], system_file_path = self.system_file_path)
         return currentData
 
 
@@ -1044,7 +1050,7 @@ class Inference2D(myObject):
 
         hdfFile = self.hdfFile
 
-        R = Inference1D(reciprocateParameter=reciprocateParameter).fromHdf(hdfFile, index=i, systemFilePath=self.systemFilepath)
+        R = Inference1D(reciprocateParameter=reciprocateParameter).fromHdf(hdfFile, index=i, system_file_path=self.system_file_path)
 
         return R
 
