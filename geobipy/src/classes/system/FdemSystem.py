@@ -310,6 +310,8 @@ class FdemSystem(myObject):
             receiverLoops.append(eval(cF.safeEval(item.attrs.get('repr'))))
         self.__init__(frequencies, transmitterLoops, receiverLoops)
 
+        self.loopOffsets = loopOffsets
+
         return self
 
 
