@@ -5,6 +5,7 @@ from ...statistics.Histogram1D import Histogram1D
 from ...statistics.Histogram2D import Histogram2D
 from ....base import customFunctions as cf
 from ....base import customPlots as cP
+from copy import deepcopy
 import numpy as np
 from ....base.logging import myLogger
 import matplotlib.pyplot as plt
@@ -30,9 +31,21 @@ class EmDataPoint(DataPoint):
         self.J = None
         self.errorPosterior = None
 
+
     @property
     def nSystems(self):
-        return len(self.system)
+        return np.size(self.nChannelsPerSystem)
+
+
+    def __deepcopy__(self, memo={}):
+        out = super().__deepcopy__(memo)
+
+        # StatArray of calibration parameters
+        out.errorPosterior = self.errorPosterior
+        # Initialize the sensitivity matrix
+        out.J = deepcopy(self.J)
+
+        return out
 
 
     def FindBestHalfSpace(self, minConductivity=1e-4, maxConductivity=1e4, nSamples=100):

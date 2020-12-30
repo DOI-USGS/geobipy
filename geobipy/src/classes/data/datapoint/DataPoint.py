@@ -47,18 +47,13 @@ class DataPoint(Point):
     def __init__(self, nChannelsPerSystem=1, x=0.0, y=0.0, z=0.0, elevation=None, data=None, std=None, predictedData=None, units="", channelNames=None, lineNumber=0.0, fiducial=0.0):
         """ Initialize the Data class """
 
-        Point.__init__(self, x, y, z)
+        super().__init__(x, y, z)
 
         # Number of Channels
         self._nChannelsPerSystem = np.atleast_1d(np.asarray(nChannelsPerSystem))
         self._systemOffset = np.concatenate([[0], np.cumsum(self.nChannelsPerSystem)])
 
-        # StatArray of data
-        if not elevation is None:
-            # assert np.size(elevation) == 1, ValueError("elevation must be single float")
-            self._elevation = StatArray.StatArray(elevation, "Elevation", "m")
-        else:
-            self._elevation = StatArray.StatArray(1, "Elevation", "m")
+        self.elevation = elevation
 
         self.units = units
 
@@ -75,6 +70,30 @@ class DataPoint(Point):
 
         self.channelNames = channelNames
 
+
+    def __deepcopy__(self, memo={}):
+
+        out = super().__deepcopy__(memo)
+
+        out._nChannelsPerSystem = self._nChannelsPerSystem
+        out._systemOffset = self._systemOffset
+
+        out.elevation = self.elevation
+        out.units = self.units
+        out.data = self.data
+        out.std = self.std
+        out.predictedData = self.predictedData
+        out.lineNumber = self.lineNumber
+        out.fiducial = self.fiducial
+        out.channelNames = self.channelNames
+        out.relErr = self.relErr
+        out.addErr = self.addErr
+
+        return out
+
+    @property
+    def additive_error(self):
+        return self._addErr
 
     @property
     def addErr(self):
@@ -171,6 +190,14 @@ class DataPoint(Point):
     def elevation(self):
         return self._elevation
 
+    @elevation.setter
+    def elevation(self, value):
+        if value is None:
+            self._elevation = StatArray.StatArray(1, "Elevation", "m")
+        else:
+            self._elevation = StatArray.StatArray(value, "Elevation", "m")
+
+
     @property
     def nActiveChannels(self):
         return self.active.size
@@ -193,6 +220,11 @@ class DataPoint(Point):
         else:
             assert np.size(values) == self.nChannels, ValueError("predictedData must have size {}".format(self.nChannels))
             self._predictedData = StatArray.StatArray(values, "Predicted Data", self.units)
+
+
+    @property
+    def relative_error(self):
+        return self._relErr
 
     @property
     def relErr(self):
@@ -220,6 +252,12 @@ class DataPoint(Point):
             assert np.size(values) == self.nChannels, ValueError("std must have size {}".format(self.nChannels))
             assert np.all(values[self.active] > 0.0), ValueError("Cannot assign standard deviations that are <= 0.0.")
             self._std[:] = values
+
+
+    def generate_noise(self, additive_error, relative_error):
+
+        std = np.sqrt(additive_error**2.0 + (relative_error * self.predictedData)**2.0)
+        return np.random.randn(self.nChannels) * std
 
 
 

@@ -83,8 +83,6 @@ class TdemDataPoint(EmDataPoint):
 
         self._data.name = "Time domain data"
 
-        self.getIplotActive()
-
         self.transmitter = transmitter_loop
         # EmLoop Reciever
         self.receiver = receiver_loop
@@ -136,9 +134,9 @@ class TdemDataPoint(EmDataPoint):
     def nTimes(self):
         return np.asarray([x.nTimes for x in self.system])
 
-    @property
-    def nChannels(self):
-        return np.sum(self.nTimes)
+    # @property
+    # def nChannels(self):
+    #     return np.sum(self.nTimes)
 
     @property
     def nWindows(self):
@@ -170,6 +168,7 @@ class TdemDataPoint(EmDataPoint):
         d = np.asarray(self.data)
         d[d <= 0.0] = np.nan
         return cf.findNotNans(d)
+
 
     @property
     def data(self):
@@ -232,32 +231,31 @@ class TdemDataPoint(EmDataPoint):
         return self.system[system].times
 
 
-    def deepcopy(self):
-        """ Define a deepcopy routine """
-        return deepcopy(self)
-
-
-    def __deepcopy__(self, memo):
-        out = TdemDataPoint(self.x, self.y, self.z, self.elevation, self.data, self.std, self.predictedData, self.system, self.transmitter, self.receiver, self.loopOffset, self.lineNumber, self.fiducial)
-        # StatArray of Relative Errors
-        out._relErr = self.relErr.deepcopy()
-        # StatArray of Additive Errors
-        out._addErr = self.addErr.deepcopy()
-        out.errorPosterior = self.errorPosterior
-        # Initialize the sensitivity matrix
-        out.J = deepcopy(self.J)
-
+    def __deepcopy__(self, memo={}):
+        out = super().__deepcopy__(memo)
+        out._system = self._system
+        out._transmitter = self._transmitter
+        out._receiver = self._receiver
+        out.loopOffset = self.loopOffset
         return out
 
 
-    def getIplotActive(self):
+    @property
+    def system_indices(self):
+        tmp = np.hstack([0, np.cumsum(self.nTimes)])
+        return [np.s_[tmp[i]:tmp[i+1]] for i in range(self.nSystems)]
+
+    @property
+    def iplotActive(self):
         """ Get the active data indices per system.  Used for plotting. """
-        self.iplotActive = []
-        i0 = 0
-        for i in range(self.nSystems):
-            i1 = i0 + self.nTimes[i]
-            self.iplotActive.append(cf.findNotNans(self._data[i0:i1]))
-            i0 = i1
+        return [cf.findNotNans(self._data[self.system_indices[i]]) for i in range(self.nSystems)]
+        # self.iplotActive = []
+        # i0 = 0
+        # for i in range(self.nSystems):
+        #     i1 = i0 + self.nTimes[i]
+        #     self.iplotActive.append(cf.findNotNans(self._data[i0:i1]))
+        #     i0 = i1
+
 
 
     def dualMoment(self):
@@ -476,14 +474,14 @@ class TdemDataPoint(EmDataPoint):
         return('TdemDataPoint(0.0,0.0,0.0,0.0)')
 
 
-    def createHdf(self, parent, myName, withPosterior=True, nRepeats=None, fillvalue=None):
+    def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
         """
         # create a new group inside h5obj
-        grp = parent.create_group(myName)
-        grp.attrs["repr"] = self.hdfName()
+        grp = self.create_hdf_group(parent, name)
+
         grp.create_dataset('nSystems', data=self.nSystems)
         for i in range(self.nSystems):
             grp.create_dataset('System{}'.format(i), data=np.string_(psplt(self.system[i].fileName)[-1]))
@@ -546,76 +544,45 @@ class TdemDataPoint(EmDataPoint):
     def fromHdf(self, grp, index=None, **kwargs):
         """ Reads the object from a HDF group """
 
-        assert ('systemFilepath' in kwargs), ValueError("missing 1 required argument 'systemFilepath', the path to directory containing system files")
+        assert ('system_file_path' in kwargs), ValueError("missing 1 required argument 'system_file_path', the path to directory containing system files")
 
-        systemFilepath = kwargs.pop('systemFilepath', None)
-        assert (not systemFilepath is None), ValueError("missing 1 required argument 'systemFilepath', the path to directory containing system files")
+        system_file_path = kwargs['system_file_path']
+
         if (not index is None):
             assert cf.isInt(index), ValueError("index must be of type int")
 
-        item = grp.get('x')
-        obj = eval(cf.safeEval(item.attrs.get('repr')))
-        x = obj.fromHdf(item, index=index)
-        item = grp.get('y')
-        obj = eval(cf.safeEval(item.attrs.get('repr')))
-        y = obj.fromHdf(item, index=index)
-        item = grp.get('z')
-        obj = eval(cf.safeEval(item.attrs.get('repr')))
-        z = obj.fromHdf(item, index=index)
-        item = grp.get('e')
-        obj = eval(cf.safeEval(item.attrs.get('repr')))
-        e = obj.fromHdf(item, index=index)
+        x = StatArray.StatArray().fromHdf(grp['x'], index=index)
+        y = StatArray.StatArray().fromHdf(grp['y'], index=index)
+        z = StatArray.StatArray().fromHdf(grp['z'], index=index)
+        e = StatArray.StatArray().fromHdf(grp['e'], index=index)
 
         nSystems = np.int(np.asarray(grp.get('nSystems')))
-        systems = []
-        for i in range(nSystems):
-            # Get the system file name. h5py has to encode strings using utf-8, so decode it!
-            # filename = join(systemFilepath, str(np.asarray(grp.get('System{}'.format(i))), 'utf-8'))
-            td = TdemSystem().read(systemFilepath[i])
-            systems.append(td)
+        systems = [join(system_file_path, str(np.asarray(grp.get('System{}'.format(i))), 'utf-8')) for i in range(nSystems)]
 
-        _aPoint = TdemDataPoint(x, y, z, e, system=systems)
+        data = StatArray.StatArray().fromHdf(grp['d'], index=index)
+        std = StatArray.StatArray().fromHdf(grp['s'], index=index)
+        predicted = StatArray.StatArray().fromHdf(grp['p'], index=index)
 
-        slic = None
-        if (not index is None):
-            slic = np.s_[index,:]
-
-        item = grp.get('d')
-        obj = eval(cf.safeEval(item.attrs.get('repr')))
-        _aPoint._data = obj.fromHdf(item, index=slic)
-        item = grp.get('s')
-        obj = eval(cf.safeEval(item.attrs.get('repr')))
-        _aPoint._std = obj.fromHdf(item, index=slic)
-        item = grp.get('p')
-        obj = eval(cf.safeEval(item.attrs.get('repr')))
-        _aPoint._predictedData = obj.fromHdf(item, index=slic)
-        if (_aPoint.nSystems == 1):
-            slic = index
-        item = grp.get('relErr')
-        obj = eval(cf.safeEval(item.attrs.get('repr')))
-        _aPoint._relErr = obj.fromHdf(item, index=slic)
-        item = grp.get('addErr')
-        obj = eval(cf.safeEval(item.attrs.get('repr')))
-        _aPoint._addErr = obj.fromHdf(item, index=slic)
-        item = grp.get('T')
-        obj = eval(cf.safeEval(item.attrs.get('repr')))
-        _aPoint._transmitter = obj.fromHdf(item, index=index)
-        item = grp.get('R')
-        obj = eval(cf.safeEval(item.attrs.get('repr')))
-        _aPoint._receiver = obj.fromHdf(item, index=index)
+        transmitter = (eval(cf.safeEval(grp['T'].attrs.get('repr')))).fromHdf(grp['T'], index=index)
+        receiver = (eval(cf.safeEval(grp['R'].attrs.get('repr')))).fromHdf(grp['R'], index=index)
 
         try:
-            item = grp.get('loop_offset')
-            obj = eval(cf.safeEval(item.attrs.get('repr')))
-            _aPoint.loopOffset = obj.fromHdf(item, index=index)
+            loopOffset = (eval(cf.safeEval(grp['loop_offset'].attrs.get('repr')))).fromHdf(grp['loop_offset'], index=index)
         except:
-            pass
+            loopOffset = None
 
-        # _aPoint.active = _aPoint.getActiveData()
+        self.__init__(x=x, y=y, z=z,
+                      elevation=e,
+                      data=data, std=std,
+                      predictedData=predicted,
+                      system=systems,
+                      transmitter_loop=transmitter, receiver_loop=receiver, loopOffset=loopOffset)
+                    #   lineNumber=0.0, fiducial=0.)
 
-        _aPoint.getIplotActive()
+        self.relErr = StatArray.StatArray().fromHdf(grp['relErr'], index=index)
+        self.addErr = StatArray.StatArray().fromHdf(grp['addErr'], index=index)
 
-        return _aPoint
+        return self
 
 
 #  def calibrate(self,Predicted=True):

@@ -59,13 +59,6 @@ class FdemDataPoint(EmDataPoint):
 
         self.system = system
 
-        # if not data is None:
-        #     assert np.size(data) == self.nChannels, ValueError("Size of data {}, must equal 2 * total number of frequencies {}".format(np.size(data), self.nChannels))
-        # if not std is None:
-        #     assert np.size(std) ==self. nChannels, ValueError("Size of std {}, must equal 2 * total number of frequencies {}".format(np.size(std), self.nChannels))
-        # if not predictedData is None:
-        #     assert np.size(predictedData) == self.nChannels, ValueError("Size of predictedData {}, must equal 2 * total number of frequencies {}".format(np.size(predictedData), self.nChannels))
-
         super().__init__(nChannelsPerSystem=2*self.nFrequencies, x=x, y=y, z=z, elevation=elevation, data=data, std=std, predictedData=predictedData, lineNumber=lineNumber, fiducial=fiducial)
 
         self._data.name = 'Frequency domain data'
@@ -74,7 +67,11 @@ class FdemDataPoint(EmDataPoint):
         # The four columns are Bias,Variance,InphaseBias,QuadratureBias.
         self.calibration = StatArray.StatArray([self.nChannels * 2], 'Calibration Parameters')
 
-        self.channelNames = ["{} {} (Hz)".format(self.getMeasurementType(iF, i), self.getFrequency(iF, i)) for i in range(self.nSystems) for iF in range(self.nChannelsPerSystem[i])]
+        self.channelNames = None
+
+
+    def __deepcopy__(self, memo):
+        return FdemDataPoint(x=self.x, y=self.y, z=self.z, elevation=self.elevation, data=self.data, std=self.std0, predictedData=self.predictedData, system=self.system, lineNumber=self.lineNumber, fiducial=self.fiducial)
 
 
     @property
@@ -110,6 +107,27 @@ class FdemDataPoint(EmDataPoint):
                 systems.append(sys)
 
         self._system = systems
+
+
+    @property
+    def channelNames(self):
+        return self._channelNames
+
+
+    @channelNames.setter
+    def channelNames(self, values):
+        if values is None:
+            self._channelNames = []
+            for i in range(self.nSystems):
+                # Set the channel names
+                if not self.system[i] is None:
+                    for iFrequency in range(2*self.nFrequencies[i]):
+                        self._channelNames.append('{} {} (Hz)'.format(self.getMeasurementType(iFrequency, i), self.getFrequency(iFrequency, i)))
+        else:
+            assert all((isinstance(x, str) for x in values))
+            assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
+            self._channelNames = values
+
 
     @property
     def nChannelsPerSystem(self):
@@ -164,6 +182,7 @@ class FdemDataPoint(EmDataPoint):
         """ Return the frequencies in an StatArray """
         return StatArray.StatArray(self.system[system].frequencies, name='Frequency', units='Hz')
 
+
     def inphase(self, system=0):
         return self.data[self._inphaseIndices(system)]
 
@@ -195,19 +214,11 @@ class FdemDataPoint(EmDataPoint):
     def __deepcopy__(self):
         """ Define a deepcopy routine """
 
-        tmp = FdemDataPoint(self.x, self.y, self.z, self.elevation, self.data, self.std, self.predictedData, self.system, self.lineNumber, self.fiducial)
-        # StatArray of Relative Errors
-        tmp._relErr = self.relErr.deepcopy()
-        # StatArray of Additive Errors
-        tmp._addErr = self.addErr.deepcopy()
-        # StatArray of calibration parameters
-        tmp.errorPosterior = self.errorPosterior
+        out = super().__deepcopy__()
         # The four columns are Bias,Variance,InphaseBias,QuadratureBias.
-        tmp.calibration = self.calibration.deepcopy()
-        # Initialize the sensitivity matrix
-        tmp.J = deepcopy(self.J)
+        out.calibration = self.calibration.deepcopy()
 
-        return tmp
+        return out
 
 
     def getMeasurementType(self, channel, system=0):
@@ -325,9 +336,8 @@ class FdemDataPoint(EmDataPoint):
 
         self.__init__(x, y, z, e, data=d, std=s, predictedData=p, system=system)
 
-        self._relErr = StatArray.StatArray().fromHdf(grp['relErr'], index=index)
-        self._addErr = StatArray.StatArray().fromHdf(grp['addErr'], index=index)
-
+        self.relErr = StatArray.StatArray().fromHdf(grp['relErr'], index=index)
+        self.addErr = StatArray.StatArray().fromHdf(grp['addErr'], index=index)
 
         # item = grp.get('calibration')
         # obj = eval(cf.safeEval(item.attrs.get('repr')))
