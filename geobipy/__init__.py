@@ -200,7 +200,7 @@ def parallel_mpi(inputFile, outputDir, skipHDF5):
 
     # Everyone needs the system classes read in early.
     Dataset = type(UP.data_type)()
-    Dataset.readSystemFile(UP.systemFilename)
+    Dataset.systems = UP.systemFilename
 
     # Get the number of points in the file.
     if masterRank:
