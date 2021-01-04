@@ -467,7 +467,7 @@ class Inference3D(myObject):
             del self.lines[i].__dict__['height'] # Free memory
             del self.lines[i].__dict__['elevation'] # Free memory
 
-        return PointCloud3D(self.nPoints, x, y, z, e)
+        return PointCloud3D(x, y, z, e)
 
 
     @cached_property
