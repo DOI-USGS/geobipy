@@ -205,7 +205,8 @@ def parallel_mpi(inputFile, outputDir, skipHDF5):
     # Get the number of points in the file.
     if masterRank:
         nPoints = Dataset._readNpoints(UP.dataFilename)
-        assert (nRanks-1 <= nPoints+1), Exception('Do not ask for more cores than you have data points! Cores:nData {}:{} '.format(nRanks, nPoints))
+        assert (nRanks > 1), Exception("You need to use at least 2 ranks for the mpi version.")
+        assert (nRanks <= nPoints+1), Exception('You requested more ranks than you have data points.  Please lower the number of ranks to a maximum of {}. '.format(nPoints+1))
 
     # Create a communicator containing only the master rank.
     allGroup = world.Get_group()

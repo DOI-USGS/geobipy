@@ -598,13 +598,13 @@ class Inference2D(myObject):
         a = np.zeros(max_distributions)
         mixture = mixPearson(a, a, a, a)
         try:
-            mixture.createHdf(hdfFile, 'fits', nRepeats=(3,3))#(nIntervals, self.nPoints))
+            mixture.createHdf(hdfFile, 'fits', nRepeats=(self.nPoints, nIntervals))
         except:
             pass
 
 
         # Distribute the points amongst cores.
-        starts, chunks = loadBalance1D_shrinkingArrays(2, self.world.size)
+        starts, chunks = loadBalance1D_shrinkingArrays(self.nPoints, self.world.size)
         chunk = chunks[self.world.rank]
         i0 = starts[self.world.rank]
         i1 = i0 + chunk
@@ -624,17 +624,18 @@ class Inference2D(myObject):
             hm = self.hitmap(i)
 
             if not np.all(hm.counts == 0):
-                mixtures = hm.fit_estimated_pdf(**kwargs)
+                mixtures = hm.fit_estimated_pdf(iPoint=i, rank=self.world.rank, **kwargs)
 
             for j, m in enumerate(mixtures):
                 if not m is None:
-                    m.writeHdf(hdfFile, 'fits', index=(j, i))
+                    m.writeHdf(hdfFile, 'fits', index=(i, j))
 
             counter += 1
-            if counter == nUpdate:
-                print('rank {}, line/fiducial {}/{}, iteration {}/{},  time/dp {} h:m:s'.format(self.world.rank, self.line, self.fiducials[i], i-i0+1, chunk, str(timedelta(seconds=MPI.Wtime()-t0)/nUpdate)), flush=True)
-                t0 = MPI.Wtime()
-                counter = 0
+            if self.world.rank == 0:
+                if counter == nUpdate:
+                    print('rank {}, line/fiducial {}/{}, iteration {}/{},  time/dp {} h:m:s'.format(self.world.rank, self.line, self.fiducials[i], i-i0+1, chunk, str(timedelta(seconds=MPI.Wtime()-t0)/nUpdate)), flush=True)
+                    t0 = MPI.Wtime()
+                    counter = 0
 
         print('rank {} finished in {} h:m:s'.format(self.world.rank, str(timedelta(seconds=MPI.Wtime()-tBase))), flush=True)
 

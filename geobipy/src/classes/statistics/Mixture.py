@@ -97,7 +97,7 @@ class Mixture(myObject):
         new_peak = np.argmax(tmp)
         x_guess = np.atleast_1d(centres[new_peak])
 
-        fit, pars = self._fit_GM_to_cuve(self.model, centres, edges, y, x_guess, **kwargs)
+        fit, pars = self._fit_GM_to_cuve(self.model, centres, edges, y, x_guess, verbose=verbose, **kwargs)
 
         x_guess = np.asarray([fit.params['g0_center']])
         sigma_guess = [fit.params['g0_sigma']]
@@ -151,7 +151,7 @@ class Mixture(myObject):
             x_guess_test = np.hstack([x_guess, centres[new_peak]])
             x_guess_test = np.atleast_1d(centres[new_peak])
 
-            fit_test, pars_test = self._fit_GM_to_cuve(self.model, centres, edges, y, x_guess_test, previous_fit=fit, previous_pars=pars, **kwargs)
+            fit_test, pars_test = self._fit_GM_to_cuve(self.model, centres, edges, y, x_guess_test, previous_fit=fit, previous_pars=pars, verbose=verbose, **kwargs)
             n_tests = len(fit_test.components)
 
             residual = y - fit_test.best_fit
@@ -272,16 +272,16 @@ class Mixture(myObject):
         return fit, pars
 
 
-    def _fit_GM_to_cuve(self, model, centres, edges, y, x_guess, sigma_guess=None, blocking_factor=1.0, previous_fit=None, previous_pars=None, **kwargs):
+    def _fit_GM_to_cuve(self, model, centres, edges, y, x_guess, sigma_guess=None, blocking_factor=1.0, previous_fit=None, previous_pars=None, verbose=False, **kwargs):
 
         if previous_pars is None:
-            return self.__fit_wo_previous(model, centres, edges, y, x_guess, sigma_guess, blocking_factor, **kwargs)
+            return self.__fit_wo_previous(model, centres, edges, y, x_guess, sigma_guess, blocking_factor, verbose,**kwargs)
         else:
-            return self.__fit_w_previous(model, centres, edges, y, x_guess, sigma_guess, blocking_factor, previous_fit, previous_pars, **kwargs)
+            return self.__fit_w_previous(model, centres, edges, y, x_guess, sigma_guess, blocking_factor, previous_fit, previous_pars, verbose, **kwargs)
 
 
 
-    def __fit_w_previous(self, model, centres, edges, y, x_guess, sigma_guess=None, blocking_factor=None, previous_fit=None, previous_pars=None, **kwargs):
+    def __fit_w_previous(self, model, centres, edges, y, x_guess, sigma_guess=None, blocking_factor=None, previous_fit=None, previous_pars=None, verbose=False, **kwargs):
 
 
         mn_var = kwargs.pop('min_variance', (edges[1]-edges[0]))
@@ -308,13 +308,16 @@ class Mixture(myObject):
             pars['g{}_sigma'.format(i)].set(value=init, min=mn_var, max=mx_var)
             pars['g{}_amplitude'.format(i)].set(value=1.0)
 
+        if verbose:
+            print(pars)
+
         init = mod.eval(pars, x=centres)
         out = mod.fit(y, pars, x=centres, **kwargs)
 
         return out, pars
 
 
-    def __fit_wo_previous(self, model, centres, edges, y, x_guess, sigma_guess=None, blocking_factor=1.0, **kwargs):
+    def __fit_wo_previous(self, model, centres, edges, y, x_guess, sigma_guess=None, blocking_factor=1.0, verbose=False, **kwargs):
 
         n_guesses = np.size(x_guess)
         # Create the first model
@@ -355,6 +358,9 @@ class Mixture(myObject):
             pars['g{}_sigma'.format(i)].set(value=init, min=mn_var, max=mx_var)
             pars['g{}_amplitude'.format(i)].set(value=1.0, min=0.0)
 
+
+        if verbose:
+            print(pars)
 
         init = mod.eval(pars, x=centres)
         out = mod.fit(y, pars, x=centres, **kwargs)

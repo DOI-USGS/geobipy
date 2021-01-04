@@ -60,7 +60,7 @@ class TdemData(Data):
         self.system = systems
 
         # Data Class containing xyz and channel values
-        Data.__init__(self, self.nTimes, units=r"$\frac{V}{m^{2}}$", **kwargs)
+        Data.__init__(self, nChannelsPerSystem=self.nTimes, units=r"$\frac{V}{m^{2}}$", **kwargs)
 
         # StatArray of Transmitter loops
         self.transmitter = kwargs.get('transmitter', None)
@@ -183,7 +183,7 @@ class TdemData(Data):
 
     @property
     def nTimes(self):
-        return np.asarray([s.nwindows() for s in self.system])
+        return self.nChannelsPerSystem
 
 
     def read(self, dataFilename, systemFilename):
@@ -598,6 +598,14 @@ class TdemData(Data):
             if not self._iS[i] is None:
                 nTmp = self._iS[i].size
                 self._iS[i] = np.arange(nTmp) + offset
+
+    @property
+    def nSystems(self):
+        return np.size(self.system)
+
+    @property
+    def nChannelsPerSystem(self):
+        return np.asarray([s.nwindows() for s in self.system])
 
 
     def _readSingleDatapoint(self):
