@@ -70,8 +70,11 @@ class FdemDataPoint(EmDataPoint):
         self.channelNames = None
 
 
-    def __deepcopy__(self, memo):
-        return FdemDataPoint(x=self.x, y=self.y, z=self.z, elevation=self.elevation, data=self.data, std=self.std0, predictedData=self.predictedData, system=self.system, lineNumber=self.lineNumber, fiducial=self.fiducial)
+    def __deepcopy__(self, memo={}):
+        out = super().__deepcopy__(memo)
+        out._system = self._system
+        out.calibration = deepcopy(self.calibration)
+        return out
 
 
     @property
@@ -129,9 +132,9 @@ class FdemDataPoint(EmDataPoint):
             self._channelNames = values
 
 
-    @property
-    def nChannelsPerSystem(self):
-        return 2 * self.nFrequencies
+    # @property
+    # def nChannelsPerSystem(self):
+    #     return 2 * self.nFrequencies
 
     @property
     def nFrequencies(self):
@@ -205,20 +208,6 @@ class FdemDataPoint(EmDataPoint):
 
     def quadratureStd(self, system=0):
         return self.std[self._quadratureIndices(system)]
-
-
-    def deepcopy(self):
-        return self.__deepcopy__()
-
-
-    def __deepcopy__(self):
-        """ Define a deepcopy routine """
-
-        out = super().__deepcopy__()
-        # The four columns are Bias,Variance,InphaseBias,QuadratureBias.
-        out.calibration = self.calibration.deepcopy()
-
-        return out
 
 
     def getMeasurementType(self, channel, system=0):
