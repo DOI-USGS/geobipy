@@ -323,6 +323,27 @@ class Inference3D(myObject):
         return self.bestData.dataMisfit()
 
 
+    def hitmap(self, fiducial=None, index=None):
+        """Get the hitmap for the given fiducial or index
+
+        Parameters
+        ----------
+        fiducial : float, optional
+            Fiducial of the required hitmap.
+            Defaults to None.
+        index : int, optional
+            Index of the required hitmap.
+            Defaults to None.
+
+        Returns
+        -------
+        geobipy.Hitmap : Parameter posterior.
+
+        """
+        iLine, index = self.lineIndex(fiducial=fiducial, index=index):
+        return self.lines[iLine].hitmap(index=index)
+
+
     @property
     def hitmapCounts(self):
         if (self._counts is None):
