@@ -623,12 +623,14 @@ class Inference2D(myObject):
 
             hm = self.hitmap(i)
 
+            mixtures = None
             if not np.all(hm.counts == 0):
                 mixtures = hm.fit_estimated_pdf(iPoint=i, rank=self.world.rank, **kwargs)
-
-            for j, m in enumerate(mixtures):
-                if not m is None:
-                    m.writeHdf(hdfFile, 'fits', index=(i, j))
+            
+            if not mixtures is None:
+                for j, m in enumerate(mixtures):
+                    if not m is None:
+                        m.writeHdf(hdfFile, 'fits', index=(i, j))
 
             counter += 1
             if self.world.rank == 0:
