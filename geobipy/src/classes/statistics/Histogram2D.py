@@ -578,7 +578,8 @@ class Histogram2D(RectilinearMesh2D):
         """
 
         if np.all(self.counts == 0):
-            return [None]*np.size(intervals)-1
+            return [None] * np.size(intervals) - 1
+
         track = kwargs.pop('track', True)
         if intervals is None:
             intervals = self.yBins if axis==0 else self.xBins

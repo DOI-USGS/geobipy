@@ -174,6 +174,7 @@ class Inference2D(myObject):
         if "FdemDataPoint" in dtype:
             bestData = FdemData().fromHdf(self.hdfFile[attr[0]])
         elif "TdemDataPoint" in dtype:
+            print(self.system_file_path)
             bestData = TdemData().fromHdf(self.hdfFile[attr[0]], system_file_path = self.system_file_path)
         return bestData
 
@@ -436,12 +437,6 @@ class Inference2D(myObject):
         return zPosterior
 
 
-    # @property
-    # def hitmap(self):
-    #     """ Get the hitmaps for each data point """
-    #     return self.getAttribute('Hit Map', index=0)
-
-
     @cached_property
     def fiducials(self):
         """ Get the id numbers of the data points in the line results file """
@@ -601,7 +596,6 @@ class Inference2D(myObject):
             mixture.createHdf(hdfFile, 'fits', nRepeats=(self.nPoints, nIntervals))
         except:
             pass
-
 
         # Distribute the points amongst cores.
         starts, chunks = loadBalance1D_shrinkingArrays(self.nPoints, self.world.size)

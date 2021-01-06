@@ -323,6 +323,27 @@ class Inference3D(myObject):
         return self.bestData.dataMisfit()
 
 
+    def hitmap(self, fiducial=None, index=None):
+        """Get the hitmap for the given fiducial or index
+
+        Parameters
+        ----------
+        fiducial : float, optional
+            Fiducial of the required hitmap.
+            Defaults to None.
+        index : int, optional
+            Index of the required hitmap.
+            Defaults to None.
+
+        Returns
+        -------
+        geobipy.Hitmap : Parameter posterior.
+
+        """
+        iLine, index = self.lineIndex(fiducial=fiducial, index=index):
+        return self.lines[iLine].hitmap(index=index)
+
+
     @property
     def hitmapCounts(self):
         if (self._counts is None):
@@ -589,10 +610,107 @@ class Inference3D(myObject):
             return np.hstack(lineIndex), np.hstack(index)
 
 
-    def fit_estimated_pdf_mpi(self, intervals=None, external_files=True, **kwargs):
+    def fit_estimated_pdf_mpi(self, intervals=None, **kwargs):
 
-        for line in self.lines:
-            line.fit_estimated_pdf_mpi(intervals=intervals, external_files=external_files, **kwargs)
+        from mpi4py import MPI
+        from geobipy.src.base import MPI as myMPI
+
+        max_distributions = kwargs.get('max_distributions', 3)
+        kwargs['track'] = False
+
+        if intervals is None:
+            intervals = self.hitmap(index=0).yBins
+
+        nIntervals = np.size(intervals) - 1
+
+        hdfFile = h5py.File("fits.h5", 'w', driver='mpio', comm=self.world)
+
+        a = np.zeros(max_distributions)
+        mixture = mixPearson(a, a, a, a)
+        mixture.createHdf(hdfFile, 'fits', nRepeats=(self.nPoints, nIntervals))
+
+        if self.world.rank == 0:  ## Master Task
+            nFinished = 0
+            nSent = 0
+
+            # Send out the first indices to the workers
+            for iWorker in range(1, world.size):
+                # Get a datapoint from the file.
+                if nSent < self.nPoints:
+                    continueRunning = True
+                    self.world.send(True, dest=iWorker)
+                    self.world.send(nSent, dest=iWorker)
+
+                    nSent += 1
+                else:
+                    continueRunning = False
+                    self.world.send(False, dest=iWorker)
+
+            t0 = MPI.Wtime()
+
+            myMPI.print("Initial posteriors sent. Master is now waiting for requests")
+
+            # Now wait to send indices out to the workers as they finish until the entire data set is finished
+            while nFinished < self.nPoints:
+                # Wait for a worker to request the next data point
+                status = MPI.Status()
+                dummy = world.recv(source = MPI.ANY_SOURCE, tag = MPI.ANY_TAG, status = status)
+                requestingRank = status.Get_source()
+
+                nFinished += 1
+
+                # If DataPoint is None, then we reached the end of the file and no more points can be read in.
+                if nSent < self.nPoints:
+                    # Send the kill switch to the worker to shut down.
+                    continueRunning = True
+                    self.world.send(True, dest=requestingRank)
+                    self.world.send(nSent, dest=requestingRank)
+
+                    nSent += 1
+                else:
+                    continueRunning = False
+                    self.world.send(False, dest=requestingRank)
+
+
+                report = (nFinished % (self.world.size - 1)) == 0 or nFinished == self.nPoints
+
+                if report:
+                    e = MPI.Wtime() - t0
+                    elapsed = str(timedelta(seconds=e))
+                    eta = str(timedelta(seconds=(self.nPoints / nFinished-1) * e))
+                    myMPI.print("Remaining Points {}/{} || Elapsed Time: {} h:m:s || ETA {} h:m:s".format(self.nPoints-nFinished, self.nPoints, elapsed, eta))
+
+        else:
+            # Initialize the worker process to go
+            Go = True
+
+            # Wait till you are told what to process next
+            continueRunning = self.world.recv(source=0)
+            # If we continue running, receive the next DataPoint. Otherwise, shutdown the rank
+            if continueRunning:
+                index = self.world.recv(source=0)
+            else:
+                Go = False
+
+            while Go:
+                hm = self.hitmap(index=index)
+
+                if not np.all(hm.counts == 0):
+                    mixtures = hm.fit_estimated_pdf(iPoint=i, rank=self.world.rank, **kwargs)
+
+                    for j, m in enumerate(mixtures):
+                        if not m is None:
+                            m.writeHdf(hdfFile, 'fits', index=(index, j))
+
+                self.world.send(1, dest=0)
+                # Wait till you are told whether to continue or not
+                continueRunning = world.recv(source=0)
+
+                # If we continue running, receive the next DataPoint. Otherwise, shutdown the rank
+                if continueRunning:
+                    index = self.world.recv(source=0)
+                else:
+                    Go = False
 
 
     def fit_mixture(self, intervals, **kwargs):
