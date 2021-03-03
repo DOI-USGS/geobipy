@@ -17,6 +17,7 @@ from ..base import Error as Err
 from ..base import customFunctions as cF # (cF.getName, cF.getUnits, cF.getNameUnits, cF.histogramEqualize, cF._log, cF.findFirstLastNotValue)
 from cycler import cycler
 import scipy as sp
+import copy
 from ..classes.core import StatArray
 
 def make_colourmap(seq, cname):
@@ -633,6 +634,8 @@ def _pcolormesh(X, Y, values, **kwargs):
         plt.sca(ax)
     pretty(ax)
 
+    kwargs['shading'] = kwargs.pop('shading', 'auto')
+
     xscale = kwargs.pop('xscale', 'linear')
     yscale = kwargs.pop('yscale', 'linear')
     flipX = kwargs.pop('flipX', False)
@@ -645,7 +648,7 @@ def _pcolormesh(X, Y, values, **kwargs):
     cax = kwargs.pop('cax', None)
     cmap = kwargs.pop('cmap', 'viridis')
     cmapIntervals = kwargs.pop('cmapIntervals', None)
-    kwargs['cmap'] = mpl.cm.get_cmap(cmap, cmapIntervals)
+    kwargs['cmap'] = copy.copy(mpl.cm.get_cmap(cmap, cmapIntervals))
     kwargs['cmap'].set_bad(color='white')
     orientation = kwargs.pop('orientation', 'vertical')
     cl = kwargs.pop('clabel', None)
@@ -810,21 +813,18 @@ def pcolor_1D(values, y=None, **kwargs):
 
     equalize = kwargs.pop('equalize', False)
 
+    kwargs['shading'] = kwargs.pop('shading', 'auto')
+
     log = kwargs.pop('log', False)
     xscale = kwargs.pop('xscale', 'linear')
     yscale = kwargs.pop('yscale', 'linear')
 
     cl = kwargs.pop('clabel', None)
     grid = kwargs.pop('grid', False)
-
     flipY = kwargs.pop('flipY', False)
-
     noColorBar = kwargs.pop('noColorbar', False)
-
     alpha = kwargs.pop('alpha', 1.0)
-
     width = kwargs.pop('width', None)
-
     transpose = kwargs.pop('transpose', False)
 
 
