@@ -210,11 +210,16 @@ def read_item(h5obj, index=None, **kwargs):
     if (not s is None):
 
         # Put temporary conversions here for items
-        if s == 'Histogram()':
-            s = 'Histogram1D()'
         if 'StatArray' in s:
             if (not 'dtype=' in s):
                 s = s.replace(',np.',',dtype=np.')
+
+        elif '(0.0,0.0,0.0,0.0)' in s:
+            s = s.replace('(0.0,0.0,0.0,0.0)', '')
+            s += '()'
+
+        elif not '()' in s:
+            s += '()'
 
         item = eval(cf.safeEval(s))
         tmp = item.fromHdf(h5obj, index=index, **kwargs)
