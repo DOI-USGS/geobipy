@@ -3,8 +3,8 @@
 import sys
 # Test Python's version
 major, minor = sys.version_info[0:2]
-if (major, minor) < (3, 5):
-    sys.stderr.write('\nPython 3.5 or later is needed to use this package\n')
+if (major, minor) == (3, 9):
+    sys.stderr.write('\nPython 3.9 is not supported by numba at this time.\n')
     sys.exit(1)
 from setuptools import find_packages, setup
 from distutils.command.sdist import sdist
@@ -41,13 +41,13 @@ setup(name='geobipy',
         'numpy >= 1.11',
         'scipy >= 0.18.1',
         'h5py >= 2.6.0',
+        'numba == 0.50.0',
         'netcdf4',
         'sklearn',
         'matplotlib',
         'pyvtk',
         'sphinx',
         'progressbar2',
-        'numba',
         'cached-property',
         'empymod',
         'smm',
