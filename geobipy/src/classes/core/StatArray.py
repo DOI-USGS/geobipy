@@ -118,6 +118,8 @@ class StatArray(np.ndarray, myObject):
         if shape is None:
             shape = 0
 
+        if isinstance(shape, list):
+            shape = np.asarray(shape)
         # Copies a StatArray but can reassign the name and units
         if isinstance(shape, StatArray):
             if np.ndim(shape) == 0:
@@ -174,7 +176,7 @@ class StatArray(np.ndarray, myObject):
     ### Properties
     @property
     def name(self):
-        return self._name
+        return "" if self._name is None else self._name
 
 
     @name.setter
@@ -225,7 +227,7 @@ class StatArray(np.ndarray, myObject):
 
     @property
     def units(self):
-        return self._units
+        return "" if self._units is None else self._units
 
     @units.setter
     def units(self, values):
@@ -811,9 +813,10 @@ class StatArray(np.ndarray, myObject):
 
         """
         np.set_printoptions(threshold=5)
-        msg = "Name: " + self.getNameUnits() + '\n'
-        msg += "     Shape: " + str(self.shape) + '\n'
-        msg += "     Values: " + str(self[:]) + '\n'
+
+        msg = ('Name: {}\n'
+               '    Shape: {}\n'
+               '    Values: {}\n').format(self.getNameUnits(), self.shape, self)
         if self.hasPrior:
             msg += "Prior: \n     {}".format(self.prior.summary)
 
@@ -1360,7 +1363,8 @@ class StatArray(np.ndarray, myObject):
 
     ### HDF Routines
 
-    def hdfName(self):
+    @property
+    def hdf_name(self):
         """Create a string that describes class instantiation
 
         Returns a string that should be used as an attr['repr'] in a HDF group.
@@ -1373,75 +1377,10 @@ class StatArray(np.ndarray, myObject):
             str
 
         """
-        name = self.getName()
-        units = self.getUnits()
-        if (not name is None):
-            sName = ',"' + name + '"'
-        else:
-            sName = ''
-        if (not units is None):
-            sUnits = ',"' + units + '"'
-        else:
-            sUnits = ''
-
-        return(r'StatArray(' + str(self.shape) + sName + sUnits + ',dtype=np.' + str(self.dtype) + ')')
+        return(r'StatArray()')
 
 
-    def toHdf(self, h5obj, myName):
-        """Write the StatArray to an HDF object
-
-        Creates and writes a new group in a HDF file under h5obj.
-        A nested heirarchy will be created e.g., myName\data, myName\prior, and myName\proposal.
-        This function modifies the file metadata and writes the contents at the same time and
-        should not be used in a parallel environment.
-
-        Parameters
-        ----------
-        h5obj : h5py._hl.files.File or h5py._hl.group.Group
-            A HDF file or group object to write the contents to.
-        myName : str
-            The name of the group to write the StatArray to.
-
-        Examples
-        --------
-        >>> import h5py
-        >>> from geobipy.src.classes.core.StatArray import StatArray
-        >>> import numpy as np
-        >>> x = StatArray(np.arange(10))
-        >>> with h5py.File('test','w') as f:
-        >>>     x.toHdf(f, 'aTestGroup')
-
-        """
-
-        if isinstance(h5obj, str):
-            with h5py.File(h5obj, 'w') as f:
-                self.createHdf(f, myName)
-                self.writeHdf(f, myName)
-                return
-
-        self.createHdf(h5obj, myName)
-        self.writeHdf(h5obj, myName)
-
-        # print('SA toHdf')
-        # # Create a new group inside h5obj
-        # grp = h5obj.create_group(myName)
-        # grp.attrs["repr"] = self.hdfName()
-        # grp.create_dataset('data', data=self)
-        # #compression="gzip",compression_opts=6,shuffle=True
-        # # if self.hasPrior:
-        # #     self.prior.toHdf(grp, 'prior')
-        # # if self.hasProposal:
-        # #     self.proposal.toHdf(grp, 'proposal')
-        # if self.hasPosterior:
-        #     grp.create_dataset('nPosteriors', data=self.nPosteriors)
-        #     if self.nPosteriors > 1:
-        #         for i in range(self.nPosteriors):
-        #             self.posterior[i].toHdf(grp, 'posterior{}'.format(i))
-        #     else:
-        #         self.posterior.toHdf(grp, 'posterior')
-
-
-    def createHdf(self, h5obj, myName, withPosterior=True, nRepeats=None, fillvalue=None):
+    def createHdf(self, h5obj, name, withPosterior=True, nRepeats=None, fillvalue=None):
         """Create the Metadata for a StatArray in a HDF file
 
         Creates a new group in a HDF file under h5obj.
@@ -1503,8 +1442,13 @@ class StatArray(np.ndarray, myObject):
         """
 
         # create a new group inside h5obj
-        grp = h5obj.create_group(myName)
-        grp.attrs["repr"] = self.hdfName()
+        grp = self.create_hdf_group(h5obj, name)
+
+        if not self._name is None:
+            grp.attrs['name'] = self.name
+        if not self._units is None:
+            grp.attrs['units'] = self.units
+
         if (nRepeats is None):
             grp.create_dataset('data', self.shape, dtype=self.dtype, fillvalue=fillvalue)
         else:
@@ -1525,7 +1469,7 @@ class StatArray(np.ndarray, myObject):
                     self.posterior.createHdf(grp, 'posterior', nRepeats=nRepeats, fillvalue=fillvalue)
 
 
-    def writeHdf(self, h5obj, myName, withPosterior=True, index=None):
+    def writeHdf(self, h5obj, name, withPosterior=True, index=None):
         """Write the values of a StatArray to a HDF file
 
         Writes the contents of the StatArray to an already created group in a HDF file under h5obj.
@@ -1573,15 +1517,8 @@ class StatArray(np.ndarray, myObject):
         >>> f.close()
 
         """
-        write_nd(self, h5obj, myName+'/data', index=index)
-#        try:
-#            self.prior.writeHdf(h5obj,myName+'/prior',create=False)
-#        except:
-#            pass
-#        try:
-#            self.proposal.writeHdf(h5obj,myName+'/proposal',create=False)
-#        except:
-#            pass
+        grp = h5obj.get(name)
+        write_nd(self, grp, 'data', index=index)
 
         if withPosterior:
             if self.hasPosterior:
@@ -1589,12 +1526,12 @@ class StatArray(np.ndarray, myObject):
                     index = index[0]
                 if self.nPosteriors > 1:
                     for i in range(self.nPosteriors):
-                        self.posterior[i].writeHdf(h5obj, myName + '/posterior{}'.format(i), index=index)
+                        self.posterior[i].writeHdf(grp, 'posterior{}'.format(i), index=index)
                 else:
-                    self.posterior.writeHdf(h5obj, myName + '/posterior', index=index)
+                    self.posterior.writeHdf(grp, 'posterior', index=index)
 
 
-    def fromHdf(self, h5grp, myName=None, index=None):
+    def fromHdf(self, grp, name=None, index=None, verbose=False):
         """Read the StatArray from a HDF group
 
         Given the HDF group object, read the contents into a StatArray.
@@ -1608,12 +1545,16 @@ class StatArray(np.ndarray, myObject):
 
         """
 
-        if not myName is None:
-            h5grp = h5grp[myName]
+        if verbose:
+            print('StatArray.fromHdf')
+            print(self.shape)
+
+        if not name is None:
+            grp = grp[name]
 
         nPosteriors = 0
-        if 'nPosteriors' in h5grp:
-            nPosteriors = np.asarray(h5grp['nPosteriors'])
+        if 'nPosteriors' in grp:
+            nPosteriors = np.asarray(grp['nPosteriors'])
 
         posterior = None
         iTmp = index
@@ -1621,24 +1562,36 @@ class StatArray(np.ndarray, myObject):
             if np.ndim(index) > 0:
                 iTmp = index[0]
 
+
         if nPosteriors == 1:
-            posterior = hdfRead.read_item(h5grp['posterior'], index = iTmp)
+            posterior = hdfRead.read_item(grp['posterior'], index = iTmp)
         elif nPosteriors > 1:
             posterior = []
             for i in range(nPosteriors):
-                posterior.append(hdfRead.read_item(h5grp['posterior{}'.format(i)], index = iTmp))
+                posterior.append(hdfRead.read_item(grp['posterior{}'.format(i)], index = iTmp))
 
         if (index is None):
-            d = np.asarray(h5grp.get('data'))
+            d = np.asarray(grp['data'])
         else:
-            d = np.asarray(h5grp.get('data')[np.s_[index]])
+            d = np.asarray(grp['data'][np.s_[index]])
+
+        if verbose:
+            print(grp.attrs['repr'])
+            print('hdf data', d)
 
         if np.ndim(d) >= 2:
             d = np.squeeze(d)
 
         ### Do not use self, return self here.  You tried it, it doesnt work.
-        out = StatArray(d, self.name, self.units)
+        name = grp.attrs['name'] if 'name' in grp.attrs else None
+        units = grp.attrs['units'] if 'units' in grp.attrs else None
+
+        if 'StatArray((1,)' in grp.attrs['repr']:
+            out = StatArray(1, name, units) + d
+        else:
+            out = StatArray(d, name, units)
         out.setPosterior(posterior)
+
         return out
 
     ### Classification Routines
