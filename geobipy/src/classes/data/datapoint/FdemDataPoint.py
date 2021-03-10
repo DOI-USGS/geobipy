@@ -54,6 +54,8 @@ class FdemDataPoint(EmDataPoint):
     def __init__(self, x=0.0, y=0.0, z=0.0, elevation=0.0, data=None, std=None, predictedData=None, system=None, lineNumber=0.0, fiducial=0.0):
         """Define initializer. """
 
+        self.units = None
+
         if (system is None):
             return
 
@@ -73,7 +75,7 @@ class FdemDataPoint(EmDataPoint):
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
         out._system = self._system
-        out.calibration = deepcopy(self.calibration)
+        # out.calibration = deepcopy(self.calibration)
         return out
 
 
@@ -83,7 +85,6 @@ class FdemDataPoint(EmDataPoint):
 
     @units.setter
     def units(self, value):
-
         if value is None:
             self._units = "ppm"
         else:
@@ -411,8 +412,6 @@ class FdemDataPoint(EmDataPoint):
         xscale = kwargs.pop('xscale','log')
         yscale = kwargs.pop('yscale','log')
 
-
-
         if with_error_bars:
             plt.errorbar(self.frequencies(system), self.inphase(system), yerr=self.inphaseStd(system),
                 marker=im, color=inColor, markerfacecolor=inColor, label='In-Phase', **kwargs)
@@ -510,7 +509,7 @@ class FdemDataPoint(EmDataPoint):
         cnew = 0.5 * (c0 + c1)
         # Initialize a single layer model
         p = StatArray.StatArray(1, 'Conductivity', r'$\frac{S}{m}$')
-        model = Model1D(1, parameters=p)
+        model = Model1D(nCells=1, parameters=p)
         # Initialize the first conductivity
         model._par[0] = 10.0**c0
         self.forward(model)  # Forward model the EM data
