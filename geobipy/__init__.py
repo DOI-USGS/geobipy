@@ -117,7 +117,6 @@ def serial_geobipy(inputFile, output_directory, seed=None, index=None):
 
     output_directory = pathlib.Path(output_directory)
 
-
     # Make sure the results folders exist
     makedirs(output_directory, exist_ok=True)
 
@@ -126,6 +125,12 @@ def serial_geobipy(inputFile, output_directory, seed=None, index=None):
 
     # Import the script from the input file
     userParameters = import_module(str(inputFile.with_suffix('')), package='geobipy')
+    assert 'data_type' in userParameters.__dict__, ValueError(("Please specify the data_type in the parameter file. \n"
+                                                    "data_type = FdemData()\n"
+                                                    "data_type = FdemDataPoint()\n"
+                                                    "data_type = TdemData()\n"
+                                                    "data_type = TdemDataPoint()\n"
+                                                    ))
 
     # Everyone needs the system classes read in early.
     Dataset = type(userParameters.data_type)()
@@ -208,6 +213,12 @@ def parallel_mpi(inputFile, outputDir, skipHDF5):
     output_directory = pathlib.Path(output_directory)
 
     UP = import_module(str(inputFile.with_suffix('')), package='geobipy')
+    assert 'data_type' in userParameters.__dict__, ValueError(("Please specify the data_type in the parameter file. \n"
+                                                    "data_type = FdemData()\n"
+                                                    "data_type = FdemDataPoint()\n"
+                                                    "data_type = TdemData()\n"
+                                                    "data_type = TdemDataPoint()\n"
+                                                    ))
 
     # Make data and system filenames lists of str.
     if isinstance(UP.dataFilename, str):
