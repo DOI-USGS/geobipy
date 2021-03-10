@@ -2367,64 +2367,64 @@ class Inference2D(myObject):
 #        tmp=self.bestModel.pad(self.bestModel.maxLayers)
 #        tmp.createHdf(grp, 'bestmodel')
 
-    def results2Hdf(self, results):
+    def write_inference1d(self, inference1d):
         """ Given a HDF file initialized as line results, write the contents of results to the appropriate arrays """
 
-        assert results.fiducial in self.fiducials, Exception("The HDF file does not have ID number {}. Available ids are between {} and {}".format(results.fiducial, np.min(self.fiducials), np.max(self.fiducials)))
+        assert inference1d.fiducial in self.fiducials, Exception("The HDF file does not have ID number {}. Available ids are between {} and {}".format(inference1d.fiducial, np.min(self.fiducials), np.max(self.fiducials)))
 
         hdfFile = self.hdfFile
 
         # Get the point index
-        i = self.fiducials.searchsorted(results.fiducial)
+        i = self.fiducials.searchsorted(reinference1dsults.fiducial)
 
         # Add the iteration number
-        hdfFile['i'][i] = results.i
+        hdfFile['i'][i] = inference1d.i
 
         # Add the burn in iteration
-        hdfFile['iburn'][i] = results.iBurn
+        hdfFile['iburn'][i] = inference1d.iBurn
 
         # Add the burn in iteration
-        hdfFile['ibest'][i] = results.iBest
+        hdfFile['ibest'][i] = inference1d.iBest
 
         # Add the burned in logical
-        hdfFile['burnedin'][i] = results.burnedIn
+        hdfFile['burnedin'][i] = inference1d.burnedIn
 
         # Add the depth of investigation
-        # hdfFile['doi'][i] = results.doi()
+        # hdfFile['doi'][i] = inference1d.doi()
 
         # Add the multiplier
-        hdfFile['multiplier'][i] = results.multiplier
+        hdfFile['multiplier'][i] = inference1d.multiplier
 
         # Add the inversion time
-        hdfFile['invtime'][i] = results.invTime
+        hdfFile['invtime'][i] = inference1d.invTime
 
         # Add the savetime
-#        hdfFile['savetime'][i] = results.saveTime
+#        hdfFile['savetime'][i] = inference1d.saveTime
 
         # Interpolate the mean and best model to the discretized hitmap
-        hm = results.currentModel.par.posterior
-        results.meanInterp[:] = hm.mean()
-        results.bestInterp[:] = results.bestModel.interpPar2Mesh(results.bestModel.par, hm)
-        # results.opacityInterp[:] = results.Hitmap.credibleRange(percent=95.0, log='e')
+        hm = inference1d.currentModel.par.posterior
+        inference1d.meanInterp[:] = hm.mean()
+        inference1d.bestInterp[:] = inference1d.bestModel.interpPar2Mesh(inference1d.bestModel.par, hm)
+        # inference1d.opacityInterp[:] = inference1d.Hitmap.credibleRange(percent=95.0, log='e')
 
         slic = np.s_[i, :]
         # Add the interpolated mean model
-        results.meanInterp.writeHdf(hdfFile, 'meaninterp',  index=i)
+        inference1d.meanInterp.writeHdf(hdfFile, 'meaninterp',  index=i)
         # Add the interpolated best
-        results.bestInterp.writeHdf(hdfFile, 'bestinterp',  index=i)
+        inference1d.bestInterp.writeHdf(hdfFile, 'bestinterp',  index=i)
         # Add the interpolated opacity
 
         # Add the acceptance rate
-        results.rate.writeHdf(hdfFile, 'rate', index=i)
+        inference1d.rate.writeHdf(hdfFile, 'rate', index=i)
 
         # Add the data misfit
-        results.PhiDs.writeHdf(hdfFile,'phids',index=i)
+        inference1d.PhiDs.writeHdf(hdfFile,'phids',index=i)
 
-        results.currentDataPoint.writeHdf(hdfFile,'currentdatapoint',  index=i)
+        inference1d.currentDataPoint.writeHdf(hdfFile,'currentdatapoint',  index=i)
 
-        results.bestDataPoint.writeHdf(hdfFile,'bestd', withPosterior=False, index=i)
+        inference1d.bestDataPoint.writeHdf(hdfFile,'bestd', withPosterior=False, index=i)
 
-        results.currentModel.writeHdf(hdfFile,'currentmodel', index=i)
+        inference1d.currentModel.writeHdf(hdfFile,'currentmodel', index=i)
 
-        results.bestModel.writeHdf(hdfFile,'bestmodel', withPosterior=False, index=i)
+        inference1d.bestModel.writeHdf(hdfFile,'bestmodel', withPosterior=False, index=i)
 
