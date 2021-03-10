@@ -975,56 +975,11 @@ class FdemData(Data):
     def fromHdf(self, grp, **kwargs):
         """ Reads the object from a HDF group """
 
-        # s = grp['d/data'].shape
+        super().fromHdf(grp)
+        self.system = FdemSystem().fromHdf(grp['sys'])
 
-        item = grp.get('sys')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        system = obj.fromHdf(item)
+        return self
 
-        tmp = FdemData(systems=system)
-
-        item = grp.get('x')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp.x = obj.fromHdf(item)
-
-        item = grp.get('y')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp.y = obj.fromHdf(item)
-
-        item = grp.get('z')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp._z = obj.fromHdf(item)
-
-        item = grp.get('e')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp._elevation = obj.fromHdf(item)
-
-        item = grp.get('d')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp._data = obj.fromHdf(item)
-
-        item = grp.get('s')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp._std = obj.fromHdf(item)
-
-        item = grp.get('p')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp._predictedData = obj.fromHdf(item)
-
-        item = grp.get('relErr')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp._relErr = obj.fromHdf(item)
-
-        item = grp.get('addErr')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp._addErr = obj.fromHdf(item)
-
-        item = grp.get('calibration')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp.calibration = obj.fromHdf(item)
-
-        # tmp.getActiveChannels()
-        return tmp
 
     def Bcast(self, world, root=0):
         """Broadcast the FdemData using MPI
