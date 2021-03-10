@@ -83,9 +83,11 @@ class TdemDataPoint(EmDataPoint):
 
         self._data.name = "Time domain data"
 
-        self.transmitter = transmitter_loop
+        if not transmitter_loop is None:
+            self.transmitter = transmitter_loop
         # EmLoop Reciever
-        self.receiver = receiver_loop
+        if not receiver_loop is None:
+            self.receiver = receiver_loop
         # Set the loop offset
         self.loopOffset = StatArray.StatArray(np.asarray(loopOffset), 'Loop Offset', 'm')
 
@@ -234,9 +236,11 @@ class TdemDataPoint(EmDataPoint):
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
         out._system = self._system
+        out._nChannelsPerSystem = self.nTimes
         out._transmitter = self._transmitter
         out._receiver = self._receiver
         out.loopOffset = self.loopOffset
+
         return out
 
 
