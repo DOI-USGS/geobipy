@@ -66,7 +66,6 @@ class RectilinearMesh2D(myObject):
 
     """
 
-
     def __init__(self, xCentres=None, xEdges=None, yCentres=None, yEdges=None, zCentres=None, zEdges=None, **kwargs):
         """ Initialize a 2D Rectilinear Mesh"""
 
@@ -83,13 +82,13 @@ class RectilinearMesh2D(myObject):
         self._x = RectilinearMesh1D(cellCentres=xCentres, cellEdges=xEdges, relativeTo=kwargs.pop('xrelativeTo', 0.0), **xExtras)
 
         yExtras = dict((k[1:], kwargs.pop(k, None)) for k in ('yedgesMin', 'yedgesMax', 'ylog'))
-        self._y = RectilinearMesh1D(cellCentres=yCentres, cellEdges=yEdges, relativeTo=kwargs.pop('xrelativeTo', 0.0),  **yExtras)
+        self._y = RectilinearMesh1D(cellCentres=yCentres, cellEdges=yEdges, relativeTo=kwargs.pop('yrelativeTo', 0.0),  **yExtras)
 
         if (not zCentres is None or not zEdges is None):
             assert self._x.nCells == self._y.nCells, Exception("x and y axes must have the same number of cells.")
 
             zExtras = dict((k[1:], kwargs.pop(k, None)) for k in ('zedgesMin', 'zedgesMax', 'zlog'))
-            self._z = RectilinearMesh1D(cellCentres=zCentres, cellEdges=zEdges, relativeTo=kwargs.pop('xrelativeTo', 0.0), **zExtras)
+            self._z = RectilinearMesh1D(cellCentres=zCentres, cellEdges=zEdges, relativeTo=kwargs.pop('zrelativeTo', 0.0), **zExtras)
             self.xyz = True
 
         else:
@@ -103,9 +102,9 @@ class RectilinearMesh2D(myObject):
         assert np.shape(slic) == (2, ), ValueError("slic must be over two dimensions.")
 
         if self.xyz:
-            return RectilinearMesh2D(xEdges=self._x[slic[1]], yEdges=self._y[slic[1]], zEdges=self._z[slic[0]])
+            return type(self)(xEdges=self._x[slic[1]], yEdges=self._y[slic[1]], zEdges=self._z[slic[0]])
         else:
-            return RectilinearMesh2D(xEdges=self._x[slic[1]], yEdges=self._y[slic[0]])
+            return type(self)(xEdges=self._x[slic[1]], yEdges=self._y[slic[0]])
 
 
     @property
@@ -181,13 +180,128 @@ class RectilinearMesh2D(myObject):
         return self._z
 
 
+    def _mean(self, arr, log=None, axis=0):
+        a = self.axis(axis)
+        b = self.other_axis(axis)
 
-    def median(self, arr, log=None, axis=0):
+        t = np.sum(np.repeat(np.expand_dims(a.cellCentres, axis), b.nCells, axis) * self.counts, 1-axis)
+        s = self._counts.sum(axis = 1 - axis)
+
+        i = np.where(s > 0.0)[0]
+        out = np.zeros(t.size)
+        out[i] = t[i] / s[i]
+
+        if log:
+            out, dum = cF._log(out, log=log)
+
+        return out
+
+
+    def _percent_interval(self, values, percent=95.0, log=None, axis=0):
+        """Gets the percent interval along axis.
+
+        Get the statistical interval, e.g. median is 50%.
+
+        Parameters
+        ----------
+        values : array_like
+            Valus used to compute interval like histogram counts.
+        percent : float
+            Interval percentage.  0.0 < percent < 100.0
+        log : 'e' or float, optional
+            Take the log of the interval to a base. 'e' if log = 'e', or a number e.g. log = 10.
+        axis : int
+            Along which axis to obtain the interval locations.
+
+        Returns
+        -------
+        interval : array_like
+            Contains the interval along the specified axis. Has size equal to self.shape[axis].
+
+        """
+
+        percent *= 0.01
+
+        # total of the counts
+        total = values.sum(axis=1-axis)
+        # Cumulative sum
+        cs = np.cumsum(values, axis=1-axis)
+        # Cumulative "probability"
+        tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+        # Find the interval
+        i = np.apply_along_axis(np.searchsorted, 1-axis, tmp, percent)
+        # Obtain the values at those locations
+        out = self.axis(axis).cellCentres[i]
+
+        if (not log is None):
+            out, dum = cF._log(out, log=log)
+
+        return out
+
+
+    def _credibleIntervals(self, values, percent=90.0, log=None, axis=0):
+        """Gets the median and the credible intervals for the specified axis.
+
+        Parameters
+        ----------
+        values : array_like
+        Values to use to compute the intervals.
+        percent : float
+        Confidence percentage.
+        log : 'e' or float, optional
+        Take the log of the credible intervals to a base. 'e' if log = 'e', or a number e.g. log = 10.
+        axis : int
+        Along which axis to obtain the interval locations.
+
+        Returns
+        -------
+        med : array_like
+        Contains the medians along the specified axis. Has size equal to arr.shape[axis].
+        low : array_like
+        Contains the lower interval along the specified axis. Has size equal to arr.shape[axis].
+        high : array_like
+        Contains the upper interval along the specified axis. Has size equal to arr.shape[axis].
+
+        """
+
+        percent = 0.5 * np.minimum(percent, 100.0 - percent)
+
+        lower = self._percent_interval(values, percent, log, axis)
+        median = self._percent_interval(values, 50.0, log, axis)
+        upper = self._percent_interval(values, 100.0 - percent, log, axis)
+
+        return (median, lower, upper)
+
+
+    def _credibleRange(self, values, percent=90.0, log=None, axis=0):
+        """ Get the range of credibility
+
+        Parameters
+        ----------
+        values : array_like
+            Values to use to compute the range.
+        percent : float
+            Percent of the credible intervals
+        log : 'e' or float, optional
+            If None: The range is the difference in linear space of the credible intervals
+            If 'e' or float: The range is the difference in log space, or ratio in linear space.
+        axis : int
+            Axis along which to get the marginal histogram.
+
+
+        """
+        sMed, sLow, sHigh = self._credibleIntervals(values, percent, log=log, axis=axis)
+
+        return sHigh - sLow
+
+
+
+    def _median(self, values, log=None, axis=0):
         """Gets the median for the specified axis.
 
         Parameters
         ----------
-        arr : array_like
+        values : array_like
             2D array to get the median.
         log : 'e' or float, optional
             Take the log of the median to a base. 'e' if log = 'e', or a number e.g. log = 10.
@@ -200,26 +314,7 @@ class RectilinearMesh2D(myObject):
             Contains the medians along the specified axis. Has size equal to arr.shape[axis].
 
         """
-
-        total = arr.sum(axis = 1-axis)
-        tmp = np.cumsum(arr, axis = 1-axis)
-
-        if axis == 0:
-            tmp = tmp / np.repeat(total[:, np.newaxis], arr.shape[1], 1)
-        else:
-            tmp = tmp / np.repeat(total[np.newaxis, :], arr.shape[0], 0)
-
-        ixM = np.apply_along_axis(np.searchsorted, 1-axis, tmp, 0.5)
-
-        if axis == 0:
-            med = self.x.cellCentres[ixM]
-        else:
-            med = self.z.cellCentres[ixM]
-
-        if (not log is None):
-            med, dum = cF._log(med, log=log)
-
-        return med
+        return self._percent_interval(values=values, percent=50.0, log=log, axis=axis)
 
 
     def deepcopy(self):
@@ -236,19 +331,35 @@ class RectilinearMesh2D(myObject):
 
     def cellEdges(self, axis):
         """ Gets the cell edges in the given dimension """
-        return self.z.cellEdges if axis == 0 else self.x.cellEdges
+        return self.axis(axis).cellEdges
 
 
-    def getXAxis(self, axis='x', centres=False):
-        assert axis in ['x', 'y', 'r'], Exception("axis must be either 'x', 'y' or 'r'")
-        if axis == 'x':
-            return self.x.cellCentres if centres else self.x.cellEdges
-        elif axis == 'y':
-            assert self.xyz, Exception("To plot against 'y' the mesh must be instantiated with three co-ordinates")
-            return self.y.cellCentres if centres else self.y.cellEdges
-        elif axis == 'r':
-            assert self.xyz, Exception("To plot against 'r' the mesh must be instantiated with three co-ordinates")
-            return self.distance.cellCentres if centres else self.distance.cellEdges
+    def other_axis(self, axis):
+        if axis == 0:
+            return self.z
+        else:
+            return self.x
+
+
+    def axis(self, axis):
+        if isinstance(axis, str):
+            assert axis in ['x', 'y', 'z', 'r'], Exception("axis must be either 'x', 'y', 'z', or 'r'")
+
+            if axis == 'x':
+                return self.x
+            elif axis == 'y':
+                assert self.xyz, Exception("To plot against 'y' the mesh must be instantiated with three co-ordinates")
+                return self.y
+            elif axis == 'z':
+                return self.z
+            elif axis == 'r':
+                assert self.xyz, Exception("To plot against 'r' the mesh must be instantiated with three co-ordinates")
+                return self.distance
+
+        if axis == 0:
+            return self.x
+        elif axis == 1:
+            return self.z
 
 
     def xGradientMatrix(self):
@@ -333,16 +444,11 @@ class RectilinearMesh2D(myObject):
 
         assert np.size(intervals) > 1, ValueError("intervals must have size > 1")
 
-        if (axis == 0):
-            # Make sure the intervals are within the axis.
-            i0 = np.maximum(0, np.searchsorted(intervals, self.z.cellEdges[0]))
-            i1 = np.minimum(self.z.nCells, np.searchsorted(intervals, self.z.cellEdges[-1])+1)
-            intervals = intervals[i0:i1]
+        ax = self.other_axis(axis)
 
-        else:
-            i0 = np.maximum(0, np.searchsorted(intervals, self.x.cellEdges[0]))
-            i1 = np.minimum(self.x.nCells, np.searchsorted(intervals, self.x.cellEdges[-1])+1)
-            intervals = intervals[i0:i1]
+        i0 = np.maximum(0, np.searchsorted(intervals, ax.cellEdges[0]))
+        i1 = np.minimum(ax.nCells, np.searchsorted(intervals, ax.cellEdges[-1])+1)
+        intervals = intervals[i0:i1]
 
         return intervals
 
@@ -468,9 +574,7 @@ class RectilinearMesh2D(myObject):
 
         assert np.all(values.shape == self.shape), ValueError("values must have shape {}".format(self.shape))
 
-        xtmp = self.getXAxis(xAxis)
-
-        ax, pm, cb = cP.pcolor(values, x = xtmp, y = self.z.cellEdges, **kwargs)
+        ax, pm, cb = cP.pcolor(values, x = self.axis(xAxis).cellEdges, y = self.z.cellEdges, **kwargs)
 
         return ax, pm, cb
 
@@ -487,11 +591,9 @@ class RectilinearMesh2D(myObject):
 
         """
 
-        tmp = StatArray.StatArray(np.full([self.z.nCells, self.x.nCells], fill_value=np.nan))
+        tmp = StatArray.StatArray(np.full(self.shape, fill_value=np.nan))
+        tmp.pcolor(x=self.axis(xAxis).cellEdges, y=self.z.cellEdges, grid=True, noColorbar=True, **kwargs)
 
-        xtmp = self.getXAxis(xAxis)
-
-        tmp.pcolor(x=xtmp, y=self.z.cellEdges, grid=True, noColorbar=True, **kwargs)
 
     @property
     def summary(self):
