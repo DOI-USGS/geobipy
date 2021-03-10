@@ -1481,23 +1481,7 @@ class Model1D(Model):
                 self.depth.posterior.update(tmp[keep])
 
 
-    def hdfName(self):
-        """Create a string that describes class instantiation
-
-        Returns a string that should be used as an attr['repr'] in a HDF group.
-        This allows reading of the attribute from the hdf file, evaluating it to return an object,
-        and then reading the hdf contents via the object's methods.
-
-        Returns
-        -------
-        out
-            str
-
-        """
-        return('Model1D()')
-
-
-    def createHdf(self, parent, myName, withPosterior=True, nRepeats=None, fillvalue=None):
+    def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
         """Create the Metadata for a Model1D in a HDF file
 
         Creates a new group in a HDF file under h5obj.
@@ -1513,7 +1497,7 @@ class Model1D(Model):
         ----------
         h5obj : h5py._hl.files.File or h5py._hl.group.Group
             A HDF file or group object to create the contents in.
-        myName : str
+        name : str
             The name of the group to create.
         nRepeats : int, optional
             Inserts a first dimension into the first dimension of each attribute of the Model1D of length nRepeats.
@@ -1559,8 +1543,7 @@ class Model1D(Model):
         """
 
         # create a new group inside h5obj
-        grp = parent.create_group(myName)
-        grp.attrs["repr"] = self.hdfName()
+        grp = self.create_hdf_group(parent, name)
 
         self.nCells.createHdf(grp, 'nCells', withPosterior=withPosterior, nRepeats=nRepeats)
         self.top.createHdf(grp, 'top', nRepeats=nRepeats, fillvalue=fillvalue)
@@ -1593,7 +1576,7 @@ class Model1D(Model):
         grp.create_dataset('hasHalfspace', data=self.hasHalfspace)
 
 
-    def writeHdf(self, h5obj, myName, withPosterior=True, index=None):
+    def writeHdf(self, h5obj, name, withPosterior=True, index=None):
         """Create the Metadata for a Model1D in a HDF file
 
         Creates a new group in a HDF file under h5obj.
@@ -1607,7 +1590,7 @@ class Model1D(Model):
         ----------
         h5obj : h5py._hl.files.File or h5py._hl.group.Group
             A HDF file or group object to create the contents in.
-        myName : str
+        name : str
             The name of the group to create.
         fillvalue : number, optional
             Initializes the memory in file with the fill value
@@ -1648,7 +1631,7 @@ class Model1D(Model):
 
         """
 
-        grp = h5obj.get(myName)
+        grp = h5obj.get(name)
 
         self.nCells.writeHdf(grp, 'nCells',  withPosterior=withPosterior, index=index)
         self.top.writeHdf(grp, 'top', index=index)
@@ -1678,47 +1661,40 @@ class Model1D(Model):
         if grp['par/data'].ndim > 1:
             assert not index is None, ValueError("File was created with multiple Model1Ds, must specify an index")
 
-        item = grp.get('nCells')
-        nCells = (eval(cF.safeEval(item.attrs.get('repr'))))
-        nCells = nCells.fromHdf(item, index=index)
+        nCells = StatArray.StatArray().fromHdf(grp['nCells'], index=index)
 
-        tmp = Model1D(nCells)
-
+        self.__init__(nCells)
 
         if 'minThk' in grp:
-            tmp.minThickness = np.array(grp.get('minThk'))
+            self.minThickness = np.array(grp.get('minThk'))
 
         if 'hmin' in grp:
-            tmp.minThickness = np.array(grp.get('hmin'))
+            self.minThickness = np.array(grp.get('hmin'))
 
         if 'zmin' in grp:
-            tmp.minDepth = np.array(grp.get('zmin'))
+            self.minDepth = np.array(grp.get('zmin'))
 
         if 'zmax' in grp:
-            tmp.maxDepth = np.array(grp.get('zmax'))
+            self.maxDepth = np.array(grp.get('zmax'))
 
         if 'pWheel' in grp:
-            tmp.pWheel = np.array(grp.get('pWheel'))
+            self.pWheel = np.array(grp.get('pWheel'))
 
         if 'hasHalfspace' in grp:
-            tmp.hasHalfspace = np.array(grp.get('hasHalfspace'))
+            self.hasHalfspace = np.array(grp.get('hasHalfspace'))
 
 
         i = index
         if grp['par/data'].ndim != 1:
-            i = np.s_[index, :np.int(tmp.nCells)]
+            i = np.s_[index, :np.int(self.nCells)]
 
-        item = grp.get('top')
-        tmp._top = (eval(cF.safeEval(item.attrs.get('repr')))).fromHdf(item, index=index)
+        self._top = StatArray.StatArray().fromHdf(grp['top'], index=index)
 
-        item = grp.get('par')
-        tmp._par = (eval(cF.safeEval(item.attrs.get('repr')))).resize(np.int(tmp.nCells)).fromHdf(item, index=i)
+        self._par = StatArray.StatArray().fromHdf(grp['par'], index=i)
 
-        item = grp.get('depth')
-        tmp._depth = (eval(cF.safeEval(item.attrs.get('repr')))).resize(np.int(tmp.nCells)).fromHdf(item, index=i)
+        self._depth = StatArray.StatArray().fromHdf(grp['depth'], index=i)
 
-        item = grp.get('thk')
-        tmp._thk = (eval(cF.safeEval(item.attrs.get('repr')))).resize(np.int(tmp.nCells)).fromHdf(item, index=i)
+        self._thk = StatArray.StatArray().fromHdf(grp['thk'], index=i)
 
         # item = grp.get('magnetic_permeability')
         # obj = eval(cF.safeEval(item.attrs.get('repr')));
@@ -1727,9 +1703,10 @@ class Model1D(Model):
         # item = grp.get('magnetic_susceptibility'); obj = eval(cF.safeEval(item.attrs.get('repr')));
         # obj = obj.resize(tmp.nCells); tmp._magnetic_susceptibility = obj.fromHdf(item, index=i)
 
-        if (tmp.nCells > 0):
-            tmp._dpar = StatArray.StatArray(np.int(tmp.nCells) - 1, 'Derivative', tmp.par.units + '/m')
+        if (self.nCells > 0):
+            self._dpar = StatArray.StatArray(np.int(self.nCells) - 1, 'Derivative', self.par.units + '/m')
         else:
-            tmp._dpar = None
+            self._dpar = None
 
-        return tmp
+
+        return self
