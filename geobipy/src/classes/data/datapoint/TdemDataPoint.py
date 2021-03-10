@@ -528,31 +528,6 @@ class TdemDataPoint(EmDataPoint):
         return self
 
 
-#  def calibrate(self,Predicted=True):
-#    """ Apply calibration factors to the data point """
-#    # Make complex numbers from the data
-#    if (Predicted):
-#      tmp=cf.mergeComplex(self._predictedData)
-#    else:
-#      tmp=cf.mergeComplex(self._data)
-#
-#    # Get the calibration factors for each frequency
-#    i1=0;i2=self.system.nFreq
-#    G=self.calibration[i1:i2];i1+=self.system.nFreq;i2+=self.system.nFreq
-#    Phi=self.calibration[i1:i2];i1+=self.system.nFreq;i2+=self.system.nFreq
-#    Bi=self.calibration[i1:i2];i1+=self.system.nFreq;i2+=self.system.nFreq
-#    Bq=self.calibration[i1:i2]
-#
-#    # Calibrate the data
-#    tmp[:]=G*np.exp(1j*Phi)*tmp+Bi+(1j*Bq)
-#
-#    # Split the complex numbers back out
-#    if (Predicted):
-#      self._predictedData[:]=cf.splitComplex(tmp)
-#    else:
-#      self._data[:]=cf.splitComplex(tmp)
-#
-
     def plotWaveform(self,**kwargs):
         for i in range(self.nSystems):
             if (self.nSystems > 1):
