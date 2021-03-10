@@ -888,6 +888,39 @@ class Histogram2D(RectilinearMesh2D):
         self._counts[unique[0], unique[1]] += counts
 
 
+    def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
+        """ Create the hdf group metadata in file
+        parent: HDF object to create a group inside
+        myName: Name of the group
+        """
+        # create a new group inside h5obj
+        grp = super().createHdf(parent, name, withPosterior, nRepeats, fillvalue)
+        self._counts.createHdf(grp, 'counts', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        return grp
+
+
+    def writeHdf(self, parent, name, withPosterior=True, index=None):
+        """ Write the StatArray to an HDF object
+        parent: Upper hdf file or group
+        myName: object hdf name. Assumes createHdf has already been called
+        create: optionally create the data set as well before writing
+        """
+        super().writeHdf(parent, name, withPosterior, index)
+        self._counts.writeHdf(parent, name+'/counts',  withPosterior=withPosterior, index=index)
+
+
+    def fromHdf(self, grp, index=None):
+        """ Reads in the object from a HDF file """
+        super().fromHdf(grp, index)
+
+        if "arr" in grp:
+            self._counts = StatArray.StatArray().fromHdf(grp['arr'], index=index)
+        else:
+            self._counts = StatArray.StatArray().fromHdf(grp['counts'], index=index)
+
+        self._counts = self._counts.astype(np.int64)
+        return self
+
 
 
 
