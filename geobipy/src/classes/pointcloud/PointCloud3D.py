@@ -15,7 +15,6 @@ try:
 except:
     pass
 
-
 class PointCloud3D(myObject):
     """3D Point Cloud with x,y,z co-ordinates
 
@@ -44,8 +43,8 @@ class PointCloud3D(myObject):
     def __init__(self, x=None, y=None, z=None, elevation=None):
         """ Initialize the class """
 
-        # Number of points in the cloud
-        self.nPoints = 0
+        # # Number of points in the cloud
+        self._nPoints = 0
 
         # StatArray of the x co-ordinates
         self.x = x
@@ -548,6 +547,7 @@ class PointCloud3D(myObject):
         elif (nDims == 3):
             tmp = np.column_stack((self.x, self.y, self.z))
         self.kdtree = cKDTree(tmp)
+
 
     @property
     def summary(self):
