@@ -29,7 +29,6 @@ class EmDataPoint(DataPoint):
 
         # Initialize the sensitivity matrix
         self.J = None
-        self.errorPosterior = None
 
 
     @property
@@ -43,7 +42,7 @@ class EmDataPoint(DataPoint):
         # StatArray of calibration parameters
         out.errorPosterior = self.errorPosterior
         # Initialize the sensitivity matrix
-        out.J = deepcopy(self.J)
+        out.J = deepcopy(self.J, memo)
 
         return out
 
