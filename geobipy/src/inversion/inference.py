@@ -116,7 +116,7 @@ def infer(userParameters, DataPoint, prng, Inference2D, rank=1):
     # Does the user want to save the HDF5 results?
     if (userParameters.save):
         # No parallel write is being used, so write a single file for the data point
-        Inference2D.results2Hdf(Res)
+        Inference2D.write_inference1d(Res)
 
     # Does the user want to save the plot as a png?
     if (Res.savePNG):# and not failed):
