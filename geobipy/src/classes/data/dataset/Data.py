@@ -66,20 +66,38 @@ class Data(PointCloud3D):
         # Number of Channels
         self._nChannelsPerSystem = nChannelsPerSystem
 
-        PointCloud3D.__init__(self, x, y, z, elevation)
+        super().__init__(x, y, z, elevation)
 
         self.fiducial = fiducial
-
         self.lineNumber = lineNumber
-
         self.units = units
         self.data = data
-
         self.std = std
-
         self.predictedData = predictedData
-
         self.channelNames = channelNames
+
+        self.error_posterior = None
+
+
+    @property
+    def additive_error(self):
+        """The data. """
+        if np.size(self._additive_error, 0) == 0:
+            self._additive_error = StatArray.StatArray((self.nPoints, self.nSystems), "Additive error", "%")
+        return self._additive_error
+
+
+    @additive_error.setter
+    def additive_error(self, values):
+        shp = (self.nPoints, self.nSystems)
+        if values is None:
+            self._additive_error = StatArray.StatArray(np.ones(shp), "Additive error", "%")
+        else:
+            if self.nPoints == 0:
+                self.nPoints = np.size(values, 0)
+                shp = (self.nPoints, self.nSystems)
+            assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("additive_error must have shape {}".format(shp))
+            self._additive_error = StatArray.StatArray(values)
 
 
     @property
@@ -109,6 +127,7 @@ class Data(PointCloud3D):
         else:
             assert isinstance(values, str)
             self._units = values
+
 
     def _systemIndices(self, system=0):
         """The slice indices for the requested system.
@@ -140,13 +159,13 @@ class Data(PointCloud3D):
 
     @data.setter
     def data(self, values):
-        shp = [self.nPoints, self.nChannels]
+        shp = (self.nPoints, self.nChannels)
         if values is None:
             self._data = StatArray.StatArray(shp, "Data", self.units)
         else:
             if self.nPoints == 0:
                 self.nPoints = np.size(values, 0)
-                shp = [self.nPoints, self.nChannels]
+                shp = (self.nPoints, self.nChannels)
             assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("data must have shape {}".format(shp))
             self._data = StatArray.StatArray(values)
 
@@ -182,13 +201,13 @@ class Data(PointCloud3D):
 
     @std.setter
     def std(self, values):
-        shp = [self.nPoints, self.nChannels]
+        shp = (self.nPoints, self.nChannels)
         if values is None:
             self._std = StatArray.StatArray(np.ones(shp), "Standard deviation", self.units)
         else:
             if self.nPoints == 0:
                 self.nPoints = np.size(values, 0)
-                shp = [self.nPoints, self.nChannels]
+                shp = (self.nPoints, self.nChannels)
             assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("std must have shape {}".format(shp))
             self._std = StatArray.StatArray(values)
 
@@ -275,7 +294,28 @@ class Data(PointCloud3D):
 
     @property
     def shape(self):
-        return [self.nPoints, self.nChannels]
+        return (self.nPoints, self.nChannels)
+
+
+    @property
+    def relative_error(self):
+        """The data. """
+        if np.size(self._relative_error, 0) == 0:
+            self._relative_error = StatArray.StatArray((self.nPoints, self.nSystems), "Relative error", "%")
+        return self._relative_error
+
+
+    @relative_error.setter
+    def relative_error(self, values):
+        shp = (self.nPoints, self.nSystems)
+        if values is None:
+            self._relative_error = StatArray.StatArray(np.ones(shp), "Relative error", "%")
+        else:
+            if self.nPoints == 0:
+                self.nPoints = np.size(values, 0)
+                shp = (self.nPoints, self.nSystems)
+            assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("relative_error must have shape {}".format(shp))
+            self._relative_error = StatArray.StatArray(values)
 
 
     def addToVTK(self, vtk, prop=['data', 'predicted', 'std'], system=None):
