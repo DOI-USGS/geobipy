@@ -366,6 +366,9 @@ class StatArray(np.ndarray, myObject):
 
         return mx
 
+    def confidence_interval(self, interval):
+        values = self.flatten()
+        return st.t.interval(interval, self.size - 1, loc=np.mean(values), scale=st.sem(values))
 
     def copy(self, order='F'):
         return StatArray(self)
