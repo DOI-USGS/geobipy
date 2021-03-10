@@ -52,28 +52,3 @@ class Hitmap2D(Histogram2D):
     def hdfName(self):
         """ Reprodicibility procedure """
         return('Hitmap2D()')
-
-
-    def fromHdf(self, grp, index=None):
-        """ Reads in the object froma HDF file """
-
-        # ai=None
-        # bi=None
-        # if (not index is None):
-        #     assert cF.isInt(index), TypeError('index must be an integer {}'.format(index))
-        #     ai = np.s_[index, :, :]
-        #     bi = np.s_[index, :]
-
-        item = grp.get('arr')
-        arr = (eval(cF.safeEval(item.attrs.get('repr')))).fromHdf(item, index=index)
-
-        item = grp.get('x')
-        x = (eval(cF.safeEval(item.attrs.get('repr')))).fromHdf(item, index=index)
-
-        item = grp.get('y')
-        y = (eval(cF.safeEval(item.attrs.get('repr')))).fromHdf(item, index=index)
-
-        tmp = Hitmap2D(xBins=x.cellEdges, yBins=y.cellEdges)
-        tmp._counts[:, :] = arr
-
-        return tmp
