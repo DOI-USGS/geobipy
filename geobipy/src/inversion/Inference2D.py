@@ -288,7 +288,7 @@ class Inference2D(myObject):
         if 'doi' in self.hdfFile.keys():
             return StatArray.StatArray(np.asarray(self.getAttribute('doi')), 'Depth of investigation', 'm')
         else:
-            self.computeDOI()
+            return self.computeDOI()
 
 
     def computeDOI(self, percent=67.0, window=1):
@@ -754,12 +754,14 @@ class Inference2D(myObject):
 
         return np.asarray([depth, parameter]).T
 
-
     @cached_property
     def interfaces(self):
         """ Get the layer interfaces from the layer depth histograms """
         maxCount = self.interfacePosterior.counts.max()
-        # values = np.vstack([self.interfacePosterior.counts.T, self.interfacePosterior.counts.T[-1, :]])
+        if np.size(self.interfacePosterior.counts, 1) == (self.mesh.z.nCells - 1):
+            values = np.vstack([self.interfacePosterior.counts.T, self.interfacePosterior.counts.T[-1, :]])
+            return StatArray.StatArray(values / np.float64(maxCount), "interfaces", "")
+
         return StatArray.StatArray(self.interfacePosterior.counts.T / np.float64(maxCount), "interfaces", "")
 
 
@@ -1010,7 +1012,7 @@ class Inference2D(myObject):
     @property
     def relativeErrorPosteriors(self):
         """ Get the Relative error of the best data points """
-        return self.data._relErr.posterior
+        return self.data.relErr.posterior
 
 
     def hitmap(self, index=None, fiducial=None):
@@ -1070,7 +1072,8 @@ class Inference2D(myObject):
 
 
     def x_axis(self, axis, centres=False):
-        return self.mesh.getXAxis(axis, centres=centres)
+        ax = self.mesh.axis(axis)
+        return ax.cellCentres if centres else ax.cellEdges
 
 
     @cached_property
@@ -1091,7 +1094,7 @@ class Inference2D(myObject):
 
         xAxis = kwargs.pop('xAxis', 'x')
 
-        xtmp = self.mesh.getXAxis(xAxis, centres=False)
+        xtmp = self.x_axis(xAxis, centres=False)
 
         values = self.bestData.deltaD.T
 
@@ -1106,7 +1109,7 @@ class Inference2D(myObject):
 
         xAxis = kwargs.pop('xAxis', 'x')
 
-        xtmp = self.mesh.getXAxis(xAxis, centres=False)
+        xtmp = self.x_axis(xAxis, centres=False)
 
         cP.pcolor(self.bestData.data.T, x=xtmp, y=StatArray.StatArray(np.arange(self.bestData.predictedData.shape[1]), name='Channel'), **kwargs)
 
@@ -1116,7 +1119,7 @@ class Inference2D(myObject):
 
         xAxis = kwargs.pop('xAxis', 'x')
 
-        xtmp = self.mesh.getXAxis(xAxis, centres=False)
+        xtmp = self.x_axis(xAxis, centres=False)
 
         cP.pcolor(self.bestData.predictedData.T, x=xtmp, y=StatArray.StatArray(np.arange(self.bestData.predictedData.shape[1]), name='Channel'), **kwargs)
 
@@ -1126,7 +1129,7 @@ class Inference2D(myObject):
 
         xAxis = kwargs.pop('xAxis', 'x')
 
-        xtmp = self.mesh.getXAxis(xAxis, centres=True)
+        xtmp = self.x_axis(xAxis, centres=True)
 
         if channel is None:
             channel = np.s_[:]
@@ -1142,7 +1145,7 @@ class Inference2D(myObject):
         kwargs['color'] = kwargs.pop('color','k')
         kwargs['linewidth'] = kwargs.pop('linewidth',0.5)
 
-        xtmp = self.mesh.getXAxis(xAxis, centres=False)
+        xtmp = self.x_axis(xAxis, centres=False)
 
         cP.plot(xtmp, self.height.edges() + self.elevation.edges(), **kwargs)
 
@@ -1156,7 +1159,7 @@ class Inference2D(myObject):
 
         xAxis = kwargs.pop('xAxis', 'x')
 
-        xtmp = self.mesh.getXAxis(xAxis, centres=True)
+        xtmp = self.x_axis(xAxis, centres=True)
 
         if channel is None:
             channel = np.s_[:]
@@ -1176,7 +1179,7 @@ class Inference2D(myObject):
         kwargs['color'] = kwargs.pop('color','k')
         kwargs['linewidth'] = kwargs.pop('linewidth',0.5)
 
-        xtmp = self.mesh.getXAxis(xAxis, centres=True)
+        xtmp = self.x_axis(xAxis, centres=True)
 
         (self.elevation - self.doi).plot(x=xtmp, **kwargs)
 
@@ -1200,7 +1203,7 @@ class Inference2D(myObject):
 
         xAxis = kwargs.pop('xAxis', 'x')
 
-        xtmp = self.mesh.getXAxis(xAxis)
+        xtmp = self.x_axis(xAxis)
 
         post = self.heightPosterior
 
@@ -1233,7 +1236,7 @@ class Inference2D(myObject):
         kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth','0.1')
         xAxis = kwargs.pop('xAxis', 'x')
 
-        xtmp = self.mesh.getXAxis(xAxis)
+        xtmp = self.x_axis(xAxis)
 
         i = self.fiducials.searchsorted(fiducial)
 
@@ -1254,7 +1257,7 @@ class Inference2D(myObject):
         kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth', 1.0)
         kwargs['linestyle'] = kwargs.pop('linestyle','none')
 
-        xtmp = self.mesh.getXAxis(xAxis)
+        xtmp = self.x_axis(xAxis)
         self.nLayers.plot(xtmp, **kwargs)
         # cP.ylabel(self.nLayers.getNameUnits())
         cP.title('# of Layers in Best Model')
@@ -1267,7 +1270,7 @@ class Inference2D(myObject):
 
         xAxis = kwargs.pop('xAxis', 'x')
 
-        xtmp = self.mesh.getXAxis(xAxis)
+        xtmp = self.x_axis(xAxis)
 
         c = post.counts.T
         c = np.divide(c, np.max(c,0), casting='unsafe')
@@ -1286,7 +1289,7 @@ class Inference2D(myObject):
         ls = kwargs.pop('linestyle','-')
         lw = kwargs.pop('linewidth',1.0)
 
-        xtmp = self.mesh.getXAxis(xAxis, centres=True)
+        xtmp = self.x_axis(xAxis, centres=True)
 
         if (self.nSystems > 1):
             r = range(self.nSystems)
@@ -1314,7 +1317,7 @@ class Inference2D(myObject):
 
         xAxis = kwargs.pop('xAxis', 'x')
 
-        xtmp = self.mesh.getXAxis(xAxis)
+        xtmp = self.x_axis(xAxis)
 
         if self.nSystems > 1:
             post = self.additiveErrorPosteriors[system]
@@ -1372,7 +1375,7 @@ class Inference2D(myObject):
 
         xAxis = kwargs.pop('xAxis', 'x')
 
-        xtmp = self.mesh.getXAxis(xAxis, centres=True)
+        xtmp = self.x_axis(xAxis, centres=True)
 
         if channel is None:
             channel = np.s_[:]
@@ -1390,7 +1393,7 @@ class Inference2D(myObject):
 
         xAxis = kwargs.pop('xAxis', 'x')
 
-        xtmp = self.mesh.getXAxis(xAxis)
+        xtmp = self.x_axis(xAxis)
 
         if self.nSystems > 1:
             post = self.relativeErrorPosteriors[system]
@@ -1424,7 +1427,7 @@ class Inference2D(myObject):
         kwargs['linestyle'] = kwargs.pop('linestyle','-')
         kwargs['linewidth'] = kwargs.pop('linewidth',1.0)
 
-        xtmp = self.mesh.getXAxis(xAxis)
+        xtmp = self.x_axis(xAxis)
 
         if (self.nSystems > 1):
             r = range(self.nSystems)
@@ -1457,7 +1460,7 @@ class Inference2D(myObject):
         kwargs['linestyle'] = kwargs.pop('linestyle','-')
         kwargs['linewidth'] = kwargs.pop('linewidth',1.0)
 
-        xtmp = self.mesh.getXAxis(xAxis)
+        xtmp = self.x_axis(xAxis)
 
 #        if (self.nSystems > 1):
 #            r = range(self.nSystems)
