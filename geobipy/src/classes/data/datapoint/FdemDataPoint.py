@@ -159,7 +159,7 @@ class FdemDataPoint(EmDataPoint):
 
         assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
 
-        return np.s_[self._systemOffset[system]:self._systemOffset[system] + self.nFrequencies[system]]
+        return np.s_[self.systemOffset[system]:self.systemOffset[system] + self.nFrequencies[system]]
 
 
     def _quadratureIndices(self, system=0):
@@ -179,7 +179,7 @@ class FdemDataPoint(EmDataPoint):
 
         assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
 
-        return np.s_[self._systemOffset[system] + self.nFrequencies[system]: self._systemOffset[system+1]]
+        return np.s_[self.systemOffset[system] + self.nFrequencies[system]: 2*self.nFrequencies[system]]
 
 
     def frequencies(self, system=0):
@@ -247,11 +247,6 @@ class FdemDataPoint(EmDataPoint):
 
         """
         return self.system[system].frequencies[channel%self.nFrequencies[system]]
-
-
-    def hdfName(self):
-        """ Reproducibility procedure """
-        return('FdemDataPoint()')
 
 
     def createHdf(self, parent, myName, withPosterior=True, nRepeats=None, fillvalue=None):
