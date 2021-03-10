@@ -60,7 +60,7 @@ class TdemData(Data):
         self.system = systems
 
         # Data Class containing xyz and channel values
-        Data.__init__(self, nChannelsPerSystem=self.nTimes, units=r"$\frac{V}{m^{2}}$", **kwargs)
+        super().__init__(nChannelsPerSystem=self.nTimes, units=r"$\frac{V}{m^{2}}$", **kwargs)
 
         # StatArray of Transmitter loops
         self.transmitter = kwargs.get('transmitter', None)
@@ -267,9 +267,6 @@ class TdemData(Data):
         self.system = systemFilename
         nPoints, iC, iR, iT, iOffset, iD, iS = self.__readColumnIndices(dataFilename, self.system)
 
-
-        TdemData.__init__(self, systems=self.system)
-
         # Get all readable column indices for the first file.
         tmp = [iC[0], iR[0], iT[0], iOffset[0], iD[0]]
         if not iS[0] is None:
@@ -280,12 +277,20 @@ class TdemData(Data):
         values = fIO.read_columns(dataFilename[0], indicesForFile, 1, nPoints)
 
         # Assign columns to variables
-        self.lineNumber = values[:, 0]
-        self.fiducial = values[:, 1]
-        self.x = values[:, 2]
-        self.y = values[:, 3]
-        self.elevation = values[:, 4]
-        self.z = values[:, 5]
+        lineNumber = values[:, 0]
+        fiducial = values[:, 1]
+        x = values[:, 2]
+        y = values[:, 3]
+        elevation = values[:, 4]
+        z = values[:, 5]
+
+        self.__init__(lineNumber=lineNumber,
+                      fiducial=fiducial,
+                      x=x,
+                      y=y,
+                      z=z,
+                      elevatin=elevation,
+                      systems=self.system)
 
         # Assign the orientations of the acquisistion loops
         i0 = 6
@@ -308,6 +313,7 @@ class TdemData(Data):
 
         # Get the data values
         iSys = self._systemIndices(0)
+
         self.data[:, iSys] = values[:, iData]
         # If the data error columns are given, assign them
         if (iS[0] is None):
@@ -927,53 +933,26 @@ class TdemData(Data):
         systems = []
         for i in range(nSystems):
             # Get the system file name. h5py has to encode strings using utf-8, so decode it!
-            # filename = str(np.asarray(grp.get('System{}'.format(i))), 'utf-8')
-
-            td = TdemSystem().read(system_file_path[i])
+            filename = str(np.asarray(grp.get('System{}'.format(i))), 'utf-8')
+            td = TdemSystem().read(system_file_path+"//"+filename)
             systems.append(td)
 
-        s = grp['d/data'].shape
 
-        tmp = TdemData(nPoints=s[0], nTimes=s[1], systems=systems)
+        super().fromHdf(grp)
 
-        item = grp.get('x')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp._x = obj.fromHdf(item)
-        item = grp.get('y')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp._y = obj.fromHdf(item)
-        item = grp.get('z')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp._z = obj.fromHdf(item)
-        item = grp.get('e')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp._elevation = obj.fromHdf(item)
+        self.systems = systems
 
-        item = grp.get('d')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp._data = obj.fromHdf(item)
-        item = grp.get('s')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp._std = obj.fromHdf(item)
-        item = grp.get('p')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp._predictedData = obj.fromHdf(item)
-        item = grp.get('relErr')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp._relErr = obj.fromHdf(item)
-        item = grp.get('addErr')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp._addErr = obj.fromHdf(item)
-        item = grp.get('T')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp.T = obj.fromHdf(item)
-        item = grp.get('R')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        tmp.R = obj.fromHdf(item)
+        self._receiver = StatArray.StatArray(self.nPoints, 'Receiver loops', dtype=CircularLoop)
+        tmp = np.asarray(grp['R/data'])
+        for i in range(self.nPoints):
+            self._receiver[i] = CircularLoop(*tmp[i, :])
 
-        # tmp.iActive = tmp.getActiveChannels()
+        self._transmitter = StatArray.StatArray(self.nPoints, 'Receiver loops', dtype=CircularLoop)
+        tmp = np.asarray(grp['T/data'])
+        for i in range(self.nPoints):
+            self._transmitter[i] = CircularLoop(*tmp[i, :])
 
-        return tmp
+        return self
 
 
     def scatter2D(self, **kwargs):
