@@ -1,9 +1,11 @@
 from cached_property import cached_property
+from copy import deepcopy
 from ...pointcloud.Point import Point
 from ....classes.core import StatArray
 from ....base import customFunctions as cf
 from ....base import customPlots as cP
 from ....base import MPI as myMPI
+from ...statistics.Histogram2D import Histogram2D
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -44,14 +46,13 @@ class DataPoint(Point):
 
     """
 
-    def __init__(self, nChannelsPerSystem=1, x=0.0, y=0.0, z=0.0, elevation=None, data=None, std=None, predictedData=None, units="", channelNames=None, lineNumber=0.0, fiducial=0.0):
+    def __init__(self, nChannelsPerSystem=1, x=0.0, y=0.0, z=0.0, elevation=None, data=None, std=None, predictedData=None, units=None, channelNames=None, lineNumber=0.0, fiducial=0.0):
         """ Initialize the Data class """
 
         super().__init__(x, y, z)
 
         # Number of Channels
         self._nChannelsPerSystem = np.atleast_1d(np.asarray(nChannelsPerSystem))
-        self._systemOffset = np.concatenate([[0], np.cumsum(self.nChannelsPerSystem)])
 
         self.elevation = elevation
 
@@ -70,24 +71,26 @@ class DataPoint(Point):
 
         self.channelNames = channelNames
 
+        self.errorPosterior = None
+
 
     def __deepcopy__(self, memo={}):
 
         out = super().__deepcopy__(memo)
 
-        out._nChannelsPerSystem = self._nChannelsPerSystem
-        out._systemOffset = self._systemOffset
+        out._nChannelsPerSystem = deepcopy(self._nChannelsPerSystem, memo)
 
-        out.elevation = self.elevation
-        out.units = self.units
-        out.data = self.data
-        out.std = self.std
-        out.predictedData = self.predictedData
-        out.lineNumber = self.lineNumber
-        out.fiducial = self.fiducial
-        out.channelNames = self.channelNames
-        out.relErr = self.relErr
-        out.addErr = self.addErr
+        out._elevation = deepcopy(self.elevation, memo)
+        out._units = deepcopy(self.units, memo)
+        out._data = deepcopy(self.data, memo)
+        out._std = deepcopy(self.std, memo)
+        out._predictedData = deepcopy(self.predictedData, memo)
+        out._lineNumber = deepcopy(self.lineNumber, memo)
+        out._fiducial = deepcopy(self.fiducial, memo)
+        out._channelNames = deepcopy(self.channelNames, memo)
+        out._relErr = deepcopy(self.relErr, memo)
+        out._addErr = deepcopy(self.addErr, memo)
+        out._errorPosterior = deepcopy(self.errorPosterior, memo)
 
         return out
 
@@ -105,6 +108,7 @@ class DataPoint(Point):
             self._addErr = StatArray.StatArray(self.nSystems, '$\epsilon_{Additive}$', self.units)
         else:
             assert np.size(values) == self.nSystems, ValueError("additiveError must have length {}".format(self.nSystems))
+            assert np.asarray(values).dtype.kind == 'f', ValueError("additive_error must be floats")
             self._addErr = StatArray.StatArray(values, '$\epsilon_{Additive}$', self.units)
 
     @property
@@ -119,6 +123,11 @@ class DataPoint(Point):
             assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
             self._channelNames = values
 
+
+    @property
+    def systemOffset(self):
+        return np.concatenate([[0], np.cumsum(self.nChannelsPerSystem)])
+
     @property
     def fiducial(self):
         return self._fiducial
@@ -126,8 +135,7 @@ class DataPoint(Point):
 
     @fiducial.setter
     def fiducial(self, value):
-        assert isinstance(value, (float, np.float)), TypeError("fiducial must have type float.")
-        self._fiducial = value
+        self._fiducial = StatArray.StatArray(value, 'fiducial')
 
 
     @property
@@ -137,8 +145,7 @@ class DataPoint(Point):
 
     @lineNumber.setter
     def lineNumber(self, value):
-        assert isinstance(value, (float, np.float)), TypeError("lineNumber must have type float.")
-        self._lineNumber = value
+        self._lineNumber = StatArray.StatArray(value, 'Line number')
 
     @property
     def nChannelsPerSystem(self):
@@ -154,8 +161,11 @@ class DataPoint(Point):
 
     @units.setter
     def units(self, value):
-        assert isinstance(value, str), TypeError('units must have type str')
-        self._units = value
+        if values is None:
+            self._units = ""
+        else:
+            assert isinstance(value, str), TypeError('units must have type str')
+            self._units = value
 
     @property
     def data(self):
@@ -236,7 +246,8 @@ class DataPoint(Point):
             self._relErr = StatArray.StatArray(self.nSystems, '$\epsilon_{Relative}x10^{2}$', '%')
         else:
             assert np.size(values) == self.nSystems, ValueError("relativeError must have length {}".format(self.nSystems))
-            self._relErr = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
+            assert np.asarray(values).dtype.kind == 'f', ValueError("relative_error must be floats")
+            self._relErr = StatArray.StatArray(self.nSystems, '$\epsilon_{Relative}x10^{2}$', '%') + values
 
 
     @property
@@ -252,6 +263,20 @@ class DataPoint(Point):
             assert np.size(values) == self.nChannels, ValueError("std must have size {}".format(self.nChannels))
             assert np.all(values[self.active] > 0.0), ValueError("Cannot assign standard deviations that are <= 0.0.")
             self._std[:] = values
+
+
+    @property
+    def units(self):
+        return self._units
+
+    @units.setter
+    def units(self, value):
+
+        if value is None:
+            self._units = ""
+        else:
+            assert isinstance(value, str), TypeError("units must have type str")
+            self._units = value
 
 
     def generate_noise(self, additive_error, relative_error):
@@ -282,7 +307,7 @@ class DataPoint(Point):
         """
 
         assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-        return np.s_[self._systemOffset[system]:self._systemOffset[system+1]]
+        return np.s_[self.systemOffset[system]:self.systemOffset[system+1]]
 
 
     @property
@@ -333,6 +358,7 @@ class DataPoint(Point):
         tmp2 = self._std[self.active]**-1.0
         PhiD = np.float64(np.sum((cf.Ax(tmp2, self.deltaD[self.active]))**2.0, dtype=np.float64))
         return PhiD if squared else np.sqrt(PhiD)
+
 
     def scaleJ(self, Jin, power=1.0):
         """ Scales a matrix by the errors in the given data
