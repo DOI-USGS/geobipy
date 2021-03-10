@@ -28,7 +28,7 @@ class FdemSystem(myObject):
         self.receiverLoops = receiverLoops
 
         # StatArray of Loop Separations
-        self.loopOffsets = StatArray.StatArray([self.nFrequencies, 3], "loopOffsets", "m")
+        self.loopOffsets = StatArray.StatArray((self.nFrequencies, 3), "loopOffsets", "m")
         for i, (t, r) in enumerate(zip(transmitterLoops, receiverLoops)):
             self.loopOffsets[i, :] = [r.x - t.x, r.y - t.y, r.z - t.z]
 
