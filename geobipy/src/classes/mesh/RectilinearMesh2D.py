@@ -650,30 +650,9 @@ class RectilinearMesh2D(myObject):
         RectilinearMesh2D.__init__(self, xEdges=x, yEdges=y, zEdges=z)
         return self
 
-    def xRange(self):
-        """ Get the range of x
 
-        Returns
-        -------
-        out : numpy.float64
-            The range of x
-
-        """
-
-        return self.x.range
-
-
-    def zRange(self):
-        """ Get the range of z
-
-        Returns
-        -------
-        out : numpy.float64
-            The range of z
-
-        """
-
-        return self.z.range
+    def range(self, axis):
+        return self.axis(axis).range
 
 
     def vtkStructure(self):
