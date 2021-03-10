@@ -1,6 +1,8 @@
 from copy import copy, deepcopy
 import numpy as np
 import h5py
+import scipy.stats as st
+
 
 from ...base import customFunctions as cf
 from ...base import customPlots as cP
