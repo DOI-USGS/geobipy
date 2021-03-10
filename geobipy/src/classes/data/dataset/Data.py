@@ -953,6 +953,8 @@ class Data(PointCloud3D):
         self._additive_error = StatArray.StatArray().fromHdf(grp['addErr'])
 
         return self
+
+
     def Bcast(self, world, root=0):
         """Broadcast a Data object using MPI
 
