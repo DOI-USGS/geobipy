@@ -43,7 +43,7 @@ class Histogram1D(RectilinearMesh1D):
 
     """
 
-    def __init__(self, bins=None, binCentres=None, log=None, relativeTo=0.0, values=None):
+    def __init__(self, binCentres=None, bins=None, log=None, relativeTo=0.0, values=None, **kwargs):
         """ Initialize a histogram """
 
         # Allow an null instantiation
@@ -52,7 +52,7 @@ class Histogram1D(RectilinearMesh1D):
             return
 
         # Initialize the parent class
-        super().__init__(cellEdges=bins, cellCentres=binCentres, log=log, relativeTo=relativeTo)
+        super().__init__(cellCentres=binCentres, cellEdges=bins, log=log, relativeTo=relativeTo)
 
         self._counts = StatArray.StatArray(self.nCells, 'Frequency', dtype=np.int64)
 
