@@ -442,6 +442,98 @@ class DataPoint(Point):
             self._predictedData.prior.variance[np.diag_indices(self.nActiveChannels)] = tmp[self.active]
 
 
+    def createHdf(self, parent, myName, withPosterior=True, nRepeats=None, fillvalue=None):
+        """ Create the hdf group metadata in file
+        parent: HDF object to create a group inside
+        myName: Name of the group
+        """
+        # create a new group inside h5obj
+        grp = super().createHdf(parent, myName, withPosterior, nRepeats, fillvalue)
+
+        grp.create_dataset('channels_per_system', data=self.nChannelsPerSystem)
+
+        self.fiducial.createHdf(grp, 'fiducial', nRepeats=nRepeats, fillvalue=fillvalue)
+        self.lineNumber.createHdf(grp, 'line_number', nRepeats=nRepeats, fillvalue=fillvalue)
+        self.elevation.createHdf(grp, 'e', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.data.createHdf(grp, 'd', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.std.createHdf(grp, 's', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.predictedData.createHdf(grp, 'p', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+
+        if not self.errorPosterior is None:
+            for i, x in enumerate(self.errorPosterior):
+                x.createHdf(grp, 'joint_error_posterior_{}'.format(i), nRepeats=nRepeats, fillvalue=fillvalue)
+            # self.relErr.setPosterior([self.errorPosterior[i].marginalize(axis=1) for i in range(self.nSystems)])
+            # self.addErr.setPosterior([self.errorPosterior[i].marginalize(axis=0) for i in range(self.nSystems)])
+
+        self.relErr.createHdf(grp, 'relErr', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.addErr.createHdf(grp, 'addErr', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+
+        return grp
+
+
+    def writeHdf(self, parent, name, withPosterior=True, index=None):
+        """ Write the StatArray to an HDF object
+        parent: Upper hdf file or group
+        myName: object hdf name. Assumes createHdf has already been called
+        create: optionally create the data set as well before writing
+        """
+
+        super().writeHdf(parent, name, withPosterior, index)
+
+        grp = parent[name]
+
+        self.fiducial.writeHdf(grp, 'fiducial', index=index)
+        self.lineNumber.writeHdf(grp, 'line_number', index=index)
+        self.elevation.writeHdf(grp, 'e',  withPosterior=withPosterior, index=index)
+        self.data.writeHdf(grp, 'd',  withPosterior=withPosterior, index=index)
+        self.std.writeHdf(grp, 's',  withPosterior=withPosterior, index=index)
+        self.predictedData.writeHdf(grp, 'p',  withPosterior=withPosterior, index=index)
+
+        if not self.errorPosterior is None:
+            for i, x in enumerate(self.errorPosterior):
+                x.writeHdf(grp, 'joint_error_posterior_{}'.format(i), index=index)
+            # self.relative_error.setPosterior([self.errorPosterior[i].marginalize(axis=1) for i in range(self.nSystems)])
+            # self.additive_error.setPosterior([self.errorPosterior[i].marginalize(axis=0) for i in range(self.nSystems)])
+
+        self.relErr.writeHdf(grp, 'relErr',  withPosterior=withPosterior, index=index)
+        self.addErr.writeHdf(grp, 'addErr',  withPosterior=withPosterior, index=index)
+
+
+    def fromHdf(self, grp, index=None, **kwargs):
+        """ Reads the object from a HDF group """
+
+        super().fromHdf(grp, index=index)
+
+        self.errorPosterior = None
+
+        if 'fiducial' in grp:
+            self.fiducial = StatArray.StatArray().fromHdf(grp['fiducial'], index=index)
+
+        if 'line_number' in grp:
+            self.lineNumber = StatArray.StatArray().fromHdf(grp['line_number'], index=index)
+
+        self.elevation = StatArray.StatArray().fromHdf(grp['e'], index=index)
+
+        if 'channels_per_system' in grp:
+            self._nChannelsPerSystem = np.asarray(grp['channels_per_system'])
+
+        self._data = StatArray.StatArray().fromHdf(grp['d'], index=index)
+        self._std = StatArray.StatArray().fromHdf(grp['s'], index=index)
+        self._predictedData = StatArray.StatArray().fromHdf(grp['p'], index=index)
+
+        if 'joint_error_posterior_0' in grp:
+            i = 0
+            self.errorPosterior = []
+            while 'joint_error_posterior_{}'.format(i) in grp:
+                self.errorPosterior.append(Histogram2D().fromHdf(grp['joint_error_posterior_{}'.format(i)], index=index))
+                i += 1
+
+        self._relErr = StatArray.StatArray().fromHdf(grp['relErr'], index=index)
+        self._addErr = StatArray.StatArray().fromHdf(grp['addErr'], index=index)
+
+        return self
+
+
     def Isend(self, dest, world):
         myMPI.Isend(self.nChannelsPerSystem, dest=dest, world=world)
         tmp = np.hstack([self.x, self.y, self.z, self.elevation])
