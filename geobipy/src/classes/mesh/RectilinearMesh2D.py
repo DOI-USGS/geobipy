@@ -611,60 +611,44 @@ class RectilinearMesh2D(myObject):
         self.y.cellCentres.plot(x=self.x.cellCentres, **kwargs)
 
 
-    def hdfName(self):
-        """ Reprodicibility procedure """
-        return('Rmesh2D()')
-
-
-    def createHdf(self, parent, myName, withPosterior=True, nRepeats=None, fillvalue=None):
+    def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
         """
         # create a new group inside h5obj
-        grp = parent.create_group(myName)
-        grp.attrs["repr"] = self.hdfName()
-        self._counts.createHdf(grp, 'arr', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        self.x.createHdf(grp,'x', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        self.y.createHdf(grp,'y', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        self.z.createHdf(grp,'z', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        grp = self.create_hdf_group(parent, name)
+        self.x.createHdf(grp, 'x', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.y.createHdf(grp, 'y', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        if self.xyz:
+            self.z.createHdf(grp, 'z', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+
+        return grp
 
 
-    def writeHdf(self, parent, myName, withPosterior=True, index=None):
+    def writeHdf(self, parent, name, withPosterior=True, index=None):
         """ Write the StatArray to an HDF object
         parent: Upper hdf file or group
         myName: object hdf name. Assumes createHdf has already been called
         create: optionally create the data set as well before writing
         """
-        self._counts.writeHdf(parent, myName+'/arr',  withPosterior=withPosterior, index=index)
-        self.x.writeHdf(parent, myName+'/x',  withPosterior=withPosterior, index=index)
-        self.y.writeHdf(parent, myName+'/y',  withPosterior=withPosterior, index=index)
-        self.z.writeHdf(parent, myName+'/z',  withPosterior=withPosterior, index=index)
+        grp = parent[name]
+        self.x.writeHdf(grp, 'x',  withPosterior=withPosterior, index=index)
+        self.y.writeHdf(grp, 'y',  withPosterior=withPosterior, index=index)
+        if self.xyz:
+            self.z.writeHdf(grp, 'z',  withPosterior=withPosterior, index=index)
 
 
     def fromHdf(self, grp, index=None):
         """ Reads in the object from a HDF file """
+        x = RectilinearMesh1D().fromHdf(grp['x'], index=index).cellEdges
+        y = RectilinearMesh1D().fromHdf(grp['y'], index=index).cellEdges
 
-        ai=None
-        bi=None
-        if (not index is None):
-            assert cF.isInt(index), ValueError('index must be an integer')
-            ai = np.s_[index, :, :]
-            bi = np.s_[index, :]
-
-        item = grp.get('arr')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        arr = obj.fromHdf(item, index=ai)
-        item = grp.get('x')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        x = obj.fromHdf(item, index=bi)
-        item = grp.get('y')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        y = obj.fromHdf(item, index=bi)
-        tmp = RectilinearMesh2D(x, y)
-        tmp._counts = arr
-        return tmp
-
+        z = None
+        if 'z' in grp:
+            z = RectilinearMesh1D().fromHdf(grp['z'], index=index).cellEdges
+        RectilinearMesh2D.__init__(self, xEdges=x, yEdges=y, zEdges=z)
+        return self
 
     def xRange(self):
         """ Get the range of x
