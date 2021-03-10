@@ -206,7 +206,7 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
         flipY = kwargs.pop('flipY', False)
         c = kwargs.pop('color', 'k')
 
-        xtmp = super().getXAxis(xAxis)
+        xtmp = super().axis(xAxis).cellEdges
 
         ax = plt.gca()
         cP.pretty(ax)
@@ -242,7 +242,7 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
         kwargs['c'] = kwargs.pop('color', 'k')
         kwargs['linewidth'] = kwargs.pop('linewidth', 1.0)
 
-        xtmp = super().getXAxis(xAxis, centres=centres)
+        xtmp = super().axis(xAxis).cellCentres
 
         if centres:
             self.height.cellCentres.plot(xtmp, **kwargs)
