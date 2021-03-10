@@ -139,46 +139,43 @@ class CircularLoop(EmLoop):
                "Radius: {}\n").format(self.orient, self.moment, self.x, self.y, self.z, self.pitch, self.roll, self.yaw)
         return msg
 
-    def hdfName(self):
-        """Create a reproducibility string that can be instantiated from a hdf file """
-        return 'CircularLoop()'
+    # def hdf_name(self):
+    #     """Create a reproducibility string that can be instantiated from a hdf file """
+    #     return 'CircularLoop()'
 
-    def createHdf(self, parent, myName, nRepeats=None, fillvalue=None):
+    def createHdf(self, parent, name, nRepeats=None, fillvalue=None):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
         """
         # create a new group inside h5obj
-        grp = parent.create_group(myName)
-        grp.attrs["repr"] = self.hdfName()
+        grp = self.create_hdf_group(parent, name)
 
         data = StatArray.StatArray(9).createHdf(grp, 'data', nRepeats=nRepeats, fillvalue=fillvalue)
 
-        # if (not nRepeats is None):
-        #     g'data', [nRepeats, 9], dtype=np.float64, fillvalue=fillvalue)
-        # else:
-        #     grp.create_dataset('data', [9], dtype=np.float64, fillvalue=fillvalue)
 
-
-    def writeHdf(self, parent, myName, index=None):
+    def writeHdf(self, parent, name, index=None):
         """ Write the StatArray to an HDF object
         parent: Upper hdf file or group
         myName: object hdf name. Assumes createHdf has already been called
         create: optionally create the data set as well before writing
         """
+
+        grp = parent[name]
+
         data = StatArray.StatArray(np.asarray([self._orient, self.moment, self.x, self.y, self.z, self.pitch, self.roll, self.yaw, self.radius], dtype=np.float64))
-        data.writeHdf(parent, myName+'/data', index=index)
+        data.writeHdf(grp, 'data', index=index)
 
 
     def fromHdf(self, h5grp, index=None):
         """ Reads in the object from a HDF file """
 
-        item = h5grp.get('data')
+        item = h5grp['data']
 
         if not 'repr' in item.attrs:
             tmp = np.asarray(item[index, :])
         else:
-            tmp = (eval(cf.safeEval(item.attrs.get('repr')))).fromHdf(item, index=index)
+            tmp = StatArray.StatArray().fromHdf(item, index=index)
 
         return CircularLoop(*tmp)
 
