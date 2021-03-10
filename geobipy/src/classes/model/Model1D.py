@@ -62,12 +62,12 @@ class Model1D(Model):
     def __init__(self, nCells=None, top=None, parameters = None, depth = None, thickness = None, hasHalfspace=True):
         """Instantiate a new Model1D """
 
+
         self.hasHalfspace = hasHalfspace
         self.nCells = nCells
 
         if (all((x is None for x in [nCells, top, parameters, depth, thickness]))): return
         assert (not(not thickness is None and not depth is None)), TypeError('Cannot instantiate with both depth and thickness values')
-
 
         # Depth to the top of the model
         if top is None:
@@ -117,8 +117,12 @@ class Model1D(Model):
             self._nCells = StatArray.StatArray(1, '# of Cells', dtype=np.int32) + 1
         else:
             assert isinstance(value, (int, np.integer, StatArray.StatArray)), TypeError("nCells must be an integer")
+            assert np.size(value) == 1, ValueError("nCells must be scalar")
             assert (value >= 1), ValueError('nCells must >= 1')
-            self._nCells = StatArray.StatArray(np.atleast_1d(value), '# of Cells', dtype=np.int32)
+            if isinstance(value, int):
+                self._nCells = StatArray.StatArray(1, '# of Cells', dtype=np.int32) + value
+            else:
+                self._nCells = deepcopy(value)
 
     @property
     def top(self):
@@ -139,6 +143,7 @@ class Model1D(Model):
 
     def _init_withHalfspace(self, nCells=None, top=None, parameters = None, depth = None, thickness = None):
 
+        self.nCells = nCells
         if (not depth is None and nCells is None):
             self._nCells = depth.size + 1
         if (not thickness is None and nCells is None):
@@ -277,7 +282,7 @@ class Model1D(Model):
             Padded model
 
         """
-        tmp = Model1D(size,self.top)
+        tmp = Model1D(size, self.top)
         tmp._nCells = self.nCells
         tmp._depth = self.depth.pad(size)
         tmp._thk = self.thk.pad(size)
