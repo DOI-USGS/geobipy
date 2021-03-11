@@ -31,8 +31,8 @@ from ..classes.data.datapoint.DataPoint import DataPoint
 
 #from ..classes.statistics.Distribution import Distribution
 from ..base.HDF import hdfRead
-from ..base import customPlots as cP
-from ..base import customFunctions as cF
+from ..base import plotting as cP
+from ..base import utilities as cF
 from os.path import join
 from scipy.spatial import Delaunay
 from scipy.interpolate import CloughTocher2DInterpolator
@@ -64,6 +64,7 @@ class Inference3D(myObject):
         self._world = world
         for i in range(self.nLines):
             fName = self.h5files[i]
+
             LR = Inference2D(fName, system_file_path=system_file_path, mode=mode, world=world)
             self._lines.append(LR)
             self._lineNumbers[i] = LR.line
@@ -273,7 +274,7 @@ class Inference3D(myObject):
     @cached_property
     def additiveError(self):
 
-        additiveError = StatArray.StatArray([self.nSystems, self.nPoints], name=self.lines[0].additiveError.name, units=self.lines[0].additiveError.units, order = 'F')
+        additiveError = StatArray.StatArray((self.nSystems, self.nPoints), name=self.lines[0].additiveError.name, units=self.lines[0].additiveError.units, order = 'F')
 
         print("Reading Additive Errors Posteriors", flush=True)
         Bar = progressbar.ProgressBar()
@@ -302,8 +303,7 @@ class Inference3D(myObject):
     @cached_property
     def bestParameters(self):
 
-
-        bestParameters = StatArray.StatArray([self.zGrid.nCells, self.nPoints], name=self.lines[0].bestParameters.name, units=self.lines[0].bestParameters.units, order = 'F')
+        bestParameters = StatArray.StatArray((self.zGrid.nCells, self.nPoints), name=self.lines[0].bestParameters.name, units=self.lines[0].bestParameters.units, order = 'F')
 
         print('Reading best parameters', flush=True)
         Bar=progressbar.ProgressBar()
@@ -392,7 +392,7 @@ class Inference3D(myObject):
 
     @cached_property
     def interfaces(self):
-        interfaces = StatArray.StatArray([self.zGrid.nCells, self.nPoints], name=self.lines[0].interfaces.name, units=self.lines[0].interfaces.units)
+        interfaces = StatArray.StatArray((self.zGrid.nCells, self.nPoints), name=self.lines[0].interfaces.name, units=self.lines[0].interfaces.units)
 
         print("Reading Depth Posteriors", flush=True)
         Bar=progressbar.ProgressBar()
@@ -419,7 +419,7 @@ class Inference3D(myObject):
     @cached_property
     def meanParameters(self):
 
-        meanParameters = StatArray.StatArray([self.zGrid.nCells, self.nPoints], name=self.lines[0].meanParameters.name, units=self.lines[0].meanParameters.units, order = 'F')
+        meanParameters = StatArray.StatArray((self.zGrid.nCells, self.nPoints), name=self.lines[0].meanParameters.name, units=self.lines[0].meanParameters.units, order = 'F')
 
         print("Reading Mean Parameters", flush=True)
         Bar = progressbar.ProgressBar()
@@ -495,7 +495,7 @@ class Inference3D(myObject):
     @cached_property
     def relativeError(self):
 
-        relativeError = StatArray.StatArray([self.nSystems, self.nPoints], name=self.lines[0].relativeError.name, units=self.lines[0].relativeError.units, order = 'F')
+        relativeError = StatArray.StatArray((self.nSystems, self.nPoints), name=self.lines[0].relativeError.name, units=self.lines[0].relativeError.units, order = 'F')
 
         print('Reading Relative Error Posteriors', flush=True)
         Bar = progressbar.ProgressBar()
@@ -609,6 +609,8 @@ class Inference3D(myObject):
 
         if np.size(index) > 0:
             return np.hstack(lineIndex), np.hstack(index)
+
+        assert False, ValueError("fiducial not present in this data set")
 
 
     def fit_estimated_pdf_mpi(self, intervals=None, **kwargs):
@@ -806,8 +808,8 @@ class Inference3D(myObject):
 
         for i in range(self.nLines):
 
-            means = StatArray.StatArray([self.lines[i].nPoints, nIntervals, maxClusters], "fit means")
-            variances = StatArray.StatArray([self.lines[i].nPoints, nIntervals, maxClusters], "fit variances")
+            means = StatArray.StatArray((self.lines[i].nPoints, nIntervals, maxClusters), "fit means")
+            variances = StatArray.StatArray((self.lines[i].nPoints, nIntervals, maxClusters), "fit variances")
 
             if 'mixture_fits' in self.lines[i].hdfFile:
                 saved_command = self.lines[i].hdfFile['/mixture_fits'].attrs['command']
@@ -872,10 +874,10 @@ class Inference3D(myObject):
         intervals = self.lines[0].lineHitmap._reconcile_intervals(intervals)
         nIntervals = np.size(intervals) - 1
 
-        means = StatArray.StatArray([self.nLines, nIntervals, max_distributions], "fit means")
-        variances = StatArray.StatArray([self.nLines, nIntervals, max_distributions], "fit variances")
-        amplitudes = StatArray.StatArray([self.nLines, nIntervals, max_distributions], "fit amplitudes")
-        df = StatArray.StatArray([self.nLines, nIntervals, max_distributions], "fit df")
+        means = StatArray.StatArray((self.nLines, nIntervals, max_distributions), "fit means")
+        variances = StatArray.StatArray((self.nLines, nIntervals, max_distributions), "fit variances")
+        amplitudes = StatArray.StatArray((self.nLines, nIntervals, max_distributions), "fit amplitudes")
+        df = StatArray.StatArray((self.nLines, nIntervals, max_distributions), "fit df")
 
         output_file = h5py.File('lineHitmap_fits.h5', 'w')
 
@@ -957,9 +959,9 @@ class Inference3D(myObject):
 
         for i in range(self.nLines):
 
-            means = StatArray.StatArray([self.lines[i].nPoints, nIntervals, kwargs['maxDistributions']], "fit means")
-            variances = StatArray.StatArray([self.lines[i].nPoints, nIntervals, kwargs['maxDistributions']], "fit variances")
-            amplitudes = StatArray.StatArray([self.lines[i].nPoints, nIntervals, kwargs['maxDistributions']], "fit amplitudes")
+            means = StatArray.StatArray((self.lines[i].nPoints, nIntervals, kwargs['maxDistributions']), "fit means")
+            variances = StatArray.StatArray((self.lines[i].nPoints, nIntervals, kwargs['maxDistributions']), "fit variances")
+            amplitudes = StatArray.StatArray((self.lines[i].nPoints, nIntervals, kwargs['maxDistributions']), "fit amplitudes")
 
             if 'mixture_fits' in self.lines[i].hdfFile:
                 saved_command = self.lines[i].hdfFile['/mixture_fits'].attrs['command']
@@ -1393,6 +1395,7 @@ class Inference3D(myObject):
             res = res[np.logical_not(np.isnan(res[:,0]))]
 
         return res
+
 
     def kMeans(self, nClusters, precomputedParVsZ=None, standardize=False, log10Depth=False, plot=False, bestModel=True, withDoi=True, reciprocateParameter=True, log10=True, clipNan=True, **kwargs):
         """  """

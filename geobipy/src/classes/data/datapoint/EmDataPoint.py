@@ -3,8 +3,8 @@ from ...model.Model1D import Model1D
 from ....classes.core import StatArray
 from ...statistics.Histogram1D import Histogram1D
 from ...statistics.Histogram2D import Histogram2D
-from ....base import customFunctions as cf
-from ....base import customPlots as cP
+from ....base import utilities as cf
+from ....base import plotting as cP
 from copy import deepcopy
 import numpy as np
 from ....base.logging import myLogger
@@ -29,7 +29,6 @@ class EmDataPoint(DataPoint):
 
         # Initialize the sensitivity matrix
         self.J = None
-        self.errorPosterior = None
 
 
     @property
@@ -43,7 +42,7 @@ class EmDataPoint(DataPoint):
         # StatArray of calibration parameters
         out.errorPosterior = self.errorPosterior
         # Initialize the sensitivity matrix
-        out.J = deepcopy(self.J)
+        out.J = deepcopy(self.J, memo)
 
         return out
 

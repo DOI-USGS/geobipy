@@ -10,7 +10,7 @@ from .EmLoop import EmLoop
 from .CircularLoop import CircularLoop
 from ...base import fileIO as fIO
 from ...base import MPI as myMPI
-from ...base import customFunctions as cF
+from ...base import utilities as cF
 
 
 class FdemSystem(myObject):
@@ -28,7 +28,7 @@ class FdemSystem(myObject):
         self.receiverLoops = receiverLoops
 
         # StatArray of Loop Separations
-        self.loopOffsets = StatArray.StatArray([self.nFrequencies, 3], "loopOffsets", "m")
+        self.loopOffsets = StatArray.StatArray((self.nFrequencies, 3), "loopOffsets", "m")
         for i, (t, r) in enumerate(zip(transmitterLoops, receiverLoops)):
             self.loopOffsets[i, :] = [r.x - t.x, r.y - t.y, r.z - t.z]
 
@@ -268,46 +268,36 @@ class FdemSystem(myObject):
         return msg
 
 
-    def hdfName(self):
-        return('FdemSystem()')
-
-
-    def toHdf(self, h5obj, myName):
+    def toHdf(self, h5obj, name):
         """ Write the object to a HDF file """
         # Create a new group inside h5obj
-        grp = h5obj.create_group(myName)
-        grp.attrs["repr"] = self.hdfName()
+        grp = self.create_hdf_group(h5obj, name)
         grp.create_dataset('nFreq', data=self.nFrequencies)
         self._frequencies.toHdf(grp, 'freq')
         self.loopOffsets.toHdf(grp, 'loopoffsets')
         T = grp.create_group('T')
         R = grp.create_group('R')
         for i in range(self.nFrequencies):
-            self.transmitterLoops[i].toHdf(T, 'T' + str(i))
-            self.receiverLoops[i].toHdf(R, 'R' + str(i))
+            self.transmitterLoops[i].toHdf(T, 'T{}'.format(i))
+            self.receiverLoops[i].toHdf(R, 'R{}'.format(i))
 
 
     def fromHdf(self, grp):
         """ Reads the object from a HDF file """
         nFreq = np.int(np.array(grp.get('nFreq')))
-        item = grp.get('freq')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        frequencies = obj.fromHdf(item)
-        try:
-            item = grp.get('loopoffsets')
-            obj = eval(cF.safeEval(item.attrs.get('repr')))
-        except:
-            item = grp.get('dist')
-            obj = eval(cF.safeEval(item.attrs.get('repr')))
-        loopOffsets = obj.fromHdf(item)
+        frequencies = StatArray.StatArray().fromHdf(grp['freq'])
+
+        if 'loopoffsets' in grp:
+            loopOffsets = StatArray.StatArray().fromHdf(grp['loopoffsets'])
+        else:
+            loopOffsets = StatArray.StatArray().fromHdf(grp['dist'])
 
         transmitterLoops = []
         receiverLoops = []
         for i in range(nFreq):
-            item = grp.get('T/T' + str(i))
-            transmitterLoops.append(eval(cF.safeEval(item.attrs.get('repr'))))
-            item = grp.get('R/R' + str(i))
-            receiverLoops.append(eval(cF.safeEval(item.attrs.get('repr'))))
+            transmitterLoops.append(eval(cF.safeEval(grp['T/T{}'.format(i)].attrs.get('repr'))))
+            receiverLoops.append(eval(cF.safeEval(grp['R/R{}'.format(i)].attrs.get('repr'))))
+
         self.__init__(frequencies, transmitterLoops, receiverLoops)
 
         self.loopOffsets = loopOffsets

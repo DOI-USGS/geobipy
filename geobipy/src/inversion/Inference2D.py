@@ -17,8 +17,8 @@ from ..classes.data.dataset.FdemData import FdemData
 from ..classes.data.dataset.TdemData import TdemData
 from ..classes.model.Model1D import Model1D
 from ..base.HDF import hdfRead
-from ..base import customPlots as cP
-from ..base import customFunctions as cF
+from ..base import plotting as cP
+from ..base import utilities as cF
 from ..base import fileIO as fIO
 from ..base.MPI import loadBalance1D_shrinkingArrays
 import matplotlib.pyplot as plt
@@ -288,7 +288,7 @@ class Inference2D(myObject):
         if 'doi' in self.hdfFile.keys():
             return StatArray.StatArray(np.asarray(self.getAttribute('doi')), 'Depth of investigation', 'm')
         else:
-            self.computeDOI()
+            return self.computeDOI()
 
 
     def computeDOI(self, percent=67.0, window=1):
@@ -620,7 +620,7 @@ class Inference2D(myObject):
             mixtures = None
             if not np.all(hm.counts == 0):
                 mixtures = hm.fit_estimated_pdf(iPoint=i, rank=self.world.rank, **kwargs)
-            
+
             if not mixtures is None:
                 for j, m in enumerate(mixtures):
                     if not m is None:
@@ -756,12 +756,14 @@ class Inference2D(myObject):
 
         return np.asarray([depth, parameter]).T
 
-
     @cached_property
     def interfaces(self):
         """ Get the layer interfaces from the layer depth histograms """
         maxCount = self.interfacePosterior.counts.max()
-        # values = np.vstack([self.interfacePosterior.counts.T, self.interfacePosterior.counts.T[-1, :]])
+        if np.size(self.interfacePosterior.counts, 1) == (self.mesh.z.nCells - 1):
+            values = np.vstack([self.interfacePosterior.counts.T, self.interfacePosterior.counts.T[-1, :]])
+            return StatArray.StatArray(values / np.float64(maxCount), "interfaces", "")
+
         return StatArray.StatArray(self.interfacePosterior.counts.T / np.float64(maxCount), "interfaces", "")
 
 
@@ -1012,7 +1014,7 @@ class Inference2D(myObject):
     @property
     def relativeErrorPosteriors(self):
         """ Get the Relative error of the best data points """
-        return self.data._relErr.posterior
+        return self.data.relErr.posterior
 
 
     def hitmap(self, index=None, fiducial=None):
@@ -1072,7 +1074,8 @@ class Inference2D(myObject):
 
 
     def x_axis(self, axis, centres=False):
-        return self.mesh.getXAxis(axis, centres=centres)
+        ax = self.mesh.axis(axis)
+        return ax.cellCentres if centres else ax.cellEdges
 
 
     @cached_property
@@ -1093,7 +1096,7 @@ class Inference2D(myObject):
 
         xAxis = kwargs.pop('xAxis', 'x')
 
-        xtmp = self.mesh.getXAxis(xAxis, centres=False)
+        xtmp = self.x_axis(xAxis, centres=False)
 
         values = self.bestData.deltaD.T
 
@@ -1108,7 +1111,7 @@ class Inference2D(myObject):
 
         xAxis = kwargs.pop('xAxis', 'x')
 
-        xtmp = self.mesh.getXAxis(xAxis, centres=False)
+        xtmp = self.x_axis(xAxis, centres=False)
 
         cP.pcolor(self.bestData.data.T, x=xtmp, y=StatArray.StatArray(np.arange(self.bestData.predictedData.shape[1]), name='Channel'), **kwargs)
 
@@ -1118,7 +1121,7 @@ class Inference2D(myObject):
 
         xAxis = kwargs.pop('xAxis', 'x')
 
-        xtmp = self.mesh.getXAxis(xAxis, centres=False)
+        xtmp = self.x_axis(xAxis, centres=False)
 
         cP.pcolor(self.bestData.predictedData.T, x=xtmp, y=StatArray.StatArray(np.arange(self.bestData.predictedData.shape[1]), name='Channel'), **kwargs)
 
@@ -1128,7 +1131,7 @@ class Inference2D(myObject):
 
         xAxis = kwargs.pop('xAxis', 'x')
 
-        xtmp = self.mesh.getXAxis(xAxis, centres=True)
+        xtmp = self.x_axis(xAxis, centres=True)
 
         if channel is None:
             channel = np.s_[:]
@@ -1144,7 +1147,7 @@ class Inference2D(myObject):
         kwargs['color'] = kwargs.pop('color','k')
         kwargs['linewidth'] = kwargs.pop('linewidth',0.5)
 
-        xtmp = self.mesh.getXAxis(xAxis, centres=False)
+        xtmp = self.x_axis(xAxis, centres=False)
 
         cP.plot(xtmp, self.height.edges() + self.elevation.edges(), **kwargs)
 
@@ -1158,7 +1161,7 @@ class Inference2D(myObject):
 
         xAxis = kwargs.pop('xAxis', 'x')
 
-        xtmp = self.mesh.getXAxis(xAxis, centres=True)
+        xtmp = self.x_axis(xAxis, centres=True)
 
         if channel is None:
             channel = np.s_[:]
@@ -1178,7 +1181,7 @@ class Inference2D(myObject):
         kwargs['color'] = kwargs.pop('color','k')
         kwargs['linewidth'] = kwargs.pop('linewidth',0.5)
 
-        xtmp = self.mesh.getXAxis(xAxis, centres=True)
+        xtmp = self.x_axis(xAxis, centres=True)
 
         (self.elevation - self.doi).plot(x=xtmp, **kwargs)
 
@@ -1202,7 +1205,7 @@ class Inference2D(myObject):
 
         xAxis = kwargs.pop('xAxis', 'x')
 
-        xtmp = self.mesh.getXAxis(xAxis)
+        xtmp = self.x_axis(xAxis)
 
         post = self.heightPosterior
 
@@ -1235,7 +1238,7 @@ class Inference2D(myObject):
         kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth','0.1')
         xAxis = kwargs.pop('xAxis', 'x')
 
-        xtmp = self.mesh.getXAxis(xAxis)
+        xtmp = self.x_axis(xAxis)
 
         i = self.fiducials.searchsorted(fiducial)
 
@@ -1256,7 +1259,7 @@ class Inference2D(myObject):
         kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth', 1.0)
         kwargs['linestyle'] = kwargs.pop('linestyle','none')
 
-        xtmp = self.mesh.getXAxis(xAxis)
+        xtmp = self.x_axis(xAxis)
         self.nLayers.plot(xtmp, **kwargs)
         # cP.ylabel(self.nLayers.getNameUnits())
         cP.title('# of Layers in Best Model')
@@ -1269,7 +1272,7 @@ class Inference2D(myObject):
 
         xAxis = kwargs.pop('xAxis', 'x')
 
-        xtmp = self.mesh.getXAxis(xAxis)
+        xtmp = self.x_axis(xAxis)
 
         c = post.counts.T
         c = np.divide(c, np.max(c,0), casting='unsafe')
@@ -1288,7 +1291,7 @@ class Inference2D(myObject):
         ls = kwargs.pop('linestyle','-')
         lw = kwargs.pop('linewidth',1.0)
 
-        xtmp = self.mesh.getXAxis(xAxis, centres=True)
+        xtmp = self.x_axis(xAxis, centres=True)
 
         if (self.nSystems > 1):
             r = range(self.nSystems)
@@ -1316,7 +1319,7 @@ class Inference2D(myObject):
 
         xAxis = kwargs.pop('xAxis', 'x')
 
-        xtmp = self.mesh.getXAxis(xAxis)
+        xtmp = self.x_axis(xAxis)
 
         if self.nSystems > 1:
             post = self.additiveErrorPosteriors[system]
@@ -1374,7 +1377,7 @@ class Inference2D(myObject):
 
         xAxis = kwargs.pop('xAxis', 'x')
 
-        xtmp = self.mesh.getXAxis(xAxis, centres=True)
+        xtmp = self.x_axis(xAxis, centres=True)
 
         if channel is None:
             channel = np.s_[:]
@@ -1392,7 +1395,7 @@ class Inference2D(myObject):
 
         xAxis = kwargs.pop('xAxis', 'x')
 
-        xtmp = self.mesh.getXAxis(xAxis)
+        xtmp = self.x_axis(xAxis)
 
         if self.nSystems > 1:
             post = self.relativeErrorPosteriors[system]
@@ -1426,7 +1429,7 @@ class Inference2D(myObject):
         kwargs['linestyle'] = kwargs.pop('linestyle','-')
         kwargs['linewidth'] = kwargs.pop('linewidth',1.0)
 
-        xtmp = self.mesh.getXAxis(xAxis)
+        xtmp = self.x_axis(xAxis)
 
         if (self.nSystems > 1):
             r = range(self.nSystems)
@@ -1459,7 +1462,7 @@ class Inference2D(myObject):
         kwargs['linestyle'] = kwargs.pop('linestyle','-')
         kwargs['linewidth'] = kwargs.pop('linewidth',1.0)
 
-        xtmp = self.mesh.getXAxis(xAxis)
+        xtmp = self.x_axis(xAxis)
 
 #        if (self.nSystems > 1):
 #            r = range(self.nSystems)
@@ -2366,64 +2369,64 @@ class Inference2D(myObject):
 #        tmp=self.bestModel.pad(self.bestModel.maxLayers)
 #        tmp.createHdf(grp, 'bestmodel')
 
-    def results2Hdf(self, results):
+    def write_inference1d(self, inference1d):
         """ Given a HDF file initialized as line results, write the contents of results to the appropriate arrays """
 
-        assert results.fiducial in self.fiducials, Exception("The HDF file does not have ID number {}. Available ids are between {} and {}".format(results.fiducial, np.min(self.fiducials), np.max(self.fiducials)))
+        assert inference1d.fiducial in self.fiducials, Exception("The HDF file does not have ID number {}. Available ids are between {} and {}".format(inference1d.fiducial, np.min(self.fiducials), np.max(self.fiducials)))
 
         hdfFile = self.hdfFile
 
         # Get the point index
-        i = self.fiducials.searchsorted(results.fiducial)
+        i = self.fiducials.searchsorted(reinference1dsults.fiducial)
 
         # Add the iteration number
-        hdfFile['i'][i] = results.i
+        hdfFile['i'][i] = inference1d.i
 
         # Add the burn in iteration
-        hdfFile['iburn'][i] = results.iBurn
+        hdfFile['iburn'][i] = inference1d.iBurn
 
         # Add the burn in iteration
-        hdfFile['ibest'][i] = results.iBest
+        hdfFile['ibest'][i] = inference1d.iBest
 
         # Add the burned in logical
-        hdfFile['burnedin'][i] = results.burnedIn
+        hdfFile['burnedin'][i] = inference1d.burnedIn
 
         # Add the depth of investigation
-        # hdfFile['doi'][i] = results.doi()
+        # hdfFile['doi'][i] = inference1d.doi()
 
         # Add the multiplier
-        hdfFile['multiplier'][i] = results.multiplier
+        hdfFile['multiplier'][i] = inference1d.multiplier
 
         # Add the inversion time
-        hdfFile['invtime'][i] = results.invTime
+        hdfFile['invtime'][i] = inference1d.invTime
 
         # Add the savetime
-#        hdfFile['savetime'][i] = results.saveTime
+#        hdfFile['savetime'][i] = inference1d.saveTime
 
         # Interpolate the mean and best model to the discretized hitmap
-        hm = results.currentModel.par.posterior
-        results.meanInterp[:] = hm.mean()
-        results.bestInterp[:] = results.bestModel.interpPar2Mesh(results.bestModel.par, hm)
-        # results.opacityInterp[:] = results.Hitmap.credibleRange(percent=95.0, log='e')
+        hm = inference1d.currentModel.par.posterior
+        inference1d.meanInterp[:] = hm.mean()
+        inference1d.bestInterp[:] = inference1d.bestModel.interpPar2Mesh(inference1d.bestModel.par, hm)
+        # inference1d.opacityInterp[:] = inference1d.Hitmap.credibleRange(percent=95.0, log='e')
 
         slic = np.s_[i, :]
         # Add the interpolated mean model
-        results.meanInterp.writeHdf(hdfFile, 'meaninterp',  index=i)
+        inference1d.meanInterp.writeHdf(hdfFile, 'meaninterp',  index=i)
         # Add the interpolated best
-        results.bestInterp.writeHdf(hdfFile, 'bestinterp',  index=i)
+        inference1d.bestInterp.writeHdf(hdfFile, 'bestinterp',  index=i)
         # Add the interpolated opacity
 
         # Add the acceptance rate
-        results.rate.writeHdf(hdfFile, 'rate', index=i)
+        inference1d.rate.writeHdf(hdfFile, 'rate', index=i)
 
         # Add the data misfit
-        results.PhiDs.writeHdf(hdfFile,'phids',index=i)
+        inference1d.PhiDs.writeHdf(hdfFile,'phids',index=i)
 
-        results.currentDataPoint.writeHdf(hdfFile,'currentdatapoint',  index=i)
+        inference1d.currentDataPoint.writeHdf(hdfFile,'currentdatapoint',  index=i)
 
-        results.bestDataPoint.writeHdf(hdfFile,'bestd', withPosterior=False, index=i)
+        inference1d.bestDataPoint.writeHdf(hdfFile,'bestd', withPosterior=False, index=i)
 
-        results.currentModel.writeHdf(hdfFile,'currentmodel', index=i)
+        inference1d.currentModel.writeHdf(hdfFile,'currentmodel', index=i)
 
-        results.bestModel.writeHdf(hdfFile,'bestmodel', withPosterior=False, index=i)
+        inference1d.bestModel.writeHdf(hdfFile,'bestmodel', withPosterior=False, index=i)
 

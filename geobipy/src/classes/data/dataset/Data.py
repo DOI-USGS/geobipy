@@ -5,8 +5,8 @@ import numpy as np
 from cached_property import cached_property
 from ....classes.core import StatArray
 from ....base import fileIO as fIO
-from ....base import customFunctions as cf
-from ....base import customPlots as cP
+from ....base import utilities as cf
+from ....base import plotting as cP
 from ...pointcloud.PointCloud3D import PointCloud3D
 from ..datapoint.DataPoint import DataPoint
 from ....classes.core.myObject import myObject
@@ -66,20 +66,38 @@ class Data(PointCloud3D):
         # Number of Channels
         self._nChannelsPerSystem = nChannelsPerSystem
 
-        PointCloud3D.__init__(self, x, y, z, elevation)
+        super().__init__(x, y, z, elevation)
 
         self.fiducial = fiducial
-
         self.lineNumber = lineNumber
-
         self.units = units
         self.data = data
-
         self.std = std
-
         self.predictedData = predictedData
-
         self.channelNames = channelNames
+
+        self.error_posterior = None
+
+
+    @property
+    def additive_error(self):
+        """The data. """
+        if np.size(self._additive_error, 0) == 0:
+            self._additive_error = StatArray.StatArray((self.nPoints, self.nSystems), "Additive error", "%")
+        return self._additive_error
+
+
+    @additive_error.setter
+    def additive_error(self, values):
+        shp = (self.nPoints, self.nSystems)
+        if values is None:
+            self._additive_error = StatArray.StatArray(np.ones(shp), "Additive error", "%")
+        else:
+            if self.nPoints == 0:
+                self.nPoints = np.size(values, 0)
+                shp = (self.nPoints, self.nSystems)
+            assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("additive_error must have shape {}".format(shp))
+            self._additive_error = StatArray.StatArray(values)
 
 
     @property
@@ -109,6 +127,7 @@ class Data(PointCloud3D):
         else:
             assert isinstance(values, str)
             self._units = values
+
 
     def _systemIndices(self, system=0):
         """The slice indices for the requested system.
@@ -140,13 +159,13 @@ class Data(PointCloud3D):
 
     @data.setter
     def data(self, values):
-        shp = [self.nPoints, self.nChannels]
+        shp = (self.nPoints, self.nChannels)
         if values is None:
             self._data = StatArray.StatArray(shp, "Data", self.units)
         else:
             if self.nPoints == 0:
                 self.nPoints = np.size(values, 0)
-                shp = [self.nPoints, self.nChannels]
+                shp = (self.nPoints, self.nChannels)
             assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("data must have shape {}".format(shp))
             self._data = StatArray.StatArray(values)
 
@@ -182,13 +201,13 @@ class Data(PointCloud3D):
 
     @std.setter
     def std(self, values):
-        shp = [self.nPoints, self.nChannels]
+        shp = (self.nPoints, self.nChannels)
         if values is None:
             self._std = StatArray.StatArray(np.ones(shp), "Standard deviation", self.units)
         else:
             if self.nPoints == 0:
                 self.nPoints = np.size(values, 0)
-                shp = [self.nPoints, self.nChannels]
+                shp = (self.nPoints, self.nChannels)
             assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("std must have shape {}".format(shp))
             self._std = StatArray.StatArray(values)
 
@@ -275,7 +294,28 @@ class Data(PointCloud3D):
 
     @property
     def shape(self):
-        return [self.nPoints, self.nChannels]
+        return (self.nPoints, self.nChannels)
+
+
+    @property
+    def relative_error(self):
+        """The data. """
+        if np.size(self._relative_error, 0) == 0:
+            self._relative_error = StatArray.StatArray((self.nPoints, self.nSystems), "Relative error", "%")
+        return self._relative_error
+
+
+    @relative_error.setter
+    def relative_error(self, values):
+        shp = (self.nPoints, self.nSystems)
+        if values is None:
+            self._relative_error = StatArray.StatArray(np.ones(shp), "Relative error", "%")
+        else:
+            if self.nPoints == 0:
+                self.nPoints = np.size(values, 0)
+                shp = (self.nPoints, self.nSystems)
+            assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("relative_error must have shape {}".format(shp))
+            self._relative_error = StatArray.StatArray(values)
 
 
     def addToVTK(self, vtk, prop=['data', 'predicted', 'std'], system=None):
@@ -620,7 +660,7 @@ class Data(PointCloud3D):
 
         See Also
         --------
-        geobipy.customPlots.plot : For additional keyword arguments
+        geobipy.plotting.plot : For additional keyword arguments
 
         """
 
@@ -684,7 +724,7 @@ class Data(PointCloud3D):
 
         See Also
         --------
-        geobipy.customPlots.plot : For additional keyword arguments
+        geobipy.plotting.plot : For additional keyword arguments
 
         """
 
@@ -826,6 +866,93 @@ class Data(PointCloud3D):
         self.addToVTK(vtk, prop, system=system)
 
         vtk.tofile(fileName, format=format)
+
+
+    def createHdf(self, parent, myName, withPosterior=True, fillvalue=None):
+        """ Create the hdf group metadata in file
+        parent: HDF object to create a group inside
+        myName: Name of the group
+        """
+        # create a new group inside h5obj
+        grp = super().createHdf(parent, myName, withPosterior, fillvalue)
+
+        grp.create_dataset('channels_per_system', data=self.nChannelsPerSystem)
+
+        self.fiducial.createHdf(grp, 'fiducial', fillvalue=fillvalue)
+        self.lineNumber.createHdf(grp, 'line_number', fillvalue=fillvalue)
+        self.elevation.createHdf(grp, 'e', withPosterior=withPosterior, fillvalue=fillvalue)
+        self.data.createHdf(grp, 'd', withPosterior=withPosterior, fillvalue=fillvalue)
+        self.std.createHdf(grp, 's', withPosterior=withPosterior, fillvalue=fillvalue)
+        self.predictedData.createHdf(grp, 'p', withPosterior=withPosterior, fillvalue=fillvalue)
+
+        if not self.errorPosterior is None:
+            for i, x in enumerate(self.errorPosterior):
+                x.createHdf(grp, 'joint_error_posterior_{}'.format(i), fillvalue=fillvalue)
+
+        self.relErr.createHdf(grp, 'relErr', withPosterior=withPosterior, fillvalue=fillvalue)
+        self.addErr.createHdf(grp, 'addErr', withPosterior=withPosterior, fillvalue=fillvalue)
+
+        return grp
+
+
+    def writeHdf(self, parent, name, withPosterior=True):
+        """ Write the StatArray to an HDF object
+        parent: Upper hdf file or group
+        myName: object hdf name. Assumes createHdf has already been called
+        create: optionally create the data set as well before writing
+        """
+
+        super().writeHdf(parent, name, withPosterior, index)
+
+        grp = parent[name]
+
+        self.fiducial.writeHdf(grp, 'fiducial', index=index)
+        self.lineNumber.writeHdf(grp, 'line_number', index=index)
+        self.elevation.writeHdf(grp, 'e',  withPosterior=withPosterior, index=index)
+
+        self.data.writeHdf(grp, 'd',  withPosterior=withPosterior, index=index)
+        self.std.writeHdf(grp, 's',  withPosterior=withPosterior, index=index)
+        self.predictedData.writeHdf(grp, 'p',  withPosterior=withPosterior, index=index)
+
+        if not self.errorPosterior is None:
+            for i, x in enumerate(self.errorPosterior):
+                x.writeHdf(grp, 'joint_error_posterior_{}'.format(i), index=index)
+
+        self.relative_error.writeHdf(grp, 'relErr',  withPosterior=withPosterior, index=index)
+        self.additive_error.writeHdf(grp, 'addErr',  withPosterior=withPosterior, index=index)
+
+
+    def fromHdf(self, grp, **kwargs):
+        """ Reads the object from a HDF group """
+
+        super().fromHdf(grp)
+
+        self.errorPosterior = None
+
+        if 'fiducial' in grp:
+            self.fiducial = StatArray.StatArray().fromHdf(grp['fiducial'])
+
+        if 'line_number' in grp:
+            self.lineNumber = StatArray.StatArray().fromHdf(grp['line_number'])
+
+        if 'channels_per_system' in grp:
+            self._nChannelsPerSystem = np.asarray(grp['channels_per_system'])
+
+        self._data = StatArray.StatArray().fromHdf(grp['d'])
+        self._std = StatArray.StatArray().fromHdf(grp['s'])
+        self._predictedData = StatArray.StatArray().fromHdf(grp['p'])
+
+        if 'joint_error_posterior_0' in grp:
+            i = 0
+            self.errorPosterior = []
+            while 'joint_error_posterior_{}'.format(i) in grp:
+                self.errorPosterior.append(Histogram3D().fromHdf(grp['joint_error_posterior_{}'.format(i)]))
+                i += 1
+
+        self._relative_error = StatArray.StatArray().fromHdf(grp['relErr'])
+        self._additive_error = StatArray.StatArray().fromHdf(grp['addErr'])
+
+        return self
 
 
     def Bcast(self, world, root=0):

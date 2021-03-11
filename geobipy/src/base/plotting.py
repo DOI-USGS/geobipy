@@ -14,9 +14,10 @@ import numpy as np
 import numpy.ma as ma
 from .fileIO import deleteFile
 from ..base import Error as Err
-from ..base import customFunctions as cF # (cF.getName, cF.getUnits, cF.getNameUnits, cF.histogramEqualize, cF._log, cF.findFirstLastNotValue)
+from ..base import utilities as cF # (cF.getName, cF.getUnits, cF.getNameUnits, cF.histogramEqualize, cF._log, cF.findFirstLastNotValue)
 from cycler import cycler
 import scipy as sp
+import copy
 from ..classes.core import StatArray
 
 def make_colourmap(seq, cname):
@@ -430,7 +431,7 @@ def pcolor(values, x=None, y=None, **kwargs):
     grid : bool, optional
         Plot the grid
     noColorbar : bool, optional
-        Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
+        Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.
     reciprocateX : bool, optional
         Take the reciprocal of the X axis before other transforms
     reciprocateY : bool, optional
@@ -603,7 +604,7 @@ def _pcolormesh(X, Y, values, **kwargs):
     grid : bool, optional
         Plot the grid
     noColorbar : bool, optional
-        Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
+        Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.
     trim : array_like, optional
         Set the x and y limits to the first and last locations that don't equal the values in trim.
     classes : dict, optional
@@ -633,6 +634,8 @@ def _pcolormesh(X, Y, values, **kwargs):
         plt.sca(ax)
     pretty(ax)
 
+    kwargs['shading'] = kwargs.pop('shading', 'auto')
+
     xscale = kwargs.pop('xscale', 'linear')
     yscale = kwargs.pop('yscale', 'linear')
     flipX = kwargs.pop('flipX', False)
@@ -645,7 +648,7 @@ def _pcolormesh(X, Y, values, **kwargs):
     cax = kwargs.pop('cax', None)
     cmap = kwargs.pop('cmap', 'viridis')
     cmapIntervals = kwargs.pop('cmapIntervals', None)
-    kwargs['cmap'] = mpl.cm.get_cmap(cmap, cmapIntervals)
+    kwargs['cmap'] = copy.copy(mpl.cm.get_cmap(cmap, cmapIntervals))
     kwargs['cmap'].set_bad(color='white')
     orientation = kwargs.pop('orientation', 'vertical')
     cl = kwargs.pop('clabel', None)
@@ -793,7 +796,7 @@ def pcolor_1D(values, y=None, **kwargs):
     transpose : bool, optional
         Transpose the image
     noColorBar : bool, optional
-        Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
+        Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.
 
     Returns
     -------
@@ -810,21 +813,18 @@ def pcolor_1D(values, y=None, **kwargs):
 
     equalize = kwargs.pop('equalize', False)
 
+    kwargs['shading'] = kwargs.pop('shading', 'auto')
+
     log = kwargs.pop('log', False)
     xscale = kwargs.pop('xscale', 'linear')
     yscale = kwargs.pop('yscale', 'linear')
 
     cl = kwargs.pop('clabel', None)
     grid = kwargs.pop('grid', False)
-
     flipY = kwargs.pop('flipY', False)
-
     noColorBar = kwargs.pop('noColorbar', False)
-
     alpha = kwargs.pop('alpha', 1.0)
-
     width = kwargs.pop('width', None)
-
     transpose = kwargs.pop('transpose', False)
 
 
@@ -1026,7 +1026,7 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
     flipY : bool, optional
         Flip the Y axis
     noColorBar : bool, optional
-        Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
+        Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.
 
     Returns
     -------

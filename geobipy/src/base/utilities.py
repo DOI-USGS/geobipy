@@ -3,6 +3,8 @@ from copy import deepcopy
 from numpy import issubdtype
 from math import exp as mExp
 from ..classes.core import StatArray
+import h5py
+from sklearn.mixture import GaussianMixture
 
 def isInt(this):
     """Check whether an entry is a subtype of an int
@@ -826,3 +828,21 @@ def safeEval(string):
         return string
 
     raise  ValueError("Problem evaluating string "+string)
+
+def save_gmm(gmm, filename):
+    with h5py.File(filename, 'w') as f:
+        f.create_dataset('weights', data=gmm.weights_)
+        f.create_dataset('means', data=gmm.means_)
+        f.create_dataset('covariances', data=gmm.covariances_)
+
+def load_gmm(filename):
+    with h5py.File(filename, 'r') as f:
+        weights = np.asarray(f['weights'])
+        means = np.asarray(f['means'])
+        covar = np.asarray(f['covariances'])
+
+        out = GaussianMixture(n_components = len(means), covariance_type='full')
+        out.precisions_cholesky_ = np.linalg.cholesky(np.linalg.inv(covar))
+        out.weights_ = weights
+        out.covariances_ = covar
+    return out

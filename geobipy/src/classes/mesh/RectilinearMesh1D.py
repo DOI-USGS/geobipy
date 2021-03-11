@@ -5,8 +5,8 @@ from ...classes.core.myObject import myObject
 from ...classes.core import StatArray
 from copy import deepcopy
 import numpy as np
-from ...base import customFunctions as cF
-from ...base import customPlots as cp
+from ...base import utilities as cF
+from ...base import plotting as cp
 from scipy.sparse import diags
 
 class RectilinearMesh1D(myObject):
@@ -336,13 +336,13 @@ class RectilinearMesh1D(myObject):
         grid : bool, optional
             Plot the grid
         noColorbar : bool, optional
-            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
+            Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.
         trim : bool, optional
             Set the x and y limits to the first and last non zero values along each axis.
 
         See Also
         --------
-        geobipy.customPlots.pcolor : For non matplotlib keywords.
+        geobipy.plotting.pcolor : For non matplotlib keywords.
         matplotlib.pyplot.pcolormesh : For additional keyword arguments you may use.
 
         """
@@ -375,43 +375,70 @@ class RectilinearMesh1D(myObject):
         return('RectilinearMesh1D()')
 
 
-    def createHdf(self, parent, myName, withPosterior=True, nRepeats=None, fillvalue=None):
+    def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
         """
         # create a new group inside h5obj
-        grp = parent.create_group(myName)
-        grp.attrs["repr"] = self.hdfName()
-        self._cellCentres.createHdf(grp, 'x', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        grp = self.create_hdf_group(parent, name)
+        self._cellCentres.createHdf(grp, 'centres', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self._cellEdges.createHdf(grp, 'edges', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+
+        if not self.log is None:
+            grp.create_dataset('log', data=self.log)
+
+        self.relativeTo.createHdf(grp, 'relativeTo', nRepeats=nRepeats, fillvalue=fillvalue)
+
+        return grp
 
 
-    def writeHdf(self, parent, myName, withPosterior=True, index=None):
+    def writeHdf(self, parent, name, withPosterior=True, index=None):
         """ Write the StatArray to an HDF object
         parent: Upper hdf file or group
         myName: object hdf name. Assumes createHdf has already been called
         create: optionally create the data set as well before writing
         """
-        self._cellCentres.writeHdf(parent, myName+'/x',  withPosterior=withPosterior, index=index)
-
-
-    def toHdf(self, h5obj, myName):
-        """ Write the StatArray to an HDF object
-        h5obj: :An HDF File or Group Object.
-        """
-        # Create a new group inside h5obj
-        grp = h5obj.create_group(myName)
-        grp.attrs["repr"] = self.hdfName()
-        self._cellCentres.toHdf(grp, 'x')
+        grp = parent.get(name)
+        self._cellCentres.writeHdf(grp, 'centres',  withPosterior=withPosterior, index=index)
+        self._cellEdges.writeHdf(grp, 'edges',  withPosterior=withPosterior, index=index)
+        self.relativeTo.writeHdf(grp, 'relativeTo', index=index)
 
 
     def fromHdf(self, grp, index=None):
         """ Reads in the object froma HDF file """
-        item = grp.get('x')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        x = obj.fromHdf(item, index=index)
-        res = RectilinearMesh1D(x)
-        return res
+
+        if 'relativeTo' in grp:
+            relativeTo = StatArray.StatArray().fromHdf(grp['relativeTo'], index=index)
+        else:
+            relativeTo = 0.0
+
+        centres = None
+        if ('centres' in grp) or ('x' in grp):
+            key = 'centres' if not 'x' in grp else 'x'
+            if np.ndim(grp[key+'/data']) == 2:
+                centres = StatArray.StatArray().fromHdf(grp[key], index=index)
+            else:
+                centres = StatArray.StatArray().fromHdf(grp[key])
+
+        edges = None
+
+        if centres is None and (('edges' in grp) or ('bins' in grp)):
+            key = 'edges' if 'edges' in grp else 'bins'
+            if np.ndim(grp[key+'/data']) == 2:
+                edges = StatArray.StatArray().fromHdf(grp[key], index=index)
+            else:
+                edges = StatArray.StatArray().fromHdf(grp[key])
+
+        self.__init__(centres, edges)
+
+        if 'log' in grp:
+            self.log = np.asscalar(np.asarray(grp['log']))
+
+        self.relativeTo = relativeTo
+
+        return self
+
 
     @property
     def summary(self):

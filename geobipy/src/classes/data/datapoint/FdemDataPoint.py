@@ -12,9 +12,9 @@ from ...system.FdemSystem import FdemSystem
 import matplotlib.pyplot as plt
 import numpy as np
 #from ....base import Error as Err
-from ....base import customFunctions as cf
+from ....base import utilities as cf
 from ....base import MPI as myMPI
-from ....base import customPlots as cp
+from ....base import plotting as cp
 
 
 class FdemDataPoint(EmDataPoint):
@@ -54,6 +54,8 @@ class FdemDataPoint(EmDataPoint):
     def __init__(self, x=0.0, y=0.0, z=0.0, elevation=0.0, data=None, std=None, predictedData=None, system=None, lineNumber=0.0, fiducial=0.0):
         """Define initializer. """
 
+        self.units = None
+
         if (system is None):
             return
 
@@ -73,7 +75,7 @@ class FdemDataPoint(EmDataPoint):
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
         out._system = self._system
-        out.calibration = deepcopy(self.calibration)
+        # out.calibration = deepcopy(self.calibration)
         return out
 
 
@@ -83,7 +85,6 @@ class FdemDataPoint(EmDataPoint):
 
     @units.setter
     def units(self, value):
-
         if value is None:
             self._units = "ppm"
         else:
@@ -158,7 +159,7 @@ class FdemDataPoint(EmDataPoint):
 
         assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
 
-        return np.s_[self._systemOffset[system]:self._systemOffset[system] + self.nFrequencies[system]]
+        return np.s_[self.systemOffset[system]:self.systemOffset[system] + self.nFrequencies[system]]
 
 
     def _quadratureIndices(self, system=0):
@@ -178,7 +179,7 @@ class FdemDataPoint(EmDataPoint):
 
         assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
 
-        return np.s_[self._systemOffset[system] + self.nFrequencies[system]: self._systemOffset[system+1]]
+        return np.s_[self.systemOffset[system] + self.nFrequencies[system]: 2*self.nFrequencies[system]]
 
 
     def frequencies(self, system=0):
@@ -248,85 +249,38 @@ class FdemDataPoint(EmDataPoint):
         return self.system[system].frequencies[channel%self.nFrequencies[system]]
 
 
-    def hdfName(self):
-        """ Reproducibility procedure """
-        return('FdemDataPoint()')
-
-
-    def createHdf(self, parent, myName, withPosterior=True, nRepeats=None, fillvalue=None):
+    def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
         """
-        # create a new group inside h5obj
-        grp = parent.create_group(myName)
-        grp.attrs["repr"] = self.hdfName()
-        self.x.createHdf(grp, 'x', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        self.y.createHdf(grp, 'y', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        self.z.createHdf(grp, 'z', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        self.elevation.createHdf(grp, 'e', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        self._data.createHdf(grp, 'd', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        self._std.createHdf(grp, 's', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        self._predictedData.createHdf(grp, 'p', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        grp = super().createHdf(parent, name, withPosterior, nRepeats, fillvalue)
+        # self.calibration.createHdf(grp, 'calibration', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
 
-        if not self.errorPosterior is None:
-            self.relErr.setPosterior([self.errorPosterior[i].marginalize(axis=1) for i in range(self.nSystems)])
-            self.addErr.setPosterior([self.errorPosterior[i].marginalize(axis=0) for i in range(self.nSystems)])
-
-        self.relErr.createHdf(grp, 'relErr', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        self.addErr.createHdf(grp, 'addErr', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        self.calibration.createHdf(grp, 'calibration', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self.system[0].toHdf(grp, 'sys')
 
 
-    def writeHdf(self, parent, myName, withPosterior=True, index=None):
-        """ Write the StatArray to an HDF object
-        parent: Upper hdf file or group
-        myName: object hdf name. Assumes createHdf has already been called
-        create: optionally create the data set as well before writing
-        """
-        grp = parent.get(myName)
-        self.x.writeHdf(grp, 'x',  withPosterior=withPosterior, index=index)
-        self.y.writeHdf(grp, 'y',  withPosterior=withPosterior, index=index)
-        self.z.writeHdf(grp, 'z',  withPosterior=withPosterior, index=index)
-        self.elevation.writeHdf(grp, 'e',  withPosterior=withPosterior, index=index)
+    # def writeHdf(self, parent, name, withPosterior=True, index=None):
+    #     """ Write the StatArray to an HDF object
+    #     parent: Upper hdf file or group
+    #     myName: object hdf name. Assumes createHdf has already been called
+    #     create: optionally create the data set as well before writing
+    #     """
+    #     super().writeHdf(parent, name, withPosterior, index)
 
-        self._data.writeHdf(grp, 'd',  withPosterior=withPosterior, index=index)
-        self._std.writeHdf(grp, 's',  withPosterior=withPosterior, index=index)
-        self._predictedData.writeHdf(grp, 'p',  withPosterior=withPosterior, index=index)
+    #     grp = parent[name]
 
-        if not self.errorPosterior is None:
-            self.relErr.setPosterior([self.errorPosterior[i].marginalize(axis=1) for i in range(self.nSystems)])
-            self.addErr.setPosterior([self.errorPosterior[i].marginalize(axis=0) for i in range(self.nSystems)])
-
-        self.relErr.writeHdf(grp, 'relErr',  withPosterior=withPosterior, index=index)
-        self.addErr.writeHdf(grp, 'addErr',  withPosterior=withPosterior, index=index)
-        self.calibration.writeHdf(grp, 'calibration',  withPosterior=withPosterior, index=index)
+        # self.calibration.writeHdf(grp, 'calibration',  withPosterior=withPosterior, index=index)
 
 
     def fromHdf(self, grp, index=None, **kwargs):
         """ Reads the object from a HDF group """
 
-        if grp['d/data'].ndim > 1:
-            assert not index is None, ValueError("File contains multiple FdemDataPoints.  Must specify an index.")
+        self.system = FdemSystem().fromHdf(grp['sys'])
 
-        x = StatArray.StatArray().fromHdf(grp['x'], index=index)
-        y = StatArray.StatArray().fromHdf(grp['y'], index=index)
-        z = StatArray.StatArray().fromHdf(grp['z'], index=index)
-        e = StatArray.StatArray().fromHdf(grp['e'], index=index)
-        system = FdemSystem().fromHdf(grp['sys'])
+        super().fromHdf(grp, index)
 
-        d = StatArray.StatArray().fromHdf(grp['d'], index=index)
-        s = StatArray.StatArray().fromHdf(grp['s'], index=index)
-        p = StatArray.StatArray().fromHdf(grp['p'], index=index)
-
-        rErr = StatArray.StatArray().fromHdf(grp['relErr'], index=index)
-        aErr = StatArray.StatArray().fromHdf(grp['addErr'], index=index)
-
-        self.__init__(x, y, z, e, data=d, std=s, predictedData=p, system=system)
-
-        self.relErr = StatArray.StatArray().fromHdf(grp['relErr'], index=index)
-        self.addErr = StatArray.StatArray().fromHdf(grp['addErr'], index=index)
+        self._nChannelsPerSystem = self.nFrequencies
 
         # item = grp.get('calibration')
         # obj = eval(cf.safeEval(item.attrs.get('repr')))
@@ -410,8 +364,6 @@ class FdemDataPoint(EmDataPoint):
 
         xscale = kwargs.pop('xscale','log')
         yscale = kwargs.pop('yscale','log')
-
-
 
         if with_error_bars:
             plt.errorbar(self.frequencies(system), self.inphase(system), yerr=self.inphaseStd(system),
@@ -510,7 +462,7 @@ class FdemDataPoint(EmDataPoint):
         cnew = 0.5 * (c0 + c1)
         # Initialize a single layer model
         p = StatArray.StatArray(1, 'Conductivity', r'$\frac{S}{m}$')
-        model = Model1D(1, parameters=p)
+        model = Model1D(nCells=1, parameters=p)
         # Initialize the first conductivity
         model._par[0] = 10.0**c0
         self.forward(model)  # Forward model the EM data

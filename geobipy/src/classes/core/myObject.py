@@ -13,6 +13,9 @@ from numpy import log10
 class myObject(object):
     """Abstract base class """
 
+    # def __init__(self, **kwargs):
+    #     raise NotImplementedError()
+
     def __getsizeof__(self):
         """Get the size of the object in memory """
         i = 0
@@ -38,17 +41,17 @@ class myObject(object):
 
     @property
     def hdf_name(self):
-        return str(self.__class__)
+        return type(self).__name__ + '()'
 
 
     def create_hdf_group(self, h5obj, name):
         grp = h5obj.create_group(name)
-        grp.attrs["repr"] = self.hdfName()
+        grp.attrs["repr"] = self.hdf_name
 
         return grp
 
 
-    def toHdf(self, h5obj, myName):
+    def toHdf(self, h5obj, name):
         """Create and write to HDF.
 
         Parameters
@@ -62,9 +65,9 @@ class myObject(object):
 
         if isinstance(h5obj, str):
             with h5py.File(h5obj, 'w') as f:
-                self.createHdf(f, myName)
-                self.writeHdf(f, myName)
-                return
+                self.createHdf(f, name)
+                self.writeHdf(f, name)
+            return
 
-        self.createHdf(h5obj, myName)
-        self.writeHdf(h5obj, myName)
+        self.createHdf(h5obj, name)
+        self.writeHdf(h5obj, name)

@@ -3,7 +3,7 @@ Module defining a multivariate normal distribution with statistical procedures
 """
 #from copy import deepcopy
 import numpy as np
-from ...base  import customFunctions as cf
+from ...base  import utilities as cf
 from .baseDistribution import baseDistribution
 from .NormalDistribution import Normal
 from ..core import StatArray

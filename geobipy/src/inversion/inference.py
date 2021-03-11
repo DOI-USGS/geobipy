@@ -11,7 +11,7 @@ from ..classes.model.Model1D import Model1D
 from ..classes.core import StatArray
 from ..classes.statistics.Distribution import Distribution
 from ..classes.statistics.Histogram1D import Histogram1D
-from ..base.customFunctions import expReal as mExp
+from ..base.utilities import expReal as mExp
 from scipy import sparse
 from copy import deepcopy
 import numpy as np
@@ -20,7 +20,7 @@ from ..base.MPI import print
 import matplotlib.pyplot as plt
 
 
-def infer(userParameters, DataPoint, prng, LineResults=None, rank=1):
+def infer(userParameters, DataPoint, prng, Inference2D, rank=1):
     """ Markov Chain Monte Carlo approach for inversion of geophysical data
     userParameters: User input parameters object
     DataPoint: Datapoint to invert
@@ -116,11 +116,7 @@ def infer(userParameters, DataPoint, prng, LineResults=None, rank=1):
     # Does the user want to save the HDF5 results?
     if (userParameters.save):
         # No parallel write is being used, so write a single file for the data point
-        if (LineResults is None):
-            Res.save(outdir=userParameters.dataPointResultsDir, fiducial=DataPoint.fiducial)
-        else: # Write the contents to the parallel HDF5 file
-            LineResults.results2Hdf(Res)
-#            Res.writeHdf(pHDFfile, str(ID), create=False) # Assumes space has been created for the data point
+        Inference2D.write_inference1d(Res)
 
     # Does the user want to save the plot as a png?
     if (Res.savePNG):# and not failed):

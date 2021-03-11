@@ -19,8 +19,8 @@ from numpy.random import randint
 
 # Set up shorter aliases for classes within geobipy
 # Base routines
-from .src.base import customFunctions
-from .src.base import customPlots
+from .src.base import utilities
+from .src.base import plotting
 from .src.base import fileIO
 from .src.base import interpolation
 
@@ -49,6 +49,7 @@ from .src.classes.system.filters.butterworth import butterworth
 # Meshes
 from .src.classes.mesh.RectilinearMesh1D import RectilinearMesh1D
 from .src.classes.mesh.RectilinearMesh2D import RectilinearMesh2D
+from .src.classes.mesh.RectilinearMesh3D import RectilinearMesh3D
 from .src.classes.mesh.TopoRectilinearMesh2D import TopoRectilinearMesh2D
 # Models
 from .src.classes.model.Model1D import Model1D
@@ -61,6 +62,7 @@ from .src.classes.statistics.Distribution import Distribution
 from .src.classes.statistics.MvDistribution import MvDistribution
 from .src.classes.statistics.Histogram1D import Histogram1D
 from .src.classes.statistics.Histogram2D import Histogram2D
+from .src.classes.statistics.Histogram3D import Histogram3D
 from .src.classes.statistics.Hitmap2D import Hitmap2D
 from .src.classes.statistics.Mixture import Mixture
 from .src.classes.statistics.mixStudentT import mixStudentT
@@ -97,22 +99,23 @@ def checkCommandArguments():
     Parser.add_argument('output_directory', help='Output directory for results')
     Parser.add_argument('--skipHDF5', dest='skipHDF5', default=False, help='Skip the creation of the HDF5 files.  Only do this if you know they have been created.')
     Parser.add_argument('--seed', dest='seed', type=int, default=None, help='Specify a single integer to fix the seed of the random number generator. Only used in serial mode.')
+    Parser.add_argument('--index', dest='index', type=int, default=None, help='Invert this data point only. Only used in serial mode.')
 
     args = Parser.parse_args()
 
-    inputFile = pathlib.Path(args.inputFile)
-    assert inputFile.exists(), Exception("Cannot find input file {}".format(inputFile))
-
-    output_directory = pathlib.Path(args.output_directory)
-
-    return inputFile, output_directory, args.skipHDF5, args.seed
+    return args.inputFile, args.output_directory, args.skipHDF5, args.seed, args.index
 
 
-def serial_geobipy(inputFile, output_directory, seed=None):
+def serial_geobipy(inputFile, output_directory, seed=None, index=None):
 
     print('Running GeoBIPy in serial mode')
     print('Using user input file {}'.format(inputFile))
     print('Output files will be produced at {}'.format(output_directory))
+
+    inputFile = pathlib.Path(inputFile)
+    assert inputFile.exists(), Exception("Cannot find input file {}".format(inputFile))
+
+    output_directory = pathlib.Path(output_directory)
 
     # Make sure the results folders exist
     makedirs(output_directory, exist_ok=True)
@@ -122,6 +125,12 @@ def serial_geobipy(inputFile, output_directory, seed=None):
 
     # Import the script from the input file
     userParameters = import_module(str(inputFile.with_suffix('')), package='geobipy')
+    assert 'data_type' in userParameters.__dict__, ValueError(("Please specify the data_type in the parameter file. \n"
+                                                    "data_type = FdemData()\n"
+                                                    "data_type = FdemDataPoint()\n"
+                                                    "data_type = TdemData()\n"
+                                                    "data_type = TdemDataPoint()\n"
+                                                    ))
 
     # Everyone needs the system classes read in early.
     Dataset = type(userParameters.data_type)()
@@ -129,7 +138,7 @@ def serial_geobipy(inputFile, output_directory, seed=None):
     if isinstance(Dataset, DataPoint):
         serial_datapoint(userParameters, output_directory, seed=seed)
     else:
-        serial_dataset(userParameters, output_directory, seed=seed)
+        serial_dataset(userParameters, output_directory, seed=seed, index=index)
 
 
 def serial_datapoint(userParameters, output_directory, seed=None):
@@ -146,25 +155,34 @@ def serial_datapoint(userParameters, output_directory, seed=None):
     infer(options, datapoint, prng=prng)
 
 
-def serial_dataset(userParameters, output_directory, seed=None):
+def serial_dataset(userParameters, output_directory, seed=None, index=None):
 
     Dataset = type(userParameters.data_type)(systems=userParameters.systemFilename)
 
-    results = Inference3D(output_directory, userParameters.systemFilename)
-    results.createHDF5(Dataset, userParameters)
+    r3D = Inference3D(output_directory, userParameters.systemFilename)
+    r3D.createHDF5(Dataset, userParameters)
 
     # Get the random number generator
     prng = np.random.RandomState(seed)
 
     # Loop through data points in the file.
-    for _ in range(Dataset.nPoints):
-        datapoint = Dataset._readSingleDatapoint()
+    if index is None:
+        for _ in range(Dataset.nPoints):
+            datapoint = Dataset._readSingleDatapoint()
+            options = userParameters.userParameters(datapoint)
+
+            infer(options, datapoint, prng=prng, LineResults=r3D.line(datapoint.lineNumber))
+    else:
+        for _ in range(index+1):
+            datapoint = Dataset._readSingleDatapoint()
+
         options = userParameters.userParameters(datapoint)
+        options.output_directory = output_directory
 
-        iLine = results.lineIndex(lineNumber=datapoint.lineNumber)
-        infer(options, datapoint, prng=prng, LineResults=results.lines[iLine])
+        infer(options, datapoint, prng=prng, LineResults=r3D.line(datapoint.lineNumber))
 
-    results.close()
+
+    r3D.close()
     Dataset._closeDatafiles()
 
 
@@ -190,7 +208,17 @@ def parallel_mpi(inputFile, outputDir, skipHDF5):
     t0 = MPI.Wtime()
     t1 = t0
 
+    inputFile = pathlib.Path(inputFile)
+    assert inputFile.exists(), Exception("Cannot find input file {}".format(inputFile))
+    output_directory = pathlib.Path(output_directory)
+
     UP = import_module(str(inputFile.with_suffix('')), package='geobipy')
+    assert 'data_type' in userParameters.__dict__, ValueError(("Please specify the data_type in the parameter file. \n"
+                                                    "data_type = FdemData()\n"
+                                                    "data_type = FdemDataPoint()\n"
+                                                    "data_type = TdemData()\n"
+                                                    "data_type = TdemDataPoint()\n"
+                                                    ))
 
     # Make data and system filenames lists of str.
     if isinstance(UP.dataFilename, str):
@@ -304,7 +332,7 @@ def parallel_mpi(inputFile, outputDir, skipHDF5):
     if (world.rank == 0):
         masterTask(Dataset, world)
     else:
-        DataPoint = eval(customFunctions.safeEval(DataPointType))
+        DataPoint = eval(utilities.safeEval(DataPointType))
         workerTask(DataPoint, UP, prng, world, lineNumbers, LR)
 
     world.barrier()
@@ -338,11 +366,9 @@ def masterTask(Dataset, world):
     # If DataPoint is None, then we reached the end of the file and no more points can be read in.
     if DataPoint is None:
         # Send the kill switch to the worker to shut down.
-        # continueRunning[0] = 0 # Do not continue running
-        continueRunning =False
+        continueRunning = False
         world.send(continueRunning, dest=iWorker)
     else:
-        # continueRunning[0] = 1 # Yes, continue with the next point.
         continueRunning = True
         world.send(continueRunning, dest=iWorker)
         DataPoint.Isend(dest=iWorker, world=world)
@@ -408,8 +434,6 @@ def workerTask(_DataPoint, UP, prng, world, lineNumbers, LineResults):
     else:
         Go = False
 
-    # communicationTime = 0.0
-
     while Go:
         # initialize the parameters
         paras = UP.userParameters(DataPoint)
@@ -442,16 +466,16 @@ def workerTask(_DataPoint, UP, prng, world, lineNumbers, LineResults):
 def geobipy():
     """Run the serial implementation of GeoBIPy. """
 
-    inputFile, output_directory, _, seed = checkCommandArguments()
+    inputFile, output_directory, _, seed, index = checkCommandArguments()
     sys.path.append(getcwd())
 
-    serial_geobipy(inputFile, output_directory, seed)
+    serial_geobipy(inputFile, output_directory, seed, index)
 
 
 def geobipy_mpi():
     """Run the parallel implementation of GeoBIPy. """
 
-    inputFile, output_directory, skipHDF5, _ = checkCommandArguments()
+    inputFile, output_directory, skipHDF5, _, _ = checkCommandArguments()
     sys.path.append(getcwd())
 
     parallel_geobipy(inputFile, output_directory, skipHDF5)

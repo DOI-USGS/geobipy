@@ -51,8 +51,10 @@ class Point(myObject):
         self._z = StatArray.StatArray(value, 'Height', 'm')
 
 
-    def __deepcopy(self, memo):
-        return Point(self.x, self.y, self.z)
+    def __deepcopy(self, memo={}):
+        out = type(self)(self.x, self.y, self.z)
+        out.__dict__.update(self.__dict__)
+        return out
 
 
     def __add__(self, other):
@@ -95,9 +97,42 @@ class Point(myObject):
         return self
 
 
-    # def __str__(self):
-    #     """ Prints the x,y,z co-ordinates of a point """
-    #     return "Point({}, {}, {})".format(self.x[0], self.y[0], self.z[0])
+    def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
+        """ Create the hdf group metadata in file
+        parent: HDF object to create a group inside
+        myName: Name of the group
+        """
+        # create a new group inside h5obj
+        grp = self.create_hdf_group(parent, name)
+        self.x.createHdf(grp, 'x', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.y.createHdf(grp, 'y', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.z.createHdf(grp, 'z', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+
+        return grp
+
+
+    def writeHdf(self, parent, name, withPosterior=True, index=None):
+        """ Write the StatArray to an HDF object
+        parent: Upper hdf file or group
+        myName: object hdf name. Assumes createHdf has already been called
+        create: optionally create the data set as well before writing
+        """
+        grp = parent[name]
+        self.x.writeHdf(grp, 'x',  withPosterior=withPosterior, index=index)
+        self.y.writeHdf(grp, 'y',  withPosterior=withPosterior, index=index)
+        self.z.writeHdf(grp, 'z',  withPosterior=withPosterior, index=index)
+
+
+    def fromHdf(self, grp, index=None, **kwargs):
+        """ Reads the object from a HDF group """
+
+        x = StatArray.StatArray().fromHdf(grp['x'], index=index)
+        y = StatArray.StatArray().fromHdf(grp['y'], index=index)
+        z = StatArray.StatArray().fromHdf(grp['z'], index=index)
+
+        Point.__init__(self, x, y, z)
+
+        return self
 
 
     def Isend(self, dest, world):

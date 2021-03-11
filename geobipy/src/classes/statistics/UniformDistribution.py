@@ -3,7 +3,7 @@ Module defining a uniform distribution with statistical procedures
 """
 from copy import deepcopy
 from .baseDistribution import baseDistribution
-from ...base import customPlots as cP
+from ...base import plotting as cP
 import numpy as np
 from scipy.stats import uniform
 from ..core import StatArray

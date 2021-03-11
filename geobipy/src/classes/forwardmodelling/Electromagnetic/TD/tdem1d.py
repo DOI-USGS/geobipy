@@ -57,9 +57,9 @@ def empymod_tdem1dsen(datapoint, model1d, ix=None):
 
     if (ix is None):  # Generate a full matrix if the layers are not specified
         ix = range(model1d.nCells[0])
-        J = np.zeros([datapoint.nWindows, model1d.nCells[0]])
+        J = np.zeros((datapoint.nWindows, model1d.nCells[0]))
     else:  # Partial matrix for specified layers
-        J = np.zeros([datapoint.nWindows, np.size(ix)])
+        J = np.zeros((datapoint.nWindows, np.size(ix)))
 
     for j in range(datapoint.nSystems):  # For each system
         iSys = datapoint._systemIndices(j)
@@ -87,6 +87,7 @@ try:
     def gaTdem1dfwd(datapoint, model1d):
         # Generate the Brodie Earth class
         E = Earth(model1d.par[:], model1d.thk[:-1])
+
         # Generate the Brodie Geometry class
         G = Geometry(datapoint.z[0],
                     datapoint.transmitter.roll, datapoint.transmitter.pitch, datapoint.transmitter.yaw,
@@ -114,11 +115,13 @@ try:
             for i in range(datapoint.nSystems):
                 datapoint.system[i].forwardmodel(G, E)
 
+        nCells = np.squeeze(model1d.nCells)
+
         if (ix is None):  # Generate a full matrix if the layers are not specified
-            ix = range(np.int(model1d.nCells[0]))
-            J = np.zeros([datapoint.nWindows, np.int(model1d.nCells[0])])
+            ix = range(nCells)
+            J = np.zeros((datapoint.nWindows, nCells))
         else:  # Partial matrix for specified layers
-            J = np.zeros([datapoint.nWindows, np.size(ix)])
+            J = np.zeros((datapoint.nWindows, np.size(ix)))
 
         for j in range(datapoint.nSystems):  # For each system
             iSys = datapoint._systemIndices(j)

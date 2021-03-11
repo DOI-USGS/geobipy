@@ -3,8 +3,8 @@ Module describing an efficient histogram class
 """
 from ...classes.mesh.RectilinearMesh1D import RectilinearMesh1D
 from ...classes.core import StatArray
-from ...base import customFunctions as cF
-from ...base import customPlots as cP
+from ...base import utilities as cF
+from ...base import plotting as cP
 from .Distribution import Distribution
 from .mixNormal import mixNormal
 from .mixPearson import mixPearson
@@ -43,7 +43,7 @@ class Histogram1D(RectilinearMesh1D):
 
     """
 
-    def __init__(self, bins=None, binCentres=None, log=None, relativeTo=0.0, values=None):
+    def __init__(self, binCentres=None, bins=None, log=None, relativeTo=0.0, values=None, **kwargs):
         """ Initialize a histogram """
 
         # Allow an null instantiation
@@ -52,7 +52,7 @@ class Histogram1D(RectilinearMesh1D):
             return
 
         # Initialize the parent class
-        super().__init__(cellEdges=bins, cellCentres=binCentres, log=log, relativeTo=relativeTo)
+        super().__init__(cellCentres=binCentres, cellEdges=bins, log=log, relativeTo=relativeTo)
 
         self._counts = StatArray.StatArray(self.nCells, 'Frequency', dtype=np.int64)
 
@@ -390,13 +390,13 @@ class Histogram1D(RectilinearMesh1D):
         grid : bool, optional
             Plot the grid
         noColorbar : bool, optional
-            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
+            Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.
         trim : bool, optional
             Set the x and y limits to the first and last non zero values along each axis.
 
         See Also
         --------
-        geobipy.customPlots.pcolor : For additional keywords
+        geobipy.plotting.pcolor : For additional keywords
 
         """
         kwargs['y'] = self.bins
@@ -427,96 +427,41 @@ class Histogram1D(RectilinearMesh1D):
         if normalize:
             cP.ylabel('Density')
 
-
-    def hdfName(self):
+    @property
+    def hdf_name(self):
         """ Reprodicibility procedure """
         return('Histogram1D()')
 
 
-    def createHdf(self, parent, myName, withPosterior=True, nRepeats=None, fillvalue=None):
+    def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
         """
         # create a new group inside h5obj
-        grp = parent.create_group(myName)
-        grp.attrs["repr"] = self.hdfName()
-
+        grp = super().createHdf(parent, name, withPosterior, nRepeats, fillvalue)
+        # grp = self.create_hdf_group(parent, name)
         self._counts.createHdf(grp, 'counts', nRepeats=nRepeats, fillvalue=fillvalue)
 
-        if not self.log is None:
-            grp.create_dataset('log', data = self.log)
 
-        self._cellEdges.toHdf(grp, 'bins')
-        self.relativeTo.createHdf(grp, 'relativeTo', nRepeats=nRepeats, fillvalue=fillvalue)
-
-
-    def writeHdf(self, parent, myName, withPosterior=True, index=None):
+    def writeHdf(self, parent, name, withPosterior=True, index=None):
         """ Write the StatArray to an HDF object
         parent: Upper hdf file or group
         myName: object hdf name. Assumes createHdf has already been called
         create: optionally create the data set as well before writing
         """
-        self._counts.writeHdf(parent, myName+'/counts', index=index)
-
-        self.relativeTo.writeHdf(parent, myName+'/relativeTo', index=index)
-        # self._cellEdges.writeHdf(parent, myName+'/bins', index=index)
-
-
-    def toHdf(self, h5obj, myName):
-        """ Write the StatArray to an HDF object
-        h5obj: :An HDF File or Group Object.
-        """
-        # Create a new group inside h5obj
-        grp = h5obj.create_group(myName)
-        grp.attrs["repr"] = self.hdfName()
-        self._cellEdges.toHdf(grp, 'bins')
-        self._counts.toHdf(grp, 'counts')
-        if not self.log is None:
-            grp.create_dataset('log', data = self.log)
-        self.relativeTo.toHdf(grp, 'relativeTo')
+        super().writeHdf(parent, name, withPosterior, index=index)
+        grp = parent[name]
+        self._counts.writeHdf(grp, 'counts', index=index)
 
 
     def fromHdf(self, grp, index=None):
         """ Reads in the object froma HDF file """
 
-        try:
-            item = grp.get('relativeTo')
-            obj = eval(cF.safeEval(item.attrs.get('repr')))
-            relativeTo = obj.fromHdf(item, index=index)
-        except:
-            relativeTo = 0.0
+        super().fromHdf(grp, index)
+        self._counts = StatArray.StatArray().fromHdf(grp['counts'], index=index)
 
-        item = grp.get('bins')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-        bins = obj.fromHdf(item)
-
-        if np.ndim(bins) == 2:
-            bins = bins[0, :]
-
-        item = grp.get('counts')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
-
-        if (index is None):
-            counts = obj.fromHdf(item)
-        else:
-            counts = obj.fromHdf(item, index=index)
-
-        try:
-            log = np.asscalar(np.asarray(grp.get('log')))
-        except:
-            log = None
-
-        if bins.shape[-1] == counts.shape[-1]:
-            Hist = Histogram1D(binCentres = bins)
-        else:
-            Hist = Histogram1D(bins = bins)
-
-        Hist._counts = counts
-        Hist.log = log
-        Hist.relativeTo = relativeTo
-
-        return Hist
+        return self
 
     @property
     def summary(self):

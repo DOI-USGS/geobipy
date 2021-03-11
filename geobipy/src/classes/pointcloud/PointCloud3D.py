@@ -4,8 +4,8 @@ import numpy as np
 from ...classes.core import StatArray
 from ...base import fileIO as fIO
 from ...base import interpolation
-from ...base import customFunctions as cf
-from ...base import customPlots as cP
+from ...base import utilities as cf
+from ...base import plotting as cP
 from .Point import Point
 from ...base import MPI
 from scipy.spatial import cKDTree
@@ -14,7 +14,6 @@ try:
     from pyvtk import VtkData, Scalars, PolyData, PointData, UnstructuredGrid
 except:
     pass
-
 
 class PointCloud3D(myObject):
     """3D Point Cloud with x,y,z co-ordinates
@@ -44,8 +43,8 @@ class PointCloud3D(myObject):
     def __init__(self, x=None, y=None, z=None, elevation=None):
         """ Initialize the class """
 
-        # Number of points in the cloud
-        self.nPoints = 0
+        # # Number of points in the cloud
+        self._nPoints = 0
 
         # StatArray of the x co-ordinates
         self.x = x
@@ -375,7 +374,7 @@ class PointCloud3D(myObject):
 
         See Also
         --------
-        geobipy.customPlots.plot : For additional keyword arguments
+        geobipy.plotting.plot : For additional keyword arguments
 
         """
         x = self.getXAxis(xAxis)
@@ -523,7 +522,7 @@ class PointCloud3D(myObject):
 
         See Also
         --------
-        geobipy.customPlots.Scatter2D : For additional keyword arguments you may use.
+        geobipy.plotting.Scatter2D : For additional keyword arguments you may use.
 
         """
 
@@ -548,6 +547,7 @@ class PointCloud3D(myObject):
         elif (nDims == 3):
             tmp = np.column_stack((self.x, self.y, self.z))
         self.kdtree = cKDTree(tmp)
+
 
     @property
     def summary(self):
@@ -636,6 +636,48 @@ class PointCloud3D(myObject):
                 vtk.point_data.append(Scalars(pointData, pointData.getNameUnits()))
 
         vtk.tofile(fileName, format=format)
+
+
+    def createHdf(self, parent, name, withPosterior=True, fillvalue=None):
+        """ Create the hdf group metadata in file
+        parent: HDF object to create a group inside
+        myName: Name of the group
+        """
+        # create a new group inside h5obj
+        grp = self.create_hdf_group(parent, name)
+        self.x.createHdf(grp, 'x', withPosterior=withPosterior, fillvalue=fillvalue)
+        self.y.createHdf(grp, 'y', withPosterior=withPosterior, fillvalue=fillvalue)
+        self.z.createHdf(grp, 'z', withPosterior=withPosterior, fillvalue=fillvalue)
+        self.elevation.createHdf(grp, 'e', withPosterior=withPosterior, fillvalue=fillvalue)
+
+        return grp
+
+
+    def writeHdf(self, parent, name, withPosterior=True):
+        """ Write the StatArray to an HDF object
+        parent: Upper hdf file or group
+        myName: object hdf name. Assumes createHdf has already been called
+        create: optionally create the data set as well before writing
+        """
+        grp = parent[name]
+        self.x.writeHdf(grp, 'x',  withPosterior=withPosterior)
+        self.y.writeHdf(grp, 'y',  withPosterior=withPosterior)
+        self.z.writeHdf(grp, 'z',  withPosterior=withPosterior)
+        self.elevation.writeHdf(grp, 'elevation',  withPosterior=withPosterior)
+
+
+    def fromHdf(self, grp):
+        """ Reads the object from a HDF group """
+
+        x = StatArray.StatArray().fromHdf(grp['x'])
+        y = StatArray.StatArray().fromHdf(grp['y'])
+        z = StatArray.StatArray().fromHdf(grp['z'])
+        elevation = StatArray.StatArray().fromHdf(grp['e'])
+
+        PointCloud3D.__init__(self, x, y, z, elevation)
+
+        return self
+
 
 
     def Bcast(self, world, root=0):

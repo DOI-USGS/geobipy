@@ -1,9 +1,11 @@
 from cached_property import cached_property
+from copy import deepcopy
 from ...pointcloud.Point import Point
 from ....classes.core import StatArray
-from ....base import customFunctions as cf
-from ....base import customPlots as cP
+from ....base import utilities as cf
+from ....base import plotting as cP
 from ....base import MPI as myMPI
+from ...statistics.Histogram2D import Histogram2D
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -44,14 +46,13 @@ class DataPoint(Point):
 
     """
 
-    def __init__(self, nChannelsPerSystem=1, x=0.0, y=0.0, z=0.0, elevation=None, data=None, std=None, predictedData=None, units="", channelNames=None, lineNumber=0.0, fiducial=0.0):
+    def __init__(self, nChannelsPerSystem=1, x=0.0, y=0.0, z=0.0, elevation=None, data=None, std=None, predictedData=None, units=None, channelNames=None, lineNumber=0.0, fiducial=0.0):
         """ Initialize the Data class """
 
         super().__init__(x, y, z)
 
         # Number of Channels
         self._nChannelsPerSystem = np.atleast_1d(np.asarray(nChannelsPerSystem))
-        self._systemOffset = np.concatenate([[0], np.cumsum(self.nChannelsPerSystem)])
 
         self.elevation = elevation
 
@@ -70,24 +71,26 @@ class DataPoint(Point):
 
         self.channelNames = channelNames
 
+        self.errorPosterior = None
+
 
     def __deepcopy__(self, memo={}):
 
         out = super().__deepcopy__(memo)
 
-        out._nChannelsPerSystem = self._nChannelsPerSystem
-        out._systemOffset = self._systemOffset
+        out._nChannelsPerSystem = deepcopy(self._nChannelsPerSystem, memo)
 
-        out.elevation = self.elevation
-        out.units = self.units
-        out.data = self.data
-        out.std = self.std
-        out.predictedData = self.predictedData
-        out.lineNumber = self.lineNumber
-        out.fiducial = self.fiducial
-        out.channelNames = self.channelNames
-        out.relErr = self.relErr
-        out.addErr = self.addErr
+        out._elevation = deepcopy(self.elevation, memo)
+        out._units = deepcopy(self.units, memo)
+        out._data = deepcopy(self.data, memo)
+        out._std = deepcopy(self.std, memo)
+        out._predictedData = deepcopy(self.predictedData, memo)
+        out._lineNumber = deepcopy(self.lineNumber, memo)
+        out._fiducial = deepcopy(self.fiducial, memo)
+        out._channelNames = deepcopy(self.channelNames, memo)
+        out._relErr = deepcopy(self.relErr, memo)
+        out._addErr = deepcopy(self.addErr, memo)
+        out._errorPosterior = deepcopy(self.errorPosterior, memo)
 
         return out
 
@@ -105,6 +108,7 @@ class DataPoint(Point):
             self._addErr = StatArray.StatArray(self.nSystems, '$\epsilon_{Additive}$', self.units)
         else:
             assert np.size(values) == self.nSystems, ValueError("additiveError must have length {}".format(self.nSystems))
+            assert np.asarray(values).dtype.kind == 'f', ValueError("additive_error must be floats")
             self._addErr = StatArray.StatArray(values, '$\epsilon_{Additive}$', self.units)
 
     @property
@@ -119,6 +123,11 @@ class DataPoint(Point):
             assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
             self._channelNames = values
 
+
+    @property
+    def systemOffset(self):
+        return np.concatenate([[0], np.cumsum(self.nChannelsPerSystem)])
+
     @property
     def fiducial(self):
         return self._fiducial
@@ -126,8 +135,7 @@ class DataPoint(Point):
 
     @fiducial.setter
     def fiducial(self, value):
-        assert isinstance(value, (float, np.float)), TypeError("fiducial must have type float.")
-        self._fiducial = value
+        self._fiducial = StatArray.StatArray(value, 'fiducial')
 
 
     @property
@@ -137,8 +145,7 @@ class DataPoint(Point):
 
     @lineNumber.setter
     def lineNumber(self, value):
-        assert isinstance(value, (float, np.float)), TypeError("lineNumber must have type float.")
-        self._lineNumber = value
+        self._lineNumber = StatArray.StatArray(value, 'Line number')
 
     @property
     def nChannelsPerSystem(self):
@@ -154,8 +161,11 @@ class DataPoint(Point):
 
     @units.setter
     def units(self, value):
-        assert isinstance(value, str), TypeError('units must have type str')
-        self._units = value
+        if values is None:
+            self._units = ""
+        else:
+            assert isinstance(value, str), TypeError('units must have type str')
+            self._units = value
 
     @property
     def data(self):
@@ -236,7 +246,8 @@ class DataPoint(Point):
             self._relErr = StatArray.StatArray(self.nSystems, '$\epsilon_{Relative}x10^{2}$', '%')
         else:
             assert np.size(values) == self.nSystems, ValueError("relativeError must have length {}".format(self.nSystems))
-            self._relErr = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
+            assert np.asarray(values).dtype.kind == 'f', ValueError("relative_error must be floats")
+            self._relErr = StatArray.StatArray(self.nSystems, '$\epsilon_{Relative}x10^{2}$', '%') + values
 
 
     @property
@@ -252,6 +263,20 @@ class DataPoint(Point):
             assert np.size(values) == self.nChannels, ValueError("std must have size {}".format(self.nChannels))
             assert np.all(values[self.active] > 0.0), ValueError("Cannot assign standard deviations that are <= 0.0.")
             self._std[:] = values
+
+
+    @property
+    def units(self):
+        return self._units
+
+    @units.setter
+    def units(self, value):
+
+        if value is None:
+            self._units = ""
+        else:
+            assert isinstance(value, str), TypeError("units must have type str")
+            self._units = value
 
 
     def generate_noise(self, additive_error, relative_error):
@@ -282,7 +307,7 @@ class DataPoint(Point):
         """
 
         assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-        return np.s_[self._systemOffset[system]:self._systemOffset[system+1]]
+        return np.s_[self.systemOffset[system]:self.systemOffset[system+1]]
 
 
     @property
@@ -333,6 +358,7 @@ class DataPoint(Point):
         tmp2 = self._std[self.active]**-1.0
         PhiD = np.float64(np.sum((cf.Ax(tmp2, self.deltaD[self.active]))**2.0, dtype=np.float64))
         return PhiD if squared else np.sqrt(PhiD)
+
 
     def scaleJ(self, Jin, power=1.0):
         """ Scales a matrix by the errors in the given data
@@ -414,6 +440,98 @@ class DataPoint(Point):
 
         if self._predictedData.hasPrior:
             self._predictedData.prior.variance[np.diag_indices(self.nActiveChannels)] = tmp[self.active]
+
+
+    def createHdf(self, parent, myName, withPosterior=True, nRepeats=None, fillvalue=None):
+        """ Create the hdf group metadata in file
+        parent: HDF object to create a group inside
+        myName: Name of the group
+        """
+        # create a new group inside h5obj
+        grp = super().createHdf(parent, myName, withPosterior, nRepeats, fillvalue)
+
+        grp.create_dataset('channels_per_system', data=self.nChannelsPerSystem)
+
+        self.fiducial.createHdf(grp, 'fiducial', nRepeats=nRepeats, fillvalue=fillvalue)
+        self.lineNumber.createHdf(grp, 'line_number', nRepeats=nRepeats, fillvalue=fillvalue)
+        self.elevation.createHdf(grp, 'e', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.data.createHdf(grp, 'd', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.std.createHdf(grp, 's', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.predictedData.createHdf(grp, 'p', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+
+        if not self.errorPosterior is None:
+            for i, x in enumerate(self.errorPosterior):
+                x.createHdf(grp, 'joint_error_posterior_{}'.format(i), nRepeats=nRepeats, fillvalue=fillvalue)
+            # self.relErr.setPosterior([self.errorPosterior[i].marginalize(axis=1) for i in range(self.nSystems)])
+            # self.addErr.setPosterior([self.errorPosterior[i].marginalize(axis=0) for i in range(self.nSystems)])
+
+        self.relErr.createHdf(grp, 'relErr', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.addErr.createHdf(grp, 'addErr', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+
+        return grp
+
+
+    def writeHdf(self, parent, name, withPosterior=True, index=None):
+        """ Write the StatArray to an HDF object
+        parent: Upper hdf file or group
+        myName: object hdf name. Assumes createHdf has already been called
+        create: optionally create the data set as well before writing
+        """
+
+        super().writeHdf(parent, name, withPosterior, index)
+
+        grp = parent[name]
+
+        self.fiducial.writeHdf(grp, 'fiducial', index=index)
+        self.lineNumber.writeHdf(grp, 'line_number', index=index)
+        self.elevation.writeHdf(grp, 'e',  withPosterior=withPosterior, index=index)
+        self.data.writeHdf(grp, 'd',  withPosterior=withPosterior, index=index)
+        self.std.writeHdf(grp, 's',  withPosterior=withPosterior, index=index)
+        self.predictedData.writeHdf(grp, 'p',  withPosterior=withPosterior, index=index)
+
+        if not self.errorPosterior is None:
+            for i, x in enumerate(self.errorPosterior):
+                x.writeHdf(grp, 'joint_error_posterior_{}'.format(i), index=index)
+            # self.relative_error.setPosterior([self.errorPosterior[i].marginalize(axis=1) for i in range(self.nSystems)])
+            # self.additive_error.setPosterior([self.errorPosterior[i].marginalize(axis=0) for i in range(self.nSystems)])
+
+        self.relErr.writeHdf(grp, 'relErr',  withPosterior=withPosterior, index=index)
+        self.addErr.writeHdf(grp, 'addErr',  withPosterior=withPosterior, index=index)
+
+
+    def fromHdf(self, grp, index=None, **kwargs):
+        """ Reads the object from a HDF group """
+
+        super().fromHdf(grp, index=index)
+
+        self.errorPosterior = None
+
+        if 'fiducial' in grp:
+            self.fiducial = StatArray.StatArray().fromHdf(grp['fiducial'], index=index)
+
+        if 'line_number' in grp:
+            self.lineNumber = StatArray.StatArray().fromHdf(grp['line_number'], index=index)
+
+        self.elevation = StatArray.StatArray().fromHdf(grp['e'], index=index)
+
+        if 'channels_per_system' in grp:
+            self._nChannelsPerSystem = np.asarray(grp['channels_per_system'])
+
+        self._data = StatArray.StatArray().fromHdf(grp['d'], index=index)
+        self._std = StatArray.StatArray().fromHdf(grp['s'], index=index)
+        self._predictedData = StatArray.StatArray().fromHdf(grp['p'], index=index)
+
+        if 'joint_error_posterior_0' in grp:
+            i = 0
+            self.errorPosterior = []
+            while 'joint_error_posterior_{}'.format(i) in grp:
+                self.errorPosterior.append(Histogram2D().fromHdf(grp['joint_error_posterior_{}'.format(i)], index=index))
+                i += 1
+
+        self._relErr = StatArray.StatArray().fromHdf(grp['relErr'], index=index)
+        self._addErr = StatArray.StatArray().fromHdf(grp['addErr'], index=index)
+
+        return self
 
 
     def Isend(self, dest, world):

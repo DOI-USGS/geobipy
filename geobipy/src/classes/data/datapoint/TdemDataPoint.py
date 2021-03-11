@@ -17,8 +17,8 @@ import numpy as np
 
 #from ....base import Error as Err
 from ....base import fileIO as fIO
-from ....base import customFunctions as cf
-from ....base import customPlots as cp
+from ....base import utilities as cf
+from ....base import plotting as cp
 from ....base import MPI as myMPI
 from os.path import split as psplt
 from os.path import join
@@ -83,9 +83,11 @@ class TdemDataPoint(EmDataPoint):
 
         self._data.name = "Time domain data"
 
-        self.transmitter = transmitter_loop
+        if not transmitter_loop is None:
+            self.transmitter = transmitter_loop
         # EmLoop Reciever
-        self.receiver = receiver_loop
+        if not receiver_loop is None:
+            self.receiver = receiver_loop
         # Set the loop offset
         self.loopOffset = StatArray.StatArray(np.asarray(loopOffset), 'Loop Offset', 'm')
 
@@ -234,9 +236,11 @@ class TdemDataPoint(EmDataPoint):
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
         out._system = self._system
+        out._nChannelsPerSystem = self.nTimes
         out._transmitter = self._transmitter
         out._receiver = self._receiver
         out.loopOffset = self.loopOffset
+
         return out
 
 
@@ -469,77 +473,37 @@ class TdemDataPoint(EmDataPoint):
         return np.asarray(time), np.asarray(data), np.asarray(std)
 
 
-    def hdfName(self):
-        """ Reprodicibility procedure """
-        return('TdemDataPoint(0.0,0.0,0.0,0.0)')
-
-
     def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
         """
-        # create a new group inside h5obj
-        grp = self.create_hdf_group(parent, name)
+
+        grp = super().createHdf(parent, name, withPosterior, nRepeats, fillvalue)
 
         grp.create_dataset('nSystems', data=self.nSystems)
         for i in range(self.nSystems):
             grp.create_dataset('System{}'.format(i), data=np.string_(psplt(self.system[i].fileName)[-1]))
-        self.x.createHdf(grp, 'x', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        self.y.createHdf(grp, 'y', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        self.z.createHdf(grp, 'z', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        self.elevation.createHdf(grp, 'e', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        self._data.createHdf(grp, 'd', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        self._std.createHdf(grp, 's', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        self._predictedData.createHdf(grp, 'p', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
 
-        if not self.errorPosterior is None:
-            self.relErr.setPosterior([self.errorPosterior[i].marginalize(axis=1) for i in range(self.nSystems)])
-            self.addErr.setPosterior([self.errorPosterior[i].marginalize(axis=0) for i in range(self.nSystems)])
-
-        self.relErr.createHdf(grp, 'relErr', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        self.addErr.createHdf(grp, 'addErr', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self.transmitter.createHdf(grp, 'T', nRepeats=nRepeats, fillvalue=fillvalue)
         self.receiver.createHdf(grp, 'R', nRepeats=nRepeats, fillvalue=fillvalue)
         self.loopOffset.createHdf(grp, 'loop_offset', nRepeats=nRepeats, fillvalue=fillvalue)
 
 
-    def writeHdf(self, parent, myName, withPosterior=True, index=None):
+    def writeHdf(self, parent, name, withPosterior=True, index=None):
         """ Write the StatArray to an HDF object
         parent: Upper hdf file or group
         myName: object hdf name. Assumes createHdf has already been called
         create: optionally create the data set as well before writing
         """
+        super().writeHdf(parent, name, withPosterior, index)
 
-        if (not index is None):
-            assert cf.isInt(index), TypeError('Index must be an int')
+        grp = parent[name]
 
-        grp = parent.get(myName)
-
-        self.x.writeHdf(grp, 'x', withPosterior=withPosterior, index=index)
-        self.y.writeHdf(grp, 'y',  withPosterior=withPosterior, index=index)
-        self.z.writeHdf(grp, 'z',  withPosterior=withPosterior, index=index)
-        self.elevation.writeHdf(grp, 'e',  withPosterior=withPosterior, index=index)
-        self._data.writeHdf(grp, 'd',  withPosterior=withPosterior, index=index)
-        self._std.writeHdf(grp, 's',  withPosterior=withPosterior, index=index)
-        self._predictedData.writeHdf(grp, 'p',  withPosterior=withPosterior, index=index)
-
-        if not self.errorPosterior is None:
-            self.relErr.setPosterior([self.errorPosterior[i].marginalize(axis=1) for i in range(self.nSystems)])
-            self.addErr.setPosterior([self.errorPosterior[i].marginalize(axis=0) for i in range(self.nSystems)])
-
-        self.relErr.writeHdf(grp, 'relErr',  withPosterior=withPosterior, index=index)
-        self.addErr.writeHdf(grp, 'addErr',  withPosterior=withPosterior, index=index)
         self.transmitter.writeHdf(grp, 'T', index=index)
         self.receiver.writeHdf(grp, 'R', index=index)
         self.loopOffset.writeHdf(grp, 'loop_offset', index=index)
-        #writeNumpy(self.active, grp, 'iActive')
 
-#    def toHdf(self, parent, myName):
-#        """ Write the TdemDataPoint to an HDF object
-#        h5obj: :An HDF File or Group Object.
-#        """
-#        self.writeHdf(parent, myName, index=np.s_[0])
 
     def fromHdf(self, grp, index=None, **kwargs):
         """ Reads the object from a HDF group """
@@ -548,67 +512,21 @@ class TdemDataPoint(EmDataPoint):
 
         system_file_path = kwargs['system_file_path']
 
-        if (not index is None):
-            assert cf.isInt(index), ValueError("index must be of type int")
+        super().fromHdf(grp, index)
 
-        x = StatArray.StatArray().fromHdf(grp['x'], index=index)
-        y = StatArray.StatArray().fromHdf(grp['y'], index=index)
-        z = StatArray.StatArray().fromHdf(grp['z'], index=index)
-        e = StatArray.StatArray().fromHdf(grp['e'], index=index)
+        self.transmitter = (eval(cf.safeEval(grp['T'].attrs.get('repr')))).fromHdf(grp['T'], index=index)
+        self.receiver = (eval(cf.safeEval(grp['R'].attrs.get('repr')))).fromHdf(grp['R'], index=index)
 
-        nSystems = np.int(np.asarray(grp.get('nSystems')))
-        systems = [join(system_file_path, str(np.asarray(grp.get('System{}'.format(i))), 'utf-8')) for i in range(nSystems)]
+        if 'loop_offset' in grp:
+            self.loopOffset = StatArray.StatArray().fromHdf(grp['loop_offset'], index=index)
 
-        data = StatArray.StatArray().fromHdf(grp['d'], index=index)
-        std = StatArray.StatArray().fromHdf(grp['s'], index=index)
-        predicted = StatArray.StatArray().fromHdf(grp['p'], index=index)
+        nSystems = np.int(np.asarray(grp['nSystems']))
+        self.system = [join(system_file_path, str(np.asarray(grp['System{}'.format(i)]), 'utf-8')) for i in range(nSystems)]
 
-        transmitter = (eval(cf.safeEval(grp['T'].attrs.get('repr')))).fromHdf(grp['T'], index=index)
-        receiver = (eval(cf.safeEval(grp['R'].attrs.get('repr')))).fromHdf(grp['R'], index=index)
-
-        try:
-            loopOffset = (eval(cf.safeEval(grp['loop_offset'].attrs.get('repr')))).fromHdf(grp['loop_offset'], index=index)
-        except:
-            loopOffset = None
-
-        self.__init__(x=x, y=y, z=z,
-                      elevation=e,
-                      data=data, std=std,
-                      predictedData=predicted,
-                      system=systems,
-                      transmitter_loop=transmitter, receiver_loop=receiver, loopOffset=loopOffset)
-                    #   lineNumber=0.0, fiducial=0.)
-
-        self.relErr = StatArray.StatArray().fromHdf(grp['relErr'], index=index)
-        self.addErr = StatArray.StatArray().fromHdf(grp['addErr'], index=index)
+        self._nChannelsPerSystem = self.nTimes
 
         return self
 
-
-#  def calibrate(self,Predicted=True):
-#    """ Apply calibration factors to the data point """
-#    # Make complex numbers from the data
-#    if (Predicted):
-#      tmp=cf.mergeComplex(self._predictedData)
-#    else:
-#      tmp=cf.mergeComplex(self._data)
-#
-#    # Get the calibration factors for each frequency
-#    i1=0;i2=self.system.nFreq
-#    G=self.calibration[i1:i2];i1+=self.system.nFreq;i2+=self.system.nFreq
-#    Phi=self.calibration[i1:i2];i1+=self.system.nFreq;i2+=self.system.nFreq
-#    Bi=self.calibration[i1:i2];i1+=self.system.nFreq;i2+=self.system.nFreq
-#    Bq=self.calibration[i1:i2]
-#
-#    # Calibrate the data
-#    tmp[:]=G*np.exp(1j*Phi)*tmp+Bi+(1j*Bq)
-#
-#    # Split the complex numbers back out
-#    if (Predicted):
-#      self._predictedData[:]=cf.splitComplex(tmp)
-#    else:
-#      self._data[:]=cf.splitComplex(tmp)
-#
 
     def plotWaveform(self,**kwargs):
         for i in range(self.nSystems):

@@ -3,7 +3,8 @@ Module describing an efficient histogram class
 """
 from copy import deepcopy
 from ...classes.statistics.Histogram1D import Histogram1D
-from ...classes.mesh.RectilinearMesh2D import RectilinearMesh2D
+from ...classes.statistics.Histogram2D import Histogram2D
+from ...classes.mesh.RectilinearMesh3D import RectilinearMesh3D
 from ...classes.core import StatArray
 from ...base import plotting as cP
 from ...base import utilities as cF
@@ -16,23 +17,21 @@ import matplotlib.gridspec as gridspec
 import progressbar
 
 
-class Histogram2D(RectilinearMesh2D):
-    """ 2D Histogram class that can update and plot efficiently.
+class Histogram3D(RectilinearMesh3D):
+    """3D Histogram class that can update and plot efficiently.
 
-    Class extension to the RectilinearMesh2D.  The mesh defines the x and y axes, while the Histogram2D manages the counts.
+    Class extension to the RectilinearMesh.  The mesh defines the x, y,and z axes, while the Histogram manages the counts.
 
-    Histogram2D(x, y, name, units)
+    Histogram3D(x, y, z, name, units)
 
     Parameters
     ----------
     x : array_like or geobipy.RectilinearMesh1D, optional
-        If array_like, defines the centre x locations of each element of the 2D hitmap array.
+        If array_like, defines the centre x locations of each element of the 3D hitmap array.
     y : array_like or geobipy.RectilinearMesh1D, optional
-        If array_like, defines the centre y locations of each element of the 2D hitmap array.
-    name : str
-        Name of the hitmap array, default is 'Frequency'.
-    units : str
-        Units of the hitmap array, default is none since counts are unitless.
+        If array_like, defines the centre y locations of each element of the 3D hitmap array.
+    z : array_like or geobipy.RectilinearMesh1D, optional
+        If array_like, defines the centre z locations of each element of the 3D hitmap array.
 
     Returns
     -------
@@ -41,57 +40,33 @@ class Histogram2D(RectilinearMesh2D):
 
     """
 
-    def __init__(self, xBins=None, xBinCentres=None, yBins=None, yBinCentres=None, **kwargs):
+    def __init__(self, xBins=None, xBinCentres=None, yBins=None, yBinCentres=None, zBins=None, zBinCentres=None, **kwargs):
         """ Instantiate a 2D histogram """
         if (xBins is None and xBinCentres is None):
             return
 
         # Instantiate the parent class
-        super().__init__(xCentres=xBinCentres, xEdges=xBins, yCentres=yBinCentres, yEdges=yBins, **kwargs)
+        super().__init__(xCentres=xBinCentres, xEdges=xBins, yCentres=yBinCentres, yEdges=yBins, zCentres=zBinCentres, zEdges=zBins, **kwargs)
 
         # Point counts to self.arr to make variable names more intuitive
-        self._counts = StatArray.StatArray(self.shape, name='Frequency', dtype=np.int64)
+        self._values = StatArray.StatArray((self.z.nCells, self.y.nCells, self.x.nCells), **kwargs)
 
-
-    @property
-    def xBins(self):
-        return self.x.cellEdges
-
-    @property
-    def xBinCentres(self):
-        return self.x.cellCentres
-
-    @property
-    def yBins(self):
-        return self.y.cellEdges
-
-    @property
-    def yBinCentres(self):
-        return self.y.cellCentres
-
-    @property
-    def zBins(self):
-        return self.z.cellEdges
-
-    @property
-    def zBinCentres(self):
-        return self.z.cellCentres
 
     @property
     def counts(self):
-        return self._counts
+        return self._values
 
 
     def __getitem__(self, slic):
         """Allow slicing of the histogram.
 
         """
-        assert np.shape(slic) == (2,), ValueError("slic must be over 2 dimensions.")
+        assert np.shape(slic) == (3,), ValueError("slic must be over 3 dimensions.")
 
         slic0 = slic
 
         slic = []
-        axis = -1
+        axis = []
         for i, x in enumerate(slic0):
             if not isinstance(x, int):
                 tmp = x
@@ -99,54 +74,38 @@ class Histogram2D(RectilinearMesh2D):
                     tmp = slice(x.start, x.stop+1, x.step) # If a slice, add one to the end for bins.
             else:
                 tmp = x
-                axis = i
+                axis.append(i)
 
             slic.append(tmp)
+
+        assert not len(axis) == 3, ValueError("Slic cannot be a single cell")
         slic = tuple(slic)
 
-        if axis == -1:
-            if self.xyz:
-                out = Histogram2D(xBins=self._x.cellEdges[slic[1]], yBins=self._y.cellEdges[slic[1]], zBins=self._z.cellEdges[slic[0]])
-            else:
-                out = Histogram2D(xBins=self._x.cellEdges[slic[1]], yBins=self._z.cellEdges[slic[0]])
+        if len(axis) == 0:
+            out = type(self)(None, self._x.cellEdges[slic[2]], None, self._y.cellEdges[slic[1]], None, self._z.cellEdges[slic[0]])
 
-            out._counts += self.counts[slic0]
+            out._values += self.values[slic0]
             return out
 
-        if axis == 0:
-            out = Histogram1D(bins=self._x.cellEdges[slic[1]])
+        if len(axis) == 1:
+            a = [x for x in (0, 1, 2) if not x in axis]
+            out = self._reduction_class(None, self.axis(a[1]).cellEdges[slic[a[1]]], None, self.axis(a[0]).cellEdges[slic[a[0]]])
+            out._values += self.values[slic0]
+
+        else:
+            a = [x for x in (0, 1, 2) if not x in axis][0]
+            out = self._reduction_class._reduction_class(None, self.axis(a).cellEdges[slic[a]])
             out._counts += np.squeeze(self.counts[slic0])
-        elif axis == 1:
-            out = Histogram1D(bins=self._y.cellEdges[slic[0]])
-            out._counts += np.squeeze(self.counts[slic0])
+
         return out
 
-
-    # def percent_interval(self, percent=90.0, log=None, axis=0):
-    #     """Gets the percent interval along axis.
-
-    #     Get the statistical interval, e.g. median is 50%.
-
-    #     Parameters
-    #     ----------
-    #     percent : float
-    #         Interval percentage.  0.0 < percent < 100.0
-    #     log : 'e' or float, optional
-    #         Take the log of the interval to a base. 'e' if log = 'e', or a number e.g. log = 10.
-    #     axis : int
-    #         Along which axis to obtain the interval locations.
-
-    #     Returns
-    #     -------
-    #     interval : array_like
-    #         Contains the interval along the specified axis. Has size equal to self.shape[axis].
-
-    #     """
-    #     return super().percent_interval(self.counts, percent, log, axis)
+    @property
+    def _reduction_class(self):
+        return Model2D
 
 
-    def credibleIntervals(self, percent=90.0, log=None, axis=0):
-        """Gets the median and the credible intervals for the specified axis.
+    def credibleIntervals(self, percent=95.0, log=None, axis=0):
+        """Gets the credible intervals for the specified axis.
 
         Parameters
         ----------
@@ -167,10 +126,40 @@ class Histogram2D(RectilinearMesh2D):
             Contains the upper interval along the specified axis. Has size equal to arr.shape[axis].
 
         """
-        return super()._credibleIntervals(values=self.counts, percent=percent, log=log, axis=axis)
+
+        total = self._counts.sum(axis=1-axis)
+        p = 0.01 * percent
+        cs = np.cumsum(self._counts, axis=1-axis)
+
+        if axis == 0:
+            tmp = np.divide(cs, total[:, np.newaxis])
+            # tmp = tmp / np.repeat(total[:, np.newaxis], self._counts.shape[1], 1)
+        else:
+            tmp = np.divide(cs, total[np.newaxis, :])
+            # tmp = tmp / np.repeat(total[np.newaxis, :], self._counts.shape[0], 0)
+
+        ixM = np.apply_along_axis(np.searchsorted, 1-axis, tmp, 0.5)
+        ix1 = np.apply_along_axis(np.searchsorted, 1-axis, tmp, (1.0 - p))
+        ix2 = np.apply_along_axis(np.searchsorted, 1-axis, tmp, p)
+
+        if axis == 0:
+            med = self.x.cellCentres[ixM]
+            low = self.x.cellCentres[ix1]
+            high = self.x.cellCentres[ix2]
+        else:
+            med = self.y.cellCentres[ixM]
+            low = self.y.cellCentres[ix1]
+            high = self.y.cellCentres[ix2]
+
+        if (not log is None):
+            med, dum = cF._log(med, log=log)
+            low, dum = cF._log(low, log=log)
+            high, dum = cF._log(high, log=log)
+
+        return (med, low, high)
 
 
-    def credibleRange(self, percent=90.0, log=None, axis=0):
+    def credibleRange(self, percent=95.0, log=None, axis=0):
         """ Get the range of credibility with depth
 
         Parameters
@@ -185,11 +174,13 @@ class Histogram2D(RectilinearMesh2D):
 
 
         """
-        return super()._credibleRange(self.counts, percent, log, axis)
+        sMed, sLow, sHigh = self.credibleIntervals(percent, log=log, axis=axis)
+
+        return sHigh - sLow
 
 
 
-    def marginalize(self, intervals=None, index=None, log=None, axis=0):
+    def marginalize(self, log=None, axis=0):
         """Get the marginal histogram along an axis
 
         Parameters
@@ -207,29 +198,13 @@ class Histogram2D(RectilinearMesh2D):
         out : geobipy.Histogram1D
 
         """
-        assert 0 <= axis <= 1, ValueError("0 <= axis <= 1")
+        assert 0 <= axis <= 2, ValueError("0 <= axis <= 2")
 
-        bins = self.axis(axis)
+        a, b = self.other_axis(axis)
 
-        if intervals is None and index is None:
-            s = np.sum(self._counts, axis=axis)
-        else:
-            assert (intervals is None) or (index is None), ValueError("Cannot provide both intervals and an index")
+        out = Histogram2D(xBins = a.cellEdges, yBins = b.cellEdges)
+        out._counts += np.sum(self.counts, axis=2-axis)
 
-            if not intervals is None:
-                assert np.size(intervals) == 2, ValueError("intervals must have size equal to 2")
-                assert intervals[1] > intervals[0], ValueError("intervals must be monotonically increasing")
-                indices = self.other_axis(axis).cellCentres.searchsorted(intervals)
-            else:
-                indices = np.asarray([index, index+1])
-
-            if axis == 0:
-                s = np.sum(self._counts[indices[0]:indices[1], :], axis=axis)
-            else:
-                s = np.sum(self._counts[:, indices[0]:indices[1]], axis=1-axis)
-
-        out = Histogram1D(bins = bins.cellEdges, log=log)
-        out._counts += s
         return out
 
 
@@ -252,7 +227,7 @@ class Histogram2D(RectilinearMesh2D):
 
         """
 
-        return super()._mean(self.counts, log=log, axis=axis)
+        return super().mean(self.counts, log, axis)
 
 
     def median(self, log=None, axis=0):
@@ -271,7 +246,7 @@ class Histogram2D(RectilinearMesh2D):
             The medians along the specified axis. Has size equal to arr.shape[axis].
 
         """
-        return super()._median(values=self.counts, log=log, axis=axis)
+        return super().median(self._counts, log, axis)
 
 
     def mode(self, log=None, axis=0):
@@ -540,7 +515,7 @@ class Histogram2D(RectilinearMesh2D):
         return distributions, active
 
 
-    def fit_estimated_pdf(self, intervals=None, axis=0, mixture_type='pearson', iPoint=None, rank=None, verbose=False, **kwargs):
+    def fit_estimated_pdf(self, intervals=None, axis=0, mixture_type='pearson', **kwargs):
         """Find peaks in the histogram along an axis.
 
         Parameters
@@ -553,8 +528,7 @@ class Histogram2D(RectilinearMesh2D):
         """
 
         if np.all(self.counts == 0):
-            return [None] * np.size(intervals) - 1
-
+            return [None]*np.size(intervals)-1
         track = kwargs.pop('track', True)
         if intervals is None:
             intervals = self.yBins if axis==0 else self.xBins
@@ -569,13 +543,8 @@ class Histogram2D(RectilinearMesh2D):
 
         mixtures = []
         for i in r:
-            try:
-                h = self.marginalize(intervals=intervals[i:i+2], axis=axis)
-                ms = h.fit_estimated_pdf(mixture_type = mixture_type, **kwargs)
-            except:
-                print('rank {} point {} interval {} failed'.format(rank, iPoint, i))
-                ms = None
-
+            h = self.marginalize(intervals=intervals[i:i+2], axis=axis)
+            ms = h.fit_estimated_pdf(mixture_type = mixture_type, **kwargs)
             mixtures.append(ms)
 
         return mixtures
@@ -778,8 +747,24 @@ class Histogram2D(RectilinearMesh2D):
         return self.pcolor(**kwargs)
 
 
-    def pcolor(self, **kwargs):
+    def plot_pyvista(self, **kwargs):
+
+        pv_mesh = super().plot_pyvista(**kwargs)
+
+        pv_mesh.cell_arrays["counts"] = self.counts.flatten()
+
+        return pv_mesh
+
+
+    def pcolor(self, axis, index, **kwargs):
         """Plot the Histogram2D as an image
+
+        Parameters
+        ----------
+        axis : int
+            axis through which to take a slice.
+        index : int
+            index of slice to take.
 
         Other Parameters
         ----------------
@@ -852,7 +837,7 @@ class Histogram2D(RectilinearMesh2D):
             cP.plot(self.x.cellCentres, m, label='median', **kwargs)
 
 
-    def update(self, xValues, yValues=None, trim=False):
+    def update(self, xValues, yValues=None, zValues=None, trim=False):
         """Update the histogram by counting the entry of values into the bins of the histogram.
 
         Parameters
@@ -868,14 +853,15 @@ class Histogram2D(RectilinearMesh2D):
 
         """
 
-        if yValues is None:
-            assert xValues.ndim == 2, ValueError("If yValues is not given, xValues must be 2D.")
-            assert np.shape(xValues)[0] == 2, ValueError("xValues must have first dimension with size 2.")
+        if zValues is None:
+            assert xValues.ndim == 2, ValueError("If zValues is not given, xValues must be 2D.")
+            assert np.shape(xValues)[0] == 3, ValueError("xValues must have first dimension with size 3.")
 
+            zValues = xValues[0, :]
             yValues = xValues[1, :]
-            xValues = xValues[0, :]
+            xValues = xValues[2, :]
 
-        iBin = self.cellIndices(xValues, yValues, clip=True, trim=trim)
+        iBin = self.cellIndices(xValues, yValues, zValues, clip=True, trim=trim)
 
         if np.ndim(iBin) == 1:
             unique = iBin
@@ -883,7 +869,7 @@ class Histogram2D(RectilinearMesh2D):
         else:
             unique, counts = np.unique(iBin, axis=1, return_counts=True)
 
-        self._counts[unique[0], unique[1]] += counts
+        self._counts[unique[0], unique[1], unique[2]] += counts
 
 
     def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
@@ -904,35 +890,12 @@ class Histogram2D(RectilinearMesh2D):
         create: optionally create the data set as well before writing
         """
         super().writeHdf(parent, name, withPosterior, index)
-        self._counts.writeHdf(parent, name+'/counts',  withPosterior=withPosterior, index=index)
+        grp = h5obj.get(name)
+        self._counts.writeHdf(grp, 'counts',  withPosterior=withPosterior, index=index)
 
 
     def fromHdf(self, grp, index=None):
         """ Reads in the object from a HDF file """
         super().fromHdf(grp, index)
-
-        if "arr" in grp:
-            self._counts = StatArray.StatArray().fromHdf(grp['arr'], index=index)
-        else:
-            self._counts = StatArray.StatArray().fromHdf(grp['counts'], index=index)
-
-        self._counts = self._counts.astype(np.int64)
+        self._counts = StatArray.StatArray().fromHdf(grp['counts'], index)
         return self
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
