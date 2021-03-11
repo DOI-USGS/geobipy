@@ -14,7 +14,7 @@ import numpy as np
 import numpy.ma as ma
 from .fileIO import deleteFile
 from ..base import Error as Err
-from ..base import customFunctions as cF # (cF.getName, cF.getUnits, cF.getNameUnits, cF.histogramEqualize, cF._log, cF.findFirstLastNotValue)
+from ..base import utilities as cF # (cF.getName, cF.getUnits, cF.getNameUnits, cF.histogramEqualize, cF._log, cF.findFirstLastNotValue)
 from cycler import cycler
 import scipy as sp
 import copy
@@ -431,7 +431,7 @@ def pcolor(values, x=None, y=None, **kwargs):
     grid : bool, optional
         Plot the grid
     noColorbar : bool, optional
-        Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
+        Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.
     reciprocateX : bool, optional
         Take the reciprocal of the X axis before other transforms
     reciprocateY : bool, optional
@@ -604,7 +604,7 @@ def _pcolormesh(X, Y, values, **kwargs):
     grid : bool, optional
         Plot the grid
     noColorbar : bool, optional
-        Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
+        Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.
     trim : array_like, optional
         Set the x and y limits to the first and last locations that don't equal the values in trim.
     classes : dict, optional
@@ -796,7 +796,7 @@ def pcolor_1D(values, y=None, **kwargs):
     transpose : bool, optional
         Transpose the image
     noColorBar : bool, optional
-        Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
+        Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.
 
     Returns
     -------
@@ -1026,7 +1026,7 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
     flipY : bool, optional
         Flip the Y axis
     noColorBar : bool, optional
-        Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
+        Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.
 
     Returns
     -------

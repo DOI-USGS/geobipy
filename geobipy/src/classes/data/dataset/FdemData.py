@@ -3,8 +3,8 @@ Module describing an EMData Set where channels are associated with an xyz co-ord
 """
 from .Data import Data
 from ..datapoint.FdemDataPoint import FdemDataPoint
-from ....base import customFunctions as cF
-from ....base import customPlots as cP
+from ....base import utilities as cF
+from ....base import plotting as cP
 from ....classes.core import StatArray
 from ...system.FdemSystem import FdemSystem
 from ...system.CircularLoop import CircularLoop
@@ -425,7 +425,7 @@ class FdemData(Data):
 
         See Also
         --------
-        geobipy.customPlots.plot : For additional keyword arguments
+        geobipy.plotting.plot : For additional keyword arguments
 
         """
 

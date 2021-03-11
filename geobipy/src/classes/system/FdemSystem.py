@@ -10,7 +10,7 @@ from .EmLoop import EmLoop
 from .CircularLoop import CircularLoop
 from ...base import fileIO as fIO
 from ...base import MPI as myMPI
-from ...base import customFunctions as cF
+from ...base import utilities as cF
 
 
 class FdemSystem(myObject):

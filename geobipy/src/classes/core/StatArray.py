@@ -4,8 +4,8 @@ import h5py
 import scipy.stats as st
 
 
-from ...base import customFunctions as cf
-from ...base import customPlots as cP
+from ...base import utilities as cf
+from ...base import plotting as cP
 from ..statistics.Distribution import Distribution
 from ..statistics.baseDistribution import baseDistribution
 from .myObject import myObject
@@ -103,12 +103,17 @@ class StatArray(np.ndarray, myObject):
 
     ### "hidden" methods
 
-    def __new__(subtype, shape=None, name=None, units=None, **kwargs):
+    def __new__(subtype, shape=None, name=None, units=None, verbose = False, **kwargs):
         """Instantiate a new StatArray """
         # Create the ndarray instance of our type, given the usual
         # ndarray input arguments.  This will call the standard
         # ndarray constructor, but return an object of our type.
         # It also triggers a call to InfoArray.__array_finalize__
+
+        if verbose:
+            print('SA.new')
+            print(shape)
+            print(type(shape))
 
         if (not name is None):
             assert (isinstance(name,str)), TypeError('name must be a string')
@@ -122,8 +127,12 @@ class StatArray(np.ndarray, myObject):
 
         if isinstance(shape, list):
             shape = np.asarray(shape)
+
         # Copies a StatArray but can reassign the name and units
         if isinstance(shape, StatArray):
+            if verbose:
+                print('I am a StatArray')
+                print('ndim', np.ndim(shape))
             if np.ndim(shape) == 0:
                 self = np.ndarray.__new__(subtype, 1, **kwargs)
                 self[:] = shape
@@ -892,7 +901,7 @@ class StatArray(np.ndarray, myObject):
 
         See Also
         --------
-        geobipy.customPlots.hist : For geobipy additional arguments
+        geobipy.plotting.hist : For geobipy additional arguments
         matplotlib.pyplot.hist : For histogram related arguments
 
         Example
@@ -1137,7 +1146,7 @@ class StatArray(np.ndarray, myObject):
         grid : bool, optional
             Plot the grid
         noColorbar : bool, optional
-            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
+            Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.
         trim : bool, optional
             Set the x and y limits to the first and last non zero values along each axis.
         classes : dict, optional
@@ -1287,7 +1296,7 @@ class StatArray(np.ndarray, myObject):
 
         See Also
         --------
-        geobipy.customPlots.Scatter2D : For additional keyword arguments you may use.
+        geobipy.plotting.Scatter2D : For additional keyword arguments you may use.
 
         """
 

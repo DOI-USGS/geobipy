@@ -19,8 +19,8 @@ from numpy.random import randint
 
 # Set up shorter aliases for classes within geobipy
 # Base routines
-from .src.base import customFunctions
-from .src.base import customPlots
+from .src.base import utilities
+from .src.base import plotting
 from .src.base import fileIO
 from .src.base import interpolation
 
@@ -332,7 +332,7 @@ def parallel_mpi(inputFile, outputDir, skipHDF5):
     if (world.rank == 0):
         masterTask(Dataset, world)
     else:
-        DataPoint = eval(customFunctions.safeEval(DataPointType))
+        DataPoint = eval(utilities.safeEval(DataPointType))
         workerTask(DataPoint, UP, prng, world, lineNumbers, LR)
 
     world.barrier()

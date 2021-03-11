@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.pyplot import pause
 from matplotlib.ticker import MaxNLocator
-from ..base import customPlots as cP
-from ..base import customFunctions as cF
+from ..base import plotting as cP
+from ..base import utilities as cF
 import numpy as np
 from ..base import fileIO as fIO
 import h5py

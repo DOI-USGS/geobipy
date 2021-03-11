@@ -11,8 +11,8 @@ from ...base.logging import myLogger
 from ..statistics.Distribution import Distribution
 import numpy as np
 import matplotlib.pyplot as plt
-from ...base import customPlots as cP
-from ...base import customFunctions as cF
+from ...base import plotting as cP
+from ...base import utilities as cF
 from copy import deepcopy
 
 class Model1D(Model):
@@ -1154,7 +1154,7 @@ class Model1D(Model):
         grid : bool, optional
             Plot the grid
         noColorbar : bool, optional
-            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
+            Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.
         trim : bool, optional
             Set the x and y limits to the first and last non zero values along each axis.
 

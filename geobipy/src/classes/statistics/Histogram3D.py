@@ -6,8 +6,8 @@ from ...classes.statistics.Histogram1D import Histogram1D
 from ...classes.statistics.Histogram2D import Histogram2D
 from ...classes.mesh.RectilinearMesh3D import RectilinearMesh3D
 from ...classes.core import StatArray
-from ...base import customPlots as cP
-from ...base import customFunctions as cF
+from ...base import plotting as cP
+from ...base import utilities as cF
 from .baseDistribution import baseDistribution
 from .Mixture import Mixture
 import numpy as np
@@ -842,7 +842,7 @@ class Histogram3D(RectilinearMesh3D):
         grid : bool, optional
             Plot the grid
         noColorbar : bool, optional
-            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
+            Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.
         trim : bool, optional
             Set the x and y limits to the first and last non zero values along each axis.
 

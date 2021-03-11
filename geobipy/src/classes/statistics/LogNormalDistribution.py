@@ -6,7 +6,7 @@ import numpy as np
 from ...base.logging import myLogger
 from .NormalDistribution import Normal
 from scipy.stats import norm
-from ...base import customPlots as cP
+from ...base import plotting as cP
 from ..core import StatArray
 
 class LogNormal(Normal):

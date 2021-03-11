@@ -3,7 +3,7 @@ Module defining a multivariate normal distribution with statistical procedures
 """
 #from copy import deepcopy
 import numpy as np
-from ...base  import customFunctions as cf
+from ...base  import utilities as cf
 from .baseDistribution import baseDistribution
 from ..core import StatArray
 from .MvNormalDistribution import MvNormal
@@ -12,7 +12,7 @@ from scipy.stats import multivariate_normal
 class MvLogNormal(MvNormal):
     """Class extension to geobipy.baseDistribution
 
-    Handles a multivariate lognormal distribution.  Uses Scipy to evaluate probabilities, 
+    Handles a multivariate lognormal distribution.  Uses Scipy to evaluate probabilities,
     but Numpy to generate random samples since scipy is slow.
 
     MvLogNormal(mean, variance, ndim, linearSpace, prng)
@@ -28,11 +28,11 @@ class MvLogNormal(MvNormal):
         Only used if mean and variance are scalars that are constant for all dimensions
     linearSpace : bool, optional
         If False, any input and output is in log space.
-        If True, input and output is in linear space. 
+        If True, input and output is in linear space.
             Inputs are internally logged, and the exponential of any output is returned
     prng : numpy.random.RandomState, optional
         A random state to generate random numbers. Required for parallel instantiation.
-        
+
     Returns
     -------
     out : MvLogNormal
@@ -47,8 +47,8 @@ class MvLogNormal(MvNormal):
             mean = np.log(mean)
         super().__init__(mean, variance, ndim, prng=prng)
         self.linearSpace = linearSpace
-        
-    
+
+
 
     @property
     def mean(self):
@@ -89,8 +89,8 @@ class MvLogNormal(MvNormal):
 
 
     def bins(self, nBins=100, nStd=4.0, axis=None):
-        """Discretizes a range given the mean and variance of the distribution 
-        
+        """Discretizes a range given the mean and variance of the distribution
+
         Parameters
         ----------
         nBins : int, optional
@@ -99,7 +99,7 @@ class MvLogNormal(MvNormal):
             The bin edges = mean +- nStd * variance.
         dim : int, optional
             Get the bins of this dimension, if None, returns bins for all dimensions.
-        
+
         Returns
         -------
         bins : geobipy.StatArray

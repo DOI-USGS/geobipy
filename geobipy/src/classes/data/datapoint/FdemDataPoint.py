@@ -12,9 +12,9 @@ from ...system.FdemSystem import FdemSystem
 import matplotlib.pyplot as plt
 import numpy as np
 #from ....base import Error as Err
-from ....base import customFunctions as cf
+from ....base import utilities as cf
 from ....base import MPI as myMPI
-from ....base import customPlots as cp
+from ....base import plotting as cp
 
 
 class FdemDataPoint(EmDataPoint):

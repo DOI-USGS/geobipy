@@ -4,8 +4,8 @@ import numpy as np
 from ...classes.core import StatArray
 from ...base import fileIO as fIO
 from ...base import interpolation
-from ...base import customFunctions as cf
-from ...base import customPlots as cP
+from ...base import utilities as cf
+from ...base import plotting as cP
 from .Point import Point
 from ...base import MPI
 from scipy.spatial import cKDTree
@@ -374,7 +374,7 @@ class PointCloud3D(myObject):
 
         See Also
         --------
-        geobipy.customPlots.plot : For additional keyword arguments
+        geobipy.plotting.plot : For additional keyword arguments
 
         """
         x = self.getXAxis(xAxis)
@@ -522,7 +522,7 @@ class PointCloud3D(myObject):
 
         See Also
         --------
-        geobipy.customPlots.Scatter2D : For additional keyword arguments you may use.
+        geobipy.plotting.Scatter2D : For additional keyword arguments you may use.
 
         """
 

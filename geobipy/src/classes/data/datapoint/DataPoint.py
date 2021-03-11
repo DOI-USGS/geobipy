@@ -2,8 +2,8 @@ from cached_property import cached_property
 from copy import deepcopy
 from ...pointcloud.Point import Point
 from ....classes.core import StatArray
-from ....base import customFunctions as cf
-from ....base import customPlots as cP
+from ....base import utilities as cf
+from ....base import plotting as cP
 from ....base import MPI as myMPI
 from ...statistics.Histogram2D import Histogram2D
 import numpy as np

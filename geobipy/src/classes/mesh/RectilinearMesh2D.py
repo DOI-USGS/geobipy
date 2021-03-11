@@ -7,8 +7,8 @@ from ...classes.core import StatArray
 from .RectilinearMesh1D import RectilinearMesh1D
 import numpy as np
 from scipy.stats import binned_statistic
-from ...base import customPlots as cP
-from ...base import customFunctions as cF
+from ...base import plotting as cP
+from ...base import utilities as cF
 from scipy.sparse import kron
 
 try:
@@ -561,13 +561,13 @@ class RectilinearMesh2D(myObject):
         grid : bool, optional
             Plot the grid
         noColorbar : bool, optional
-            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
+            Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.
         trim : bool, optional
             Set the x and y limits to the first and last non zero values along each axis.
 
         See Also
         --------
-        geobipy.customPlots.pcolor : For non matplotlib keywords.
+        geobipy.plotting.pcolor : For non matplotlib keywords.
         matplotlib.pyplot.pcolormesh : For additional keyword arguments you may use.
 
         """

@@ -1,6 +1,6 @@
 import h5py
 import numpy as np
-from geobipy.src.base import customPlots as cP
+from geobipy.src.base import plotting as cP
 from geobipy.src.inversion.LineResults import LineResults
 from geobipy.src.inversion.DataSetResults import DataSetResults
 import matplotlib.pyplot as plt
@@ -30,17 +30,17 @@ save = args.save
 
 h5FilePath = args.h5file
 h5File = os.path.split(h5FilePath)[-1]
-    
+
 # Set a default figure size
 if args.size is None:
     figSize = (14, 10)
 else:
     figSize = (int(args.size[0]), int(args.size[1]))
-    
+
 mpl.rcParams['figure.figsize'] = figSize[0], figSize[1]
 
 dpi = args.dpi
-                    
+
 # Open up the HDF5 file
 LR = LineResults(args.h5file, systemFilepath=args.datadir)
 

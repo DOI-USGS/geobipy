@@ -9,7 +9,7 @@ from ..classes.data.datapoint.FdemDataPoint import FdemDataPoint
 from ..classes.data.datapoint.TdemDataPoint import TdemDataPoint
 from ..classes.statistics.Hitmap2D import Hitmap2D
 import numpy as np
-from ..base.customFunctions import isInt
+from ..base.utilities import isInt
 
 
 class _userParameters(myObject):

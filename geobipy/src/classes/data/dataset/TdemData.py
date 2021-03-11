@@ -16,8 +16,8 @@ from ...system.TdemSystem import TdemSystem
 import numpy as np
 from ....base import fileIO as fIO
 #from ....base import Error as Err
-from ....base import customPlots as cP
-from ....base import customFunctions as cF
+from ....base import plotting as cP
+from ....base import utilities as cF
 from ....base import MPI as myMPI
 import matplotlib.pyplot as plt
 from os.path import join
@@ -969,7 +969,7 @@ class TdemData(Data):
 
         See Also
         --------
-        geobipy.customPlots.Scatter2D : For additional keyword arguments you may use.
+        geobipy.plotting.Scatter2D : For additional keyword arguments you may use.
 
         """
 

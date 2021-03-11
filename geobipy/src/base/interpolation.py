@@ -2,7 +2,7 @@ import subprocess
 import numpy as np
 from .fileIO import deleteFile
 from ..classes.core import StatArray
-from . import customFunctions as cf
+from . import utilities as cf
 from scipy import interpolate
 from scipy.interpolate import CloughTocher2DInterpolator
 from scipy.interpolate.interpnd import _ndim_coords_from_arrays

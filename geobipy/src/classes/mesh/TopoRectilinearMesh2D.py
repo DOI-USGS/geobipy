@@ -8,7 +8,7 @@ from .RectilinearMesh2D import RectilinearMesh2D
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
-from ...base import customPlots as cP
+from ...base import plotting as cP
 from ...base import fileIO as fio
 
 try:
@@ -168,7 +168,7 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
         grid : bool, optional
             Plot the grid
         noColorbar : bool, optional
-            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
+            Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.
         trim : bool, optional
             Set the x and y limits to the first and last non zero values along each axis.
 

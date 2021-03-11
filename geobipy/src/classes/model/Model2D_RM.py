@@ -2,9 +2,7 @@
 Module describing an efficient histogram class
 """
 from copy import deepcopy
-from ...classes.statistics.Histogram1D import Histogram1D
-from ...classes.statistics.Histogram2D import Histogram2D
-from ...classes.mesh.RectilinearMesh3D import RectilinearMesh3D
+from ...classes.mesh.RectilinearMesh2D import RectilinearMesh2D
 from ...classes.core import StatArray
 from ...base import plotting as cP
 from ...base import utilities as cF
@@ -17,21 +15,23 @@ import matplotlib.gridspec as gridspec
 import progressbar
 
 
-class Histogram3D(RectilinearMesh3D):
-    """3D Histogram class that can update and plot efficiently.
+class Model2D_RM(RectilinearMesh2D):
+    """ 2D Histogram class that can update and plot efficiently.
 
-    Class extension to the RectilinearMesh.  The mesh defines the x, y,and z axes, while the Histogram manages the counts.
+    Class extension to the RectilinearMesh2D.  The mesh defines the x and y axes, while the Histogram2D manages the counts.
 
-    Histogram3D(x, y, z, name, units)
+    Histogram2D(x, y, name, units)
 
     Parameters
     ----------
     x : array_like or geobipy.RectilinearMesh1D, optional
-        If array_like, defines the centre x locations of each element of the 3D hitmap array.
+        If array_like, defines the centre x locations of each element of the 2D hitmap array.
     y : array_like or geobipy.RectilinearMesh1D, optional
-        If array_like, defines the centre y locations of each element of the 3D hitmap array.
-    z : array_like or geobipy.RectilinearMesh1D, optional
-        If array_like, defines the centre z locations of each element of the 3D hitmap array.
+        If array_like, defines the centre y locations of each element of the 2D hitmap array.
+    name : str
+        Name of the hitmap array, default is 'Frequency'.
+    units : str
+        Units of the hitmap array, default is none since counts are unitless.
 
     Returns
     -------
@@ -40,68 +40,59 @@ class Histogram3D(RectilinearMesh3D):
 
     """
 
-    def __init__(self, xBins=None, xBinCentres=None, yBins=None, yBinCentres=None, zBins=None, zBinCentres=None, **kwargs):
+    def __init__(self, xCentres=None, xEdges=None, yCentres=None, yEdges=None, zCentres=None, zEdges=None, **kwargs):
         """ Instantiate a 2D histogram """
-        if (xBins is None and xBinCentres is None):
-            return
 
         # Instantiate the parent class
-        super().__init__(xCentres=xBinCentres, xEdges=xBins, yCentres=yBinCentres, yEdges=yBins, zCentres=zBinCentres, zEdges=zBins, **kwargs)
+        super().__init__(xCentres, xEdges, yCentres, yEdges, zCentres, zEdges, **kwargs)
 
         # Point counts to self.arr to make variable names more intuitive
-        self._values = StatArray.StatArray((self.z.nCells, self.y.nCells, self.x.nCells), **kwargs)
+        self._values = StatArray.StatArray(self.shape)
 
 
     @property
-    def counts(self):
+    def values(self):
         return self._values
 
 
     def __getitem__(self, slic):
-        """Allow slicing of the histogram.
+        """Allow slicing.
 
         """
-        assert np.shape(slic) == (3,), ValueError("slic must be over 3 dimensions.")
+        assert np.shape(slic) == (2,), ValueError("slic must be over 2 dimensions.")
 
         slic0 = slic
 
         slic = []
-        axis = []
+        axis = -1
         for i, x in enumerate(slic0):
             if not isinstance(x, int):
-                tmp = x
                 if isinstance(x.stop, int):
                     tmp = slice(x.start, x.stop+1, x.step) # If a slice, add one to the end for bins.
             else:
                 tmp = x
-                axis.append(i)
+                axis = i
+
 
             slic.append(tmp)
-
-        assert not len(axis) == 3, ValueError("Slic cannot be a single cell")
         slic = tuple(slic)
 
-        if len(axis) == 0:
-            out = type(self)(None, self._x.cellEdges[slic[2]], None, self._y.cellEdges[slic[1]], None, self._z.cellEdges[slic[0]])
+        if axis == -1:
+            if self.xyz:
+                out = type(self)(xEdges=self.x.cellEdges[slic[1]], yBins=self.y.cellEdges[slic[1]], zBins=self.z.cellEdges[slic[0]])
+            else:
+                out = type(self)(xBins=self.x.cellEdges[slic[1]], yBins=self.z.cellEdges[slic[0]])
 
-            out._values += self.values[slic0]
+            out._counts += self.values[slic0]
             return out
 
-        if len(axis) == 1:
-            a = [x for x in (0, 1, 2) if not x in axis]
-            out = self._reduction_class(None, self.axis(a[1]).cellEdges[slic[a[1]]], None, self.axis(a[0]).cellEdges[slic[a[0]]])
-            out._values += self.values[slic0]
-
-        else:
-            a = [x for x in (0, 1, 2) if not x in axis][0]
-            out = self._reduction_class._reduction_class(None, self.axis(a).cellEdges[slic[a]])
+        if axis == 0:
+            out = type(self)(bins=self.x.cellEdges[slic[1]])
             out._counts += np.squeeze(self.counts[slic0])
-
+        elif axis == 1:
+            out = type(self)(bins=self.y.cellEdges[slic[0]])
+            out._counts += np.squeeze(self.counts[slic0])
         return out
-
-    @property
-    def _reduction_class(self):
-        return Model2D
 
 
     def credibleIntervals(self, percent=95.0, log=None, axis=0):
@@ -180,7 +171,7 @@ class Histogram3D(RectilinearMesh3D):
 
 
 
-    def marginalize(self, log=None, axis=0):
+    def marginalize(self, intervals=None, index=None, log=None, axis=0):
         """Get the marginal histogram along an axis
 
         Parameters
@@ -198,13 +189,33 @@ class Histogram3D(RectilinearMesh3D):
         out : geobipy.Histogram1D
 
         """
-        assert 0 <= axis <= 2, ValueError("0 <= axis <= 2")
+        assert 0 <= axis <= 1, ValueError("0 <= axis <= 1")
 
-        a, b = self.other_axis(axis)
 
-        out = Histogram2D(xBins = a.cellEdges, yBins = b.cellEdges)
-        out._counts += np.sum(self.counts, axis=2-axis)
+        bins = self.x if axis == 0 else self.y
 
+        if intervals is None and index is None:
+            s = np.sum(self._counts, axis=axis)
+        else:
+            assert (intervals is None) or (index is None), ValueError("Cannot provide both intervals and an index")
+
+            if not intervals is None:
+                assert np.size(intervals) == 2, ValueError("intervals must have size equal to 2")
+                assert intervals[1] > intervals[0], ValueError("intervals must be monotonically increasing")
+                if axis == 0:
+                    indices = self.y.cellCentres.searchsorted(intervals)
+                else:
+                    indices = self.x.cellCentres.searchsorted(intervals)
+            else:
+                indices = np.asarray([index, index+1])
+
+            if axis == 0:
+                s = np.sum(self._counts[indices[0]:indices[1], :], axis=axis)
+            else:
+                s = np.sum(self._counts[:, indices[0]:indices[1]], axis=axis)
+
+        out = Histogram1D(bins = bins.cellEdges, log=log)
+        out._counts += s
         return out
 
 
@@ -246,7 +257,7 @@ class Histogram3D(RectilinearMesh3D):
             The medians along the specified axis. Has size equal to arr.shape[axis].
 
         """
-        return super().median(self._counts, log, axis)
+        return super().median(self.counts, log, axis)
 
 
     def mode(self, log=None, axis=0):
@@ -515,7 +526,7 @@ class Histogram3D(RectilinearMesh3D):
         return distributions, active
 
 
-    def fit_estimated_pdf(self, intervals=None, axis=0, mixture_type='pearson', **kwargs):
+    def fit_estimated_pdf(self, intervals=None, axis=0, mixture_type='pearson', iPoint=None, rank=None, **kwargs):
         """Find peaks in the histogram along an axis.
 
         Parameters
@@ -528,7 +539,8 @@ class Histogram3D(RectilinearMesh3D):
         """
 
         if np.all(self.counts == 0):
-            return [None]*np.size(intervals)-1
+            return [None] * np.size(intervals) - 1
+
         track = kwargs.pop('track', True)
         if intervals is None:
             intervals = self.yBins if axis==0 else self.xBins
@@ -543,8 +555,15 @@ class Histogram3D(RectilinearMesh3D):
 
         mixtures = []
         for i in r:
-            h = self.marginalize(intervals=intervals[i:i+2], axis=axis)
-            ms = h.fit_estimated_pdf(mixture_type = mixture_type, **kwargs)
+            # print(iPoint, i)
+            # verbose = (i == 120)
+            try:
+                h = self.marginalize(intervals=intervals[i:i+2], axis=axis)
+                ms = h.fit_estimated_pdf(mixture_type = mixture_type, **kwargs)
+            except:
+                print('rank {} point {} interval {} failed'.format(rank, iPoint, i))
+                ms = None
+
             mixtures.append(ms)
 
         return mixtures
@@ -747,24 +766,8 @@ class Histogram3D(RectilinearMesh3D):
         return self.pcolor(**kwargs)
 
 
-    def plot_pyvista(self, **kwargs):
-
-        pv_mesh = super().plot_pyvista(**kwargs)
-
-        pv_mesh.cell_arrays["counts"] = self.counts.flatten()
-
-        return pv_mesh
-
-
-    def pcolor(self, axis, index, **kwargs):
+    def pcolor(self, **kwargs):
         """Plot the Histogram2D as an image
-
-        Parameters
-        ----------
-        axis : int
-            axis through which to take a slice.
-        index : int
-            index of slice to take.
 
         Other Parameters
         ----------------
@@ -837,7 +840,7 @@ class Histogram3D(RectilinearMesh3D):
             cP.plot(self.x.cellCentres, m, label='median', **kwargs)
 
 
-    def update(self, xValues, yValues=None, zValues=None, trim=False):
+    def update(self, xValues, yValues=None, trim=False):
         """Update the histogram by counting the entry of values into the bins of the histogram.
 
         Parameters
@@ -853,15 +856,14 @@ class Histogram3D(RectilinearMesh3D):
 
         """
 
-        if zValues is None:
-            assert xValues.ndim == 2, ValueError("If zValues is not given, xValues must be 2D.")
-            assert np.shape(xValues)[0] == 3, ValueError("xValues must have first dimension with size 3.")
+        if yValues is None:
+            assert xValues.ndim == 2, ValueError("If yValues is not given, xValues must be 2D.")
+            assert np.shape(xValues)[0] == 2, ValueError("xValues must have first dimension with size 2.")
 
-            zValues = xValues[0, :]
             yValues = xValues[1, :]
-            xValues = xValues[2, :]
+            xValues = xValues[0, :]
 
-        iBin = self.cellIndices(xValues, yValues, zValues, clip=True, trim=trim)
+        iBin = self.cellIndices(xValues, yValues, clip=True, trim=trim)
 
         if np.ndim(iBin) == 1:
             unique = iBin
@@ -869,7 +871,7 @@ class Histogram3D(RectilinearMesh3D):
         else:
             unique, counts = np.unique(iBin, axis=1, return_counts=True)
 
-        self._counts[unique[0], unique[1], unique[2]] += counts
+        self._counts[unique[0], unique[1]] += counts
 
 
     def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
@@ -890,12 +892,32 @@ class Histogram3D(RectilinearMesh3D):
         create: optionally create the data set as well before writing
         """
         super().writeHdf(parent, name, withPosterior, index)
-        grp = h5obj.get(name)
-        self._counts.writeHdf(grp, 'counts',  withPosterior=withPosterior, index=index)
+        self._counts.writeHdf(parent, name+'/counts',  withPosterior=withPosterior, index=index)
 
 
     def fromHdf(self, grp, index=None):
         """ Reads in the object from a HDF file """
         super().fromHdf(grp, index)
-        self._counts = StatArray.StatArray().fromHdf(grp['counts'], index)
+        try:
+            self._counts = StatArray.StatArray().fromHdf(grp['arr'], index)
+        except:
+            self._counts = StatArray.StatArray().fromHdf(grp['counts'], index)
         return self
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

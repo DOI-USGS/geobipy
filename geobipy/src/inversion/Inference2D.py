@@ -17,8 +17,8 @@ from ..classes.data.dataset.FdemData import FdemData
 from ..classes.data.dataset.TdemData import TdemData
 from ..classes.model.Model1D import Model1D
 from ..base.HDF import hdfRead
-from ..base import customPlots as cP
-from ..base import customFunctions as cF
+from ..base import plotting as cP
+from ..base import utilities as cF
 from ..base import fileIO as fIO
 from ..base.MPI import loadBalance1D_shrinkingArrays
 import matplotlib.pyplot as plt
@@ -620,7 +620,7 @@ class Inference2D(myObject):
             mixtures = None
             if not np.all(hm.counts == 0):
                 mixtures = hm.fit_estimated_pdf(iPoint=i, rank=self.world.rank, **kwargs)
-            
+
             if not mixtures is None:
                 for j, m in enumerate(mixtures):
                     if not m is None:

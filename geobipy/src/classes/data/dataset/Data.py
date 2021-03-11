@@ -5,8 +5,8 @@ import numpy as np
 from cached_property import cached_property
 from ....classes.core import StatArray
 from ....base import fileIO as fIO
-from ....base import customFunctions as cf
-from ....base import customPlots as cP
+from ....base import utilities as cf
+from ....base import plotting as cP
 from ...pointcloud.PointCloud3D import PointCloud3D
 from ..datapoint.DataPoint import DataPoint
 from ....classes.core.myObject import myObject
@@ -660,7 +660,7 @@ class Data(PointCloud3D):
 
         See Also
         --------
-        geobipy.customPlots.plot : For additional keyword arguments
+        geobipy.plotting.plot : For additional keyword arguments
 
         """
 
@@ -724,7 +724,7 @@ class Data(PointCloud3D):
 
         See Also
         --------
-        geobipy.customPlots.plot : For additional keyword arguments
+        geobipy.plotting.plot : For additional keyword arguments
 
         """
 

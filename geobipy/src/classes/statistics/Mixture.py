@@ -2,7 +2,7 @@ import numpy as np
 import h5py
 from ...classes.core.myObject import myObject
 from ...classes.core import StatArray
-from ...base import customFunctions as cF
+from ...base import utilities as cF
 from scipy.optimize import curve_fit
 from lmfit import models
 from lmfit import Parameters
@@ -366,44 +366,6 @@ class Mixture(myObject):
         out = mod.fit(y, pars, x=centres, **kwargs)
 
         return out, pars
-
-
-    # def _single_fit_to_curve(self, centres, edges, y, iPeaks, variance_bound, **kwargs):
-
-    #     log = kwargs.pop('log', None)
-
-    #     nPeaks = np.size(iPeaks)
-    #     # Carry out the first fitting.
-    #     guess = np.ones(nPeaks * self.n_solvable_parameters)
-    #     lowerBounds = np.zeros(nPeaks * self.n_solvable_parameters)
-    #     upperBounds = np.full(nPeaks * self.n_solvable_parameters, np.inf)
-
-    #     # Set the mean bounds
-    #     guess[1::self.n_solvable_parameters] = centres[iPeaks]
-    #     lowerBounds[1::self.n_solvable_parameters] = edges[iPeaks]
-    #     upperBounds[1::self.n_solvable_parameters] = edges[iPeaks+1]
-
-    #     # Set the variance bounds
-    #     upperBounds[2::self.n_solvable_parameters] = variance_bound
-
-    #     if np.isinf(variance_bound):
-    #         guess[2::self.n_solvable_parameters] = 1.0
-    #     else:
-    #         guess[2::self.n_solvable_parameters] = 0.5 * (lowerBounds[2::self.n_solvable_parameters] + upperBounds[2::self.n_solvable_parameters])
-
-    #     if self.n_solvable_parameters > 3:
-    #         dfGuess = 1e4
-    #         # Set the degrees of freedom bounds
-    #         guess[3::self.n_solvable_parameters] = dfGuess
-    #         lowerBounds[3::self.n_solvable_parameters] = 2
-
-    #     bounds = (lowerBounds, upperBounds)
-
-    #     iWhere = np.where(y > 0.0)[0]
-
-    #     model, pcov = curve_fit(self._sum, xdata=centres, ydata=y, p0=guess, bounds=bounds, ftol=1e-3, method='dogbox', **kwargs)
-
-    #     return np.asarray(model)
 
 
     def createHdf(self, h5obj, myName, nRepeats=None):

@@ -17,8 +17,8 @@ import numpy as np
 
 #from ....base import Error as Err
 from ....base import fileIO as fIO
-from ....base import customFunctions as cf
-from ....base import customPlots as cp
+from ....base import utilities as cf
+from ....base import plotting as cp
 from ....base import MPI as myMPI
 from os.path import split as psplt
 from os.path import join

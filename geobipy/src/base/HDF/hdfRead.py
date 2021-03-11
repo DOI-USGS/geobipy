@@ -11,7 +11,7 @@ from ...classes.mesh.RectilinearMesh2D import RectilinearMesh2D
 from ...classes.statistics.Hitmap2D import Hitmap2D
 from ...inversion.Inference1D import Inference1D
 from ...classes.system.CircularLoop import CircularLoop
-from ...base import customFunctions as cf
+from ...base import utilities as cf
 #from .. import Error as Err
 
 

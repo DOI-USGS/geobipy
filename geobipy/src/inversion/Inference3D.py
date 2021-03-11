@@ -30,8 +30,8 @@ from ..classes.data.datapoint.DataPoint import DataPoint
 
 #from ..classes.statistics.Distribution import Distribution
 from ..base.HDF import hdfRead
-from ..base import customPlots as cP
-from ..base import customFunctions as cF
+from ..base import plotting as cP
+from ..base import utilities as cF
 from os.path import join
 from scipy.spatial import Delaunay
 from scipy.interpolate import CloughTocher2DInterpolator

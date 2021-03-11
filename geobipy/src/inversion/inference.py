@@ -11,7 +11,7 @@ from ..classes.model.Model1D import Model1D
 from ..classes.core import StatArray
 from ..classes.statistics.Distribution import Distribution
 from ..classes.statistics.Histogram1D import Histogram1D
-from ..base.customFunctions import expReal as mExp
+from ..base.utilities import expReal as mExp
 from scipy import sparse
 from copy import deepcopy
 import numpy as np

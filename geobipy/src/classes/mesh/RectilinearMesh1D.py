@@ -5,8 +5,8 @@ from ...classes.core.myObject import myObject
 from ...classes.core import StatArray
 from copy import deepcopy
 import numpy as np
-from ...base import customFunctions as cF
-from ...base import customPlots as cp
+from ...base import utilities as cF
+from ...base import plotting as cp
 from scipy.sparse import diags
 
 class RectilinearMesh1D(myObject):
@@ -336,13 +336,13 @@ class RectilinearMesh1D(myObject):
         grid : bool, optional
             Plot the grid
         noColorbar : bool, optional
-            Turn off the colour bar, useful if multiple customPlots plotting routines are used on the same figure.
+            Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.
         trim : bool, optional
             Set the x and y limits to the first and last non zero values along each axis.
 
         See Also
         --------
-        geobipy.customPlots.pcolor : For non matplotlib keywords.
+        geobipy.plotting.pcolor : For non matplotlib keywords.
         matplotlib.pyplot.pcolormesh : For additional keyword arguments you may use.
 
         """

@@ -4,7 +4,7 @@ Module describing a 2D Rectilinear Mesh class with x and y axes specified
 #from ...base import Error as Err
 from copy import deepcopy
 import numpy as np
-from ...base import customFunctions as cF
+from ...base import utilities as cF
 from ..core import StatArray
 from ..mesh.RectilinearMesh1D import RectilinearMesh1D
 from .Histogram2D import Histogram2D

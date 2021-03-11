@@ -2,7 +2,7 @@ from copy import deepcopy
 import numpy as np
 from ...base import MPI as myMPI
 from .EmLoop import EmLoop
-from ...base import customFunctions as cf
+from ...base import utilities as cf
 from ..core import StatArray
 from ...base.HDF.hdfWrite import write_nd
 
