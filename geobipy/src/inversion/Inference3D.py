@@ -18,6 +18,7 @@ from ..base.MPI import loadBalance1D_shrinkingArrays
 
 from ..classes.statistics.Histogram1D import Histogram1D
 from ..classes.statistics.Hitmap2D import Hitmap2D
+from ..classes.statistics.mixPearson import mixPearson
 from ..classes.pointcloud.PointCloud3D import PointCloud3D
 from ..base import interpolation as interpolation
 from .inference import initialize
@@ -340,7 +341,7 @@ class Inference3D(myObject):
         geobipy.Hitmap : Parameter posterior.
 
         """
-        iLine, index = self.lineIndex(fiducial=fiducial, index=index):
+        iLine, index = self.lineIndex(fiducial=fiducial, index=index)
         return self.lines[iLine].hitmap(index=index)
 
 
@@ -440,7 +441,7 @@ class Inference3D(myObject):
         return nActive
 
 
-    @cached_property
+    @property
     def nPoints(self):
         """ Get the total number of data points """
         tmp = np.asarray([line.nPoints for line in self.lines])
@@ -565,7 +566,7 @@ class Inference3D(myObject):
         i = np.squeeze(np.where(iLine > 0))
         index[i] -= self._cumNpoints[iLine[i]-1]
 
-        return iLine, index
+        return np.squeeze(iLine), np.squeeze(index)
 
 
     def fiducial(self, index):
@@ -634,7 +635,7 @@ class Inference3D(myObject):
             nSent = 0
 
             # Send out the first indices to the workers
-            for iWorker in range(1, world.size):
+            for iWorker in range(1, self.world.size):
                 # Get a datapoint from the file.
                 if nSent < self.nPoints:
                     continueRunning = True
@@ -654,7 +655,7 @@ class Inference3D(myObject):
             while nFinished < self.nPoints:
                 # Wait for a worker to request the next data point
                 status = MPI.Status()
-                dummy = world.recv(source = MPI.ANY_SOURCE, tag = MPI.ANY_TAG, status = status)
+                dummy = self.world.recv(source = MPI.ANY_SOURCE, tag = MPI.ANY_TAG, status = status)
                 requestingRank = status.Get_source()
 
                 nFinished += 1
@@ -696,7 +697,7 @@ class Inference3D(myObject):
                 hm = self.hitmap(index=index)
 
                 if not np.all(hm.counts == 0):
-                    mixtures = hm.fit_estimated_pdf(iPoint=i, rank=self.world.rank, **kwargs)
+                    mixtures = hm.fit_estimated_pdf(iPoint=index, rank=self.world.rank, **kwargs)
 
                     for j, m in enumerate(mixtures):
                         if not m is None:
@@ -704,7 +705,7 @@ class Inference3D(myObject):
 
                 self.world.send(1, dest=0)
                 # Wait till you are told whether to continue or not
-                continueRunning = world.recv(source=0)
+                continueRunning = self.world.recv(source=0)
 
                 # If we continue running, receive the next DataPoint. Otherwise, shutdown the rank
                 if continueRunning:

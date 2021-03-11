@@ -565,7 +565,7 @@ class Histogram2D(RectilinearMesh2D):
         return distributions, active
 
 
-    def fit_estimated_pdf(self, intervals=None, axis=0, mixture_type='pearson', iPoint=None, rank=None, **kwargs):
+    def fit_estimated_pdf(self, intervals=None, axis=0, mixture_type='pearson', iPoint=None, rank=None, verbose=False, **kwargs):
         """Find peaks in the histogram along an axis.
 
         Parameters
@@ -594,8 +594,6 @@ class Histogram2D(RectilinearMesh2D):
 
         mixtures = []
         for i in r:
-            # print(iPoint, i)
-            # verbose = (i == 120)
             try:
                 h = self.marginalize(intervals=intervals[i:i+2], axis=axis)
                 ms = h.fit_estimated_pdf(mixture_type = mixture_type, **kwargs)
