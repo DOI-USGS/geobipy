@@ -647,6 +647,10 @@ class RectilinearMesh2D(myObject):
         z = None
         if 'z' in grp:
             z = RectilinearMesh1D().fromHdf(grp['z'], index=index).cellEdges
+
+        if z.size == y.size:
+            z = None
+
         RectilinearMesh2D.__init__(self, xEdges=x, yEdges=y, zEdges=z)
         return self
 
