@@ -1797,44 +1797,6 @@ class Inference2D(myObject):
         if 'e' in components:
             exponents = StatArray.StatArray(d[:, :, 3::4], 'Exponent')
 
-
-        # intervals = self.mesh.z.cellCentres
-
-        # if mask_by_doi:
-        #     indices = intervals.searchsorted(self.doi)
-        #     if 'a' in components:
-        #         for i in range(self.nPoints):
-        #             amplitudes[i, indices[i]:, :] = np.nan
-        #     if 'm' in components:
-        #         for i in range(self.nPoints):
-        #             means[i, indices[i]:, :] = np.nan
-        #     if 'v' in components:
-        #         for i in range(self.nPoints):
-        #             variances[i, indices[i]:, :] = np.nan
-        #     if 'd' in components:
-        #         for i in range(self.nPoints):
-        #             degrees[i, indices[i]:, :] = np.nan
-
-        # iWhere = np.argsort(means, axis=-1)
-        # for i in range(means.shape[0]):
-        #     for j in range(means.shape[1]):
-        #         tmp = iWhere[i, j, :]
-        #         if 'm' in components:
-        #             m = means[i, j, tmp]
-        #             means[i, j, :] = m
-
-        #         if 'a' in components:
-        #             a = amplitudes[i, j, tmp]
-        #             amplitudes[i, j, :] = a
-
-        #         if 'v' in components:
-        #             v = variances[i, j, tmp]
-        #             variances[i, j, :] = v
-
-        #         if 'd' in components:
-        #             d = degrees[i, j, tmp]
-        #             degrees[i, j, :] = d
-
         return amplitudes, means, stds, exponents
 
 

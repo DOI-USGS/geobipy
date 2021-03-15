@@ -835,14 +835,24 @@ def save_gmm(gmm, filename):
         f.create_dataset('means', data=gmm.means_)
         f.create_dataset('covariances', data=gmm.covariances_)
 
-def load_gmm(filename):
+def set_gmm(weights, means, covariances):
+    out = GaussianMixture(n_components = len(means), covariance_type='full')
+    out.means_ = means
+    out.precisions_cholesky_ = np.linalg.cholesky(np.linalg.inv(covariances))
+    out.weights_ = weights
+    out.covariances_ = covariances
+    return out
+
+def load_gmm(filename, sort_by_means=True):
     with h5py.File(filename, 'r') as f:
         weights = np.asarray(f['weights'])
         means = np.asarray(f['means'])
-        covar = np.asarray(f['covariances'])
+        covariances = np.asarray(f['covariances'])
 
-        out = GaussianMixture(n_components = len(means), covariance_type='full')
-        out.precisions_cholesky_ = np.linalg.cholesky(np.linalg.inv(covar))
-        out.weights_ = weights
-        out.covariances_ = covar
-    return out
+    if sort_by_means:
+        order = np.argsort(means[:, 0])
+        weights = weights[order]
+        means = means[order, :]
+        covariances = covariances[order, :, :]
+
+    return set_gmm(weights, means, covariances)
