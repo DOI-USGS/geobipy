@@ -417,10 +417,10 @@ class Mixture(myObject):
             If the group was created using the nRepeats option, index specifies the index'th entry from which to read the data.
 
         """
+
         item = h5grp.get('params')
-        obj = eval(cF.safeEval(item.attrs.get('repr')))
 
         assert np.size(index) == np.size(item['data'].shape) - 1, ValueError('Need to specify a {}D index'.format(np.size(item['data'].shape)-1))
 
-        self.params = obj.fromHdf(item, index=index)
-        return self
+        self.params = StatArray.StatArray().fromHdf(item, index=index)
+        return self.squeeze()

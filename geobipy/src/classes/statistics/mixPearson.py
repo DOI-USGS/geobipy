@@ -95,6 +95,17 @@ class mixPearson(Mixture):
     def n_components(self):
         return self.means.size
 
+    def squeeze(self):
+
+        i = np.where(self.amplitudes > 0.0)[0]
+
+        means = self.means[i]
+        amplitudes = self.amplitudes[i]
+        sigma = self.sigmas[i]
+        exp = self.exponents[i]
+
+        return mixPearson(amplitudes, means, sigma, exp)
+
 
     def fit_to_curve(self, *args, **kwargs):
         fit, pars = super().fit_to_curve(*args, **kwargs)
@@ -119,10 +130,10 @@ class mixPearson(Mixture):
         if component is None:
             out = StatArray.StatArray(np.empty([np.size(x), self.n_components]), "Probability Density")
             for i in range(self.n_components):
-                out[:, i] = self.amplitudes[i] * self._probability(x, log, self.means[i], self.variances[i], self.exponents[i])
+                out[:, i] =  self._probability(x, log, self.means[i], self.variances[i], self.exponents[i])
             return out
         else:
-            return self.amplitudes[component] * self._probability(x, log, self.means[component], self.variances[component], self.exponents[component])
+            return self._probability(x, log, self.means[component], self.variances[component], self.exponents[component])
 
 
     def _probability(self, x, log, mean, sigma, exponent):
