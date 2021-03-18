@@ -856,7 +856,8 @@ def pcolor_1D(values, y=None, **kwargs):
         v,logLabel=cF._log(v,log)
 
     # Append with null values to correctly use pcolormesh
-    v = np.concatenate([np.atleast_2d(np.hstack([np.asarray(v),0])), np.atleast_2d(np.zeros(v.size+1))], axis=0)
+    # v = np.concatenate([np.atleast_2d(np.hstack([np.asarray(v),0])), np.atleast_2d(np.zeros(v.size+1))], axis=0)
+    v = np.atleast_2d(v)
 
     if equalize:
         nBins = kwargs.pop('nbins',256)
