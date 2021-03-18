@@ -858,252 +858,98 @@ class Inference3D(myObject):
         return line, depths, means, variances
 
 
-    def fit_mixture_mpi(self, intervals, **kwargs):
-        """Uses Mixture modelling to fit disrtibutions to the hitmaps for the specified intervals.
+    # def fit_mixture_mpi(self, intervals, **kwargs):
+    #     """Uses Mixture modelling to fit disrtibutions to the hitmaps for the specified intervals.
 
-        This mpi version fits all hitmaps individually throughout the data set.
-        This provides detailed fits, but requires a lot of compute, hence the mpi enabled version.
+    #     This mpi version fits all hitmaps individually throughout the data set.
+    #     This provides detailed fits, but requires a lot of compute, hence the mpi enabled version.
 
-        Parameters
-        ----------
-        intervals : array_like
-            Depth intervals between which the marginal histogram is computed before fitting.
+    #     Parameters
+    #     ----------
+    #     intervals : array_like
+    #         Depth intervals between which the marginal histogram is computed before fitting.
 
-        See Also
-        --------
-        geobipy.Histogram1D.fit_mixture
-            For details on the fitting arguments.
+    #     See Also
+    #     --------
+    #     geobipy.Histogram1D.fit_mixture
+    #         For details on the fitting arguments.
 
-        """
+    #     """
 
-        from mpi4py import MPI
+    #     from mpi4py import MPI
 
-        world = self.world
+    #     world = self.world
 
-        kwargs['k'] = kwargs.pop('k', [1, 5])
-        k = kwargs['k']
+    #     kwargs['k'] = kwargs.pop('k', [1, 5])
+    #     k = kwargs['k']
 
-        maxClusters = (k[1] - k[0]) + 1
-        nIntervals = np.size(intervals) - 1
+    #     maxClusters = (k[1] - k[0]) + 1
+    #     nIntervals = np.size(intervals) - 1
 
-        tmp = locals()
-        for key in ['self', 'MPI', 'world', 'k']:
-            tmp.pop(key, None)
-        command = str(tmp)
+    #     tmp = locals()
+    #     for key in ['self', 'MPI', 'world', 'k']:
+    #         tmp.pop(key, None)
+    #     command = str(tmp)
 
-        for i in range(self.nLines):
+    #     for i in range(self.nLines):
 
-            means = StatArray.StatArray((self.lines[i].nPoints, nIntervals, maxClusters), "fit means")
-            variances = StatArray.StatArray((self.lines[i].nPoints, nIntervals, maxClusters), "fit variances")
+    #         means = StatArray.StatArray((self.lines[i].nPoints, nIntervals, maxClusters), "fit means")
+    #         variances = StatArray.StatArray((self.lines[i].nPoints, nIntervals, maxClusters), "fit variances")
 
-            if 'mixture_fits' in self.lines[i].hdfFile:
-                saved_command = self.lines[i].hdfFile['/mixture_fits'].attrs['command']
-                if command != saved_command:
-                    del self.lines[i].hdfFile['/mixture_fits']
+    #         if 'mixture_fits' in self.lines[i].hdfFile:
+    #             saved_command = self.lines[i].hdfFile['/mixture_fits'].attrs['command']
+    #             if command != saved_command:
+    #                 del self.lines[i].hdfFile['/mixture_fits']
 
-                    means.createHdf(self.lines[i].hdfFile, "/mixture_fits/means")
-                    variances.createHdf(self.lines[i].hdfFile, "/mixture_fits/variances")
+    #                 means.createHdf(self.lines[i].hdfFile, "/mixture_fits/means")
+    #                 variances.createHdf(self.lines[i].hdfFile, "/mixture_fits/variances")
 
-                    print('writing \n', command)
-                    self.lines[i].hdfFile['/mixture_fits'].attrs['command'] = command
+    #                 print('writing \n', command)
+    #                 self.lines[i].hdfFile['/mixture_fits'].attrs['command'] = command
 
-        # Distribute the points amongst cores.
-        starts, chunks = loadBalance1D_shrinkingArrays(self.nPoints, self.world.size)
+    #     # Distribute the points amongst cores.
+    #     starts, chunks = loadBalance1D_shrinkingArrays(self.nPoints, self.world.size)
 
-        chunk = chunks[self.world.rank]
-        chunk = 10
-        i0 = starts[self.world.rank]
-        i1 = i0 + chunk
+    #     chunk = chunks[self.world.rank]
+    #     chunk = 10
+    #     i0 = starts[self.world.rank]
+    #     i1 = i0 + chunk
 
-        iLine, index = self.lineIndex(index=np.arange(i0, i1))
+    #     iLine, index = self.lineIndex(index=np.arange(i0, i1))
 
-        tBase = MPI.Wtime()
-        t0 = tBase
+    #     tBase = MPI.Wtime()
+    #     t0 = tBase
 
-        nUpdate = np.int(0.1 * chunk)
-        counter = 0
+    #     nUpdate = np.int(0.1 * chunk)
+    #     counter = 0
 
-        for i in range(chunk):
+    #     for i in range(chunk):
 
-            iL = iLine[i]
-            ind = index[i]
+    #         iL = iLine[i]
+    #         ind = index[i]
 
-            line = self.lines[iL]
+    #         line = self.lines[iL]
 
-            hm = line.get_hitmap(ind)
+    #         hm = line.get_hitmap(ind)
 
-            d, a = hm.fit_mixture(intervals, track=False, **kwargs)
+    #         d, a = hm.fit_mixture(intervals, track=False, **kwargs)
 
-            for j in range(nIntervals):
-                dm = np.squeeze(d[j].means_[a[j]])
-                dv = np.squeeze(d[j].covariances_[a[j]])
+    #         for j in range(nIntervals):
+    #             dm = np.squeeze(d[j].means_[a[j]])
+    #             dv = np.squeeze(d[j].covariances_[a[j]])
 
-                nD = np.size(dm)
+    #             nD = np.size(dm)
 
-                line.hdfFile['/mixture_fits/means/data'][ind, j, :nD] = dm
-                line.hdfFile['/mixture_fits/variances/data'][ind, j, :nD] = dv
+    #             line.hdfFile['/mixture_fits/means/data'][ind, j, :nD] = dm
+    #             line.hdfFile['/mixture_fits/variances/data'][ind, j, :nD] = dv
 
-            counter += 1
-            if counter == nUpdate:
-                print('rank {}, line/fiducial {}/{}, iteration {}/{},  time/dp {} h:m:s'.format(world.rank, self.lineNumbers[iL], line.fiducials[ind], i+1, chunk, str(timedelta(seconds=MPI.Wtime()-t0)/nUpdate)), flush=True)
-                t0 = MPI.Wtime()
-                counter = 0
+    #         counter += 1
+    #         if counter == nUpdate:
+    #             print('rank {}, line/fiducial {}/{}, iteration {}/{},  time/dp {} h:m:s'.format(world.rank, self.lineNumbers[iL], line.fiducials[ind], i+1, chunk, str(timedelta(seconds=MPI.Wtime()-t0)/nUpdate)), flush=True)
+    #             t0 = MPI.Wtime()
+    #             counter = 0
 
-        print('rank {} finished in {} h:m:s'.format(world.rank, str(timedelta(seconds=MPI.Wtime()-tBase))))
-
-
-    def fitMajorPeaks_lineHitmap(self, intervals, **kwargs):
-
-        max_distributions = kwargs.get('max_distributions', 5)
-
-        intervals = self.lines[0].lineHitmap._reconcile_intervals(intervals)
-        nIntervals = np.size(intervals) - 1
-
-        means = StatArray.StatArray((self.nLines, nIntervals, max_distributions), "fit means")
-        variances = StatArray.StatArray((self.nLines, nIntervals, max_distributions), "fit variances")
-        amplitudes = StatArray.StatArray((self.nLines, nIntervals, max_distributions), "fit amplitudes")
-        df = StatArray.StatArray((self.nLines, nIntervals, max_distributions), "fit df")
-
-        output_file = h5py.File('lineHitmap_fits.h5', 'w')
-
-        means.createHdf(output_file, "/means", fillvalue=np.nan)
-        variances.createHdf(output_file, "/variances", fillvalue=np.nan)
-        df.createHdf(output_file, "/df", fillvalue=np.nan)
-        amplitudes.createHdf(output_file, "/amplitudes", fillvalue=np.nan)
-
-        for i, line in enumerate(self.lines):
-            print('Fitting line hitmap for line {}'.format(line.line))
-            distributions, amplitudes = line.lineHitmap.fitMajorPeaks(intervals, **kwargs)
-
-            for j in range(nIntervals):
-                dist = distributions[j]
-
-                nd = len(dist)
-
-                tmp = np.full(max_distributions, fill_value=np.nan)
-                for k in range(nd):
-                    tmp[k] = dist[k].mean
-                output_file['/means/data'][i, j, :] = tmp
-
-                for k in range(nd):
-                    tmp[k] = dist[k].variance
-                output_file['/variances/data'][i, j, :] = tmp
-
-                for k in range(nd):
-                    tmp[k] = dist[k].degrees
-                output_file['/df/data'][i, j, :] = tmp
-
-                tmp[:nd] = amplitudes[j]
-                output_file['/amplitudes/data'][i, j, :] = tmp
-
-        output_file.close()
-
-
-    def fitMajorPeaks(self, intervals, **kwargs):
-
-        distributions = []
-        amplitudes = []
-        for line in self.lines:
-            d, a = line.lineHitmap.fitMajorPeaks(intervals, **kwargs)
-            distributions.append(d)
-            amplitudes.append(a)
-
-        return distributions, amplitudes
-
-
-    def fitMajorPeaks_mpi(self, intervals, **kwargs):
-        """Uses Mixture modelling to fit disrtibutions to the hitmaps for the specified intervals.
-
-        This mpi version fits all hitmaps individually throughout the data set.
-        This provides detailed fits, but requires a lot of compute, hence the mpi enabled version.
-
-        Parameters
-        ----------
-        intervals : array_like
-            Depth intervals between which the marginal histogram is computed before fitting.
-
-        See Also
-        --------
-        geobipy.Histogram1D.fit_mixture
-            For details on the fitting arguments.
-
-        """
-
-        from mpi4py import MPI
-
-        world = self.world
-
-
-        kwargs['maxDistributions'] = kwargs.pop('maxDistributions', 5)
-        nIntervals = np.size(intervals) - 1
-
-        tmp = locals()
-        for key in ['self', 'MPI', 'world', 'k']:
-            tmp.pop(key, None)
-        command = str(tmp)
-
-        for i in range(self.nLines):
-
-            means = StatArray.StatArray((self.lines[i].nPoints, nIntervals, kwargs['maxDistributions']), "fit means")
-            variances = StatArray.StatArray((self.lines[i].nPoints, nIntervals, kwargs['maxDistributions']), "fit variances")
-            amplitudes = StatArray.StatArray((self.lines[i].nPoints, nIntervals, kwargs['maxDistributions']), "fit amplitudes")
-
-            if 'mixture_fits' in self.lines[i].hdfFile:
-                saved_command = self.lines[i].hdfFile['/mixture_fits'].attrs['command']
-
-                # if command != saved_command:
-                del self.lines[i].hdfFile['/mixture_fits']
-
-            means.createHdf(self.lines[i].hdfFile, "/mixture_fits/means", fillvalue=np.nan)
-            variances.createHdf(self.lines[i].hdfFile, "/mixture_fits/variances", fillvalue=np.nan)
-            amplitudes.createHdf(self.lines[i].hdfFile, "/mixture_fits/amplitudes", fillvalue=np.nan)
-
-            self.lines[i].hdfFile['/mixture_fits'].attrs['command'] = command
-
-        # Distribute the points amongst cores.
-        starts, chunks = loadBalance1D_shrinkingArrays(self.nPoints, self.world.size)
-
-        chunk = chunks[self.world.rank]
-        i0 = starts[self.world.rank]
-        i1 = i0 + chunk
-
-        iLine, index = self.lineIndex(index=np.arange(i0, i1))
-
-        tBase = MPI.Wtime()
-        t0 = tBase
-
-        nUpdate = np.int(0.1 * chunk)
-        counter = 0
-
-        for i in range(chunk):
-
-            iL = iLine[i]
-            ind = index[i]
-
-            line = self.lines[iL]
-
-            hm = line.get_hitmap(ind)
-
-            distributions, amplitudes = hm.fitMajorPeaks(intervals, track=False, **kwargs)
-
-            for j in range(nIntervals):
-                dm = np.asarray([d.mean for d in distributions[j]])
-                dv = np.asarray([d.variance for d in distributions[j]])
-                da = amplitudes[j]
-
-                nD = np.size(dm)
-
-                line.hdfFile['/mixture_fits/means/data'][ind, j, :nD] = dm
-                line.hdfFile['/mixture_fits/variances/data'][ind, j, :nD] = dv
-                line.hdfFile['/mixture_fits/amplitudes/data'][ind, j, :nD] = da
-
-            counter += 1
-            if counter == nUpdate:
-                print('rank {}, line/fiducial {}/{}, iteration {}/{},  time/dp {} h:m:s'.format(world.rank, self.lineNumbers[iL], line.fiducials[ind], i+1, chunk, str(timedelta(seconds=MPI.Wtime()-t0)/nUpdate)), flush=True)
-                t0 = MPI.Wtime()
-                counter = 0
-
-        print('rank {} finished in {} h:m:s'.format(world.rank, str(timedelta(seconds=MPI.Wtime()-tBase))), flush=True)
+    #     print('rank {} finished in {} h:m:s'.format(world.rank, str(timedelta(seconds=MPI.Wtime()-tBase))))
 
 
     def histogram(self, nBins, **kwargs):
