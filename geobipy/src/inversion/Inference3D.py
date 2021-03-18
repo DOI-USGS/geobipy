@@ -242,8 +242,8 @@ class Inference3D(myObject):
             return self.highestMarginal
 
         if variable == 'marginalprobability':
-            assert not index is None, ValueError('Please specify keyword "index" when requesting marginalProbability')
-            return self.marginalProbability[:, :, index].T
+            assert 'index' in kwargs, ValueError('Please specify keyword "index" when requesting marginalProbability')
+            return self.marginalProbability[:, :, kwargs["index"]].T
 
 
     def _get_h5Files_from_list(self, directory, files):
@@ -314,9 +314,23 @@ class Inference3D(myObject):
         return bestParameters
 
 
-    def computeMarginalProbability(self, fractions, distributions, **kwargs):
-        for line in self.lines:
-            line.computeMarginalProbability(fractions, distributions, **kwargs)
+    @cached_property
+    def marginalProbability(self):
+
+        marginalProbability = StatArray.StatArray((self.nPoints, self.zGrid.nCells, self.lines[0].marginalProbability.shape[-1]), name=self.lines[0].marginalProbability.name, units=self.lines[0].marginalProbability.units)
+
+        print('Reading marginal probability', flush=True)
+        Bar = progressbar.ProgressBar()
+        for i in Bar(range(self.nLines)):
+            marginalProbability[self.lineIndices[i], :, :] = self.lines[i].marginalProbability
+            del self.lines[i].__dict__['marginalProbability'] # Free memory
+
+        return marginalProbability
+
+
+    # def computeMarginalProbability(self, fractions, distributions, **kwargs):
+    #     for line in self.lines:
+    #         line.computeMarginalProbability(fractions, distributions, **kwargs)
 
 
     def compute_MinsleyFoksBedrosian2020_P_lithology(self, global_mixture_hdf5, local_mixture_hdf5, log=None):
@@ -1261,11 +1275,11 @@ class Inference3D(myObject):
 
         cell1 = self.zGrid.cellIndex(depth)
 
-        nFacies = self.MarginalProbability().shape[0]
+        nClusters = self.marginalProbability.shape[-1]
 
-        for i in range(nFacies):
-            plt.subplot(nFacies, 1, i+1)
-            self.pointcloud.mapPlot(dx = dx, dy = dy, c = self.marginalProbability[i, :, cell1], **kwargs)
+        for i in range(nClusters):
+            plt.subplot(nClusters, 1, i+1)
+            self.pointcloud.mapPlot(dx = dx, dy = dy, c = self.marginalProbability[:, cell1, i], **kwargs)
 
 
     def percentageParameter(self, value, depth, depth2=None):
@@ -1283,45 +1297,15 @@ class Inference3D(myObject):
     def depthSlice(self, depth, variable, reciprocateParameter=False, **kwargs):
 
         out = np.empty(self.nPoints)
+
+        index = kwargs.pop('index', None)
         for i, line in enumerate(self.lines):
-            p = line._get(variable, reciprocateParameter=reciprocateParameter, **kwargs)
+            p = line._get(variable, reciprocateParameter=reciprocateParameter, index=index, **kwargs)
             tmp = line.depthSlice(depth, p, **kwargs)
 
             out[self.lineIndices[i]] = tmp
 
         return StatArray.StatArray(out, p.name, p.units)
-
-
-
-
-    # def getElevationSlice(self, depth, depth2=None, reciprocateParameter=False, bestModel=False, force=False):
-
-    #     # Get the depth grid
-    #     assert depth <= self.zGrid.cellEdges[-1], 'Depth is greater than max depth '+str(self.zGrid.cellEdges[-1])
-    #     if (not depth2 is None):
-    #         assert depth2 <= self.zGrid.cellEdges[-1], 'Depth2 is greater than max depth '+str(self.zGrid.cellEdges[-1])
-    #         assert depth <= depth2, 'Depth2 must be >= depth'
-
-    #     if (bestModel):
-    #         model = self.bestParameters
-    #     else:
-    #         model = self.meanParameters
-
-    #     model[model == 0.0] = 1.0
-
-    #     cell1 = self.zGrid.cellIndex(depth)
-
-    #     if (depth2 is None):
-    #         vals1D = model[cell1, :]
-    #     else:
-    #         cell2 = self.zGrid.cellIndex(depth2)
-    #         vals1D = np.mean(model[cell1:cell2+1,:], axis = 0)
-
-    #     if (reciprocateParameter):
-    #         vals1D = StatArray.StatArray(1.0 / vals1D, name = 'Resistivity', units = '$\Omega m$')
-    #     else:
-    #         vals1D = StatArray.StatArray(vals1D, name = 'Conductivity', units = '$Sm^{-1}$')
-    #     return vals1D
 
 
     def mapAdditiveError(self,dx, dy, system=0, mask = None, clip = True, useVariance=False, **kwargs):
@@ -1336,10 +1320,10 @@ class Inference3D(myObject):
         return self.map(dx = dx, dy = dy, mask = mask, clip = clip, values = self.additiveError[system, :], **kwargs)
 
 
-    def mapDepthSlice(self, dx, dy, depth, variable, method='ct', mask = None, clip = True, reciprocateParameter=False, useVariance=False, **kwargs):
+    def mapDepthSlice(self, dx, dy, depth, variable, method='ct', mask = None, clip = True, reciprocateParameter=False, useVariance=False, index=None, **kwargs):
         """ Create a depth slice through the recovered model """
 
-        vals1D = self.depthSlice(depth=depth, variable=variable, reciprocateParameter=reciprocateParameter)
+        vals1D = self.depthSlice(depth=depth, variable=variable, reciprocateParameter=reciprocateParameter, index=index)
 
         if useVariance:
             tmp = self.depthSlice(depth=depth, variable='opacity')
@@ -1354,6 +1338,35 @@ class Inference3D(myObject):
         return self.map(dx = dx, dy = dy, mask = mask, clip = clip, values = self.elevation, **kwargs)
 
 
+    def map_highest_marginal(self, dx, dy, depth, method='ct', mask=None, clip=True, reciprocateParameter=False, useVariance=False, **kwargs):
+
+        nClusters = self.marginalProbability.shape[-1]
+
+        vals1D = self.depthSlice(depth=depth, variable='marginalProbability', reciprocateParameter=reciprocateParameter, index=0)
+        x, y, z, dum = self.interpolate(dx, dy, vals1D, method=method, mask=mask, clip=clip, **kwargs)
+
+        interpolated_marginal = np.zeros((*z.shape, nClusters))
+        interpolated_marginal[:, :, 0] = z
+
+        for i in range(1, nClusters):
+            vals1D = self.depthSlice(depth=depth, variable='marginalProbability', reciprocateParameter=reciprocateParameter, index=i)
+            x, y, interpolated_marginal[:, :, i], dum = self.interpolate(dx, dy, vals1D, method=method, mask=mask, clip=clip, **kwargs)
+
+        highest = StatArray.StatArray((np.argmax(interpolated_marginal, axis=-1)).astype(np.float32))
+        msk = np.all(np.isnan(interpolated_marginal), axis=-1)
+        highest[msk] = np.nan
+
+        ax, pc, cb = highest.pcolor(x.edges(), y.edges(), vmin=0, vmax=nClusters-1, cmapIntervals=nClusters, **dum)
+
+        offset = (nClusters-1) / (2*nClusters)
+        ticks = np.arange(offset, nClusters-offset, 2.0*offset)
+        tick_labels = np.arange(nClusters)+1
+        cb.set_ticks(ticks)
+        cb.set_ticklabels(tick_labels)
+
+        return ax, pc, cb
+
+
     def mapRelativeError(self,dx, dy, system=0, mask = None, clip = True, useVariance=False, **kwargs):
         """ Create a map of a parameter """
 
@@ -1366,10 +1379,10 @@ class Inference3D(myObject):
         return  self.map(dx = dx, dy = dy, mask = mask, clip = clip, values = self.relativeError[system, :], **kwargs)
 
 
-    def plotDepthSlice(self, depth, variable, mask = None, clip = True, **kwargs):
+    def plotDepthSlice(self, depth, variable, mask = None, clip = True, index=None, **kwargs):
         """ Create a depth slice through the recovered model """
 
-        vals1D = self.depthSlice(depth=depth, variable=variable, **kwargs)
+        vals1D = self.depthSlice(depth=depth, variable=variable, index=index, **kwargs)
         return self.scatter2D(c = vals1D, **kwargs)
 
 
