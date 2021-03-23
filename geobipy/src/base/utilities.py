@@ -6,6 +6,30 @@ from ..classes.core import StatArray
 import h5py
 from sklearn.mixture import GaussianMixture
 
+
+def interleave(a, b):
+        """Interleave two arrays together like zip
+
+        Parameters
+        ----------
+        a : array_like
+            Interleave in [0::2]
+        b : array_like
+            Interleave in [1::2]
+
+        Returns
+        -------
+        out : array_like
+            Interleaved arrays
+
+        """
+        assert a.size == b.size, ValueError("other must have size {}".format(a.size))
+        out = np.empty((a.size + b.size), dtype=a.dtype)
+        out[0::2] = a
+        out[1::2] = b
+        return out
+
+
 def isInt(this):
     """Check whether an entry is a subtype of an int
 
