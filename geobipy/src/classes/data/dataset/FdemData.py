@@ -153,6 +153,8 @@ class FdemData(Data):
             else:
                 self._system[i] = s
 
+        self._nChannelsPerSystem = np.asarray([2*s.nFrequencies for s in self.system])
+
 
     @property
     def channelNames(self):
@@ -756,6 +758,7 @@ class FdemData(Data):
 
         # Read in the EM System file
         self.system = systemFilename
+
         # self.readSystemFile(systemFilename)
         self._nPoints, self._iC, self._iD, self._iS, iP, iM = self.__readColumnIndices(dataFilename, self.system)
 
@@ -820,11 +823,13 @@ class FdemData(Data):
         if endOfFile:
             return None
 
+
         D = np.empty(self.nChannels)
         S = np.empty(self.nChannels)
         for j in range(self.nSystems):
             iSys = self._systemIndices(j)
             iC = self._iC[j]
+
             D[iSys] = values[j][iC.size:iC.size + 2*self.nFrequencies[j]]
             if self._iS[j] is None:
                 S[iSys] = 0.1 * D[iSys]
