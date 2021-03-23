@@ -662,20 +662,28 @@ class FdemData(Data):
                 channel = channel.lower()
                 if(channel in ['line']):
                     nCoordinates += 1
-                elif(channel in ['id', 'fid']):
+                    line_ = True
+                elif(channel in ['id', 'fid', 'fiducial']):
                     nCoordinates += 1
+                    fid_ = True
                 elif (channel in ['n', 'x','northing']):
                     nCoordinates += 1
+                    northing_ = True
                 elif (channel in ['e', 'y', 'easting']):
                     nCoordinates += 1
+                    easting_ = True
                 elif (channel in ['alt', 'laser', 'bheight', 'height']):
                     nCoordinates += 1
+                    height_ = True
                 elif(channel in ['z','dtm','dem_elev', 'dem', 'dem_np','topo', 'elev', 'elevation']):
                     nCoordinates += 1
+                    elevation_ = True
                 elif(channel in ['powerline']):
                     nCoordinates += 1
+                    print('detected powerline')
                 elif(channel in ['magnetic']):
                     nCoordinates += 1
+                    print('detected magnetic')
 
             assert nCoordinates >= 6, Exception("Data file must contain columns for easting, northing, height, elevation, line, and fid. \n {}".format(self.fileInformation()))
 
