@@ -288,7 +288,7 @@ def getRealNumbersfromLine(line, indices=None, delimiters=','):
         The values read in from the string.
 
     """
-    
+
     line = parseString(line, delimiters)
     values = np.asfarray(line, np.float64)
 
@@ -342,7 +342,7 @@ def getHeaderNames(fName, i=[-1], nHeaders=0):
 
     """
     assert fileExists(fName), 'Cannot find file '+fName
-    with open(fName) as f:
+    with open(fName, 'r', encoding='utf-8-sig') as f:
         skipLines(f, nHeaders)  # Skip header lines
         line = f.readline()     # Read a line from the file
 
