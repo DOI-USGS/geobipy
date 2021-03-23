@@ -641,6 +641,9 @@ def _pcolormesh(X, Y, values, **kwargs):
     flipX = kwargs.pop('flipX', False)
     flipY = kwargs.pop('flipY', False)
 
+    xlim_u = kwargs.pop('xlim', None)
+    ylim_u = kwargs.pop('ylim', None)
+
     # Colourbar
     equalize = kwargs.pop('equalize', False)
     clim_scaling = kwargs.pop('clim_scaling', None)
@@ -712,6 +715,12 @@ def _pcolormesh(X, Y, values, **kwargs):
 
     if flipY:
         ax.invert_yaxis()
+
+    if not xlim_u is None:
+        ax.set_xlim(xlim_u)
+    if not ylim_u is None:
+        ax.set_ylim(ylim_u)
+
 
     cbar = None
     if (not noColorBar):
@@ -827,6 +836,8 @@ def pcolor_1D(values, y=None, **kwargs):
     width = kwargs.pop('width', None)
     transpose = kwargs.pop('transpose', False)
 
+    xlim_u = kwargs.pop('xlim', None)
+    ylim_u = kwargs.pop('ylim', None)
 
     # Set the grid colour if specified
     c = None
@@ -887,6 +898,11 @@ def pcolor_1D(values, y=None, **kwargs):
     else:
         ylabel(cF.getNameUnits(y))
         ax.get_xaxis().set_ticks([])
+
+    if not xlim_u is None:
+        ax.set_xlim(xlim_u)
+    if not ylim_u is None:
+        ax.set_ylim(ylim_u)
 
     if (not noColorBar):
         if (equalize):
