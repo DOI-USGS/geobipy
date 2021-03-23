@@ -117,7 +117,7 @@ def CT(dx, dy, bounds, XY, values, mask = False, kdtree = None, clip = False, ex
     return xc, yc, vals
 
 
-def minimumCurvature(x, y, values, bounds, dx, dy, mask=False, clip=False, iterations=2000, tension=0.25, accuracy=0.01):
+def minimumCurvature(x, y, values, bounds, dx, dy, mask=False, clip=False, iterations=2000, tension=0.25, accuracy=0.01, verbose=False):
 
     values[values == np.inf] = np.nan
     mn = np.nanmin(values)
@@ -155,7 +155,8 @@ def minimumCurvature(x, y, values, bounds, dx, dy, mask=False, clip=False, itera
         subcall = ["gmt", "surface", "tmp.txt", increments, region, "-N%d"%(iterations), "-T%g"%(tension), "-C%g"%(accuracy), "-Gtmp.grd"]
         subprocess.call(subcall)
 
-    print('Interpolating with {}'.format(' '.join(subcall)))
+    if verbose:
+        print('Interpolating with {}'.format(' '.join(subcall)))
 
     with Dataset("tmp.grd", "r") as f:
         xT = np.asarray(f['x'])
