@@ -591,6 +591,27 @@ class StatArray(np.ndarray, myObject):
         return out
 
 
+    def interleave(self, other):
+        """Interleave two arrays together like zip
+
+        Parameters
+        ----------
+        other : StatArray or array_like
+            Must have same size
+
+        Returns
+        -------
+        out : StatArray
+            Interleaved arrays
+
+        """
+        assert self.size == other.size, ValueError("other must have size {}".format(self.size))
+        out = StatArray((self.size + other.size), dtype=self.dtype)
+        out[0::2] = self
+        out[1::2] = other
+        return out
+
+
     def internalEdges(self, axis=-1):
         """Get the midpoint values between elements in the StatArray
 
@@ -1597,8 +1618,19 @@ class StatArray(np.ndarray, myObject):
             d = np.squeeze(d)
 
         ### Do not use self, return self here.  You tried it, it doesnt work.
-        name = grp.attrs['name'] if 'name' in grp.attrs else None
-        units = grp.attrs['units'] if 'units' in grp.attrs else None
+        name = None
+        if 'name' in grp.attrs:
+            name = grp.attrs['name']
+        else:# Try to get it from the repr
+            if '"' in grp.attrs['repr']:
+                name = grp.attrs['repr'].split('"')[1]
+
+        units = None
+        if 'units' in grp.attrs:
+            units = grp.attrs['units']
+        else:# Try to get it from the repr
+            if '"' in grp.attrs['repr']:
+                units = grp.attrs['repr'].split('"')[3]
 
         if 'StatArray((1,)' in grp.attrs['repr']:
             out = StatArray(1, name, units) + d
