@@ -99,29 +99,33 @@ armytage = [
 # Generate default properties for GeoBIPy
 #==============================================
 
-label_size = 8
+# label_size = 8
 
-try:
-    mpl.axes.rcParams['ytick.labelsize'] = label_size
-except:
-    assert not Err.isIpython(), 'Please use %matplotlib inline for ipython notebook on the very first line'
+# try:
+#     mpl.axes.rcParams['ytick.labelsize'] = label_size
+# except:
+#     assert not Err.isIpython(), 'Please use %matplotlib inline for ipython notebook on the very first line'
 
-myFonts = {'fontsize': 8}
-mpl.rc('axes', labelsize=label_size)
-mpl.rc('xtick', labelsize=label_size)
-mpl.rc('ytick', labelsize=label_size)
-# mpl.rc('axes', labelsize='small')
+# myFonts = {'fontsize': 8}
+# mpl.rc('axes', labelsize=label_size)
+# mpl.rc('xtick', labelsize=label_size)
+# mpl.rc('ytick', labelsize=label_size)
+# # mpl.rc('axes', labelsize='small')
 
-mpl.rc('lines', linewidth=2, markersize=5, markeredgewidth=2, color=wellSeparated[0])
-mpl.rcParams['boxplot.flierprops.markerfacecolor'] = wellSeparated[0]
-mpl.rcParams['grid.alpha'] = 0.1
-mpl.rcParams['axes.prop_cycle'] = cycler('color', wellSeparated)
-mpl.rcParams['image.cmap'] = 'viridis'
-plt.rcParams['figure.facecolor'] = 'white'
-mpl.rcParams['figure.titlesize'] = 'small'
-plt.rcParams['axes.facecolor'] = 'white'
-plt.rcParams['savefig.facecolor'] = 'white'
-#plt.rcParams.update({'figure.autolayout': True})
+# mpl.rc('lines', linewidth=2, markersize=5, markeredgewidth=2, color=wellSeparated[0])
+# mpl.rcParams['boxplot.flierprops.markerfacecolor'] = wellSeparated[0]
+# mpl.rcParams['grid.alpha'] = 0.1
+# mpl.rcParams['axes.prop_cycle'] = cycler('color', wellSeparated)
+# mpl.rcParams['image.cmap'] = 'viridis'
+# plt.rcParams['figure.facecolor'] = 'white'
+# mpl.rcParams['figure.titlesize'] = 'small'
+# plt.rcParams['axes.facecolor'] = 'white'
+# plt.rcParams['savefig.facecolor'] = 'white'
+# #plt.rcParams.update({'figure.autolayout': True})
+
+# import os
+# print(os.getcwd())
+# plt.style.use('./geobipy.mplstyle')
 
 def pretty(ax):
     """Make a plot with nice axes.
@@ -152,7 +156,7 @@ def xlabel(label, **kwargs):
         The x label.
 
     """
-    mpl.pyplot.xlabel(label, **myFonts, **kwargs)
+    mpl.pyplot.xlabel(label, **kwargs)
 
 
 def ylabel(label, **kwargs):
@@ -164,7 +168,7 @@ def ylabel(label, **kwargs):
         The y label.
 
     """
-    mpl.pyplot.ylabel(label, **myFonts, **kwargs)
+    mpl.pyplot.ylabel(label, **kwargs)
 
 
 def clabel(cb, label, **kwargs):
@@ -178,7 +182,7 @@ def clabel(cb, label, **kwargs):
         The colourbar label
 
     """
-    cb.ax.set_ylabel(label, **myFonts, **kwargs)
+    cb.ax.set_ylabel(label, **kwargs)
 
 
 def title(label, **kwargs):
@@ -190,7 +194,7 @@ def title(label, **kwargs):
         The title.
 
     """
-    mpl.pyplot.title(label, **myFonts, **kwargs)
+    mpl.pyplot.title(label, **kwargs)
 
 
 def suptitle(label, **kwargs):
@@ -202,7 +206,7 @@ def suptitle(label, **kwargs):
         The suptitle.
 
     """
-    mpl.pyplot.suptitle(label, **myFonts, **kwargs)
+    mpl.pyplot.suptitle(label, **kwargs)
 
 
 def bar(values, x=None, i=None, **kwargs):
