@@ -67,6 +67,8 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
 
         super().__init__(xCentres, xEdges, yCentres, yEdges, zCentres, zEdges)
 
+        if (heightCentres is None) and (heightEdges is None):
+            heightEdges = np.zeros(self.x.nEdges)
         # mesh of the z axis values
         self._height = RectilinearMesh1D(cellCentres=heightCentres, cellEdges=heightEdges)
 
@@ -91,6 +93,47 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
     def height(self):
         return self._height
 
+
+    def mask_cells(self, xAxis, x_distance=None, z_distance=None, values=None):
+        """Mask cells by a distance.
+
+        If the edges of the cell are further than distance away, extra cells are inserted such that
+        the cell's new edges are at distance away from the centre.
+
+        Parameters
+        ----------
+        xAxis : str
+            If xAxis is 'x', the horizontal axis uses self.x
+            If xAxis is 'y', the horizontal axis uses self.y
+            If xAxis is 'r', the horizontal axis uses cumulative distance along the line
+        x_distance : float, optional
+            Mask along the x axis using this distance.
+            Defaults to None.
+        y_distance : float, optional
+            Mask along the y axis using this distance.
+            Defaults to None.
+        values : array_like, optional.
+            If given, values will be remapped to the masked mesh.
+            Has shape (y.nCells, x.nCells)
+
+        Returns
+        -------
+        out : RectilinearMesh2D
+            Masked mesh
+        x_indices : ints, optional
+            Location of the original centres in the expanded mesh along the x axis.
+        y_indices : ints, optional
+            Location of the original centres in the expanded mesh along the y axis.
+        out_values : array_like, optional
+            If values is given, values will be remapped to the masked mesh.
+
+        """
+
+        masked, x_indices, z_indices, values = super().mask_cells(xAxis, x_distance, z_distance, values)
+
+        masked.height.cellEdges = np.interp(masked.x.cellEdges, self.x.cellEdges, self.height.cellEdges)
+
+        return masked, x_indices, z_indices, values
 
     def xMesh(self, xAxis='x'):
         """Creates an array suitable for plt.pcolormesh for the abscissa.
@@ -185,11 +228,20 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
         # assert isinstance(values, StatArray), TypeError("values must be a StatArray")
         assert np.all(values.shape == self.shape), ValueError("values must have shape {} but have shape {}".format(self.shape, values.shape))
 
-        xm = self.xMesh(xAxis=xAxis)
-        zm = self.zMesh(zAxis=zAxis)
+        x_distance = kwargs.pop('x_distance', None)
+        z_distance = kwargs.pop('z_distance', None)
+
+        masked = self
+        if np.sum([x is None for x in [x_distance, z_distance]]) < 2:
+            masked, x_indices, z_indices, values = self.mask_cells(xAxis, x_distance, z_distance, values)
+            xAxis='x'
+
+        xm = masked.xMesh(xAxis=xAxis)
+        zm = masked.zMesh(zAxis=zAxis)
 
         if zAxis.lower() == 'relative':
             kwargs['flipY'] = kwargs.pop('flipY', True)
+
         ax, pm, cb = cP.pcolormesh(xm, zm, values, **kwargs)
         cP.xlabel(xm.getNameUnits())
         cP.ylabel(zm.getNameUnits())

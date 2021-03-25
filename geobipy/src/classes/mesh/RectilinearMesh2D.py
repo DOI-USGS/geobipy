@@ -440,6 +440,69 @@ class RectilinearMesh2D(myObject):
         return res, intervals
 
 
+    def mask_cells(self, xAxis, x_distance=None, z_distance=None, values=None):
+        """Mask cells by a distance.
+
+        If the edges of the cell are further than distance away, extra cells are inserted such that
+        the cell's new edges are at distance away from the centre.
+
+        Parameters
+        ----------
+        xAxis : str
+            If xAxis is 'x', the horizontal axis uses self.x
+            If xAxis is 'y', the horizontal axis uses self.y
+            If xAxis is 'r', the horizontal axis uses cumulative distance along the line
+        x_distance : float, optional
+            Mask along the x axis using this distance.
+            Defaults to None.
+        y_distance : float, optional
+            Mask along the y axis using this distance.
+            Defaults to None.
+        values : array_like, optional.
+            If given, values will be remapped to the masked mesh.
+            Has shape (y.nCells, x.nCells)
+
+        Returns
+        -------
+        out : RectilinearMesh2D
+            Masked mesh
+        x_indices : ints, optional
+            Location of the original centres in the expanded mesh along the x axis.
+        y_indices : ints, optional
+            Location of the original centres in the expanded mesh along the y axis.
+        out_values : array_like, optional
+            If values is given, values will be remapped to the masked mesh.
+
+        """
+
+        out_values = None
+        if not values is None:
+            out_values = values
+
+        x_indices = None
+        x = self.axis(xAxis)
+        if not x_distance is None:
+            x, x_indices = self.x.mask_cells(x_distance)
+            if not values is None:
+                out_values = np.full((self.z.nCells, x.nCells), fill_value=np.nan)
+                for i in range(self.x.nCells):
+                    out_values[:, x_indices[i]] = values[:, i]
+
+        z_indices = None
+        z = self.z
+        if not z_distance is None:
+            z, z_indices = self.z.mask_cells(z_distance)
+            if not values is None:
+                out_values2 = np.full((z.nCells, out_values.shape[1]), fill_value=np.nan)
+                for i in range(self.z.nCells):
+                    out_values2[z_indices[i], :] = out_values[i, :]
+                out_values = out_values2
+
+        out = type(self)(xCentres=x, yCentres=z)
+
+        return out, x_indices, z_indices, out_values
+
+
     def _reconcile_intervals(self, intervals, axis=0):
 
         assert np.size(intervals) > 1, ValueError("intervals must have size > 1")
@@ -564,6 +627,12 @@ class RectilinearMesh2D(myObject):
             Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.
         trim : bool, optional
             Set the x and y limits to the first and last non zero values along each axis.
+        x_distance : float, optional
+            Mask along the x axis using this distance.
+            Defaults to None.
+        y_distance : float, optional
+            Mask along the z axis using this distance.
+            Defaults to None.
 
         See Also
         --------
@@ -574,7 +643,15 @@ class RectilinearMesh2D(myObject):
 
         assert np.all(values.shape == self.shape), ValueError("values must have shape {}".format(self.shape))
 
-        ax, pm, cb = cP.pcolor(values, x = self.axis(xAxis).cellEdges, y = self.z.cellEdges, **kwargs)
+        x_distance = kwargs.pop('x_distance', None)
+        z_distance = kwargs.pop('z_distance', None)
+
+        if np.sum([x is None for x in [x_distance, z_distance]]) < 2:
+            masked, x_indices, z_indices, values = self.mask_cells(xAxis, x_distance, z_distance, values)
+            ax, pm, cb = cP.pcolor(values, x = masked.axis('x').cellEdges, y = masked.z.cellEdges, **kwargs)
+        else:
+            ax, pm, cb = cP.pcolor(values, x = self.axis(xAxis).cellEdges, y = self.z.cellEdges, **kwargs)
+
 
         return ax, pm, cb
 

@@ -65,13 +65,15 @@ class RectilinearMesh1D(myObject):
             self._cellCentres = StatArray.StatArray(0)
             return
 
-        assert (not(not cellCentres is None and not cellEdges is None)), Exception('Cannot instantiate with both centres and edges values')
+        # assert (not(not cellCentres is None and not cellEdges is None)), Exception('Cannot instantiate with both centres and edges values')
 
-        if not cellCentres is None:
+        if (not cellCentres is None) and (cellEdges is None):
             self.cellCentres = cellCentres
-
-        if not cellEdges is None:
+        elif (cellCentres is None) and (not cellEdges is None):
             self.cellEdges = cellEdges
+        else:
+            self.cellCentres = cellCentres
+            self._cellEdges = cellEdges
 
         # Is the discretization regular
         self.isRegular = self._cellCentres.isRegular
@@ -303,6 +305,73 @@ class RectilinearMesh1D(myObject):
         return (values >= self._cellEdges[0]) & (values < self._cellEdges[-1])
 
 
+    def mask_cells(self, distance, values=None):
+        """Mask cells by a distance.
+
+        If the edges of the cell are further than distance away, extra cells are inserted such that
+        the cell's new edges are at distance away from the centre.
+
+        Parameters
+        ----------
+        distance : float
+            Distance to mask
+        values : array_like, optional
+            If given, values will be remapped to the masked mesh.
+
+        Returns
+        -------
+        out : RectilinearMesh1D
+            Masked mesh
+        indices : ints
+            Location of the original centres in the expanded mesh
+        out_values : array_like, optional
+            If values is given, values will be remapped to the masked mesh.
+
+        """
+
+        w = self.cellWidths
+        distance2 = distance
+        iBig = np.where(w >= distance2)
+        n_large = np.size(iBig)
+        new_edges = np.full((self.nEdges + 2*n_large), fill_value=np.nan)
+        indices = np.zeros(self.nCells, dtype=np.int32)
+
+        x = np.asarray([-distance, +distance])
+        k = 0
+
+        for i in range(self.nCells):
+            new_edges[k] = self.cellEdges[i]
+            k += 1
+            modified = False
+            if ((self.cellCentres[i] - self.cellEdges[i]) > distance):
+                new_edges[k] = self.cellCentres[i] - distance
+                indices[i] = k-1
+                modified = True
+                k += 1
+            else:
+                indices[i] = k-1
+
+            if ((self.cellEdges[i+1] - self.cellCentres[i]) > distance):
+                new_edges[k] = self.cellCentres[i] + distance
+                indices[i] = k-1
+                mdified = True
+                k += 1
+            else:
+                indices[i] = k-1
+
+        new_edges[k] = self.cellEdges[-1]
+
+        new_edges = new_edges[~np.isnan(new_edges)]
+        out = RectilinearMesh1D(cellEdges=new_edges)
+
+        if not values is None:
+            out_values = np.full(out.nCells, fill_value=np.nan)
+            out_values[indices] = values
+            return out, indices, out_values
+
+        return out, indices
+
+
     def pcolor(self, values, **kwargs):
         """Create a pseudocolour plot.
 
@@ -347,7 +416,7 @@ class RectilinearMesh1D(myObject):
 
         """
 
-        assert isinstance(values, StatArray.StatArray), TypeError("arr must be a StatArray")
+        # assert isinstance(values, StatArray.StatArray), TypeError("arr must be a StatArray")
         assert values.size == self.nCells, ValueError("arr must have size nCell {}".format(self.nCells))
 
         kwargs['y'] = kwargs.pop('y', self.cellEdges)
