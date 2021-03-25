@@ -171,7 +171,7 @@ def serial_dataset(userParameters, output_directory, seed=None, index=None):
             datapoint = Dataset._readSingleDatapoint()
             options = userParameters.userParameters(datapoint)
 
-            infer(options, datapoint, prng=prng, LineResults=r3D.line(datapoint.lineNumber))
+            infer(options, datapoint, prng=prng, Inference2D=r3D.line(datapoint.lineNumber))
     else:
         for _ in range(index+1):
             datapoint = Dataset._readSingleDatapoint()
@@ -179,7 +179,7 @@ def serial_dataset(userParameters, output_directory, seed=None, index=None):
         options = userParameters.userParameters(datapoint)
         options.output_directory = output_directory
 
-        infer(options, datapoint, prng=prng, LineResults=r3D.line(datapoint.lineNumber))
+        infer(options, datapoint, prng=prng, Inference2D=r3D.line(datapoint.lineNumber))
 
 
     r3D.close()
@@ -210,10 +210,10 @@ def parallel_mpi(inputFile, outputDir, skipHDF5):
 
     inputFile = pathlib.Path(inputFile)
     assert inputFile.exists(), Exception("Cannot find input file {}".format(inputFile))
-    output_directory = pathlib.Path(output_directory)
+    output_directory = pathlib.Path(outputDir)
 
     UP = import_module(str(inputFile.with_suffix('')), package='geobipy')
-    assert 'data_type' in userParameters.__dict__, ValueError(("Please specify the data_type in the parameter file. \n"
+    assert 'data_type' in UP.__dict__, ValueError(("Please specify the data_type in the parameter file. \n"
                                                     "data_type = FdemData()\n"
                                                     "data_type = FdemDataPoint()\n"
                                                     "data_type = TdemData()\n"
@@ -309,7 +309,7 @@ def parallel_mpi(inputFile, outputDir, skipHDF5):
 
     # Everyone needs the line numbers in order to open the results files collectively.
     if masterRank:
-        DataPointType = DataPoint.hdfName()
+        DataPointType = DataPoint.hdf_name
     else:
         lineNumbers = None
         DataPointType = None
@@ -416,7 +416,7 @@ def masterTask(Dataset, world):
         # myMPI.print('Inverted data point {} in {:.3f}s  ||  Time: {:.3f}s  ||  QueueLength: {}/{}  ||  ETA: {:.3f}s'.format(dataPointProcessed, rankRecv[2], elapsed, nPoints-nFinished, nPoints, eta))
 
 
-def workerTask(_DataPoint, UP, prng, world, lineNumbers, LineResults):
+def workerTask(_DataPoint, UP, prng, world, lineNumbers, Inference2D):
     """ Define a wait run ping procedure for each worker """
 
     # Import here so serial code still works...
@@ -439,8 +439,8 @@ def workerTask(_DataPoint, UP, prng, world, lineNumbers, LineResults):
         paras = UP.userParameters(DataPoint)
 
         # Pass through the line results file object if a parallel file system is in use.
-        iLine = lineNumbers.searchsorted(DataPoint.lineNumber)
-        failed = infer(paras, DataPoint, prng=prng, rank=world.rank, LineResults=LineResults[iLine])
+        iLine = lineNumbers.searchsorted(DataPoint.lineNumber)[0]
+        failed = infer(paras, DataPoint, prng=prng, rank=world.rank, Inference2D=Inference2D[iLine])
 
         # Ping the Master to request a new index
         t0 = MPI.Wtime()
