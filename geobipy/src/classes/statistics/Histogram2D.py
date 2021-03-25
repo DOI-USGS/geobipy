@@ -93,13 +93,13 @@ class Histogram2D(RectilinearMesh2D):
         slic = []
         axis = -1
         for i, x in enumerate(slic0):
-            if not isinstance(x, int):
-                tmp = x
-                if isinstance(x.stop, int):
-                    tmp = slice(x.start, x.stop+1, x.step) # If a slice, add one to the end for bins.
-            else:
+            if isinstance(x, (int, np.integer)):
                 tmp = x
                 axis = i
+            else:
+                tmp = x
+                if isinstance(x.stop, (int, np.integer)):
+                    tmp = slice(x.start, x.stop+1, x.step) # If a slice, add one to the end for bins.
 
             slic.append(tmp)
         slic = tuple(slic)

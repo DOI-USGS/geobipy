@@ -758,6 +758,7 @@ class Inference1D(myObject):
 
         if (lim[1] > lim[0]):
             ax.set_ylim(lim[::-1])
+
         plt.xscale('log')
         plt.margins(0.01)
 

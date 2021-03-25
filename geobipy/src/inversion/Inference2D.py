@@ -131,7 +131,7 @@ class Inference2D(myObject):
     @cached_property
     def additiveError(self):
         """ Get the Additive error of the best data points """
-        return self.getAttribute('Additive Error')
+        return StatArray.StatArray().fromHdf(self.hdfFile, 'bestd/addErr')
 
 
     @property
@@ -1009,7 +1009,7 @@ class Inference2D(myObject):
     @cached_property
     def relativeError(self):
         """ Get the Relative error of the best data points """
-        return self.getAttribute('Relative Error')
+        return StatArray.StatArray().fromHdf(self.hdfFile, 'bestd/relErr')
 
 
     @property

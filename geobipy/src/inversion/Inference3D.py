@@ -657,6 +657,8 @@ class Inference3D(myObject):
     def fiducial(self, index):
         """ Get the fiducial of the given data point """
         iLine, index = self.lineIndex(index=index)
+        iLine = np.atleast_1d(iLine)
+        index = np.atleast_1d(index)
 
         out = np.empty(np.size(index))
         for i in range(np.size(index)):
@@ -1123,8 +1125,10 @@ class Inference3D(myObject):
 
         nClusters = self.marginalProbability.shape[-1]
 
+        ax = plt.subplot(nClusters, 1, 1)
         for i in range(nClusters):
-            plt.subplot(nClusters, 1, i+1)
+            if i > 0:
+                plt.subplot(nClusters, 1, i+1, sharex=ax, sharey=ax)
             self.pointcloud.mapPlot(dx = dx, dy = dy, c = self.marginalProbability[:, cell1, i], **kwargs)
 
 
