@@ -74,7 +74,7 @@ class EmDataPoint(DataPoint):
         c = np.logspace(minConductivity, maxConductivity, nSamples)
         PhiD = np.zeros(nSamples)
         p = StatArray.StatArray(1, 'Conductivity', r'$\frac{S}{m}$')
-        model = Model1D(1, parameters=p)
+        model = Model1D(1, edges=np.asarray([0.0, np.inf]), parameters=p)
         for i in range(nSamples):
             model._par[0] = c[i]
             self.forward(model)

@@ -61,7 +61,7 @@ class Uniform(baseDistribution):
         return self._variance
 
 
-    def deepcopy(self):
+    def __deepcopy__(self, memo={}):
         """ Define a deepcopy routine """
         return Uniform(self.min, self.max, self.log, self.prng)
 

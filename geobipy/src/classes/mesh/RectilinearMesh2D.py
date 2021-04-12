@@ -4,7 +4,7 @@ Module describing a 2D Rectilinear Mesh class with x and y axes specified
 from copy import deepcopy
 from ...classes.core.myObject import myObject
 from ...classes.core import StatArray
-from .RectilinearMesh1D import RectilinearMesh1D
+from . import RectilinearMesh1D
 import numpy as np
 from scipy.stats import binned_statistic
 from ...base import plotting as cP
@@ -79,16 +79,16 @@ class RectilinearMesh2D(myObject):
             return
 
         xExtras = dict((k[1:], kwargs.pop(k, None)) for k in ('xedgesMin', 'xedgesMax', 'xlog'))
-        self._x = RectilinearMesh1D(cellCentres=xCentres, cellEdges=xEdges, relativeTo=kwargs.pop('xrelativeTo', 0.0), **xExtras)
+        self._x = RectilinearMesh1D.RectilinearMesh1D(centres=xCentres, edges=xEdges, relativeTo=kwargs.pop('xrelativeTo', 0.0), **xExtras)
 
         yExtras = dict((k[1:], kwargs.pop(k, None)) for k in ('yedgesMin', 'yedgesMax', 'ylog'))
-        self._y = RectilinearMesh1D(cellCentres=yCentres, cellEdges=yEdges, relativeTo=kwargs.pop('yrelativeTo', 0.0),  **yExtras)
+        self._y = RectilinearMesh1D.RectilinearMesh1D(centres=yCentres, edges=yEdges, relativeTo=kwargs.pop('yrelativeTo', 0.0),  **yExtras)
 
         if (not zCentres is None or not zEdges is None):
             assert self._x.nCells == self._y.nCells, Exception("x and y axes must have the same number of cells.")
 
             zExtras = dict((k[1:], kwargs.pop(k, None)) for k in ('zedgesMin', 'zedgesMax', 'zlog'))
-            self._z = RectilinearMesh1D(cellCentres=zCentres, cellEdges=zEdges, relativeTo=kwargs.pop('zrelativeTo', 0.0), **zExtras)
+            self._z = RectilinearMesh1D.RectilinearMesh1D(centres=zCentres, edges=zEdges, relativeTo=kwargs.pop('zrelativeTo', 0.0), **zExtras)
             self.xyz = True
 
         else:
@@ -115,13 +115,13 @@ class RectilinearMesh2D(myObject):
 
         if self._distance is None:
 
-            dx = np.diff(self.x.cellEdges)
-            dy = np.diff(self.y.cellEdges)
+            dx = np.diff(self.x.edges)
+            dy = np.diff(self.y.edges)
 
-            distance = StatArray.StatArray(np.zeros(self.x.nEdges), 'Distance', self.x.cellCentres.units)
+            distance = StatArray.StatArray(np.zeros(self.x.nEdges), 'Distance', self.x.centres.units)
             distance[1:] = np.cumsum(np.sqrt(dx**2.0 + dy**2.0))
 
-            self._distance = RectilinearMesh1D(cellEdges = distance)
+            self._distance = RectilinearMesh1D.RectilinearMesh1D(edges = distance)
         return self._distance
 
 
@@ -164,7 +164,7 @@ class RectilinearMesh2D(myObject):
 
         """
 
-        return (self.z.nCells, self.x.nCells)
+        return (self.z.nCells.value, self.x.nCells.value)
 
 
     @property
@@ -184,7 +184,7 @@ class RectilinearMesh2D(myObject):
         a = self.axis(axis)
         b = self.other_axis(axis)
 
-        t = np.sum(np.repeat(np.expand_dims(a.cellCentres, axis), b.nCells, axis) * self.counts, 1-axis)
+        t = np.sum(np.repeat(np.expand_dims(a.centres, axis), b.nCells, axis) * self.counts, 1-axis)
         s = self._counts.sum(axis = 1 - axis)
 
         i = np.where(s > 0.0)[0]
@@ -231,7 +231,7 @@ class RectilinearMesh2D(myObject):
         # Find the interval
         i = np.apply_along_axis(np.searchsorted, 1-axis, tmp, percent)
         # Obtain the values at those locations
-        out = self.axis(axis).cellCentres[i]
+        out = self.axis(axis).centres[i]
 
         if (not log is None):
             out, dum = cF._log(out, log=log)
@@ -324,14 +324,14 @@ class RectilinearMesh2D(myObject):
     def __deepcopy__(self, memo):
         """ Define the deepcopy for the StatArray """
         if self.xyz:
-            return RectilinearMesh2D(xEdges=self.x.cellEdges, yEdges=self.y.cellEdges, zEdges=self.z.cellEdges)
+            return RectilinearMesh2D(xEdges=self.x.edges, yEdges=self.y.edges, zEdges=self.z.edges)
         else:
-            return RectilinearMesh2D(xEdges=self.x.cellEdges, zEdges=self.z.cellEdges)
+            return RectilinearMesh2D(xEdges=self.x.edges, zEdges=self.z.edges)
 
 
-    def cellEdges(self, axis):
+    def edges(self, axis):
         """ Gets the cell edges in the given dimension """
-        return self.axis(axis).cellEdges
+        return self.axis(axis).edges
 
 
     def other_axis(self, axis):
@@ -385,6 +385,24 @@ class RectilinearMesh2D(myObject):
             return False
         return True
 
+    # def intersect(self, x, y, axis=0):
+    #     """Intersect coordinates with
+
+    #     [extended_summary]
+
+    #     Parameters
+    #     ----------
+    #     values : [type]
+    #         [description]
+    #     axis : int, optional
+    #         [description].
+    #         Defaults to 0.
+
+    #     Returns
+    #     -------
+    #     [type] : [description]
+    #     """
+    #     return out
 
     def intervalStatistic(self, arr, intervals, axis=0, statistic='mean'):
         """Compute a statistic of the array between the intervals given along dimension dim.
@@ -431,10 +449,10 @@ class RectilinearMesh2D(myObject):
         intervals = self._reconcile_intervals(intervals, axis=axis)
 
         if (axis == 0):
-            bins = binned_statistic(self.z.cellCentres, arr.T, bins = intervals, statistic=statistic)
+            bins = binned_statistic(self.z.centres, arr.T, bins = intervals, statistic=statistic)
             res = bins.statistic.T
         else:
-            bins = binned_statistic(self.x.cellCentres, arr, bins = intervals, statistic=statistic)
+            bins = binned_statistic(self.x.centres, arr, bins = intervals, statistic=statistic)
             res = bins.statistic
 
         return res, intervals
@@ -509,12 +527,33 @@ class RectilinearMesh2D(myObject):
 
         ax = self.other_axis(axis)
 
-        i0 = np.maximum(0, np.searchsorted(intervals, ax.cellEdges[0]))
-        i1 = np.minimum(ax.nCells, np.searchsorted(intervals, ax.cellEdges[-1])+1)
+        i0 = np.maximum(0, np.searchsorted(intervals, ax.edges[0]))
+        i1 = np.minimum(ax.nCells, np.searchsorted(intervals, ax.edges[-1])+1)
         intervals = intervals[i0:i1]
 
         return intervals
 
+    def cellIndex(self, values, axis, clip=False, trim=False):
+        """Return the cell indices of values along axis.
+
+        Parameters
+        ----------
+        values : scalar or array_like
+            Locations to obtain the cell index for
+        axis : int
+            Axis along which to obtain indices
+        clip : bool
+            A negative index which would normally wrap will clip to 0 instead.
+        trim : bool
+            Do not include out of axis indices. Negates clip, since they wont be included in the output.
+
+        Returns
+        -------
+        out : ints
+            indices for the locations along the axis
+
+        """
+        return self.axis(axis).cellIndex(values, clip=clip, trim=trim)
 
     def cellIndices(self, x, y, clip=False, trim=False):
         """Return the cell indices in x and z for two floats.
@@ -648,9 +687,9 @@ class RectilinearMesh2D(myObject):
 
         if np.sum([x is None for x in [x_distance, z_distance]]) < 2:
             masked, x_indices, z_indices, values = self.mask_cells(xAxis, x_distance, z_distance, values)
-            ax, pm, cb = cP.pcolor(values, x = masked.axis('x').cellEdges, y = masked.z.cellEdges, **kwargs)
+            ax, pm, cb = cP.pcolor(values, x = masked.axis('x').edges, y = masked.z.edges, **kwargs)
         else:
-            ax, pm, cb = cP.pcolor(values, x = self.axis(xAxis).cellEdges, y = self.z.cellEdges, **kwargs)
+            ax, pm, cb = cP.pcolor(values, x = self.axis(xAxis).edges, y = self.z.edges, **kwargs)
 
 
         return ax, pm, cb
@@ -669,7 +708,7 @@ class RectilinearMesh2D(myObject):
         """
 
         tmp = StatArray.StatArray(np.full(self.shape, fill_value=np.nan))
-        tmp.pcolor(x=self.axis(xAxis).cellEdges, y=self.z.cellEdges, grid=True, noColorbar=True, **kwargs)
+        tmp.pcolor(x=self.axis(xAxis).edges, y=self.z.edges, grid=True, noColorbar=True, **kwargs)
 
 
     @property
@@ -685,7 +724,7 @@ class RectilinearMesh2D(myObject):
         kwargs['marker'] = kwargs.pop('marker', 'o')
         kwargs['linestyle'] = kwargs.pop('linestyle', 'none')
 
-        self.y.cellCentres.plot(x=self.x.cellCentres, **kwargs)
+        self.y.centres.plot(x=self.x.centres, **kwargs)
 
 
     def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
@@ -718,15 +757,15 @@ class RectilinearMesh2D(myObject):
 
     def fromHdf(self, grp, index=None):
         """ Reads in the object from a HDF file """
-        x = RectilinearMesh1D().fromHdf(grp['x'], index=index).cellEdges
-        y = RectilinearMesh1D().fromHdf(grp['y'], index=index).cellEdges
+        x = RectilinearMesh1D.RectilinearMesh1D().fromHdf(grp['x'], index=index).edges
+        y = RectilinearMesh1D.RectilinearMesh1D().fromHdf(grp['y'], index=index).edges
 
         z = None
         if 'z' in grp:
-            z = RectilinearMesh1D().fromHdf(grp['z'], index=index).cellEdges
+            z = RectilinearMesh1D.RectilinearMesh1D().fromHdf(grp['z'], index=index).edges
 
-        if z.size == y.size:
-            z = None
+            if np.size(z) == y.size:
+                z = None
 
         RectilinearMesh2D.__init__(self, xEdges=x, yEdges=y, zEdges=z)
         return self
@@ -747,13 +786,13 @@ class RectilinearMesh2D(myObject):
         """
 
         # Generate the quad node locations in x
-        x = self.x.cellEdges
-        y = self.y.cellEdges
-        z = self.z.cellEdges
+        x = self.x.edges
+        y = self.y.edges
+        z = self.z.edges
 
         nCells = self.x.nCells * self.z.nCells
 
-        z = self.z.cellEdges
+        z = self.z.edges
         nNodes = self.x.nEdges * self.z.nEdges
 
         # Constuct the node locations for the vtk file

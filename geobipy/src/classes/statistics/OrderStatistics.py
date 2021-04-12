@@ -31,7 +31,7 @@ class Order(object):
         return False
 
 
-    def deepcopy(self):
+    def __deepcopy__(self, memo={}):
         """ Define a deepcopy routine """
         return Order(self.denominator)
 
@@ -70,4 +70,4 @@ class Order(object):
     #     """ Reads the Uniform Distribution from an HDF group """
     #     T = np.array(h5grp.get('pdf'))
     #     self.pdf = T
-    #     return self        
+    #     return self

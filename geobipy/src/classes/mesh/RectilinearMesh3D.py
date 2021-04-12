@@ -79,13 +79,13 @@ class RectilinearMesh3D(myObject):
             return
 
         xExtras = dict((k[1:], kwargs.pop(k, None)) for k in ('xedgesMin', 'xedgesMax', 'xlog'))
-        self._x = RectilinearMesh1D(cellCentres=xCentres, cellEdges=xEdges, relativeTo=kwargs.pop('xrelativeTo', 0.0), **xExtras)
+        self._x = RectilinearMesh1D(centres=xCentres, edges=xEdges, relativeTo=kwargs.pop('xrelativeTo', 0.0), **xExtras)
 
         yExtras = dict((k[1:], kwargs.pop(k, None)) for k in ('yedgesMin', 'yedgesMax', 'ylog'))
-        self._y = RectilinearMesh1D(cellCentres=yCentres, cellEdges=yEdges, relativeTo=kwargs.pop('yrelativeTo', 0.0),  **yExtras)
+        self._y = RectilinearMesh1D(centres=yCentres, edges=yEdges, relativeTo=kwargs.pop('yrelativeTo', 0.0),  **yExtras)
 
         zExtras = dict((k[1:], kwargs.pop(k, None)) for k in ('zedgesMin', 'zedgesMax', 'zlog'))
-        self._z = RectilinearMesh1D(cellCentres=zCentres, cellEdges=zEdges, relativeTo=kwargs.pop('zrelativeTo', 0.0), **zExtras)
+        self._z = RectilinearMesh1D(centres=zCentres, edges=zEdges, relativeTo=kwargs.pop('zrelativeTo', 0.0), **zExtras)
 
 
 
@@ -109,15 +109,15 @@ class RectilinearMesh3D(myObject):
         slic = tuple(slic)
 
         if len(axis) == 0:
-            out = RectilinearMesh3D(xBins=self._x.cellEdges[slic[2]], yBins=self._y.cellEdges[slic[1]], zBins=self._z.cellEdges[slic[0]])
+            out = RectilinearMesh3D(xBins=self._x.edges[slic[2]], yBins=self._y.edges[slic[1]], zBins=self._z.edges[slic[0]])
             return out
 
         if len(axis) == 1:
             a = [x for x in (0, 1, 2) if not x in axis]
-            out = RectilinearMesh2D(xBins=self.axis(a[1]).cellEdges[slic[a[1]]], yBins=self.axis(a[0]).cellEdges[slic[a[0]]])
+            out = RectilinearMesh2D(xBins=self.axis(a[1]).edges[slic[a[1]]], yBins=self.axis(a[0]).edges[slic[a[0]]])
         else:
             a = [x for x in (0, 1, 2) if not x in axis][0]
-            out = RectilinearMesh1D(bins=self.axis(a).cellEdges[slic[a]])
+            out = RectilinearMesh1D(bins=self.axis(a).edges[slic[a]])
 
         return out
 
@@ -156,13 +156,13 @@ class RectilinearMesh3D(myObject):
 
     #     if self._distance is None:
 
-    #         dx = np.diff(self.x.cellEdges)
-    #         dy = np.diff(self.y.cellEdges)
+    #         dx = np.diff(self.x.edges)
+    #         dy = np.diff(self.y.edges)
 
-    #         distance = StatArray.StatArray(np.zeros(self.x.nEdges), 'Distance', self.x.cellCentres.units)
+    #         distance = StatArray.StatArray(np.zeros(self.x.nEdges), 'Distance', self.x.centres.units)
     #         distance[1:] = np.cumsum(np.sqrt(dx**2.0 + dy**2.0))
 
-    #         self._distance = RectilinearMesh1D(cellEdges = distance)
+    #         self._distance = RectilinearMesh1D(edges = distance)
     #     return self._distance
 
 
@@ -227,7 +227,7 @@ class RectilinearMesh3D(myObject):
         b, c = self.other_axis(axis)
         i, j = self.other_axis_indices(axis)
 
-        tmp = np.expand_dims(a.cellCentres, (i, j))
+        tmp = np.expand_dims(a.centres, (i, j))
         tmp = np.repeat(tmp, c.nCells, i)
         tmp = np.repeat(tmp, b.nCells, j)
 
@@ -299,7 +299,7 @@ class RectilinearMesh3D(myObject):
         # # Find the interval
         i = np.apply_along_axis(np.searchsorted, 2-axis, tmp, percent)
         # # Obtain the values at those locations
-        out = self.axis(axis).cellCentres[i]
+        out = self.axis(axis).centres[i]
 
         if (not log is None):
             out, dum = cF._log(out, log=log)
@@ -313,24 +313,24 @@ class RectilinearMesh3D(myObject):
 
     def __deepcopy__(self, memo):
         """ Define the deepcopy for the StatArray """
-        return RectilinearMesh2D(xEdges=self.x.cellEdges, yEdges=self.y.cellEdges, zEdges=self.z.cellEdges)
+        return RectilinearMesh2D(xEdges=self.x.edges, yEdges=self.y.edges, zEdges=self.z.edges)
 
 
-    def cellEdges(self, axis):
+    def edges(self, axis):
         """ Gets the cell edges in the given dimension """
-        return self.axis(axis).cellEdges
+        return self.axis(axis).edges
 
 
     def getXAxis(self, axis='x', centres=False):
         assert axis in ['x', 'y', 'r'], Exception("axis must be either 'x', 'y' or 'r'")
         if axis == 'x':
-            return self.x.cellCentres if centres else self.x.cellEdges
+            return self.x.centres if centres else self.x.edges
         elif axis == 'y':
             assert self.xyz, Exception("To plot against 'y' the mesh must be instantiated with three co-ordinates")
-            return self.y.cellCentres if centres else self.y.cellEdges
+            return self.y.centres if centres else self.y.edges
         elif axis == 'r':
             assert self.xyz, Exception("To plot against 'r' the mesh must be instantiated with three co-ordinates")
-            return self.distance.cellCentres if centres else self.distance.cellEdges
+            return self.distance.centres if centres else self.distance.edges
 
 
     # def xGradientMatrix(self):
@@ -402,10 +402,10 @@ class RectilinearMesh3D(myObject):
         intervals = self._reconcile_intervals(intervals, axis=axis)
 
         if (axis == 0):
-            bins = binned_statistic(self.z.cellCentres, arr.T, bins = intervals, statistic=statistic)
+            bins = binned_statistic(self.z.centres, arr.T, bins = intervals, statistic=statistic)
             res = bins.statistic.T
         else:
-            bins = binned_statistic(self.x.cellCentres, arr, bins = intervals, statistic=statistic)
+            bins = binned_statistic(self.x.centres, arr, bins = intervals, statistic=statistic)
             res = bins.statistic
 
         return res, intervals
@@ -419,13 +419,13 @@ class RectilinearMesh3D(myObject):
 
         if (axis == 0):
             # Make sure the intervals are within the axis.
-            i0 = np.maximum(0, np.searchsorted(intervals, self.z.cellEdges[0]))
-            i1 = np.minimum(self.z.nCells, np.searchsorted(intervals, self.z.cellEdges[-1])+1)
+            i0 = np.maximum(0, np.searchsorted(intervals, self.z.edges[0]))
+            i1 = np.minimum(self.z.nCells, np.searchsorted(intervals, self.z.edges[-1])+1)
             intervals = intervals[i0:i1]
 
         else:
-            i0 = np.maximum(0, np.searchsorted(intervals, self.x.cellEdges[0]))
-            i1 = np.minimum(self.x.nCells, np.searchsorted(intervals, self.x.cellEdges[-1])+1)
+            i0 = np.maximum(0, np.searchsorted(intervals, self.x.edges[0]))
+            i1 = np.minimum(self.x.nCells, np.searchsorted(intervals, self.x.edges[-1])+1)
             intervals = intervals[i0:i1]
 
         return intervals
@@ -555,7 +555,7 @@ class RectilinearMesh3D(myObject):
 
     #     xtmp = self.getXAxis(xAxis)
 
-    #     ax, pm, cb = cP.pcolor(values, x = xtmp, y = self.z.cellEdges, **kwargs)
+    #     ax, pm, cb = cP.pcolor(values, x = xtmp, y = self.z.edges, **kwargs)
 
     #     return ax, pm, cb
 
@@ -571,7 +571,7 @@ class RectilinearMesh3D(myObject):
         """
         import pyvista as pv
 
-        x, y, z = np.meshgrid(self.x.cellEdges, self.y.cellEdges, self.z.cellEdges)
+        x, y, z = np.meshgrid(self.x.edges, self.y.edges, self.z.edges)
 
         mesh = pv.StructuredGrid(x, y, z)
 
@@ -590,7 +590,7 @@ class RectilinearMesh3D(myObject):
     #     kwargs['marker'] = kwargs.pop('marker', 'o')
     #     kwargs['linestyle'] = kwargs.pop('linestyle', 'none')
 
-    #     self.y.cellCentres.plot(x=self.x.cellCentres, **kwargs)
+    #     self.y.centres.plot(x=self.x.centres, **kwargs)
 
 
 
@@ -666,13 +666,13 @@ class RectilinearMesh3D(myObject):
         """
 
         # Generate the quad node locations in x
-        x = self.x.cellEdges
-        y = self.y.cellEdges
-        z = self.z.cellEdges
+        x = self.x.edges
+        y = self.y.edges
+        z = self.z.edges
 
         nCells = self.x.nCells * self.z.nCells
 
-        z = self.z.cellEdges
+        z = self.z.edges
         nNodes = self.x.nEdges * self.z.nEdges
 
         # Constuct the node locations for the vtk file

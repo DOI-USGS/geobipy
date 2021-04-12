@@ -1386,7 +1386,7 @@ class Inference3D(myObject):
         points = np.zeros([nPoints,3], order='F')
         points[:,0] = np.tile(x, my*mz)
         points[:,1] = np.tile(y.repeat(mx), mz)
-        points[:,2] = np.tile(vals, mz) - z.cellCentres.repeat(mx*my)
+        points[:,2] = np.tile(vals, mz) - z.centres.repeat(mx*my)
 
         # Create the cell indices into the points
         p = np.arange(nPoints).reshape((mz, my, mx))

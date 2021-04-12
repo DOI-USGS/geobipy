@@ -1,7 +1,9 @@
 """ @Distribution_Class
 Module describing statistical distributions
 """
-#from ...base import Error as Err
+#from ...base import Erro
+# r as Err
+from copy import deepcopy
 from numpy.random import RandomState
 from .baseDistribution import baseDistribution
 from .CategoricalDistribution import Categorical
@@ -61,7 +63,7 @@ def Distribution(distributionType, *args, **kwargs):
     #    kwargs['prng'] = RandomState()
 
     if (isinstance(distributionType, baseDistribution)):
-        return distributionType.deepcopy()
+        return deepcopy(distributionType)
 
     tName = distributionType.lower()
     if (tName == 'uniform'):
@@ -69,34 +71,34 @@ def Distribution(distributionType, *args, **kwargs):
 
     elif (tName == 'normal'):
         return Normal(*args, **kwargs)
-    
+
     elif (tName == 'lognormal'):
         return LogNormal(*args, **kwargs)
-    
+
     elif (tName == 'mvnormal'):
         return MvNormal(*args, **kwargs)
 
     elif (tName == 'mvlognormal'):
         return MvLogNormal(*args, **kwargs)
-    
+
     elif (tName == 'studentt'):
         return StudentT(*args, **kwargs)
-    
+
     elif (tName == 'gamma'):
         return Gamma(*args, **kwargs)
-    
+
     elif (tName == 'poisson'):
         assert False, ('Poisson not implemented yet')
-    
+
     elif (tName == 'laplace'):
         assert False, ('Laplace not implemented yet')
-    
+
     elif (tName == 'order'):
         return Order(*args, **kwargs)
 
     elif (tName == 'categorical'):
         return Categorical(*args, **kwargs)
-    
+
     else:
         assert False, Exception('Please choose an appropriate distribution [Uniform, Normal, MvNormal, Gamma, Order, Categorical]')
 

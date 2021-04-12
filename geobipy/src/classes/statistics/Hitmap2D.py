@@ -46,7 +46,7 @@ class Hitmap2D(Histogram2D):
         iC = 0
         while op[iC] < p and iC < nz:
             iC +=1
-        return self.y.cellCentres[op.size - iC -1]
+        return self.y.centres[op.size - iC -1]
 
 
     def hdfName(self):

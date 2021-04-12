@@ -52,9 +52,9 @@ class Histogram1D(RectilinearMesh1D):
             return
 
         # Initialize the parent class
-        super().__init__(cellCentres=binCentres, cellEdges=bins, log=log, relativeTo=relativeTo)
+        super().__init__(centres=binCentres, edges=bins, log=log, relativeTo=relativeTo)
 
-        self._counts = StatArray.StatArray(self.nCells, 'Frequency', dtype=np.int64)
+        self._counts = StatArray.StatArray(self.nCells.value, 'Frequency', dtype=np.int64)
 
         if not values is None:
             self.update(values)
@@ -66,11 +66,11 @@ class Histogram1D(RectilinearMesh1D):
         assert np.shape(slic) == (), ValueError("slic must have one dimension.")
 
 
-        bins = super().__getitem__(slic).cellEdges
+        bins = super().__getitem__(slic).edges
 
         out = Histogram1D()
 
-        out._cellEdges = bins
+        out._edges = bins
         out.log = self.log
         out._relativeTo = self._relativeTo
 
@@ -90,38 +90,39 @@ class Histogram1D(RectilinearMesh1D):
 
     @property
     def bins(self):
-        return self.cellEdges
+        return self.edges
 
     @bins.setter
     def bins(self, values):
-        self.cellEdges = values
+        self.edges = values
 
     @property
     def binCentres(self):
-        return self.cellCentres
+        return self.centres
 
     @binCentres.setter
     def binCentres(self, values):
-        self.cellCentres = values
+        self.centres = values
 
     @property
     def nBins(self):
-        return self.nCells
+        return self.nCells.value
 
     @property
     def nSamples(self):
         return self._counts.sum()
 
 
-    def __deepcopy__(self, memo):
-        out = type(self)()
-        out._cellCentres = self._cellCentres.deepcopy()
-        out._cellEdges = self._cellEdges.deepcopy()
-        out.isRegular = self.isRegular
-        out.dx = self.dx
+    def __deepcopy__(self, memo={}):
+        out = super().__deepcopy__(memo)
+        # out = type(self)()
+        # out._centres = self._centres.deepcopy()
+        # out._edges = self._edges.deepcopy()
+        # out.isRegular = self.isRegular
+        # out.dx = self.dx
         out._counts = self._counts.deepcopy()
-        out.log = self.log
-        out._relativeTo = self._relativeTo
+        # out.log = self.log
+        # out._relativeTo = self._relativeTo
 
         return out
 
@@ -138,7 +139,7 @@ class Histogram1D(RectilinearMesh1D):
 
         """
 
-        cc = other.cellCentres
+        cc = other.centres
 
         cc = cF._power(cc, other.log)
 
@@ -382,7 +383,6 @@ class Histogram1D(RectilinearMesh1D):
         values = np.ravel(values[~np.isnan(values)])
         iBin = np.atleast_1d(self.cellIndex(values, clip=clip, trim=trim))
         tmp = np.bincount(iBin, minlength = self.nBins)
-
         self._counts += tmp
 
 
@@ -421,20 +421,19 @@ class Histogram1D(RectilinearMesh1D):
         geobipy.plotting.pcolor : For additional keywords
 
         """
-        kwargs['y'] = self.bins
         return super().pcolor(self._counts, **kwargs)
 
 
     def plot(self, rotate=False, flipX=False, flipY=False, trim=True, normalize=False, **kwargs):
         """ Plots the histogram """
 
-        ax = cP.hist(self.counts, self.bins, rotate=rotate, flipX=flipX, flipY=flipY, trim=trim, normalize=normalize, **kwargs)
+        ax = cP.hist(self.counts, self.edges_absolute, rotate=rotate, flipX=flipX, flipY=flipY, trim=trim, normalize=normalize, **kwargs)
         return ax
 
 
     def plot_as_line(self, rotate=False, flipX=False, flipY=False, trim=True, normalize=False, **kwargs):
 
-        x = self.binCentres
+        x = self.centres_absolute
         x1 = x
         if kwargs.get('xscale', '') == 'log':
             x1 = np.log10(x1)

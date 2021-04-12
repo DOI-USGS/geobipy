@@ -25,7 +25,7 @@ def tdem1dfwd(datapoint, model1d):
         Frequency domain data.
 
     """
-    assert datapoint.z[0] >= model1d.top, "Sensor altitude must be above the top of the model"
+    assert datapoint.z[0] >= model1d.relativeTo, "Sensor altitude must be above the top of the model"
 
     heightTolerance = 0.0
     if (datapoint.z > heightTolerance):
@@ -86,7 +86,7 @@ try:
 
     def gaTdem1dfwd(datapoint, model1d):
         # Generate the Brodie Earth class
-        E = Earth(model1d.par[:], model1d.thk[:-1])
+        E = Earth(model1d.par[:], model1d.widths[:-1])
 
         # Generate the Brodie Geometry class
         G = Geometry(datapoint.z[0],
@@ -106,7 +106,7 @@ try:
         # Unfortunately the code requires forward modelled data to compute the
         # sensitivity if the model has changed since last time
         if modelChanged:
-            E = Earth(model1d.par[:], model1d.thk[:-1])
+            E = Earth(model1d.par[:], model1d.widths[:-1])
             G = Geometry(datapoint.z[0],
                         datapoint.transmitter.roll, datapoint.transmitter.pitch, datapoint.transmitter.yaw,
                         datapoint.loopOffset[0], datapoint.loopOffset[1], datapoint.loopOffset[2],
@@ -115,7 +115,7 @@ try:
             for i in range(datapoint.nSystems):
                 datapoint.system[i].forwardmodel(G, E)
 
-        nCells = np.squeeze(model1d.nCells)
+        nCells = model1d.nCells.value
 
         if (ix is None):  # Generate a full matrix if the layers are not specified
             ix = range(nCells)

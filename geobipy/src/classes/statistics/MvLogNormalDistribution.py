@@ -59,7 +59,7 @@ class MvLogNormal(MvNormal):
         self._mean[:] = np.log(values) if self.linearSpace else values
 
 
-    def deepcopy(self):
+    def __deepcopy__(self, memo={}):
         """ Define a deepcopy routine """
         if self._constant:
             return MvLogNormal(mean=self.mean[0], variance=self.variance[0, 0], ndim=self.ndim, linearSpace=self.linearSpace, prng=self.prng)

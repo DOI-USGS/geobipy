@@ -53,6 +53,7 @@ from .src.classes.mesh.RectilinearMesh3D import RectilinearMesh3D
 from .src.classes.mesh.TopoRectilinearMesh2D import TopoRectilinearMesh2D
 # Models
 from .src.classes.model.Model1D import Model1D
+from .src.classes.model.Model2D import Model2D
 from .src.classes.model.AarhusModel import AarhusModel
 # Pointclouds
 from .src.classes.pointcloud.PointCloud3D import PointCloud3D

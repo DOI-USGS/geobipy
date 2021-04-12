@@ -1,9 +1,10 @@
 """ @Model1D_Class
 Module describing a 1 Dimensional layered Model
 """
-#from ...base import Error as Err
+# from ...base import Error as Err
 from ...classes.core import StatArray
 from .Model import Model
+from ..mesh.RectilinearMesh1D import RectilinearMesh1D
 from ..mesh import RectilinearMesh2D
 from ..statistics.Histogram1D import Histogram1D
 from ..statistics.Hitmap2D import Hitmap2D
@@ -15,7 +16,8 @@ from ...base import plotting as cP
 from ...base import utilities as cF
 from copy import deepcopy
 
-class Model1D(Model):
+
+class Model1D(RectilinearMesh1D, Model):
     """Class extension to geobipy.Model
 
     Class creates a representation of the 1D layered earth.
@@ -24,7 +26,7 @@ class Model1D(Model):
     This class allows a probability wheel to be assigned such that the 1D layered earth can be peturbed. i.e.
     randomly create, delete, or perturb the layers in the model.  This is a key step in a Markov Chain for Bayesian inference.
 
-    Model1D(nCells, top, parameters, depth, thickness)
+    Model1D(nCells, top, parameters, edges, widths)
 
     Parameters
     ----------
@@ -59,74 +61,36 @@ class Model1D(Model):
 
     """
 
-    def __init__(self, nCells=None, top=None, parameters = None, depth = None, thickness = None, hasHalfspace=True):
+    def __init__(self, nCells=None, parameters=None, edges=None, widths=None, relativeTo=None):
         """Instantiate a new Model1D """
 
+        relativeTo = 0.0 if relativeTo is None else relativeTo
 
-        self.hasHalfspace = hasHalfspace
-        self.nCells = nCells
+        super().__init__(edges=edges, widths=widths, relativeTo=relativeTo)
 
-        if (all((x is None for x in [nCells, top, parameters, depth, thickness]))): return
-        assert (not(not thickness is None and not depth is None)), TypeError('Cannot instantiate with both depth and thickness values')
 
-        # Depth to the top of the model
-        if top is None:
-            top = 0.0
-        self._top = StatArray.StatArray(top, "Depth to top", "m")
+        if (all((x is None for x in [nCells, relativeTo, parameters, edges, widths]))):
+            return
+        assert (not(not widths is None and not edges is None)), TypeError('Cannot instantiate with both edges and widths values')
 
-        if hasHalfspace:
-            self._init_withHalfspace(nCells, top, parameters, depth, thickness)
-        else:
-            self._init_withoutHalfspace(nCells, top, parameters, depth, thickness)
+        self._par = StatArray.StatArray(self.nCells.value)
+
+        # StatArray of the physical parameters
+        if (not parameters is None):
+            assert parameters.size == self.nCells, ValueError('Size of parameters {} must equal {}'.format(parameters.size, self.nCells.value))
+            self._par = StatArray.StatArray(parameters)
 
         # StatArray of the change in physical parameters
-        self._dpar = StatArray.StatArray(np.int(self.nCells) - 1, 'Derivative', r"$\frac{"+self.par.getUnits()+"}{m}$")
+        self._dpar = StatArray.StatArray(self.nCells.value - 1, 'Derivative', r"$\frac{"+self.par.getUnits()+"}{m}$")
 
         # StatArray of magnetic properties.
-        self._magnetic_susceptibility = StatArray.StatArray(np.int(self.nCells), "Magnetic Susceptibility", r"$\kappa$")
-        self._magnetic_permeability = StatArray.StatArray(np.int(self.nCells), "Magnetic Permeability", "$\frac{H}{m}$")
-
-        # Instantiate extra parameters for Markov chain perturbations.
-        # Minimum cell thickness
-        self.minThickness = None
-        # Minimum depth
-        self.minDepth = None
-        # Maximum depth
-        self.maxDepth = None
-        # Maximum number of layers
-        self.maxLayers = None
-        # Categorical distribution for choosing perturbation events
-        self.eventProposal = None
-        # Keep track of actions made to the Model.
-        self.action = ['none', 0, 0.0]
+        self._magnetic_susceptibility = StatArray.StatArray(self.nCells.value, "Magnetic Susceptibility", r"$\kappa$")
+        self._magnetic_permeability = StatArray.StatArray(self.nCells.value, "Magnetic Permeability", "$\frac{H}{m}$")
 
         self.parameterBounds = None
         self._halfSpaceParameter = None
         self.Hitmap = None
         self._inverseHessian = None
-
-
-    @property
-    def nCells(self):
-        return self._nCells
-
-    @nCells.setter
-    def nCells(self, value):
-        # assert isinstance(value, (int, np.integer))
-        if value is None:
-            self._nCells = StatArray.StatArray(1, '# of Cells', dtype=np.int32) + 1
-        else:
-            assert isinstance(value, (int, np.integer, StatArray.StatArray)), TypeError("nCells must be an integer")
-            assert np.size(value) == 1, ValueError("nCells must be scalar")
-            assert (value >= 1), ValueError('nCells must >= 1')
-            if isinstance(value, int):
-                self._nCells = StatArray.StatArray(1, '# of Cells', dtype=np.int32) + value
-            else:
-                self._nCells = deepcopy(value)
-
-    @property
-    def top(self):
-        return self._top
 
     @property
     def dpar(self):
@@ -140,81 +104,6 @@ class Model1D(Model):
     def inverseHessian(self):
         return self._inverseHessian
 
-
-    def _init_withHalfspace(self, nCells=None, top=None, parameters = None, depth = None, thickness = None):
-
-        self.nCells = nCells
-        if (not depth is None and nCells is None):
-            self._nCells = depth.size + 1
-        if (not thickness is None and nCells is None):
-            self._nCells = thickness.size + 1
-
-        self._depth = StatArray.StatArray(np.int(self.nCells), 'Depth', 'm')
-        self._thk = StatArray.StatArray(np.int(self.nCells), 'Thickness', 'm')
-        self._par = StatArray.StatArray(np.int(self.nCells))
-
-        if (not depth is None):
-            if (self.nCells > 1):
-                assert depth.size == self.nCells-1, ValueError('Size of depth must equal {}'.format(np.int(self.nCells)-1))
-                assert np.all(np.diff(depth) > 0.0), ValueError('Depths must monotonically increase')
-            self._depth[:-1] = depth
-            self._depth[-1] = np.inf
-            self.thicknessFromDepth()
-
-
-        if (not thickness is None):
-            if nCells is None:
-                self.nCells = thickness.size + 1
-            if (self.nCells > 1):
-                assert thickness.size == self.nCells-1, ValueError('Size of thickness must equal {}'.format(np.int(self.nCells)-1))
-                assert np.all(thickness > 0.0), ValueError('Thicknesses must be positive')
-            self._thk[:-1] = thickness
-            self._thk[-1] = np.inf
-            self.depthFromThickness()
-
-        # StatArray of the physical parameters
-        if (not parameters is None):
-            assert parameters.size == self.nCells, ValueError('Size of parameters {} must equal {}'.format(parameters.size, np.int(self.nCells)))
-            self._par = StatArray.StatArray(parameters)
-
-
-    def _init_withoutHalfspace(self, nCells = None, top = None, parameters = None, depth = None, thickness = None):
-
-
-        if (not depth is None and nCells is None):
-            self.nCells = depth.size
-        if (not thickness is None and nCells is None):
-            self.nCells = thickness.size
-
-        self._depth = StatArray.StatArray(np.int(self.nCells), 'Depth', 'm')
-        self._thk = StatArray.StatArray(np.int(self.nCells), 'Thickness', 'm')
-        self._par = StatArray.StatArray(np.int(self.nCells))
-
-        if (not depth is None):
-            if (self.nCells > 1):
-                assert depth.size == self.nCells, ValueError('Size of depth must equal {}'.format(np.int(self.nCells)))
-                assert np.all(np.diff(depth) > 0.0), ValueError('Depths must monotonically increase')
-            self._depth[:] = depth
-            self.thicknessFromDepth()
-
-        if (not thickness is None):
-            if nCells is None:
-                self.nCells = thickness.size
-            if (self.nCells > 1):
-                assert thickness.size == self.nCells, ValueError('Size of thickness must equal {}'.format(np.int(self.nCells)))
-                assert np.all(thickness > 0.0), ValueError('Thicknesses must be positive')
-            self._thk[:] = thickness
-            self.depthFromThickness()
-
-        # StatArray of the physical parameters
-        if (not parameters is None):
-            assert parameters.size == self.nCells, ValueError('Size of parameters must equal {}'.format(np.int(self.nCells)))
-            self._par = StatArray.StatArray(parameters)
-
-    @property
-    def depth(self):
-        return self._depth
-
     @property
     def magnetic_permeability(self):
         return self._magnetic_permeability
@@ -224,10 +113,6 @@ class Model1D(Model):
         return self._magnetic_susceptibility
 
     @property
-    def thk(self):
-        return self._thk
-
-    @property
     def par(self):
         return self._par
 
@@ -235,8 +120,7 @@ class Model1D(Model):
     def par(self, values):
         self._par[:] = values
 
-
-    def deepcopy(self):
+    def __deepcopy__(self, memo={}):
         """Create a deepcopy
 
         Returns
@@ -245,28 +129,18 @@ class Model1D(Model):
             Deepcopy of Model1D
 
         """
-        other = Model1D(nCells=None)
-        other._nCells = self.nCells.deepcopy()
-        other._top = self.top
-        other._depth = self.depth.deepcopy()
-        other._thk = self.thk.deepcopy()
-        other.minThickness = self.minThickness
-        other.minDepth = self.minDepth
-        other.maxDepth = self.maxDepth
-        other.maxLayers = self.maxLayers
-        other._par = self.par.deepcopy()
-        other._dpar = self.dpar.deepcopy()
-        other._magnetic_permeability = self.magnetic_permeability.deepcopy() #StatArray(other.nCells, "Electric Susceptibility", r"$\kappa$")
-        other._magnetic_susceptibility = self.magnetic_susceptibility.deepcopy() #StatArray(other.nCells, "Magnetic Susceptibility", "$\frac{H}{m}$")
-        other.eventProposal = self.eventProposal
-        other.action = self.action.copy()
-        other.Hitmap = self.Hitmap
-        other.hasHalfspace = self.hasHalfspace
-        other._inverseHessian = deepcopy(self._inverseHessian)
-        other.parameterBounds = self.parameterBounds
-        other._halfSpaceParameter = self._halfSpaceParameter
-        return other
-
+        out = super().__deepcopy__(memo)
+        out._par = deepcopy(self.par)
+        out._dpar = deepcopy(self.dpar)
+        # StatArray(out.nCells, "Electric Susceptibility", r"$\kappa$")
+        out._magnetic_permeability = deepcopy(self.magnetic_permeability)
+        # StatArray(out.nCells, "Magnetic Susceptibility", "$\frac{H}{m}$")
+        out._magnetic_susceptibility = deepcopy(self.magnetic_susceptibility)
+        out.Hitmap = self.Hitmap
+        out._inverseHessian = deepcopy(self._inverseHessian)
+        out.parameterBounds = self.parameterBounds
+        out._halfSpaceParameter = self._halfSpaceParameter
+        return out
 
     def pad(self, size):
         """Copies the properties of a model including all priors or proposals, but pads memory to the given size
@@ -282,40 +156,14 @@ class Model1D(Model):
             Padded model
 
         """
-        tmp = Model1D(size, self.top)
-        tmp._nCells = self.nCells
-        tmp._depth = self.depth.pad(size)
-        tmp._thk = self.thk.pad(size)
-        tmp._par = self.par.pad(size)
-        tmp._magnetic_permeability = self.magnetic_permeability.pad(size)
-        tmp._magnetic_susceptibility = self.magnetic_susceptibility.pad(size)
-        tmp._dpar=self.dpar.pad(size-1)
-        if (not self.minDepth is None): tmp.minDepth=self.minDepth
-        if (not self.maxDepth is None): tmp.maxDepth=self.maxDepth
-        if (not self.maxLayers is None): tmp.maxLayers=self.maxLayers
-        if (not self.minThickness is None): tmp.minThickness=self.minThickness
-        if (not self.Hitmap is None): tmp.Hitmap=self.Hitmap
-        return tmp
-
-
-    def depthFromThickness(self):
-        """Given the thicknesses of each layer, create the depths to each interface. The last depth is inf for the halfspace."""
-        self._depth[:] = np.cumsum(self.thk)
-
-        if self.hasHalfspace:
-            self._depth[-1] = np.infty
-
-
-    def thicknessFromDepth(self):
-        """Given the depths to each interface, compute the layer thicknesses. The last thickness is nan for the halfspace."""
-        self._thk = self.thk.resize(np.int(self.nCells))
-        self._thk[0] = self.depth[0]
-        for i in range(1, np.int(self.nCells)):
-            self._thk[i] = self.depth[i] - self.depth[i - 1]
-
-        if self.hasHalfspace:
-            self._thk[-1] = np.inf
-
+        out = super().pad(size)
+        out._par = self.par.pad(size)
+        out._magnetic_permeability = self.magnetic_permeability.pad(size)
+        out._magnetic_susceptibility = self.magnetic_susceptibility.pad(size)
+        out._dpar = self.dpar.pad(size-1)
+        if (not self.Hitmap is None):
+            out.Hitmap = self.Hitmap
+        return out
 
     def localParameterVariance(self, dataPoint=None):
         """Generate a localized inverse Hessian matrix using a dataPoint and the current realization of the Model1D.
@@ -336,9 +184,9 @@ class Model1D(Model):
 
         if not dataPoint is None:
             # Compute the sensitivity of the data to the perturbed model
-            dataPoint.sensitivity(self)
+            J = dataPoint.sensitivity(self)
             Wd = dataPoint.weightingMatrix(power=1.0)
-            WdJ = np.dot(Wd, dataPoint.J)
+            WdJ = np.dot(Wd, J)
             WdJTWdJ = np.dot(WdJ.T, WdJ)
 
             # Propose new layer conductivities
@@ -347,7 +195,6 @@ class Model1D(Model):
             self._inverseHessian = self.par.prior.derivative(x=None, order=2)
 
         return self._inverseHessian
-
 
     def updateLocalParameterVariance(self, dataPoint=None):
         """Generate a localized Hessian matrix using
@@ -367,15 +214,8 @@ class Model1D(Model):
         """
         # Compute a new parameter variance matrix if the structure of the model changed.
 
-        if (self.action[0] in ['birth', 'death']):
-            # Compute the sensitivity of the data to the perturbed model
-            # dataPoint.updateSensitivity(self)
-            # Wd = dataPoint.weightingMatrix(power=1.0)
-            # WdJ = np.dot(Wd, dataPoint.J)
-            # WdJTWdJ = np.dot(WdJ.T, WdJ)
-
-            # # Propose new layer conductivities
-            # self._inverseHessian = np.linalg.inv(WdJTWdJ + self.par.prior.derivative(x=None, order=2))
+        if (self.action[0] in ['insert', 'delete']):
+            # Propose new layer conductivities
             self.localParameterVariance(dataPoint)
 
         else:  # There was no change in the model
@@ -385,17 +225,18 @@ class Model1D(Model):
 
         return self.inverseHessian
 
-
-    def insertLayer(self, z, par=None):
-        """Insert a new layer into a model at a given depth
+    def insert_edge(self, value, par=None, update_priors=False):
+        """Insert a new edge into a model at a given location
 
         Parameters
         ----------
-        z : numpy.float64
-            Depth at which to insert a new interface
+        value : numpy.float64
+            Location at which to insert a new edge
         par : numpy.float64, optional
             Value of the parameter for the new layer
             If None, The value of the split layer is duplicated.
+        update_priors : bool, optional
+            If priors are attached, update their dimension to match
 
         Returns
         -------
@@ -403,206 +244,66 @@ class Model1D(Model):
             Model with inserted layer.
 
         """
+        # Insert edge into the mesh
+        out = super().insert_edge(value)
 
-        # Deepcopy the 1D Model
-        tmp = self.depth[:-1]
-        # Get the index to insert the new layer
-        i = tmp.searchsorted(z)
-        # Deepcopy the 1D Model
-        other = self.deepcopy()
-        # Increase the number of cells
-        other.nCells += 1
-        # Insert the new layer depth
-        other._depth = self.depth.insert(i, z)
+        i = out.action[1] - 1
+
         if (par is None):
             if (i >= self.par.size):
-                i -= 2
-                other._par = other.par.insert(i, self.par[i])
-                other._depth[-2] = other.depth[-1]
+                out._par = out.par.insert(i, self.par[i])
             else:
-                other._par = other.par.insert(i, self.par[i])
+                out._par = out.par.insert(i, self.par[i])
         else:
-            other._par = other.par.insert(i, par)
-        # Get the new thicknesses
-        other.thicknessFromDepth()
+            out._par = out.par.insert(i, par)
+
         # Reset ChiE and ChiM
-        other._magnetic_permeability = StatArray.StatArray(np.int(other.nCells), "Electric Susceptibility", r"$\kappa$")
-        other._magnetic_susceptibility = StatArray.StatArray(np.int(other.nCells), "Magnetic Susceptibility", r"$\frac{H}{m}$")
+        out._magnetic_permeability = StatArray.StatArray(
+            np.int(out.nCells), "Electric Susceptibility", r"$\kappa$")
+        out._magnetic_susceptibility = StatArray.StatArray(
+            np.int(out.nCells), "Magnetic Susceptibility", r"$\frac{H}{m}$")
         # Resize the parameter gradient
-        other._dpar = other.dpar.resize(other.par.size - 1)
-        other.action = ['birth', np.int(i), z]
-        return other
+        out._dpar = out.dpar.resize(out.par.size - 1)
 
+        # Update the dimensions of any priors.
+        if update_priors:
+            out.par.prior.ndim = out.nCells
+            out.dpar.prior.ndim = np.maximum(1, out.nCells-1)
 
-    def deleteLayer(self, i):
-        """Remove a layer from the model
+        return out
+
+    def delete_edge(self, i, update_priors=False):
+        """Remove an edge from the model
 
         Parameters
         ----------
         i : int
-            The layer to remove.
+            The edge to remove.
 
         Returns
         -------
         out : geobipy.Model1D
             Model with layer removed.
+        update_priors : bool, optional
+            If priors are attached, update their dimension to match
 
         """
+        out = super().delete_edge(i)
 
-        if (self.nCells == 0):
-            return self
-
-        assert i < np.int(self.nCells) - 1, ValueError("i must be less than the number of cells - 1{}".format(np.int(self.nCells)-1))
-
-        # Deepcopy the 1D Model to ensure priors and proposals are passed
-        other = self.deepcopy()
-        # Decrease the number of cells
-        other._nCells -= 1
-        # Remove the interface depth
-        other._depth = other.depth.delete(i)
-        # Get the new thicknesses
-        other.thicknessFromDepth()
         # Take the average of the deleted layer and the one below it
-        other._par = other.par.delete(i)
-        other._par[i] = 0.5 * (self.par[i] + self.par[i + 1])
+        out._par = out.par.delete(i)
+        out._par[i-1] = 0.5 * (self.par[i-1] + self.par[i])
         # Reset ChiE and ChiM
-        other._magnetic_permeability = other.magnetic_permeability.delete(i)
-        other._magnetic_susceptibility = other.magnetic_susceptibility.delete(i)
+        out._magnetic_permeability = out.magnetic_permeability.delete(i)
+        out._magnetic_susceptibility = out.magnetic_susceptibility.delete(i)
         # Resize the parameter gradient
-        other._dpar = other.dpar.resize(other.par.size - 1)
-        other.action = ['death', np.int(i), self.depth[i]]
+        out._dpar = out.dpar.resize(out.par.size - 1)
 
-        return other
+        if update_priors:
+            out.par.prior.ndim = out.nCells
+            out.dpar.prior.ndim = np.maximum(1, out.nCells-1)
 
-
-    def perturbStructure(self):
-        """Perturb a model
-
-        Generates a new model by perturbing the current model based on four probabilities.
-        The probabilities correspond to
-        * Birth, the insertion of a new layer into the model
-        * Death, the deletion of a layer from the model
-        * Change, change one the existing interfaces
-        * No change, do nothing and return the original
-
-        The method self.makePerturbable must be used before calling self.perturb.
-
-        The perturbation starts by generating a random number from a uniform distribution to determine which cycle to go through.
-        If a layer is created, or an interface perturbed, any resulting layer thicknesses must be greater than the minimum thickness :math:`h_{min}`.
-        If the new layer thickness test fails, the birth or perturbation tries again. If the cycle fails after 10 tries, the entire process begins again
-        such that a death, or no change is possible thus preventing any neverending cycles.
-
-        Returns
-        -------
-        out[0] : Model1D
-            The perturbed model
-
-        See Also
-        --------
-        geobipy.Model1D.makePerturbable : Must be used before calling self.perturb
-
-        """
-        assert (not self.eventProposal is None), ValueError('Please set the proposals of the model1D with model1D.addProposals()')
-        prng = self.nCells.prior.prng
-        # Pre-compute exponential values (Take them out of log space)
-        hmin = self.minThickness
-        zmin = self.minDepth
-        zmax = self.maxDepth
-        nTries = 10
-        # This outer loop will allow the perturbation to change types. e.g. if the loop is stuck in a birthing
-        # cycle, the number of tries will exceed 10, and we can try a different perturbation type.
-        tryAgain = True  # Temporary to enter the loop
-        while (tryAgain):
-            tryAgain = False
-
-            goodAction = False
-
-            # Choose an action to perform, and make sure its legitimate
-            #i.e. don't delete a single layer model, or add a layer to a model that is at the priors max on number of cells.
-            while not goodAction:
-                goodAction = True
-                # Get a random probability from 0-1
-                event = self.eventProposal.rng()
-
-                if (np.int(self.nCells) == 1 and (event == 1 or event == 2)):
-                    goodAction = False
-                elif (np.int(self.nCells) == self.nCells.prior.max and event == 0):
-                    goodAction = False
-
-            # Return if no change
-            if (event == 3):
-                out = self.deepcopy()
-                out.action = ['none', 0, 0.0]
-                return out
-
-            # Otherwise enter life-death-perturb cycle
-            if (event == 0):  # Create a new layer
-                newThicknessBiggerThanMinimum = False
-                tries = 0
-                while (not newThicknessBiggerThanMinimum):  # Continue while the new layer is smaller than the minimum
-                    # Get the new depth
-                    newDepth = np.exp(np.float64(prng.uniform(np.log(self.minDepth), np.log(self.maxDepth), 1)))
-                    z = self.depth[:-1]
-                    # Insert the new depth
-                    i = z.searchsorted(newDepth)
-                    z = z.insert(i, newDepth)
-                    # Get the thicknesses
-                    z = z.prepend(0.0)
-                    h = np.min(np.diff(z[:]))
-                    tries += 1
-                    if (h > hmin):
-                        newThicknessBiggerThanMinimum = True  # Exit if thickness is larger than minimum
-                    if (tries == nTries):
-                        newThicknessBiggerThanMinimum = True # just to exit.
-                        tryAgain = True
-                if (not tryAgain):
-                    out = self.insertLayer(newDepth)
-                    # Update the dimensions of any priors.
-                    out.par.prior.ndim = out.nCells
-                    out.dpar.prior.ndim = np.maximum(1, out.nCells-1)
-                    return out
-
-            if (event == 1):
-                # Get the layer to remove
-                iDeleted = np.int64(prng.uniform(0, self.nCells - 1, 1)[0])
-                # Remove the layer and return
-                out = self.deleteLayer(iDeleted)
-                out.par.prior.ndim = out.nCells
-                out.dpar.prior.ndim = np.maximum(1, out.nCells-1)
-                return out
-
-            if (event == 2):
-                newThicknessBiggerThanMinimum = False
-                k = np.int(self.nCells) - 1
-                tries = 0
-                while (not newThicknessBiggerThanMinimum):  # Continue while the perturbed layer is suitable
-                    z = self.depth[:-1]
-                    # Get the layer to perturb
-                    i = np.int64(prng.uniform(0, k, 1)[0])
-                    # Get the perturbation amount
-                    dz = np.sign(prng.randn()) * hmin * prng.uniform()
-                    # Perturb the layer
-                    z = z.prepend(0.0)
-                    z[i + 1] += dz
-                    # Get the minimum thickness
-                    h = np.min(np.diff(z))
-                    tries += 1
-                    # Exit if the thickness is big enough, and we stayed within
-                    # the depth bounds
-                    if (h > hmin and z[1] > zmin and z[-1] < zmax):
-                        newThicknessBiggerThanMinimum = True
-                    if (tries == nTries):
-                        newThicknessBiggerThanMinimum = True
-                        tryAgain = True
-                if (not tryAgain):
-                    out = self.deepcopy()
-                    out.depth[i] += dz  # Perturb the depth in the model
-                    out.thicknessFromDepth()
-                    out.action = ['perturb', np.int(i), dz]
-                    return out
-
-        assert False, Exception("Should not be here, file a bug report....")
-
+        return out
 
     def priorProbability(self, pPrior, gPrior, log=True, verbose=False):
         """Evaluate the prior probability for the 1D Model.
@@ -699,41 +400,24 @@ class Model1D(Model):
             if np.any(np.isinf(pInBounds)):
                 return -np.inf
 
-        # Probability of the number of layers
-        P_nCells = self.nCells.probability(log=log)
-
-        # Probability of depth given nCells
-        P_depthcells = self.depth.probability(x=self.nCells-1, log=log)
+        # Get the structural prior probability
+        p = super().priorProbability(log=log)
 
         # Evaluate the prior based on the assigned hitmap
         if (not self.Hitmap is None):
             self.evaluateHitmapPrior(self.Hitmap)
 
         # Probability of parameter
-        # if self.par.hasPrior:
-        P_parameter = 1.0 if log else 0.0
+        p_prior = 0.0 if log else 1.0
         if pPrior:
-            P_parameter = self.par.probability(log=log)
+            p_prior = self.par.probability(log=log)
 
         # Probability of model gradient
-        # if self.dpar.hasPrior:
-        P_gradient = 1.0 if log else 0.0
+        g_prior = 0.0 if log else 1.0
         if gPrior:
-            P_gradient = self.gradientProbability(log=log)
+            g_prior = self.gradientProbability(log=log)
 
-        if log:
-            probability = np.sum(np.r_[P_nCells, P_depthcells, P_parameter, P_gradient])
-        else:
-            probability = np.prod(np.r_[P_nCells, P_depthcells, P_parameter, P_gradient])
-
-        if verbose:
-            return probability, np.asarray([P_nCells, P_depthcells, P_parameter, P_gradient])
-        return probability
-
-
-    def remainingSpace(self, nLayers):
-        return (self.maxDepth - self.minDepth) - nLayers * self.minThickness
-
+        return (p + p_prior + g_prior) if log else (p * p_prior * g_prior)
 
     def proposalProbabilities(self, remappedModel, dataPoint=None):
         """Return the forward and reverse proposal probabilities for the model
@@ -770,7 +454,7 @@ class Model1D(Model):
 
         """
 
-        ### Evaluate the Reversible Jump Step.
+        # Evaluate the Reversible Jump Step.
         # For the reversible jump, we need to compute the gradient from the perturbed parameter values.
         # We therefore scale the sensitivity matrix by the proposed errors in the data, and our gradient uses
         # the data residual using the perturbed parameter values.
@@ -799,54 +483,28 @@ class Model1D(Model):
         tmp = Distribution('MvLogNormal', remappedModel.par, self.inverseHessian, linearSpace=True, prng=prng)
         proposal1 = tmp.probability(x=self.par, log=True)
 
-        if self.action[0] == 'birth':
+        if self.action[0] == 'insert':
             k = self.nCells - 1
 
             forward = Distribution('Uniform', 0.0, self.remainingSpace(k))
             reverse = Distribution('Uniform', 0.0, k)
 
-            proposal  += reverse.probability(1, log=True)
+            proposal += reverse.probability(1, log=True)
             proposal1 += forward.probability(0.0, log=True)
 
-        if self.action[0] == 'death':
+        if self.action[0] == 'delete':
             k = self.nCells
 
             forward = Distribution('Uniform', 0.0, self.remainingSpace(k))
             reverse = Distribution('Uniform', 0.0, k)
 
-            proposal  += forward.probability(0.0, log=True)
+            proposal += forward.probability(0.0, log=True)
             proposal1 += reverse.probability(1, log=True)
 
         return proposal, proposal1
 
 
-    # def reversibleJumpProbabilities(self):
-
-    #     if self.action[0] in ['none', 'perturb']:
-    #         return 1.0, 1.0
-
-    #     if self.action[0] == 'birth':
-    #         k = self.nCells - 1
-
-    #         forward = Distribution('Uniform', 0.0, self.remainingSpace(k))
-    #         reverse = Distribution('Uniform', 0.0, k)
-
-    #         Pforward = forward.probability(self.maxDepth, log=True)
-    #         Preverse = reverse.probability(k, log=True)
-
-    #     if self.action[0] == 'death':
-    #         k = self.nCells
-
-    #         forward = Distribution('Uniform', 0.0, self.remainingSpace(k))
-    #         reverse = Distribution('Uniform', 0.0, k)
-
-    #         Pforward = reverse.probability(k, log=True)
-    #         Preverse = forward.probability(self.maxDepth, log=True)
-
-    #     return Pforward, Preverse
-
-
-    def perturb(self, datapoint=None):
+    def perturb(self, datapoint=None, verbose=False):
         """Perturb a model's structure and parameter values.
 
         Uses a stochastic newtown approach if a datapoint is provided.
@@ -866,32 +524,30 @@ class Model1D(Model):
             The model with perturbed structure and parameter values.
 
         """
-        return self.stochasticNewtonPerturbation(datapoint)
+        return self.stochasticNewtonPerturbation(datapoint, verbose)
 
-
-    def squeeze(self, thickness, parameters, hasHalfspace=False):
+    def squeeze(self, widths, parameters):
 
         i = np.hstack([np.where(np.diff(parameters) != 0)[0], -1])
 
-        depth = np.cumsum(thickness)
+        edges = np.cumsum(widths)
 
-        Model1D.__init__(self, depth=depth[i], parameters=parameters[i], hasHalfspace=hasHalfspace)
+        Model1D.__init__(self, edges=edges[i], parameters=parameters[i])
 
         return self
 
-
-
-    def stochasticNewtonPerturbation(self, datapoint=None):
+    def stochasticNewtonPerturbation(self, datapoint=None, verbose=False):
 
         # Perturb the structure of the model
-        remappedModel = self.perturbStructure()
+        remappedModel = super().perturb(verbose)
 
         # Update the local Hessian around the current model.
         inverseHessian = remappedModel.updateLocalParameterVariance(datapoint)
 
-        ### Proposing new parameter values
+        # Proposing new parameter values
         # Compute the gradient of the "deterministic" objective function using the unperturbed, remapped, parameter values.
         gradient = remappedModel.par.priorDerivative(order=1)
+
         if not datapoint is None:
             gradient += np.dot(datapoint.J.T, datapoint.predictedData.priorDerivative(order=1, i=datapoint.active))
 
@@ -905,57 +561,48 @@ class Model1D(Model):
         SN_step_from_unperturbed = 0.5 * np.dot(inverseHessian, gradient)
 
         mean = np.log(remappedModel.par) - SN_step_from_unperturbed
-        # variance = Mod1.inverseHessian
 
-        perturbedModel = remappedModel.deepcopy()
+        perturbedModel = deepcopy(remappedModel)
 
         # Assign a proposal distribution for the parameter using the mean and variance.
-        perturbedModel.par.setProposal('MvLogNormal', np.exp(mean), inverseHessian, linearSpace=True, prng=perturbedModel.par.proposal.prng)
+        perturbedModel.par.setProposal('MvLogNormal', mean=np.exp(mean),
+                                                      variance=inverseHessian,
+                                                      linearSpace=True,
+                                                      prng=perturbedModel.par.proposal.prng)
 
         # Generate new conductivities
         perturbedModel.par.perturb()
 
         return remappedModel, perturbedModel
 
-
     def setPosteriors(self):
 
-        assert not self.maxLayers is None, ValueError("No priors are set, user Model1D.setPriors() to do so.")
-
-        # Initialize the posterior histogram for the number of layers
-        self.nCells.setPosterior(Histogram1D(binCentres=StatArray.StatArray(np.arange(0.0, self.maxLayers + 1.0), name="# of Layers")))
-
-        # Discretize the parameter values
-        zGrd = StatArray.StatArray(np.arange(0.5 * self.minDepth, 1.1 * self.maxDepth, 0.5 * self.minThickness), self.depth.name, self.depth.units)
-        # zGrd = StatArray.StatArray(np.logspace(np.log10(self.minDepth), np.log10(self.maxDepth), zGrd.size), self.depth.name, self.depth.units)
+        super().set_posteriors()
 
         if self.par.hasPrior:
-            p = self.par.prior.bins(nBins = 250, nStd=4.0, axis=0)
+            p = self.par.prior.bins(nBins=250, nStd=4.0, axis=0)
         else:
             tmp = 4.0 * np.log(11.0)
-            p = np.linspace(self._halfSpaceParameter - tmp, self._halfSpaceParameter + tmp, 251)
+            p = np.linspace(self.halfSpaceParameter - tmp,
+                            self.halfSpaceParameter + tmp, 251)
 
         pGrd = StatArray.StatArray(p, self.par.name, self.par.units)
 
         # Set the posterior hitmap for conductivity vs depth
-        self.par.setPosterior(Hitmap2D(xBins = pGrd, yBinCentres = zGrd))
+        self.par.setPosterior(Hitmap2D(xBins=pGrd, yBinCentres=self.edges.posterior.edges))
 
-        # Initialize the interface Depth Histogram
-        self.depth.setPosterior(Histogram1D(bins = zGrd))
-
-
-    def setPriors(self, halfSpaceValue, minDepth, maxDepth, maxLayers, parameterPrior, gradientPrior, parameterLimits=None, minThickness=None, factor=10.0, dzVariance=1.5, prng=None):
+    def setPriors(self, halfSpaceValue, min_edge, max_edge, max_cells, parameterPrior, gradientPrior, parameterLimits=None, min_width=None, factor=10.0, dzVariance=1.5, prng=None):
         """Setup the priors of a 1D model.
 
         Parameters
         ----------
         halfSpaceValue : float
             Value of the parameter for the halfspace.
-        minDepth : float64
+        min_edge : float64
             Minimum depth possible for the model
-        maxDepth : float64
+        max_edge : float64
             Maximum depth possible for the model
-        maxLayers : int
+        max_cells : int
             Maximum number of layers allowable in the model
         parameterPrior : bool
             Sets a prior on the parameter values
@@ -963,8 +610,8 @@ class Model1D(Model):
             Sets a prior on the gradient of the parameter values
         parameterLimits : array_like, optional
             Length 2 array with the bounds on the parameter values to impose.
-        minThickness : float64, optional
-            Minimum thickness of any layer. If minThickness = None, minThickness is computed from minDepth, maxDepth, and maxLayers (recommended).
+        min_width : float64, optional
+            Minimum thickness of any layer. If min_width = None, min_width is computed from min_edge, max_edge, and max_cells (recommended).
         factor : float, optional
             Tuning parameter used in the std of the parameter prior.
         prng : numpy.random.RandomState(), optional
@@ -975,32 +622,14 @@ class Model1D(Model):
         geobipy.Model1D.perturb : For a description of the perturbation cycle.
 
         """
-        assert minDepth > 0.0, ValueError("minDepth must be > 0.0")
-        assert maxDepth > 0.0, ValueError("maxDepth must be > 0.0")
-        assert maxLayers > 0.0, ValueError("maxLayers must be > 0.0")
 
-        if (minThickness is None):
-            # Assign a minimum possible thickness
-            self.minThickness = (maxDepth - minDepth) / (2 * maxLayers)
-        else:
-            self.minThickness = minThickness
-
-        self.minDepth = minDepth  # Assign the log of the min depth
-        self.maxDepth = maxDepth  # Assign the log of the max depth
-        self.maxLayers = np.int32(maxLayers)
-
-        # Assign a uniform distribution to the number of layers
-        self.nCells.setPrior('Uniform', 1, self.maxLayers, prng=prng)
-
-        # Set priors on the depth interfaces, given a number of layers
-        i = np.arange(self.maxLayers)
-        dz = self.remainingSpace(i)
-
-        self.depth.setPrior('Order', denominator=dz)  # priZ
+        super().set_priors(min_edge, max_edge, max_cells, min_width, prng)
 
         if not parameterLimits is None:
-            assert np.size(parameterLimits) == 2, ValueError("parameterLimits must have size 2.")
-            self.parameterBounds = Distribution('Uniform', parameterLimits[0], parameterLimits[1], log=True)
+            assert np.size(parameterLimits) == 2, ValueError(
+                "parameterLimits must have size 2.")
+            self.parameterBounds = Distribution(
+                'Uniform', parameterLimits[0], parameterLimits[1], log=True)
         else:
             self.parameterBounds = None
 
@@ -1008,12 +637,18 @@ class Model1D(Model):
 
         # if parameterPrior:
         # Assign the initial prior to the parameters
-        self.par.setPrior('MvLogNormal', self._halfSpaceParameter, np.log(1.0 + factor)**2.0, ndim=self.nCells, linearSpace=True, prng=prng)
+        self.par.setPrior('MvLogNormal', mean=self._halfSpaceParameter,
+                                         variance=np.log(1.0 + factor)**2.0,
+                                         ndim=self.nCells,
+                                         linearSpace=True,
+                                         prng=prng)
 
         # if gradientPrior:
         # Assign the prior on the parameter gradient
-        self.dpar.setPrior('MvNormal', 0.0, dzVariance, ndim=np.maximum(1, self.nCells-1), prng=prng)
-
+        self.dpar.setPrior('MvNormal', mean=0.0,
+                                       variance=dzVariance,
+                                       ndim=np.maximum(1, self.nCells-1),
+                                       prng=prng)
 
     def setProposals(self, probabilities, parameterProposal, prng=None):
         """Setup the proposals of a 1D model.
@@ -1026,7 +661,7 @@ class Model1D(Model):
             Probability of birth, death, perturb, and no change for the model
             e.g. pWheel = [0.5, 0.25, 0.15, 0.1]
         parameterProposal : geobipy.Distribution
-            The proposal  distribution for the parameter.
+            The proposal distribution for the parameter.
         prng : numpy.random.RandomState(), optional
             Random number generator, if none is given, will use numpy's global generator.
 
@@ -1035,13 +670,9 @@ class Model1D(Model):
         geobipy.Model1D.perturb : For a description of the perturbation cycle.
 
         """
-        assert np.size(probabilities) == 4, ValueError('pWheel must have size 4')
-        # assert not self.maxLayers is None, Exception("Please set the priors on the model with setPriors()")
 
-        self.eventProposal = Distribution('Categorical', np.asarray(probabilities), ['birth', 'death', 'perturb', 'noChange'], prng=prng)
-
+        super().set_proposals(probabilities, prng)
         self.par.setProposal(parameterProposal)
-
 
     def gradientProbability(self, log=True):
         """Evaluate the prior for the gradient of the parameter with depth
@@ -1082,49 +713,51 @@ class Model1D(Model):
             The probability given the prior on the gradient of the parameters with depth.
 
         """
-        assert (self.dpar.hasPrior), TypeError('No prior defined on parameter gradient. Use Model1D.dpar.addPrior() to set the prior.')
+        assert (self.dpar.hasPrior), TypeError(
+            'No prior defined on parameter gradient. Use Model1D.dpar.addPrior() to set the prior.')
 
         if np.int(self.nCells) == 1:
-            tmp = self.insertLayer(np.log(self.minDepth) + (0.5 * (self.maxDepth - self.minDepth)))
-            tmp.dpar[:] = (np.diff(np.log(tmp.par))) / (np.log(tmp.thk[:-1]) - np.log(self.minThickness))
+            tmp = self.insert_edge(np.log(self.min_edge) + (0.5 * (self.max_edge - self.min_edge)))
+            tmp.dpar[:] = (np.diff(np.log(tmp.par))) / (np.log(tmp.widths[:-1]) - np.log(self.min_width))
             probability = tmp.dpar.probability(log=log)
 
         else:
-            self.dpar[:] = (np.diff(np.log(self.par))) / (np.log(self.thk[:-1]) - np.log(self.minThickness))
+            self.dpar[:] = (np.diff(np.log(self.par))) / (np.log(self.widths[:-1]) - np.log(self.min_width))
             probability = self.dpar.probability(log=log)
         return probability
-
 
     @property
     def summary(self):
         """ Write a summary of the 1D model """
-        msg = "1D Model: \n"
-        msg += self.nCells.summary
-        msg += 'Top of the model: ' + str(self.top) + '\n'
-        msg += self.thk.summary
-        msg += self.par.summary
-        msg += self.depth.summary
-        return msg
 
+        msg = ("1D Model: \n"
+               "nCells\n{}\n"
+               "edges\n{}\n"
+               "thickness\n{}\n"
+               "parameters\n{}\n"
+               ).format(self.nCells.summary,
+                        self.edges.summary,
+                        self.widths.summary,
+                        self.par.summary)
+        return msg
 
     def unperturb(self):
         """After a model has had its structure perturbed, remap the model back its previous state. Used for the reversible jump McMC step.
 
         """
         if self.action[0] == 'none':
-            return self.deepcopy()
+            return deepcopy(self)
 
         if self.action[0] == 'perturb':
-            other = self.deepcopy()
-            other.depth[self.action[1]] -= self.action[2]
-            return other
+            out = deepcopy(self)
+            out.edges[self.action[1]] -= self.action[2]
+            return out
 
-        if self.action[0] == 'birth':
-            return self.deleteLayer(self.action[1])
+        if self.action[0] == 'insert':
+            return self.delete_edge(self.action[1])
 
-        if self.action[0] == 'death':
-            return self.insertLayer(self.action[2])
-
+        if self.action[0] == 'delete':
+            return self.insert_edge(self.action[2])
 
     def pcolor(self, *args, **kwargs):
         """Create a pseudocolour plot of the 1D Model.
@@ -1169,28 +802,29 @@ class Model1D(Model):
 
         """
 
-        kwargs['flipY'] = kwargs.pop('flipY', True)
+        return super().pcolor(values=self.par, **kwargs)
+    #     d = self.depth
+    #     if self.hasHalfspace:
+    #         if (self.max_edge is None):
+    #             if (self.nCells > 1):
+    #                 d[-1] = 1.1 * d[-2]
+    #             else:
+    #                 d[0] = 1.0
+    #         else:
+    #             d[-1] = 1.1 * self.max_edge
 
-        d = self.depth.prepend(0.0)
-        if self.hasHalfspace:
-            if (self.maxDepth is None):
-                if (self.nCells > 1):
-                    d[-1] = 1.1 * d[-2]
-                else:
-                    d[0] = 1.0
-            else:
-                d[-1] = 1.1 * self.maxDepth
+    #     ax = self.par.pcolor(*args, y = d + self.top, **kwargs)
 
-        ax = self.par.pcolor(*args, y = d + self.top, **kwargs)
+    #     if self.hasHalfspace:
+    #         h = 0.99*d[-1]
+    #         if (self.nCells == 1):
+    #             h = 0.99*self.max_edge
+    #         plt.text(0, h, s=r'$\downarrow \infty$', fontsize=12)
 
-        if self.hasHalfspace:
-            h = 0.99*d[-1]
-            if (self.nCells == 1):
-                h = 0.99*self.maxDepth
-            plt.text(0, h, s=r'$\downarrow \infty$', fontsize=12)
+    #     return ax
 
-        return ax
-
+    # def piecewise_constant_interpolate(self, other, bound=False, axis=0):
+    #     return super().piecewise_constant_interpolate(self.par, other, bound, axis)
 
     def plot(self, **kwargs):
         """Plots a 1D model parameters as a line against depth
@@ -1211,35 +845,14 @@ class Model1D(Model):
             Do not plot the labels
 
         """
-        # Must create a new parameter, so that the last layer is plotted
-        ax = plt.gca()
-        cP.pretty(ax)
 
-        reciprocateX = kwargs.pop("reciprocateX", False)
-        flipY = kwargs.pop('flipY', True)
-        kwargs['flipY'] = flipY
-        kwargs['xscale'] = kwargs.pop('xscale', 'linear')
+        super().plot(values=self.par, **kwargs)
 
-        # Repeat the last entry
-        par = self.par.append(self.par[-1])
-        if (reciprocateX):
-            par = 1.0 / par
-
-        z = self.depth.prepend(0.0)
-        if self.hasHalfspace:
-            if (self.maxDepth is None):
-                z[-1] = 1.1 * z[-2]
-            else:
-                z[-1] = 1.1 * np.exp(self.maxDepth)
-
-        cP.step(x=par, y=z, **kwargs)
-
-        if self.hasHalfspace:
-            h = 0.99*z[-1]
-            if (self.nCells == 1):
-                h = 0.99*self.maxDepth
-            plt.text(0, h, s=r'$\downarrow \infty$', fontsize=12)
-
+        # if self.hasHalfspace:
+        #     h = 0.99*z[-1]
+        #     if (self.nCells == 1):
+        #         h = 0.99*self.max_edge
+        #     plt.text(0, h, s=r'$\downarrow \infty$', fontsize=12)
 
     def evaluateHitmapPrior(self, Hitmap):
         """ Evaluates the model parameters against a hitmap.
@@ -1262,7 +875,6 @@ class Model1D(Model):
         tmp = np.sum(Hitmap.arr[:, iM])
         return tmp / np.sum(Hitmap.arr)
 
-
     def asHistogram2D(self, variance, Hist):
         """ Creates a Hitmap from the model given the variance of each layer.
 
@@ -1278,12 +890,12 @@ class Model1D(Model):
             Must be instantiated before calling so that the model can be interpolated correctly
 
         """
-        assert (variance.size == self.nCells), ValueError('size of variance must equal number of cells')
+        assert (variance.size == self.nCells), ValueError(
+            'size of variance must equal number of cells')
         # Interpolate the parameter to the depths of the grid
         par = self.interp2depth(self.par, Hist)
         # Interpolate the variance to the depths of the grid
         var = self.interp2depth(variance, Hist)
-
 
         # plt.figure()
         for i in range(Hist.y.size):
@@ -1304,14 +916,13 @@ class Model1D(Model):
             # print(np.max(Hist.arr[i, :]))
             # plt.subplot(212)
             # plt.plot(np.log10(tmp), Hist.arr[i, :])
-            #for j in range(Hist.x.size):
+            # for j in range(Hist.x.size):
             #    Hist.arr[i, j] = np.exp(dist.probability([np.log(Hist.x[j])]))
             #    Hist.sum += Hist.arr[i, j]
 
         Hist.sum = np.sum(Hist.arr)
 
-
-    def addToHitMap(self, Hitmap):
+    def update_parameter_posterior(self, axis=1):
         """ Imposes a model's parameters with depth onto a 2D Hitmap.
 
         The cells that the parameter-depth profile passes through are accumulated by 1.
@@ -1322,114 +933,34 @@ class Model1D(Model):
             The hitmap to add to
 
         """
-        iM = self.getParMeshXIndex(Hitmap)
-        if self.hasHalfspace:
-            iz = np.arange(Hitmap.y.nCells)
+        histogram = self.par.posterior
+        # Interpolate the cell centres and parameter values to the 'axis' of the histogram
+        values = self.piecewise_constant_interpolate(self.par, histogram, axis=axis)
+        # values is now histogram.axis(axis).nCells in length
+        # interpolate those values to the opposite axis
+        i0 = histogram.cellIndex(values, axis=1-axis, clip=True)
+
+        ax = histogram.axis(axis)
+        # Get the bounding indices depending on whether the mesh has open limits.
+        if self.open_right:
+            mx = ax.nCells
         else:
-            i = Hitmap.y.cellIndex(self.depth[-1], clip=True)
-            iz = np.arange(i)
+            mx = ax.cellIndex(self.edges[-1], clip=True)
+        i1 = np.arange(mx)
 
-        Hitmap._counts[iz, iM] += 1
-
+        histogram._counts[i1, i0] += 1
 
     # def setReferenceHitmap(self, Hitmap):
     #     """ Assigns a Hitmap as the model's prior """
     #     assert isinstance(Hitmap, Hitmap2D), "Hitmap must be a Hitmap2D class"
     #     self.Hitmap = Hitmap.deepcopy()
 
-
-    def getParMeshXIndex(self, mesh):
-        """ Interpolate the model parameters to a 2D rectilinear mesh.
-
-        Uses piece wise constant interpolation of the parameter-depth profile to the y axis of the mesh.
-        Then the indices into the mesh x axis for those interpolated values are returned.
-
-        Parameters
-        ----------
-        mesh : geobipy.RectilinearMesh2D
-            A mesh to interpolate to.
-
-        Returns
-        -------
-        out : array
-            The indices into mesh.x after interpolating the model parameters to the mesh.y axis.
-
-        """
-        mint = self.interpPar2Mesh(self.par, mesh)
-        iM = mesh.x.cellCentres.searchsorted(mint)
-        return np.minimum(iM, mesh.x.nCells - 1)
-
-
-    def interpPar2Mesh(self, par, mesh, matchTop=False, bound=False):
-        """ Interpolate the model parameters to a 2D rectilinear mesh.
-
-        Uses piece wise constant interpolation of the parameter-depth profile to the y axis of the mesh.
-
-        Parameters
-        ----------
-        par : geobipy.StatArray
-            The values to interpolate to the mesh y axis. Must have length Model1D.nCells.
-        mesh : geobipy.RectilinearMesh2D
-            A mesh to interpolate to.
-        matchTop : bool, optional
-            Force the mesh y axis and top of the model to match.
-        bound : bool, optional
-            Interpolated values above the top of the model are nan.
-
-        Returns
-        -------
-        out : array
-            The interpolated model parameters at each y axis value of the mesh.
-
-        """
-        assert (np.size(par) == np.int(self.nCells)), 'par must have length nCells'
-        assert (isinstance(mesh, RectilinearMesh2D.RectilinearMesh2D)), TypeError('mesh must be a RectilinearMesh2D')
-
-        if self.hasHalfspace:
-            bounds = [0.0, mesh.y.range]
-        else:
-            bounds = [0.0, np.minimum(self.depth[-1], mesh.y.range)]
-
-        if self.hasHalfspace:
-            depth = self.depth[:-1]
-        else:
-            depth = self.depth
-
-        # Add in the top of the model
-        if (matchTop):
-            bounds += self.top
-            depth += self.top
-
-        if self.hasHalfspace:
-            y = mesh.y.cellCentres
-        else:
-            i = mesh.y.cellIndex(depth[-1], clip=True)
-            y = mesh.y.cellCentres[:i]
-
-        if (np.int(self.nCells) == 1):
-            mint = np.interp(y, bounds, np.kron(par[:], [1, 1]))
-        else:
-            xp = np.kron(np.asarray(depth), [1, 1.001])
-            if self.hasHalfspace:
-                xp = np.insert(xp, [0, np.size(xp)], bounds)
-
-            fp = np.kron(par[:], [1, 1])
-
-            mint = np.interp(y, xp, fp)
-
-        if bound:
-            i = np.where((y < bounds[0]) & (y > bounds[-1]))
-            mint[i] = np.nan
-
-        return mint
-
-
-    def isInsideConfidence(self, Hitmap, percent=95.0, log=None):
+    def isInsideConfidence(self, histogram2d, percent=95.0, log=None):
         """ Check that the model is insde the specified confidence region of a 2D hitmap
 
         Parameters
         ----------
-        Hitmap : geobipy.Hitmap2D
+        histogram2d : geobipy.Histogram
             The hitmap to check against.
         percent : np.float, optional
             The confidence interval percentage.
@@ -1442,15 +973,13 @@ class Model1D(Model):
             All parameter values are within the confidence intervals.
 
         """
-        assert isinstance(Hitmap, Hitmap2D), TypeError('Hitmap must be of type Hitmap2D')
+        assert isinstance(histogram2d, Histogram2D), TypeError('histogram2d must be of type Histogram2D')
 
-        sMed, sLow, sHigh = Hitmap.getConfidenceIntervals(percent=percent, log=log)
-        print(sLow)
+        sMed, sLow, sHigh = histogram2d.getConfidenceIntervals(percent=percent, log=log)
 
-        par = self.interpPar2Mesh(self.par, Hitmap)
+        par = self.piecewise_constant_interpolate(self.par, histogram2d, axis=1)
 
         return np.all(par > sLow) and np.all(par < sHigh)
-
 
     def updatePosteriors(self, minimumRatio=0.5):
         """Update any attached posterior distributions.
@@ -1463,23 +992,9 @@ class Model1D(Model):
 
         """
 
-        # Update the number of layeres posterior
-        self.nCells.updatePosterior()
-
+        super().update_posteriors(values=self.par, ratio=minimumRatio)
         # Update the hitmap posterior
-        self.addToHitMap(self.par.posterior)
-
-        # Update the layer interface histogram
-        if (self.nCells > 1):
-            ratio = np.exp(np.diff(np.log(self.par)))
-            m1 = ratio <= 1.0 - minimumRatio
-            m2 = ratio >= 1.0 + minimumRatio
-            keep = np.logical_not(np.ma.masked_invalid(ratio).mask) & np.ma.mask_or(m1,m2)
-            tmp = self.depth[:-1]
-
-            if (tmp[keep].size > 0):
-                self.depth.posterior.update(tmp[keep])
-
+        self.update_parameter_posterior(axis=1)
 
     def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
         """Create the Metadata for a Model1D in a HDF file
@@ -1542,39 +1057,9 @@ class Model1D(Model):
 
         """
 
-        # create a new group inside h5obj
-        grp = self.create_hdf_group(parent, name)
+        grp = super().createHdf(parent, name, withPosterior, nRepeats, fillvalue)
 
-        self.nCells.createHdf(grp, 'nCells', withPosterior=withPosterior, nRepeats=nRepeats)
-        self.top.createHdf(grp, 'top', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.depth.createHdf(grp, 'depth', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        self.thk.createHdf(grp, 'thk', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self.par.createHdf(grp, 'par', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        #self.magnetic_permeability.createHdf(grp, 'magnetic_permeability', nRepeats=nRepeats, fillvalue=fillvalue)
-        #self.magnetic_susceptibility.createHdf(grp, 'magnetic_susceptibility', nRepeats=nRepeats, fillvalue=fillvalue)
-
-        try:
-            grp.create_dataset('pWheel', data=self.pWheel)
-        except:
-            pass
-        try:
-            grp.create_dataset('zmin', data=self.minDepth)
-        except:
-            pass
-        try:
-            grp.create_dataset('zmax', data=self.maxDepth)
-        except:
-            pass
-        try:
-            grp.create_dataset('kmax', data=self.maxLayers)
-        except:
-            pass
-        try:
-            grp.create_dataset('hmin', data=self.minThickness)
-        except:
-            pass
-        grp.create_dataset('hasHalfspace', data=self.hasHalfspace)
-
 
     def writeHdf(self, h5obj, name, withPosterior=True, index=None):
         """Create the Metadata for a Model1D in a HDF file
@@ -1631,18 +1116,10 @@ class Model1D(Model):
 
         """
 
+        super().writeHdf(h5obj, name, withPosterior, index)
+
         grp = h5obj.get(name)
-
-        self.nCells.writeHdf(grp, 'nCells',  withPosterior=withPosterior, index=index)
-        self.top.writeHdf(grp, 'top', index=index)
-        nCells = np.int(self.nCells)
-
-        self.depth.writeHdf(grp, 'depth',  withPosterior=withPosterior, index=index)
-        self.thk.writeHdf(grp, 'thk',  withPosterior=withPosterior, index=index)
         self.par.writeHdf(grp, 'par',  withPosterior=withPosterior, index=index)
-        #self.magnetic_permeability.writeHdf(grp, 'magnetic_permeability',  withPosterior=withPosterior, index=i)
-        #self.magnetic_susceptibility.writeHdf(grp, 'magnetic_susceptibility',  withPosterior=withPosterior, index=i)
-
 
     def fromHdf(self, grp, index=None):
         """Read the class from a HDF group
@@ -1658,55 +1135,8 @@ class Model1D(Model):
 
         """
 
-        if grp['par/data'].ndim > 1:
-            assert not index is None, ValueError("File was created with multiple Model1Ds, must specify an index")
-
-        nCells = StatArray.StatArray().fromHdf(grp['nCells'], index=index)
-
-        self.__init__(nCells)
-
-        if 'minThk' in grp:
-            self.minThickness = np.array(grp.get('minThk'))
-
-        if 'hmin' in grp:
-            self.minThickness = np.array(grp.get('hmin'))
-
-        if 'zmin' in grp:
-            self.minDepth = np.array(grp.get('zmin'))
-
-        if 'zmax' in grp:
-            self.maxDepth = np.array(grp.get('zmax'))
-
-        if 'pWheel' in grp:
-            self.pWheel = np.array(grp.get('pWheel'))
-
-        if 'hasHalfspace' in grp:
-            self.hasHalfspace = np.array(grp.get('hasHalfspace'))
-
-
-        i = index
-        if grp['par/data'].ndim != 1:
-            i = np.s_[index, :np.int(self.nCells)]
-
-        self._top = StatArray.StatArray().fromHdf(grp['top'], index=index)
+        super().fromHdf(grp, index)
 
         self._par = StatArray.StatArray().fromHdf(grp['par'], index=i)
-
-        self._depth = StatArray.StatArray().fromHdf(grp['depth'], index=i)
-
-        self._thk = StatArray.StatArray().fromHdf(grp['thk'], index=i)
-
-        # item = grp.get('magnetic_permeability')
-        # obj = eval(cF.safeEval(item.attrs.get('repr')));
-        # obj = obj.resize(tmp.nCells); tmp._magnetic_permeability = obj.fromHdf(item, index=i)
-
-        # item = grp.get('magnetic_susceptibility'); obj = eval(cF.safeEval(item.attrs.get('repr')));
-        # obj = obj.resize(tmp.nCells); tmp._magnetic_susceptibility = obj.fromHdf(item, index=i)
-
-        if (self.nCells > 0):
-            self._dpar = StatArray.StatArray(np.int(self.nCells) - 1, 'Derivative', self.par.units + '/m')
-        else:
-            self._dpar = None
-
 
         return self

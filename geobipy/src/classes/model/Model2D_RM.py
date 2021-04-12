@@ -79,18 +79,18 @@ class Model2D_RM(RectilinearMesh2D):
 
         if axis == -1:
             if self.xyz:
-                out = type(self)(xEdges=self.x.cellEdges[slic[1]], yBins=self.y.cellEdges[slic[1]], zBins=self.z.cellEdges[slic[0]])
+                out = type(self)(xEdges=self.x.edges[slic[1]], yBins=self.y.edges[slic[1]], zBins=self.z.edges[slic[0]])
             else:
-                out = type(self)(xBins=self.x.cellEdges[slic[1]], yBins=self.z.cellEdges[slic[0]])
+                out = type(self)(xBins=self.x.edges[slic[1]], yBins=self.z.edges[slic[0]])
 
             out._counts += self.values[slic0]
             return out
 
         if axis == 0:
-            out = type(self)(bins=self.x.cellEdges[slic[1]])
+            out = type(self)(bins=self.x.edges[slic[1]])
             out._counts += np.squeeze(self.counts[slic0])
         elif axis == 1:
-            out = type(self)(bins=self.y.cellEdges[slic[0]])
+            out = type(self)(bins=self.y.edges[slic[0]])
             out._counts += np.squeeze(self.counts[slic0])
         return out
 
@@ -134,13 +134,13 @@ class Model2D_RM(RectilinearMesh2D):
         ix2 = np.apply_along_axis(np.searchsorted, 1-axis, tmp, p)
 
         if axis == 0:
-            med = self.x.cellCentres[ixM]
-            low = self.x.cellCentres[ix1]
-            high = self.x.cellCentres[ix2]
+            med = self.x.centres[ixM]
+            low = self.x.centres[ix1]
+            high = self.x.centres[ix2]
         else:
-            med = self.y.cellCentres[ixM]
-            low = self.y.cellCentres[ix1]
-            high = self.y.cellCentres[ix2]
+            med = self.y.centres[ixM]
+            low = self.y.centres[ix1]
+            high = self.y.centres[ix2]
 
         if (not log is None):
             med, dum = cF._log(med, log=log)
@@ -203,9 +203,9 @@ class Model2D_RM(RectilinearMesh2D):
                 assert np.size(intervals) == 2, ValueError("intervals must have size equal to 2")
                 assert intervals[1] > intervals[0], ValueError("intervals must be monotonically increasing")
                 if axis == 0:
-                    indices = self.y.cellCentres.searchsorted(intervals)
+                    indices = self.y.centres.searchsorted(intervals)
                 else:
-                    indices = self.x.cellCentres.searchsorted(intervals)
+                    indices = self.x.centres.searchsorted(intervals)
             else:
                 indices = np.asarray([index, index+1])
 
@@ -214,7 +214,7 @@ class Model2D_RM(RectilinearMesh2D):
             else:
                 s = np.sum(self._counts[:, indices[0]:indices[1]], axis=axis)
 
-        out = Histogram1D(bins = bins.cellEdges, log=log)
+        out = Histogram1D(bins = bins.edges, log=log)
         out._counts += s
         return out
 
@@ -280,9 +280,9 @@ class Model2D_RM(RectilinearMesh2D):
         iMode = np.argmax(self._counts, axis = 1-axis)
 
         if axis == 0:
-            mode = self.x.cellCentres[iMode]
+            mode = self.x.centres[iMode]
         else:
-            mode = self.z.cellCentres[iMode]
+            mode = self.z.centres[iMode]
 
         if (not log is None):
             mode, dum = cF._log(mode, log=log)
@@ -377,9 +377,9 @@ class Model2D_RM(RectilinearMesh2D):
         ix2 = np.apply_along_axis(np.searchsorted, 1-axis, tmp, p)
 
         if axis == 0:
-            out = self.x.cellCentres[ix2]
+            out = self.x.centres[ix2]
         else:
-            out = self.y.cellCentres[ix2]
+            out = self.y.centres[ix2]
 
         if (not log is None):
             out, dum = cF._log(out, log=log)
@@ -587,10 +587,10 @@ class Model2D_RM(RectilinearMesh2D):
         counts, intervals = super().intervalStatistic(self._counts, intervals, axis, statistic)
 
         if axis == 0:
-            out = Histogram2D(xBins = self.x.cellEdges, yBins = StatArray.StatArray(np.asarray(intervals), name=self.y.name, units=self.y.units))
+            out = Histogram2D(xBins = self.x.edges, yBins = StatArray.StatArray(np.asarray(intervals), name=self.y.name, units=self.y.units))
             out._counts[:] = counts
         else:
-            out = Histogram2D(xBins = StatArray.StatArray(np.asarray(intervals), name=self.x.name, units=self.x.units), yBins = self.y.cellEdges)
+            out = Histogram2D(xBins = StatArray.StatArray(np.asarray(intervals), name=self.x.name, units=self.x.units), yBins = self.y.edges)
             out._counts[:] = counts
         return out
 
@@ -634,9 +634,9 @@ class Model2D_RM(RectilinearMesh2D):
         assert np.size(fractions) == nDistributions, ValueError("Fractions must have same size as number of distributions")
 
         if axis == 0:
-            ax = self.x.cellCentres
+            ax = self.x.centres
         else:
-            ax = self.y.cellCentres
+            ax = self.y.centres
 
         if reciprocateParameter:
             ax = 1.0 / ax[::-1]
@@ -676,9 +676,9 @@ class Model2D_RM(RectilinearMesh2D):
         maxDistributions = kwargs.pop('maxDistributions', np.max([mm.n_mixtures for mm in mixtures]))
 
         if axis == 0:
-            ax = self.x.cellCentres
+            ax = self.x.centres
         else:
-            ax = self.y.cellCentres
+            ax = self.y.centres
 
         if reciprocateParameter:
             ax = 1.0 / ax[::-1]
@@ -722,14 +722,14 @@ class Model2D_RM(RectilinearMesh2D):
         assert np.size(fractions) == nDistributions, ValueError("Fractions must have same size as number of distributions")
 
         # Get the axes
-        ax0 = self.y.cellCentres
+        ax0 = self.y.centres
 
         if reciprocateParameter[0]:
             ax0 = 1.0 / ax0[::-1]
 
         ax0, dum = cF._log(ax0, log[0])
 
-        ax1 = self.x.cellCentres
+        ax1 = self.x.centres
 
         if reciprocateParameter[1]:
             ax1 = 1.0 / ax1[::-1]
@@ -799,7 +799,7 @@ class Model2D_RM(RectilinearMesh2D):
         """
         kwargs['trim'] = kwargs.pop('trim',  0.0)
         kwargs.pop('normalize', None)
-        ax = self.counts.pcolor(x=self.x.cellEdges, y=self.y.cellEdges, **kwargs)
+        ax = self.counts.pcolor(x=self.x.edges, y=self.y.edges, **kwargs)
         return ax
 
 
@@ -813,11 +813,11 @@ class Model2D_RM(RectilinearMesh2D):
         a = kwargs.pop('alpha', 0.6)
 
         if axis == 0:
-            cP.plot(low, self.y.cellCentres, color=c, linestyle=ls, linewidth=lw, alpha=a, **kwargs)
-            cP.plot(high, self.y.cellCentres, color=c, linestyle=ls, linewidth=lw, alpha=a, **kwargs)
+            cP.plot(low, self.y.centres, color=c, linestyle=ls, linewidth=lw, alpha=a, **kwargs)
+            cP.plot(high, self.y.centres, color=c, linestyle=ls, linewidth=lw, alpha=a, **kwargs)
         else:
-            cP.plot(self.x.cellCentres, low, color=c, linestyle=ls, linewidth=lw, alpha=a, **kwargs)
-            cP.plot(self.x.cellCentres, high, color=c, linestyle=ls, linewidth=lw, alpha=a, **kwargs)
+            cP.plot(self.x.centres, low, color=c, linestyle=ls, linewidth=lw, alpha=a, **kwargs)
+            cP.plot(self.x.centres, high, color=c, linestyle=ls, linewidth=lw, alpha=a, **kwargs)
 
 
     def plotMean(self, log=None, axis=0, **kwargs):
@@ -825,9 +825,9 @@ class Model2D_RM(RectilinearMesh2D):
         m = self.mean(log=log, axis=axis)
 
         if axis == 0:
-            cP.plot(m, self.y.cellCentres, label='mean',  **kwargs)
+            cP.plot(m, self.y.centres, label='mean',  **kwargs)
         else:
-            cP.plot(self.x.cellCentres, m, label='mean', **kwargs)
+            cP.plot(self.x.centres, m, label='mean', **kwargs)
 
 
     def plotMedian(self, log=None, axis=0, **kwargs):
@@ -835,9 +835,9 @@ class Model2D_RM(RectilinearMesh2D):
         m = self.median(log=log, axis=axis)
 
         if axis == 0:
-            cP.plot(m, self.y.cellCentres, label='median', **kwargs)
+            cP.plot(m, self.y.centres, label='median', **kwargs)
         else:
-            cP.plot(self.x.cellCentres, m, label='median', **kwargs)
+            cP.plot(self.x.centres, m, label='median', **kwargs)
 
 
     def update(self, xValues, yValues=None, trim=False):

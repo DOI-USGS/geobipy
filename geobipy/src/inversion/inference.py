@@ -16,7 +16,6 @@ from scipy import sparse
 from copy import deepcopy
 import numpy as np
 from .Inference1D import Inference1D
-from ..base.MPI import print
 import matplotlib.pyplot as plt
 
 
@@ -49,7 +48,7 @@ def infer(userParameters, DataPoint, prng, Inference2D, rank=1):
         plt.show(block=False)
 
     # Set the saved best models and data
-    bestModel = Mod.deepcopy()
+    bestModel = deepcopy(Mod)
     bestData = deepcopy(DataPoint)
     bestPosterior = -np.inf #posterior#.copy()
 
@@ -78,13 +77,13 @@ def infer(userParameters, DataPoint, prng, Inference2D, rank=1):
                 Res.burnedIn = True  # Let the results know they are burned in
                 Res.iBurn = i         # Save the burn in iteration to the results
                 iBest = i
-                bestModel = Mod.deepcopy()
+                bestModel = deepcopy(Mod)
                 bestData = deepcopy(DataPoint)
                 bestPosterior = posterior
 
         if (posterior > bestPosterior):
             iBest = i
-            bestModel = Mod.deepcopy()
+            bestModel = deepcopy(Mod)
             bestData = deepcopy(DataPoint)
             bestPosterior = posterior
 
@@ -196,13 +195,22 @@ def initialize(userParameters, DataPoint, prng=None):
     # Initialize a 1D model with the half space conductivity
     # parameter = StatArray.StatArray(np.full(2, halfspaceValue), name='Conductivity', units=r'$\frac{S}{m}$')
     # Assign the depth to the interface as half the bounds
-    Mod = halfspace.insertLayer(z = 0.5 * (userParameters.maximumDepth + userParameters.minimumDepth))
+
+    Mod = halfspace.insert_edge(0.5 * (userParameters.maximumDepth + userParameters.minimumDepth))
 
     # thk = np.asarray([0.5 * (userParameters.maximumDepth + userParameters.minimumDepth)])
     # Mod = Model1D(2, parameters = parameter, thickness=thk)
 
     # Setup the model for perturbation
-    Mod.setPriors(halfspace.par[0], userParameters.minimumDepth, userParameters.maximumDepth, userParameters.maximumNumberofLayers, userParameters.solveParameter, userParameters.solveGradient, parameterLimits=userParameters.parameterLimits, minThickness=userParameters.minimumThickness, factor=userParameters.factor, prng=prng)
+    Mod.setPriors(halfspace.par[0],
+                  userParameters.minimumDepth,
+                  userParameters.maximumDepth,
+                  userParameters.maximumNumberofLayers,
+                  userParameters.solveParameter,
+                  userParameters.solveGradient,
+                  parameterLimits=userParameters.parameterLimits,
+                  min_width=userParameters.minimumThickness,
+                  factor=userParameters.factor, prng=prng)
 
 
     # Assign a Hitmap as a prior if one is given

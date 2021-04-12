@@ -70,7 +70,7 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
         if (heightCentres is None) and (heightEdges is None):
             heightEdges = np.zeros(self.x.nEdges)
         # mesh of the z axis values
-        self._height = RectilinearMesh1D(cellCentres=heightCentres, cellEdges=heightEdges)
+        self._height = RectilinearMesh1D(centres=heightCentres, edges=heightEdges)
 
         assert self._height.nCells == self._x.nCells, Exception("heights must have enough values for {} cells or {} edges.".format(self.x.nCells, self.x.nEdges))
 
@@ -131,7 +131,7 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
 
         masked, x_indices, z_indices, values = super().mask_cells(xAxis, x_distance, z_distance, values)
 
-        masked.height.cellEdges = np.interp(masked.x.cellEdges, self.x.cellEdges, self.height.cellEdges)
+        masked.height.edges = np.interp(masked.x.edges, self.x.edges, self.height.edges)
 
         return masked, x_indices, z_indices, values
 
@@ -149,15 +149,15 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
 
         assert xAxis in ['x', 'y', 'r'], Exception("xAxis must be either 'x', 'y' or 'r'")
         if xAxis == 'x':
-            xMesh = np.repeat(self.x.cellEdges[np.newaxis, :], self.z.nCells+1, 0)
+            xMesh = np.repeat(self.x.edges[np.newaxis, :], self.z.nCells+1, 0)
         elif xAxis == 'y':
             assert self.xyz, Exception("To plot against 'y' the mesh must be instantiated with three co-ordinates")
-            xMesh = np.repeat(self.y.cellEdges[np.newaxis, :], self.z.nCells+1, 0)
+            xMesh = np.repeat(self.y.edges[np.newaxis, :], self.z.nCells+1, 0)
         elif xAxis == 'r':
             assert self.xyz, Exception("To plot against 'r' the mesh must be instantiated with three co-ordinates")
-            dx = np.diff(self.x.cellEdges)
-            dy = np.diff(self.y.cellEdges)
-            distance = StatArray.StatArray(np.zeros(self.x.nEdges), 'Distance', self.x.cellCentres.units)
+            dx = np.diff(self.x.edges)
+            dy = np.diff(self.y.edges)
+            distance = StatArray.StatArray(np.zeros(self.x.nEdges), 'Distance', self.x.centres.units)
             distance[1:] = np.cumsum(np.sqrt(dx**2.0 + dy**2.0))
             xMesh = np.repeat(distance[np.newaxis, :], self.z.nCells+1, 0)
 
@@ -168,9 +168,9 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
         """Creates an array suitable for plt.pcolormesh for the ordinate """
         assert zAxis.lower() in ['relative', 'absolute'], Exception("zAxis must be either 'relative' or 'absolute'")
         if zAxis.lower() == 'relative':
-            return np.repeat(self.z.cellEdges[:, np.newaxis], self.x.nCells+1, 1)
+            return np.repeat(self.z.edges[:, np.newaxis], self.x.nCells+1, 1)
         elif zAxis.lower() == 'absolute':
-            return self.height.cellEdges - np.repeat(self.z.cellEdges[:, np.newaxis], self.x.nCells+1, 1)
+            return self.height.edges - np.repeat(self.z.edges[:, np.newaxis], self.x.nCells+1, 1)
 
 
     def pcolor(self, values, xAxis='x', zAxis='absolute', **kwargs):
@@ -258,14 +258,14 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
         flipY = kwargs.pop('flipY', False)
         c = kwargs.pop('color', 'k')
 
-        xtmp = super().axis(xAxis).cellEdges
+        xtmp = super().axis(xAxis).edges
 
         ax = plt.gca()
         cP.pretty(ax)
         ax.vlines(x = xtmp, ymin=self._zMesh[0, :], ymax=self._zMesh[-1, :], **kwargs)
         segs = np.zeros([self.z.nEdges, self.x.nEdges, 2])
         segs[:, :, 0] = np.repeat(xtmp[np.newaxis, :], self.z.nEdges, 0)
-        segs[:, :, 1] = self.height.cellEdges - np.repeat(self.z.cellEdges[:, np.newaxis], self.x.nEdges, 1)
+        segs[:, :, 1] = self.height.edges - np.repeat(self.z.edges[:, np.newaxis], self.x.nEdges, 1)
 
         ls = LineCollection(segs, color='k', linestyle='solid', **kwargs)
         ax.add_collection(ls)
@@ -279,7 +279,7 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
         plt.xscale(xscale)
         plt.yscale(yscale)
         cP.xlabel(xtmp.getNameUnits())
-        cP.ylabel(self.y._cellCentres.getNameUnits())
+        cP.ylabel(self.y._centres.getNameUnits())
 
         if flipX:
             ax.set_xlim(ax.get_xlim()[::-1])
@@ -294,12 +294,12 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
         kwargs['c'] = kwargs.pop('color', 'k')
         kwargs['linewidth'] = kwargs.pop('linewidth', 1.0)
 
-        xtmp = super().axis(xAxis).cellCentres
+        xtmp = super().axis(xAxis).centres
 
         if centres:
-            self.height.cellCentres.plot(xtmp, **kwargs)
+            self.height.centres.plot(xtmp, **kwargs)
         else:
-            self.height.cellEdges.plot(xtmp, **kwargs)
+            self.height.edges.plot(xtmp, **kwargs)
 
 
     def vtkStructure(self):
@@ -312,13 +312,13 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
 
         """
         # Generate the quad node locations in x
-        x = self.x.cellEdges
-        y = self.y.cellEdges
-        z = self.z.cellEdges
+        x = self.x.edges
+        y = self.y.edges
+        z = self.z.edges
 
         nCells = self.nCells
 
-        z = self.z.cellEdges
+        z = self.z.edges
         nNodes = self.x.nEdges * self.z.nEdges
 
         # Constuct the node locations for the vtk file

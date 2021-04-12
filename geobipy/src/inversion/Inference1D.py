@@ -140,14 +140,14 @@ class Inference1D(myObject):
         self.iBest = np.int32(0)
         self.iBestV = StatArray.StatArray(2*self.nMC, name='Iteration of best model')
 
-        self.iz = np.arange(model.par.posterior.y.nCells)
+        self.iz = np.arange(model.par.posterior.y.nCells.value)
 
         # Initialize the doi
         # self.doi = model.par.posterior.yBinCentres[0]
 
-        self.meanInterp = StatArray.StatArray(model.par.posterior.y.nCells)
-        self.bestInterp = StatArray.StatArray(model.par.posterior.y.nCells)
-        self.opacityInterp = StatArray.StatArray(model.par.posterior.y.nCells)
+        self.meanInterp = StatArray.StatArray(model.par.posterior.y.nCells.value)
+        self.bestInterp = StatArray.StatArray(model.par.posterior.y.nCells.value)
+        self.opacityInterp = StatArray.StatArray(model.par.posterior.y.nCells.value)
 
         # Set a tag to catch data points that are not minimizing
         self.zeroCount = 0
@@ -207,7 +207,7 @@ class Inference1D(myObject):
                     self.allRelErr[j, iTmp] = dataPoint.relErr[j]
                     self.allAddErr[j, iTmp] = dataPoint.addErr[j]
                 self.allZ[iTmp] = dataPoint.z[0]
-                self.allK[iTmp] = model.nCells[0]
+                self.allK[iTmp] = model.nCells.value
                 self.posteriorComponents[:, iTmp] = posteriorComponents
                 self.ratioComponents[:, iTmp] = ratioComponents
                 self.accepted[iTmp] = accepted
@@ -689,7 +689,7 @@ class Inference1D(myObject):
         kwargs['normalize'] = kwargs.pop('normalize', True)
 
 
-        ax = self.currentModel.depth.posterior.plot(**kwargs)
+        ax = self.currentModel.edges.posterior.plot(**kwargs)
         ax.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
 
         return ax
@@ -705,10 +705,10 @@ class Inference1D(myObject):
         hm = self.currentModel.par.posterior
 
         if (reciprocateX):
-            x = 1.0 / hm.x.cellCentres
+            x = 1.0 / hm.x.centres
             xlabel = 'Resistivity ($\Omega m$)'
         else:
-            x = hm.x.cellCentres
+            x = hm.x.centres
             xlabel = 'Conductivity ($Sm^{-1}$)'
 
 
@@ -723,11 +723,11 @@ class Inference1D(myObject):
                 sl = sigLow
                 sh = sigHigh
 
-            hm.counts.pcolor(x=x, y=hm.y.cellEdges, cmap=mpl.cm.Greys, **kwargs)
+            hm.counts.pcolor(x=x, y=hm.y.edges, cmap=mpl.cm.Greys, **kwargs)
 
             CI_kw = {'color':'#5046C8', 'linestyle':'dashed', 'linewidth':1, 'alpha':0.6}
-            plt.plot(sl, hm.y.cellCentres, **CI_kw)
-            plt.plot(sh, hm.y.cellCentres, **CI_kw)
+            plt.plot(sl, hm.y.centres, **CI_kw)
+            plt.plot(sh, hm.y.centres, **CI_kw)
 
             # Plot the DOI cutoff based on percentage variance
             plt.axhline(self.doi(log=10), **CI_kw)
@@ -741,10 +741,10 @@ class Inference1D(myObject):
 
         # Set parameter limits on the hitmap
         if xlim is None:
-            plt.axis([x.min(), x.max(), hm.y.cellEdges[0], hm.y.cellEdges[-1]])
+            plt.axis([x.min(), x.max(), hm.y.edges[0], hm.y.edges[-1]])
         else:
             assert np.size(xlim) == 2, ValueError("xlim must have size 2")
-            plt.axis([xlim[0], xlim[1], hm.y.cellEdges[0], hm.y.cellEdges[-1]])
+            plt.axis([xlim[0], xlim[1], hm.y.edges[0], hm.y.edges[-1]])
 
         cP.xlabel(xlabel)
         cP.ylabel(hm.yBins.getNameUnits())
@@ -1066,13 +1066,13 @@ class Inference1D(myObject):
 
         self.currentModel = hdfRead.readKeyFromFile(hdfFile,'','/','currentmodel', index=index)
         self.Hitmap = self.currentModel.par.posterior
-        self.currentModel.maxDepth = np.log(self.Hitmap.y.cellCentres[-1])
+        self.currentModel.max_edge = np.log(self.Hitmap.y.centres[-1])
         # except:
         #     self.Hitmap = hdfRead.readKeyFromFile(hdfFile,'','/','hitmap', index=index)
 
 
         self.bestModel = hdfRead.readKeyFromFile(hdfFile,'','/','bestmodel', index=index)
-        self.bestModel.maxDepth = np.log(self.Hitmap.y.cellCentres[-1])
+        self.bestModel.max_edge = np.log(self.Hitmap.y.centres[-1])
 
         self.invTime=np.array(hdfFile.get('invtime')[index])
         self.saveTime=np.array(hdfFile.get('savetime')[index])

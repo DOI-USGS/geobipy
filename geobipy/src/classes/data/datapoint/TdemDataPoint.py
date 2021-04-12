@@ -756,13 +756,13 @@ class TdemDataPoint(EmDataPoint):
         if(mod.action[0] == 'none'):  # Do Nothing!
             J1[:, :] = self.J[:, :]
 
-        elif (mod.action[0] == 'birth'):  # Created a layer
+        elif (mod.action[0] == 'insert'):  # Created a layer
             J1[:, :perturbedLayer] = self.J[:, :perturbedLayer]
             J1[:, perturbedLayer + 2:] = self.J[:, perturbedLayer + 1:]
             tmp = self.sensitivity(mod, ix=[perturbedLayer, perturbedLayer + 1], modelChanged=True)
             J1[:, perturbedLayer:perturbedLayer + 2] = tmp
 
-        elif(mod.action[0] == 'death'):  # Deleted a layer
+        elif(mod.action[0] == 'delete'):  # Deleted a layer
             J1[:, :perturbedLayer] = self.J[:, :perturbedLayer]
             J1[:, perturbedLayer + 1:] = self.J[:, perturbedLayer + 2:]
             tmp = self.sensitivity(mod, ix=[perturbedLayer], modelChanged=True)

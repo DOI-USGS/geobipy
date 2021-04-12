@@ -3,7 +3,7 @@ Module defining a multivariate normal distribution with statistical procedures
 """
 #from copy import deepcopy
 import numpy as np
-from ...base  import utilities as cf
+from ...base import utilities as cf
 from .baseDistribution import baseDistribution
 from .NormalDistribution import Normal
 from ..core import StatArray
@@ -44,7 +44,8 @@ class MvNormal(baseDistribution):
 
         """
 
-        if (type(variance) is float): variance = np.float64(variance)
+        if (type(variance) is float):
+            variance = np.float64(variance)
 
         baseDistribution.__init__(self, prng)
 
@@ -54,28 +55,32 @@ class MvNormal(baseDistribution):
             # Variance
             ndim = np.ndim(variance)
             if ndim == 0:
-                self._variance = np.diag(np.full(np.size(mean), fill_value=variance))
+                self._variance = np.diag(
+                    np.full(np.size(mean), fill_value=variance))
 
             elif ndim == 1:
-                assert np.size(variance) == np.size(mean), Exception('Mismatch in size of mean and variance')
+                assert np.size(variance) == np.size(mean), Exception(
+                    'Mismatch in size of mean and variance')
                 self._variance = np.diag(variance)
 
             elif ndim == 2:
-                assert np.all(np.equal(variance.shape,  np.size(mean))), ValueError('Covariance must have same dimensions as the mean')
+                assert np.all(np.equal(variance.shape,  np.size(mean))), ValueError(
+                    'Covariance must have same dimensions as the mean')
                 self._variance = np.asarray(variance)
 
             self._constant = False
 
         else:
 
-            assert np.size(mean) == 1, ValueError("When specifying ndim, mean must be a scalar.")
-            assert np.size(variance) == 1, ValueError("When specifying ndim, variance must be a scalar.")
+            assert np.size(mean) == 1, ValueError(
+                "When specifying ndim, mean must be a scalar.")
+            assert np.size(variance) == 1, ValueError(
+                "When specifying ndim, variance must be a scalar.")
 
             ndim = np.int(np.maximum(1, ndim))
             self._constant = True
             self._mean = np.full(ndim, fill_value=mean)
             self._variance = np.diag(np.full(ndim, fill_value=variance))
-
 
     @property
     def mean(self):
@@ -99,7 +104,8 @@ class MvNormal(baseDistribution):
         if newDimension == self.ndim:
             return
         assert newDimension > 0, ValueError("Cannot have zero dimensions.")
-        assert self._constant, ValueError("Cannot change the dimension of a non-constant multivariate distribution.")
+        assert self._constant, ValueError(
+            "Cannot change the dimension of a non-constant multivariate distribution.")
         if np.ndim(self.mean) == 0:
             mean = self._mean
         else:
@@ -113,7 +119,6 @@ class MvNormal(baseDistribution):
         self._mean = np.full(newDimension, fill_value=mean)
         self._variance = np.diag(np.full(newDimension, fill_value=variance))
 
-
     @property
     def std(self):
         return np.sqrt(self.variance)
@@ -126,14 +131,12 @@ class MvNormal(baseDistribution):
     def inverseVariance(self):
         return np.linalg.inv(self.variance)
 
-
-    def deepcopy(self):
+    def __deepcopy__(self, memo={}):
         """ Define a deepcopy routine """
         if self._constant:
             return MvNormal(mean=self.mean[0], variance=self.variance[0, 0], ndim=self.ndim, prng=self.prng)
         else:
             return MvNormal(mean=self.mean, variance=self.variance, prng=self.prng)
-
 
     # def derivative(self, x, order):
 
@@ -143,24 +146,24 @@ class MvNormal(baseDistribution):
     #     elif order == 2:
     #         return cf.Ax(self.inverseVariance, self.probability(x))
 
-
-    def rng(self, size = 1):
+    def rng(self, size=1):
         """  """
         return np.atleast_1d(np.squeeze(self.prng.multivariate_normal(self._mean, self.variance, size)))
-
 
     def probability(self, x, log, axis=None):
         """ For a realization x, compute the probability """
 
         if not axis is None:
-            d = Normal(mean = self.mean[axis], variance=self.variance[axis, axis])
+            d = Normal(mean=self.mean[axis],
+                       variance=self.variance[axis, axis])
             return d.probability(x, log)
 
         if log:
 
             N = np.size(x)
             nD = self.mean.size
-            assert (N == nD), TypeError('size of samples {} must equal number of distribution dimensions {} for a multivariate distribution'.format(N, nD))
+            assert (N == nD), TypeError(
+                'size of samples {} must equal number of distribution dimensions {} for a multivariate distribution'.format(N, nD))
 
             mean = self._mean
             if (nD == 1):
@@ -176,13 +179,13 @@ class MvNormal(baseDistribution):
             # Probability Density Function
             return -(0.5 * N) * np.log(2.0 * np.pi) - dv - tmp
 
-
         else:
 
             N = x.size
             nD = self.mean.size
 
-            assert (N == nD), TypeError('size of samples {} must equal number of distribution dimensions {} for a multivariate distribution'.format(N, nD))
+            assert (N == nD), TypeError(
+                'size of samples {} must equal number of distribution dimensions {} for a multivariate distribution'.format(N, nD))
             # For a diagonal matrix, the determinant is the product of the diagonal
             # entries
             dv = cf.Det(self.variance)
@@ -197,25 +200,22 @@ class MvNormal(baseDistribution):
             prob = (1.0 / np.sqrt(((2.0 * np.pi)**N) * dv)) * exp
             return prob
 
-
     @property
     def summary(self):
-        msg = 'MV Normal Distribution: \n'
-        msg += '    Mean: ' + str(self.mean) + '\n'
-        msg += '    Variance: ' + str(self.variance) + '\n'
+        msg = ('MV Normal Distribution:\n'
+               'Mean:\n{}\n'
+               'Variance:\n{}\n').format(str(self.mean), str(self.variance))
 
         return msg
-
 
     def pad(self, N):
         """ Pads the mean and variance to the given size
         N: Padded size
         """
         if (self.variance.ndim == 1):
-            return MvNormal(np.zeros(N,dtype=self.mean.dtype),np.zeros(N, dtype=self.variance.dtype), prng=self.prng)
+            return MvNormal(np.zeros(N, dtype=self.mean.dtype), np.zeros(N, dtype=self.variance.dtype), prng=self.prng)
         if (self.variance.ndim == 2):
-            return MvNormal(np.zeros(N,dtype=self.mean.dtype),np.zeros([N,N], dtype=self.variance.dtype), prng=self.prng)
-
+            return MvNormal(np.zeros(N, dtype=self.mean.dtype), np.zeros([N, N], dtype=self.variance.dtype), prng=self.prng)
 
     def bins(self, nBins=100, nStd=4.0, axis=None):
         """Discretizes a range given the mean and variance of the distribution
@@ -243,16 +243,19 @@ class MvNormal(baseDistribution):
                 bins = np.empty([nD, nBins+1])
                 for i in range(nD):
                     tmp = nStd * self.std[axis, axis]
-                    bins[i, :] = np.linspace(self._mean[i] - tmp, self._mean[i] + tmp, nBins+1)
+                    bins[i, :] = np.linspace(
+                        self._mean[i] - tmp, self._mean[i] + tmp, nBins+1)
                 values = np.squeeze(bins)
             else:
                 bins = np.empty(nBins+1)
                 tmp = nStd * self.std[axis, axis]
-                bins[:] = np.linspace(self._mean[axis] - tmp, self._mean[axis] + tmp, nBins+1)
+                bins[:] = np.linspace(
+                    self._mean[axis] - tmp, self._mean[axis] + tmp, nBins+1)
                 values = np.squeeze(bins)
 
         else:
             tmp = nStd * self.std[axis, axis]
-            values = np.squeeze(np.linspace(self._mean - tmp, self._mean + tmp, nBins+1))
+            values = np.squeeze(np.linspace(
+                self._mean - tmp, self._mean + tmp, nBins+1))
 
         return StatArray.StatArray(values)

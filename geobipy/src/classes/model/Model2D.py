@@ -3,18 +3,17 @@ Module describing a 2 Dimensional Model with two axes
 """
 
 import numpy as np
-from ...classes.core import StatArray
+from ..core import StatArray
 from .Model import Model
 
 """ @Histogram_Class
 Module describing an efficient histogram class
 """
-from .baseDistribution import baseDistribution
-from ...classes.statistics.Histogram1D import Histogram1D
-from ...classes.mesh.RectilinearMesh2D import RectilinearMesh2D
-from ...classes.core import StatArray
+from ..statistics.baseDistribution import baseDistribution
+from ..statistics.Histogram1D import Histogram1D
+from ..mesh.RectilinearMesh2D import RectilinearMesh2D
 from ...base import plotting as cP
-from ...base.utilities import _logSomething
+from ...base.utilities import _log
 import numpy as np
 from scipy.stats import binned_statistic
 import matplotlib.pyplot as plt
@@ -58,6 +57,17 @@ class Model2D(Model):
         else:
             self._values = StatArray.StatArray(values, name, units)
 
+    @property
+    def x(self):
+        return self.mesh.x
+
+    @property
+    def y(self):
+        return self.mesh.y
+
+    @property
+    def z(self):
+        return self.mesh.z
 
     @property
     def mesh(self):
@@ -82,9 +92,9 @@ class Model2D(Model):
         """
 
         if axis == 0:
-            t = np.sum(np.repeat(self.x.cellCentres[np.newaxis, :], self.y.nCells, 0) * self._values, 1)
+            t = np.sum(np.repeat(self.x.centres[np.newaxis, :], self.y.nCells, 0) * self._values, 1)
         else:
-            t = np.sum(np.repeat(self.y.cellCentres[:, np.newaxis], self.x.nCells, 1) * self._values, 0)
+            t = np.sum(np.repeat(self.y.centres[:, np.newaxis], self.x.nCells, 1) * self._values, 0)
         s = self._values.sum(axis = 1 - axis)
 
         i = np.where(s > 0.0)[0]
@@ -169,9 +179,9 @@ class Model2D(Model):
         ix2 = np.apply_along_axis(np.searchsorted, 1-axis, tmp, p)
 
         if axis == 0:
-            out = self.x.cellCentres[ix2]
+            out = self.x.centres[ix2]
         else:
-            out = self.y.cellCentres[ix2]
+            out = self.y.centres[ix2]
 
         if (not log is None):
             out, dum = _logSomething(out, log=log)
@@ -246,10 +256,10 @@ class Model2D(Model):
 
         counts = super().intervalMean(self._values, intervals, axis, statistic)
         if axis == 0:
-            out = Histogram2D(xBins = self.x.cellEdges, yBins = StatArray.StatArray(np.asarray(intervals), name=self.y.name(), units=self.y.units()))
+            out = Histogram2D(xBins = self.x.edges, yBins = StatArray.StatArray(np.asarray(intervals), name=self.y.name(), units=self.y.units()))
             out._values[:] = counts
         else:
-            out = Histogram2D(xBins = StatArray.StatArray(np.asarray(intervals), name=self.x.name(), units=self.x.units()), yBins = self.y.cellEdges)
+            out = Histogram2D(xBins = StatArray.StatArray(np.asarray(intervals), name=self.x.name(), units=self.x.units()), yBins = self.y.edges)
             out._values[:] = counts
         return out
 
@@ -285,7 +295,7 @@ class Model2D(Model):
             Set the x and y limits to the first and last non zero values along each axis.
 
         """
-        self._values.pcolor(x=self.x.cellEdges, y=self.y.cellEdges, **kwargs)
+        self._values.pcolor(x=self.x.edges, y=self.y.edges, **kwargs)
 
 
 

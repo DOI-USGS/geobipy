@@ -371,10 +371,10 @@ def hist(counts, bins, rotate=False, flipX=False, flipY=False, trim=True, normal
 
         ax = plt.gca()
         cP.pretty(ax)
-        ax.vlines(x = self.x.cellEdges, ymin=self._zMesh[0, :], ymax=self._zMesh[-1, :], **kwargs)
+        ax.vlines(x = self.x.edges, ymin=self._zMesh[0, :], ymax=self._zMesh[-1, :], **kwargs)
         segs = np.zeros([self.y.nEdges, self.x.nEdges, 2])
-        segs[:, :, 0] = np.repeat(self.x.cellEdges[np.newaxis, :], self.y.nEdges, 0)
-        segs[:, :, 1] = np.repeat(self.y.cellEdges[:, np.newaxis], self.x.nEdges, 1) + self.z.cellEdges
+        segs[:, :, 0] = np.repeat(self.x.edges[np.newaxis, :], self.y.nEdges, 0)
+        segs[:, :, 1] = np.repeat(self.y.edges[:, np.newaxis], self.x.nEdges, 1) + self.z.edges
 
         ls = LineCollection(segs, color='k', linestyle='solid', **kwargs)
         ax.add_collection(ls)
@@ -386,8 +386,8 @@ def hist(counts, bins, rotate=False, flipX=False, flipY=False, trim=True, normal
 
         plt.xscale(xscale)
         plt.yscale(yscale)
-        cP.xlabel(self.x._cellCentres.cF.getNameUnits())
-        cP.ylabel(self.y._cellCentres.cF.getNameUnits())
+        cP.xlabel(self.x._centres.cF.getNameUnits())
+        cP.ylabel(self.y._centres.cF.getNameUnits())
 
         if flipX:
             ax.invert_xaxis()
@@ -834,7 +834,7 @@ def pcolor_1D(values, y=None, **kwargs):
 
     cl = kwargs.pop('clabel', None)
     grid = kwargs.pop('grid', False)
-    flipY = kwargs.pop('flipY', False)
+    flip = kwargs.pop('flip', False)
     noColorBar = kwargs.pop('noColorbar', False)
     alpha = kwargs.pop('alpha', 1.0)
     width = kwargs.pop('width', None)
@@ -854,13 +854,12 @@ def pcolor_1D(values, y=None, **kwargs):
 
     # Set the x and y axes before meshgridding them
     if (y is None):
-        my = np.arange(np.size(values)+1)
-        mx = np.asarray([0.0, 0.1*(np.nanmax(my)-np.nanmin(my))])
+        mx = np.arange(np.size(values)+1)
+        my = np.asarray([0.0, 0.1*(np.nanmax(mx)-np.nanmin(mx))])
     else:
         assert y.size == values.size+1, ValueError('y must be size '+str(values.size+1))
-        #my = np.hstack([np.asarray(y), y[-1]])
-        my = y
-        mx = np.asarray([0.0, 0.1*(np.nanmax(y)-np.nanmin(y))])
+        mx = y
+        my = np.asarray([0.0, 0.1*(np.nanmax(y)-np.nanmin(y))])
 
     if not width is None:
         assert width > 0.0, ValueError("width must be positive")
@@ -881,7 +880,7 @@ def pcolor_1D(values, y=None, **kwargs):
 
     # Zm = ma.masked_invalid(v, copy=False)
 
-    Y, X = np.meshgrid(my, mx)
+    X, Y = np.meshgrid(mx, my)
 
     if transpose:
         X, Y = Y, X
@@ -890,18 +889,18 @@ def pcolor_1D(values, y=None, **kwargs):
 
     ax.set_aspect('equal')
 
-    if flipY:
-        ax.invert_yaxis()
+    if flip:
+        ax.invert_yaxis() if transpose else ax.invert_xaxis()
 
     plt.xscale(xscale)
     plt.yscale(yscale)
 
     if transpose:
-        xlabel(cF.getNameUnits(y))
-        ax.get_yaxis().set_ticks([])
-    else:
         ylabel(cF.getNameUnits(y))
         ax.get_xaxis().set_ticks([])
+    else:
+        xlabel(cF.getNameUnits(y))
+        ax.get_yaxis().set_ticks([])
 
     if not xlim_u is None:
         ax.set_xlim(xlim_u)

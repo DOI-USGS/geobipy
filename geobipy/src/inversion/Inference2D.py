@@ -157,7 +157,7 @@ class Inference2D(myObject):
         opacity = StatArray.StatArray(np.zeros(self.nPoints))
 
         for i in range(self.nPoints):
-            h = Histogram1D(bins = self.additiveErrorPosteriors._cellEdges + self.additiveErrorPosteriors.relativeTo[i])
+            h = Histogram1D(bins = self.additiveErrorPosteriors._edges + self.additiveErrorPosteriors.relativeTo[i])
             h._counts[:] = self.additiveErrorPosteriors.counts[i, :]
             opacity[i] = h.credibleRange(percent, log)
 
@@ -303,7 +303,7 @@ class Inference2D(myObject):
         opacity = self.opacity
 
         nz = self.hitmap(0).z.nCells
-        doi = StatArray.StatArray(np.full(self.nPoints, fill_value=self.hitmap(0).z.cellEdges[-1]), 'Depth of investigation', self.height.units)
+        doi = StatArray.StatArray(np.full(self.nPoints, fill_value=self.hitmap(0).z.edges[-1]), 'Depth of investigation', self.height.units)
 
         p = 0.01 * percent
 
@@ -316,7 +316,7 @@ class Inference2D(myObject):
                 iCell -=1
 
             if iCell >= 0:
-                doi[i] = self.hitmap(0).z.cellCentres[iCell-1]
+                doi[i] = self.hitmap(0).z.centres[iCell-1]
 
         doiOut = doi
         if window > 1:
@@ -335,15 +335,15 @@ class Inference2D(myObject):
 
     @property
     def easting(self):
-        return self.mesh.x.cellCentres
+        return self.mesh.x.centres
 
     @property
     def northing(self):
-        return self.mesh.y.cellCentres
+        return self.mesh.y.centres
 
     @property
     def depth(self):
-        return self.mesh.z.cellCentres
+        return self.mesh.z.centres
 
 
     @cached_property
@@ -366,7 +366,7 @@ class Inference2D(myObject):
             i = index
             fiducial = self.fiducials[index]
 
-        depth = self.mesh.z.cellEdges[:-1]
+        depth = self.mesh.z.edges[:-1]
         parameter = values[:, i]
 
         return Model1D(self.mesh.z.nCells, depth=depth, parameters=parameter, hasHalfspace=False)
@@ -661,10 +661,10 @@ class Inference2D(myObject):
         if np.size(depth) > 1:
             assert np.size(depth) == 2, ValueError("depth must be a scalar or size 2 array.")
             depth.sort()
-            assert np.all(depth < self.mesh.z.cellEdges[-1]), 'Depths must be lees than max depth {}'.format(self.mesh.z.cellEdges[-1])
+            assert np.all(depth < self.mesh.z.edges[-1]), 'Depths must be lees than max depth {}'.format(self.mesh.z.edges[-1])
             assert depth[0] <= depth[1], ValueError("Depths must be monotonically increasing")
         else:
-            assert depth < self.mesh.z.cellEdges[-1], 'Depth must be lees than max depth {}'.format(self.mesh.z.cellEdges[-1])
+            assert depth < self.mesh.z.edges[-1], 'Depth must be lees than max depth {}'.format(self.mesh.z.edges[-1])
 
         assert np.all(np.shape(values)[-2:] == self.mesh.shape), ValueError("values must have shape {} but have shape {}".format(self.mesh.shape, np.shape(values)))
 
@@ -705,7 +705,7 @@ class Inference2D(myObject):
 
             for i in range(self.nPoints):
                 tmp = self.elevation[i] - elevation
-                if tmp[1] < self.mesh.z.cellEdges[-1] and tmp[0] > self.mesh.z.cellEdges[0]:
+                if tmp[1] < self.mesh.z.edges[-1] and tmp[0] > self.mesh.z.edges[0]:
                     cell1 = self.mesh.z.cellIndex(tmp[1], clip=True)
                     cell2 = self.mesh.z.cellIndex(tmp[0], clip=True)
 
@@ -715,7 +715,7 @@ class Inference2D(myObject):
 
             for i in range(self.nPoints):
                 tmp = self.elevation[i] - elevation
-                if tmp > self.mesh.z.cellEdges[0] and tmp < self.mesh.z.cellEdges[-1]:
+                if tmp > self.mesh.z.edges[0] and tmp < self.mesh.z.edges[-1]:
                     cell1 = self.mesh.z.cellIndex(tmp, clip=True)
 
                     out[i] = values[cell1, i]
@@ -749,7 +749,7 @@ class Inference2D(myObject):
         # # for i in Bar(range(self.nPoints)):
         for i in range(tmp.y.nCells):
             peaks, _ = find_peaks(tmp.counts[i, :],  width=width)
-            values = tmp.x.cellCentres[peaks]
+            values = tmp.x.centres[peaks]
             if not limits is None:
                 values = values[(values > limits[0]) & (values < limits[1])]
             parameter = np.hstack([parameter, values])
@@ -802,16 +802,16 @@ class Inference2D(myObject):
 
         xBins = StatArray.StatArray(np.logspace(x0, x1, nBins+1), self.parameterName, units = self.parameterUnits)
 
-        lineHitmap = Histogram2D(xBins=xBins, yBins=self.mesh.z.cellEdges)
+        lineHitmap = Histogram2D(xBins=xBins, yBins=self.mesh.z.edges)
 
         parameters = RectilinearMesh1D().fromHdf(self.hdfFile['currentmodel/par/posterior/x'])
 
         # Bar = progressbar.ProgressBar()
         # for i in Bar(range(self.nPoints)):
         for i in range(self.nPoints):
-            p = RectilinearMesh1D(cellEdges=parameters.cellEdges[i, :])
+            p = RectilinearMesh1D(edges=parameters.edges[i, :])
 
-            pj = lineHitmap.x.cellIndex(p.cellCentres, clip=True)
+            pj = lineHitmap.x.cellIndex(p.centres, clip=True)
 
             cTmp = counts[i, :, :]
 
@@ -844,17 +844,17 @@ class Inference2D(myObject):
         # if (self.hitmap(0) is None):
         #     tmp = self.getAttribute('hitmap/y', index=0)
         #     try:
-        #         tmp = RectilinearMesh1D(cellCentres=tmp.cellCentres, edgesMin=0.0)
+        #         tmp = RectilinearMesh1D(centres=tmp.centres, edgesMin=0.0)
         #     except:
-        #         tmp = RectilinearMesh1D(cellCentres=tmp, edgesMin=0.0)
+        #         tmp = RectilinearMesh1D(centres=tmp, edgesMin=0.0)
         # else:
         tmp = self.hitmap(0).y
         try:
-            tmp = RectilinearMesh1D(cellCentres=tmp.cellCentres, edgesMin=0.0)
+            tmp = RectilinearMesh1D(centres=tmp.centres, edgesMin=0.0)
         except:
-            tmp = RectilinearMesh1D(cellCentres=tmp, edgesMin=0.0)
+            tmp = RectilinearMesh1D(centres=tmp, edgesMin=0.0)
 
-        return TopoRectilinearMesh2D(xCentres=self.x, yCentres=self.y, zEdges=tmp.cellEdges, heightCentres=self.elevation)
+        return TopoRectilinearMesh2D(xCentres=self.x, yCentres=self.y, zEdges=tmp.edges, heightCentres=self.elevation)
 
 
     @property
@@ -962,24 +962,24 @@ class Inference2D(myObject):
     @property
     def parameterName(self):
 
-        return self.hitmap(0).x.cellCentres.name
+        return self.hitmap(0).x.centres.name
 
 
     @property
     def parameterUnits(self):
 
-        return self.hitmap(0).x.cellCentres.units
+        return self.hitmap(0).x.centres.units
 
 
     def percentageParameter(self, value, depth=None, depth2=None, progress=False):
 
         # Get the depth grid
         if (not depth is None):
-            assert depth <= self.mesh.z.cellEdges[-1], 'Depth is greater than max depth '+str(self.mesh.z.cellEdges[-1])
+            assert depth <= self.mesh.z.edges[-1], 'Depth is greater than max depth '+str(self.mesh.z.edges[-1])
             j = self.mesh.z.cellIndex(depth)
             k = j+1
             if (not depth2 is None):
-                assert depth2 <= self.mesh.z.cellEdges[-1], 'Depth2 is greater than max depth '+str(self.mesh.z.cellEdges[-1])
+                assert depth2 <= self.mesh.z.edges[-1], 'Depth2 is greater than max depth '+str(self.mesh.z.edges[-1])
                 assert depth <= depth2, 'Depth2 must be >= depth'
                 k = self.mesh.z.cellIndex(depth2)
 
@@ -996,7 +996,7 @@ class Inference2D(myObject):
         Bar = progressbar.ProgressBar()
         print('Computing P(X > value)', flush=True)
         for i in Bar(range(self.nPoints)):
-            p = RectilinearMesh1D(cellEdges=parameters.cellEdges[i, :])
+            p = RectilinearMesh1D(edges=parameters.edges[i, :])
             pj = p.cellIndex(value)
 
             cTmp = counts[i, :, :]
@@ -1076,7 +1076,7 @@ class Inference2D(myObject):
 
     def x_axis(self, axis, centres=False):
         ax = self.mesh.axis(axis)
-        return ax.cellCentres if centres else ax.cellEdges
+        return ax.centres if centres else ax.edges
 
 
     @cached_property
@@ -1336,7 +1336,7 @@ class Inference2D(myObject):
         #     else:
         #         stuff = 2
         # else:
-        y = post._cellCentres
+        y = post._centres
         c.pcolor(xtmp, y=y, **kwargs)
         cP.title('Additive error posterior distributions for system {}'.format(system))
 
@@ -1412,7 +1412,7 @@ class Inference2D(myObject):
         #     else:
         #         stuff = 2
         # else:
-        y = post._cellCentres #[0, :]
+        y = post._centres #[0, :]
         c.pcolor(xtmp, y=y, **kwargs)
 
         cP.title('Relative error posterior distributions for system {}'.format(system))
@@ -1506,11 +1506,11 @@ class Inference2D(myObject):
         """ Compute a histogram of the model, optionally show the histogram for given depth ranges instead """
 
         if (depth1 is None):
-            depth1 = np.maximum(self.mesh.z.cellEdges[0], 0.0)
+            depth1 = np.maximum(self.mesh.z.edges[0], 0.0)
         if (depth2 is None):
-            depth2 = self.mesh.z.cellEdges[-1]
+            depth2 = self.mesh.z.edges[-1]
 
-        maxDepth = self.mesh.z.cellEdges[-1]
+        maxDepth = self.mesh.z.edges[-1]
 
         # Ensure order in depth values
         if (depth1 > depth2):
@@ -1518,7 +1518,7 @@ class Inference2D(myObject):
             depth2 = depth1
             depth1 = tmp
 
-        # Don't need to check for depth being shallower than self.mesh.y.cellEdges[0] since the sortedsearch will return 0
+        # Don't need to check for depth being shallower than self.mesh.y.edges[0] since the sortedsearch will return 0
         assert depth1 <= maxDepth, ValueError('Depth1 is greater than max depth {}'.format(maxDepth))
         assert depth2 <= maxDepth, ValueError('Depth2 is greater than max depth {}'.format(maxDepth))
 
@@ -1561,11 +1561,11 @@ class Inference2D(myObject):
 
         # Get the depth grid
         if (not depth is None):
-            assert depth <= self.mesh.z.cellEdges[-1], 'Depth is greater than max depth '+str(self.mesh.z.cellEdges[-1])
+            assert depth <= self.mesh.z.edges[-1], 'Depth is greater than max depth '+str(self.mesh.z.edges[-1])
             j = self.mesh.z.cellIndex(depth)
             k = j+1
             if (not depth2 is None):
-                assert depth2 <= self.mesh.z.cellEdges[-1], 'Depth2 is greater than max depth '+str(self.mesh.z.cellEdges[-1])
+                assert depth2 <= self.mesh.z.edges[-1], 'Depth2 is greater than max depth '+str(self.mesh.z.edges[-1])
                 assert depth <= depth2, 'Depth2 must be >= depth'
                 k = self.mesh.z.cellIndex(depth2)
 
@@ -1589,9 +1589,9 @@ class Inference2D(myObject):
         # Bar = progressbar.ProgressBar()
         # for i in Bar(range(self.nPoints)):
         for i in range(self.nPoints):
-            p = RectilinearMesh1D(cellEdges=parameters.cellEdges[i, :])
+            p = RectilinearMesh1D(edges=parameters.edges[i, :])
 
-            pj = out.cellIndex(p.cellCentres, clip=True)
+            pj = out.cellIndex(p.centres, clip=True)
 
             cTmp = counts[i, :, :]
 
@@ -1724,7 +1724,7 @@ class Inference2D(myObject):
             if 'd' in components:
                 degrees = StatArray.StatArray(np.asarray(f['degrees/data']), 'Degrees of freedom')
 
-        intervals = self.mesh.z.cellCentres
+        intervals = self.mesh.z.centres
 
         if mask_by_doi:
             indices = intervals.searchsorted(self.doi)
@@ -2170,11 +2170,11 @@ class Inference2D(myObject):
         results.bestDataPoint.createHdf(hdfFile,'bestd', withPosterior=False, nRepeats=nPoints, fillvalue=np.nan)
 
         # Since the 1D models change size adaptively during the inversion, we need to pad the HDF creation to the maximum allowable number of layers.
-        tmp = results.currentModel.pad(results.currentModel.maxLayers)
+        tmp = results.currentModel.pad(results.currentModel.max_cells)
 
         tmp.createHdf(hdfFile, 'currentmodel', nRepeats=nPoints, fillvalue=np.nan)
 
-        tmp = results.bestModel.pad(results.bestModel.maxLayers)
+        tmp = results.bestModel.pad(results.bestModel.max_cells)
         tmp.createHdf(hdfFile, 'bestmodel', withPosterior=False, nRepeats=nPoints, fillvalue=np.nan)
 
         if results.verbose:
@@ -2208,7 +2208,7 @@ class Inference2D(myObject):
         hdfFile = self.hdfFile
 
         # Get the point index
-        i = self.fiducials.searchsorted(reinference1dsults.fiducial)
+        i = self.fiducials.searchsorted(inference1d.fiducial)
 
         # Add the iteration number
         hdfFile['i'][i] = inference1d.i
@@ -2237,7 +2237,7 @@ class Inference2D(myObject):
         # Interpolate the mean and best model to the discretized hitmap
         hm = inference1d.currentModel.par.posterior
         inference1d.meanInterp[:] = hm.mean()
-        inference1d.bestInterp[:] = inference1d.bestModel.interpPar2Mesh(inference1d.bestModel.par, hm)
+        inference1d.bestInterp[:] = inference1d.bestModel.piecewise_constant_interpolate(inference1d.bestModel.par, hm, axis=1)
         # inference1d.opacityInterp[:] = inference1d.Hitmap.credibleRange(percent=95.0, log='e')
 
         slic = np.s_[i, :]

@@ -61,7 +61,7 @@ class Normal(baseDistribution):
         return StatArray.StatArray(norm.cdf(x, loc = self._mean, scale = self.variance), "Cumulative Density")
 
 
-    def deepcopy(self):
+    def __deepcopy__(self, memo={}):
         """Create a deepcopy
 
         Returns

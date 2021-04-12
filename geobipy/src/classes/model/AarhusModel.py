@@ -17,7 +17,7 @@ class AarhusModel(Model):
         self.rho = None
         self.fid = None
 
-    
+
     def pcolor(self, useDOI = True, **kwargs):
 
         if useDOI:
@@ -28,13 +28,13 @@ class AarhusModel(Model):
             kwargs['alpha'] = alpha
 
         self.mesh.pcolor(self.rho, **kwargs)
-    
+
 
     def plotDOI(self, xAxis='x', **kwargs):
 
         xtmp = self.mesh.getXAxis(xAxis, centres=True)
 
-        (self.mesh.height.cellCentres - self.doi).plot(x = xtmp, **kwargs)
+        (self.mesh.height.centres - self.doi).plot(x = xtmp, **kwargs)
 
 
     def plotElevation(self, **kwargs):
@@ -44,15 +44,15 @@ class AarhusModel(Model):
     def plotXY(self, **kwargs):
         self.mesh.plotXY(**kwargs)
 
-    
+
     def readLineNumbers(self, fileName):
-        """Read in the line numbers from an inversion file. 
-        
+        """Read in the line numbers from an inversion file.
+
         Parameters
         ----------
         fileName : str
             Path to the inversion file.
-            
+
         """
 
         # Get the total number of points to pre-allocate memory.
@@ -66,7 +66,7 @@ class AarhusModel(Model):
 
             header = line.split()[1:]
 
-            # We now have the header line, so grab the column indices for what we need            
+            # We now have the header line, so grab the column indices for what we need
             lineIndex = 0
 
             for i, head in enumerate(header):
@@ -127,7 +127,7 @@ class AarhusModel(Model):
 
             header = line.split()[1:]
 
-            # We now have the header line, so grab the column indices for what we need            
+            # We now have the header line, so grab the column indices for what we need
             lineIndex = 0
             xIndex = 1
             yIndex = 2
@@ -136,7 +136,7 @@ class AarhusModel(Model):
             rhoIndex = []
             topIndex = []
             doiIndex = None
-            
+
             for i, head in enumerate(header):
                 head = head.lower()
                 if head == "line":
@@ -151,7 +151,7 @@ class AarhusModel(Model):
                     zIndex = i
                 elif head == "doi_lower":
                     doiIndex = i
-                
+
                 if "rho_i" in head and not "std" in head:
                     rhoIndex.append(i)
                 elif "dep_top" in head and not "std" in head:
@@ -160,7 +160,7 @@ class AarhusModel(Model):
             # Index arrays are set, pre-allocate memory
             rhoIndex = np.asarray(rhoIndex, dtype=np.int)
             topIndex = np.asarray(topIndex, dtype=np.int)
-            
+
             x = StatArray(nPoints, 'Easting', 'm')
             y = StatArray(nPoints, 'Northing', 'm')
             z = StatArray(nPoints, 'Elevation', 'm')
@@ -175,8 +175,8 @@ class AarhusModel(Model):
             while line[lineIndex] != lineNumber:
                 line = fio.getRealNumbersfromLine(f.readline())
 
-            # Read in the data points for the requested line, 
-            # assumes the data points for the given line are contiguous.            
+            # Read in the data points for the requested line,
+            # assumes the data points for the given line are contiguous.
             nPoints = 0
             first = True
             while line[lineIndex] == lineNumber:

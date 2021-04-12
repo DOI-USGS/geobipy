@@ -53,27 +53,27 @@ class Histogram3D(RectilinearMesh3D):
 
     @property
     def xBins(self):
-        return self.x.cellEdges
+        return self.x.edges
 
     @property
     def xBinCentres(self):
-        return self.x.cellCentres
+        return self.x.centres
 
     @property
     def yBins(self):
-        return self.y.cellEdges
+        return self.y.edges
 
     @property
     def yBinCentres(self):
-        return self.y.cellCentres
+        return self.y.centres
 
     @property
     def zBins(self):
-        return self.z.cellEdges
+        return self.z.edges
 
     @property
     def zBinCentres(self):
-        return self.z.cellCentres
+        return self.z.centres
 
     @property
     def counts(self):
@@ -105,19 +105,19 @@ class Histogram3D(RectilinearMesh3D):
         slic = tuple(slic)
 
         if len(axis) == 0:
-            out = Histogram3D(xBins=self._x.cellEdges[slic[2]], yBins=self._y.cellEdges[slic[1]], zBins=self._z.cellEdges[slic[0]])
+            out = Histogram3D(xBins=self._x.edges[slic[2]], yBins=self._y.edges[slic[1]], zBins=self._z.edges[slic[0]])
 
             out._counts += self.counts[slic0]
             return out
 
         if len(axis) == 1:
             a = [x for x in (0, 1, 2) if not x in axis]
-            out = Histogram2D(xBins=self.axis(a[1]).cellEdges[slic[a[1]]], yBins=self.axis(a[0]).cellEdges[slic[a[0]]])
+            out = Histogram2D(xBins=self.axis(a[1]).edges[slic[a[1]]], yBins=self.axis(a[0]).edges[slic[a[0]]])
             out._counts += self.counts[slic0]
 
         else:
             a = [x for x in (0, 1, 2) if not x in axis][0]
-            out = Histogram1D(bins=self.axis(a).cellEdges[slic[a]])
+            out = Histogram1D(bins=self.axis(a).edges[slic[a]])
             out._counts += np.squeeze(self.counts[slic0])
 
         return out
@@ -196,13 +196,13 @@ class Histogram3D(RectilinearMesh3D):
         ix2 = np.apply_along_axis(np.searchsorted, 1-axis, tmp, p)
 
         if axis == 0:
-            med = self.x.cellCentres[ixM]
-            low = self.x.cellCentres[ix1]
-            high = self.x.cellCentres[ix2]
+            med = self.x.centres[ixM]
+            low = self.x.centres[ix1]
+            high = self.x.centres[ix2]
         else:
-            med = self.y.cellCentres[ixM]
-            low = self.y.cellCentres[ix1]
-            high = self.y.cellCentres[ix2]
+            med = self.y.centres[ixM]
+            low = self.y.centres[ix1]
+            high = self.y.centres[ix2]
 
         if (not log is None):
             med, dum = cF._log(med, log=log)
@@ -255,7 +255,7 @@ class Histogram3D(RectilinearMesh3D):
 
         a, b = self.other_axis(axis)
 
-        out = Histogram2D(xBins = a.cellEdges, yBins = b.cellEdges)
+        out = Histogram2D(xBins = a.edges, yBins = b.edges)
         out._counts += np.sum(self.counts, axis=2-axis)
 
         return out
@@ -322,9 +322,9 @@ class Histogram3D(RectilinearMesh3D):
         iMode = np.argmax(self._counts, axis = 1-axis)
 
         if axis == 0:
-            mode = self.x.cellCentres[iMode]
+            mode = self.x.centres[iMode]
         else:
-            mode = self.z.cellCentres[iMode]
+            mode = self.z.centres[iMode]
 
         if (not log is None):
             mode, dum = cF._log(mode, log=log)
@@ -419,9 +419,9 @@ class Histogram3D(RectilinearMesh3D):
         ix2 = np.apply_along_axis(np.searchsorted, 1-axis, tmp, p)
 
         if axis == 0:
-            out = self.x.cellCentres[ix2]
+            out = self.x.centres[ix2]
         else:
-            out = self.y.cellCentres[ix2]
+            out = self.y.centres[ix2]
 
         if (not log is None):
             out, dum = cF._log(out, log=log)
@@ -621,10 +621,10 @@ class Histogram3D(RectilinearMesh3D):
         counts, intervals = super().intervalStatistic(self._counts, intervals, axis, statistic)
 
         if axis == 0:
-            out = Histogram2D(xBins = self.x.cellEdges, yBins = StatArray.StatArray(np.asarray(intervals), name=self.y.name, units=self.y.units))
+            out = Histogram2D(xBins = self.x.edges, yBins = StatArray.StatArray(np.asarray(intervals), name=self.y.name, units=self.y.units))
             out._counts[:] = counts
         else:
-            out = Histogram2D(xBins = StatArray.StatArray(np.asarray(intervals), name=self.x.name, units=self.x.units), yBins = self.y.cellEdges)
+            out = Histogram2D(xBins = StatArray.StatArray(np.asarray(intervals), name=self.x.name, units=self.x.units), yBins = self.y.edges)
             out._counts[:] = counts
         return out
 
@@ -668,9 +668,9 @@ class Histogram3D(RectilinearMesh3D):
         assert np.size(fractions) == nDistributions, ValueError("Fractions must have same size as number of distributions")
 
         if axis == 0:
-            ax = self.x.cellCentres
+            ax = self.x.centres
         else:
-            ax = self.y.cellCentres
+            ax = self.y.centres
 
         if reciprocateParameter:
             ax = 1.0 / ax[::-1]
@@ -710,9 +710,9 @@ class Histogram3D(RectilinearMesh3D):
         maxDistributions = kwargs.pop('maxDistributions', np.max([mm.n_mixtures for mm in mixtures]))
 
         if axis == 0:
-            ax = self.x.cellCentres
+            ax = self.x.centres
         else:
-            ax = self.y.cellCentres
+            ax = self.y.centres
 
         if reciprocateParameter:
             ax = 1.0 / ax[::-1]
@@ -756,14 +756,14 @@ class Histogram3D(RectilinearMesh3D):
         assert np.size(fractions) == nDistributions, ValueError("Fractions must have same size as number of distributions")
 
         # Get the axes
-        ax0 = self.y.cellCentres
+        ax0 = self.y.centres
 
         if reciprocateParameter[0]:
             ax0 = 1.0 / ax0[::-1]
 
         ax0, dum = cF._log(ax0, log[0])
 
-        ax1 = self.x.cellCentres
+        ax1 = self.x.centres
 
         if reciprocateParameter[1]:
             ax1 = 1.0 / ax1[::-1]
@@ -849,7 +849,7 @@ class Histogram3D(RectilinearMesh3D):
         """
         kwargs['trim'] = kwargs.pop('trim',  0.0)
         kwargs.pop('normalize', None)
-        ax = self.counts.pcolor(x=self.x.cellEdges, y=self.y.cellEdges, **kwargs)
+        ax = self.counts.pcolor(x=self.x.edges, y=self.y.edges, **kwargs)
         return ax
 
 
@@ -863,11 +863,11 @@ class Histogram3D(RectilinearMesh3D):
         a = kwargs.pop('alpha', 0.6)
 
         if axis == 0:
-            cP.plot(low, self.y.cellCentres, color=c, linestyle=ls, linewidth=lw, alpha=a, **kwargs)
-            cP.plot(high, self.y.cellCentres, color=c, linestyle=ls, linewidth=lw, alpha=a, **kwargs)
+            cP.plot(low, self.y.centres, color=c, linestyle=ls, linewidth=lw, alpha=a, **kwargs)
+            cP.plot(high, self.y.centres, color=c, linestyle=ls, linewidth=lw, alpha=a, **kwargs)
         else:
-            cP.plot(self.x.cellCentres, low, color=c, linestyle=ls, linewidth=lw, alpha=a, **kwargs)
-            cP.plot(self.x.cellCentres, high, color=c, linestyle=ls, linewidth=lw, alpha=a, **kwargs)
+            cP.plot(self.x.centres, low, color=c, linestyle=ls, linewidth=lw, alpha=a, **kwargs)
+            cP.plot(self.x.centres, high, color=c, linestyle=ls, linewidth=lw, alpha=a, **kwargs)
 
 
     def plotMean(self, log=None, axis=0, **kwargs):
@@ -875,9 +875,9 @@ class Histogram3D(RectilinearMesh3D):
         m = self.mean(log=log, axis=axis)
 
         if axis == 0:
-            cP.plot(m, self.y.cellCentres, label='mean',  **kwargs)
+            cP.plot(m, self.y.centres, label='mean',  **kwargs)
         else:
-            cP.plot(self.x.cellCentres, m, label='mean', **kwargs)
+            cP.plot(self.x.centres, m, label='mean', **kwargs)
 
 
     def plotMedian(self, log=None, axis=0, **kwargs):
@@ -885,9 +885,9 @@ class Histogram3D(RectilinearMesh3D):
         m = self.median(log=log, axis=axis)
 
         if axis == 0:
-            cP.plot(m, self.y.cellCentres, label='median', **kwargs)
+            cP.plot(m, self.y.centres, label='median', **kwargs)
         else:
-            cP.plot(self.x.cellCentres, m, label='median', **kwargs)
+            cP.plot(self.x.centres, m, label='median', **kwargs)
 
 
     def update(self, xValues, yValues=None, zValues=None, trim=False):

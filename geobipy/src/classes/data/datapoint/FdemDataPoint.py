@@ -462,7 +462,7 @@ class FdemDataPoint(EmDataPoint):
         cnew = 0.5 * (c0 + c1)
         # Initialize a single layer model
         p = StatArray.StatArray(1, 'Conductivity', r'$\frac{S}{m}$')
-        model = Model1D(nCells=1, parameters=p)
+        model = Model1D(nCells=1, edges=np.asarray([0.0, np.inf]), parameters=p)
         # Initialize the first conductivity
         model._par[0] = 10.0**c0
         self.forward(model)  # Forward model the EM data
