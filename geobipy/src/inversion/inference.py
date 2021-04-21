@@ -12,6 +12,7 @@ from ..classes.core import StatArray
 from ..classes.statistics.Distribution import Distribution
 from ..classes.statistics.Histogram1D import Histogram1D
 from ..base.utilities import expReal as mExp
+from ..base import MPI
 from scipy import sparse
 from copy import deepcopy
 import numpy as np
@@ -26,6 +27,9 @@ def infer(userParameters, DataPoint, prng, Inference2D, rank=1):
     ID: Datapoint label for saving results
     pHDFfile: Optional HDF5 file opened using h5py.File('name.h5','w',driver='mpio', comm=world) before calling Inv_MCMC
     """
+
+    if not Inference2D.world is None:
+        rank = Inference2D.world.rank
 
     # Check the user input parameters against the datapoint
     userParameters.check(DataPoint)
@@ -91,7 +95,7 @@ def infer(userParameters, DataPoint, prng, Inference2D, rank=1):
             tPerMod = Res.clk.lap() / userParameters.plotEvery
             tmp = "i=%i, k=%i, %4.3f s/Model, %0.3f s Elapsed\n" % (i, np.float(Mod.nCells[0]), tPerMod, Res.clk.timeinSeconds())
             if (rank == 1):
-                print(tmp)
+                print(tmp, flush=True)
 
             if (not Res.burnedIn and not userParameters.solveRelativeError):
                 multiplier *= userParameters.multiplier
