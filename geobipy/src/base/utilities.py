@@ -5,6 +5,7 @@ from math import exp as mExp
 from ..classes.core import StatArray
 import h5py
 from sklearn.mixture import GaussianMixture
+from smm import SMM
 
 
 def interleave(a, b):
@@ -880,3 +881,34 @@ def load_gmm(filename, sort_by_means=True):
         covariances = covariances[order, :, :]
 
     return set_gmm(weights, means, covariances)
+
+def save_smm(gmm, filename):
+    with h5py.File(filename, 'w') as f:
+        f.create_dataset('weights', data=gmm.weights_)
+        f.create_dataset('means', data=gmm.means_)
+        f.create_dataset('covariances', data=gmm.covars_)
+        f.create_dataset('degrees', data=gmm.degrees_)
+
+def set_smm(weights, means, covariances, degrees):
+    out = SMM(n_components = len(means))
+    out.means_ = means
+    out.weights_ = weights
+    out.covars_ = covariances
+    out.degrees_ = degrees
+    return out
+
+def load_smm(filename, sort_by_means=True):
+    with h5py.File(filename, 'r') as f:
+        weights = np.asarray(f['weights'])
+        means = np.asarray(f['means'])
+        covariances = np.asarray(f['covariances'])
+        degrees = np.asarray(f['degrees'])
+
+    if sort_by_means:
+        order = np.argsort(means[:, 0])
+        weights = weights[order]
+        means = means[order, :]
+        covariances = covariances[order, :, :]
+        degrees = degrees[order]
+
+    return set_smm(weights, means, covariances, degrees)
