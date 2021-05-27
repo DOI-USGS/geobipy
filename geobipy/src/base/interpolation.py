@@ -117,88 +117,42 @@ def CT(dx, dy, bounds, XY, values, mask = False, kdtree = None, clip = False, ex
     return xc, yc, vals
 
 
-def minimumCurvature(x, y, values, bounds, dx, dy, mask=False, clip=False, iterations=2000, tension=0.25, accuracy=0.01, verbose=False):
+def minimumCurvature(x, y, values, bounds, dx, dy, mask=False, clip=False, iterations=2000, tension=0.25, accuracy=0.01, verbose=False, **kwargs):
+
+    from pygmt import surface
 
     values[values == np.inf] = np.nan
     mn = np.nanmin(values)
     mx = np.nanmax(values)
 
-    if (mx - mn) == 0.0:
-        values = values - mn
-    else:
-        values = (values - mn) / (mx - mn)
-
-    T = np.column_stack([x, y, values])
-    np.savetxt('tmp.txt', T)
-
-    bnds = bounds.copy()
-    nx = np.int(np.ceil((bnds[1]-bnds[0])/dx))
-    ny = np.int(np.ceil((bnds[3]-bnds[2])/dy))
-
-    bnds[0] -= 0.5*dx
-    bnds[2] -= 0.5*dy
-
-    bnds[1] = bnds[0] + (nx+1)*dx
-    bnds[3] = bnds[2] + (ny+1)*dy
-
-    # Create the grid axes
-    x = np.linspace(bnds[0], bnds[0]+nx*dx, nx+1)
-    y = np.linspace(bnds[2], bnds[2]+ny*dx, ny+1)
-
-    increments = "-I%g/%g"%(dx,dy)
-    region = "-R%g/%g/%g/%g"%(bnds[0], bnds[1], bnds[2], bnds[3])
+    values -= mn
+    if (mx - mn) != 0.0:
+        values = values / (mx - mn)
 
     if clip:
-        subcall = ["gmt", "surface", "tmp.txt", increments, region, "-N%d"%(iterations), "-T%g"%(tension), "-C%g"%(accuracy), "-Gtmp.grd", "-Ll%g"%(np.nanmin(values)), "-Lu%g"%(np.nanmax(values))]
-        subprocess.call(subcall)
+        clip_min = kwargs.pop('clip_min', np.nanmin(values))
+        clip_max = kwargs.pop('clip_max', np.nanmax(values))
+        xr = surface(x=x, y=y, z=values, I=(dx, dy), R=bounds, N=iterations, T=tension, C=accuracy, Ll=[clip_min], Lu=[clip_max])
     else:
-        subcall = ["gmt", "surface", "tmp.txt", increments, region, "-N%d"%(iterations), "-T%g"%(tension), "-C%g"%(accuracy), "-Gtmp.grd"]
-        subprocess.call(subcall)
+        xr = surface(x=x, y=y, z=values, I=(dx, dy), R=bounds, N=iterations, T=tension, C=accuracy)
 
-    if verbose:
-        print('Interpolating with {}'.format(' '.join(subcall)))
+    xc = StatArray.StatArray(xr['x'].values, name=cf.getName(x), units=cf.getUnits(x))
+    yc = StatArray.StatArray(xr['y'].values, name=cf.getName(y), units=cf.getUnits(y))
+    vals = xr.values
 
-    with Dataset("tmp.grd", "r") as f:
-        xT = np.asarray(f['x'])
-        yT = np.asarray(f['y'])
-        vals = np.asarray(f['z'])
-    deleteFile("tmp.grd")
+    if (mx - mn) != 0.0:
+        vals = vals * (mx - mn)
+    vals += mn
 
-    if (mx - mn) == 0.0:
-        values = values + mn
-    else:
-        vals = (vals * (mx - mn)) + mn
-
+    # Use distance masking
     if mask:
-        masked = "-S%g"%(mask)
-        subprocess.call(["gmt", "grdmask", "tmp.txt", increments, region, masked, "-Gmask.grd"])
-
-        with Dataset("mask.grd", 'r') as f:
-            msk = np.asarray(f['z'])
-        deleteFile("mask.grd")
-
-        msk[msk == 0.0] = np.nan
-        vals *= msk
-        deleteFile("mask.grd")
-
-#    # Truncate values to the observed values
-#    if (clip):
-#        minV = np.nanmin(values)
-#        maxV = np.nanmax(values)
-#        mask = ~np.isnan(vals)
-#        mask[mask] &= vals[mask] < minV
-#        vals[mask] = minV
-#        mask = ~np.isnan(vals)
-#        mask[mask] &= vals[mask] > maxV
-#        vals[mask] = maxV
-
-    deleteFile('tmp.txt')
-
-    xT = StatArray.StatArray(x, name=cf.getName(x), units=cf.getUnits(x))
-    yT = StatArray.StatArray(y, name=cf.getName(y), units=cf.getUnits(y))
+        kdt = cKDTree(np.column_stack((x, y)))
+        xi = _ndim_coords_from_arrays(tuple(np.meshgrid(xc, yc)), ndim=2)
+        dists, indexes = kdt.query(xi)
+        vals[dists > mask] = np.nan
 
     vals = StatArray.StatArray(vals, name=cf.getName(values), units = cf.getUnits(values))
-    return xT, yT, vals
+    return xc, yc, vals
 
 def getGridLocations2D(bounds, dx, dy):
     """Discretize a 2D bounding box by increments of dx and return the grid node locations
