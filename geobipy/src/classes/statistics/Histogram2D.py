@@ -349,8 +349,7 @@ class Histogram2D(RectilinearMesh2D):
     def pdf(self, axis=None):
 
         if axis is None:
-            out = StatArray.StatArray(
-                np.divide(self._counts, np.sum(self._counts)), 'Probability density')
+            out = StatArray.StatArray(np.divide(self._counts, np.sum(self._counts)), 'Probability density')
             out[np.isnan(out)] = 0.0
             return out
 
@@ -399,6 +398,19 @@ class Histogram2D(RectilinearMesh2D):
             out, dum = cF._log(out, log=log)
 
         return out
+
+    def sample(self, n_samples):
+
+        p = self.pdf().ravel()
+        i = np.random.choice(p.size, size=n_samples, p = p)
+        iy, ix = np.unravel_index(i, self.shape)
+        dx = np.random.rand(n_samples)
+        dy = np.random.rand(n_samples)
+
+        rx = self.x.edges[ix] + dx * self.x.widths[ix]
+        ry = self.z.edges[iy] + dy * self.z.widths[iy]
+
+        return rx, ry
 
     def transparency(self, percent=95.0, log=None, axis=0):
         """Return a transparency value between 0 and 1 based on the difference between credible invervals of the hitmap.
