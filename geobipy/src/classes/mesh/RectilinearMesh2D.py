@@ -84,6 +84,9 @@ class RectilinearMesh2D(myObject):
         yExtras = dict((k[1:], kwargs.pop(k, None)) for k in ('yedgesMin', 'yedgesMax', 'ylog'))
         self._y = RectilinearMesh1D.RectilinearMesh1D(centres=yCentres, edges=yEdges, relativeTo=kwargs.pop('yrelativeTo', 0.0),  **yExtras)
 
+        self._xyz = False
+        self._z = self._y
+
         if (not zCentres is None or not zEdges is None):
             assert self._x.nCells == self._y.nCells, Exception("x and y axes must have the same number of cells.")
 
@@ -91,21 +94,39 @@ class RectilinearMesh2D(myObject):
             self._z = RectilinearMesh1D.RectilinearMesh1D(centres=zCentres, edges=zEdges, relativeTo=kwargs.pop('zrelativeTo', 0.0), **zExtras)
             self.xyz = True
 
-        else:
-            self._xyz = False
-            self._z = self._y
-
 
     def __getitem__(self, slic):
-        """Slice into the mesh. """
+        """Allow slicing of the histogram.
 
-        assert np.shape(slic) == (2, ), ValueError("slic must be over two dimensions.")
+        """
+        assert np.shape(slic) == (2,), ValueError("slic must be over 2 dimensions.")
 
-        if self.xyz:
-            return type(self)(xEdges=self._x[slic[1]], yEdges=self._y[slic[1]], zEdges=self._z[slic[0]])
-        else:
-            return type(self)(xEdges=self._x[slic[1]], yEdges=self._y[slic[0]])
+        slic0 = slic
 
+        slic = []
+        axis = -1
+        for i, x in enumerate(slic0):
+            if isinstance(x, (int, np.integer)):
+                tmp = x
+                axis = i
+            else:
+                tmp = x
+                if isinstance(x.stop, (int, np.integer)):
+                    # If a slice, add one to the end for bins.
+                    tmp = slice(x.start, x.stop+1, x.step)
+
+            slic.append(tmp)
+        slic = tuple(slic)
+
+        if axis == -1:
+            if self.xyz:
+                out = type(self)(xEdges=self._x.edges[slic[1]], yEdges=self._y.edges[slic[1]], zEdges=self._z.edges[slic[0]])
+            else:
+                out = type(self)(xEdges=self._x.edges[slic[1]], yEdges=self._z.edges[slic[0]])
+            return out
+
+        out = RectilinearMesh1D.RectilinearMesh1D(edges=self.axis(axis).edges[slic[1-axis]])
+        return out
 
     @property
     def distance(self):
@@ -171,13 +192,25 @@ class RectilinearMesh2D(myObject):
     def x(self):
         return self._x
 
+    @x.setter
+    def x(self, values):
+        self._x = values
+
     @property
     def y(self):
         return self._y
 
+    @y.setter
+    def y(self, values):
+        self._y = values
+
     @property
     def z(self):
         return self._z
+
+    @z.setter
+    def z(self, values):
+        self._z = values
 
 
     def _mean(self, arr, log=None, axis=0):
@@ -502,8 +535,8 @@ class RectilinearMesh2D(myObject):
         if not x_distance is None:
             x, x_indices = self.x.mask_cells(x_distance)
             if not values is None:
-                out_values = np.full((self.z.nCells, x.nCells), fill_value=np.nan)
-                for i in range(self.x.nCells):
+                out_values = np.full((self.z.nCells.value, x.nCells.value), fill_value=np.nan)
+                for i in range(self.x.nCells.value):
                     out_values[:, x_indices[i]] = values[:, i]
 
         z_indices = None
@@ -511,12 +544,12 @@ class RectilinearMesh2D(myObject):
         if not z_distance is None:
             z, z_indices = self.z.mask_cells(z_distance)
             if not values is None:
-                out_values2 = np.full((z.nCells, out_values.shape[1]), fill_value=np.nan)
-                for i in range(self.z.nCells):
+                out_values2 = np.full((z.nCells.value, out_values.shape[1]), fill_value=np.nan)
+                for i in range(self.z.nCells.value):
                     out_values2[z_indices[i], :] = out_values[i, :]
                 out_values = out_values2
 
-        out = type(self)(xCentres=x, yCentres=z)
+        out = type(self)(xEdges=x.edges, yEdges=z.edges)
 
         return out, x_indices, z_indices, out_values
 
@@ -528,7 +561,8 @@ class RectilinearMesh2D(myObject):
         ax = self.other_axis(axis)
 
         i0 = np.maximum(0, np.searchsorted(intervals, ax.edges[0]))
-        i1 = np.minimum(ax.nCells, np.searchsorted(intervals, ax.edges[-1])+1)
+        i1 = np.minimum(ax.nCells.value, np.searchsorted(intervals, ax.edges[-1])+1)
+
         intervals = intervals[i0:i1]
 
         return intervals
@@ -666,10 +700,10 @@ class RectilinearMesh2D(myObject):
             Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.
         trim : bool, optional
             Set the x and y limits to the first and last non zero values along each axis.
-        x_distance : float, optional
+        x_mask : float, optional
             Mask along the x axis using this distance.
             Defaults to None.
-        y_distance : float, optional
+        z_mask : float, optional
             Mask along the z axis using this distance.
             Defaults to None.
 
@@ -682,11 +716,11 @@ class RectilinearMesh2D(myObject):
 
         assert np.all(values.shape == self.shape), ValueError("values must have shape {}".format(self.shape))
 
-        x_distance = kwargs.pop('x_distance', None)
-        z_distance = kwargs.pop('z_distance', None)
+        x_mask = kwargs.pop('x_mask', None)
+        z_mask = kwargs.pop('z_mask', None)
 
-        if np.sum([x is None for x in [x_distance, z_distance]]) < 2:
-            masked, x_indices, z_indices, values = self.mask_cells(xAxis, x_distance, z_distance, values)
+        if np.sum([x is None for x in [x_mask, z_mask]]) < 2:
+            masked, x_indices, z_indices, values = self.mask_cells(xAxis, x_mask, z_mask, values)
             ax, pm, cb = cP.pcolor(values, x = masked.axis('x').edges, y = masked.z.edges, **kwargs)
         else:
             ax, pm, cb = cP.pcolor(values, x = self.axis(xAxis).edges, y = self.z.edges, **kwargs)
@@ -757,17 +791,27 @@ class RectilinearMesh2D(myObject):
 
     def fromHdf(self, grp, index=None):
         """ Reads in the object from a HDF file """
-        x = RectilinearMesh1D.RectilinearMesh1D().fromHdf(grp['x'], index=index).edges
-        y = RectilinearMesh1D.RectilinearMesh1D().fromHdf(grp['y'], index=index).edges
+        x = RectilinearMesh1D.RectilinearMesh1D().fromHdf(grp['x'], index=index)
+        y = RectilinearMesh1D.RectilinearMesh1D().fromHdf(grp['y'], index=index)
 
         z = None
         if 'z' in grp:
-            z = RectilinearMesh1D.RectilinearMesh1D().fromHdf(grp['z'], index=index).edges
+            z = RectilinearMesh1D.RectilinearMesh1D().fromHdf(grp['z'], index=index)
 
-            if np.size(z) == y.size:
+            if z.nCells.value == y.nCells.value:
                 z = None
 
-        RectilinearMesh2D.__init__(self, xEdges=x, yEdges=y, zEdges=z)
+        RectilinearMesh2D.__init__(self)
+        self.x = x
+        self.y = y
+        self._xyz = False
+
+        if not z is None:
+            self.z = z
+            self._xyz = True
+        else:
+            self._z = self._y
+
         return self
 
 
