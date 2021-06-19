@@ -42,7 +42,7 @@ class Inference2D(myObject):
         assert not system_file_path is None, Exception("Please also specify the path to the system file")
 
         self._burnedIn = None
-        self._marginalProbability = None
+        self._marginal_probability = None
         self.range = None
         self.system_file_path = system_file_path
         self._zPosterior = None
@@ -389,9 +389,10 @@ class Inference2D(myObject):
     def _get(self, variable, reciprocateParameter=False, **kwargs):
 
         variable = variable.lower()
-        assert variable in ['mean', 'best', 'interfaces', 'opacity', 'highestmarginal', 'marginalprobability'], ValueError("variable must be ['mean', 'best', 'interfaces', 'opacity', 'highestMarginal', 'marginalProbability']")
+        assert variable in ['mean', 'best', 'interfaces', 'opacity', 'highestmarginal', 'marginal_probability'], ValueError("variable must be ['mean', 'best', 'interfaces', 'opacity', 'highestMarginal', 'marginal_probability']")
 
         if variable == 'mean':
+
             if reciprocateParameter:
                 vals = np.divide(1.0, self.meanParameters)
                 vals.name = 'Resistivity'
@@ -418,10 +419,10 @@ class Inference2D(myObject):
         if variable == 'highestmarginal':
             return self.highestMarginal
 
-        if variable == 'marginalprobability':
-            assert "index" in kwargs, ValueError('Please specify keyword "index" when requesting marginalProbability')
-            assert not kwargs['index'] is None, ValueError('Please specify keyword "index" when requesting marginalProbability')
-            return self.marginalProbability[:, :, kwargs["index"]].T
+        if variable == 'marginal_probability':
+            assert "index" in kwargs, ValueError('Please specify keyword "index" when requesting marginal_probability')
+            assert not kwargs['index'] is None, ValueError('Please specify keyword "index" when requesting marginal_probability')
+            return self.marginal_probability[:, :, kwargs["index"]].T
 
 
     @cached_property
@@ -556,6 +557,16 @@ class Inference2D(myObject):
 
         if external_files:
             hdfFile.close()
+
+    def fit_interface_posterior(self, **kwargs):
+
+        fit_interfaces = np.zeros(self.interfacePosterior.shape)
+        for i in progressbar.progressbar(range(self.nPoints)):
+            h1 = self.interfacePosterior[:, i]
+            vest = h1.estimateVariance(100000, log=10)
+            fit, f, p = h1.fit_estimated_pdf(mixture_type='pearson', smooth=vest, mask=0.5, epsilon=1e-1, mu=1e-5, method='lbfgsb', max_distributions=self.nLayers[i]-1)
+            fit_interfaces[:, i] = fit.probability(h1.binCentres, log=False).sum(axis=1)
+        return fit_interface
 
 
     def fit_estimated_pdf_mpi(self, intervals=None, external_files=True, **kwargs):
@@ -761,17 +772,22 @@ class Inference2D(myObject):
     def interfaces(self):
         """ Get the layer interfaces from the layer depth histograms """
         maxCount = self.interfacePosterior.counts.max()
-        if np.size(self.interfacePosterior.counts, 1) == (self.mesh.z.nCells - 1):
-            values = np.vstack([self.interfacePosterior.counts.T, self.interfacePosterior.counts.T[-1, :]])
+        if np.size(self.interfacePosterior.counts, 0) != (self.mesh.z.nCells):
+            values = np.vstack([self.interfacePosterior.counts, self.interfacePosterior.counts[-1, :]])
             return StatArray.StatArray(values / np.float64(maxCount), "interfaces", "")
 
-        return StatArray.StatArray(self.interfacePosterior.counts.T / np.float64(maxCount), "interfaces", "")
+        return StatArray.StatArray(self.interfacePosterior.counts / np.float64(maxCount), "interfaces", "")
 
 
 
     @cached_property
     def interfacePosterior(self):
-        return self.getAttribute('layer depth posterior')
+        tmp = self.getAttribute('layer depth posterior')
+
+        x = StatArray.StatArray(np.arange(self.nPoints, dtype=np.float64), "Index")
+        out = Histogram2D(xBinCentres=x, yBins=tmp.bins)
+        out._counts = tmp.counts.T
+        return out
 
 
     @cached_property
@@ -1075,8 +1091,14 @@ class Inference2D(myObject):
 
 
     def x_axis(self, axis, centres=False):
-        ax = self.mesh.axis(axis)
-        return ax.centres if centres else ax.edges
+
+        if axis == 'index':
+            ax = StatArray.StatArray(np.arange(self.nPoints, dtype=np.float64), 'Index')
+        elif axis == 'fiducial':
+            ax = self.fiducial
+        else:
+            ax = self.mesh.axis(axis)
+        return ax.centres if centres else ax.edges()
 
 
     @cached_property
@@ -1264,6 +1286,16 @@ class Inference2D(myObject):
         self.nLayers.plot(xtmp, **kwargs)
         # cP.ylabel(self.nLayers.getNameUnits())
         cP.title('# of Layers in Best Model')
+
+    @property
+    def kLayers_posterior(self):
+        tmp = self.getAttribute('layer posterior')
+
+        x = StatArray.StatArray(np.arange(self.nPoints, dtype=np.float64), "Index")
+        out = Histogram2D(xBinCentres=x, yBins=tmp.bins)
+        out._counts = tmp.counts.T
+
+        return out
 
 
     def plotKlayersPosteriors(self, **kwargs):
@@ -1619,7 +1651,7 @@ class Inference2D(myObject):
 
     def plot_marginal_probabilities(self, **kwargs):
 
-        nClusters = self.marginalProbability.shape[-1]
+        nClusters = self.marginal_probability.shape[-1]
 
         gs1 = gridspec.GridSpec(nrows=nClusters+1, ncols=1, left=0.15, right=0.91, bottom=0.06, top=0.95, wspace=0.06, hspace=0.175)
 
@@ -1631,7 +1663,7 @@ class Inference2D(myObject):
             else:
                 axTmp = plt.subplot(gs1[i, 0], sharex=ax, sharey=ax)
 
-            ax1, pm1, cb1 = self.plotXsection(self.marginalProbability[:, :, i].T, vmin=0.0, vmax=1.0, **kwargs)
+            ax1, pm1, cb1 = self.plotXsection(self.marginal_probability[:, :, i].T, vmin=0.0, vmax=1.0, **kwargs)
             # self.plotElevation(alpha=0.3, **kwargs)
             # self.plotDataElevation(**kwargs)
             axes.append(ax1)
@@ -1696,9 +1728,9 @@ class Inference2D(myObject):
 
 
     @cached_property
-    def marginalProbability(self):
+    def marginal_probability(self):
 
-        assert 'probabilities' in self.hdfFile.keys(), Exception("Marginal probabilities need computing, use Inference_2D.computeMarginalProbability_X()")
+        # assert 'probabilities' in self.hdfFile.keys(), Exception("Marginal probabilities need computing, use Inference_2D.computeMarginalProbability_X()")
 
         if 'probabilities' in self.hdfFile.keys():
             marginal_probability = StatArray.StatArray().fromHdf(self.hdfFile['probabilities'])
@@ -1786,7 +1818,7 @@ class Inference2D(myObject):
 
     #     amplitudes, means, variances, degrees = self.read_fit_distributions(fit_file, mask_by_doi=False)
 
-    #     # self.marginalProbability = StatArray.StatArray(np.zeros([self.nPoints, self.mesh.z.nCells, gmm.n_components]), 'Marginal probability')
+    #     # self.marginal_probability = StatArray.StatArray(np.zeros([self.nPoints, self.mesh.z.nCells, gmm.n_components]), 'Marginal probability')
 
     #     iSort = np.argsort(np.squeeze(gmm.means_))
 
@@ -1826,20 +1858,20 @@ class Inference2D(myObject):
     #                 gmm_pdfs = np.dot(fit_pdfs, a*b).T
 
     #                 h = hm.marginalize(index = j)
-    #                 self.marginalProbability[i, j, :] = h._marginal_probability_pdfs(gmm_pdfs)
+    #                 self.marginal_probability[i, j, :] = h._marginal_probability_pdfs(gmm_pdfs)
     #             else:
-    #                 self.marginalProbability[i, j, :] = np.nan
+    #                 self.marginal_probability[i, j, :] = np.nan
 
     #     if 'marginal_probability' in self.hdfFile.keys():
-    #         self.marginalProbability.writeHdf(self.hdfFile, 'marginal_probability')
+    #         self.marginal_probability.writeHdf(self.hdfFile, 'marginal_probability')
     #     else:
-    #         self.marginalProbability.toHdf(self.hdfFile, 'marginal_probability')
+    #         self.marginal_probability.toHdf(self.hdfFile, 'marginal_probability')
 
 
     # def compute_marginal_probability_from_fits(self, fit_file, mask_by_doi=True):
 
     #     amplitudes, means, variances, degrees = self.read_fit_distributions(fit_file, mask_by_doi)
-    #     self.marginalProbability = StatArray.StatArray(np.zeros([self.nPoints, self.mesh.z.nCells, means.shape[-1]]), 'Marginal probability')
+    #     self.marginal_probability = StatArray.StatArray(np.zeros([self.nPoints, self.mesh.z.nCells, means.shape[-1]]), 'Marginal probability')
 
     #     print('Computing marginal probability', flush=True)
     #     for i in progressbar.progressbar(range(self.nPoints)):
@@ -1854,20 +1886,19 @@ class Inference2D(myObject):
     #             inan = ~np.isnan(m)
     #             mixtures.append(mixStudentT(m[inan], v[inan], df[inan], a[inan]))
 
-    #         mp = hm.marginalProbability(1.0, distributions=mixtures, log=10, maxDistributions=means.shape[-1])
-    #         self.marginalProbability[i, :mp.shape[0], :] = mp
+    #         mp = hm.marginal_probability(1.0, distributions=mixtures, log=10, maxDistributions=means.shape[-1])
+    #         self.marginal_probability[i, :mp.shape[0], :] = mp
 
     #     if 'marginal_probability' in self.hdfFile.keys():
-    #         self.marginalProbability.writeHdf(self.hdfFile, 'marginal_probability')
+    #         self.marginal_probability.writeHdf(self.hdfFile, 'marginal_probability')
     #     else:
-    #         self.marginalProbability.toHdf(self.hdfFile, 'marginal_probability')
-    #     # self.marginalProbability.toHdf('line_{}_marginal_probability.h5'.format(self.line), 'marginal_probability')
+    #         self.marginal_probability.toHdf(self.hdfFile, 'marginal_probability')
+    #     # self.marginal_probability.toHdf('line_{}_marginal_probability.h5'.format(self.line), 'marginal_probability')
 
 
     @cached_property
     def highestMarginal(self):
-
-        return StatArray.StatArray(np.argmax(self.marginalProbability, axis=-1), name='Highest marginal')
+        return StatArray.StatArray(np.argmax(self.marginal_probability, axis=-1), name='Highest marginal')
 
 
     @property
@@ -1878,7 +1909,7 @@ class Inference2D(myObject):
         hm = self.highestMarginal
         classes = np.unique(hm)
 
-        mp = self.marginalProbability()
+        mp = self.marginal_probability()
 
         for i, c in enumerate(classes):
             iWhere = np.where(hm == c)
