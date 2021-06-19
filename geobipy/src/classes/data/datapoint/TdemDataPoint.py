@@ -82,6 +82,7 @@ class TdemDataPoint(EmDataPoint):
         super().__init__(nChannelsPerSystem=self.nTimes, x=x, y=y, z=z, elevation=elevation, data=data, std=std, predictedData=predictedData, lineNumber=lineNumber, fiducial=fiducial)
 
         self._data.name = "Time domain data"
+        self._units = ''
 
         if not transmitter_loop is None:
             self.transmitter = transmitter_loop
@@ -146,7 +147,7 @@ class TdemDataPoint(EmDataPoint):
 
     @property
     def units(self):
-        return self._units
+        return ""
 
     @units.setter
     def units(self, value):
