@@ -234,7 +234,6 @@ class RectilinearMesh1D(myObject):
                 out[-1] = 1.1 * out[-2]
             else:
                 out[-1] = self.max_edge
-
         return out
 
     @property
@@ -789,8 +788,7 @@ class RectilinearMesh1D(myObject):
         if (reciprocateX):
             par = 1.0 / par
 
-        return cp.step(x=par, y=self.plotting_edges, **kwargs)
-
+        ax, stp = cp.step(x=par, y=self.plotting_edges, **kwargs)
         # if self.hasHalfspace:
         #     h = 0.99*z[-1]
         #     if (self.nCells == 1):
@@ -1034,6 +1032,8 @@ class RectilinearMesh1D(myObject):
         # create a new group inside h5obj
         grp = self.create_hdf_group(parent, name)
 
+        self.nCells.createHdf(grp, 'nCells', withPosterior=withPosterior, nRepeats=nRepeats)
+
         self._centres.createHdf(grp, 'centres', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self._edges.createHdf(grp, 'edges', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
 
@@ -1058,12 +1058,18 @@ class RectilinearMesh1D(myObject):
         create: optionally create the data set as well before writing
         """
         grp = parent.get(name)
+        self.nCells.writeHdf(grp, 'nCells',  withPosterior=withPosterior, index=index)
         self._centres.writeHdf(grp, 'centres',  withPosterior=withPosterior, index=index)
         self._edges.writeHdf(grp, 'edges',  withPosterior=withPosterior, index=index)
         self.relativeTo.writeHdf(grp, 'relativeTo', index=index)
 
     def fromHdf(self, grp, index=None):
         """ Reads in the object froma HDF file """
+
+        if 'nCells' in grp:
+            tmp = StatArray.StatArray().fromHdf(grp['nCells'], index=index)
+            nCells = tmp.astype(np.int32)
+            nCells.copyStats(tmp)
 
         if 'relativeTo' in grp:
             relativeTo = StatArray.StatArray().fromHdf(grp['relativeTo'], index=index)
@@ -1073,22 +1079,25 @@ class RectilinearMesh1D(myObject):
             else:
                 relativeTo = 0.0
 
+        edges = None
+        if (('edges' in grp) or ('bins' in grp)):
+            if 'edges' in grp:
+                key = 'edges'
+            elif 'bins' in grp:
+                key = 'bins'
+
+            if np.ndim(grp[key+'/data']) == 2:
+                edges = StatArray.StatArray().fromHdf(grp[key], index=index)
+            else:
+                edges = StatArray.StatArray().fromHdf(grp[key])
+
         centres = None
-        if ('centres' in grp) or ('x' in grp):
+        if edges is None and (('centres' in grp) or ('x' in grp)):
             key = 'centres' if not 'x' in grp else 'x'
             if np.ndim(grp[key+'/data']) == 2:
                 centres = StatArray.StatArray().fromHdf(grp[key], index=index)
             else:
                 centres = StatArray.StatArray().fromHdf(grp[key])
-
-        edges = None
-
-        if centres is None and (('edges' in grp) or ('bins' in grp)):
-            key = 'edges' if 'edges' in grp else 'bins'
-            if np.ndim(grp[key+'/data']) == 2:
-                edges = StatArray.StatArray().fromHdf(grp[key], index=index)
-            else:
-                edges = StatArray.StatArray().fromHdf(grp[key])
 
         RectilinearMesh1D.__init__(self, centres, edges)
 
@@ -1097,10 +1106,29 @@ class RectilinearMesh1D(myObject):
         self.relativeTo = relativeTo
 
         if 'min_width' in grp: self._min_width = np.array(grp.get('min_width'))
-        if 'max_edge' in grp: self._max_edge = np.array(grp.get('min_edge'))
+        if 'min_edge' in grp: self._min_edge = np.array(grp.get('min_edge'))
         if 'max_edge' in grp: self._max_edge = np.array(grp.get('max_edge'))
         if 'max_cells' in grp: self._max_cells = np.array(grp.get('max_cells'))
+
         # if 'event_proposal' in grp: self._event_proposal = np.array(grp.get('event_proposal'))
+
+        if 'depth' in grp: # Old Model1D class
+            print('here')
+            i = np.s_[index, :nCells.value]
+            tmp = StatArray.StatArray().fromHdf(grp['depth'], index=i)
+            edges = tmp.prepend(0.0)
+            edges[-1] = np.inf
+            edges.copyStats(tmp)
+
+            RectilinearMesh1D.__init__(self, edges=edges)
+            self.nCells = nCells
+            # self.edges = edges
+
+            if 'minThk'    in grp: self._min_width = np.array(grp.get('minThk'))
+            if 'hmin'      in grp: self._min_width = np.array(grp.get('hmin'))
+            if 'zmin'     in grp: self._min_edge = np.array(grp.get('zmin'))
+            if 'zmax'     in grp: self._max_edge = np.array(grp.get('zmax'))
+            if 'kmax'      in grp: self._max_cells = np.array(grp.get('kmax'))
 
         return self
 
