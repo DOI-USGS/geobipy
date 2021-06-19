@@ -414,8 +414,6 @@ def masterTask(Dataset, world):
         elapsed = str(timedelta(seconds=e))
         eta = str(timedelta(seconds=(nPoints / nFinished-1) * e))
         myMPI.print("Remaining Points {}/{} || Elapsed Time: {} h:m:s || ETA {} h:m:s".format(nPoints-nFinished, nPoints, elapsed, eta))
-        # myMPI.print('Inverted data point {} in {:.3f}s  ||  Time: {:.3f}s  ||  QueueLength: {}/{}  ||  ETA: {:.3f}s'.format(dataPointProcessed, rankRecv[2], elapsed, nPoints-nFinished, nPoints, eta))
-
 
 def workerTask(_DataPoint, UP, prng, world, lineNumbers, Inference2D):
     """ Define a wait run ping procedure for each worker """
