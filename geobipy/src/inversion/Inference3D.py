@@ -417,13 +417,13 @@ class Inference3D(myObject):
             r = Bar(range(self.nPoints))
 
         # Create the space in HDF5
-        probabilities = StatArray.StatArray((z.nCells, global_mixture.n_components), name='probabilities')
+        probabilities = StatArray.StatArray((z.nCells.value, global_mixture.n_components), name='probabilities')
         probabilities.createHdf(probabilities_h5, 'probabilities', nRepeats=self.nPoints)
 
         for i in r:
             # Read the local fits
             local_fits = []
-            for j in range(z.nCells):
+            for j in range(z.nCells.value):
                 local_fits.append(mixPearson().fromHdf(local_mixture_h5['fits'], index=(i, j)))
 
             # Get the 2D posterior for parameter
