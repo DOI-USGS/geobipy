@@ -376,12 +376,21 @@ class StatArray(np.ndarray, myObject):
         return StatArray(self)
 
     def copyStats(self, other):
-        # if self.hasPrior:
-        #     other._prior = self._prior.deepcopy()
-        # if self.hasProposal:
-        #     other._proposal = self._proposal.deepcopy()
-        if self.hasPosterior:
-            other._posterior = self._posterior
+        """Copy statistical properties from other to self
+
+        [extended_summary]
+
+        Parameters
+        ----------
+        other : [type]
+            [description]
+        """
+        if other.hasPrior:
+            self._prior = deepcopy(other._prior)
+        if other.hasProposal:
+            self._proposal = deepcopy(other._proposal)
+        if other.hasPosterior:
+            self._posterior = other._posterior
 
     def deepcopy(self):
         """Create a deepcopy
@@ -431,7 +440,7 @@ class StatArray(np.ndarray, myObject):
         out = self.resize(tmp.shape)
         out[:] = tmp[:]
 
-        self.copyStats(out)
+        out.copyStats(self)
         return out
 
     def edges(self, min=None, max=None, axis=-1):
@@ -568,7 +577,7 @@ class StatArray(np.ndarray, myObject):
         out = self.resize(tmp.shape)  # Keeps the prior and proposal if set.
         out[:] = tmp[:]
 
-        self.copyStats(out)
+        out.copyStats(self)
         return out
 
     def interleave(self, other):
