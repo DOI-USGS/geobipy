@@ -37,6 +37,8 @@ class Inference2D(myObject):
     """ Class to define results from EMinv1D_MCMC for a line of data """
     def __init__(self, hdf5_file_path=None, system_file_path=None, hdfFile=None, mode='r+', world=None):
         """ Initialize the lineResults """
+        self._world = None
+
         if (hdf5_file_path is None): return
 
         assert not system_file_path is None, Exception("Please also specify the path to the system file")
@@ -51,7 +53,6 @@ class Inference2D(myObject):
         self.directory = split(hdf5_file_path)[0]
         self.line = np.float64(os.path.splitext(split(hdf5_file_path)[1])[0])
 
-        self._world = None
         self.hdfFile = None
         if (hdfFile is None): # Open the file
             self.open(mode, world)
