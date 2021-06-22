@@ -117,6 +117,7 @@ def serial_geobipy(inputFile, output_directory, seed=None, index=None):
     assert inputFile.exists(), Exception("Cannot find input file {}".format(inputFile))
 
     output_directory = pathlib.Path(output_directory)
+    assert output_directory.exists(), Exception("Make sure the output directory exists {}".format(output_directory))
 
     # Make sure the results folders exist
     makedirs(output_directory, exist_ok=True)
@@ -212,6 +213,7 @@ def parallel_mpi(inputFile, outputDir, skipHDF5):
     inputFile = pathlib.Path(inputFile)
     assert inputFile.exists(), Exception("Cannot find input file {}".format(inputFile))
     output_directory = pathlib.Path(outputDir)
+    assert output_directory.exists(), Exception("Make sure the output directory exists {}".format(output_directory))
 
     UP = import_module(str(inputFile.with_suffix('')), package='geobipy')
     assert 'data_type' in UP.__dict__, ValueError(("Please specify the data_type in the parameter file. \n"

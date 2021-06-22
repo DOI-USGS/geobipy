@@ -65,13 +65,14 @@ class Inference3D(myObject):
 
         self._lines = []
         self._lineNumbers = np.empty(self.nLines)
-        self._world = world
         for i in range(self.nLines):
             fName = self.h5files[i]
 
             LR = Inference2D(fName, system_file_path=system_file_path, mode=mode, world=world)
             self._lines.append(LR)
             self._lineNumbers[i] = LR.line
+
+        self.world = world
 
         self.kdtree = None
         self.doi = None
@@ -86,10 +87,56 @@ class Inference3D(myObject):
     def world(self):
         return self._world
 
+    @world.setter
+    def world(self, communicator):
+
+        if communicator is None:
+            self._world = None
+            return
+        assert communicator.size > 1, TypeError("communicator must be mpi4py.MPI.COMM_WORLD")
+
+        self._world = communicator
+
+        # Set some starts and chunks for points and lines.
+        self._point_starts, self._point_chunks = loadBalance1D_shrinkingArrays(self.nPoints, world.size)
+
+        # Potentially create a team that operates over lines.
+        self._line_starts, self._line_chunks = loadBalance1D_shrinkingArrays(self.nLines, world.size)
+
+
     @property
     def parallel_access(self):
         return not self.world is None
 
+    @property
+    def point_chunks(self):
+        assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
+        return self._point_chunks
+
+    @property
+    def point_ends(self):
+        assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
+        return self.point_starts + self.point_chunks
+
+    @property
+    def point_starts(self):
+        assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
+        return self._point_starts
+
+    @property
+    def line_chunks(self):
+        assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
+        return self._line_chunks
+
+    @property
+    def line_ends(self):
+        assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
+        return self.line_starts + self.line_chunks
+
+    @property
+    def line_starts(self):
+        assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
+        return self._line_starts
 
     def open(self, mode='r+', world=None):
         """ Check whether the file is open """
@@ -364,9 +411,28 @@ class Inference3D(myObject):
 
         return slic
 
-    # def computeMarginalProbability(self, fractions, distributions, **kwargs):
-    #     for line in self.lines:
-    #         line.computeMarginalProbability(fractions, distributions, **kwargs)
+    def compute_credible_interval(self, percent=95.0, log=None, progress=False):
+
+        # Need to create HDF memory collectively.
+        for line in self.lines:
+            key = 'credible_lower'
+            if not key in self.hdfFile.keys():
+                credibleLower = StatArray.StatArray(np.zeros(line.mesh.shape), '{}% Credible Interval'.format(100.0 - percent), line.parameterUnits)
+                credibleLower.createHdf(line.hdfFile, key)
+
+            key = 'credible_upper'
+            if key in self.hdfFile.keys():
+                credibleUpper = StatArray.StatArray(np.zeros(line.mesh.shape), '{}% Credible Interval'.format(percent), line.parameterUnits)
+                credibleUpper.createHdf(line.hdfFile, key)
+
+
+        r = range(self.nLines)
+        if self.parallel_access:
+            r = range(self.line_starts[self.world.rank], self.line_ends[self.world.rank])
+            self.world.barrier()
+
+        for i in r:
+            self.Lines[i].computeCredibleInterval(percent, log)
 
 
     def compute_MinsleyFoksBedrosian2020_P_lithology(self, global_mixture_hdf5, local_mixture_hdf5, log=None):
