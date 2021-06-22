@@ -225,27 +225,21 @@ class Inference2D(myObject):
         credibleUpper = StatArray.StatArray(np.zeros(self.mesh.shape), '{}% Credible Interval'.format(percent), self.parameterUnits)
 
         loc = 'currentmodel/par/posterior'
-        a = np.asarray(self.hdfFile[loc+'/arr/data'])
-        try:
-            b = np.asarray(self.hdfFile[loc+'/x/data'])
-        except:
-            b = np.asarray(self.hdfFile[loc+'/x/x/data'])
 
-        try:
-            c = np.asarray(self.hdfFile[loc+'/y/data'])
-        except:
-            c = np.asarray(self.hdfFile[loc+'/y/x/data'])
+        counts = np.asarray(self.hdfFile[loc+'/counts/data'])
+        xc = np.asarray(self.hdfFile[loc+'/x/centres/data'])
+        yc = np.asarray(self.hdfFile[loc+'/y/centres/data'])
 
-        h = Hitmap2D(xBinCentres = StatArray.StatArray(b[0, :]), yBinCentres = StatArray.StatArray(c[0, :]))
-        h._counts[:, :] = a[0, :, :]
+        h = Hitmap2D(xBinCentres = StatArray.StatArray(xc[0, :]), yBinCentres = StatArray.StatArray(yc[0, :]))
+        h._counts[:, :] = counts[0, :, :]
         m, l, u = h.credibleIntervals(percent=percent, log=log)
         credibleLower[:, 0] = l
         credibleUpper[:, 0] = u
 
         print('Computing {}% Credible Intervals'.format(percent), flush=True)
         for i in progressbar.progressbar(range(1, self.nPoints)):
-            h.x.xBinCentres = b[i, :]
-            h._counts[:, :] = a[i, :, :]
+            h.x.xBinCentres = xc[i, :]
+            h._counts[:, :] = counts[i, :, :]
             m, l, u = h.credibleIntervals(percent=percent, log=log)
             credibleLower[:, i] = l
             credibleUpper[:, i] = u
