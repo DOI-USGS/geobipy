@@ -119,7 +119,7 @@ def CT(dx, dy, bounds, XY, values, mask = False, kdtree = None, clip = False, ex
 
 def minimumCurvature(x, y, values, bounds, dx, dy, mask=False, clip=False, iterations=2000, tension=0.25, accuracy=0.01, verbose=False, **kwargs):
 
-    from pygmt import surface
+    from pygmt import (surface, blockmedian)
 
     values[values == np.inf] = np.nan
     mn = np.nanmin(values)
@@ -129,12 +129,29 @@ def minimumCurvature(x, y, values, bounds, dx, dy, mask=False, clip=False, itera
     if (mx - mn) != 0.0:
         values = values / (mx - mn)
 
+    nx = np.floor((bounds[1] - bounds[0])/dx) + 1
+    mid = 0.5 * (bounds[0] + bounds[1])
+    sx = 0.5 * nx * dx
+    bounds[0] = mid - sx
+    bounds[1] = mid + sx
+
+    ny = np.floor((bounds[3] - bounds[2])/dx) + 1
+    mid = 0.5 * (bounds[2] + bounds[3])
+    sy = 0.5 * ny * dy
+    bounds[2] = mid - sy
+    bounds[3] = mid + sy
+
+    pd = blockmedian(x=x, y=y, z=values, spacing=(dx, dy), region=bounds)
+    x = pd.values[:, 0]
+    y = pd.values[:, 1]
+    values = pd.values[:, 2]
+
     if clip:
         clip_min = kwargs.pop('clip_min', np.nanmin(values))
         clip_max = kwargs.pop('clip_max', np.nanmax(values))
-        xr = surface(x=x, y=y, z=values, I=(dx, dy), R=bounds, N=iterations, T=tension, C=accuracy, Ll=[clip_min], Lu=[clip_max])
+        xr = surface(x=x, y=y, z=values, spacing=(dx, dy), region=bounds, N=iterations, T=tension, C=accuracy, Ll=[clip_min], Lu=[clip_max])
     else:
-        xr = surface(x=x, y=y, z=values, I=(dx, dy), R=bounds, N=iterations, T=tension, C=accuracy)
+        xr = surface(x=x, y=y, z=values, spacing=(dx, dy), region=bounds, N=iterations, T=tension, C=accuracy)
 
     xc = StatArray.StatArray(xr['x'].values, name=cf.getName(x), units=cf.getUnits(x))
     yc = StatArray.StatArray(xr['y'].values, name=cf.getName(y), units=cf.getUnits(y))
