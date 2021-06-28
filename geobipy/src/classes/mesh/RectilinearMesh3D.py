@@ -592,6 +592,8 @@ class RectilinearMesh3D(RectilinearMesh2D):
         self.x.createHdf(grp,'x', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self.y.createHdf(grp,'y', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self.z.createHdf(grp,'z', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        if not self.height is None:
+            self.height.createHdf(grp, 'height', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
 
         return grp
 
@@ -606,6 +608,8 @@ class RectilinearMesh3D(RectilinearMesh2D):
         self.x.writeHdf(grp, 'x',  withPosterior=withPosterior, index=index)
         self.y.writeHdf(grp, 'y',  withPosterior=withPosterior, index=index)
         self.z.writeHdf(grp, 'z',  withPosterior=withPosterior, index=index)
+        if not self.height is None:
+            self.height.createHdf(grp, 'height', withPosterior=withPosterior
 
 
     def fromHdf(self, grp, index=None):
@@ -614,6 +618,8 @@ class RectilinearMesh3D(RectilinearMesh2D):
         y = RectilinearMesh1D().fromHdf(grp['y'], index=index)
         z = RectilinearMesh1D().fromHdf(grp['z'], index=index)
         self.__init__(xCentres=x, yCentres=y, zCentres=z)
+        if 'height' in grp:
+            self._height = read_item(grp['height'], index=index)
         return self
 
 
