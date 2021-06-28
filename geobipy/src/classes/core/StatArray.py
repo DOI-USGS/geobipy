@@ -511,6 +511,10 @@ class StatArray(np.ndarray, myObject):
         msk = self != 0.0
         return np.where(msk.any(axis=axis), msk.argmax(axis=axis), invalid_val)
 
+    @property
+    def label(self):
+        return self.getNameUnits()
+
     def getNameUnits(self):
         """Get the name and units
 
@@ -522,37 +526,37 @@ class StatArray(np.ndarray, myObject):
             String containing name(units).
 
         """
-        out = self.getName()
-        u = self.getUnits()
+        out = self.name
+        u = self.units
         return out if u == "" else "{} ({})".format(out, u)
 
-    def getName(self):
-        """Get the name of the StatArray
+    # def getName(self):
+    #     """Get the name of the StatArray
 
-        If the name has not been attached, returns an empty string
+    #     If the name has not been attached, returns an empty string
 
-        Returns
-        -------
-        out : str
-            The name of the StatArray.
+    #     Returns
+    #     -------
+    #     out : str
+    #         The name of the StatArray.
 
-        """
+    #     """
 
-        return "" if self.name is None else self.name
+    #     return "" if self.name is None else self.name
 
-    def getUnits(self):
-        """Get the units of the StatArray
+    # def getUnits(self):
+    #     """Get the units of the StatArray
 
-        If the units have not been attached, returns an empty string
+    #     If the units have not been attached, returns an empty string
 
-        Returns
-        -------
-        out : str
-            The unist of the StatArray
+    #     Returns
+    #     -------
+    #     out : str
+    #         The unist of the StatArray
 
-        """
+    #     """
 
-        return "" if self.units is None else self.units
+    #     return "" if self.units is None else self.units
 
     def insert(self, i, values, axis=0):
         """ Insert values
