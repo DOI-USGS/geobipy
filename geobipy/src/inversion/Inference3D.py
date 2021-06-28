@@ -74,10 +74,11 @@ class Inference3D(myObject):
 
         self.world = world
 
+        self._mesh3d = None
         self.kdtree = None
         self.doi = None
         self.doi2D = None
-        self.mean3D = None
+        self._mean3D = None
         self.best3D = None
         self._facies = None
         self.system_file_path = system_file_path
@@ -693,6 +694,23 @@ class Inference3D(myObject):
 
         return meanParameters
 
+    def mesh3d(self, dx, dy):
+        """Generate a 3D mesh using dx, dy, and the apriori discretized vertical dimension before inversion.
+
+        Parameters
+        ----------
+        dx : float
+            Increment in x.
+        dy : float
+            Increment in y.
+
+        Returns
+        -------
+        geoobipy.RectilinearMesh3D : 3D rectilinear mesh with a draped top surface.
+        """
+        # Interpolate the draped surface of the mesh
+        height = self.pointcloud.interpolate(dx, dy, values=self.pointcloud.elevation, block=True)
+        return RectilinearMesh3D(xEdges=x.edges, yEdges=y.edges, zEdges=self.zGrid.edges, height=height.values)
 
     @cached_property
     def nActive(self):
@@ -703,7 +721,6 @@ class Inference3D(myObject):
             del self.lines[i].__dict__['bestData'] # Free memory
 
         return nActive
-
 
     @property
     def nPoints(self):
@@ -1298,74 +1315,8 @@ class Inference3D(myObject):
 
         self.mean3D = mean3D
 
-
-    def __getMean3D_CloughTocher(self, dx, dy, mask=None, clip=False, force=False):
-
-        # Get the discretization
-        if (dx is None):
-            tmp = self.pointcloud.bounds[1]-self.pointcloud.bounds[0]
-            dx = 0.01 * tmp
-        assert dx > 0.0, "dx must be positive!"
-
-        # Get the discretization
-        if (dy is None):
-            tmp = self.pointcloud.bounds[3]-self.pointcloud.bounds[2]
-            dy = 0.01 * tmp
-        assert dy > 0.0, "dy must be positive!"
-
-        tmp = np.column_stack((self.pointcloud.x, self.points.y))
-
-        # Get the points to interpolate to
-        x,y,intPoints = interpolation.getGridLocations2D(self.pointcloud.bounds, dx, dy)
-
-        # Create a distance mask
-        if mask:
-            self.pointcloud.setKdTree(nDims=2) # Set the KdTree on the data points
-            g = np.meshgrid(x,y)
-            xi = _ndim_coords_from_arrays(tuple(g), ndim=tmp.shape[1])
-            dists, indexes = self.points.kdtree.query(xi)
-            iMask = np.where(dists > mask)
-
-        # Get the value bounds
-        minV = np.nanmin(self.mean)
-        maxV = np.nanmax(self.mean)
-
-        # Initialize 3D volume
-        mean3D = StatArray.StatArray(np.zeros([self.zGrid.size, y.nCells, x.nCells], order = 'F'),name = 'Conductivity', units = '$Sm^{-1}$')
-
-        # Triangulate the data locations
-        dTri = Delaunay(tmp)
-
-        # Interpolate for each depth
-        print('Interpolating using clough tocher')
-        Bar=progressbar.ProgressBar()
-        for i in Bar(range(self.zGrid.size)):
-            # Get the model values for the current depth
-            vals1D = self.mean[i,:]
-            # Create the interpolant
-            f=CloughTocher2DInterpolator(dTri,vals1D)
-            # Interpolate to the grid
-            vals = f(intPoints)
-            # Reshape to a 2D array
-            vals = vals.reshape(y.size,x.size)
-
-            # clip values to the observed values
-            if (clip):
-                vals.clip(minV, maxV)
-
-            # Mask based on distance
-            if (mask):
-                vals[iMask] = np.nan
-
-            # Add values to the 3D array
-            mean3D[i,:,:] = vals
-        self.mean3D = mean3D #.reshape(self.zGrid.size*y.size*x.size)
-
-
-    def interpolate(self, dx, dy, values, method='ct', mask=None, clip=True, **kwargs):
-
-        return self.pointcloud.interpolate(dx=dx, dy=dy, values=values, method=method, mask=mask, clip=clip, **kwargs)
-
+    def interpolate(self, dx, dy, values, method='ct', mask=None, clip=True, i=None, block=True, **kwargs):
+        return self.pointcloud.interpolate(dx=dx, dy=dy, values=values, method=method, mask=mask, clip=clip, i=i, block=block, **kwargs)
 
     def map(self, dx, dy, values, method='ct', mask = None, clip = True, **kwargs):
         """ Create a map of a parameter """
@@ -1418,6 +1369,26 @@ class Inference3D(myObject):
         # out[out <= 0.0] = np.nan
 
         return StatArray.StatArray(out, p.name, p.units)
+
+    def interpolate_3d(self, dx, dy, variable, block=True, filename=None, **kwargs):
+
+        tmp = self.depthSlice(depth=self.zGrid.centres[0], variable=variable, **kwargs)
+        x, y, values, dum = self.interpolate(dx, dy, values=tmp, block=block, **kwargs)
+
+        out = Model(self.mesh3D)
+        out.values[0, :, :] = values
+
+        for i in range(1, self.zGrid.nCells.value):
+            tmp = self.depthSlice(depth=self.zGrid.centres[i], variable=variable, **kwargs)
+            x, y, values, dum = self.interpolate(dx, dy, values=tmp, block=block, **kwargs)
+            values, dum = cF._log(values, kwargs.get('log', None))
+            out.values[i, :, :] = values
+
+        # Save the 3D model
+        if not filename is None:
+            out.toHdf("{}_{}_{}.h5".format(variable, dx, dy), "{}_3d".format(variable))
+
+        return out
 
     def scatter_z_slice_animate(self, variable, filename, **kwargs):
 
@@ -1509,7 +1480,6 @@ class Inference3D(myObject):
             kwargs['alpha'] = a
 
         return self.map(dx, dy, vals1D, method=method, mask = mask, clip = clip, **kwargs)
-
 
     def mapElevation(self,dx, dy, mask = None, clip = True, **kwargs):
         """ Create a map of a parameter """
