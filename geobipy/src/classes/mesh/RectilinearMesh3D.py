@@ -131,7 +131,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
                 assert np.all(values.shape == self.shape[1:]), ValueError("height must have shape {}".format(self.shape[1:]))
                 self._height = values
             else:
-                self._height = Model(mesh = self[0, :, :], values=height)
+                self._height = Model(mesh = self[0, :, :], values=values)
 
     def other_axis(self, axis):
 
