@@ -114,3 +114,20 @@ class Model(myObject):
         mesh, values = self.mesh.resample(dx, dy, self.values, kind='cubic')
 
         return Model(mesh, values)
+
+    def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
+        # create a new group inside h5obj
+        # grp = self.mesh.createHdf(parent, name, withPosterior, nRepeats, fillvalue)
+        self.mesh.writeHdf(parent, name, withPosterior=withPosterior, index=index)
+        grp = h5obj.get(name)
+        self.values.createHdf(grp, 'values', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        return grp
+
+    def writeHdf(self, parent, name, withPosterior=True, index=None):
+        self.values.writeHdf(parent, name, 'values',  withPosterior=withPosterior, index=index)
+
+    def fromHdf(self, grp, index=None):
+        """ Reads in the object from a HDF file """
+        self._mesh = read_hdf5.read_item(h5obj, index=index)
+        self._values = StatArray.StatArray().fromHdf(grp['values'], index)
+        return self
