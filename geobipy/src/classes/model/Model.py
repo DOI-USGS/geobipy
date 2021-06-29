@@ -3,6 +3,7 @@ Module describing a Model
 """
 import numpy as np
 from ..core.myObject import myObject
+from ...base.HDF import hdfRead
 from ..core import StatArray
 
 
@@ -18,7 +19,7 @@ class Model(myObject):
 
     """
 
-    def __init__(self, mesh, values=None):
+    def __init__(self, mesh=None, values=None):
         """ Instantiate a 2D histogram """
         if (mesh is None):
             return
@@ -26,6 +27,10 @@ class Model(myObject):
         self._mesh = mesh
         # Assign the values
         self.values = values
+
+    def __getitem__(self, slic):
+        mesh = self.mesh[slic]
+        return Model(mesh, values = self.values[slic])
 
     @property
     def shape(self):
@@ -41,7 +46,7 @@ class Model(myObject):
             self._values = StatArray.StatArray(self.shape)
             return
 
-        assert np.all(values.shape == self.shape), ValueError("values must have shape {}".format(self.shape))
+        # assert np.all(values.shape == self.shape), ValueError("values must have shape {}".format(self.shape))
         self._values = StatArray.StatArray(values)
 
     @property
@@ -64,8 +69,8 @@ class Model(myObject):
     def y(self):
         return self.mesh.y
 
-    def interpolate_centres_to_nodes(self, kind='cubic'):
-        return self.mesh.interpolate_centres_to_nodes(self.values, kind=kind, fill_value="extrapolate")
+    def interpolate_centres_to_nodes(self, kind='cubic', **kwargs):
+        return self.mesh.interpolate_centres_to_nodes(self.values, kind=kind, **kwargs)
 
     def pcolor(self, **kwargs):
         """Plot the Histogram2D as an image
@@ -102,7 +107,7 @@ class Model(myObject):
 
     def pyvista_mesh(self, **kwargs):
         mesh = self.mesh.pyvista_mesh(**kwargs)
-        mesh.cell_arrays[self.values.label] = self.values.flatten()
+        mesh.cell_arrays[self.values.label] = self.values.ravel()
 
         return mesh
 
@@ -117,17 +122,16 @@ class Model(myObject):
 
     def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
         # create a new group inside h5obj
-        # grp = self.mesh.createHdf(parent, name, withPosterior, nRepeats, fillvalue)
-        self.mesh.writeHdf(parent, name, withPosterior=withPosterior, index=index)
-        grp = h5obj.get(name)
+        grp = self.create_hdf_group(parent, name)
+        self.mesh.toHdf(grp, 'mesh', withPosterior=withPosterior)
         self.values.createHdf(grp, 'values', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         return grp
 
     def writeHdf(self, parent, name, withPosterior=True, index=None):
-        self.values.writeHdf(parent, name, 'values',  withPosterior=withPosterior, index=index)
+        self.values.writeHdf(parent, name+'/values',  withPosterior=withPosterior, index=index)
 
     def fromHdf(self, grp, index=None):
         """ Reads in the object from a HDF file """
-        self._mesh = read_hdf5.read_item(h5obj, index=index)
+        self._mesh = hdfRead.read_item(grp['mesh'], index=index)
         self._values = StatArray.StatArray().fromHdf(grp['values'], index)
         return self
