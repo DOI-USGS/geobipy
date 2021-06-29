@@ -23,7 +23,7 @@ from ..classes.statistics.Histogram1D import Histogram1D
 from ..classes.statistics.Hitmap2D import Hitmap2D
 from ..classes.statistics.mixPearson import mixPearson
 from ..classes.pointcloud.PointCloud3D import PointCloud3D
-from ..classes.model.Model2D_RM import Model2D_RM
+# from ..classes.model.Model2D_RM import Model2D_RM
 from ..base import interpolation as interpolation
 from .inference import initialize
 from .Inference1D import Inference1D
@@ -408,7 +408,8 @@ class Inference3D(myObject):
         i = pd.unique(i)
 
         values = self._get(variable)[:, i]
-        slic = Model2D_RM(xCentres=self.x[i], yCentres=self.y[i], zEdges=self.zGrid.edges, heightCentres=self.height[i], values=values)
+        mesh2d = RectilinearMesh2D(xCentres=self.x[i], yCentres=self.y[i], zEdges=self.zGrid.edges, heightCentres=self.height[i])
+        slic = Model(mesh2d, values=values)
 
         return slic
 
@@ -710,7 +711,7 @@ class Inference3D(myObject):
         """
         # Interpolate the draped surface of the mesh
         height = self.pointcloud.interpolate(dx, dy, values=self.pointcloud.elevation, block=True)
-        return RectilinearMesh3D(xEdges=x.edges, yEdges=y.edges, zEdges=self.zGrid.edges, height=height.values)
+        return RectilinearMesh3D(xEdges=height.x.edges, yEdges=height.y.edges, zEdges=self.zGrid.edges, height=height.values)
 
     @cached_property
     def nActive(self):
@@ -1366,11 +1367,16 @@ class Inference3D(myObject):
             tmp = line.depthSlice(depth, p, **kwargs)
             out[self.lineIndices[i]] = tmp
 
-        # out[out <= 0.0] = np.nan
-
         return StatArray.StatArray(out, p.name, p.units)
 
-    def interpolate_3d(self, dx, dy, variable, block=True, filename=None, **kwargs):
+    def interpolate_3d(self, dx, dy, variable, block=True, **kwargs):
+
+        if self.parallel_access:
+            return self._interpolate_3d_mpi(dx, dy, variable, block=block, **kwargs)
+        else:
+            return self._interpolate_3d(dx, dy, variable, block=block, **kwargs)
+
+    def _interpolate_3d(self, dx, dy, variable, block=True, **kwargs):
 
         tmp = self.depthSlice(depth=self.zGrid.centres[0], variable=variable, **kwargs)
         x, y, values, dum = self.interpolate(dx, dy, values=tmp, block=block, **kwargs)
@@ -1385,10 +1391,35 @@ class Inference3D(myObject):
             out.values[i, :, :] = values
 
         # Save the 3D model
-        if not filename is None:
-            out.toHdf("{}_{}_{}.h5".format(variable, dx, dy), "{}_3d".format(variable))
+        out.toHdf("{}_{}_{}.h5".format(variable, dx, dy), "{}_3d".format(variable))
 
         return out
+
+    def _interpolate_3d_mpi(self, dx, dy, variable, block=True, **kwargs):
+
+        starts, chunks = loadBalance1D_shrinkingArrays(self.zGrid.size, self.world.size)
+        ends = starts + chunks
+        tmp = self.depthSlice(depth=starts[self.world.rank], variable=variable, **kwargs)
+        values, dum = self.interpolate(dx, dy, values=tmp, block=block, **kwargs)
+        # values, dum = cF._log(values, kwargs.get('log', None))
+
+        out = Model(self.mesh3D)
+
+        f = h5py.File("{}_{}_{}.h5".format(variable, dx, dy), 'w', driver='mpio', comm=world)
+        out.createHdf(f, "{}_3d".format(variable))
+
+        self.world.barrier()
+
+        values.writeHdf(f, "{}_3d".format(variable), index=starts[self.world.rank])
+
+        for i in range(starts[world.rank]+1, ends[world.rank]):
+            tmp = self.depthSlice(depth=i, variable=variable, **kwargs)
+            values, dum = self.interpolate(dx, dy, values=tmp, block=block, **kwargs)
+            # values, dum = cF._log(values, kwargs.get('log', None))
+            values.writeHdf(f, "{}_3d".format(variable), index=starts[i])
+
+        f.close()
+
 
     def scatter_z_slice_animate(self, variable, filename, **kwargs):
 
