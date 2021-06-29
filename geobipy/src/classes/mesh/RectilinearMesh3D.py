@@ -73,20 +73,13 @@ class RectilinearMesh3D(RectilinearMesh2D):
     def __init__(self, xCentres=None, xEdges=None, yCentres=None, yEdges=None, zCentres=None, zEdges=None, height=None, **kwargs):
         """ Initialize a 2D Rectilinear Mesh"""
 
+        self._height = None
+        super().__init__(xCentres, xEdges, yCentres, yEdges, zCentres, zEdges, **kwargs)
+
         if (all(x is None for x in [xCentres, yCentres, zCentres, xEdges, yEdges, zEdges])):
             return
 
-        super().__init__(xCentres, xEdges, yCentres, yEdges, zCentres, zEdges, **kwargs)
-
-        self._height = None
-        if not height is None:
-            self._height = Model(mesh = self[0, :, :], values=height)
-
-
-    @property
-    def height(self):
-        return self._height
-
+        self.height = height
 
     def __getitem__(self, slic):
         """Slice into the mesh. """
@@ -98,7 +91,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
             if not isinstance(x, int):
                 tmp = x
                 if isinstance(x.stop, int):
-                    tmp = slice(x.start, x.stop+1, x.step) # If a slice, add one to the end for bins.
+                    tmp = slice(x.start, x.stop+1, x.step)
             else:
                 tmp = x
                 axis.append(i)
@@ -109,36 +102,54 @@ class RectilinearMesh3D(RectilinearMesh2D):
         slic = tuple(slic)
 
         if len(axis) == 0:
-            height = None if self.height is None else self.height[slic[1], slic[2]]
-            out = RectilinearMesh3D(xEdges=self._x.edges[slic[2]], yEdges=self._y.edges[slic[1]], zEdges=self._z.edges[slic[0]])
+            height = None if self.height is None else self.height[slic0[1], slic0[2]]
+            out = RectilinearMesh3D(xEdges=self._x.edges[slic[2]], yEdges=self._y.edges[slic[1]], zEdges=self._z.edges[slic[0]], height=height)
             return out
 
         if len(axis) == 1:
             a = [x for x in (0, 1, 2) if not x in axis]
-            out = RectilinearMesh2D(xEdges=self.axis(a[1]).edges[slic[a[1]]], yEdges=self.axis(a[0]).edges[slic[a[0]]])
+            b = [x for x in (0, 1, 2) if x in axis]
+            height = None
+            if b[0] != 0:
+                height = None if self.height is None else self.height[slic0[1], slic0[2]].values
+            out = RectilinearMesh2D(xEdges=self.axis(a[1]).edges[slic[a[1]]], yEdges=self.axis(a[0]).edges[slic[a[0]]], heightCentres=height)
+
         else:
             a = [x for x in (0, 1, 2) if not x in axis][0]
             out = RectilinearMesh1D(edges=self.axis(a).edges[slic[a]])
 
         return out
 
+    @property
+    def height(self):
+        return self._height
+
+    @height.setter
+    def height(self, values):
+        if not values is None:
+            if isinstance(values, Model):
+                assert np.all(values.shape == self.shape[1:]), ValueError("height must have shape {}".format(self.shape[1:]))
+                self._height = values
+            else:
+                self._height = Model(mesh = self[0, :, :], values=height)
+
     def other_axis(self, axis):
 
         if axis == 0:
-            return self.y, self.z
+            return self.x, self.y
         elif axis == 1:
             return self.x, self.z
         elif axis == 2:
-            return self.x, self.y
+            return self.y, self.z
 
 
     def axis(self, axis):
         if axis == 0:
-            return self.x
+            return self.z
         elif axis == 1:
             return self.y
         elif axis == 2:
-            return self.z
+            return self.x
 
     def other_axis_indices(self, axis):
         if axis == 0:
@@ -185,16 +196,13 @@ class RectilinearMesh3D(RectilinearMesh2D):
         return (self.z.nCells.value, self.y.nCells.value, self.x.nCells.value)
 
     @property
-    def x(self):
-        return self._x
-
-    @property
-    def y(self):
-        return self._y
-
-    @property
     def z(self):
         return self._z
+
+    @z.setter
+    def z(self, values):
+        assert isinstance(values, RectilinearMesh1D)
+        self._z = values
 
     def _mean(self, values, log=None, axis=0):
 
@@ -541,10 +549,10 @@ class RectilinearMesh3D(RectilinearMesh2D):
         """
         import pyvista as pv
 
-        x, y, z = np.meshgrid(self.x.edges, self.y.edges, self.z.edges)
+        x, y, z = np.meshgrid(self.y.edges, self.x.edges, self.z.edges, indexing='xy')
 
         if not self.height is None:
-            nz = self.height.interpolate_centres_to_nodes()
+            nz = self.height.interpolate_centres_to_nodes().T
             z = nz[:, :, None] - z
 
         mesh = pv.StructuredGrid(x, y, z)
@@ -604,22 +612,22 @@ class RectilinearMesh3D(RectilinearMesh2D):
         myName: object hdf name. Assumes createHdf has already been called
         create: optionally create the data set as well before writing
         """
-        grp = h5obj.get(name)
+        grp = parent.get(name)
         self.x.writeHdf(grp, 'x',  withPosterior=withPosterior, index=index)
         self.y.writeHdf(grp, 'y',  withPosterior=withPosterior, index=index)
         self.z.writeHdf(grp, 'z',  withPosterior=withPosterior, index=index)
         if not self.height is None:
-            self.height.createHdf(grp, 'height', withPosterior=withPosterior
+            self.height.writeHdf(grp, 'height', withPosterior=withPosterior, index=index)
 
 
     def fromHdf(self, grp, index=None):
         """ Reads in the object from a HDF file """
-        x = RectilinearMesh1D().fromHdf(grp['x'], index=index)
-        y = RectilinearMesh1D().fromHdf(grp['y'], index=index)
-        z = RectilinearMesh1D().fromHdf(grp['z'], index=index)
-        self.__init__(xCentres=x, yCentres=y, zCentres=z)
+        self.__init__()
+        self.x = RectilinearMesh1D().fromHdf(grp['x'], index=index)
+        self.y = RectilinearMesh1D().fromHdf(grp['y'], index=index)
+        self.z = RectilinearMesh1D().fromHdf(grp['z'], index=index)
         if 'height' in grp:
-            self._height = read_item(grp['height'], index=index)
+            self.height = Model().fromHdf(grp['height'], index=index)
         return self
 
 
