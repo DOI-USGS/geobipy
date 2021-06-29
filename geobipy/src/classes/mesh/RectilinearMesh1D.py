@@ -1150,10 +1150,10 @@ class RectilinearMesh1D(Mesh):
     @property
     def summary(self):
         """ Print a summary of self """
-        msg = ("Cell Centres \n"
-               "{}"
-               "Cell Edges"
-               "{}").format(
+        msg = ("Cell Centres\n"
+               "    {}"
+               "Cell Edges \n"
+               "    {}").format(
                    self._centres.summary,
                    self._edges.summary
         )
