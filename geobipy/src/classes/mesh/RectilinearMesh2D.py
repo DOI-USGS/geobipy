@@ -78,32 +78,30 @@ class RectilinearMesh2D(Mesh):
         self._z = None
         self._distance = None
         self.xyz = None
+        self._height = None
 
         if (all(x is None for x in [xCentres, yCentres, zCentres, xEdges, yEdges, zEdges])):
             return
 
         xExtras = dict((k[1:], kwargs.pop(k, None)) for k in ['xlog'])
-        self._x = RectilinearMesh1D.RectilinearMesh1D(centres=xCentres, edges=xEdges, relativeTo=kwargs.pop('xrelativeTo', 0.0), **xExtras)
+        self.x = RectilinearMesh1D.RectilinearMesh1D(centres=xCentres, edges=xEdges, relativeTo=kwargs.pop('xrelativeTo', 0.0), **xExtras)
 
         yExtras = dict((k[1:], kwargs.pop(k, None)) for k in ['ylog'])
-        self._y = RectilinearMesh1D.RectilinearMesh1D(centres=yCentres, edges=yEdges, relativeTo=kwargs.pop('yrelativeTo', 0.0),  **yExtras)
+        self.y = RectilinearMesh1D.RectilinearMesh1D(centres=yCentres, edges=yEdges, relativeTo=kwargs.pop('yrelativeTo', 0.0),  **yExtras)
 
-        self._xyz = False
+        self.xyz = False
         self._z = self._y
 
         if (not zCentres is None or not zEdges is None):
-            assert self._x.nCells == self._y.nCells, Exception("x and y axes must have the same number of cells.")
-
             zExtras = dict((k[1:], kwargs.pop(k, None)) for k in ['zlog'])
-            self._z = RectilinearMesh1D.RectilinearMesh1D(centres=zCentres, edges=zEdges, relativeTo=kwargs.pop('zrelativeTo', 0.0), **zExtras)
+            self.z = RectilinearMesh1D.RectilinearMesh1D(centres=zCentres, edges=zEdges, relativeTo=kwargs.pop('zrelativeTo', 0.0), **zExtras)
             self.xyz = True
 
-        self._height = None
         if not ((heightCentres is None) and (heightEdges is None)):
             # mesh of the z axis values
             self._height = RectilinearMesh1D.RectilinearMesh1D(centres=heightCentres, edges=heightEdges)
 
-            assert self.height.nCells == self.x.nCells, Exception("heights must have enough values for {} cells or {} edges.".format(self.x.nCells, self.x.nEdges))
+            assert self.height.nCells == self.x.nCells, Exception("heights must have enough values for {} cells or {} edges.\nInstead got {}".format(self.x.nCells, self.x.nEdges, self.height.nCells))
 
     def __getitem__(self, slic):
         """Allow slicing of the histogram.
@@ -132,11 +130,12 @@ class RectilinearMesh2D(Mesh):
             height = self.height.edges[slic[1]] if not self.height is None else None
             if self.xyz:
                 out = type(self)(xEdges=self._x.edges[slic[1]], yEdges=self._y.edges[slic[1]], zEdges=self._z.edges[slic[0]], heightEdges=height)
+                return out
             else:
                 out = type(self)(xEdges=self._x.edges[slic[1]], yEdges=self._z.edges[slic[0]], heightEdges=height)
             return out
 
-        out = RectilinearMesh1D.RectilinearMesh1D(edges=self.axis(axis).edges[slic[1-axis]])
+        out = RectilinearMesh1D.RectilinearMesh1D(edges=self.axis(1-axis).edges[slic[1-axis]])
         return out
 
     @property
@@ -160,6 +159,9 @@ class RectilinearMesh2D(Mesh):
     def height(self):
         return self._height
 
+    @height.setter
+    def height(self, values):
+        self._height = values
 
     @property
     def nCells(self):
@@ -209,6 +211,7 @@ class RectilinearMesh2D(Mesh):
 
     @x.setter
     def x(self, values):
+        assert isinstance(values, RectilinearMesh1D.RectilinearMesh1D)
         self._x = values
 
     @property
@@ -217,6 +220,7 @@ class RectilinearMesh2D(Mesh):
 
     @y.setter
     def y(self, values):
+        assert isinstance(values, RectilinearMesh1D.RectilinearMesh1D)
         self._y = values
 
     @property
@@ -225,6 +229,8 @@ class RectilinearMesh2D(Mesh):
 
     @z.setter
     def z(self, values):
+        assert self.x.nCells == self.y.nCells, Exception("x and y axes must have the same number of cells.")
+        assert isinstance(values, RectilinearMesh1D.RectilinearMesh1D)
         self._z = values
 
 
@@ -381,9 +387,9 @@ class RectilinearMesh2D(Mesh):
 
     def other_axis(self, axis):
         if axis == 0:
-            return self.z
-        else:
             return self.x
+        else:
+            return self.z
 
 
     def axis(self, axis):
@@ -402,9 +408,9 @@ class RectilinearMesh2D(Mesh):
                 return self.distance
 
         if axis == 0:
-            return self.x
-        elif axis == 1:
             return self.z
+        elif axis == 1:
+            return self.x
 
 
     def xGradientMatrix(self):
@@ -462,6 +468,8 @@ class RectilinearMesh2D(Mesh):
         return mesh, f(mesh.x.centres, mesh.y.centres)
 
     def interpolate_centres_to_nodes(self, values, kind='cubic'):
+        if self.x.nCells <= 3 or self.y.nCells <= 3:
+            kind = 'linear'
         f = interpolate.interp2d(self.x.centres, self.y.centres, values, kind=kind)
         return f(self.x.edges, self.y.edges)
 
@@ -901,7 +909,12 @@ class RectilinearMesh2D(Mesh):
 
     @property
     def summary(self):
-        return
+        """ Display a summary of the 3D Point Cloud """
+        msg = ("2D Rectilinear Mesh: \n"
+              "Shape: : {} \n{}{}{}").format(self.shape, self.x.summary, self.y.summary, self.z.summary)
+        if not self.height is None:
+            msg += self.height.summary
+        return msg
 
 
     def plotXY(self, **kwargs):
@@ -958,26 +971,16 @@ class RectilinearMesh2D(Mesh):
 
     def fromHdf(self, grp, index=None):
         """ Reads in the object from a HDF file """
-        x = RectilinearMesh1D.RectilinearMesh1D().fromHdf(grp['x'], index=index)
-        y = RectilinearMesh1D.RectilinearMesh1D().fromHdf(grp['y'], index=index)
-
-        z = None
-        if 'z' in grp:
-            z = RectilinearMesh1D.RectilinearMesh1D().fromHdf(grp['z'], index=index)
-
-            if z.nCells.value == y.nCells.value:
-                z = None
 
         RectilinearMesh2D.__init__(self)
-        self.x = x
-        self.y = y
-        self._xyz = False
 
-        if not z is None:
-            self.z = z
-            self._xyz = True
-        else:
-            self._z = self._y
+        self.x = RectilinearMesh1D.RectilinearMesh1D().fromHdf(grp['x'], index=index)
+        self.y = RectilinearMesh1D.RectilinearMesh1D().fromHdf(grp['y'], index=index)
+        self._z = self._y
+
+        if 'z' in grp:
+            self.z = RectilinearMesh1D.RectilinearMesh1D().fromHdf(grp['z'], index=index)
+            self.xyz = True
 
         if 'height' in grp:
             self._height = RectilinearMesh1D.RectilinearMesh1D().fromHdf(grp['height'], index=index)
