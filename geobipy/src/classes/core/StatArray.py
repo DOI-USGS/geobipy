@@ -150,6 +150,10 @@ class StatArray(np.ndarray, myObject):
             if (shape.hasPosterior):
                 # deepcopy(shape._posterior)
                 self._posterior = shape._posterior
+            if name is None and not shape._name is None:
+                name = shape._name
+            if units is None and not shape._units is None:
+                units = shape._units
 
         # Can pass in a numpy function call like arange(10) as the first argument
         elif isinstance(shape, np.ndarray):
