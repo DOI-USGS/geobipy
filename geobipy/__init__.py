@@ -451,7 +451,7 @@ def workerTask(_DataPoint, UP, prng, world, lineNumbers, Inference2D):
         continueRunning = world.recv(source=0)
 
         if failed:
-            print("Datapoint {} failed to converge".format(DataPoint.fiducial))
+            myMPI.print("Datapoint {} failed to converge".format(DataPoint.fiducial))
 
         # If we continue running, receive the next DataPoint. Otherwise, shutdown the rank
         if continueRunning:
