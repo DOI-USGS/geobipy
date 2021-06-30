@@ -150,6 +150,10 @@ class StatArray(np.ndarray, myObject):
             if (shape.hasPosterior):
                 # deepcopy(shape._posterior)
                 self._posterior = shape._posterior
+            if name is None and not shape._name is None:
+                name = shape._name
+            if units is None and not shape._units is None:
+                units = shape._units
 
         # Can pass in a numpy function call like arange(10) as the first argument
         elif isinstance(shape, np.ndarray):
@@ -376,12 +380,21 @@ class StatArray(np.ndarray, myObject):
         return StatArray(self)
 
     def copyStats(self, other):
-        # if self.hasPrior:
-        #     other._prior = self._prior.deepcopy()
-        # if self.hasProposal:
-        #     other._proposal = self._proposal.deepcopy()
-        if self.hasPosterior:
-            other._posterior = self._posterior
+        """Copy statistical properties from other to self
+
+        [extended_summary]
+
+        Parameters
+        ----------
+        other : [type]
+            [description]
+        """
+        if other.hasPrior:
+            self._prior = deepcopy(other._prior)
+        if other.hasProposal:
+            self._proposal = deepcopy(other._proposal)
+        if other.hasPosterior:
+            self._posterior = other._posterior
 
     def deepcopy(self):
         """Create a deepcopy
@@ -431,7 +444,7 @@ class StatArray(np.ndarray, myObject):
         out = self.resize(tmp.shape)
         out[:] = tmp[:]
 
-        self.copyStats(out)
+        out.copyStats(self)
         return out
 
     def edges(self, min=None, max=None, axis=-1):
@@ -502,6 +515,10 @@ class StatArray(np.ndarray, myObject):
         msk = self != 0.0
         return np.where(msk.any(axis=axis), msk.argmax(axis=axis), invalid_val)
 
+    @property
+    def label(self):
+        return self.getNameUnits()
+
     def getNameUnits(self):
         """Get the name and units
 
@@ -513,37 +530,37 @@ class StatArray(np.ndarray, myObject):
             String containing name(units).
 
         """
-        out = self.getName()
-        u = self.getUnits()
+        out = self.name
+        u = self.units
         return out if u == "" else "{} ({})".format(out, u)
 
-    def getName(self):
-        """Get the name of the StatArray
+    # def getName(self):
+    #     """Get the name of the StatArray
 
-        If the name has not been attached, returns an empty string
+    #     If the name has not been attached, returns an empty string
 
-        Returns
-        -------
-        out : str
-            The name of the StatArray.
+    #     Returns
+    #     -------
+    #     out : str
+    #         The name of the StatArray.
 
-        """
+    #     """
 
-        return "" if self.name is None else self.name
+    #     return "" if self.name is None else self.name
 
-    def getUnits(self):
-        """Get the units of the StatArray
+    # def getUnits(self):
+    #     """Get the units of the StatArray
 
-        If the units have not been attached, returns an empty string
+    #     If the units have not been attached, returns an empty string
 
-        Returns
-        -------
-        out : str
-            The unist of the StatArray
+    #     Returns
+    #     -------
+    #     out : str
+    #         The unist of the StatArray
 
-        """
+    #     """
 
-        return "" if self.units is None else self.units
+    #     return "" if self.units is None else self.units
 
     def insert(self, i, values, axis=0):
         """ Insert values
@@ -568,7 +585,7 @@ class StatArray(np.ndarray, myObject):
         out = self.resize(tmp.shape)  # Keeps the prior and proposal if set.
         out[:] = tmp[:]
 
-        self.copyStats(out)
+        out.copyStats(self)
         return out
 
     def interleave(self, other):

@@ -232,7 +232,7 @@ class EmDataPoint(DataPoint):
 
         c = StatArray.StatArray(np.logspace(minConductivity, maxConductivity, nSamples), 'Conductivity', '$S/m$')
         PhiD = StatArray.StatArray(c.size, 'Normalized Data Misfit', '')
-        mod = Model1D(1)
+        mod = Model1D(1, edges=np.asarray([0.0, np.inf]))
         for i in range(c.size):
             mod.par[0] = c[i]
             self.forward(mod)

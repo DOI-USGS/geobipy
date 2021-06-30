@@ -52,8 +52,10 @@ from .src.classes.mesh.RectilinearMesh2D import RectilinearMesh2D
 from .src.classes.mesh.RectilinearMesh3D import RectilinearMesh3D
 from .src.classes.mesh.TopoRectilinearMesh2D import TopoRectilinearMesh2D
 # Models
+from .src.classes.model.Model import Model
 from .src.classes.model.Model1D import Model1D
-from .src.classes.model.Model2D import Model2D
+# from .src.classes.model.Model2D import Model2D
+# from .src.classes.model.Model3D import Model3D
 from .src.classes.model.AarhusModel import AarhusModel
 # Pointclouds
 from .src.classes.pointcloud.PointCloud3D import PointCloud3D
@@ -117,6 +119,7 @@ def serial_geobipy(inputFile, output_directory, seed=None, index=None):
     assert inputFile.exists(), Exception("Cannot find input file {}".format(inputFile))
 
     output_directory = pathlib.Path(output_directory)
+    assert output_directory.exists(), Exception("Make sure the output directory exists {}".format(output_directory))
 
     # Make sure the results folders exist
     makedirs(output_directory, exist_ok=True)
@@ -212,6 +215,7 @@ def parallel_mpi(inputFile, outputDir, skipHDF5):
     inputFile = pathlib.Path(inputFile)
     assert inputFile.exists(), Exception("Cannot find input file {}".format(inputFile))
     output_directory = pathlib.Path(outputDir)
+    assert output_directory.exists(), Exception("Make sure the output directory exists {}".format(output_directory))
 
     UP = import_module(str(inputFile.with_suffix('')), package='geobipy')
     assert 'data_type' in UP.__dict__, ValueError(("Please specify the data_type in the parameter file. \n"
@@ -414,8 +418,6 @@ def masterTask(Dataset, world):
         elapsed = str(timedelta(seconds=e))
         eta = str(timedelta(seconds=(nPoints / nFinished-1) * e))
         myMPI.print("Remaining Points {}/{} || Elapsed Time: {} h:m:s || ETA {} h:m:s".format(nPoints-nFinished, nPoints, elapsed, eta))
-        # myMPI.print('Inverted data point {} in {:.3f}s  ||  Time: {:.3f}s  ||  QueueLength: {}/{}  ||  ETA: {:.3f}s'.format(dataPointProcessed, rankRecv[2], elapsed, nPoints-nFinished, nPoints, eta))
-
 
 def workerTask(_DataPoint, UP, prng, world, lineNumbers, Inference2D):
     """ Define a wait run ping procedure for each worker """

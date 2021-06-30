@@ -69,10 +69,11 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
 
         if (heightCentres is None) and (heightEdges is None):
             heightEdges = np.zeros(self.x.nEdges)
+
         # mesh of the z axis values
         self._height = RectilinearMesh1D(centres=heightCentres, edges=heightEdges)
 
-        assert self._height.nCells == self._x.nCells, Exception("heights must have enough values for {} cells or {} edges.".format(self.x.nCells, self.x.nEdges))
+        assert self.height.nCells == self.x.nCells, Exception("heights must have enough values for {} cells or {} edges.".format(self.x.nCells, self.x.nEdges))
 
         self._xMesh = self.xMesh()
         self._zMesh = self.zMesh()
@@ -147,8 +148,10 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
 
         """
 
-        assert xAxis in ['x', 'y', 'r'], Exception("xAxis must be either 'x', 'y' or 'r'")
-        if xAxis == 'x':
+        # assert xAxis in ['x', 'y', 'r'], Exception("xAxis must be either 'x', 'y' or 'r'")
+        if xAxis == 'index':
+            xMesh = StatArray.StatArray(np.repeat(np.arange(self.x.nEdges, dtype=np.float64)[np.newaxis, :], self.z.nCells+1, 0))
+        elif xAxis == 'x':
             xMesh = np.repeat(self.x.edges[np.newaxis, :], self.z.nCells+1, 0)
         elif xAxis == 'y':
             assert self.xyz, Exception("To plot against 'y' the mesh must be instantiated with three co-ordinates")
@@ -228,19 +231,22 @@ class TopoRectilinearMesh2D(RectilinearMesh2D):
         # assert isinstance(values, StatArray), TypeError("values must be a StatArray")
         assert np.all(values.shape == self.shape), ValueError("values must have shape {} but have shape {}".format(self.shape, values.shape))
 
-        x_distance = kwargs.pop('x_distance', None)
-        z_distance = kwargs.pop('z_distance', None)
+        if zAxis == 'relative':
+            return super().pcolor(values, xAxis='x', **kwargs)
+
+        x_mask = kwargs.pop('x_mask', None)
+        z_mask = kwargs.pop('z_mask', None)
 
         masked = self
-        if np.sum([x is None for x in [x_distance, z_distance]]) < 2:
-            masked, x_indices, z_indices, values = self.mask_cells(xAxis, x_distance, z_distance, values)
+        if np.sum([x is None for x in [x_mask, z_mask]]) < 2:
+            masked, x_indices, z_indices, values = self.mask_cells(xAxis, x_mask, z_mask, values)
             xAxis='x'
 
         xm = masked.xMesh(xAxis=xAxis)
         zm = masked.zMesh(zAxis=zAxis)
 
-        if zAxis.lower() == 'relative':
-            kwargs['flipY'] = kwargs.pop('flipY', True)
+        # if zAxis.lower() == 'relative':
+        #     kwargs['flipY'] = kwargs.pop('flipY', True)
 
         ax, pm, cb = cP.pcolormesh(xm, zm, values, **kwargs)
         cP.xlabel(xm.getNameUnits())

@@ -8,6 +8,9 @@ from ...base import utilities as cf
 from ...base import plotting as cP
 from .Point import Point
 from ...base import MPI
+from ..mesh.RectilinearMesh1D import RectilinearMesh1D
+from ..mesh.RectilinearMesh2D import RectilinearMesh2D
+from..model.Model import Model
 from scipy.spatial import cKDTree
 
 try:
@@ -194,6 +197,128 @@ class PointCloud3D(myObject):
         """Gets the bounding box of the data set """
         return np.asarray([np.nanmin(self.x), np.nanmax(self.x), np.nanmin(self.y), np.nanmax(self.y)])
 
+    def block_indices(self, dx, dy):
+        """Returns the indices of the points lying in blocks across the domain..
+
+        Performed before a block median filter by extracting the point location within blocks across the domain.
+        Idea taken from pygmt, however I extracted the indices and this was quite a bit faster.
+
+        Parameters
+        ----------
+        dx : float
+            Grid spacing in x.
+        dy : float
+            Grid spacing in y.
+
+        Returns
+        -------
+        ints : Index into self whose points are the median location within blocks across the domain.
+        """
+        bounds = self.bounds
+        d = (dx, dy)
+        n = np.empty(2, dtype=np.int32)
+
+        for k, (i,j) in enumerate(zip((0, 2),(1, 3))):
+            n[k] = np.floor((bounds[j] - bounds[i])/d[k]) + 1
+            mid = 0.5 * (bounds[i] + bounds[j])
+            s = 0.5 * n[k] * d[k]
+            bounds[i] = mid - s
+            bounds[j] = mid + s
+
+        ax = RectilinearMesh1D(edges=np.linspace(bounds[0], bounds[1], n[0]+1))
+        ix = ax.cellIndex(self.x)
+        ax = RectilinearMesh1D(edges=np.linspace(bounds[2], bounds[3], n[1]+1))
+        iy = ax.cellIndex(self.y)
+
+        return np.ravel_multi_index([ix, iy], n)
+
+
+    def block_mean(self, dx, dy, values=None):
+
+        i_cell = self.block_indices(dx, dy)
+
+        isort = np.argsort(i_cell)
+        n_new = np.unique(i_cell).size
+        cuts = np.hstack([0, np.squeeze(np.argwhere(np.diff(i_cell[isort]) > 0)), i_cell.size])
+
+        if values is None:
+            values = self.z
+
+        x_new = np.empty(n_new)
+        y_new = np.empty(n_new)
+        z_new = np.empty(n_new)
+        e_new = np.empty(n_new)
+
+        for i in range(cuts.size-1):
+            i_cut = isort[cuts[i]:cuts[i+1]]
+            x_new[i] = np.mean(self.x[i_cut])
+            y_new[i] = np.mean(self.y[i_cut])
+            z_new[i] = np.mean(self.z[i_cut])
+            e_new[i] = np.mean(self.elevation[i_cut])
+
+        return PointCloud3D(x=x_new, y=y_new, z=z_new, elevation=e_new)
+
+
+    def block_median_indices(self, dx, dy, values=None):
+        """Index to the median point within juxtaposed blocks across the domain.
+
+        Parameters
+        ----------
+        dx : float
+            Increment in x.
+        dy : float
+            Increment in y.
+        values : array_like, optional
+            Used to compute the median in each block.
+            Defaults to None.
+
+        Returns
+        -------
+        ints : Index of the median point in each block.
+        """
+
+        i_cell = self.block_indices(dx, dy)
+
+        isort = np.argsort(i_cell)
+        n_new = np.unique(i_cell).size
+
+        cuts = np.squeeze(np.argwhere(np.diff(i_cell[isort]) > 0))
+        if cuts[0] != 0:
+            cuts = np.hstack([0, cuts])
+        if cuts[-1] != i_cell.size:
+            cuts = np.hstack([cuts, i_cell.size])
+
+        if values is None:
+            values = self.z
+
+        i_new = np.empty(cuts.size-1, dtype=np.int64)
+        for i in range(cuts.size-1):
+            i_cut = isort[cuts[i]:cuts[i+1]]
+            tmp = values[i_cut]
+            i_new[i] = i_cut[np.argpartition(tmp, tmp.size // 2)[tmp.size // 2]]
+
+        return i_new
+
+
+    def block_median(self, dx, dy, values=None):
+        """Median point within juxtaposed blocks across the domain.
+
+        Parameters
+        ----------
+        dx : float
+            Increment in x.
+        dy : float
+            Increment in y.
+        values : array_like, optional
+            Used to compute the median in each block.
+            Defaults to None.
+
+        Returns
+        -------
+        geobipt.PointCloud3d : Contains one point in each block.
+        """
+        return self[self.block_median_indices(dx, dy, values)]
+
 
     def getPoint(self, i):
         """Get a point from the 3D Point Cloud
@@ -261,7 +386,47 @@ class PointCloud3D(myObject):
             return distance
 
 
-    def interpolate(self, dx, dy, values, method='ct', mask = False, clip = True, i=None, **kwargs):
+    def interpolate(self, dx, dy, values=None, method='ct', mask = False, clip = True, i=None, block=False, **kwargs):
+        """Interpolate values to a grid.
+
+        The grid is automatically generated such that it is centred over the point cloud.
+
+        Parameters
+        ----------
+        dx : float
+            Grid spacing in x.
+        dy : float
+            Grid spacing in y.
+        values : array_like, optional
+            Values to interpolate.  Must have size self.nPoints.
+            Defaults to None.
+        method : str, optional
+            * 'ct' uses Clough Tocher interpolation
+            * 'mc' uses Minimum curvature and requires pygmt to be installed.
+            Defaults to 'ct'.
+        mask : float, optional
+            Cells of distance mask away from points are NaN.
+            Defaults to False.
+        clip : bool, optional
+            Clip any overshot grid values to the min/max of values.
+            Defaults to True.
+        i : ints, optional
+            Use only the i locations during interpolation.
+            Defaults to None.
+        block : bool, optional
+            Perform a block median filter before interpolation. Inherrently smooths the final grid, but alleviates aliasing.
+            Defaults to False.
+
+        Returns
+        -------
+        geobipy.Model : Interpolated values.
+        """
+
+        if values is None:
+            values = self.z
+
+        if i is None:
+            i = self.block_median_indices() if block else None
 
         if method.lower() == 'ct':
             return self.interpCloughTocher(dx, dy, values, mask, clip, i, **kwargs)
@@ -297,11 +462,14 @@ class PointCloud3D(myObject):
         x = StatArray.StatArray(xc, name=self.x.name, units=self.x.units)
         y = StatArray.StatArray(yc, name=self.y.name, units=self.y.units)
 
-        return x, y, vals, kwargs
+        mesh = RectilinearMesh2D(xCentres=x, yCentres=y)
+
+        out = Model(mesh=mesh, values=vals)
+
+        return out, kwargs
 
 
-    def interpMinimumCurvature(self, dx, dy, values, mask=False, clip=True, i=None, **kwargs):
-
+    def interpMinimumCurvature(self, dx, dy, values, mask=False, clip=True, i=None, operator=None, condition=None, **kwargs):
 
         iterations = kwargs.pop('iterations', 2000)
         tension = kwargs.pop('tension', 0.25)
@@ -311,32 +479,46 @@ class PointCloud3D(myObject):
         assert dx > 0.0, ValueError("dx must be positive!")
         assert dy > 0.0, ValueError("dy must be positive!")
 
-        x, y, vals = interpolation.minimumCurvature(self.x, self.y, values, self.bounds, dx, dy, mask=mask, clip=clip, iterations=iterations, tension=tension, accuracy=accuracy)
+        x = self.x
+        y = self.y
+        # if not operator is None:
+        #     i = np.argwhere(cf.isTrue(values, operator, condition))
+        #     x = self.x[i]
+        #     y = self.y[i]
+        #     values = values[i]
+        if not i is None:
+            x = x[i]
+            y = y[i]
+            values = values[i]
+
+        x, y, vals = interpolation.minimumCurvature(x, y, values, self.bounds, dx, dy, mask=mask, clip=clip, iterations=iterations, tension=tension, accuracy=accuracy, **kwargs)
         x = StatArray.StatArray(x, name=self.x.name, units=self.x.units)
         y = StatArray.StatArray(y, name=self.y.name, units=self.y.units)
-        return x, y, vals, kwargs
+
+        mesh = RectilinearMesh2D(xCentres=x, yCentres=y)
+
+        out = Model(mesh=mesh, values=vals)
+
+        return out, kwargs
 
 
     def mapPlot(self, dx, dy, i=None, **kwargs):
         """ Create a map of a parameter """
 
         cTmp = kwargs.pop('c', self.z)
-
         mask = kwargs.pop('mask', False)
-
         clip = kwargs.pop('clip', True)
-
         method = kwargs.pop('method', "ct").lower()
 
 
         if method == 'ct':
-            x, y, vals, kwargs = self.interpCloughTocher(dx, dy, values=cTmp, mask=mask, clip=clip, i=i, **kwargs)
+            mesh, kwargs = self.interpCloughTocher(dx, dy, values=cTmp, mask=mask, clip=clip, i=i, **kwargs)
         elif method == 'mc':
-            x, y, vals, kwargs = self.interpMinimumCurvature(dx, dy, values=cTmp, mask=mask, clip=clip, i=i, **kwargs)
+            mesh, kwargs = self.interpMinimumCurvature(dx, dy, values=cTmp, mask=mask, clip=clip, i=i, **kwargs)
         else:
             assert False, ValueError("method must be either 'ct' or 'mc' ")
 
-        return cP.pcolor(vals, x.edges(), y.edges(), **kwargs)
+        return mesh.pcolor(**kwargs)
 
 
     def nearest(self, x, k=1, eps=0, p=2, radius=np.inf):
@@ -380,6 +562,29 @@ class PointCloud3D(myObject):
         x = self.getXAxis(xAxis)
         ax = cP.plot(x, values, **kwargs)
         return ax
+
+    def pyvista_mesh(self):
+        import pyvista as pv
+
+        out = pv.PolyData(np.vstack([self.x, self.y, self.z]).T)
+        out['height'] = self.z
+        out["elevation"] = self.elevation
+
+        return out
+
+    def pyvista_plotter(self, plotter=None, **kwargs):
+
+        import pyvista as pv
+
+        if plotter is None:
+            plotter = pv.Plotter()
+        plotter.add_mesh(self.pyvista_mesh())
+
+        labels = dict(xlabel=self.x.label, ylabel=self.y.label, zlabel=self.z.label)
+        plotter.add_axes(**labels)
+
+        return plotter
+
 
 
     def _readNpoints(self, filename):

@@ -1066,16 +1066,16 @@ class Inference1D(myObject):
 
         self.currentModel = hdfRead.readKeyFromFile(hdfFile,'','/','currentmodel', index=index)
         self.Hitmap = self.currentModel.par.posterior
-        self.currentModel.max_edge = np.log(self.Hitmap.y.centres[-1])
+        # self.currentModel._max_edge = np.log(self.Hitmap.y.centres[-1])
         # except:
         #     self.Hitmap = hdfRead.readKeyFromFile(hdfFile,'','/','hitmap', index=index)
 
 
         self.bestModel = hdfRead.readKeyFromFile(hdfFile,'','/','bestmodel', index=index)
-        self.bestModel.max_edge = np.log(self.Hitmap.y.centres[-1])
+        # self.bestModel._max_edge = np.log(self.Hitmap.y.centres[-1])
 
-        self.invTime=np.array(hdfFile.get('invtime')[index])
-        self.saveTime=np.array(hdfFile.get('savetime')[index])
+        self.invTime = np.array(hdfFile.get('invtime')[index])
+        self.saveTime = np.array(hdfFile.get('savetime')[index])
 
         # Initialize a list of iteration number
         self.iRange = StatArray.StatArray(np.arange(2 * self.nMC), name="Iteration #", dtype=np.int64)

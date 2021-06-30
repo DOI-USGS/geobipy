@@ -847,7 +847,18 @@ def safeEval(string):
         string = string.replace('EmLoop', 'CircularLoop')
         return string
 
-    allowed = ('Histogram', 'Model1D', 'Hitmap', 'TdemData', 'FdemData', 'TdemDataPoint', 'FdemDataPoint', 'TdemSystem', 'FdemSystem', 'CircularLoop', 'RectilinearMesh')
+    allowed = ('Histogram',
+    'Model',
+    'Model1D',
+    'Hitmap',
+    'TdemData',
+    'FdemData',
+    'TdemDataPoint',
+    'FdemDataPoint',
+    'TdemSystem',
+    'FdemSystem',
+    'CircularLoop',
+    'RectilinearMesh')
 
     if (any(x in string for x in allowed)):
         return string

@@ -464,6 +464,7 @@ def pcolor(values, x=None, y=None, **kwargs):
 
     recX = kwargs.pop('reciprocateX', False)
     recY = kwargs.pop('reciprocateY', False)
+    transpose = kwargs.get('transpose', False)
 
     # Set the grid colour if specified
     c = None
@@ -487,9 +488,6 @@ def pcolor(values, x=None, y=None, **kwargs):
         else:
             assert x.size == values.shape[1]+1, ValueError('x must be size {}. Not {}'.format(values.shape[1]+1, x.size))
 
-    if recX:
-        mx = 1.0 / mx
-
     if (y is None):
         my = np.arange(np.size(values,0)+1)
     else:
@@ -499,6 +497,12 @@ def pcolor(values, x=None, y=None, **kwargs):
         else:
             assert y.size == values.shape[0]+1, ValueError('y must be size {}. Not {}'.format(values.shape[0]+1, y.size))
 
+    if transpose:
+        mx, my = my, mx
+        values = values.T
+
+    if recX:
+        mx = 1.0 / mx
     if recY:
         my = 1.0 / my
 
@@ -644,6 +648,7 @@ def _pcolormesh(X, Y, values, **kwargs):
     yscale = kwargs.pop('yscale', 'linear')
     flipX = kwargs.pop('flipX', False)
     flipY = kwargs.pop('flipY', False)
+    transpose = kwargs.pop('transpose', False)
 
     xlim_u = kwargs.pop('xlim', None)
     ylim_u = kwargs.pop('ylim', None)
@@ -722,6 +727,7 @@ def _pcolormesh(X, Y, values, **kwargs):
 
     if not xlim_u is None:
         ax.set_xlim(xlim_u)
+
     if not ylim_u is None:
         ax.set_ylim(ylim_u)
 
@@ -863,7 +869,7 @@ def pcolor_1D(values, y=None, **kwargs):
 
     if not width is None:
         assert width > 0.0, ValueError("width must be positive")
-        mx[1] = width
+        my[1] = width
 
     v = ma.masked_invalid(values)
     if (log):
@@ -1291,15 +1297,13 @@ def step(x, y, **kwargs):
 
     kwargs['color'] = kwargs.pop('color', wellSeparated[3])
 
-    plt.step(x=x, y=y, **kwargs)
+    stp = plt.step(x=x, y=y, **kwargs)
 
     if (flipX):
         ax.invert_xaxis()
-        # ax.set_xlim(ax.get_xlim()[::-1])
 
     if (flipY):
         ax.invert_yaxis()
-        # ax.set_ylim(ax.get_ylim()[::-1])
 
     if (not noLabels):
         xlabel(cF.getNameUnits(x))
@@ -1307,6 +1311,8 @@ def step(x, y, **kwargs):
 
     plt.xscale(xscale)
     plt.yscale(yscale)
+
+    return ax, stp
 
 
 def pause(interval):

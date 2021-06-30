@@ -1,7 +1,7 @@
 """ @RectilinearMesh1D_Class
 Module describing a 1D Rectilinear Mesh class
 """
-from ...classes.core.myObject import myObject
+from .Mesh import Mesh
 from ...classes.core import StatArray
 from copy import deepcopy
 import numpy as np
@@ -11,10 +11,11 @@ from . import RectilinearMesh2D
 from ..statistics.Distribution import Distribution
 from ..statistics import Histogram1D
 from scipy.sparse import diags
+from scipy import interpolate
 import matplotlib.pyplot as plt
 
 
-class RectilinearMesh1D(myObject):
+class RectilinearMesh1D(Mesh):
     """Class defining a 1D rectilinear mesh with cell centres and edges.
 
     Contains a simple 1D mesh with cell edges, widths, and centre locations.
@@ -24,17 +25,11 @@ class RectilinearMesh1D(myObject):
     Parameters
     ----------
     centres : geobipy.StatArray, optional
-        The locations of the centre of each cell. Only centres or edges can be given.
+        The locations of the centre of each cell. Only centres, edges, or widths can be given.
     edges : geobipy.StatArray, optional
-        The locations of the edges of each cell, including the outermost edges. Only centres or edges can be given.
-    edgesMin : float, optional
-        Only used if instantiated with centres.
-        Normally the 'left' edge is calucated by centres[0] - 0.5 * (centres[1] - centres[0]).
-        Instead, force the leftmost edge to be edgesMin.
-    edgesMax : float, optional
-        Only used if instantiated with centres.
-        Normally the 'right' edge is calucated by centres[-1] - 0.5 * (centres[-1] - centres[-2]).
-        Instead, force the rightmost edge to be edgesMax.
+        The locations of the edges of each cell, including the outermost edges. Only centres, edges, or widths can be given.
+    widths : geobipy.StatArray, optional
+        The widths of the cells.
     log : 'e' or float, optional
         Entries are given in linear space, but internally cells are logged.
         Plotting is in log space.
@@ -57,7 +52,7 @@ class RectilinearMesh1D(myObject):
 
     """
 
-    def __init__(self, centres=None, edges=None, widths=None, edgesMin=None, edgesMax=None, log=None, relativeTo=0.0):
+    def __init__(self, centres=None, edges=None, widths=None, log=None, relativeTo=0.0):
         """ Initialize a 1D Rectilinear Mesh"""
         self._centres = None
         self._edges = None
@@ -97,7 +92,7 @@ class RectilinearMesh1D(myObject):
         self._max_cells = None
         # Categorical distribution for choosing perturbation events
         self._event_proposal = None
-        # Keep track of actions made to the Model.
+        # Keep track of actions made to the mesh.
         self._action = ['none', 0, 0.0]
 
     def __deepcopy__(self, memo):
@@ -173,7 +168,7 @@ class RectilinearMesh1D(myObject):
         values, _ = cF._log(values, log=self.log)
         values -= self.relativeTo
 
-        values.name = cF._logLabel(self.log) + values.getName()
+        values.name = cF._logLabel(self.log) + values.name
 
         # assert np.ndim(values) == 1, ValueError("centres must be 1D")
         # StatArray of the x axis values
@@ -209,7 +204,7 @@ class RectilinearMesh1D(myObject):
         values, _ = cF._log(values, log=self.log)
         values -= self.relativeTo
 
-        values.name = cF._logLabel(self.log) + values.getName()
+        values.name = cF._logLabel(self.log) + values.name
         # assert np.ndim(values) == 1, ValueError("edges must be 1D")
         self._edges = deepcopy(values)
         self._centres = values.internalEdges()
@@ -234,7 +229,6 @@ class RectilinearMesh1D(myObject):
                 out[-1] = 1.1 * out[-2]
             else:
                 out[-1] = self.max_edge
-
         return out
 
     @property
@@ -244,6 +238,10 @@ class RectilinearMesh1D(myObject):
     @property
     def internaledges(self):
         return self._edges[1:-1]
+
+    @property
+    def label(self):
+        return self.centres.label
 
     @property
     def max_cells(self):
@@ -292,11 +290,10 @@ class RectilinearMesh1D(myObject):
 
     @property
     def name(self):
-        return self._centres.getName()
+        return self._centres.name
 
     @property
     def open_left(self):
-
         return self.edges[0] == -np.inf
 
     @property
@@ -319,8 +316,12 @@ class RectilinearMesh1D(myObject):
         self._relativeTo = StatArray.StatArray(value)
 
     @property
+    def shape(self):
+        return (self.nCells.value, )
+
+    @property
     def units(self):
-        return self._centres.getUnits()
+        return self._centres.units
 
     @property
     def widths(self):
@@ -404,6 +405,7 @@ class RectilinearMesh1D(myObject):
         out = deepcopy(self)
         # Remove the interface depth
         out.edges = out.edges.delete(i)
+
         out._action = ['delete', np.int(i), np.squeeze(self.edges[i])]
         return out
 
@@ -789,8 +791,7 @@ class RectilinearMesh1D(myObject):
         if (reciprocateX):
             par = 1.0 / par
 
-        return cp.step(x=par, y=self.plotting_edges, **kwargs)
-
+        ax, stp = cp.step(x=par, y=self.plotting_edges, **kwargs)
         # if self.hasHalfspace:
         #     h = 0.99*z[-1]
         #     if (self.nCells == 1):
@@ -864,6 +865,18 @@ class RectilinearMesh1D(myObject):
 
     def remainingSpace(self, n_cells):
         return (self.max_edge - self.min_edge) - n_cells * self.min_width
+
+    def resample(self, dx, values, kind='cubic'):
+        x = np.arange(self.edges[0], self.edges[-1]+dx, dx)
+
+        mesh = RectilinearMesh1D(edges=x)
+        f = interpolate.interp1d(self.centres, values, kind=kind)
+        return mesh, f(mesh.centres)
+
+    def interpolate_centres_to_nodes(self, values, kind='cubic', **kwargs):
+        kwargs['fill_value'] = kwargs.pop('fill_value', 'extrapolate')
+        f = interpolate.interp1d(self.centres, values, kind=kind, **kwargs)
+        return f(self.edges)
 
     def set_posteriors(self, nCells_posterior=None, edges_posterior=None):
 
@@ -1034,6 +1047,8 @@ class RectilinearMesh1D(myObject):
         # create a new group inside h5obj
         grp = self.create_hdf_group(parent, name)
 
+        self.nCells.createHdf(grp, 'nCells', withPosterior=withPosterior, nRepeats=nRepeats)
+
         self._centres.createHdf(grp, 'centres', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self._edges.createHdf(grp, 'edges', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
 
@@ -1058,12 +1073,18 @@ class RectilinearMesh1D(myObject):
         create: optionally create the data set as well before writing
         """
         grp = parent.get(name)
+        self.nCells.writeHdf(grp, 'nCells',  withPosterior=withPosterior, index=index)
         self._centres.writeHdf(grp, 'centres',  withPosterior=withPosterior, index=index)
         self._edges.writeHdf(grp, 'edges',  withPosterior=withPosterior, index=index)
         self.relativeTo.writeHdf(grp, 'relativeTo', index=index)
 
     def fromHdf(self, grp, index=None):
         """ Reads in the object froma HDF file """
+
+        if 'nCells' in grp:
+            tmp = StatArray.StatArray().fromHdf(grp['nCells'], index=index)
+            nCells = tmp.astype(np.int32)
+            nCells.copyStats(tmp)
 
         if 'relativeTo' in grp:
             relativeTo = StatArray.StatArray().fromHdf(grp['relativeTo'], index=index)
@@ -1073,22 +1094,25 @@ class RectilinearMesh1D(myObject):
             else:
                 relativeTo = 0.0
 
+        edges = None
+        if (('edges' in grp) or ('bins' in grp)):
+            if 'edges' in grp:
+                key = 'edges'
+            elif 'bins' in grp:
+                key = 'bins'
+
+            if np.ndim(grp[key+'/data']) == 2:
+                edges = StatArray.StatArray().fromHdf(grp[key], index=index)
+            else:
+                edges = StatArray.StatArray().fromHdf(grp[key])
+
         centres = None
-        if ('centres' in grp) or ('x' in grp):
+        if edges is None and (('centres' in grp) or ('x' in grp)):
             key = 'centres' if not 'x' in grp else 'x'
             if np.ndim(grp[key+'/data']) == 2:
                 centres = StatArray.StatArray().fromHdf(grp[key], index=index)
             else:
                 centres = StatArray.StatArray().fromHdf(grp[key])
-
-        edges = None
-
-        if centres is None and (('edges' in grp) or ('bins' in grp)):
-            key = 'edges' if 'edges' in grp else 'bins'
-            if np.ndim(grp[key+'/data']) == 2:
-                edges = StatArray.StatArray().fromHdf(grp[key], index=index)
-            else:
-                edges = StatArray.StatArray().fromHdf(grp[key])
 
         RectilinearMesh1D.__init__(self, centres, edges)
 
@@ -1097,20 +1121,39 @@ class RectilinearMesh1D(myObject):
         self.relativeTo = relativeTo
 
         if 'min_width' in grp: self._min_width = np.array(grp.get('min_width'))
-        if 'max_edge' in grp: self._max_edge = np.array(grp.get('min_edge'))
+        if 'min_edge' in grp: self._min_edge = np.array(grp.get('min_edge'))
         if 'max_edge' in grp: self._max_edge = np.array(grp.get('max_edge'))
         if 'max_cells' in grp: self._max_cells = np.array(grp.get('max_cells'))
+
         # if 'event_proposal' in grp: self._event_proposal = np.array(grp.get('event_proposal'))
+
+        if 'depth' in grp: # Old Model1D class
+            print('here')
+            i = np.s_[index, :nCells.value]
+            tmp = StatArray.StatArray().fromHdf(grp['depth'], index=i)
+            edges = tmp.prepend(0.0)
+            edges[-1] = np.inf
+            edges.copyStats(tmp)
+
+            RectilinearMesh1D.__init__(self, edges=edges)
+            self.nCells = nCells
+            # self.edges = edges
+
+            if 'minThk'    in grp: self._min_width = np.array(grp.get('minThk'))
+            if 'hmin'      in grp: self._min_width = np.array(grp.get('hmin'))
+            if 'zmin'     in grp: self._min_edge = np.array(grp.get('zmin'))
+            if 'zmax'     in grp: self._max_edge = np.array(grp.get('zmax'))
+            if 'kmax'      in grp: self._max_cells = np.array(grp.get('kmax'))
 
         return self
 
     @property
     def summary(self):
         """ Print a summary of self """
-        msg = ("Cell Centres \n"
-               "{}"
-               "Cell Edges"
-               "{}").format(
+        msg = ("Cell Centres\n"
+               "    {}"
+               "Cell Edges \n"
+               "    {}").format(
                    self._centres.summary,
                    self._edges.summary
         )
