@@ -15,6 +15,8 @@ Foks, N. L., and Minsley, B. J. 2020. GeoBIPy - Geophysical Bayesian Inference i
 Background scientific references
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Minsley, B. J., Foks, N. L., and Bedrosian, P. A. 2020. Quantifying model structural uncertainty using airborne electromagnetic data. Geophys. J. Int. 224, 1, 590–607. https://doi.org/10.1093/gji/ggaa393
+
 Minsley, B. J. 2011. A trans-dimensional Bayesian Markov chain Monte Carlo algorithm for model assessment using frequency-domain electromagnetic data. Geophys. J. Int. 187, 252–272. 10.1111/j.1365-246X.2011.05165.x
 
 `Documentation is here! <https://usgs.github.io/geobipy/>`_

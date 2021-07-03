@@ -52,8 +52,10 @@ from .src.classes.mesh.RectilinearMesh2D import RectilinearMesh2D
 from .src.classes.mesh.RectilinearMesh3D import RectilinearMesh3D
 from .src.classes.mesh.TopoRectilinearMesh2D import TopoRectilinearMesh2D
 # Models
+from .src.classes.model.Model import Model
 from .src.classes.model.Model1D import Model1D
-from .src.classes.model.Model2D import Model2D
+# from .src.classes.model.Model2D import Model2D
+# from .src.classes.model.Model3D import Model3D
 from .src.classes.model.AarhusModel import AarhusModel
 # Pointclouds
 from .src.classes.pointcloud.PointCloud3D import PointCloud3D
@@ -451,7 +453,7 @@ def workerTask(_DataPoint, UP, prng, world, lineNumbers, Inference2D):
         continueRunning = world.recv(source=0)
 
         if failed:
-            print("Datapoint {} failed to converge".format(DataPoint.fiducial))
+            myMPI.print("Datapoint {} failed to converge".format(DataPoint.fiducial))
 
         # If we continue running, receive the next DataPoint. Otherwise, shutdown the rank
         if continueRunning:

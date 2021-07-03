@@ -654,9 +654,11 @@ class Inference2D(myObject):
 
         Parameters
         ----------
-        depth : float or array_like
+        depth : float or array_like or int or slice
             If float: The depth at which to obtain the slice
-            If arraylike: length 2 array of an interval over which to average.
+            If array_like: length 2 array of an interval over which to average.
+            If int: the index along depth
+            If slice: A slice along depth to return
         values : array_like
             Values of shape self.mesh.shape from which to obtain the slice.
 
@@ -666,6 +668,9 @@ class Inference2D(myObject):
             The slice at depth.
 
         """
+
+        if isinstance(depth, (np.integer, int, slice)):
+            return values[depth, :]
 
         if np.size(depth) > 1:
             assert np.size(depth) == 2, ValueError("depth must be a scalar or size 2 array.")

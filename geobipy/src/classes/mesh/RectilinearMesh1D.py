@@ -1,7 +1,7 @@
 """ @RectilinearMesh1D_Class
 Module describing a 1D Rectilinear Mesh class
 """
-from ...classes.core.myObject import myObject
+from .Mesh import Mesh
 from ...classes.core import StatArray
 from copy import deepcopy
 import numpy as np
@@ -11,10 +11,11 @@ from . import RectilinearMesh2D
 from ..statistics.Distribution import Distribution
 from ..statistics import Histogram1D
 from scipy.sparse import diags
+from scipy import interpolate
 import matplotlib.pyplot as plt
 
 
-class RectilinearMesh1D(myObject):
+class RectilinearMesh1D(Mesh):
     """Class defining a 1D rectilinear mesh with cell centres and edges.
 
     Contains a simple 1D mesh with cell edges, widths, and centre locations.
@@ -24,17 +25,11 @@ class RectilinearMesh1D(myObject):
     Parameters
     ----------
     centres : geobipy.StatArray, optional
-        The locations of the centre of each cell. Only centres or edges can be given.
+        The locations of the centre of each cell. Only centres, edges, or widths can be given.
     edges : geobipy.StatArray, optional
-        The locations of the edges of each cell, including the outermost edges. Only centres or edges can be given.
-    edgesMin : float, optional
-        Only used if instantiated with centres.
-        Normally the 'left' edge is calucated by centres[0] - 0.5 * (centres[1] - centres[0]).
-        Instead, force the leftmost edge to be edgesMin.
-    edgesMax : float, optional
-        Only used if instantiated with centres.
-        Normally the 'right' edge is calucated by centres[-1] - 0.5 * (centres[-1] - centres[-2]).
-        Instead, force the rightmost edge to be edgesMax.
+        The locations of the edges of each cell, including the outermost edges. Only centres, edges, or widths can be given.
+    widths : geobipy.StatArray, optional
+        The widths of the cells.
     log : 'e' or float, optional
         Entries are given in linear space, but internally cells are logged.
         Plotting is in log space.
@@ -57,7 +52,7 @@ class RectilinearMesh1D(myObject):
 
     """
 
-    def __init__(self, centres=None, edges=None, widths=None, edgesMin=None, edgesMax=None, log=None, relativeTo=0.0):
+    def __init__(self, centres=None, edges=None, widths=None, log=None, relativeTo=0.0):
         """ Initialize a 1D Rectilinear Mesh"""
         self._centres = None
         self._edges = None
@@ -97,7 +92,7 @@ class RectilinearMesh1D(myObject):
         self._max_cells = None
         # Categorical distribution for choosing perturbation events
         self._event_proposal = None
-        # Keep track of actions made to the Model.
+        # Keep track of actions made to the mesh.
         self._action = ['none', 0, 0.0]
 
     def __deepcopy__(self, memo):
@@ -173,7 +168,7 @@ class RectilinearMesh1D(myObject):
         values, _ = cF._log(values, log=self.log)
         values -= self.relativeTo
 
-        values.name = cF._logLabel(self.log) + values.getName()
+        values.name = cF._logLabel(self.log) + values.name
 
         # assert np.ndim(values) == 1, ValueError("centres must be 1D")
         # StatArray of the x axis values
@@ -209,7 +204,7 @@ class RectilinearMesh1D(myObject):
         values, _ = cF._log(values, log=self.log)
         values -= self.relativeTo
 
-        values.name = cF._logLabel(self.log) + values.getName()
+        values.name = cF._logLabel(self.log) + values.name
         # assert np.ndim(values) == 1, ValueError("edges must be 1D")
         self._edges = deepcopy(values)
         self._centres = values.internalEdges()
@@ -243,6 +238,10 @@ class RectilinearMesh1D(myObject):
     @property
     def internaledges(self):
         return self._edges[1:-1]
+
+    @property
+    def label(self):
+        return self.centres.label
 
     @property
     def max_cells(self):
@@ -291,11 +290,10 @@ class RectilinearMesh1D(myObject):
 
     @property
     def name(self):
-        return self._centres.getName()
+        return self._centres.name
 
     @property
     def open_left(self):
-
         return self.edges[0] == -np.inf
 
     @property
@@ -318,8 +316,12 @@ class RectilinearMesh1D(myObject):
         self._relativeTo = StatArray.StatArray(value)
 
     @property
+    def shape(self):
+        return (self.nCells.value, )
+
+    @property
     def units(self):
-        return self._centres.getUnits()
+        return self._centres.units
 
     @property
     def widths(self):
@@ -403,6 +405,7 @@ class RectilinearMesh1D(myObject):
         out = deepcopy(self)
         # Remove the interface depth
         out.edges = out.edges.delete(i)
+
         out._action = ['delete', np.int(i), np.squeeze(self.edges[i])]
         return out
 
@@ -863,6 +866,18 @@ class RectilinearMesh1D(myObject):
     def remainingSpace(self, n_cells):
         return (self.max_edge - self.min_edge) - n_cells * self.min_width
 
+    def resample(self, dx, values, kind='cubic'):
+        x = np.arange(self.edges[0], self.edges[-1]+dx, dx)
+
+        mesh = RectilinearMesh1D(edges=x)
+        f = interpolate.interp1d(self.centres, values, kind=kind)
+        return mesh, f(mesh.centres)
+
+    def interpolate_centres_to_nodes(self, values, kind='cubic', **kwargs):
+        kwargs['fill_value'] = kwargs.pop('fill_value', 'extrapolate')
+        f = interpolate.interp1d(self.centres, values, kind=kind, **kwargs)
+        return f(self.edges)
+
     def set_posteriors(self, nCells_posterior=None, edges_posterior=None):
 
         # Initialize the posterior histogram for the number of layers
@@ -1135,10 +1150,10 @@ class RectilinearMesh1D(myObject):
     @property
     def summary(self):
         """ Print a summary of self """
-        msg = ("Cell Centres \n"
-               "{}"
-               "Cell Edges"
-               "{}").format(
+        msg = ("Cell Centres\n"
+               "    {}"
+               "Cell Edges \n"
+               "    {}").format(
                    self._centres.summary,
                    self._edges.summary
         )

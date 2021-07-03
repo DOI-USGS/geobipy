@@ -47,11 +47,10 @@ class myObject(object):
     def create_hdf_group(self, h5obj, name):
         grp = h5obj.create_group(name)
         grp.attrs["repr"] = self.hdf_name
-
         return grp
 
 
-    def toHdf(self, h5obj, name):
+    def toHdf(self, h5obj, name, withPosterior=False):
         """Create and write to HDF.
 
         Parameters
@@ -65,9 +64,9 @@ class myObject(object):
 
         if isinstance(h5obj, str):
             with h5py.File(h5obj, 'w') as f:
-                self.createHdf(f, name)
-                self.writeHdf(f, name)
+                self.createHdf(f, name, withPosterior=withPosterior)
+                self.writeHdf(f, name, withPosterior=withPosterior)
             return
 
-        self.createHdf(h5obj, name)
-        self.writeHdf(h5obj, name)
+        self.createHdf(h5obj, name, withPosterior=withPosterior)
+        self.writeHdf(h5obj, name, withPosterior=withPosterior)

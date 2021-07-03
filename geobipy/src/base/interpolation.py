@@ -141,11 +141,6 @@ def minimumCurvature(x, y, values, bounds, dx, dy, mask=False, clip=False, itera
     bounds[2] = mid - sy
     bounds[3] = mid + sy
 
-    pd = blockmedian(x=x, y=y, z=values, spacing=(dx, dy), region=bounds)
-    x = pd.values[:, 0]
-    y = pd.values[:, 1]
-    values = pd.values[:, 2]
-
     if clip:
         clip_min = kwargs.pop('clip_min', np.nanmin(values))
         clip_max = kwargs.pop('clip_max', np.nanmax(values))

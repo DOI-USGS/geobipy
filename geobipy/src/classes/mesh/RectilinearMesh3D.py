@@ -2,9 +2,11 @@
 Module describing a 2D Rectilinear Mesh class with x and y axes specified
 """
 from copy import deepcopy
-from ...classes.core.myObject import myObject
+from .Mesh import Mesh
 from ...classes.core import StatArray
 from .RectilinearMesh1D import RectilinearMesh1D
+from .RectilinearMesh2D import RectilinearMesh2D
+from ..model.Model import Model
 import numpy as np
 from scipy.stats import binned_statistic
 from ...base import plotting as cP
@@ -17,7 +19,7 @@ except:
     pass
 
 
-class RectilinearMesh3D(myObject):
+class RectilinearMesh3D(RectilinearMesh2D):
     """Class defining a 3D rectilinear mesh with cell centres and edges.
 
     Contains a simple mesh with cell edges, widths, and centre locations.
@@ -47,13 +49,15 @@ class RectilinearMesh3D(myObject):
         The locations of the centre of each cell in the "z" direction. Only zCentres or zEdges can be given.
     zEdges : geobipy.StatArray, optional
         The locations of the edges of each cell, including the outermost edges, in the "z" direction. Only zCentres or zEdges can be given.
+    heightCentres : geobipy.StatArray, optional
+        The height of each point at the x, y locations. Only heightCentres or heightEdges can be given, not both.
+        Has shape (y.nCells, x.nCells).
+    heightEdges : geobipy.StatArray, optional
+        The height of each point at the x, y locations of the edges of each cell, including the outermost edges. Only heightCentres or heightEdges can be given, not both.
+        Has shape (y.nEdges, x.nEdges).
 
     Other Parameters
     ----------------
-    [x, y, z]edgesMin : float, optional
-        See geobipy.RectilinearMesh1D for edgesMin description.
-    [x, y, z]edgesMax : float, optional
-        See geobipy.RectilinearMesh1D for edgesMax description.
     [x, y, z]log : 'e' or float, optional
         See geobipy.RectilinearMesh1D for log description.
     [x, y, z]relativeTo : float, optional
@@ -66,39 +70,28 @@ class RectilinearMesh3D(myObject):
 
     """
 
-    def __init__(self, xCentres=None, xEdges=None, yCentres=None, yEdges=None, zCentres=None, zEdges=None, **kwargs):
+    def __init__(self, xCentres=None, xEdges=None, yCentres=None, yEdges=None, zCentres=None, zEdges=None, height=None, **kwargs):
         """ Initialize a 2D Rectilinear Mesh"""
 
-        self._x = None
-        self._y = None
-        self._z = None
-        self._distance = None
-        self.xyz = None
+        self._height = None
+        super().__init__(xCentres, xEdges, yCentres, yEdges, zCentres, zEdges, **kwargs)
 
         if (all(x is None for x in [xCentres, yCentres, zCentres, xEdges, yEdges, zEdges])):
             return
 
-        xExtras = dict((k[1:], kwargs.pop(k, None)) for k in ('xedgesMin', 'xedgesMax', 'xlog'))
-        self._x = RectilinearMesh1D(centres=xCentres, edges=xEdges, relativeTo=kwargs.pop('xrelativeTo', 0.0), **xExtras)
-
-        yExtras = dict((k[1:], kwargs.pop(k, None)) for k in ('yedgesMin', 'yedgesMax', 'ylog'))
-        self._y = RectilinearMesh1D(centres=yCentres, edges=yEdges, relativeTo=kwargs.pop('yrelativeTo', 0.0),  **yExtras)
-
-        zExtras = dict((k[1:], kwargs.pop(k, None)) for k in ('zedgesMin', 'zedgesMax', 'zlog'))
-        self._z = RectilinearMesh1D(centres=zCentres, edges=zEdges, relativeTo=kwargs.pop('zrelativeTo', 0.0), **zExtras)
-
-
+        self.height = height
 
     def __getitem__(self, slic):
         """Slice into the mesh. """
 
+        slic0 = slic
         slic = []
         axis = []
         for i, x in enumerate(slic0):
             if not isinstance(x, int):
                 tmp = x
                 if isinstance(x.stop, int):
-                    tmp = slice(x.start, x.stop+1, x.step) # If a slice, add one to the end for bins.
+                    tmp = slice(x.start, x.stop+1, x.step)
             else:
                 tmp = x
                 axis.append(i)
@@ -109,35 +102,54 @@ class RectilinearMesh3D(myObject):
         slic = tuple(slic)
 
         if len(axis) == 0:
-            out = RectilinearMesh3D(xBins=self._x.edges[slic[2]], yBins=self._y.edges[slic[1]], zBins=self._z.edges[slic[0]])
+            height = None if self.height is None else self.height[slic0[1], slic0[2]]
+            out = RectilinearMesh3D(xEdges=self._x.edges[slic[2]], yEdges=self._y.edges[slic[1]], zEdges=self._z.edges[slic[0]], height=height)
             return out
 
         if len(axis) == 1:
             a = [x for x in (0, 1, 2) if not x in axis]
-            out = RectilinearMesh2D(xBins=self.axis(a[1]).edges[slic[a[1]]], yBins=self.axis(a[0]).edges[slic[a[0]]])
+            b = [x for x in (0, 1, 2) if x in axis]
+            height = None
+            if b[0] != 0:
+                height = None if self.height is None else self.height[slic0[1], slic0[2]].values
+            out = RectilinearMesh2D(xEdges=self.axis(a[1]).edges[slic[a[1]]], yEdges=self.axis(a[0]).edges[slic[a[0]]], heightCentres=height)
+
         else:
             a = [x for x in (0, 1, 2) if not x in axis][0]
-            out = RectilinearMesh1D(bins=self.axis(a).edges[slic[a]])
+            out = RectilinearMesh1D(edges=self.axis(a).edges[slic[a]])
 
         return out
+
+    @property
+    def height(self):
+        return self._height
+
+    @height.setter
+    def height(self, values):
+        if not values is None:
+            if isinstance(values, Model):
+                assert np.all(values.shape == self.shape[1:]), ValueError("height must have shape {}".format(self.shape[1:]))
+                self._height = values
+            else:
+                self._height = Model(mesh = self[0, :, :], values=values)
 
     def other_axis(self, axis):
 
         if axis == 0:
-            return self.y, self.z
+            return self.x, self.y
         elif axis == 1:
             return self.x, self.z
         elif axis == 2:
-            return self.x, self.y
+            return self.y, self.z
 
 
     def axis(self, axis):
         if axis == 0:
-            return self.x
+            return self.z
         elif axis == 1:
             return self.y
         elif axis == 2:
-            return self.z
+            return self.x
 
     def other_axis_indices(self, axis):
         if axis == 0:
@@ -146,25 +158,6 @@ class RectilinearMesh3D(myObject):
             return 0, 2
         elif axis == 2:
             return 1, 2
-
-
-    # @property
-    # def distance(self):
-    #     """The distance along the top of the mesh using the x and y co-ordinates. """
-
-    #     assert self.xyz, Exception("To set the distance, the mesh must be instantiated with three co-ordinates")
-
-    #     if self._distance is None:
-
-    #         dx = np.diff(self.x.edges)
-    #         dy = np.diff(self.y.edges)
-
-    #         distance = StatArray.StatArray(np.zeros(self.x.nEdges), 'Distance', self.x.centres.units)
-    #         distance[1:] = np.cumsum(np.sqrt(dx**2.0 + dy**2.0))
-
-    #         self._distance = RectilinearMesh1D(edges = distance)
-    #     return self._distance
-
 
     @property
     def nCells(self):
@@ -176,9 +169,7 @@ class RectilinearMesh3D(myObject):
             Number of cells
 
         """
-
         return np.prod(self.shape)
-
 
     @property
     def nNodes(self):
@@ -190,9 +181,7 @@ class RectilinearMesh3D(myObject):
             Number of nodes
 
         """
-
         return self.x.nEdges * self.y.nEdges * self.z.nEdges
-
 
     @property
     def shape(self):
@@ -204,22 +193,16 @@ class RectilinearMesh3D(myObject):
             Array of integers
 
         """
-
-        return (self.z.nCells, self.y.nCells, self.x.nCells)
-
-
-    @property
-    def x(self):
-        return self._x
-
-    @property
-    def y(self):
-        return self._y
+        return (self.z.nCells.value, self.y.nCells.value, self.x.nCells.value)
 
     @property
     def z(self):
         return self._z
 
+    @z.setter
+    def z(self, values):
+        assert isinstance(values, RectilinearMesh1D)
+        self._z = values
 
     def _mean(self, values, log=None, axis=0):
 
@@ -243,7 +226,6 @@ class RectilinearMesh3D(myObject):
 
         return out
 
-
     def _median(self, values, log=None, axis=0):
         """Gets the median for the specified axis.
 
@@ -263,7 +245,6 @@ class RectilinearMesh3D(myObject):
 
         """
         return self._percent_interval(values, 50.0, log, axis)
-
 
     def _percent_interval(self, values, percent=95.0, log=None, axis=0):
         """Gets the percent interval along axis.
@@ -306,31 +287,28 @@ class RectilinearMesh3D(myObject):
 
         return out
 
-
-    def deepcopy(self):
-        return deepcopy(self)
-
-
     def __deepcopy__(self, memo):
         """ Define the deepcopy for the StatArray """
         return RectilinearMesh2D(xEdges=self.x.edges, yEdges=self.y.edges, zEdges=self.z.edges)
-
 
     def edges(self, axis):
         """ Gets the cell edges in the given dimension """
         return self.axis(axis).edges
 
-
     def getXAxis(self, axis='x', centres=False):
-        assert axis in ['x', 'y', 'r'], Exception("axis must be either 'x', 'y' or 'r'")
+        assert axis in ['x', 'y', 'z', 'r'], Exception("axis must be either 'x', 'y', 'z', 'r'")
         if axis == 'x':
-            return self.x.centres if centres else self.x.edges
+            ax = self.x
         elif axis == 'y':
             assert self.xyz, Exception("To plot against 'y' the mesh must be instantiated with three co-ordinates")
-            return self.y.centres if centres else self.y.edges
+            ax = self.y
+        elif axis == 'z':
+            ax = self.z
         elif axis == 'r':
             assert self.xyz, Exception("To plot against 'r' the mesh must be instantiated with three co-ordinates")
-            return self.distance.centres if centres else self.distance.edges
+            ax = self.distance
+
+        return ax.centres if centres else ax.edges
 
 
     # def xGradientMatrix(self):
@@ -357,78 +335,78 @@ class RectilinearMesh3D(myObject):
     #     return True
 
 
-    def intervalStatistic(self, arr, intervals, axis=0, statistic='mean'):
-        """Compute a statistic of the array between the intervals given along dimension dim.
+    # def intervalStatistic(self, arr, intervals, axis=0, statistic='mean'):
+    #     """Compute a statistic of the array between the intervals given along dimension dim.
 
-        Parameters
-        ----------
-        arr : array_like
-            2D array to take the mean over the given intervals
-        intervals : array_like
-            A new set of mesh edges. The mean is computed between each two edges in the array.
-        axis : int, optional
-            Which axis to take the mean
-        statistic : string or callable, optional
-            The statistic to compute (default is 'mean').
-            The following statistics are available:
+    #     Parameters
+    #     ----------
+    #     arr : array_like
+    #         2D array to take the mean over the given intervals
+    #     intervals : array_like
+    #         A new set of mesh edges. The mean is computed between each two edges in the array.
+    #     axis : int, optional
+    #         Which axis to take the mean
+    #     statistic : string or callable, optional
+    #         The statistic to compute (default is 'mean').
+    #         The following statistics are available:
 
-          * 'mean' : compute the mean of values for points within each bin.
-            Empty bins will be represented by NaN.
-          * 'median' : compute the median of values for points within each
-            bin. Empty bins will be represented by NaN.
-          * 'count' : compute the count of points within each bin.  This is
-            identical to an unweighted histogram.  `values` array is not
-            referenced.
-          * 'sum' : compute the sum of values for points within each bin.
-            This is identical to a weighted histogram.
-          * 'min' : compute the minimum of values for points within each bin.
-            Empty bins will be represented by NaN.
-          * 'max' : compute the maximum of values for point within each bin.
-            Empty bins will be represented by NaN.
-          * function : a user-defined function which takes a 1D array of
-            values, and outputs a single numerical statistic. This function
-            will be called on the values in each bin.  Empty bins will be
-            represented by function([]), or NaN if this returns an error.
-
-
-        See Also
-        --------
-        scipy.stats.binned_statistic : for more information
-
-        """
-
-        assert np.size(intervals) > 1, ValueError("intervals must have size > 1")
-
-        intervals = self._reconcile_intervals(intervals, axis=axis)
-
-        if (axis == 0):
-            bins = binned_statistic(self.z.centres, arr.T, bins = intervals, statistic=statistic)
-            res = bins.statistic.T
-        else:
-            bins = binned_statistic(self.x.centres, arr, bins = intervals, statistic=statistic)
-            res = bins.statistic
-
-        return res, intervals
+    #       * 'mean' : compute the mean of values for points within each bin.
+    #         Empty bins will be represented by NaN.
+    #       * 'median' : compute the median of values for points within each
+    #         bin. Empty bins will be represented by NaN.
+    #       * 'count' : compute the count of points within each bin.  This is
+    #         identical to an unweighted histogram.  `values` array is not
+    #         referenced.
+    #       * 'sum' : compute the sum of values for points within each bin.
+    #         This is identical to a weighted histogram.
+    #       * 'min' : compute the minimum of values for points within each bin.
+    #         Empty bins will be represented by NaN.
+    #       * 'max' : compute the maximum of values for point within each bin.
+    #         Empty bins will be represented by NaN.
+    #       * function : a user-defined function which takes a 1D array of
+    #         values, and outputs a single numerical statistic. This function
+    #         will be called on the values in each bin.  Empty bins will be
+    #         represented by function([]), or NaN if this returns an error.
 
 
-    def _reconcile_intervals(self, intervals, axis=0):
+    #     See Also
+    #     --------
+    #     scipy.stats.binned_statistic : for more information
 
-        assert np.size(intervals) > 1, ValueError("intervals must have size > 1")
+    #     """
 
-        ax
+    #     assert np.size(intervals) > 1, ValueError("intervals must have size > 1")
 
-        if (axis == 0):
-            # Make sure the intervals are within the axis.
-            i0 = np.maximum(0, np.searchsorted(intervals, self.z.edges[0]))
-            i1 = np.minimum(self.z.nCells, np.searchsorted(intervals, self.z.edges[-1])+1)
-            intervals = intervals[i0:i1]
+    #     intervals = self._reconcile_intervals(intervals, axis=axis)
 
-        else:
-            i0 = np.maximum(0, np.searchsorted(intervals, self.x.edges[0]))
-            i1 = np.minimum(self.x.nCells, np.searchsorted(intervals, self.x.edges[-1])+1)
-            intervals = intervals[i0:i1]
+    #     if (axis == 0):
+    #         bins = binned_statistic(self.z.centres, arr.T, bins = intervals, statistic=statistic)
+    #         res = bins.statistic.T
+    #     else:
+    #         bins = binned_statistic(self.x.centres, arr, bins = intervals, statistic=statistic)
+    #         res = bins.statistic
 
-        return intervals
+    #     return res, intervals
+
+
+    # def _reconcile_intervals(self, intervals, axis=0):
+
+    #     assert np.size(intervals) > 1, ValueError("intervals must have size > 1")
+
+    #     ax
+
+    #     if (axis == 0):
+    #         # Make sure the intervals are within the axis.
+    #         i0 = np.maximum(0, np.searchsorted(intervals, self.z.edges[0]))
+    #         i1 = np.minimum(self.z.nCells, np.searchsorted(intervals, self.z.edges[-1])+1)
+    #         intervals = intervals[i0:i1]
+
+    #     else:
+    #         i0 = np.maximum(0, np.searchsorted(intervals, self.x.edges[0]))
+    #         i1 = np.minimum(self.x.nCells, np.searchsorted(intervals, self.x.edges[-1])+1)
+    #         intervals = intervals[i0:i1]
+
+    #     return intervals
 
 
     def cellIndices(self, x, y, z, clip=False, trim=False):
@@ -467,12 +445,12 @@ class RectilinearMesh3D(myObject):
         return np.squeeze(out)
 
 
-    def ravelIndices(self, ixy, order='C'):
+    def ravelIndices(self, indices, order='C'):
         """Return a global index into a 1D array given the two cell indices in x and z.
 
         Parameters
         ----------
-        ixy : tuple of array_like
+        indices : array_like
             A tuple of integer arrays, one array for each dimension.
 
         Returns
@@ -481,7 +459,7 @@ class RectilinearMesh3D(myObject):
             Global index.
 
         """
-        return np.ravel_multi_index(ixy, self.shape, order=order)
+        return np.ravel_multi_index(indices, self.shape, order=order)
 
 
     def unravelIndex(self, indices, order='C'):
@@ -560,7 +538,7 @@ class RectilinearMesh3D(myObject):
     #     return ax, pm, cb
 
 
-    def plot_pyvista(self, **kwargs):
+    def pyvista_mesh(self, **kwargs):
         """Creates a pyvista plotting object linked to VTK.
 
         Use mesh.plot(show_edges=True, show_grid=True) to plot the mesh.
@@ -571,11 +549,29 @@ class RectilinearMesh3D(myObject):
         """
         import pyvista as pv
 
-        x, y, z = np.meshgrid(self.x.edges, self.y.edges, self.z.edges)
+        x, y, z = np.meshgrid(self.y.edges, self.x.edges, self.z.edges, indexing='xy')
+
+        if not self.height is None:
+            nz = self.height.interpolate_centres_to_nodes().T
+            z = nz[:, :, None] - z
 
         mesh = pv.StructuredGrid(x, y, z)
 
         return mesh
+
+    def pyvista_plotter(self, plotter=None, **kwargs):
+
+        import pyvista as pv
+
+        if plotter is None:
+            plotter = pv.Plotter()
+        plotter.add_mesh(self.pyvista_mesh(), show_edges=True)
+
+        labels = dict(xlabel=self.x.label, ylabel=self.y.label, zlabel=self.z.label)
+        plotter.show_grid()
+        plotter.add_axes(**labels)
+
+        return plotter
 
     @property
     def summary(self):
@@ -604,6 +600,8 @@ class RectilinearMesh3D(myObject):
         self.x.createHdf(grp,'x', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self.y.createHdf(grp,'y', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self.z.createHdf(grp,'z', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        if not self.height is None:
+            self.height.createHdf(grp, 'height', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
 
         return grp
 
@@ -614,18 +612,22 @@ class RectilinearMesh3D(myObject):
         myName: object hdf name. Assumes createHdf has already been called
         create: optionally create the data set as well before writing
         """
-        grp = h5obj.get(name)
+        grp = parent.get(name)
         self.x.writeHdf(grp, 'x',  withPosterior=withPosterior, index=index)
         self.y.writeHdf(grp, 'y',  withPosterior=withPosterior, index=index)
         self.z.writeHdf(grp, 'z',  withPosterior=withPosterior, index=index)
+        if not self.height is None:
+            self.height.writeHdf(grp, 'height', withPosterior=withPosterior, index=index)
 
 
     def fromHdf(self, grp, index=None):
         """ Reads in the object from a HDF file """
-        x = RectilinearMesh1D().fromHdf(grp['x'], index=index)
-        y = RectilinearMesh1D().fromHdf(grp['y'], index=index)
-        z = RectilinearMesh1D().fromHdf(grp['z'], index=index)
-        self.__init__(xCentres=x, yCentres=y, zCentres=z)
+        self.__init__()
+        self.x = RectilinearMesh1D().fromHdf(grp['x'], index=index)
+        self.y = RectilinearMesh1D().fromHdf(grp['y'], index=index)
+        self.z = RectilinearMesh1D().fromHdf(grp['z'], index=index)
+        if 'height' in grp:
+            self.height = Model().fromHdf(grp['height'], index=index)
         return self
 
 
@@ -655,93 +657,93 @@ class RectilinearMesh3D(myObject):
         return self.z.range
 
 
-    def vtkStructure(self):
-        """Generates a vtk mesh structure that can be used in a vtk file.
+    # def vtkStructure(self):
+    #     """Generates a vtk mesh structure that can be used in a vtk file.
 
-        Returns
-        -------
-        out : pyvtk.VtkData
-            Vtk data structure
+    #     Returns
+    #     -------
+    #     out : pyvtk.VtkData
+    #         Vtk data structure
 
-        """
+    #     """
 
-        # Generate the quad node locations in x
-        x = self.x.edges
-        y = self.y.edges
-        z = self.z.edges
+    #     # Generate the quad node locations in x
+    #     x = self.x.edges
+    #     y = self.y.edges
+    #     z = self.z.edges
 
-        nCells = self.x.nCells * self.z.nCells
+    #     nCells = self.x.nCells * self.z.nCells
 
-        z = self.z.edges
-        nNodes = self.x.nEdges * self.z.nEdges
+    #     z = self.z.edges
+    #     nNodes = self.x.nEdges * self.z.nEdges
 
-        # Constuct the node locations for the vtk file
-        nodes = np.empty([nNodes, 3])
-        nodes[:, 0] = np.tile(x, self.z.nEdges)
-        nodes[:, 1] = np.tile(y, self.z.nEdges)
-        nodes[:, 2] = np.repeat(z, self.x.nEdges)
+    #     # Constuct the node locations for the vtk file
+    #     nodes = np.empty([nNodes, 3])
+    #     nodes[:, 0] = np.tile(x, self.z.nEdges)
+    #     nodes[:, 1] = np.tile(y, self.z.nEdges)
+    #     nodes[:, 2] = np.repeat(z, self.x.nEdges)
 
-        tmp = np.int32([0, 1, self.x.nEdges+1, self.x.nEdges])
-        a = np.ones(self.x.nCells, dtype=np.int32)
-        a[0] = 2
-        index = (np.repeat(tmp[:, np.newaxis], nCells, 1) + np.cumsum(np.tile(a, self.z.nCells))-2).T
+    #     tmp = np.int32([0, 1, self.x.nEdges+1, self.x.nEdges])
+    #     a = np.ones(self.x.nCells, dtype=np.int32)
+    #     a[0] = 2
+    #     index = (np.repeat(tmp[:, np.newaxis], nCells, 1) + np.cumsum(np.tile(a, self.z.nCells))-2).T
 
-        return VtkData(PolyData(points=nodes, polygons=index))
+    #     return VtkData(PolyData(points=nodes, polygons=index))
 
 
-    def toVTK(self, fileName, pointData=None, cellData=None, format='binary'):
-        """Save to a VTK file.
+    # def toVTK(self, fileName, pointData=None, cellData=None, format='binary'):
+    #     """Save to a VTK file.
 
-        Parameters
-        ----------
-        fileName : str
-            Filename to save to.
-        pointData : geobipy.StatArray or list of geobipy.StatArray, optional
-            Data at each node in the mesh. Each entry is saved as a separate
-            vtk attribute.
-        cellData : geobipy.StatArray or list of geobipy.StatArray, optional
-            Data at each cell in the mesh. Each entry is saved as a separate
-            vtk attribute.
-        format : str, optional
-            "ascii" or "binary" format. Ascii is readable, binary is not but results in smaller files.
+    #     Parameters
+    #     ----------
+    #     fileName : str
+    #         Filename to save to.
+    #     pointData : geobipy.StatArray or list of geobipy.StatArray, optional
+    #         Data at each node in the mesh. Each entry is saved as a separate
+    #         vtk attribute.
+    #     cellData : geobipy.StatArray or list of geobipy.StatArray, optional
+    #         Data at each cell in the mesh. Each entry is saved as a separate
+    #         vtk attribute.
+    #     format : str, optional
+    #         "ascii" or "binary" format. Ascii is readable, binary is not but results in smaller files.
 
-        Raises
-        ------
-        TypeError
-            If pointData or cellData is not a geobipy.StatArray or list of them.
-        ValueError
-            If any pointData (cellData) entry does not have size equal to the number of points (cells).
-        ValueError
-            If any StatArray does not have a name or units. This is needed for the vtk attribute.
+    #     Raises
+    #     ------
+    #     TypeError
+    #         If pointData or cellData is not a geobipy.StatArray or list of them.
+    #     ValueError
+    #         If any pointData (cellData) entry does not have size equal to the number of points (cells).
+    #     ValueError
+    #         If any StatArray does not have a name or units. This is needed for the vtk attribute.
 
-        """
+    #     """
 
-        vtk = self.vtkStructure()
+    #     vtk = self.vtkStructure()
 
-        if not pointData is None:
-            assert isinstance(pointData, (StatArray.StatArray, list)), TypeError("pointData must a geobipy.StatArray or a list of them.")
-            if isinstance(pointData, list):
-                for p in pointData:
-                    assert isinstance(p, StatArray.StatArray), TypeError("pointData entries must be a geobipy.StatArray")
-                    assert all(p.shape == [self.z.nEdges, self.x.nEdges]), ValueError("pointData entries must have shape {}".format([self.z.nEdges, self.x.nEdges]))
-                    assert p.hasLabels(), ValueError("StatArray needs a name")
-                    vtk.point_data.append(Scalars(p.reshape(self.nNodes), p.getNameUnits()))
-            else:
-                assert all(pointData.shape == [self.z.nEdges, self.x.nEdges]), ValueError("pointData entries must have shape {}".format([self.z.nEdges, self.x.nEdges]))
-                assert pointData.hasLabels(), ValueError("StatArray needs a name")
-                vtk.point_data.append(Scalars(pointData.reshape(self.nNodes), pointData.getNameUnits()))
+    #     if not pointData is None:
+    #         assert isinstance(pointData, (StatArray.StatArray, list)), TypeError("pointData must a geobipy.StatArray or a list of them.")
+    #         if isinstance(pointData, list):
+    #             for p in pointData:
+    #                 assert isinstance(p, StatArray.StatArray), TypeError("pointData entries must be a geobipy.StatArray")
+    #                 assert all(p.shape == [self.z.nEdges, self.x.nEdges]), ValueError("pointData entries must have shape {}".format([self.z.nEdges, self.x.nEdges]))
+    #                 assert p.hasLabels(), ValueError("StatArray needs a name")
+    #                 vtk.point_data.append(Scalars(p.reshape(self.nNodes), p.getNameUnits()))
+    #         else:
+    #             assert all(pointData.shape == [self.z.nEdges, self.x.nEdges]), ValueError("pointData entries must have shape {}".format([self.z.nEdges, self.x.nEdges]))
+    #             assert pointData.hasLabels(), ValueError("StatArray needs a name")
+    #             vtk.point_data.append(Scalars(pointData.reshape(self.nNodes), pointData.getNameUnits()))
 
-        if not cellData is None:
-            assert isinstance(cellData, (StatArray.StatArray, list)), TypeError("cellData must a geobipy.StatArray or a list of them.")
-            if isinstance(cellData, list):
-                for p in cellData:
-                    assert isinstance(p, StatArray.StatArray), TypeError("cellData entries must be a geobipy.StatArray")
-                    assert np.all(p.shape == self.shape), ValueError("cellData entries must have shape {}".format(self.shape))
-                    assert p.hasLabels(), ValueError("StatArray needs a name")
-                    vtk.cell_data.append(Scalars(p.reshape(self.nCells), p.getNameUnits()))
-            else:
-                assert all(cellData.shape == self.shape), ValueError("cellData entries must have shape {}".format(self.shape))
-                assert cellData.hasLabels(), ValueError("StatArray needs a name")
-                vtk.cell_data.append(Scalars(cellData.reshape(self.nCells), cellData.getNameUnits()))
+    #     if not cellData is None:
+    #         assert isinstance(cellData, (StatArray.StatArray, list)), TypeError("cellData must a geobipy.StatArray or a list of them.")
+    #         if isinstance(cellData, list):
+    #             for p in cellData:
+    #                 assert isinstance(p, StatArray.StatArray), TypeError("cellData entries must be a geobipy.StatArray")
+    #                 assert np.all(p.shape == self.shape), ValueError("cellData entries must have shape {}".format(self.shape))
+    #                 assert p.hasLabels(), ValueError("StatArray needs a name")
+    #                 vtk.cell_data.append(Scalars(p.reshape(self.nCells), p.getNameUnits()))
+    #         else:
+    #             assert all(cellData.shape == self.shape), ValueError("cellData entries must have shape {}".format(self.shape))
+    #             assert cellData.hasLabels(), ValueError("StatArray needs a name")
+    #             vtk.cell_data.append(Scalars(cellData.reshape(self.nCells), cellData.getNameUnits()))
 
-        vtk.tofile(fileName, format)
+    #     vtk.tofile(fileName, format)
