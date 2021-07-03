@@ -98,10 +98,10 @@ class Inference3D(myObject):
         self._world = communicator
 
         # Set some starts and chunks for points and lines.
-        self._point_starts, self._point_chunks = loadBalance1D_shrinkingArrays(self.nPoints, world.size)
+        self._point_starts, self._point_chunks = loadBalance1D_shrinkingArrays(self.nPoints, self.world.size)
 
         # Potentially create a team that operates over lines.
-        self._line_starts, self._line_chunks = loadBalance1D_shrinkingArrays(self.nLines, world.size)
+        self._line_starts, self._line_chunks = loadBalance1D_shrinkingArrays(self.nLines, self.world.size)
 
 
     @property
@@ -416,23 +416,26 @@ class Inference3D(myObject):
         # Need to create HDF memory collectively.
         for line in self.lines:
             key = 'credible_lower'
-            if not key in self.hdfFile.keys():
+            if not key in line.hdfFile.keys():
                 credibleLower = StatArray.StatArray(np.zeros(line.mesh.shape), '{}% Credible Interval'.format(100.0 - percent), line.parameterUnits)
                 credibleLower.createHdf(line.hdfFile, key)
 
             key = 'credible_upper'
-            if key in self.hdfFile.keys():
+            if not key in line.hdfFile.keys():
                 credibleUpper = StatArray.StatArray(np.zeros(line.mesh.shape), '{}% Credible Interval'.format(percent), line.parameterUnits)
                 credibleUpper.createHdf(line.hdfFile, key)
-
 
         r = range(self.nLines)
         if self.parallel_access:
             r = range(self.line_starts[self.world.rank], self.line_ends[self.world.rank])
             self.world.barrier()
 
+            if self.world.rank == 0:
+                Bar = progressbar.ProgressBar()
+                r = Bar(r)
+
         for i in r:
-            self.Lines[i].computeCredibleInterval(percent, log)
+            self.lines[i].computeCredibleInterval(percent, log)
 
 
     def compute_MinsleyFoksBedrosian2020_P_lithology(self, global_mixture_hdf5, local_mixture_hdf5, log=None):
