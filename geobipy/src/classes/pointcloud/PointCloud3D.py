@@ -426,7 +426,7 @@ class PointCloud3D(myObject):
             values = self.z
 
         if i is None:
-            i = self.block_median_indices() if block else None
+            i = self.block_median_indices(dx, dy) if block else None
 
         if method.lower() == 'ct':
             return self.interpCloughTocher(dx, dy, values, mask, clip, i, **kwargs)
