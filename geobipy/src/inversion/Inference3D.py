@@ -23,7 +23,8 @@ from ..classes.statistics.Histogram1D import Histogram1D
 from ..classes.statistics.Hitmap2D import Hitmap2D
 from ..classes.statistics.mixPearson import mixPearson
 from ..classes.pointcloud.PointCloud3D import PointCloud3D
-# from ..classes.model.Model2D_RM import Model2D_RM
+from ..classes.mesh.RectilinearMesh3D import RectilinearMesh3D
+from ..classes.model.Model import Model
 from ..base import interpolation as interpolation
 from .inference import initialize
 from .Inference1D import Inference1D
@@ -99,10 +100,10 @@ class Inference3D(myObject):
         self._world = communicator
 
         # Set some starts and chunks for points and lines.
-        self._point_starts, self._point_chunks = loadBalance1D_shrinkingArrays(self.nPoints, world.size)
+        self._point_starts, self._point_chunks = loadBalance1D_shrinkingArrays(self.nPoints, self.world.size)
 
         # Potentially create a team that operates over lines.
-        self._line_starts, self._line_chunks = loadBalance1D_shrinkingArrays(self.nLines, world.size)
+        self._line_starts, self._line_chunks = loadBalance1D_shrinkingArrays(self.nLines, self.world.size)
 
 
     @property
@@ -329,8 +330,9 @@ class Inference3D(myObject):
         additiveError = StatArray.StatArray((self.nSystems, self.nPoints), name=self.lines[0].additiveError.name, units=self.lines[0].additiveError.units, order = 'F')
 
         print("Reading Additive Errors Posteriors", flush=True)
-        Bar = progressbar.ProgressBar()
-        for i in Bar(range(self.nLines)):
+        bar = self.loop_over(self.nLines)
+
+        for i in bar:
             additiveError[:, self.lineIndices[i]] = self.lines[i].additiveError.T
             del self.lines[i].__dict__['additiveError'] # Free memory
         return additiveError
@@ -343,9 +345,9 @@ class Inference3D(myObject):
         del self.lines[0].__dict__['bestData']
 
         print("Reading Most Probable Data", flush=True)
-        Bar = progressbar.ProgressBar()
+        bar = self.loop_over(self.nLines)
 
-        for i in Bar(range(1, self.nLines)):
+        for i in bar:
             bestData = bestData + self.lines[i].bestData
             del self.lines[i].__dict__['bestData']
 
@@ -358,8 +360,9 @@ class Inference3D(myObject):
         bestParameters = StatArray.StatArray((self.zGrid.nCells.value, self.nPoints), name=self.lines[0].bestParameters.name, units=self.lines[0].bestParameters.units, order = 'F')
 
         print('Reading best parameters', flush=True)
-        Bar=progressbar.ProgressBar()
-        for i in Bar(range(self.nLines)):
+        bar = self.loop_over(self.nLines)
+
+        for i in bar:
             bestParameters[:, self.lineIndices[i]] = self.lines[i].bestParameters
             del self.lines[i].__dict__['bestParameters'] # Free memory
 
@@ -385,8 +388,9 @@ class Inference3D(myObject):
         marginalProbability = StatArray.StatArray((self.nPoints, self.zGrid.nCells.value, mp.shape[-1]), name=mp.name, units=mp.units)
 
         print('Reading marginal probability', flush=True)
-        Bar = progressbar.ProgressBar()
-        for i in Bar(range(self.nLines)):
+        bar = self.loop_over(self.nLines)
+
+        for i in bar:
             marginalProbability[self.lineIndices[i], :, :] = self.lines[i].marginal_probability
             # del self.lines[i].__dict__['marginalProbability'] # Free memory
 
@@ -483,6 +487,8 @@ class Inference3D(myObject):
 
             Bar = progressbar.ProgressBar()
             r = Bar(range(self.nPoints))
+
+
 
         # Create the space in HDF5
         probabilities = StatArray.StatArray((z.nCells.value, global_mixture.n_components), name='probabilities')
@@ -695,7 +701,7 @@ class Inference3D(myObject):
 
         return meanParameters
 
-    def mesh3d(self, dx, dy):
+    def mesh3d(self, dx, dy, **kwargs):
         """Generate a 3D mesh using dx, dy, and the apriori discretized vertical dimension before inversion.
 
         Parameters
@@ -710,7 +716,7 @@ class Inference3D(myObject):
         geoobipy.RectilinearMesh3D : 3D rectilinear mesh with a draped top surface.
         """
         # Interpolate the draped surface of the mesh
-        height = self.pointcloud.interpolate(dx, dy, values=self.pointcloud.elevation, block=True)
+        height, dum = self.pointcloud.interpolate(dx, dy, values=self.pointcloud.elevation, **kwargs)
         return RectilinearMesh3D(xEdges=height.x.edges, yEdges=height.y.edges, zEdges=self.zGrid.edges, height=height.values)
 
     @cached_property
@@ -771,8 +777,9 @@ class Inference3D(myObject):
         e = StatArray.StatArray(self.nPoints, name=self.lines[0].elevation.name, units=self.lines[0].elevation.units)
         # Loop over the lines in the data set and get the attributes
         print('Reading co-ordinates', flush=True)
-        Bar = progressbar.ProgressBar()
-        for i in Bar(range(self.nLines)):
+        bar = self.loop_over(self.nLines)
+
+        for i in bar:
             indices = self.lineIndices[i]
             x[indices] = self.lines[i].x
             y[indices] = self.lines[i].y
@@ -902,6 +909,29 @@ class Inference3D(myObject):
         index[i] -= self._cumNpoints[iLine[i]-1]
 
         return np.squeeze(iLine), np.squeeze(index)
+
+    def loop_over(self, *args, **kwargs):
+        """Generate a loop range.
+
+        Tracks progress on the master rank only if parallel.
+
+        Parameters
+        ----------
+        value : int
+            Size of the loop to generate
+        """
+
+        if self.parallel_access:
+            bar = range(*args, **kwargs)
+
+            if self.world.rank == 0:
+                Bar = progressbar.ProgressBar()
+                bar = Bar(bar)
+            return bar
+
+        else:
+            bar = progressbar.ProgressBar()
+            return bar(range(*args, **kwargs))
 
 
     def fiducial(self, index):
@@ -1280,8 +1310,8 @@ class Inference3D(myObject):
 
         # Interpolate for each depth
         print('Interpolating using minimum curvature')
-        Bar=progressbar.ProgressBar()
-        for i in Bar(range(1, self.zGrid.nCells.value)):
+        bar = self.loop_over(1, self.zGrid.nCells.value)
+        for i in bar:
             # Get the model values for the current depth
             values = self.meanParameters[i, :]
             dum1, dum2, vals = interpolation.minimumCurvature(x, y, values, self.pointcloud.bounds, dx=dx, dy=dy, mask=mask, clip=clip, iterations=2000, tension=0.25, accuracy=0.01)
@@ -1306,8 +1336,8 @@ class Inference3D(myObject):
 
         # Interpolate for each depth
         print('Interpolating using minimum curvature')
-        Bar=progressbar.ProgressBar()
-        for i in Bar(range(1, self.zGrid.nCells.value)):
+        bar = self.loop_over(1, self.zGrid.nCells.value)
+        for i in bar:
             # Get the model values for the current depth
             values = self.meanParameters[i, :]
             dum1, dum2, vals = interpolation.minimumCurvature(x, y, values, self.pointcloud.bounds, dx=dx, dy=dy, mask=mask, clip=clip, iterations=2000, tension=0.25, accuracy=0.01)
@@ -1350,8 +1380,8 @@ class Inference3D(myObject):
         percentage = StatArray.StatArray(np.empty(self.nPoints), name="Probability of {} > {:0.2f}".format(self.meanParameters.name, value), units = self.meanParameters.units)
 
         print('Calculating percentages', flush = True)
-        Bar=progressbar.ProgressBar()
-        for i in Bar(range(self.nLines)):
+        bar = self.loop_over(self.nLines)
+        for i in bar:
             percentage[self.lineIndices[i]] = self.lines[i].percentageParameter(value, depth, depth2)
 
         return percentage
@@ -1395,28 +1425,32 @@ class Inference3D(myObject):
 
         return out
 
-    def _interpolate_3d_mpi(self, dx, dy, variable, block=True, **kwargs):
+    def _interpolate_3d_mpi(self, dx, dy, variable, **kwargs):
 
-        starts, chunks = loadBalance1D_shrinkingArrays(self.zGrid.size, self.world.size)
+        kwargs['block'] = kwargs.pop('block', True)
+
+        starts, chunks = loadBalance1D_shrinkingArrays(self.zGrid.nCells.value, self.world.size)
         ends = starts + chunks
         tmp = self.depthSlice(depth=starts[self.world.rank], variable=variable, **kwargs)
-        values, dum = self.interpolate(dx, dy, values=tmp, block=block, **kwargs)
-        # values, dum = cF._log(values, kwargs.get('log', None))
+        values, dum = self.interpolate(dx, dy, values=tmp, **kwargs)
+        values.values, dum = cF._log(values.values, kwargs.get('log', None))
 
-        out = Model(self.mesh3D)
+        out = Model(self.mesh3d(dx, dy, **kwargs))
 
-        f = h5py.File("{}_{}_{}.h5".format(variable, dx, dy), 'w', driver='mpio', comm=world)
-        out.createHdf(f, "{}_3d".format(variable))
+        f = h5py.File("{}_{}_{}.h5".format(variable, dx, dy), 'w', driver='mpio', comm=self.world)
+        grp = out.createHdf(f, "{}_3d".format(variable))
 
         self.world.barrier()
 
         values.writeHdf(f, "{}_3d".format(variable), index=starts[self.world.rank])
 
-        for i in range(starts[world.rank]+1, ends[world.rank]):
+        r = self.loop_over(starts[self.world.rank]+1, ends[self.world.rank])
+
+        for i in r:
             tmp = self.depthSlice(depth=i, variable=variable, **kwargs)
-            values, dum = self.interpolate(dx, dy, values=tmp, block=block, **kwargs)
-            # values, dum = cF._log(values, kwargs.get('log', None))
-            values.writeHdf(f, "{}_3d".format(variable), index=starts[i])
+            values, dum = self.interpolate(dx, dy, values=tmp, **kwargs)
+            values.values, dum = cF._log(values.values, kwargs.get('log', None))
+            values.writeHdf(f, "{}_3d".format(variable), index=i)
 
         f.close()
 
