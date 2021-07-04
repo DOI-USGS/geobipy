@@ -12,7 +12,7 @@ from ..classes.statistics.Histogram1D import Histogram1D
 from ..classes.statistics.Histogram2D import Histogram2D
 from ..classes.statistics.Hitmap2D import Hitmap2D
 from ..classes.mesh.RectilinearMesh1D import RectilinearMesh1D
-from ..classes.mesh.TopoRectilinearMesh2D import TopoRectilinearMesh2D
+from ..classes.mesh.RectilinearMesh2D import RectilinearMesh2D
 from ..classes.data.dataset.FdemData import FdemData
 from ..classes.data.dataset.TdemData import TdemData
 from ..classes.model.Model1D import Model1D
@@ -868,12 +868,12 @@ class Inference2D(myObject):
         #         tmp = RectilinearMesh1D(centres=tmp, edgesMin=0.0)
         # else:
         tmp = self.hitmap(0).y
-        try:
-            tmp = RectilinearMesh1D(centres=tmp.centres, edgesMin=0.0)
-        except:
-            tmp = RectilinearMesh1D(centres=tmp, edgesMin=0.0)
 
-        return TopoRectilinearMesh2D(xCentres=self.x, yCentres=self.y, zEdges=tmp.edges, heightCentres=self.elevation)
+        tmp.edges[0] = 0.0
+
+        tmp = RectilinearMesh1D(edges=tmp.edges)
+
+        return RectilinearMesh2D(xCentres=self.x, yCentres=self.y, zEdges=tmp.edges, heightCentres=self.elevation)
 
 
     @property
