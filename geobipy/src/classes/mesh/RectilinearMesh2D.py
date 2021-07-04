@@ -976,11 +976,16 @@ class RectilinearMesh2D(Mesh):
 
         self.x = RectilinearMesh1D.RectilinearMesh1D().fromHdf(grp['x'], index=index)
         self.y = RectilinearMesh1D.RectilinearMesh1D().fromHdf(grp['y'], index=index)
+
         self._z = self._y
 
         if 'z' in grp:
-            self.z = RectilinearMesh1D.RectilinearMesh1D().fromHdf(grp['z'], index=index)
-            self.xyz = True
+            if self.y.nCells == self.x.nCells:
+                z = RectilinearMesh1D.RectilinearMesh1D().fromHdf(grp['z'], index=index)
+                self.z = z
+                self.xyz = True
+
+
 
         if 'height' in grp:
             self._height = RectilinearMesh1D.RectilinearMesh1D().fromHdf(grp['height'], index=index)
