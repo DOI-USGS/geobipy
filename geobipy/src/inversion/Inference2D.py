@@ -241,8 +241,8 @@ class Inference2D(myObject):
             r = progressbar.progressbar(r)
 
         for i in r:
-            h.x.xBinCentres = b[i, :]
-            h._counts[:, :] = a[i, :, :]
+            h.x.xBinCentres = xc[i, :]
+            h._counts[:, :] = counts[i, :, :]
             m, l, u = h.credibleIntervals(percent=percent, log=log)
             credibleLower[:, i] = l
             credibleUpper[:, i] = u
@@ -2052,7 +2052,7 @@ class Inference2D(myObject):
             elif (low == 'layer posterior'):
                 res.append('currentmodel/nCells/posterior')
             elif (low == 'layer depth posterior'):
-                res.append('currentmodel/depth/posterior')
+                res.append('currentmodel/edges/posterior')
             elif (low == 'best data'):
                 res.append('bestd')
             elif (low == 'x'):
