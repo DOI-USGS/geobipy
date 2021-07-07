@@ -25,7 +25,7 @@ from ..classes.statistics.mixPearson import mixPearson
 from ..classes.pointcloud.PointCloud3D import PointCloud3D
 from ..classes.mesh.RectilinearMesh3D import RectilinearMesh3D
 from ..classes.model.Model import Model
-from ..base import interpolation as interpolation
+# from ..base import interpolation as interpolation
 from .inference import initialize
 from .Inference1D import Inference1D
 from .Inference2D import Inference2D
@@ -40,8 +40,8 @@ from ..base import plotting as cP
 from ..base import utilities as cF
 from os.path import join
 from scipy.spatial import Delaunay
-from scipy.interpolate import CloughTocher2DInterpolator
-from scipy.interpolate.interpnd import _ndim_coords_from_arrays
+# from scipy.interpolate import CloughTocher2DInterpolator
+# from scipy.interpolate.interpnd import _ndim_coords_from_arrays
 
 from os import listdir
 import progressbar
@@ -704,6 +704,9 @@ class Inference3D(myObject):
 
         return meanParameters
 
+    def mesh2d(self):
+        return self.pointcloud.centred_mesh
+
     def mesh3d(self, dx, dy, **kwargs):
         """Generate a 3D mesh using dx, dy, and the apriori discretized vertical dimension before inversion.
 
@@ -718,8 +721,9 @@ class Inference3D(myObject):
         -------
         geoobipy.RectilinearMesh3D : 3D rectilinear mesh with a draped top surface.
         """
+        mesh = self.mesh2d(dx, dy)
         # Interpolate the draped surface of the mesh
-        height, dum = self.pointcloud.interpolate(dx, dy, values=self.pointcloud.elevation, **kwargs)
+        height, dum = self.pointcloud.interpolate(mesh=mesh, values=self.pointcloud.elevation, block=True, mask=None)
         return RectilinearMesh3D(xEdges=height.x.edges, yEdges=height.y.edges, zEdges=self.zGrid.edges, height=height.values)
 
     @cached_property
@@ -738,7 +742,6 @@ class Inference3D(myObject):
         tmp = np.asarray([line.nPoints for line in self.lines])
         self._cumNpoints = np.cumsum(tmp)
         return np.sum(tmp)
-
 
     @property
     def nSystems(self):
@@ -1267,90 +1270,90 @@ class Inference3D(myObject):
         return self.lines[0].mesh.z
 
 
-    def getMean3D(self, dx, dy, mask = False, clip = False, force=False, method='ct'):
-        """ Interpolate each depth slice to create a 3D volume """
-        if (not self.mean3D is None and not force): return
+    # def getMean3D(self, dx, dy, mask = False, clip = False, force=False, method='ct'):
+    #     """ Interpolate each depth slice to create a 3D volume """
+    #     if (not self.mean3D is None and not force): return
 
-        # Test for an existing file, created with the same parameters.
-        # Read it and return if it exists.
-        file = 'mean3D.h5'
-        if fileIO.fileExists(file):
-            variables = hdfRead.read_all(file)
-            if (dx == variables['dx'] and dy == variables['dy'] and mask == variables['mask'] and clip == variables['clip'] and method == variables['method']):
-                self.mean3D = variables['mean3d']
-                return
-
-
-        method = method.lower()
-        if method == 'ct':
-            self.__getMean3D_CloughTocher(dx=dx, dy=dy, mask=mask, clip=clip, force=force)
-        elif method == 'mc':
-            self.__getMean3D_minimumCurvature(dx=dx, dy=dy, mask=mask, clip=clip)
-        else:
-            assert False, ValueError("method must be either 'ct' or 'mc' ")
-
-        with h5py.File('mean3D.h5','w') as f:
-            f.create_dataset(name = 'dx', data = dx)
-            f.create_dataset(name = 'dy', data = dy)
-            f.create_dataset(name = 'mask', data = mask)
-            f.create_dataset(name = 'clip', data = clip)
-            f.create_dataset(name = 'method', data = method)
-            self.mean3D.toHdf(f,'mean3d')
+    #     # Test for an existing file, created with the same parameters.
+    #     # Read it and return if it exists.
+    #     file = 'mean3D.h5'
+    #     if fileIO.fileExists(file):
+    #         variables = hdfRead.read_all(file)
+    #         if (dx == variables['dx'] and dy == variables['dy'] and mask == variables['mask'] and clip == variables['clip'] and method == variables['method']):
+    #             self.mean3D = variables['mean3d']
+    #             return
 
 
-    def highest_marginal_3D(self, dx, dy, mask=None, clip=False):
+    #     method = method.lower()
+    #     if method == 'ct':
+    #         self.__getMean3D_CloughTocher(dx=dx, dy=dy, mask=mask, clip=clip, force=force)
+    #     elif method == 'mc':
+    #         self.__getMean3D_minimumCurvature(dx=dx, dy=dy, mask=mask, clip=clip)
+    #     else:
+    #         assert False, ValueError("method must be either 'ct' or 'mc' ")
+
+    #     with h5py.File('mean3D.h5','w') as f:
+    #         f.create_dataset(name = 'dx', data = dx)
+    #         f.create_dataset(name = 'dy', data = dy)
+    #         f.create_dataset(name = 'mask', data = mask)
+    #         f.create_dataset(name = 'clip', data = clip)
+    #         f.create_dataset(name = 'method', data = method)
+    #         self.mean3D.toHdf(f,'mean3d')
 
 
-        x = self.pointcloud.x.deepcopy()
-        y = self.pointcloud.y.deepcopy()
-
-        values = self.meanParameters[0, :]
-        x1, y1, vals = interpolation.minimumCurvature(x, y, values, self.pointcloud.bounds, dx=dx, dy=dy, mask=mask, clip=clip, iterations=2000, tension=0.25, accuracy=0.01)
-
-        # Initialize 3D volume
-        mean3D = StatArray.StatArray(np.zeros([self.zGrid.nCells.value, y1.size+1, x1.size+1], order = 'F'),name = 'Conductivity', units = '$Sm^{-1}$')
-        mean3D[0, :, :] = vals
-
-        # Interpolate for each depth
-        print('Interpolating using minimum curvature')
-        bar = self.loop_over(1, self.zGrid.nCells.value)
-        for i in bar:
-            # Get the model values for the current depth
-            values = self.meanParameters[i, :]
-            dum1, dum2, vals = interpolation.minimumCurvature(x, y, values, self.pointcloud.bounds, dx=dx, dy=dy, mask=mask, clip=clip, iterations=2000, tension=0.25, accuracy=0.01)
-            # Add values to the 3D array
-            mean3D[i, :, :] = vals
-
-        self.mean3D = mean3D
+    # def highest_marginal_3D(self, dx, dy, mask=None, clip=False):
 
 
-    def __getMean3D_minimumCurvature(self, dx, dy, mask=None, clip=False):
+    #     x = self.pointcloud.x.deepcopy()
+    #     y = self.pointcloud.y.deepcopy()
+
+    #     values = self.meanParameters[0, :]
+    #     x1, y1, vals = interpolation.minimumCurvature(x, y, values, self.pointcloud.bounds, dx=dx, dy=dy, mask=mask, clip=clip, iterations=2000, tension=0.25, accuracy=0.01)
+
+    #     # Initialize 3D volume
+    #     mean3D = StatArray.StatArray(np.zeros([self.zGrid.nCells.value, y1.size+1, x1.size+1], order = 'F'),name = 'Conductivity', units = '$Sm^{-1}$')
+    #     mean3D[0, :, :] = vals
+
+    #     # Interpolate for each depth
+    #     print('Interpolating using minimum curvature')
+    #     bar = self.loop_over(1, self.zGrid.nCells.value)
+    #     for i in bar:
+    #         # Get the model values for the current depth
+    #         values = self.meanParameters[i, :]
+    #         dum1, dum2, vals = interpolation.minimumCurvature(x, y, values, self.pointcloud.bounds, dx=dx, dy=dy, mask=mask, clip=clip, iterations=2000, tension=0.25, accuracy=0.01)
+    #         # Add values to the 3D array
+    #         mean3D[i, :, :] = vals
+
+    #     self.mean3D = mean3D
 
 
-        x = self.pointcloud.x.deepcopy()
-        y = self.pointcloud.y.deepcopy()
+    # def __getMean3D_minimumCurvature(self, dx, dy, mask=None, clip=False):
 
-        values = self.meanParameters[0, :]
-        x1, y1, vals = interpolation.minimumCurvature(x, y, values, self.pointcloud.bounds, dx=dx, dy=dy, mask=mask, clip=clip, iterations=2000, tension=0.25, accuracy=0.01)
 
-        # Initialize 3D volume
-        mean3D = StatArray.StatArray(np.zeros([self.zGrid.nCells.value, y1.size+1, x1.size+1], order = 'F'),name = 'Conductivity', units = '$Sm^{-1}$')
-        mean3D[0, :, :] = vals
+    #     x = self.pointcloud.x.deepcopy()
+    #     y = self.pointcloud.y.deepcopy()
 
-        # Interpolate for each depth
-        print('Interpolating using minimum curvature')
-        bar = self.loop_over(1, self.zGrid.nCells.value)
-        for i in bar:
-            # Get the model values for the current depth
-            values = self.meanParameters[i, :]
-            dum1, dum2, vals = interpolation.minimumCurvature(x, y, values, self.pointcloud.bounds, dx=dx, dy=dy, mask=mask, clip=clip, iterations=2000, tension=0.25, accuracy=0.01)
-            # Add values to the 3D array
-            mean3D[i, :, :] = vals
+    #     values = self.meanParameters[0, :]
+    #     x1, y1, vals = interpolation.minimumCurvature(x, y, values, self.pointcloud.bounds, dx=dx, dy=dy, mask=mask, clip=clip, iterations=2000, tension=0.25, accuracy=0.01)
 
-        self.mean3D = mean3D
+    #     # Initialize 3D volume
+    #     mean3D = StatArray.StatArray(np.zeros([self.zGrid.nCells.value, y1.size+1, x1.size+1], order = 'F'),name = 'Conductivity', units = '$Sm^{-1}$')
+    #     mean3D[0, :, :] = vals
+
+    #     # Interpolate for each depth
+    #     print('Interpolating using minimum curvature')
+    #     bar = self.loop_over(1, self.zGrid.nCells.value)
+    #     for i in bar:
+    #         # Get the model values for the current depth
+    #         values = self.meanParameters[i, :]
+    #         dum1, dum2, vals = interpolation.minimumCurvature(x, y, values, self.pointcloud.bounds, dx=dx, dy=dy, mask=mask, clip=clip, iterations=2000, tension=0.25, accuracy=0.01)
+    #         # Add values to the 3D array
+    #         mean3D[i, :, :] = vals
+
+    #     self.mean3D = mean3D
 
     def interpolate(self, dx, dy, values, method='ct', mask=None, clip=True, i=None, block=True, **kwargs):
-        return self.pointcloud.interpolate(dx=dx, dy=dy, values=values, method=method, mask=mask, clip=clip, i=i, block=block, **kwargs)
+        return self.pointcloud.interpolate(self.mesh2d(dx, dy), values=values, method=method, mask=mask, clip=clip, i=i, block=block, **kwargs)
 
     def map(self, dx, dy, values, method='ct', mask = None, clip = True, **kwargs):
         """ Create a map of a parameter """
@@ -1412,16 +1415,18 @@ class Inference3D(myObject):
     def _interpolate_3d(self, dx, dy, variable, block=True, **kwargs):
 
         tmp = self.depthSlice(depth=self.zGrid.centres[0], variable=variable, **kwargs)
-        x, y, values, dum = self.interpolate(dx, dy, values=tmp, block=block, **kwargs)
+        values, dum = self.interpolate(dx, dy, values=tmp, block=block, **kwargs)
 
-        out = Model(self.mesh3D)
-        out.values[0, :, :] = values
+        out = Model(self.mesh3d(dx, dy))
+        out.values[0, :, :] = values.values
 
-        for i in range(1, self.zGrid.nCells.value):
+        r = self.loop_over(1, self.zGrid.nCells.value)
+
+        for i in r:
             tmp = self.depthSlice(depth=self.zGrid.centres[i], variable=variable, **kwargs)
-            x, y, values, dum = self.interpolate(dx, dy, values=tmp, block=block, **kwargs)
-            values, dum = cF._log(values, kwargs.get('log', None))
-            out.values[i, :, :] = values
+            values, dum = self.interpolate(dx, dy, values=tmp, block=block, **kwargs)
+            values, dum = cF._log(values.values, kwargs.get('log', None))
+            out.values[i, :, :] = values.values
 
         # Save the 3D model
         out.toHdf("{}_{}_{}.h5".format(variable, dx, dy), "{}_3d".format(variable))
@@ -1757,81 +1762,81 @@ class Inference3D(myObject):
 
 
 
-    def toVTK(self, fName, dx, dy, mask=False, clip=False, force=False, method='ct'):
-        """ Convert a 3D volume of interpolated values to vtk for visualization in Paraview """
+#     def toVTK(self, fName, dx, dy, mask=False, clip=False, force=False, method='ct'):
+#         """ Convert a 3D volume of interpolated values to vtk for visualization in Paraview """
 
-        self.getMean3D(dx=dx, dy=dy, mask=mask, clip=clip, force=force, method=method)
-        self.pointcloud.getBounds()
+#         self.getMean3D(dx=dx, dy=dy, mask=mask, clip=clip, force=force, method=method)
+#         self.pointcloud.getBounds()
 
-        x, y, intPoints = interpolation.getGridLocations2D(self.pointcloud.bounds, dx, dy)
-        z = self.zGrid
+#         x, y, intPoints = interpolation.getGridLocations2D(self.pointcloud.bounds, dx, dy)
+#         z = self.zGrid
 
 
-        from pyvtk import VtkData, UnstructuredGrid, PointData, CellData, Scalars
+#         from pyvtk import VtkData, UnstructuredGrid, PointData, CellData, Scalars
 
-        # Get the 3D dimensions
-        mx = x.size
-        my = y.size
-        mz = z.nCells
+#         # Get the 3D dimensions
+#         mx = x.size
+#         my = y.size
+#         mz = z.nCells
 
-        nPoints = mx * my * mz
-        nCells = (mx-1)*(my-1)*(mz-1)
+#         nPoints = mx * my * mz
+#         nCells = (mx-1)*(my-1)*(mz-1)
 
-        # Interpolate the elevation to the grid nodes
-        if (method == 'ct'):
-            tx,ty, vals, k = self.pointcloud.interpCloughTocher(dx = dx,dy=dy, values=self.elevation, mask = mask, clip = clip, extrapolate='nearest')
-        elif (method == 'mc'):
-            tx,ty, vals, k = self.pointcloud.interpMinimumCurvature(dx = dx, dy=dy, values=self.elevation, mask = mask, clip = clip)
+#         # Interpolate the elevation to the grid nodes
+#         if (method == 'ct'):
+#             tx,ty, vals, k = self.pointcloud.interpCloughTocher(dx = dx,dy=dy, values=self.elevation, mask = mask, clip = clip, extrapolate='nearest')
+#         elif (method == 'mc'):
+#             tx,ty, vals, k = self.pointcloud.interpMinimumCurvature(dx = dx, dy=dy, values=self.elevation, mask = mask, clip = clip)
 
-        vals = vals[:my,:mx]
-        vals = vals.reshape(mx*my)
+#         vals = vals[:my,:mx]
+#         vals = vals.reshape(mx*my)
 
-        # Set up the nodes and voxel indices
-        points = np.zeros([nPoints,3], order='F')
-        points[:,0] = np.tile(x, my*mz)
-        points[:,1] = np.tile(y.repeat(mx), mz)
-        points[:,2] = np.tile(vals, mz) - z.centres.repeat(mx*my)
+#         # Set up the nodes and voxel indices
+#         points = np.zeros([nPoints,3], order='F')
+#         points[:,0] = np.tile(x, my*mz)
+#         points[:,1] = np.tile(y.repeat(mx), mz)
+#         points[:,2] = np.tile(vals, mz) - z.centres.repeat(mx*my)
 
-        # Create the cell indices into the points
-        p = np.arange(nPoints).reshape((mz, my, mx))
-        voxels = np.zeros([nCells, 8], dtype=np.int)
-        iCell = 0
-        for k in range(mz-1):
-            k1 = k + 1
-            for j in range(my-1):
-                j1 = j + 1
-                for i in range(mx-1):
-                    i1 = i + 1
-                    voxels[iCell,:] = [p[k1,j,i],p[k1,j,i1],p[k1,j1,i1],p[k1,j1,i], p[k,j,i],p[k,j,i1],p[k,j1,i1],p[k,j1,i]]
-                    iCell += 1
+#         # Create the cell indices into the points
+#         p = np.arange(nPoints).reshape((mz, my, mx))
+#         voxels = np.zeros([nCells, 8], dtype=np.int)
+#         iCell = 0
+#         for k in range(mz-1):
+#             k1 = k + 1
+#             for j in range(my-1):
+#                 j1 = j + 1
+#                 for i in range(mx-1):
+#                     i1 = i + 1
+#                     voxels[iCell,:] = [p[k1,j,i],p[k1,j,i1],p[k1,j1,i1],p[k1,j1,i], p[k,j,i],p[k,j,i1],p[k,j1,i1],p[k,j1,i]]
+#                     iCell += 1
 
-        # Create the various point data
-        pointID = Scalars(np.arange(nPoints), name='Point iD')
-        pointElev = Scalars(points[:,2], name='Point Elevation (m)')
+#         # Create the various point data
+#         pointID = Scalars(np.arange(nPoints), name='Point iD')
+#         pointElev = Scalars(points[:,2], name='Point Elevation (m)')
 
-        tmp = self.mean3D.reshape(np.size(self.mean3D))
-        tmp[tmp == 0.0] = np.nan
+#         tmp = self.mean3D.reshape(np.size(self.mean3D))
+#         tmp[tmp == 0.0] = np.nan
 
-        print(np.nanmin(tmp), np.nanmax(tmp))
-        tmp1 = 1.0 / tmp
+#         print(np.nanmin(tmp), np.nanmax(tmp))
+#         tmp1 = 1.0 / tmp
 
-        print(np.nanmin(tmp), np.nanmax(tmp))
-        pointRes = Scalars(tmp1, name = 'log10(Resistivity) (Ohm m)')
-        tmp1 = np.log10(tmp)
+#         print(np.nanmin(tmp), np.nanmax(tmp))
+#         pointRes = Scalars(tmp1, name = 'log10(Resistivity) (Ohm m)')
+#         tmp1 = np.log10(tmp)
 
-        pointCon = Scalars(tmp1, name = 'log10(Conductivity) (S/m)')
+#         pointCon = Scalars(tmp1, name = 'log10(Conductivity) (S/m)')
 
-        print(nPoints, tmp.size)
+#         print(nPoints, tmp.size)
 
-        PData = PointData(pointID, pointElev, pointRes)#, pointCon)
-        CData = CellData(Scalars(np.arange(nCells),name='Cell iD'))
-        vtk = VtkData(
-              UnstructuredGrid(points,
-                               hexahedron=voxels),
-#                               ),
-              PData,
-              CData,
-              'Some Name'
-              )
+#         PData = PointData(pointID, pointElev, pointRes)#, pointCon)
+#         CData = CellData(Scalars(np.arange(nCells),name='Cell iD'))
+#         vtk = VtkData(
+#               UnstructuredGrid(points,
+#                                hexahedron=voxels),
+# #                               ),
+#               PData,
+#               CData,
+#               'Some Name'
+#               )
 
-        vtk.tofile(fName, 'binary')
+#         vtk.tofile(fName, 'binary')
