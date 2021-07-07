@@ -704,7 +704,7 @@ class Inference3D(myObject):
 
         return meanParameters
 
-    def mesh3d(self, dx, dy, **kwargs):
+    def mesh3d(self, dx, dy):
         """Generate a 3D mesh using dx, dy, and the apriori discretized vertical dimension before inversion.
 
         Parameters
@@ -719,7 +719,7 @@ class Inference3D(myObject):
         geoobipy.RectilinearMesh3D : 3D rectilinear mesh with a draped top surface.
         """
         # Interpolate the draped surface of the mesh
-        height, dum = self.pointcloud.interpolate(dx, dy, values=self.pointcloud.elevation, **kwargs)
+        height, dum = self.pointcloud.interpolate(dx, dy, values=self.pointcloud.elevation, block=True, mask=None)
         return RectilinearMesh3D(xEdges=height.x.edges, yEdges=height.y.edges, zEdges=self.zGrid.edges, height=height.values)
 
     @cached_property
@@ -1411,17 +1411,19 @@ class Inference3D(myObject):
 
     def _interpolate_3d(self, dx, dy, variable, block=True, **kwargs):
 
-        tmp = self.depthSlice(depth=self.zGrid.centres[0], variable=variable, **kwargs)
-        x, y, values, dum = self.interpolate(dx, dy, values=tmp, block=block, **kwargs)
+        tmp = self.depthSlice(depth=0, variable=variable, **kwargs)
+        values, dum = self.interpolate(dx, dy, values=tmp, block=block, **kwargs)
 
-        out = Model(self.mesh3D)
-        out.values[0, :, :] = values
+        out = Model(self.mesh3d(dx, dy))
+        out.values[0, :, :] = values.values
 
-        for i in range(1, self.zGrid.nCells.value):
-            tmp = self.depthSlice(depth=self.zGrid.centres[i], variable=variable, **kwargs)
-            x, y, values, dum = self.interpolate(dx, dy, values=tmp, block=block, **kwargs)
-            values, dum = cF._log(values, kwargs.get('log', None))
-            out.values[i, :, :] = values
+        r = self.loop_over(1, self.zGrid.nCells.value)
+
+        for i in r:
+            tmp = self.depthSlice(depth=i, variable=variable, **kwargs)
+            values, dum = self.interpolate(dx, dy, values=tmp, block=block, **kwargs)
+            values.values, dum = cF._log(values.values, kwargs.get('log', None))
+            out.values[i, :, :] = values.values
 
         # Save the 3D model
         out.toHdf("{}_{}_{}.h5".format(variable, dx, dy), "{}_3d".format(variable))
