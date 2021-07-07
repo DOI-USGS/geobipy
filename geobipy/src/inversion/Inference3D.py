@@ -1414,7 +1414,7 @@ class Inference3D(myObject):
 
     def _interpolate_3d(self, dx, dy, variable, block=True, **kwargs):
 
-        tmp = self.depthSlice(depth=self.zGrid.centres[0], variable=variable, **kwargs)
+        tmp = self.depthSlice(depth=0, variable=variable, **kwargs)
         values, dum = self.interpolate(dx, dy, values=tmp, block=block, **kwargs)
 
         out = Model(self.mesh3d(dx, dy))
@@ -1423,9 +1423,9 @@ class Inference3D(myObject):
         r = self.loop_over(1, self.zGrid.nCells.value)
 
         for i in r:
-            tmp = self.depthSlice(depth=self.zGrid.centres[i], variable=variable, **kwargs)
+            tmp = self.depthSlice(depth=i, variable=variable, **kwargs)
             values, dum = self.interpolate(dx, dy, values=tmp, block=block, **kwargs)
-            values, dum = cF._log(values.values, kwargs.get('log', None))
+            values.values, dum = cF._log(values.values, kwargs.get('log', None))
             out.values[i, :, :] = values.values
 
         # Save the 3D model
