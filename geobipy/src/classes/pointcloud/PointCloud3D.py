@@ -3,7 +3,7 @@ from ...classes.core.myObject import myObject
 import numpy as np
 from ...classes.core import StatArray
 from ...base import fileIO as fIO
-from ...base import interpolation
+# from ...base import interpolation
 from ...base import utilities as cf
 from ...base import plotting as cP
 from .Point import Point
@@ -12,6 +12,8 @@ from ..mesh.RectilinearMesh1D import RectilinearMesh1D
 from ..mesh.RectilinearMesh2D import RectilinearMesh2D
 from..model.Model import Model
 from scipy.spatial import cKDTree
+from scipy.interpolate import CloughTocher2DInterpolator
+from scipy.interpolate.interpnd import _ndim_coords_from_arrays
 
 try:
     from pyvtk import VtkData, Scalars, PolyData, PointData, UnstructuredGrid
@@ -197,7 +199,7 @@ class PointCloud3D(myObject):
         """Gets the bounding box of the data set """
         return np.asarray([np.nanmin(self.x), np.nanmax(self.x), np.nanmin(self.y), np.nanmax(self.y)])
 
-    def block_indices(self, dx, dy):
+    def block_indices(self, dx=None, dy=None, x_grid=None, y_grid=None):
         """Returns the indices of the points lying in blocks across the domain..
 
         Performed before a block median filter by extracting the point location within blocks across the domain.
@@ -214,23 +216,17 @@ class PointCloud3D(myObject):
         -------
         ints : Index into self whose points are the median location within blocks across the domain.
         """
-        bounds = self.bounds
-        d = (dx, dy)
-        n = np.empty(2, dtype=np.int32)
+        if x_grid is None:
+            x_grid = self.centred_grid_nodes(self.bounds[:2], dx)
+        if y_grid is None:
+            y_grid = self.centred_grid_nodes(self.bounds[2:], dy)
 
-        for k, (i,j) in enumerate(zip((0, 2),(1, 3))):
-            n[k] = np.floor((bounds[j] - bounds[i])/d[k]) + 1
-            mid = 0.5 * (bounds[i] + bounds[j])
-            s = 0.5 * n[k] * d[k]
-            bounds[i] = mid - s
-            bounds[j] = mid + s
-
-        ax = RectilinearMesh1D(edges=np.linspace(bounds[0], bounds[1], n[0]+1))
+        ax = RectilinearMesh1D(edges=x_grid)
         ix = ax.cellIndex(self.x)
-        ax = RectilinearMesh1D(edges=np.linspace(bounds[2], bounds[3], n[1]+1))
-        iy = ax.cellIndex(self.y)
+        ay = RectilinearMesh1D(edges=y_grid)
+        iy = ay.cellIndex(self.y)
 
-        return np.ravel_multi_index([ix, iy], n)
+        return np.ravel_multi_index([ix, iy], (ax.nCells.value, ay.nCells.value))
 
 
     def block_mean(self, dx, dy, values=None):
@@ -259,7 +255,7 @@ class PointCloud3D(myObject):
         return PointCloud3D(x=x_new, y=y_new, z=z_new, elevation=e_new)
 
 
-    def block_median_indices(self, dx, dy, values=None):
+    def block_median_indices(self, dx=None, dy=None, x_grid=None, y_grid=None, values=None):
         """Index to the median point within juxtaposed blocks across the domain.
 
         Parameters
@@ -276,8 +272,7 @@ class PointCloud3D(myObject):
         -------
         ints : Index of the median point in each block.
         """
-
-        i_cell = self.block_indices(dx, dy)
+        i_cell = self.block_indices(dx, dy, x_grid, y_grid)
 
         isort = np.argsort(i_cell)
         n_new = np.unique(i_cell).size
@@ -300,7 +295,7 @@ class PointCloud3D(myObject):
         return i_new
 
 
-    def block_median(self, dx, dy, values=None):
+    def block_median(self, dx=None, dy=None, x_grid=None, y_grid=None, values=None):
         """Median point within juxtaposed blocks across the domain.
 
         Parameters
@@ -317,8 +312,30 @@ class PointCloud3D(myObject):
         -------
         geobipt.PointCloud3d : Contains one point in each block.
         """
-        return self[self.block_median_indices(dx, dy, values)]
+        return self[self.block_median_indices(dx, dy, x_grid, y_grid, values)]
 
+    def centred_mesh(self, dx, dy):
+
+        x_grid = self.centred_grid_nodes(self.bounds[:2], dx)
+        y_grid = self.centred_grid_nodes(self.bounds[2:], dy)
+        return RectilinearMesh2D(xEdges=x_grid, yEdges=y_grid)
+
+
+    def centred_grid_nodes(self, bounds, spacing):
+        """Generates grid nodes centred over bounds
+
+        Parameters
+        ----------
+        bounds : array_like
+            bounds of the dimension
+        spacing : float
+            distance between nodes
+
+        """
+        # Get the discretization
+        assert spacing > 0.0, ValueError("spacing must be positive!")
+        sp = 0.5 * spacing
+        return np.arange(bounds[0] - sp, bounds[1] + (2*sp), spacing)
 
     def getPoint(self, i):
         """Get a point from the 3D Point Cloud
@@ -386,7 +403,7 @@ class PointCloud3D(myObject):
             return distance
 
 
-    def interpolate(self, dx, dy, values=None, method='ct', mask = False, clip = True, i=None, block=False, **kwargs):
+    def interpolate(self, dx=None, dy=None, mesh=None, values=None , method='ct', mask = False, clip = True, i=None, block=False, **kwargs):
         """Interpolate values to a grid.
 
         The grid is automatically generated such that it is centred over the point cloud.
@@ -425,77 +442,155 @@ class PointCloud3D(myObject):
         if values is None:
             values = self.z
 
+        if mesh is None:
+            mesh = self.centred_mesh(dx, dy)
+
         if i is None:
-            i = self.block_median_indices(dx, dy) if block else None
+            i = self.block_median_indices(x_grid=mesh.x.edges, y_grid=mesh.y.edges, values=values) if block else None
 
         if method.lower() == 'ct':
-            return self.interpCloughTocher(dx, dy, values, mask, clip, i, **kwargs)
+            return self.interpCloughTocher(mesh, values, mask=mask, clip=clip, i=i, **kwargs)
         else:
-            return self.interpMinimumCurvature(dx, dy, values, mask, clip, i, **kwargs)
+            return self.interpMinimumCurvature(mesh, values, mask=mask, clip=clip, i=i, **kwargs)
 
-    def interpCloughTocher(self, dx, dy, values, mask = False, clip = None, i=None, **kwargs):
+    def interpCloughTocher(self, mesh, values, mask = False, clip = None, i=None, **kwargs):
         """ Interpolate values at the points to a grid """
 
         extrapolate = kwargs.pop('extrapolate', None)
         # Get the bounding box
 
-        assert dx > 0.0, ValueError("dx must be positive!")
-        assert dy > 0.0, ValueError("dy must be positive!")
+        values[values == np.inf] = np.nan
+        mn = np.nanmin(values)
+        mx = np.nanmax(values)
+
+        values -= mn
+        if (mx - mn) != 0.0:
+            values = values / (mx - mn)
 
         kdtree = None
         if (not i is None):
             xTmp = self.x[i]
             yTmp = self.y[i]
             vTmp = values[i]
-            tmp = np.column_stack((xTmp, yTmp))
+            XY = np.column_stack((xTmp, yTmp))
             if (mask or extrapolate):
-                kdtree = cKDTree(tmp)
+                kdtree = cKDTree(XY)
         else:
-            tmp = np.column_stack((self.x, self.y))
+            XY = np.column_stack((self.x, self.y))
             vTmp = values
             if (mask or extrapolate):
                 self.setKdTree(nDims = 2)
                 kdtree = self.kdtree
 
-        xc, yc, vals = interpolation.CT(dx, dy, self.bounds, tmp, vTmp , mask = mask, kdtree = kdtree, clip = clip, extrapolate=extrapolate)
+        # Create the CT function for interpolation
+        f = CloughTocher2DInterpolator(XY, vTmp)
 
-        x = StatArray.StatArray(xc, name=self.x.name, units=self.x.units)
-        y = StatArray.StatArray(yc, name=self.y.name, units=self.y.units)
+        # Interpolate to the grid
+        vals = f(mesh.centres).reshape(*mesh.shape)
 
-        mesh = RectilinearMesh2D(xCentres=x, yCentres=y)
+        # Reshape to a 2D array
+        vals = StatArray.StatArray(vals, name=cf.getName(values), units = cf.getUnits(values))
+
+        if mask or extrapolate:
+            if (kdtree is None):
+                kdt = cKDTree(XY)
+            else:
+                kdt = kdtree
+
+        # Use distance masking
+        if mask:
+            g = np.meshgrid(mesh.x.centres, mesh.y.centres)
+            xi = _ndim_coords_from_arrays(tuple(g), ndim=XY.shape[1])
+            dists, indexes = kdt.query(xi)
+            vals[dists > mask] = np.nan
+
+        # Truncate values to the observed values
+        if (clip):
+            minV = np.nanmin(values)
+            maxV = np.nanmax(values)
+            mask = ~np.isnan(vals)
+            mask[mask] &= vals[mask] < minV
+            vals[mask] = minV
+            mask = ~np.isnan(vals)
+            mask[mask] &= vals[mask] > maxV
+            vals[mask] = maxV
+
+        if (not extrapolate is None):
+            assert isinstance(extrapolate,str), 'extrapolate must be a string. Choose [Nearest]'
+            extrapolate = extrapolate.lower()
+            if (extrapolate == 'nearest'):
+                # Get the indices of the nans
+                iNan = np.argwhere(np.isnan(vals))
+                # Create Query locations from the nans
+                xi =  np.zeros([iNan.shape[0],2])
+                xi[:, 0] = x[iNan[:, 1]]
+                xi[:, 1] = y[iNan[:, 0]]
+                # Get the nearest neighbours
+                dists, indexes = kdt.query(xi)
+                # Assign the nearest value to the Nan locations
+                vals[iNan[:, 0], iNan[:, 1]] = values[indexes]
+            else:
+                assert False, 'Extrapolation option not available. Choose [Nearest]'
+
+        if (mx - mn) != 0.0:
+            vals = vals * (mx - mn)
+        vals += mn
 
         out = Model(mesh=mesh, values=vals)
 
         return out, kwargs
 
+    def interpMinimumCurvature(self, mesh, values, mask=False, clip=True, i=None, operator=None, condition=None, **kwargs):
 
-    def interpMinimumCurvature(self, dx, dy, values, mask=False, clip=True, i=None, operator=None, condition=None, **kwargs):
+        from pygmt import surface
+
+        assert isinstance(mesh, RectilinearMesh2D), TypeError("mesh must be RectilinearMesh2D")
+        assert mesh.is_regular, ValueError("Minimum curvature must interpolate to a regular mesh")
 
         iterations = kwargs.pop('iterations', 2000)
         tension = kwargs.pop('tension', 0.25)
         accuracy = kwargs.pop('accuracy', 0.01)
 
-        # Get the discretization
-        assert dx > 0.0, ValueError("dx must be positive!")
-        assert dy > 0.0, ValueError("dy must be positive!")
-
         x = self.x
         y = self.y
-        # if not operator is None:
-        #     i = np.argwhere(cf.isTrue(values, operator, condition))
-        #     x = self.x[i]
-        #     y = self.y[i]
-        #     values = values[i]
+
         if not i is None:
             x = x[i]
             y = y[i]
             values = values[i]
 
-        x, y, vals = interpolation.minimumCurvature(x, y, values, self.bounds, dx, dy, mask=mask, clip=clip, iterations=iterations, tension=tension, accuracy=accuracy, **kwargs)
-        x = StatArray.StatArray(x, name=self.x.name, units=self.x.units)
-        y = StatArray.StatArray(y, name=self.y.name, units=self.y.units)
+        values[values == np.inf] = np.nan
+        mn = np.nanmin(values)
+        mx = np.nanmax(values)
 
-        mesh = RectilinearMesh2D(xCentres=x, yCentres=y)
+        values -= mn
+        if (mx - mn) != 0.0:
+            values = values / (mx - mn)
+
+        dx = mesh.x.widths[0]
+        dy = mesh.x.widths[1]
+
+        if clip:
+            clip_min = kwargs.pop('clip_min', np.nanmin(values))
+            clip_max = kwargs.pop('clip_max', np.nanmax(values))
+            xr = surface(x=x, y=y, z=values, spacing=(dx, dy), region=mesh.centres_bounds, N=iterations, T=tension, C=accuracy, Ll=[clip_min], Lu=[clip_max])
+        else:
+            xr = surface(x=x, y=y, z=values, spacing=(dx, dy), region=mesh.centres_bounds, N=iterations, T=tension, C=accuracy)
+
+        vals = xr.values
+
+        if (mx - mn) != 0.0:
+            vals = vals * (mx - mn)
+        vals += mn
+
+        # Use distance masking
+        if mask:
+            kdt = cKDTree(np.column_stack((x, y)))
+            xi = _ndim_coords_from_arrays(tuple(np.meshgrid(mesh.x.centres, mesh.y.centres)), ndim=2)
+            dists, indexes = kdt.query(xi)
+            vals[dists > mask] = np.nan
+
+        vals = StatArray.StatArray(vals, name=cf.getName(values), units = cf.getUnits(values))
 
         out = Model(mesh=mesh, values=vals)
 
