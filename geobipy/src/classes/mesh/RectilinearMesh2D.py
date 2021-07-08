@@ -139,6 +139,21 @@ class RectilinearMesh2D(Mesh):
         return out
 
     @property
+    def centres(self):
+        """Ravelled cell centres
+
+        Returns
+        -------
+        out : array_like
+            ravelled cell centre locations.
+
+        """
+        out = np.zeros((self.nCells.value, 2))
+        out[:, 0] = np.tile(self.x.centres, self.y.nCells.value)
+        out[:, 1] = self.y.centres.repeat(self.x.nCells.value)
+        return out
+
+    @property
     def distance(self):
         """The distance along the top of the mesh using the x and y co-ordinates. """
 
@@ -176,7 +191,6 @@ class RectilinearMesh2D(Mesh):
 
         return self.x.nCells * self.z.nCells
 
-
     @property
     def nNodes(self):
         """The number of nodes in the mesh.
@@ -190,6 +204,20 @@ class RectilinearMesh2D(Mesh):
 
         return self.x.nEdges * self.z.nEdges
 
+    @property
+    def nodes(self):
+        """Ravelled cell nodes
+
+        Returns
+        -------
+        out : array_like
+            ravelled cell node locations.
+
+        """
+        out = np.zeros((self.nNodes.value, 2))
+        out[:, 0] = np.tile(self.x.edges, self.y.nNodes.value)
+        out[:, 1] = self.y.edges.repeat(self.x.nNodes.value)
+        return out
 
     @property
     def shape(self):
@@ -291,7 +319,6 @@ class RectilinearMesh2D(Mesh):
             out, dum = cF._log(out, log=log)
 
         return out
-
 
     def _credibleIntervals(self, values, percent=90.0, log=None, axis=0):
         """Gets the median and the credible intervals for the specified axis.
@@ -412,6 +439,13 @@ class RectilinearMesh2D(Mesh):
         elif axis == 1:
             return self.x
 
+    @property
+    def centres_bounds(self):
+        return np.r_[self.x.centres[0], self.x.centres[-1], self.y.centres[0], self.y.centres[-1]]
+
+    @property
+    def bounds(self):
+        return np.r_[self.x.bounds[0], self.x.bounds[1], self.y.bounds[0], self.y.bounds[1]]
 
     def xGradientMatrix(self):
         tmp = self.x.gradientMatrix()
@@ -435,6 +469,10 @@ class RectilinearMesh2D(Mesh):
         if self.z.nCells != other.z.nCells:
             return False
         return True
+
+    @property
+    def is_regular(self):
+        return self.x.is_regular and self.y.is_regular
 
     # def intersect(self, x, y, axis=0):
     #     """Intersect coordinates with
