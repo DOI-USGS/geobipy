@@ -153,6 +153,10 @@ class RectilinearMesh1D(Mesh):
         return self._action
 
     @property
+    def bounds(self):
+        return np.r_[self.edges[0], self.edges[-1]]
+
+    @property
     def centres(self):
         return self._centres
 
@@ -238,6 +242,10 @@ class RectilinearMesh1D(Mesh):
     @property
     def internaledges(self):
         return self._edges[1:-1]
+
+    @property
+    def is_regular(self):
+        return self.edges.isRegular()
 
     @property
     def label(self):
