@@ -17,7 +17,7 @@ from ...base import utilities as cF
 from copy import deepcopy
 
 
-class Model1D(RectilinearMesh1D, Model):
+class Model1D(RectilinearMesh1D):
     """Class extension to geobipy.Model
 
     Class creates a representation of the 1D layered earth.
@@ -81,7 +81,7 @@ class Model1D(RectilinearMesh1D, Model):
             self._par = StatArray.StatArray(parameters)
 
         # StatArray of the change in physical parameters
-        self._dpar = StatArray.StatArray(self.nCells.value - 1, 'Derivative', r"$\frac{"+self.par.getUnits()+"}{m}$")
+        self._dpar = StatArray.StatArray(self.nCells.value - 1, 'Derivative', r"$\frac{"+self.par.units+"}{m}$")
 
         # StatArray of magnetic properties.
         self._magnetic_susceptibility = StatArray.StatArray(self.nCells.value, "Magnetic Susceptibility", r"$\kappa$")
@@ -530,9 +530,9 @@ class Model1D(RectilinearMesh1D, Model):
 
         i = np.hstack([np.where(np.diff(parameters) != 0)[0], -1])
 
-        edges = np.cumsum(widths)
+        edges = np.hstack([0.0, np.cumsum(widths)[i]])
 
-        Model1D.__init__(self, edges=edges[i], parameters=parameters[i])
+        self.__init__(edges=edges, parameters=parameters[i])
 
         return self
 
@@ -589,7 +589,7 @@ class Model1D(RectilinearMesh1D, Model):
         pGrd = StatArray.StatArray(p, self.par.name, self.par.units)
 
         # Set the posterior hitmap for conductivity vs depth
-        self.par.setPosterior(Hitmap2D(xBins=pGrd, yBinCentres=self.edges.posterior.edges))
+        self.par.setPosterior(Hitmap2D(xBins=pGrd, yBins=self.edges.posterior.edges))
 
     def setPriors(self, halfSpaceValue, min_edge, max_edge, max_cells, parameterPrior, gradientPrior, parameterLimits=None, min_width=None, factor=10.0, dzVariance=1.5, prng=None):
         """Setup the priors of a 1D model.
@@ -991,7 +991,6 @@ class Model1D(RectilinearMesh1D, Model):
             is greater than this number.
 
         """
-
         super().update_posteriors(values=self.par, ratio=minimumRatio)
         # Update the hitmap posterior
         self.update_parameter_posterior(axis=1)
