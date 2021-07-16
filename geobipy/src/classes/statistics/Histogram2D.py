@@ -125,27 +125,27 @@ class Histogram2D(RectilinearMesh2D):
             out._counts += np.squeeze(self.counts[slic0])
         return out
 
-    # def percent_interval(self, percent=90.0, log=None, axis=0):
-    #     """Gets the percent interval along axis.
+    def percent_interval(self, percent=90.0, log=None, axis=0):
+        """Gets the percent interval along axis.
 
-    #     Get the statistical interval, e.g. median is 50%.
+        Get the statistical interval, e.g. median is 50%.
 
-    #     Parameters
-    #     ----------
-    #     percent : float
-    #         Interval percentage.  0.0 < percent < 100.0
-    #     log : 'e' or float, optional
-    #         Take the log of the interval to a base. 'e' if log = 'e', or a number e.g. log = 10.
-    #     axis : int
-    #         Along which axis to obtain the interval locations.
+        Parameters
+        ----------
+        percent : float
+            Interval percentage.  0.0 < percent < 100.0
+        log : 'e' or float, optional
+            Take the log of the interval to a base. 'e' if log = 'e', or a number e.g. log = 10.
+        axis : int
+            Along which axis to obtain the interval locations.
 
-    #     Returns
-    #     -------
-    #     interval : array_like
-    #         Contains the interval along the specified axis. Has size equal to self.shape[axis].
+        Returns
+        -------
+        interval : array_like
+            Contains the interval along the specified axis. Has size equal to self.shape[axis].
 
-    #     """
-    #     return super().percent_interval(self.counts, percent, log, axis)
+        """
+        return super()._percent_interval(self.counts, percent, log, axis)
 
     def credibleIntervals(self, percent=90.0, log=None, axis=0):
         """Gets the median and the credible intervals for the specified axis.
@@ -183,7 +183,6 @@ class Histogram2D(RectilinearMesh2D):
             If 'e' or float: The range is the difference in log space, or ratio in linear space.
         axis : int
             Axis along which to get the marginal histogram.
-
 
         """
         return super()._credibleRange(self.counts, percent, log, axis)
