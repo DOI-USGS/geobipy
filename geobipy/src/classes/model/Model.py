@@ -103,11 +103,12 @@ class Model(myObject):
             Set the x and y limits to the first and last non zero values along each axis.
 
         """
-        self.mesh.pcolor(values=self.values, **kwargs)
+        return self.mesh.pcolor(values=self.values, **kwargs)
 
     def pyvista_mesh(self, **kwargs):
         mesh = self.mesh.pyvista_mesh(**kwargs)
-        mesh.cell_arrays[self.values.label] = self.values.ravel()
+
+        mesh.cell_arrays[self.values.label] = self.mesh._reorder_for_pyvista(self.values)
 
         return mesh
 
