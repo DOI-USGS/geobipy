@@ -1630,7 +1630,10 @@ class StatArray(np.ndarray, myObject):
         if (index is None):
             d = np.asarray(grp['data'])
         else:
-            d = np.asarray(grp['data'][np.s_[index]])
+            if isinstance(index, slice):
+                d = np.asarray(grp['data'][index])
+            else:
+                d = np.asarray(grp['data'][np.s_[index]])
 
         if verbose:
             print(grp.attrs['repr'])
