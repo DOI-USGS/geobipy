@@ -262,21 +262,21 @@ class RectilinearMesh2D(Mesh):
         self._z = values
 
 
-    # def _mean(self, arr, log=None, axis=0):
-    #     a = self.axis(axis)
-    #     b = self.other_axis(axis)
+    def _mean(self, arr, log=None, axis=0):
+        a = self.axis(axis)
+        b = self.other_axis(axis)
 
-    #     t = np.sum(np.repeat(np.expand_dims(a.centres, axis), b.nCells, axis) * self.counts, 1-axis)
-    #     s = self._counts.sum(axis = 1 - axis)
+        t = np.sum(np.repeat(np.expand_dims(a.centres, axis), b.nCells, axis) * self.counts, 1-axis)
+        s = self._counts.sum(axis = 1 - axis)
 
-    #     i = np.where(s > 0.0)[0]
-    #     out = np.zeros(t.size)
-    #     out[i] = t[i] / s[i]
+        i = np.where(s > 0.0)[0]
+        out = np.zeros(t.size)
+        out[i] = t[i] / s[i]
 
-    #     if log:
-    #         out, dum = cF._log(out, log=log)
+        if log:
+            out, dum = cF._log(out, log=log)
 
-    #     return out
+        return out
 
 
     def _percent_interval(self, values, percent=95.0, log=None, axis=0):
@@ -313,7 +313,7 @@ class RectilinearMesh2D(Mesh):
         # Find the interval
         i = np.apply_along_axis(np.searchsorted, 1-axis, tmp, percent)
         # Obtain the values at those locations
-        out = self.axis(axis).centres[i]
+        out = self.axis(1-axis).centres[i]
 
         if (not log is None):
             out, dum = cF._log(out, log=log)
@@ -347,11 +347,13 @@ class RectilinearMesh2D(Mesh):
 
         percent = 0.5 * np.minimum(percent, 100.0 - percent)
 
-        lower = self._percent_interval(values, percent, log, axis)
-        median = self._percent_interval(values, 50.0, log, axis)
-        upper = self._percent_interval(values, 100.0 - percent, log, axis)
+        tmp = self._percent_interval(values, np.r_[50.0, percent, 100.0-percent], log, axis)
 
-        return (median, lower, upper)
+        # lower = self._percent_interval(values, percent, log, axis)
+        # median = self._percent_interval(values, 50.0, log, axis)
+        # upper = self._percent_interval(values, 100.0 - percent, log, axis)
+
+        return np.take(tmp, 0, 1-axis), np.take(tmp, 1, 1-axis), np.take(tmp, 2, 1-axis)
 
 
     def _credibleRange(self, values, percent=90.0, log=None, axis=0):
@@ -369,11 +371,12 @@ class RectilinearMesh2D(Mesh):
         axis : int
             Axis along which to get the marginal histogram.
 
-
         """
-        sMed, sLow, sHigh = self._credibleIntervals(values, percent, log=log, axis=axis)
+        percent = 0.5 * np.minimum(percent, 100.0 - percent)
 
-        return sHigh - sLow
+        tmp = self._percent_interval(values, np.r_[100.0 - percent, percent], log, axis)
+
+        return np.diff(tmp, axis=1)
 
 
 
@@ -943,6 +946,19 @@ class RectilinearMesh2D(Mesh):
 
             if flipY:
                 ax.set_ylim(ax.get_ylim()[::-1])
+
+    def plotHeight(self, xAxis='x', centres=False, **kwargs):
+        """Plot the height of the mesh as a line. """
+
+        kwargs['c'] = kwargs.pop('color', 'k')
+        kwargs['linewidth'] = kwargs.pop('linewidth', 1.0)
+
+        xtmp = self.axis(xAxis).centres
+
+        if centres:
+            self.height.centres.plot(xtmp, **kwargs)
+        else:
+            self.height.edges.plot(xtmp, **kwargs)
 
 
     @property
