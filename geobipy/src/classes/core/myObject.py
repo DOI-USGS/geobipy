@@ -9,6 +9,7 @@
 
 import sys
 from numpy import log10
+import h5py
 
 class myObject(object):
     """Abstract base class """

@@ -600,20 +600,14 @@ class PointCloud3D(myObject):
     def mapPlot(self, dx, dy, i=None, **kwargs):
         """ Create a map of a parameter """
 
-        cTmp = kwargs.pop('c', self.z)
-        mask = kwargs.pop('mask', False)
+        values = kwargs.pop('values', self.z)
+        mask = kwargs.pop('mask', None)
         clip = kwargs.pop('clip', True)
         method = kwargs.pop('method', "ct").lower()
 
+        values, _ = self.interpolate(dx, dy, values=values, mask=mask, method=method, i=i, clip=clip, **kwargs)
 
-        if method == 'ct':
-            mesh, kwargs = self.interpCloughTocher(dx, dy, values=cTmp, mask=mask, clip=clip, i=i, **kwargs)
-        elif method == 'mc':
-            mesh, kwargs = self.interpMinimumCurvature(dx, dy, values=cTmp, mask=mask, clip=clip, i=i, **kwargs)
-        else:
-            assert False, ValueError("method must be either 'ct' or 'mc' ")
-
-        return mesh.pcolor(**kwargs)
+        return values.pcolor(**kwargs)
 
 
     def nearest(self, x, k=1, eps=0, p=2, radius=np.inf):

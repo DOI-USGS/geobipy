@@ -1136,7 +1136,6 @@ class RectilinearMesh1D(Mesh):
         # if 'event_proposal' in grp: self._event_proposal = np.array(grp.get('event_proposal'))
 
         if 'depth' in grp: # Old Model1D class
-            print('here')
             i = np.s_[index, :nCells.value]
             tmp = StatArray.StatArray().fromHdf(grp['depth'], index=i)
             edges = tmp.prepend(0.0)

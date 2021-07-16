@@ -77,8 +77,6 @@ def read_groups_with_tag(filename, tag, index=None, **kwargs):
             classes.append(read_item(f[loc], index=index, **kwargs))
     return classes
 
-
-
 def read_all(fName):
     """Reads all the entries written to a HDF file
 
@@ -102,7 +100,6 @@ def read_all(fName):
             tmp = read_item(grp)
             items[key] = tmp  # Add the object to the list.
     return items
-
 
 def readKeyFromFiles(fNames, groupName, key, index=None, **kwargs):
     """Reads in the keys from multiple files
@@ -139,7 +136,6 @@ def readKeyFromFiles(fNames, groupName, key, index=None, **kwargs):
     if (len(items) == 1): items = items[0] # Return unlisted item if single
     return items
 
-
 def readKeyFromFile(h5obj, fName, groupName, key, index=None, **kwargs):
     """Reads in the keys from a file
 
@@ -170,7 +166,7 @@ def readKeyFromFile(h5obj, fName, groupName, key, index=None, **kwargs):
     """
     items = []
     if isinstance(groupName, str):
-        groupName=[groupName]
+        groupName = [groupName]
     if isinstance(key, str):
         key = [key]
 
