@@ -334,22 +334,24 @@ class Inference3D(myObject):
 
         for i in bar:
             additiveError[:, self.lineIndices[i]] = self.lines[i].additiveError.T
-            del self.lines[i].__dict__['additiveError'] # Free memory
+            self.lines[i].uncache('additiveError')
+
         return additiveError
 
 
     @cached_property
     def bestData(self):
 
+
         bestData = self.lines[0].bestData
-        del self.lines[0].__dict__['bestData']
+        lines[0].uncache('bestData')
 
         print("Reading Most Probable Data", flush=True)
         bar = self.loop_over(self.nLines)
 
         for i in bar:
             bestData = bestData + self.lines[i].bestData
-            del self.lines[i].__dict__['bestData']
+            lines[i].uncache('bestData')
 
         return bestData
 
@@ -364,35 +366,35 @@ class Inference3D(myObject):
 
         for i in bar:
             bestParameters[:, self.lineIndices[i]] = self.lines[i].bestParameters
-            del self.lines[i].__dict__['bestParameters'] # Free memory
+            self.lines[i].uncache('bestParameters')
 
         return bestParameters
-
 
     def load_marginal_probability(self, filename):
         with h5py.File(filename, 'r') as f:
             for i in range(self.nLines):
                 self.lines[i].marginal_probability = StatArray.StatArray().fromHdf(f['probabilities'], index=np.s_[self.lineIndices[i], :, :])
+                self.lines[i].uncache('highest_marginal')
 
-                if 'highest_marginal' in self.lines[i].__dict__:
-                    del self.lines[i].__dict__['highest_marginal']
-
-        if 'marginalProbability' in self.__dict__:
-            del self.__dict__['marginalProbability']
+        self.uncache('marginalProbability')
+        self.uncache('highest_marginal')
         return self.marginalProbability
 
     @cached_property
     def marginalProbability(self):
 
-        mp = self.lines[0].marginal_probability
+        mp = self.lines[0].marginal_probability()
         marginalProbability = StatArray.StatArray((self.nPoints, self.zGrid.nCells.value, mp.shape[-1]), name=mp.name, units=mp.units)
+        marginalProbability[self.lineIndices[0], :, :] = mp
 
         print('Reading marginal probability', flush=True)
-        bar = self.loop_over(self.nLines)
+        bar = self.loop_over(1, self.nLines)
 
         for i in bar:
-            marginalProbability[self.lineIndices[i], :, :] = self.lines[i].marginal_probability
-            # del self.lines[i].__dict__['marginalProbability'] # Free memory
+            marginalProbability[self.lineIndices[i], :, :] = self.lines[i].marginal_probability()
+            self.lines[i].uncache('marginalProbability')
+
+        self.uncache('highest_marginal')
 
         return marginalProbability
 
@@ -673,7 +675,7 @@ class Inference3D(myObject):
         Bar=progressbar.ProgressBar()
         for i in Bar(range(self.nLines)):
             interfaces[:, self.lineIndices[i]] = self.lines[i].interfaces
-            del self.lines[i].__dict__['interfaces'] # Free memory
+            self.lines[i].uncache('interfaces')
 
         return interfaces
 
@@ -700,12 +702,12 @@ class Inference3D(myObject):
         Bar = progressbar.ProgressBar()
         for i in Bar(range(self.nLines)):
             meanParameters[:, self.lineIndices[i]] = self.lines[i].meanParameters
-            del self.lines[i].__dict__['meanParameters'] # Free memory
+            self.lines[i].uncache('meanParameters')
 
         return meanParameters
 
-    def mesh2d(self):
-        return self.pointcloud.centred_mesh
+    def mesh2d(self, dx, dy, **kwargs):
+        return self.pointcloud.centred_mesh(dx, dy, **kwargs)
 
     def mesh3d(self, dx, dy, **kwargs):
         """Generate a 3D mesh using dx, dy, and the apriori discretized vertical dimension before inversion.
@@ -723,7 +725,7 @@ class Inference3D(myObject):
         """
         mesh = self.mesh2d(dx, dy)
         # Interpolate the draped surface of the mesh
-        height, dum = self.pointcloud.interpolate(mesh=mesh, values=self.pointcloud.elevation, block=True, mask=None)
+        height, dum = self.pointcloud.interpolate(mesh=mesh, values=self.pointcloud.elevation, block=True, mask=None, **kwargs)
         return RectilinearMesh3D(xEdges=height.x.edges, yEdges=height.y.edges, zEdges=self.zGrid.edges, height=height.values)
 
     @cached_property
@@ -732,7 +734,7 @@ class Inference3D(myObject):
         Bar = progressbar.ProgressBar()
         for i in Bar(range(self.nLines)):
             nActive[self.lineIndices[i]] = self.lines[i].bestData.nActiveChannels
-            del self.lines[i].__dict__['bestData'] # Free memory
+            self.lines[i].uncache('bestData')
 
         return nActive
 
@@ -757,7 +759,7 @@ class Inference3D(myObject):
         Bar = progressbar.ProgressBar()
         for i in Bar(range(self.nLines)):
             opacity[:, self.lineIndices[i]] = self.lines[i].opacity
-            del self.lines[i].__dict__['opacity'] # Free memory
+            self.lines[i].uncache('opacity')
 
         return opacity
 
@@ -792,10 +794,7 @@ class Inference3D(myObject):
             z[indices] = self.lines[i].height
             e[indices] = self.lines[i].elevation
 
-            del self.lines[i].__dict__['x'] # Free memory
-            del self.lines[i].__dict__['y'] # Free memory
-            del self.lines[i].__dict__['height'] # Free memory
-            del self.lines[i].__dict__['elevation'] # Free memory
+            self.lines[i].uncache(['x', 'y', 'height', 'elevation'])
 
         return PointCloud3D(x, y, z, e)
 
@@ -859,7 +858,7 @@ class Inference3D(myObject):
         Bar = progressbar.ProgressBar()
         for i in Bar(range(self.nLines)):
             relativeError[:, self.lineIndices[i]] = self.lines[i].relativeError.T
-            del self.lines[i].__dict__['relativeError'] # Free memory
+            self.lines[i].uncache('relativeError')
 
         return relativeError
 
@@ -1269,6 +1268,9 @@ class Inference3D(myObject):
         """ Gets the discretization in depth """
         return self.lines[0].mesh.z
 
+    def _z_slice(self, depth=None):
+        return self.lines[0]._z_slice(depth)
+
 
     # def getMean3D(self, dx, dy, mask = False, clip = False, force=False, method='ct'):
     #     """ Interpolate each depth slice to create a 3D volume """
@@ -1353,14 +1355,14 @@ class Inference3D(myObject):
     #     self.mean3D = mean3D
 
     def interpolate(self, dx, dy, values, method='ct', mask=None, clip=True, i=None, block=True, **kwargs):
-        return self.pointcloud.interpolate(self.mesh2d(dx, dy), values=values, method=method, mask=mask, clip=clip, i=i, block=block, **kwargs)
+        return self.pointcloud.interpolate(mesh=self.mesh2d(dx, dy), values=values, method=method, mask=mask, clip=clip, i=i, block=block, **kwargs)
 
     def map(self, dx, dy, values, method='ct', mask = None, clip = True, **kwargs):
         """ Create a map of a parameter """
 
         assert values.size == self.nPoints, ValueError("values must have size {}".format(self.nPoints))
 
-        x, y, z, kwargs = self.interpolate(dx=dx, dy=dy, values=values, method=method, mask=mask, clip=clip, **kwargs)
+        values, kwargs = self.interpolate(dx=dx, dy=dy, values=values, method=method, mask=mask, clip=clip, **kwargs)
 
         kwargs.pop('operator', None)
         kwargs.pop('condition', None)
@@ -1369,16 +1371,16 @@ class Inference3D(myObject):
 
 
         if 'alpha' in kwargs:
-            x, y, a, kwargs = self.interpolate(dx=dx, dy=dy, values=kwargs['alpha'], method=method, mask=mask, clip=clip, **kwargs)
-            kwargs['alpha'] = a
+            alpha, kwargs = self.interpolate(dx=dx, dy=dy, values=kwargs['alpha'], method=method, mask=mask, clip=clip, **kwargs)
+            kwargs['alpha'] = alpha.values
 
-        return z.pcolor(x=x.edges(), y=y.edges(), **kwargs)
+        return values.pcolor(**kwargs)
 
 
     def mapMarginalProbability(self, dx, dy, depth, index, **kwargs):
 
-        cell1 = self.zGrid.cellIndex(depth)
-        self.pointcloud.mapPlot(dx = dx, dy = dy, c = self.marginalProbability[:, cell1, index], **kwargs)
+        z_slice = self._z_slice(depth)
+        self.pointcloud.mapPlot(dx = dx, dy = dy, values = self.marginalProbability[:, z_slice, index], **kwargs)
 
 
     def percentageParameter(self, value, depth, depth2=None):
@@ -1393,17 +1395,16 @@ class Inference3D(myObject):
         return percentage
 
 
-    def depthSlice(self, depth, variable, reciprocateParameter=False, **kwargs):
+    def depth_slice(self, depth, variable, reciprocateParameter=False, **kwargs):
 
         out = np.empty(self.nPoints)
+        # z_slice = (np.s_[:], self.lines[0]._z_slice(depth))
 
-        index = kwargs.pop('index', None)
         for i, line in enumerate(self.lines):
-            p = line._get(variable, reciprocateParameter=reciprocateParameter, index=index, **kwargs)
-            tmp = line.depthSlice(depth, p, **kwargs)
-            out[self.lineIndices[i]] = tmp
+            values = line.depth_slice(depth, variable, reciprocateParameter=reciprocateParameter, **kwargs)
+            out[self.lineIndices[i]] = values
 
-        return StatArray.StatArray(out, p.name, p.units)
+        return StatArray.StatArray(out, values.name, values.units)
 
     def interpolate_3d(self, dx, dy, variable, block=True, **kwargs):
 
@@ -1429,7 +1430,7 @@ class Inference3D(myObject):
             out.values[i, :, :] = values.values
 
         # Save the 3D model
-        out.toHdf("{}_{}_{}.h5".format(variable, dx, dy), "{}_3d".format(variable))
+        out.toHdf("{}_{}_{}.h5".format(variable, dx, dy), "{}".format(variable))
 
         return out
 
@@ -1446,11 +1447,11 @@ class Inference3D(myObject):
         out = Model(self.mesh3d(dx, dy, **kwargs))
 
         f = h5py.File("{}_{}_{}.h5".format(variable, dx, dy), 'w', driver='mpio', comm=self.world)
-        grp = out.createHdf(f, "{}_3d".format(variable))
+        grp = out.createHdf(f, "{}".format(variable))
 
         self.world.barrier()
 
-        values.writeHdf(f, "{}_3d".format(variable), index=starts[self.world.rank])
+        values.writeHdf(f, "{}".format(variable), index=starts[self.world.rank])
 
         r = self.loop_over(starts[self.world.rank]+1, ends[self.world.rank])
 
@@ -1458,10 +1459,61 @@ class Inference3D(myObject):
             tmp = self.depthSlice(depth=i, variable=variable, **kwargs)
             values, dum = self.interpolate(dx, dy, values=tmp, **kwargs)
             values.values, dum = cF._log(values.values, kwargs.get('log', None))
-            values.writeHdf(f, "{}_3d".format(variable), index=i)
+            values.writeHdf(f, "{}".format(variable), index=i)
 
         f.close()
 
+    def interpolate_marginal_3d(self, dx, dy, block=True, **kwargs):
+
+        if self.parallel_access:
+            return self._interpolate_marginal_3d_mpi(dx, dy, block=block, **kwargs)
+        else:
+            return self._interpolate_marginal_3d(dx, dy, block=block, **kwargs)
+
+    def _interpolate_marginal_3d(self, dx, dy, block=True, **kwargs):
+
+        nClusters = self.marginalProbability.shape[-1]
+
+        values, _, _ = self.interpolate_marginal(dx, dy, depth=0, **kwargs)
+
+        f = h5py.File("marginal_probability_3d_{}_{}.h5".format(dx, dy), 'w')
+
+        values.createHdf(f, 'marginal_probability', nRepeats=self.zGrid.nCells.value)
+        values.writeHdf(f, 'marginal_probability', index=0)
+
+        r = self.loop_over(1, self.zGrid.nCells.value)
+
+        for i in r:
+            values, _, _ = self.interpolate_marginal(dx, dy, depth=i, **kwargs)
+            values.writeHdf(f, 'marginal_probability', index=i)
+
+        f.close()
+
+
+    def _interpolate_marginal_3d_mpi(self, dx, dy, variable, **kwargs):
+
+        kwargs['block'] = kwargs.pop('block', True)
+
+        starts, chunks = loadBalance1D_shrinkingArrays(self.zGrid.nCells.value, self.world.size)
+        ends = starts + chunks
+
+        values, _, _ = self.interpolate_marginal(dx, dy, depth=starts[world.rank], **kwargs)
+
+        f = h5py.File("marginal_probability_3d_{}_{}.h5".format(dx, dy), 'w', driver='mpio', comm=self.world)
+
+        values.createHdf(f, 'marginal_probability', nRepeats=self.zGrid.nCells.value)
+
+        self.world.barrier()
+
+        values.writeHdf(f, 'marginal_probability', index=starts[world.rank])
+
+        r = self.loop_over(starts[self.world.rank]+1, ends[self.world.rank])
+
+        for i in r:
+            values, _, _ = self.interpolate_marginal(dx, dy, depth=i, **kwargs)
+            values.writeHdf(f, 'marginal_probability', index=i)
+
+        f.close()
 
     def scatter_z_slice_animate(self, variable, filename, **kwargs):
 
@@ -1498,8 +1550,8 @@ class Inference3D(myObject):
         def animate(i):
             plt.title('{:.2f} m depth'.format(self.zGrid.centres[i]))
             tmp = self.depthSlice(depth=self.zGrid.centres[i], variable=variable, **kwargs)
-            x, y, values, dum = self.interpolate(dx, dy, values=tmp, **kwargs)
-            values, dum = cF._log(values, kwargs.get('log', None))
+            values, _ = self.interpolate(dx, dy, values=tmp, **kwargs)
+            values, _ = cF._log(values.values, kwargs.get('log', None))
             pc.set_array(values.flatten())
 
         anim = FuncAnimation(fig, animate, interval=300, frames=self.zGrid.nCells.value)
@@ -1542,15 +1594,15 @@ class Inference3D(myObject):
         return self.map(dx = dx, dy = dy, mask = mask, clip = clip, values = self.additiveError[system, :], **kwargs)
 
 
-    def mapDepthSlice(self, dx, dy, depth, variable, method='ct', mask = None, clip = True, reciprocateParameter=False, useVariance=False, index=None, **kwargs):
+    def map_depth_slice(self, dx, dy, depth, variable, method='ct', mask = None, clip = True, reciprocateParameter=False, useVariance=False, index=None, **kwargs):
         """ Create a depth slice through the recovered model """
 
-        vals1D = self.depthSlice(depth=depth, variable=variable, reciprocateParameter=reciprocateParameter, index=index)
+        vals1D = self.depth_slice(depth=depth, variable=variable, reciprocateParameter=reciprocateParameter, index=index)
 
         if useVariance:
-            tmp = self.depthSlice(depth=depth, variable='opacity')
-            x, y, a = self.interpolate(dx=dx, dy=dy, values=tmp, method=method, clip=True, **kwargs)
-            kwargs['alpha'] = a
+            tmp = self.depth_slice(depth=depth, variable='opacity')
+            alpha, _ = self.interpolate(dx=dx, dy=dy, values=tmp, method=method, clip=True, **kwargs)
+            kwargs['alpha'] = alpha.alpha
 
         return self.map(dx, dy, vals1D, method=method, mask = mask, clip = clip, **kwargs)
 
@@ -1562,36 +1614,37 @@ class Inference3D(myObject):
 
         nClusters = self.marginalProbability.shape[-1]
 
-        vals1D = self.depthSlice(depth=depth, variable='marginal_probability', index=0, **kwargs)
-        x, y, z, dum = self.interpolate(dx, dy, vals1D, **kwargs)
+        vals1D = self.depth_slice(depth=depth, variable='marginal_probability', index=0, **kwargs)
+        values, dum = self.interpolate(dx, dy, vals1D, **kwargs)
 
-        interpolated_marginal = np.zeros((*z.shape, nClusters))
-        interpolated_marginal[:, :, 0] = z
+        interpolated_marginal = StatArray.StatArray((*values.shape, nClusters), 'Marginal probability')
+        interpolated_marginal[:, :, 0] = values.values
 
         for i in range(1, nClusters):
-            vals1D = self.depthSlice(depth=depth, variable='marginal_probability', index=i, **kwargs)
-            x, y, interpolated_marginal[:, :, i], dum = self.interpolate(dx, dy, vals1D, **kwargs)
+            vals1D = self.depth_slice(depth=depth, variable='marginal_probability', index=i, **kwargs)
+            values, dum = self.interpolate(dx, dy, vals1D, **kwargs)
+            interpolated_marginal[:, :, i] = values.values
 
-        return interpolated_marginal, x, y, z, dum
+        return interpolated_marginal, values, dum
 
     def interpolate_highest_marginal(self, dx, dy, depth, **kwargs):
 
-        interpolated_marginal, x, y, z, dum = self.interpolate_marginal(dx, dy, depth, **kwargs)
+        interpolated_marginal, values, dum = self.interpolate_marginal(dx, dy, depth, **kwargs)
 
         highest = StatArray.StatArray((np.argmax(interpolated_marginal, axis=-1)).astype(np.float32))
         msk = np.all(np.isnan(interpolated_marginal), axis=-1)
         highest[msk] = np.nan
+        values.values = highest
 
-        return highest, x, y, z, dum
-
+        return values, dum
 
     def map_highest_marginal(self, dx, dy, depth, **kwargs):
 
         nClusters = self.marginalProbability.shape[-1]
 
-        highest, x, y, z, dum = self.interpolate_highest_marginal(dx, dy, depth, **kwargs)
+        highest, dum = self.interpolate_highest_marginal(dx, dy, depth, **kwargs)
 
-        ax, pc, cb = highest.pcolor(x.edges(), y.edges(), vmin=0, vmax=nClusters-1, cmapIntervals=nClusters, **dum)
+        ax, pc, cb = highest.pcolor(vmin=0, vmax=nClusters-1, cmapIntervals=nClusters, **dum)
 
         offset = (nClusters-1) / (2*nClusters)
         ticks = np.arange(offset, nClusters-offset, 2.0*offset)
@@ -1601,7 +1654,6 @@ class Inference3D(myObject):
             cb.set_ticklabels(tick_labels)
 
         return ax, pc, cb
-
 
     def mapRelativeError(self,dx, dy, system=0, mask = None, clip = True, useVariance=False, **kwargs):
         """ Create a map of a parameter """
@@ -1754,13 +1806,19 @@ class Inference3D(myObject):
 
         return ParVsZ.kMeans(nClusters, standardize=standardize, nIterations=10, plot=plot, **kwargs)
 
-
     def GMM(self, ParVsZ, clusterID, trainPercent=90.0, plot=True):
         """ Classify the subsurface parameters """
         assert isinstance(ParVsZ, StatArray.StatArray), "ParVsZ must be an StatArray"
         ParVsZ.GMM(clusterID, trainPercent=trainPercent, covType=['spherical','tied','diag','full'], plot=plot)
 
+    def uncache(self, variable):
 
+        if isinstance(variable, str):
+            variable = [variable]
+
+        for var in variable:
+            if var in self.__dict__:
+                del self.__dict__[var]
 
 #     def toVTK(self, fName, dx, dy, mask=False, clip=False, force=False, method='ct'):
 #         """ Convert a 3D volume of interpolated values to vtk for visualization in Paraview """
