@@ -18,7 +18,6 @@ try:
 except:
     pass
 
-
 class RectilinearMesh3D(RectilinearMesh2D):
     """Class defining a 3D rectilinear mesh with cell centres and edges.
 
@@ -549,15 +548,19 @@ class RectilinearMesh3D(RectilinearMesh2D):
         """
         import pyvista as pv
 
-        x, y, z = np.meshgrid(self.y.edges, self.x.edges, self.z.edges, indexing='xy')
-
+        x, y, z = np.meshgrid(self.x.edges, self.y.edges, self.z.edges, indexing='xy')
+        z = -z
         if not self.height is None:
-            nz = self.height.interpolate_centres_to_nodes().T
-            z = nz[:, :, None] - z
+            nz = self.height.interpolate_centres_to_nodes()
+            z = nz[:, :, None] + z
+
 
         mesh = pv.StructuredGrid(x, y, z)
 
         return mesh
+
+    def _reorder_for_pyvista(self, values):
+        return cF.reorder_3d_for_pyvista(values)
 
     def pyvista_plotter(self, plotter=None, **kwargs):
 
