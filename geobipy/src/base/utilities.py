@@ -7,6 +7,8 @@ import h5py
 from sklearn.mixture import GaussianMixture
 from smm import SMM
 
+from numba import (jit, float64)
+_numba_settings = {'nopython': True, 'nogil': False, 'fastmath': True, 'cache': True}
 
 def interleave(a, b):
         """Interleave two arrays together like zip
@@ -309,6 +311,17 @@ def cosSin1(x, y, a, p):
     """Simple function for creating tests. """
     return x * (1.0 - x) * np.cos(a * np.pi * x) * np.sin(a * np.pi * y**p)**p
 
+@jit(**_numba_settings)
+def reorder_3d_for_pyvista(values):
+    shp = np.shape(values)
+    arr = np.zeros(shp[0] * shp[1] * shp[2], dtype=float64)
+    ii = 0
+    for i in range(shp[0]): #z
+        for k in range(shp[2]): #x
+            for j in range(shp[1]): #y
+                arr[ii] = values[i, j, k]
+                ii += 1
+    return arr
 
 def rosenbrock(x, y, a, b):
     """ Generates values from the Rosenbrock function. """
