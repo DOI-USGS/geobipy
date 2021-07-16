@@ -5,6 +5,7 @@ import numpy as np
 from ..core.myObject import myObject
 from ...base.HDF import hdfRead
 from ..core import StatArray
+from ..mesh.Mesh import Mesh
 
 
 class Model(myObject):
@@ -55,7 +56,8 @@ class Model(myObject):
 
     @mesh.setter
     def mesh(self, value):
-        assert isinstance(value, Mesh), TypeError
+        assert isinstance(value, Mesh), TypeError('mesh must be instance of geobipy.Mesh')
+        self._mesh = value
 
     @property
     def nCells(self):
@@ -68,6 +70,10 @@ class Model(myObject):
     @property
     def y(self):
         return self.mesh.y
+
+    @property
+    def z(self):
+        return self.mesh.z
 
     def interpolate_centres_to_nodes(self, kind='cubic', **kwargs):
         return self.mesh.interpolate_centres_to_nodes(self.values, kind=kind, **kwargs)

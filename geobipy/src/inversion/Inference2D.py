@@ -800,10 +800,10 @@ class Inference2D(myObject):
     def interface_probability(self, slic=None):
         """ Get the layer interfaces from the layer depth histograms """
 
-        values = self.interfacePosterior.pdf(axis=1).T
+        values = self.interfacePosterior.pdf(axis=1)
         # Patch for old error when creating posterior
-        if np.size(values, 0) != (self.mesh.z.nCells):
-            values = np.vstack([values, values[-1, :]])
+        # if np.size(values, 1) != (self.mesh.z.nCells):
+        values = StatArray.StatArray(np.hstack([values, values[:, -1][:, None]]), 'P(interface)')
 
         return values if slic is None else values[slic]
 

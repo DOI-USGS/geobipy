@@ -1415,16 +1415,16 @@ class Inference3D(myObject):
 
     def _interpolate_3d(self, dx, dy, variable, block=True, **kwargs):
 
-        tmp = self.depthSlice(depth=0, variable=variable, **kwargs)
+        tmp = self.depth_slice(depth=0, variable=variable, **kwargs)
         values, dum = self.interpolate(dx, dy, values=tmp, block=block, **kwargs)
 
-        out = Model(self.mesh3d(dx, dy))
+        out = Model(self.mesh3d(dx, dy, **kwargs))
         out.values[0, :, :] = values.values
 
         r = self.loop_over(1, self.zGrid.nCells.value)
 
         for i in r:
-            tmp = self.depthSlice(depth=i, variable=variable, **kwargs)
+            tmp = self.depth_slice(depth=i, variable=variable, **kwargs)
             values, dum = self.interpolate(dx, dy, values=tmp, block=block, **kwargs)
             values.values, dum = cF._log(values.values, kwargs.get('log', None))
             out.values[i, :, :] = values.values
@@ -1440,7 +1440,7 @@ class Inference3D(myObject):
 
         starts, chunks = loadBalance1D_shrinkingArrays(self.zGrid.nCells.value, self.world.size)
         ends = starts + chunks
-        tmp = self.depthSlice(depth=starts[self.world.rank], variable=variable, **kwargs)
+        tmp = self.depth_slice(depth=starts[self.world.rank], variable=variable, **kwargs)
         values, dum = self.interpolate(dx, dy, values=tmp, **kwargs)
         values.values, dum = cF._log(values.values, kwargs.get('log', None))
 
@@ -1456,7 +1456,7 @@ class Inference3D(myObject):
         r = self.loop_over(starts[self.world.rank]+1, ends[self.world.rank])
 
         for i in r:
-            tmp = self.depthSlice(depth=i, variable=variable, **kwargs)
+            tmp = self.depth_slice(depth=i, variable=variable, **kwargs)
             values, dum = self.interpolate(dx, dy, values=tmp, **kwargs)
             values.values, dum = cF._log(values.values, kwargs.get('log', None))
             values.writeHdf(f, "{}".format(variable), index=i)
@@ -1526,7 +1526,7 @@ class Inference3D(myObject):
 
         def animate(i):
             plt.title('{:.2f} m depth'.format(self.zGrid.centres[i]))
-            values = self.depthSlice(depth=self.zGrid.centres[i], variable=variable, **kwargs)
+            values = self.depth_slice(depth=self.zGrid.centres[i], variable=variable, **kwargs)
             values, dum = cF._log(values, kwargs.get('log', None))
             pc.set_array(values.flatten())
 
@@ -1549,7 +1549,7 @@ class Inference3D(myObject):
 
         def animate(i):
             plt.title('{:.2f} m depth'.format(self.zGrid.centres[i]))
-            tmp = self.depthSlice(depth=self.zGrid.centres[i], variable=variable, **kwargs)
+            tmp = self.depth_slice(depth=self.zGrid.centres[i], variable=variable, **kwargs)
             values, _ = self.interpolate(dx, dy, values=tmp, **kwargs)
             values, _ = cF._log(values.values, kwargs.get('log', None))
             pc.set_array(values.flatten())
@@ -1670,7 +1670,7 @@ class Inference3D(myObject):
     def plotDepthSlice(self, depth, variable, mask = None, clip = True, index=None, **kwargs):
         """ Create a depth slice through the recovered model """
 
-        vals1D = self.depthSlice(depth=depth, variable=variable, index=index, **kwargs)
+        vals1D = self.depth_slice(depth=depth, variable=variable, index=index, **kwargs)
         return self.scatter2D(c = vals1D, **kwargs)
 
 
