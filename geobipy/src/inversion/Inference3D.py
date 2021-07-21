@@ -723,9 +723,10 @@ class Inference3D(myObject):
         -------
         geoobipy.RectilinearMesh3D : 3D rectilinear mesh with a draped top surface.
         """
+        kwargs['mask'] = None
         mesh = self.mesh2d(dx, dy)
         # Interpolate the draped surface of the mesh
-        height, dum = self.pointcloud.interpolate(mesh=mesh, values=self.pointcloud.elevation, block=True, mask=None, **kwargs)
+        height, dum = self.pointcloud.interpolate(mesh=mesh, values=self.pointcloud.elevation, block=True, **kwargs)
         return RectilinearMesh3D(xEdges=height.x.edges, yEdges=height.y.edges, zEdges=self.zGrid.edges, height=height.values)
 
     @cached_property
@@ -1520,7 +1521,7 @@ class Inference3D(myObject):
         fig = kwargs.pop('fig', plt.figure(figsize=(9, 9)))
 
         # Do the first slice
-        ax, pc, cb = self.plotDepthSlice(depth=self.zGrid.centres[0], variable=variable, **kwargs)
+        ax, pc, cb = self.plotdepth_slice(depth=self.zGrid.centres[0], variable=variable, **kwargs)
 
         kwargs['noColorbar'] = True
 
@@ -1543,7 +1544,7 @@ class Inference3D(myObject):
         fig = kwargs.pop('fig', plt.figure(figsize=(9, 9)))
 
         # Do the first slice
-        ax, pc, cb = self.mapDepthSlice(dx, dy, depth=self.zGrid.centres[0], variable=variable, **kwargs)
+        ax, pc, cb = self.mapdepth_slice(dx, dy, depth=self.zGrid.centres[0], variable=variable, **kwargs)
 
         kwargs['noColorbar'] = True
 
@@ -1667,7 +1668,7 @@ class Inference3D(myObject):
         return  self.map(dx = dx, dy = dy, mask = mask, clip = clip, values = self.relativeError[system, :], **kwargs)
 
 
-    def plotDepthSlice(self, depth, variable, mask = None, clip = True, index=None, **kwargs):
+    def plotdepth_slice(self, depth, variable, mask = None, clip = True, index=None, **kwargs):
         """ Create a depth slice through the recovered model """
 
         vals1D = self.depth_slice(depth=depth, variable=variable, index=index, **kwargs)
