@@ -111,6 +111,7 @@ class TdemSystem(myObject):
         # Read in the System file
         from .TdemSystem_GAAEM import TdemSystem_GAAEM
         self = TdemSystem_GAAEM(systemFilename)
+
         assert np.min(np.diff(self.windows.centre)) > 0.0, ValueError("Receiver window times must monotonically increase for system "+systemFilename)
 
         self.readCurrentWaveform(systemFilename)
