@@ -800,10 +800,10 @@ class Inference2D(myObject):
     def interface_probability(self, slic=None):
         """ Get the layer interfaces from the layer depth histograms """
 
-        values = self.interfacePosterior.pdf(axis=1)
+        values = self.interfacePosterior.pdf(axis=0)
         # Patch for old error when creating posterior
-        # if np.size(values, 1) != (self.mesh.z.nCells):
-        values = StatArray.StatArray(np.hstack([values, values[:, -1][:, None]]), 'P(interface)')
+        if np.size(values, 1) != (self.mesh.z.nCells):
+            values = StatArray.StatArray(np.hstack([values, values[:, -1][:, None]]), 'P(interface)')
 
         return values if slic is None else values[slic]
 
@@ -813,7 +813,6 @@ class Inference2D(myObject):
             tmp = hdfRead.read_item(self.hdfFile['currentmodel/depth/posterior'])
         else:
             tmp = hdfRead.read_item(self.hdfFile['currentmodel/edges/posterior'])
-        # tmp = self.getAttribute('layer depth posterior')
 
         x = StatArray.StatArray(np.arange(self.nPoints, dtype=np.float64), "Index")
         out = Histogram2D(xBinCentres=tmp.bins, yBins=x)
