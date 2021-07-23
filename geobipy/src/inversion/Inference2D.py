@@ -982,6 +982,8 @@ class Inference2D(myObject):
     def opacity(self, slic=None):
         """ Get the model parameter opacity using the credible intervals """
         if "opacity" in self.hdfFile.keys():
+            if not slic is None:
+                slic = slic[::-1]
             return StatArray.StatArray().fromHdf(self.hdfFile['opacity'], index=slic)
         else:
             return self.computeOpacity()
@@ -1912,10 +1914,8 @@ class Inference2D(myObject):
     #     # self.marginal_probability.toHdf('line_{}_marginal_probability.h5'.format(self.line), 'marginal_probability')
 
 
-    @cached_property
-    def highestMarginal(self):
-        return StatArray.StatArray(np.argmax(self.marginal_probability, axis=-1), name='Highest marginal')
-
+    def highestMarginal(self, slic=None):
+        return StatArray.StatArray(np.argmax(self.marginal_probability(slic), axis=-1), name='Highest marginal')
 
     @property
     def probability_of_highest_marginal(self):
