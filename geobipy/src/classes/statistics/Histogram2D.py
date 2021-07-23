@@ -355,11 +355,9 @@ class Histogram2D(RectilinearMesh2D):
         total = self._counts.sum(axis=1-axis)
 
         if axis == 0:
-            out = StatArray.StatArray(
-                np.divide(self._counts.T, total).T, 'Probability density')
+            out = StatArray.StatArray(np.divide(self._counts.T, total).T, 'Probability density')
         else:
-            out = StatArray.StatArray(
-                np.divide(self._counts, total), 'Probability density')
+            out = StatArray.StatArray(np.divide(self._counts, total), 'Probability density')
         out[np.isnan(out)] = 0.0
         return out
 
