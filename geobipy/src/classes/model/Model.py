@@ -2,10 +2,13 @@
 Module describing a Model
 """
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 from ..core.myObject import myObject
 from ...base.HDF import hdfRead
 from ..core import StatArray
 from ..mesh.Mesh import Mesh
+
 
 
 class Model(myObject):
@@ -74,6 +77,32 @@ class Model(myObject):
     @property
     def z(self):
         return self.mesh.z
+
+    def animate(self, axis, filename, slic=None, **kwargs):
+
+        fig = kwargs.pop('fig', plt.figure(figsize=(9, 9)))
+
+        slic = list(slic)
+        if slic is None:
+            slic = [np.s_[:] for i in range(self.mesh.ndim)]
+
+        slic[axis] = 0
+
+        # Do the first slice
+        sub = self[slic]
+        ax, pc, cb = sub.pcolor(**kwargs)
+
+        kwargs['noColorbar'] = True
+
+        def animate(i):
+            plt.title('{:.2f}'.format(self.mesh.axis(axis).centres[i]))
+            slic[axis] = i
+            pc.set_array(self.values[slic].flatten())
+
+        anim = FuncAnimation(fig, animate, interval=300, frames=self.mesh.axis(axis).nCells.value)
+
+        plt.draw()
+        anim.save(filename)
 
     def interpolate_centres_to_nodes(self, kind='cubic', **kwargs):
         return self.mesh.interpolate_centres_to_nodes(self.values, kind=kind, **kwargs)
