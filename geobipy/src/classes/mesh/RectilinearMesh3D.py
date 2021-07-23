@@ -171,6 +171,10 @@ class RectilinearMesh3D(RectilinearMesh2D):
         return np.prod(self.shape)
 
     @property
+    def ndim(self):
+        return 3
+
+    @property
     def nNodes(self):
         """The number of nodes in the mesh.
 

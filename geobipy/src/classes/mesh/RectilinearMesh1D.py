@@ -289,6 +289,10 @@ class RectilinearMesh1D(Mesh):
                 self._nCells = deepcopy(value)
 
     @property
+    def ndim(self):
+        return 1
+
+    @property
     def nEdges(self):
         return 0 if self._edges is None else self._edges.size
 

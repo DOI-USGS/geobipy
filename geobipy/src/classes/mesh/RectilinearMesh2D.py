@@ -192,6 +192,10 @@ class RectilinearMesh2D(Mesh):
         return self.x.nCells * self.z.nCells
 
     @property
+    def ndim(self):
+        return 2
+
+    @property
     def nNodes(self):
         """The number of nodes in the mesh.
 
