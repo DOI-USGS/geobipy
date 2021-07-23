@@ -696,13 +696,13 @@ class Inference3D(myObject):
     @cached_property
     def meanParameters(self):
 
-        meanParameters = StatArray.StatArray((self.zGrid.nCells.value, self.nPoints), name=self.lines[0].meanParameters.name, units=self.lines[0].meanParameters.units, order = 'F')
+        meanParameters = StatArray.StatArray((self.nPoints, self.zGrid.nCells.value), name=self.lines[0].parameterName, units=self.lines[0].parameterUnits, order = 'F')
 
         print("Reading Mean Parameters", flush=True)
         Bar = progressbar.ProgressBar()
         for i in Bar(range(self.nLines)):
-            meanParameters[:, self.lineIndices[i]] = self.lines[i].meanParameters
-            self.lines[i].uncache('meanParameters')
+            meanParameters[self.lineIndices[i], :] = self.lines[i].meanParameters()
+            # self.lines[i].uncache('meanParameters')
 
         return meanParameters
 
@@ -1490,7 +1490,6 @@ class Inference3D(myObject):
 
         f.close()
 
-
     def _interpolate_marginal_3d_mpi(self, dx, dy, variable, **kwargs):
 
         kwargs['block'] = kwargs.pop('block', True)
@@ -1601,9 +1600,8 @@ class Inference3D(myObject):
         vals1D = self.depth_slice(depth=depth, variable=variable, reciprocateParameter=reciprocateParameter, index=index)
 
         if useVariance:
-            tmp = self.depth_slice(depth=depth, variable='opacity')
-            alpha, _ = self.interpolate(dx=dx, dy=dy, values=tmp, method=method, clip=True, **kwargs)
-            kwargs['alpha'] = alpha.alpha
+            alpha = self.depth_slice(depth=depth, variable='opacity')
+            kwargs['alpha'] = alpha
 
         return self.map(dx, dy, vals1D, method=method, mask = mask, clip = clip, **kwargs)
 
