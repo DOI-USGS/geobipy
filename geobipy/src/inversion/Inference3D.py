@@ -371,14 +371,18 @@ class Inference3D(myObject):
         return bestParameters
 
     def load_marginal_probability(self, filename):
-        with h5py.File(filename, 'r') as f:
-            for i in range(self.nLines):
-                self.lines[i].marginal_probability = StatArray.StatArray().fromHdf(f['probabilities'], index=np.s_[self.lineIndices[i], :, :])
-                self.lines[i].uncache('highest_marginal')
 
-        self.uncache('marginalProbability')
-        self.uncache('highest_marginal')
-        return self.marginalProbability
+        with h5py.File(filename, 'r') as f:
+            values = StatArray.StatArray().fromHdf(f['probabilities'])
+
+        return values
+            # for i in range(self.nLines):
+            #     self.lines[i].marginal_probability = StatArray.StatArray().fromHdf(f['probabilities'], index=np.s_[self.lineIndices[i], :, :])
+            #     self.lines[i].uncache('highest_marginal')
+
+        # self.uncache('marginalProbability')
+        # self.uncache('highest_marginal')
+        # return self.marginalProbability
 
     @cached_property
     def marginalProbability(self):
@@ -666,16 +670,15 @@ class Inference3D(myObject):
 
         return out
 
-
     @cached_property
-    def interfaces(self):
-        interfaces = StatArray.StatArray((self.zGrid.nCells.value, self.nPoints), name=self.lines[0].interfaces.name, units=self.lines[0].interfaces.units)
+    def interface_probability(self):
+        interfaces = StatArray.StatArray((self.zGrid.nCells.value, self.nPoints), name='P(interface)')
 
         print("Reading Depth Posteriors", flush=True)
         Bar=progressbar.ProgressBar()
         for i in Bar(range(self.nLines)):
-            interfaces[:, self.lineIndices[i]] = self.lines[i].interfaces
-            self.lines[i].uncache('interfaces')
+            interfaces[:, self.lineIndices[i]] = self.lines[i].interface_probability().T
+            self.lines[i].uncache('interface_probability')
 
         return interfaces
 
@@ -1383,7 +1386,6 @@ class Inference3D(myObject):
         z_slice = self._z_slice(depth)
         self.pointcloud.mapPlot(dx = dx, dy = dy, values = self.marginalProbability[:, z_slice, index], **kwargs)
 
-
     def percentageParameter(self, value, depth, depth2=None):
 
         percentage = StatArray.StatArray(np.empty(self.nPoints), name="Probability of {} > {:0.2f}".format(self.meanParameters.name, value), units = self.meanParameters.units)
@@ -1395,11 +1397,9 @@ class Inference3D(myObject):
 
         return percentage
 
-
     def depth_slice(self, depth, variable, reciprocateParameter=False, **kwargs):
 
         out = np.empty(self.nPoints)
-        # z_slice = (np.s_[:], self.lines[0]._z_slice(depth))
 
         for i, line in enumerate(self.lines):
             values = line.depth_slice(depth, variable, reciprocateParameter=reciprocateParameter, **kwargs)
@@ -1701,14 +1701,14 @@ class Inference3D(myObject):
     # def interface_probability_3D(self, dx, dy, lowerThreshold=0.0, **kwargs):
 
 
-    def interface_probability(self, depth, lowerThreshold=0.0, **kwargs):
-        cell1 = self.zGrid.cellIndex(depth)
+    # def interface_probability(self, depth, lowerThreshold=0.0, **kwargs):
+    #     cell1 = self.zGrid.cellIndex(depth)
 
-        values = self.interfaces[:, cell1]
-        if lowerThreshold > 0.0:
-            values = self.interfaces[:, cell1].deepcopy()
-            values[values < lowerThreshold] = np.nan
-        return values
+    #     values = self.interfaces[:, cell1]
+    #     if lowerThreshold > 0.0:
+    #         values = self.interfaces[:, cell1].deepcopy()
+    #         values[values < lowerThreshold] = np.nan
+    #     return values
 
 
     def plotInterfaceProbability(self, depth, lowerThreshold=0.0, **kwargs):
