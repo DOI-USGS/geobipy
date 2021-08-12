@@ -62,117 +62,128 @@ dataFile = dataFolder + 'Resolve2.txt'
 # The EM system file name
 systemFile = dataFolder + 'FdemSystem2.stm'
 
-################################################################################
-# Read in a data set from file.
-FD1 = FdemData().read(dataFile, systemFile)
+# ################################################################################
+# # Read in a data set from file.
+# FD1 = FdemData().read(dataFile, systemFile)
 
-################################################################################
-# Take a look at the channel names
-for name in FD1.channelNames:
-    print(name)
+# ################################################################################
+# # Take a look at the channel names
+# for name in FD1.channelNames:
+#     print(name)
 
-################################################################################
-# Get data points by slicing
-FDa = FD1[10:]
-FD1 = FD1[:10]
+# ################################################################################
+# # Get data points by slicing
+# FDa = FD1[10:]
+# FD1 = FD1[:10]
 
-################################################################################
-# Append data sets together
-FD1.append(FDa)
+# ################################################################################
+# # Append data sets together
+# FD1.append(FDa)
 
 
-################################################################################
-# Plot the locations of the data points
-plt.figure(figsize=(8,6))
-_ = FD1.scatter2D();
+# ################################################################################
+# # Plot the locations of the data points
+# plt.figure(figsize=(8,6))
+# _ = FD1.scatter2D();
 
-################################################################################
-# Plot all the data along the specified line
-plt.figure(figsize=(8,6))
-_ = FD1.plotLine(30010.0, log=10);
+# ################################################################################
+# # Plot all the data along the specified line
+# plt.figure(figsize=(8,6))
+# _ = FD1.plotLine(30010.0, log=10);
 
-################################################################################
-# Or, plot specific channels in the data
-plt.figure(figsize=(8,6))
-_ = FD1.plot(channels=[0,11,8], log=10, linewidth=0.5);
+# ################################################################################
+# # Or, plot specific channels in the data
+# plt.figure(figsize=(8,6))
+# _ = FD1.plot(channels=[0,11,8], log=10, linewidth=0.5);
 
-################################################################################
-# Read in a second data set
-FD2 = FdemData()
-FD2.read(dataFilename=dataFolder + 'Resolve1.txt', systemFilename=dataFolder + 'FdemSystem1.stm')
+# ################################################################################
+# # Read in a second data set
+# FD2 = FdemData()
+# FD2.read(dataFilename=dataFolder + 'Resolve1.txt', systemFilename=dataFolder + 'FdemSystem1.stm')
 
-################################################################################
-# We can create maps of the elevations in two separate figures
-plt.figure(figsize=(8,6))
-_ = FD1.mapPlot(dx=50.0, dy=50.0, mask = 200.0)
-plt.axis('equal');
+# ################################################################################
+# # We can create maps of the elevations in two separate figures
+# plt.figure(figsize=(8,6))
+# _ = FD1.mapPlot(dx=50.0, dy=50.0, mask = 200.0)
+# plt.axis('equal');
 
-################################################################################
+# ################################################################################
 
-plt.figure(figsize=(8,6))
-_ = FD2.mapPlot(dx=50.0, dy=50.0, mask = 200.0)
-plt.axis('equal');
+# plt.figure(figsize=(8,6))
+# _ = FD2.mapPlot(dx=50.0, dy=50.0, mask = 200.0)
+# plt.axis('equal');
 
-################################################################################
-# Or, we can plot both data sets in one figure to see their positions relative
-# to each other.
-#
-# In this case, I use a 2D scatter plot of the data point co-ordinates, and pass
-# one of the channels as the colour.
+# ################################################################################
+# # Or, we can plot both data sets in one figure to see their positions relative
+# # to each other.
+# #
+# # In this case, I use a 2D scatter plot of the data point co-ordinates, and pass
+# # one of the channels as the colour.
 
-plt.figure(figsize=(8,6))
-_ = FD1.scatter2D(s=1.0, c=FD1.dataChannel(0))
-_ = FD2.scatter2D(s=1.0, c=FD2.dataChannel(0), cmap='jet');
+# plt.figure(figsize=(8,6))
+# _ = FD1.scatter2D(s=1.0, c=FD1.dataChannel(0))
+# _ = FD2.scatter2D(s=1.0, c=FD2.dataChannel(0), cmap='jet');
 
-################################################################################
-# Or, interpolate the values to create a gridded "map". mapChannel will
-# interpolate the specified channel number.
+# ################################################################################
+# # Or, interpolate the values to create a gridded "map". mapChannel will
+# # interpolate the specified channel number.
 
-plt.figure(figsize=(8,6))
-_ = FD1.mapData(channel=3, system=0, dx=200, dy=200, mask=250)
-plt.axis('equal');
+# plt.figure(figsize=(8,6))
+# _ = FD1.mapData(channel=3, system=0, dx=200, dy=200, mask=250)
+# plt.axis('equal');
 
-################################################################################
-# Export the data to VTK
+# ################################################################################
+# # Export the data to VTK
 
-# FD1.toVTK('FD_one')
-# FD2.toVTK('FD_two')
+# # FD1.toVTK('FD_one')
+# # FD2.toVTK('FD_two')
 
-#%%
-# Obtain a line from the data set
-# +++++++++++++++++++++++++++++++
+# #%%
+# # Obtain a line from the data set
+# # +++++++++++++++++++++++++++++++
 
-################################################################################
-# Take a look at the line numbers in the dataset
-print(np.unique(FD1.lineNumber))
+# ################################################################################
+# # Take a look at the line numbers in the dataset
+# print(np.unique(FD1.lineNumber))
 
-################################################################################
-L = FD1.line(30010.0)
+# ################################################################################
+# L = FD1.line(30010.0)
 
-################################################################################
-# A summary will now show the properties of the line.
+# ################################################################################
+# # A summary will now show the properties of the line.
 
-L.summary()
+# print(L.summary)
 
-################################################################################
-# And we can scatter2D the points in the line.
+# ################################################################################
+# # And we can scatter2D the points in the line.
 
-plt.figure(figsize=(8,6))
-_ = L.scatter2D();
+# plt.figure(figsize=(8,6))
+# _ = L.scatter2D();
 
-################################################################################
-# We can specify the axis along which to plot.
-# xAxis can be index, x, y, z, r2d, r3d
-plt.figure(figsize=(8,6))
-_ = FD1.plot(channels=[0,11,8], log=10, linewidth=0.5);
+# ################################################################################
+# # We can specify the axis along which to plot.
+# # xAxis can be index, x, y, z, r2d, r3d
+# plt.figure(figsize=(8,6))
+# _ = FD1.plot(channels=[0,11,8], log=10, linewidth=0.5);
 
-#%%
-# Obtain a single datapoint from the data set
-# +++++++++++++++++++++++++++++++++++++++++++
-#
-# Checkout :ref:`Frequency domain datapoint` for an example
-# about how to use a datapoint once it is instantiated.
-dp = FD1.datapoint(0)
+# #%%
+# # Obtain a single datapoint from the data set
+# # +++++++++++++++++++++++++++++++++++++++++++
+# #
+# # Checkout :ref:`Frequency domain datapoint` for an example
+# # about how to use a datapoint once it is instantiated.
+# dp = FD1.datapoint(0)
+
+
+Dataset = FdemData()
+Dataset.systems = systemFile
+
+# Prepare the dataset so that we can read a point at a time.
+Dataset._initLineByLineRead(dataFile, systemFile)
+# Get a datapoint from the file.
+DataPoint = Dataset._readSingleDatapoint()
+
+Dataset._closeDatafiles()
 
 ################################################################################
 # File Format for frequency domain data

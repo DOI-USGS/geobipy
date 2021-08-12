@@ -66,8 +66,8 @@ fdp = FdemDataPoint(x=0.0, y=0.0, z=30.0, elevation=0.0,
                     system=fds, lineNumber=0.0, fiducial=0.0)
 
 ################################################################################
-plt.figure()
-_ = fdp.plot()
+# plt.figure()
+# _ = fdp.plot()
 
 ################################################################################
 # Obtaining a datapoint from a dataset
@@ -94,8 +94,8 @@ D.read(dataFile,systemFile)
 ################################################################################
 # Get a data point from the dataset
 fdp = D.datapoint(0)
-plt.figure()
-_ = fdp.plot()
+# plt.figure()
+# _ = fdp.plot()
 
 ################################################################################
 # Using a datapoint
@@ -105,26 +105,26 @@ _ = fdp.plot()
 # We can define a 1D layered earth model, and use it to predict some data
 nCells = 19
 par = StatArray(np.linspace(0.01, 0.1, nCells), "Conductivity", "$\frac{S}{m}$")
-thk = StatArray(np.ones(nCells-1) * 10.0)
-mod = Model1D(nCells = nCells, parameters=par, thickness=thk)
+thk = StatArray(np.ones(nCells) * 10.0)
+mod = Model1D(nCells = nCells, parameters=par, widths=thk)
 
 ################################################################################
 # Forward model the data
 fdp.forward(mod)
 
 ################################################################################
-plt.figure()
-plt.subplot(121)
-_ = mod.pcolor()
-plt.subplot(122)
-_ = fdp.plotPredicted()
-plt.tight_layout()
+# plt.figure()
+# plt.subplot(121)
+# _ = mod.pcolor()
+# plt.subplot(122)
+# _ = fdp.plotPredicted()
+# plt.tight_layout()
 
 ################################################################################
 # Compute the sensitivity matrix for a given model
 J = fdp.sensitivity(mod)
-plt.figure()
-_ = np.abs(J).pcolor(equalize=True, log=10, flipY=True)
+# plt.figure()
+# _ = np.abs(J).pcolor(equalize=True, log=10, flipY=True)
 
 ################################################################################
 # Attaching statistical descriptors to the datapoint
@@ -143,9 +143,9 @@ print(fdp.dataMisfit())
 # We can perform a quick search for the best fitting half space
 halfspace = fdp.FindBestHalfSpace()
 print('Best half space conductivity is {} $S/m$'.format(halfspace.par))
-plt.figure()
-_ = fdp.plot()
-_ = fdp.plotPredicted()
+# plt.figure()
+# _ = fdp.plot()
+# _ = fdp.plotPredicted()
 
 ################################################################################
 # Compute the misfit between observed and predicted data
@@ -153,17 +153,18 @@ print(fdp.dataMisfit())
 
 ################################################################################
 # Plot the misfits for a range of half space conductivities
-plt.figure()
-_ = fdp.plotHalfSpaceResponses(-6.0, 4.0, 200)
-plt.title("Halfspace responses");
+# plt.figure()
+# _ = fdp.plotHalfSpaceResponses(-6.0, 4.0, 200)
+# plt.title("Halfspace responses");
 
 ################################################################################
 # We can attach priors to the height of the datapoint,
 # the relative error multiplier, and the additive error noise floor
 
 # Set values of relative and additive error for both systems.
+
 fdp.relErr = 0.05
-fdp.addErr = 10
+fdp.addErr = 10.0
 
 # Define the distributions used as priors.
 heightPrior = Distribution('Uniform', min=np.float64(fdp.z) - 2.0, max=np.float64(fdp.z) + 2.0)
@@ -179,25 +180,43 @@ additiveProposal = Distribution('MvLogNormal', mean=fdp.addErr, variance=1e-4)
 fdp.setProposals(heightProposal, relativeProposal, additiveProposal)
 
 ################################################################################
-# With priorss set we can auto generate the posteriors
+# With priors set we can auto generate the posteriors
 fdp.setPosteriors()
 
 ################################################################################
 # Perturb the datapoint and record the perturbations
-for i in range(1000):
+for i in range(1):
     fdp.perturb(True, True, True, False)
     fdp.updatePosteriors()
 
 ################################################################################
 # Plot the posterior distributions
-plt.figure()
-_ = fdp.z.plotPosteriors()
+fig = plt.figure()
+gs = fig.add_gridspec(nrows=1, ncols=1)
+ax = fdp.init_posterior_plots(gs)
+fig.tight_layout()
+
+fdp.plot_posteriors(axes=ax)
+plt.sca(ax[1])
+fdp.plot()
+fdp.plotPredicted()
+
+# _ = fdp.z.plotPosteriors()
 
 ################################################################################
-plt.figure()
-_ = fdp.errorPosterior[0].comboPlot(cmap='gray_r')
+# plt.figure()
+# _ = fdp.errorPosterior[0].comboPlot(cmap='gray_r')
 # _ = fdp.relErr.plotPosteriors()
 
 ################################################################################
 # plt.figure()
 # _ = fdp.addErr.plotPosteriors()
+
+import h5py
+with h5py.File('fdp.h5', 'w') as f:
+    fdp.toHdf(f, 'fdp')
+
+with h5py.File('fdp.h5', 'r') as f:
+    fdp1 = FdemDataPoint().fromHdf(f['fdp'])
+
+plt.show()

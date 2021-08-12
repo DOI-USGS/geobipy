@@ -5,8 +5,8 @@ Core routines needed for GeoBIPy
 .. toctree::
    :maxdepth: 1
 
-   customFunctions
-   customPlots
+   utilities
+   plotting
    fileIO
    interpolation
    HDF

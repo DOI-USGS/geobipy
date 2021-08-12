@@ -97,50 +97,14 @@ Get the median, and 95% confidence values
 
 
 
+
 .. rst-class:: sphx-glr-script-out
 
  Out:
 
  .. code-block:: none
 
-    (-0.030000000000000027, -1.71, 1.65)
-
-
-
-
-
-.. code-block:: default
-
-
-    # We can write the histogram to a HDF file
-    with h5py.File('Histogram.h5','w') as hf:
-        H.toHdf(hf,'Histogram')
-
-
-
-
-
-
-
-
-
-.. code-block:: default
-
-
-    # And read it back in from Hdf5
-    H1 = hdfRead.readKeyFromFiles('Histogram.h5','/','Histogram')
-
-    plt.figure()
-    _ = H1.plot()
-
-
-
-
-
-.. image:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_002.png
-    :alt: plot histogram 1d
-    :class: sphx-glr-single-img
-
+    (0.030000000000000027, -1.59, 1.5899999999999999)
 
 
 
@@ -234,7 +198,7 @@ Update the histogram
 
 
 
-.. image:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_003.png
+.. image:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_002.png
     :alt: plot histogram 1d
     :class: sphx-glr-single-img
 
@@ -255,7 +219,7 @@ We can plot the histogram as a pcolor plot
 
 
 
-.. image:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_004.png
+.. image:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_003.png
     :alt: plot histogram 1d
     :class: sphx-glr-single-img
 
@@ -266,7 +230,7 @@ We can plot the histogram as a pcolor plot
 
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:873: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/plotting.py:874: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
       pm = ax.pcolormesh(X, Y, v, color=c, **kwargs)
 
 
@@ -369,10 +333,33 @@ The update takes in the numbers in linear space and takes their log=10
     _ = H.plot()
 
 
+    import h5py
+    with h5py.File('h1d.h5', 'w') as f:
+        H.toHdf(f, 'h1d')
 
-.. image:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_005.png
-    :alt: plot histogram 1d
-    :class: sphx-glr-single-img
+    with h5py.File('h1d.h5', 'r') as f:
+        H1 = Histogram1D().fromHdf(f['h1d'])
+
+    plt.figure()
+    _ = H1.plot()
+
+    plt.show()
+
+
+.. rst-class:: sphx-glr-horizontal
+
+
+    *
+
+      .. image:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_004.png
+          :alt: plot histogram 1d
+          :class: sphx-glr-multi-img
+
+    *
+
+      .. image:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_005.png
+          :alt: plot histogram 1d
+          :class: sphx-glr-multi-img
 
 
 
@@ -381,7 +368,7 @@ The update takes in the numbers in linear space and takes their log=10
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.814 seconds)
+   **Total running time of the script:** ( 0 minutes  0.747 seconds)
 
 
 .. _sphx_glr_download_examples_Statistics_plot_histogram_1d.py:

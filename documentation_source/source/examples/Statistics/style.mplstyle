@@ -1,0 +1,15 @@
+axes.titlesize : 10
+axes.labelsize : 8
+lines.linewidth : 2
+lines.markersize : 5
+lines.markeredgewidth : 2
+lines.color : wellSeparated[0]
+xtick.labelsize : 8
+ytick.labelsize : 8
+boxplot.flierprops.markerfacecolor : wellSeparated[0]
+grid.alpha : 0.1
+axes.prop_cycle : cycler('color', wellSeparated)
+image.cmap :'viridis'
+figure.facecolor : 'white'
+axes.facecolor : 'black'
+savefig.facecolor: 'white'

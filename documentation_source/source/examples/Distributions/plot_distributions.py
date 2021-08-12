@@ -7,7 +7,7 @@ Handles the initialization of different statistical distribution
 
 #%%
 from geobipy import Distribution
-from geobipy import customPlots as cP
+from geobipy import plotting as cP
 import matplotlib.pyplot as plt
 import numpy as np
 

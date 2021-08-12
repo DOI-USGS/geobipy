@@ -39,6 +39,7 @@ H.update(x)
 
 ################################################################################
 plt.figure()
+plt.title("2D Histogram")
 _ = H.pcolor(cmap='gray_r')
 
 
@@ -51,6 +52,7 @@ h2 = H.marginalize(axis=1)
 ################################################################################
 # Note that the names of the variables are automatically displayed
 plt.figure()
+plt.suptitle("Marginals along each axis")
 plt.subplot(121)
 h1.plot()
 plt.subplot(122)
@@ -67,6 +69,7 @@ _ = H.comboPlot(cmap='gray_r')
 ################################################################################
 # We can overlay the histogram with its credible intervals
 plt.figure()
+plt.title("90% credible intervals overlain")
 H.pcolor(cmap='gray_r')
 H.plotCredibleIntervals(axis=0, percent=95.0)
 _ = H.plotCredibleIntervals(axis=1, percent=95.0)
@@ -77,28 +80,41 @@ _ = H.plotCredibleIntervals(axis=1, percent=95.0)
 mean = H.mean()
 median = H.median()
 
-
-################################################################################
-# Or plot the mean and median
-plt.figure()
-H.pcolor(cmap='gray_r')
-H.plotMean()
-H.plotMedian()
-plt.legend()
-
 ################################################################################
 plt.figure(figsize=(9.5, 5))
+plt.suptitle("Mean, median, and credible interval overlain")
 ax = plt.subplot(121)
 H.pcolor(cmap='gray_r', noColorbar=True)
 H.plotCredibleIntervals(axis=0)
 H.plotMedian()
 H.plotMean(color='y')
+plt.legend()
 
 plt.subplot(122, sharex=ax, sharey=ax)
 H.pcolor(cmap='gray_r', noColorbar=True)
 H.plotCredibleIntervals(axis=1)
 H.plotMedian(axis=1)
 H.plotMean(axis=1, color='y')
+plt.legend()
+
+
+################################################################################
+# Get the range between credible intervals
+H.credibleRange(percent=95.0)
+
+
+################################################################################
+# We can map the credible range to an opacity or transparency
+H.opacity()
+H.transparency()
+
+
+import h5py
+with h5py.File('h2d.h5', 'w') as f:
+    H.toHdf(f, 'h2d')
+
+with h5py.File('h2d.h5', 'r') as f:
+    H1 = Histogram2D().fromHdf(f['h2d'])
 
 
 ################################################################################
@@ -112,13 +128,4 @@ H1 = H.intervalStatistic([-4.0, -2.0, 2.0, 4.0], statistic='mean', axis=1)
 H1.pcolor(cmap='gray_r', equalize=True, noColorbar=True)
 H1.plotCredibleIntervals(axis=1)
 
-
-################################################################################
-# Get the range between credible intervals
-H.credibleRange(percent=95.0)
-
-
-################################################################################
-# We can map the credible range to an opacity or transparency
-H.opacity()
-H.transparency()
+plt.show()

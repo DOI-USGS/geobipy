@@ -293,7 +293,7 @@ Read in a second data set
 
     Warning: Your data contains values that are <= 0.0
 
-    <geobipy.src.classes.data.dataset.FdemData.FdemData object at 0x1279b4490>
+    <geobipy.src.classes.data.dataset.FdemData.FdemData object at 0x12cab4d60>
 
 
 
@@ -320,8 +320,6 @@ We can create maps of the elevations in two separate figures
 
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
-      kwargs['cmap'].set_bad(color='white')
 
     (584519.0671621622, 590166.7428378379, 4639079.207593819, 4661808.632406181)
 
@@ -349,8 +347,6 @@ We can create maps of the elevations in two separate figures
 
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
-      kwargs['cmap'].set_bad(color='white')
 
     (662847.3094082569, 668366.7995917432, 4560053.628459876, 4600646.676540123)
 
@@ -406,8 +402,6 @@ interpolate the specified channel number.
 
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
-      kwargs['cmap'].set_bad(color='white')
 
     (584518.405, 590167.405, 4639078.6625, 4661809.1775)
 
@@ -472,7 +466,7 @@ A summary will now show the properties of the line.
 .. code-block:: default
 
 
-    L.summary()
+    print(L.summary)
 
 
 
@@ -486,29 +480,24 @@ A summary will now show the properties of the line.
 
     3D Point Cloud: 
     Number of Points: : 6710 
-     Name: Easting
-         Units: m
-         Shape: (6710,)
-         Values: [586852.29 586852.23 586852.17 ... 586123.57 586123.2  586122.82]
-     Name: Northing
-         Units: m
-         Shape: (6710,)
-         Values: [4639119.38 4639122.68 4639125.98 ... 4661765.26 4661768.84 4661772.42]
-     Name: Height
-         Units: m
-         Shape: (6710,)
-         Values: [36.629 37.012 37.349 ... 28.313 28.218 28.115]
-     Name: Elevation
-         Units: m
-         Shape: (6710,)
-         Values: [1246.84 1246.71 1246.61 ... 1337.94 1337.96 1338.02]
+     Name: Easting (m)
+        Shape: (6710,)
+        Values: [586852.29 586852.23 586852.17 ... 586123.57 586123.2  586122.82]
+     Name: Northing (m)
+        Shape: (6710,)
+        Values: [4639119.38 4639122.68 4639125.98 ... 4661765.26 4661768.84 4661772.42]
+     Name: Height (m)
+        Shape: (6710,)
+        Values: [36.629 37.012 37.349 ... 28.313 28.218 28.115]
+     Name: Elevation (m)
+        Shape: (6710,)
+        Values: [1246.84 1246.71 1246.61 ... 1337.94 1337.96 1338.02]
     Data:          : 
     # of Channels: 12 
     # of Total Data: 80520 
     Name: Fdem Data
-         Units: 
-         Shape: (6710, 12)
-         Values: [[145.3 435.8 260.6 ... 516.5 405.7 255.7]
+        Shape: (6710, 12)
+        Values: [[145.3 435.8 260.6 ... 516.5 405.7 255.7]
      [145.7 436.5 257.9 ... 513.6 403.2 252. ]
      [146.4 437.4 255.8 ... 511.2 400.9 248.8]
      ...
@@ -517,9 +506,8 @@ A summary will now show the properties of the line.
      [ 72.1 316.6 220.7 ... 749.2 976.5 928.3]]
 
      Name: 
-         Units: 
-         Shape: (6710, 12)
-         Values: [[14.53 43.58 26.06 ... 51.65 40.57 25.57]
+        Shape: (6710, 12)
+        Values: [[14.53 43.58 26.06 ... 51.65 40.57 25.57]
      [14.57 43.65 25.79 ... 51.36 40.32 25.2 ]
      [14.64 43.74 25.58 ... 51.12 40.09 24.88]
      ...
@@ -528,9 +516,8 @@ A summary will now show the properties of the line.
      [ 7.21 31.66 22.07 ... 74.92 97.65 92.83]]
 
      Name: 
-         Units: 
-         Shape: (6710, 12)
-         Values: [[0. 0. 0. ... 0. 0. 0.]
+        Shape: (6710, 12)
+        Values: [[0. 0. 0. ... 0. 0. 0.]
      [0. 0. 0. ... 0. 0. 0.]
      [0. 0. 0. ... 0. 0. 0.]
      ...
@@ -672,7 +659,7 @@ See the Resolve.stm files.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  11.702 seconds)
+   **Total running time of the script:** ( 0 minutes  11.508 seconds)
 
 
 .. _sphx_glr_download_examples_Data_plot_frequency_dataset.py:

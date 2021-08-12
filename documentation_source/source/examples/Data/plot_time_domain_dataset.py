@@ -3,7 +3,7 @@ Time domain dataset
 --------------------
 """
 #%%
-from geobipy import customPlots as cP
+from geobipy import plotting as cP
 from os.path import join
 import matplotlib.pyplot as plt
 import numpy as np
@@ -72,6 +72,8 @@ _ = line.scatter2D(c = line.dataChannel(17, system=1))
 plt.figure()
 _ = line.plot(xAxis='x', log=10)
 
+print(TD.system[0].windows.centre)
+plt.show()
 
 #%%
 # File Format for time domain data

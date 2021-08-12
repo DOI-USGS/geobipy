@@ -5,12 +5,12 @@
 
 Computation times
 =================
-**00:33.478** total execution time for **examples_Inference** files:
+**00:33.990** total execution time for **examples_Inference** files:
 
 +------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Inference_plot_inference_2d.py` (``plot_inference_2d.py``) | 00:33.478 | 0.0 MB |
+| :ref:`sphx_glr_examples_Inference_plot_inference_2d.py` (``plot_inference_2d.py``) | 00:32.548 | 0.0 MB |
 +------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Inference_plot_inference_1d.py` (``plot_inference_1d.py``) | 00:00.000 | 0.0 MB |
+| :ref:`sphx_glr_examples_Inference_plot_inference_1d.py` (``plot_inference_1d.py``) | 00:01.443 | 0.0 MB |
 +------------------------------------------------------------------------------------+-----------+--------+
 | :ref:`sphx_glr_examples_Inference_plot_inference_3d.py` (``plot_inference_3d.py``) | 00:00.000 | 0.0 MB |
 +------------------------------------------------------------------------------------+-----------+--------+

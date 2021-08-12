@@ -76,7 +76,7 @@ Write a summary of the contents of the point cloud
 .. code-block:: default
 
 
-    PC3D.summary()
+    print(PC3D.summary)
 
 
 
@@ -90,25 +90,21 @@ Write a summary of the contents of the point cloud
 
     3D Point Cloud: 
     Number of Points: : 20000 
-     Name: Easting
-         Units: m
-         Shape: (20000,)
-         Values: [-0.49955817 -0.93368476 -0.69809349 ...  0.7588914   0.36178379
-      0.09533399]
-     Name: Northing
-         Units: m
-         Shape: (20000,)
-         Values: [-0.06031532 -0.4436347  -0.16737524 ...  0.26017353  0.62756379
-      0.47234696]
-     Name: Height
-         Units: m
-         Shape: (20000,)
-         Values: [ 1.95854160e-04 -1.73879019e+00 -3.46841568e-01 ... -9.69631853e-02
-      8.94419868e-02  8.20953454e-02]
-     Name: Elevation
-         Units: m
-         Shape: (20000,)
-         Values: [0. 0. 0. ... 0. 0. 0.]
+     Name: Easting (m)
+        Shape: (20000,)
+        Values: [-0.98773319 -0.55023466 -0.13412766 ...  0.84262521  0.3091211
+      0.51431745]
+     Name: Northing (m)
+        Shape: (20000,)
+        Values: [-0.68587549 -0.37151232 -0.07661938 ...  0.57331589  0.53308878
+      0.70317217]
+     Name: Height (m)
+        Shape: (20000,)
+        Values: [-1.6367953  -0.12328441  0.03309123 ... -0.11364554  0.11987811
+     -0.00902055]
+     Name: Elevation (m)
+        Shape: (20000,)
+        Values: [0. 0. 0. ... 0. 0. 0.]
 
 
 
@@ -134,7 +130,7 @@ Get a single location from the point as a 3x1 vector
 
  .. code-block:: none
 
-    <geobipy.src.classes.pointcloud.Point.Point object at 0x12b674f70>
+    <geobipy.src.classes.pointcloud.Point.Point object at 0x12bf328b0>
 
 
 
@@ -163,7 +159,7 @@ Plot the locations with Height as colour
  .. code-block:: none
 
 
-    (<AxesSubplot:xlabel='Easting (m)', ylabel='Northing (m)'>, <matplotlib.collections.PathCollection object at 0x12744e6d0>, <matplotlib.colorbar.Colorbar object at 0x12ba8c910>)
+    (<AxesSubplot:xlabel='Easting (m)', ylabel='Northing (m)'>, <matplotlib.collections.PathCollection object at 0x12c427280>, <matplotlib.colorbar.Colorbar object at 0x12c416280>)
 
 
 
@@ -216,13 +212,9 @@ Grid the points using a triangulated CloughTocher interpolation
 
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
-      kwargs['cmap'].set_bad(color='white')
-    Interpolating with gmt surface tmp.txt -I0.1/0.1 -R-1.04997/1.05003/-1.04988/1.05012 -N2000 -T0.25 -C0.01 -Gtmp.grd -Ll0 -Lu1
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
-      kwargs['cmap'].set_bad(color='white')
+    Interpolating with gmt surface tmp.txt -I0.1/0.1 -R-1.04988/1.05012/-1.04995/1.05005 -N2000 -T0.25 -C0.01 -Gtmp.grd -Ll0 -Lu1
 
-    (<AxesSubplot:xlabel='Easting (m)', ylabel='Northing (m)'>, <matplotlib.collections.QuadMesh object at 0x126fa0f10>, <matplotlib.colorbar.Colorbar object at 0x127972190>)
+    (<AxesSubplot:xlabel='Easting (m)', ylabel='Northing (m)'>, <matplotlib.collections.QuadMesh object at 0x12c2e4490>, <matplotlib.colorbar.Colorbar object at 0x12c7a4130>)
 
 
 
@@ -247,8 +239,8 @@ We can perform spatial searches on the 3D point cloud
 
  .. code-block:: none
 
-    (array([0.00420115, 0.00640944, 0.00971474, ..., 0.11054256, 0.11103671,
-           0.11139794]), array([16626, 16568, 10093, ...,  7117, 17037,   409]))
+    (array([0.01599939, 0.02188347, 0.02220646, ..., 0.11441974, 0.11456269,
+           0.11582736]), array([18456,  6029,   577, ..., 13206,  1778,  2833]))
 
 
 
@@ -287,7 +279,7 @@ We can then obtain those points as another point cloud
  .. code-block:: none
 
 
-    [<matplotlib.lines.Line2D object at 0x1272f8fa0>]
+    [<matplotlib.lines.Line2D object at 0x12ee76700>]
 
 
 
@@ -313,7 +305,7 @@ Read in the xyz co-ordinates in columns 2,3,4 from a file. Skip 1 header line.
  .. code-block:: none
 
 
-    <geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D object at 0x12b674b80>
+    <geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D object at 0x12bf32730>
 
 
 
@@ -357,7 +349,7 @@ when opened in Paraview (or other software)
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  5.513 seconds)
+   **Total running time of the script:** ( 0 minutes  5.245 seconds)
 
 
 .. _sphx_glr_download_examples_Data_plot_pointcloud3d.py:

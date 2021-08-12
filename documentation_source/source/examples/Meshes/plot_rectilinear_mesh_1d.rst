@@ -46,7 +46,7 @@ Here we use edges
 
 .. code-block:: default
 
-    rm = RectilinearMesh1D(cellEdges=x)
+    rm = RectilinearMesh1D(edges=x)
 
 
 
@@ -59,7 +59,7 @@ Here we use edges
 
 .. code-block:: default
 
-    print(rm.cellCentres)
+    print(rm.centres)
 
 
 
@@ -79,7 +79,7 @@ Here we use edges
 
 .. code-block:: default
 
-    print(rm.cellEdges)
+    print(rm.edges)
 
 
 
@@ -99,7 +99,7 @@ Here we use edges
 
 .. code-block:: default
 
-    print(rm.internalCellEdges)
+    print(rm.internaledges)
 
 
 
@@ -181,7 +181,7 @@ We can plot the grid of the mesh
 
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:873: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/plotting.py:874: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
       pm = ax.pcolormesh(X, Y, v, color=c, **kwargs)
 
 
@@ -211,7 +211,7 @@ Or Pcolor the mesh showing. An array of cell values is used as the colour.
 
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:873: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/plotting.py:874: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
       pm = ax.pcolormesh(X, Y, v, color=c, **kwargs)
 
 
@@ -235,7 +235,7 @@ Here we use edges
 
 .. code-block:: default
 
-    rm = RectilinearMesh1D(cellEdges=x, log=10)
+    rm = RectilinearMesh1D(edges=x, log=10)
 
 
 
@@ -250,7 +250,7 @@ Access property describing the mesh
 
 .. code-block:: default
 
-    print(rm.cellCentres)
+    print(rm.centres)
 
 
 
@@ -271,7 +271,7 @@ Access property describing the mesh
 
 .. code-block:: default
 
-    print(rm.cellEdges)
+    print(rm.edges)
 
 
 
@@ -292,7 +292,7 @@ Access property describing the mesh
 
 .. code-block:: default
 
-    print(rm.internalCellEdges)
+    print(rm.internaledges)
 
 
 
@@ -347,7 +347,7 @@ Get the cell indices
 
  .. code-block:: none
 
-    [1 5 7]
+    [2 5 7]
 
 
 
@@ -375,7 +375,7 @@ We can plot the grid of the mesh
 
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:873: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/plotting.py:874: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
       pm = ax.pcolormesh(X, Y, v, color=c, **kwargs)
 
 
@@ -391,6 +391,12 @@ Or Pcolor the mesh showing. An array of cell values is used as the colour.
     _ = rm.pcolor(arr, grid=True, flipY=True)
 
 
+    import h5py
+    with h5py.File('rm1d.h5', 'w') as f:
+        rm.toHdf(f, 'rm1d')
+
+    with h5py.File('rm1d.h5', 'r') as f:
+        rm1 = RectilinearMesh1D().fromHdf(f['rm1d'])
 
 
 .. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_004.png
@@ -404,7 +410,7 @@ Or Pcolor the mesh showing. An array of cell values is used as the colour.
 
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:873: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/plotting.py:874: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
       pm = ax.pcolormesh(X, Y, v, color=c, **kwargs)
 
 
@@ -413,7 +419,7 @@ Or Pcolor the mesh showing. An array of cell values is used as the colour.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.380 seconds)
+   **Total running time of the script:** ( 0 minutes  0.371 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_1d.py:

@@ -90,8 +90,9 @@ Plot a location map of the data point locations along the line
 
  .. code-block:: none
 
+    <HDF5 group "/currentdatapoint/addErr" (3 members)>
 
-    (<AxesSubplot:xlabel='Easting (m)', ylabel='Northing (m)'>, <matplotlib.collections.PathCollection object at 0x12f4c8dc0>, <matplotlib.colorbar.Colorbar object at 0x12f542640>)
+    (<AxesSubplot:>, <matplotlib.collections.PathCollection object at 0x134b24070>, <matplotlib.colorbar.Colorbar object at 0x12bff2400>)
 
 
 
@@ -156,12 +157,6 @@ We can show a basic cross-section of the parameter inverted for
 
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
-      kwargs['cmap'].set_bad(color='white')
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
-      kwargs['cmap'].set_bad(color='white')
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
-      kwargs['cmap'].set_bad(color='white')
 
     (900.0, 1400.0)
 
@@ -207,12 +202,6 @@ We can plot the parameter values that produced the highest posterior
 
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
-      kwargs['cmap'].set_bad(color='white')
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
-      kwargs['cmap'].set_bad(color='white')
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
-      kwargs['cmap'].set_bad(color='white')
 
     (900.0, 1400.0)
 
@@ -245,9 +234,7 @@ How about the confidence?
 
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("plasma"))
-      kwargs['cmap'].set_bad(color='white')
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/inversion/Inference2D.py:1303: UserWarning: FixedFormatter should only be used together with FixedLocator
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/inversion/Inference2D.py:1343: UserWarning: FixedFormatter should only be used together with FixedLocator
       cb.ax.set_yticklabels(['Less', '', '', '', '', 'More'])
 
     (900.0, 1400.0)
@@ -282,8 +269,6 @@ the top and bottom 0.5% of the colour range
 
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("Greys"))
-      kwargs['cmap'].set_bad(color='white')
 
     (900.0, 1400.0)
 
@@ -308,7 +293,7 @@ We can plot the posteriors along the line as a shaded histogram
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  33.478 seconds)
+   **Total running time of the script:** ( 0 minutes  32.548 seconds)
 
 
 .. _sphx_glr_download_examples_Inference_plot_inference_2d.py:

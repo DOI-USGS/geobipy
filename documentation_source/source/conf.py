@@ -373,6 +373,7 @@ sphinx_gallery_conf = {
                                     'examples/Data/',
                                     'examples/Datapoints/',
                                     'examples/Inference',
+                                    'examples/HDF5',
                                     ]),
     "within_subsection_order": ExampleTitleSortKey,
     "image_scrapers": ('matplotlib'),

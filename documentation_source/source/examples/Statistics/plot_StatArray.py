@@ -15,41 +15,62 @@ import matplotlib.pyplot as plt
 import h5py
 from geobipy import hdfRead
 
+plt.style.use('seaborn-pastel')
+
 
 #%%
 # Instantiating a new StatArray class
 # +++++++++++++++++++++++++++++++++++
 #
+
+# Integer
+test = StatArray(1, name='1')
+print(test.summary)
+test = StatArray(10, name='10')
+print(test.summary)
+# tuple/Shape
+test = StatArray((2, 10), name='(2, 10)')
+print(test.summary)
+
+# float
+test = StatArray(45.454, name='45.454')
+print(test.summary)
+test = StatArray(np.float64(45.454), name='45.454')
+print(test.summary)
+
+# complex
+# test = StatArray(np.complex(0.0, 1.0), name='complex(0, 1)')
+
+# array
+Density = StatArray(np.random.randn(1), name="Density", units="$\frac{g}{cc}$")
+print(Density.summary)
+
 # The StatArray can take any numpy function that returns an array as an input.
 # The name and units of the variable can be assigned to the StatArray.
-
-Density = StatArray(np.random.randn(1), name="Density", units="$\frac{g}{cc}$")
-Density.summary()
-
 
 #%%
 # Attaching Prior and Proposal Distributions to a StatArray
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
-# The StatArray class has been built so that we may easily 
-# attach not only names and units, but statistical distributions too.  
-# We won't go into too much detail about the different distribution 
+# The StatArray class has been built so that we may easily
+# attach not only names and units, but statistical distributions too.
+# We won't go into too much detail about the different distribution
 # classes here so check out the :ref:`Distribution Class` for a better description.
 #
 # Two types of distributions can be attached to the StatArray.
 #
 # * Prior Distribution
-#     The prior represents how the user believes the variable should 
-#     behave from a statistical standpoint.  
-#     The values of the variable can be evaluated against the attached prior, 
+#     The prior represents how the user believes the variable should
+#     behave from a statistical standpoint.
+#     The values of the variable can be evaluated against the attached prior,
 #     to determine how likely they are to have occured https://en.wikipedia.org/wiki/Prior_probability
 #
 # * Proposal Distribution
-#     The proposal describes a probability distribution from which to 
-#     sample when we wish to perturb the variable 
+#     The proposal describes a probability distribution from which to
+#     sample when we wish to perturb the variable
 #     https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm
 
-# Obtain an instantiation of a random number generator. 
+# Obtain an instantiation of a random number generator.
 # This is optional, but is an important consideration for parallel programming.
 prng = np.random.RandomState()
 Density.setPrior('Uniform', -2.0, 2.0, prng=prng)
@@ -57,14 +78,14 @@ Density.setPrior('Uniform', -2.0, 2.0, prng=prng)
 #%%
 # We can also attach a proposal distribution
 Density.setProposal('Normal', 0.0, 1.0, prng=prng)
-Density.summary()
+print(Density.summary)
 print("Class type of the prior: ",type(Density.prior))
 print("Class type of the proposal: ",type(Density.proposal))
 
 
 #%%
 # The values in the variable can be evaluated against the prior.
-# In this case, we have 3 elements in the variable, and a univariate Normal for the prior. 
+# In this case, we have 3 elements in the variable, and a univariate Normal for the prior.
 # Therefore each element is evaluated to get 3 probabilities, one for each element.
 print(Density.probability(log=False))
 
@@ -74,14 +95,14 @@ print(Density.propose())
 
 ################################################################################
 # From a sampling stand point we can either sample using only the proposal
-# Or we can only generate samples that simultaneously satisfy the prior. 
+# Or we can only generate samples that simultaneously satisfy the prior.
 print(Density.propose(relative=True))
 
 ################################################################################
 # We can perturb the variable by drawing from the attached proposal distribution.
 
 Density.perturb()
-Density.summary()
+print(Density.summary)
 
 ################################################################################
 # Attaching a Histogram to capture the posterior distribution
@@ -139,7 +160,7 @@ Density.setProposal('MvNormal', mean, variance, prng=prng)
 # Perturb the variables using the multivariate proposal.
 
 Density.perturb()
-Density.summary()
+Density.summary
 
 
 ################################################################################
@@ -148,8 +169,8 @@ Density.summary()
 #
 # The StatArray contains other functions to perform basic array manipulations
 #
-# These routines essentially wrap around numpy functions, 
-# but the result will have the same name and units, 
+# These routines essentially wrap around numpy functions,
+# but the result will have the same name and units,
 # and if any prior or proposal are set, those will be carried through too.
 #
 # 1D example
@@ -382,12 +403,12 @@ _ = Density.scatter(x=Time, alpha=0.7, edgecolor='k')
 
 
 ################################################################################
-# Notice that I never specified the y axis, so the y axis defaulted to the values in the StatArray. 
-# In this case, any operations applied to the colours, are also applied to the y axis, e.g. log=10.  
+# Notice that I never specified the y axis, so the y axis defaulted to the values in the StatArray.
+# In this case, any operations applied to the colours, are also applied to the y axis, e.g. log=10.
 # When I take the values of Density to log base 10, because I do not specify the y plotting locations, those locations are similarly affected.
 #
-# I can however force the y co-ordinates by specifying it as input. 
-# In the second subplot I explicitly plot distance on the y axis. 
+# I can however force the y co-ordinates by specifying it as input.
+# In the second subplot I explicitly plot distance on the y axis.
 # In the first subplot, the y axis is the same as the colourbar.
 
 
@@ -482,7 +503,7 @@ print('x has its own memory allocated (not a reference/pointer)? ', id(x) != id(
 # We can also define a 2D array
 
 Density = StatArray(np.random.randn(50,100),"Density","$\frac{g}{cc}$")
-Density.summary()
+Density.summary
 
 
 ################################################################################
@@ -580,3 +601,5 @@ ax1 = plt.subplot(211)
 A.stackedAreaPlot(x=x, axis=1)
 plt.subplot(212, sharex=ax1)
 _ = A.stackedAreaPlot(x=x, i=np.s_[[1,3,4],:], axis=1, labels=['a','b','c'])
+
+plt.show()

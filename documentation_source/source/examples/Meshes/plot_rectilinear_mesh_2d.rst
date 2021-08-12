@@ -13,12 +13,12 @@
 -------------------
 This 2D rectilinear mesh defines a grid with straight cell boundaries.
 
-It can be instantiated in two ways.  
+It can be instantiated in two ways.
 
 The first is by providing the cell centres or
 cell edges in two dimensions.
 
-The second embeds the 2D mesh in 3D by providing the cell centres or edges in three dimensions.  
+The second embeds the 2D mesh in 3D by providing the cell centres or edges in three dimensions.
 The first two dimensions specify the mesh coordinates in the horiztontal cartesian plane
 while the third discretizes in depth. This allows us to characterize a mesh whose horizontal coordinates
 do not follow a line that is parallel to either the "x" or "y" axis.
@@ -72,15 +72,6 @@ We can plot the grid lines of the mesh.
     :alt: plot rectilinear mesh 2d
     :class: sphx-glr-single-img
 
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
-      kwargs['cmap'].set_bad(color='white')
 
 
 
@@ -136,15 +127,6 @@ Again, plot the grid. This time the z-coordinate dominates the plot.
     :class: sphx-glr-single-img
 
 
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
-      kwargs['cmap'].set_bad(color='white')
-
 
 
 
@@ -165,15 +147,6 @@ We can pcolor the mesh by providing cell values.
     :alt: plot rectilinear mesh 2d
     :class: sphx-glr-single-img
 
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
-      kwargs['cmap'].set_bad(color='white')
 
 
 
@@ -301,9 +274,26 @@ We can specify either axis
 rm.toVTK('test', cellData=StatArray(np.random.randn(z.size, x.size), "Name"))
 
 
+.. code-block:: default
+
+    import h5py
+    with h5py.File('rm2d.h5', 'w') as f:
+        rm.createHdf(f, 'test')
+        rm.writeHdf(f, 'test')
+
+    with h5py.File('rm2d.h5', 'r') as f:
+        rm2 = RectilinearMesh2D().fromHdf(f['test'])
+
+
+
+
+
+
+
+
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.377 seconds)
+   **Total running time of the script:** ( 0 minutes  0.359 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_2d.py:

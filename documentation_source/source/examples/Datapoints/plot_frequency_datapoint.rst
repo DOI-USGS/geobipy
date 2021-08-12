@@ -174,7 +174,7 @@ Initialize and read an EM data set
  .. code-block:: none
 
 
-    <geobipy.src.classes.data.dataset.FdemData.FdemData object at 0x1290c08e0>
+    <geobipy.src.classes.data.dataset.FdemData.FdemData object at 0x13417faf0>
 
 
 
@@ -256,7 +256,7 @@ Forward model the data
 
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:873: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/plotting.py:874: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
       pm = ax.pcolormesh(X, Y, v, color=c, **kwargs)
 
 
@@ -285,8 +285,6 @@ Compute the sensitivity matrix for a given model
 
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
-      kwargs['cmap'].set_bad(color='white')
     Values <= 0.0 have been masked before taking their log
 
 
@@ -422,8 +420,9 @@ the relative error multiplier, and the additive error noise floor
 
 
     # Set values of relative and additive error for both systems.
+
     fdp.relErr = 0.05
-    fdp.addErr = 10
+    fdp.addErr = 10.0
 
     # Define the distributions used as priors.
     heightPrior = Distribution('Uniform', min=np.float64(fdp.z) - 2.0, max=np.float64(fdp.z) + 2.0)
@@ -525,9 +524,7 @@ Plot the posterior distributions
 
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("gray_r"))
-      kwargs['cmap'].set_bad(color='white')
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:690: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/plotting.py:691: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
       pm = ax.pcolormesh(X, Y, Zm, alpha = alpha, **kwargs)
 
 
@@ -537,9 +534,27 @@ plt.figure()
 _ = fdp.addErr.plotPosteriors()
 
 
+.. code-block:: default
+
+
+    import h5py
+    with h5py.File('fdp.h5', 'w') as f:
+        fdp.toHdf(f, 'fdp')
+
+    with h5py.File('fdp.h5', 'r') as f:
+        fdp1 = FdemDataPoint().fromHdf(f['fdp'])
+
+    # plt.show()
+
+
+
+
+
+
+
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  10.629 seconds)
+   **Total running time of the script:** ( 0 minutes  10.891 seconds)
 
 
 .. _sphx_glr_download_examples_Datapoints_plot_frequency_datapoint.py:

@@ -35,7 +35,7 @@ PC3D.append(Other_PC)
 ################################################################################
 # Write a summary of the contents of the point cloud
 
-PC3D.summary()
+print(PC3D.summary)
 
 ################################################################################
 # Get a single location from the point as a 3x1 vector
@@ -57,15 +57,33 @@ PC3D.scatter2D(edgecolor='k')
 plt.figure()
 ax = PC3D.scatter2D(s=100*np.abs(PC3D.z), edgecolor='k')
 
+################################################################################
+# Interpolate the points to a 2D rectilinear mesh
+mesh, dum = PC3D.interpolate(0.01, 0.01, method='mc', mask=0.03)
+
+# We can save that mesh to VTK
+mesh.to_vtk('pointcloud_interpolated.vtk')
 
 ################################################################################
-# Grid the points using a triangulated CloughTocher interpolation
+# Grid the points using a triangulated CloughTocher, or minimum curvature interpolation
 
 plt.figure()
-plt.subplot(121)
-PC3D.mapPlot(dx=0.1, dy=0.1, method='ct')
-plt.subplot(122)
-PC3D.mapPlot(dx=0.1, dy=0.1, method='mc')
+plt.subplot(321)
+PC3D.mapPlot(dx=0.01, dy=0.01, method='ct')
+plt.subplot(322)
+PC3D.mapPlot(dx=0.01, dy=0.01, method='mc')
+
+plt.subplot(323)
+PC3D.mapPlot(dx=0.01, dy=0.01, method='ct', mask=0.03)
+plt.subplot(324)
+PC3D.mapPlot(dx=0.01, dy=0.01, method='mc', mask=0.03)
+################################################################################
+# For lots of points, these surfaces can look noisy. Using a block filter will help
+PCsub = PC3D.block_median(0.005, 0.005)
+plt.subplot(325)
+PCsub.mapPlot(dx=0.01, dy=0.01, method='ct', mask=0.03)
+plt.subplot(326)
+PCsub.mapPlot(dx=0.01, dy=0.01, method='mc', mask=0.03)
 
 
 ################################################################################
@@ -116,3 +134,5 @@ f = PC3D.scatter2D(s=10)
 
 
 # PC3D.toVTK('testPoints', format='binary')
+
+plt.show()

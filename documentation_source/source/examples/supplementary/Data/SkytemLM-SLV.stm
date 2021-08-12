@@ -85,8 +85,8 @@ System Begin
 
 		SaveDiagnosticFiles = no
 
-		XOutputScaling = 1
-		YOutputScaling = 1
+		XOutputScaling = 0
+		YOutputScaling = 0
 		ZOutputScaling = 1
 		SecondaryFieldNormalisation  =  none
 

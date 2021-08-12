@@ -65,11 +65,11 @@ The halfSpaceValue is used as a reference value for the parameter prior.
     prng = np.random.RandomState()
     # Set the priors
     mod.setPriors(halfSpaceValue = 0.01,
-                  minDepth = 1.0, 
-                  maxDepth = 150.0, 
-                  maxLayers = 30, 
-                  parameterPrior = True, 
-                  gradientPrior = True, 
+                  minDepth = 1.0,
+                  maxDepth = 150.0,
+                  maxLayers = 30,
+                  parameterPrior = True,
+                  gradientPrior = True,
                   prng = prng)
 
 
@@ -133,7 +133,7 @@ perturbed = mod.perturbStructure()
 
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:873: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/plotting.py:874: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
       pm = ax.pcolormesh(X, Y, v, color=c, **kwargs)
 
     <AxesSubplot:ylabel='Depth (m)'>
@@ -167,8 +167,8 @@ We can evaluate the prior of the model using depths only
 
 Perturbing a model multiple times
 +++++++++++++++++++++++++++++++++
-In the stochasitic inference process, we perturb the model structure, 
-and parameter values, multiple times. 
+In the stochasitic inference process, we perturb the model structure,
+and parameter values, multiple times.
 Each time the model is perturbed, we can record its state
 in a posterior distribution.
 
@@ -244,9 +244,7 @@ The proposal for the parameter values is fixed and centred around a single value
 
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("gray_r"))
-      kwargs['cmap'].set_bad(color='white')
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:690: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/plotting.py:691: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
       pm = ax.pcolormesh(X, Y, Zm, alpha = alpha, **kwargs)
 
     <AxesSubplot:xlabel='Frequency', ylabel='Depth (m)'>
@@ -256,7 +254,7 @@ The proposal for the parameter values is fixed and centred around a single value
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.733 seconds)
+   **Total running time of the script:** ( 0 minutes  2.414 seconds)
 
 
 .. _sphx_glr_download_examples_Models_plot_model_1d.py:

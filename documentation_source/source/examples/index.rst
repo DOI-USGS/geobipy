@@ -96,6 +96,27 @@ Statistics
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="This 2D histogram class allows efficient updating of histograms, plotting and saving as HDF5.">
+
+.. only:: html
+
+ .. figure:: /examples/Statistics/images/thumb/sphx_glr_plot_histogram_3d_thumb.png
+     :alt: Histogram 2D
+
+     :ref:`sphx_glr_examples_Statistics_plot_histogram_3d.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/Statistics/plot_histogram_3d
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="Extends the numpy ndarray class to add extra attributes such as names, and units, and allows us...">
 
 .. only:: html
@@ -150,7 +171,7 @@ Meshes
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="It can be instantiated in two ways.  ">
+    <div class="sphx-glr-thumbcontainer" tooltip="It can be instantiated in two ways.">
 
 .. only:: html
 
@@ -422,6 +443,38 @@ Posterior Analysis
    :hidden:
 
    /examples/Inference/plot_inference_3d
+.. raw:: html
+
+    <div class="sphx-glr-clear"></div>
+
+
+
+.. _sphx_glr_examples_HDF5:
+
+HDF 5
+=====
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Inference for large scale datasets in GeoBIPy is handled using MPI and distributed memory syste...">
+
+.. only:: html
+
+ .. figure:: /examples/HDF5/images/thumb/sphx_glr_hdf5_thumb.png
+     :alt: Using HDF5 within GeoBIPy
+
+     :ref:`sphx_glr_examples_HDF5_hdf5.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/HDF5/hdf5
 .. raw:: html
 
     <div class="sphx-glr-clear"></div>

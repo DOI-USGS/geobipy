@@ -40,20 +40,6 @@ _ = H.plot()
 # Get the median, and 95% confidence values
 print(H.credibleIntervals(percent=95.0))
 
-################################################################################
-
-# We can write the histogram to a HDF file
-with h5py.File('Histogram.h5','w') as hf:
-    H.toHdf(hf,'Histogram')
-
-################################################################################
-
-# And read it back in from Hdf5
-H1 = hdfRead.readKeyFromFiles('Histogram.h5','/','Histogram')
-
-plt.figure()
-_ = H1.plot()
-
 
 #%%
 # Histogram with irregular bins
@@ -120,3 +106,16 @@ H.update(x, trim=True)
 ################################################################################
 plt.figure()
 _ = H.plot()
+
+
+import h5py
+with h5py.File('h1d.h5', 'w') as f:
+    H.toHdf(f, 'h1d')
+
+with h5py.File('h1d.h5', 'r') as f:
+    H1 = Histogram1D().fromHdf(f['h1d'])
+
+plt.figure()
+_ = H1.plot()
+
+plt.show()

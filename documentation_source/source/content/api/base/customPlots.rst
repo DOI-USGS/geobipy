@@ -1,5 +1,5 @@
-customPlots
+plotting
 ===========
 
-.. automodule:: geobipy.src.base.customPlots
+.. automodule:: geobipy.src.base.plotting
    :members:

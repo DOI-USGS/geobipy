@@ -18,7 +18,7 @@ Handles the initialization of different statistical distribution
 .. code-block:: default
 
     from geobipy import Distribution
-    from geobipy import customPlots as cP
+    from geobipy import plotting as cP
     import matplotlib.pyplot as plt
     import numpy as np
 
@@ -82,7 +82,7 @@ Multivariate Normal Distribution
  .. code-block:: none
 
 
-    array([0.6240394 , 0.50091112, 0.92328856])
+    array([ 0.1613555 , -0.19977711,  2.29697006])
 
 
 
@@ -121,7 +121,7 @@ Uniform Distribution
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.635 seconds)
+   **Total running time of the script:** ( 0 minutes  0.908 seconds)
 
 
 .. _sphx_glr_download_examples_Distributions_plot_distributions.py:

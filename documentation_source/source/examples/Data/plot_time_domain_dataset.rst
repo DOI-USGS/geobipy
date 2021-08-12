@@ -15,7 +15,7 @@ Time domain dataset
 
 .. code-block:: default
 
-    from geobipy import customPlots as cP
+    from geobipy import plotting as cP
     from os.path import join
     import matplotlib.pyplot as plt
     import numpy as np
@@ -67,8 +67,12 @@ Read in the data from file
 
  .. code-block:: none
 
+    npoints 39327
+    nchannels 60
+    data shape (39327, 60)
+    values shape (39327, 49)
 
-    <geobipy.src.classes.data.dataset.TdemData.TdemData object at 0x127020f10>
+    <geobipy.src.classes.data.dataset.TdemData.TdemData object at 0x116ad8fd0>
 
 
 
@@ -146,15 +150,6 @@ Or, plot specific channels in the data
     :alt: plot time domain dataset
     :class: sphx-glr-single-img
 
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customPlots.py:649: MatplotlibDeprecationWarning: You are modifying the state of a globally registered colormap. In future versions, you will not be able to modify a registered colormap in-place. To remove this warning, you can make a copy of the colormap first. cmap = copy.copy(mpl.cm.get_cmap("viridis"))
-      kwargs['cmap'].set_bad(color='white')
 
 
 
@@ -240,53 +235,53 @@ Obtain a line from the data set
 
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/utilities.py:664: RuntimeWarning: All-NaN axis encountered
       if (np.nanmin(values) <= 0.0):
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/utilities.py:664: RuntimeWarning: All-NaN axis encountered
       if (np.nanmin(values) <= 0.0):
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/utilities.py:664: RuntimeWarning: All-NaN axis encountered
       if (np.nanmin(values) <= 0.0):
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/utilities.py:664: RuntimeWarning: All-NaN axis encountered
       if (np.nanmin(values) <= 0.0):
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/utilities.py:664: RuntimeWarning: All-NaN axis encountered
       if (np.nanmin(values) <= 0.0):
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/utilities.py:664: RuntimeWarning: All-NaN axis encountered
       if (np.nanmin(values) <= 0.0):
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/utilities.py:664: RuntimeWarning: All-NaN axis encountered
       if (np.nanmin(values) <= 0.0):
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/utilities.py:664: RuntimeWarning: All-NaN axis encountered
       if (np.nanmin(values) <= 0.0):
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/utilities.py:664: RuntimeWarning: All-NaN axis encountered
       if (np.nanmin(values) <= 0.0):
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/utilities.py:664: RuntimeWarning: All-NaN axis encountered
       if (np.nanmin(values) <= 0.0):
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/utilities.py:664: RuntimeWarning: All-NaN axis encountered
       if (np.nanmin(values) <= 0.0):
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/utilities.py:664: RuntimeWarning: All-NaN axis encountered
       if (np.nanmin(values) <= 0.0):
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/utilities.py:664: RuntimeWarning: All-NaN axis encountered
       if (np.nanmin(values) <= 0.0):
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/utilities.py:664: RuntimeWarning: All-NaN axis encountered
       if (np.nanmin(values) <= 0.0):
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/utilities.py:664: RuntimeWarning: All-NaN axis encountered
       if (np.nanmin(values) <= 0.0):
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/utilities.py:664: RuntimeWarning: All-NaN axis encountered
       if (np.nanmin(values) <= 0.0):
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/utilities.py:664: RuntimeWarning: All-NaN axis encountered
       if (np.nanmin(values) <= 0.0):
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/utilities.py:664: RuntimeWarning: All-NaN axis encountered
       if (np.nanmin(values) <= 0.0):
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/utilities.py:664: RuntimeWarning: All-NaN axis encountered
       if (np.nanmin(values) <= 0.0):
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/utilities.py:664: RuntimeWarning: All-NaN axis encountered
       if (np.nanmin(values) <= 0.0):
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/utilities.py:664: RuntimeWarning: All-NaN axis encountered
       if (np.nanmin(values) <= 0.0):
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/utilities.py:664: RuntimeWarning: All-NaN axis encountered
       if (np.nanmin(values) <= 0.0):
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/utilities.py:664: RuntimeWarning: All-NaN axis encountered
       if (np.nanmin(values) <= 0.0):
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/customFunctions.py:664: RuntimeWarning: All-NaN axis encountered
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/utilities.py:664: RuntimeWarning: All-NaN axis encountered
       if (np.nanmin(values) <= 0.0):
 
 
@@ -359,7 +354,7 @@ Example system files are contained in
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  6.465 seconds)
+   **Total running time of the script:** ( 0 minutes  6.361 seconds)
 
 
 .. _sphx_glr_download_examples_Data_plot_time_domain_dataset.py:

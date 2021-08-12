@@ -1,5 +1,5 @@
-customFunctions
+utilities
 ===============
 
-.. automodule:: geobipy.src.base.customFunctions
+.. automodule:: geobipy.src.base.utilities
    :members:
