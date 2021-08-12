@@ -129,7 +129,6 @@ def infer(userParameters, DataPoint, prng, Inference2D, rank=1):
 
     return failed
 
-
 def initialize(userParameters, DataPoint, prng=None):
     """Initialize the transdimensional Markov chain Monte Carlo inversion.
 
@@ -178,7 +177,6 @@ def initialize(userParameters, DataPoint, prng=None):
     # if userParameters.solveRelativeError or userParameters.solveAdditiveError:
     DataPoint.updateErrors(userParameters.initialRelativeError, userParameters.initialAdditiveError)
 
-
     # # Initialize the calibration parameters
     # if (userParameters.solveCalibration):
     #     DataPoint.calibration.setPrior('Normal',
@@ -193,7 +191,7 @@ def initialize(userParameters, DataPoint, prng=None):
     # ---------------------------------
 
     # Find the conductivity of a half space model that best fits the data
-    halfspace = DataPoint.FindBestHalfSpace()
+    halfspace = DataPoint.find_best_halfspace()
 
     # Create an initial model for the first iteration of the inversion
     # Initialize a 1D model with the half space conductivity
@@ -223,7 +221,6 @@ def initialize(userParameters, DataPoint, prng=None):
 
     # Compute the predicted data
     DataPoint.forward(Mod)
-
 
     if userParameters.ignoreLikelihood:
         inverseHessian = Mod.localParameterVariance()
@@ -314,13 +311,11 @@ def accept_reject(userParameters, Mod, DataPoint, prior, likelihood, posterior, 
 
     posterior1 = prior1 + likelihood1
 
-
     priorRatio = prior1 - prior
 
     likelihoodRatio = likelihood1 - likelihood
 
     proposalRatio = proposal - proposal1
-
 
     try:
         log_acceptanceRatio = np.float128(priorRatio + likelihoodRatio + proposalRatio)

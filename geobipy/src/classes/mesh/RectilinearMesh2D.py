@@ -12,8 +12,10 @@ from matplotlib.collections import LineCollection
 from scipy.stats import binned_statistic
 from ...base import plotting as cP
 from ...base import utilities as cF
+from ...base import geometry
 from scipy.sparse import (kron, diags)
 from scipy import interpolate
+from skimage.draw import line
 
 try:
     from pyvtk import VtkData, CellData, Scalars, PolyData
@@ -270,8 +272,8 @@ class RectilinearMesh2D(Mesh):
         a = self.axis(axis)
         b = self.other_axis(axis)
 
-        t = np.sum(np.repeat(np.expand_dims(a.centres, axis), b.nCells, axis) * self.counts, 1-axis)
-        s = self._counts.sum(axis = 1 - axis)
+        t = np.sum(np.repeat(np.expand_dims(b.centres, axis), a.nCells, axis) * arr, 1-axis)
+        s = arr.sum(axis = 1 - axis)
 
         i = np.where(s > 0.0)[0]
         out = np.zeros(t.size)
@@ -283,7 +285,7 @@ class RectilinearMesh2D(Mesh):
         return out
 
 
-    def _percent_interval(self, values, percent=95.0, log=None, axis=0):
+    def _percent_interval(self, values, percent=95.0, log=None, reciprocate=False, axis=0):
         """Gets the percent interval along axis.
 
         Get the statistical interval, e.g. median is 50%.
@@ -319,12 +321,9 @@ class RectilinearMesh2D(Mesh):
         # Obtain the values at those locations
         out = self.axis(1-axis).centres[i]
 
-        if (not log is None):
-            out, dum = cF._log(out, log=log)
-
         return out
 
-    def _credibleIntervals(self, values, percent=90.0, log=None, axis=0):
+    def _credibleIntervals(self, values, percent=90.0, log=None, reciprocate=False, axis=0):
         """Gets the median and the credible intervals for the specified axis.
 
         Parameters
@@ -351,11 +350,7 @@ class RectilinearMesh2D(Mesh):
 
         percent = 0.5 * np.minimum(percent, 100.0 - percent)
 
-        tmp = self._percent_interval(values, np.r_[50.0, percent, 100.0-percent], log, axis)
-
-        # lower = self._percent_interval(values, percent, log, axis)
-        # median = self._percent_interval(values, 50.0, log, axis)
-        # upper = self._percent_interval(values, 100.0 - percent, log, axis)
+        tmp = self._percent_interval(values, np.r_[50.0, percent, 100.0-percent], log, reciprocate, axis)
 
         return np.take(tmp, 0, 1-axis), np.take(tmp, 1, 1-axis), np.take(tmp, 2, 1-axis)
 
@@ -448,11 +443,35 @@ class RectilinearMesh2D(Mesh):
 
     @property
     def centres_bounds(self):
-        return np.r_[self.x.centres[0], self.x.centres[-1], self.y.centres[0], self.y.centres[-1]]
+        return np.r_[self.x.centres[0], self.x.centres[-1], self.z.centres[0], self.z.centres[-1]]
 
     @property
     def bounds(self):
-        return np.r_[self.x.bounds[0], self.x.bounds[1], self.y.bounds[0], self.y.bounds[1]]
+        return np.r_[self.x.bounds[0], self.x.bounds[1], self.z.bounds[0], self.z.bounds[1]]
+
+    def in_bounds(self, x, y):
+        """Return whether values are inside the cell edges
+
+        Parameters
+        ----------
+        values : array_like
+            Check if these are inside left <= values < right.
+
+        Returns
+        -------
+        out : bools
+            Are the values inside.
+
+        """
+        return self.x.in_bounds(x) & self.y.in_bounds(y)
+
+    def project_line_to_box(self, x, y):
+        x ,_ = cF._log(x, self.x.log)
+        y ,_ = cF._log(y, self.y.log)
+        x, y = geometry.liang_barsky(x[0], y[0], x[1], y[1], self.bounds)
+        x = cF._power(x, self.x.log)
+        y = cF._power(y, self.y.log)
+        return x, y
 
     def xGradientMatrix(self):
         tmp = self.x.gradientMatrix()
@@ -707,7 +726,6 @@ class RectilinearMesh2D(Mesh):
             out[0, :] = self.z.cellIndex(y, clip=clip)
         return np.squeeze(out)
 
-
     def ravelIndices(self, ixy, order='C'):
         """Return a global index into a 1D array given the two cell indices in x and z.
 
@@ -745,73 +763,73 @@ class RectilinearMesh2D(Mesh):
         return np.unravel_index(indices, self.shape, order=order)
 
 
-    def pcolor(self, values, xAxis='x', **kwargs):
-        """Create a pseudocolour plot.
+    # def pcolor(self, values, xAxis='x', **kwargs):
+    #     """Create a pseudocolour plot.
 
-        Can take any other matplotlib arguments and keyword arguments e.g. cmap etc.
+    #     Can take any other matplotlib arguments and keyword arguments e.g. cmap etc.
 
-        Parameters
-        ----------
-        values : array_like
-            2D array of colour values
-        xAxis : str
-            If xAxis is 'x', the horizontal axis uses self.x
-            If xAxis is 'y', the horizontal axis uses self.y
-            If xAxis is 'r', the horizontal axis uses cumulative distance along the line
+    #     Parameters
+    #     ----------
+    #     values : array_like
+    #         2D array of colour values
+    #     xAxis : str
+    #         If xAxis is 'x', the horizontal axis uses self.x
+    #         If xAxis is 'y', the horizontal axis uses self.y
+    #         If xAxis is 'r', the horizontal axis uses cumulative distance along the line
 
-        Other Parameters
-        ----------------
-        alpha : scalar or array_like, optional
-            If alpha is scalar, behaves like standard matplotlib alpha and opacity is applied to entire plot
-            If array_like, each pixel is given an individual alpha value.
-        log : 'e' or float, optional
-            Take the log of the colour to a base. 'e' if log = 'e', and a number e.g. log = 10.
-            Values in c that are <= 0 are masked.
-        equalize : bool, optional
-            Equalize the histogram of the colourmap so that all colours have an equal amount.
-        nbins : int, optional
-            Number of bins to use for histogram equalization.
-        xscale : str, optional
-            Scale the x axis? e.g. xscale = 'linear' or 'log'
-        yscale : str, optional
-            Scale the y axis? e.g. yscale = 'linear' or 'log'.
-        flipX : bool, optional
-            Flip the X axis
-        flipY : bool, optional
-            Flip the Y axis
-        grid : bool, optional
-            Plot the grid
-        noColorbar : bool, optional
-            Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.
-        trim : bool, optional
-            Set the x and y limits to the first and last non zero values along each axis.
-        x_mask : float, optional
-            Mask along the x axis using this distance.
-            Defaults to None.
-        z_mask : float, optional
-            Mask along the z axis using this distance.
-            Defaults to None.
+    #     Other Parameters
+    #     ----------------
+    #     alpha : scalar or array_like, optional
+    #         If alpha is scalar, behaves like standard matplotlib alpha and opacity is applied to entire plot
+    #         If array_like, each pixel is given an individual alpha value.
+    #     log : 'e' or float, optional
+    #         Take the log of the colour to a base. 'e' if log = 'e', and a number e.g. log = 10.
+    #         Values in c that are <= 0 are masked.
+    #     equalize : bool, optional
+    #         Equalize the histogram of the colourmap so that all colours have an equal amount.
+    #     nbins : int, optional
+    #         Number of bins to use for histogram equalization.
+    #     xscale : str, optional
+    #         Scale the x axis? e.g. xscale = 'linear' or 'log'
+    #     yscale : str, optional
+    #         Scale the y axis? e.g. yscale = 'linear' or 'log'.
+    #     flipX : bool, optional
+    #         Flip the X axis
+    #     flipY : bool, optional
+    #         Flip the Y axis
+    #     grid : bool, optional
+    #         Plot the grid
+    #     noColorbar : bool, optional
+    #         Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.
+    #     trim : bool, optional
+    #         Set the x and y limits to the first and last non zero values along each axis.
+    #     x_mask : float, optional
+    #         Mask along the x axis using this distance.
+    #         Defaults to None.
+    #     z_mask : float, optional
+    #         Mask along the z axis using this distance.
+    #         Defaults to None.
 
-        See Also
-        --------
-        geobipy.plotting.pcolor : For non matplotlib keywords.
-        matplotlib.pyplot.pcolormesh : For additional keyword arguments you may use.
+    #     See Also
+    #     --------
+    #     geobipy.plotting.pcolor : For non matplotlib keywords.
+    #     matplotlib.pyplot.pcolormesh : For additional keyword arguments you may use.
 
-        """
+    #     """
 
-        assert np.all(values.shape == self.shape), ValueError("values must have shape {}".format(self.shape))
+    #     assert np.all(values.shape == self.shape), ValueError("values must have shape {}".format(self.shape))
 
-        x_mask = kwargs.pop('x_mask', None)
-        z_mask = kwargs.pop('z_mask', None)
+    #     x_mask = kwargs.pop('x_mask', None)
+    #     z_mask = kwargs.pop('z_mask', None)
 
-        if np.sum([x is None for x in [x_mask, z_mask]]) < 2:
-            masked, x_indices, z_indices, values = self.mask_cells(xAxis, x_mask, z_mask, values)
-            ax, pm, cb = cP.pcolor(values, x = masked.axis('x').edges, y = masked.z.edges, **kwargs)
-        else:
-            ax, pm, cb = cP.pcolor(values, x = self.axis(xAxis).edges, y = self.z.edges, **kwargs)
+    #     if np.sum([x is None for x in [x_mask, z_mask]]) < 2:
+    #         masked, x_indices, z_indices, values = self.mask_cells(xAxis, x_mask, z_mask, values)
+    #         ax, pm, cb = cP.pcolor(values, x = masked.axis('x').edges, y = masked.z.edges, **kwargs)
+    #     else:
+    #         ax, pm, cb = cP.pcolor(values, x = self.axis(xAxis).edges, y = self.z.edges, **kwargs)
 
 
-        return ax, pm, cb
+    #     return ax, pm, cb
 
     def pcolor(self, values, xAxis='x', zAxis='absolute', **kwargs):
         """Create a pseudocolour plot of a 2D array using the mesh.
@@ -876,7 +894,19 @@ class RectilinearMesh2D(Mesh):
                 masked, x_indices, z_indices, values = self.mask_cells(xAxis, x_mask, z_mask, values)
                 ax, pm, cb = cP.pcolor(values, x = masked.axis('x').edges, y = masked.z.edges, **kwargs)
             else:
-                ax, pm, cb = cP.pcolor(values, x = self.axis(xAxis).edges, y = self.z.edges, **kwargs)
+                if not self.x.log is None:
+                    tmp = self.axis(xAxis)
+                    x = cF._power(tmp.edges, tmp.log)
+                    kwargs['xscale'] = 'log'
+                else:
+                    x = self.axis(xAxis).edges
+                if not self.y.log is None:
+                    y = cF._power(self.z.edges, self.z.log)
+                    kwargs['yscale'] = 'log'
+                else:
+                    y = self.z.edges
+
+                ax, pm, cb = cP.pcolor(values, x = x, y = y, **kwargs)
 
         else:
             masked = self

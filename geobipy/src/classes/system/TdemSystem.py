@@ -23,11 +23,13 @@ class TdemSystem(myObject):
 
     """
 
-    def __init__(self, offTimes=None, transmitterLoop = None, receiverLoop=None, loopOffset=None, waveform=None, offTimeFilters=None):
+    def __init__(self, offTimes=None, transmitterLoop = None, receiverLoop=None, loopOffset=None, waveform=None, offTimeFilters=None, components=['z']):
         """Instantiate"""
 
         if offTimes is None:
             return
+
+        self._components = components
 
         self.offTimes = StatArray.StatArray(offTimes, 'Time', 's')
         self.transmitterLoop = transmitterLoop
@@ -44,6 +46,14 @@ class TdemSystem(myObject):
             ft='dlf',           # Use DLF
             ftarg={'fftfilt': 'key_81_CosSin_2009'},
             verb=0)
+
+    @property
+    def components(self):
+        return self._components
+
+    @property
+    def n_components(self):
+        return np.size(self.components)
 
     @property
     def isGA(self):

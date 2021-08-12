@@ -40,6 +40,8 @@ class Inference2D(myObject):
     """ Class to define results from EMinv1D_MCMC for a line of data """
     def __init__(self, hdf5_file_path=None, system_file_path=None, hdfFile=None, mode='r+', world=None):
         """ Initialize the lineResults """
+
+        self._world = None
         if (hdf5_file_path is None): return
 
         assert not system_file_path is None, Exception("Please also specify the path to the system file")
@@ -54,12 +56,12 @@ class Inference2D(myObject):
         self.directory = split(hdf5_file_path)[0]
         self.line = np.float64(os.path.splitext(split(hdf5_file_path)[1])[0])
 
-        self._world = None
         self.hdfFile = None
         if (hdfFile is None): # Open the file
             self.open(mode, world)
         else:
             self.hdfFile = hdfFile
+        self._indices = None
 
     @property
     def world(self):
@@ -177,7 +179,6 @@ class Inference2D(myObject):
         if "FdemDataPoint" in dtype:
             bestData = FdemData().fromHdf(self.hdfFile[attr[0]])
         elif "TdemDataPoint" in dtype:
-            print(self.system_file_path)
             bestData = TdemData().fromHdf(self.hdfFile[attr[0]], system_file_path = self.system_file_path)
         return bestData
 
@@ -458,6 +459,15 @@ class Inference2D(myObject):
         zPosterior.bins.name = 'Relative ' + zPosterior.bins.name
 
         return zPosterior
+
+    @property
+    def indices(self):
+        return self._indices
+
+    @indices.setter
+    def indices(self, values):
+        assert isinstance(values, slice), TypeError("indices must be a slice")
+        self._indices = values
 
     @cached_property
     def fiducials(self):
@@ -2283,7 +2293,7 @@ class Inference2D(myObject):
         # Interpolate the mean and best model to the discretized hitmap
         hm = inference1d.currentModel.par.posterior
         inference1d.meanInterp[:] = hm.mean()
-        inference1d.bestInterp[:] = inference1d.bestModel.piecewise_constant_interpolate(inference1d.bestModel.par, hm, axis=1)
+        inference1d.bestInterp[:] = inference1d.bestModel.piecewise_constant_interpolate(inference1d.bestModel.par, hm, axis=0)
         # inference1d.opacityInterp[:] = inference1d.Hitmap.credibleRange(percent=95.0, log='e')
 
         slic = np.s_[i, :]

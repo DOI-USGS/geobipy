@@ -184,6 +184,38 @@ def clabel(cb, label, **kwargs):
     """
     cb.ax.set_ylabel(label, **kwargs)
 
+def generate_subplots(n, ax=None):
+    """Generates subplots depending on whats given
+
+    Parameters
+    ----------
+    n : int
+        number of subplots
+    ax : variable, optional
+        List of subplots.
+        gridspec.GridSpec or gridspec.Subplotspec
+        list of gridspec.Subplotspec
+        Defaults to None.
+
+    """
+    if ax is None:
+        if n > 1:
+            ax = [plt.subplot(1, n, p+1) for p in range(n)]
+    else:
+        if isinstance(ax, (gridspec.GridSpec, gridspec.SubplotSpec)):
+            gs = ax.subgridspec(1, n)
+            ax = [plt.subplot(gs[:, i]) for i in range(n)]
+        else:
+            assert len(ax) == n, ValueError("Need {} subplots to match the number of posteriors")
+            ax2 = []
+            for a in ax:
+                if isinstance(a, gridspec.SubplotSpec):
+                    ax2.append(plt.subplot(a))
+                else:
+                    ax2.append(a)
+            ax = ax2
+    return ax
+
 
 def title(label, **kwargs):
     """Create a title with default fontsizes
@@ -289,6 +321,7 @@ def hist(counts, bins, rotate=False, flipX=False, flipY=False, trim=True, normal
     kwargs['linewidth'] = kwargs.pop('linewidth', 0.5)
     kwargs['edgecolor'] = kwargs.pop('edgecolor', 'k')
     xscale = kwargs.pop('xscale', 'linear')
+    yscale = kwargs.pop('yscale', 'linear')
     reciprocateX = kwargs.pop('reciprocateX', False)
     logBins = kwargs.pop('logBins', False)
 
@@ -346,6 +379,7 @@ def hist(counts, bins, rotate=False, flipX=False, flipY=False, trim=True, normal
     if (i1 > i0):
         if (rotate):
             plt.ylim(bins[i0], bins[i1+1])
+            xscale, yscale = yscale, xscale
         else:
             plt.xlim(bins[i0], bins[i1+1])
 
@@ -356,6 +390,12 @@ def hist(counts, bins, rotate=False, flipX=False, flipY=False, trim=True, normal
         ax.invert_yaxis()
 
     plt.xscale(xscale)
+    plt.yscale(yscale)
+
+    if xscale == 'linear':
+        ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 2))
+    if yscale == 'linear':
+        ax.ticklabel_format(style='sci', axis='y', scilimits=(0, 2))
 
     return ax
 
@@ -464,6 +504,8 @@ def pcolor(values, x=None, y=None, **kwargs):
 
     recX = kwargs.pop('reciprocateX', False)
     recY = kwargs.pop('reciprocateY', False)
+    logX = kwargs.pop('logX', None)
+    logY = kwargs.pop('logY', None)
     transpose = kwargs.get('transpose', False)
 
     # Set the grid colour if specified
@@ -475,6 +517,8 @@ def pcolor(values, x=None, y=None, **kwargs):
     if ax is None:
         ax = plt.gca()
     else:
+        if isinstance(ax, list):
+            ax = ax[0]
         plt.sca(ax)
 
     pretty(ax)
@@ -503,8 +547,14 @@ def pcolor(values, x=None, y=None, **kwargs):
 
     if recX:
         mx = 1.0 / mx
+
     if recY:
         my = 1.0 / my
+
+    if not logX is None:
+        mx, _ = cF._log(mx, logX)
+    if not logY is None:
+        my, _ = cF._log(my, logY)
 
     X, Y = np.meshgrid(mx, my)
 
@@ -642,7 +692,7 @@ def _pcolormesh(X, Y, values, **kwargs):
         plt.sca(ax)
     pretty(ax)
 
-    kwargs['shading'] = kwargs.pop('shading', 'auto')
+    kwargs['shading'] = 'auto'
 
     xscale = kwargs.pop('xscale', 'linear')
     yscale = kwargs.pop('yscale', 'linear')
@@ -681,12 +731,13 @@ def _pcolormesh(X, Y, values, **kwargs):
 
     values = values.astype('float64')
 
-    if not trim is None:
+    rang = values.max() - values.min()
+    if not trim is None and rang > 0.0:
         assert isinstance(trim, (float, np.float)), TypeError("trim must be a float")
         bounds = cF.findFirstLastNotValue(values, trim)
         X = X[bounds[0, 0]:bounds[0, 1]+2, bounds[1, 0]:bounds[1, 1]+2]
         Y = Y[bounds[0, 0]:bounds[0, 1]+2, bounds[1, 0]:bounds[1, 1]+2]
-        values = values[bounds[0, 0]:bounds[0, 1]+2, bounds[1, 0]:bounds[1, 1]+2]
+        values = values[bounds[0, 0]:bounds[0, 1]+1, bounds[1, 0]:bounds[1, 1]+1]
 
     if (log):
         values, logLabel = cF._log(values, log)
@@ -1015,6 +1066,9 @@ def plot(x, y, **kwargs):
     if flipY:
         ax.invert_yaxis()
 
+    ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 2))
+    ax.ticklabel_format(style='sci', axis='y', scilimits=(0, 2))
+
     return ax
 
 
@@ -1288,14 +1342,18 @@ def step(x, y, **kwargs):
     ax = plt.gca()
     pretty(ax)
 
-
     flipX = kwargs.pop('flipX', False)
     flipY = kwargs.pop('flipY', False)
     noLabels = kwargs.pop('noLabels', False)
+    logx = kwargs.pop('logX', None)
+    logy = kwargs.pop('logY', None)
     xscale = kwargs.pop('xscale', 'linear')
     yscale = kwargs.pop('yscale', 'linear')
 
     kwargs['color'] = kwargs.pop('color', wellSeparated[3])
+
+    x, _ = cF._log(x, logx)
+    y, _ = cF._log(y, logy)
 
     stp = plt.step(x=x, y=y, **kwargs)
 

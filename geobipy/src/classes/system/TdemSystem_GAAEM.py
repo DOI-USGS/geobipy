@@ -24,15 +24,15 @@ try:
 
         """
 
-        def __init__(self, systemFilename):
+        def __init__(self, system_filename):
             """ Nothing needed """
 
             # Check that the file exists, rBodies class does not handle errors
-            assert fIO.fileExists(systemFilename),'Could not open file: ' + systemFilename
+            assert fIO.fileExists(system_filename),'Could not open file: ' + system_filename
 
-            TDAEMSystem.__init__(self, systemFilename)
-            self.fileName = systemFilename
-
+            TDAEMSystem.__init__(self, system_filename)
+            self.read_components(system_filename)
+            self.fileName = system_filename
 
         @property
         def isGA(self):
@@ -55,6 +55,23 @@ try:
             assert np.min(np.diff(self.windows.centre)) > 0.0, ValueError("Receiver window times must monotonically increase for system "+systemFilename)
 
             self.readCurrentWaveform(systemFilename)
+
+        def read_components(self, system_filename):
+            self._components = []
+            with open(system_filename, 'r') as f:
+                for i, line in enumerate(f):
+                    if 'XOutputScaling' in line:
+                        value = np.float64(line.strip().split()[-1])
+                        if value != 0.0:
+                            self._components.append('x')
+                    elif 'YOutputScaling' in line:
+                        value = np.float64(line.strip().split()[-1])
+                        if value != 0.0:
+                            self._components.append('y')
+                    elif 'ZOutputScaling' in line:
+                        value = np.float64(line.strip().split()[-1])
+                        if value != 0.0:
+                            self._components.append('z')
 
         def readCurrentWaveform(self, systemFname):
             get = False

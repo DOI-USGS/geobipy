@@ -11,6 +11,7 @@ from .baseDistribution import baseDistribution
 from .Mixture import Mixture
 import numpy as np
 from scipy.stats import binned_statistic
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import progressbar
@@ -43,8 +44,8 @@ class Histogram2D(RectilinearMesh2D):
 
     def __init__(self, xBins=None, xBinCentres=None, yBins=None, yBinCentres=None, **kwargs):
         """ Instantiate a 2D histogram """
-        if (xBins is None and xBinCentres is None):
-            return
+        # if (xBins is None and xBinCentres is None):
+        #     return
 
         # Instantiate the parent class
         super().__init__(xCentres=xBinCentres, xEdges=xBins,
@@ -147,7 +148,7 @@ class Histogram2D(RectilinearMesh2D):
         """
         return super()._percent_interval(self.counts, percent, log, axis)
 
-    def credibleIntervals(self, percent=90.0, log=None, axis=0):
+    def credibleIntervals(self, percent=90.0, log=None, reciprocate=False, axis=0):
         """Gets the median and the credible intervals for the specified axis.
 
         Parameters
@@ -169,7 +170,7 @@ class Histogram2D(RectilinearMesh2D):
             Contains the upper interval along the specified axis. Has size equal to arr.shape[axis].
 
         """
-        return super()._credibleIntervals(values=self.counts, percent=percent, log=log, axis=axis)
+        return super()._credibleIntervals(values=self.counts, percent=percent, log=log, reciprocate=reciprocate, axis=axis)
 
     def credibleRange(self, percent=90.0, log=None, axis=0):
         """ Get the range of credibility with depth
@@ -870,12 +871,19 @@ class Histogram2D(RectilinearMesh2D):
         """
         kwargs['trim'] = kwargs.pop('trim',  0.0)
         kwargs.pop('normalize', None)
-        ax = self.counts.pcolor(x=self.x.edges, y=self.y.edges, **kwargs)
+        kwargs['cmap'] = kwargs.pop('cmap', mpl.cm.Greys)
+        interval_kwargs = kwargs.pop('credible_interval_kwargs', None)
+
+        ax = super().pcolor(self.counts, **kwargs)
+
+        if not interval_kwargs is None:
+            self.plotCredibleIntervals(**interval_kwargs)
+
         return ax
 
-    def plotCredibleIntervals(self, percent=95.0, log=None, axis=0, **kwargs):
+    def plotCredibleIntervals(self, percent=95.0, log=None, reciprocate=False, axis=0, **kwargs):
 
-        med, low, high = self.credibleIntervals(percent, log, axis)
+        med, low, high = self.credibleIntervals(percent=percent, log=log, reciprocate=reciprocate, axis=axis)
 
         c = kwargs.pop('color', '#5046C8')
         ls = kwargs.pop('linestyle', 'dashed')
@@ -911,6 +919,10 @@ class Histogram2D(RectilinearMesh2D):
         else:
             cP.plot(self.x.centres, m, label='median', **kwargs)
 
+    def update_line(self, x, y, **kwargs):
+        ix, iy = super().line_indices(x, y, **kwargs)
+        self.counts[iy, ix] += 1
+
     def update(self, xValues, yValues=None, trim=False):
         """Update the histogram by counting the entry of values into the bins of the histogram.
 
@@ -928,10 +940,8 @@ class Histogram2D(RectilinearMesh2D):
         """
 
         if yValues is None:
-            assert xValues.ndim == 2, ValueError(
-                "If yValues is not given, xValues must be 2D.")
-            assert np.shape(xValues)[0] == 2, ValueError(
-                "xValues must have first dimension with size 2.")
+            assert xValues.ndim == 2, ValueError("If yValues is not given, xValues must be 2D.")
+            assert np.shape(xValues)[0] == 2, ValueError("xValues must have first dimension with size 2.")
 
             yValues = xValues[1, :]
             xValues = xValues[0, :]

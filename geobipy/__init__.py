@@ -39,6 +39,7 @@ from .src.classes.data.datapoint.TdemDataPoint import TdemDataPoint
 from .src.classes.data.dataset.Data import Data
 from .src.classes.data.dataset.FdemData import FdemData
 from .src.classes.data.dataset.TdemData import TdemData
+from .src.classes.data.dataset.TempestData import TempestData
 # Systems
 from .src.classes.system.FdemSystem import FdemSystem
 from .src.classes.system.TdemSystem import TdemSystem
@@ -171,14 +172,15 @@ def serial_dataset(userParameters, output_directory, seed=None, index=None):
 
     # Loop through data points in the file.
     if index is None:
-        for _ in range(Dataset.nPoints):
-            datapoint = Dataset._readSingleDatapoint()
+        for i in range(Dataset.nPoints):
+            datapoint = Dataset._read_record(i)
+
             options = userParameters.userParameters(datapoint)
 
             infer(options, datapoint, prng=prng, Inference2D=r3D.line(datapoint.lineNumber))
     else:
-        for _ in range(index+1):
-            datapoint = Dataset._readSingleDatapoint()
+        for i in range(index+1):
+            datapoint = Dataset._read_record(i)
 
         options = userParameters.userParameters(datapoint)
         options.output_directory = output_directory

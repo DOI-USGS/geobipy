@@ -23,31 +23,33 @@ class EmDataPoint(DataPoint):
 
     """
 
-    def __init__(self, nChannelsPerSystem=1, x=0.0, y=0.0, z=0.0, elevation=None, data=None, std=None, predictedData=None, channelNames=None, lineNumber=0.0, fiducial=0.0):
+    def __init__(self, channels_per_system=1, components_per_channel=None, x=0.0, y=0.0, z=0.0, elevation=None, data=None, std=None, predictedData=None, channelNames=None, lineNumber=0.0, fiducial=0.0):
 
-        super().__init__(nChannelsPerSystem, x, y, z, elevation, data, std, predictedData, channelNames=channelNames, lineNumber=lineNumber, fiducial=fiducial)
+        super().__init__(channels_per_system = channels_per_system,
+                         components_per_channel = components_per_channel,
+                         x = x, y = y, z = z,
+                         elevation = elevation,
+                         data = data, std = std, predictedData = predictedData,
+                         channelNames=channelNames, lineNumber=lineNumber, fiducial=fiducial)
 
         # Initialize the sensitivity matrix
         self.J = None
 
-
     @property
     def nSystems(self):
-        return np.size(self.nChannelsPerSystem)
-
+        return np.size(self.channels_per_system)
 
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
 
         # StatArray of calibration parameters
-        out.errorPosterior = self.errorPosterior
+        # out.errorPosterior = self.errorPosterior
         # Initialize the sensitivity matrix
         out.J = deepcopy(self.J, memo)
 
         return out
 
-
-    def FindBestHalfSpace(self, minConductivity=1e-4, maxConductivity=1e4, nSamples=100):
+    def find_best_halfspace(self, minConductivity=1e-4, maxConductivity=1e4, nSamples=100):
         """Computes the best value of a half space that fits the data.
 
         Carries out a brute force search of the halfspace conductivity that best fits the data.
@@ -71,14 +73,20 @@ class EmDataPoint(DataPoint):
         assert maxConductivity > minConductivity, ValueError("Maximum conductivity must be greater than the minimum")
         minConductivity = np.log10(minConductivity)
         maxConductivity = np.log10(maxConductivity)
+
         c = np.logspace(minConductivity, maxConductivity, nSamples)
+
         PhiD = np.zeros(nSamples)
+
+        e = StatArray.StatArray(np.asarray([0.0, np.inf]), 'Depth', 'm')
         p = StatArray.StatArray(1, 'Conductivity', r'$\frac{S}{m}$')
-        model = Model1D(1, edges=np.asarray([0.0, np.inf]), parameters=p)
+        model = Model1D(1, edges=e, parameters=p)
+
         for i in range(nSamples):
             model._par[0] = c[i]
             self.forward(model)
             PhiD[i] = self.dataMisfit(squared=True)
+
         i = np.argmin(PhiD)
         model._par[0] = c[i]
         return model
@@ -194,27 +202,26 @@ class EmDataPoint(DataPoint):
 
             self.calibrate()
 
-
     def perturbAdditiveError(self):
-        # Generate a new error
-        self.addErr.perturb(imposePrior=True, log=True)
-        # Update the mean of the proposed errors
-        self.addErr.proposal.mean = self.addErr
-
+        if self.addErr.hasProposal:
+            # Generate a new error
+            self.addErr.perturb(imposePrior=True, log=True)
+            # Update the mean of the proposed errors
+            self.addErr.proposal.mean = self.addErr
 
     def perturbHeight(self):
-        # Generate a new elevation
-        self.z.perturb(imposePrior=True, log=True)
-        # Update the mean of the proposed elevation
-        self.z.proposal.mean = self.z
-
+        if self.z.hasProposal:
+            # Generate a new elevation
+            self.z.perturb(imposePrior=True, log=True)
+            # Update the mean of the proposed elevation
+            self.z.proposal.mean = self.z
 
     def perturbRelativeError(self):
-        # Generate a new error
-        self.relErr.perturb(imposePrior=True, log=True)
-        # Update the mean of the proposed errors
-        self.relErr.proposal.mean = self.relErr
-
+        if self.relErr.hasProposal:
+            # Generate a new error
+            self.relErr.perturb(imposePrior=True, log=True)
+            # Update the mean of the proposed errors
+            self.relErr.proposal.mean = self.relErr
 
     def plotHalfSpaceResponses(self, minConductivity=-4.0, maxConductivity=2.0, nSamples=100, **kwargs):
         """Plots the reponses of different half space models.
@@ -237,10 +244,9 @@ class EmDataPoint(DataPoint):
             mod.par[0] = c[i]
             self.forward(mod)
             PhiD[i] = self.dataMisfit()
-        plt.loglog(c, PhiD/self.nActiveChannels, **kwargs)
+        plt.loglog(c, PhiD, **kwargs)
         cP.xlabel(c.getNameUnits())
         cP.ylabel('Data misfit')
-
 
     def setPriors(self, heightPrior=None, relativeErrorPrior=None, additiveErrorPrior=None):
         """Set the priors on the datapoint's perturbable parameters
@@ -269,7 +275,6 @@ class EmDataPoint(DataPoint):
         if not additiveErrorPrior is None:
             self.addErr.setPrior(additiveErrorPrior)
 
-
     def setProposals(self, heightProposal=None, relativeErrorProposal=None, additiveErrorProposal=None):
         """Set the proposals on the datapoint's perturbable parameters
 
@@ -288,15 +293,9 @@ class EmDataPoint(DataPoint):
 
         """
 
-        if not heightProposal is None:
-            self.z.setProposal(heightProposal)
-
-        if not relativeErrorProposal is None:
-            self.relErr.setProposal(relativeErrorProposal)
-
-        if not additiveErrorProposal is None:
-            self.addErr.setProposal(additiveErrorProposal)
-
+        self.z.setProposal(heightProposal)
+        self.relErr.setProposal(relativeErrorProposal)
+        self.addErr.setProposal(additiveErrorProposal)
 
     def setPosteriors(self, log=None):
         """ Set the posteriors based on the attached priors
@@ -309,11 +308,12 @@ class EmDataPoint(DataPoint):
         # Create a histogram to set the height posterior.
         self.setHeightPosterior()
         # # Initialize the histograms for the relative errors
-        # self.setRelativeErrorPosterior()
+        # self.set_predicted_data_posterior()
         # # Set the posterior for the data point.
         # self.setAdditiveErrorPosterior(log=log)
         self.setErrorPosterior(log=log)
 
+        # self.set_predicted_data_posterior()
 
     def setHeightPosterior(self):
         """
@@ -322,7 +322,6 @@ class EmDataPoint(DataPoint):
         if self.z.hasPrior:
             H = Histogram1D(bins = StatArray.StatArray(self.z.prior.bins(), name=self.z.name, units=self.z.units), relativeTo=self.z)
             self.z.setPosterior(H)
-
 
     def setErrorPosterior(self, log=None):
         """
@@ -333,41 +332,11 @@ class EmDataPoint(DataPoint):
 
         if self.relErr.hasPrior:
             rb = StatArray.StatArray(np.atleast_2d(self.relErr.prior.bins()), name=self.relErr.name, units=self.relErr.units)
-            if not self.addErr.hasPrior:
-                self.relErr.setPosterior([Histogram1D(bins = rb[i, :]) for i in range(self.nSystems)])
-                return
+            self.relErr.setPosterior([Histogram1D(bins = rb[i, :]) for i in range(self.nSystems)])
 
         if self.addErr.hasPrior:
             ab = StatArray.StatArray(np.atleast_2d(self.addErr.prior.bins()), name=self.addErr.name, units=self.data.units)
-            if not self.relErr.hasPrior:
-                self.addErr.setPosterior([Histogram1D(bins = ab[i, :], log=log) for i in range(self.nSystems)])
-                return
-
-        self.errorPosterior = [Histogram2D(xBins=ab[i, :], yBins=rb[i, :], xlog=log) for i in range(self.nSystems)]
-
-        # self.relErr.setPosterior([self.errorPosterior[i].marginalize(axis=1) for i in range(self.nSystems)])
-        # self.addErr.setPosterior([self.errorPosterior[i].marginalize(axis=0) for i in range(self.nSystems)])
-
-
-    # def setAdditiveErrorPosterior(self, log=None):
-
-    #     assert self.addErr.hasPrior, Exception("Must set a prior on the additive error")
-
-    #     aBins = self.addErr.prior.bins()
-    #     binsMidpoint = 0.5 * aBins.max(axis=-1) + aBins.min(axis=-1)
-    #     ab = np.atleast_2d(aBins)
-    #     binsMidpoint = np.atleast_1d(binsMidpoint)
-
-    #     self.addErr.setPosterior([Histogram1D(bins = StatArray.StatArray(ab[i, :], name=self.addErr.name, units=self.data.units), log=log, relativeTo=binsMidpoint[i]) for i in range(self.nSystems)])
-
-
-    # def setRelativeErrorPosterior(self):
-
-    #     rBins = self.relErr.prior.bins()
-    #     if self.nSystems > 1:
-    #         self.relErr.setPosterior([Histogram1D(bins = StatArray.StatArray(rBins[i, :], name='$\epsilon_{Relative}x10^{2}$', units='%')) for i in range(self.nSystems)])
-    #     else:
-    #         self.relErr.setPosterior(Histogram1D(bins = StatArray.StatArray(rBins, name='$\epsilon_{Relative}x10^{2}$', units='%')))
+            self.addErr.setPosterior([Histogram1D(bins = ab[i, :], log=log) for i in range(self.nSystems)])
 
     @property
     def summary(self):
@@ -388,15 +357,8 @@ class EmDataPoint(DataPoint):
         if self.z.hasPosterior:
             self.z.updatePosterior()
 
-        if not self.errorPosterior is None:
-            for i in range(self.nSystems):
-                self.errorPosterior[i].update(xValues=self.addErr[i], yValues=self.relErr[i])
-        else:
-            if self.relErr.hasPosterior:
-                self.relErr.updatePosterior()
+        if self.relErr.hasPosterior:
+            self.relErr.updatePosterior()
 
-            if self.addErr.hasPosterior:
-                self.addErr.updatePosterior()
-
-
-
+        if self.addErr.hasPosterior:
+            self.addErr.updatePosterior()

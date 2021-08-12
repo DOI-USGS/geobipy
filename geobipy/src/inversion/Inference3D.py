@@ -182,22 +182,25 @@ class Inference3D(myObject):
         # dataset.readSystemFile(userParameters.systemFilename)
 
         # Prepare the dataset so that we can read a point at a time.
-        dataset._initLineByLineRead(userParameters.dataFilename, userParameters.systemFilename)
+        dataset._initialize_sequential_reading(userParameters.dataFilename, userParameters.systemFilename)
         # Get a datapoint from the file.
-        DataPoint = dataset._readSingleDatapoint()
-        dataset._closeDatafiles()
+        DataPoint = dataset._read_record(record=0)
+
+        line_numbers, fiducials = dataset._read_line_fiducial(userParameters.dataFilename, userParameters.systemFilename)
+
+        dataset._close_data_files()
 
         # Initialize the user parameters
         options = userParameters.userParameters(DataPoint)
 
         # While preparing the file, we need access to the line numbers and fiducials in the data file
-        tmp = fileIO.read_columns(options.dataFilename[0], dataset._indicesForFile[0][:2], 1, dataset.nPoints)
 
-        dataset._openDatafiles(options.dataFilename)
+        # tmp = fileIO.read_columns(options.dataFilename[0], dataset._indicesForFile[0][:2], 1, dataset.nPoints)
+
+        dataset._open_data_files(options.dataFilename)
 
         # Get the line numbers in the data
-        self._lineNumbers = np.sort(np.unique(tmp[:, 0]))
-        fiducials = tmp[:, 1]
+        self._lineNumbers = np.sort(np.unique(line_numbers))
 
         # Initialize the inversion to obtain the sizes of everything
         options, Mod, DataPoint, _, _, _, _ = initialize(options, DataPoint)
@@ -214,7 +217,7 @@ class Inference3D(myObject):
         # No need to create and close the files like in parallel, so create and keep them open
         self._lines = []
         for line in self.lineNumbers:
-            fiducialsForLine = np.where(tmp[:, 0] == line)[0]
+            fiducialsForLine = np.where(line_numbers == line)[0]
             H5File = h5py.File(join(self.directory, '{}.h5'.format(line)), 'w')
             lr = Inference2D()
             lr.createHdf(H5File, fiducials[fiducialsForLine], Res)
@@ -229,7 +232,6 @@ class Inference3D(myObject):
     def h5files(self):
         """ Get the list of line result files for the dataset """
         return self._h5files
-
 
     def line(self, line_number):
         """Get the inversion results for the given line.
@@ -323,20 +325,26 @@ class Inference3D(myObject):
 
         return h5files
 
+    def additiveError(self, slic=None):
+        op = np.vstack if self.nSystems > 1 else np.hstack
+        out = StatArray.StatArray(op([line.additiveError for line in self.lines]), name=self.lines[0].additiveError.name, units=self.lines[0].additiveError.units)
+        for line in self.lines:
+            line.uncache('additiveError')
+        return out
 
-    @cached_property
-    def additiveError(self):
+    # @cached_property
+    # def additiveError(self):
 
-        additiveError = StatArray.StatArray((self.nSystems, self.nPoints), name=self.lines[0].additiveError.name, units=self.lines[0].additiveError.units, order = 'F')
+    #     additiveError = StatArray.StatArray((self.nSystems, self.nPoints), name=self.lines[0].additiveError.name, units=self.lines[0].additiveError.units, order = 'F')
 
-        print("Reading Additive Errors Posteriors", flush=True)
-        bar = self.loop_over(self.nLines)
+    #     print("Reading Additive Errors Posteriors", flush=True)
+    #     bar = self.loop_over(self.nLines)
 
-        for i in bar:
-            additiveError[:, self.lineIndices[i]] = self.lines[i].additiveError.T
-            self.lines[i].uncache('additiveError')
+    #     for i in bar:
+    #         additiveError[:, self.lineIndices[i]] = self.lines[i].additiveError.T
+    #         self.lines[i].uncache('additiveError')
 
-        return additiveError
+    #     return additiveError
 
 
     @cached_property
@@ -355,20 +363,8 @@ class Inference3D(myObject):
 
         return bestData
 
-
-    @cached_property
-    def bestParameters(self):
-
-        bestParameters = StatArray.StatArray((self.zGrid.nCells.value, self.nPoints), name=self.lines[0].bestParameters.name, units=self.lines[0].bestParameters.units, order = 'F')
-
-        print('Reading best parameters', flush=True)
-        bar = self.loop_over(self.nLines)
-
-        for i in bar:
-            bestParameters[:, self.lineIndices[i]] = self.lines[i].bestParameters
-            self.lines[i].uncache('bestParameters')
-
-        return bestParameters
+    def bestParameters(self, slic=None):
+        return StatArray.StatArray(np.vstack([line.bestParameters(slic) for line in self.lines]), name=self.lines[0].parameterName, units=self.lines[0].parameterUnits)
 
     def load_marginal_probability(self, filename):
 
@@ -683,7 +679,7 @@ class Inference3D(myObject):
         return interfaces
 
 
-    @cached_property
+    @property
     def lineIndices(self):
 
         lineIndices = []
@@ -696,18 +692,8 @@ class Inference3D(myObject):
         return lineIndices
 
 
-    @cached_property
-    def meanParameters(self):
-
-        meanParameters = StatArray.StatArray((self.nPoints, self.zGrid.nCells.value), name=self.lines[0].parameterName, units=self.lines[0].parameterUnits, order = 'F')
-
-        print("Reading Mean Parameters", flush=True)
-        Bar = progressbar.ProgressBar()
-        for i in Bar(range(self.nLines)):
-            meanParameters[self.lineIndices[i], :] = self.lines[i].meanParameters()
-            # self.lines[i].uncache('meanParameters')
-
-        return meanParameters
+    def meanParameters(self, slic=None):
+        return StatArray.StatArray(np.vstack([line.meanParameters(slic) for line in self.lines]), name=self.lines[0].parameterName, units=self.lines[0].parameterUnits)
 
     def mesh2d(self, dx, dy, **kwargs):
         return self.pointcloud.centred_mesh(dx, dy, **kwargs)
@@ -853,18 +839,12 @@ class Inference3D(myObject):
         return mean_3D
 
 
-    @cached_property
     def relativeError(self):
-
-        relativeError = StatArray.StatArray((self.nSystems, self.nPoints), name=self.lines[0].relativeError.name, units=self.lines[0].relativeError.units, order = 'F')
-
-        print('Reading Relative Error Posteriors', flush=True)
-        Bar = progressbar.ProgressBar()
-        for i in Bar(range(self.nLines)):
-            relativeError[:, self.lineIndices[i]] = self.lines[i].relativeError.T
-            self.lines[i].uncache('relativeError')
-
-        return relativeError
+        op = np.vstack if self.nSystems > 1 else np.hstack
+        out = StatArray.StatArray(op([line.relativeError for line in self.lines]), name=self.lines[0].relativeError.name, units=self.lines[0].relativeError.units)
+        for line in self.lines:
+            line.uncache('relativeError')
+        return out
 
     @property
     def x(self):

@@ -13,6 +13,7 @@ from ..statistics import Histogram1D
 from scipy.sparse import diags
 from scipy import interpolate
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 
 
 class RectilinearMesh1D(Mesh):
@@ -190,7 +191,7 @@ class RectilinearMesh1D(Mesh):
     @property
     def displayLimits(self):
         dx = 0.02 * self.range
-        return (self._edges[0] - dx, self._edges[-1] + dx)
+        return (self.plotting_edges[0] - dx, self.plotting_edges[-1] + dx)
 
     @property
     def edges(self):
@@ -199,6 +200,7 @@ class RectilinearMesh1D(Mesh):
     @property
     def edges_absolute(self):
         return self.edges + self.relativeTo.value
+        # return cF._power(edges, self.log)
 
     @edges.setter
     def edges(self, values):
@@ -370,16 +372,15 @@ class RectilinearMesh1D(Mesh):
         """
 
         values, dum = cF._log(np.atleast_1d(values).flatten(), self.log)
-
         values = values - self.relativeTo
 
         # Get the bin indices for all values
-        iBin = np.atleast_1d(self._edges.searchsorted(values, side='right') - 1)
+        iBin = np.atleast_1d(self.edges.searchsorted(values, side='right') - 1)
 
         # Remove indices that are out of bounds
         if trim:
-            iBin = iBin[(values >= self._edges[0]) &
-                        (values < self._edges[-1])]
+            iBin = iBin[(values >= self.edges[0]) &
+                        (values < self.edges[-1])]
         else:
             # Force out of bounds to be in bounds if we are clipping
             if clip:
@@ -387,8 +388,8 @@ class RectilinearMesh1D(Mesh):
                 iBin = np.minimum(iBin, self.nCells.value - 1)
             # Make sure values outside the lower edge are -1
             else:
-                iBin[values < self._edges[0]] = -1
-                iBin[values >= self._edges[-1]] = self.nCells
+                iBin[values < self.edges[0]] = -1
+                iBin[values >= self.edges[-1]] = self.nCells
 
         return np.squeeze(iBin)
 
@@ -425,7 +426,7 @@ class RectilinearMesh1D(Mesh):
         tmp = 1.0/np.sqrt(self.centreTocentre)
         return diags([tmp, -tmp], [0, 1], shape=(self.nCells.value-1, self.nCells.value))
 
-    def inBounds(self, values):
+    def in_bounds(self, values):
         """Return whether values are inside the cell edges
 
         Parameters
@@ -439,6 +440,7 @@ class RectilinearMesh1D(Mesh):
             Are the values inside.
 
         """
+        values, _ = cF._log(values, self.log)
         return (values >= self._edges[0]) & (values < self._edges[-1])
 
     def insert_edge(self, value, **kwargs):
@@ -465,6 +467,14 @@ class RectilinearMesh1D(Mesh):
         out.edges = self.edges.insert(i, value)
         out._action = ['insert', np.int32(i), value]
         return out
+
+    def is_left(self, value):
+        value, _ = cF._log(value, self.log)
+        return value < self.edges[0]
+
+    def is_right(self, value):
+        value, _ = cF._log(value, self.log)
+        return value > self.edges[-1]
 
     def mask_cells(self, distance, values=None):
         """Mask cells by a distance.
@@ -734,7 +744,7 @@ class RectilinearMesh1D(Mesh):
         assert False, Exception("Should not be here, file a bug report....")
 
     def piecewise_constant_interpolate(self, values, other, bound=False, axis=0):
-        """Interpolate values of the cells to another RectilinearMesh1D in a piecewise constant manner.
+        """Interpolate values of the cells to another RectilinearMesh in a piecewise constant manner.
 
         Parameters
         ----------
@@ -743,10 +753,10 @@ class RectilinearMesh1D(Mesh):
         mesh : geobipy.RectilinearMeshND for N = 1, 2, 3.
             A mesh to interpolate to.
             If 2D, axis must be given to specify which axis to interpolate against.
-        matchTop : bool, optional
-            Force the mesh y axis and top of the model to match.
         bound : bool, optional
             Interpolated values above the top of the model are nan.
+        axis : int, optional
+            Axis to interpolate the value to.
 
         Returns
         -------
@@ -841,6 +851,23 @@ class RectilinearMesh1D(Mesh):
         #         plt.text(0, 0.99*h, s=r'$\{}arrow \infty$'.format(s))
         #     else:
         #         plt.text(0.99*h, 0, s=r'$\{}arrow \infty$'.format(s))
+
+    @property
+    def n_posteriors(self):
+        return np.sum([x.hasPosterior for x in [self.nCells, self.edges]])
+
+    def plot_posteriors(self, axes=None, ncells_kwargs={}, edges_kwargs={}, **kwargs):
+        assert len(axes) == 2, ValueError("Must have length 2 list of axes for the posteriors. self.init_posterior_plots can generate them")
+        best = kwargs.get('best', None)
+        if not best is None:
+            ncells_kwargs['line'] = best.nCells
+            edges_kwargs['line'] = best.edges[1:]
+        self.nCells.plotPosteriors(ax = axes[0], **ncells_kwargs)
+        self.edges.plotPosteriors(ax = axes[1] ,**edges_kwargs)
+
+        # ax = self.currentModel.nCells.posterior.plot(**kwargs)
+        # plt.axvline(self.bestModel.nCells, color=cP.wellSeparated[3], linewidth=1)
+        # ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 
     def priorProbability(self, log=True, verbose=False):
         """Evaluate the prior probability for the mesh.

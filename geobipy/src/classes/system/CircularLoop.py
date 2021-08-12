@@ -143,7 +143,7 @@ class CircularLoop(EmLoop):
     #     """Create a reproducibility string that can be instantiated from a hdf file """
     #     return 'CircularLoop()'
 
-    def createHdf(self, parent, name, nRepeats=None, fillvalue=None):
+    def createHdf(self, parent, name, nRepeats=None, fillvalue=None, withPosterior=False):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
@@ -154,7 +154,7 @@ class CircularLoop(EmLoop):
         data = StatArray.StatArray(9).createHdf(grp, 'data', nRepeats=nRepeats, fillvalue=fillvalue)
 
 
-    def writeHdf(self, parent, name, index=None):
+    def writeHdf(self, parent, name, withPosterior=False, index=None):
         """ Write the StatArray to an HDF object
         parent: Upper hdf file or group
         myName: object hdf name. Assumes createHdf has already been called

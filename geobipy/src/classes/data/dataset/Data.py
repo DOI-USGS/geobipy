@@ -60,11 +60,11 @@ class Data(PointCloud3D):
 
     """
 
-    def __init__(self, nChannelsPerSystem=1, x=None, y=None, z=None, elevation=None, data=None, std=None, predictedData=None, fiducial=None, lineNumber=None, units=None, channelNames=None, **kwargs):
+    def __init__(self, channels_per_system=1, x=None, y=None, z=None, elevation=None, data=None, std=None, predictedData=None, fiducial=None, lineNumber=None, units=None, channelNames=None, **kwargs):
         """ Initialize the Data class """
 
         # Number of Channels
-        self._nChannelsPerSystem = nChannelsPerSystem
+        self._channels_per_system = channels_per_system
 
         super().__init__(x, y, z, elevation)
 
@@ -78,6 +78,35 @@ class Data(PointCloud3D):
 
         self.error_posterior = None
 
+    def _reconcile_channels(self, channels):
+
+        channels = super()._reconcile_channels(channels)
+        for i, channel in enumerate(channels):
+            channel = channel.lower()
+            if(channel in ['line']):
+                channels[i] = 'line'
+            elif(channel in ['id', 'fid', 'fiducial']):
+                channels[i] = 'fiducial'
+
+        return channels
+
+    @property
+    def active(self):
+        """Logical array whether the channel is active or not.
+
+        An inactive channel is one where channel values are NaN for all points.
+
+        Returns
+        -------
+        out : bools
+            Indices of non-NaN columns.
+
+        """
+        return ~np.isnan(self.data)
+
+    @property
+    def active_channel(self):
+        return np.any(self.active, axis=0)
 
     @property
     def additive_error(self):
@@ -85,7 +114,6 @@ class Data(PointCloud3D):
         if np.size(self._additive_error, 0) == 0:
             self._additive_error = StatArray.StatArray((self.nPoints, self.nSystems), "Additive error", "%")
         return self._additive_error
-
 
     @additive_error.setter
     def additive_error(self, values):
@@ -99,55 +127,26 @@ class Data(PointCloud3D):
             assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("additive_error must have shape {}".format(shp))
             self._additive_error = StatArray.StatArray(values)
 
-
     @property
-    def nChannelsPerSystem(self):
-        return self._nChannelsPerSystem
+    def channelNames(self):
+        return self._channelNames
 
-    @nChannelsPerSystem.setter
-    def nChannelsPerSystem(self, values):
-        self._nChannelsPerSystem = np.asarray(values, dtype=np.int32)
-
-    @property
-    def systemOffset(self):
-        return np.r_[0, np.cumsum(self.nChannelsPerSystem)]
-
-    @property
-    def nSystems(self):
-        return np.size(self.nChannelsPerSystem)
-
-    @property
-    def units(self):
-        return self._units
-
-    @units.setter
-    def units(self, values):
+    @channelNames.setter
+    def channelNames(self, values):
         if values is None:
-            self._units = None
+            self._channelNames = ['Channel {}'.format(i) for i in range(self.nChannels)]
         else:
-            assert isinstance(values, str)
-            self._units = values
+            assert all((isinstance(x, str) for x in values))
+            assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
+            self._channelNames = values
 
+    @property
+    def channels_per_system(self):
+        return self._channels_per_system
 
-    def _systemIndices(self, system=0):
-        """The slice indices for the requested system.
-
-        Parameters
-        ----------
-        system : int
-            Requested system index.
-
-        Returns
-        -------
-        out : numpy.slice
-            The slice pertaining to the requested system.
-
-        """
-
-        assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-
-        return np.s_[self.systemOffset[system]:self.systemOffset[system+1]]
-
+    @channels_per_system.setter
+    def channels_per_system(self, values):
+        self._channels_per_system = np.asarray(values, dtype=np.int32)
 
     @property
     def data(self):
@@ -169,49 +168,6 @@ class Data(PointCloud3D):
             assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("data must have shape {}".format(shp))
             self._data = StatArray.StatArray(values)
 
-
-    @property
-    def predictedData(self):
-        """The predicted data. """
-        if np.size(self._predictedData, 0) == 0:
-            self._predictedData = StatArray.StatArray((self.nPoints, self.nChannels), "Predicted Data", self.units)
-        return self._predictedData
-
-
-    @predictedData.setter
-    def predictedData(self, values):
-        shp = (self.nPoints, self.nChannels)
-        if values is None:
-            self._predictedData = StatArray.StatArray(shp, "Predicted Data", self.units)
-        else:
-            if self.nPoints == 0:
-                self.nPoints = np.size(values, 0)
-                shp = (self.nPoints, self.nChannels)
-            assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("predictedData must have shape {}".format(shp))
-            self._predictedData = StatArray.StatArray(values)
-
-
-    @property
-    def std(self):
-        """The data. """
-        if np.size(self._std, 0) == 0:
-            self._std = StatArray.StatArray((self.nPoints, self.nChannels), "Standard deviation", self.units)
-        return self._std
-
-
-    @std.setter
-    def std(self, values):
-        shp = (self.nPoints, self.nChannels)
-        if values is None:
-            self._std = StatArray.StatArray(np.ones(shp), "Standard deviation", self.units)
-        else:
-            if self.nPoints == 0:
-                self.nPoints = np.size(values, 0)
-                shp = (self.nPoints, self.nChannels)
-            assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("std must have shape {}".format(shp))
-            self._std = StatArray.StatArray(values)
-
-
     @property
     def deltaD(self):
         """Get the difference between the predicted and observed data,
@@ -227,11 +183,9 @@ class Data(PointCloud3D):
         """
         return self.predictedData - self.data
 
-
     @property
     def fiducial(self):
         return self._fiducial
-
 
     @fiducial.setter
     def fiducial(self, values):
@@ -246,11 +200,9 @@ class Data(PointCloud3D):
             else:
                 self._fiducial = StatArray.StatArray(values, "Fiducial")
 
-
     @property
     def lineNumber(self):
         return self._lineNumber
-
 
     @lineNumber.setter
     def lineNumber(self, values):
@@ -265,37 +217,40 @@ class Data(PointCloud3D):
             else:
                 self._lineNumber = StatArray.StatArray(values, "Line number")
 
-
     @property
     def nActiveChannels(self):
         return np.sum(self.active, axis=1)
 
     @property
     def nChannels(self):
-        return np.sum(self.nChannelsPerSystem)
+        return np.sum(self.channels_per_system)
 
     @property
     def nLines(self):
         return np.unique(self.lineNumber).size
 
     @property
-    def channelNames(self):
-        return self._channelNames
-
-
-    @channelNames.setter
-    def channelNames(self, values):
-        if values is None:
-            self._channelNames = ['Channel {}'.format(i) for i in range(self.nChannels)]
-        else:
-            assert all((isinstance(x, str) for x in values))
-            assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
-            self._channelNames = values
+    def nSystems(self):
+        return np.size(self.channels_per_system)
 
     @property
-    def shape(self):
-        return (self.nPoints, self.nChannels)
+    def predictedData(self):
+        """The predicted data. """
+        if np.size(self._predictedData, 0) == 0:
+            self._predictedData = StatArray.StatArray((self.nPoints, self.nChannels), "Predicted Data", self.units)
+        return self._predictedData
 
+    @predictedData.setter
+    def predictedData(self, values):
+        shp = (self.nPoints, self.nChannels)
+        if values is None:
+            self._predictedData = StatArray.StatArray(shp, "Predicted Data", self.units)
+        else:
+            if self.nPoints == 0:
+                self.nPoints = np.size(values, 0)
+                shp = (self.nPoints, self.nChannels)
+            assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("predictedData must have shape {}".format(shp))
+            self._predictedData = StatArray.StatArray(values)
 
     @property
     def relative_error(self):
@@ -303,7 +258,6 @@ class Data(PointCloud3D):
         if np.size(self._relative_error, 0) == 0:
             self._relative_error = StatArray.StatArray((self.nPoints, self.nSystems), "Relative error", "%")
         return self._relative_error
-
 
     @relative_error.setter
     def relative_error(self, values):
@@ -316,6 +270,55 @@ class Data(PointCloud3D):
                 shp = (self.nPoints, self.nSystems)
             assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("relative_error must have shape {}".format(shp))
             self._relative_error = StatArray.StatArray(values)
+
+    @property
+    def std(self):
+        """The data. """
+        if np.size(self._std, 0) == 0:
+            self._std = StatArray.StatArray((self.nPoints, self.nChannels), "Standard deviation", self.units)
+        return self._std
+
+    @std.setter
+    def std(self, values):
+        shp = (self.nPoints, self.nChannels)
+        if values is None:
+            self._std = StatArray.StatArray(np.ones(shp), "Standard deviation", self.units)
+        else:
+            if self.nPoints == 0:
+                self.nPoints = np.size(values, 0)
+                shp = (self.nPoints, self.nChannels)
+            assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("std must have shape {}".format(shp))
+            self._std = StatArray.StatArray(values)
+
+    @property
+    def summary(self):
+        """ Display a summary of the Data """
+        msg = ("{}"
+              "Data:          : \n"
+              "# of Channels: {} \n"
+              "# of Total Data: {} \n"
+              "{}\n {}\n {}\n").format(super().summary, self.nChannels, self.nPoints * self.nChannels, self.data.summary, self.std.summary, self.predictedData.summary)
+        return msg
+
+    @property
+    def systemOffset(self):
+        return np.r_[0, np.cumsum(self.channels_per_system)]
+
+    @property
+    def units(self):
+        return self._units
+
+    @units.setter
+    def units(self, values):
+        if values is None:
+            self._units = None
+        else:
+            assert isinstance(values, str)
+            self._units = values
+
+    @property
+    def shape(self):
+        return (self.nPoints, self.nChannels)
 
 
     def addToVTK(self, vtk, prop=['data', 'predicted', 'std'], system=None):
@@ -354,6 +357,73 @@ class Data(PointCloud3D):
             for i in r:
                 vtk.point_data.append(Scalars(tmp[:, i], "{} {}".format(self.channelNames[i], tmp.getNameUnits())))
 
+    def _csv_column_indices(self, filename):
+        """Get the column indices from a csv file.
+
+        Parameters
+        ----------
+        fileName : str
+            Path to the data file.
+
+        Returns
+        -------
+        nPoints : int
+            Number of measurements.
+        columnIndex : ints
+            The column indices for line, id, x, y, z, elevation, data, uncertainties.
+
+        """
+
+        indices = []
+
+        # Get the column headers of the data file
+        channels = fIO.getHeaderNames(filename)
+        nChannels = len(channels)
+
+        line_names = ('line', 'linenumber')
+        fiducial_names = ('fid', 'fiducial', 'id')
+
+        # Check for each aspect of the data file and the number of columns
+        nCoordinates = 0
+        indices = []
+        for channel in channels:
+            channel = channel.lower()
+            if (channel in line_names):
+                nCoordinates += 1
+            elif (channel in fiducial_names):
+                nCoordinates += 1
+
+        assert nCoordinates == 2, Exception("File must contain columns for line and fiducial. May also have an elevation column \n {}".format(self.fileInformation()))
+
+        # Initialize a column identifier for x y z
+        index = np.zeros(nCoordinates, dtype=np.int32)
+        for j, channel in enumerate(channels):
+            channel = channel.lower()
+            if (channel in line_names):
+                index[0] = j
+            elif (channel in fiducial_names):
+                index[1] = j
+
+        return super()._csv_column_indices(filename), index
+
+    def _systemIndices(self, system=0):
+        """The slice indices for the requested system.
+
+        Parameters
+        ----------
+        system : int
+            Requested system index.
+
+        Returns
+        -------
+        out : numpy.slice
+            The slice pertaining to the requested system.
+
+        """
+
+        assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+
+        return np.s_[self.systemOffset[system]:self.systemOffset[system+1]]
 
     def append(self, other):
         super().append(other)
@@ -362,7 +432,6 @@ class Data(PointCloud3D):
         self.data = np.vstack([self.data, other.data])
         self.predictedData = np.vstack([self.predictedData, other.predictedData])
         self.std = np.vstack([self.std, other.std])
-
 
     def dataMisfit(self, squared=False):
         """Compute the :math:`L_{2}` norm squared misfit between the observed and predicted data
@@ -387,32 +456,15 @@ class Data(PointCloud3D):
         dataMisfit = StatArray.StatArray(np.sum(x, axis=1), "Data misfit")
         return dataMisfit if squared else np.sqrt(dataMisfit)
 
-
     def __getitem__(self, i):
         """ Define item getter for Data """
         i = np.unique(i)
-        out = Data(nChannelsPerSystem=self.nChannelsPerSystem, x=self.x[i], y=self.y[i], z=self.z[i], elevation=self.elevation[i], data=self.data[i, :], std=self.std[i, :], predictedData=self.predictedData[i, :], channelNames=self.channelNames)
+        out = Data(nChannelsPerSystem=self.nChannelsPerSystem,
+                   x=self.x[i], y=self.y[i], z=self.z[i], elevation=self.elevation[i],
+                   data=self.data[i, :], std=self.std[i, :],
+                   predictedData=self.predictedData[i, :],
+                   channelNames=self.channelNames)
         return out
-
-
-    @property
-    def active(self):
-        """Logical array whether the channel is active or not.
-
-        An inactive channel is one where channel values are NaN for all points.
-
-        Returns
-        -------
-        out : bools
-            Indices of non-NaN columns.
-
-        """
-        return ~np.isnan(self.data)
-
-    @property
-    def active_channel(self):
-        return np.any(self.active, axis=0)
-
 
     def dataChannel(self, channel, system=None):
         """Gets the data in the specified channel
@@ -783,17 +835,6 @@ class Data(PointCloud3D):
     #             self.y[j] = values[1]
     #             self.z[j] = values[2]
     #             self._data[j, ] = values[3:]
-
-    @property
-    def summary(self):
-        """ Display a summary of the Data """
-        msg = ("{}"
-              "Data:          : \n"
-              "# of Channels: {} \n"
-              "# of Total Data: {} \n"
-              "{}\n {}\n {}\n").format(super().summary, self.nChannels, self.nPoints * self.nChannels, self.data.summary, self.std.summary, self.predictedData.summary)
-        return msg
-
 
     def updateErrors(self, relativeErr, additiveErr, system=None):
         """Updates the data errors

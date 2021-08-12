@@ -98,8 +98,18 @@ try:
         for i in range(datapoint.nSystems):
             iSys = datapoint._systemIndices(i)
             fm = datapoint.system[i].forwardmodel(G, E)
-            datapoint._predictedData[iSys] = -fm.SZ[:]  # Store the necessary component
-
+            comps = []
+            if 'x' in datapoint.components_per_channel:
+                comps.append(fm.SX)
+                # datapoint._predicted_x_primary_field = fm.PX
+            if 'y' in datapoint.components_per_channel:
+                comps.append(fm.SY)
+                # datapoint._predicted_y_primary_field = fm.PY
+            if 'z' in datapoint.components_per_channel:
+                comps.append(-fm.SZ)
+                # datapoint._predicted_z_primary_field = fm.PZ
+            p = np.hstack(comps)
+            datapoint._predicted_secondary_field[iSys] = p  # Store the necessary component
 
     def gaTdem1dsen(datapoint, model1d, ix=None, modelChanged=True):
         """ Compute the sensitivty matrix for a 1D layered earth model, optionally compute the responses for only the layers in ix """
@@ -119,17 +129,25 @@ try:
 
         if (ix is None):  # Generate a full matrix if the layers are not specified
             ix = range(nCells)
-            J = np.zeros((datapoint.nWindows, nCells))
+            J = np.zeros((datapoint.nChannels, nCells))
         else:  # Partial matrix for specified layers
-            J = np.zeros((datapoint.nWindows, np.size(ix)))
+            J = np.zeros((datapoint.nChannels, np.size(ix)))
 
         for j in range(datapoint.nSystems):  # For each system
             iSys = datapoint._systemIndices(j)
             for i in range(np.size(ix)):  # For the specified layers
                 tmp = datapoint.system[j].derivative(
-                    datapoint.system[j].CONDUCTIVITYDERIVATIVE, ix[i] + 1)
+                    datapoint.system[j].CONDUCTIVITYDERIVATIVE,
+                    ix[i] + 1)
                 # Store the necessary component
-                J[iSys, i] = -model1d.par[ix[i]] * tmp.SZ[:]
+                comps = []
+                if 'x' in datapoint.components_per_channel:
+                    comps.append(tmp.SX)
+                if 'y' in datapoint.components_per_channel:
+                    comps.append(-tmp.SY)
+                if 'z' in datapoint.components_per_channel:
+                    comps.append(-tmp.SZ)
+                J[iSys, i] = model1d.par[ix[i]] * np.hstack(comps)
 
         datapoint.J = J[datapoint.active, :]
         return datapoint.J

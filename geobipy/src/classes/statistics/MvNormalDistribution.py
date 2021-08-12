@@ -104,8 +104,7 @@ class MvNormal(baseDistribution):
         if newDimension == self.ndim:
             return
         assert newDimension > 0, ValueError("Cannot have zero dimensions.")
-        assert self._constant, ValueError(
-            "Cannot change the dimension of a non-constant multivariate distribution.")
+        assert self._constant, ValueError("Cannot change the dimension of a non-constant multivariate distribution.")
         if np.ndim(self.mean) == 0:
             mean = self._mean
         else:

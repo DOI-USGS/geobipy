@@ -7,6 +7,7 @@ from ...forwardmodelling.Electromagnetic.FD.fdem1d import fdem1dfwd, fdem1dsen
 from .EmDataPoint import EmDataPoint
 from ...model.Model import Model
 from ...model.Model1D import Model1D
+from ...statistics.Histogram2D import Histogram2D
 from ....base.logging import myLogger
 from ...system.FdemSystem import FdemSystem
 import matplotlib.pyplot as plt
@@ -61,7 +62,7 @@ class FdemDataPoint(EmDataPoint):
 
         self.system = system
 
-        super().__init__(nChannelsPerSystem=2*self.nFrequencies, x=x, y=y, z=z, elevation=elevation, data=data, std=std, predictedData=predictedData, lineNumber=lineNumber, fiducial=fiducial)
+        super().__init__(channels_per_system=2*self.nFrequencies, x=x, y=y, z=z, elevation=elevation, data=data, std=std, predictedData=predictedData, lineNumber=lineNumber, fiducial=fiducial)
 
         self._data.name = 'Frequency domain data'
 
@@ -77,7 +78,6 @@ class FdemDataPoint(EmDataPoint):
         out._system = self._system
         # out.calibration = deepcopy(self.calibration)
         return out
-
 
     @property
     def units(self):
@@ -140,6 +140,10 @@ class FdemDataPoint(EmDataPoint):
     @property
     def nFrequencies(self):
         return np.asarray([x.nFrequencies for x in self.system])
+
+    @property
+    def channels(self):
+        return np.squeeze(np.asarray([np.tile(self.frequencies(i), 2) for i in range(self.nSystems)]))
 
 
     def _inphaseIndices(self, system=0):
@@ -210,7 +214,6 @@ class FdemDataPoint(EmDataPoint):
     def quadratureStd(self, system=0):
         return self.std[self._quadratureIndices(system)]
 
-
     def getMeasurementType(self, channel, system=0):
         """Returns the measurement type of the channel
 
@@ -228,7 +231,6 @@ class FdemDataPoint(EmDataPoint):
 
         """
         return 'In-Phase' if channel < self.nFrequencies[system] else 'Quadrature'
-
 
     def getFrequency(self, channel, system=0):
         """Return the measurement frequency of the channel
@@ -248,6 +250,24 @@ class FdemDataPoint(EmDataPoint):
         """
         return self.system[system].frequencies[channel%self.nFrequencies[system]]
 
+    def set_predicted_data_posterior(self):
+        if self.predictedData.hasPrior:
+            freqs = np.log10(self.frequencies())
+            data = np.log10(self.data[self.active])
+            a = data.min()
+            b = data.max()
+
+            xbuf = 0.05*(freqs[-1] - freqs[0])
+            xbins = StatArray.StatArray(np.logspace(freqs[0]-xbuf, freqs[-1]+xbuf, 200), freqs.name, freqs.units)
+            buf = 0.5*(b - a)
+            ybins = StatArray.StatArray(np.logspace(a-buf, b+buf, 200), data.name, data.units)
+            # rto = 0.5 * (ybins[0] + ybins[-1])
+            # ybins -= rto
+
+            H = Histogram2D(xBins=xbins, xlog=10, yBins=ybins, ylog=10)
+
+            self.predictedData.setPosterior(H)
+
 
     def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
         """ Create the hdf group metadata in file
@@ -258,7 +278,6 @@ class FdemDataPoint(EmDataPoint):
         # self.calibration.createHdf(grp, 'calibration', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
 
         self.system[0].toHdf(grp, 'sys')
-
 
     # def writeHdf(self, parent, name, withPosterior=True, index=None):
     #     """ Write the StatArray to an HDF object
@@ -365,17 +384,19 @@ class FdemDataPoint(EmDataPoint):
         xscale = kwargs.pop('xscale','log')
         yscale = kwargs.pop('yscale','log')
 
+        f = self.frequencies(system)
+
         if with_error_bars:
-            plt.errorbar(self.frequencies(system), self.inphase(system), yerr=self.inphaseStd(system),
+            plt.errorbar(f, self.inphase(system), yerr=self.inphaseStd(system),
                 marker=im, color=inColor, markerfacecolor=inColor, label='In-Phase', **kwargs)
 
-            plt.errorbar(self.frequencies(system), self.quadrature(system), yerr=self.quadratureStd(system),
+            plt.errorbar(f, self.quadrature(system), yerr=self.quadratureStd(system),
                 marker=qm, color=quadColor, markerfacecolor=quadColor, label='Quadrature', **kwargs)
         else:
-            plt.plot(self.frequencies(system), self.inphase(system),
+            plt.plot(f, np.log10(self.inphase(system)),
                 marker=im, color=inColor, markerfacecolor=inColor, label='In-Phase', **kwargs)
 
-            plt.plot(self.frequencies(system), self.quadrature(system),
+            plt.plot(f, np.log10(self.quadrature(system)),
                 marker=qm, color=quadColor, markerfacecolor=quadColor, label='Quadrature', **kwargs)
 
         plt.xscale(xscale)
@@ -429,6 +450,9 @@ class FdemDataPoint(EmDataPoint):
         plt.yscale(yscale)
 
         return ax
+
+    def updatePosteriors(self):
+        super().updatePosteriors()
 
 
     def updateSensitivity(self, model):
@@ -495,7 +519,7 @@ class FdemDataPoint(EmDataPoint):
     def forward(self, mod):
         """ Forward model the data from the given model """
 
-        assert isinstance(mod, Model), TypeError("Invalid model class for forward modeling [1D]")
+        assert isinstance(mod, Model1D), TypeError("Invalid model class for forward modeling [1D]")
 
         self._forward1D(mod)
 
@@ -503,7 +527,7 @@ class FdemDataPoint(EmDataPoint):
     def sensitivity(self, mod):
         """ Compute the sensitivty matrix for the given model """
 
-        assert isinstance(mod, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
+        assert isinstance(mod, Model1D), TypeError("Invalid model class for sensitivity matrix [1D]")
 
         return StatArray.StatArray(self._sensitivity1D(mod), 'Sensitivity', '$\\frac{ppm.m}{S}$')
 

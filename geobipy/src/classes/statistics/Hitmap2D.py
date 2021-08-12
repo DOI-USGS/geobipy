@@ -27,7 +27,6 @@ class Hitmap2D(Histogram2D):
 
         return out
 
-
     def varianceCutoff(self, percent=67.0):
         """ Get the cutoff value along y axis from the bottom up where the variance is percent*max(variance) """
         p = 0.01*percent
@@ -37,8 +36,7 @@ class Hitmap2D(Histogram2D):
 
         return self.yBinCentres[iC]
 
-
-    def getOpacityLevel(self, percent, log=None):
+    def getOpacityLevel(self, percent=95.0, log=None):
         """ Get the index along axis 1 from the bottom up that corresponds to the percent opacity """
         p = 0.01*percent
         op = self.opacity(log=log)[::-1]
@@ -47,7 +45,6 @@ class Hitmap2D(Histogram2D):
         while op[iC] < p and iC < nz:
             iC +=1
         return self.y.centres[op.size - iC -1]
-
 
     def hdfName(self):
         """ Reprodicibility procedure """

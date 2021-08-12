@@ -854,6 +854,52 @@ class Model1D(RectilinearMesh1D):
         #         h = 0.99*self.max_edge
         #     plt.text(0, h, s=r'$\downarrow \infty$', fontsize=12)
 
+    @property
+    def n_posteriors(self):
+        return super().n_posteriors + np.sum(self.par.hasPosterior)
+
+    def init_posterior_plots(self, gs):
+        """Initialize axes for posterior plots
+
+        Parameters
+        ----------
+        gs : matplotlib.gridspec.Gridspec
+            Gridspec to split
+
+        """
+
+        splt = gs.subgridspec(2, 2, height_ratios=[1, 4])
+        splt2 = splt[1, :].subgridspec(1, 2, wspace=0.2)
+        ax = []
+        ax.append(plt.subplot(splt[0, :]))
+        ax.append(plt.subplot(splt2[0, 1]))
+        ax.append(plt.subplot(splt2[0, 0]))
+
+        for a in ax:
+            cP.pretty(a)
+
+        return ax
+
+    def plot_posteriors(self, axes=None, parameter_kwargs={}, **kwargs):
+
+        assert len(axes) == 3, ValueError(("Must have length 3 list of axes for the posteriors. \n"
+                                          "self.init_posterior_plots() can generate them"))
+
+        if kwargs.get('edges_kwargs', {}).get('flipY', False) and parameter_kwargs.get('flipY', False):
+            parameter_kwargs['flipY'] = False
+
+        ax = super().plot_posteriors(axes[:2], **kwargs)
+        axes[2].sharey(axes[1])
+        self.par.plotPosteriors(ax=axes[2], **parameter_kwargs)
+
+        best = kwargs.pop('best', None)
+        if not best is None:
+            best.plot(xscale=parameter_kwargs.get('xscale', None), flipY=False, reciprocateX=parameter_kwargs.get('reciprocateX', None), noLabels=True, linewidth=1, color=cP.wellSeparated[3])
+            doi = self.par.posterior.getOpacityLevel(log=parameter_kwargs.get('logX', None))
+            plt.axhline(doi, color = '#5046C8', linestyle = 'dashed', linewidth = 1, alpha = 0.6)
+        #     plt.ylim(self.par.posterior.y.bounds[::-1])
+        return ax
+
     def evaluateHitmapPrior(self, Hitmap):
         """ Evaluates the model parameters against a hitmap.
 
@@ -993,7 +1039,7 @@ class Model1D(RectilinearMesh1D):
         """
         super().update_posteriors(values=self.par, ratio=minimumRatio)
         # Update the hitmap posterior
-        self.update_parameter_posterior(axis=1)
+        self.update_parameter_posterior(axis=0)
 
     def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
         """Create the Metadata for a Model1D in a HDF file

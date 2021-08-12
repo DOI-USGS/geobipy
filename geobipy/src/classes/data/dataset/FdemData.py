@@ -72,7 +72,7 @@ class FdemData(Data):
         self.system = systems
 
         # Data Class containing xyz and channel values
-        Data.__init__(self, nChannelsPerSystem=2*self.nFrequencies, units="ppm", **kwargs)
+        Data.__init__(self, channels_per_system=2*self.nFrequencies, units="ppm", **kwargs)
 
         # Assign data names
         self._data.name = 'Fdem Data'
@@ -523,7 +523,7 @@ class FdemData(Data):
         self.system = systemFilename
         # self.readSystemFile(systemFilename)
 
-        nPoints, iC, iD, iS, powerline, magnetic = self.__readColumnIndices(dataFilename, self.system)
+        nPoints, iC, iD, iS, powerline, magnetic = self._csv_column_indices(dataFilename, self.system)
 
         nBase = np.size(iC[0])
 
@@ -611,12 +611,31 @@ class FdemData(Data):
     #     self.nChannelsPerSystem = np.asarray([np.int32(2*x.nFrequencies) for x in self.system])
     #     self._systemOffset = np.append(0, np.cumsum(self.nChannelsPerSystem))
 
+    def _reconcile_channels(self, channels):
+
+        for i, channel in enumerate(channels):
+            channel = channel.lower()
+            if(channel in ['line']):
+                channels[i] = 'line'
+            elif(channel in ['id', 'fid', 'fiducial']):
+                channels[i] = 'fiducial'
+            elif (channel in ['n', 'x','northing']):
+                channels[i] = 'x'
+            elif (channel in ['e', 'y', 'easting']):
+                channels[i] = 'y'
+            elif (channel in ['alt', 'laser', 'bheight', 'height']):
+                channels[i] = 'height'
+            elif(channel in ['z','dtm','dem_elev', 'dem', 'dem_np','topo', 'elev', 'elevation']):
+                channels[i] = 'elevation'
+
+        return channels
+
 
     # Section contains routines for opening a data file, and reading data points one at a time
     # when requested.  These are used for a parallel implementation so that data points can be read
     # by a master rank and sent individually to worker ranks.  Removes the need to read the entire
     # dataset on all cores and minimizes RAM requirements.
-    def __readColumnIndices(self, dataFilename, system):
+    def _csv_column_indices(self, dataFilename, system):
         """Read in the header information for an FdemData file.
 
         Parameters
@@ -638,6 +657,8 @@ class FdemData(Data):
         indices = []
         dataIndices = []
         errIndices = []
+        powerline = None
+        magnetic = None
 
         if isinstance(dataFilename, str):
             dataFilename = [dataFilename]
@@ -652,40 +673,18 @@ class FdemData(Data):
 
             # Get the column headers of the data file
             channels = fIO.getHeaderNames(f)
-            channels = [channel.lower() for channel in channels]
+            channels = [c.lower() for c in channels]
             nChannels = len(channels)
 
-            # Check for each aspect of the data file and the number of columns
-            nCoordinates = 0
+            ixyz, ilf = super()._csv_column_indices(f)
+            _indices = np.hstack([ilf, ixyz])
 
-            powerline = None
-            magnetic = None
-            for channel in channels:
-                channel = channel.lower()
-                if(channel in ['line']):
-                    nCoordinates += 1
-                    line_ = True
-                elif(channel in ['id', 'fid', 'fiducial']):
-                    nCoordinates += 1
-                    fid_ = True
-                elif (channel in ['n', 'x','northing']):
-                    nCoordinates += 1
-                    northing_ = True
-                elif (channel in ['e', 'y', 'easting']):
-                    nCoordinates += 1
-                    easting_ = True
-                elif (channel in ['alt', 'laser', 'bheight', 'height']):
-                    nCoordinates += 1
-                    height_ = True
-                elif(channel in ['z','dtm','dem_elev', 'dem', 'dem_np','topo', 'elev', 'elevation']):
-                    nCoordinates += 1
-                    elevation_ = True
-                elif(channel in ['powerline']):
-                    nCoordinates += 1
-                    print('detected powerline')
-                elif(channel in ['magnetic']):
-                    nCoordinates += 1
-                    print('detected magnetic')
+            # Check for each aspect of the data file and the number of columns
+            nCoordinates = _indices.size
+            if 'powerline' in channels:
+                nCoordinates += 1
+            if 'magnetic' in channels:
+                nCoordinates += 1
 
             assert nCoordinates >= 6, Exception("Data file must contain columns for easting, northing, height, elevation, line, and fid. \n {}".format(self.fileInformation()))
 
@@ -699,35 +698,15 @@ class FdemData(Data):
                 _hasErrors = False
                 assert nData == 2*system[k].nFrequencies, Exception("Data file must have {} data channels each for in-phase and quadrature data.".format(system[k].nFrequencies))
 
-
             # To grab the EM data, skip the following header names. (More can be added to this)
             # Initialize a column identifier for x y z
-            _columnIndex = np.zeros(nCoordinates, dtype=np.int32)
             inPhase = []
             quadrature = []
             for j, channel in enumerate(channels):
-                if(channel in ['line']):
-                    _columnIndex[0] = j
-                elif(channel in ['id', 'fid', 'fiducial']):
-                    _columnIndex[1] = j
-                elif (channel in ['e', 'x', 'easting']):
-                    _columnIndex[2] = j
-                elif (channel in ['n', 'y','northing']):
-                    _columnIndex[3] = j
-                elif (channel in ['alt', 'laser', 'bheight', 'height']):
-                    _columnIndex[4] = j
-                elif(channel in ['z','dtm','dem_elev','dem_np','topo', 'elev', 'elevation']):
-                    _columnIndex[5] = j
-                elif channel in ['powerline']:
-                    _columnIndex[6] = j
-                    powerline = 6
+                if channel in ['powerline']:
+                    powerline = j
                 elif channel in ['magnetic']:
-                    if nCoordinates == 6:
-                        _columnIndex[6] = j
-                        magnetic = 6
-                    else:
-                        _columnIndex[7] = j
-                        magnetic = 7
+                    magnetic = j
                 elif 'i_' in channel:
                     inPhase.append(j)
                 elif 'q_' in channel:
@@ -737,14 +716,14 @@ class FdemData(Data):
 
             _errIndices = np.hstack([inPhase + 2*system[k].nFrequencies, quadrature + 2*system[k].nFrequencies]) if _hasErrors else None
 
-            indices.append(_columnIndex)
+            indices.append(_indices)
             dataIndices.append(_dataIndices)
             errIndices.append(_errIndices)
 
         return nPoints, indices, dataIndices, errIndices, powerline, magnetic
 
 
-    def _initLineByLineRead(self, dataFilename, systemFilename):
+    def _initialize_sequential_reading(self, dataFilename, systemFilename):
         """Special function to initialize a file for reading data points one at a time.
 
         Parameters
@@ -760,12 +739,14 @@ class FdemData(Data):
         self.system = systemFilename
 
         # self.readSystemFile(systemFilename)
-        self._nPoints, self._iC, self._iD, self._iS, iP, iM = self.__readColumnIndices(dataFilename, self.system)
+        self._nPoints, self._iC, self._iD, self._iS, iP, iM = self._csv_column_indices(dataFilename, self.system)
 
         if isinstance(dataFilename, str):
             dataFilename = [dataFilename]
 
-        self._openDatafiles(dataFilename)
+        self._data_filename = dataFilename
+
+        self._open_data_files(dataFilename)
 
         # Get all readable column indices for the first file.
         self._indicesForFile = []
@@ -788,20 +769,24 @@ class FdemData(Data):
                 self._iS[i] = np.arange(nTmp) + offset
 
 
-    def _openDatafiles(self, dataFilename):
+    def _open_data_files(self, dataFilename):
         self._file = []
         for i, f in enumerate(dataFilename):
             self._file.append(open(f, 'r'))
             fIO.skipLines(self._file[i], nLines=1)
 
 
-    def _closeDatafiles(self):
+    def _close_data_files(self):
         for f in self._file:
             if not f.closed:
                 f.close()
 
+    def _read_line_fiducial(self, data_filename=None, system_filename=None):
 
-    def _readSingleDatapoint(self):
+        values = fIO.read_columns(self._data_filename[0], self._iC[:2], 1, self.nPoints)
+        return values[:, 0], values[:, 1]
+
+    def _read_record(self, record=0):
         """Reads a single data point from the data file.
 
         FdemData.__initLineByLineRead() must have already been run.

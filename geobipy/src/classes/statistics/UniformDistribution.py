@@ -20,14 +20,14 @@ class Uniform(baseDistribution):
 
         assert np.all(max > min), ValueError("Maximum must be > minimum")
         super().__init__(prng)
-        # Minimum
-        self._min = np.log(min) if log else deepcopy(min)
-        # Maximum
-        self._max = np.log(max) if log else deepcopy(max)
+
         self.log = log
+
+        self.min = min
+        self.max = max
+
         # Mean
         self._mean = 0.5 * (self._max + self._min)
-        self._scale = self._max - self._min
         # Variance
         self._variance = (1.0 / 12.0) * self.scale**2.0
 
@@ -44,9 +44,17 @@ class Uniform(baseDistribution):
     def min(self):
         return np.exp(self._min) if self.log else self._min
 
+    @min.setter
+    def min(self, values):
+        self._min = np.log(values) if self.log else deepcopy(values)
+
     @property
     def max(self):
         return np.exp(self._max) if self.log else self._max
+
+    @max.setter
+    def max(self, values):
+        self._max = np.log(values) if self.log else deepcopy(values)
 
     @property
     def mean(self):
@@ -54,7 +62,7 @@ class Uniform(baseDistribution):
 
     @property
     def scale(self):
-        return self._scale
+        return self._max - self._min
 
     @property
     def variance(self):

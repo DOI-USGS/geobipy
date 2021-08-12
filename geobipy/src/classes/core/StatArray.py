@@ -309,6 +309,8 @@ class StatArray(np.ndarray, myObject):
         geobipy.src.classes.statistics.Distribution : For available distributions to instantiate
 
         """
+        if distributionType is None:
+            return
         self._proposal = Distribution(distributionType, *args, **kwargs)
 
     # Methods
@@ -1219,7 +1221,7 @@ class StatArray(np.ndarray, myObject):
 
             return cP.pcolor(self, x=mx, y=my, **kwargs)
 
-    def plot(self, x=None, i=None, axis=0, **kwargs):
+    def plot(self, x=None, i=None, axis=0, ax=None, **kwargs):
         """Plot self against x
 
         If x and y are StatArrays, the axes are automatically labelled.
@@ -1257,6 +1259,9 @@ class StatArray(np.ndarray, myObject):
 
         """
 
+        if not ax is None:
+            plt.sca(ax)
+
         if (not i is None):
             assert (isinstance(i, (slice, tuple))), TypeError(
                 "i must be a slice, use np.s_[]")
@@ -1276,20 +1281,20 @@ class StatArray(np.ndarray, myObject):
 
         return cP.plot(x[j], self[i], **kwargs)
 
-    def plotPosteriors(self, axes=None, **kwargs):
+    def plotPosteriors(self, ax=None, **kwargs):
         """Plot the posteriors of the StatArray.
 
         Parameters
         ----------
-        axes : matplotlib axis or list of axes, optional
+        ax : matplotlib axis or list of ax, optional
             Must match the number of attached posteriors.
             * If not specified, subplots are created vertically.
 
         """
-        assert self.hasPosterior, Exception(
-            "StatArray has no attached posteriors")
+        if not self.hasPosterior:
+            return
 
-        if axes is None:
+        if ax is None:
             if self.nPosteriors > 1:
                 for i in range(self.nPosteriors):
                     plt.subplot(self.nPosteriors, 1, i+1)
@@ -1298,15 +1303,17 @@ class StatArray(np.ndarray, myObject):
                 self.posterior.plot(**kwargs)
 
         else:
-            assert np.size(axes) == self.nPosteriors, ValueError(
-                "Length of axes {} must equal number of attached posteriors {}".format(np.size(axes), self.nPosteriors))
-            if np.size(axes) > 1:
+            assert np.size(ax) == self.nPosteriors, ValueError(
+                "Length of ax {} must equal number of attached posteriors {}".format(np.size(ax), self.nPosteriors))
+            if np.size(ax) > 1:
                 for i in range(self.nPosteriors):
-                    plt.sca(axes[i])
+                    plt.sca(ax[i])
                     plt.cla()
                     self.posterior[i].plot(**kwargs)
             else:
-                plt.sca(axes[0])
+                if isinstance(ax, list):
+                    ax = ax[0]
+                plt.sca(ax)
                 plt.cla()
                 self.posterior.plot(**kwargs)
 

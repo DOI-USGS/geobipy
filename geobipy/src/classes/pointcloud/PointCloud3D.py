@@ -51,7 +51,7 @@ class PointCloud3D(myObject):
         # # Number of points in the cloud
         self._nPoints = 0
 
-        # StatArray of the x co-ordinates
+            # StatArray of the x co-ordinates
         self.x = x
 
         # StatArray of the y co-ordinates
@@ -175,6 +175,21 @@ class PointCloud3D(myObject):
     def scalar(self):
         assert self.size == 1, ValueError("Cannot return array as scalar")
         return self[0]
+
+    def _reconcile_channels(self, channels):
+
+        for i, channel in enumerate(channels):
+            channel = channel.lower()
+            if (channel in ['n', 'x','northing']):
+                channels[i] = 'x'
+            elif (channel in ['e', 'y', 'easting']):
+                channels[i] = 'y'
+            elif (channel in ['alt', 'laser', 'bheight', 'height']):
+                channels[i] = 'height'
+            elif(channel in ['z','dtm','dem_elev', 'dem', 'dem_np','topo', 'elev', 'elevation']):
+                channels[i] = 'elevation'
+
+        return channels
 
 
     def append(self, other):
@@ -700,9 +715,31 @@ class PointCloud3D(myObject):
             assert nPoints[i] == nPoints[0], Exception('Number of data points {} in file {} does not match {} in file {}'.format(nPoints[i], filename[i], nPoints[0], filename[0]))
         return nPoints[0]
 
+    def _csv_n_points(self, filename):
+        """Read the number of points in a data file
 
-    def __readColumnIndices(self, filename):
-        """Read in the header information for an FdemData file.
+        Parameters
+        ----------
+        filename : str or list of str.
+            Path to the files.
+
+        Returns
+        -------
+        nPoints : int
+            Number of observations.
+
+        """
+        if isinstance(filename, str):
+            filename = [filename]
+
+        nPoints = np.asarray([fIO.getNlines(df, 1) for df in filename])
+
+        if nPoints.size > 1:
+            assert np.all(np.diff(nPoints) == 0), Exception('Number of data points must match in all data files')
+        return nPoints[0]
+
+    def _csv_column_indices(self, filename):
+        """Get the column indices from a csv file.
 
         Parameters
         ----------
@@ -715,25 +752,25 @@ class PointCloud3D(myObject):
             Number of measurements.
         columnIndex : ints
             The column indices for line, id, x, y, z, elevation, data, uncertainties.
-        hasErrors : bool
-            Whether the file contains uncertainties or not.
 
         """
 
         indices = []
 
         # Get the column headers of the data file
-        channels = [channel.lower() for channel in fIO.getHeaderNames(filename)]
+        channels = fIO.getHeaderNames(filename)
         nChannels = len(channels)
 
         x_names = ('e', 'x','easting')
         y_names = ('n', 'y', 'northing')
         z_names = ('alt', 'laser', 'bheight', 'height')
-        e_names = ('z','dtm','dem_elev','dem_np','topo', 'elev', 'elevation')
+        e_names = ('dtm','dem_elev','dem_np','topo', 'elev', 'elevation')
 
         # Check for each aspect of the data file and the number of columns
         nCoordinates = 0
+        indices = []
         for channel in channels:
+            channel = channel.lower()
             if (channel in x_names):
                 nCoordinates += 1
             elif (channel in y_names):
@@ -743,12 +780,12 @@ class PointCloud3D(myObject):
             elif(channel in e_names):
                 nCoordinates += 1
 
-        assert nCoordinates >= 3, Exception("File must contain columns for easting, northing, height. May also have an elevation column \n {}".format(self.fileInformation()))
+        assert nCoordinates <= 4, Exception("File must contain columns for easting, northing, height. May also have an elevation column \n {}".format(self.fileInformation()))
 
-        # To grab the EM data, skip the following header names. (More can be added to this)
         # Initialize a column identifier for x y z
         index = np.zeros(nCoordinates, dtype=np.int32)
         for j, channel in enumerate(channels):
+            channel = channel.lower()
             if (channel in x_names):
                 index[0] = j
             elif (channel in y_names):
@@ -770,7 +807,7 @@ class PointCloud3D(myObject):
             Path to the file to read from.
 
         """
-        indices = self.__readColumnIndices(fileName)
+        indices = self.csv_column_indices(fileName)
         values = fIO.read_columns(fileName, nHeaders=1, indices=indices)
 
         tmp = fIO.getHeaderNames(fileName, indices)

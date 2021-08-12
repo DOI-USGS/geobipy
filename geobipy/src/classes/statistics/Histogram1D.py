@@ -424,10 +424,17 @@ class Histogram1D(RectilinearMesh1D):
         return super().pcolor(self._counts, **kwargs)
 
 
-    def plot(self, rotate=False, flipX=False, flipY=False, trim=True, normalize=False, **kwargs):
+    def plot(self, rotate=False, flipX=False, flipY=False, trim=True, normalize=False, line=None, **kwargs):
         """ Plots the histogram """
-
+        axis = 'x' if rotate else 'y'
         ax = cP.hist(self.counts, self.edges_absolute, rotate=rotate, flipX=flipX, flipY=flipY, trim=trim, normalize=normalize, **kwargs)
+
+        if not line is None:
+            f = plt.axhline if rotate else plt.axvline
+            if np.size(line) > 1:
+                [f(l, color=cP.wellSeparated[3], linewidth=1) for l in line]
+            else:
+                f(line, color=cP.wellSeparated[3], linewidth=1)
         return ax
 
 

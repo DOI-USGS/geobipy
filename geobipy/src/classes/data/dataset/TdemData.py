@@ -59,8 +59,12 @@ class TdemData(Data):
 
         self.system = systems
 
+        kwargs['channels_per_system'] = kwargs.get('channels_per_system', self.nTimes)
+        kwargs['components_per_channel'] = kwargs.get('components_per_channel', self.system[0].components)
+        kwargs['units'] = r"$\frac{V}{m^{2}}$"
+
         # Data Class containing xyz and channel values
-        super().__init__(nChannelsPerSystem=self.nTimes, units=r"$\frac{V}{m^{2}}$", **kwargs)
+        super().__init__(**kwargs)
 
         # StatArray of Transmitter loops
         self.transmitter = kwargs.get('transmitter', None)
@@ -69,23 +73,17 @@ class TdemData(Data):
         # Loop Offsets
         self.loopOffset = kwargs.get('loopOffset', None)
 
-
         self.channelNames = kwargs.get('channel_names', None)
 
-
-    @property
-    def channelNames(self):
-        return self._channelNames
-
-
-    @channelNames.setter
+    @Data.channelNames.setter
     def channelNames(self, values):
         if values is None:
             self._channelNames = []
             for i in range(self.nSystems):
                 # Set the channel names
-                for iTime in range(self.nTimes[i]):
-                    self._channelNames.append('Time {:.3e} s'.format(self.system[i].windows.centre[iTime]))
+                for ic in range(self.n_components):
+                    for iTime in range(self.nTimes[i]):
+                        self._channelNames.append('Time {:.3e} s'.format(self.system[i].windows.centre[iTime]))
         else:
             assert all((isinstance(x, str) for x in values))
             assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
@@ -94,7 +92,6 @@ class TdemData(Data):
     @property
     def loopOffset(self):
         return self._loopOffset
-
 
     @loopOffset.setter
     def loopOffset(self, values):
@@ -109,11 +106,17 @@ class TdemData(Data):
             else:
                 self._loopOffset = StatArray.StatArray(values, "Loop Offset")
 
+    @property
+    def n_components(self):
+        return self.system[0].n_components
+
+    @property
+    def nTimes(self):
+        return self.nChannelsPerSystem
 
     @property
     def receiver(self):
         return self._receiver
-
 
     @receiver.setter
     def receiver(self, values):
@@ -129,11 +132,9 @@ class TdemData(Data):
             # else:
             self._receiver = values #StatArray.StatArray(values, 'Receiver loops', dtype=CircularLoop)
 
-
     @property
     def system(self):
         return self._system
-
 
     @system.setter
     def system(self, values):
@@ -156,7 +157,6 @@ class TdemData(Data):
     def transmitter(self):
         return self._transmitter
 
-
     @transmitter.setter
     def transmitter(self, values):
 
@@ -171,7 +171,6 @@ class TdemData(Data):
             # else:
             self._transmitter = values #StatArray.StatArray(self.nPoi, 'Transmitter loops', dtype=CircularLoop)
 
-
     def append(self, other):
 
         super().append(self, other)
@@ -180,10 +179,9 @@ class TdemData(Data):
         self.T = np.hstack([self.T, other.T])
         self.R = np.hstack(self.R, other.R)
 
-
-    @property
-    def nTimes(self):
-        return self.nChannelsPerSystem
+    def _component_indices(self, component=0, system=0):
+        assert component < self.n_components, ValueError("component must be < {}".format(self.n_components))
+        return np.s_[((self.nTimes*component)+(system*self.nChannels))[0]:(self.nTimes*(component+1)+(system*self.nChannels))[0]]
 
 
     def read(self, dataFilename, systemFilename):
@@ -265,7 +263,7 @@ class TdemData(Data):
         assert nDatafiles == nSystems, Exception("Number of data files must match number of system files.")
 
         self.system = systemFilename
-        nPoints, iC, iR, iT, iOffset, iD, iS = self.__readColumnIndices(dataFilename, self.system)
+        nPoints, iC, iR, iT, iOffset, iD, iS = self._csv_column_indices(dataFilename, self.system)
 
         # Get all readable column indices for the first file.
         tmp = [iC[0], iR[0], iT[0], iOffset[0], iD[0]]
@@ -281,8 +279,8 @@ class TdemData(Data):
         fiducial = values[:, 1]
         x = values[:, 2]
         y = values[:, 3]
-        elevation = values[:, 4]
-        z = values[:, 5]
+        z = values[:, 4]
+        elevation = values[:, 5]
 
         self.__init__(lineNumber=lineNumber,
                       fiducial=fiducial,
@@ -365,7 +363,7 @@ class TdemData(Data):
     #     self._systemOffset = np.append(0, np.cumsum(self.nChannelsPerSystem))
 
 
-    def __readColumnIndices(self, dataFilename, system):
+    def _csv_column_indices(self, data_filename, system):
         """Reads the column indices for the co-ordinates, loop orientations, and data from the TdemData file.
 
         Parameters
@@ -397,52 +395,40 @@ class TdemData(Data):
         offdataIndices = []
         offerrIndices = []
 
-        if isinstance(dataFilename, str):
-            dataFilename = [dataFilename]
-
         nSystems = len(system) if isinstance(system, list) else 1
         assert all(isinstance(s, TdemSystem) for s in system), TypeError("system must contain geobipy.TdemSystem classes.")
 
         # First get the number of points in each data file. They should be equal.
-        nPoints = self._readNpoints(dataFilename)
+        nPoints = self._csv_n_points(data_filename)
 
+        rloop_names = ('rxpitch', 'rxroll', 'rxyaw')
+        tloop_names = ('txpitch', 'txroll', 'txyaw')
+        offset_names = ('txrx_dx', 'txrx_dy', 'txrx_dz')
+        fiducial_names = ('fid', 'fiducial', 'id')
 
-        for k, f in enumerate(dataFilename):
+        if isinstance(data_filename, str):
+            data_filename = [data_filename]
 
+        for k, f in enumerate(data_filename):
             # Get the column headers of the data file
             channels = fIO.getHeaderNames(f)
             channels = [channel.lower() for channel in channels]
 
-
+            ixyz, ilf = super()._csv_column_indices(f)
+            _indices = np.hstack([ilf, ixyz])
 
             # Check for each aspect of the data file and the number of columns
-            nCoordinates = 0
-            nOffData = 0
-            nOffErr = 0
-            nOnData = 0
-            nOnErr = 0
-            nRloop = 0
-            nTloop = 0
-            nOffset = 0
+            nOffData = nOffErr = 0
+            nOnData = nOnErr = 0
+            nRloop = nTloop = nOffset = 0
 
             for channel in channels:
-                if(channel in ['line']):
-                    nCoordinates += 1
-                elif(channel in ['id', 'fid']):
-                    nCoordinates += 1
-                elif (channel in ['e', 'x','easting']):
-                    nCoordinates += 1
-                elif (channel in ['n', 'y', 'northing']):
-                    nCoordinates += 1
-                elif (channel in ['alt', 'laser', 'bheight', 'height']):
-                    nCoordinates += 1
-                elif(channel in ['z','dtm','dem_elev','dem_np','topo', 'elev', 'elevation']):
-                    nCoordinates += 1
-                elif channel in ["rxpitch", "rxroll", "rxyaw"]:
+                channel = channel.lower()
+                if channel in rloop_names:
                     nRloop += 1
-                elif channel in ["txpitch", "txroll", "txyaw"]:
+                elif channel in tloop_names:
                     nTloop += 1
-                elif channel in ['txrx_dx', 'txrx_dy', 'txrx_dz']:
+                elif channel in offset_names:
                     nOffset += 1
                 elif "on[" in channel:
                     nOnData += 1
@@ -453,42 +439,31 @@ class TdemData(Data):
                 elif "offerr[" in channel:
                     nOffErr += 1
 
-            assert nCoordinates >= 6, Exception("Data file must contain columns for easting, northing, height, elevation, line, and fid. \n {}".format(self.fileInformation()))
+            assert ixyz.size + ilf.size == 6, Exception("Data file must contain columns for line, fid, easting, northing, height, and elevation. \n {}".format(self.fileInformation()))
 
             assert nRloop == 3, Exception('Must have all three RxPitch, RxRoll, and RxYaw headers in data file {} if reciever orientation is specified. \n {}'.format(f, self.fileInformation()))
             assert nTloop == 3, Exception('Must have all three TxPitch, TxRoll, and TxYaw headers in data file {} if transmitter orientation is specified. \n {}'.format(f, self.fileInformation()))
             assert nOffset == 3, Exception('Must have all three txrx_dx, txrx_dy, and txrx_dz headers in data file {} if transmitter-reciever loop separation is specified. \n {}'.format(f, self.fileInformation()))
+            _rLoopIndices = np.empty(3, dtype=np.int32)
+            _tLoopIndices = np.empty(3, dtype=np.int32)
+            _offsetIndices = np.empty(3, dtype=np.int32)
+
 
             assert nOffData == system[k].windows.centre.size, Exception("Number of Off time columns {} in {} does not match number of times {} in system file {}. \n {}".format(nOffData, f, system[k].fileName, system[k].windows.centre.size, self.fileInformation()))
+            _offdataIndices = np.empty(nOffData, dtype=np.int32)
+
+            _offerrIndices = None
             if nOffErr > 0:
                 assert nOffErr == nOffData, Exception("Number of Off time standard deviation estimates does not match number of Off time data columns in file {}. \n {}".format(f, self.fileInformation()))
+                _offerrIndices = np.empty(nOffErr, dtype=np.int32)
 
-            _indices = np.zeros(6, dtype=np.int32)
-            _rLoopIndices = None if nRloop == 0 else np.empty(3, dtype=np.int32)
-            _tLoopIndices = None if nTloop == 0 else np.empty(3, dtype=np.int32)
-            _offsetIndices = None if nOffset == 0 else np.empty(3, dtype=np.int32)
-            _offdataIndices = np.empty(nOffData, dtype=np.int32)
-            _offerrIndices = None if nOffErr == 0 else np.empty(nOffErr, dtype=np.int32)
-
-            i1 = -1
-            i2 = -1
+            i1 = 0
+            i2 = 0
 
             for j, channel in enumerate(channels):
-                if (channel in ['line']):
-                    _indices[0] = j
-                elif(channel in ['id', 'fid']):
-                    _indices[1] = j
-                elif (channel in ['e', 'x', 'easting']):
-                    _indices[2] = j
-                elif (channel in ['n', 'y', 'northing']):
-                    _indices[3] = j
-                elif(channel in ['z', 'dtm', 'dem_elev', 'dem_np', 'topo', 'elev', 'elevation']):
-                    _indices[4] = j
-                elif (channel in ['alt', 'laser', 'bheight', 'height']):
-                    _indices[5] = j
-
+                channel = channel.lower()
                 # Get the receiver loop orientation indices
-                elif (channel == 'rxpitch'):
+                if (channel == 'rxpitch'):
                     _rLoopIndices[0] = j
                 elif (channel == 'rxroll'):
                     _rLoopIndices[1] = j
@@ -512,12 +487,12 @@ class TdemData(Data):
                     _offsetIndices[2] = j
 
                 elif ('off[' in channel):
-                    i1 += 1
                     _offdataIndices[i1] = j
+                    i1 += 1
 
                 elif ('offerr[' in channel):
-                    i2 += 1
                     _offerrIndices[i2] = j
+                    i2 += 1
 
             indices.append(_indices)
             rLoopIndices.append(_rLoopIndices)
@@ -528,31 +503,24 @@ class TdemData(Data):
 
         return nPoints, indices, rLoopIndices, tLoopIndices, offsetIndices, offdataIndices, offerrIndices
 
+    def _read_line_fiducial(self, data_filename, system_filename):
+        # Read in the columns from the first data file
+        self.system = system_filename
 
-    def _readNpoints(self, dataFilename):
-        """Read the number of points in a data file
+        if isinstance(data_filename, list):
+            data_filename = data_filename[0]
 
-        Parameters
-        ----------
-        dataFilename : list of str.
-            Path to the data files.
+        nPoints = self._csv_n_points(data_filename)
+        ixyz, ilf = super()._csv_column_indices(data_filename)
 
-        Returns
-        -------
-        nPoints : int
-            Number of observations.
+        if isinstance(data_filename, str):
+            data_filename = [data_filename]
+            ilf = (ilf)
 
-        """
-        nSystems = len(dataFilename)
-        nPoints = np.empty(nSystems, dtype=np.int64)
-        for i in range(nSystems):
-            nPoints[i] = fIO.getNlines(dataFilename[i], 1)
-        for i in range(1, nSystems):
-            assert nPoints[i] == nPoints[0], Exception('Number of data points {} in file {} does not match {} in file {}'.format(nPoints[i], dataFilename[i], nPoints[0], dataFilename[0]))
-        return nPoints[0]
+        values = fIO.read_columns(data_filename[0], ilf, 1, nPoints)
+        return values[:, 0], values[:, 1]
 
-
-    def _initLineByLineRead(self, dataFileName, systemFilename):
+    def _initialize_sequential_reading(self, dataFileName, systemFilename):
         """Special function to initialize a file for reading data points one at a time.
 
         Parameters
@@ -567,10 +535,11 @@ class TdemData(Data):
         # Read in the EM System file
         self.system = systemFilename
 
-        self._nPoints, self._iC, self._iR, self._iT, self._iOffset, self._iD, self._iS = self.__readColumnIndices(dataFileName, self.system)
+        self._nPoints, self._iC, self._iR, self._iT, self._iOffset, self._iD, self._iS = self._csv_column_indices(dataFileName, self.system)
 
         if isinstance(dataFileName, str):
             dataFileName = [dataFileName]
+        self.data_filename = dataFileName
 
         self._file = []
         for f in dataFileName:
@@ -613,8 +582,7 @@ class TdemData(Data):
     def nChannelsPerSystem(self):
         return np.asarray([s.nwindows() for s in self.system])
 
-
-    def _readSingleDatapoint(self):
+    def _read_record(self, record=None):
         """Reads a single data point from the data file.
 
         FdemData.__initLineByLineRead() must have already been run.
@@ -658,19 +626,23 @@ class TdemData(Data):
         loopOffset = values[i0:i0+3]
         i0 += 3
 
-        out = TdemDataPoint(x=values[2], y=values[3], z=values[5], elevation=values[4], data=D, std=S, system=self.system, transmitter_loop=T, receiver_loop=R, loopOffset=loopOffset, lineNumber=values[0], fiducial=values[1])
+        out = TdemDataPoint(x=values[2], y=values[3], z=values[4], elevation=values[5],
+                            data=D, std=S,
+                            system=self.system,
+                            transmitter_loop=T, receiver_loop=R, loopOffset=loopOffset,
+                            lineNumber=values[0], fiducial=values[1])
 
         return out
 
 
-    def _openDatafiles(self, dataFilename):
+    def _open_data_files(self, dataFilename):
         self._file = []
         for i, f in enumerate(dataFilename):
             self._file.append(open(f, 'r'))
             fIO.skipLines(self._file[i], nLines=1)
 
 
-    def _closeDatafiles(self):
+    def _close_data_files(self):
         for f in self._file:
             if not f.closed:
                 f.close()
@@ -754,7 +726,11 @@ class TdemData(Data):
             index = self.fiducial.searchsorted(fiducial)
 
         i = index
-        return TdemDataPoint(self.x[i], self.y[i], self.z[i], self.elevation[i], self.data[i, :], self.std[i, :], self.predictedData[i, :], self.system, self.transmitter[i], self.receiver[i], self.loopOffset[i, :], self.lineNumber[i], self.fiducial[i])
+        return TdemDataPoint(self.x[i], self.y[i], self.z[i], self.elevation[i],
+                             self.data[i, :], self.std[i, :], self.predictedData[i, :],
+                             self.system,
+                             self.transmitter[i], self.receiver[i], self.loopOffset[i, :],
+                             self.lineNumber[i], self.fiducial[i])
 
 
     # def getLine(self, line):
@@ -888,7 +864,7 @@ class TdemData(Data):
 
         for i in range(self.nSystems):
             plt.subplot(2, 1, i + 1)
-            line._data[:, self._systemIndices(i)].plot(x=x, **kwargs)
+            line.data[:, self._systemIndices(i)].plot(x=x, **kwargs)
 
 
     def plotWaveform(self, **kwargs):
@@ -954,26 +930,6 @@ class TdemData(Data):
 
         return self
 
-
-    def scatter2D(self, **kwargs):
-        """Create a 2D scatter plot using the x, y coordinates.
-
-        Can take any other matplotlib arguments and keyword arguments e.g. markersize etc.
-
-        Parameters
-        ----------
-        c : 1D array_like or StatArray, optional
-            Colour values of the points, default is the height of the points
-        i : sequence of ints, optional
-            Plot a subset of x, y, c, using the indices in i
-
-        See Also
-        --------
-        geobipy.plotting.Scatter2D : For additional keyword arguments you may use.
-
-        """
-
-        return Data.scatter2D(self, **kwargs)
 
 
     def _BcastSystem(self, world, root=0, system=None):

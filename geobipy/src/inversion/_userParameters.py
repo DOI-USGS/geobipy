@@ -39,13 +39,15 @@ class _userParameters(myObject):
         self.minimumRelativeError = StatArray.StatArray(Datapoint.nSystems, 'Minimum Relative Error') + self.minimumRelativeError
         self.maximumRelativeError = StatArray.StatArray(Datapoint.nSystems, 'Maximum Relative Error') + self.maximumRelativeError
 
-        assert np.all((self.minimumRelativeError <= self.initialRelativeError) & (self.initialRelativeError <= self.maximumRelativeError) ), ValueError("Initial relative error must be within the min max")
+        if self.solveRelativeError:
+            assert np.all((self.minimumRelativeError <= self.initialRelativeError) & (self.initialRelativeError <= self.maximumRelativeError) ), ValueError("Initial relative error must be within the min max")
 
         self.initialAdditiveError = StatArray.StatArray(Datapoint.nSystems, 'Additive Error') + self.initialAdditiveError
         self.minimumAdditiveError = StatArray.StatArray(Datapoint.nSystems, 'Minimum Additive Error') + self.minimumAdditiveError
         self.maximumAdditiveError = StatArray.StatArray(Datapoint.nSystems, 'Maximum Additive Error') + self.maximumAdditiveError
 
-        assert np.all((self.minimumAdditiveError <= self.initialAdditiveError) & (self.initialAdditiveError <= self.maximumAdditiveError)), ValueError("Initial additive error must be within the min max")
+        if self.solveAdditiveError:
+            assert np.all((self.minimumAdditiveError <= self.initialAdditiveError) & (self.initialAdditiveError <= self.maximumAdditiveError)), ValueError("Initial additive error must be within the min max")
 
         self.maximumElevationChange = np.float64(self.maximumElevationChange)
 
@@ -318,13 +320,15 @@ class _userParameters(myObject):
         assert self.maximumRelativeError.size == DataPoint.nSystems, ValueError('Maximum Relative error must be size {}'.format(DataPoint.nSystems))
 
         # Check the error floor
-        assert self.initialAdditiveError.size == DataPoint.nSystems, ValueError('Initial additive error must have size {}'.format(DataPoint.nSystems))
+        check = (DataPoint.nSystems, DataPoint.nChannels)
+        assert (self.initialAdditiveError.size in check), ValueError('Initial additive error size must equal one of these {}'.format(check))
 
-        # Check the minimum relative error
-        assert self.minimumAdditiveError.size == DataPoint.nSystems, ValueError('Minimum additive error must be size {}'.format(DataPoint.nSystems))
+        if self.solveAdditiveError:
+            # Check the minimum relative error
+            assert self.minimumAdditiveError.size == DataPoint.nSystems, ValueError('Minimum additive error must be size {}'.format(DataPoint.nSystems))
 
-        # Check the maximum relative error
-        assert self.maximumAdditiveError.size == DataPoint.nSystems, ValueError('Maximum additive error must be size {}'.format(DataPoint.nSystems))
+            # Check the maximum relative error
+            assert self.maximumAdditiveError.size == DataPoint.nSystems, ValueError('Maximum additive error must be size {}'.format(DataPoint.nSystems))
 
         # Check the range allowed on the data point elevation
         assert isinstance(self.maximumElevationChange, float), TypeError('Elevation range must be a float (preferably np.float64)')

@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from cached_property import cached_property
 from copy import deepcopy
 from ...pointcloud.Point import Point
@@ -8,6 +9,7 @@ from ....base import MPI as myMPI
 from ...statistics.Histogram2D import Histogram2D
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 
 class DataPoint(Point):
     """Class defines a data point.
@@ -46,13 +48,14 @@ class DataPoint(Point):
 
     """
 
-    def __init__(self, nChannelsPerSystem=1, x=0.0, y=0.0, z=0.0, elevation=None, data=None, std=None, predictedData=None, units=None, channelNames=None, lineNumber=0.0, fiducial=0.0):
+    def __init__(self, channels_per_system=1, components_per_channel=None, x=0.0, y=0.0, z=0.0, elevation=None, data=None, std=None, predictedData=None, units=None, channelNames=None, lineNumber=0.0, fiducial=0.0):
         """ Initialize the Data class """
 
         super().__init__(x, y, z)
 
         # Number of Channels
-        self._nChannelsPerSystem = np.atleast_1d(np.asarray(nChannelsPerSystem))
+        self.components_per_channel = components_per_channel
+        self._channels_per_system = np.atleast_1d(np.asarray(channels_per_system * self.n_components))
 
         self.elevation = elevation
 
@@ -71,14 +74,43 @@ class DataPoint(Point):
 
         self.channelNames = channelNames
 
-        self.errorPosterior = None
+        # self.errorPosterior = None
 
+    @property
+    def components_per_channel(self):
+        return self._components_per_channel
+
+    @components_per_channel.setter
+    def components_per_channel(self, values):
+        if values is None:
+            self._components_per_channel = ['z']
+        else:
+            assert np.all([isinstance(x, str) for x in values]), TypeError('components_per_channel must be list of str')
+            self._components_per_channel = values
+
+    @property
+    def n_components(self):
+        if self.components_per_channel is None:
+            return 1
+        return np.size(self.components_per_channel)
+
+    @property
+    def n_posteriors(self):
+        return self._n_error_posteriors + self.z.hasPosterior
+
+    @property
+    def _n_error_posteriors(self):
+        # if not self.errorPosterior is None:
+        #     return len(self.errorPosterior)
+        # else:
+        return self.nSystems * np.sum([x.hasPosterior for x in [self.relErr, self.addErr]])
 
     def __deepcopy__(self, memo={}):
 
         out = super().__deepcopy__(memo)
 
-        out._nChannelsPerSystem = deepcopy(self._nChannelsPerSystem, memo)
+        out._components_per_channel = deepcopy(self._components_per_channel, memo)
+        out._channels_per_system = deepcopy(self._channels_per_system, memo)
 
         out._elevation = deepcopy(self.elevation, memo)
         out._units = deepcopy(self.units, memo)
@@ -90,7 +122,7 @@ class DataPoint(Point):
         out._channelNames = deepcopy(self.channelNames, memo)
         out._relErr = deepcopy(self.relErr, memo)
         out._addErr = deepcopy(self.addErr, memo)
-        out._errorPosterior = deepcopy(self.errorPosterior, memo)
+        # out._errorPosterior = deepcopy(self.errorPosterior, memo)
 
         return out
 
@@ -104,12 +136,14 @@ class DataPoint(Point):
 
     @addErr.setter
     def addErr(self, values):
-        if values is None:
+        if not '_addErr' in self.__dict__:
             self._addErr = StatArray.StatArray(self.nSystems, '$\epsilon_{Additive}$', self.units)
-        else:
-            assert np.size(values) == self.nSystems, ValueError("additiveError must have length {}".format(self.nSystems))
+
+        if not values is None:
+            check = (self.nSystems, self.nChannels)
+            assert np.size(values) in check, ValueError("additiveError must have length {}".format(check))
             assert np.asarray(values).dtype.kind == 'f', ValueError("additive_error must be floats")
-            self._addErr = StatArray.StatArray(values, '$\epsilon_{Additive}$', self.units)
+            self._addErr[:] = values
 
     @property
     def channelNames(self):
@@ -123,49 +157,33 @@ class DataPoint(Point):
             assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
             self._channelNames = values
 
-
     @property
     def systemOffset(self):
-        return np.concatenate([[0], np.cumsum(self.nChannelsPerSystem)])
+        return np.hstack([0, np.cumsum(self.channels_per_system)])
 
     @property
     def fiducial(self):
         return self._fiducial
 
-
     @fiducial.setter
     def fiducial(self, value):
         self._fiducial = StatArray.StatArray(value, 'fiducial')
-
 
     @property
     def lineNumber(self):
         return self._lineNumber
 
-
     @lineNumber.setter
     def lineNumber(self, value):
-        self._lineNumber = StatArray.StatArray(value, 'Line number')
+        self._lineNumber = StatArray.StatArray(np.float64(value), 'Line number')
 
     @property
-    def nChannelsPerSystem(self):
-        return self._nChannelsPerSystem
+    def channels_per_system(self):
+        return self._channels_per_system
 
     @property
     def nSystems(self):
-        return np.size(self.nChannelsPerSystem)
-
-    @property
-    def units(self):
-        return self._units
-
-    @units.setter
-    def units(self, value):
-        if values is None:
-            self._units = ""
-        else:
-            assert isinstance(value, str), TypeError('units must have type str')
-            self._units = value
+        return np.size(self.channels_per_system)
 
     @property
     def data(self):
@@ -177,7 +195,7 @@ class DataPoint(Point):
         self._data = StatArray.StatArray(self.nChannels, "Data", self.units)
 
         if not values is None:
-            assert np.size(values) == self.nChannels, ValueError("data must have size {}".format(self.nChannels))
+            # assert np.size(values) == self.nChannels, ValueError("data must have size {}".format(self.nChannels))
             self._data[:] = values
 
     @property
@@ -194,7 +212,7 @@ class DataPoint(Point):
             with size equal to the number of active channels.
 
         """
-        return StatArray.StatArray(self._predictedData - self._data, name="$\\mathbf{Fm} - \\mathbf{d}_{obs}$", units=self.units)
+        return StatArray.StatArray(self.predictedData - self.data, name="$\\mathbf{Fm} - \\mathbf{d}_{obs}$", units=self.units)
 
     @property
     def elevation(self):
@@ -202,11 +220,11 @@ class DataPoint(Point):
 
     @elevation.setter
     def elevation(self, value):
-        if value is None:
+        if not '_elevation' in self.__dict__:
             self._elevation = StatArray.StatArray(1, "Elevation", "m")
-        else:
-            self._elevation = StatArray.StatArray(value, "Elevation", "m")
 
+        if not value is None:
+            self._elevation[:] = value
 
     @property
     def nActiveChannels(self):
@@ -214,23 +232,20 @@ class DataPoint(Point):
 
     @property
     def nChannels(self):
-        return np.sum(self.nChannelsPerSystem)
-
+        return np.sum(self.channels_per_system)
 
     @property
     def predictedData(self):
         """The predicted data. """
         return self._predictedData
 
-
     @predictedData.setter
     def predictedData(self, values):
-        if values is None:
+        if not '_predictedData' in self.__dict__:
             self._predictedData = StatArray.StatArray(self.nChannels, "Predicted Data", self.units)
-        else:
-            assert np.size(values) == self.nChannels, ValueError("predictedData must have size {}".format(self.nChannels))
-            self._predictedData = StatArray.StatArray(values, "Predicted Data", self.units)
 
+        if not values is None:
+            self._predictedData[:] = values
 
     @property
     def relative_error(self):
@@ -242,13 +257,11 @@ class DataPoint(Point):
 
     @relErr.setter
     def relErr(self, values):
-        if values is None:
+        if not '_relErr' in self.__dict__:
             self._relErr = StatArray.StatArray(self.nSystems, '$\epsilon_{Relative}x10^{2}$', '%')
-        else:
-            assert np.size(values) == self.nSystems, ValueError("relativeError must have length {}".format(self.nSystems))
-            assert np.asarray(values).dtype.kind == 'f', ValueError("relative_error must be floats")
-            self._relErr = StatArray.StatArray(self.nSystems, '$\epsilon_{Relative}x10^{2}$', '%') + values
 
+        if not values is None:
+            self._relErr[:] = values
 
     @property
     def std(self):
@@ -256,40 +269,87 @@ class DataPoint(Point):
 
     @std.setter
     def std(self, values):
-
-        self._std = StatArray.StatArray(np.ones(self.nChannels), "Standard Deviation", self.units)
+        if not '_std' in self.__dict__:
+            self._std = StatArray.StatArray(np.ones(self.nChannels), "Standard Deviation", self.units)
 
         if not values is None:
             assert np.size(values) == self.nChannels, ValueError("std must have size {}".format(self.nChannels))
             assert np.all(values[self.active] > 0.0), ValueError("Cannot assign standard deviations that are <= 0.0.")
             self._std[:] = values
 
-
     @property
     def units(self):
         return self._units
 
     @units.setter
+    @abstractmethod
     def units(self, value):
-
-        if value is None:
+        if values is None:
             self._units = ""
         else:
-            assert isinstance(value, str), TypeError("units must have type str")
+            assert isinstance(value, str), TypeError('units must have type str')
             self._units = value
-
 
     def generate_noise(self, additive_error, relative_error):
 
         std = np.sqrt(additive_error**2.0 + (relative_error * self.predictedData)**2.0)
         return np.random.randn(self.nChannels) * std
 
+    def init_posterior_plots(self, gs):
+        """Initialize axes for posterior plots
 
+        Parameters
+        ----------
+        gs : matplotlib.gridspec.Gridspec
+            Gridspec to split
+
+        """
+
+        splt = gs.subgridspec(2, 2, width_ratios=[1, 4], height_ratios=[2, 1], wspace=0.3)
+        ax = []
+        # Height axis
+        ax.append(plt.subplot(splt[0, 0]))
+        # Data axis
+        ax.append(plt.subplot(splt[0, 1]))
+
+        splt2 = splt[1, :].subgridspec(self.nSystems, 2, wspace=0.2)
+        # Relative error axes
+        ax.append([plt.subplot(splt2[i, 0]) for i in range(self.nSystems)])
+        # Additive Error axes
+        ax.append([plt.subplot(splt2[i, 1]) for i in range(self.nSystems)])
+
+        return ax
+
+    def plot_posteriors(self, axes=None, height_kwargs={}, data_kwargs={}, rel_error_kwargs={}, add_error_kwargs={}, **kwargs):
+
+        assert len(axes) == 4, ValueError("Must have length 3 list of axes for the posteriors. self.init_posterior_plots can generate them")
+
+        best = kwargs.pop('best', None)
+        if not best is None:
+            height_kwargs['line'] = best.z
+            rel_error_kwargs['line'] = best.relErr
+            add_error_kwargs['line'] = best.addErr
+
+        height_kwargs['rotate'] = height_kwargs.get('rotate', True)
+        self.z.plotPosteriors(ax = axes[0], **height_kwargs)
+
+        self.plot(ax=axes[1], **data_kwargs)
+        if not best is None:
+            best.plotPredicted(color=cP.wellSeparated[3], ax=axes[1], **data_kwargs)
+        # data_kwargs['noColorbar'] = data_kwargs.get('noColorbar', True)
+        # ax.append(self.predictedData.plotPosteriors(ax = axes[1], **data_kwargs))
+        # if self.errorPosterior is None:
+        self.relErr.plotPosteriors(ax=axes[2], **rel_error_kwargs)
+        self.addErr.plotPosteriors(ax=axes[3], **add_error_kwargs)
+        # else:
+        #     for p in self.errorPosterior:
+        #         p.plot(**error_kwargs)
+
+        # return ax
 
     def weightingMatrix(self, power=1.0):
         """Return a diagonal data weighting matrix of the reciprocated data standard deviations."""
         return np.diag(self.std[self.active]**-power)
-
 
     def _systemIndices(self, system=0):
         """The slice indices for the requested system.
@@ -450,7 +510,7 @@ class DataPoint(Point):
         # create a new group inside h5obj
         grp = super().createHdf(parent, myName, withPosterior, nRepeats, fillvalue)
 
-        grp.create_dataset('channels_per_system', data=self.nChannelsPerSystem)
+        grp.create_dataset('channels_per_system', data=self.channels_per_system)
 
         self.fiducial.createHdf(grp, 'fiducial', nRepeats=nRepeats, fillvalue=fillvalue)
         self.lineNumber.createHdf(grp, 'line_number', nRepeats=nRepeats, fillvalue=fillvalue)
@@ -459,9 +519,9 @@ class DataPoint(Point):
         self.std.createHdf(grp, 's', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self.predictedData.createHdf(grp, 'p', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
 
-        if not self.errorPosterior is None:
-            for i, x in enumerate(self.errorPosterior):
-                x.createHdf(grp, 'joint_error_posterior_{}'.format(i), nRepeats=nRepeats, fillvalue=fillvalue)
+        # if not self.errorPosterior is None:
+        #     for i, x in enumerate(self.errorPosterior):
+        #         x.createHdf(grp, 'joint_error_posterior_{}'.format(i), nRepeats=nRepeats, fillvalue=fillvalue)
             # self.relErr.setPosterior([self.errorPosterior[i].marginalize(axis=1) for i in range(self.nSystems)])
             # self.addErr.setPosterior([self.errorPosterior[i].marginalize(axis=0) for i in range(self.nSystems)])
 
@@ -489,9 +549,9 @@ class DataPoint(Point):
         self.std.writeHdf(grp, 's',  withPosterior=withPosterior, index=index)
         self.predictedData.writeHdf(grp, 'p',  withPosterior=withPosterior, index=index)
 
-        if not self.errorPosterior is None:
-            for i, x in enumerate(self.errorPosterior):
-                x.writeHdf(grp, 'joint_error_posterior_{}'.format(i), index=index)
+        # if not self.errorPosterior is None:
+        #     for i, x in enumerate(self.errorPosterior):
+        #         x.writeHdf(grp, 'joint_error_posterior_{}'.format(i), index=index)
             # self.relative_error.setPosterior([self.errorPosterior[i].marginalize(axis=1) for i in range(self.nSystems)])
             # self.additive_error.setPosterior([self.errorPosterior[i].marginalize(axis=0) for i in range(self.nSystems)])
 
@@ -521,12 +581,12 @@ class DataPoint(Point):
         self._std = StatArray.StatArray().fromHdf(grp['s'], index=index)
         self._predictedData = StatArray.StatArray().fromHdf(grp['p'], index=index)
 
-        if 'joint_error_posterior_0' in grp:
-            i = 0
-            self.errorPosterior = []
-            while 'joint_error_posterior_{}'.format(i) in grp:
-                self.errorPosterior.append(Histogram2D().fromHdf(grp['joint_error_posterior_{}'.format(i)], index=index))
-                i += 1
+        # if 'joint_error_posterior_0' in grp:
+        #     i = 0
+        #     self.errorPosterior = []
+        #     while 'joint_error_posterior_{}'.format(i) in grp:
+        #         self.errorPosterior.append(Histogram2D().fromHdf(grp['joint_error_posterior_{}'.format(i)], index=index))
+        #         i += 1
 
         self._relErr = StatArray.StatArray().fromHdf(grp['relErr'], index=index)
         self._addErr = StatArray.StatArray().fromHdf(grp['addErr'], index=index)

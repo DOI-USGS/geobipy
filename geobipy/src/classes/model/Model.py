@@ -82,9 +82,10 @@ class Model(myObject):
 
         fig = kwargs.pop('fig', plt.figure(figsize=(9, 9)))
 
-        slic = list(slic)
         if slic is None:
             slic = [np.s_[:] for i in range(self.mesh.ndim)]
+        else:
+            slic = list(slic)
 
         slic[axis] = 0
 

@@ -48,8 +48,6 @@ class MvLogNormal(MvNormal):
         super().__init__(mean, variance, ndim, prng=prng)
         self.linearSpace = linearSpace
 
-
-
     @property
     def mean(self):
         return np.exp(self._mean) if self.linearSpace else self._mean
@@ -58,14 +56,12 @@ class MvLogNormal(MvNormal):
     def mean(self, values):
         self._mean[:] = np.log(values) if self.linearSpace else values
 
-
     def __deepcopy__(self, memo={}):
         """ Define a deepcopy routine """
         if self._constant:
             return MvLogNormal(mean=self.mean[0], variance=self.variance[0, 0], ndim=self.ndim, linearSpace=self.linearSpace, prng=self.prng)
         else:
             return MvLogNormal(mean=self.mean, variance=self.variance, linearSpace=self.linearSpace, prng=self.prng)
-
 
     def derivative(self, x, order):
 
@@ -80,13 +76,11 @@ class MvLogNormal(MvNormal):
     def rng(self, size = 1):
         return np.exp(super().rng(size)) if self.linearSpace else super().rng(size)
 
-
     def probability(self, x, log):
         if self.linearSpace:
             x = np.log(x)
 
         return super().probability(x=x, log=log)
-
 
     def bins(self, nBins=100, nStd=4.0, axis=None):
         """Discretizes a range given the mean and variance of the distribution
