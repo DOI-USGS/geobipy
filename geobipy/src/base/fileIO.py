@@ -2,6 +2,7 @@
 Module with custom file handling operations
 """
 import re
+from pandas import read_csv
 import numpy as np
 import os
 from subprocess import Popen, PIPE, STDOUT
@@ -146,7 +147,7 @@ def getFileSize(fName):
     if os.path.isfile(fName):
         return bytes2readable(os.stat(fName).st_size)
 
-def wccount(fname):
+def wccount(filename):
     """Count the number of lines in a file using a wc system call
 
     Parameters
@@ -160,9 +161,8 @@ def wccount(fname):
         The number of lines in the file
 
     """
-    assert fileExists(fname), 'Cannot find file '+fname
-    out = Popen(['wc', '-l', fname], stdout=PIPE, stderr=STDOUT).communicate()[0]
-    return(np.int(out.strip().split()[0]))
+    with open(filename, 'rb') as f:
+        return sum(1 for line in f)
 
 def getNlines(fname, nHeaders=0):
     """Gets the number of lines in a file after taking into account the number of header lines
@@ -212,65 +212,65 @@ def getNcolumns(fName, nHeaders=0):
         return len(line)
 
 
-def skipLines(f, nLines=0):
-    """Skip N lines in an open file object
+# def skipLines(f, nLines=0):
+#     """Skip N lines in an open file object
 
-    Parameters
-    ----------
-    f : _io.TextIOWrapper
-        A file handle generated with open(file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None).
-    nLines : int
-        The number of lines to skip.
+#     Parameters
+#     ----------
+#     f : _io.TextIOWrapper
+#         A file handle generated with open(file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None).
+#     nLines : int
+#         The number of lines to skip.
 
-    """
-    for _ in range(nLines):
-        next(f)
-
-
-def read_columns(fName, indices=None, nHeaders=0, nLines=0):
-    """Reads specified columns from a file
-
-    Parameters
-    ----------
-    fName : str
-        A path and/or file name.
-    indices : in or list of ints, optional
-        The indices of the columns to read in from the file.  By default, all columns are read in.
-
-    nHeaders : int, optional
-        The number of header lines to skip in the file.
-    nLines : int, optional
-        The number of lines to read in.  By default, all lines are read in after the header lines.
-
-    Returns
-    -------
-    out : numpy.ndarray
-        2D array containing the lines in the file.
-
-    """
-
-    assert fileExists(fName), 'Cannot find file '+fName
-
-    indices = np.atleast_1d(indices)
-    if (nLines == 0):
-        # Get the number of lines in the file
-        nLines = getNlines(fName, nHeaders)
-
-    nCols = getNcolumns(fName, nHeaders) if indices is None else indices.size
-
-    values = np.zeros([nLines, nCols], dtype='float64', order='F')  # Initialize output
-
-    with open(fName) as f:  # Open the file
-        skipLines(f, nHeaders)  # Skip header lines
-        for j, line in enumerate(f):  # For each line in the file
-            try:
-                values[j, ] = getRealNumbersfromLine(line, indices)  # grab the requested entries
-            except:
-                assert False, Exception("Could not read numbers from line {} in file {} \n\n {}".format(j+nHeaders, fName, line))
-    return values
+#     """
+#     for _ in range(nLines):
+#         next(f)
 
 
-def getRealNumbersfromLine(line, indices=None, delimiters=','):
+# def read_columns(fName, indices=None, nHeaders=0, nLines=0):
+#     """Reads specified columns from a file
+
+#     Parameters
+#     ----------
+#     fName : str
+#         A path and/or file name.
+#     indices : in or list of ints, optional
+#         The indices of the columns to read in from the file.  By default, all columns are read in.
+
+#     nHeaders : int, optional
+#         The number of header lines to skip in the file.
+#     nLines : int, optional
+#         The number of lines to read in.  By default, all lines are read in after the header lines.
+
+#     Returns
+#     -------
+#     out : numpy.ndarray
+#         2D array containing the lines in the file.
+
+#     """
+
+#     assert fileExists(fName), 'Cannot find file '+fName
+
+#     indices = np.atleast_1d(indices)
+#     if (nLines == 0):
+#         # Get the number of lines in the file
+#         nLines = getNlines(fName, nHeaders)
+
+#     nCols = getNcolumns(fName, nHeaders) if indices is None else indices.size
+
+#     values = np.zeros([nLines, nCols], dtype='float64', order='F')  # Initialize output
+
+#     with open(fName) as f:  # Open the file
+#         skipLines(f, nHeaders)  # Skip header lines
+#         for j, line in enumerate(f):  # For each line in the file
+#             # try:
+#                 values[j, ] = getRealNumbersfromLine(line, indices)  # grab the requested entries
+#             # except:
+#             #     assert False, Exception("Could not read numbers from line {} in file {} \n\n {}".format(j+nHeaders, fName, line))
+#     return values
+
+
+def get_real_numbers_from_line(line, indices=None, delimiters=','):
     """Reads strictly the numbers from a string
 
     Parameters
@@ -290,11 +290,14 @@ def getRealNumbersfromLine(line, indices=None, delimiters=','):
     """
 
     line = parseString(line, delimiters)
-    values = np.asfarray(line, np.float64)
 
-    indices = np.atleast_1d(indices)
+    if not indices is None:
+        indices = np.atleast_1d(indices)
+        values = np.asfarray([i for i in indices], np.float64)
+    else:
+        values = np.asfarray(line, np.float64)
 
-    return values if indices[0] is None else values[indices]
+    return values
 
 
 def parseString(this, delimiters=','):
@@ -323,7 +326,7 @@ def parseString(this, delimiters=','):
     return list(filter(None, line))
 
 
-def getHeaderNames(fName, i=[-1], nHeaders=0):
+def get_column_name(filename):
     """Read headers names from a line in a file
 
     Parameters
@@ -341,21 +344,16 @@ def getHeaderNames(fName, i=[-1], nHeaders=0):
         A list of the parsed header entries.
 
     """
-    assert fileExists(fName), 'Cannot find file '+fName
-    with open(fName, 'r', encoding='utf-8-sig') as f:
-        skipLines(f, nHeaders)  # Skip header lines
-        line = f.readline()     # Read a line from the file
+    assert fileExists(filename), 'Cannot find file {}'.format(filename)
 
-    line = parseString(line)  # Parse the line into separater entries
-    if isinstance(i,int):
-        i = [i]
-    if (len(i) == 1):
-        if (i[0] == -1):
-            i = np.arange(len(line))
-    out = []
-    for j in i:
-        out.append(line[j])         # Grab the entries for the columns in i
-    return out
+    channels = read_csv(filename, nrows=0).columns
+
+    if len(channels) == 1:
+        channels = read_csv(filename, nrows=0, delim_whitespace=True).columns
+
+    channels = [c.strip() for c in channels]
+
+    return channels
 
 
 def int2str(i, N):
