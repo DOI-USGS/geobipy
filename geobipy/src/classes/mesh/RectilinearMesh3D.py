@@ -626,16 +626,16 @@ class RectilinearMesh3D(RectilinearMesh2D):
         if not self.height is None:
             self.height.writeHdf(grp, 'height', withPosterior=withPosterior, index=index)
 
-
-    def fromHdf(self, grp, index=None):
+    @classmethod
+    def fromHdf(cls, grp, index=None):
         """ Reads in the object from a HDF file """
-        self.__init__()
-        self.x = RectilinearMesh1D().fromHdf(grp['x'], index=index)
-        self.y = RectilinearMesh1D().fromHdf(grp['y'], index=index)
-        self.z = RectilinearMesh1D().fromHdf(grp['z'], index=index)
+        out = cls()
+        out.x = RectilinearMesh1D.fromHdf(grp['x'], index=index)
+        out.y = RectilinearMesh1D.fromHdf(grp['y'], index=index)
+        out.z = RectilinearMesh1D.fromHdf(grp['z'], index=index)
         if 'height' in grp:
-            self.height = Model().fromHdf(grp['height'], index=index)
-        return self
+            out.height = Model.fromHdf(grp['height'], index=index)
+        return out
 
 
     def xRange(self):

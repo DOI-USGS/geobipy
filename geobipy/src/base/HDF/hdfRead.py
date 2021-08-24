@@ -214,10 +214,10 @@ def read_item(h5obj, index=None, **kwargs):
 
         elif '(0.0,0.0,0.0,0.0)' in s:
             s = s.replace('(0.0,0.0,0.0,0.0)', '')
-            s += '()'
+            # s += '()'
 
-        elif not '()' in s:
-            s += '()'
+        if '()' in s:
+            s = s.replace('()', '')
 
         item = eval(cf.safeEval(s))
         tmp = item.fromHdf(h5obj, index=index, **kwargs)

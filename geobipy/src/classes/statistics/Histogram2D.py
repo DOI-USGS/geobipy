@@ -977,16 +977,15 @@ class Histogram2D(RectilinearMesh2D):
         self._counts.writeHdf(parent, name+'/counts',
                               withPosterior=withPosterior, index=index)
 
-    def fromHdf(self, grp, index=None):
+    @classmethod
+    def fromHdf(cls, grp, index=None):
         """ Reads in the object from a HDF file """
-        super().fromHdf(grp, index)
+        out = super(Histogram2D, cls).fromHdf(grp, index)
 
         if "arr" in grp:
-            self._counts = StatArray.StatArray().fromHdf(
-                grp['arr'], index=index)
+            out._counts = StatArray.StatArray.fromHdf(grp['arr'], index=index)
         else:
-            self._counts = StatArray.StatArray().fromHdf(
-                grp['counts'], index=index)
+            out._counts = StatArray.StatArray.fromHdf(grp['counts'], index=index)
 
-        self._counts = self._counts.astype(np.int64)
-        return self
+        out._counts = out._counts.astype(np.int64)
+        return out

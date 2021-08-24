@@ -558,40 +558,40 @@ class DataPoint(Point):
         self.relErr.writeHdf(grp, 'relErr',  withPosterior=withPosterior, index=index)
         self.addErr.writeHdf(grp, 'addErr',  withPosterior=withPosterior, index=index)
 
-
-    def fromHdf(self, grp, index=None, **kwargs):
+    @classmethod
+    def fromHdf(cls, grp, index=None, **kwargs):
         """ Reads the object from a HDF group """
 
-        super().fromHdf(grp, index=index)
+        out = super(DataPoint, cls).fromHdf(grp, index=index)
 
-        self.errorPosterior = None
+        out.errorPosterior = None
 
         if 'fiducial' in grp:
-            self.fiducial = StatArray.StatArray().fromHdf(grp['fiducial'], index=index)
+            out.fiducial = StatArray.StatArray.fromHdf(grp['fiducial'], index=index)
 
         if 'line_number' in grp:
-            self.lineNumber = StatArray.StatArray().fromHdf(grp['line_number'], index=index)
+            out.lineNumber = StatArray.StatArray.fromHdf(grp['line_number'], index=index)
 
-        self.elevation = StatArray.StatArray().fromHdf(grp['e'], index=index)
+        out.elevation = StatArray.StatArray.fromHdf(grp['e'], index=index)
 
         if 'channels_per_system' in grp:
-            self._nChannelsPerSystem = np.asarray(grp['channels_per_system'])
+            out._nChannelsPerSystem = np.asarray(grp['channels_per_system'])
 
-        self._data = StatArray.StatArray().fromHdf(grp['d'], index=index)
-        self._std = StatArray.StatArray().fromHdf(grp['s'], index=index)
-        self._predictedData = StatArray.StatArray().fromHdf(grp['p'], index=index)
+        out._data = StatArray.StatArray.fromHdf(grp['d'], index=index)
+        out._std = StatArray.StatArray.fromHdf(grp['s'], index=index)
+        out._predictedData = StatArray.StatArray.fromHdf(grp['p'], index=index)
 
         # if 'joint_error_posterior_0' in grp:
         #     i = 0
         #     self.errorPosterior = []
         #     while 'joint_error_posterior_{}'.format(i) in grp:
-        #         self.errorPosterior.append(Histogram2D().fromHdf(grp['joint_error_posterior_{}'.format(i)], index=index))
+        #         self.errorPosterior.append(Histogram2D.fromHdf(grp['joint_error_posterior_{}'.format(i)], index=index))
         #         i += 1
 
-        self._relErr = StatArray.StatArray().fromHdf(grp['relErr'], index=index)
-        self._addErr = StatArray.StatArray().fromHdf(grp['addErr'], index=index)
+        out._relErr = StatArray.StatArray.fromHdf(grp['relErr'], index=index)
+        out._addErr = StatArray.StatArray.fromHdf(grp['addErr'], index=index)
 
-        return self
+        return out
 
 
     def Isend(self, dest, world):

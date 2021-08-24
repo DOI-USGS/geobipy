@@ -915,7 +915,7 @@ class TdemData(Data):
             systems.append(td)
 
 
-        super().fromHdf(grp)
+        super.fromHdf(grp)
 
         self.systems = systems
 

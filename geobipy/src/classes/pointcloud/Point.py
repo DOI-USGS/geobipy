@@ -104,16 +104,15 @@ class Point(myObject, ABC):
         self.y.writeHdf(grp, 'y',  withPosterior=withPosterior, index=index)
         self.z.writeHdf(grp, 'z',  withPosterior=withPosterior, index=index)
 
-    def fromHdf(self, grp, index=None, **kwargs):
+    @classmethod
+    def fromHdf(cls, grp, index=None, **kwargs):
         """ Reads the object from a HDF group """
 
-        x = StatArray.StatArray().fromHdf(grp['x'], index=index)
-        y = StatArray.StatArray().fromHdf(grp['y'], index=index)
-        z = StatArray.StatArray().fromHdf(grp['z'], index=index)
+        x = StatArray.StatArray.fromHdf(grp['x'], index=index)
+        y = StatArray.StatArray.fromHdf(grp['y'], index=index)
+        z = StatArray.StatArray.fromHdf(grp['z'], index=index)
 
-        Point.__init__(self, x, y, z)
-
-        return self
+        return cls(x, y, z)
 
     def Isend(self, dest, world):
         tmp = np.empty(3, np.float64)

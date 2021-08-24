@@ -173,8 +173,10 @@ class Model(myObject):
     def writeHdf(self, parent, name, withPosterior=True, index=None):
         self.values.writeHdf(parent, name+'/values',  withPosterior=withPosterior, index=index)
 
-    def fromHdf(self, grp, index=None):
+    @classmethod
+    def fromHdf(cls, grp, index=None):
         """ Reads in the object from a HDF file """
-        self._mesh = hdfRead.read_item(grp['mesh'], index=index)
-        self._values = StatArray.StatArray().fromHdf(grp['values'], index)
-        return self
+        out = cls()
+        out._mesh = hdfRead.read_item(grp['mesh'], index=index)
+        out._values = StatArray.StatArray.fromHdf(grp['values'], index)
+        return out

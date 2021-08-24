@@ -1056,29 +1056,28 @@ class RectilinearMesh2D(Mesh):
         if not self.height is None:
             self.height.writeHdf(grp, 'height',  withPosterior=withPosterior, index=index)
 
-
-    def fromHdf(self, grp, index=None):
+    @classmethod
+    def fromHdf(cls, grp, index=None):
         """ Reads in the object from a HDF file """
 
-        RectilinearMesh2D.__init__(self)
+        out = cls()
 
-        self.x = RectilinearMesh1D.RectilinearMesh1D().fromHdf(grp['x'], index=index)
-        self.y = RectilinearMesh1D.RectilinearMesh1D().fromHdf(grp['y'], index=index)
+        out.x = RectilinearMesh1D.RectilinearMesh1D.fromHdf(grp['x'], index=index)
 
-        self._z = self._y
+        out.y = RectilinearMesh1D.RectilinearMesh1D.fromHdf(grp['y'], index=index)
+
+        out._z = out._y
 
         if 'z' in grp:
-            if self.y.nCells == self.x.nCells:
-                z = RectilinearMesh1D.RectilinearMesh1D().fromHdf(grp['z'], index=index)
-                self.z = z
-                self.xyz = True
-
-
+            if out.y.nCells == out.x.nCells:
+                z = RectilinearMesh1D.RectilinearMesh1D.fromHdf(grp['z'], index=index)
+                out.z = z
+                out.xyz = True
 
         if 'height' in grp:
-            self._height = RectilinearMesh1D.RectilinearMesh1D().fromHdf(grp['height'], index=index)
+            out._height = RectilinearMesh1D.RectilinearMesh1D.fromHdf(grp['height'], index=index)
 
-        return self
+        return out
 
 
     def range(self, axis):

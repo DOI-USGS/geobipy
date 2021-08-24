@@ -482,14 +482,13 @@ class Histogram1D(RectilinearMesh1D):
         grp = parent[name]
         self._counts.writeHdf(grp, 'counts', index=index)
 
-
-    def fromHdf(self, grp, index=None):
+    @classmethod
+    def fromHdf(cls, grp, index=None):
         """ Reads in the object froma HDF file """
+        out = super(Histogram1D, cls).fromHdf(grp, index)
+        out._counts = StatArray.StatArray.fromHdf(grp['counts'], index=index)
 
-        super().fromHdf(grp, index)
-        self._counts = StatArray.StatArray().fromHdf(grp['counts'], index=index)
-
-        return self
+        return out
 
     @property
     def summary(self):

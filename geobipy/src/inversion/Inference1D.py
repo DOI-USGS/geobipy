@@ -429,7 +429,7 @@ class Inference1D(myObject):
 
         assert not (iNone and fNone) ^ (not iNone and not fNone), Exception("Must specify either an index OR a fiducial.")
 
-        fiducials = StatArray.StatArray().fromHdf(hdfFile['fiducials'])
+        fiducials = StatArray.StatArray.fromHdf(hdfFile['fiducials'])
 
         if not fNone:
             index = fiducials.searchsorted(fiducial)

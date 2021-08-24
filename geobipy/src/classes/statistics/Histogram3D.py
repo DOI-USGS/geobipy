@@ -949,11 +949,11 @@ class Histogram3D(RectilinearMesh3D):
 
     def fromHdf(self, grp, index=None):
         """ Reads in the object from a HDF file """
-        super().fromHdf(grp, index)
+        super.fromHdf(grp, index)
         if 'counts' in grp:
-            self._counts = StatArray.StatArray().fromHdf(grp['counts'], index)
+            self._counts = StatArray.StatArray.fromHdf(grp['counts'], index)
         else:
-            self._counts = StatArray.StatArray().fromHdf(grp['arr'], index)
+            self._counts = StatArray.StatArray.fromHdf(grp['arr'], index)
         return self
 
 

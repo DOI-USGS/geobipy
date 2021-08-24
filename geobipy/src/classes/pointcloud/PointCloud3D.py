@@ -998,10 +998,10 @@ class PointCloud3D(myObject):
     def fromHdf(self, grp):
         """ Reads the object from a HDF group """
 
-        x = StatArray.StatArray().fromHdf(grp['x'])
-        y = StatArray.StatArray().fromHdf(grp['y'])
-        z = StatArray.StatArray().fromHdf(grp['z'])
-        elevation = StatArray.StatArray().fromHdf(grp['e'])
+        x = StatArray.StatArray.fromHdf(grp['x'])
+        y = StatArray.StatArray.fromHdf(grp['y'])
+        z = StatArray.StatArray.fromHdf(grp['z'])
+        elevation = StatArray.StatArray.fromHdf(grp['e'])
 
         PointCloud3D.__init__(self, x, y, z, elevation)
 

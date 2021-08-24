@@ -166,8 +166,8 @@ class SquareLoop(EmLoop):
         grp.create_dataset('data',        data = self.data)
         grp.create_dataset('sidelength',      data = self.sideLength)
 
-
-    def fromHdf(self, h5grp, index=None):
+    @classmethod
+    def fromHdf(cls, h5grp, index=None):
         """ Reads in the object from a HDF file """
 
         if (index is None):
@@ -182,7 +182,7 @@ class SquareLoop(EmLoop):
             except:
                 assert False, ValueError("HDF data was created as a larger array, specify the row index to read from")
 
-            return SquareLoop(o, m, d[:, 0], d[:, 1], d[:, 2], d[:, 3], d[:, 4], d[:, 5], r)
+            return cls(o, m, d[:, 0], d[:, 1], d[:, 2], d[:, 3], d[:, 4], d[:, 5], r)
         else:
             o = np.array(h5grp.get('orientation')[index])
             m = np.array(h5grp.get('moment')[index])
@@ -191,7 +191,7 @@ class SquareLoop(EmLoop):
                 r = np.array(h5grp.get('sidelength')[index])
             except:
                 r = 1.0
-            return SquareLoop(o, m, d[0], d[1], d[2], d[3], d[4], d[5], r)
+            return cls(o, m, d[0], d[1], d[2], d[3], d[4], d[5], r)
 
 
     def Bcast(self, world, root=0):

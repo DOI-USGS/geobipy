@@ -967,32 +967,32 @@ class Data(PointCloud3D):
     def fromHdf(self, grp, **kwargs):
         """ Reads the object from a HDF group """
 
-        super().fromHdf(grp)
+        super.fromHdf(grp)
 
         self.errorPosterior = None
 
         if 'fiducial' in grp:
-            self.fiducial = StatArray.StatArray().fromHdf(grp['fiducial'])
+            self.fiducial = StatArray.StatArray.fromHdf(grp['fiducial'])
 
         if 'line_number' in grp:
-            self.lineNumber = StatArray.StatArray().fromHdf(grp['line_number'])
+            self.lineNumber = StatArray.StatArray.fromHdf(grp['line_number'])
 
         if 'channels_per_system' in grp:
             self._nChannelsPerSystem = np.asarray(grp['channels_per_system'])
 
-        self._data = StatArray.StatArray().fromHdf(grp['d'])
-        self._std = StatArray.StatArray().fromHdf(grp['s'])
-        self._predictedData = StatArray.StatArray().fromHdf(grp['p'])
+        self._data = StatArray.StatArray.fromHdf(grp['d'])
+        self._std = StatArray.StatArray.fromHdf(grp['s'])
+        self._predictedData = StatArray.StatArray.fromHdf(grp['p'])
 
         if 'joint_error_posterior_0' in grp:
             i = 0
             self.errorPosterior = []
             while 'joint_error_posterior_{}'.format(i) in grp:
-                self.errorPosterior.append(Histogram3D().fromHdf(grp['joint_error_posterior_{}'.format(i)]))
+                self.errorPosterior.append(Histogram3D.fromHdf(grp['joint_error_posterior_{}'.format(i)]))
                 i += 1
 
-        self._relative_error = StatArray.StatArray().fromHdf(grp['relErr'])
-        self._additive_error = StatArray.StatArray().fromHdf(grp['addErr'])
+        self._relative_error = StatArray.StatArray.fromHdf(grp['relErr'])
+        self._additive_error = StatArray.StatArray.fromHdf(grp['addErr'])
 
         return self
 

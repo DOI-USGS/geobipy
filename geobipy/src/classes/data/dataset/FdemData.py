@@ -974,8 +974,8 @@ class FdemData(Data):
     def fromHdf(self, grp, **kwargs):
         """ Reads the object from a HDF group """
 
-        super().fromHdf(grp)
-        self.system = FdemSystem().fromHdf(grp['sys'])
+        super.fromHdf(grp)
+        self.system = FdemSystem.fromHdf(grp['sys'])
 
         return self
 

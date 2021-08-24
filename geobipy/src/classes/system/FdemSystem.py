@@ -6,6 +6,7 @@ from copy import deepcopy
 from ...classes.core.myObject import myObject
 import numpy as np
 from ...classes.core import StatArray
+from ...base.HDF import hdfRead
 from .EmLoop import EmLoop
 from .CircularLoop import CircularLoop
 from ...base import fileIO as fIO
@@ -277,28 +278,30 @@ class FdemSystem(myObject):
             self.transmitterLoops[i].toHdf(T, 'T{}'.format(i))
             self.receiverLoops[i].toHdf(R, 'R{}'.format(i))
 
-
-    def fromHdf(self, grp):
+    @classmethod
+    def fromHdf(cls, grp):
         """ Reads the object from a HDF file """
         nFreq = np.int(np.array(grp.get('nFreq')))
-        frequencies = StatArray.StatArray().fromHdf(grp['freq'])
+        frequencies = StatArray.StatArray.fromHdf(grp['freq'])
 
         if 'loopoffsets' in grp:
-            loopOffsets = StatArray.StatArray().fromHdf(grp['loopoffsets'])
+            loopOffsets = StatArray.StatArray.fromHdf(grp['loopoffsets'])
         else:
-            loopOffsets = StatArray.StatArray().fromHdf(grp['dist'])
+            loopOffsets = StatArray.StatArray.fromHdf(grp['dist'])
 
         transmitterLoops = []
         receiverLoops = []
         for i in range(nFreq):
-            transmitterLoops.append(eval(cF.safeEval(grp['T/T{}'.format(i)].attrs.get('repr'))))
-            receiverLoops.append(eval(cF.safeEval(grp['R/R{}'.format(i)].attrs.get('repr'))))
+            transmitterLoops.append(hdfRead.read_item(grp['T/T{}'.format(i)]))
+            receiverLoops.append(hdfRead.read_item(grp['R/R{}'.format(i)]))
 
-        self.__init__(frequencies, transmitterLoops, receiverLoops)
+            # print(cF.safeEval(grp['T/T{}'.format(i)].attrs.get('repr')))
+            # transmitterLoops.append(eval(cF.safeEval(grp['T/T{}'.format(i)].attrs.get('repr'))))
+            # receiverLoops.append(eval(cF.safeEval(grp['R/R{}'.format(i)].attrs.get('repr'))))
 
-        self.loopOffsets = loopOffsets
-
-        return self
+        out = cls(frequencies, transmitterLoops, receiverLoops)
+        out.loopOffsets = loopOffsets
+        return out
 
 
     def Bcast(self, world, root=0):

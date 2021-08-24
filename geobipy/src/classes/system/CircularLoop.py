@@ -166,18 +166,18 @@ class CircularLoop(EmLoop):
         data = StatArray.StatArray(np.asarray([self._orient, self.moment, self.x, self.y, self.z, self.pitch, self.roll, self.yaw, self.radius], dtype=np.float64))
         data.writeHdf(grp, 'data', index=index)
 
-
-    def fromHdf(self, h5grp, index=None):
+    @classmethod
+    def fromHdf(cls, grp, index=None):
         """ Reads in the object from a HDF file """
 
-        item = h5grp['data']
+        item = grp['data']
 
         if not 'repr' in item.attrs:
             tmp = np.asarray(item[index, :])
         else:
-            tmp = StatArray.StatArray().fromHdf(item, index=index)
+            tmp = StatArray.StatArray.fromHdf(item, index=index)
 
-        return CircularLoop(*tmp)
+        return cls(*tmp)
 
 
     def Bcast(self, world, root=0):

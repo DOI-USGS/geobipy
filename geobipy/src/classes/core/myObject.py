@@ -44,17 +44,14 @@ class myObject(ABC):
         if (j < 15):
             return (str(i / (1024**4)) + ' TB')
 
-
     @property
     def hdf_name(self):
-        return type(self).__name__ + '()'
-
+        return type(self).__name__
 
     def create_hdf_group(self, h5obj, name):
         grp = h5obj.create_group(name)
         grp.attrs["repr"] = self.hdf_name
         return grp
-
 
     def toHdf(self, h5obj, name, withPosterior=False):
         """Create and write to HDF.

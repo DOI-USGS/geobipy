@@ -372,11 +372,11 @@ class Inference3D(myObject):
     def load_marginal_probability(self, filename):
 
         with h5py.File(filename, 'r') as f:
-            values = StatArray.StatArray().fromHdf(f['probabilities'])
+            values = StatArray.StatArray.fromHdf(f['probabilities'])
 
         return values
             # for i in range(self.nLines):
-            #     self.lines[i].marginal_probability = StatArray.StatArray().fromHdf(f['probabilities'], index=np.s_[self.lineIndices[i], :, :])
+            #     self.lines[i].marginal_probability = StatArray.StatArray.fromHdf(f['probabilities'], index=np.s_[self.lineIndices[i], :, :])
             #     self.lines[i].uncache('highest_marginal')
 
         # self.uncache('marginalProbability')
@@ -506,7 +506,7 @@ class Inference3D(myObject):
             # Read the local fits
             local_fits = []
             for j in range(z.nCells.value):
-                local_fits.append(mixPearson().fromHdf(local_mixture_h5['fits'], index=(i, j)))
+                local_fits.append(mixPearson.fromHdf(local_mixture_h5['fits'], index=(i, j)))
 
             # Get the 2D posterior for parameter
             posterior = self.hitmap(index=i)

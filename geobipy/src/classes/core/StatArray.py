@@ -1584,7 +1584,8 @@ class StatArray(np.ndarray, myObject):
                 else:
                     self.posterior.writeHdf(grp, 'posterior', index=index)
 
-    def fromHdf(self, grp, name=None, index=None, verbose=False):
+    @classmethod
+    def fromHdf(cls, grp, name=None, index=None, verbose=False):
         """Read the StatArray from a HDF group
 
         Given the HDF group object, read the contents into a StatArray.
@@ -1598,9 +1599,15 @@ class StatArray(np.ndarray, myObject):
 
         """
 
-        if verbose:
-            print('StatArray.fromHdf')
-            print(self.shape)
+        # if verbose:
+        #     print('StatArray.fromHdf')
+        #     print(self.shape)
+
+        is_file = False
+        if isinstance(grp, str):
+            f = h5py.File(grp, 'r')
+            grp = f
+            is_file = True
 
         if not name is None:
             grp = grp[name]
@@ -1654,10 +1661,13 @@ class StatArray(np.ndarray, myObject):
                 units = grp.attrs['repr'].split('"')[3]
 
         if 'StatArray((1,)' in grp.attrs['repr']:
-            out = StatArray(1, name, units) + d
+            out = cls(1, name, units) + d
         else:
-            out = StatArray(d, name, units)
+            out = cls(d, name, units)
         out.setPosterior(posterior)
+
+        if is_file:
+            f.close()
 
         return out
 

@@ -291,21 +291,22 @@ class FdemDataPoint(EmDataPoint):
 
         # self.calibration.writeHdf(grp, 'calibration',  withPosterior=withPosterior, index=index)
 
-
-    def fromHdf(self, grp, index=None, **kwargs):
+    @classmethod
+    def fromHdf(cls, grp, index=None, **kwargs):
         """ Reads the object from a HDF group """
 
-        self.system = FdemSystem().fromHdf(grp['sys'])
+        system = FdemSystem.fromHdf(grp['sys'])
 
-        super().fromHdf(grp, index)
+        out = super(FdemDataPoint, cls).fromHdf(grp, index)
 
-        self._nChannelsPerSystem = self.nFrequencies
+        out.system = system
+        out._nChannelsPerSystem = out.nFrequencies
 
         # item = grp.get('calibration')
         # obj = eval(cf.safeEval(item.attrs.get('repr')))
         # _aPoint.calibration = obj.fromHdf(item, index=index)
 
-        return self
+        return out
 
 
     def calibrate(self, Predicted=True):

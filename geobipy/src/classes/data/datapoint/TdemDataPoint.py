@@ -522,13 +522,13 @@ class TdemDataPoint(EmDataPoint):
 
         system_file_path = kwargs['system_file_path']
 
-        super().fromHdf(grp, index)
+        super.fromHdf(grp, index)
 
         self.transmitter = (eval(cf.safeEval(grp['T'].attrs.get('repr')))).fromHdf(grp['T'], index=index)
         self.receiver = (eval(cf.safeEval(grp['R'].attrs.get('repr')))).fromHdf(grp['R'], index=index)
 
         if 'loop_offset' in grp:
-            self.loopOffset = StatArray.StatArray().fromHdf(grp['loop_offset'], index=index)
+            self.loopOffset = StatArray.StatArray.fromHdf(grp['loop_offset'], index=index)
 
         nSystems = np.int(np.asarray(grp['nSystems']))
         self.system = [join(system_file_path, str(np.asarray(grp['System{}'.format(i)]), 'utf-8')) for i in range(nSystems)]
