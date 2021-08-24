@@ -1,6 +1,7 @@
 from copy import deepcopy
 from ...classes.core.myObject import myObject
 import numpy as np
+from pandas import read_csv
 from ...classes.core import StatArray
 from ...base import fileIO as fIO
 # from ...base import interpolation
@@ -736,7 +737,7 @@ class PointCloud3D(myObject):
             assert np.all(np.diff(nPoints) == 0), Exception('Number of data points must match in all data files')
         return nPoints[0]
 
-    def _csv_column_indices(self, filename):
+    def _csv_channels(self, filename):
         """Get the column indices from a csv file.
 
         Parameters
@@ -756,69 +757,59 @@ class PointCloud3D(myObject):
         indices = []
 
         # Get the column headers of the data file
-        channels = fIO.getHeaderNames(filename)
+        channels = fIO.get_column_name(filename)
         nChannels = len(channels)
 
         x_names = ('e', 'x','easting')
         y_names = ('n', 'y', 'northing')
-        z_names = ('alt', 'laser', 'bheight', 'height')
+        z_names = ('alt', 'altitude', 'laser', 'bheight', 'height')
         e_names = ('dtm','dem_elev','dem_np','topo', 'elev', 'elevation')
 
-        # Check for each aspect of the data file and the number of columns
-        nCoordinates = 0
-        indices = []
+        n = 0
+        labels = [None]*3
+
         for channel in channels:
-            channel = channel.lower()
-            if (channel in x_names):
-                nCoordinates += 1
-            elif (channel in y_names):
-                nCoordinates += 1
-            elif (channel in z_names):
-                nCoordinates += 1
-            elif(channel in e_names):
-                nCoordinates += 1
+            cTmp = channel.lower()
+            if (cTmp in x_names):
+                n += 1
+                labels[0] = channel
+            elif (cTmp in y_names):
+                n += 1
+                labels[1] = channel
+            elif (cTmp in z_names):
+                n += 1
+                labels[2] = channel
+            elif(cTmp in e_names):
+                labels.append(channel)
 
-        assert nCoordinates <= 4, Exception("File must contain columns for easting, northing, height. May also have an elevation column \n {}".format(self.fileInformation()))
+        assert n == 3 and len(labels) <= 4, Exception("File must contain columns for easting, northing, height. May also have an elevation column \n {}".format(self.fileInformation()))
+        return labels
 
-        # Initialize a column identifier for x y z
-        index = np.zeros(nCoordinates, dtype=np.int32)
-        for j, channel in enumerate(channels):
-            channel = channel.lower()
-            if (channel in x_names):
-                index[0] = j
-            elif (channel in y_names):
-                index[1] = j
-            elif (channel in z_names):
-                index[2] = j
-            elif(channel in e_names):
-                index[3] = j
-
-        return index
-
-
-    def read(self, fileName):
+    def read_csv(self, filename):
         """Reads x y z co-ordinates from an ascii csv file.
 
         Parameters
         ----------
-        fileName : str
+        filename : str
             Path to the file to read from.
 
         """
-        indices = self.csv_column_indices(fileName)
-        values = fIO.read_columns(fileName, nHeaders=1, indices=indices)
+        channels = self._csv_channels(filename)
 
-        tmp = fIO.getHeaderNames(fileName, indices)
+        try:
+            df = read_csv(filename, index_col=False, usecols=channels, skipinitialspace = True)
+        except:
+            df = read_csv(filename, index_col=False, usecols=channels, delim_whitespace=True, skipinitialspace = True)
+        df = df.replace('NaN',np.nan)
 
-        self.__init__(*np.hsplit(values, np.size(indices)))
-        self.x.name = tmp[0]
-        self.y.name = tmp[1]
-        self.z.name = tmp[2]
-        if np.size(indices) > 3:
-            self.elevation.name = tmp[3]
+        self.__init__()
+        self.x = df[channels[0]].values
+        self.y = df[channels[1]].values
+        self.z = df[channels[2]].values
+        if np.size(channels) > 3:
+            self.elevation = df[channels[3]].values
 
         return self
-
 
     def fileInformation(self):
         """Description of PointCloud3D file.

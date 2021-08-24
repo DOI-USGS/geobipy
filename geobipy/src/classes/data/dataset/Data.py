@@ -3,6 +3,7 @@ Module describing a Data Set where values are associated with an xyz co-ordinate
 """
 from copy import deepcopy
 import numpy as np
+from pandas import read_csv
 from cached_property import cached_property
 from ....classes.core import StatArray
 from ....base import fileIO as fIO
@@ -358,7 +359,7 @@ class Data(PointCloud3D):
             for i in r:
                 vtk.point_data.append(Scalars(tmp[:, i], "{} {}".format(self.channelNames[i], tmp.getNameUnits())))
 
-    def _csv_column_indices(self, filename):
+    def _csv_channels(self, filename):
         """Get the column indices from a csv file.
 
         Parameters
@@ -378,34 +379,57 @@ class Data(PointCloud3D):
         indices = []
 
         # Get the column headers of the data file
-        channels = fIO.getHeaderNames(filename)
+        channels = fIO.get_column_name(filename)
         nChannels = len(channels)
 
         line_names = ('line', 'linenumber')
         fiducial_names = ('fid', 'fiducial', 'id')
 
-        # Check for each aspect of the data file and the number of columns
-        nCoordinates = 0
-        indices = []
+        n = 0
+        labels = [None]*2
+
         for channel in channels:
-            channel = channel.lower()
-            if (channel in line_names):
-                nCoordinates += 1
-            elif (channel in fiducial_names):
-                nCoordinates += 1
+            cTmp = channel.lower()
+            if (cTmp in line_names):
+                n += 1
+                labels[0] = channel
+            elif (cTmp in fiducial_names):
+                n += 1
+                labels[1] = channel
 
-        assert nCoordinates == 2, Exception("File must contain columns for line and fiducial. May also have an elevation column \n {}".format(self.fileInformation()))
+        assert n == 2, Exception("File {} must contain columns for line and fiducial. \n {}".format(filename, self.fileInformation()))
 
-        # Initialize a column identifier for x y z
-        index = np.zeros(nCoordinates, dtype=np.int32)
-        for j, channel in enumerate(channels):
-            channel = channel.lower()
-            if (channel in line_names):
-                index[0] = j
-            elif (channel in fiducial_names):
-                index[1] = j
+        return super()._csv_channels(filename), labels
 
-        return super()._csv_column_indices(filename), index
+    def _open_csv_files(self, filename):
+        self._file = []
+        channels = self.csv_channels(filename)
+
+        if isinstance(filename, str):
+            filename = [filename]
+
+        for i, f in enumerate(filename):
+            try:
+                df = read_csv(f, index_col=False, usecols=channels[i], chunksize=1, skipinitialspace = True)
+            except:
+                df = read_csv(f, index_col=False, usecols=channels[i], chunksize=1, delim_whitespace=True, skipinitialspace = True)
+
+            self._file.append(df)
+
+    def _read_csv_line_fiducial(self, filename=None):
+
+        if isinstance(filename, str):
+            filename = [filename]
+
+        _, channels = Data._csv_channels(self, filename[0])
+
+        try:
+            df = read_csv(filename[0], index_col=False, usecols=channels, skipinitialspace = True)
+        except:
+            df = read_csv(filename[0], index_col=False, usecols=channels, delim_whitespace=True, skipinitialspace = True)
+
+        df = df.replace('NaN',np.nan)
+        return df[channels[0]].values, df[channels[1]].values
 
     def _systemIndices(self, system=0):
         """The slice indices for the requested system.
@@ -616,10 +640,10 @@ class Data(PointCloud3D):
             assert 0 <= channel < self.nChannels, ValueError('Requested channel must be 0 <= channel < {}'.format(self.nChannels))
         else:
             assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-            assert 0 <= channel < self.nChannelsPerSystem[system], ValueError('Requested channel must be 0 <= channel {}'.format(self.nChannelsPerSystem[system]))
+            assert 0 <= channel < self.channels_per_system[system], ValueError('Requested channel must be 0 <= channel {}'.format(self.channels_per_system[system]))
             channel = self.systemOffset[system] + channel
 
-        kwargs['c'] = self.dataChannel(channel)
+        kwargs['values'] = self.dataChannel(channel)
 
         self.mapPlot(*args, **kwargs)
 

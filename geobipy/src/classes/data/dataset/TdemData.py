@@ -7,6 +7,7 @@
 
 """
 from copy import deepcopy
+from pandas import read_csv
 from ...pointcloud.PointCloud3D import PointCloud3D
 from .Data import Data
 from ..datapoint.TdemDataPoint import TdemDataPoint
@@ -154,6 +155,8 @@ class TdemData(Data):
             else:
                 self._system[i] = s
 
+        self._channels_per_system = np.asarray([s.nTimes for s in self.system])
+
     @property
     def transmitter(self):
         return self._transmitter
@@ -185,7 +188,7 @@ class TdemData(Data):
         return np.s_[((self.nTimes*component)+(system*self.nChannels))[0]:(self.nTimes*(component+1)+(system*self.nChannels))[0]]
 
 
-    def read(self, dataFilename, systemFilename):
+    def read_csv(self, dataFilename, systemFilename):
         """Reads the data and system parameters from file
 
         Parameters
@@ -263,83 +266,76 @@ class TdemData(Data):
 
         assert nDatafiles == nSystems, Exception("Number of data files must match number of system files.")
 
-        self.system = systemFilename
-        nPoints, iC, iR, iT, iOffset, iD, iS = self._csv_column_indices(dataFilename, self.system)
+        TdemData.__init__(self, systems=systemFilename)
+
+        self._nPoints, iC, iR, iT, iOffset, iD, iS = self._csv_channels(dataFilename)
 
         # Get all readable column indices for the first file.
-        tmp = [iC[0], iR[0], iT[0], iOffset[0], iD[0]]
+        channels = iC[0] + iR[0] + iT[0] + iOffset[0] + iD[0]
         if not iS[0] is None:
-            tmp.append(iS[0])
-        indicesForFile = np.hstack(tmp)
+            channels += iS[0]
 
         # Read in the columns from the first data file
-        values = fIO.read_columns(dataFilename[0], indicesForFile, 1, nPoints)
+        try:
+            df = read_csv(dataFilename[0], usecols=channels, skipinitialspace = True)
+        except:
+            df = read_csv(dataFilename[0], usecols=channels, delim_whitespace=True, skipinitialspace = True)
+        df = df.replace('NaN',np.nan)
 
         # Assign columns to variables
-        lineNumber = values[:, 0]
-        fiducial = values[:, 1]
-        x = values[:, 2]
-        y = values[:, 3]
-        z = values[:, 4]
-        elevation = values[:, 5]
-
-        self.__init__(lineNumber=lineNumber,
-                      fiducial=fiducial,
-                      x=x,
-                      y=y,
-                      z=z,
-                      elevatin=elevation,
-                      systems=self.system)
+        self.lineNumber = df[iC[0][0]].values
+        self.fiducial = df[iC[0][1]].values
+        self.x = df[iC[0][2]].values
+        self.y = df[iC[0][3]].values
+        self.z = df[iC[0][4]].values
+        self.elevation = df[iC[0][5]].values
 
         # Assign the orientations of the acquisistion loops
-        i0 = 6
         self.receiver = None
-        for i in range(nPoints):
-            self.receiver[i] = CircularLoop(z=self.z[i], pitch=values[i, i0], roll=values[i, i0+1], yaw=values[i, i0+2], radius=self.system[0].loopRadius())
-        i0 += 3
+        for i in range(self.nPoints):
+            self.receiver[i] = CircularLoop(z=self.z[i], pitch=df[iR[0][0]].values[i], roll=df[iR[0][1]].values[i], yaw=df[iR[0][2]].values[i], radius=self.system[0].loopRadius())
 
         self.transmitter = None
-        for i in range(nPoints):
-            self.transmitter[i] = CircularLoop(z=self.z[i], pitch=values[i, i0], roll=values[i, i0+1], yaw=values[i, i0+2], radius=self.system[0].loopRadius())
-        i0 += 3
+        for i in range(self.nPoints):
+            self.transmitter[i] = CircularLoop(z=self.z[i], pitch=df[iT[0][0]].values[i], roll=df[iT[0][1]].values[i], yaw=df[iT[0][2]].values[i], radius=self.system[0].loopRadius())
 
-        self.loopOffset = values[:, i0:i0+3]
-        i0 += 3
+        self.loopOffset = df[iOffset[0]].values
 
-        # Assign the data values
-        i1 = i0 + self.nTimes[0]
-        iData = np.arange(i0, i1)
 
         # Get the data values
         iSys = self._systemIndices(0)
 
-        self.data[:, iSys] = values[:, iData]
+        self.data[:, iSys] = df[iD[0]].values
         # If the data error columns are given, assign them
+
         if (iS[0] is None):
             self.std[:, iSys] = 0.1 * self.data[:, iSys]
         else:
-            i2 = i1 + self.nTimes[0]
-            iStd = np.arange(i1, i2)
-            self.std[:, iSys] = values[:, iStd]
+            self.std[:, iSys] = df[iS[0]].values
 
         # Read in the data for the other systems.  Only read in the data and, if available, the errors
         for i in range(1, self.nSystems):
             # Assign the columns to read
-            indicesForFile = iD[i]
+            channels = iD[i]
             if (not iS[i] is None): # Append the error columns if they are available
-                indicesForFile = np.concatenate(indicesForFile, iS[i])
+                channels += iS[i]
 
             # Read the columns
-            values = fIO.read_columns(dataFilename[i], indicesForFile, 1, nPoints)
+            try:
+                df = read_csv(dataFilename[i], usecols=channels, skipinitialspace = True)
+            except:
+                df = read_csv(dataFilename[i], usecols=channels, delim_whitespace=True, skipinitialspace = True)
+            df = df.replace('NaN',np.nan)
+
             # Assign the data
             iSys = self._systemIndices(i)
-            self.data[:, iSys] = values[:, :self.nTimes[i]]
+
+            self.data[:, iSys] = df[iD[i]].values
             if (iS[i] is None):
                 self.std[:, iSys] = 0.1 * self.data[:, iSys]
             else:
-                self.std[:, iSys] = values[:, self.nTimes[i]:]
+                self.std[:, iSys] = df[iS[i]].values
 
-        # self.iActive = self.getActiveChannels()
 
         self.check()
 
@@ -363,8 +359,21 @@ class TdemData(Data):
 
     #     self._systemOffset = np.append(0, np.cumsum(self.nChannelsPerSystem))
 
+    def csv_channels(self, data_filename):
 
-    def _csv_column_indices(self, data_filename, system):
+        self._nPoints, self._iC, self._iR, self._iT, self._iOffset, self._iD, self._iS = self._csv_channels(data_filename)
+
+        self._channels = []
+        for i in range(self.nSystems):
+            channels = self._iC[i] + self._iR[i] + self._iT[i] + self._iOffset[i] + self._iD[i]
+            if not self._iS[i] is None:
+                channels += self._iS[i]
+            self._channels.append(channels)
+
+        return self._channels
+
+
+    def _csv_channels(self, data_filename):
         """Reads the column indices for the co-ordinates, loop orientations, and data from the TdemData file.
 
         Parameters
@@ -389,15 +398,12 @@ class TdemData(Data):
 
         """
 
-        indices = []
-        rLoopIndices = []
-        tLoopIndices = []
-        offsetIndices = []
-        offdataIndices = []
-        offerrIndices = []
-
-        nSystems = len(system) if isinstance(system, list) else 1
-        assert all(isinstance(s, TdemSystem) for s in system), TypeError("system must contain geobipy.TdemSystem classes.")
+        location_channels = []
+        rLoop_channels = []
+        tLoop_channels = []
+        offset_channels = []
+        off_channels = []
+        off_error_channels = []
 
         # First get the number of points in each data file. They should be equal.
         nPoints = self._csv_n_points(data_filename)
@@ -405,123 +411,69 @@ class TdemData(Data):
         rloop_names = ('rxpitch', 'rxroll', 'rxyaw')
         tloop_names = ('txpitch', 'txroll', 'txyaw')
         offset_names = ('txrx_dx', 'txrx_dy', 'txrx_dz')
-        fiducial_names = ('fid', 'fiducial', 'id')
 
         if isinstance(data_filename, str):
             data_filename = [data_filename]
 
         for k, f in enumerate(data_filename):
             # Get the column headers of the data file
-            channels = fIO.getHeaderNames(f)
-            channels = [channel.lower() for channel in channels]
+            channels = fIO.get_column_name(f)
+            nChannels = len(channels)
 
-            ixyz, ilf = super()._csv_column_indices(f)
-            _indices = np.hstack([ilf, ixyz])
+            ixyz, ilf = super()._csv_channels(f)
+            loc = ilf + ixyz
+
+            nr = nt = no = 0
+            rloop = [None]*3
+            tloop = [None]*3
+            offset = [None]*3
+            on = []
+            on_error = []
+            off = []
+            off_error = []
 
             # Check for each aspect of the data file and the number of columns
-            nOffData = nOffErr = 0
-            nOnData = nOnErr = 0
-            nRloop = nTloop = nOffset = 0
-
             for channel in channels:
-                channel = channel.lower()
-                if channel in rloop_names:
-                    nRloop += 1
-                elif channel in tloop_names:
-                    nTloop += 1
-                elif channel in offset_names:
-                    nOffset += 1
-                elif "on[" in channel:
-                    nOnData += 1
-                elif "onerr[" in channel:
-                    nOnErr += 1
-                elif "off[" in channel:
-                    nOffData += 1
-                elif "offerr[" in channel:
-                    nOffErr += 1
+                cTmp = channel.lower()
+                if cTmp in rloop_names:
+                    nr +=1
+                    rloop[rloop_names.index(cTmp)] = channel
+                elif cTmp in tloop_names:
+                    nt += 1
+                    tloop[tloop_names.index(cTmp)] = channel
+                elif cTmp in offset_names:
+                    no += 1
+                    offset[offset_names.index(cTmp)] = channel
+                elif "on[" in cTmp:
+                    on.append(channel)
+                elif "onerr[" in cTmp:
+                    on_error.append(channel)
+                elif "off[" in cTmp:
+                    off.append(channel)
+                elif "offerr[" in cTmp:
+                    off_error.append(channel)
 
-            assert ixyz.size + ilf.size == 6, Exception("Data file must contain columns for line, fid, easting, northing, height, and elevation. \n {}".format(self.fileInformation()))
+            assert nr == 3, Exception('Must have all three RxPitch, RxRoll, and RxYaw headers in data file {} if reciever orientation is specified. \n {}'.format(f, self.fileInformation()))
+            assert nt == 3, Exception('Must have all three TxPitch, TxRoll, and TxYaw headers in data file {} if transmitter orientation is specified. \n {}'.format(f, self.fileInformation()))
+            assert no == 3, Exception('Must have all three txrx_dx, txrx_dy, and txrx_dz headers in data file {} if transmitter-reciever loop separation is specified. \n {}'.format(f, self.fileInformation()))
 
-            assert nRloop == 3, Exception('Must have all three RxPitch, RxRoll, and RxYaw headers in data file {} if reciever orientation is specified. \n {}'.format(f, self.fileInformation()))
-            assert nTloop == 3, Exception('Must have all three TxPitch, TxRoll, and TxYaw headers in data file {} if transmitter orientation is specified. \n {}'.format(f, self.fileInformation()))
-            assert nOffset == 3, Exception('Must have all three txrx_dx, txrx_dy, and txrx_dz headers in data file {} if transmitter-reciever loop separation is specified. \n {}'.format(f, self.fileInformation()))
-            _rLoopIndices = np.empty(3, dtype=np.int32)
-            _tLoopIndices = np.empty(3, dtype=np.int32)
-            _offsetIndices = np.empty(3, dtype=np.int32)
+            assert len(off) == self.system[k].windows.centre.size, Exception("Number of Off time columns {} in {} does not match number of times {} in system file {}. \n {}".format(len(off), f, self.system[k].fileName, self.system[k].windows.centre.size, self.fileInformation()))
 
+            if len(off_error) > 0:
+                assert len(off_error) == len(off), Exception("Number of Off time standard deviation estimates does not match number of Off time data columns in file {}. \n {}".format(f, self.fileInformation()))
+            else:
+                off_error = None
 
-            assert nOffData == system[k].windows.centre.size, Exception("Number of Off time columns {} in {} does not match number of times {} in system file {}. \n {}".format(nOffData, f, system[k].fileName, system[k].windows.centre.size, self.fileInformation()))
-            _offdataIndices = np.empty(nOffData, dtype=np.int32)
+            location_channels.append(loc)
+            rLoop_channels.append(rloop)
+            tLoop_channels.append(tloop)
+            offset_channels.append(offset)
+            off_channels.append(off)
+            off_error_channels.append(off_error)
 
-            _offerrIndices = None
-            if nOffErr > 0:
-                assert nOffErr == nOffData, Exception("Number of Off time standard deviation estimates does not match number of Off time data columns in file {}. \n {}".format(f, self.fileInformation()))
-                _offerrIndices = np.empty(nOffErr, dtype=np.int32)
+        return nPoints, location_channels, rLoop_channels, tLoop_channels, offset_channels, off_channels, off_error_channels
 
-            i1 = 0
-            i2 = 0
-
-            for j, channel in enumerate(channels):
-                channel = channel.lower()
-                # Get the receiver loop orientation indices
-                if (channel == 'rxpitch'):
-                    _rLoopIndices[0] = j
-                elif (channel == 'rxroll'):
-                    _rLoopIndices[1] = j
-                elif (channel == 'rxyaw'):
-                    _rLoopIndices[2] = j
-
-                # Get the transmitter loop orientation indices
-                elif (channel == 'txpitch'):
-                    _tLoopIndices[0] = j
-                elif (channel == 'txroll'):
-                    _tLoopIndices[1] = j
-                elif (channel == 'txyaw'):
-                    _tLoopIndices[2] = j
-
-                # Get the transmitter loop orientation indices
-                elif (channel == 'txrx_dx'):
-                    _offsetIndices[0] = j
-                elif (channel == 'txrx_dy'):
-                    _offsetIndices[1] = j
-                elif (channel == 'txrx_dz'):
-                    _offsetIndices[2] = j
-
-                elif ('off[' in channel):
-                    _offdataIndices[i1] = j
-                    i1 += 1
-
-                elif ('offerr[' in channel):
-                    _offerrIndices[i2] = j
-                    i2 += 1
-
-            indices.append(_indices)
-            rLoopIndices.append(_rLoopIndices)
-            tLoopIndices.append(_tLoopIndices)
-            offsetIndices.append(_offsetIndices)
-            offdataIndices.append(_offdataIndices)
-            offerrIndices.append(_offerrIndices)
-
-        return nPoints, indices, rLoopIndices, tLoopIndices, offsetIndices, offdataIndices, offerrIndices
-
-    def _read_line_fiducial(self, data_filename, system_filename):
-        # Read in the columns from the first data file
-        self.system = system_filename
-
-        if isinstance(data_filename, list):
-            data_filename = data_filename[0]
-
-        nPoints = self._csv_n_points(data_filename)
-        ixyz, ilf = super()._csv_column_indices(data_filename)
-
-        if isinstance(data_filename, str):
-            data_filename = [data_filename]
-            ilf = (ilf)
-
-        values = fIO.read_columns(data_filename[0], ilf, 1, nPoints)
-        return values[:, 0], values[:, 1]
-
-    def _initialize_sequential_reading(self, dataFileName, systemFilename):
+    def _initialize_sequential_reading(self, data_filename, system_filename):
         """Special function to initialize a file for reading data points one at a time.
 
         Parameters
@@ -533,47 +485,11 @@ class TdemData(Data):
 
         """
 
+
         # Read in the EM System file
-        self.system = systemFilename
-
-        self._nPoints, self._iC, self._iR, self._iT, self._iOffset, self._iD, self._iS = self._csv_column_indices(dataFileName, self.system)
-
-        if isinstance(dataFileName, str):
-            dataFileName = [dataFileName]
-        self.data_filename = dataFileName
-
-        self._file = []
-        for f in dataFileName:
-            self._file.append(open(f, 'r'))
-        for f in self._file:
-            fIO.skipLines(f, nLines=1)
-
-        # Get all readable column indices for the first file.
-        self._indicesForFile = []
-
-        for i in range(self.nSystems):
-            tmp = [self._iC[i], self._iR[i], self._iT[i], self._iOffset[i], self._iD[i]]
-            if not self._iS[i] is None:
-                tmp.append(self._iS[i])
-            self._indicesForFile.append(np.hstack(tmp))
-
-        # Remap the indices for the different components of the file to make reading easier.
-        for i in range(self.nSystems):
-            offset = self._iC[i].size
-            self._iC[i] = np.arange(offset)
-            self._iR[i] = np.arange(3) + offset
-            offset += 3
-            self._iT[i] = np.arange(3) + offset
-            offset += 3
-            self._iOffset[i] = np.arange(3) + offset
-            offset += 3
-
-            nTmp = self._iD[i].size
-            self._iD[i] = np.arange(nTmp) + offset
-            offset += nTmp
-            if not self._iS[i] is None:
-                nTmp = self._iS[i].size
-                self._iS[i] = np.arange(nTmp) + offset
+        self.system = system_filename
+        self._data_filename = data_filename
+        self._open_csv_files(data_filename)
 
     @property
     def nSystems(self):
@@ -589,15 +505,13 @@ class TdemData(Data):
         FdemData.__initLineByLineRead() must have already been run.
 
         """
-        if self._file[0].closed:
-            return None
-
         endOfFile = False
-        values = []
+        dfs = []
         for i in range(self.nSystems):
-            line = self._file[i].readline()
             try:
-                values.append(fIO.getRealNumbersfromLine(line, self._indicesForFile[i]))
+                df = self._file[i].get_chunk()
+                df = df.replace('NaN',np.nan)
+                dfs.append(df)
             except:
                 self._file[i].close()
                 endOfFile = True
@@ -605,54 +519,33 @@ class TdemData(Data):
         if endOfFile:
             return None
 
-        D = np.empty(self.nChannels)
-        S = np.empty(self.nChannels)
-        for j in range(self.nSystems):
-            iSys = self._systemIndices(j)
-            D[iSys] = values[j][self._iD[j]]
-            if self._iS[j] is None:
-                S[iSys] = 0.1 * D[iSys]
-            else:
-                S[iSys] = values[j][self._iS[j]]
+        D = np.squeeze(np.hstack([dfs[i][self._iD[i]].values for i in range(self.nSystems)]))
 
-        values = values[0]
+        if self._iS[0] is None:
+            S = 0.1 * D
+        else:
+            S = np.squeeze(np.hstack([dfs[i][self._iS[i]].values for i in range(self.nSystems)]))
 
-        i0 = 6
-        R = CircularLoop(z=values[4], pitch=values[i0], roll=values[i0+1], yaw=values[i0+2], radius=self.system[0].loopRadius())
-        i0 += 3
+        data = np.squeeze(dfs[0][self._iC[0]].values)
 
-        T = CircularLoop(z=values[4], pitch=values[i0], roll=values[i0+1], yaw=values[i0+2], radius=self.system[0].loopRadius())
-        i0 += 3
+        rloop = np.squeeze(dfs[0][self._iR[0]].values)
+        R = CircularLoop(z=data[4], pitch=rloop[0], roll=rloop[1], yaw=rloop[2], radius=self.system[0].loopRadius())
+        tloop = np.squeeze(dfs[0][self._iT[0]].values)
+        T = CircularLoop(z=data[4], pitch=tloop[0], roll=tloop[1], yaw=tloop[2], radius=self.system[0].loopRadius())
 
-        loopOffset = values[i0:i0+3]
-        i0 += 3
+        loopOffset = np.squeeze(dfs[0][self._iOffset[0]].values)
 
-        out = TdemDataPoint(x=values[2], y=values[3], z=values[4], elevation=values[5],
+        out = TdemDataPoint(x=data[2], y=data[3], z=data[4], elevation=data[5],
                             data=D, std=S,
                             system=self.system,
                             transmitter_loop=T, receiver_loop=R, loopOffset=loopOffset,
-                            lineNumber=values[0], fiducial=values[1])
+                            lineNumber=data[0], fiducial=data[1])
 
         return out
-
-
-    def _open_data_files(self, dataFilename):
-        self._file = []
-        for i, f in enumerate(dataFilename):
-            self._file.append(open(f, 'r'))
-            fIO.skipLines(self._file[i], nLines=1)
-
-
-    def _close_data_files(self):
-        for f in self._file:
-            if not f.closed:
-                f.close()
-
 
     def check(self):
         if (np.any(self._data[~np.isnan(self._data)] <= 0.0)):
             print("Warning: Your data contains values that are <= 0.0")
-
 
     def estimateAdditiveError(self):
         """ Uses the late times after 1ms to estimate the additive errors and error bounds in the data. """

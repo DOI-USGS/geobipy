@@ -2,6 +2,7 @@
 Module describing an EMData Set where channels are associated with an xyz co-ordinate
 """
 from copy import deepcopy
+from pandas import read_csv
 from .Data import Data
 from ..datapoint.FdemDataPoint import FdemDataPoint
 from ....base import utilities as cF
@@ -154,7 +155,7 @@ class FdemData(Data):
             else:
                 self._system[i] = s
 
-        self._nChannelsPerSystem = np.asarray([2*s.nFrequencies for s in self.system])
+        self._channels_per_system = np.asarray([2*s.nFrequencies for s in self.system])
 
 
     @property
@@ -488,7 +489,7 @@ class FdemData(Data):
         return ax
 
 
-    def read(self, dataFilename, systemFilename):
+    def read_csv(self, dataFilename, systemFilename):
         """Read in both the Fdem data and FDEM system files
 
         The data file is structured using columns with the first line containing header information.
@@ -513,130 +514,89 @@ class FdemData(Data):
         # Read in the EM System file
         if (isinstance(dataFilename, str)):
             dataFilename = [dataFilename]
-        if (isinstance(systemFilename, str)):
-            systemFilename = [systemFilename]
 
         nDatafiles = len(dataFilename)
-        nSystems = len(systemFilename)
-
-        assert nDatafiles == nSystems, Exception("Number of data files must match number of system files.")
-
-        self.system = systemFilename
-        # self.readSystemFile(systemFilename)
-
-        nPoints, iC, iD, iS, powerline, magnetic = self._csv_column_indices(dataFilename, self.system)
-
-        nBase = np.size(iC[0])
-
-        # Get all readable column indices for the first file.
-        tmp = [iC[0]]
-        tmp.append(iD[0])
-        if not iS[0] is None:
-            tmp.append(iS[0])
-        indicesForFile = np.hstack(tmp)
-
 
         # Initialize the EMData Class
-        FdemData.__init__(self, systems=self.system)
+        FdemData.__init__(self, systems=systemFilename)
+
+        assert nDatafiles == self.nSystems, Exception("Number of data files must match number of system files.")
+
+        nPoints, iC, iD, iS, powerline, magnetic = self._csv_channels(dataFilename)
+
+        channels = iC[0] + iD[0]
+        if not iS[0] is None:
+            channels += iS[0]
 
         # Read in the columns from the first data file
-        values = fIO.read_columns(dataFilename[0], indicesForFile, 1, nPoints)
+        try:
+            df = read_csv(dataFilename[0], index_col=False, usecols=channels, skipinitialspace = True)
+        except:
+            df = read_csv(dataFilename[0], index_col=False, usecols=channels, delim_whitespace=True, skipinitialspace = True)
+        df = df.replace('NaN',np.nan)
 
         # Assign columns to variables
-        self.lineNumber = values[:, 0]
-        self.fiducial = values[:, 1]
-        self.x = values[:, 2]
-        self.y = values[:, 3]
-        self.z = values[:, 4]
-        self.elevation = values[:, 5]
+        self.lineNumber = df[iC[0][0]].values
+        self.fiducial = df[iC[0][1]].values
+        self.x = df[iC[0][2]].values
+        self.y = df[iC[0][3]].values
+        self.z = df[iC[0][4]].values
+        self.elevation = df[iC[0][5]].values
 
         if not powerline is None:
-            self.powerline = values[:, powerline]
+            self.powerline = df[powerline[0]].values
         else:
             self.powerline = None
 
         if not magnetic is None:
-            self.magnetic = values[:, magnetic]
+            self.magnetic = df[magnetic[0]].values
         else:
             self.magnetic = None
 
-        # EM data columns are in the following order
-        # I1 Q1 I2 Q2 .... IN QN ErrI1 ErrQ1 ... ErrIN ErrQN
-        # Reshuffle to the following
-        # I1 I2 ... IN Q1 Q2 ... QN and
-        # ErrI1 ErrI2 ... ErrIN ErrQ1 ErrQ2 ... ErrQN
-
-        self.data = values[:, nBase:nBase + (2 * self.nFrequencies[0])]
-        if (iS[0]):
-            self.std = values[:, nBase + (2 * self.nFrequencies[0]):]
+        self.data = df[iD[0]].values
+        if not iS[0] is None:
+            self.std = df[iS[0]].values
         else:
             self.std = 0.1 * self.data
-
-        # # Read in the data for the other systems.  Only read in the data and, if available, the errors
-        # for i in range(1, self.nSystems):
-        #     # Get all readable column indices for the file.
-        #     tmp = [iD[i]]
-        #     if not iS[i] is None:
-        #         tmp.append(iS[i])
-        #     indicesForFile = np.hstack(tmp)
-
-        #     # Read the columns
-        #     values = fIO.read_columns(dataFilename[i], indicesForFile[i], 1, nPoints)
-        #     # Assign the data
-        #     iSys = self._systemIndices(i)
-        #     self.data[:, iSys] = values[:, nBase:nBase + 2 * self.nFrequencies[i]]
-        #     if (iS[i]):
-        #         self.std[:, iSys] = values[:, nBase + 2 * self.nFrequencies[i]:]
-        #     else:
-        #         self.std[:, iSys] = 0.1 * self.data[:, iSys]
 
         self.check()
 
         return self
 
 
-    # def readSystemFile(self, systemFilename):
-    #     """ Reads in the system handler using the system file name """
+    # def _reconcile_channels(self, channels):
 
-    #     if isinstance(systemFilename, str):
-    #         systemFilename = [systemFilename]
+    #     for i, channel in enumerate(channels):
+    #         channel = channel.lower()
+    #         if(channel in ['line']):
+    #             channels[i] = 'line'
+    #         elif(channel in ['id', 'fid', 'fiducial']):
+    #             channels[i] = 'fiducial'
+    #         elif (channel in ['n', 'x','northing']):
+    #             channels[i] = 'x'
+    #         elif (channel in ['e', 'y', 'easting']):
+    #             channels[i] = 'y'
+    #         elif (channel in ['alt', 'laser', 'bheight', 'height']):
+    #             channels[i] = 'height'
+    #         elif(channel in ['z','dtm','dem_elev', 'dem', 'dem_np','topo', 'elev', 'elevation']):
+    #             channels[i] = 'elevation'
 
-    #     nSys = len(systemFilename)
-    #     self.system = np.ndarray(nSys, dtype=FdemSystem)
+    #     return channels
 
-    #     for i in range(nSys):
-    #         self.system[i] = FdemSystem()
-    #         self.system[i].read(systemFilename[i])
+    def csv_channels(self, filename):
+        self._nPoints, self._iC, self._iD, self._iS, iP, iM = self._csv_channels(filename)
 
-    #     self.nSystems = nSys
-    #     self.nChannelsPerSystem = np.asarray([np.int32(2*x.nFrequencies) for x in self.system])
-    #     self._systemOffset = np.append(0, np.cumsum(self.nChannelsPerSystem))
+        self._channels = []
+        for i in range(self.nSystems):
+            channels = self._iC[i] + self._iD[i]
+            if not self._iS[i] is None:
+                channels += self._iS[i]
+            self._channels.append(channels)
 
-    def _reconcile_channels(self, channels):
-
-        for i, channel in enumerate(channels):
-            channel = channel.lower()
-            if(channel in ['line']):
-                channels[i] = 'line'
-            elif(channel in ['id', 'fid', 'fiducial']):
-                channels[i] = 'fiducial'
-            elif (channel in ['n', 'x','northing']):
-                channels[i] = 'x'
-            elif (channel in ['e', 'y', 'easting']):
-                channels[i] = 'y'
-            elif (channel in ['alt', 'laser', 'bheight', 'height']):
-                channels[i] = 'height'
-            elif(channel in ['z','dtm','dem_elev', 'dem', 'dem_np','topo', 'elev', 'elevation']):
-                channels[i] = 'elevation'
-
-        return channels
+        return self._channels
 
 
-    # Section contains routines for opening a data file, and reading data points one at a time
-    # when requested.  These are used for a parallel implementation so that data points can be read
-    # by a master rank and sent individually to worker ranks.  Removes the need to read the entire
-    # dataset on all cores and minimizes RAM requirements.
-    def _csv_column_indices(self, dataFilename, system):
+    def _csv_channels(self, data_filename):
         """Read in the header information for an FdemData file.
 
         Parameters
@@ -655,76 +615,67 @@ class FdemData(Data):
 
         """
 
-        indices = []
-        dataIndices = []
-        errIndices = []
+        location_channels = []
+        data_channels = []
+        error_channels = []
         powerline = None
         magnetic = None
 
-        if isinstance(dataFilename, str):
-            dataFilename = [dataFilename]
-        if isinstance(system, FdemSystem):
-            system = [system]
+        if isinstance(data_filename, str):
+            data_filename = [data_filename]
 
-        assert all(isinstance(s, FdemSystem) for s in system), TypeError("system must contain geobipy.FdemSystem classes.")
+        nPoints = self._csv_n_points(data_filename)
 
-        nPoints = self._readNpoints(dataFilename)
+        for k, f in enumerate(data_filename):
 
-        for k, f in enumerate(dataFilename):
+            ixyz, ilf = super()._csv_channels(f)
+            _loc_channels = ilf + ixyz
 
             # Get the column headers of the data file
-            channels = fIO.getHeaderNames(f)
-            channels = [c.lower() for c in channels]
+            channels = fIO.get_column_name(f)
             nChannels = len(channels)
-
-            ixyz, ilf = super()._csv_column_indices(f)
-            _indices = np.hstack([ilf, ixyz])
-
-            # Check for each aspect of the data file and the number of columns
-            nCoordinates = _indices.size
-            if 'powerline' in channels:
-                nCoordinates += 1
-            if 'magnetic' in channels:
-                nCoordinates += 1
-
-            assert nCoordinates >= 6, Exception("Data file must contain columns for easting, northing, height, elevation, line, and fid. \n {}".format(self.fileInformation()))
-
-            nData = nChannels - nCoordinates
-
-            if nData > 2*system[k].nFrequencies:
-                _hasErrors = True
-                assert nData == 4*system[k].nFrequencies, Exception("Data file must have {0} data channels and {0} uncertainty channels each for in-phase and quadrature data.".format(system[k].nFrequencies))
-
-            else:
-                _hasErrors = False
-                assert nData == 2*system[k].nFrequencies, Exception("Data file must have {} data channels each for in-phase and quadrature data.".format(system[k].nFrequencies))
 
             # To grab the EM data, skip the following header names. (More can be added to this)
             # Initialize a column identifier for x y z
             inPhase = []
             quadrature = []
+            in_err = []
+            quad_err = []
             for j, channel in enumerate(channels):
-                if channel in ['powerline']:
-                    powerline = j
-                elif channel in ['magnetic']:
-                    magnetic = j
-                elif 'i_' in channel:
-                    inPhase.append(j)
-                elif 'q_' in channel:
-                    quadrature.append(j)
+                cTmp = channel.lower()
+                if cTmp in ['powerline']:
+                    powerline = 'powerline'
+                elif cTmp in ['magnetic']:
+                    magnetic = 'magnetic'
+                elif 'i_' in cTmp:
+                    if 'err' in cTmp:
+                        in_err.append(channel)
+                    else:
+                        inPhase.append(channel)
+                elif 'q_' in cTmp:
+                    if 'err' in cTmp:
+                        quad_err.append(channel)
+                    else:
+                        quadrature.append(channel)
 
-            _dataIndices = np.hstack([inPhase, quadrature])
-
-            _errIndices = np.hstack([inPhase + 2*system[k].nFrequencies, quadrature + 2*system[k].nFrequencies]) if _hasErrors else None
-
-            indices.append(_indices)
-            dataIndices.append(_dataIndices)
-            errIndices.append(_errIndices)
-
-        return nPoints, indices, dataIndices, errIndices, powerline, magnetic
+            hasErrors = len(quad_err) > 0
 
 
-    def _initialize_sequential_reading(self, dataFilename, systemFilename):
+            assert len(inPhase) == self.system[k].nFrequencies, Exception("Data file must have {} inphase channels, header should be I_<Frequency> for each inphase column".format(self.system[k].nFrequencies))
+            assert len(quadrature) == self.system[k].nFrequencies, Exception("Data file must have {} quadrature channels, header should be Q_<Frequency> for each quadrature column".format(self.system[k].nFrequencies))
+
+            _data_channels = inPhase + quadrature
+
+            _error_channels = in_err + quad_err if hasErrors else None
+
+            location_channels.append(_loc_channels)
+            data_channels.append(_data_channels)
+            error_channels.append(_error_channels)
+
+
+        return nPoints, location_channels, data_channels, error_channels, powerline, magnetic
+
+    def _initialize_sequential_reading(self, data_filename, system_filename):
         """Special function to initialize a file for reading data points one at a time.
 
         Parameters
@@ -737,55 +688,37 @@ class FdemData(Data):
         """
 
         # Read in the EM System file
-        self.system = systemFilename
-
-        # self.readSystemFile(systemFilename)
-        self._nPoints, self._iC, self._iD, self._iS, iP, iM = self._csv_column_indices(dataFilename, self.system)
-
-        if isinstance(dataFilename, str):
-            dataFilename = [dataFilename]
-
-        self._data_filename = dataFilename
-
-        self._open_data_files(dataFilename)
-
-        # Get all readable column indices for the first file.
-        self._indicesForFile = []
-        for i in range(self.nSystems):
-            tmp = [self._iC[i]]
-            tmp.append(self._iD[i])
-            if not self._iS[i] is None:
-                tmp.append(self._iS[i])
-            self._indicesForFile.append(np.hstack(tmp))
-
-        # Remap the indices for the different components of the file to make reading easier.
-        for i in range(self.nSystems):
-            offset = self._iC[i].size
-            self._iC[i] = np.arange(offset)
-            nTmp = self._iD[i].size
-            self._iD[i] = np.arange(nTmp) + offset
-            offset += nTmp
-            if not self._iS[i] is None:
-                nTmp = self._iS[i].size
-                self._iS[i] = np.arange(nTmp) + offset
+        self.system = system_filename
+        self._data_filename = data_filename
+        self._open_csv_files(data_filename)
 
 
-    def _open_data_files(self, dataFilename):
-        self._file = []
-        for i, f in enumerate(dataFilename):
-            self._file.append(open(f, 'r'))
-            fIO.skipLines(self._file[i], nLines=1)
+    # def _open_csv_files(self, dataFilename):
+    #     self._file = []
+    #     for i, f in enumerate(dataFilename):
+    #         try:
+    #             df = read_csv(f, index_col=False, usecols=self._channels[i], chunksize=1, skipinitialspace = True)
+    #         except:
+    #             df = read_csv(f, index_col=False, usecols=self._channels[i], chunksize=1, delim_whitespace=True, skipinitialspace = True)
+
+    #         self._file.append(df)
+
+            # self._file.append(read_csv(f, usecols=self._indicesForFile[i], chunksize=1, delim_whitespace=True))
 
 
-    def _close_data_files(self):
-        for f in self._file:
-            if not f.closed:
-                f.close()
+    # def _close_data_files(self):
+    #     for f in self._file:
+    #         if not f.closed:
+    #             f.close()
 
-    def _read_line_fiducial(self, data_filename=None, system_filename=None):
+    # def _read_line_fiducial(self, data_filename=None):
+    #     try:
+    #         df = read_csv(data_filename[0], index_col=False, usecols=self._iC[0][:2], skipinitialspace = True)
+    #     except:
+    #         df = read_csv(data_filename[0], index_col=False, usecols=self._iC[0][:2], delim_whitespace=True, skipinitialspace = True)
 
-        values = fIO.read_columns(self._data_filename[0], self._iC[:2], 1, self.nPoints)
-        return values[:, 0], values[:, 1]
+    #     df = df.replace('NaN',np.nan)
+    #     return df[self._iC[0][0]].values, df[self._iC[0][1]].values
 
     def _read_record(self, record=0):
         """Reads a single data point from the data file.
@@ -793,15 +726,16 @@ class FdemData(Data):
         FdemData.__initLineByLineRead() must have already been run.
 
         """
-        if self._file[0].closed:
-            return None
+        # if self._file[0].closed:
+        #     return None
 
         endOfFile = False
-        values = []
+        dfs = []
         for i in range(self.nSystems):
-            line = self._file[i].readline()
             try:
-                values.append(fIO.getRealNumbersfromLine(line, self._indicesForFile[i]))
+                df = self._file[i].get_chunk()
+                df = df.replace('NaN',np.nan)
+                dfs.append(df)
             except:
                 self._file[i].close()
                 endOfFile = True
@@ -809,22 +743,20 @@ class FdemData(Data):
         if endOfFile:
             return None
 
+        D = np.squeeze(np.hstack([dfs[i][self._iD[i]].values for i in range(self.nSystems)]))
 
-        D = np.empty(self.nChannels)
-        S = np.empty(self.nChannels)
-        for j in range(self.nSystems):
-            iSys = self._systemIndices(j)
-            iC = self._iC[j]
+        if self._iS[0] is None:
+            S = 0.1 * D
+        else:
+            S = np.squeeze(np.hstack([dfs[i][self._iS[i]].values for i in range(self.nSystems)]))
 
-            D[iSys] = values[j][iC.size:iC.size + 2*self.nFrequencies[j]]
-            if self._iS[j] is None:
-                S[iSys] = 0.1 * D[iSys]
-            else:
-                S[iSys] = values[j][iC.size + 2*self.nFrequencies[j] : iC.size + 4*self.nFrequencies[j]]
-
-        values = values[0]
-
-        return FdemDataPoint(x=values[2], y=values[3], z=values[4], elevation=values[5], data=D, std=S, system=self.system, lineNumber=values[0], fiducial=values[1])
+        return FdemDataPoint(x=dfs[0][self._iC[0][2]].values,
+                             y=dfs[0][self._iC[0][3]].values,
+                             z=dfs[0][self._iC[0][4]].values,
+                             elevation=dfs[0][self._iC[0][5]].values,
+                             data=D, std=S, system=self.system,
+                             lineNumber=dfs[0][self._iC[0][0]].values,
+                             fiducial=dfs[0][self._iC[0][1]].values)
 
 
     def readAarhusFile(self, dataFilename):
