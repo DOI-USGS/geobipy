@@ -1066,8 +1066,11 @@ def plot(x, y, **kwargs):
     if flipY:
         ax.invert_yaxis()
 
-    ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 2))
-    ax.ticklabel_format(style='sci', axis='y', scilimits=(0, 2))
+    if not xscale == 'log':
+        ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 2))
+
+    if not yscale == 'log':
+        ax.ticklabel_format(style='sci', axis='y', scilimits=(0, 2))
 
     return ax
 
