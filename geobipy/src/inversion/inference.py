@@ -138,8 +138,6 @@ def initialize(userParameters, DataPoint, prng=None):
     # Set the statistical properties of the datapoint
     # ---------------------------------------
     # Set the prior on the data
-    DataPoint.predictedData.setPrior('MvLogNormal', DataPoint.data[DataPoint.active], DataPoint.std[DataPoint.active]**2.0, linearSpace=False, prng=prng)
-
     DataPoint.relErr = userParameters.initialRelativeError
     DataPoint.addErr = userParameters.initialAdditiveError
 
@@ -151,6 +149,8 @@ def initialize(userParameters, DataPoint, prng=None):
         dz = userParameters.maximumElevationChange
         heightPrior = Distribution('Uniform', z - dz, z + dz, prng=prng)
         heightProposal = Distribution('Normal', DataPoint.z, userParameters.elevationProposalVariance, prng=prng)
+
+    data_prior = Distribution('MvLogNormal', DataPoint.data[DataPoint.active], DataPoint.std[DataPoint.active]**2.0, linearSpace=False, prng=prng)
 
     # Define prior, proposal, posterior for relative error
     relativePrior = None
@@ -169,7 +169,7 @@ def initialize(userParameters, DataPoint, prng=None):
 
 
     # Set the priors, proposals, and posteriors.
-    DataPoint.setPriors(heightPrior=heightPrior, relativeErrorPrior=relativePrior, additiveErrorPrior=additivePrior)
+    DataPoint.set_priors(height_prior=heightPrior, data_prior=data_prior, relative_error_prior=relativePrior, additive_error_prior=additivePrior)
     DataPoint.setProposals(heightProposal=heightProposal, relativeErrorProposal=relativeProposal, additiveErrorProposal=additiveProposal)
     DataPoint.setPosteriors()
 
@@ -179,7 +179,7 @@ def initialize(userParameters, DataPoint, prng=None):
 
     # # Initialize the calibration parameters
     # if (userParameters.solveCalibration):
-    #     DataPoint.calibration.setPrior('Normal',
+    #     DataPoint.calibration.set_prior('Normal',
     #                            np.reshape(userParameters.calMean, np.size(userParameters.calMean), order='F'),
     #                            np.reshape(userParameters.calVar, np.size(userParameters.calVar), order='F'), prng=prng)
     #     DataPoint.calibration[:] = DataPoint.calibration.prior.mean
@@ -204,7 +204,7 @@ def initialize(userParameters, DataPoint, prng=None):
     # Mod = Model1D(2, parameters = parameter, thickness=thk)
 
     # Setup the model for perturbation
-    Mod.setPriors(halfspace.par[0],
+    Mod.set_priors(halfspace.par[0],
                   userParameters.minimumDepth,
                   userParameters.maximumDepth,
                   userParameters.maximumNumberofLayers,

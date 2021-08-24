@@ -269,7 +269,7 @@ class StatArray(np.ndarray, myObject):
 
         self._posterior = posterior  # deepcopy(posterior)
 
-    def setPrior(self, distributionType, *args, **kwargs):
+    def set_prior(self, distributionType, *args, **kwargs):
         """Set a prior distribution
 
         Adds a prior by interfacing through the Distribution method rather than passing any subclasses of the baseDistribution class.
@@ -701,7 +701,7 @@ class StatArray(np.ndarray, myObject):
 
         """
         assert self.hasPrior, TypeError(
-            'No prior defined on variable {}. Use StatArray.setPrior()'.format(self.name))
+            'No prior defined on variable {}. Use StatArray.set_prior()'.format(self.name))
         if i is None:
             i = np.s_[:]
         return self.prior.derivative(self[i], order)
@@ -1012,7 +1012,7 @@ class StatArray(np.ndarray, myObject):
         """
 
         assert (self.hasPrior), TypeError(
-            'No prior defined on variable {}. Use StatArray.setPrior()'.format(self.name))
+            'No prior defined on variable {}. Use StatArray.set_prior()'.format(self.name))
 
         samples = self[:]
         if not x is None:
@@ -1045,14 +1045,15 @@ class StatArray(np.ndarray, myObject):
         """
 
         assert (self.hasProposal), TypeError(
-            'No proposal defined on variable {}. Use StatArray.setProposal()'.format(self.name))
+                                   'No proposal defined on variable {}. Use StatArray.setProposal()'.format(self.name))
 
         mv = self.proposal.multivariate
 
         if mv:
             nSamples = 1
             assert self.proposal.ndim == self.size, ValueError(
-                "Trying to generate {} samples from an {}-dimensional distribution. Proposal dimensions must match self.size.".format(self.size, self.proposal.ndim))
+                ("Trying to generate {} samples from an {}-dimensional distribution."
+                "Proposal dimensions must match self.size.").format(self.size, self.proposal.ndim))
         else:
             nSamples = self.size
 
@@ -1065,8 +1066,8 @@ class StatArray(np.ndarray, myObject):
         if not imposePrior:
             return proposed[i] if mv else proposed
 
-        assert self.hasPrior, TypeError(
-            'No prior defined on variable {}. Use StatArray.setPrior()'.format(self.name))
+        assert self.hasPrior, TypeError('No prior defined on variable {}. Use StatArray.set_prior()'.format(self.name))
+
         p = self.probability(x=proposed, log=log)
         num = -np.inf if log else 0.0
         while p == num:

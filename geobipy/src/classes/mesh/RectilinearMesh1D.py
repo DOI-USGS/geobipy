@@ -627,7 +627,7 @@ class RectilinearMesh1D(Mesh):
         * Change, change one the existing interfaces
         * No change, do nothing and return the original
 
-        The methods setPriors and setProposals must be used before calling self.perturb.
+        The methods.set_priors and setProposals must be used before calling self.perturb.
 
         If an interface is created, or an interface perturbed, any resulting cell width must be greater than the minimum width :math:`h_{min}`.
         If the new cell width test fails, the birth or perturbation tries again. If the cycle fails after 10 tries, the entire process begins again
@@ -640,7 +640,7 @@ class RectilinearMesh1D(Mesh):
 
         See Also
         --------
-        RectilinearMesh1D.setPriors : Must be used before calling self.perturb
+        RectilinearMesh1D.set_priors : Must be used before calling self.perturb
         RectilinearMesh1D.setProposals : Must be used before calling self.perturb
 
         """
@@ -927,7 +927,7 @@ class RectilinearMesh1D(Mesh):
         if edges_posterior is None:
 
             assert not self.max_cells is None, ValueError(
-                "No priors are set, user self.setPriors().")
+                "No priors are set, user self.set_priors().")
 
             # Discretize the parameter values
             zGrd = StatArray.StatArray(np.arange(
@@ -1003,13 +1003,13 @@ class RectilinearMesh1D(Mesh):
         self._max_cells = np.int32(max_cells)
 
         # Assign a uniform distribution to the number of layers
-        self.nCells.setPrior('Uniform', 1, self.max_cells, prng=prng)
+        self.nCells.set_prior('Uniform', 1, self.max_cells, prng=prng)
 
         # Set priors on the depth interfaces, given a number of layers
         i = np.arange(self.max_cells)
         dz = self.remainingSpace(i)
 
-        self.edges.setPrior('Order', denominator=dz)  # priZ
+        self.edges.set_prior('Order', denominator=dz)  # priZ
 
     def set_proposals(self, probabilities, prng=None):
         """Setup the proposal distibution.

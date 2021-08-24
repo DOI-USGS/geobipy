@@ -248,7 +248,8 @@ class EmDataPoint(DataPoint):
         cP.xlabel(c.getNameUnits())
         cP.ylabel('Data misfit')
 
-    def setPriors(self, heightPrior=None, relativeErrorPrior=None, additiveErrorPrior=None):
+
+    def set_priors(self, height_prior=None, data_prior=None, relative_error_prior=None, additive_error_prior=None):
         """Set the priors on the datapoint's perturbable parameters
 
         Parameters
@@ -266,14 +267,17 @@ class EmDataPoint(DataPoint):
 
         """
 
-        if not heightPrior is None:
-            self.z.setPrior(heightPrior)
+        if not height_prior is None:
+            self.z.set_prior(height_prior)
 
-        if not relativeErrorPrior is None:
-            self.relErr.setPrior(relativeErrorPrior)
+        if not data_prior is None:
+            self.predictedData.set_prior(data_prior)
 
-        if not additiveErrorPrior is None:
-            self.addErr.setPrior(additiveErrorPrior)
+        if not relative_error_prior is None:
+            self.relErr.set_prior(relative_error_prior)
+
+        if not additive_error_prior is None:
+            self.addErr.set_prior(additive_error_prior)
 
     def setProposals(self, heightProposal=None, relativeErrorProposal=None, additiveErrorProposal=None):
         """Set the proposals on the datapoint's perturbable parameters

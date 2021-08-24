@@ -180,7 +180,7 @@ class Model1D(RectilinearMesh1D):
             Inverse Hessian matrix
 
         """
-        assert self.par.hasPrior or self.dpar.hasPrior, Exception("Model must have either a parameter prior or gradient prior, use self.setPriors()")
+        assert self.par.hasPrior or self.dpar.hasPrior, Exception("Model must have either a parameter prior or gradient prior, use self.set_priors()")
 
         if not dataPoint is None:
             # Compute the sensitivity of the data to the perturbed model
@@ -591,7 +591,7 @@ class Model1D(RectilinearMesh1D):
         # Set the posterior hitmap for conductivity vs depth
         self.par.setPosterior(Hitmap2D(xBins=pGrd, yBins=self.edges.posterior.edges))
 
-    def setPriors(self, halfSpaceValue, min_edge, max_edge, max_cells, parameterPrior, gradientPrior, parameterLimits=None, min_width=None, factor=10.0, dzVariance=1.5, prng=None):
+    def set_priors(self, halfSpaceValue, min_edge, max_edge, max_cells, parameterPrior, gradientPrior, parameterLimits=None, min_width=None, factor=10.0, dzVariance=1.5, prng=None):
         """Setup the priors of a 1D model.
 
         Parameters
@@ -637,7 +637,7 @@ class Model1D(RectilinearMesh1D):
 
         # if parameterPrior:
         # Assign the initial prior to the parameters
-        self.par.setPrior('MvLogNormal', mean=self._halfSpaceParameter,
+        self.par.set_prior('MvLogNormal', mean=self._halfSpaceParameter,
                                          variance=np.log(1.0 + factor)**2.0,
                                          ndim=self.nCells,
                                          linearSpace=True,
@@ -645,7 +645,7 @@ class Model1D(RectilinearMesh1D):
 
         # if gradientPrior:
         # Assign the prior on the parameter gradient
-        self.dpar.setPrior('MvNormal', mean=0.0,
+        self.dpar.set_prior('MvNormal', mean=0.0,
                                        variance=dzVariance,
                                        ndim=np.maximum(1, self.nCells-1),
                                        prng=prng)
