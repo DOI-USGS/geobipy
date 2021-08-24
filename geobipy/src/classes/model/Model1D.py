@@ -1180,8 +1180,8 @@ class Model1D(RectilinearMesh1D):
 
         """
 
-        super().fromHdf(grp, index)
+        super.fromHdf(grp, index)
 
-        self._par = StatArray.StatArray().fromHdf(grp['par'], index=np.s_[index, :self.nCells.value])
+        self._par = StatArray.StatArray.fromHdf(grp['par'], index=np.s_[index, :self.nCells.value])
 
         return self
