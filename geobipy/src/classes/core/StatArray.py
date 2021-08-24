@@ -159,7 +159,7 @@ class StatArray(np.ndarray, myObject):
         elif isinstance(shape, np.ndarray):
             self = shape.view(StatArray)
 
-        elif isinstance(shape, (float, np.float)):
+        elif isinstance(shape, (float, np.float32, np.float64)):
             self = np.ndarray.__new__(subtype, 1, **kwargs)
             self[:] = shape
 
@@ -1580,8 +1580,7 @@ class StatArray(np.ndarray, myObject):
                     index = index[0]
                 if self.nPosteriors > 1:
                     for i in range(self.nPosteriors):
-                        self.posterior[i].writeHdf(
-                            grp, 'posterior{}'.format(i), index=index)
+                        self.posterior[i].writeHdf(grp, 'posterior{}'.format(i), index=index)
                 else:
                     self.posterior.writeHdf(grp, 'posterior', index=index)
 
