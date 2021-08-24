@@ -72,7 +72,7 @@ class Categorical(baseDistribution):
         return out
 
 
-    def deepcopy(self):
+    def __deepcopy__(self):
         """Create a deepcopy
 
         Returns
