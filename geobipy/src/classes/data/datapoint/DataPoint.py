@@ -349,7 +349,7 @@ class DataPoint(Point):
 
     def weightingMatrix(self, power=1.0):
         """Return a diagonal data weighting matrix of the reciprocated data standard deviations."""
-        return np.diag(self.std[self.active]**-power)
+        return np.diag(1.0 / self.std[self.active])
 
     def _systemIndices(self, system=0):
         """The slice indices for the requested system.
@@ -415,7 +415,7 @@ class DataPoint(Point):
 
         """
         assert not any(self._std[self.active] == 0.0), ValueError('Cannot compute the misfit when the data standard deviations are zero.')
-        tmp2 = self._std[self.active]**-1.0
+        tmp2 = 1.0 / self.std[self.active]
         PhiD = np.float64(np.sum((cf.Ax(tmp2, self.deltaD[self.active]))**2.0, dtype=np.float64))
         return PhiD if squared else np.sqrt(PhiD)
 
