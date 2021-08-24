@@ -165,6 +165,7 @@ def serial_dataset(userParameters, output_directory, seed=None, index=None):
     Dataset = type(userParameters.data_type)(systems=userParameters.systemFilename)
 
     r3D = Inference3D(output_directory, userParameters.systemFilename)
+
     r3D.createHDF5(Dataset, userParameters)
 
     # Get the random number generator
