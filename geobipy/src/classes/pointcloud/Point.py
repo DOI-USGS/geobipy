@@ -47,7 +47,7 @@ class Point(myObject, ABC):
 
     def __add__(self, other):
         """ Add two points together """
-        P = self.deepcopy()
+        P = deepcopy(self)
         P._x += other.x
         P._y += other.y
         P._z += other.z
@@ -65,7 +65,6 @@ class Point(myObject, ABC):
         """Get the Lp norm distance between two points. """
         return np.linalg.norm(np.asarray([self.x, self.y, self.z])-np.asarray([other.x, other.y, other.z]), **kwargs)
 
-    @abstractmethod
     def __deepcopy__(self, memo={}):
         """ Define a deepcopy routine """
         result = type(self).__new__(type(self))

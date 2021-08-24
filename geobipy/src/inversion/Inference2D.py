@@ -63,6 +63,9 @@ class Inference2D(myObject):
             self.hdfFile = hdfFile
         self._indices = None
 
+    def __deepcopy__(self, memo={}):
+        return None
+
     @property
     def world(self):
         return self._world
@@ -506,7 +509,7 @@ class Inference2D(myObject):
         """
         distributions = []
 
-        hm = self.hitmap(0).deepcopy()
+        hm = deepcopy(self.hitmap(0))
         counts = np.asarray(self.hdfFile['currentmodel/par/posterior/arr/data'])
 
         # Bar = progressbar.ProgressBar()

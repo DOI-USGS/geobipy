@@ -8,10 +8,11 @@
 """
 
 import sys
+from abc import ABC, abstractmethod
 from numpy import log10
 import h5py
 
-class myObject(object):
+class myObject(ABC):
     """Abstract base class """
 
     # def __init__(self, **kwargs):
@@ -23,6 +24,10 @@ class myObject(object):
         for k, v in self.__dict__.items():
             i += sys.getsizeof(v)
         return i
+
+    @abstractmethod
+    def __deepcopy__(self, memo={}):
+        return None
 
     def getsizeof(self):
         """Get the size of the object in memory with nice output """

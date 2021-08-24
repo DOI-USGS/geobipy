@@ -176,6 +176,8 @@ class Inference1D(myObject):
             self.accepted = StatArray.StatArray(np.zeros(n, dtype=bool), name='Accepted')
             self.dimensionChange = StatArray.StatArray(np.zeros(n, dtype=bool), name='Dimensions were changed')
 
+    def __deepcopy__(self, memo={}):
+        return None
 
     @property
     def hitmap(self):

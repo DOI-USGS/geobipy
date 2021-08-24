@@ -120,7 +120,7 @@ class Histogram1D(RectilinearMesh1D):
         # out._edges = self._edges.deepcopy()
         # out.isRegular = self.isRegular
         # out.dx = self.dx
-        out._counts = self._counts.deepcopy()
+        out._counts = deepcopy(self._counts)
         # out.log = self.log
         # out._relativeTo = self._relativeTo
 

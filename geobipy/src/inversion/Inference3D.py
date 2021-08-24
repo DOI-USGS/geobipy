@@ -84,6 +84,9 @@ class Inference3D(myObject):
         self._facies = None
         self.system_file_path = system_file_path
 
+    def __deepcopy__(self, memo={}):
+        return None
+
 
     @property
     def world(self):
@@ -1697,7 +1700,7 @@ class Inference3D(myObject):
 
         slce = self.interfaces[:, cell1]
         if lowerThreshold > 0.0:
-            slce = self.interfaces[:, cell1].deepcopy()
+            slce = deepcopy(self.interfaces[:, cell1])
             slce[slce < lowerThreshold] = np.nan
 
         return self.scatter2D(c = slce, **kwargs)

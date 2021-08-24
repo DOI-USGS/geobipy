@@ -3,6 +3,7 @@ Module for forward modeling time domain electro magnetic data.
 Leon Foks
 June 2020
 """
+from copy import deepcopy
 import numpy as np
 from ....system.TdemSystem_GAAEM import TdemSystem_GAAEM
 from .empymod_walktem import empymod_walktem
@@ -65,7 +66,7 @@ def empymod_tdem1dsen(datapoint, model1d, ix=None):
         iSys = datapoint._systemIndices(j)
 
         d0 = empymod_walktem(datapoint.system[j], model1d)
-        m1 = model1d.deepcopy()
+        m1 = deepcopy(model1d)
 
         for i in range(np.size(ix)):  # For the specified layers
             iLayer = ix[i]

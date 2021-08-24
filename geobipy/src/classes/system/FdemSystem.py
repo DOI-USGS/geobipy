@@ -123,7 +123,7 @@ class FdemSystem(myObject):
         assert all([isinstance(x, EmLoop) for x in values]), TypeError("receiverLoops must have type geobipy.EmLoop")
         self._receiverLoops = []
         for i in range(self.nFrequencies):
-            self._receiverLoops.append(values[i].deepcopy())
+            self._receiverLoops.append(deepcopy(values[i]))
 
     @property
     def transmitterLoops(self):
@@ -135,18 +135,14 @@ class FdemSystem(myObject):
         assert all([isinstance(x, EmLoop) for x in values]), TypeError("transmitterLoops must have type geobipy.EmLoop")
         self._transmitterLoops = []
         for i in range(self.nFrequencies):
-            self._transmitterLoops.append(values[i].deepcopy())
+            self._transmitterLoops.append(deepcopy(values[i]))
 
+    def __deepcopy__(self, memo={}):
+        out = FdemSystem(self.frequencies, self.transmitterLoops, self.receiverLoops)
+        out._fiilename = self._filename
+        return out
 
-    def deepcopy(self):
-        return deepcopy(self)
-
-
-    def __deepcopy__(self, memo):
-        return FdemSystem(self.frequencies, self.transmitterLoops, self.receiverLoops, self.fileName)
-
-
-    def read(self, fileName):
+    def read(self, filename):
         """ Read in a file containing the system information
 
         The system file is structured using columns with the first line containing header information

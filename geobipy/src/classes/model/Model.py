@@ -36,6 +36,12 @@ class Model(myObject):
         mesh = self.mesh[slic]
         return Model(mesh, values = self.values[slic])
 
+    def __deepcopy__(self, memo={}):
+        result = type(self).__new__(type(self))
+        result.mesh = self.mesh
+        result.mesh = self.values
+        return result
+
     @property
     def shape(self):
         return self.mesh.shape

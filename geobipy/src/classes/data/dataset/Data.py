@@ -1,6 +1,7 @@
 """ @Data_Class
 Module describing a Data Set where values are associated with an xyz co-ordinate
 """
+from copy import deepcopy
 import numpy as np
 from cached_property import cached_property
 from ....classes.core import StatArray
@@ -196,7 +197,7 @@ class Data(PointCloud3D):
                 self.nPoints = np.size(values)
             assert np.size(values) == self.nPoints, ValueError("fiducial must have size {}".format(self.nPoints))
             if (isinstance(values, StatArray.StatArray)):
-                self._fiducial = values.deepcopy()
+                self._fiducial = deepcopy(values)
             else:
                 self._fiducial = StatArray.StatArray(values, "Fiducial")
 
@@ -213,7 +214,7 @@ class Data(PointCloud3D):
                 self.nPoints = np.size(values)
             assert np.size(values) == self.nPoints, ValueError("lineNumber must have size {}".format(self.nPoints))
             if (isinstance(values, StatArray.StatArray)):
-                self._lineNumber = values.deepcopy()
+                self._lineNumber = deepcopy(values)
             else:
                 self._lineNumber = StatArray.StatArray(values, "Line number")
 

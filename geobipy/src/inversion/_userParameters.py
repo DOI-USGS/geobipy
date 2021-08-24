@@ -113,6 +113,9 @@ class _userParameters(myObject):
 
         self.check(Datapoint)
 
+    def __deepcopy__(self, memo={}):
+        return None
+
 
     # @property
     # def dataFilename(self):

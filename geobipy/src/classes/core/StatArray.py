@@ -398,17 +398,6 @@ class StatArray(np.ndarray, myObject):
         if other.hasPosterior:
             self._posterior = other._posterior
 
-    def deepcopy(self):
-        """Create a deepcopy
-
-        Returns
-        -------
-        out : StatArray
-            Deepcopy of StatArray
-
-        """
-        return deepcopy(self)
-
     def __deepcopy__(self, memo):
 
         other = StatArray(self, dtype=self.dtype)

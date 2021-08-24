@@ -23,7 +23,7 @@ class Hitmap2D(Histogram2D):
             out = Hitmap2D(xBins=self.xBins, yBins=self.yBins, zBins=self.zBins)
         else:
             out = Hitmap2D(xBins=self.xBins, yBins=self.yBins)
-        out._counts = self._counts.deepcopy()
+        out._counts = deepcopy(self._counts)
 
         return out
 

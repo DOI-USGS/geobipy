@@ -1,6 +1,7 @@
 """ @FdemData_Class
 Module describing an EMData Set where channels are associated with an xyz co-ordinate
 """
+from copy import deepcopy
 from .Data import Data
 from ..datapoint.FdemDataPoint import FdemDataPoint
 from ....base import utilities as cF
@@ -107,7 +108,7 @@ class FdemData(Data):
                 self.nPoints = np.size(values)
             assert np.size(values) == self.nPoints, ValueError("magnetic must have size {}".format(self.nPoints))
             if (isinstance(values, StatArray.StatArray)):
-                self._magnetic = values.deepcopy()
+                self._magnetic = deepcopy(values)
             else:
                 self._magnetic = StatArray.StatArray(values, "Magnetic", "nT")
 
@@ -126,7 +127,7 @@ class FdemData(Data):
                 self.nPoints = np.size(values)
             assert np.size(values) == self.nPoints, ValueError("powerline must have size {}".format(self.nPoints))
             if (isinstance(values, StatArray.StatArray)):
-                self._powerline = values.deepcopy()
+                self._powerline = deepcopy(values)
             else:
                 self._powerline = StatArray.StatArray(values, "Powerline")
 

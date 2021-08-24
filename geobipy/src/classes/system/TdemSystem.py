@@ -47,6 +47,9 @@ class TdemSystem(myObject):
             ftarg={'fftfilt': 'key_81_CosSin_2009'},
             verb=0)
 
+    def __deepcopy__(self, memo={}):
+        return None
+
     @property
     def components(self):
         return self._components
@@ -85,7 +88,7 @@ class TdemSystem(myObject):
             self._receiverLoop = CircularLoop()
         else:
             assert isinstance(value, EmLoop), TypeError("transmitterLoop must have type geobipy.EmLoop")
-            self._receiverLoop = value.deepcopy()
+            self._receiverLoop = deepcopy(values)
 
     @property
     def summary(self):
@@ -114,7 +117,7 @@ class TdemSystem(myObject):
             self._transmitterLoop = CircularLoop()
         else:
             assert isinstance(value, EmLoop), TypeError("transmitterLoop must have type geobipy.EmLoop")
-            self._transmitterLoop = value.deepcopy()
+            self._transmitterLoop = deepcopy(values)
 
 
     def read(self, systemFilename):

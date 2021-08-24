@@ -6,6 +6,7 @@
 .. moduleauthor:: Leon Foks
 
 """
+from copy import deepcopy
 from ...pointcloud.PointCloud3D import PointCloud3D
 from .Data import Data
 from ..datapoint.TdemDataPoint import TdemDataPoint
@@ -102,7 +103,7 @@ class TdemData(Data):
                 self.nPoints = np.size(values)
             assert np.all(np.shape(values) == (self.nPoints, 3)), ValueError("loopOffset must have shape {}".format((self.nPoints, 3)))
             if (isinstance(values, StatArray.StatArray)):
-                self._loopOffset = values.deepcopy()
+                self._loopOffset = deepcopy(values)
             else:
                 self._loopOffset = StatArray.StatArray(values, "Loop Offset")
 
