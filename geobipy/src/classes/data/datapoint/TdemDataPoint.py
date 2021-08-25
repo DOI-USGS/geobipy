@@ -176,61 +176,11 @@ class TdemDataPoint(EmDataPoint):
             Indices into the observed data that are not NaN
 
         """
-        d = self.data.copy()
+        d = np.asarray(self.data)
         d[d <= 0.0] = np.nan
-        return ~np.isnan(d)
+        out = ~np.isnan(d)
+        return out
 
-    @property
-    def data(self):
-        return self.secondary_field
-
-    @data.setter
-    def data(self, values):
-        self.secondary_field = values
-
-    @property
-    def predictedData(self):
-        return self.predicted_secondary_field
-
-    @predictedData.setter
-    def predictedData(self, values):
-        self.predicted_secondary_field = values
-
-    @property
-    def predicted_secondary_field(self):
-        return self._predicted_secondary_field
-
-    @predicted_secondary_field.setter
-    def predicted_secondary_field(self, values):
-        if not '_predicted_secondary_field' in self.__dict__:
-            self._predicted_secondary_field = StatArray.StatArray(self.nChannels, "Predicted secondary field", self.units)
-
-        if not values is None:
-            self._predicted_secondary_field[:] = values
-
-    @property
-    def secondary_field(self):
-        return self._secondary_field
-
-    @secondary_field.setter
-    def secondary_field(self, values):
-        if not '_secondary_field' in self.__dict__:
-            self._secondary_field = StatArray.StatArray(self.nChannels, "Secondary field", self.units)
-
-        if not values is None:
-            self._secondary_field[:] = values
-
-    @EmDataPoint.std.setter
-    def std(self, value):
-
-        self._std = StatArray.StatArray(np.ones(self.nChannels), "Standard deviation", self.units)
-
-        if not value is None:
-            if isinstance(value, list):
-                assert len(value) == self.nSystems, ValueError("std as a list must have {} elements".format(self.nSystems))
-                value = np.hstack(value)
-            assert value.size == self.nChannels, ValueError("Size of std must equal total number of time channels * components {}".format(self.nChannels))
-            self._std = StatArray.StatArray(value, "Standard deviation", self.units)
 
     def times(self, system=0):
         """ Return the window times in an StatArray """
@@ -247,8 +197,6 @@ class TdemDataPoint(EmDataPoint):
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
         out._system = self._system
-        out._secondary_field = deepcopy(self.secondary_field, memo)
-        out._predicted_secondary_field = deepcopy(self.predicted_secondary_field, memo)
         out._transmitter = self._transmitter
         out._receiver = self._receiver
         out.loopOffset = self.loopOffset
@@ -551,9 +499,8 @@ class TdemDataPoint(EmDataPoint):
         """ Plot the Inphase and Quadrature Data for an EM measurement
         """
         ax = kwargs.pop('ax', None)
-        if not ax is None:
-            plt.sca(ax)
-            plt.cla()
+        ax = plt.gca() if ax is None else plt.sca(ax)
+        plt.cla()
 
         kwargs['marker'] = kwargs.pop('marker', 'v')
         kwargs['markersize'] = kwargs.pop('markersize', 7)
@@ -609,8 +556,6 @@ class TdemDataPoint(EmDataPoint):
         return ax
 
     def plot_posteriors(self, axes=None, height_kwargs={}, data_kwargs={}, rel_error_kwargs={}, add_error_kwargs={}, **kwargs):
-        add_error_kwargs['xscale'] = 'log'
-
         super().plot_posteriors(axes=axes,
                                 height_kwargs=height_kwargs,
                                 data_kwargs=data_kwargs,
@@ -620,6 +565,9 @@ class TdemDataPoint(EmDataPoint):
 
 
     def plotPredicted(self, title='Time Domain EM Data', **kwargs):
+
+        ax = kwargs.pop('ax', None)
+        ax = plt.gca() if ax is None else plt.sca(ax)
 
         noLabels = kwargs.pop('nolabels', False)
 
@@ -653,9 +601,14 @@ class TdemDataPoint(EmDataPoint):
 
     def plotDataResidual(self, title='', **kwargs):
 
+        ax = kwargs.pop('ax', None)
+        ax = plt.gca() if ax is None else plt.sca(ax)
+        cP.pretty(ax)
+
+        dD = self.deltaD
         for i in range(self.nSystems):
             iAct = self.iplotActive[i]
-            dD = self.deltaD[self._systemIndices(i)]
+
             np.abs(dD[iAct]).plot(x=self.times(i)[iAct], **kwargs)
 
         plt.ylabel("|{}| ({})".format(dD.name, dD.units))

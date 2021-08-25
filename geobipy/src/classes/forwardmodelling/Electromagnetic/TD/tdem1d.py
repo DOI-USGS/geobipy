@@ -110,7 +110,7 @@ try:
                 comps.append(-fm.SZ)
                 # datapoint._predicted_z_primary_field = fm.PZ
             p = np.hstack(comps)
-            datapoint._predicted_secondary_field[iSys] = p  # Store the necessary component
+            datapoint._predictedData[iSys] = p  # Store the necessary component
 
     def gaTdem1dsen(datapoint, model1d, ix=None, modelChanged=True):
         """ Compute the sensitivty matrix for a 1D layered earth model, optionally compute the responses for only the layers in ix """
