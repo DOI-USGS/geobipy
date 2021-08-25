@@ -132,9 +132,7 @@ class Model1D(RectilinearMesh1D):
         out = super().__deepcopy__(memo)
         out._par = deepcopy(self.par)
         out._dpar = deepcopy(self.dpar)
-        # StatArray(out.nCells, "Electric Susceptibility", r"$\kappa$")
         out._magnetic_permeability = deepcopy(self.magnetic_permeability)
-        # StatArray(out.nCells, "Magnetic Susceptibility", "$\frac{H}{m}$")
         out._magnetic_susceptibility = deepcopy(self.magnetic_susceptibility)
         out.Hitmap = self.Hitmap
         out._inverseHessian = deepcopy(self._inverseHessian)

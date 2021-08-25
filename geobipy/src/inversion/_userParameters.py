@@ -286,7 +286,7 @@ class _userParameters(myObject):
         assert isinstance(DataPoint, (FdemDataPoint, TdemDataPoint)), TypeError('Invalid DataPoint type used')
 
         # Check the number of Markov chains
-        self.nMarkovChains = np.int(self.nMarkovChains)
+        self.nMarkovChains = np.int32(self.nMarkovChains)
         assert isInt(self.nMarkovChains), TypeError('nMC must be a numpy integer')
         assert self.nMarkovChains >= 1000, ValueError('Number of Markov Chain iterations nMC must be >= 1000')
 

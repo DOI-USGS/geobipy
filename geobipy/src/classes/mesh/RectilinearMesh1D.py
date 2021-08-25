@@ -64,12 +64,6 @@ class RectilinearMesh1D(Mesh):
 
         self.nCells = None
 
-        if ((centres is None) and (edges is None) and (widths is None)):
-            self._edges = StatArray.StatArray(0)
-            self._centres = StatArray.StatArray(0)
-            self._widths = StatArray.StatArray(0)
-            return
-
         # assert (not(not centres is None and not edges is None)), Exception('Cannot instantiate with both centres and edges values')
 
         if not widths is None:
@@ -613,6 +607,10 @@ class RectilinearMesh1D(Mesh):
 
         kwargs['y'] = kwargs.pop('y', self.plotting_edges)
 
+        # if not self.log is None:
+        #     kwargs['y'] = cF._power(kwargs['y'], self.log)
+        #     kwargs['yscale'] = 'log'
+
         ax = values.pcolor(**kwargs)
 
         return ax
@@ -833,8 +831,7 @@ class RectilinearMesh1D(Mesh):
         kwargs['noColorbar'] = True
 
         values = StatArray.StatArray(np.full(self.nCells.value, np.nan))
-        RectilinearMesh1D.pcolor(
-            self, values=values, y=self.plotting_edges, **kwargs)
+        RectilinearMesh1D.pcolor(self, values=values, y=self.plotting_edges, **kwargs)
 
         # if self.open_left:
         #     h = y[-1] if kwargs.get('flip', False) else y[0]

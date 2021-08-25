@@ -171,7 +171,6 @@ class PointCloud3D(myObject):
         assert isinstance(value, np.int), TypeError("nPoints must be an integer")
         self._nPoints = value
 
-
     @property
     def scalar(self):
         assert self.size == 1, ValueError("Cannot return array as scalar")

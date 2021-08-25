@@ -261,7 +261,7 @@ class FdemSystem(myObject):
         msg = ("FdemSystem: \n"
                "{} \n"
                "{} \n"
-               "{} \n").format(self._fileName, self.frequencies.summary, self.loopOffsets.summary)
+               "{} \n").format(self._filename, self.frequencies.summary, self.loopOffsets.summary)
         return msg
 
 

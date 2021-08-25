@@ -340,14 +340,8 @@ class DataPoint(Point):
             best.plotPredicted(color=cP.wellSeparated[3], ax=axes[1], **data_kwargs)
         # data_kwargs['noColorbar'] = data_kwargs.get('noColorbar', True)
         # ax.append(self.predictedData.plotPosteriors(ax = axes[1], **data_kwargs))
-        # if self.errorPosterior is None:
         self.relErr.plotPosteriors(ax=axes[2], **rel_error_kwargs)
         self.addErr.plotPosteriors(ax=axes[3], **add_error_kwargs)
-        # else:
-        #     for p in self.errorPosterior:
-        #         p.plot(**error_kwargs)
-
-        # return ax
 
     def weightingMatrix(self, power=1.0):
         """Return a diagonal data weighting matrix of the reciprocated data standard deviations."""

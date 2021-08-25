@@ -49,7 +49,7 @@ class Histogram3D(RectilinearMesh3D):
         super().__init__(xCentres=xBinCentres, xEdges=xBins, yCentres=yBinCentres, yEdges=yBins, zCentres=zBinCentres, zEdges=zBins, **kwargs)
 
         # Point counts to self.arr to make variable names more intuitive
-        self._counts = StatArray.StatArray((self.z.nCells, self.y.nCells, self.x.nCells), name='Frequency', dtype=np.int64)
+        self._counts = StatArray.StatArray(self.shape, name='Frequency', dtype=np.int64)
 
     @property
     def xBins(self):
@@ -256,7 +256,7 @@ class Histogram3D(RectilinearMesh3D):
         a, b = self.other_axis(axis)
 
         out = Histogram2D(xBins = a.edges, yBins = b.edges)
-        out._counts += np.sum(self.counts, axis=2-axis)
+        out._counts += np.sum(self.counts, axis=axis)
 
         return out
 

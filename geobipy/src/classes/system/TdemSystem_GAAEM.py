@@ -42,7 +42,6 @@ try:
         def nTimes(self):
             return self.nwindows()
 
-
         @property
         def times(self):
             """Time windows."""
@@ -87,7 +86,7 @@ try:
                         return
 
                     if (get):
-                        x = fIO.getRealNumbersfromLine(line)
+                        x = fIO.get_real_numbers_from_line(line)
                         if len(x) > 0:
                             time.append(x[0])
                             current.append(x[1])

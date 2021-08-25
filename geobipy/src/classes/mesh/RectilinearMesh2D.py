@@ -15,7 +15,6 @@ from ...base import utilities as cF
 from ...base import geometry
 from scipy.sparse import (kron, diags)
 from scipy import interpolate
-from skimage.draw import line
 
 try:
     from pyvtk import VtkData, CellData, Scalars, PolyData

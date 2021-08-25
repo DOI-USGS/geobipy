@@ -44,8 +44,9 @@ class Histogram2D(RectilinearMesh2D):
 
     def __init__(self, xBins=None, xBinCentres=None, yBins=None, yBinCentres=None, **kwargs):
         """ Instantiate a 2D histogram """
-        # if (xBins is None and xBinCentres is None):
-        #     return
+
+        if (all(x is None for x in [xBins, yBins, yBinCentres, xBinCentres])):
+            return
 
         # Instantiate the parent class
         super().__init__(xCentres=xBinCentres, xEdges=xBins,

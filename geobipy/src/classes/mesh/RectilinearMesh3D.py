@@ -72,12 +72,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
     def __init__(self, xCentres=None, xEdges=None, yCentres=None, yEdges=None, zCentres=None, zEdges=None, height=None, **kwargs):
         """ Initialize a 2D Rectilinear Mesh"""
 
-        self._height = None
         super().__init__(xCentres, xEdges, yCentres, yEdges, zCentres, zEdges, **kwargs)
-
-        if (all(x is None for x in [xCentres, yCentres, zCentres, xEdges, yEdges, zEdges])):
-            return
-
         self.height = height
 
     def __getitem__(self, slic):
@@ -217,8 +212,8 @@ class RectilinearMesh3D(RectilinearMesh2D):
         tmp = np.repeat(tmp, c.nCells, i)
         tmp = np.repeat(tmp, b.nCells, j)
 
-        t = np.sum(tmp * values, axis = 2-axis)
-        s = values.sum(axis = 2-axis)
+        t = np.sum(tmp * values, axis = axis)
+        s = values.sum(axis = axis)
 
         i = np.where(s > 0.0)
         out = StatArray.StatArray(t.shape)
