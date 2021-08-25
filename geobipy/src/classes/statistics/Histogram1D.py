@@ -46,11 +46,6 @@ class Histogram1D(RectilinearMesh1D):
     def __init__(self, binCentres=None, bins=None, log=None, relativeTo=0.0, values=None, **kwargs):
         """ Initialize a histogram """
 
-        # Allow an null instantiation
-        if (bins is None and binCentres is None):
-            self._counts = None
-            return
-
         # Initialize the parent class
         super().__init__(centres=binCentres, edges=bins, log=log, relativeTo=relativeTo)
 
@@ -112,7 +107,6 @@ class Histogram1D(RectilinearMesh1D):
     def nSamples(self):
         return self._counts.sum()
 
-
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
         # out = type(self)()
@@ -125,7 +119,6 @@ class Histogram1D(RectilinearMesh1D):
         # out._relativeTo = self._relativeTo
 
         return out
-
 
     def combine(self, other):
         """Combine two histograms together.
@@ -426,8 +419,9 @@ class Histogram1D(RectilinearMesh1D):
 
     def plot(self, rotate=False, flipX=False, flipY=False, trim=True, normalize=False, line=None, **kwargs):
         """ Plots the histogram """
-        axis = 'x' if rotate else 'y'
-        ax = cP.hist(self.counts, self.edges_absolute, rotate=rotate, flipX=flipX, flipY=flipY, trim=trim, normalize=normalize, **kwargs)
+        bins = self.edges_absolute
+
+        ax = cP.hist(self.counts, bins, rotate=rotate, flipX=flipX, flipY=flipY, trim=trim, normalize=normalize, **kwargs)
 
         if not line is None:
             f = plt.axhline if rotate else plt.axvline
