@@ -402,12 +402,13 @@ class Data(PointCloud3D):
         return super()._csv_channels(filename), labels
 
     def _open_csv_files(self, filename):
-        self._file = []
+
         channels = self.csv_channels(filename)
 
         if isinstance(filename, str):
             filename = [filename]
 
+        self._file = []
         for i, f in enumerate(filename):
             try:
                 df = read_csv(f, index_col=False, usecols=channels[i], chunksize=1, skipinitialspace = True)

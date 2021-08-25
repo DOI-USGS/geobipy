@@ -189,9 +189,9 @@ class Inference3D(myObject):
         # Get a datapoint from the file.
         DataPoint = dataset._read_record(record=0)
 
-        line_numbers, fiducials = dataset._read_line_fiducial(userParameters.dataFilename, userParameters.systemFilename)
+        line_numbers, fiducials = dataset._read_csv_line_fiducial(userParameters.dataFilename)
 
-        dataset._close_data_files()
+        # dataset._close_data_files()
 
         # Initialize the user parameters
         options = userParameters.userParameters(DataPoint)
@@ -200,7 +200,7 @@ class Inference3D(myObject):
 
         # tmp = fileIO.read_columns(options.dataFilename[0], dataset._indicesForFile[0][:2], 1, dataset.nPoints)
 
-        dataset._open_data_files(options.dataFilename)
+        dataset._open_csv_files(options.dataFilename)
 
         # Get the line numbers in the data
         self._lineNumbers = np.sort(np.unique(line_numbers))

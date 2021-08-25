@@ -20,6 +20,7 @@ class FdemSystem(myObject):
     def __init__(self, frequencies=None, transmitterLoops = None, receiverLoops=None):
         """ Initialize an FdemSystem """
 
+        self._filename = None
         # StatArray of frequencies
         if frequencies is None:
             return
@@ -159,33 +160,34 @@ class FdemSystem(myObject):
 
         """
 
-        nFrequencies = fIO.getNlines(fileName, 1)
+        nFrequencies = fIO.getNlines(filename, 1)
         frequencies = np.empty(nFrequencies)
         transmitters = []
         receivers = []
-        with open(fileName) as f:
+        with open(filename) as f:
             tmp = f.readline().lower().split()
 
-            assert 'freq' in tmp, ('Cannot read headers from FdemSystem File ' + fileName +
+            assert 'freq' in tmp, ('Cannot read headers from FdemSystem File ' + filename +
                                    '\nFirst line of system file should contain\nfreq tor tmom  tx ty tzoff ror rmom  rx   ry rzoff')
             for j, line in enumerate(f):  # For each line in the file
                 line = fIO.parseString(line)
                 frequencies[j] = np.float64(line[0])
                 T = (CircularLoop(
                         line[1],
-                        np.int(line[2]),
-                        np.int(line[3]),
+                        np.int32(line[2]),
+                        np.int32(line[3]),
                         np.float64(line[4]),
                         np.float64(line[5])))
                 R = (CircularLoop(
                         line[6],
-                        np.int(line[7]),
+                        np.int32(line[7]),
                         np.float64(line[8]),
                         np.float64(line[9]),
                         np.float64(line[10])))
                 transmitters.append(T)
                 receivers.append(R)
         self.__init__(frequencies, transmitters, receivers)
+        self._filename = filename
         return self
 
 

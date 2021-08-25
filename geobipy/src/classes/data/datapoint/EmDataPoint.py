@@ -237,14 +237,14 @@ class EmDataPoint(DataPoint):
 
         """
 
-        tmp = deepcopy(self)
+        # tmp = deepcopy(self)
         c = StatArray.StatArray(np.logspace(minConductivity, maxConductivity, nSamples), 'Conductivity', '$S/m$')
         PhiD = StatArray.StatArray(c.size, 'Normalized Data Misfit', '')
         mod = Model1D(1, edges=np.asarray([0.0, np.inf]))
         for i in range(c.size):
             mod.par[0] = c[i]
-            tmp.forward(mod)
-            PhiD[i] = tmp.dataMisfit()
+            self.forward(mod)
+            PhiD[i] = self.dataMisfit()
         plt.loglog(c, PhiD, **kwargs)
         cP.xlabel(c.getNameUnits())
         cP.ylabel('Data misfit')

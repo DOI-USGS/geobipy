@@ -160,12 +160,11 @@ class TdemDataPoint(EmDataPoint):
 
     @EmDataPoint.units.setter
     def units(self, value):
-
         if value is None:
-            self._units = r"$\frac{V}{m^{2}}$"
+            value = r"$\frac{V}{m^{2}}$"
         else:
             assert isinstance(value, str), TypeError('units must have type str')
-            self._units = value
+        self._units = value
 
     @property
     def active(self):

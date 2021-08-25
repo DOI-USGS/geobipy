@@ -307,6 +307,9 @@ class RectilinearMesh2D(Mesh):
 
         """
 
+        if values.max() == 0:
+            return np.full(values.shape[1-axis], fill_value=self.axis(1-axis).centres[0])
+
         percent *= 0.01
 
         # total of the counts
@@ -669,6 +672,9 @@ class RectilinearMesh2D(Mesh):
         intervals = intervals[i0:i1]
 
         return intervals
+
+    def _reorder_for_pyvista(self, values):
+        return values.flatten(order='C')
 
     def cellIndex(self, values, axis, clip=False, trim=False):
         """Return the cell indices of values along axis.

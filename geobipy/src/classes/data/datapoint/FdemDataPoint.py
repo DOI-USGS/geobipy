@@ -363,8 +363,12 @@ class FdemDataPoint(EmDataPoint):
             Figure axis
 
         """
-
-        ax = plt.gca()
+        ax = kwargs.pop('ax', None)
+        if not ax is None:
+            plt.sca(ax)
+        else:
+            ax = plt.gca()
+        plt.cla()
         cp.pretty(ax)
 
         cp.xlabel('Frequency (Hz)')
@@ -427,7 +431,11 @@ class FdemDataPoint(EmDataPoint):
             Figure axis
 
         """
-        ax = plt.gca()
+        ax = kwargs.pop('ax', None)
+        if not ax is None:
+            plt.sca(ax)
+        else:
+            ax = plt.gca()
         cp.pretty(ax)
 
         noLabels = kwargs.pop('nolabels', False)
@@ -535,6 +543,7 @@ class FdemDataPoint(EmDataPoint):
 
     def _forward1D(self, mod):
         """ Forward model the data from a 1D layered earth model """
+        assert np.isinf(mod.edges[-1]), ValueError('mod.edges must have last entry be infinity for forward modelling.')
         for i, s in enumerate(self.system):
             tmp = fdem1dfwd(s, mod, self.z[0])
             self._predictedData[:self.nFrequencies[i]] = tmp.real
