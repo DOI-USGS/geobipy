@@ -290,7 +290,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
 
         return out
 
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo={}):
         """ Define the deepcopy for the StatArray """
         return RectilinearMesh2D(xEdges=self.x.edges, yEdges=self.y.edges, zEdges=self.z.edges)
 

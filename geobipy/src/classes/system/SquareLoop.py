@@ -99,7 +99,7 @@ class SquareLoop(EmLoop):
         return deepcopy(self)
 
 
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo={}):
         return SquareLoop(self.orient, self.moment, self.x, self.y, self.z, self.pitch, self.roll, self.yaw, self.sideLength)
 
 

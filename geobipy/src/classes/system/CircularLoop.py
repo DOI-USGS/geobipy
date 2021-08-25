@@ -115,12 +115,7 @@ class CircularLoop(EmLoop):
             assert value in [0, 0.0, 1, 1.0, 2, 2.0], ValueError("orientation must be 0, 1, or 2")
             self._orient = np.float64(value)
 
-
-    def deepcopy(self):
-        return deepcopy(self)
-
-
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo={}):
         return CircularLoop(self.orient, self.moment, self.x, self.y, self.z, self.pitch, self.roll, self.yaw, self.radius)
 
 

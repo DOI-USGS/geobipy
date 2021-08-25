@@ -96,7 +96,7 @@ class RectilinearMesh1D(Mesh):
         # Keep track of actions made to the mesh.
         self._action = ['none', 0, 0.0]
 
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo={}):
         out = type(self).__new__(type(self))
         out._nCells = deepcopy(self._nCells)
         out._centres = deepcopy(self._centres)
@@ -856,8 +856,31 @@ class RectilinearMesh1D(Mesh):
     def n_posteriors(self):
         return np.sum([x.hasPosterior for x in [self.nCells, self.edges]])
 
+    def init_posterior_plots(self, gs):
+        """Initialize axes for posterior plots
+
+        Parameters
+        ----------
+        gs : matplotlib.gridspec.Gridspec
+            Gridspec to split
+
+        """
+
+        splt = gs.subgridspec(2, 1, height_ratios=[1, 4])
+        ax = []
+        ax.append(plt.subplot(splt[0, 0]))
+        ax.append(plt.subplot(splt[1, 0]))
+
+        for a in ax:
+            cp.pretty(a)
+
+        return ax
+
     def plot_posteriors(self, axes=None, ncells_kwargs={}, edges_kwargs={}, **kwargs):
         assert len(axes) == 2, ValueError("Must have length 2 list of axes for the posteriors. self.init_posterior_plots can generate them")
+
+        edges_kwargs['rotate'] = edges_kwargs.get('rotate', True)
+
         best = kwargs.get('best', None)
         if not best is None:
             ncells_kwargs['line'] = best.nCells

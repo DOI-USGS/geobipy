@@ -507,11 +507,7 @@ class Histogram3D(RectilinearMesh3D):
         self._counts[:,:] = np.outer(H1.counts, H2.counts)
 
 
-    def deepcopy(self):
-        return deepcopy(self)
-
-
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo={}):
         """ Define the deepcopy. """
 
         if self.xyz:

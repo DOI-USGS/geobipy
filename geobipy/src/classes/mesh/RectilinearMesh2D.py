@@ -400,7 +400,7 @@ class RectilinearMesh2D(Mesh):
         return self._percent_interval(values=values, percent=50.0, log=log, axis=axis)
 
 
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo={}):
         """ Define the deepcopy for the StatArray """
         height = self.height.edges if not self.height is None else None
         if self.xyz:

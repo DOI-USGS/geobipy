@@ -465,7 +465,7 @@ class FdemData(Data):
         leg = ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), fancybox=True)
         leg.set_title('Frequency (Hz)')
 
-        ylabel ='{}In-Phase ({})'.format(cF._logLabel(kwargs['log']), l._data.getUnits())
+        ylabel ='{}In-Phase ({})'.format(cF._logLabel(kwargs['log']), l._data.units)
         cP.ylabel(ylabel)
 
         ax = plt.subplot(212, sharex=ax1)
@@ -483,7 +483,7 @@ class FdemData(Data):
 
         # cP.xlabel(cF.getNameUnits(r))
 
-        ylabel = '{}Quadrature ({})'.format(cF._logLabel(kwargs['log']), l._data.getUnits())
+        ylabel = '{}Quadrature ({})'.format(cF._logLabel(kwargs['log']), l._data.units)
         cP.ylabel(ylabel)
 
         return ax

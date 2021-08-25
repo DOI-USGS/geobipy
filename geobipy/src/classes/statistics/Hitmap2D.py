@@ -12,11 +12,7 @@ from .Histogram2D import Histogram2D
 class Hitmap2D(Histogram2D):
     """ Class defining a 2D hitmap whose cells are rectangular with linear sides """
 
-    def deepcopy(self):
-        return deepcopy(self)
-
-
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo={}):
         """ Define the deepcopy. """
 
         if self.xyz:
