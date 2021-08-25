@@ -86,10 +86,10 @@ class FdemDataPoint(EmDataPoint):
     @units.setter
     def units(self, value):
         if value is None:
-            self._units = "ppm"
+            value = "ppm"
         else:
             assert isinstance(value, str), TypeError("units must have type str")
-            self._units = value
+        self._units = value
 
     @property
     def system(self):

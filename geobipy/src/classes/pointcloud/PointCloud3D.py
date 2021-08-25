@@ -89,24 +89,23 @@ class PointCloud3D(myObject):
                             self.z[i],
                             self.elevation[i])
 
-
     @property
     def x(self):
         return self._x
 
-
     @x.setter
     def x(self, values):
         if (values is None):
-            self._x = StatArray.StatArray(self.nPoints, "Easting", "m")
+            values = self.nPoints
         else:
             if self.nPoints == 0:
                 self.nPoints = np.size(values)
             assert np.size(values) == self.nPoints, ValueError("x must have size {}".format(self.nPoints))
             if (isinstance(values, StatArray.StatArray)):
                 self._x = deepcopy(values)
-            else:
-                self._x = StatArray.StatArray(values, "Easting", "m")
+                return
+
+        self._x = StatArray.StatArray(values, "Easting", "m")
 
     @property
     def y(self):
@@ -115,15 +114,16 @@ class PointCloud3D(myObject):
     @y.setter
     def y(self, values):
         if (values is None):
-            self._y = StatArray.StatArray(self.nPoints, "Northing", "m")
+            values = self.nPoints
         else:
             if self.nPoints == 0:
                 self.nPoints = np.size(values)
             assert np.size(values) == self.nPoints, ValueError("y must have size {}".format(self.nPoints))
             if (isinstance(values, StatArray.StatArray)):
                 self._y = deepcopy(values)
-            else:
-                self._y = StatArray.StatArray(values, "Northing", "m")
+                return
+
+        self._y = StatArray.StatArray(values, "Northing", "m")
 
     @property
     def z(self):
@@ -132,15 +132,16 @@ class PointCloud3D(myObject):
     @z.setter
     def z(self, values):
         if (values is None):
-            self._z = StatArray.StatArray(self.nPoints, "Height", "m")
+            values = self.nPoints
         else:
             if self.nPoints == 0:
                 self.nPoints = np.size(values)
             assert np.size(values) == self.nPoints, ValueError("z must have size {}".format(self.nPoints))
             if (isinstance(values, StatArray.StatArray)):
                 self._z = deepcopy(values)
-            else:
-                self._z = StatArray.StatArray(values, "Height", "m")
+                return
+
+        self._z = StatArray.StatArray(values, "Height", "m")
 
     @property
     def elevation(self):
@@ -149,15 +150,16 @@ class PointCloud3D(myObject):
     @elevation.setter
     def elevation(self, values):
         if (values is None):
-            self._elevation = StatArray.StatArray(self.nPoints, "Elevation", "m")
+            values = self.nPoints
         else:
             if self.nPoints == 0:
                 self.nPoints = np.size(values)
             assert np.size(values) == self.nPoints, ValueError("elevation must have size {}".format(self.nPoints))
             if (isinstance(values, StatArray.StatArray)):
                 self._elevation = deepcopy(values)
-            else:
-                self._elevation = StatArray.StatArray(values, "Elevation", "m")
+                return
+
+        self._elevation = StatArray.StatArray(values, "Elevation", "m")
 
     @property
     def nPoints(self):

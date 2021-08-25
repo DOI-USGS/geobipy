@@ -136,14 +136,12 @@ class DataPoint(Point):
 
     @addErr.setter
     def addErr(self, values):
-        if not '_addErr' in self.__dict__:
-            self._addErr = StatArray.StatArray(self.nSystems, '$\epsilon_{Additive}$', self.units)
-
-        if not values is None:
-            check = (self.nSystems, self.nChannels)
-            assert np.size(values) in check, ValueError("additiveError must have length {}".format(check))
+        if values is None:
+            values = self.nSystems
+        else:
+            assert np.size(values) == self.nSystems, ValueError("additiveError must have length {}".format(self.nSystems))
             assert np.asarray(values).dtype.kind == 'f', ValueError("additive_error must be floats")
-            self._addErr[:] = values
+        self._addErr = StatArray.StatArray(values, '$\epsilon_{Additive}$', self.units)
 
     @property
     def channelNames(self):
@@ -192,11 +190,12 @@ class DataPoint(Point):
     @data.setter
     def data(self, values):
 
-        self._data = StatArray.StatArray(self.nChannels, "Data", self.units)
+        if values is None:
+            values = self.nChannels
+        else:
+            assert np.size(values) == self.nChannels, ValueError("data must have size {}".format(self.nChannels))
 
-        if not values is None:
-            # assert np.size(values) == self.nChannels, ValueError("data must have size {}".format(self.nChannels))
-            self._data[:] = values
+        self._data = StatArray.StatArray(values, "Data", self.units)
 
     @property
     def deltaD(self):
@@ -220,11 +219,9 @@ class DataPoint(Point):
 
     @elevation.setter
     def elevation(self, value):
-        if not '_elevation' in self.__dict__:
-            self._elevation = StatArray.StatArray(1, "Elevation", "m")
-
-        if not value is None:
-            self._elevation[:] = value
+        if value is None:
+            value = 1
+        self._elevation = StatArray.StatArray(value, "Elevation", "m")
 
     @property
     def nActiveChannels(self):
@@ -239,13 +236,18 @@ class DataPoint(Point):
         """The predicted data. """
         return self._predictedData
 
+
     @predictedData.setter
     def predictedData(self, values):
-        if not '_predictedData' in self.__dict__:
-            self._predictedData = StatArray.StatArray(self.nChannels, "Predicted Data", self.units)
-
-        if not values is None:
-            self._predictedData[:] = values
+        if values is None:
+            values = self.nChannels
+        else:
+            if isinstance(values, list):
+                assert len(values) == self.nSystems, ValueError("predictedData as a list must have {} elements".format(self.nSystems))
+                values = np.hstack(values)
+            assert values.size == self.nChannels, ValueError("Size of predictedData must equal total number of time channels {}".format(self.nChannels))
+            # Mask invalid data values less than 0.0 to NaN
+        self._predictedData = StatArray.StatArray(values, "Predicted Data", self.units)
 
     @property
     def relative_error(self):
@@ -257,25 +259,25 @@ class DataPoint(Point):
 
     @relErr.setter
     def relErr(self, values):
-        if not '_relErr' in self.__dict__:
-            self._relErr = StatArray.StatArray(self.nSystems, '$\epsilon_{Relative}x10^{2}$', '%')
-
-        if not values is None:
-            self._relErr[:] = values
+        if values is None:
+            values = self.nSystems
+        self._relErr = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
 
     @property
     def std(self):
         return self._std
 
     @std.setter
-    def std(self, values):
-        if not '_std' in self.__dict__:
-            self._std = StatArray.StatArray(np.ones(self.nChannels), "Standard Deviation", self.units)
+    def std(self, value):
+        if value is None:
+            value = np.ones(self.nChannels)
+        else:
+            if isinstance(value, list):
+                assert len(value) == self.nSystems, ValueError("std as a list must have {} elements".format(self.nSystems))
+                value = np.hstack(value)
+            assert value.size == self.nChannels, ValueError("Size of std must equal total number of time channels {}".format(nChannels))
 
-        if not values is None:
-            assert np.size(values) == self.nChannels, ValueError("std must have size {}".format(self.nChannels))
-            assert np.all(values[self.active] > 0.0), ValueError("Cannot assign standard deviations that are <= 0.0.")
-            self._std[:] = values
+        self._std = StatArray.StatArray(value, "Standard deviation", self.units)
 
     @property
     def units(self):
@@ -285,10 +287,10 @@ class DataPoint(Point):
     @abstractmethod
     def units(self, value):
         if values is None:
-            self._units = ""
+            value = ""
         else:
             assert isinstance(value, str), TypeError('units must have type str')
-            self._units = value
+        self._units = value
 
     def generate_noise(self, additive_error, relative_error):
 
