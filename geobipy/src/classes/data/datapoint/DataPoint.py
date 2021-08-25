@@ -48,7 +48,11 @@ class DataPoint(Point):
 
     """
 
-    def __init__(self, channels_per_system=1, components_per_channel=None, x=0.0, y=0.0, z=0.0, elevation=None, data=None, std=None, predictedData=None, units=None, channelNames=None, lineNumber=0.0, fiducial=0.0):
+    def __init__(self, channels_per_system=1, components_per_channel=None,
+                       x=0.0, y=0.0, z=0.0, elevation=None,
+                        data=None, std=None, predictedData=None,
+                        units=None, channelNames=None,
+                        lineNumber=0.0, fiducial=0.0):
         """ Initialize the Data class """
 
         super().__init__(x, y, z)
@@ -73,6 +77,9 @@ class DataPoint(Point):
         self.fiducial = fiducial
 
         self.channelNames = channelNames
+
+        self.relErr = None
+        self.addErr = None
 
         # self.errorPosterior = None
 
