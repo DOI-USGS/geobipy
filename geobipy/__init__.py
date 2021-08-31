@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -- coding: utf-8 --
 
-
+import os
 from os import getcwd
 from os import makedirs
 from os.path import join
@@ -80,7 +80,6 @@ from .src.inversion.Inference3D import Inference3D
 from .src.inversion.inference import initialize, infer
 
 from .src.example_path import example_path
-
 
 # Set an MPI failed tag
 dpFailed = 0
@@ -235,8 +234,7 @@ def parallel_mpi(inputFile, outputDir, skipHDF5):
             UP.systemFilename = [UP.systemFilename]
 
     # Everyone needs the system classes read in early.
-    Dataset = type(UP.data_type)()
-    Dataset.systems = UP.systemFilename
+    Dataset = type(UP.data_type)(systems=UP.systemFilename)
 
     # Get the number of points in the file.
     if masterRank:
@@ -264,16 +262,16 @@ def parallel_mpi(inputFile, outputDir, skipHDF5):
         copy(inputFile, outputDir)
 
         # Prepare the dataset so that we can read a point at a time.
-        Dataset._initLineByLineRead(UP.dataFilename, UP.systemFilename)
+        Dataset._initialize_sequential_reading(UP.dataFilename, UP.systemFilename)
         # Get a datapoint from the file.
-        DataPoint = Dataset._readSingleDatapoint()
+        DataPoint = Dataset._read_record(record=0)
 
-        Dataset._closeDatafiles()
+        # Dataset._closeDatafiles()
 
         # While preparing the file, we need access to the line numbers and fiducials in the data file
-        tmp = fileIO.read_columns(UP.dataFilename[0], Dataset._indicesForFile[0][:2], 1, nPoints)
+        line_numbers, fiducials = dataset._read_csv_line_fiducial(UP.dataFilename[0])
 
-        Dataset._openDatafiles(UP.dataFilename)
+        Dataset._open_csv_files(UP.dataFilename)
 
         # Get the line numbers in the data
         lineNumbers = np.unique(tmp[:, 0])
@@ -301,14 +299,14 @@ def parallel_mpi(inputFile, outputDir, skipHDF5):
         # A line results file needs an initialized Results class for a single data point.
         if not skipHDF5:
             for line in lineNumbers:
-                fiducialsForLine = np.where(tmp[:, 0] == line)[0]
+                fiducialsForLine = np.where(line_numbers == line)[0]
                 nFids = fiducialsForLine.size
                 # Create a filename for the current line number
                 fName = join(outputDir, '{}.h5'.format(line))
                 # Open a HDF5 file in parallel mode.
 
                 with h5py.File(fName, 'w', driver='mpio', comm=masterComm) as f:
-                    LR = Inference2D().createHdf(f, tmp[fiducialsForLine, 1], Res)
+                    LR = Inference2D().createHdf(f, fiducials[fiducialsForLine], Res)
                 myMPI.rankPrint(world,'Time to create line {} with {} data points: {} h:m:s'.format(line, nFids, str(timedelta(seconds=MPI.Wtime()-t0))))
                 t0 = MPI.Wtime()
 
