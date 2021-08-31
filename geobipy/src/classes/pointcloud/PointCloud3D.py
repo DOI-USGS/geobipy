@@ -52,7 +52,7 @@ class PointCloud3D(myObject):
         # # Number of points in the cloud
         self._nPoints = 0
 
-            # StatArray of the x co-ordinates
+        # StatArray of the x co-ordinates
         self.x = x
 
         # StatArray of the y co-ordinates

@@ -331,7 +331,7 @@ class Inference1D(myObject):
                         )
         # cP.xlabel('Iteration #')
         # cP.ylabel('% Acceptance')
-        # ax.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
+        self.ax[0].ticklabel_format(style='sci', axis='x', scilimits=(0,0))
 
 
     def _plotMisfitVsIteration(self, **kwargs):
@@ -352,8 +352,9 @@ class Inference1D(myObject):
         if (self.burnedIn):
             plt.axvline(self.iBurn, color='#C92641', linestyle='dashed', linewidth=lw)
             # plt.axvline(self.iBest, color=cP.wellSeparated[3])
-        plt.yscale('log')
+        # plt.yscale('log')
         ax.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
+
         plt.xlim([0, self.iRange[self.i]])
 
 

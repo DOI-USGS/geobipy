@@ -209,7 +209,7 @@ class Histogram2D(RectilinearMesh2D):
         """
         assert 0 <= axis <= 1, ValueError("0 <= axis <= 1")
 
-        bins = self.axis(axis)
+        bins = self.axis(1-axis)
 
         if intervals is None and index is None:
             s = np.sum(self._counts, axis=axis)

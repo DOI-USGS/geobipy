@@ -307,8 +307,9 @@ class RectilinearMesh2D(Mesh):
 
         """
 
-        if values.max() == 0:
-            return np.full(values.shape[1-axis], fill_value=self.axis(1-axis).centres[0])
+        # if values.max() == 0:
+        #     shape =
+        #     return np.atleast_2d(np.full(values.shape[1-axis], fill_value=self.axis(1-axis).centres[0]))
 
         percent *= 0.01
 
