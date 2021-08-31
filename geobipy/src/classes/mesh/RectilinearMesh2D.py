@@ -12,7 +12,7 @@ from matplotlib.collections import LineCollection
 from scipy.stats import binned_statistic
 from ...base import plotting as cP
 from ...base import utilities as cF
-from ...base import geometry
+# from ...base import geometry
 from scipy.sparse import (kron, diags)
 from scipy import interpolate
 
@@ -468,13 +468,13 @@ class RectilinearMesh2D(Mesh):
         """
         return self.x.in_bounds(x) & self.y.in_bounds(y)
 
-    def project_line_to_box(self, x, y):
-        x ,_ = cF._log(x, self.x.log)
-        y ,_ = cF._log(y, self.y.log)
-        x, y = geometry.liang_barsky(x[0], y[0], x[1], y[1], self.bounds)
-        x = cF._power(x, self.x.log)
-        y = cF._power(y, self.y.log)
-        return x, y
+    # def project_line_to_box(self, x, y):
+    #     x ,_ = cF._log(x, self.x.log)
+    #     y ,_ = cF._log(y, self.y.log)
+    #     x, y = geometry.liang_barsky(x[0], y[0], x[1], y[1], self.bounds)
+    #     x = cF._power(x, self.x.log)
+    #     y = cF._power(y, self.y.log)
+    #     return x, y
 
     def xGradientMatrix(self):
         tmp = self.x.gradientMatrix()
