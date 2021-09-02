@@ -9,7 +9,7 @@ import pathlib
 import argparse
 from importlib import import_module
 import sys
-from shutil import copy
+import shutil
 import time
 from datetime import timedelta
 
@@ -196,7 +196,7 @@ def parallel_geobipy(inputFile, outputDir, skipHDF5):
 
     parallel_mpi(inputFile, outputDir, skipHDF5)
 
-def parallel_mpi(inputFile, outputDir, skipHDF5):
+def parallel_mpi(inputFile, output_directory, skipHDF5):
 
     from mpi4py import MPI
     from geobipy.src.base import MPI as myMPI
@@ -208,15 +208,11 @@ def parallel_mpi(inputFile, outputDir, skipHDF5):
 
     myMPI.rankPrint(world,'Running GeoBIPy in parallel mode with {} cores'.format(nRanks))
     myMPI.rankPrint(world,'Using user input file {}'.format(inputFile))
-    myMPI.rankPrint(world,'Output files will be produced at {}'.format(outputDir))
-
-    # Start keeping track of time.
-    t0 = MPI.Wtime()
-    t1 = t0
+    myMPI.rankPrint(world,'Output files will be produced at {}'.format(output_directory))
 
     inputFile = pathlib.Path(inputFile)
     assert inputFile.exists(), Exception("Cannot find input file {}".format(inputFile))
-    output_directory = pathlib.Path(outputDir)
+    output_directory = pathlib.Path(output_directory)
     assert output_directory.exists(), Exception("Make sure the output directory exists {}".format(output_directory))
 
     UP = import_module(str(inputFile.with_suffix('')), package='geobipy')
@@ -234,237 +230,29 @@ def parallel_mpi(inputFile, outputDir, skipHDF5):
             UP.systemFilename = [UP.systemFilename]
 
     # Everyone needs the system classes read in early.
-    Dataset = type(UP.data_type)(systems=UP.systemFilename)
+    dataset = type(UP.data_type)(systems=UP.systemFilename)
 
     # Get the number of points in the file.
     if masterRank:
-        nPoints = Dataset._readNpoints(UP.dataFilename)
+        nPoints = dataset._csv_n_points(UP.dataFilename)
         assert (nRanks > 1), Exception("You need to use at least 2 ranks for the mpi version.")
         assert (nRanks <= nPoints+1), Exception('You requested more ranks than you have data points.  Please lower the number of ranks to a maximum of {}. '.format(nPoints+1))
 
-    # Create a communicator containing only the master rank.
-    allGroup = world.Get_group()
-    masterGroup = allGroup.Incl([0])
-    masterComm = world.Create(masterGroup)
-
-    # Create a parallel RNG on each worker with a different seed.
-    prng = myMPI.getParallelPrng(world, MPI.Wtime)
-
-    myMPI.rankPrint(world, 'Creating HDF5 files, this may take a few minutes...')
-    myMPI.rankPrint(world, 'Files are being created for data files {} and system files {}'.format(UP.dataFilename, UP.systemFilename))
-    ### Only do this using the Master subcommunicator!
-    # Here we initialize the HDF5 files.
-    if (masterComm != MPI.COMM_NULL):
-
         # Make sure the results folders exist
-        makedirs(outputDir, exist_ok=True)
+        makedirs(output_directory, exist_ok=True)
+        # Copy the user_parameter file to the output directory
+        shutil.copy(inputFile, output_directory)
 
-        copy(inputFile, outputDir)
-
-        # Prepare the dataset so that we can read a point at a time.
-        Dataset._initialize_sequential_reading(UP.dataFilename, UP.systemFilename)
-        # Get a datapoint from the file.
-        DataPoint = Dataset._read_record(record=0)
-
-        # Dataset._closeDatafiles()
-
-        # While preparing the file, we need access to the line numbers and fiducials in the data file
-        line_numbers, fiducials = dataset._read_csv_line_fiducial(UP.dataFilename[0])
-
-        Dataset._open_csv_files(UP.dataFilename)
-
-        # Get the line numbers in the data
-        lineNumbers = np.unique(tmp[:, 0])
-        lineNumbers.sort()
-        nLines = lineNumbers.size
-        fiducials = tmp[:, 1]
-
-        # Read in the user parameters
-        paras = UP.userParameters(DataPoint)
-
-        # Check the parameters
-        paras.check(DataPoint)
-
-        # Initialize the inversion to obtain the sizes of everything
-        paras, Mod, DataPoint, prior, likelihood, posterior, PhiD = initialize(paras, DataPoint, prng = prng)
-
-        # Create the results template
-        Res = Inference1D(DataPoint, Mod,
-            save=paras.save, plot=paras.plot, savePNG=paras.savePNG,
-            nMarkovChains=paras.nMarkovChains, plotEvery=paras.plotEvery,
-            reciprocateParameters=paras.reciprocateParameters)
-
-
-        # For each line. Get the fiducials, and create a HDF5 for the Line results.
-        # A line results file needs an initialized Results class for a single data point.
-        if not skipHDF5:
-            for line in lineNumbers:
-                fiducialsForLine = np.where(line_numbers == line)[0]
-                nFids = fiducialsForLine.size
-                # Create a filename for the current line number
-                fName = join(outputDir, '{}.h5'.format(line))
-                # Open a HDF5 file in parallel mode.
-
-                with h5py.File(fName, 'w', driver='mpio', comm=masterComm) as f:
-                    LR = Inference2D().createHdf(f, fiducials[fiducialsForLine], Res)
-                myMPI.rankPrint(world,'Time to create line {} with {} data points: {} h:m:s'.format(line, nFids, str(timedelta(seconds=MPI.Wtime()-t0))))
-                t0 = MPI.Wtime()
-
-            myMPI.print('Initialized results for writing.')
-
-
-    # Everyone needs the line numbers in order to open the results files collectively.
-    if masterRank:
-        DataPointType = DataPoint.hdf_name
-    else:
-        lineNumbers = None
-        DataPointType = None
-    lineNumbers = myMPI.Bcast(lineNumbers, world)
-    nLines = lineNumbers.size
-
-    DataPointType = world.bcast(DataPointType)
-
-    # Open the files collectively
-    LR = [None] * nLines
-    for i, line in enumerate(lineNumbers):
-        fName = join(outputDir, '{}.h5'.format(line))
-        LR[i] = Inference2D(fName, UP.systemFilename, hdfFile = h5py.File(fName, 'a', driver='mpio', comm=world))
-
-    world.barrier()
-    myMPI.rankPrint(world,'Files created in {} h:m:s'.format(str(timedelta(seconds=MPI.Wtime()-t1))))
+    # Start keeping track of time.
     t0 = MPI.Wtime()
 
-    # Carryout the master-worker tasks
-    if (world.rank == 0):
-        masterTask(Dataset, world)
-    else:
-        DataPoint = eval(utilities.safeEval(DataPointType))
-        workerTask(DataPoint, UP, prng, world, lineNumbers, LR)
+    inference3d = Inference3D(output_directory, UP.systemFilename, world=world)
+    inference3d.create_hdf5(dataset, UP)
 
-    world.barrier()
-    # Close all the files. Must be collective.
-    for i in range(nLines):
-        LR[i].close()
+    myMPI.rankPrint(world, "Created hdf5 files in {} h:m:s".format(str(timedelta(seconds=MPI.Wtime()-t0))))
 
-    if masterRank:
-        Dataset._closeDatafiles()
+    inference3d.infer(dataset, UP)
 
-
-def masterTask(Dataset, world):
-  """ Define a Send Recv Send procedure on the master """
-
-  from mpi4py import MPI
-  from geobipy.src.base import MPI as myMPI
-
-  # Set the total number of data points
-  nPoints = Dataset.nPoints
-
-  nFinished = 0
-  nSent = 0
-#   continueRunning = np.empty(1, dtype=np.int32)
-#   rankRecv = np.zeros(3, dtype = np.float64)
-
-  # Send out the first indices to the workers
-  for iWorker in range(1, world.size):
-    # Get a datapoint from the file.
-    DataPoint = Dataset._readSingleDatapoint()
-
-    # If DataPoint is None, then we reached the end of the file and no more points can be read in.
-    if DataPoint is None:
-        # Send the kill switch to the worker to shut down.
-        continueRunning = False
-        world.send(continueRunning, dest=iWorker)
-    else:
-        continueRunning = True
-        world.send(continueRunning, dest=iWorker)
-        DataPoint.Isend(dest=iWorker, world=world)
-
-    nSent += 1
-
-  # Start a timer
-  t0 = MPI.Wtime()
-
-  myMPI.print("Initial data points sent. Master is now waiting for requests")
-
-  # Now wait to send indices out to the workers as they finish until the entire data set is finished
-  while nFinished < nPoints:
-    # Wait for a worker to request the next data point
-    status = MPI.Status()
-    dummy = world.recv(source = MPI.ANY_SOURCE, tag = MPI.ANY_TAG, status = status)
-    requestingRank = status.Get_source()
-    # requestingRank = np.int(rankRecv[0])
-    # dataPointProcessed = rankRecv[1]
-
-    nFinished += 1
-
-    # Read the next data point from the file
-    DataPoint = Dataset._readSingleDatapoint()
-
-    # If DataPoint is None, then we reached the end of the file and no more points can be read in.
-    if DataPoint is None:
-        # Send the kill switch to the worker to shut down.
-        # continueRunning[0] = 0 # Do not continue running
-        continueRunning = False
-        world.send(continueRunning, dest=requestingRank)
-    else:
-        # continueRunning[0] = 1 # Yes, continue with the next point.
-        continueRunning = True
-        world.send(continueRunning, dest=requestingRank)
-        DataPoint.Isend(dest=requestingRank, world=world, systems=DataPoint.system)
-
-    report = (nFinished % (world.size - 1)) == 0 or nFinished == nPoints
-
-    if report:
-        e = MPI.Wtime() - t0
-        elapsed = str(timedelta(seconds=e))
-        eta = str(timedelta(seconds=(nPoints / nFinished-1) * e))
-        myMPI.print("Remaining Points {}/{} || Elapsed Time: {} h:m:s || ETA {} h:m:s".format(nPoints-nFinished, nPoints, elapsed, eta))
-
-def workerTask(_DataPoint, UP, prng, world, lineNumbers, Inference2D):
-    """ Define a wait run ping procedure for each worker """
-
-    # Import here so serial code still works...
-    from mpi4py import MPI
-    from geobipy.src.base import MPI as myMPI
-
-    # Initialize the worker process to go
-    Go = True
-
-    # Wait till you are told what to process next
-    continueRunning = world.recv(source=0)
-    # If we continue running, receive the next DataPoint. Otherwise, shutdown the rank
-    if continueRunning:
-        DataPoint = _DataPoint.Irecv(source=0, world=world)
-    else:
-        Go = False
-
-    while Go:
-        # initialize the parameters
-        paras = UP.userParameters(DataPoint)
-
-        # Pass through the line results file object if a parallel file system is in use.
-        iLine = lineNumbers.searchsorted(DataPoint.lineNumber)[0]
-        failed = infer(paras, DataPoint, prng=prng, rank=world.rank, Inference2D=Inference2D[iLine])
-
-        # Ping the Master to request a new index
-        t0 = MPI.Wtime()
-        world.send(1, dest=0)
-
-        # Wait till you are told whether to continue or not
-        continueRunning = world.recv(source=0)
-
-        if failed:
-            myMPI.print("Datapoint {} failed to converge".format(DataPoint.fiducial))
-
-        # If we continue running, receive the next DataPoint. Otherwise, shutdown the rank
-        if continueRunning:
-            DataPoint = _DataPoint.Irecv(source=0, world=world, systems=DataPoint.system)
-#            communicationTime += MPI.Wtime() - t0
-        else:
-#            communicationTime += MPI.Wtime() - t0
-#            s = str(timedelta(seconds = communicationTime))
-#            print('Communicaton Time on Rank {} {} h:m:s'.format(world.rank, s))
-            Go = False
 
 
 def geobipy():
