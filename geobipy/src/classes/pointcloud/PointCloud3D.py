@@ -783,6 +783,7 @@ class PointCloud3D(myObject):
             elif(cTmp in e_names):
                 labels.append(channel)
 
+        assert not any([x is None for x in labels[:3]]), Exception("File must contain columns for easting, northing, height. May also have an elevation column \n {}".format(self.fileInformation()))
         assert n == 3 and len(labels) <= 4, Exception("File must contain columns for easting, northing, height. May also have an elevation column \n {}".format(self.fileInformation()))
         return labels
 
