@@ -351,6 +351,9 @@ class FdemData(Data):
                        powerline=self.powerline[i],
                        magnetic=self.magnetic[i])
 
+    @property
+    def datapoint_type(self):
+        return FdemDataPoint
 
     def datapoint(self, index=None, fiducial=None):
         """Get the ith data point from the data set

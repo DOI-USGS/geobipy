@@ -510,7 +510,7 @@ class TdemData(Data):
         for i in range(self.nSystems):
             try:
                 df = self._file[i].get_chunk()
-                df = df.replace('NaN',np.nan)
+                df = df.replace('NaN', np.nan)
                 dfs.append(df)
             except:
                 self._file[i].close()
@@ -520,6 +520,7 @@ class TdemData(Data):
             return None
 
         D = np.squeeze(np.hstack([dfs[i][self._iD[i]].values for i in range(self.nSystems)]))
+
 
         if self._iS[0] is None:
             S = 0.1 * D
@@ -588,7 +589,9 @@ class TdemData(Data):
                     '  4Std:    {} \n'.format(np.nanmin(d), np.nanmax(d), np.nanmedian(d), np.nanmean(d), s, 4.0*s)
             print(h)
 
-
+    @property
+    def datapoint_type(self):
+        return TdemDataPoint
 
     def datapoint(self, index=None, fiducial=None):
         """Get the ith data point from the data set
