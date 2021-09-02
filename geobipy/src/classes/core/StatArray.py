@@ -1878,8 +1878,8 @@ class StatArray(np.ndarray, myObject):
             The broadcast StatArray on every rank in the MPI communicator.
 
         """
-        name = " " + self.getName()
-        units = " " + self.getUnits()
+        name = " " + self.name
+        units = " " + self.units
         tmp = name + ',' + units
         nameUnits = world.bcast(tmp)
         name, units = nameUnits.split(',')
@@ -1910,8 +1910,8 @@ class StatArray(np.ndarray, myObject):
             The StatArray distributed amongst ranks.
 
         """
-        name = " " + self.getName()
-        units = " " + self.getUnits()
+        name = " " + self.name
+        units = " " + self.units
         tmp = name + ',' + units
         nameUnits = world.bcast(tmp)
         name, units = nameUnits.split(',')
@@ -1919,19 +1919,20 @@ class StatArray(np.ndarray, myObject):
         return StatArray(tmp, name, units, dtype=tmp.dtype)
 
     def Isend(self, dest, world, ndim=None, shape=None, dtype=None):
-        name = " " + self.getName()
-        units = " " + self.getUnits()
+        name = " " + self.name
+        units = " " + self.units
         tmp = name + ',' + units
         world.send(tmp, dest=dest)
         myMPI.Isend(self, dest=dest, world=world,
                     ndim=ndim, shape=shape, dtype=dtype)
 
-    def Irecv(self, source, world, ndim=None, shape=None, dtype=None):
+    @classmethod
+    def Irecv(cls, source, world, ndim=None, shape=None, dtype=None):
         nameUnits = world.recv(source=source)
         name, units = nameUnits.split(',')
         tmp = myMPI.Irecv(source=source, world=world,
                           ndim=ndim, shape=shape, dtype=dtype)
-        return StatArray(tmp, name, units)
+        return cls(tmp, name, units)
 
     def IsendToLeft(self, world):
         """ISend an array to the rank left of world.rank.
