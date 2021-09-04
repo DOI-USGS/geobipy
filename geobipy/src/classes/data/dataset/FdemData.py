@@ -68,13 +68,15 @@ class FdemData(Data):
     def __init__(self, systems=None, **kwargs):
         """Instantiate the FdemData class. """
 
-        if (systems is None):
-            return
+        self._nPoints = 0
+
+        # if (systems is None):
+        #     return
 
         self.system = systems
 
         # Data Class containing xyz and channel values
-        Data.__init__(self, channels_per_system=2*self.nFrequencies, units="ppm", **kwargs)
+        super().__init__(channels_per_system=2*self.nFrequencies, units="ppm", **kwargs)
 
         # Assign data names
         self._data.name = 'Fdem Data'
@@ -141,17 +143,22 @@ class FdemData(Data):
     @system.setter
     def system(self, values):
 
+        if values is None:
+            self._system = None
+            self._channels_per_system = 0
+            return
+
         if isinstance(values, (str, FdemSystem)):
             values = [values]
         nSystems = len(values)
         # Make sure that list contains strings or TdemSystem classes
         assert all([isinstance(x, (str, FdemSystem)) for x in values]), TypeError("system must be str or list of either str or geobipy.FdemSystem")
 
-        self._system = np.ndarray(nSystems, dtype=FdemSystem)
+        self._system = [None] * nSystems
 
         for i, s in enumerate(values):
             if isinstance(s, str):
-                self._system[i] = FdemSystem().read(s)
+                self._system[i] = FdemSystem.read(s)
             else:
                 self._system[i] = s
 
@@ -491,8 +498,8 @@ class FdemData(Data):
 
         return ax
 
-
-    def read_csv(self, dataFilename, systemFilename):
+    @classmethod
+    def read_csv(cls, dataFilename, systemFilename):
         """Read in both the Fdem data and FDEM system files
 
         The data file is structured using columns with the first line containing header information.
@@ -521,7 +528,7 @@ class FdemData(Data):
         nDatafiles = len(dataFilename)
 
         # Initialize the EMData Class
-        FdemData.__init__(self, systems=systemFilename)
+        self = cls(systems=systemFilename)
 
         assert nDatafiles == self.nSystems, Exception("Number of data files must match number of system files.")
 
@@ -678,7 +685,8 @@ class FdemData(Data):
 
         return nPoints, location_channels, data_channels, error_channels, powerline, magnetic
 
-    def _initialize_sequential_reading(self, data_filename, system_filename):
+    @classmethod
+    def _initialize_sequential_reading(cls, data_filename, system_filename):
         """Special function to initialize a file for reading data points one at a time.
 
         Parameters
@@ -691,9 +699,12 @@ class FdemData(Data):
         """
 
         # Read in the EM System file
-        self.system = system_filename
+        self = cls(system_filename)
+
         self._data_filename = data_filename
         self._open_csv_files(data_filename)
+
+        return self
 
 
     # def _open_csv_files(self, dataFilename):
@@ -947,28 +958,26 @@ class FdemData(Data):
 
         """
 
-        npoints = myMPI.Bcast(self.nPoints, world, root=root)
-        nf = myMPI.Bcast(self.nFrequencies, world, root=root)
-        ns = myMPI.Bcast(self.nSystems, world, root=root)
-        if world.rank != root:
-            sys = np.ndarray(ns, dtype=FdemSystem)
-            for i in range(ns):
-                sys[i] = FdemSystem()
+        # npoints = myMPI.Bcast(self.nPoints, world, root=root)
+        n_frequencies = myMPI.Bcast(self.nFrequencies, world, root=root)
+        n_systems = myMPI.Bcast(self.nSystems, world, root=root)
+
+        if world.rank == root:
+            systems_null = self.system
         else:
-            sys = self.system
+            systems_null = [FdemSystem(None, None, None, n_frequencies = n_frequencies) for i in range(n_systems)]
 
-        sysTmp = []
-        for i in range(ns):
-            sysTmp.append(sys[i].Bcast(world, root=root))
+        systems = [sys.Bcast(world, root=root) for sys in systems_null]
 
-        out = FdemData(npoints, nf, sysTmp)
+        out = FdemData(systems)
+
         out._x = self.x.Bcast(world, root=root)
         out._y = self.y.Bcast(world, root=root)
         out._z = self.z.Bcast(world, root=root)
         out._elevation = self.elevation.Bcast(world, root=root)
-        out._data = self._data.Bcast(world, root=root)
-        out._std = self._std.Bcast(world, root=root)
-        out._predictedData = self._predictedData.Bcast(world, root=root)
+        out._data = self.data.Bcast(world, root=root)
+        out._std = self.std.Bcast(world, root=root)
+        out._predictedData = self.predictedData.Bcast(world, root=root)
         out._fiducial = self.fiducial.Bcast(world, root=root)
         out._lineNumber = self.lineNumber.Bcast(world, root=root)
         return out
@@ -1015,27 +1024,26 @@ class FdemData(Data):
 
         """
 
-        nf = myMPI.Bcast(self.nFrequencies, world, root=root)
-        ns = myMPI.Bcast(self.nSystems, world, root=root)
-        if world.rank != root:
-            sys = np.ndarray(ns, dtype=FdemSystem)
-            for i in range(ns):
-                sys[i] = FdemSystem()
+        # npoints = myMPI.Bcast(self.nPoints, world, root=root)
+        n_frequencies = myMPI.Bcast(self.nFrequencies, world, root=root)
+        n_systems = myMPI.Bcast(self.nSystems, world, root=root)
+
+        if world.rank == root:
+            systems_null = self.system
         else:
-            sys = self.system
+            systems_null = [FdemSystem(None, None, None, n_frequencies = n_frequencies) for i in range(n_systems)]
 
-        sysTmp = []
-        for i in range(ns):
-            sysTmp.append(sys[i].Bcast(world, root=root))
+        systems = [sys.Bcast(world, root=root) for sys in systems_null]
 
-        out = FdemData(chunks[world.rank], nf, sysTmp)
+        out = FdemData(systems)
+
         out._x = self.x.Scatterv(starts, chunks, world, root=root)
         out._y = self.y.Scatterv(starts, chunks, world, root=root)
         out._z = self.z.Scatterv(starts, chunks, world, root=root)
         out._elevation = self.elevation.Scatterv(starts, chunks, world, root=root)
-        out._data = self._data.Scatterv(starts, chunks, world, root=root)
-        out._std = self._std.Scatterv(starts, chunks, world, root=root)
-        out._predictedData = self._predictedData.Scatterv(starts, chunks, world, root=root)
+        out._data = self.data.Scatterv(starts, chunks, world, root=root)
+        out._std = self.std.Scatterv(starts, chunks, world, root=root)
+        out._predictedData = self.predictedData.Scatterv(starts, chunks, world, root=root)
         out._fiducial = self.fiducial.Scatterv(starts, chunks, world, root=root)
         out._lineNumber = self.lineNumber.Scatterv(starts, chunks, world, root=root)
 

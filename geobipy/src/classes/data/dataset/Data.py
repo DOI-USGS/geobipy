@@ -25,13 +25,13 @@ class Data(PointCloud3D):
     """Class defining a set of Data.
 
 
-    Data(nPoints, nChannelsPerSystem, x, y, z, data, std, predictedData, dataUnits, channelNames)
+    Data(channels_per_system, x, y, z, data, std, predictedData, dataUnits, channelNames)
 
     Parameters
     ----------
     nPoints : int
         Number of points in the data.
-    nChannelsPerSystem : int or array_like
+    channels_per_system : int or array_like
         Number of data channels in the data
         * If int, a single acquisition system is assumed.
         * If array_like, each item describes the number of points per acquisition system.
@@ -53,7 +53,7 @@ class Data(PointCloud3D):
     dataUnits : str
         Units of the data.
     channelNames : list of str, optional
-        Names of each channel of length sum(nChannelsPerSystem)
+        Names of each channel of length sum(channels_per_system)
 
     Returns
     -------
@@ -66,7 +66,7 @@ class Data(PointCloud3D):
         """ Initialize the Data class """
 
         # Number of Channels
-        self._channels_per_system = channels_per_system
+        self.channels_per_system = channels_per_system
 
         super().__init__(x, y, z, elevation)
 
@@ -533,7 +533,10 @@ class Data(PointCloud3D):
         """
         assert np.size(i) == 1, ValueError("i must be a single integer")
         assert 0 <= i <= self.nPoints, ValueError("Must have 0 <= i <= {}".format(self.nPoints))
-        return DataPoint(self.nChannelsPerSystem, self.x[i], self.y[i], self.z[i], self.elevation[i], self.data[i, :], self.std[i, :], self.predictedData[i, :], channelNames=self.channelNames)
+        return DataPoint(self.channels_per_system,
+                         x=self.x[i], y=self.y[i], z=self.z[i], elevation=self.elevation[i],
+                         data=self.data[i, :], std=self.std[i, :], predictedData=self.predictedData[i, :],
+                         channelNames=self.channelNames)
 
 
     def line(self, line):
@@ -1040,8 +1043,8 @@ class Data(PointCloud3D):
         """
 
         pc3d = PointCloud3D.Bcast(self, world, root=root)
-        nPoints = myMPI.Bcast(self.nPoints, world, root=root)
-        ncps = myMPI.Bcast(self.nChannelsPerSystem, world, root=root)
+        # nPoints = myMPI.Bcast(self.nPoints, world, root=root)
+        ncps = myMPI.Bcast(self.channels_per_system, world, root=root)
         x = self.x.Bcast(world)
         y = self.y.Bcast(world)
         z = self.z.Bcast(world)
@@ -1050,7 +1053,7 @@ class Data(PointCloud3D):
         s = self._std.Bcast(world)
         p = self._predictedData.Bcast(world)
 
-        return Data(nPoints, ncps, x=x, y=y, z=z,elevation=e, data=d, std=s, predictedData=p)
+        return Data(ncps, x=x, y=y, z=z,elevation=e, data=d, std=s, predictedData=p)
 
 
     def Scatterv(self, starts, chunks, world, root=0):
@@ -1073,7 +1076,7 @@ class Data(PointCloud3D):
             The Data distributed amongst ranks.
 
         """
-        ncps = myMPI.Bcast(self.nChannelsPerSystem, world, root=root)
+        ncps = myMPI.Bcast(self.channels_per_system, world, root=root)
         x = self.x.Scatterv(starts, chunks, world, root=root)
         y = self.y.Scatterv(starts, chunks, world, root=root)
         z = self.z.Scatterv(starts, chunks, world, root=root)
@@ -1081,4 +1084,4 @@ class Data(PointCloud3D):
         d = self._data.Scatterv(starts, chunks, world, root=root)
         s = self._std.Scatterv(starts, chunks, world, root=root)
         p = self._predictedData.Scatterv(starts, chunks, world, root=root)
-        return Data(chunks[world.rank], ncps, x=x, y=y, z=z, elevation=e, data=d, std=s, predictedData=p)
+        return Data(ncps, x=x, y=y, z=z, elevation=e, data=d, std=s, predictedData=p)
