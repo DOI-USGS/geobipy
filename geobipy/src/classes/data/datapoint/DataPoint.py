@@ -291,9 +291,8 @@ class DataPoint(Point):
         return self._units
 
     @units.setter
-    @abstractmethod
     def units(self, value):
-        if values is None:
+        if value is None:
             value = ""
         else:
             assert isinstance(value, str), TypeError('units must have type str')
@@ -598,7 +597,7 @@ class DataPoint(Point):
 
 
     def Isend(self, dest, world):
-        myMPI.Isend(self.nChannelsPerSystem, dest=dest, world=world)
+        myMPI.Isend(self.channels_per_system, dest=dest, world=world)
         tmp = np.hstack([self.x, self.y, self.z, self.elevation])
         myMPI.Isend(tmp, dest=dest, world=world)
         self._data.Isend(dest, world)
@@ -607,15 +606,17 @@ class DataPoint(Point):
         world.isend(self._channelNames, dest=dest)
 
 
-
-    def Irecv(self, source, world):
+    @classmethod
+    def Irecv(cls, source, world):
         ncps = myMPI.Irecv(source=source, world=world)
         tmp = myMPI.Irecv(source=source, world=world)
-        x = StatArray.StatArray(0)
-        d = x.Irecv(source, world)
-        s = x.Irecv(source, world)
-        p = x.Irecv(source, world)
+        d = StatArray.StatArray.Irecv(source, world)
+        s = StatArray.StatArray.Irecv(source, world)
+        p = StatArray.StatArray.Irecv(source, world)
         cn = world.irecv(source = 0).wait()
 
-        return DataPoint(ncps, tmp[0], tmp[1], tmp[2], tmp[3], d, s, p, channelNames=cn)
+        return cls(ncps,
+                   x=tmp[0], y=tmp[1], z=tmp[2], elevation=tmp[3],
+                   data=d, std=s, predictedData=p,
+                   channelNames=cn)
 

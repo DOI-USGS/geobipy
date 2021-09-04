@@ -582,17 +582,11 @@ class FdemDataPoint(EmDataPoint):
         tmp = myMPI.Irecv(source=source, ndim=1, shape=(7, ), dtype=np.float64, world=world)
 
         if systems is None:
-            nSystems = np.int32(tmp[4])
+            systems = [FdemSystem.Irecv(source=source, world=world) for i in range(np.int32(tmp[4]))]
 
-            systems = []
-            fs = FdemSystem()
-            for i in range(nSystems):
-                systems.append(fs.Irecv(source=source, world=world))
-
-        s = StatArray.StatArray(0)
-        d = s.Irecv(source, world)
-        s = s.Irecv(source, world)
-        p = s.Irecv(source, world)
+        d = StatArray.StatArray.Irecv(source, world)
+        s = StatArray.StatArray.Irecv(source, world)
+        p = StatArray.StatArray.Irecv(source, world)
 
         return cls(tmp[0], tmp[1], tmp[2], tmp[3], data=d, std=s, predictedData=p, system=systems, lineNumber=tmp[5], fiducial=tmp[6])
 
