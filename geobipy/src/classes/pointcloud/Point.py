@@ -115,11 +115,12 @@ class Point(myObject, ABC):
         return cls(x, y, z)
 
     def Isend(self, dest, world):
-        tmp = np.empty(3, np.float64)
-        tmp[:] = np.hstack([self.x, self.y, self.z])
+        # tmp = np.empty(3, np.float64)
+        tmp = np.hstack([self.x, self.y, self.z])
         world.Isend(tmp, dest=dest)
 
-    def Irecv(self, source, world):
+    @classmethod
+    def Irecv(cls, source, world):
         tmp = np.empty(3, np.float64)
         req = world.Irecv(tmp, source=source)
         req.Wait()
