@@ -165,17 +165,6 @@ class Inference1D(myObject):
         self.currentModel = model
         self.bestModel = model
 
-        if verbose:
-            n = np.int(1.2*self.nMC)
-            self.allRelErr = StatArray.StatArray(np.full([self.nSystems, n], np.nan), name='$\epsilon_{Relative}x10^{2}$', units='%')
-            self.allAddErr = StatArray.StatArray(np.full([self.nSystems, n], np.nan), name='$\epsilon_{Additive}$', units=dataPoint.data.units)
-            self.allZ = StatArray.StatArray(np.full(n, np.nan), name='Height', units='m')
-            self.allK = StatArray.StatArray(np.full(n, np.nan), name='Number of Layers')
-            self.posteriorComponents = StatArray.StatArray(np.full([8, n], np.nan), 'Components of the posterior')
-            self.ratioComponents = StatArray.StatArray(np.full([7, n], np.nan), 'log(Ratio Components)')
-            self.accepted = StatArray.StatArray(np.zeros(n, dtype=bool), name='Accepted')
-            self.dimensionChange = StatArray.StatArray(np.zeros(n, dtype=bool), name='Dimensions were changed')
-
     def __deepcopy__(self, memo={}):
         return None
 
@@ -311,7 +300,7 @@ class Inference1D(myObject):
 
             cP.suptitle(title)
 
-            self.fig.tight_layout()
+            # self.fig.tight_layout()
             self.fig.canvas.draw()
             self.fig.canvas.flush_events()
 
