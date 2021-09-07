@@ -279,6 +279,8 @@ class FdemDataPoint(EmDataPoint):
 
         self.system[0].toHdf(grp, 'sys')
 
+        return grp
+
     # def writeHdf(self, parent, name, withPosterior=True, index=None):
     #     """ Write the StatArray to an HDF object
     #     parent: Upper hdf file or group
