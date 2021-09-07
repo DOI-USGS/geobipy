@@ -2071,7 +2071,7 @@ class Inference2D(myObject):
             elif (low == 'height posterior'):
                 res.append('currentdatapoint/z/posterior')
             elif (low == 'fiducials'):
-                res.append('fiducials')
+                res.append('currentdatapoint/fiducials')
             elif (low == 'labels'):
                 res.append('labels')
             elif (low == 'layer posterior'):
@@ -2176,147 +2176,12 @@ class Inference2D(myObject):
               "====================================================\n")
 
 
-    def createHdf(self, hdfFile, fiducials, results):
+    def createHdf(self, hdfFile, fiducials, inference1d):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
         """
 
         self.hdfFile = hdfFile
-
-        nPoints = fiducials.size
-        self.fiducials = StatArray.StatArray(np.sort(fiducials), "fiducials")
-        assert not np.any(np.isnan(self.fiducials)), ValueError("Cannot have fiducials == NaN")
-
-        # Initialize and write the attributes that won't change
-        # hdfFile.create_dataset('ids',data=self.fiducials)
-        self.fiducials.toHdf(hdfFile, 'fiducials')
-        # self.fiducials.writeHdf(hdfFile, 'fiducials')
-        hdfFile.create_dataset('iplot', data=results.iPlot)
-        hdfFile.create_dataset('plotme', data=results.plotMe)
-        hdfFile.create_dataset('reciprocateParameter', data=results.reciprocateParameter)
-
-        if not results.limits is None:
-            hdfFile.create_dataset('limits', data=results.limits)
-        hdfFile.create_dataset('nmc', data=results.nMC)
-        hdfFile.create_dataset('nsystems', data=results.nSystems)
-        results.ratex.toHdf(hdfFile,'ratex')
-#        hdfFile.create_dataset('ratex', [results.ratex.size], dtype=results.ratex.dtype)
-#        hdfFile['ratex'][:] = results.ratex
-
-
-        # Initialize the attributes that will be written later
-        hdfFile.create_dataset('i', shape=[nPoints], dtype=results.i.dtype, fillvalue=np.nan)
-        hdfFile.create_dataset('iburn', shape=[nPoints], dtype=results.iBurn.dtype, fillvalue=np.nan)
-        hdfFile.create_dataset('ibest', shape=[nPoints], dtype=results.iBest.dtype, fillvalue=np.nan)
-        hdfFile.create_dataset('burnedin', shape=[nPoints], dtype=type(results.burnedIn))
-        # hdfFile.create_dataset('doi',  shape=[nPoints], dtype=float, fillvalue=np.nan)
-        hdfFile.create_dataset('multiplier',  shape=[nPoints], dtype=results.multiplier.dtype, fillvalue=np.nan)
-        hdfFile.create_dataset('invtime',  shape=[nPoints], dtype=float, fillvalue=np.nan)
-        hdfFile.create_dataset('savetime',  shape=[nPoints], dtype=float, fillvalue=np.nan)
-
-        results.meanInterp.createHdf(hdfFile,'meaninterp', nRepeats=nPoints, fillvalue=np.nan)
-        results.bestInterp.createHdf(hdfFile,'bestinterp', nRepeats=nPoints, fillvalue=np.nan)
-        results.opacityInterp.createHdf(hdfFile,'opacityinterp',nRepeats=nPoints, fillvalue=np.nan)
-#        hdfFile.create_dataset('opacityinterp', [nPoints,nz], dtype=np.float64)
-
-        results.rate.createHdf(hdfFile,'rate',nRepeats=nPoints, fillvalue=np.nan)
-#        hdfFile.create_dataset('rate', [nPoints,results.rate.size], dtype=results.rate.dtype)
-        results.PhiDs.createHdf(hdfFile,'phids',nRepeats=nPoints, fillvalue=np.nan)
-        #hdfFile.create_dataset('phids', [nPoints,results.PhiDs.size], dtype=results.PhiDs.dtype)
-
-        results.currentDataPoint.createHdf(hdfFile,'currentdatapoint', nRepeats=nPoints, fillvalue=np.nan)
-        results.bestDataPoint.createHdf(hdfFile,'bestd', withPosterior=False, nRepeats=nPoints, fillvalue=np.nan)
-
-        # Since the 1D models change size adaptively during the inversion, we need to pad the HDF creation to the maximum allowable number of layers.
-        tmp = results.currentModel.pad(results.currentModel.max_cells)
-
-        tmp.createHdf(hdfFile, 'currentmodel', nRepeats=nPoints, fillvalue=np.nan)
-
-        tmp = results.bestModel.pad(results.bestModel.max_cells)
-        tmp.createHdf(hdfFile, 'bestmodel', withPosterior=False, nRepeats=nPoints, fillvalue=np.nan)
-
-        if results.verbose:
-            results.posteriorComponents.createHdf(hdfFile,'posteriorcomponents',nRepeats=nPoints, fillvalue=np.nan)
-
-        # Add the best data components
-#        hdfFile.create_dataset('bestdata.z', [nPoints], dtype=results.bestD.z.dtype)
-#        hdfFile.create_dataset('bestdata.p', [nPoints,*results.bestD.p.shape], dtype=results.bestD.p.dtype)
-#        hdfFile.create_dataset('bestdata.s', [nPoints,*results.bestD.s.shape], dtype=results.bestD.s.dtype)
-
-        # Add the best model components
-#        hdfFile.create_dataset('bestmodel.ncells', [nPoints], dtype=results.bestModel.nCells.dtype)
-#        hdfFile.create_dataset('bestmodel.top', [nPoints], dtype=results.bestModel.top.dtype)
-#        hdfFile.create_dataset('bestmodel.par', [nPoints,*results.bestModel.par.shape], dtype=results.bestModel.par.dtype)
-#        hdfFile.create_dataset('bestmodel.depth', [nPoints,*results.bestModel.depth.shape], dtype=results.bestModel.depth.dtype)
-#        hdfFile.create_dataset('bestmodel.thk', [nPoints,*results.bestModel.thk.shape], dtype=results.bestModel.thk.dtype)
-#        hdfFile.create_dataset('bestmodel.chie', [nPoints,*results.bestModel.chie.shape], dtype=results.bestModel.chie.dtype)
-#        hdfFile.create_dataset('bestmodel.chim', [nPoints,*results.bestModel.chim.shape], dtype=results.bestModel.chim.dtype)
-
-#        self.currentD.createHdf(grp, 'currentd')
-#        self.bestD.createHdf(grp, 'bestd')
-#
-#        tmp=self.bestModel.pad(self.bestModel.maxLayers)
-#        tmp.createHdf(grp, 'bestmodel')
-
-    def write_inference1d(self, inference1d):
-        """ Given a HDF file initialized as line results, write the contents of results to the appropriate arrays """
-
-        assert inference1d.fiducial in self.fiducials, Exception("The HDF file does not have ID number {}. Available ids are between {} and {}".format(inference1d.fiducial, np.min(self.fiducials), np.max(self.fiducials)))
-
-        hdfFile = self.hdfFile
-
-        # Get the point index
-        i = self.fiducials.searchsorted(inference1d.fiducial)
-
-        # Add the iteration number
-        hdfFile['i'][i] = inference1d.i
-
-        # Add the burn in iteration
-        hdfFile['iburn'][i] = inference1d.iBurn
-
-        # Add the burn in iteration
-        hdfFile['ibest'][i] = inference1d.iBest
-
-        # Add the burned in logical
-        hdfFile['burnedin'][i] = inference1d.burnedIn
-
-        # Add the depth of investigation
-        # hdfFile['doi'][i] = inference1d.doi()
-
-        # Add the multiplier
-        hdfFile['multiplier'][i] = inference1d.multiplier
-
-        # Add the inversion time
-        hdfFile['invtime'][i] = inference1d.invTime
-
-        # Add the savetime
-#        hdfFile['savetime'][i] = inference1d.saveTime
-
-        # Interpolate the mean and best model to the discretized hitmap
-        hm = inference1d.currentModel.par.posterior
-        inference1d.meanInterp[:] = hm.mean()
-        inference1d.bestInterp[:] = inference1d.bestModel.piecewise_constant_interpolate(inference1d.bestModel.par, hm, axis=0)
-        # inference1d.opacityInterp[:] = inference1d.Hitmap.credibleRange(percent=95.0, log='e')
-
-        slic = np.s_[i, :]
-        # Add the interpolated mean model
-        inference1d.meanInterp.writeHdf(hdfFile, 'meaninterp',  index=i)
-        # Add the interpolated best
-        inference1d.bestInterp.writeHdf(hdfFile, 'bestinterp',  index=i)
-        # Add the interpolated opacity
-
-        # Add the acceptance rate
-        inference1d.rate.writeHdf(hdfFile, 'rate', index=i)
-
-        # Add the data misfit
-        inference1d.PhiDs.writeHdf(hdfFile,'phids',index=i)
-
-        inference1d.currentDataPoint.writeHdf(hdfFile,'currentdatapoint',  index=i)
-
-        inference1d.bestDataPoint.writeHdf(hdfFile,'bestd', withPosterior=False, index=i)
-
-        inference1d.currentModel.writeHdf(hdfFile,'currentmodel', index=i)
-
-        inference1d.bestModel.writeHdf(hdfFile,'bestmodel', withPosterior=False, index=i)
+        inference1d.createHdf(hdfFile, fiducials)
 
