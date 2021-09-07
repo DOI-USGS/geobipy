@@ -17,17 +17,21 @@ from ...base import utilities as cF
 class FdemSystem(myObject):
     """ Defines a Frequency Domain ElectroMagnetic acquisition system """
 
-    def __init__(self, frequencies=None, transmitterLoops = None, receiverLoops=None):
+    def __init__(self, frequencies, transmitterLoops, receiverLoops, n_frequencies=None):
         """ Initialize an FdemSystem """
 
         self._filename = None
         # StatArray of frequencies
-        if frequencies is None:
-            return
+
+        if not n_frequencies is None:
+            frequencies = np.zeros(n_frequencies)
 
         self.frequencies = frequencies
         self.transmitterLoops = transmitterLoops
         self.receiverLoops = receiverLoops
+
+        if receiverLoops is None:
+            return
 
         # StatArray of Loop Separations
         self.loopOffsets = StatArray.StatArray((self.nFrequencies, 3), "loopOffsets", "m")
@@ -48,6 +52,9 @@ class FdemSystem(myObject):
 
     @frequencies.setter
     def frequencies(self, values):
+        if values is None:
+            self._frequencies = StatArray.StatArray(0, "Frequencies", "Hz", dtype=np.float64)
+            return
         self._frequencies = StatArray.StatArray(values, "Frequencies", "Hz", dtype=np.float64)
 
     @property
@@ -121,6 +128,10 @@ class FdemSystem(myObject):
 
     @receiverLoops.setter
     def receiverLoops(self, values):
+        if values is None:
+            self._receiverLoops = [CircularLoop()] * self.nFrequencies
+            return
+
         assert np.size(values) == self.nFrequencies, ValueError("receiverLoops must have size {}".format(self.nFrequencies))
         assert all([isinstance(x, EmLoop) for x in values]), TypeError("receiverLoops must have type geobipy.EmLoop")
         self._receiverLoops = []
@@ -133,6 +144,9 @@ class FdemSystem(myObject):
 
     @transmitterLoops.setter
     def transmitterLoops(self, values):
+        if values is None:
+            self._transmitterLoops = [CircularLoop()] * self.nFrequencies
+            return
         assert np.size(values) == self.nFrequencies, ValueError("transmitterLoops must have size {}".format(self.nFrequencies))
         assert all([isinstance(x, EmLoop) for x in values]), TypeError("transmitterLoops must have type geobipy.EmLoop")
         self._transmitterLoops = []
@@ -144,7 +158,8 @@ class FdemSystem(myObject):
         out._fiilename = self._filename
         return out
 
-    def read(self, filename):
+    @classmethod
+    def read(cls, filename):
         """ Read in a file containing the system information
 
         The system file is structured using columns with the first line containing header information
@@ -174,19 +189,19 @@ class FdemSystem(myObject):
                 frequencies[j] = np.float64(line[0])
                 T = (CircularLoop(
                         line[1],
-                        np.int32(line[2]),
-                        np.int32(line[3]),
+                        np.float64(line[2]),
+                        np.float64(line[3]),
                         np.float64(line[4]),
                         np.float64(line[5])))
                 R = (CircularLoop(
                         line[6],
-                        np.int32(line[7]),
+                        np.float64(line[7]),
                         np.float64(line[8]),
                         np.float64(line[9]),
                         np.float64(line[10])))
                 transmitters.append(T)
                 receivers.append(R)
-        self.__init__(frequencies, transmitters, receivers)
+        self = cls(frequencies, transmitters, receivers)
         self._filename = filename
         return self
 
@@ -308,41 +323,42 @@ class FdemSystem(myObject):
 
     def Bcast(self, world, root=0):
         """ Broadcast the FdemSystem using MPI """
-        nFreq = myMPI.Bcast(self.nFrequencies, world, root=root)
-        if (world.rank > 0):
-            self = FdemSystem(nFreq)
-        this = FdemSystem(nFreq)
-        this._frequencies = self._frequencies.Bcast(world, root=root)
-        this.loopSeparation = self.loopSeparation.Bcast(world, root=root)
+        # nFreq = myMPI.Bcast(self.nFrequencies, world, root=root)
+        # if (world.rank > 0):
+        #     self = FdemSystem(nFreq)
+
+        frequencies = self.frequencies.Bcast(world, root=root)
+        transmitters = []
+        receivers = []
         for i in range(self.nFrequencies):
-            this.transmitterLoops[i] = self.transmitterLoops[i].Bcast(world, root=root)
-            this.receiverLoops[i] = self.receiverLoops[i].Bcast(world, root=root)
-        return this
+            t = self.transmitterLoops[i].Bcast(world, root=root)
+            transmitters.append(t)
+            r = self.receiverLoops[i].Bcast(world, root=root)
+            receivers.append(r)
+        return FdemSystem(frequencies, transmitters, receivers)
 
 
     def Isend(self, dest, world):
-        myMPI.Isend(self.nFrequencies, dest=dest, world=world)
+        # myMPI.Isend(self.nFrequencies, dest=dest, world=world)
         self.frequencies.Isend(dest=dest, world=world)
         # self.loopOffsets.Isend(dest=dest, world=world)
         for i in range(self.nFrequencies):
             self.transmitterLoops[i].Isend(dest=dest, world=world)
             self.receiverLoops[i].Isend(dest=dest, world=world)
 
+    @classmethod
+    def Irecv(cls, source, world):
+        # nFreq = myMPI.Irecv(source=source, world=world)
 
-    def Irecv(self, source, world):
-        nFreq = myMPI.Irecv(source=source, world=world)
-
-        x = StatArray.StatArray()
-        frequencies = x.Irecv(source=source, world=world)
+        frequencies = StatArray.StatArray.Irecv(source=source, world=world)
         # out.loopOffsets = out.loopOffsets.Irecv(source=source, world=world)
         transmitterLoops = []
         receiverLoops = []
-        x = CircularLoop()
-        for i in range(nFreq):
-            transmitterLoops.append(x.Irecv(source=source, world=world))
-            receiverLoops.append(x.Irecv(source=source, world=world))
+        for i in range(frequencies.size):
+            transmitterLoops.append(CircularLoop.Irecv(source=source, world=world))
+            receiverLoops.append(CircularLoop.Irecv(source=source, world=world))
 
-        return FdemSystem(frequencies, transmitterLoops, receiverLoops)
+        return cls(frequencies, transmitterLoops, receiverLoops)
 
 
     @cached_property

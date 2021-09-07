@@ -32,7 +32,7 @@ try:
 
             TDAEMSystem.__init__(self, system_filename)
             self.read_components(system_filename)
-            self.fileName = system_filename
+            self.filename = system_filename
 
         @property
         def isGA(self):
@@ -47,13 +47,14 @@ try:
             """Time windows."""
             return StatArray.StatArray(self.windows.centre, name='Time', units='s')
 
-
-        def read(self, systemFilename):
+        @classmethod
+        def read(cls, systemFilename):
             # Read in the System file
-            self.__init__(systemFilename)
+            self = cls(systemFilename)
             assert np.min(np.diff(self.windows.centre)) > 0.0, ValueError("Receiver window times must monotonically increase for system "+systemFilename)
 
             self.readCurrentWaveform(systemFilename)
+            return self
 
         def read_components(self, system_filename):
             self._components = []

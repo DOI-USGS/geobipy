@@ -101,7 +101,10 @@ def write_nd_indexed(arr, h5obj, myName, index):
         if not isinstance(i, (int, np.integer)):
             i = i[0]
         if (nda == 1):
-            ds[i, :s] = arr
+            if np.ndim(ds) == 1:
+                ds[i] = arr
+            else:
+                ds[i, :s] = arr
 
         elif(nda == 2):
             ds[i, :s[0], :s[1]] = arr

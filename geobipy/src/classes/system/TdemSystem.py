@@ -119,16 +119,11 @@ class TdemSystem(myObject):
             assert isinstance(value, EmLoop), TypeError("transmitterLoop must have type geobipy.EmLoop")
             self._transmitterLoop = deepcopy(values)
 
-
-    def read(self, systemFilename):
+    @classmethod
+    def read(cls, systemFilename):
         # Read in the System file
         from .TdemSystem_GAAEM import TdemSystem_GAAEM
-        self = TdemSystem_GAAEM(systemFilename)
-
-        assert np.min(np.diff(self.windows.centre)) > 0.0, ValueError("Receiver window times must monotonically increase for system "+systemFilename)
-
-        self.readCurrentWaveform(systemFilename)
-        return self
+        return TdemSystem_GAAEM.read(systemFilename)
 
 
     @property

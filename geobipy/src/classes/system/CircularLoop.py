@@ -201,9 +201,10 @@ class CircularLoop(EmLoop):
         myMPI.Isend(data, dest=dest, ndim=1, shape=(9, ), dtype=np.float64, world=world)
 
 
-    def Irecv(self, source, world):
+    @classmethod
+    def Irecv(cls, source, world):
         data = myMPI.Irecv(source=source, ndim=1, shape=(9, ), dtype=np.float64, world=world)
-        return CircularLoop(*data)
+        return cls(*data)
 
 
     def __str__(self):

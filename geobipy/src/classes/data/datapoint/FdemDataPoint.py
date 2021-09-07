@@ -279,6 +279,8 @@ class FdemDataPoint(EmDataPoint):
 
         self.system[0].toHdf(grp, 'sys')
 
+        return grp
+
     # def writeHdf(self, parent, name, withPosterior=True, index=None):
     #     """ Write the StatArray to an HDF object
     #     parent: Upper hdf file or group
@@ -576,24 +578,18 @@ class FdemDataPoint(EmDataPoint):
         self._std.Isend(dest, world)
         self._predictedData.Isend(dest, world)
 
-
-    def Irecv(self, source, world, systems=None):
+    @classmethod
+    def Irecv(cls, source, world, systems=None):
 
         tmp = myMPI.Irecv(source=source, ndim=1, shape=(7, ), dtype=np.float64, world=world)
 
         if systems is None:
-            nSystems = np.int32(tmp[4])
+            systems = [FdemSystem.Irecv(source=source, world=world) for i in range(np.int32(tmp[4]))]
 
-            systems = []
-            fs = FdemSystem()
-            for i in range(nSystems):
-                systems.append(fs.Irecv(source=source, world=world))
+        d = StatArray.StatArray.Irecv(source, world)
+        s = StatArray.StatArray.Irecv(source, world)
+        p = StatArray.StatArray.Irecv(source, world)
 
-        s = StatArray.StatArray(0)
-        d = s.Irecv(source, world)
-        s = s.Irecv(source, world)
-        p = s.Irecv(source, world)
-
-        return FdemDataPoint(tmp[0], tmp[1], tmp[2], tmp[3], data=d, std=s, predictedData=p, system=systems, lineNumber=tmp[5], fiducial=tmp[6])
+        return cls(tmp[0], tmp[1], tmp[2], tmp[3], data=d, std=s, predictedData=p, system=systems, lineNumber=tmp[5], fiducial=tmp[6])
 
 

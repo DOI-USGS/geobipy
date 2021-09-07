@@ -21,7 +21,7 @@ size = world.size
 
 #assert size == 4, Exception("Please use 4 cores to test")
 
-dataPath = "..//documentation_source//source//examples//supplementary//Data//" 
+dataPath = "..//documentation_source//source//examples//supplementary//Data//"
 
 x = 1
 # Set up array sizes for consistency and chunk lengths per core
@@ -128,7 +128,7 @@ elif world.rank == 1:
     x.Isend(2, world)
     z = StatArray(0).Irecv(0, world)
 elif world.rank == 2:
-    z = StatArray(0).Irecv(1, world) 
+    z = StatArray(0).Irecv(1, world)
 
 tst = [None, [0.0, 1.0, 2.0, 3.0, 4.0], [0.0, 2.0, 4.0, 6.0, 8.0], None]
 assert np.all(z == tst[rank]), Exception("Could not use StatArray.Isend/Irecv. Rank {}".format(rank))
@@ -162,9 +162,9 @@ zSave = np.arange(N) + 100.0
 
 ### Test the PointCloud3D
 if master:
-    pc = PointCloud3D(N, xSave, ySave, zSave)
+    pc = PointCloud3D(xSave, ySave, zSave)
 else:
-    pc = PointCloud3D(0)
+    pc = PointCloud3D()
 
 # Bcast
 pc1 = pc.Bcast(world)
@@ -181,7 +181,7 @@ pSave = np.ones([N, 4])
 ## Test the Data class
 if master:
     ncps = np.asarray([2,2])
-    data = Data(nPoints=N, nChannelsPerSystem=ncps, x=xSave, y=ySave, z=zSave, data=dSave, std=sSave, predictedData=pSave, channelNames=['t1', 't2', 't3', 't4'])
+    data = Data(channels_per_system=ncps, x=xSave, y=ySave, z=zSave, data=dSave, std=sSave, predictedData=pSave, channelNames=['t1', 't2', 't3', 't4'])
 else:
     data = Data(0)
 
@@ -200,21 +200,20 @@ assert np.all(data1.data == dSave[i0:i1, :]) and np.all(data1.std == sSave[i0:i1
 # Send and Recv a point
 y = None
 if master:
-    y = data.getDataPoint(0)
+    y = data.datapoint(0)
     for i in range(1, size):
-        data.getDataPoint(i).Isend(dest=i, world=world)
+        data.datapoint(i).Isend(dest=i, world=world)
 else:
-    y = DataPoint().Irecv(0, world)
+    y = DataPoint.Irecv(0, world)
 
 assert np.all(y.data == dSave[rank, :]) and np.all(y.std == sSave[rank, :]) and np.all(y.predictedData == pSave[rank, :]), Exception("Could not use Data.Isend/Irecv. Rank {}".format(rank))
 
 ### Test Frequency Domain Data
-fdSave = FdemData()
-fdSave.read(dataPath+"Resolve2.txt", dataPath+"FdemSystem2.stm")
+fdSave = FdemData.read_csv(dataPath+"Resolve2.txt", dataPath+"FdemSystem2.stm")
 if master:
     fd = fdSave
 else:
-    fd = FdemData()
+    fd = FdemData(systems=dataPath+"FdemSystem2.stm")
 
 # Bcast
 fd1 = fd.Bcast(world)
@@ -230,45 +229,39 @@ fd1 = fd.Scatterv(starts, chunks, world)
 
 assert np.allclose(fd1.data, fdSave.data[i0:i1, :], equal_nan=True), Exception("Could not use FdemData.Scatterv. Rank {}".format(rank))
 
-# Point by Point read in and send 
+# Point by Point read in and send
 if master:
-    fd = FdemData()
-    fd._initLineByLineRead(dataPath+"Resolve2.txt", dataPath+"FdemSystem2.stm")
+    fd = FdemData._initialize_sequential_reading(dataPath+"Resolve2.txt", dataPath+"FdemSystem2.stm")
 
 # Send and recieve a single datapoint from the file.
 if master:
-    fdp = fd._readSingleDatapoint()
+    fdp = fd._read_record()
     for i in range(1, size):
-        fdp1 = fd._readSingleDatapoint()
+        fdp1 = fd._read_record()
         fdp1.Isend(dest=i, world=world)
 else:
-    fdp = FdemDataPoint().Irecv(source=0, world=world)
+    fdp = FdemDataPoint.Irecv(source=0, world=world)
 
 assert np.allclose(fdp.data, fdSave.data[rank, :], equal_nan=True), Exception("Could not use FdemData.Isend/Irecv. Rank {}".format(rank))
 
 #Testing pre-read in system classes
-sysPath = [dataPath+"FdemSystem2.stm"]
-systems = []
-for s in sysPath:
-    systems.append(FdemSystem(systemFilename=s))
+systems = FdemSystem.read(dataPath+"FdemSystem2.stm")
 
 # Send and recieve a single datapoint from the file.
 if master:
-    fd = FdemData()
-    fd._initLineByLineRead(dataPath+"Resolve2.txt", dataPath+"FdemSystem2.stm")
+    fd = FdemData._initialize_sequential_reading(dataPath+"Resolve2.txt", dataPath+"FdemSystem2.stm")
 
-    fdp = fd._readSingleDatapoint()
+    fdp = fd._read_record()
     for i in range(1, size):
-        fdp1 = fd._readSingleDatapoint()
+        fdp1 = fd._read_record()
         fdp1.Isend(dest=i, world=world, systems=systems)
 else:
-    fdp = FdemDataPoint().Irecv(source=0, world=world, systems=systems)
+    fdp = FdemDataPoint.Irecv(source=0, world=world, systems=systems)
 
-assert np.allclose(fdp.data, fdSave.data[rank, :], equal_nan=True), Exception("Could not use FdemData.Isend/Irecv, with pre-existing system class. Rank {}".format(rank))   
+assert np.allclose(fdp.data, fdSave.data[rank, :], equal_nan=True), Exception("Could not use FdemData.Isend/Irecv, with pre-existing system class. Rank {}".format(rank))
 
 
-tdSave = TdemData()
-tdSave.read([dataPath+"Skytem_High.txt", dataPath+"Skytem_Low.txt"], [dataPath+"SkytemHM-SLV.stm", dataPath+"SkytemLM-SLV.stm"])
+tdSave = TdemData.read_csv([dataPath+"Skytem_High.txt", dataPath+"Skytem_Low.txt"], [dataPath+"SkytemHM-SLV.stm", dataPath+"SkytemLM-SLV.stm"])
 ### Test Time Domain Data
 if master:
     td = tdSave
@@ -291,15 +284,14 @@ assert np.allclose(td1.data, tdSave.data[i0:i1, :], equal_nan=True), Exception("
 
 # Send and recieve a single datapoint from the file.
 if master:
-    td = TdemData()
-    td._initLineByLineRead([dataPath+"Skytem_High.txt", dataPath+"Skytem_Low.txt"], [dataPath+"SkytemHM-SLV.stm", dataPath+"SkytemLM-SLV.stm"])
+    td = TdemData._initialize_sequential_reading([dataPath+"Skytem_High.txt", dataPath+"Skytem_Low.txt"], [dataPath+"SkytemHM-SLV.stm", dataPath+"SkytemLM-SLV.stm"])
 
-    tdp = td._readSingleDatapoint()
+    tdp = td._read_record()
     for i in range(1, size):
-        tdp1 = td._readSingleDatapoint()
+        tdp1 = td._read_record()
         tdp1.Isend(dest=i, world=world)
 else:
-    tdp = TdemDataPoint().Irecv(source=0, world=world)
+    tdp = TdemDataPoint.Irecv(source=0, world=world)
 
 assert np.allclose(tdp.data, tdSave.data[rank, :], equal_nan=True), Exception("Could not use TdemData.Isend/Irecv. Rank {}".format(rank))
 
@@ -307,18 +299,17 @@ assert np.allclose(tdp.data, tdSave.data[rank, :], equal_nan=True), Exception("C
 sysPath = [dataPath+"SkytemHM-SLV.stm", dataPath+"SkytemLM-SLV.stm"]
 systems = []
 for s in sysPath:
-    systems.append(TdemSystem(s))
+    systems.append(TdemSystem.read(s))
 
 # Send and recieve a single datapoint from the file.
 if master:
-    td = TdemData()
-    td._initLineByLineRead([dataPath+"Skytem_High.txt", dataPath+"Skytem_Low.txt"], [dataPath+"SkytemHM-SLV.stm", dataPath+"SkytemLM-SLV.stm"])
-    tdp = td._readSingleDatapoint()
+    td = TdemData._initialize_sequential_reading([dataPath+"Skytem_High.txt", dataPath+"Skytem_Low.txt"], [dataPath+"SkytemHM-SLV.stm", dataPath+"SkytemLM-SLV.stm"])
+    tdp = td._read_record()
     for i in range(1, size):
-        tdp1 = td._readSingleDatapoint()
+        tdp1 = td._read_record()
         tdp1.Isend(dest=i, world=world, systems=systems)
 else:
-    tdp = TdemDataPoint().Irecv(source=0, world=world, systems=systems)
+    tdp = TdemDataPoint.Irecv(source=0, world=world, systems=systems)
 
 assert np.allclose(tdp.data, tdSave.data[rank, :], equal_nan=True), Exception("Could not use TdemData.Isend/Irecv. Rank {}".format(rank))
 

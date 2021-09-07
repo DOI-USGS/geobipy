@@ -110,11 +110,6 @@ class StatArray(np.ndarray, myObject):
         # ndarray constructor, but return an object of our type.
         # It also triggers a call to InfoArray.__array_finalize__
 
-        if verbose:
-            print('SA.new')
-            print(shape)
-            print(type(shape))
-
         if (not name is None):
             assert (isinstance(name, str)), TypeError('name must be a string')
             # Do some possible LateX checking. some Backslash operatores in LateX do not pass correctly as strings
@@ -133,9 +128,6 @@ class StatArray(np.ndarray, myObject):
 
         # Copies a StatArray but can reassign the name and units
         if isinstance(shape, StatArray):
-            if verbose:
-                print('I am a StatArray')
-                print('ndim', np.ndim(shape))
             if np.ndim(shape) == 0:
                 self = np.ndarray.__new__(subtype, 1, **kwargs)
                 self[:] = shape
@@ -1507,7 +1499,7 @@ class StatArray(np.ndarray, myObject):
             nRepeats = np.atleast_1d(nRepeats)
             if (self.size == 1):
                 grp.create_dataset(
-                    'data', [*nRepeats, 1], dtype=self.dtype, fillvalue=fillvalue)
+                    'data', [*nRepeats], dtype=self.dtype, fillvalue=fillvalue)
             else:
                 grp.create_dataset(
                     'data', [*nRepeats, *self.shape], dtype=self.dtype, fillvalue=fillvalue)
@@ -1599,10 +1591,6 @@ class StatArray(np.ndarray, myObject):
 
         """
 
-        # if verbose:
-        #     print('StatArray.fromHdf')
-        #     print(self.shape)
-
         is_file = False
         if isinstance(grp, str):
             f = h5py.File(grp, 'r')
@@ -1637,10 +1625,6 @@ class StatArray(np.ndarray, myObject):
                 d = np.asarray(grp['data'][index])
             else:
                 d = np.asarray(grp['data'][np.s_[index]])
-
-        if verbose:
-            print(grp.attrs['repr'])
-            print('hdf data', d)
 
         if np.ndim(d) >= 2:
             d = np.squeeze(d)
@@ -1878,8 +1862,8 @@ class StatArray(np.ndarray, myObject):
             The broadcast StatArray on every rank in the MPI communicator.
 
         """
-        name = " " + self.getName()
-        units = " " + self.getUnits()
+        name = " " + self.name
+        units = " " + self.units
         tmp = name + ',' + units
         nameUnits = world.bcast(tmp)
         name, units = nameUnits.split(',')
@@ -1910,8 +1894,8 @@ class StatArray(np.ndarray, myObject):
             The StatArray distributed amongst ranks.
 
         """
-        name = " " + self.getName()
-        units = " " + self.getUnits()
+        name = " " + self.name
+        units = " " + self.units
         tmp = name + ',' + units
         nameUnits = world.bcast(tmp)
         name, units = nameUnits.split(',')
@@ -1919,19 +1903,20 @@ class StatArray(np.ndarray, myObject):
         return StatArray(tmp, name, units, dtype=tmp.dtype)
 
     def Isend(self, dest, world, ndim=None, shape=None, dtype=None):
-        name = " " + self.getName()
-        units = " " + self.getUnits()
+        name = " " + self.name
+        units = " " + self.units
         tmp = name + ',' + units
         world.send(tmp, dest=dest)
         myMPI.Isend(self, dest=dest, world=world,
                     ndim=ndim, shape=shape, dtype=dtype)
 
-    def Irecv(self, source, world, ndim=None, shape=None, dtype=None):
+    @classmethod
+    def Irecv(cls, source, world, ndim=None, shape=None, dtype=None):
         nameUnits = world.recv(source=source)
         name, units = nameUnits.split(',')
         tmp = myMPI.Irecv(source=source, world=world,
                           ndim=ndim, shape=shape, dtype=dtype)
-        return StatArray(tmp, name, units)
+        return cls(tmp, name, units)
 
     def IsendToLeft(self, world):
         """ISend an array to the rank left of world.rank.

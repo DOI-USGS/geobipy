@@ -438,7 +438,7 @@ class TdemDataPoint(EmDataPoint):
 
         grp.create_dataset('nSystems', data=self.nSystems)
         for i in range(self.nSystems):
-            grp.create_dataset('System{}'.format(i), data=np.string_(psplt(self.system[i].fileName)[-1]))
+            grp.create_dataset('System{}'.format(i), data=np.string_(psplt(self.system[i].filename)[-1]))
 
         self.transmitter.createHdf(grp, 'T', nRepeats=nRepeats, fillvalue=fillvalue)
         self.receiver.createHdf(grp, 'R', nRepeats=nRepeats, fillvalue=fillvalue)
@@ -854,7 +854,7 @@ class TdemDataPoint(EmDataPoint):
 
         if systems is None:
             for i in range(self.nSystems):
-                world.send(self.system[i].fileName, dest=dest)
+                world.send(self.system[i].filename, dest=dest)
 
         self.data.Isend(dest, world)
         self.std.Isend(dest, world)
@@ -863,8 +863,8 @@ class TdemDataPoint(EmDataPoint):
         self.receiver.Isend(dest, world)
 
 
-
-    def Irecv(self, source, world, systems=None):
+    @classmethod
+    def Irecv(cls, source, world, systems=None):
 
         tmp = myMPI.Irecv(source=source, ndim=1, shape=(10, ), dtype=np.float64, world=world)
 
@@ -876,12 +876,10 @@ class TdemDataPoint(EmDataPoint):
                 sys = world.recv(source=source)
                 systems.append(sys)
 
-        s = StatArray.StatArray(0)
-        d = s.Irecv(source, world)
-        s = s.Irecv(source, world)
-        p = s.Irecv(source, world)
-        c = CircularLoop()
-        transmitter = c.Irecv(source, world)
-        receiver = c.Irecv(source, world)
+        d = StatArray.StatArray.Irecv(source, world)
+        s = StatArray.StatArray.Irecv(source, world)
+        p = StatArray.StatArray.Irecv(source, world)
+        transmitter = CircularLoop.Irecv(source, world)
+        receiver = CircularLoop.Irecv(source, world)
         loopOffset  = tmp[-3:]
-        return TdemDataPoint(tmp[0], tmp[1], tmp[2], tmp[3], data=d, std=s, predictedData=p, system=systems, transmitter_loop=transmitter, receiver_loop=receiver, loopOffset=loopOffset, lineNumber=tmp[5], fiducial=tmp[6])
+        return cls(tmp[0], tmp[1], tmp[2], tmp[3], data=d, std=s, predictedData=p, system=systems, transmitter_loop=transmitter, receiver_loop=receiver, loopOffset=loopOffset, lineNumber=tmp[5], fiducial=tmp[6])
