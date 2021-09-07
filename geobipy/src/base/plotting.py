@@ -270,7 +270,12 @@ def bar(values, x=None, i=None, **kwargs):
         i = np.size(values)
     if (x is None):
         x = np.arange(i)
-    ax = plt.gca()
+    ax = kwargs.pop('ax', None)
+    if ax is None:
+        ax = plt.gca()
+    else:
+        plt.sca(ax)
+
     pretty(ax)
     plt.bar(x[:i], values[:i], color=wellSeparated[0], **kwargs)
     title(cF.getName(values))
@@ -409,7 +414,11 @@ def hist(counts, bins, rotate=False, flipX=False, flipY=False, trim=True, normal
         flipY = kwargs.pop('flipY',False)
         c = kwargs.pop('color', 'k')
 
-        ax = plt.gca()
+        ax = kwargs.pop('ax', None)
+        if ax is None:
+            ax = plt.gca()
+        else:
+            plt.sca(ax)
         cP.pretty(ax)
         ax.vlines(x = self.x.edges, ymin=self._zMesh[0, :], ymax=self._zMesh[-1, :], **kwargs)
         segs = np.zeros([self.y.nEdges, self.x.nEdges, 2])
@@ -906,7 +915,11 @@ def pcolor_1D(values, y=None, **kwargs):
         c = kwargs.pop('color', 'k')
 
     # Get the figure axis
-    ax = plt.gca()
+    ax = kwargs.pop('ax', None)
+    if ax is None:
+        ax = plt.gca()
+    else:
+        plt.sca(ax)
     pretty(ax)
 
     # Set the x and y axes before meshgridding them
@@ -1021,7 +1034,6 @@ def plot(x, y, **kwargs):
 
     """
 
-    ax = kwargs.pop('ax', None)
     xscale = kwargs.pop('xscale','linear')
     yscale = kwargs.pop('yscale','linear')
     flipX = kwargs.pop('flipX',False)
@@ -1043,9 +1055,12 @@ def plot(x, y, **kwargs):
         tmp, logLabel = cF._log(y, log)
         yl = logLabel + yl
 
-    if (ax is None):
+    ax = kwargs.pop('ax', None)
+    if ax is None:
         ax = plt.gca()
-        pretty(ax)
+    else:
+        plt.sca(ax)
+    pretty(ax)
 
     try:
         plt.plot(x, tmp, **kwargs)
@@ -1177,7 +1192,12 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
         yt = y[i]
         yt = yt[iNaN]
 
-    ax = plt.gca()
+    ax = kwargs.pop('ax', None)
+    if ax is None:
+        ax = plt.gca()
+    else:
+        plt.sca(ax)
+
     pretty(ax)
     f = plt.scatter(xt, yt, c = c, **kwargs)
 
@@ -1301,7 +1321,13 @@ def stackplot2D(x, y, labels=[], colors=tatarize, **kwargs):
 
     xscale = kwargs.pop('xscale','linear')
     yscale = kwargs.pop('yscale','linear')
-    ax = plt.gca()
+
+    ax = kwargs.pop('ax', None)
+    if ax is None:
+        ax = plt.gca()
+    else:
+        plt.sca(ax)
+
     pretty(ax)
 
     plt.stackplot(x, y, labels=labels, colors=colors, **kwargs)
@@ -1342,7 +1368,13 @@ def step(x, y, **kwargs):
 
     """
     # Must create a new parameter, so that the last layer is plotted
-    ax = plt.gca()
+
+    ax = kwargs.pop('ax', None)
+    if ax is None:
+        ax = plt.gca()
+    else:
+        plt.sca(ax)
+
     pretty(ax)
 
     flipX = kwargs.pop('flipX', False)
