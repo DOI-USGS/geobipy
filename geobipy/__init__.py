@@ -77,8 +77,6 @@ from .src.inversion.Inference1D import Inference1D
 from .src.inversion.Inference2D import Inference2D
 from .src.inversion.Inference3D import Inference3D
 
-from .src.inversion.inference import initialize, infer
-
 from .src.example_path import example_path
 
 # Set an MPI failed tag
@@ -125,24 +123,24 @@ def serial_geobipy(inputFile, output_directory, seed=None, index=None):
     makedirs(output_directory, exist_ok=True)
 
     # Copy the input file to the output directory for reference.
-    copy(inputFile, output_directory)
+    shutil.copy(inputFile, output_directory)
 
     # Import the script from the input file
     userParameters = import_module(str(inputFile.with_suffix('')), package='geobipy')
     assert 'data_type' in userParameters.__dict__, ValueError(("Please specify the data_type in the parameter file. \n"
-                                                    "data_type = FdemData()\n"
-                                                    "data_type = FdemDataPoint()\n"
-                                                    "data_type = TdemData()\n"
-                                                    "data_type = TdemDataPoint()\n"
+                                                    "data_type = FdemData\n"
+                                                    "data_type = FdemDataPoint\n"
+                                                    "data_type = TdemData\n"
+                                                    "data_type = TdemDataPoint\n"
                                                     ))
 
     # Everyone needs the system classes read in early.
-    Dataset = type(userParameters.data_type)()
+    # Dataset = userParameters.data_type()
 
-    if isinstance(Dataset, DataPoint):
-        serial_datapoint(userParameters, output_directory, seed=seed)
-    else:
-        serial_dataset(userParameters, output_directory, seed=seed, index=index)
+    # if isinstance(Dataset, DataPoint):
+    #     serial_datapoint(userParameters, output_directory, seed=seed)
+    # else:
+    serial_dataset(userParameters, output_directory, seed=seed, index=index)
 
 
 def serial_datapoint(userParameters, output_directory, seed=None):
@@ -161,36 +159,12 @@ def serial_datapoint(userParameters, output_directory, seed=None):
 
 def serial_dataset(userParameters, output_directory, seed=None, index=None):
 
-    Dataset = type(userParameters.data_type)(systems=userParameters.systemFilename)
+    dataset = userParameters.data_type(systems=userParameters.systemFilename)
 
     r3D = Inference3D(output_directory, userParameters.systemFilename)
+    r3D.create_hdf5(dataset, userParameters)
 
-    r3D.createHDF5(Dataset, userParameters)
-
-    # Get the random number generator
-    prng = np.random.RandomState(seed)
-
-    # Loop through data points in the file.
-    if index is None:
-        for i in range(Dataset.nPoints):
-            datapoint = Dataset._read_record(i)
-
-            options = userParameters.userParameters(datapoint)
-
-            infer(options, datapoint, prng=prng, Inference2D=r3D.line(datapoint.lineNumber))
-    else:
-        for i in range(index+1):
-            datapoint = Dataset._read_record(i)
-
-        options = userParameters.userParameters(datapoint)
-        options.output_directory = output_directory
-
-        infer(options, datapoint, prng=prng, Inference2D=r3D.line(datapoint.lineNumber))
-
-
-    r3D.close()
-    Dataset._closeDatafiles()
-
+    r3D.infer(dataset, userParameters)
 
 def parallel_geobipy(inputFile, outputDir, skipHDF5):
 
@@ -230,7 +204,7 @@ def parallel_mpi(inputFile, output_directory, skipHDF5):
             UP.systemFilename = [UP.systemFilename]
 
     # Everyone needs the system classes read in early.
-    dataset = type(UP.data_type)(systems=UP.systemFilename)
+    dataset = UP.data_type(systems=UP.systemFilename)
 
     # Get the number of points in the file.
     if masterRank:
