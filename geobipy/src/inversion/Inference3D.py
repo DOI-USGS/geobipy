@@ -26,11 +26,8 @@ from ..classes.pointcloud.PointCloud3D import PointCloud3D
 from ..classes.mesh.RectilinearMesh3D import RectilinearMesh3D
 from ..classes.model.Model import Model
 # from ..base import interpolation as interpolation
-from .inference import initialize
 from .Inference1D import Inference1D
 from .Inference2D import Inference2D
-from .inference import initialize, infer
-
 
 from ..classes.data.dataset.Data import Data
 from ..classes.data.datapoint.DataPoint import DataPoint
@@ -116,46 +113,43 @@ class Inference3D(myObject):
 
         self._world = communicator
 
-        # Set some starts and chunks for points and lines.
-        self._point_starts, self._point_chunks = loadBalance1D_shrinkingArrays(self.nPoints, self.world.size)
-
-        # Potentially create a team that operates over lines.
-        self._line_starts, self._line_chunks = loadBalance1D_shrinkingArrays(self.nLines, self.world.size)
-
-
     @property
     def parallel_access(self):
         return not self.world is None
 
-    @property
+    @cached_property
     def point_chunks(self):
         assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
-        return self._point_chunks
+        _point_starts, _point_chunks = loadBalance1D_shrinkingArrays(self.nPoints, self.world.size)
+        return _point_chunks
 
     @property
     def point_ends(self):
         assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
         return self.point_starts + self.point_chunks
 
-    @property
+    @cached_property
     def point_starts(self):
         assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
-        return self._point_starts
+        _point_starts, _point_chunks = loadBalance1D_shrinkingArrays(self.nPoints, self.world.size)
+        return _point_starts
 
-    @property
+    @cached_property
     def line_chunks(self):
         assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
-        return self._line_chunks
+        _line_starts, _line_chunks = loadBalance1D_shrinkingArrays(self.nLines, self.world.size)
+        return _line_chunks
 
     @property
     def line_ends(self):
         assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
         return self.line_starts + self.line_chunks
 
-    @property
+    @cached_property
     def line_starts(self):
         assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
-        return self._line_starts
+        _line_starts, _line_chunks = loadBalance1D_shrinkingArrays(self.nLines, self.world.size)
+        return _line_starts
 
     def open(self, mode='r+', world=None):
         """ Check whether the file is open """
@@ -203,53 +197,53 @@ class Inference3D(myObject):
             self.__init__(self.directory, user_parameters.systemFilename, world=self.world)
 
         else:
-
             self._create_hdf5(data, user_parameters)
+            self.__init__(self.directory, user_parameters.systemFilename)
 
 
     def _create_hdf5(self, data, user_parameters):
+
         if isinstance(data, Data):
             return self._createHDF5_dataset(data, user_parameters)
         else:
             return self._createHDF5_datapoint(data, user_parameters)
 
-
     def _createHDF5_dataset(self, dataset, userParameters):
 
         # Prepare the dataset so that we can read a point at a time.
-        dataset._initialize_sequential_reading(userParameters.dataFilename, userParameters.systemFilename)
-        # Get a datapoint from the file.
-        DataPoint = dataset._read_record(record=0)
+        dataset = dataset._initialize_sequential_reading(userParameters.dataFilename, userParameters.systemFilename)
 
-        line_numbers, fiducials = dataset._read_csv_line_fiducial(userParameters.dataFilename[0])
+        # Get a datapoint from the file.
+        datapoint = dataset._read_record(record=0)
+
+        line_numbers, fiducials = dataset._read_csv_line_fiducial(userParameters.dataFilename)
         # Get the line numbers in the data
         self._lineNumbers = np.sort(np.unique(line_numbers))
 
         # Initialize the user parameters
-        options = userParameters.userParameters(DataPoint)
-        options.check(DataPoint)
+        options = userParameters.userParameters(datapoint)
+        options.check(datapoint)
 
         # While preparing the file, we need access to the line numbers and fiducials in the data file
 
-        # Initialize the inversion to obtain the sizes of everything
-        options, Mod, DataPoint, _, _, _, _ = initialize(options, DataPoint)
-
-        # Create the results template
-        Res = Inference1D(DataPoint, Mod,
-                      save=options.save, plot=options.plot, savePNG=options.savePNG,
-                      nMarkovChains=options.nMarkovChains, plotEvery=options.plotEvery,
-                      reciprocateParameters=options.reciprocateParameters, verbose=options.verbose)
+        inference1d = Inference1D(datapoint, prng=None, kwargs=options)
 
         self.print('Creating HDF5 files, this may take a few minutes...')
         self.print('Files are being created for data files {} and system files {}'.format(options.dataFilename, options.systemFilename))
 
         # No need to create and close the files like in parallel, so create and keep them open
         for line in self.lineNumbers:
-            fiducialsForLine = np.where(line_numbers == line)[0]
-            driver = 'mpio' if not self.world is None else None
-            with h5py.File(join(self.directory, '{}.h5'.format(line)), 'w', driver=driver, comm=self.world) as f:
-                Inference2D().createHdf(f, fiducials[fiducialsForLine], Res)
-            self.print('Created hdf5 file for line {} with {} data points'.format(line, fiducialsForLine.size))
+            line_fiducials = fiducials[np.where(line_numbers == line)[0]]
+
+            kwargs = {}
+            if self.parallel_access:
+                kwargs['driver'] = 'mpio'
+                kwargs['comm'] = self.world
+
+            with h5py.File(join(self.directory, '{}.h5'.format(line)), 'w', **kwargs) as f:
+                Inference2D().createHdf(f, line_fiducials, inference1d)
+
+            self.print('Created hdf5 file for line {} with {} data points'.format(line, line_fiducials.size))
 
     def _createHDF5_datapoint(self, datapoint, userParameters):
 
@@ -347,12 +341,38 @@ class Inference3D(myObject):
 
     def infer(self, dataset, user_parameters):
 
-        dataset._initialize_sequential_reading(user_parameters.dataFilename, user_parameters.systemFilename)
-
         if self.parallel_access:
             self.infer_mpi(dataset, user_parameters)
-        # else:
-        #     self.infer_serial(dataset)
+        else:
+            self.infer_serial(dataset, user_parameters)
+
+    def infer_serial(self, dataset, user_parameters, seed=None):
+
+        t0 = time.time()
+        dataset = dataset._initialize_sequential_reading(user_parameters.dataFilename, user_parameters.systemFilename)
+
+        prng = np.random.RandomState(seed)
+
+        nPoints = dataset.nPoints
+
+        for i in range(nPoints):
+            datapoint = dataset._read_record()
+
+            options = user_parameters.userParameters(datapoint)
+            # Check the user input parameters against the datapoint
+            options.check(datapoint)
+
+            # Pass through the line results file object if a parallel file system is in use.
+            iLine = self.lineNumbers.searchsorted(datapoint.lineNumber)[0]
+
+            inference = Inference1D(datapoint, prng, options)
+            inference.infer(hdf_file_handle=self.lines[iLine].hdfFile)
+
+            e = time.time() - t0
+            elapsed = str(timedelta(seconds=e))
+
+            eta = str(timedelta(seconds=(np.float64(nPoints) / np.float64(i+1)) * e))
+            print("Remaining Points {}/{} || Elapsed Time: {} h:m:s || ETA {} h:m:s".format(nPoints-i+1, nPoints, elapsed, eta))
 
 
     def infer_mpi(self, dataset, user_parameters):
@@ -369,15 +389,18 @@ class Inference3D(myObject):
 
         # Carryout the master-worker tasks
         if (world.rank == 0):
-            self._infer_mpi_master_task(dataset)
+            self._infer_mpi_master_task(dataset, user_parameters)
         else:
             self._infer_mpi_worker_task(dataset.datapoint_type, user_parameters, prng)
 
-    def _infer_mpi_master_task(self, dataset):
+    def _infer_mpi_master_task(self, dataset, user_parameters):
         """ Define a Send Recv Send procedure on the master """
 
         from mpi4py import MPI
         from ..base import MPI as myMPI
+
+        # Prep the data for point by point reading
+        dataset = dataset._initialize_sequential_reading(user_parameters.dataFilename, user_parameters.systemFilename)
 
         # Set the total number of data points
         nPoints = dataset.nPoints
@@ -442,7 +465,7 @@ class Inference3D(myObject):
                 eta = str(timedelta(seconds=(nPoints / nFinished-1) * e))
                 myMPI.print("Remaining Points {}/{} || Elapsed Time: {} h:m:s || ETA {} h:m:s".format(nPoints-nFinished, nPoints, elapsed, eta))
 
-    def _infer_mpi_worker_task(self, DataPoint, user_parameters, prng):
+    def _infer_mpi_worker_task(self, datapoint, user_parameters, prng):
         """ Define a wait run ping procedure for each worker """
 
         # Import here so serial code still works...
@@ -460,17 +483,21 @@ class Inference3D(myObject):
         continueRunning = world.recv(source=0)
         # If we continue running, receive the next DataPoint. Otherwise, shutdown the rank
         if continueRunning:
-            DataPoint = DataPoint.Irecv(source=0, world=world)
+            datapoint = datapoint.Irecv(source=0, world=world)
         else:
             Go = False
 
         while Go:
             # initialize the parameters
-            paras = user_parameters.userParameters(DataPoint)
+            paras = user_parameters.userParameters(datapoint)
+            # Check the user input parameters against the datapoint
+            paras.check(datapoint)
 
             # Pass through the line results file object if a parallel file system is in use.
-            iLine = lineNumbers.searchsorted(DataPoint.lineNumber)[0]
-            failed = infer(paras, DataPoint, prng=prng, rank=world.rank, Inference2D=Inference2D[iLine])
+            iLine = lineNumbers.searchsorted(datapoint.lineNumber)[0]
+
+            inference = Inference1D(datapoint, prng, paras, world=world)
+            failed = inference.infer(hdf_file_handle=self.lines[iLine].hdfFile)
 
             # Ping the Master to request a new index
             t0 = MPI.Wtime()
@@ -480,11 +507,11 @@ class Inference3D(myObject):
             continueRunning = world.recv(source=0)
 
             if failed:
-                myMPI.print("Datapoint {} failed to converge".format(DataPoint.fiducial))
+                myMPI.print("datapoint {} failed to converge".format(datapoint.fiducial))
 
             # If we continue running, receive the next DataPoint. Otherwise, shutdown the rank
             if continueRunning:
-                DataPoint = DataPoint.Irecv(source=0, world=world, systems=DataPoint.system)
+                datapoint = datapoint.Irecv(source=0, world=world, systems=datapoint.system)
             else:
                 Go = False
 
