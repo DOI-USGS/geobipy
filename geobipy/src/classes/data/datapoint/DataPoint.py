@@ -291,7 +291,6 @@ class DataPoint(Point):
         return self._units
 
     @units.setter
-    @abstractmethod
     def units(self, value):
         if values is None:
             value = ""
