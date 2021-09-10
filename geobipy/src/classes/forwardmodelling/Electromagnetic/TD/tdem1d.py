@@ -160,7 +160,7 @@ try:
                     comps.append(-tmp.SZ)
                 J[iSys, i] = model1d.par[ix[i]] * np.hstack(comps)
 
-        datapoint.J = J[datapoint.active, :]
+        datapoint.J = J #[datapoint.active, :]
         return datapoint.J
 
 except:
