@@ -606,7 +606,12 @@ class TdemDataPoint(EmDataPoint):
 
             for k in range(self.n_components):
                 iS = self._component_indices(k, j)
-                active = self.active[iS]
+
+                if np.all(self.data <= 0.0):
+                    active = (self.predictedData > 0.0)[iS]
+
+                else:
+                    active = self.active[iS]
 
                 p = self.predictedData[iS][active]
                 p.plot(x=times[active], **kwargs)
