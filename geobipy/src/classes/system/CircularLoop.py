@@ -36,16 +36,12 @@ class CircularLoop(EmLoop):
 
     def __init__(self, orient="z", moment=1.0, x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0):
         """ Initialize a loop in an EM system """
+
+        super().__init__(x, y, z)
         # Orientation of the loop dipole
         self.orient = orient
         # Dipole moment of the loop
         self._moment = moment
-        # Not sure yet
-        self._x = x
-        # Not sure yet
-        self._y = y
-        # Not sure yet
-        self._z = z
         # Pitch of the loop
         self._pitch = pitch
         # Roll of the loop
@@ -76,21 +72,8 @@ class CircularLoop(EmLoop):
         return self._roll
 
     @property
-    def x(self):
-        return self._x
-
-    @property
-    def y(self):
-        return self._y
-
-    @property
     def yaw(self):
         return self._yaw
-
-    @property
-    def z(self):
-        return self._z
-
 
     @property
     def orient(self):
