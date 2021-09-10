@@ -2,6 +2,7 @@
 Module describing a Point defined by x,y,z c-ordinates
 """
 from abc import ABC, abstractmethod
+from copy import deepcopy
 from ..core.myObject import myObject
 from ..core import StatArray
 import numpy as np
