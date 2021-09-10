@@ -72,8 +72,8 @@ class TdemData(Data):
         self.transmitter = kwargs.get('transmitter', None)
         # StatArray of Receiever loops
         self.receiver = kwargs.get('receiver', None)
-        # Loop Offsets
-        self.loopOffset = kwargs.get('loopOffset', None)
+        # # Loop Offsets
+        # self.loopOffset = kwargs.get('loopOffset', None)
 
         self.channelNames = kwargs.get('channel_names', None)
 
@@ -91,22 +91,24 @@ class TdemData(Data):
             assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
             self._channelNames = values
 
-    @property
-    def loopOffset(self):
-        return self._loopOffset
+    # @property
+    # def loopOffset(self):
+    #     return self._loopOffset
 
-    @loopOffset.setter
-    def loopOffset(self, values):
-        if (values is None):
-            self._loopOffset = StatArray.StatArray((self.nPoints, 3), "Loop Offset")
-        else:
-            if self.nPoints == 0:
-                self.nPoints = np.size(values)
-            assert np.all(np.shape(values) == (self.nPoints, 3)), ValueError("loopOffset must have shape {}".format((self.nPoints, 3)))
-            if (isinstance(values, StatArray.StatArray)):
-                self._loopOffset = deepcopy(values)
-            else:
-                self._loopOffset = StatArray.StatArray(values, "Loop Offset")
+    # @loopOffset.setter
+    # def loopOffset(self, values):
+    #     if (values is None):
+    #         self._loopOffset = StatArray.StatArray(
+    #             (self.nPoints, 3), "Loop Offset")
+    #     else:
+    #         if self.nPoints == 0:
+    #             self.nPoints = np.size(values)
+    #         assert np.all(np.shape(values) == (self.nPoints, 3)), ValueError(
+    #             "loopOffset must have shape {}".format((self.nPoints, 3)))
+    #         if (isinstance(values, StatArray.StatArray)):
+    #             self._loopOffset = deepcopy(values)
+    #         else:
+    #             self._loopOffset = StatArray.StatArray(values, "Loop Offset")
 
     @property
     def n_components(self):
@@ -186,7 +188,7 @@ class TdemData(Data):
 
         super().append(self, other)
 
-        self.loopOffset = np.hstack([self.loopOffset, other.loopOffset])
+        # self.loopOffset = np.hstack([self.loopOffset, other.loopOffset])
         self.T = np.hstack([self.T, other.T])
         self.R = np.hstack(self.R, other.R)
 
@@ -297,16 +299,23 @@ class TdemData(Data):
         self.z = df[iC[0][4]].values
         self.elevation = df[iC[0][5]].values
 
+        self.transmitter = None
+        for i in range(self.nPoints):
+            self.transmitter[i] = CircularLoop(x=self.x[i], y=self.y[i], z=self.z[i],
+                                               pitch=df[iT[0][0]].values[i], roll=df[iT[0][1]].values[i], yaw=df[iT[0][2]].values[i],
+                                               radius=self.system[0].loopRadius())
+
+        loopOffset = df[iOffset[0]].values
+
         # Assign the orientations of the acquisistion loops
         self.receiver = None
         for i in range(self.nPoints):
-            self.receiver[i] = CircularLoop(z=self.z[i], pitch=df[iR[0][0]].values[i], roll=df[iR[0][1]].values[i], yaw=df[iR[0][2]].values[i], radius=self.system[0].loopRadius())
+            self.receiver[i] = CircularLoop(x = self.transmitter[i].x + loopOffset[i, 0],
+                                            y = self.transmitter[i].t + loopOffset[i, 1],
+                                            z = self.transmitter[i].z + loopOffset[i, 2],
+                                            pitch=df[iR[0][0]].values[i], roll=df[iR[0][1]].values[i], yaw=df[iR[0][2]].values[i],
+                                            radius=self.system[0].loopRadius())
 
-        self.transmitter = None
-        for i in range(self.nPoints):
-            self.transmitter[i] = CircularLoop(z=self.z[i], pitch=df[iT[0][0]].values[i], roll=df[iT[0][1]].values[i], yaw=df[iT[0][2]].values[i], radius=self.system[0].loopRadius())
-
-        self.loopOffset = df[iOffset[0]].values
 
 
         # Get the data values
@@ -536,17 +545,24 @@ class TdemData(Data):
 
         data = np.squeeze(dfs[0][self._iC[0]].values)
 
-        rloop = np.squeeze(dfs[0][self._iR[0]].values)
-        R = CircularLoop(z=data[4], pitch=rloop[0], roll=rloop[1], yaw=rloop[2], radius=self.system[0].loopRadius())
-        tloop = np.squeeze(dfs[0][self._iT[0]].values)
-        T = CircularLoop(z=data[4], pitch=tloop[0], roll=tloop[1], yaw=tloop[2], radius=self.system[0].loopRadius())
-
         loopOffset = np.squeeze(dfs[0][self._iOffset[0]].values)
+
+        tloop = np.squeeze(dfs[0][self._iT[0]].values)
+        T = CircularLoop(x=data[2], y=data[3], z=data[4],
+                         pitch=tloop[0], roll=tloop[1],yaw=tloop[2],
+                         radius=self.system[0].loopRadius())
+
+        rloop = np.squeeze(dfs[0][self._iR[0]].values)
+        R = CircularLoop(x=T.x + loopOffset[0],
+                         y=T.y + loopOffset[1],
+                         z=T.z + loopOffset[2],
+                         pitch=rloop[0], roll=rloop[1], yaw=rloop[2],
+                         radius=self.system[0].loopRadius())
 
         out = TdemDataPoint(x=data[2], y=data[3], z=data[4], elevation=data[5],
                             data=D, std=S,
                             system=self.system,
-                            transmitter_loop=T, receiver_loop=R, loopOffset=loopOffset,
+                            transmitter_loop=T, receiver_loop=R,
                             lineNumber=data[0], fiducial=data[1])
 
         return out
@@ -633,7 +649,7 @@ class TdemData(Data):
         return TdemDataPoint(self.x[i], self.y[i], self.z[i], self.elevation[i],
                              self.data[i, :], self.std[i, :], self.predictedData[i, :],
                              self.system,
-                             self.transmitter[i], self.receiver[i], self.loopOffset[i, :],
+                             self.transmitter[i], self.receiver[i],
                              self.lineNumber[i], self.fiducial[i])
 
 
@@ -655,20 +671,19 @@ class TdemData(Data):
         if not isinstance(i, slice):
             i = np.unique(i)
         return TdemData(self.system,
-                        x = self.x[i],
-                        y = self.y[i],
-                        z = self.z[i],
-                        elevation = self.elevation[i],
-                        lineNumber = self.lineNumber[i],
-                        fiducial = self.fiducial[i],
-                        transmitter = self.transmitter[i],
-                        receiver = self.receiver[i],
-                        loopOffset = self.loopOffset[i, :],
-                        data = self.data[i, :],
-                        std = self.std[i, :],
-                        predictedData = self.predictedData[i, :],
-                        channelNames = self.channelNames)
-
+                        x=self.x[i],
+                        y=self.y[i],
+                        z=self.z[i],
+                        elevation=self.elevation[i],
+                        lineNumber=self.lineNumber[i],
+                        fiducial=self.fiducial[i],
+                        transmitter=self.transmitter[i],
+                        receiver=self.receiver[i],
+                        # loopOffset=self.loopOffset[i, :],
+                        data=self.data[i, :],
+                        std=self.std[i, :],
+                        predictedData=self.predictedData[i, :],
+                        channelNames=self.channelNames)
 
     def fileInformation(self):
         s =('\nThe data columns are read in according to the column names in the first line \n'
@@ -1000,9 +1015,9 @@ class TdemData(Data):
                     for j in range(self.nPoints):
 
                         x = np.asarray([self.lineNumber[j], self.id[j], self.x[j], self.y[j], self.elevation[j], self.z[j],
-                                        self.loopOffset[j, 0], self.loopOffset[j, 1], self.loopOffset[j, 2],
-                                        self.T.pitch, self.T.roll, self.T.yaw,
-                                        self.R.pitch, self.R.roll, self.R.yaw])
+                                        self.R[j].x-self.T[j].x, self.R[j].y-self.T[j].y, self.R[j].z-self.T[j].z,
+                                        self.T[j].pitch, self.T[j].roll, self.T[j].yaw,
+                                        self.R[j].pitch, self.R[j].roll, self.R[j].yaw])
 
                         if predictedData:
                             d[:] = self.predictedData[j, iSys]

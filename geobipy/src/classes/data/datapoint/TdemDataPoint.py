@@ -76,7 +76,7 @@ class TdemDataPoint(EmDataPoint):
     def __init__(self, x=0.0, y=0.0, z=0.0, elevation=0.0,
                  data=None, std=None, predictedData=None,
                  system=None,
-                 transmitter_loop=None, receiver_loop=None, loopOffset=[0.0, 0.0, 0.0],
+                 transmitter_loop=None, receiver_loop=None,
                  lineNumber=0.0, fiducial=0.0):
         """Initializer. """
 
@@ -93,10 +93,6 @@ class TdemDataPoint(EmDataPoint):
         self.transmitter = transmitter_loop
         self.receiver = receiver_loop
 
-        # Set the loop offset
-        self.loopOffset = StatArray.StatArray(
-            np.asarray(loopOffset), 'Loop Offset', 'm')
-
         self.channelNames = ['Time {:.3e} s {}'.format(self.system[i].off_time[iTime], self.components_per_channel[k]) for k in range(
             self.n_components) for i in range(self.nSystems) for iTime in range(self.nTimes[i])]
 
@@ -107,6 +103,11 @@ class TdemDataPoint(EmDataPoint):
     @property
     def channels(self):
         return np.asarray([self.off_time(i) for i in range(self.nSystems)])
+
+    @property
+    def loopOffset(self):
+        diff = self.receiver - self.transmitter
+        return np.r_[diff.x, diff.y, diff.z]
 
     @property
     def receiver(self):
@@ -207,7 +208,6 @@ class TdemDataPoint(EmDataPoint):
         out._system = self._system
         out._transmitter = self._transmitter
         out._receiver = self._receiver
-        out.loopOffset = self.loopOffset
 
         return out
 
@@ -292,7 +292,6 @@ class TdemDataPoint(EmDataPoint):
                 system.append(TdemSystem(offTimes=times,
                                          transmitterLoop=transmitterLoop,
                                          receiverLoop=receiverLoop,
-                                         loopOffset=loopOffset,
                                          waveform=waveform,
                                          offTimeFilters=offTimeFilters))
 
@@ -451,8 +450,8 @@ class TdemDataPoint(EmDataPoint):
             grp, 'T', nRepeats=nRepeats, fillvalue=fillvalue)
         self.receiver.createHdf(
             grp, 'R', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.loopOffset.createHdf(
-            grp, 'loop_offset', nRepeats=nRepeats, fillvalue=fillvalue)
+        # self.loopOffset.createHdf(
+        #     grp, 'loop_offset', nRepeats=nRepeats, fillvalue=fillvalue)
 
         return grp
 
@@ -468,7 +467,7 @@ class TdemDataPoint(EmDataPoint):
 
         self.transmitter.writeHdf(grp, 'T', index=index)
         self.receiver.writeHdf(grp, 'R', index=index)
-        self.loopOffset.writeHdf(grp, 'loop_offset', index=index)
+        # self.loopOffset.writeHdf(grp, 'loop_offset', index=index)
 
     def fromHdf(self, grp, index=None, **kwargs):
         """ Reads the object from a HDF group """
@@ -486,8 +485,11 @@ class TdemDataPoint(EmDataPoint):
             grp['R'], index=index)
 
         if 'loop_offset' in grp:
-            self.loopOffset = StatArray.StatArray.fromHdf(
+            loopOffset = StatArray.StatArray.fromHdf(
                 grp['loop_offset'], index=index)
+            self.receiver.x = self.transmitter.x + loopOffset[0]
+            self.receiver.y = self.transmitter.y + loopOffset[1]
+            self.receiver.z = self.transmitter.z + loopOffset[2]
 
         nSystems = np.int(np.asarray(grp['nSystems']))
         self.system = [join(system_file_path, str(np.asarray(
@@ -866,7 +868,7 @@ class TdemDataPoint(EmDataPoint):
 
     def Isend(self, dest, world, systems=None):
         tmp = np.asarray([self.x, self.y, self.z, self.elevation, self.nSystems,
-                         self.lineNumber, self.fiducial, *self.loopOffset], dtype=np.float64)
+                         self.lineNumber, self.fiducial], dtype=np.float64)
         myMPI.Isend(tmp, dest=dest, ndim=1, shape=(
             10, ), dtype=np.float64, world=world)
 
@@ -884,7 +886,7 @@ class TdemDataPoint(EmDataPoint):
     def Irecv(cls, source, world, systems=None):
 
         tmp = myMPI.Irecv(source=source, ndim=1, shape=(
-            10, ), dtype=np.float64, world=world)
+            7, ), dtype=np.float64, world=world)
 
         if systems is None:
             nSystems = np.int32(tmp[4])
@@ -899,5 +901,5 @@ class TdemDataPoint(EmDataPoint):
         p = StatArray.StatArray.Irecv(source, world)
         transmitter = CircularLoop.Irecv(source, world)
         receiver = CircularLoop.Irecv(source, world)
-        loopOffset = tmp[-3:]
-        return cls(tmp[0], tmp[1], tmp[2], tmp[3], data=d, std=s, predictedData=p, system=systems, transmitter_loop=transmitter, receiver_loop=receiver, loopOffset=loopOffset, lineNumber=tmp[5], fiducial=tmp[6])
+        # loopOffset = tmp[-3:]
+        return cls(tmp[0], tmp[1], tmp[2], tmp[3], data=d, std=s, predictedData=p, system=systems, transmitter_loop=transmitter, receiver_loop=receiver, lineNumber=tmp[5], fiducial=tmp[6])
