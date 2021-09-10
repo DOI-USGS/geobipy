@@ -8,6 +8,7 @@ import numpy as np
 from ....system.TdemSystem_GAAEM import TdemSystem_GAAEM
 from .empymod_walktem import empymod_walktem
 
+
 def tdem1dfwd(datapoint, model1d):
     """Wrapper to freqeuency domain EM forward modellers
 
@@ -30,7 +31,8 @@ def tdem1dfwd(datapoint, model1d):
 
     heightTolerance = 0.0
     if (datapoint.z > heightTolerance):
-        assert isinstance(datapoint.system[0], TdemSystem_GAAEM), TypeError("For airborne data, system must be type TdemSystem_GAAEM")
+        assert isinstance(datapoint.system[0], TdemSystem_GAAEM), TypeError(
+            "For airborne data, system must be type TdemSystem_GAAEM")
         return gaTdem1dfwd(datapoint, model1d)
 
     else:
@@ -41,10 +43,12 @@ def tdem1dsen(datapoint, model1d, ix=None, modelChanged=True):
 
     heightTolerance = 0.0
     if (datapoint.z > heightTolerance):
-        assert isinstance(datapoint.system[0], TdemSystem_GAAEM), TypeError("For airborne data, system must be type TdemSystem_GAAEM")
+        assert isinstance(datapoint.system[0], TdemSystem_GAAEM), TypeError(
+            "For airborne data, system must be type TdemSystem_GAAEM")
         return gaTdem1dsen(datapoint, model1d, ix, modelChanged)
     else:
         return empymod_tdem1dsen(datapoint, model1d, ix)
+
 
 def empymod_tdem1dfwd(datapoint, model1d):
 
