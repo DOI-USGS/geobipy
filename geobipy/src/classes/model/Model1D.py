@@ -182,7 +182,7 @@ class Model1D(RectilinearMesh1D):
 
         if not dataPoint is None:
             # Compute the sensitivity of the data to the perturbed model
-            J = dataPoint.sensitivity(self)
+            J = dataPoint.sensitivity(self)[dataPoint.active, :]
             Wd = dataPoint.weightingMatrix(power=1.0)
             WdJ = np.dot(Wd, J)
             WdJTWdJ = np.dot(WdJ.T, WdJ)
@@ -460,7 +460,7 @@ class Model1D(RectilinearMesh1D):
         # Compute the gradient according to the perturbed parameters and data residual
         gradient = self.par.priorDerivative(order=1)
         if not dataPoint is None:
-            gradient += np.dot(dataPoint.J.T, dataPoint.predictedData.priorDerivative(order=1, i=dataPoint.active))
+            gradient += np.dot(dataPoint.J[dataPoint.active, :].T, dataPoint.predictedData.priorDerivative(order=1, i=dataPoint.active))
 
         # if (not burnedIn):
         #     SN_step_from_perturbed = 0.0
@@ -547,7 +547,7 @@ class Model1D(RectilinearMesh1D):
         gradient = remappedModel.par.priorDerivative(order=1)
 
         if not datapoint is None:
-            gradient += np.dot(datapoint.J.T, datapoint.predictedData.priorDerivative(order=1, i=datapoint.active))
+            gradient += np.dot(datapoint.J[datapoint.active, :].T, datapoint.predictedData.priorDerivative(order=1, i=datapoint.active))
 
         # scaling = parameterCovarianceScaling * ((2.0 * np.float64(Mod1.nCells)) - 1)**(-1.0 / 3.0)
 
