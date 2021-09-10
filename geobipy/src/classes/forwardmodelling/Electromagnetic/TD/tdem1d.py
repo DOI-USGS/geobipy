@@ -91,9 +91,12 @@ try:
 
         # Generate the Brodie Geometry class
         G = Geometry(datapoint.z[0],
-                    datapoint.transmitter.roll, datapoint.transmitter.pitch, datapoint.transmitter.yaw,
-                    datapoint.loopOffset[0], datapoint.loopOffset[1], datapoint.loopOffset[2],
-                    datapoint.receiver.roll, datapoint.receiver.pitch, datapoint.receiver.yaw)
+                     datapoint.transmitter.roll, datapoint.transmitter.pitch, datapoint.transmitter.yaw,
+                     datapoint.receiver.x - datapoint.transmitter.x,
+                     datapoint.receiver.y - datapoint.transmitter.y,
+                     datapoint.receiver.z - datapoint.transmitter.z,
+                     #  datapoint.loopOffset[0], datapoint.loopOffset[1], datapoint.loopOffset[2],
+                     datapoint.receiver.roll, datapoint.receiver.pitch, datapoint.receiver.yaw)
 
         # Forward model the data for each system
         for i in range(datapoint.nSystems):
@@ -119,9 +122,12 @@ try:
         if modelChanged:
             E = Earth(model1d.par[:], model1d.widths[:-1])
             G = Geometry(datapoint.z[0],
-                        datapoint.transmitter.roll, datapoint.transmitter.pitch, datapoint.transmitter.yaw,
-                        datapoint.loopOffset[0], datapoint.loopOffset[1], datapoint.loopOffset[2],
-                        datapoint.receiver.roll, datapoint.receiver.pitch, datapoint.receiver.yaw)
+                         datapoint.transmitter.roll, datapoint.transmitter.pitch, datapoint.transmitter.yaw,
+                         datapoint.receiver.x - datapoint.transmitter.x,
+                         datapoint.receiver.y - datapoint.transmitter.y,
+                         datapoint.receiver.z - datapoint.transmitter.z,
+                         #  datapoint.loopOffset[0], datapoint.loopOffset[1], datapoint.loopOffset[2],
+                         datapoint.receiver.roll, datapoint.receiver.pitch, datapoint.receiver.yaw)
 
             for i in range(datapoint.nSystems):
                 datapoint.system[i].forwardmodel(G, E)
