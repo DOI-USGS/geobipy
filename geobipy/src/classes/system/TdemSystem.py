@@ -4,9 +4,11 @@ from ...base import fileIO as fIO
 from ...classes.core import StatArray
 from .EmLoop import EmLoop
 from .CircularLoop import CircularLoop
+from .TdemSystem_GAAEM import TdemSystem_GAAEM
 import empymod
 
-class TdemSystem(myObject):
+
+class TdemSystem(TdemSystem_GAAEM):
     """ Initialize a Time domain system class
 
     TdemSystem(systemFileName)
@@ -23,22 +25,20 @@ class TdemSystem(myObject):
 
     """
 
-    def __init__(self, offTimes=None, transmitterLoop = None, receiverLoop=None, loopOffset=None, waveform=None, offTimeFilters=None, components=['z']):
+    def __init__(self, offTimes=None, transmitterLoop=None, receiverLoop=None, loopOffset=None, waveform=None, offTimeFilters=None, components=['z'], system_filename=None):
         """Instantiate"""
 
-        if offTimes is None:
-            return
+        if not system_filename is None:
+            return super().__init__(system_filename)
 
-        self._components = components
-
-        self.offTimes = StatArray.StatArray(offTimes, 'Time', 's')
+        # self.offTimes = StatArray.StatArray(offTimes, 'Time', 's')
+        self._off_time = StatArray.StatArray(offTimes, 'Time', 's')
         self.transmitterLoop = transmitterLoop
         self.receiverLoop = receiverLoop
         self.loopOffset = loopOffset
         self.waveform = waveform
         self.offTimeFilters = offTimeFilters
         self.delayTime = 1.8e-7
-
 
         self.modellingTimes, self.modellingFrequencies, self.ft, self.ftarg = empymod.utils.check_time(
             time=self.get_modellingTimes,          # Required times
@@ -71,12 +71,13 @@ class TdemSystem(myObject):
         if values is None:
             self._loopOffset = StatArray.StatArray(3, "Loop Offset", "m")
         else:
-            assert np.size(values) == 3, ValueError("loopOffset must have size 3 for offset in x, y, z.")
+            assert np.size(values) == 3, ValueError(
+                "loopOffset must have size 3 for offset in x, y, z.")
             self._loopOffset = StatArray.StatArray(values, "Loop Offset", "m")
 
-    @property
-    def nTimes(self):
-        return np.size(self.offTimes)
+    # @property
+    # def nTimes(self):
+    #     return np.size(self.off_times)
 
     @property
     def receiverLoop(self):
@@ -87,7 +88,8 @@ class TdemSystem(myObject):
         if value is None:
             self._receiverLoop = CircularLoop()
         else:
-            assert isinstance(value, EmLoop), TypeError("transmitterLoop must have type geobipy.EmLoop")
+            assert isinstance(value, EmLoop), TypeError(
+                "transmitterLoop must have type geobipy.EmLoop")
             self._receiverLoop = deepcopy(values)
 
     @property
@@ -95,17 +97,9 @@ class TdemSystem(myObject):
         msg = ("TdemSystem: ")
         return msg
 
-    @property
-    def times(self):
-        return self.offTimes
-
-    @times.setter
-    def times(self, values):
-        if values is None:
-            self._times = StatArray.StatArray(self.nTimes, "Time", "s")
-        else:
-            assert np.size(values) == self.nTimes, ValueError("times must have size {}".format(self.nTimes))
-            self._times = StatArray.StatArray(values, "Time", "s")
+    # @property
+    # def times(self):
+    #     return self.offTimes
 
     @property
     def transmitterLoop(self):
@@ -116,15 +110,13 @@ class TdemSystem(myObject):
         if value is None:
             self._transmitterLoop = CircularLoop()
         else:
-            assert isinstance(value, EmLoop), TypeError("transmitterLoop must have type geobipy.EmLoop")
+            assert isinstance(value, EmLoop), TypeError(
+                "transmitterLoop must have type geobipy.EmLoop")
             self._transmitterLoop = deepcopy(values)
 
     @classmethod
-    def read(cls, systemFilename):
-        # Read in the System file
-        from .TdemSystem_GAAEM import TdemSystem_GAAEM
-        return TdemSystem_GAAEM.read(systemFilename)
-
+    def read(cls, system_filename):
+        return cls(system_filename=system_filename)
 
     @property
     def get_modellingTimes(self):
@@ -145,6 +137,8 @@ class TdemSystem(myObject):
 
         """
 
-        tmin = np.log10(np.maximum(np.min(self.times) - np.max(self.waveform.time-self.delayTime), 1e-10))
-        tmax = np.log10(np.max(self.times) - np.min(self.waveform.time-self.delayTime))
+        tmin = np.log10(np.maximum(np.min(self.times) -
+                        np.max(self.waveform.time-self.delayTime), 1e-10))
+        tmax = np.log10(np.max(self.times) -
+                        np.min(self.waveform.time-self.delayTime))
         return np.logspace(tmin, tmax, self.nTimes+2)
