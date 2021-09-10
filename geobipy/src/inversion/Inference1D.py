@@ -353,13 +353,14 @@ class Inference1D(myObject):
 
         proposal_ratio = proposal - proposal1
 
-        try:
-            log_acceptance_ratio = np.float128(prior_ratio + likelihood_ratio + proposal_ratio)
+        # try:
+        log_acceptance_ratio = np.float128(
+            prior_ratio + likelihood_ratio + proposal_ratio)
 
-            acceptance_probability = mExp(log_acceptance_ratio)
-        except:
-            log_acceptance_ratio = -np.inf
-            acceptance_probability = -1.0
+        acceptance_probability = cF.expReal(log_acceptance_ratio)
+        # except:
+        #     log_acceptance_ratio = -np.inf
+        #     acceptance_probability = -1.0
 
         # If we accept the model
         accepted = acceptance_probability > self.prng.uniform()
