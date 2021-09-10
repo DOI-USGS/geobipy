@@ -3,12 +3,14 @@ from abc import abstractmethod
 from ....classes.core import StatArray
 from ...model.Model1D import Model1D
 from .EmDataPoint import EmDataPoint
-from ...forwardmodelling.Electromagnetic.TD.tdem1d import (tdem1dfwd, tdem1dsen)
+from ...forwardmodelling.Electromagnetic.TD.tdem1d import (
+    tdem1dfwd, tdem1dsen)
 from ...system.EmLoop import EmLoop
 from ...system.SquareLoop import SquareLoop
 from ...system.CircularLoop import CircularLoop
 from ....base.logging import myLogger
 from ...system.TdemSystem import TdemSystem
+from ...system.TdemSystem_GAAEM import TdemSystem_GAAEM
 from ...system.filters.butterworth import butterworth
 from ...system.Waveform import Waveform
 from ...statistics.Histogram1D import Histogram1D
@@ -92,9 +94,11 @@ class TdemDataPoint(EmDataPoint):
         self.receiver = receiver_loop
 
         # Set the loop offset
-        self.loopOffset = StatArray.StatArray(np.asarray(loopOffset), 'Loop Offset', 'm')
+        self.loopOffset = StatArray.StatArray(
+            np.asarray(loopOffset), 'Loop Offset', 'm')
 
-        self.channelNames = ['Time {:.3e} s {}'.format(self.system[i].times[iTime], self.components_per_channel[k]) for k in range(self.n_components) for i in range(self.nSystems) for iTime in range(self.nTimes[i])]
+        self.channelNames = ['Time {:.3e} s {}'.format(self.system[i].off_time[iTime], self.components_per_channel[k]) for k in range(
+            self.n_components) for i in range(self.nSystems) for iTime in range(self.nTimes[i])]
 
     @property
     def components(self):
@@ -102,7 +106,7 @@ class TdemDataPoint(EmDataPoint):
 
     @property
     def channels(self):
-        return np.asarray([self.times(i) for i in range(self.nSystems)])
+        return np.asarray([self.off_time(i) for i in range(self.nSystems)])
 
     @property
     def receiver(self):
@@ -111,7 +115,8 @@ class TdemDataPoint(EmDataPoint):
     @receiver.setter
     def receiver(self, value):
         if not value is None:
-            assert isinstance(value, EmLoop), TypeError("receiver must be of type EmLoop")
+            assert isinstance(value, EmLoop), TypeError(
+                "receiver must be of type EmLoop")
             self._receiver = value
 
     @property
@@ -123,13 +128,14 @@ class TdemDataPoint(EmDataPoint):
 
         if isinstance(value, (str, TdemSystem)):
             value = [value]
-        assert all((isinstance(sys, (str, TdemSystem)) for sys in value)), TypeError("System must be list with items of type TdemSystem")
+        assert all((isinstance(sys, (str, TdemSystem_GAAEM)) for sys in value)), TypeError(
+            "System must be list with items of type TdemSystem")
 
         self._system = []
         for j, sys in enumerate(value):
             if isinstance(sys, str):
-                self._system.append(TdemSystem().read(sys))
-            elif isinstance(sys, TdemSystem):
+                self._system.append(TdemSystem.read(sys))
+            else:
                 self._system.append(sys)
 
     @property
@@ -139,7 +145,8 @@ class TdemDataPoint(EmDataPoint):
     @transmitter.setter
     def transmitter(self, value):
         if not value is None:
-            assert isinstance(value, EmLoop), TypeError("transmitter must be of type EmLoop")
+            assert isinstance(value, EmLoop), TypeError(
+                "transmitter must be of type EmLoop")
             self._transmitter = value
 
     # @property
@@ -163,7 +170,8 @@ class TdemDataPoint(EmDataPoint):
         if value is None:
             value = r"$\frac{V}{m^{2}}$"
         else:
-            assert isinstance(value, str), TypeError('units must have type str')
+            assert isinstance(value, str), TypeError(
+                'units must have type str')
         self._units = value
 
     @property
@@ -181,17 +189,17 @@ class TdemDataPoint(EmDataPoint):
         out = ~np.isnan(d)
         return out
 
-
-    def times(self, system=0):
+    def off_time(self, system=0):
         """ Return the window times in an StatArray """
-        return self.system[system].times
+        return self.system[system].off_time
 
     @property
     def _ravel_index(self):
         return np.cumsum(np.hstack([0, np.repeat(self.nTimes, self.n_components)]))
 
     def _component_indices(self, component=0, system=0):
-        i = np.ravel_multi_index((component, system), (self.n_components, self.nSystems))
+        i = np.ravel_multi_index(
+            (component, system), (self.n_components, self.nSystems))
         return np.s_[self._ravel_index[i]:self._ravel_index[i+1]]
 
     def __deepcopy__(self, memo={}):
@@ -249,17 +257,18 @@ class TdemDataPoint(EmDataPoint):
         data = np.empty(0)
         std = np.empty(0)
 
-
         for fName in dataFileName:
             with open(fName, 'r') as f:
                 # Header line
-                dtype, x, y, z, elevation, fiducial, lineNumber, current = self.__aarhus_header(f)
+                dtype, x, y, z, elevation, fiducial, lineNumber, current = self.__aarhus_header(
+                    f)
                 # Source type
                 source, polarization = self.__aarhus_source(f)
                 # Offset
                 loopOffset = self.__aarhus_positions(f)
                 # Loop Dimensions
-                transmitterLoop, receiverLoop = self.__aarhus_loop_dimensions(f, source)
+                transmitterLoop, receiverLoop = self.__aarhus_loop_dimensions(
+                    f, source)
                 # Data transforms
                 transform = self.__aarhus_data_transforms(f)
                 # Waveform
@@ -287,8 +296,8 @@ class TdemDataPoint(EmDataPoint):
                                          waveform=waveform,
                                          offTimeFilters=offTimeFilters))
 
-        TdemDataPoint.__init__(self, x, y, 0.0, elevation, data, std, system=system, lineNumber=lineNumber, fiducial=fiducial)
-
+        TdemDataPoint.__init__(self, x, y, 0.0, elevation, data, std,
+                               system=system, lineNumber=lineNumber, fiducial=fiducial)
 
     def __aarhus_header(self, f):
         line = f.readline().strip().split(';')
@@ -314,27 +323,27 @@ class TdemDataPoint(EmDataPoint):
             elif tag == "current":
                 current = np.float(value)
 
-        assert not np.any([x, y, elevation, current] is None), ValueError("Aarhus file header line must contain 'XUTM', 'YUTM', 'Elevation', 'current'")
+        assert not np.any([x, y, elevation, current] is None), ValueError(
+            "Aarhus file header line must contain 'XUTM', 'YUTM', 'Elevation', 'current'")
 
         return dtype, x, y, z, elevation, fiducial, lineNumber, current
-
 
     def __aarhus_source(self, f):
         line = f.readline().strip().split()
         source = np.int32(line[0])
         polarization = np.int32(line[1])
 
-        assert source == 7, ValueError("Have only incorporated source == 7 so far.")
-        assert polarization == 3, ValueError("Have only incorporated polarization == 3 so far.")
+        assert source == 7, ValueError(
+            "Have only incorporated source == 7 so far.")
+        assert polarization == 3, ValueError(
+            "Have only incorporated polarization == 3 so far.")
 
         return source, polarization
-
 
     def __aarhus_positions(self, f):
         line = f.readline().strip().split()
         tx, ty, tz, rx, ry, rz = [np.float(x) for x in line]
-        return np.asarray([rx - tx, ry - ty, rz - tz]) # loopOffset
-
+        return np.asarray([rx - tx, ry - ty, rz - tz])  # loopOffset
 
     def __aarhus_loop_dimensions(self, f, source):
 
@@ -346,11 +355,11 @@ class TdemDataPoint(EmDataPoint):
         line = f.readline().strip().split()
         if source == 7:
             dx, dy = [np.float(x) for x in line]
-            assert dx == dy, ValueError("Only handling square loops at the moment")
-            transmitter = SquareLoop(sideLength = dx)
-            receiver = CircularLoop() # Dummy.
+            assert dx == dy, ValueError(
+                "Only handling square loops at the moment")
+            transmitter = SquareLoop(sideLength=dx)
+            receiver = CircularLoop()  # Dummy.
             return transmitter, receiver
-
 
     def __aarhus_data_transforms(self, f):
         line = f.readline().strip().split()
@@ -359,12 +368,12 @@ class TdemDataPoint(EmDataPoint):
 
         return a
 
-
     def __aarhus_waveform(self, f):
         line = f.readline().strip().split()
         typ, nWaveforms = [np.int32(x) for x in line]
 
-        assert typ == 3, ValueError("Can only handle user defined waveforms, option 3")
+        assert typ == 3, ValueError(
+            "Can only handle user defined waveforms, option 3")
 
         time = np.empty(0)
         amplitude = np.empty(0)
@@ -376,7 +385,6 @@ class TdemDataPoint(EmDataPoint):
 
         return time, amplitude
 
-
     def __aarhus_frontgate(self, f):
         line = f.readline().strip().split()
         nFilters = np.int(line[0])
@@ -384,7 +392,6 @@ class TdemDataPoint(EmDataPoint):
         damping = np.float64(line[2])
 
         return nFilters, frontGate, damping
-
 
     def __aarhus_filters(self, f, nFilters):
 
@@ -406,10 +413,10 @@ class TdemDataPoint(EmDataPoint):
             for j in range(nHighPass):
                 order = np.int(np.floate(line[(2*j)+1]))
                 frequency = np.float64(line[(2*j)+2])
-                filters.append(butterworth(order, frequency, btype='high', analog=True))
+                filters.append(butterworth(
+                    order, frequency, btype='high', analog=True))
 
         return filters
-
 
     def __aarhus_data(self, f):
 
@@ -427,7 +434,6 @@ class TdemDataPoint(EmDataPoint):
 
         return np.asarray(time), np.asarray(data), np.asarray(std)
 
-
     def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
@@ -438,14 +444,17 @@ class TdemDataPoint(EmDataPoint):
 
         grp.create_dataset('nSystems', data=self.nSystems)
         for i in range(self.nSystems):
-            grp.create_dataset('System{}'.format(i), data=np.string_(psplt(self.system[i].filename)[-1]))
+            grp.create_dataset('System{}'.format(i), data=np.string_(
+                psplt(self.system[i].filename)[-1]))
 
-        self.transmitter.createHdf(grp, 'T', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.receiver.createHdf(grp, 'R', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.loopOffset.createHdf(grp, 'loop_offset', nRepeats=nRepeats, fillvalue=fillvalue)
+        self.transmitter.createHdf(
+            grp, 'T', nRepeats=nRepeats, fillvalue=fillvalue)
+        self.receiver.createHdf(
+            grp, 'R', nRepeats=nRepeats, fillvalue=fillvalue)
+        self.loopOffset.createHdf(
+            grp, 'loop_offset', nRepeats=nRepeats, fillvalue=fillvalue)
 
         return grp
-
 
     def writeHdf(self, parent, name, withPosterior=True, index=None):
         """ Write the StatArray to an HDF object
@@ -461,39 +470,42 @@ class TdemDataPoint(EmDataPoint):
         self.receiver.writeHdf(grp, 'R', index=index)
         self.loopOffset.writeHdf(grp, 'loop_offset', index=index)
 
-
     def fromHdf(self, grp, index=None, **kwargs):
         """ Reads the object from a HDF group """
 
-        assert ('system_file_path' in kwargs), ValueError("missing 1 required argument 'system_file_path', the path to directory containing system files")
+        assert ('system_file_path' in kwargs), ValueError(
+            "missing 1 required argument 'system_file_path', the path to directory containing system files")
 
         system_file_path = kwargs['system_file_path']
 
         super.fromHdf(grp, index)
 
-        self.transmitter = (eval(cf.safeEval(grp['T'].attrs.get('repr')))).fromHdf(grp['T'], index=index)
-        self.receiver = (eval(cf.safeEval(grp['R'].attrs.get('repr')))).fromHdf(grp['R'], index=index)
+        self.transmitter = (eval(cf.safeEval(grp['T'].attrs.get('repr')))).fromHdf(
+            grp['T'], index=index)
+        self.receiver = (eval(cf.safeEval(grp['R'].attrs.get('repr')))).fromHdf(
+            grp['R'], index=index)
 
         if 'loop_offset' in grp:
-            self.loopOffset = StatArray.StatArray.fromHdf(grp['loop_offset'], index=index)
+            self.loopOffset = StatArray.StatArray.fromHdf(
+                grp['loop_offset'], index=index)
 
         nSystems = np.int(np.asarray(grp['nSystems']))
-        self.system = [join(system_file_path, str(np.asarray(grp['System{}'.format(i)]), 'utf-8')) for i in range(nSystems)]
+        self.system = [join(system_file_path, str(np.asarray(
+            grp['System{}'.format(i)]), 'utf-8')) for i in range(nSystems)]
 
         self._nChannelsPerSystem = self.nTimes
 
         return self
 
-
-    def plotWaveform(self,**kwargs):
+    def plotWaveform(self, **kwargs):
         for i in range(self.nSystems):
             if (self.nSystems > 1):
                 plt.subplot(2, 1, i + 1)
-            plt.plot(self.system[i].waveform.time, self.system[i].waveform.current, **kwargs)
+            plt.plot(self.system[i].waveform.time,
+                     self.system[i].waveform.current, **kwargs)
             cp.xlabel('Time (s)')
             cp.ylabel('Normalized Current (A)')
             plt.margins(0.1, 0.1)
-
 
     def plot(self, title='Time Domain EM Data', with_error_bars=True, **kwargs):
         """ Plot the Inphase and Quadrature Data for an EM measurement
@@ -504,10 +516,14 @@ class TdemDataPoint(EmDataPoint):
 
         kwargs['marker'] = kwargs.pop('marker', 'v')
         kwargs['markersize'] = kwargs.pop('markersize', 7)
-        c = kwargs.pop('color', [cp.wellSeparated[i+1] for i in range(self.nSystems)])
-        mfc = kwargs.pop('markerfacecolor',[cp.wellSeparated[i+1] for i in range(self.nSystems)])
-        assert len(c) == self.nSystems, ValueError("color must be a list of length {}".format(self.nSystems))
-        assert len(mfc) == self.nSystems, ValueError("markerfacecolor must be a list of length {}".format(self.nSystems))
+        c = kwargs.pop('color', [cp.wellSeparated[i+1]
+                       for i in range(self.nSystems)])
+        mfc = kwargs.pop('markerfacecolor', [
+                         cp.wellSeparated[i+1] for i in range(self.nSystems)])
+        assert len(c) == self.nSystems, ValueError(
+            "color must be a list of length {}".format(self.nSystems))
+        assert len(mfc) == self.nSystems, ValueError(
+            "markerfacecolor must be a list of length {}".format(self.nSystems))
         kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor', 'k')
         kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth', 1.0)
         kwargs['alpha'] = kwargs.pop('alpha', 0.8)
@@ -521,7 +537,7 @@ class TdemDataPoint(EmDataPoint):
         logy = kwargs.pop('logY', None)
 
         for j in range(self.nSystems):
-            times, _ = cf._log(self.times(j), logx)
+            times, _ = cf._log(self.off_time(j), logx)
 
             for k in range(self.n_components):
 
@@ -530,19 +546,18 @@ class TdemDataPoint(EmDataPoint):
 
                 if (with_error_bars):
                     s = self._std[iS]
-                    # plt.errorbar(self.times(j)[iAct], d[iAct], yerr=s[iAct],
+                    # plt.errorbar(self.off_time(j)[iAct], d[iAct], yerr=s[iAct],
                     plt.errorbar(times, d, yerr=s,
-                    color=c[j],
-                    markerfacecolor=mfc[j],
-                    label='System: {}'.format(j+1),
-                    **kwargs)
+                                 color=c[j],
+                                 markerfacecolor=mfc[j],
+                                 label='System: {}'.format(j+1),
+                                 **kwargs)
                 else:
-                    # plt.plot(self.times(j)[iAct], d[iAct],
+                    # plt.plot(self.off_time(j)[iAct], d[iAct],
                     plt.plot(times, d,
-                    markerfacecolor=mfc[j],
-                    label='System: {}'.format(j+1),
-                    **kwargs)
-
+                             markerfacecolor=mfc[j],
+                             label='System: {}'.format(j+1),
+                             **kwargs)
 
         plt.xscale(xscale)
         plt.yscale(yscale)
@@ -562,7 +577,6 @@ class TdemDataPoint(EmDataPoint):
                                 rel_error_kwargs=rel_error_kwargs,
                                 add_error_kwargs=add_error_kwargs,
                                 **kwargs)
-
 
     def plotPredicted(self, title='Time Domain EM Data', **kwargs):
 
@@ -586,7 +600,7 @@ class TdemDataPoint(EmDataPoint):
         logy = kwargs.pop('logY', None)
 
         for j in range(self.nSystems):
-            times, _ = cf._log(self.times(j), logx)
+            times, _ = cf._log(self.off_time(j), logx)
 
             for k in range(self.n_components):
                 iS = self._component_indices(k, j)
@@ -598,7 +612,6 @@ class TdemDataPoint(EmDataPoint):
         plt.xscale(xscale)
         plt.yscale(yscale)
 
-
     def plotDataResidual(self, title='', **kwargs):
 
         ax = kwargs.pop('ax', None)
@@ -609,12 +622,11 @@ class TdemDataPoint(EmDataPoint):
         for i in range(self.nSystems):
             iAct = self.iplotActive[i]
 
-            np.abs(dD[iAct]).plot(x=self.times(i)[iAct], **kwargs)
+            np.abs(dD[iAct]).plot(x=self.off_time(i)[iAct], **kwargs)
 
         plt.ylabel("|{}| ({})".format(dD.name, dD.units))
 
         cp.title(title)
-
 
     def priorProbability(self, rErr, aErr, height, calibration, verbose=False):
         """Evaluate the probability for the EM data point given the specified attached priors
@@ -678,10 +690,8 @@ class TdemDataPoint(EmDataPoint):
             return probability, np.asarray([P_relative, P_additive, P_height, P_calibration])
         return probability
 
-
     def setPosteriors(self, log=10):
         super().setPosteriors(log=log)
-
 
     def updateErrors(self, relativeErr, additiveErr):
         """ Updates the data errors
@@ -711,30 +721,37 @@ class TdemDataPoint(EmDataPoint):
         additiveErr = np.atleast_1d(additiveErr)
 
         #assert (isinstance(relativeErr, list)), TypeError("relativeErr must be a list of size equal to the number of systems {}".format(self.nSystems))
-        assert (relativeErr.size == self.nSystems), TypeError("relativeErr must be a list of size equal to the number of systems {}".format(self.nSystems))
+        assert (relativeErr.size == self.nSystems), TypeError(
+            "relativeErr must be a list of size equal to the number of systems {}".format(self.nSystems))
 
         #assert (isinstance(additiveErr, list)), TypeError("additiveErr must be a list of size equal to the number of systems {}".format(self.nSystems))
-        assert (additiveErr.size == self.nSystems), TypeError("additiveErr must be a list of size equal to the number of systems {}".format(self.nSystems))
+        assert (additiveErr.size == self.nSystems), TypeError(
+            "additiveErr must be a list of size equal to the number of systems {}".format(self.nSystems))
 
         t0 = 0.5 * np.log(1e-3)  # Assign fixed t0 at 1ms
         # For each system assign error levels using the user inputs
         for i in range(self.nSystems):
-            assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], np.ndarray)), TypeError("relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
-            assert (isinstance(additiveErr[i], float) or isinstance(additiveErr[i], np.ndarray)), TypeError("additiveErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
-            assert (np.all(relativeErr[i] > 0.0)), ValueError("relativeErr for system {} cannot contain values <= 0.0.".format(i+1))
-            assert (np.all(additiveErr[i] > 0.0)), ValueError("additiveErr for system {} should contain values > 0.0. Make sure the values are in linear space".format(i+1))
+            assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], np.ndarray)), TypeError(
+                "relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
+            assert (isinstance(additiveErr[i], float) or isinstance(additiveErr[i], np.ndarray)), TypeError(
+                "additiveErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
+            assert (np.all(relativeErr[i] > 0.0)), ValueError(
+                "relativeErr for system {} cannot contain values <= 0.0.".format(i+1))
+            assert (np.all(additiveErr[i] > 0.0)), ValueError(
+                "additiveErr for system {} should contain values > 0.0. Make sure the values are in linear space".format(i+1))
             iSys = self._systemIndices(system=i)
 
             # Compute the relative error
             rErr = relativeErr[i] * self.data[iSys]
-            aErr = np.exp(np.log(additiveErr[i]) - 0.5 * np.log(self.times(i)) + t0)
+            aErr = np.exp(
+                np.log(additiveErr[i]) - 0.5 * np.log(self.off_time(i)) + t0)
 
             self.std[iSys] = np.sqrt((rErr**2.0) + (aErr**2.0))
 
         # Update the variance of the predicted data prior
         if self.predictedData.hasPrior:
-            self.predictedData.prior.variance[np.diag_indices(np.sum(self.active))] = self.std[self.active]**2.0
-
+            self.predictedData.prior.variance[np.diag_indices(
+                np.sum(self.active))] = self.std[self.active]**2.0
 
     def updateSensitivity(self, mod):
         """ Compute an updated sensitivity matrix using a new model based on an existing matrix """
@@ -749,7 +766,8 @@ class TdemDataPoint(EmDataPoint):
         elif (mod.action[0] == 'insert'):  # Created a layer
             J1[:, :perturbedLayer] = self.J[:, :perturbedLayer]
             J1[:, perturbedLayer + 2:] = self.J[:, perturbedLayer + 1:]
-            tmp = self.sensitivity(mod, ix=[perturbedLayer, perturbedLayer + 1], modelChanged=True)
+            tmp = self.sensitivity(
+                mod, ix=[perturbedLayer, perturbedLayer + 1], modelChanged=True)
             J1[:, perturbedLayer:perturbedLayer + 2] = tmp
 
         elif(mod.action[0] == 'delete'):  # Deleted a layer
@@ -766,20 +784,19 @@ class TdemDataPoint(EmDataPoint):
 
         self.J = J1
 
-
     def forward(self, mod):
         """ Forward model the data from the given model """
 
-        assert isinstance(mod, Model1D), TypeError("Invalid model class for forward modeling [1D]")
+        assert isinstance(mod, Model1D), TypeError(
+            "Invalid model class for forward modeling [1D]")
         tdem1dfwd(self, mod)
-
 
     def sensitivity(self, model, ix=None, modelChanged=True):
         """ Compute the sensitivty matrix for the given model """
 
-        assert isinstance(model, Model1D), TypeError("Invalid model class for sensitivity matrix [1D]")
+        assert isinstance(model, Model1D), TypeError(
+            "Invalid model class for sensitivity matrix [1D]")
         return StatArray.StatArray(tdem1dsen(self, model, ix, modelChanged), 'Sensitivity', '$\\frac{V}{SAm^{3}}$')
-
 
     def _empymodForward(self, mod):
 
@@ -847,10 +864,11 @@ class TdemDataPoint(EmDataPoint):
 
     #     self._predictedData[:] = -simPEG_survey.dpred(mod.par)
 
-
     def Isend(self, dest, world, systems=None):
-        tmp = np.asarray([self.x, self.y, self.z, self.elevation, self.nSystems, self.lineNumber, self.fiducial, *self.loopOffset], dtype=np.float64)
-        myMPI.Isend(tmp, dest=dest, ndim=1, shape=(10, ), dtype=np.float64, world=world)
+        tmp = np.asarray([self.x, self.y, self.z, self.elevation, self.nSystems,
+                         self.lineNumber, self.fiducial, *self.loopOffset], dtype=np.float64)
+        myMPI.Isend(tmp, dest=dest, ndim=1, shape=(
+            10, ), dtype=np.float64, world=world)
 
         if systems is None:
             for i in range(self.nSystems):
@@ -862,11 +880,11 @@ class TdemDataPoint(EmDataPoint):
         self.transmitter.Isend(dest, world)
         self.receiver.Isend(dest, world)
 
-
     @classmethod
     def Irecv(cls, source, world, systems=None):
 
-        tmp = myMPI.Irecv(source=source, ndim=1, shape=(10, ), dtype=np.float64, world=world)
+        tmp = myMPI.Irecv(source=source, ndim=1, shape=(
+            10, ), dtype=np.float64, world=world)
 
         if systems is None:
             nSystems = np.int32(tmp[4])
@@ -881,5 +899,5 @@ class TdemDataPoint(EmDataPoint):
         p = StatArray.StatArray.Irecv(source, world)
         transmitter = CircularLoop.Irecv(source, world)
         receiver = CircularLoop.Irecv(source, world)
-        loopOffset  = tmp[-3:]
+        loopOffset = tmp[-3:]
         return cls(tmp[0], tmp[1], tmp[2], tmp[3], data=d, std=s, predictedData=p, system=systems, transmitter_loop=transmitter, receiver_loop=receiver, loopOffset=loopOffset, lineNumber=tmp[5], fiducial=tmp[6])
