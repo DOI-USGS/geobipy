@@ -452,7 +452,7 @@ class TdemData(Data):
             for channel in channels:
                 cTmp = channel.lower()
                 if cTmp in rloop_names:
-                    nr +=1
+                    nr += 1
                     rloop[rloop_names.index(cTmp)] = channel
                 elif cTmp in tloop_names:
                     nt += 1
@@ -469,14 +469,19 @@ class TdemData(Data):
                 elif "offerr[" in cTmp:
                     off_error.append(channel)
 
-            assert nr == 3, Exception('Must have all three RxPitch, RxRoll, and RxYaw headers in data file {} if reciever orientation is specified. \n {}'.format(f, self.fileInformation()))
-            assert nt == 3, Exception('Must have all three TxPitch, TxRoll, and TxYaw headers in data file {} if transmitter orientation is specified. \n {}'.format(f, self.fileInformation()))
-            assert no == 3, Exception('Must have all three txrx_dx, txrx_dy, and txrx_dz headers in data file {} if transmitter-reciever loop separation is specified. \n {}'.format(f, self.fileInformation()))
+            assert nr == 3, Exception(
+                'Must have all three RxPitch, RxRoll, and RxYaw headers in data file {} if reciever orientation is specified. \n {}'.format(f, self.fileInformation()))
+            assert nt == 3, Exception(
+                'Must have all three TxPitch, TxRoll, and TxYaw headers in data file {} if transmitter orientation is specified. \n {}'.format(f, self.fileInformation()))
+            assert no == 3, Exception(
+                'Must have all three txrx_dx, txrx_dy, and txrx_dz headers in data file {} if transmitter-reciever loop separation is specified. \n {}'.format(f, self.fileInformation()))
 
-            assert len(off) == self.system[k].windows.centre.size, Exception("Number of Off time columns {} in {} does not match number of times {} in system file {}. \n {}".format(len(off), f, self.system[k].fileName, self.system[k].windows.centre.size, self.fileInformation()))
+            assert len(off) == self.system[k].windows.centre.size, Exception("Number of Off time columns {} in {} does not match number of times {} in system file {}. \n {}".format(
+                len(off), f, self.system[k].fileName, self.system[k].windows.centre.size, self.fileInformation()))
 
             if len(off_error) > 0:
-                assert len(off_error) == len(off), Exception("Number of Off time standard deviation estimates does not match number of Off time data columns in file {}. \n {}".format(f, self.fileInformation()))
+                assert len(off_error) == len(off), Exception(
+                    "Number of Off time standard deviation estimates does not match number of Off time data columns in file {}. \n {}".format(f, self.fileInformation()))
             else:
                 off_error = None
 
@@ -652,19 +657,17 @@ class TdemData(Data):
                              self.transmitter[i], self.receiver[i],
                              self.lineNumber[i], self.fiducial[i])
 
-
     # def getLine(self, line):
     #     """ Gets the data in the given line number """
     #     assert line in self.lineNumber, ValueError("No line available in data with number {}".format(line))
     #     i = np.where(self.lineNumber == line)[0]
     #     return self[i]
 
-
     def times(self, system=0):
         """ Obtain the times from the system file """
-        assert 0 <= system < self.nSystems, ValueError('system must be in (0, {}]'.format(self.nSystems))
+        assert 0 <= system < self.nSystems, ValueError(
+            'system must be in (0, {}]'.format(self.nSystems))
         return StatArray.StatArray(self.system[system].windows.centre, 'Time', 'ms')
-
 
     def __getitem__(self, i):
         """ Define item getter for TdemData """
@@ -686,48 +689,47 @@ class TdemData(Data):
                         channelNames=self.channelNames)
 
     def fileInformation(self):
-        s =('\nThe data columns are read in according to the column names in the first line \n'
-            'The header line should contain at least the following column names. Extra columns may exist, but will be ignored \n'
-            'In this description, the column name or its alternatives are given followed by what the name represents \n'
-            'Optional columns are also described \n'
-            'Required columns'
-            'line \n'
-            '    Line number for the data point\n'
-            'id or fid \n'
-            '    Id number of the data point, these be unique\n'
-            'x or northing or n \n'
-            '    Northing co-ordinate of the data point, (m)\n'
-            'y or easting or e \n'
-            '    Easting co-ordinate of the data point, (m)\n'
-            'z or alt or laser or bheight \n'
-            '    Altitude of the transmitter coil above ground level (m)\n'
-            'dtm or dem_elev or dem_np \n'
-            '    Elevation of the ground at the data point (m)\n'
-            'txrx_dx \n'
-            '    Distance in x between transmitter and reciever (m)\n'
-            'txrx_dy \n'
-            '    Distance in y between transmitter and reciever (m)\n'
-            'txrx_dz \n'
-            '    Distance in z between transmitter and reciever (m)\n'
-            'TxPitch \n'
-            '    Pitch of the transmitter loop\n'
-            'TxRoll \n'
-            '    Roll of the transmitter loop\n'
-            'TxYaw \n'
-            '    Yaw of the transmitter loop\n'
-            'RxPitch \n'
-            '    Pitch of the receiver loop\n'
-            'RxRoll \n'
-            '    Roll of the receiver loop\n'
-            'RxYaw \n'
-            '    Yaw of the receiver loop\n'
-            'Off[0] Off[1] ... Off[nWindows]  - with the number and square brackets\n'
-            '    The measurements for each time specified in the accompanying system file under Receiver Window Times \n'
-            'Optional columns\n'
-            'OffErr[0] OffErr[1] ... Off[nWindows]\n'
-            '    Estimates of standard deviation for each off time measurement.')
+        s = ('\nThe data columns are read in according to the column names in the first line \n'
+             'The header line should contain at least the following column names. Extra columns may exist, but will be ignored \n'
+             'In this description, the column name or its alternatives are given followed by what the name represents \n'
+             'Optional columns are also described \n'
+             'Required columns'
+             'line \n'
+             '    Line number for the data point\n'
+             'id or fid \n'
+             '    Id number of the data point, these be unique\n'
+             'x or northing or n \n'
+             '    Northing co-ordinate of the data point, (m)\n'
+             'y or easting or e \n'
+             '    Easting co-ordinate of the data point, (m)\n'
+             'z or alt or laser or bheight \n'
+             '    Altitude of the transmitter coil above ground level (m)\n'
+             'dtm or dem_elev or dem_np \n'
+             '    Elevation of the ground at the data point (m)\n'
+             'txrx_dx \n'
+             '    Distance in x between transmitter and reciever (m)\n'
+             'txrx_dy \n'
+             '    Distance in y between transmitter and reciever (m)\n'
+             'txrx_dz \n'
+             '    Distance in z between transmitter and reciever (m)\n'
+             'TxPitch \n'
+             '    Pitch of the transmitter loop\n'
+             'TxRoll \n'
+             '    Roll of the transmitter loop\n'
+             'TxYaw \n'
+             '    Yaw of the transmitter loop\n'
+             'RxPitch \n'
+             '    Pitch of the receiver loop\n'
+             'RxRoll \n'
+             '    Roll of the receiver loop\n'
+             'RxYaw \n'
+             '    Yaw of the receiver loop\n'
+             'Off[0] Off[1] ... Off[nWindows]  - with the number and square brackets\n'
+             '    The measurements for each time specified in the accompanying system file under Receiver Window Times \n'
+             'Optional columns\n'
+             'OffErr[0] OffErr[1] ... Off[nWindows]\n'
+             '    Estimates of standard deviation for each off time measurement.')
         return s
-
 
     def mapChannel(self, channel, system=0, *args, **kwargs):
         """ Create a map of the specified data channel """
@@ -738,7 +740,6 @@ class TdemData(Data):
         self.mapPlot(*args, **kwargs)
 
         cP.title(tmp.name)
-
 
     def plot(self, system=0, channels=None, xAxis='x', **kwargs):
         """ Plots the data
@@ -759,21 +760,23 @@ class TdemData(Data):
             nCols = self.nTimes[system]
             for i in range(nCols):
                 i1 = self.systemOffset[system] + i
-                cP.plot(x, self.data[:, i1], label=self.channelNames[i1], **kwargs)
+                cP.plot(x, self.data[:, i1],
+                        label=self.channelNames[i1], **kwargs)
         else:
             channels = np.atleast_1d(channels)
             for j, i in enumerate(channels):
-                cP.plot(x, self.data[:, i], label=self.channelNames[i], **kwargs)
+                cP.plot(x, self.data[:, i],
+                        label=self.channelNames[i], **kwargs)
 
         box = ax.get_position()
         ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
 
         # Put a legend to the right of the current axis
-        leg=ax.legend(loc='center left', bbox_to_anchor=(1, 0.5),fancybox=True)
+        leg = ax.legend(loc='center left',
+                        bbox_to_anchor=(1, 0.5), fancybox=True)
         leg.set_title(self.data.getNameUnits())
 
         plt.xlabel(cF.getNameUnits(x))
-
 
     def plotLine(self, line, xAxis='index', **kwargs):
 
@@ -785,15 +788,15 @@ class TdemData(Data):
             plt.subplot(2, 1, i + 1)
             line.data[:, self._systemIndices(i)].plot(x=x, **kwargs)
 
-
     def plotWaveform(self, **kwargs):
         for i in range(self.nSystems):
             plt.subplot(self.nSystems, 1, i + 1)
-            plt.plot(self.system[i].waveform.time, self.system[i].waveform.current, **kwargs)
-            if (i == self.nSystems-1): cP.xlabel('Time (s)')
+            plt.plot(self.system[i].waveform.time,
+                     self.system[i].waveform.current, **kwargs)
+            if (i == self.nSystems-1):
+                cP.xlabel('Time (s)')
             cP.ylabel('Normalized Current (A)')
             plt.margins(0.1, 0.1)
-
 
     def pcolor(self, system=0, yAxis='index', **kwargs):
         """ Plot the data in the given system as a 2D array
@@ -815,14 +818,15 @@ class TdemData(Data):
         msg += self.elevation.summary
         return msg
 
-
     def fromHdf(self, grp, **kwargs):
         """ Reads the object from a HDF group """
 
-        assert ('system_file_path' in kwargs), ValueError("missing 1 required argument 'system_file_path', the path to directory containing system files")
+        assert ('system_file_path' in kwargs), ValueError(
+            "missing 1 required argument 'system_file_path', the path to directory containing system files")
 
         system_file_path = kwargs.pop('system_file_path', None)
-        assert (not system_file_path is None), ValueError("missing 1 required argument 'system_file_path', the path to directory containing system files")
+        assert (not system_file_path is None), ValueError(
+            "missing 1 required argument 'system_file_path', the path to directory containing system files")
 
         nSystems = np.int(np.asarray(grp.get('nSystems')))
         systems = []
@@ -832,24 +836,23 @@ class TdemData(Data):
             td = TdemSystem().read(system_file_path+"//"+filename)
             systems.append(td)
 
-
         super.fromHdf(grp)
 
         self.systems = systems
 
-        self._receiver = StatArray.StatArray(self.nPoints, 'Receiver loops', dtype=CircularLoop)
+        self._receiver = StatArray.StatArray(
+            self.nPoints, 'Receiver loops', dtype=CircularLoop)
         tmp = np.asarray(grp['R/data'])
         for i in range(self.nPoints):
             self._receiver[i] = CircularLoop(*tmp[i, :])
 
-        self._transmitter = StatArray.StatArray(self.nPoints, 'Receiver loops', dtype=CircularLoop)
+        self._transmitter = StatArray.StatArray(
+            self.nPoints, 'Receiver loops', dtype=CircularLoop)
         tmp = np.asarray(grp['T/data'])
         for i in range(self.nPoints):
             self._transmitter[i] = CircularLoop(*tmp[i, :])
 
         return self
-
-
 
     def _BcastSystem(self, world, root=0, system=None):
         """Broadcast the TdemSystems.
@@ -935,7 +938,6 @@ class TdemData(Data):
 
         return this
 
-
     def Scatterv(self, starts, chunks, world, root=0, system=None):
         """ Scatterv the TdemData using MPI """
 
@@ -947,15 +949,19 @@ class TdemData(Data):
         this = TdemData(systems)
 
         # Broadcast the Data point id, line numbers and elevations
-        this._fiducial = self.fiducial.Scatterv(starts, chunks, world, root=root)
-        this._lineNumber = self.lineNumber.Scatterv(starts, chunks, world, root=root)
+        this._fiducial = self.fiducial.Scatterv(
+            starts, chunks, world, root=root)
+        this._lineNumber = self.lineNumber.Scatterv(
+            starts, chunks, world, root=root)
         this._x = self.x.Scatterv(starts, chunks, world, root=root)
         this._y = self.y.Scatterv(starts, chunks, world, root=root)
         this._z = self.z.Scatterv(starts, chunks, world, root=root)
-        this._elevation = self.elevation.Scatterv(starts, chunks, world, root=root)
+        this._elevation = self.elevation.Scatterv(
+            starts, chunks, world, root=root)
         this._data = self.data.Scatterv(starts, chunks, world, root=root)
         this._std = self.std.Scatterv(starts, chunks, world, root=root)
-        this._predictedData = self.predictedData.Scatterv(starts, chunks, world, root=root)
+        this._predictedData = self.predictedData.Scatterv(
+            starts, chunks, world, root=root)
 
         # Scatterv the Transmitter Loops.
         if (world.rank == 0):
@@ -985,13 +991,13 @@ class TdemData(Data):
 
         return this
 
-
     def write(self, fileNames, std=False, predictedData=False):
 
         if isinstance(fileNames, str):
             fileNames = [fileNames]
 
-        assert len(fileNames) == self.nSystems, ValueError("fileNames must have length equal to the number of systems {}".format(self.nSystems))
+        assert len(fileNames) == self.nSystems, ValueError(
+            "fileNames must have length equal to the number of systems {}".format(self.nSystems))
 
         for i in range(self.nSystems):
 
