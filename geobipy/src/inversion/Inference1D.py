@@ -117,13 +117,13 @@ class Inference1D(myObject):
 
         # Initialize the burned in state
         self.burned_in_iteration = self._n_markov_chains
-        self.burned_in = False
+        self.burned_in = True
 
         # Add the likelihood function to the prior
         self.likelihood = 1.0
         if not kwargs.ignoreLikelihood:
             self.likelihood = self.datapoint.likelihood(log=True)
-            self.burned_in = True
+            self.burned_in = False
             self.burned_in_iteration = np.int64(0)
 
         self.posterior = self.likelihood + self.prior
@@ -178,11 +178,12 @@ class Inference1D(myObject):
 
         # Initialize the acceptance level
         # Model acceptance rate
-        self.acceptance = 0.0
+        self.accepted = 0
 
         n = 2 * np.int(self.n_markov_chains / 1000)
-        self.rate = StatArray.StatArray(n, name='% Acceptance')
-        self.ratex = StatArray.StatArray(np.arange(1, n + 1) * 1000, name='Iteration #')
+        self.acceptance_x = StatArray.StatArray(np.arange(1, n + 1) * 1000, name='Iteration #')
+        self.acceptance_rate = StatArray.StatArray(n, name='% Acceptance')
+
 
         self.iRange = StatArray.StatArray(
             np.arange(2 * self.n_markov_chains), name="Iteration #", dtype=np.int64)
@@ -372,7 +373,7 @@ class Inference1D(myObject):
         accepted = acceptance_probability > self.prng.uniform()
 
         if (accepted):
-            self.acceptance += 1
+            self.accepted += 1
             self.data_misfit = data_misfit1
             self.prior = prior1
             self.likelihood = likelihood1
@@ -411,7 +412,7 @@ class Inference1D(myObject):
             Go = self.iteration <= self.n_markov_chains + self.burned_in_iteration
 
             if not self.burned_in:
-                Go = i < self.n_markov_chains
+                Go = self.iteration < self.n_markov_chains
                 if not Go:
                     failed = True
 
@@ -443,7 +444,8 @@ class Inference1D(myObject):
         self.data_misfit_v[self.iteration] = self.data_misfit
         # Determine if we are burning in
         if (not self.burned_in):
-            if (self.data_misfit <= multiplier * DataPoint.data.size):  # datapoint.target_misfit
+            target_misfit = np.sum(self.datapoint.active)
+            if (self.data_misfit <= self.multiplier * target_misfit):  # datapoint.target_misfit
                 self.burned_in = True  # Let the results know they are burned in
                 self.burned_in_iteration = self.iteration       # Save the burn in iteration to the results
                 self.best_iteration = self.iteration
@@ -475,9 +477,10 @@ class Inference1D(myObject):
             self.datapoint.updatePosteriors()
 
         if (np.mod(self.iteration, 1000) == 0):
-            ratePercent = 0.1 * np.float64(self.acceptance)
-            self.rate[np.int32(self.iteration / 1000) - 1] = ratePercent
-            self.acceptance = 0
+            ratePercent = 0.1 * np.float64(self.accepted)
+
+            self.acceptance_rate[np.int32(self.iteration / 1000)] = ratePercent
+            self.accepted = 0
 
         self.iteration += 1
 
@@ -587,12 +590,13 @@ class Inference1D(myObject):
         """ Plots the acceptance percentage against iteration. """
 
         i = np.s_[:np.int64(self.iteration / 1000)]
-        self.rate.plot(self.ratex, i=i,
+        self.acceptance_rate.plot(self.acceptance_x, i=i,
                        ax=self.ax[0],
                        marker='o',
                        alpha=0.7,
                        linestyle='none',
-                       markeredgecolor='k'
+                       markeredgecolor='k',
+                       color='k'
                        )
         # cP.xlabel('Iteration #')
         # cP.ylabel('% Acceptance')
@@ -609,10 +613,10 @@ class Inference1D(myObject):
         c = kwargs.pop('color', 'k')
         lw = kwargs.pop('linewidth', 3)
 
-        ax = self.data_misfit_v.plot(self.iRange, i=np.s_[
-            :self.iteration], marker=m, alpha=a, markersize=ms, linestyle=ls, color=c, **kwargs)
+        ax = self.data_misfit_v.plot(self.iRange, i=np.s_[:self.iteration], marker=m, alpha=a, markersize=ms, linestyle=ls, color=c, **kwargs)
         plt.ylabel('Data Misfit')
-        dum = self.multiplier * self.datapoint.active.size
+
+        dum = self.multiplier * np.sum(self.datapoint.active)
         plt.axhline(dum, color='#C92641', linestyle='dashed', linewidth=lw)
         if (self.burned_in):
             plt.axvline(self.burned_in_iteration, color='#C92641',
@@ -686,7 +690,7 @@ class Inference1D(myObject):
             parent.create_dataset('limits', data=self.limits)
         parent.create_dataset('nmc', data=self.n_markov_chains)
         parent.create_dataset('nsystems', data=self.datapoint.nSystems)
-        self.ratex.toHdf(parent,'ratex')
+        self.acceptance_x.toHdf(parent,'ratex')
 #        parent.create_dataset('ratex', [self.ratex.size], dtype=self.ratex.dtype)
 #        parent['ratex'][:] = self.ratex
 
@@ -706,7 +710,7 @@ class Inference1D(myObject):
         # self.opacityInterp.createHdf(parent,'opacityinterp',nRepeats=nPoints, fillvalue=np.nan)
 #        parent.create_dataset('opacityinterp', [nPoints,nz], dtype=np.float64)
 
-        self.rate.createHdf(parent,'rate',nRepeats=nPoints, fillvalue=np.nan)
+        self.acceptance_rate.createHdf(parent,'rate',nRepeats=nPoints, fillvalue=np.nan)
 #        parent.create_dataset('rate', [nPoints,self.rate.size], dtype=self.rate.dtype)
         self.data_misfit_v.createHdf(
             parent, 'phids', nRepeats=nPoints, fillvalue=np.nan)
@@ -772,7 +776,7 @@ class Inference1D(myObject):
         # # Add the interpolated opacity
 
         # Add the acceptance rate
-        self.rate.writeHdf(hdfFile, 'rate', index=i)
+        self.acceptance_rate.writeHdf(hdfFile, 'rate', index=i)
 
         # Add the data misfit
         self.data_misfit_v.writeHdf(hdfFile, 'phids', index=i)
@@ -817,7 +821,7 @@ class Inference1D(myObject):
         self.reciprocateParameter = np.array(hdfFile.get('reciprocateParameter'))
         self.n_markov_chains = np.array(hdfFile.get('nmc'))
         self.nSystems = np.array(hdfFile.get('nsystems'))
-        self.ratex = hdfRead.readKeyFromFile(hdfFile, '', '/', 'ratex')
+        self.acceptance_x = hdfRead.readKeyFromFile(hdfFile, '', '/', 'ratex')
 
         self.iteration = hdfRead.readKeyFromFile(
             hdfFile, '', '/', 'i', index=index)
@@ -828,7 +832,7 @@ class Inference1D(myObject):
         # self.doi = hdfRead.readKeyFromFile(hdfFile,'','/','doi', index=index)
         self.multiplier = hdfRead.readKeyFromFile(
             hdfFile, '', '/', 'multiplier', index=index)
-        self.rate = hdfRead.readKeyFromFile(hdfFile, '', '/', 'rate', index=s)
+        self.acceptance_rate = hdfRead.readKeyFromFile(hdfFile, '', '/', 'rate', index=s)
         self.data_misfit_v = hdfRead.readKeyFromFile(
             hdfFile, '', '/', 'phids', index=s)
 
