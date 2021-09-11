@@ -372,19 +372,6 @@ class DataPoint(Point):
         return np.s_[self.systemOffset[system]:self.systemOffset[system+1]]
 
 
-    @property
-    def active(self):
-        """Gets the indices to the observed data values that are not NaN
-
-        Returns
-        -------
-        out : array of ints
-            Indices into the observed data that are not NaN
-
-        """
-        return cf.findNotNans(self.data)
-
-
     def likelihood(self, log):
         """Compute the likelihood of the current predicted data given the observed data and assigned errors
 
@@ -395,7 +382,6 @@ class DataPoint(Point):
 
         """
         return self.predictedData.probability(i=self.active, log=log)
-
 
     def dataMisfit(self, squared=False):
         """Compute the :math:`L_{2}` norm squared misfit between the observed and predicted data

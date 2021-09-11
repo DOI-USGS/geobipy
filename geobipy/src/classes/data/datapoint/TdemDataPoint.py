@@ -175,21 +175,6 @@ class TdemDataPoint(EmDataPoint):
                 'units must have type str')
         self._units = value
 
-    @property
-    def active(self):
-        """Gets the indices to the observed data values that are not NaN
-
-        Returns
-        -------
-        out : array of ints
-            Indices into the observed data that are not NaN
-
-        """
-        d = np.asarray(self.data)
-        d[d <= 0.0] = np.nan
-        out = ~np.isnan(d)
-        return out
-
     def off_time(self, system=0):
         """ Return the window times in an StatArray """
         return self.system[system].off_time

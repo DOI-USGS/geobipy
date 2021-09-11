@@ -49,6 +49,20 @@ class EmDataPoint(DataPoint):
 
         return out
 
+    @property
+    def active(self):
+        """Gets the indices to the observed data values that are not NaN
+
+        Returns
+        -------
+        out : array of ints
+            Indices into the observed data that are not NaN
+
+        """
+        d = np.asarray(self.data)
+        d[d <= 0.0] = np.nan
+        return ~np.isnan(d)
+
     def find_best_halfspace(self, minConductivity=1e-4, maxConductivity=1e4, nSamples=100):
         """Computes the best value of a half space that fits the data.
 

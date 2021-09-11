@@ -174,7 +174,7 @@ class Inference1D(myObject):
         # Logical whether to take the reciprocal of the parameters
 
         # Multiplier for discrepancy principle
-        self.multiplier = np.float64(0.0)
+        self.multiplier = np.float64(1.0)
 
         # Initialize the acceptance level
         # Model acceptance rate
@@ -406,7 +406,7 @@ class Inference1D(myObject):
             #i, Mod, DataPoint, iBest, bestData, bestModel, multiplier, PhiD, posterior, posteriorComponents, ratioComponents, accepted, dimensionChange, userParameters.clipRatio)
 
             if self.interactive_plot:
-                self.plot("Fiducial {}".format(self.datapoint.fiducial), increment=self.user_options.update_plot_every)
+                self.plot("Fiducial {}".format(self.datapoint.fiducial), increment=self.user_options.plotEvery)
 
             Go = self.iteration <= self.n_markov_chains + self.burned_in_iteration
 
