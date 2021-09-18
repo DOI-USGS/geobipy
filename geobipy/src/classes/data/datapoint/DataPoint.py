@@ -48,11 +48,11 @@ class DataPoint(Point):
 
     """
 
-    def __init__(self, channels_per_system=1, components_per_channel=None,
-                       x=0.0, y=0.0, z=0.0, elevation=None,
-                        data=None, std=None, predictedData=None,
-                        units=None, channelNames=None,
-                        lineNumber=0.0, fiducial=0.0):
+    def __init__(self, x=0.0, y=0.0, z=0.0, elevation=None,
+                       channels_per_system=1, components_per_channel=None,
+                       data=None, std=None, predictedData=None,
+                       units=None, channelNames=None,
+                       lineNumber=0.0, fiducial=0.0):
         """ Initialize the Data class """
 
         super().__init__(x, y, z)
@@ -268,6 +268,9 @@ class DataPoint(Point):
     def relErr(self, values):
         if values is None:
             values = self.nSystems
+        else:
+            assert np.size(values) == self.nSystems, ValueError("relErr must have size {}".format(self.nSystems))
+
         self._relErr = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
 
     @property

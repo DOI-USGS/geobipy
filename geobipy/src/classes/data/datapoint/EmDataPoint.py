@@ -23,12 +23,11 @@ class EmDataPoint(DataPoint):
 
     """
 
-    def __init__(self, channels_per_system=1, components_per_channel=None, x=0.0, y=0.0, z=0.0, elevation=None, data=None, std=None, predictedData=None, channelNames=None, lineNumber=0.0, fiducial=0.0):
+    def __init__(self, x=0.0, y=0.0, z=0.0, elevation=None, channels_per_system=1, components_per_channel=None, data=None, std=None, predictedData=None, channelNames=None, lineNumber=0.0, fiducial=0.0):
 
-        super().__init__(channels_per_system = channels_per_system,
+        super().__init__(x = x, y = y, z = z, elevation = elevation,
+                         channels_per_system = channels_per_system,
                          components_per_channel = components_per_channel,
-                         x = x, y = y, z = z,
-                         elevation = elevation,
                          data = data, std = std, predictedData = predictedData,
                          channelNames=channelNames, lineNumber=lineNumber, fiducial=fiducial)
 
@@ -94,7 +93,7 @@ class EmDataPoint(DataPoint):
 
         e = StatArray.StatArray(np.asarray([0.0, np.inf]), 'Depth', 'm')
         p = StatArray.StatArray(1, 'Conductivity', r'$\frac{S}{m}$')
-        model = Model1D(1, edges=e, parameters=p)
+        model = Model1D(edges=e, parameters=p)
 
         for i in range(nSamples):
             model._par[0] = c[i]

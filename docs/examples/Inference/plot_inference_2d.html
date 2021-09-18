@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2D Posterior analysis of the Bayesian inference &mdash; GeoBIPy 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> GeoBIPy
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../content/getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../content/api/api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GeoBIPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>2D Posterior analysis of the Bayesian inference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/examples/Inference/plot_inference_2d.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-inference-plot-inference-2d-py"><span class="std std-ref">here</span></a>     to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="d-posterior-analysis-of-the-bayesian-inference">
+<span id="sphx-glr-examples-inference-plot-inference-2d-py"></span><h1>2D Posterior analysis of the Bayesian inference<a class="headerlink" href="#d-posterior-analysis-of-the-bayesian-inference" title="Permalink to this headline"></a></h1>
+<p>All plotting in GeoBIPy can be carried out using the 3D inference class</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">example_path</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">Inference3D</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+<section id="inference-for-a-line-of-inferences">
+<h2>Inference for a line of inferences<a class="headerlink" href="#inference-for-a-line-of-inferences" title="Permalink to this headline"></a></h2>
+<p>We can instantiate the inference handler by providing a path to the directory containing
+HDF5 files generated by GeoBIPy.</p>
+<p>The InfereceXD classes are low memory.  They only read information from the HDF5 files
+as and when it is needed.</p>
+<p>The first time you use these classes to create plots, expect long initial processing times.
+I precompute expensive properties and store them in the HDF5 files for later use.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">results_3d</span> <span class="o">=</span> <span class="n">Inference3D</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="n">example_path</span><span class="p">,</span> <span class="n">system_file_path</span><span class="o">=</span><span class="n">example_path</span><span class="o">+</span><span class="s2">&quot;//../../Data&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can grab the results for an entire line of data</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">results_2d</span> <span class="o">=</span> <span class="n">results_3d</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="mf">30060.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Plot a location map of the data point locations along the line</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">results_2d</span><span class="o">.</span><span class="n">scatter2D</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="plot inference 2d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_inference_2d_001.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;HDF5 group &quot;/currentdatapoint/addErr&quot; (3 members)&gt;
+
+(&lt;AxesSubplot:&gt;, &lt;matplotlib.collections.PathCollection object at 0x134b24070&gt;, &lt;matplotlib.colorbar.Colorbar object at 0x12bff2400&gt;)
+</pre></div>
+</div>
+<p>Before we start plotting cross sections, lets set some common keywords</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xAxis</span> <span class="o">=</span> <span class="s1">&#39;y&#39;</span>
+<span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;log&quot;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="c1"># I want to plot the log conductivity</span>
+           <span class="s2">&quot;reciprocateParameter&quot;</span> <span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="c1"># Plot resistivity instead?</span>
+           <span class="s2">&quot;vmin&quot;</span> <span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="c1"># Set the minimum colour bar range in log space</span>
+           <span class="s2">&quot;vmax&quot;</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mf">500.0</span><span class="p">),</span> <span class="c1"># Set the maximum colour bar range in log space</span>
+           <span class="s2">&quot;xAxis&quot;</span> <span class="p">:</span> <span class="n">xAxis</span> <span class="c1"># Set the axis along which to display attributes</span>
+           <span class="p">}</span>
+</pre></div>
+</div>
+<p>We can show a basic cross-section of the parameter inverted for</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">311</span><span class="p">)</span>
+<span class="n">results_2d</span><span class="o">.</span><span class="n">plotMeanModel</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">);</span>
+<span class="n">results_2d</span><span class="o">.</span><span class="n">plotDataElevation</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">xAxis</span><span class="o">=</span><span class="n">xAxis</span><span class="p">);</span>
+<span class="n">results_2d</span><span class="o">.</span><span class="n">plotElevation</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">xAxis</span><span class="o">=</span><span class="n">xAxis</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="mf">900.0</span><span class="p">,</span> <span class="mf">1400.0</span><span class="p">]);</span>
+
+<span class="c1"># By adding the useVariance keyword, we can make regions of lower confidence more transparent</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">312</span><span class="p">)</span>
+<span class="n">results_2d</span><span class="o">.</span><span class="n">plotMeanModel</span><span class="p">(</span><span class="n">useVariance</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">);</span>
+<span class="n">results_2d</span><span class="o">.</span><span class="n">plotDataElevation</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">xAxis</span><span class="o">=</span><span class="n">xAxis</span><span class="p">);</span>
+<span class="n">results_2d</span><span class="o">.</span><span class="n">plotElevation</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">xAxis</span><span class="o">=</span><span class="n">xAxis</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="mf">900.0</span><span class="p">,</span> <span class="mf">1400.0</span><span class="p">]);</span>
+
+<span class="c1"># We can also choose to keep parameters above the DOI opaque.</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">313</span><span class="p">)</span>
+<span class="n">results_2d</span><span class="o">.</span><span class="n">plotMeanModel</span><span class="p">(</span><span class="n">useVariance</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">only_below_doi</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">);</span>
+<span class="n">results_2d</span><span class="o">.</span><span class="n">plotDataElevation</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">xAxis</span><span class="o">=</span><span class="n">xAxis</span><span class="p">);</span>
+<span class="n">results_2d</span><span class="o">.</span><span class="n">plotElevation</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">xAxis</span><span class="o">=</span><span class="n">xAxis</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="mf">900.0</span><span class="p">,</span> <span class="mf">1400.0</span><span class="p">]);</span>
+</pre></div>
+</div>
+<img alt="plot inference 2d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_inference_2d_002.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(900.0, 1400.0)
+</pre></div>
+</div>
+<p>We can plot the parameter values that produced the highest posterior</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">311</span><span class="p">)</span>
+<span class="n">results_2d</span><span class="o">.</span><span class="n">plotBestModel</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">);</span>
+<span class="n">results_2d</span><span class="o">.</span><span class="n">plotDataElevation</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">xAxis</span><span class="o">=</span><span class="n">xAxis</span><span class="p">);</span>
+<span class="n">results_2d</span><span class="o">.</span><span class="n">plotElevation</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">xAxis</span><span class="o">=</span><span class="n">xAxis</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="mf">900.0</span><span class="p">,</span> <span class="mf">1400.0</span><span class="p">]);</span>
+
+<span class="c1"># By adding the useVariance keyword, we can shade regions of lower confidence</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">312</span><span class="p">)</span>
+<span class="n">results_2d</span><span class="o">.</span><span class="n">plotBestModel</span><span class="p">(</span><span class="n">useVariance</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">);</span>
+<span class="n">results_2d</span><span class="o">.</span><span class="n">plotDataElevation</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">xAxis</span><span class="o">=</span><span class="n">xAxis</span><span class="p">);</span>
+<span class="n">results_2d</span><span class="o">.</span><span class="n">plotElevation</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">xAxis</span><span class="o">=</span><span class="n">xAxis</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="mf">900.0</span><span class="p">,</span> <span class="mf">1400.0</span><span class="p">]);</span>
+
+<span class="c1"># We can also choose to keep parameters above the DOI opaque.</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">313</span><span class="p">)</span>
+<span class="n">results_2d</span><span class="o">.</span><span class="n">plotBestModel</span><span class="p">(</span><span class="n">useVariance</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">only_below_doi</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">);</span>
+<span class="n">results_2d</span><span class="o">.</span><span class="n">plotDataElevation</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">xAxis</span><span class="o">=</span><span class="n">xAxis</span><span class="p">);</span>
+<span class="n">results_2d</span><span class="o">.</span><span class="n">plotElevation</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">xAxis</span><span class="o">=</span><span class="n">xAxis</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="mf">900.0</span><span class="p">,</span> <span class="mf">1400.0</span><span class="p">]);</span>
+</pre></div>
+</div>
+<img alt="plot inference 2d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_inference_2d_003.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(900.0, 1400.0)
+</pre></div>
+</div>
+<p>Now we can start plotting some more interesting posterior properties.
+How about the confidence?</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">results_2d</span><span class="o">.</span><span class="n">plotConfidence</span><span class="p">(</span><span class="n">xAxis</span><span class="o">=</span><span class="n">xAxis</span><span class="p">);</span>
+<span class="n">results_2d</span><span class="o">.</span><span class="n">plotDataElevation</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">xAxis</span><span class="o">=</span><span class="n">xAxis</span><span class="p">);</span>
+<span class="n">results_2d</span><span class="o">.</span><span class="n">plotElevation</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">xAxis</span><span class="o">=</span><span class="n">xAxis</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="mf">900.0</span><span class="p">,</span> <span class="mf">1400.0</span><span class="p">]);</span>
+</pre></div>
+</div>
+<img alt="plot inference 2d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_inference_2d_004.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/inversion/Inference2D.py:1343: UserWarning: FixedFormatter should only be used together with FixedLocator
+  cb.ax.set_yticklabels([&#39;Less&#39;, &#39;&#39;, &#39;&#39;, &#39;&#39;, &#39;&#39;, &#39;More&#39;])
+
+(900.0, 1400.0)
+</pre></div>
+</div>
+<p>We can take the interface depth posterior for each data point,
+and display an interface probability cross section
+This posterior can be washed out, so the clim_scaling keyword lets me saturate
+the top and bottom 0.5% of the colour range</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">results_2d</span><span class="o">.</span><span class="n">plotInterfaces</span><span class="p">(</span><span class="n">xAxis</span><span class="o">=</span><span class="n">xAxis</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;Greys&#39;</span><span class="p">,</span> <span class="n">clim_scaling</span><span class="o">=</span><span class="mf">0.5</span><span class="p">);</span>
+<span class="n">results_2d</span><span class="o">.</span><span class="n">plotDataElevation</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">xAxis</span><span class="o">=</span><span class="n">xAxis</span><span class="p">);</span>
+<span class="n">results_2d</span><span class="o">.</span><span class="n">plotElevation</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">xAxis</span><span class="o">=</span><span class="n">xAxis</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="mf">900.0</span><span class="p">,</span> <span class="mf">1400.0</span><span class="p">]);</span>
+</pre></div>
+</div>
+<img alt="plot inference 2d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_inference_2d_005.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(900.0, 1400.0)
+</pre></div>
+</div>
+<p>We can plot the posteriors along the line as a shaded histogram</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># results_2d.nLayers</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  32.548 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-inference-plot-inference-2d-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_inference_2d.py</span></code></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_inference_2d.ipynb</span></code></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright None.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

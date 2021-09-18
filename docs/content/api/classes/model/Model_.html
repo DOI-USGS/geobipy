@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Model &mdash; GeoBIPy 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Model1D" href="Model1D.html" />
+    <link rel="prev" title="Model classes" href="model.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> GeoBIPy
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../api.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../base/base.html">Core routines needed for GeoBIPy</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../classes.html">Classes used in GeoBIPy</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../core/core.html">Core classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../data/data.html">Data classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../mesh/mesh.html">Mesh classes</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="model.html">Model classes</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Model1D.html">Model1D</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../pointcloud/pointcloud.html">Pointcloud classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../statistics/statistics.html">Statistics classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../system/system.html">System classes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">GeoBIPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../api.html">API</a> &raquo;</li>
+          <li><a href="../classes.html">Classes used in GeoBIPy</a> &raquo;</li>
+          <li><a href="model.html">Model classes</a> &raquo;</li>
+      <li>Model</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/content/api/classes/model/Model_.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="model">
+<h1>Model<a class="headerlink" href="#model" title="Permalink to this headline"></a></h1>
+digraph inheritance456558ffd0 {
+bgcolor=transparent;
+rankdir=LR;
+size=&quot;8.0, 12.0&quot;;
+  &quot;ABC&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Helper class that provides a standard way to create an ABC using&quot;];
+  &quot;Model&quot; [URL=&quot;#geobipy.src.classes.model.Model.Model&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Abstract Model Class&quot;];
+  &quot;myObject&quot; -&gt; &quot;Model&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;myObject&quot; [URL=&quot;../core/myObject.html#geobipy.src.classes.core.myObject.myObject&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Abstract base class&quot;];
+  &quot;ABC&quot; -&gt; &quot;myObject&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+}
+<span class="target" id="module-geobipy.src.classes.model.Model"></span><p>&#64;Model_Class
+Module describing a Model</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="geobipy.src.classes.model.Model.Model">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.model.Model.</span></span><span class="sig-name descname"><span class="pre">Model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model.Model" title="Permalink to this definition"></a></dt>
+<dd><p>Abstract Model Class</p>
+<p>This is an abstract base class for additional model classes</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">geobipy.Model1D</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">geobipy.Model2D</span></code></p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.model.Model.Model.fromHdf">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">fromHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model.Model.fromHdf" title="Permalink to this definition"></a></dt>
+<dd><p>Reads in the object from a HDF file</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.model.Model.Model.pcolor">
+<span class="sig-name descname"><span class="pre">pcolor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model.Model.pcolor" title="Permalink to this definition"></a></dt>
+<dd><p>Plot the Histogram2D as an image</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>alpha</strong> (<em>scalar</em><em> or </em><em>array_like</em><em>, </em><em>optional</em>) – If alpha is scalar, behaves like standard matplotlib alpha and opacity is applied to entire plot
+If array_like, each pixel is given an individual alpha value.</p></li>
+<li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Take the log of the colour to a base. ‘e’ if log = ‘e’, and a number e.g. log = 10.
+Values in c that are &lt;= 0 are masked.</p></li>
+<li><p><strong>equalize</strong> (<em>bool</em><em>, </em><em>optional</em>) – Equalize the histogram of the colourmap so that all colours have an equal amount.</p></li>
+<li><p><strong>nbins</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of bins to use for histogram equalization.</p></li>
+<li><p><strong>xscale</strong> (<em>str</em><em>, </em><em>optional</em>) – Scale the x axis? e.g. xscale = ‘linear’ or ‘log’</p></li>
+<li><p><strong>yscale</strong> (<em>str</em><em>, </em><em>optional</em>) – Scale the y axis? e.g. yscale = ‘linear’ or ‘log’.</p></li>
+<li><p><strong>flipX</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flip the X axis</p></li>
+<li><p><strong>flipY</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flip the Y axis</p></li>
+<li><p><strong>grid</strong> (<em>bool</em><em>, </em><em>optional</em>) – Plot the grid</p></li>
+<li><p><strong>noColorbar</strong> (<em>bool</em><em>, </em><em>optional</em>) – Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.</p></li>
+<li><p><strong>trim</strong> (<em>bool</em><em>, </em><em>optional</em>) – Set the x and y limits to the first and last non zero values along each axis.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="model.html" class="btn btn-neutral float-left" title="Model classes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Model1D.html" class="btn btn-neutral float-right" title="Model1D" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright None.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

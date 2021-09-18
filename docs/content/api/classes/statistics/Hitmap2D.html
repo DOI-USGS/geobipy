@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hitmap2D &mdash; GeoBIPy 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="baseDistribution" href="baseDistribution.html" />
+    <link rel="prev" title="Histogram2D" href="Histogram2D.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> GeoBIPy
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../api.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../base/base.html">Core routines needed for GeoBIPy</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../classes.html">Classes used in GeoBIPy</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../core/core.html">Core classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../data/data.html">Data classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../mesh/mesh.html">Mesh classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../model/model.html">Model classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pointcloud/pointcloud.html">Pointcloud classes</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="statistics.html">Statistics classes</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="Distribution.html">Distribution Wrapper</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Histogram1D.html">Histogram1D</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Histogram2D.html">Histogram2D</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Hitmap2D</a></li>
+<li class="toctree-l4"><a class="reference internal" href="baseDistribution.html">baseDistribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="NormalDistribution.html">Normal distribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MvNormalDistribution.html">MvNormal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="UniformDistribution.html">Uniform distribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="GammaDistribution.html">Gamma Distribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="OrderStatistics.html">Order Statistics</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../system/system.html">System classes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">GeoBIPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../api.html">API</a> &raquo;</li>
+          <li><a href="../classes.html">Classes used in GeoBIPy</a> &raquo;</li>
+          <li><a href="statistics.html">Statistics classes</a> &raquo;</li>
+      <li>Hitmap2D</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/content/api/classes/statistics/Hitmap2D.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="hitmap2d">
+<h1>Hitmap2D<a class="headerlink" href="#hitmap2d" title="Permalink to this headline"></a></h1>
+digraph inheritance1348eec39b {
+bgcolor=transparent;
+rankdir=LR;
+size=&quot;8.0, 12.0&quot;;
+  &quot;ABC&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Helper class that provides a standard way to create an ABC using&quot;];
+  &quot;Histogram2D&quot; [URL=&quot;Histogram2D.html#geobipy.src.classes.statistics.Histogram2D.Histogram2D&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;2D Histogram class that can update and plot efficiently.&quot;];
+  &quot;RectilinearMesh2D&quot; -&gt; &quot;Histogram2D&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;Hitmap2D&quot; [URL=&quot;#geobipy.src.classes.statistics.Hitmap2D.Hitmap2D&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defining a 2D hitmap whose cells are rectangular with linear sides&quot;];
+  &quot;Histogram2D&quot; -&gt; &quot;Hitmap2D&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;Mesh&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Abstract Base Class&quot;];
+  &quot;myObject&quot; -&gt; &quot;Mesh&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;RectilinearMesh2D&quot; [URL=&quot;../mesh/RectilinearMesh2D.html#geobipy.src.classes.mesh.RectilinearMesh2D.RectilinearMesh2D&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defining a 2D rectilinear mesh with cell centres and edges.&quot;];
+  &quot;Mesh&quot; -&gt; &quot;RectilinearMesh2D&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;myObject&quot; [URL=&quot;../core/myObject.html#geobipy.src.classes.core.myObject.myObject&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Abstract base class&quot;];
+  &quot;ABC&quot; -&gt; &quot;myObject&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+}
+<span class="target" id="module-geobipy.src.classes.statistics.Hitmap2D"></span><p>&#64;RectilinearMesh2D_Class
+Module describing a 2D Rectilinear Mesh class with x and y axes specified</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="geobipy.src.classes.statistics.Hitmap2D.Hitmap2D">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.statistics.Hitmap2D.</span></span><span class="sig-name descname"><span class="pre">Hitmap2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Hitmap2D.Hitmap2D" title="Permalink to this definition"></a></dt>
+<dd><p>Class defining a 2D hitmap whose cells are rectangular with linear sides</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.statistics.Hitmap2D.Hitmap2D.getOpacityLevel">
+<span class="sig-name descname"><span class="pre">getOpacityLevel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">percent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">95.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Hitmap2D.Hitmap2D.getOpacityLevel" title="Permalink to this definition"></a></dt>
+<dd><p>Get the index along axis 1 from the bottom up that corresponds to the percent opacity</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.statistics.Hitmap2D.Hitmap2D.hdfName">
+<span class="sig-name descname"><span class="pre">hdfName</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Hitmap2D.Hitmap2D.hdfName" title="Permalink to this definition"></a></dt>
+<dd><p>Reprodicibility procedure</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.statistics.Hitmap2D.Hitmap2D.varianceCutoff">
+<span class="sig-name descname"><span class="pre">varianceCutoff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">percent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">67.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Hitmap2D.Hitmap2D.varianceCutoff" title="Permalink to this definition"></a></dt>
+<dd><p>Get the cutoff value along y axis from the bottom up where the variance is percent*max(variance)</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Histogram2D.html" class="btn btn-neutral float-left" title="Histogram2D" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="baseDistribution.html" class="btn btn-neutral float-right" title="baseDistribution" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright None.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -57,12 +57,13 @@ class FdemDataPoint(EmDataPoint):
 
         self.units = None
 
+        self._system = None
         if (system is None):
-            return
+            return super().__init__(x=x, y=y, z=z, elevation=elevation)
 
         self.system = system
 
-        super().__init__(channels_per_system=2*self.nFrequencies, x=x, y=y, z=z, elevation=elevation, data=data, std=std, predictedData=predictedData, lineNumber=lineNumber, fiducial=fiducial)
+        super().__init__(x=x, y=y, z=z, elevation=elevation, channels_per_system=2*self.nFrequencies, components_per_channel=None, data=data, std=std, predictedData=predictedData, lineNumber=lineNumber, fiducial=fiducial)
 
         self._data.name = 'Frequency domain data'
 
@@ -121,6 +122,9 @@ class FdemDataPoint(EmDataPoint):
     @channelNames.setter
     def channelNames(self, values):
         if values is None:
+            if self.system is None:
+                self._channelNames = ['None']
+                return
             self._channelNames = []
             for i in range(self.nSystems):
                 # Set the channel names
@@ -131,11 +135,6 @@ class FdemDataPoint(EmDataPoint):
             assert all((isinstance(x, str) for x in values))
             assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
             self._channelNames = values
-
-
-    # @property
-    # def nChannelsPerSystem(self):
-    #     return 2 * self.nFrequencies
 
     @property
     def nFrequencies(self):
@@ -264,7 +263,7 @@ class FdemDataPoint(EmDataPoint):
             # rto = 0.5 * (ybins[0] + ybins[-1])
             # ybins -= rto
 
-            H = Histogram2D(xBins=xbins, xlog=10, yBins=ybins, ylog=10)
+            H = Histogram2D(xEdges=xbins, xlog=10, yEdges=ybins, ylog=10)
 
             self.predictedData.setPosterior(H)
 
@@ -302,11 +301,7 @@ class FdemDataPoint(EmDataPoint):
         out = super(FdemDataPoint, cls).fromHdf(grp, index)
 
         out.system = system
-        out._nChannelsPerSystem = out.nFrequencies
-
-        # item = grp.get('calibration')
-        # obj = eval(cf.safeEval(item.attrs.get('repr')))
-        # _aPoint.calibration = obj.fromHdf(item, index=index)
+        out._channels_per_system = out.nFrequencies
 
         return out
 

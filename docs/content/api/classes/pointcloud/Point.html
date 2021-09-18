@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Point &mdash; GeoBIPy 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="PointCloud3D" href="PointCloud3D.html" />
+    <link rel="prev" title="Pointcloud classes" href="pointcloud.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> GeoBIPy
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../api.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../base/base.html">Core routines needed for GeoBIPy</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../classes.html">Classes used in GeoBIPy</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../core/core.html">Core classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../data/data.html">Data classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../mesh/mesh.html">Mesh classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../model/model.html">Model classes</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="pointcloud.html">Pointcloud classes</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Point</a></li>
+<li class="toctree-l4"><a class="reference internal" href="PointCloud3D.html">PointCloud3D</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../statistics/statistics.html">Statistics classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../system/system.html">System classes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">GeoBIPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../api.html">API</a> &raquo;</li>
+          <li><a href="../classes.html">Classes used in GeoBIPy</a> &raquo;</li>
+          <li><a href="pointcloud.html">Pointcloud classes</a> &raquo;</li>
+      <li>Point</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/content/api/classes/pointcloud/Point.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="point">
+<h1>Point<a class="headerlink" href="#point" title="Permalink to this headline"></a></h1>
+digraph inheritancefff5d93699 {
+bgcolor=transparent;
+rankdir=LR;
+size=&quot;8.0, 12.0&quot;;
+  &quot;ABC&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Helper class that provides a standard way to create an ABC using&quot;];
+  &quot;Point&quot; [URL=&quot;#geobipy.src.classes.pointcloud.Point.Point&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defining a point in 3D Euclidean space&quot;];
+  &quot;myObject&quot; -&gt; &quot;Point&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;ABC&quot; -&gt; &quot;Point&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;myObject&quot; [URL=&quot;../core/myObject.html#geobipy.src.classes.core.myObject.myObject&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Abstract base class&quot;];
+  &quot;ABC&quot; -&gt; &quot;myObject&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+}
+<span class="target" id="module-geobipy.src.classes.pointcloud.Point"></span><p>&#64;Point_Class
+Module describing a Point defined by x,y,z c-ordinates</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="geobipy.src.classes.pointcloud.Point.Point">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.pointcloud.Point.</span></span><span class="sig-name descname"><span class="pre">Point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.Point.Point" title="Permalink to this definition"></a></dt>
+<dd><p>Class defining a point in 3D Euclidean space</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.pointcloud.Point.Point.createHdf">
+<span class="sig-name descname"><span class="pre">createHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withPosterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nRepeats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fillvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.Point.Point.createHdf" title="Permalink to this definition"></a></dt>
+<dd><p>Create the hdf group metadata in file
+parent: HDF object to create a group inside
+myName: Name of the group</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.pointcloud.Point.Point.distance">
+<span class="sig-name descname"><span class="pre">distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.Point.Point.distance" title="Permalink to this definition"></a></dt>
+<dd><p>Get the Lp norm distance between two points.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.pointcloud.Point.Point.fromHdf">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">fromHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.Point.Point.fromHdf" title="Permalink to this definition"></a></dt>
+<dd><p>Reads the object from a HDF group</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.pointcloud.Point.Point.move">
+<span class="sig-name descname"><span class="pre">move</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dz</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.Point.Point.move" title="Permalink to this definition"></a></dt>
+<dd><p>Move the point by [dx,dy,dz]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.pointcloud.Point.Point.writeHdf">
+<span class="sig-name descname"><span class="pre">writeHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withPosterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.Point.Point.writeHdf" title="Permalink to this definition"></a></dt>
+<dd><p>Write the StatArray to an HDF object
+parent: Upper hdf file or group
+myName: object hdf name. Assumes createHdf has already been called
+create: optionally create the data set as well before writing</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pointcloud.html" class="btn btn-neutral float-left" title="Pointcloud classes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="PointCloud3D.html" class="btn btn-neutral float-right" title="PointCloud3D" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright None.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

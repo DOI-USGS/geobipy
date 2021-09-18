@@ -375,6 +375,7 @@ sphinx_gallery_conf = {
                                     'examples/Inference',
                                     'examples/HDF5',
                                     ]),
+    "ignore_pattern": r"examples/Inference/user_parameters_",
     "within_subsection_order": ExampleTitleSortKey,
     "image_scrapers": ('matplotlib'),
     "thumbnail_size": (350, 350),
