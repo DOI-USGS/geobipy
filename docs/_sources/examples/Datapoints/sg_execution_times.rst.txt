@@ -5,12 +5,12 @@
 
 Computation times
 =================
-**00:06.191** total execution time for **examples_Datapoints** files:
+**00:30.839** total execution time for **examples_Datapoints** files:
 
 +---------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Datapoints_plot_tempest_datapoint.py` (``plot_tempest_datapoint.py``)     | 00:06.191 | 0.0 MB |
+| :ref:`sphx_glr_examples_Datapoints_plot_time_datapoint.py` (``plot_time_datapoint.py``)           | 00:20.301 | 0.0 MB |
 +---------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Datapoints_plot_frequency_datapoint.py` (``plot_frequency_datapoint.py``) | 00:00.000 | 0.0 MB |
+| :ref:`sphx_glr_examples_Datapoints_plot_frequency_datapoint.py` (``plot_frequency_datapoint.py``) | 00:07.615 | 0.0 MB |
 +---------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Datapoints_plot_time_datapoint.py` (``plot_time_datapoint.py``)           | 00:00.000 | 0.0 MB |
+| :ref:`sphx_glr_examples_Datapoints_plot_tempest_datapoint.py` (``plot_tempest_datapoint.py``)     | 00:02.923 | 0.0 MB |
 +---------------------------------------------------------------------------------------------------+-----------+--------+

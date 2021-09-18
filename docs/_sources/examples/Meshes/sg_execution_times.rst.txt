@@ -5,14 +5,14 @@
 
 Computation times
 =================
-**00:01.362** total execution time for **examples_Meshes** files:
+**00:04.109** total execution time for **examples_Meshes** files:
 
 +---------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Meshes_plot_topo_rectilinear_mesh_2d.py` (``plot_topo_rectilinear_mesh_2d.py``) | 00:01.362 | 0.0 MB |
+| :ref:`sphx_glr_examples_Meshes_plot_rectilinear_mesh_2d.py` (``plot_rectilinear_mesh_2d.py``)           | 00:01.343 | 0.0 MB |
 +---------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Meshes_plot_rectilinear_mesh_1d.py` (``plot_rectilinear_mesh_1d.py``)           | 00:00.000 | 0.0 MB |
+| :ref:`sphx_glr_examples_Meshes_plot_rectilinear_mesh_1d.py` (``plot_rectilinear_mesh_1d.py``)           | 00:01.341 | 0.0 MB |
 +---------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Meshes_plot_rectilinear_mesh_2d.py` (``plot_rectilinear_mesh_2d.py``)           | 00:00.000 | 0.0 MB |
+| :ref:`sphx_glr_examples_Meshes_plot_rectilinear_mesh_3d.py` (``plot_rectilinear_mesh_3d.py``)           | 00:00.810 | 0.0 MB |
 +---------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Meshes_plot_rectilinear_mesh_3d.py` (``plot_rectilinear_mesh_3d.py``)           | 00:00.000 | 0.0 MB |
+| :ref:`sphx_glr_examples_Meshes_plot_topo_rectilinear_mesh_2d.py` (``plot_topo_rectilinear_mesh_2d.py``) | 00:00.616 | 0.0 MB |
 +---------------------------------------------------------------------------------------------------------+-----------+--------+

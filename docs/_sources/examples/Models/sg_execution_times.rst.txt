@@ -5,12 +5,12 @@
 
 Computation times
 =================
-**00:03.680** total execution time for **examples_Models** files:
+**00:03.594** total execution time for **examples_Models** files:
 
 +-------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Models_plot_model_1d.py` (``plot_model_1d.py``) | 00:02.755 | 0.0 MB |
+| :ref:`sphx_glr_examples_Models_plot_model_1d.py` (``plot_model_1d.py``) | 00:03.157 | 0.0 MB |
 +-------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Models_plot_model_3d.py` (``plot_model_3d.py``) | 00:00.629 | 0.0 MB |
+| :ref:`sphx_glr_examples_Models_plot_model_2d.py` (``plot_model_2d.py``) | 00:00.300 | 0.0 MB |
 +-------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Models_plot_model_2d.py` (``plot_model_2d.py``) | 00:00.296 | 0.0 MB |
+| :ref:`sphx_glr_examples_Models_plot_model_3d.py` (``plot_model_3d.py``) | 00:00.137 | 0.0 MB |
 +-------------------------------------------------------------------------+-----------+--------+

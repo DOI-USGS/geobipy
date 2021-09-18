@@ -115,7 +115,7 @@ Instantiating a new StatArray class
 
     Name: Density ($\frac{g}{cc}$)
         Shape: (1,)
-        Values: [0.41548284]
+        Values: [-0.75372714]
 
 
 
@@ -187,7 +187,7 @@ We can also attach a proposal distribution
 
     Name: Density ($\frac{g}{cc}$)
         Shape: (1,)
-        Values: [0.41548284]
+        Values: [-0.75372714]
     Prior:
     Uniform Distribution: 
       Min: :-2.0
@@ -250,7 +250,7 @@ The univariate proposal distribution can generate random samples from itself.
 
  .. code-block:: none
 
-    -0.6422990486958783
+    -0.408643514569295
 
 
 
@@ -276,7 +276,7 @@ Or we can only generate samples that simultaneously satisfy the prior.
 
  .. code-block:: none
 
-    [0.0904766]
+    [-1.38345889]
 
 
 
@@ -305,7 +305,7 @@ We can perturb the variable by drawing from the attached proposal distribution.
 
     Name: Density ($\frac{g}{cc}$)
         Shape: (1,)
-        Values: [0.71215311]
+        Values: [-2.0970952]
     Prior:
     Uniform Distribution: 
       Min: :-2.0
@@ -445,7 +445,7 @@ This produces a single probability.
 
  .. code-block:: none
 
-    0.3182504238263932
+    0.35174163492831295
 
 
 
@@ -495,7 +495,7 @@ Perturb the variables using the multivariate proposal.
  .. code-block:: none
 
 
-    "Name: Density ($\\frac{g}{cc}$)\n    Shape: (1,)\n    Values: [0.60918535]\nPrior:\nMV Normal Distribution:\nMean:\n[0.35218746]\nVariance:\n[[1.]]\nProposal:\nMV Normal Distribution:\nMean:\n[-1.42758734]\nVariance:\n[[1.]]\nPosterior:\n<class 'geobipy.src.classes.statistics.Histogram1D.Histogram1D'>\nBins: \n<property object at 0x129affa40>Counts:\nName: Frequency\n    Shape: (100,)\n    Values: [3 2 3 ... 5 4 1]\nValues are logged to base None\nRelative to: [0.]"
+    "Name: Density ($\\frac{g}{cc}$)\n    Shape: (1,)\n    Values: [-2.08845559]\nPrior:\nMV Normal Distribution:\nMean:\n[0.30685651]\nVariance:\n[[1.]]\nProposal:\nMV Normal Distribution:\nMean:\n[-1.48735038]\nVariance:\n[[1.]]\nPosterior:\n<class 'geobipy.src.classes.statistics.Histogram1D.Histogram1D'>\nBins: \n<property object at 0x16e189900>Counts:\nName: Frequency\n    Shape: (100,)\n    Values: [4 1 2 ... 3 4 1]\nValues are logged to base None\nRelative to: [0.]"
 
 
 
@@ -1663,7 +1663,7 @@ We can also define a 2D array
  .. code-block:: none
 
 
-    'Name: Density ($\\frac{g}{cc}$)\n    Shape: (50, 100)\n    Values: [[-0.40623321  1.0201118   0.57482569 ... -0.09671177 -1.98902004\n   1.42747249]\n [-0.09155503  0.2648866  -1.2563997  ... -0.85586203 -0.10943409\n  -0.14616791]\n [ 0.75649116  0.11702007  0.35008631 ...  0.96042335 -1.89206668\n   0.5595371 ]\n ...\n [-1.05642731  0.55639445  0.7874665  ... -1.63949984 -1.14579709\n  -0.197091  ]\n [-0.67781223 -0.45293352 -1.18877941 ...  0.63315721 -1.87045174\n  -1.87940155]\n [-0.23370162 -0.54719268 -0.059334   ...  0.30065222  0.28343569\n   0.18839636]]\n'
+    'Name: Density ($\\frac{g}{cc}$)\n    Shape: (50, 100)\n    Values: [[-0.02407258 -0.36157746 -0.89136839 ...  0.42873409 -0.46909846\n   0.34545497]\n [ 0.08049025  1.61686931 -1.55243277 ...  0.81030441  1.10025182\n   0.97249845]\n [ 0.88544251  0.62663325 -1.78757082 ... -0.72249882 -1.83123948\n   1.25340127]\n ...\n [-0.22991794  0.60984238  0.05938041 ...  0.13838507 -0.23869344\n  -1.13383899]\n [ 1.15320786 -1.43537932  0.21243017 ...  0.27988024  0.4032205\n  -1.75734128]\n [ 0.25409164 -0.27461103 -0.31283683 ... -0.646722   -1.72400898\n  -0.10781534]]\n'
 
 
 
@@ -1946,7 +1946,7 @@ Create a stacked area plot of a 2D StatArray
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  4.362 seconds)
+   **Total running time of the script:** ( 0 minutes  3.526 seconds)
 
 
 .. _sphx_glr_download_examples_Statistics_plot_StatArray.py:

@@ -352,7 +352,7 @@ We can interpolate the Model to another mesh.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.755 seconds)
+   **Total running time of the script:** ( 0 minutes  3.157 seconds)
 
 
 .. _sphx_glr_download_examples_Models_plot_model_1d.py:

@@ -478,7 +478,7 @@ Resample a grid
  .. code-block:: none
 
 
-    (<AxesSubplot:xlabel='Easting (m)', ylabel='Depth (m)'>, <matplotlib.collections.QuadMesh object at 0x119012910>, <matplotlib.colorbar.Colorbar object at 0x118a29880>)
+    (<AxesSubplot:xlabel='Easting (m)', ylabel='Depth (m)'>, <matplotlib.collections.QuadMesh object at 0x1151e9e50>, <matplotlib.colorbar.Colorbar object at 0x1151f0fd0>)
 
 
 
@@ -582,7 +582,7 @@ rm.pcolor(values = arr)
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.324 seconds)
+   **Total running time of the script:** ( 0 minutes  1.343 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_2d.py:

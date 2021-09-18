@@ -110,7 +110,7 @@ Specify some cell centres in x and y
  .. code-block:: none
 
 
-    (<AxesSubplot:xlabel='Easting (m)', ylabel='Northing (m)'>, <matplotlib.collections.QuadMesh object at 0x13125aa90>, <matplotlib.colorbar.Colorbar object at 0x131b6bb50>)
+    (<AxesSubplot:xlabel='Easting (m)', ylabel='Northing (m)'>, <matplotlib.collections.QuadMesh object at 0x17cf8b0a0>, <matplotlib.colorbar.Colorbar object at 0x17d763b80>)
 
 
 
@@ -165,7 +165,7 @@ We can plot the mesh in 3D!
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.605 seconds)
+   **Total running time of the script:** ( 0 minutes  0.810 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_3d.py:

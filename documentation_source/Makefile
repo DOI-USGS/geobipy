@@ -23,6 +23,12 @@ help:
 clean:
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 	find ./source/examples -name "*.md5" -type f -delete
+	find ./source/examples -name "*.pickle" -type f -delete
+	find ./source/examples -name "*.ipynb" -type f -delete
+	find ./source/examples -name "*.rst" -type f -delete
+	find ./source/examples -name "*.h5" -type f -delete
+	find ./source/examples -name "*.vtk" -type f -delete
+	find ./source/examples -name "*.png" -type f -delete
 
 cleanGallery:
 	find ./source/examples -name "*.md5" -type f -delete

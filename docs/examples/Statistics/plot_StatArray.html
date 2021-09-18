@@ -24,7 +24,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="1D Rectilinear Mesh" href="../Meshes/plot_rectilinear_mesh_1d.html" />
-    <link rel="prev" title="Histogram 2D" href="plot_histogram_3d.html" /> 
+    <link rel="prev" title="Histogram 3D" href="plot_histogram_3d.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -53,7 +53,7 @@
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html#statistics">Statistics</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="plot_histogram_1d.html">Histogram 1D</a></li>
 <li class="toctree-l3"><a class="reference internal" href="plot_histogram_2d.html">Histogram 2D</a></li>
-<li class="toctree-l3"><a class="reference internal" href="plot_histogram_3d.html">Histogram 2D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_histogram_3d.html">Histogram 3D</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">StatArray Class</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#instantiating-a-new-statarray-class">Instantiating a new StatArray class</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#attaching-prior-and-proposal-distributions-to-a-statarray">Attaching Prior and Proposal Distributions to a StatArray</a></li>
@@ -172,7 +172,7 @@ Name: 45.454
 
 Name: Density ($\frac{g}{cc}$)
     Shape: (1,)
-    Values: [0.41548284]
+    Values: [-0.75372714]
 </pre></div>
 </div>
 </section>
@@ -216,7 +216,7 @@ sample when we wish to perturb the variable
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: Density ($\frac{g}{cc}$)
     Shape: (1,)
-    Values: [0.41548284]
+    Values: [-0.75372714]
 Prior:
 Uniform Distribution:
   Min: :-2.0
@@ -245,7 +245,7 @@ Therefore each element is evaluated to get 3 probabilities, one for each element
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>-0.6422990486958783
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>-0.408643514569295
 </pre></div>
 </div>
 <p>From a sampling stand point we can either sample using only the proposal
@@ -254,7 +254,7 @@ Or we can only generate samples that simultaneously satisfy the prior.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[0.0904766]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[-1.38345889]
 </pre></div>
 </div>
 <p>We can perturb the variable by drawing from the attached proposal distribution.</p>
@@ -265,7 +265,7 @@ Or we can only generate samples that simultaneously satisfy the prior.</p>
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: Density ($\frac{g}{cc}$)
     Shape: (1,)
-    Values: [0.71215311]
+    Values: [-2.0970952]
 Prior:
 Uniform Distribution:
   Min: :-2.0
@@ -320,7 +320,7 @@ This produces a single probability.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>0.3182504238263932
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>0.35174163492831295
 </pre></div>
 </div>
 <p>Attach the multivariate proposal</p>
@@ -335,7 +335,7 @@ This produces a single probability.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&quot;Name: Density ($\\frac{g}{cc}$)\n    Shape: (1,)\n    Values: [0.60918535]\nPrior:\nMV Normal Distribution:\nMean:\n[0.35218746]\nVariance:\n[[1.]]\nProposal:\nMV Normal Distribution:\nMean:\n[-1.42758734]\nVariance:\n[[1.]]\nPosterior:\n&lt;class &#39;geobipy.src.classes.statistics.Histogram1D.Histogram1D&#39;&gt;\nBins: \n&lt;property object at 0x129affa40&gt;Counts:\nName: Frequency\n    Shape: (100,)\n    Values: [3 2 3 ... 5 4 1]\nValues are logged to base None\nRelative to: [0.]&quot;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&quot;Name: Density ($\\frac{g}{cc}$)\n    Shape: (1,)\n    Values: [-2.08845559]\nPrior:\nMV Normal Distribution:\nMean:\n[0.30685651]\nVariance:\n[[1.]]\nProposal:\nMV Normal Distribution:\nMean:\n[-1.48735038]\nVariance:\n[[1.]]\nPosterior:\n&lt;class &#39;geobipy.src.classes.statistics.Histogram1D.Histogram1D&#39;&gt;\nBins: \n&lt;property object at 0x16e189900&gt;Counts:\nName: Frequency\n    Shape: (100,)\n    Values: [4 1 2 ... 3 4 1]\nValues are logged to base None\nRelative to: [0.]&quot;
 </pre></div>
 </div>
 </section>
@@ -729,7 +729,7 @@ x has its own memory allocated (not a reference/pointer)?  True
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&#39;Name: Density ($\\frac{g}{cc}$)\n    Shape: (50, 100)\n    Values: [[-0.40623321  1.0201118   0.57482569 ... -0.09671177 -1.98902004\n   1.42747249]\n [-0.09155503  0.2648866  -1.2563997  ... -0.85586203 -0.10943409\n  -0.14616791]\n [ 0.75649116  0.11702007  0.35008631 ...  0.96042335 -1.89206668\n   0.5595371 ]\n ...\n [-1.05642731  0.55639445  0.7874665  ... -1.63949984 -1.14579709\n  -0.197091  ]\n [-0.67781223 -0.45293352 -1.18877941 ...  0.63315721 -1.87045174\n  -1.87940155]\n [-0.23370162 -0.54719268 -0.059334   ...  0.30065222  0.28343569\n   0.18839636]]\n&#39;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&#39;Name: Density ($\\frac{g}{cc}$)\n    Shape: (50, 100)\n    Values: [[-0.02407258 -0.36157746 -0.89136839 ...  0.42873409 -0.46909846\n   0.34545497]\n [ 0.08049025  1.61686931 -1.55243277 ...  0.81030441  1.10025182\n   0.97249845]\n [ 0.88544251  0.62663325 -1.78757082 ... -0.72249882 -1.83123948\n   1.25340127]\n ...\n [-0.22991794  0.60984238  0.05938041 ...  0.13838507 -0.23869344\n  -1.13383899]\n [ 1.15320786 -1.43537932  0.21243017 ...  0.27988024  0.4032205\n  -1.75734128]\n [ 0.25409164 -0.27461103 -0.31283683 ... -0.646722   -1.72400898\n  -0.10781534]]\n&#39;
 </pre></div>
 </div>
 <p>The StatArray Class’s functions work whether it is 1D or 2D</p>
@@ -825,7 +825,7 @@ ends of whatever you are plotting</p>
 </pre></div>
 </div>
 <img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_022.png" />
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  4.362 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  3.526 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-statistics-plot-statarray-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/53dc65a717762d4693b891c0caabbde0/plot_StatArray.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_StatArray.py</span></code></a></p>
@@ -843,7 +843,7 @@ ends of whatever you are plotting</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="plot_histogram_3d.html" class="btn btn-neutral float-left" title="Histogram 2D" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot_histogram_3d.html" class="btn btn-neutral float-left" title="Histogram 3D" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="../Meshes/plot_rectilinear_mesh_1d.html" class="btn btn-neutral float-right" title="1D Rectilinear Mesh" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

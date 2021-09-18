@@ -445,8 +445,8 @@ This allows us to evaluate the likelihood of the predicted data
 
  .. code-block:: none
 
-    -19707.246512951857
-    201.75779160924557
+    -19707.246512951326
+    201.75779160924293
 
 
 
@@ -504,7 +504,7 @@ Compute the misfit between observed and predicted data
 
  .. code-block:: none
 
-    48.247662254426665
+    48.24766225442447
 
 
 
@@ -902,7 +902,7 @@ Example data files are contained in
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  20.027 seconds)
+   **Total running time of the script:** ( 0 minutes  20.301 seconds)
 
 
 .. _sphx_glr_download_examples_Datapoints_plot_time_datapoint.py:
