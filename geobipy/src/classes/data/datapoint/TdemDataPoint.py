@@ -80,13 +80,14 @@ class TdemDataPoint(EmDataPoint):
                  lineNumber=0.0, fiducial=0.0):
         """Initializer. """
 
+        self._system = None
         if system is None:
-            return
+            return super().__init__(x=x, y=y, z=z, elevation=elevation)
 
         self.system = system
 
-        super().__init__(channels_per_system=self.nTimes, components_per_channel=self.components,
-                         x=x, y=y, z=z, elevation=elevation,
+        super().__init__(x=x, y=y, z=z, elevation=elevation,
+                         channels_per_system=self.nTimes, components_per_channel=self.components,
                          data=data, std=std, predictedData=predictedData,
                          lineNumber=lineNumber, fiducial=fiducial)
 
@@ -156,6 +157,8 @@ class TdemDataPoint(EmDataPoint):
 
     @property
     def n_components(self):
+        if self._system is None:
+            return 1
         return self.system[0].n_components
 
     @property
@@ -175,6 +178,10 @@ class TdemDataPoint(EmDataPoint):
                 'units must have type str')
         self._units = value
 
+    # def off_time(self, system=0):
+    #     """ Return the window times in an StatArray """
+    #     return np.tile(self.system[system].off_time, 2)
+
     def off_time(self, system=0):
         """ Return the window times in an StatArray """
         return self.system[system].off_time
@@ -184,8 +191,7 @@ class TdemDataPoint(EmDataPoint):
         return np.cumsum(np.hstack([0, np.repeat(self.nTimes, self.n_components)]))
 
     def _component_indices(self, component=0, system=0):
-        i = np.ravel_multi_index(
-            (component, system), (self.n_components, self.nSystems))
+        i = np.ravel_multi_index((component, system), (self.n_components, self.nSystems))
         return np.s_[self._ravel_index[i]:self._ravel_index[i+1]]
 
     def __deepcopy__(self, memo={}):
@@ -454,7 +460,8 @@ class TdemDataPoint(EmDataPoint):
         self.receiver.writeHdf(grp, 'R', index=index)
         # self.loopOffset.writeHdf(grp, 'loop_offset', index=index)
 
-    def fromHdf(self, grp, index=None, **kwargs):
+    @classmethod
+    def fromHdf(cls, grp, index=None, **kwargs):
         """ Reads the object from a HDF group """
 
         assert ('system_file_path' in kwargs), ValueError(
@@ -462,7 +469,7 @@ class TdemDataPoint(EmDataPoint):
 
         system_file_path = kwargs['system_file_path']
 
-        super.fromHdf(grp, index)
+        self = super(TdemDataPoint, cls).fromHdf(grp, index)
 
         self.transmitter = (eval(cf.safeEval(grp['T'].attrs.get('repr')))).fromHdf(
             grp['T'], index=index)
@@ -470,17 +477,18 @@ class TdemDataPoint(EmDataPoint):
             grp['R'], index=index)
 
         if 'loop_offset' in grp:
-            loopOffset = StatArray.StatArray.fromHdf(
-                grp['loop_offset'], index=index)
+            loopOffset = StatArray.StatArray.fromHdf(grp['loop_offset'], index=index)
             self.receiver.x = self.transmitter.x + loopOffset[0]
             self.receiver.y = self.transmitter.y + loopOffset[1]
             self.receiver.z = self.transmitter.z + loopOffset[2]
 
         nSystems = np.int(np.asarray(grp['nSystems']))
-        self.system = [join(system_file_path, str(np.asarray(
-            grp['System{}'.format(i)]), 'utf-8')) for i in range(nSystems)]
 
-        self._nChannelsPerSystem = self.nTimes
+        lst = [join(system_file_path, str(np.asarray(grp['System{}'.format(i)]), 'utf-8')) for i in range(nSystems)]
+
+        self.system = lst
+
+        self._channels_per_system = self.nTimes
 
         return self
 
@@ -524,24 +532,23 @@ class TdemDataPoint(EmDataPoint):
         logy = kwargs.pop('logY', None)
 
         for j in range(self.nSystems):
-            times, _ = cf._log(self.off_time(j), logx)
+            system_times, _ = cf._log(self.off_time(j), logx)
 
             for k in range(self.n_components):
 
-                iS = self._component_indices(k, j)
-                d = self.data[iS]
+                icomp = self._component_indices(k, j)
+                # component_times = system_times[icomp]
+                d = self.data[icomp]
 
                 if (with_error_bars):
-                    s = self._std[iS]
-                    # plt.errorbar(self.off_time(j)[iAct], d[iAct], yerr=s[iAct],
-                    plt.errorbar(times, d, yerr=s,
+                    s = self._std[icomp]
+                    plt.errorbar(system_times, d, yerr=s,
                                  color=c[j],
                                  markerfacecolor=mfc[j],
                                  label='System: {}'.format(j+1),
                                  **kwargs)
                 else:
-                    # plt.plot(self.off_time(j)[iAct], d[iAct],
-                    plt.plot(times, d,
+                    plt.plot(system_times, d,
                              markerfacecolor=mfc[j],
                              label='System: {}'.format(j+1),
                              **kwargs)
@@ -587,19 +594,19 @@ class TdemDataPoint(EmDataPoint):
         logy = kwargs.pop('logY', None)
 
         for j in range(self.nSystems):
-            times, _ = cf._log(self.off_time(j), logx)
+            system_times, _ = cf._log(self.off_time(j), logx)
 
             for k in range(self.n_components):
                 iS = self._component_indices(k, j)
 
                 if np.all(self.data <= 0.0):
-                    active = (self.predictedData > 0.0)[iS]
+                    active = (self.predictedData[iS] > 0.0)
 
                 else:
                     active = self.active[iS]
 
                 p = self.predictedData[iS][active]
-                p.plot(x=times[active], **kwargs)
+                p.plot(x=system_times[active], **kwargs)
 
         plt.xscale(xscale)
         plt.yscale(yscale)
@@ -608,13 +615,16 @@ class TdemDataPoint(EmDataPoint):
 
         ax = kwargs.pop('ax', None)
         ax = plt.gca() if ax is None else plt.sca(ax)
-        cP.pretty(ax)
+        cp.pretty(ax)
 
         dD = self.deltaD
-        for i in range(self.nSystems):
-            iAct = self.iplotActive[i]
+        for j in range(self.nSystems):
+            system_times, _ = cf._log(self.off_time(j), kwargs.get('logX', None))
 
-            np.abs(dD[iAct]).plot(x=self.off_time(i)[iAct], **kwargs)
+            for k in range(self.n_components):
+                iS = self._component_indices(k, j)
+                active = self.active[iS]
+                (dD[iS][active]).plot(x=system_times[active], **kwargs)
 
         plt.ylabel("|{}| ({})".format(dD.name, dD.units))
 
@@ -749,8 +759,7 @@ class TdemDataPoint(EmDataPoint):
 
         # Update the variance of the predicted data prior
         if self.predictedData.hasPrior:
-            self.predictedData.prior.variance[np.diag_indices(
-                np.sum(self.active))] = self.std[self.active]**2.0
+            self.predictedData.prior.variance[np.diag_indices(np.sum(self.active))] = self.std[self.active]**2.0
 
     def updateSensitivity(self, mod):
         """ Compute an updated sensitivity matrix using a new model based on an existing matrix """

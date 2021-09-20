@@ -77,7 +77,7 @@ class Tempest_datapoint(TdemDataPoint):
                  std=None,
                  predicted_primary_field=None, predicted_secondary_field=None,
                  system=None,
-                 transmitter_loop=None, receiver_loop=None, loopOffset=[0.0, 0.0, 0.0],
+                 transmitter_loop=None, receiver_loop=None,
                  lineNumber=0.0, fiducial=0.0):
         """Initializer. """
 
@@ -87,21 +87,21 @@ class Tempest_datapoint(TdemDataPoint):
         super().__init__(x=x, y=y, z=z, elevation=elevation,
                          data=None, std=None, predictedData=None,
                          system=system, transmitter_loop=transmitter_loop,
-                         receiver_loop=receiver_loop, loopOffset=loopOffset,
+                         receiver_loop=receiver_loop,
                          lineNumber=lineNumber, fiducial=fiducial)
 
         self.primary_field = primary_field
         self.secondary_field = secondary_field
 
-        self.predicted_primary_field = predicted_primary_field
-        self.predicted_secondary_field = predicted_secondary_field
-
-        # self.data[self._component_indices(0, 0)] += self.x_primary_field
-        # self.data[self._component_indices(1, 0)] += self.z_primary_field
+        self.predicted_primary_field = None
+        self.predicted_secondary_field = None
 
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
         out._primary_field = deepcopy(self.primary_field)
+        out._secondary_field = deepcopy(self.secondary_field)
+        out._predicted_primary_field = deepcopy(self.predicted_primary_field)
+        out._predicted_secondary_field = deepcopy(self.predicted_secondary_field)
 
         return out
 
@@ -109,34 +109,12 @@ class Tempest_datapoint(TdemDataPoint):
     def channels(self):
         return np.squeeze(np.asarray([np.tile(self.times(i), 2) for i in range(self.nSystems)]))
 
-    @property
+    @TdemDataPoint.data.getter
     def data(self):
         for i in range(self.n_components):
             ic = self._component_indices(i, 0)
             self._data[ic] = self.primary_field[i] + self.secondary_field[ic]
         return self._data
-
-    @data.setter
-    def data(self, values):
-        if not '_data' in self.__dict__:
-            self._data = StatArray.StatArray(self.nChannels, "Tempest data", self.units)
-
-        if not values is None:
-            assert values.size == self.nChannels, ValueError("Size of data must equal total number of time channels * components {}".format(self.nChannels))
-            # Mask invalid data values less than 0.0 to NaN
-            self._data[:] = values
-
-    @property
-    def predicted_primary_field(self):
-        return self._predicted_primary_field
-
-    @predicted_primary_field.setter
-    def predicted_primary_field(self, values):
-        if not '_predicted_primary_field' in self.__dict__:
-            self._predicted_primary_field = np.squeeze(StatArray.StatArray(self.n_components, "Predicted primary field", self.units))
-
-        if not values is None:
-            self._predicted_primary_field[:] = values
 
     @property
     def primary_field(self):
@@ -144,29 +122,72 @@ class Tempest_datapoint(TdemDataPoint):
 
     @primary_field.setter
     def primary_field(self, values):
-        if not '_primary_field' in self.__dict__:
-            self._primary_field = StatArray.StatArray(self.n_components, "Primary field", self.units)
 
-        if not values is None:
-            self._primary_field[:] = values
+        if values is None:
+            values = self.n_components
+        else:
+            assert np.size(values) == self.n_components, ValueError("primary field must have size {}".format(self.n_components))
+
+        self._primary_field = StatArray.StatArray(values, "Primary field", self.units)
+
+    @TdemDataPoint.relErr.setter
+    def relErr(self, values):
+        if values is None:
+            values = 2*self.nSystems
+        else:
+            assert values.size == 2*self.nSystems, ValueError(("Tempest data must a have relative error for the primary and secondary fields, for each system. \n"
+                                                              "relErr must have size {}").format(2*self.nSystems))
+
+        self._relErr = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
+
+    @property
+    def secondary_field(self):
+        return self._secondary_field
+
+    @secondary_field.setter
+    def secondary_field(self, values):
+
+        if values is None:
+            values = self.nChannels
+        else:
+            assert np.size(values) == self.nChannels, ValueError("Secondary field must have size {}".format(self.nChannels))
+
+        self._secondary_field = StatArray.StatArray(values, "Secondary field", self.units)
 
     @TdemDataPoint.predictedData.getter
     def predictedData(self):
         for i in range(self.n_components):
             ic = self._component_indices(i, 0)
             self._predictedData[ic] = self.predicted_primary_field[i] + self.predicted_secondary_field[ic]
-
         return self._predictedData
 
-    # @predictedData.setter
-    # def predictedData(self, values):
-    #     if not '_predictedData' in self.__dict__:
-    #         self._predictedData = StatArray.StatArray(self.nChannels, "Predicted Data", self.units)
+    @property
+    def predicted_primary_field(self):
+        return self._predicted_primary_field
 
-    #     if not values is None:
-    #         assert values.size == self.nChannels, ValueError("Size of predictedData must equal total number of time channels * components {}".format(self.nChannels))
-    #         # Mask invalid data values less than 0.0 to NaN
-    #         self._predictedData[:] = values
+    @predicted_primary_field.setter
+    def predicted_primary_field(self, values):
+
+        if values is None:
+            values = self.n_components
+        else:
+            assert np.size(values) == self.n_components, ValueError("predicted primary field must have size {}".format(self.n_components))
+
+        self._predicted_primary_field = StatArray.StatArray(values, "Predicted primary field", self.units)
+
+    @property
+    def predicted_secondary_field(self):
+        return self._predicted_secondary_field
+
+    @predicted_secondary_field.setter
+    def predicted_secondary_field(self, values):
+
+        if values is None:
+            values = self.nChannels
+        else:
+            assert np.size(values) == self.nChannels, ValueError("predicted secondary field must have size {}".format(self.nChannels))
+
+        self._predicted_secondary_field = StatArray.StatArray(values, "Predicted secondary field", self.units)
 
     @TdemDataPoint.units.setter
     def units(self, value):
@@ -176,6 +197,21 @@ class Tempest_datapoint(TdemDataPoint):
         else:
             assert isinstance(value, str), TypeError('units must have type str')
             self._units = value
+
+    def likelihood(self, log):
+        """Compute the likelihood of the current predicted data given the observed data and assigned errors
+
+        Returns
+        -------
+        out : np.float64
+            Likelihood of the data point
+
+        """
+        return self.predictedData.probability(i=self.active, log=log)
+
+    def off_time(self, system=0):
+        """ Return the window times in an StatArray """
+        return self.system[system].off_time
 
     def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
         """ Create the hdf group metadata in file
@@ -213,9 +249,9 @@ class Tempest_datapoint(TdemDataPoint):
     def fromHdf(self, grp, index=None, **kwargs):
         """ Reads the object from a HDF group """
 
-        super().fromHdf(grp, index, **kwargs)
+        super.fromHdf(grp, index, **kwargs)
 
-        self._primary_field = StatArray.StatArray().fromHdf(grp['primary_field'], index=index)
+        self._primary_field = StatArray.StatArray.fromHdf(grp['primary_field'], index=index)
 
         return self
 
@@ -288,7 +324,7 @@ class Tempest_datapoint(TdemDataPoint):
         """
         relativeErr = np.atleast_1d(relativeErr)
         #assert (isinstance(relativeErr, list)), TypeError("relativeErr must be a list of size equal to the number of systems {}".format(self.nSystems))
-        assert (relativeErr.size == self.nSystems), TypeError("relativeErr must be a list of size equal to the number of systems {}".format(self.nSystems))
+        assert (relativeErr.size == 2*self.nSystems), TypeError("relativeErr must be a list of size equal to the number of systems {}".format(2*self.nSystems))
 
         additiveErr = np.atleast_1d(additiveErr)
         #assert (isinstance(additiveErr, list)), TypeError("additiveErr must be a list of size equal to the number of systems {}".format(self.nSystems))
@@ -297,41 +333,68 @@ class Tempest_datapoint(TdemDataPoint):
 
         # For each system assign error levels using the user inputs
         for i in range(self.nSystems):
-            assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], np.ndarray)), TypeError("relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
-            assert (np.all(relativeErr[i] > 0.0)), ValueError("relativeErr for system {} cannot contain values <= 0.0.".format(i+1))
 
-            assert (isinstance(additiveErr[i], float) or isinstance(additiveErr[i], np.ndarray)), TypeError("additiveErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
+            primary_percentage = relativeErr[i*2]
+            secondary_percentage = relativeErr[(i*2)+1]
+
+            # assert (isinstance(primary_relative_error, float) or isinstance(primary_relative_error, np.ndarray)), TypeError("primary_relative_error for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
+            assert (np.all(primary_percentage > 0.0)), ValueError("primary_relative_error for system {} cannot contain values <= 0.0.".format(i+1))
+            # assert (isinstance(secondary_relative_error, float) or isinstance(secondary_relative_error, np.ndarray)), TypeError("secondary_relative_error for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
+            assert (np.all(secondary_percentage > 0.0)), ValueError("secondary_relative_error for system {} cannot contain values <= 0.0.".format(i+1))
+
+            # assert (isinstance(additiveErr[i], float) or isinstance(additiveErr[i], np.ndarray)), TypeError("additiveErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
             assert (np.all(additiveErr[i] > 0.0)), ValueError("additiveErr for system {} should contain values > 0.0. Make sure the values are in linear space".format(i+1))
             iSys = self._systemIndices(system=i)
 
+            # Compute the error on the primary field
+            p_relative_error = np.zeros(self.channels_per_system)
+            for j in range(self.n_components):
+                ptmp = primary_percentage * self.primary_field[i*2:(i*2)+2]
+                p_relative_error[self._component_indices(j, i)] = ptmp[j]
+
             # Compute the relative error
-            data = self.data[iSys]
+            s_relative_error = secondary_percentage * self.secondary_field[iSys]
 
-            rErr = relativeErr[i] * data
-            if additiveErr.size == self.nSystems:
-                aErr = np.full_like(rErr, fill_value=additiveErr[i])
-            else:
-                aErr = additiveErr[iSys]
+            s_additive_error = np.full_like(s_relative_error, fill_value=additiveErr[i])
 
-            self._std[iSys] = np.sqrt((rErr**2.0) + (aErr**2.0))
+            self._std[iSys] = p_relative_error + np.sqrt((s_relative_error**2.0) + (s_additive_error**2.0))
 
         # Update the variance of the predicted data prior
-        if self._predictedData.hasPrior:
-            self._predictedData.prior.variance[np.diag_indices(self.active.size)] = self._std[self.active]**2.0
+        if self.secondary_field.hasPrior:
+            self.secondary_field.prior.variance[np.diag_indices(self.active.size)] = self._std[self.active]**2.0
 
     def updatePosteriors(self):
+
         super().updatePosteriors()
-        if self.predictedData.hasPosterior:
-            for i in range(self.n_components):
-                j = self._component_indices(i, 0)
-                self.predictedData.posterior.update_line(x=self.channels[j], y=self.predictedData[j])
+
+        # if self.predictedData.hasPosterior:
+        #     for i in range(self.n_components):
+        #         j = self._component_indices(i, 0)
+        #         self.predictedData.posterior.update_line(x=self.channels[j], y=self.predictedData[j])
 
 
     def forward(self, mod):
         """ Forward model the data from the given model """
 
         assert isinstance(mod, Model1D), TypeError("Invalid model class for forward modeling [1D]")
-        tdem1dfwd(self, mod)
+        fm = tdem1dfwd(self, mod)
+
+        for i in range(self.nSystems):
+            iSys = self._systemIndices(i)
+            self.predicted_primary_field[:] = np.r_[fm[i].PX, -fm[i].PZ]
+            self.predicted_secondary_field[iSys] = np.hstack([fm[i].SX, -fm[i].SZ])  # Store the necessary component
+
+    # def sensitivity(self, mod):
+    #     """ Forward model the data from the given model """
+
+    #     assert isinstance(mod, Model1D), TypeError("Invalid model class for forward modeling [1D]")
+    #     fm = tdem1dfwd(self, mod)
+
+    #     for i in range(self.nSystems):
+    #         iSys = self._systemIndices(i)
+    #         self.predicted_primary_field[:] = np.r_[fm[i].PX, -fm[i].PZ]
+    #         self.predicted_secondary_field[iSys] = np.hstack([fm[i].SX, -fm[i].SZ])  # Store the necessary component
+
 
     def _empymodForward(self, mod):
 
