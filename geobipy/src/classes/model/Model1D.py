@@ -112,7 +112,13 @@ class Model1D(RectilinearMesh1D):
 
     @par.setter
     def par(self, values):
-        self._par[:] = values
+
+        if values is None:
+            values = self.nCells.value
+        else:
+            assert values.size == self.nCells, ValueError('Size of parameters {} must equal {}'.format(values.size, self.nCells.value))
+
+        self._par = StatArray.StatArray(values)
 
     def __deepcopy__(self, memo={}):
         """Create a deepcopy
