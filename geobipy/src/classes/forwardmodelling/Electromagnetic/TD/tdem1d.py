@@ -103,21 +103,7 @@ try:
                      datapoint.receiver.roll, datapoint.receiver.pitch, datapoint.receiver.yaw)
 
         # Forward model the data for each system
-        for i in range(datapoint.nSystems):
-            iSys = datapoint._systemIndices(i)
-            fm = datapoint.system[i].forwardmodel(G, E)
-            comps = []
-            if 'x' in datapoint.components_per_channel:
-                comps.append(fm.SX)
-                # datapoint._predicted_x_primary_field = fm.PX
-            if 'y' in datapoint.components_per_channel:
-                comps.append(fm.SY)
-                # datapoint._predicted_y_primary_field = fm.PY
-            if 'z' in datapoint.components_per_channel:
-                comps.append(-fm.SZ)
-                # datapoint._predicted_z_primary_field = fm.PZ
-            p = np.hstack(comps)
-            datapoint._predictedData[iSys] = p  # Store the necessary component
+        return [datapoint.system[i].forwardmodel(G, E) for i in range(datapoint.nSystems)]
 
     def gaTdem1dsen(datapoint, model1d, ix=None, modelChanged=True):
         """ Compute the sensitivty matrix for a 1D layered earth model, optionally compute the responses for only the layers in ix """
@@ -130,7 +116,6 @@ try:
                          datapoint.receiver.x - datapoint.transmitter.x,
                          datapoint.receiver.y - datapoint.transmitter.y,
                          datapoint.receiver.z - datapoint.transmitter.z,
-                         #  datapoint.loopOffset[0], datapoint.loopOffset[1], datapoint.loopOffset[2],
                          datapoint.receiver.roll, datapoint.receiver.pitch, datapoint.receiver.yaw)
 
             for i in range(datapoint.nSystems):
