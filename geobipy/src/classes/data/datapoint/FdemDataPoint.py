@@ -249,6 +249,13 @@ class FdemDataPoint(EmDataPoint):
         """
         return self.system[system].frequencies[channel%self.nFrequencies[system]]
 
+    def set_priors(self, height_prior=None, data_prior=None, relative_error_prior=None, additive_error_prior=None):
+
+        super().set_priors(height_prior, relative_error_prior, additive_error_prior)
+
+        if not data_prior is None:
+            self.predictedData.set_prior(data_prior)
+
     def set_predicted_data_posterior(self):
         if self.predictedData.hasPrior:
             freqs = np.log10(self.frequencies())

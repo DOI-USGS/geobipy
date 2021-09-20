@@ -685,6 +685,13 @@ class TdemDataPoint(EmDataPoint):
     def setPosteriors(self, log=10):
         super().setPosteriors(log=log)
 
+    def set_priors(self, height_prior=None, data_prior=None, relative_error_prior=None, additive_error_prior=None):
+
+        super().set_priors(height_prior, relative_error_prior, additive_error_prior)
+
+        if not data_prior is None:
+            self.predictedData.set_prior(data_prior)
+
     def updateErrors(self, relativeErr, additiveErr):
         """ Updates the data errors
 
