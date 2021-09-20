@@ -70,9 +70,13 @@ class Inference1D(myObject):
     def __init__(self, datapoint, prng, kwargs, world=None):
         """ Initialize the results of the inversion """
 
+        self.fig = None
         self._user_options = kwargs
         self.prng = prng
         self.rank = 1 if world is None else world.rank
+
+        if kwargs is None:
+            return
 
 
         self._n_markov_chains = np.int64(kwargs.nMarkovChains) #np.int64(kwargs.pop('nMarkovChains', 100000))
@@ -148,7 +152,6 @@ class Inference1D(myObject):
         self.interactive_plot = kwargs.plot  # .pop('plot', False)
         self.save_png = kwargs.savePNG  # .pop('savePNG', False)
 
-        self.fig = None
         # Return none if important parameters are not used (used for hdf 5)
         if datapoint is None:
             return
@@ -262,7 +265,6 @@ class Inference1D(myObject):
             log = isinstance(self.datapoint, TdemDataPoint)
             additivePrior = Distribution('Uniform', kwargs.minimumAdditiveError, kwargs.maximumAdditiveError, log=log, prng=self.prng)
             additiveProposal = Distribution('MvLogNormal', self.datapoint.addErr, kwargs.additiveErrorProposalVariance, linearSpace=log, prng=self.prng)
-
 
         # Set the priors, proposals, and posteriors.
         self.datapoint.set_priors(height_prior=heightPrior, data_prior=data_prior, relative_error_prior=relativePrior, additive_error_prior=additivePrior)
@@ -427,7 +429,7 @@ class Inference1D(myObject):
         if (self.user_options.savePNG):# and not failed):
             # To save any thing the Results must be plot
             self.plot()
-            self.toPNG('.', datapoint.fiducial)
+            self.toPNG('.', self.datapoint.fiducial)
 
         return failed
 
@@ -509,15 +511,15 @@ class Inference1D(myObject):
                     pass
 
         gs = self.fig.add_gridspec(2, 2, height_ratios=(1, 6))
-        self.ax = []
+        self.ax = [None] * 4
 
-        self.ax.append(plt.subplot(gs[0, 0]))  # Acceptance Rate 0
-        self.ax.append(plt.subplot(gs[0, 1]))  # Data misfit vs iteration 1
-        for ax in self.ax:
+        self.ax[0] = plt.subplot(gs[0, 0])  # Acceptance Rate 0
+        self.ax[1] = plt.subplot(gs[0, 1])  # Data misfit vs iteration 1
+        for ax in self.ax[:2]:
             cP.pretty(ax)
 
-        self.ax.append(self.model.init_posterior_plots(gs[1, 0]))
-        self.ax.append(self.datapoint.init_posterior_plots(gs[1, 1]))
+        self.ax[2] = self.model.init_posterior_plots(gs[1, 0])
+        self.ax[3] = self.datapoint.init_posterior_plots(gs[1, 1])
 
         if self.interactive_plot:
             plt.show(block=False)
@@ -797,37 +799,41 @@ class Inference1D(myObject):
         self.fromHdf(grp, system_file_path)
 
 
-    def fromHdf(self, hdfFile, system_file_path, index=None, fiducial=None):
+    @classmethod
+    def fromHdf(cls, hdfFile, system_file_path, index=None, fiducial=None):
 
         iNone = index is None
         fNone = fiducial is None
 
         assert not (iNone and fNone) ^ (not iNone and not fNone), Exception("Must specify either an index OR a fiducial.")
 
-        fiducials = StatArray.StatArray.fromHdf(hdfFile['fiducials'])
+        fiducials = StatArray.StatArray.fromHdf(hdfFile['currentdatapoint/fiducial'])
 
         if not fNone:
             index = fiducials.searchsorted(fiducial)
+
+        self = cls(None, None, kwargs=None)
 
         s = np.s_[index, :]
 
         self.fiducial = np.float64(fiducials[index])
 
-        self.update_plot_every = np.array(hdfFile.get('iplot'))
-        self.plotMe = np.array(hdfFile.get('plotme'))
+        self._n_markov_chains = np.array(hdfFile.get('nmc'))
+        self._update_plot_every = np.array(hdfFile.get('iplot'))
+        self.interactive_plot = np.array(hdfFile.get('plotme'))
 
         tmp = hdfFile.get('limits')
         self.limits = None if tmp is None else np.array(tmp)
         self.reciprocateParameter = np.array(hdfFile.get('reciprocateParameter'))
-        self.n_markov_chains = np.array(hdfFile.get('nmc'))
+
         self.nSystems = np.array(hdfFile.get('nsystems'))
         self.acceptance_x = hdfRead.readKeyFromFile(hdfFile, '', '/', 'ratex')
 
         self.iteration = hdfRead.readKeyFromFile(
             hdfFile, '', '/', 'i', index=index)
-        self.iBurn = hdfRead.readKeyFromFile(
+        self.burned_in_iteration = hdfRead.readKeyFromFile(
             hdfFile, '', '/', 'iburn', index=index)
-        self.burnedIn = hdfRead.readKeyFromFile(
+        self.burned_in = hdfRead.readKeyFromFile(
             hdfFile, '', '/', 'burnedin', index=index)
         # self.doi = hdfRead.readKeyFromFile(hdfFile,'','/','doi', index=index)
         self.multiplier = hdfRead.readKeyFromFile(
@@ -838,11 +844,13 @@ class Inference1D(myObject):
 
         self.best_datapoint = hdfRead.readKeyFromFile(
             hdfFile, '', '/', 'bestd', index=index, system_file_path=system_file_path)
+
         self.datapoint = hdfRead.readKeyFromFile(
             hdfFile, '', '/', 'currentdatapoint', index=index, system_file_path=system_file_path)
 
         self.model = hdfRead.readKeyFromFile(
             hdfFile, '', '/', 'currentmodel', index=index)
+
         self.Hitmap = self.model.par.posterior
         # self.currentModel._max_edge = np.log(self.Hitmap.y.centres[-1])
         # except:
