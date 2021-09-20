@@ -338,7 +338,7 @@ class EmDataPoint(DataPoint):
 
         """
         if self.z.hasPrior:
-            H = Histogram1D(bins = StatArray.StatArray(self.z.prior.bins(), name=self.z.name, units=self.z.units), relativeTo=self.z)
+            H = Histogram1D(edges = StatArray.StatArray(self.z.prior.bins(), name=self.z.name, units=self.z.units), relativeTo=self.z)
             self.z.setPosterior(H)
 
     def setErrorPosterior(self, log=None):
@@ -350,11 +350,11 @@ class EmDataPoint(DataPoint):
 
         if self.relErr.hasPrior:
             rb = StatArray.StatArray(np.atleast_2d(self.relErr.prior.bins()), name=self.relErr.name, units=self.relErr.units)
-            self.relErr.setPosterior([Histogram1D(bins = rb[i, :]) for i in range(self.nSystems)])
+            self.relErr.setPosterior([Histogram1D(edges = rb[i, :]) for i in range(self.nSystems)])
 
         if self.addErr.hasPrior:
             ab = StatArray.StatArray(np.atleast_2d(self.addErr.prior.bins()), name=self.addErr.name, units=self.data.units)
-            self.addErr.setPosterior([Histogram1D(bins = ab[i, :], log=log) for i in range(self.nSystems)])
+            self.addErr.setPosterior([Histogram1D(edges = ab[i, :], log=log) for i in range(self.nSystems)])
 
     @property
     def summary(self):

@@ -270,17 +270,13 @@ class RectilinearMesh1D(Mesh):
     @nCells.setter
     def nCells(self, value):
         if value is None:
-            self._nCells = StatArray.StatArray(
-                1, '# of Cells', dtype=np.int32) + 1
+            self._nCells = StatArray.StatArray(1, '# of Cells', dtype=np.int32) + 1
         else:
-            assert isinstance(value, (int, np.integer, StatArray.StatArray)), TypeError(
-                "nCells must be an integer, or StatArray")
-            assert np.size(value) == 1, ValueError(
-                "nCells must be scalar or length 1")
+            assert isinstance(value, (int, np.integer, StatArray.StatArray)), TypeError("nCells must be an integer, or StatArray")
+            assert np.size(value) == 1, ValueError("nCells must be scalar or length 1")
             assert (value >= 1), ValueError('nCells must >= 1')
             if isinstance(value, int):
-                self._nCells = StatArray.StatArray(
-                    1, '# of Cells', dtype=np.int32) + value
+                self._nCells = StatArray.StatArray(1, '# of Cells', dtype=np.int32) + value
             else:
                 self._nCells = deepcopy(value)
 
@@ -941,7 +937,7 @@ class RectilinearMesh1D(Mesh):
 
         # Initialize the posterior histogram for the number of layers
         if nCells_posterior is None:
-            self.nCells.setPosterior(Histogram1D.Histogram1D(binCentres=StatArray.StatArray(
+            self.nCells.setPosterior(Histogram1D.Histogram1D(centres=StatArray.StatArray(
                 np.arange(0.0, self.max_cells + 1.0), name="# of Layers")))
 
         if edges_posterior is None:
@@ -954,7 +950,7 @@ class RectilinearMesh1D(Mesh):
                 0.9 * self.min_edge, 1.1 * self.max_edge, 0.5 * self.min_width), self.edges.name, self.edges.units)
 
             # Initialize the interface Depth Histogram
-            self.edges.setPosterior(Histogram1D.Histogram1D(bins=zGrd))
+            self.edges.setPosterior(Histogram1D.Histogram1D(edges=zGrd))
 
     def set_priors(self, min_edge, max_edge, max_cells, min_width=None, prng=None, n_cells_prior=None, edge_prior=None):
         """Setup the priors of the mesh.
@@ -1108,8 +1104,8 @@ class RectilinearMesh1D(Mesh):
 
         self.nCells.createHdf(grp, 'nCells', withPosterior=withPosterior, nRepeats=nRepeats)
 
-        self._centres.createHdf(grp, 'centres', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        self._edges.createHdf(grp, 'edges', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.centres.createHdf(grp, 'centres', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.edges.createHdf(grp, 'edges', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
 
         if not self.log is None:
             grp.create_dataset('log', data=self.log)
@@ -1133,8 +1129,8 @@ class RectilinearMesh1D(Mesh):
         """
         grp = parent.get(name)
         self.nCells.writeHdf(grp, 'nCells',  withPosterior=withPosterior, index=index)
-        self._centres.writeHdf(grp, 'centres',  withPosterior=withPosterior, index=index)
-        self._edges.writeHdf(grp, 'edges',  withPosterior=withPosterior, index=index)
+        self.centres.writeHdf(grp, 'centres',  withPosterior=withPosterior, index=index)
+        self.edges.writeHdf(grp, 'edges',  withPosterior=withPosterior, index=index)
         self.relativeTo.writeHdf(grp, 'relativeTo', index=index)
 
     @classmethod
@@ -1162,23 +1158,27 @@ class RectilinearMesh1D(Mesh):
                 key = 'bins'
 
             if np.ndim(grp[key+'/data']) == 2:
-                edges = StatArray.StatArray.fromHdf(grp[key], index=index)
+                edges = StatArray.StatArray.fromHdf(grp[key], index=(index, np.s_[:nCells.value+1]))
             else:
-                edges = StatArray.StatArray.fromHdf(grp[key])
+                edges = StatArray.StatArray.fromHdf(grp[key], index=np.s_[:nCells.value+1])
 
         centres = None
         if edges is None and (('centres' in grp) or ('x' in grp)):
             key = 'centres' if not 'x' in grp else 'x'
             if np.ndim(grp[key+'/data']) == 2:
-                centres = StatArray.StatArray.fromHdf(grp[key], index=index)
+                centres = StatArray.StatArray.fromHdf(grp[key], index=(index, np.s_[:nCells.value]))
             else:
-                centres = StatArray.StatArray.fromHdf(grp[key])
+                centres = StatArray.StatArray.fromHdf(grp[key], index=np.s_[:nCells.value+1])
 
-        out = cls(centres, edges)
+        log = None
+        if 'log' in grp:
+            log = np.asscalar(np.asarray(grp['log']))
 
-        if 'log' in grp: out.log = np.asscalar(np.asarray(grp['log']))
+        out = cls(centres, edges, widths=None)
 
+        out.log = log
         out.relativeTo = relativeTo
+        out.nCells = nCells
 
         if 'min_width' in grp: out._min_width = np.array(grp.get('min_width'))
         if 'min_edge' in grp: out._min_edge = np.array(grp.get('min_edge'))

@@ -61,24 +61,18 @@ class Model1D(RectilinearMesh1D):
 
     """
 
-    def __init__(self, nCells=None, parameters=None, edges=None, widths=None, relativeTo=None):
+    def __init__(self, centres=None, edges=None, widths=None, relativeTo=None, parameters=None, **kwargs):
         """Instantiate a new Model1D """
 
         relativeTo = 0.0 if relativeTo is None else relativeTo
 
-        super().__init__(edges=edges, widths=widths, relativeTo=relativeTo)
+        super().__init__(centres=centres, edges=edges, widths=widths, relativeTo=relativeTo)
 
-
-        if (all((x is None for x in [nCells, relativeTo, parameters, edges, widths]))):
-            return
+        # if (all((x is None for x in [centres, relativeTo, parameters, edges, widths]))):
+        #     return
         assert (not(not widths is None and not edges is None)), TypeError('Cannot instantiate with both edges and widths values')
 
-        self._par = StatArray.StatArray(self.nCells.value)
-
-        # StatArray of the physical parameters
-        if (not parameters is None):
-            assert parameters.size == self.nCells, ValueError('Size of parameters {} must equal {}'.format(parameters.size, self.nCells.value))
-            self._par = StatArray.StatArray(parameters)
+        self.par = parameters
 
         # StatArray of the change in physical parameters
         self._dpar = StatArray.StatArray(self.nCells.value - 1, 'Derivative', r"$\frac{"+self.par.units+"}{m}$")
@@ -587,7 +581,7 @@ class Model1D(RectilinearMesh1D):
         pGrd = StatArray.StatArray(p, self.par.name, self.par.units)
 
         # Set the posterior hitmap for conductivity vs depth
-        self.par.setPosterior(Hitmap2D(xBins=pGrd, yBins=self.edges.posterior.edges))
+        self.par.setPosterior(Hitmap2D(xEdges=pGrd, yEdges=self.edges.posterior.edges))
 
     def set_priors(self, halfSpaceValue, min_edge, max_edge, max_cells, parameterPrior, gradientPrior, parameterLimits=None, min_width=None, factor=10.0, dzVariance=1.5, prng=None):
         """Setup the priors of a 1D model.
@@ -1164,7 +1158,8 @@ class Model1D(RectilinearMesh1D):
         grp = h5obj.get(name)
         self.par.writeHdf(grp, 'par',  withPosterior=withPosterior, index=index)
 
-    def fromHdf(self, grp, index=None):
+    @classmethod
+    def fromHdf(cls, grp, index=None):
         """Read the class from a HDF group
 
         Given the HDF group object, read the contents into an Model1D class.
@@ -1177,8 +1172,7 @@ class Model1D(RectilinearMesh1D):
             If the group was created using the nRepeats option, index specifies the index'th entry from which to read the data.
 
         """
-
-        super.fromHdf(grp, index)
+        self = super(Model1D, cls).fromHdf(grp, index)
 
         self._par = StatArray.StatArray.fromHdf(grp['par'], index=np.s_[index, :self.nCells.value])
 

@@ -728,7 +728,7 @@ class Inference3D(myObject):
             pdf = np.exp(logprob)
             pdf_individual = responsibilities * pdf[:, np.newaxis]
 
-            h = Histogram1D(bins = bins)
+            h = Histogram1D(edges = bins)
             h.update(self.fits[2])
 
             h._counts = h._counts / np.max(h._counts)
@@ -767,7 +767,7 @@ class Inference3D(myObject):
             pdf, responsibilities = model.score_samples(x_predict)
             pdf_individual = responsibilities * pdf[:, np.newaxis]
 
-            h = Histogram1D(bins = bins)
+            h = Histogram1D(edges = bins)
             h.update(self.fits[2])
 
             h._counts = h._counts / np.max(h._counts)

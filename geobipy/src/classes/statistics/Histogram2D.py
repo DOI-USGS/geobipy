@@ -42,19 +42,15 @@ class Histogram2D(RectilinearMesh2D):
 
     """
 
-    def __init__(self, xBins=None, xBinCentres=None, yBins=None, yBinCentres=None, **kwargs):
+    def __init__(self, x=None, y=None, **kwargs):
         """ Instantiate a 2D histogram """
 
-        if (all(x is None for x in [xBins, yBins, yBinCentres, xBinCentres])):
-            return
-
         # Instantiate the parent class
-        super().__init__(xCentres=xBinCentres, xEdges=xBins,
-                         yCentres=yBinCentres, yEdges=yBins, **kwargs)
+        super().__init__(x=x, y=y, **kwargs)
+
 
         # Point counts to self.arr to make variable names more intuitive
-        self._counts = StatArray.StatArray(
-            self.shape, name='Frequency', dtype=np.int64)
+        self.counts = None
 
     @property
     def xBins(self):
@@ -84,6 +80,16 @@ class Histogram2D(RectilinearMesh2D):
     def counts(self):
         return self._counts
 
+    @counts.setter
+    def counts(self, values):
+
+        if values is None:
+            values = self.shape
+        else:
+            assert np.all(self.shape == np.shape(values)), ValueError('Counts must have shape {}'.format(self.shape))
+
+        self._counts = StatArray.StatArray(values, name='Frequency', dtype=np.int64)
+
     def __getitem__(self, slic):
         """Allow slicing of the histogram.
 
@@ -111,19 +117,19 @@ class Histogram2D(RectilinearMesh2D):
         if axis == -1:
             if self.xyz:
                 out = Histogram2D(
-                    xBins=self._x.edges[slic[1]], yBins=self._y.edges[slic[1]], zBins=self._z.edges[slic[0]])
+                    xEdges=self._x.edges[slic[1]], yEdges=self._y.edges[slic[1]], zEdges=self._z.edges[slic[0]])
             else:
                 out = Histogram2D(
-                    xBins=self._x.edges[slic[1]], yBins=self._z.edges[slic[0]])
+                    xEdges=self._x.edges[slic[1]], yEdges=self._z.edges[slic[0]])
 
             out._counts += self.counts[slic0]
             return out
 
         if axis == 0:
-            out = Histogram1D(bins=self._x.edges[slic[1]])
+            out = Histogram1D(edges=self._x.edges[slic[1]])
             out._counts += np.squeeze(self.counts[slic0])
         elif axis == 1:
-            out = Histogram1D(bins=self._y.edges[slic[0]])
+            out = Histogram1D(edges=self._y.edges[slic[0]])
             out._counts += np.squeeze(self.counts[slic0])
         return out
 
@@ -231,7 +237,7 @@ class Histogram2D(RectilinearMesh2D):
             else:
                 s = np.sum(self._counts[:, indices[0]:indices[1]], axis=1-axis)
 
-        out = Histogram1D(bins=bins.edges, log=log)
+        out = Histogram1D(edges=bins.edges, log=log)
         out._counts += s
         return out
 
@@ -497,10 +503,10 @@ class Histogram2D(RectilinearMesh2D):
         """ Define the deepcopy. """
 
         if self.xyz:
-            out = Histogram2D(xBins=self.xBins,
-                              yBins=self.yBins, zBins=self.zBins)
+            out = Histogram2D(xEdges=self.xBins,
+                              yEdges=self.yBins, zEdges=self.zBins)
         else:
-            out = Histogram2D(xBins=self.xBins, yBins=self.yBins)
+            out = Histogram2D(xEdges=self.xBins, yEdges=self.yBins)
         out._counts = deepcopy(self._counts)
 
         return out
@@ -609,12 +615,12 @@ class Histogram2D(RectilinearMesh2D):
             self._counts, intervals, axis, statistic)
 
         if axis == 0:
-            out = Histogram2D(xBins=self.x.edges, yBins=StatArray.StatArray(
+            out = Histogram2D(xEdges=self.x.edges, yEdges=StatArray.StatArray(
                 np.asarray(intervals), name=self.y.name, units=self.y.units))
             out._counts[:] = counts
         else:
-            out = Histogram2D(xBins=StatArray.StatArray(np.asarray(
-                intervals), name=self.x.name, units=self.x.units), yBins=self.y.edges)
+            out = Histogram2D(xEdges=StatArray.StatArray(np.asarray(
+                intervals), name=self.x.name, units=self.x.units), yEdges=self.y.edges)
             out._counts[:] = counts
         return out
 

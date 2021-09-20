@@ -43,11 +43,14 @@ class Histogram1D(RectilinearMesh1D):
 
     """
 
-    def __init__(self, binCentres=None, bins=None, log=None, relativeTo=0.0, values=None, **kwargs):
+    def __init__(self, centres=None, edges=None, widths=None, log=None, relativeTo=0.0, values=None, **kwargs):
         """ Initialize a histogram """
 
+        if 'bins' in kwargs:
+            raise Exception('woops')
+
         # Initialize the parent class
-        super().__init__(centres=binCentres, edges=bins, log=log, relativeTo=relativeTo)
+        super().__init__(centres=centres, edges=edges, widths=widths, log=log, relativeTo=relativeTo)
 
         self._counts = StatArray.StatArray(self.nCells.value, 'Frequency', dtype=np.int64)
 
@@ -452,7 +455,7 @@ class Histogram1D(RectilinearMesh1D):
     @property
     def hdf_name(self):
         """ Reprodicibility procedure """
-        return('Histogram1D()')
+        return('Histogram1D')
 
 
     def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
@@ -479,10 +482,9 @@ class Histogram1D(RectilinearMesh1D):
     @classmethod
     def fromHdf(cls, grp, index=None):
         """ Reads in the object froma HDF file """
-        out = super(Histogram1D, cls).fromHdf(grp, index)
-        out._counts = StatArray.StatArray.fromHdf(grp['counts'], index=index)
-
-        return out
+        self = super(Histogram1D, cls).fromHdf(grp, index)
+        self._counts = StatArray.StatArray.fromHdf(grp['counts'], index=index)
+        return self
 
     @property
     def summary(self):

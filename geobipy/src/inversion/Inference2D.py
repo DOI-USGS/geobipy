@@ -166,7 +166,7 @@ class Inference2D(myObject):
         opacity = StatArray.StatArray(np.zeros(self.nPoints))
 
         for i in range(self.nPoints):
-            h = Histogram1D(bins = self.additiveErrorPosteriors._edges + self.additiveErrorPosteriors.relativeTo[i])
+            h = Histogram1D(edges = self.additiveErrorPosteriors._edges + self.additiveErrorPosteriors.relativeTo[i])
             h._counts[:] = self.additiveErrorPosteriors.counts[i, :]
             opacity[i] = h.credibleRange(percent, log)
 
@@ -238,7 +238,7 @@ class Inference2D(myObject):
             xc = grp['x/x/data']
             yc = grp['y/x/data']
 
-        h = Hitmap2D(xBinCentres = StatArray.StatArray(np.r_[xc[0, :]]), yBinCentres = StatArray.StatArray(np.r_[yc[0, :]]))
+        h = Hitmap2D(xCentres = StatArray.StatArray(np.r_[xc[0, :]]), yCentres = StatArray.StatArray(np.r_[yc[0, :]]))
         h._counts[:, :] = np.r_[counts[0, :, :]]
         values = h.percent_interval(percent=np.r_[100.0-percent, percent], log=log)
         credibleLower[:, 0], credibleUpper[:, 0] = values[:, 0], values[:, 1]
@@ -828,7 +828,7 @@ class Inference2D(myObject):
             tmp = hdfRead.read_item(self.hdfFile['currentmodel/edges/posterior'])
 
         x = StatArray.StatArray(np.arange(self.nPoints, dtype=np.float64), "Index")
-        out = Histogram2D(xBinCentres=tmp.bins, yBins=x)
+        out = Histogram2D(xCentres=tmp.bins, yEdges=x)
         out._counts = tmp.counts
         return out
 
@@ -873,9 +873,9 @@ class Inference2D(myObject):
 
         counts = self.hdfFile['currentmodel/par/posterior/arr/data']
 
-        xBins = StatArray.StatArray(np.logspace(x0, x1, nBins+1), self.parameterName, units = self.parameterUnits)
+        xEdges = StatArray.StatArray(np.logspace(x0, x1, nBins+1), self.parameterName, units = self.parameterUnits)
 
-        lineHitmap = Histogram2D(xBins=xBins, yBins=self.mesh.z.edges)
+        lineHitmap = Histogram2D(xEdges=xBins, yEdges=self.mesh.z.edges)
 
         parameters = RectilinearMesh1D.fromHdf(self.hdfFile['currentmodel/par/posterior/x'])
 
@@ -1322,7 +1322,7 @@ class Inference2D(myObject):
         tmp = self.getAttribute('layer posterior')
 
         x = StatArray.StatArray(np.arange(self.nPoints, dtype=np.float64), "Index")
-        out = Histogram2D(xBinCentres=x, yBins=tmp.bins)
+        out = Histogram2D(xCentres=x, yEdges=tmp.bins)
         out._counts = tmp.counts.T
 
         return out
@@ -1614,7 +1614,7 @@ class Inference2D(myObject):
             name = logLabel + name
         binEdges = StatArray.StatArray(np.linspace(np.nanmin(vals), np.nanmax(vals), nBins+1), name, units)
 
-        h = Histogram1D(bins = binEdges)
+        h = Histogram1D(edges = binEdges)
         h.update(vals)
         h.plot(**kwargs)
         cP.title(title)
@@ -1647,7 +1647,7 @@ class Inference2D(myObject):
 
         bins = StatArray.StatArray(np.logspace(x0, x1, nBins), self.parameterName, units = self.parameterUnits)
 
-        out = Histogram1D(bins=bins, log=log)
+        out = Histogram1D(edges=bins, log=log)
 
 
         # Bar = progressbar.ProgressBar()

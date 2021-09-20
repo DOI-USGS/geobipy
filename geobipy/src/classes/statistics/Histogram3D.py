@@ -40,13 +40,11 @@ class Histogram3D(RectilinearMesh3D):
 
     """
 
-    def __init__(self, xBins=None, xBinCentres=None, yBins=None, yBinCentres=None, zBins=None, zBinCentres=None, **kwargs):
+    def __init__(self, x=None, y=None, z=None, **kwargs):
         """ Instantiate a 2D histogram """
-        if (xBins is None and xBinCentres is None):
-            return
 
         # Instantiate the parent class
-        super().__init__(xCentres=xBinCentres, xEdges=xBins, yCentres=yBinCentres, yEdges=yBins, zCentres=zBinCentres, zEdges=zBins, **kwargs)
+        super().__init__(x, y, z, **kwargs)
 
         # Point counts to self.arr to make variable names more intuitive
         self._counts = StatArray.StatArray(self.shape, name='Frequency', dtype=np.int64)
@@ -255,7 +253,7 @@ class Histogram3D(RectilinearMesh3D):
 
         a, b = self.other_axis(axis)
 
-        out = Histogram2D(xBins = a.edges, yBins = b.edges)
+        out = Histogram2D(xEdges = a.edges, yEdges = b.edges)
         out._counts += np.sum(self.counts, axis=axis)
 
         return out
@@ -511,9 +509,9 @@ class Histogram3D(RectilinearMesh3D):
         """ Define the deepcopy. """
 
         if self.xyz:
-            out = Histogram2D(xBins=self.xBins, yBins=self.yBins, zBins=self.zBins)
+            out = Histogram2D(xEdges=self.xBins, yEdges=self.yBins, zEdges=self.zBins)
         else:
-            out = Histogram2D(xBins=self.xBins, yBins=self.yBins)
+            out = Histogram2D(xEdges=self.xBins, yEdges=self.yBins)
         out._counts = deepcopy(self._counts)
 
         return out
@@ -545,7 +543,7 @@ class Histogram3D(RectilinearMesh3D):
             r = range(np.size(intervals) - 1)
 
         if axis == 0:
-            h = Histogram1D(bins = self.xBins)
+            h = Histogram1D(edges = self.xBins)
 
             for i in r:
                 h._counts[:] = counts[i, :]
@@ -554,7 +552,7 @@ class Histogram3D(RectilinearMesh3D):
                 active.append(a)
 
         else:
-            h = Histogram1D(bins = self.yBins)
+            h = Histogram1D(edges = self.yBins)
             for i in r:
                 h._counts[:] = counts[:, i]
                 d, a = h.fit_mixture(**kwargs)
@@ -617,10 +615,10 @@ class Histogram3D(RectilinearMesh3D):
         counts, intervals = super().intervalStatistic(self._counts, intervals, axis, statistic)
 
         if axis == 0:
-            out = Histogram2D(xBins = self.x.edges, yBins = StatArray.StatArray(np.asarray(intervals), name=self.y.name, units=self.y.units))
+            out = Histogram2D(xEdges = self.x.edges, yEdges = StatArray.StatArray(np.asarray(intervals), name=self.y.name, units=self.y.units))
             out._counts[:] = counts
         else:
-            out = Histogram2D(xBins = StatArray.StatArray(np.asarray(intervals), name=self.x.name, units=self.x.units), yBins = self.y.edges)
+            out = Histogram2D(xEdges = StatArray.StatArray(np.asarray(intervals), name=self.x.name, units=self.x.units), yEdges = self.y.edges)
             out._counts[:] = counts
         return out
 

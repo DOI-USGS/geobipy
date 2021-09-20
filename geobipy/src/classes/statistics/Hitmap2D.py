@@ -16,9 +16,9 @@ class Hitmap2D(Histogram2D):
         """ Define the deepcopy. """
 
         if self.xyz:
-            out = Hitmap2D(xBins=self.xBins, yBins=self.yBins, zBins=self.zBins)
+            out = Hitmap2D(xEdges=self.xBins, yEdges=self.yBins, zEdges=self.zBins)
         else:
-            out = Hitmap2D(xBins=self.xBins, yBins=self.yBins)
+            out = Hitmap2D(xEdges=self.xBins, yEdges=self.yBins)
         out._counts = deepcopy(self._counts)
 
         return out
@@ -44,4 +44,4 @@ class Hitmap2D(Histogram2D):
 
     def hdfName(self):
         """ Reprodicibility procedure """
-        return('Hitmap2D()')
+        return('Hitmap2D')

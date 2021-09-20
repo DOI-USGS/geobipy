@@ -69,10 +69,11 @@ class RectilinearMesh3D(RectilinearMesh2D):
 
     """
 
-    def __init__(self, xCentres=None, xEdges=None, yCentres=None, yEdges=None, zCentres=None, zEdges=None, height=None, **kwargs):
+    def __init__(self, x=None, y=None, z=None, height=None, **kwargs):
         """ Initialize a 2D Rectilinear Mesh"""
 
-        super().__init__(xCentres, xEdges, yCentres, yEdges, zCentres, zEdges, **kwargs)
+        # self._height = None
+        super().__init__(x, y, z, **kwargs)
         self.height = height
 
     def __getitem__(self, slic):
@@ -97,7 +98,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
 
         if len(axis) == 0:
             height = None if self.height is None else self.height[slic0[1], slic0[2]]
-            out = RectilinearMesh3D(xEdges=self._x.edges[slic[2]], yEdges=self._y.edges[slic[1]], zEdges=self._z.edges[slic[0]], height=height)
+            out = type(self)(x=self.x[slic[2]], y=self.y[slic[1]], z=self.z[slic[0]], height=height)
             return out
 
         if len(axis) == 1:
@@ -106,7 +107,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
             height = None
             if b[0] != 0:
                 height = None if self.height is None else self.height[slic0[1], slic0[2]].values
-            out = RectilinearMesh2D(xEdges=self.axis(a[1]).edges[slic[a[1]]], yEdges=self.axis(a[0]).edges[slic[a[0]]], heightCentres=height)
+            out = RectilinearMesh2D(x=self.axis(a[1])[slic[a[1]]], y=self.axis(a[0])[slic[a[0]]], heightCentres=height)
 
         else:
             a = [x for x in (0, 1, 2) if not x in axis][0]
@@ -120,10 +121,13 @@ class RectilinearMesh3D(RectilinearMesh2D):
 
     @height.setter
     def height(self, values):
+        self._height = None
         if not values is None:
             if isinstance(values, Model):
                 assert np.all(values.shape == self.shape[1:]), ValueError("height must have shape {}".format(self.shape[1:]))
                 self._height = values
+            elif isinstance(values, dict):
+                self._height = Model(mesh = self[0, :, :], values=StatArray.StatArray(self.shape[1:], 'height', 'm'))
             else:
                 self._height = Model(mesh = self[0, :, :], values=values)
 
@@ -193,13 +197,17 @@ class RectilinearMesh3D(RectilinearMesh2D):
         """
         return (self.z.nCells.value, self.y.nCells.value, self.x.nCells.value)
 
-    @property
-    def z(self):
-        return self._z
-
-    @z.setter
+    @RectilinearMesh2D.z.setter
     def z(self, values):
-        assert isinstance(values, RectilinearMesh1D)
+        if isinstance(values, dict):
+            # mesh of the z axis values
+            values = RectilinearMesh1D(
+                        centres=values.get('zCentres', None),
+                        edges=values.get('zEdges', None),
+                        log=values.get('zlog', None),
+                        relativeTo=values.get('zrelativeTo', 0.0))
+
+        assert isinstance(values, RectilinearMesh1D), TypeError('z must be a RectilinearMesh1D')
         self._z = values
 
     def _mean(self, values, log=None, axis=0):
@@ -624,12 +632,14 @@ class RectilinearMesh3D(RectilinearMesh2D):
     @classmethod
     def fromHdf(cls, grp, index=None):
         """ Reads in the object from a HDF file """
-        out = cls()
-        out.x = RectilinearMesh1D.fromHdf(grp['x'], index=index)
-        out.y = RectilinearMesh1D.fromHdf(grp['y'], index=index)
-        out.z = RectilinearMesh1D.fromHdf(grp['z'], index=index)
+        x = RectilinearMesh1D.fromHdf(grp['x'], index=index)
+        y = RectilinearMesh1D.fromHdf(grp['y'], index=index)
+        z = RectilinearMesh1D.fromHdf(grp['z'], index=index)
+        height = None
         if 'height' in grp:
-            out.height = Model.fromHdf(grp['height'], index=index)
+            height = Model.fromHdf(grp['height'], index=index)
+        out = cls(x=x, y=y, z=z, height=height)
+
         return out
 
 
