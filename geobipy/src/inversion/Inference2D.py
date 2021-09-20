@@ -475,7 +475,7 @@ class Inference2D(myObject):
     @cached_property
     def fiducials(self):
         """ Get the id numbers of the data points in the line results file """
-        return StatArray.StatArray.fromHdf(self.hdfFile['fiducials'])
+        return StatArray.StatArray.fromHdf(self.hdfFile['currentdatapoint/fiducial'])
 
     def fit_gaussian_mixture(self, intervals, **kwargs):
 
@@ -1113,7 +1113,7 @@ class Inference2D(myObject):
 
         hdfFile = self.hdfFile
 
-        R = Inference1D(reciprocateParameter=reciprocateParameter).fromHdf(hdfFile, index=i, system_file_path=self.system_file_path)
+        R = Inference1D.fromHdf(hdfFile, index=i, system_file_path=self.system_file_path)
 
         return R
 
@@ -2071,7 +2071,7 @@ class Inference2D(myObject):
             elif (low == 'height posterior'):
                 res.append('currentdatapoint/z/posterior')
             elif (low == 'fiducials'):
-                res.append('currentdatapoint/fiducials')
+                res.append('currentdatapoint/fiducial')
             elif (low == 'labels'):
                 res.append('labels')
             elif (low == 'layer posterior'):
