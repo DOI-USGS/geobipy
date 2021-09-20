@@ -1615,8 +1615,7 @@ class StatArray(np.ndarray, myObject):
         elif nPosteriors > 1:
             posterior = []
             for i in range(nPosteriors):
-                posterior.append(hdfRead.read_item(
-                    grp['posterior{}'.format(i)], index=iTmp))
+                posterior.append(hdfRead.read_item(grp['posterior{}'.format(i)], index=iTmp))
 
         if (index is None):
             d = np.asarray(grp['data'])
