@@ -52,7 +52,6 @@ class RectilinearMesh1D(Mesh):
         edges must be a geobipy.StatArray.
 
     """
-
     def __init__(self, centres=None, edges=None, widths=None, log=None, relativeTo=0.0):
         """ Initialize a 1D Rectilinear Mesh"""
         self._centres = None
@@ -77,9 +76,6 @@ class RectilinearMesh1D(Mesh):
                 self.centres = centres
                 self._edges = edges
 
-        # Is the discretization regular
-        self.isRegular = self._centres.isRegular
-
         # Instantiate extra parameters for Markov chain perturbations.
         self._min_width = None
         self._min_edge = None
@@ -96,7 +92,6 @@ class RectilinearMesh1D(Mesh):
         out._centres = deepcopy(self._centres)
         out._edges = deepcopy(self._edges)
         out._widths = deepcopy(self._widths)
-        out.isRegular = self.isRegular
         out.log = self.log
         out._relativeTo = self._relativeTo
 
@@ -132,15 +127,12 @@ class RectilinearMesh1D(Mesh):
         return RectilinearMesh1D(edges=self.centres + other)
 
     def __sub__(self, other):
-
         return RectilinearMesh1D(edges=self.centres - other)
 
     def __mul__(self, other):
-
         return RectilinearMesh1D(edges=self.centres * other)
 
     def __truediv__(self, other):
-
         return RectilinearMesh1D(edges=self.centres / other)
 
     @property
@@ -162,7 +154,7 @@ class RectilinearMesh1D(Mesh):
     @centres.setter
     def centres(self, values):
         if not isinstance(values, StatArray.StatArray):
-            values = StatArray.StatArray(values)
+            values = StatArray.StatArray(values, cF.getName(self._centres), cF.getUnits(self._centres))
 
         values, _ = cF._log(values, log=self.log)
         values -= self.relativeTo
@@ -199,7 +191,7 @@ class RectilinearMesh1D(Mesh):
     @edges.setter
     def edges(self, values):
         if not isinstance(values, StatArray.StatArray):
-            values = StatArray.StatArray(values)
+            values = StatArray.StatArray(values, cF.getName(self._edges), cF.getUnits(self._edges))
 
         values, _ = cF._log(values, log=self.log)
         values -= self.relativeTo
@@ -803,7 +795,7 @@ class RectilinearMesh1D(Mesh):
         reciprocateX = kwargs.pop("reciprocateX", False)
 
         # Repeat the last entry since we are plotting against edges
-        par = self.par.append(self.par[-1])
+        par = values.append(values[-1])
         if (reciprocateX):
             par = 1.0 / par
 
