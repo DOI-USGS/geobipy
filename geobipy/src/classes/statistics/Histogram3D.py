@@ -82,43 +82,46 @@ class Histogram3D(RectilinearMesh3D):
         """Allow slicing of the histogram.
 
         """
-        assert np.shape(slic) == (3,), ValueError("slic must be over 3 dimensions.")
 
-        slic0 = slic
+        out = super().__getitem__(slic)
 
-        slic = []
-        axis = []
-        for i, x in enumerate(slic0):
-            if not isinstance(x, int):
-                tmp = x
-                if isinstance(x.stop, int):
-                    tmp = slice(x.start, x.stop+1, x.step) # If a slice, add one to the end for bins.
-            else:
-                tmp = x
-                axis.append(i)
+        # assert np.shape(slic) == (3,), ValueError("slic must be over 3 dimensions.")
 
-            slic.append(tmp)
+        # slic0 = slic
 
-        assert not len(axis) == 3, ValueError("Slic cannot be a single cell")
-        slic = tuple(slic)
+        # slic = []
+        # axis = []
+        # for i, x in enumerate(slic0):
+        #     if not isinstance(x, int):
+        #         tmp = x
+        #         if isinstance(x.stop, int):
+        #             tmp = slice(x.start, x.stop+1, x.step) # If a slice, add one to the end for bins.
+        #     else:
+        #         tmp = x
+        #         axis.append(i)
 
-        if len(axis) == 0:
-            out = Histogram3D(xBins=self._x.edges[slic[2]], yBins=self._y.edges[slic[1]], zBins=self._z.edges[slic[0]])
+        #     slic.append(tmp)
 
-            out._counts += self.counts[slic0]
-            return out
+        # assert not len(axis) == 3, ValueError("Slic cannot be a single cell")
+        # slic = tuple(slic)
 
-        if len(axis) == 1:
-            a = [x for x in (0, 1, 2) if not x in axis]
-            out = Histogram2D(xBins=self.axis(a[1]).edges[slic[a[1]]], yBins=self.axis(a[0]).edges[slic[a[0]]])
-            out._counts += self.counts[slic0]
+        # if len(axis) == 0:
+        #     out = Histogram3D(xEdges=self._x.edges[slic[2]], yEdges=self._y.edges[slic[1]], zEdges=self._z.edges[slic[0]])
 
-        else:
-            a = [x for x in (0, 1, 2) if not x in axis][0]
-            out = Histogram1D(bins=self.axis(a).edges[slic[a]])
-            out._counts += np.squeeze(self.counts[slic0])
+        #     out._counts += self.counts[slic0]
+        #     return out
 
-        return out
+        # if len(axis) == 1:
+        #     a = [x for x in (0, 1, 2) if not x in axis]
+        #     out = Histogram2D(xEdges=self.axis(a[1]).edges[slic[a[1]]], yEdges=self.axis(a[0]).edges[slic[a[0]]])
+        #     out._counts += self.counts[slic0]
+
+        # else:
+        #     a = [x for x in (0, 1, 2) if not x in axis][0]
+        #     out = Histogram1D(bins=self.axis(a).edges[slic[a]])
+        #     out._counts += np.squeeze(self.counts[slic0])
+
+        # return out
 
     @property
     def _reduction_class(self):
