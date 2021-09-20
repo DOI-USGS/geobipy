@@ -55,10 +55,6 @@ class TempestData(TdemData):
     def __init__(self, systems=None, **kwargs):
         """ Initialize the TDEM data """
 
-
-        if systems is None:
-            return
-
         # Data Class containing xyz and channel values
         super().__init__(systems, **kwargs)
 
@@ -70,23 +66,23 @@ class TempestData(TdemData):
     def components_per_channel(self):
         return self.system[0].components
 
-    @TdemData.data.getter
-    def data(self):
-        for ic in range(self.n_components):
-            slic = self._component_indices(ic, 0)
-            self._data[:, slic] = self.primary_field[:, ic][:, None] + self.secondary_field[:, slic]
-        return self._data
+    # @TdemData.data.getter
+    # def data(self):
+    #     for ic in range(self.n_components):
+    #         slic = self._component_indices(ic, 0)
+    #         self._data[:, slic] = self.primary_field[:, ic][:, None] + self.secondary_field[:, slic]
+    #     return self._data
 
     @property
     def nChannels(self):
         return 2 * self.system[0].nTimes
 
-    @TdemData.predictedData.getter
-    def predictedData(self):
-        for ic in range(self.n_components):
-            slic = self._component_indices(ic, 0)
-            self._predictedData[:, slic] = self.primary_field[:, ic][:, None] + self.secondary_field[:, slic]
-        return self._predictedData
+    # @TdemData.predictedData.getter
+    # def predictedData(self):
+    #     for ic in range(self.n_components):
+    #         slic = self._component_indices(ic, 0)
+    #         self._predictedData[:, slic] = self.primary_field[:, ic][:, None] + self.secondary_field[:, slic]
+    #     return self._predictedData
 
     def append(self, other):
 
@@ -94,7 +90,8 @@ class TempestData(TdemData):
 
         self.primary_field = np.hstack(self.primary_field, other.primary_field)
 
-    def read(self, dataFilename, systemFilename):
+    @classmethod
+    def read_netcdf(cls, dataFilename, systemFilename):
         """Reads the data and system parameters from file
 
         Parameters
@@ -150,40 +147,46 @@ class TempestData(TdemData):
 
         """
 
-        if (isinstance(systemFilename, str)):
-            systemFilename = [systemFilename]
+        # if (isinstance(systemFilename, str)):
+        #     systemFilename = [systemFilename]
 
-        nSystems = len(systemFilename)
+        # nSystems = len(systemFilename)
 
-        self.system = systemFilename
+        # self.system =
 
         with h5py.File(dataFilename, 'r') as f:
             gdf = f['linedata']
 
-            self.__init__(lineNumber=np.asarray(gdf['Line']),
+            self = cls(lineNumber=np.asarray(gdf['Line']),
                         fiducial=np.asarray(gdf['Fiducial']),
                         x=np.asarray(gdf['Easting']),
                         y=np.asarray(gdf['Northing']),
                         z=np.asarray(gdf['Tx_Height']),
                         elevation=np.asarray(gdf['DTM']),
-                        systems=self.system)
+                        systems=systemFilename)
 
             # Assign the orientations of the acquisistion loops
             pitch = np.asarray(gdf['Tx_Pitch'])
             roll = np.asarray(gdf['Tx_Roll'])
             yaw = np.asarray(gdf['Tx_Yaw'])
-            self.transmitter = None
-            for i in range(self.nPoints):
-                self.transmitter[i] = CircularLoop(z=self.z[i], pitch=pitch[i], roll=roll[i], yaw=yaw[i], radius=self.system[0].loopRadius())
+
+            self.transmitter = [CircularLoop(x=self.x[i], y=self.y[i], z=self.z[i],
+                                             pitch=pitch[i], roll=roll[i], yaw=yaw[i],
+                                             radius=self.system[0].loopRadius()) for i in range(self.nPoints)]
 
             pitch = np.asarray(gdf['Rx_Pitch'])
             roll = np.asarray(gdf['Rx_Roll'])
             yaw = np.asarray(gdf['Rx_Yaw'])
-            self.receiver = None
-            for i in range(self.nPoints):
-                self.receiver[i] = CircularLoop(z=self.z[i], pitch=pitch[i], roll=roll[i], yaw=yaw[i], radius=self.system[0].loopRadius())
 
-            self.loopOffset = np.vstack([np.asarray(gdf['HSep_GPS']), np.asarray(gdf['TSep_GPS']), np.asarray(gdf['VSep_GPS'])]).T
+            loopOffset = np.vstack([np.asarray(gdf['HSep_GPS']), np.asarray(gdf['TSep_GPS']), np.asarray(gdf['VSep_GPS'])]).T
+
+            self.receiver = [CircularLoop(x=self.transmitter[i].x + loopOffset[i, 0],
+                                          y=self.transmitter[i].y + loopOffset[i, 1],
+                                          z=self.transmitter[i].z + loopOffset[i, 2],
+                                          pitch=pitch[i], roll=roll[i], yaw=yaw[i],
+                                          radius=self.system[0].loopRadius()) for i in range(self.nPoints)]
+
+
 
             self.primary_field = np.vstack([np.asarray(gdf['X_PrimaryField']), np.asarray(gdf['Z_PrimaryField'])]).T
             self.secondary_field = np.hstack([np.asarray(gdf['EMX_NonHPRG']).T, np.asarray(gdf['EMZ_NonHPRG']).T])
@@ -194,7 +197,8 @@ class TempestData(TdemData):
 
         return self
 
-    def _initialize_sequential_reading(self, data_filename, system_filename):
+    @classmethod
+    def _initialize_sequential_reading(cls, data_filename, system_filename):
         """Special function to initialize a file for reading data points one at a time.
 
         Parameters
@@ -206,12 +210,17 @@ class TempestData(TdemData):
 
         """
 
-        # Read in the EM System file
-        self.system = system_filename
-
+        self = cls(system_filename)
+        self._data_filename = data_filename
         self._open_data_files(data_filename)
+        return self
 
-        self._nPoints = self._file[0]['linedata/Easting'].size
+        # # Read in the EM System file
+        # self.system = system_filename
+
+        # self._open_data_files(data_filename)
+
+        # self._nPoints = self._file[0]['linedata/Easting'].size
 
     def _read_record(self, record):
         """Reads a single data point from the data file.
@@ -220,22 +229,33 @@ class TempestData(TdemData):
 
         """
         gdf = self._file[0]['linedata']
+        x = np.float64(gdf['Easting'][record])
+        y = np.float64(gdf['Northing'][record])
         z = np.float64(gdf['Tx_Height'][record])
         primary_field = np.asarray([np.float64(gdf['X_PrimaryField'][record]), np.float64(gdf['Z_PrimaryField'][record])])
         secondary_field = np.hstack([gdf['EMX_NonHPRG'][:, record], gdf['EMZ_NonHPRG'][:, record]])
         std = 0.1 * secondary_field
 
+        loopOffset = np.vstack([np.asarray(gdf['HSep_GPS'][record]), np.asarray(gdf['TSep_GPS'][record]), np.asarray(gdf['VSep_GPS'][record])]).T
+
         out = Tempest_datapoint(
                 lineNumber = np.float64(gdf['Line'][record]),
                 fiducial = np.float64(gdf['Fiducial'][record]),
-                x = np.float64(gdf['Easting'][record]),
-                y = np.float64(gdf['Northing'][record]),
+                x = x,
+                y = y,
                 z = z,
                 elevation = np.float64(gdf['DTM'][record]),
                 # Assign the orientations of the acquisistion loops
-                transmitter_loop = CircularLoop(z=z, pitch=np.float64(gdf['Tx_Pitch'][record]), roll=np.float64(gdf['Tx_Roll'][record]), yaw=np.float64(gdf['Tx_Yaw'][record]), radius=self.system[0].loopRadius()),
-                receiver_loop = CircularLoop(z=z, pitch=np.float64(gdf['Rx_Pitch'][record]), roll=np.float64(gdf['Rx_Roll'][record]), yaw=np.float64(gdf['Rx_Yaw'][record]), radius=self.system[0].loopRadius()),
-                loopOffset = np.hstack([np.float64(gdf['HSep_GPS'][record]), np.float64(gdf['TSep_GPS'][record]), np.float64(gdf['VSep_GPS'][record])]),
+                transmitter_loop = CircularLoop(x=x, y=y, z=z,
+                                                pitch=np.float64(gdf['Tx_Pitch'][record]), roll=np.float64(gdf['Tx_Roll'][record]), yaw=np.float64(gdf['Tx_Yaw'][record]),
+                                                radius=self.system[0].loopRadius()),
+
+                receiver_loop = CircularLoop(x=transmitter_loop.x + loopOffset[0],
+                                            y=transmitter_loop.y + loopOffset[1],
+                                            z=transmitter_loop.z + loopOffset[2],
+                                            pitch=np.float64(gdf['Rx_Pitch'][record]), roll=np.float64(gdf['Rx_Roll'][record]), yaw=np.float64(gdf['Rx_Yaw'][record]),
+                                            radius=self.system[0].loopRadius()),
+                # loopOffset = np.hstack([np.float64(gdf['HSep_GPS'][record]), np.float64(gdf['TSep_GPS'][record]), np.float64(gdf['VSep_GPS'][record])]),
                 primary_field = primary_field,
                 secondary_field = secondary_field,
                 std = std,
@@ -260,6 +280,7 @@ class TempestData(TdemData):
         self._file = []
         for f in data_filename:
             self._file.append(h5py.File(f, 'r'))
+        self._nPoints = self._file[0]['linedata/Easting'].size
 
     def _close_data_files(self):
         for f in self._file:
@@ -341,6 +362,7 @@ class TempestData(TdemData):
             index = self.fiducial.searchsorted(fiducial)
 
         i = index
+
         return Tempest_datapoint(x = self.x[i],
                              y = self.y[i],
                              z = self.z[i],
@@ -351,7 +373,6 @@ class TempestData(TdemData):
                              system = self.system,
                              transmitter_loop = self.transmitter[i],
                              receiver_loop = self.receiver[i],
-                             loopOffset = self.loopOffset[i, :],
                              lineNumber = self.lineNumber[i],
                              fiducial = self.fiducial[i],
                              )
@@ -372,9 +393,8 @@ class TempestData(TdemData):
                         elevation = self.elevation[i],
                         lineNumber = self.lineNumber[i],
                         fiducial = self.fiducial[i],
-                        transmitter = self.transmitter[i],
-                        receiver = self.receiver[i],
-                        loopOffset = self.loopOffset[i, :],
+                        transmitter = [self.transmitter[j] for j in i],
+                        receiver = [self.receiver[j] for j in i],
                         secondary_field = self.secondary_field[i, :],
                         primary_field = self.primary_field[i, :],
                         std = self.std[i, :],
@@ -477,7 +497,6 @@ class TempestData(TdemData):
             filename = str(np.asarray(grp.get('System{}'.format(i))), 'utf-8')
             td = TdemSystem().read(system_file_path+"//"+filename)
             systems.append(td)
-
 
         super().fromHdf(grp)
 

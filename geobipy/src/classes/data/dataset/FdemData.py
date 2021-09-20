@@ -734,7 +734,7 @@ class FdemData(Data):
     #     df = df.replace('NaN',np.nan)
     #     return df[self._iC[0][0]].values, df[self._iC[0][1]].values
 
-    def _read_record(self, record=0):
+    def _read_record(self, record=None):
         """Reads a single data point from the data file.
 
         FdemData.__initLineByLineRead() must have already been run.

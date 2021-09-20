@@ -311,7 +311,7 @@ class TdemData(Data):
         self.receiver = None
         for i in range(self.nPoints):
             self.receiver[i] = CircularLoop(x = self.transmitter[i].x + loopOffset[i, 0],
-                                            y = self.transmitter[i].t + loopOffset[i, 1],
+                                            y = self.transmitter[i].y + loopOffset[i, 1],
                                             z = self.transmitter[i].z + loopOffset[i, 2],
                                             pitch=df[iR[0][0]].values[i], roll=df[iR[0][1]].values[i], yaw=df[iR[0][2]].values[i],
                                             radius=self.system[0].loopRadius())
@@ -836,7 +836,7 @@ class TdemData(Data):
             td = TdemSystem().read(system_file_path+"//"+filename)
             systems.append(td)
 
-        super.fromHdf(grp)
+        super().fromHdf(grp)
 
         self.systems = systems
 

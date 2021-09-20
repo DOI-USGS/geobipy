@@ -417,7 +417,7 @@ class Data(PointCloud3D):
 
             self._file.append(df)
 
-    def _read_csv_line_fiducial(self, filename):
+    def _read_line_fiducial(self, filename):
 
         if isinstance(filename, str):
             filename = [filename]
