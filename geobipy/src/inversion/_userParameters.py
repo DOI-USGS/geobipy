@@ -313,14 +313,14 @@ class _userParameters(myObject):
         if (not self.referenceHitmap is None):
             assert isinstance(self.referenceHitmap, Hitmap2D), TypeError('referenceHitmap must be of type geobipy.Hitmap2D')
 
-        # Check the relative Error
-        assert self.initialRelativeError.size == DataPoint.nSystems, ValueError('Initial relative error must have size {}'.format(DataPoint.nSystems))
+        # # Check the relative Error
+        # assert self.initialRelativeError.size == DataPoint.nSystems, ValueError('Initial relative error must have size {}'.format(DataPoint.nSystems))
 
-        # Check the minimum relative error
-        assert self.minimumRelativeError.size == DataPoint.nSystems, ValueError('Minimum relative error must be size {}'.format(DataPoint.nSystems))
+        # # Check the minimum relative error
+        # assert self.minimumRelativeError.size == DataPoint.nSystems, ValueError('Minimum relative error must be size {}'.format(DataPoint.nSystems))
 
-        # Check the maximum relative error
-        assert self.maximumRelativeError.size == DataPoint.nSystems, ValueError('Maximum Relative error must be size {}'.format(DataPoint.nSystems))
+        # # Check the maximum relative error
+        # assert self.maximumRelativeError.size == DataPoint.nSystems, ValueError('Maximum Relative error must be size {}'.format(DataPoint.nSystems))
 
         # Check the error floor
         check = (DataPoint.nSystems, DataPoint.nChannels)
