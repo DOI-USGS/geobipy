@@ -21,6 +21,13 @@ try:
 except:
     pass
 
+try:
+    from pygmt import surface
+    gmt = True
+except:
+    gmt = False
+
+
 class PointCloud3D(myObject):
     """3D Point Cloud with x,y,z co-ordinates
 
@@ -69,6 +76,7 @@ class PointCloud3D(myObject):
         result.x = self.x
         result.y = self.y
         result.z = self.z
+        results.elevation = self.elevation
         return result
 
     def __getitem__(self, i):
@@ -557,7 +565,16 @@ class PointCloud3D(myObject):
 
     def interpMinimumCurvature(self, mesh, values, mask=False, clip=True, i=None, operator=None, condition=None, **kwargs):
 
-        from pygmt import surface
+        try:
+            from pygmt import surface
+        except Exception as e:
+            print(repr(e))
+            raise Exception(("\npygmt not installed correctly.  method='mc' can only be used when pygmt is present.\n"
+                             "To install pygmt, you need to use conda environments. Installing instructions are here\n"
+                             "https://www.pygmt.org/latest/install.html \n"
+                             "After creating a new conda environment do\n"
+                             "'pip install -c conda-forge numpy pandas xarray netcdf4 packaging gmt pygmt'\n"
+                             "Then install geobipy and its dependencies to that environment."))
 
         assert isinstance(mesh, RectilinearMesh2D), TypeError("mesh must be RectilinearMesh2D")
         assert mesh.is_regular, ValueError("Minimum curvature must interpolate to a regular mesh")
