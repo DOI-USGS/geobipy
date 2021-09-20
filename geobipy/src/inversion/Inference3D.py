@@ -216,7 +216,7 @@ class Inference3D(myObject):
         # Get a datapoint from the file.
         datapoint = dataset._read_record(record=0)
 
-        line_numbers, fiducials = dataset._read_csv_line_fiducial(userParameters.dataFilename)
+        line_numbers, fiducials = dataset._read_line_fiducial(userParameters.dataFilename)
         # Get the line numbers in the data
         self._lineNumbers = np.sort(np.unique(line_numbers))
 
@@ -225,7 +225,6 @@ class Inference3D(myObject):
         options.check(datapoint)
 
         # While preparing the file, we need access to the line numbers and fiducials in the data file
-
         inference1d = Inference1D(datapoint, prng=None, kwargs=options)
 
         self.print('Creating HDF5 files, this may take a few minutes...')
@@ -356,7 +355,7 @@ class Inference3D(myObject):
         nPoints = dataset.nPoints
 
         for i in range(nPoints):
-            datapoint = dataset._read_record()
+            datapoint = dataset._read_record(i)
 
             options = user_parameters.userParameters(datapoint)
             # Check the user input parameters against the datapoint
