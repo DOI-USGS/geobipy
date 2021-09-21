@@ -797,7 +797,18 @@ class TdemDataPoint(EmDataPoint):
 
         assert isinstance(mod, Model1D), TypeError(
             "Invalid model class for forward modeling [1D]")
-        tdem1dfwd(self, mod)
+        fm = tdem1dfwd(self, mod)
+
+        for i in range(self.nSystems):
+            iSys = self._systemIndices(i)
+            comps = []
+            if 'x' in self.components_per_channel:
+                comps.append(fm[i].SX)
+            if 'y' in self.components_per_channel:
+                comps.append(fm[i].SY)
+            if 'z' in self.components_per_channel:
+                comps.append(-fm[i].SZ)
+            self.predictedData[iSys] = np.hstack(comps)  # Store the necessary component
 
     def sensitivity(self, model, ix=None, modelChanged=True):
         """ Compute the sensitivty matrix for the given model """
