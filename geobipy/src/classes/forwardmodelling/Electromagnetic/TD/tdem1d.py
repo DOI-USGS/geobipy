@@ -132,9 +132,7 @@ try:
         for j in range(datapoint.nSystems):  # For each system
             iSys = datapoint._systemIndices(j)
             for i in range(np.size(ix)):  # For the specified layers
-                tmp = datapoint.system[j].derivative(
-                    datapoint.system[j].CONDUCTIVITYDERIVATIVE,
-                    ix[i] + 1)
+                tmp = datapoint.system[j].derivative(datapoint.system[j].CONDUCTIVITYDERIVATIVE, ix[i] + 1)
                 # Store the necessary component
                 comps = []
                 if 'x' in datapoint.components_per_channel:
