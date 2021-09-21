@@ -558,14 +558,14 @@ class FdemDataPoint(EmDataPoint):
         """ Compute the sensitivty matrix for a 1D layered earth model """
         # Re-arrange the sensitivity matrix to Real:Imaginary vertical
         # concatenation
-        J = np.zeros([self.nChannels, np.int(mod.nCells[0])])
+        J = StatArray.StatArray((self.nChannels, np.int(mod.nCells.value)), 'Sensitivity', '$\\frac{ppm.m}{S}$')
 
         for j, s in enumerate(self.system):
             Jtmp = fdem1dsen(s, mod, self.z[0])
             J[:self.nFrequencies[j], :] = Jtmp.real
             J[self.nFrequencies[j]:, :] = Jtmp.imag
 
-        self.J = J[self.active, :]
+        self.J = J
         return self.J
 
 
