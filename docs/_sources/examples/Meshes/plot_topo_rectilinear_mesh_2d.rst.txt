@@ -209,8 +209,8 @@ Compute the mean over an interval for the mesh.
  .. code-block:: none
 
 
-    (array([[0.71598044, 0.78354512, 0.63073943, ..., 0.31354038, 0.61615013,
-            0.19669057]]), [6.8, 12.4])
+    (array([[0.57518886, 0.49029993, 0.64559199, ..., 0.65733809, 0.69144853,
+            0.57689676]]), [6.8, 12.4])
 
 
 
@@ -275,8 +275,8 @@ Compute the mean over multiple intervals for the mesh.
  .. code-block:: none
 
 
-    (array([[0.71598044, 0.78354512, 0.63073943, ..., 0.31354038, 0.61615013,
-            0.19669057]]), [6.8, 12.4])
+    (array([[0.57518886, 0.49029993, 0.64559199, ..., 0.65733809, 0.69144853,
+            0.57689676]]), [6.8, 12.4])
 
 
 
@@ -327,7 +327,7 @@ rm.toVTK('test', cellData=values)
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.616 seconds)
+   **Total running time of the script:** ( 0 minutes  0.602 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_topo_rectilinear_mesh_2d.py:

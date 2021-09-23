@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>1D Inference of Aerotem Data &mdash; GeoBIPy 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="1D Inference of Resolve Data" href="plot_inference_1d_resolve.html" />
+    <link rel="prev" title="Time Domain Datapoint Class" href="../Datapoints/plot_time_datapoint.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> GeoBIPy
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../content/getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../content/api/api.html">API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#distribtions">Distribtions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#statistics">Statistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#meshes">Meshes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#data">Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#datapoints">Datapoints</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#inference">Inference</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">1D Inference of Aerotem Data</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#running-geobipy-to-invert-data">Running GeoBIPy to invert data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#plotting-the-results-for-a-single-data-point">Plotting the results for a single data point</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="plot_inference_1d_resolve.html">1D Inference of Resolve Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_inference_1d_skytem.html">1D Inference of Skytem Data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#hdf-5">HDF 5</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GeoBIPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Examples</a> &raquo;</li>
+      <li>1D Inference of Aerotem Data</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/examples/Inference/plot_inference_1d_aerotem.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-inference-plot-inference-1d-aerotem-py"><span class="std std-ref">here</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="d-inference-of-aerotem-data">
+<span id="sphx-glr-examples-inference-plot-inference-1d-aerotem-py"></span><h1>1D Inference of Aerotem Data<a class="headerlink" href="#d-inference-of-aerotem-data" title="Permalink to this headline"></a></h1>
+<p>All plotting in GeoBIPy can be carried out using the 3D inference class</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">serial_geobipy</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">example_path</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">Inference3D</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+<section id="running-geobipy-to-invert-data">
+<h2>Running GeoBIPy to invert data<a class="headerlink" href="#running-geobipy-to-invert-data" title="Permalink to this headline"></a></h2>
+<p>Define some directories and paths</p>
+<p>The directory where HDF files will be stored</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">output_directory</span> <span class="o">=</span> <span class="s2">&quot;..//supplementary//time_domain_inversion//results&quot;</span>
+</pre></div>
+</div>
+<p>The parameter file defines the set of user parameters needed to run geobipy.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">parameter_file</span> <span class="o">=</span> <span class="s2">&quot;aerotem_options&quot;</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Here are the contents of the user parameter file.</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">parameter_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>from os.path import join
+# General information about specifying parameters.
+# The following list of parameters can be given either a single value or a list of values
+# of length equal to the number of systems in the data. If one value is specified and there
+# are multiple systems, that value is used for all of them.
+# initialRelativeError
+# minimumRelativeError
+# maximumRelativeError
+# initialAdditiveError
+# minimumAdditiveError
+# maximumAdditiveError
+# relativeErrorProposalVariance
+# additiveErrorProposalVariance
+
+# -------------------------------------------------------
+# General file structure information.
+# -------------------------------------------------------
+# Data folder
+data_directory = &quot;..//supplementary//data&quot;
+# The data_filename and system_filename options are single strings for single system dataset,
+# or a list of str for multi-system datasets like Skytem.
+# Data File Name.
+data_filename = data_directory + &quot;//aerotem_single.txt&quot;
+# System File Name.
+system_filename = data_directory + &quot;//aerotem.stm&quot;
+
+# Define the data type to invert
+data_type = TdemData
+
+# Maximum number of Markov Chains per data point.
+n_markov_chains = 10000
+
+# -------------------------------------------------------
+# General GeoBIPy options.
+# -------------------------------------------------------
+# Interactively plot a single data point as it progresses
+interactive_plot = False
+# How often to update the plot. (lower is generally slower)
+update_plot_every = 1000
+# Save a PNG of the final results for each data point.
+save_png = False
+# Save the results of the McMC inversion to HDF5 files. (Generally always True)
+save_hdf5 = True
+
+# -------------------------------------------------------
+# Turning on or off different solvable parameters.
+# -------------------------------------------------------
+# Parameter Priors
+# solveParameter will prevent parameters from exploding to very large or very small numbers.
+# solveGradient prevents large changes in parameters value from occurring.
+# If both of these are active, the recovered earth models generally contain
+# less layers due to an implicit constraint.
+# If you feel that your recovered models are too conservative, try turning one of these off.
+# It is highly recommended to have at least one of these options turned on!
+# Use a prior on the parameter magnitude.
+solve_parameter = False
+# Use the Prior on the difference in log parameter diff(log(X))
+solve_gradient = True
+
+# Use the prior on the relative data errors
+solve_relative_error = True
+# Use the prior on the additive data errors
+solve_additive_error = True
+# Use the prior on the data height
+solve_height = True
+# Use the prior on the calibration parameters for the data
+solve_calibration = False
+
+# -------------------------------------------------------
+# Prior Details
+# -------------------------------------------------------
+# Earth model prior details
+# -------------------------
+# Maximum number of layers in the 1D model
+maximum_number_of_layers = 30
+# Minimum layer depth in metres
+minimum_depth = 1.0
+# Maximum layer depth in metres
+maximum_depth = 350.0
+# Minimum layer thickness.
+# If minimumThickness: None, it will be autocalculated.
+minimum_thickness = None
+
+# Data prior details
+# ------------------
+# The data priors are imposed on three different aspects of the data.
+# The relative and additive error and the elevation of the data point.
+# Data uncertainty priors are used if solveRelativeError or solveAdditiveError are True.
+# If the data file contains columns of the estimated standard deviations, they are used as the initial values
+# when starting an McMC inversion. If the file does not contain these estimates, then the initial
+# standard deviations are calculated using sqrt((relative * data)^2 + (additive)^2).
+
+# If there are multiple systems (e.g. Skytem, usually low and high moment, and hence 2 systems)
+# the relative and additive values below should have enough values to match the number of systems.
+# e.g. for Skytem, the initial_relative_error might = [0.03, 0.03],
+
+# Assign an initial percentage relative Error
+# If the file contains no standard deviations, this will be used
+# to assign the initial data uncertainties.
+initial_relative_error = 0.05
+## Relative Error Prior Details
+# Minimum Relative Error
+minimum_relative_error = 0.05
+# Maximum Relative Error
+maximum_relative_error = 0.5
+
+# Assign an initial additive error level.
+# If the file contains no standard deviations, this will be used
+# to assign the initial data uncertainties.
+initial_additive_error = 1.0e-8
+# Additive Error Prior Details
+# Minimum Additive Error
+minimum_additive_error = 1.0e-10
+# Maximum Relative Error
+maximum_additive_error = 10.0**-5.8
+
+# Elevation range allowed (m), either side of measured height
+maximum_height_change = 1.0
+
+# -------------------------------------------------------
+# Proposal details
+# -------------------------------------------------------
+
+# Data proposal details
+# ---------------------
+# The relative, additive, and elevation proposal variances are assigned to
+# normal distributions with a mean equal to its value in the current model (of the Markov chain)
+# These variances are used when we randomly choose a new value for that given variable.
+# Proposal variance for the relative error
+relative_error_proposal_variance = 2.5e-7
+# Proposal variance for the additive error
+additive_error_proposal_variance = 0.0025  #[0.0025, 0.0025]
+# Proposal variance of the elevation
+height_proposal_variance = 0.01
+
+# Earth model proposal details
+# ----------------------------
+# Evolution Probabilities for earth model manipulation during the Markov chain.
+# These four values are internally scaled such that their sum is 1.0.
+# Probability that a layer is inserted into the model.
+probability_of_birth = 1.0/6.0
+# Probablitiy that a layer is removed from the model.
+probability_of_death = 1.0/6.0
+# Probability that an interface in the model is perturbed.
+probability_of_perturb = 1.0/6.0
+# Probability of no change occuring to the layers of the model.
+probability_of_no_change = 0.5
+
+# -------------------------------------------------------
+# Typically Defaulted parameters
+# -------------------------------------------------------
+# Standard Deviation of log(rho): log(1 + factor)
+# Default is 10.0
+factor = None
+# Standard Deviation for the difference in layer resistivity
+# Default is 1.5
+gradient_standard_deviation = None
+# Initial scaling factor for proposal covariance
+covariance_scaling = None
+# Scaling factor for data misfit
+multiplier = None
+# Clipping Ratio for interface contrasts
+clip_ratio = None
+# Only sample the prior
+ignore_likelihood = False
+
+# Impose bounds on the parameter value
+# None, or a length 2 list i.e. [a, b]
+parameter_limits = None
+
+# Display the resistivity?
+reciprocate_parameters = True
+
+verbose = False
+</pre></div>
+</div>
+<p>To run geobipy in serial, simply call that function.
+Here we specify index 0 to only carry out a shortened inversion of a single
+data point for time considerations.
+You will notice however that the HDF files are created for multiple lines
+inside the data file.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">serial_geobipy</span><span class="p">(</span><span class="n">parameter_file</span><span class="p">,</span> <span class="n">output_directory</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Running GeoBIPy in serial mode
+Using user input file aerotem_options
+Output files will be produced at ..//supplementary//time_domain_inversion//results
+Creating HDF5 files, this may take a few minutes...
+Files are being created for data files [&#39;..//supplementary//data//aerotem_single.txt&#39;] and system files [&#39;..//supplementary//data//aerotem.stm&#39;]
+Created hdf5 file for line 1010 with 1 data points
+i=0, k=2, 0.000 s/Model, 0.004 s Elapsed
+
+i=1000, k=3, 0.005 s/Model, 4.943 s Elapsed
+
+i=2000, k=6, 0.005 s/Model, 9.865 s Elapsed
+
+i=3000, k=4, 0.005 s/Model, 14.875 s Elapsed
+
+i=4000, k=4, 0.005 s/Model, 19.882 s Elapsed
+
+i=5000, k=4, 0.005 s/Model, 24.930 s Elapsed
+
+i=6000, k=6, 0.005 s/Model, 30.054 s Elapsed
+
+i=7000, k=4, 0.005 s/Model, 35.137 s Elapsed
+
+i=8000, k=4, 0.005 s/Model, 40.414 s Elapsed
+
+i=9000, k=6, 0.005 s/Model, 45.748 s Elapsed
+
+i=10000, k=7, 0.005 s/Model, 51.135 s Elapsed
+
+Remaining Points 0/1 || Elapsed Time: 0:00:51.378396 h:m:s || ETA 0:00:51.378396 h:m:s
+</pre></div>
+</div>
+</section>
+<section id="plotting-the-results-for-a-single-data-point">
+<h2>Plotting the results for a single data point<a class="headerlink" href="#plotting-the-results-for-a-single-data-point" title="Permalink to this headline"></a></h2>
+<p>For the sake of plotting, we refer to a previously completed inversion.
+For space considerations we do not include those HDF files in this repository
+and simply use them for plotting.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">results_3d</span> <span class="o">=</span> <span class="n">Inference3D</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="n">output_directory</span><span class="p">,</span> <span class="n">system_file_path</span><span class="o">=</span><span class="s2">&quot;..//supplementary//data&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can grab the results for a single index or fiducial</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">results_1d</span> <span class="o">=</span> <span class="n">results_3d</span><span class="o">.</span><span class="n">inference_1d</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">results_1d</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt=", Time Domain EM Data" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_inference_1d_aerotem_001.png" />
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  55.359 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-inference-plot-inference-1d-aerotem-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/291c4f40ce42d2dcc30b16c193f0222a/plot_inference_1d_aerotem.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_inference_1d_aerotem.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/4557d479bbda6da73133d80154af5c58/plot_inference_1d_aerotem.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_inference_1d_aerotem.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../Datapoints/plot_time_datapoint.html" class="btn btn-neutral float-left" title="Time Domain Datapoint Class" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot_inference_1d_resolve.html" class="btn btn-neutral float-right" title="1D Inference of Resolve Data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright None.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

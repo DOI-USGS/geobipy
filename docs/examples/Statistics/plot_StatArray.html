@@ -49,7 +49,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../content/getting_started/getting_started.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../content/api/api.html">API</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../index.html#distributions">Distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#distribtions">Distribtions</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html#statistics">Statistics</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="plot_histogram_1d.html">Histogram 1D</a></li>
 <li class="toctree-l3"><a class="reference internal" href="plot_histogram_2d.html">Histogram 2D</a></li>
@@ -69,7 +69,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#data">Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#datapoints">Datapoints</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../index.html#posterior-analysis">Posterior Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#inference">Inference</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#hdf-5">HDF 5</a></li>
 </ul>
 </li>
@@ -172,7 +172,7 @@ Name: 45.454
 
 Name: Density ($\frac{g}{cc}$)
     Shape: (1,)
-    Values: [-0.75372714]
+    Values: [-1.18554675]
 </pre></div>
 </div>
 </section>
@@ -216,7 +216,7 @@ sample when we wish to perturb the variable
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: Density ($\frac{g}{cc}$)
     Shape: (1,)
-    Values: [-0.75372714]
+    Values: [-1.18554675]
 Prior:
 Uniform Distribution:
   Min: :-2.0
@@ -245,7 +245,7 @@ Therefore each element is evaluated to get 3 probabilities, one for each element
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>-0.408643514569295
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>0.9869024149315574
 </pre></div>
 </div>
 <p>From a sampling stand point we can either sample using only the proposal
@@ -254,7 +254,7 @@ Or we can only generate samples that simultaneously satisfy the prior.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[-1.38345889]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[-0.95826117]
 </pre></div>
 </div>
 <p>We can perturb the variable by drawing from the attached proposal distribution.</p>
@@ -265,7 +265,7 @@ Or we can only generate samples that simultaneously satisfy the prior.</p>
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: Density ($\frac{g}{cc}$)
     Shape: (1,)
-    Values: [-2.0970952]
+    Values: [-1.92632668]
 Prior:
 Uniform Distribution:
   Min: :-2.0
@@ -320,7 +320,7 @@ This produces a single probability.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>0.35174163492831295
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>0.3684889866160113
 </pre></div>
 </div>
 <p>Attach the multivariate proposal</p>
@@ -335,7 +335,7 @@ This produces a single probability.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&quot;Name: Density ($\\frac{g}{cc}$)\n    Shape: (1,)\n    Values: [-2.08845559]\nPrior:\nMV Normal Distribution:\nMean:\n[0.30685651]\nVariance:\n[[1.]]\nProposal:\nMV Normal Distribution:\nMean:\n[-1.48735038]\nVariance:\n[[1.]]\nPosterior:\n&lt;class &#39;geobipy.src.classes.statistics.Histogram1D.Histogram1D&#39;&gt;\nBins: \n&lt;property object at 0x16e189900&gt;Counts:\nName: Frequency\n    Shape: (100,)\n    Values: [4 1 2 ... 3 4 1]\nValues are logged to base None\nRelative to: [0.]&quot;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&quot;Name: Density ($\\frac{g}{cc}$)\n    Shape: (1,)\n    Values: [-1.88269123]\nPrior:\nMV Normal Distribution:\nMean:\n[0.26739957]\nVariance:\n[[1.]]\nProposal:\nMV Normal Distribution:\nMean:\n[-0.36790694]\nVariance:\n[[1.]]\nPosterior:\n&lt;class &#39;geobipy.src.classes.statistics.Histogram1D.Histogram1D&#39;&gt;\nBins: \n&lt;property object at 0x129bf7860&gt;Counts:\nName: Frequency\n    Shape: (100,)\n    Values: [2 1 2 ... 3 3 1]\nValues are logged to base None\nRelative to: [0.]&quot;
 </pre></div>
 </div>
 </section>
@@ -729,7 +729,7 @@ x has its own memory allocated (not a reference/pointer)?  True
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&#39;Name: Density ($\\frac{g}{cc}$)\n    Shape: (50, 100)\n    Values: [[-0.02407258 -0.36157746 -0.89136839 ...  0.42873409 -0.46909846\n   0.34545497]\n [ 0.08049025  1.61686931 -1.55243277 ...  0.81030441  1.10025182\n   0.97249845]\n [ 0.88544251  0.62663325 -1.78757082 ... -0.72249882 -1.83123948\n   1.25340127]\n ...\n [-0.22991794  0.60984238  0.05938041 ...  0.13838507 -0.23869344\n  -1.13383899]\n [ 1.15320786 -1.43537932  0.21243017 ...  0.27988024  0.4032205\n  -1.75734128]\n [ 0.25409164 -0.27461103 -0.31283683 ... -0.646722   -1.72400898\n  -0.10781534]]\n&#39;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&#39;Name: Density ($\\frac{g}{cc}$)\n    Shape: (50, 100)\n    Values: [[-0.31233589  0.83361338  1.28079698 ...  2.03082302 -1.10196974\n   1.25030991]\n [-1.90942522 -0.41059787  1.96738363 ... -0.90151543 -0.39237267\n  -0.26895201]\n [ 0.8033263   0.6465585  -0.16514956 ...  0.33036225 -1.27594263\n  -1.06834095]\n ...\n [-0.97261329 -1.02987097  0.86935385 ...  0.18630102 -0.61988811\n  -0.22823936]\n [-1.05245934  0.12942245 -1.31521914 ...  0.40606742  1.20804847\n   1.5587342 ]\n [ 0.81990253  0.09905753  0.99534578 ...  0.80269833  1.02511856\n   0.36313707]]\n&#39;
 </pre></div>
 </div>
 <p>The StatArray Class’s functions work whether it is 1D or 2D</p>
@@ -825,7 +825,7 @@ ends of whatever you are plotting</p>
 </pre></div>
 </div>
 <img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_022.png" />
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  3.526 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  3.561 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-statistics-plot-statarray-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/53dc65a717762d4693b891c0caabbde0/plot_StatArray.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_StatArray.py</span></code></a></p>

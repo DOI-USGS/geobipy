@@ -1,6 +1,6 @@
 """
-1D Posterior analysis of the Bayesian inference
------------------------------------------------
+1D Inference of Resolve Data
+----------------------------
 
 All plotting in GeoBIPy can be carried out using the 3D inference class
 
@@ -35,7 +35,7 @@ for filename in os.listdir(output_directory):
 
 ################################################################################
 # The parameter file defines the set of user parameters needed to run geobipy.
-parameter_file = "user_parameters_resolve.py1"
+parameter_file = "resolve_options"
 ################################################################################
 
 # Here are the contents of the user parameter file.

@@ -16,8 +16,8 @@ Examples
 
 .. _sphx_glr_examples_Distributions:
 
-Distributions
-=============
+Distribtions
+============
 
 
 .. raw:: html
@@ -145,7 +145,6 @@ Statistics
 
 Meshes
 ======
-
 
 
 .. raw:: html
@@ -482,9 +481,72 @@ Datapoints
 
 .. _sphx_glr_examples_Inference:
 
-Posterior Analysis
-==================
+Inference
+=========
 
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="All plotting in GeoBIPy can be carried out using the 3D inference class">
+
+.. only:: html
+
+ .. figure:: /examples/Inference/images/thumb/sphx_glr_plot_inference_1d_aerotem_thumb.png
+     :alt: 1D Inference of Aerotem Data
+
+     :ref:`sphx_glr_examples_Inference_plot_inference_1d_aerotem.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/Inference/plot_inference_1d_aerotem
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="All plotting in GeoBIPy can be carried out using the 3D inference class">
+
+.. only:: html
+
+ .. figure:: /examples/Inference/images/thumb/sphx_glr_plot_inference_1d_resolve_thumb.png
+     :alt: 1D Inference of Resolve Data
+
+     :ref:`sphx_glr_examples_Inference_plot_inference_1d_resolve.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/Inference/plot_inference_1d_resolve
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="All plotting in GeoBIPy can be carried out using the 3D inference class">
+
+.. only:: html
+
+ .. figure:: /examples/Inference/images/thumb/sphx_glr_plot_inference_1d_skytem_thumb.png
+     :alt: 1D Inference of Skytem Data
+
+     :ref:`sphx_glr_examples_Inference_plot_inference_1d_skytem.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/Inference/plot_inference_1d_skytem
 .. raw:: html
 
     <div class="sphx-glr-clear"></div>

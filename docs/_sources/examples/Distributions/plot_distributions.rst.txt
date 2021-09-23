@@ -98,7 +98,7 @@ Multivariate Normal Distribution
  .. code-block:: none
 
 
-    array([-1.26686358,  3.48277299,  2.12193655])
+    array([0.56551802, 1.62304052, 3.07721479])
 
 
 
@@ -140,7 +140,7 @@ Uniform Distribution
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.169 seconds)
+   **Total running time of the script:** ( 0 minutes  1.150 seconds)
 
 
 .. _sphx_glr_download_examples_Distributions_plot_distributions.py:

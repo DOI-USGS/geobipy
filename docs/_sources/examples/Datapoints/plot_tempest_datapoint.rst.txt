@@ -307,8 +307,8 @@ This allows us to evaluate the likelihood of the predicted data
 
  .. code-block:: none
 
-    -139.95785764810182
-    14.992644973583655
+    -139.95785764810176
+    14.992644973583653
 
 
 
@@ -357,7 +357,7 @@ We can perform a quick search for the best fitting half space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.923 seconds)
+   **Total running time of the script:** ( 0 minutes  2.683 seconds)
 
 
 .. _sphx_glr_download_examples_Datapoints_plot_tempest_datapoint.py:

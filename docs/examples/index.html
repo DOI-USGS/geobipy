@@ -49,7 +49,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../content/getting_started/getting_started.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../content/api/api.html">API</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#distributions">Distributions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#distribtions">Distribtions</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="Distributions/plot_distributions.html">Distribution Class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="Distributions/plot_distributions.html#univariate-normal-distribution">Univariate Normal Distribution</a></li>
 <li class="toctree-l3"><a class="reference internal" href="Distributions/plot_distributions.html#multivariate-normal-distribution">Multivariate Normal Distribution</a></li>
@@ -88,7 +88,12 @@
 <li class="toctree-l3"><a class="reference internal" href="Datapoints/plot_time_datapoint.html">Time Domain Datapoint Class</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#posterior-analysis">Posterior Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#inference">Inference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Inference/plot_inference_1d_aerotem.html">1D Inference of Aerotem Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Inference/plot_inference_1d_resolve.html">1D Inference of Resolve Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Inference/plot_inference_1d_skytem.html">1D Inference of Skytem Data</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#hdf-5">HDF 5</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="HDF5/hdf5.html">Using HDF5 within GeoBIPy</a></li>
 </ul>
@@ -123,8 +128,8 @@
              
   <section id="examples">
 <span id="sphx-glr-examples"></span><h1>Examples<a class="headerlink" href="#examples" title="Permalink to this headline"></a></h1>
-<div class="sphx-glr-clear"></div><section id="distributions">
-<span id="sphx-glr-examples-distributions"></span><h2>Distributions<a class="headerlink" href="#distributions" title="Permalink to this headline"></a></h2>
+<div class="sphx-glr-clear"></div><section id="distribtions">
+<span id="sphx-glr-examples-distributions"></span><h2>Distribtions<a class="headerlink" href="#distribtions" title="Permalink to this headline"></a></h2>
 <div class="sphx-glr-thumbcontainer" tooltip="Handles the initialization of different statistical distribution"><figure class="align-default" id="id1">
 <img alt="Distribution Class" src="../_images/sphx_glr_plot_distributions_thumb.png" />
 <figcaption>
@@ -293,15 +298,39 @@
 </div><div class="toctree-wrapper compound">
 </div>
 <div class="sphx-glr-clear"></div></section>
-<section id="posterior-analysis">
-<span id="sphx-glr-examples-inference"></span><h2>Posterior Analysis<a class="headerlink" href="#posterior-analysis" title="Permalink to this headline"></a></h2>
+<section id="inference">
+<span id="sphx-glr-examples-inference"></span><h2>Inference<a class="headerlink" href="#inference" title="Permalink to this headline"></a></h2>
+<div class="sphx-glr-thumbcontainer" tooltip="All plotting in GeoBIPy can be carried out using the 3D inference class"><figure class="align-default" id="id20">
+<img alt="1D Inference of Aerotem Data" src="../_images/sphx_glr_plot_inference_1d_aerotem_thumb.png" />
+<figcaption>
+<p><span class="caption-text"><a class="reference internal" href="Inference/plot_inference_1d_aerotem.html#sphx-glr-examples-inference-plot-inference-1d-aerotem-py"><span class="std std-ref">1D Inference of Aerotem Data</span></a></span><a class="headerlink" href="#id20" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="All plotting in GeoBIPy can be carried out using the 3D inference class"><figure class="align-default" id="id21">
+<img alt="1D Inference of Resolve Data" src="../_images/sphx_glr_plot_inference_1d_resolve_thumb.png" />
+<figcaption>
+<p><span class="caption-text"><a class="reference internal" href="Inference/plot_inference_1d_resolve.html#sphx-glr-examples-inference-plot-inference-1d-resolve-py"><span class="std std-ref">1D Inference of Resolve Data</span></a></span><a class="headerlink" href="#id21" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="All plotting in GeoBIPy can be carried out using the 3D inference class"><figure class="align-default" id="id22">
+<img alt="1D Inference of Skytem Data" src="../_images/sphx_glr_plot_inference_1d_skytem_thumb.png" />
+<figcaption>
+<p><span class="caption-text"><a class="reference internal" href="Inference/plot_inference_1d_skytem.html#sphx-glr-examples-inference-plot-inference-1d-skytem-py"><span class="std std-ref">1D Inference of Skytem Data</span></a></span><a class="headerlink" href="#id22" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</div><div class="toctree-wrapper compound">
+</div>
 <div class="sphx-glr-clear"></div></section>
 <section id="hdf-5">
 <span id="sphx-glr-examples-hdf5"></span><h2>HDF 5<a class="headerlink" href="#hdf-5" title="Permalink to this headline"></a></h2>
-<div class="sphx-glr-thumbcontainer" tooltip="Inference for large scale datasets in GeoBIPy is handled using MPI and distributed memory syste..."><figure class="align-default" id="id20">
+<div class="sphx-glr-thumbcontainer" tooltip="Inference for large scale datasets in GeoBIPy is handled using MPI and distributed memory syste..."><figure class="align-default" id="id23">
 <img alt="Using HDF5 within GeoBIPy" src="../_images/sphx_glr_hdf5_thumb.png" />
 <figcaption>
-<p><span class="caption-text"><a class="reference internal" href="HDF5/hdf5.html#sphx-glr-examples-hdf5-hdf5-py"><span class="std std-ref">Using HDF5 within GeoBIPy</span></a></span><a class="headerlink" href="#id20" title="Permalink to this image"></a></p>
+<p><span class="caption-text"><a class="reference internal" href="HDF5/hdf5.html#sphx-glr-examples-hdf5-hdf5-py"><span class="std std-ref">Using HDF5 within GeoBIPy</span></a></span><a class="headerlink" href="#id23" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 </div><div class="toctree-wrapper compound">

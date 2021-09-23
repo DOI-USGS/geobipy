@@ -1,6 +1,6 @@
 """
-1D Posterior analysis of the Bayesian inference
------------------------------------------------
+1D Inference of Resolve Data
+----------------------------
 
 All plotting in GeoBIPy can be carried out using the 3D inference class
 
@@ -11,6 +11,8 @@ from geobipy import serial_geobipy
 from geobipy import example_path
 from geobipy import Inference3D
 import numpy as np
+import os
+import shutil
 
 #%%
 # Running GeoBIPy to invert data
@@ -20,12 +22,20 @@ import numpy as np
 
 ################################################################################
 # The directory where HDF files will be stored
-output_directory = "..//supplementary//time_domain_inversion//results"
+output_directory = "..//supplementary//frequency_domain_inversion//results"
 ################################################################################
+
+for filename in os.listdir(output_directory):
+    file_path = os.path.join(output_directory, filename)
+    try:
+        if os.path.isfile(file_path) or os.path.islink(file_path):
+            os.unlink(file_path)
+    except Exception as e:
+        print('Failed to delete %s. Reason: %s' % (file_path, e))
 
 ################################################################################
 # The parameter file defines the set of user parameters needed to run geobipy.
-parameter_file = "user_parameters_aerotem.py"
+parameter_file = "resolve_options"
 ################################################################################
 
 # Here are the contents of the user parameter file.
@@ -49,14 +59,14 @@ serial_geobipy(parameter_file, output_directory, index=0)
 # For space considerations we do not include those HDF files in this repository
 # and simply use them for plotting.
 
-# ################################################################################
-# results_3d = Inference3D(directory=example_path+"//2020_03_11_TD", system_file_path=example_path+"//supplementary//data")
+################################################################################
+results_3d = Inference3D(directory=output_directory, system_file_path=example_path+"//supplementary//data")
 
-# ################################################################################
-# # We can grab the results for a single index or fiducial
-# results_1d = results_3d.inference_1d(fiducial=354780.0)
+################################################################################
+# We can grab the results for a single index or fiducial
+results_1d = results_3d.inference_1d(index=0)
 
-# ################################################################################
-# results_1d.plot()
+################################################################################
+results_1d.plot()
 
-# plt.show()
+plt.show()

@@ -1,6 +1,6 @@
 """
 3D Rectilinear Model
--------------------
+--------------------
 This 3D rectilinear model defines a grid with straight cell boundaries.
 
 """

@@ -96,7 +96,7 @@ Plot the locations of the data points
 .. code-block:: default
 
     plt.figure(figsize=(8,6))
-    _ = TD.scatter2D()
+    _ = TD.scatter2D(equalize=True)
     plt.title("Scatter plot")
 
 
@@ -331,7 +331,7 @@ Obtain a line from the data set
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  5.648 seconds)
+   **Total running time of the script:** ( 0 minutes  5.945 seconds)
 
 
 .. _sphx_glr_download_examples_Data_plot_tempest_dataset.py:

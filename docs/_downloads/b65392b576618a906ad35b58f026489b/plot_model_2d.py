@@ -1,6 +1,6 @@
 """
 2D Rectilinear Model
--------------------
+--------------------
 This 2D rectilinear model defines a grid with straight cell boundaries.
 
 """

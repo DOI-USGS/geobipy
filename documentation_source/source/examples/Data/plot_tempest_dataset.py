@@ -29,7 +29,7 @@ TD = TempestData.read_netcdf(dataFiles, systemFiles)
 ################################################################################
 # Plot the locations of the data points
 plt.figure(figsize=(8,6))
-_ = TD.scatter2D()
+_ = TD.scatter2D(equalize=True)
 plt.title("Scatter plot")
 
 ################################################################################

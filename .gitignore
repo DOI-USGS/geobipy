@@ -3,7 +3,13 @@
 *DS_Store
 images/
 .ipynb_checkpoints
+*.ipynb
+*.md5
+*.pickle
 *.h5
+documentation_source/source/examples/index.rst
+documentation_source/source/examples/*/sg_execution_times.rst
+/documentation_source/source/examples/*/plot*.rst
 MANIFEST.in
 build
 *.so
