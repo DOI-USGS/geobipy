@@ -285,9 +285,11 @@ class EmDataPoint(DataPoint):
             self.z.set_prior(height_prior)
 
         if not relative_error_prior is None:
+            assert relative_error_prior.ndim == self.nSystems, ValueError("relative_error_prior must have {} dimensions".format(self.nSystems))
             self.relErr.set_prior(relative_error_prior)
 
         if not additive_error_prior is None:
+            assert additive_error_prior.ndim == self.nSystems, ValueError("additive_error_prior must have {} dimensions".format(self.nSystems))
             self.addErr.set_prior(additive_error_prior)
 
     def setProposals(self, heightProposal=None, relativeErrorProposal=None, additiveErrorProposal=None):
