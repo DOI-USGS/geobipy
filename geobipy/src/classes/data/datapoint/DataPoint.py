@@ -146,8 +146,9 @@ class DataPoint(Point):
         if values is None:
             values = self.nSystems
         else:
+            if np.size(values) == 1:
+                values = np.full(self.nSystems, fill_value=values)
             assert np.size(values) == self.nSystems, ValueError("additiveError must have length {}".format(self.nSystems))
-            assert np.asarray(values).dtype.kind == 'f', ValueError("additive_error must be floats")
         self._addErr = StatArray.StatArray(values, '$\epsilon_{Additive}$', self.units)
 
     @property
@@ -269,6 +270,8 @@ class DataPoint(Point):
         if values is None:
             values = self.nSystems
         else:
+            if np.size(values) == 1:
+                values = np.full(self.nSystems, fill_value=values)
             assert np.size(values) == self.nSystems, ValueError("relErr must have size {}".format(self.nSystems))
 
         self._relErr = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
