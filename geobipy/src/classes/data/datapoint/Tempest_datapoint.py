@@ -290,11 +290,11 @@ class Tempest_datapoint(TdemDataPoint):
     #         # rto = 0.5 * (ybins[0] + ybins[-1])
     #         # ybins -= rto
 
-    #         H = Histogram2D(xBins=xbins, xlog=10, yBins=ybins)
+    #         H = Histogram2D(xEdges=xbins, xlog=10, yEdges=ybins)
 
     #         self.predictedData.setPosterior(H)
 
-    #         # H = Histogram2D(xBins = StatArray.StatArray(self.z.prior.bins(), name=self.z.name, units=self.z.units), relativeTo=self.z)
+    #         # H = Histogram2D(xEdges = StatArray.StatArray(self.z.prior.bins(), name=self.z.name, units=self.z.units), relativeTo=self.z)
     #         # self.z.setPosterior(H)
 
 

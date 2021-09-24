@@ -367,7 +367,7 @@ class Inference3D(myObject):
             elapsed = str(timedelta(seconds=e))
 
             eta = str(timedelta(seconds=(np.float64(nPoints) / np.float64(i+1)) * e))
-            print("Remaining Points {}/{} || Elapsed Time: {} h:m:s || ETA {} h:m:s".format(nPoints-i+1, nPoints, elapsed, eta))
+            print("Remaining Points {}/{} || Elapsed Time: {} h:m:s || ETA {} h:m:s".format(nPoints-i-1, nPoints, elapsed, eta))
 
 
     def infer_mpi(self, dataset, options):
