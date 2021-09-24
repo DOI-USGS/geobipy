@@ -35,6 +35,7 @@ from .src.classes.data.datapoint.DataPoint import DataPoint
 from .src.classes.data.datapoint.EmDataPoint import EmDataPoint
 from .src.classes.data.datapoint.FdemDataPoint import FdemDataPoint
 from .src.classes.data.datapoint.TdemDataPoint import TdemDataPoint
+from .src.classes.data.datapoint.Tempest_datapoint import Tempest_datapoint
 # Datasets
 from .src.classes.data.dataset.Data import Data
 from .src.classes.data.dataset.FdemData import FdemData
@@ -76,6 +77,7 @@ from .src.classes.statistics.mixPearson import mixPearson
 from .src.inversion.Inference1D import Inference1D
 from .src.inversion.Inference2D import Inference2D
 from .src.inversion.Inference3D import Inference3D
+from .src.inversion.user_parameters import user_parameters
 
 from .src.example_path import example_path
 
@@ -125,14 +127,7 @@ def serial_geobipy(inputFile, output_directory, seed=None, index=None):
     # Copy the input file to the output directory for reference.
     shutil.copy(inputFile, output_directory)
 
-    # Import the script from the input file
-    userParameters = import_module(str(inputFile.with_suffix('')), package='geobipy')
-    assert 'data_type' in userParameters.__dict__, ValueError(("Please specify the data_type in the parameter file. \n"
-                                                    "data_type = FdemData\n"
-                                                    "data_type = FdemDataPoint\n"
-                                                    "data_type = TdemData\n"
-                                                    "data_type = TdemDataPoint\n"
-                                                    ))
+    options = user_parameters.read(inputFile)
 
     # Everyone needs the system classes read in early.
     # Dataset = userParameters.data_type()
@@ -140,31 +135,31 @@ def serial_geobipy(inputFile, output_directory, seed=None, index=None):
     # if isinstance(Dataset, DataPoint):
     #     serial_datapoint(userParameters, output_directory, seed=seed)
     # else:
-    serial_dataset(userParameters, output_directory, seed=seed, index=index)
+    serial_dataset(options, output_directory, seed=seed, index=index)
 
 
-def serial_datapoint(userParameters, output_directory, seed=None):
+def serial_datapoint(options, output_directory, seed=None):
 
-    datapoint = type(userParameters.data_type)()
-    datapoint.read(userParameters.dataFilename)
+    datapoint = type(options.data_type)()
+    datapoint.read(options.data_filename)
 
     # Get the random number generator
     prng = np.random.RandomState(seed)
 
-    options = userParameters.userParameters(datapoint)
-    options.output_directory = output_directory
+    # options = userParameters.userParameters(datapoint)
+    # options.output_directory = output_directory
 
     infer(options, datapoint, prng=prng)
 
 
-def serial_dataset(userParameters, output_directory, seed=None, index=None):
+def serial_dataset(options, output_directory, seed=None, index=None):
 
-    dataset = userParameters.data_type(systems=userParameters.systemFilename)
+    dataset = options.data_type(systems=options.system_filename)
 
-    r3D = Inference3D(output_directory, userParameters.systemFilename)
-    r3D.create_hdf5(dataset, userParameters)
+    r3D = Inference3D(output_directory, options.system_filename)
+    r3D.create_hdf5(dataset, options)
 
-    r3D.infer(dataset, userParameters)
+    r3D.infer(dataset, options)
 
 def parallel_geobipy(inputFile, outputDir, skipHDF5):
 
