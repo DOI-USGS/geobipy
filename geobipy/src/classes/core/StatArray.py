@@ -8,6 +8,7 @@ from ...base import utilities as cf
 from ...base import plotting as cP
 from ..statistics.Distribution import Distribution
 from ..statistics.baseDistribution import baseDistribution
+from ..statistics.Histogram import Histogram
 from .myObject import myObject
 from ...base.HDF.hdfWrite import write_nd
 from ...base import MPI as myMPI
@@ -210,6 +211,20 @@ class StatArray(np.ndarray, myObject):
 
     @posterior.setter
     def posterior(self, value):
+        if value is None:
+            self._posterior = None
+            return
+
+        nP = np.size(value)
+        if nP > 1:
+            assert nP == self.shape[0], ValueError("Number of posteriors must match size of StatArray's first dimension")
+            assert np.all([isinstance(x, Histogram) for x in value]), TypeError("Posterior must have type Histogram")
+
+        if nP == 1:
+            if isinstance(value, list):
+                value = value[0]
+                assert isinstance(value, Histogram), TypeError("Posterior must have type Histogram")
+
         self._posterior = value
 
     @property
@@ -220,6 +235,14 @@ class StatArray(np.ndarray, myObject):
         else:
             return None
 
+    @prior.setter
+    def prior(self, value):
+        if value is None:
+            self._prior = None
+            return
+        assert isinstance(value, baseDistribution), TypeError('prior must be a Distribution')
+        self._prior = value
+
     @property
     def proposal(self):
         """Returns the prior if available. """
@@ -227,6 +250,14 @@ class StatArray(np.ndarray, myObject):
             return self._proposal
         else:
             return None
+
+    @proposal.setter
+    def proposal(self, value):
+        if value is None:
+            self._proposal = None
+            return
+        assert isinstance(value, baseDistribution), TypeError('proposal must be a Distribution')
+        self._proposal = value
 
     @property
     def units(self):
@@ -239,71 +270,6 @@ class StatArray(np.ndarray, myObject):
         else:
             assert isinstance(values, str)
             self._units = values
-
-    def setPosterior(self, posterior):
-        """Add a posterior for the StatArray.
-
-        Parameters
-        ----------
-        posterior : geobipy.Histogram or list of geobipy.Histogram
-            * If a single Histogram is given, all values in the StatArray will be used in any updates.
-            * If a list is given, the size must equal the size of the StatArray's first dimension.
-
-        """
-        nP = np.size(posterior)
-        if nP > 1:
-            assert nP == self.shape[0], ValueError(
-                "Number of posteriors must match size of StatArray's first dimension")
-
-        if nP == 1:
-            if isinstance(posterior, list):
-                posterior = posterior[0]
-
-        self._posterior = posterior  # deepcopy(posterior)
-
-    def set_prior(self, distributionType, *args, **kwargs):
-        """Set a prior distribution
-
-        Adds a prior by interfacing through the Distribution method rather than passing any subclasses of the baseDistribution class.
-
-        Parameters
-        ----------
-        distributionType : str
-            The name of the distribution to set.
-        \*args
-            Variable length argument list.
-        \*\*kwargs
-            Arbitrary keyword arguments.
-
-        See Also
-        --------
-        geobipy.src.classes.statistics.Distribution : For available distributions to instantiate.
-
-        """
-        self._prior = Distribution(distributionType, *args, **kwargs)
-
-    def setProposal(self, distributionType, *args, **kwargs):
-        """Set a proposal distribution
-
-        Adds a proposal by interfacing through the Distribution method rather than passing any subclasses of the baseDistribution class.
-
-        Parameters
-        ----------
-        distributionType : str
-            The name of the distribution to set
-        \*args
-            Variable length argument list.
-        \*\*kwargs
-            Arbitrary keyword arguments.
-
-        See Also
-        --------
-        geobipy.src.classes.statistics.Distribution : For available distributions to instantiate
-
-        """
-        if distributionType is None:
-            return
-        self._proposal = Distribution(distributionType, *args, **kwargs)
 
     # Methods
 
@@ -1593,29 +1559,12 @@ class StatArray(np.ndarray, myObject):
 
         is_file = False
         if isinstance(grp, str):
-            f = h5py.File(grp, 'r')
-            grp = f
+            grp = h5py.File(grp, 'r')
             is_file = True
 
         if not name is None:
             grp = grp[name]
 
-        nPosteriors = 0
-        if 'nPosteriors' in grp:
-            nPosteriors = np.asarray(grp['nPosteriors'])
-
-        posterior = None
-        iTmp = index
-        if not index is None:
-            if np.ndim(index) > 0:
-                iTmp = index[0]
-
-        if nPosteriors == 1:
-            posterior = hdfRead.read_item(grp['posterior'], index=iTmp)
-        elif nPosteriors > 1:
-            posterior = []
-            for i in range(nPosteriors):
-                posterior.append(hdfRead.read_item(grp['posterior{}'.format(i)], index=iTmp))
 
         if (index is None):
             d = np.asarray(grp['data'])
@@ -1647,7 +1596,26 @@ class StatArray(np.ndarray, myObject):
             out = cls(1, name, units) + d
         else:
             out = cls(d, name, units)
-        out.setPosterior(posterior)
+
+        nPosteriors = 0
+        if 'nPosteriors' in grp:
+            nPosteriors = np.asarray(grp['nPosteriors'])
+
+        posterior = None
+        iTmp = index
+        if not index is None:
+            if np.ndim(index) > 0:
+                iTmp = index[0]
+
+        if nPosteriors == 1:
+            posterior = hdfRead.read_item(grp['posterior'], index=iTmp)
+
+        elif nPosteriors > 1:
+            posterior = []
+            for i in range(nPosteriors):
+                posterior.append(hdfRead.read_item(grp['posterior{}'.format(i)], index=iTmp))
+
+        out.posterior = posterior
 
         if is_file:
             f.close()
