@@ -132,31 +132,31 @@ def serial_geobipy(inputFile, output_directory, seed=None, index=None):
     # if isinstance(Dataset, DataPoint):
     #     serial_datapoint(userParameters, output_directory, seed=seed)
     # else:
-    serial_dataset(options, output_directory, seed=seed, index=index)
+    serial_dataset(output_directory, seed=seed, index=index, **options)
 
 
-def serial_datapoint(options, output_directory, seed=None):
+# def serial_datapoint(options, output_directory, seed=None):
 
-    datapoint = type(options.data_type)()
-    datapoint.read(options.data_filename)
+#     datapoint = type(options.data_type)()
+#     datapoint.read(options.data_filename)
 
-    # Get the random number generator
-    prng = np.random.RandomState(seed)
+#     # Get the random number generator
+#     prng = np.random.RandomState(seed)
 
-    # options = userParameters.userParameters(datapoint)
-    # options.output_directory = output_directory
+#     # options = userParameters.userParameters(datapoint)
+#     # options.output_directory = output_directory
 
-    infer(options, datapoint, prng=prng)
+#     infer(options, datapoint, prng=prng)
 
 
-def serial_dataset(options, output_directory, seed=None, index=None):
+def serial_dataset(output_directory, seed=None, index=None, **kwargs):
 
-    dataset = options.data_type(systems=options.system_filename)
+    dataset = kwargs['data_type'](systems=kwargs['system_filename'])
 
-    r3D = Inference3D(output_directory, options.system_filename)
-    r3D.create_hdf5(dataset, options)
+    inference3d = Inference3D(output_directory, kwargs['system_filename'])
+    inference3d.create_hdf5(dataset, **kwargs)
 
-    r3D.infer(dataset, options)
+    inference3d.infer(dataset, seed=seed, index=index, **kwargs)
 
 def parallel_geobipy(inputFile, outputDir, skipHDF5):
 
@@ -178,48 +178,35 @@ def parallel_mpi(inputFile, output_directory, skipHDF5):
 
     inputFile = pathlib.Path(inputFile)
     assert inputFile.exists(), Exception("Cannot find input file {}".format(inputFile))
+
     output_directory = pathlib.Path(output_directory)
     assert output_directory.exists(), Exception("Make sure the output directory exists {}".format(output_directory))
 
-    UP = import_module(str(inputFile.with_suffix('')), package='geobipy')
-    assert 'data_type' in UP.__dict__, ValueError(("Please specify the data_type in the parameter file. \n"
-                                                    "data_type = FdemData()\n"
-                                                    "data_type = FdemDataPoint()\n"
-                                                    "data_type = TdemData()\n"
-                                                    "data_type = TdemDataPoint()\n"
-                                                    ))
-
-    # Make data and system filenames lists of str.
-    if isinstance(UP.dataFilename, str):
-            UP.dataFilename = [UP.dataFilename]
-    if isinstance(UP.systemFilename, str):
-            UP.systemFilename = [UP.systemFilename]
+    options = user_parameters.read(inputFile)
 
     # Everyone needs the system classes read in early.
-    dataset = UP.data_type(systems=UP.systemFilename)
+    dataset = kwargs['data_type'](systems=kwargs['system_filename'])
 
     # Get the number of points in the file.
     if masterRank:
-        nPoints = dataset._csv_n_points(UP.dataFilename)
-        assert (nRanks > 1), Exception("You need to use at least 2 ranks for the mpi version.")
-        assert (nRanks <= nPoints+1), Exception('You requested more ranks than you have data points.  Please lower the number of ranks to a maximum of {}. '.format(nPoints+1))
+    #     nPoints = dataset._csv_n_points(UP.dataFilename)
+    #     assert (nRanks > 1), Exception("You need to use at least 2 ranks for the mpi version.")
+    #     assert (nRanks <= nPoints+1), Exception('You requested more ranks than you have data points.  Please lower the number of ranks to a maximum of {}. '.format(nPoints+1))
 
-        # Make sure the results folders exist
-        makedirs(output_directory, exist_ok=True)
+    #     # Make sure the results folders exist
+    #     makedirs(output_directory, exist_ok=True)
         # Copy the user_parameter file to the output directory
         shutil.copy(inputFile, output_directory)
 
     # Start keeping track of time.
     t0 = MPI.Wtime()
 
-    inference3d = Inference3D(output_directory, UP.systemFilename, world=world)
-    inference3d.create_hdf5(dataset, UP)
+    inference3d = Inference3D(output_directory, kwargs['system_filename'], world=world)
+    inference3d.create_hdf5(dataset, **kwargs)
 
     myMPI.rankPrint(world, "Created hdf5 files in {} h:m:s".format(str(timedelta(seconds=MPI.Wtime()-t0))))
 
-    inference3d.infer(dataset, UP)
-
-
+    inference3d.infer(dataset, **kwargs)
 
 def geobipy():
     """Run the serial implementation of GeoBIPy. """
