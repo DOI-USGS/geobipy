@@ -67,26 +67,26 @@ class Inference1D(myObject):
 
     """
 
-    def __init__(self, datapoint, prng, kwargs, world=None):
+    def __init__(self, datapoint, prng=None, world=None, **kwargs):
         """ Initialize the results of the inversion """
 
         self.fig = None
-        self._user_options = kwargs
+        self.kwargs = kwargs
+
         self.prng = prng
         self.rank = 1 if world is None else world.rank
 
-        if kwargs is None:
+        if not 'n_markov_chains' in kwargs:
             return
 
-
-        self._n_markov_chains = kwargs.n_markov_chains
+        self.n_markov_chains = self.kwargs['n_markov_chains']
         # Get the initial best fitting halfspace and set up
         # priors and posteriors using user parameters
 
         # ------------------------------------------------
         # Intialize the datapoint with the user parameters
         # ------------------------------------------------
-        self.initialize_datapoint(datapoint, kwargs)
+        self.initialize_datapoint(datapoint)
 
         # # Initialize the calibration parameters
         # if (kwargs.solveCalibration):
@@ -100,24 +100,24 @@ class Inference1D(myObject):
         # ---------------------------------
         # Set the earth model properties
         # ---------------------------------
-        self.initialize_model(kwargs)
+        self.initialize_model()
 
         # Compute the data misfit
-        self.data_misfit = datapoint.dataMisfit(squared=True)
+        self.data_misfit = datapoint.dataMisfit()**2.0
 
         # # Calibrate the response if it is being solved for
-        # if (kwargs.solveCalibration):
+        # if (self.kwargs.solveCalibration):
         #     self.datapoint.calibrate()
 
         # Evaluate the prior for the current model
         self.prior = self.model.priorProbability(
-            kwargs.solve_parameter,
-            kwargs.solve_gradient) + \
+            self.kwargs['solve_parameter'],
+            self.kwargs['solve_gradient']) + \
             self.datapoint.priorProbability(
-            kwargs.solve_relative_error,
-            kwargs.solve_additive_error,
-            kwargs.solve_height,
-            False)# kwargs.solveCalibration)
+            self.kwargs['solve_relative_error'],
+            self.kwargs['solve_additive_error'],
+            self.kwargs['solve_height'],
+            False)# self.kwargs.solveCalibration)
 
         # Initialize the burned in state
         self.burned_in_iteration = self._n_markov_chains
@@ -125,7 +125,7 @@ class Inference1D(myObject):
 
         # Add the likelihood function to the prior
         self.likelihood = 1.0
-        if not kwargs.ignore_likelihood:
+        if not self.kwargs['ignore_likelihood']:
             self.likelihood = self.datapoint.likelihood(log=True)
             self.burned_in = False
             self.burned_in_iteration = np.int64(0)
@@ -139,8 +139,7 @@ class Inference1D(myObject):
         # Initialize the vectors to save results
         # StatArray of the data misfit
 
-        self.data_misfit_v = StatArray.StatArray(
-            2 * self._n_markov_chains, name='Data Misfit')
+        self.data_misfit_v = StatArray.StatArray(2 * self._n_markov_chains, name='Data Misfit')
         self.data_misfit_v[0] = self.data_misfit
 
         # Initialize a stopwatch to keep track of time
@@ -148,9 +147,9 @@ class Inference1D(myObject):
         self.invTime = np.float64(0.0)
 
         # Logicals of whether to plot or save
-        self.save_hdf5 = kwargs.save_hdf5  # pop('save', True)
-        self.interactive_plot = kwargs.interactive_plot  # .pop('plot', False)
-        self.save_png = kwargs.save_png  # .pop('savePNG', False)
+        self.save_hdf5 = self.kwargs['save_hdf5']  # pop('save', True)
+        self.interactive_plot = self.kwargs['interactive_plot']  # .pop('plot', False)
+        self.save_png = self.kwargs['save_png']  # .pop('savePNG', False)
 
         # Return none if important parameters are not used (used for hdf 5)
         if datapoint is None:
@@ -159,9 +158,9 @@ class Inference1D(myObject):
         assert self.interactive_plot or self.save_hdf5, Exception(
             'You have chosen to neither view or save the inversion results!')
 
-        self._update_plot_every = kwargs.update_plot_every
-        self.limits = kwargs.parameter_limits
-        self.reciprocateParameter = kwargs.reciprocate_parameters
+        self._update_plot_every = self.kwargs['update_plot_every']
+        self.limits = self.kwargs['parameter_limits']
+        self.reciprocateParameter = self.kwargs['reciprocate_parameters']
 
         # Set the ID for the data point the results pertain to
 
@@ -207,10 +206,6 @@ class Inference1D(myObject):
         self.best_posterior = self.posterior
         self.best_iteration = np.int64(0)
 
-    @property
-    def n_markov_chains(self):
-        return self._n_markov_chains
-
     @cached_property
     def iteration(self):
         return StatArray.StatArray(np.arange(2 * self._n_markov_chains), name="Iteration #", dtype=np.int64)
@@ -220,6 +215,26 @@ class Inference1D(myObject):
         return np.arange(model.par.posterior.y.nCells.value)
 
     @property
+    def n_markov_chains(self):
+        return self._n_markov_chains
+
+    @n_markov_chains.setter
+    def n_markov_chains(self, value):
+        self._n_markov_chains = np.int64(value)
+
+    @property
+    def prng(self):
+        return self._prng
+
+    @prng.setter
+    def prng(self, value):
+        if value is None:
+            self._prng = np.random.RandomState()
+        else:
+            self._prng = value
+        self.kwargs['prng'] = self.prng
+
+    @property
     def update_plot_every(self):
         return self._update_plot_every
 
@@ -227,81 +242,58 @@ class Inference1D(myObject):
     def user_options(self):
         return self._user_options
 
-    def initialize_datapoint(self, datapoint, kwargs):
+    def initialize_datapoint(self, datapoint):
 
         self.datapoint = datapoint
         # ---------------------------------------
         # Set the statistical properties of the datapoint
         # ---------------------------------------
         # Set the prior on the data
-        self.datapoint.relErr = kwargs.initial_relative_error
-        self.datapoint.addErr = kwargs.initial_additive_error
-
-        # Define prior, proposal, posterior for height
-        heightPrior = None
-        heightProposal = None
-        if kwargs.solve_height:
-            z = np.float64(self.datapoint.z)
-            dz = kwargs.maximum_height_change
-            heightPrior = Distribution('Uniform', z - dz, z + dz, prng=self.prng)
-            heightProposal = Distribution('Normal', self.datapoint.z, kwargs.height_proposal_variance, prng=self.prng)
+        self.datapoint.relErr = self.kwargs['initial_relative_error']
+        self.datapoint.addErr = self.kwargs['initial_additive_error']
 
         data_prior = Distribution('MvLogNormal', self.datapoint.data[self.datapoint.active], self.datapoint.std[self.datapoint.active]**2.0, linearSpace=False, prng=self.prng)
 
-        # Define prior, proposal, posterior for relative error
-        relativePrior = None
-        relativeProposal = None
-        if kwargs.solve_relative_error:
-            relativePrior = Distribution('Uniform', kwargs.minimum_relative_error, kwargs.maximum_relative_error, prng=self.prng)
-            relativeProposal = Distribution('MvNormal', self.datapoint.relErr, kwargs.relative_error_proposal_variance, prng=self.prng)
-
-        # Define prior, proposal, posterior for additive error
-        additivePrior = None
-        additiveProposal = None
-        if kwargs.solve_additive_error:
-            log = isinstance(self.datapoint, TdemDataPoint)
-            additivePrior = Distribution('Uniform', kwargs.minimum_additive_error, kwargs.maximum_additive_error, log=log, prng=self.prng)
-            additiveProposal = Distribution('MvLogNormal', self.datapoint.addErr, kwargs.additive_error_proposal_variance, linearSpace=log, prng=self.prng)
 
         # Set the priors, proposals, and posteriors.
-        self.datapoint.set_priors(height_prior=heightPrior, data_prior=data_prior, relative_error_prior=relativePrior, additive_error_prior=additivePrior)
-        self.datapoint.setProposals(heightProposal=heightProposal, relativeErrorProposal=relativeProposal, additiveErrorProposal=additiveProposal)
-        self.datapoint.setPosteriors()
+        self.datapoint.set_priors(**self.kwargs)
+        self.datapoint.set_proposals(**self.kwargs)
+        self.datapoint.set_posteriors()
 
         # Update the data errors based on user given parameters
-        # if kwargs.solve_relative_error or kwargs.solve_additive_error:
-        self.datapoint.updateErrors(kwargs.initial_relative_error, kwargs.initial_additive_error)
+        # if self.kwargs.solve_relative_error or self.kwargs.solve_additive_error:
+        # self.datapoint.updateErrors(self.kwargs.initial_relative_error, self.kwargs.initial_additive_error)
 
-    def initialize_model(self, kwargs):
+    def initialize_model(self):
         # Find the conductivity of a half space model that best fits the data
         halfspace = self.datapoint.find_best_halfspace()
 
         # Create an initial model for the first iteration
         # Initialize a 1D model with the half space conductivity
         # Assign the depth to the interface as half the bounds
-        self.model = halfspace.insert_edge(0.5 * (kwargs.maximum_depth + kwargs.minimum_depth))
+        self.model = halfspace.insert_edge(0.5 * (self.kwargs['maximum_depth'] + self.kwargs['minimum_depth']))
 
         # Setup the model for perturbation
         self.model.set_priors(
             halfspace.par[0],
-            kwargs.minimum_depth,
-            kwargs.maximum_depth,
-            kwargs.maximum_number_of_layers,
-            kwargs.solve_parameter,
-            kwargs.solve_gradient,
-            parameterLimits=kwargs.parameter_limits,
-            min_width=kwargs.minimum_thickness,
-            factor=kwargs.factor, prng=self.prng
+            self.kwargs['minimum_depth'],
+            self.kwargs['maximum_depth'],
+            self.kwargs['maximum_number_of_layers'],
+            self.kwargs['solve_parameter'],
+            self.kwargs['solve_gradient'],
+            parameterLimits=self.kwargs.get('parameter_limits'),
+            min_width=self.kwargs.get('minimum_thickness'),
+            factor=self.kwargs.get('factor', np.float64(10.0)), prng=self.prng
         )
 
         # Assign a Hitmap as a prior if one is given
-        # if (not kwargs.referenceHitmap is None):
-        #     Mod.setReferenceHitmap(kwargs.referenceHitmap)
+        # if (not self.kwargs.referenceHitmap is None):
+        #     Mod.setReferenceHitmap(self.kwargs.referenceHitmap)
 
         # Compute the predicted data
         self.datapoint.forward(self.model)
 
-        if kwargs.ignore_likelihood:
+        if self.kwargs['ignore_likelihood']:
             inverseHessian = self.model.localParameterVariance()
         else:
             inverseHessian = self.model.localParameterVariance(self.datapoint)
@@ -309,10 +301,10 @@ class Inference1D(myObject):
         # Instantiate the proposal for the parameters.
         parameterProposal = Distribution('MvLogNormal', self.model.par, inverseHessian, linearSpace=True, prng=self.prng)
 
-        probabilities = [kwargs.probability_of_birth,
-                         kwargs.probability_of_death,
-                         kwargs.probability_of_perturb,
-                         kwargs.probability_of_no_change]
+        probabilities = [self.kwargs['probability_of_birth'],
+                         self.kwargs['probability_of_death'],
+                         self.kwargs['probability_of_perturb'],
+                         self.kwargs['probability_of_no_change']]
         self.model.setProposals(probabilities, parameterProposal=parameterProposal, prng=self.prng)
 
         self.model.setPosteriors()
@@ -322,24 +314,24 @@ class Inference1D(myObject):
         perturbed_datapoint = deepcopy(self.datapoint)
 
         # Perturb the current model
-        if self.user_options.ignore_likelihood:
+        if self.kwargs.get('ignore_likelihood', False):
             remapped_model, perturbed_model = self.model.perturb()
         else:
             remapped_model, perturbed_model = self.model.perturb(perturbed_datapoint)
 
         # Propose a new data point, using assigned proposal distributions
-        perturbed_datapoint.perturb(self.user_options.solve_height, self.user_options.solve_relative_error, self.user_options.solve_additive_error, False)#self.user_options.solve_Calibration)
+        perturbed_datapoint.perturb()
 
         # Forward model the data from the candidate model
         perturbed_datapoint.forward(perturbed_model)
 
         # Compute the data misfit
-        data_misfit1 = perturbed_datapoint.dataMisfit(squared=True)
+        data_misfit1 = perturbed_datapoint.dataMisfit()**2.0
 
         # Evaluate the prior for the current model
-        prior1 = perturbed_model.priorProbability(self.user_options.solve_parameter, self.user_options.solve_gradient)
+        prior1 = perturbed_model.priorProbability(self.kwargs['solve_parameter'], self.kwargs['solve_gradient'])
         # Evaluate the prior for the current data
-        prior1 += perturbed_datapoint.priorProbability(self.user_options.solve_relative_error, self.user_options.solve_additive_error, self.user_options.solve_height, False)#self.user_options.solveCalibration)
+        prior1 += perturbed_datapoint.priorProbability(self.kwargs['solve_relative_error'], self.kwargs['solve_additive_error'], self.kwargs['solve_height'], False)#self.user_options.solveCalibration)
 
         # Test for early rejection
         if (prior1 == -np.inf):
@@ -347,7 +339,7 @@ class Inference1D(myObject):
 
         # Compute the components of each acceptance ratio
         likelihood1 = 1.0
-        if not self.user_options.ignore_likelihood:
+        if not self.kwargs.get('ignore_likelihood', False):
             likelihood1 = perturbed_datapoint.likelihood(log=True)
             proposal, proposal1 = perturbed_model.proposalProbabilities(remapped_model, perturbed_datapoint)
         else:
@@ -409,7 +401,8 @@ class Inference1D(myObject):
             #i, Mod, DataPoint, iBest, bestData, bestModel, multiplier, PhiD, posterior, posteriorComponents, ratioComponents, accepted, dimensionChange, userParameters.clipRatio)
 
             if self.interactive_plot:
-                self.plot("Fiducial {}".format(self.datapoint.fiducial), increment=self.user_options.update_plot_every)
+
+                self.plot("Fiducial {}".format(self.datapoint.fiducial), increment=self.kwargs['update_plot_every'])
 
             Go = self.iteration <= self.n_markov_chains + self.burned_in_iteration
 
@@ -421,12 +414,12 @@ class Inference1D(myObject):
         self.clk.stop()
         # self.invTime = np.float64(self.clk.timeinSeconds())
         # Does the user want to save the HDF5 results?
-        if (self.user_options.save_hdf5):
+        if (self.kwargs['save_hdf5']):
             # No parallel write is being used, so write a single file for the data point
             self.write_inference1d(hdf_file_handle)
 
         # Does the user want to save the plot as a png?
-        if (self.user_options.save_png):# and not failed):
+        if (self.kwargs['save_png']):# and not failed):
             # To save any thing the Results must be plot
             self.plot()
             self.toPNG('.', self.datapoint.fiducial)
@@ -447,18 +440,18 @@ class Inference1D(myObject):
         # Determine if we are burning in
         if (not self.burned_in):
             target_misfit = np.sum(self.datapoint.active)
-            if (self.data_misfit <= self.multiplier * target_misfit):  # datapoint.target_misfit
+            if np.isclose(self.data_misfit, self.multiplier*target_misfit, rtol=1e-2, atol=1e-2) :  # datapoint.target_misfit
                 self.burned_in = True  # Let the results know they are burned in
                 self.burned_in_iteration = self.iteration       # Save the burn in iteration to the results
                 self.best_iteration = self.iteration
                 self.best_model = deepcopy(self.model)
-                self.best_data = deepcopy(self.datapoint)
+                self.best_datapoint = deepcopy(self.datapoint)
                 self.best_posterior = self.posterior
 
         if (self.posterior > self.best_posterior):
             self.best_iteration = self.iteration
             self.best_model = deepcopy(self.model)
-            self.best_data = deepcopy(self.datapoint)
+            self.best_datapoint = deepcopy(self.datapoint)
             self.best_posterior = self.posterior
 
         if (np.mod(self.iteration, self.update_plot_every) == 0):
@@ -467,13 +460,13 @@ class Inference1D(myObject):
             if (self.rank == 1):
                 print(tmp, flush=True)
 
-            if (not self.burned_in and not self.user_options.solve_relative_error):
-                self.multiplier *= self.user_options.multiplier
+            if (not self.burned_in and not self.datapoint.relErr.hasPrior):
+                self.multiplier *= self.kwargs['multiplier']
 
         if (self.burned_in):  # We need to update some plotting options
             # Added the layer depths to a list, we histogram this list every
             # iPlot iterations
-            self.model.updatePosteriors(self.user_options.clip_ratio)
+            self.model.updatePosteriors(0.5)#self.user_options.clip_ratio)
 
             # Update the height posterior
             self.datapoint.updatePosteriors()
@@ -624,7 +617,7 @@ class Inference1D(myObject):
             plt.axvline(self.burned_in_iteration, color='#C92641',
                         linestyle='dashed', linewidth=lw)
             # plt.axvline(self.iBest, color=cP.wellSeparated[3])
-        # plt.yscale('log')
+        plt.yscale('log')
         ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 
         plt.xlim([0, self.iRange[self.iteration]])
@@ -812,7 +805,7 @@ class Inference1D(myObject):
         if not fNone:
             index = fiducials.searchsorted(fiducial)
 
-        self = cls(None, None, kwargs=None)
+        self = cls(None, None)
 
         s = np.s_[index, :]
 

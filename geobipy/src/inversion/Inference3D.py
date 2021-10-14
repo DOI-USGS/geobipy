@@ -163,14 +163,14 @@ class Inference3D(myObject):
             line.close()
 
 
-    def create_hdf5(self, data, user_parameters):
+    def create_hdf5(self, data, **kwargs):
         """Create HDF5 files based on the data
 
         Parameters
         ----------
         data : geobipy.Data or geobipy.DataPoint
             Data to create the HDF5 file(s) for
-        user_parameters : geobipy.userParameters
+        kwargs : geobipy.userParameters
             Input parameters for geobipy
 
         Returns
@@ -197,26 +197,27 @@ class Inference3D(myObject):
             self.__init__(self.directory, user_parameters.system_filename, world=self.world)
 
         else:
-            self._create_hdf5(data, user_parameters)
-            self.__init__(self.directory, user_parameters.system_filename)
+            self._create_hdf5(data, **kwargs)
+            self.__init__(self.directory, kwargs['system_filename'])
 
 
-    def _create_hdf5(self, data, user_parameters):
+    def _create_hdf5(self, data, **kwargs):
 
         if isinstance(data, Data):
-            return self._createHDF5_dataset(data, user_parameters)
+            return self._createHDF5_dataset(data, **kwargs)
         else:
-            return self._createHDF5_datapoint(data, user_parameters)
+            return self._createHDF5_datapoint(data, **kwargs)
 
-    def _createHDF5_dataset(self, dataset, options):
+    def _createHDF5_dataset(self, dataset, **kwargs):
 
         # Prepare the dataset so that we can read a point at a time.
-        dataset = dataset._initialize_sequential_reading(options.data_filename, options.system_filename)
+        dataset = dataset._initialize_sequential_reading(kwargs['data_filename'], kwargs['system_filename'])
 
         # Get a datapoint from the file.
         datapoint = dataset._read_record(record=0)
 
-        line_numbers, fiducials = dataset._read_line_fiducial(options.data_filename)
+        line_numbers, fiducials = dataset._read_line_fiducial(kwargs['data_filename'])
+
         # Get the line numbers in the data
         self._lineNumbers = np.sort(np.unique(line_numbers))
 
@@ -225,10 +226,10 @@ class Inference3D(myObject):
         # options.check(datapoint)
 
         # While preparing the file, we need access to the line numbers and fiducials in the data file
-        inference1d = Inference1D(datapoint, prng=None, kwargs=options)
+        inference1d = Inference1D(datapoint, **kwargs)
 
         self.print('Creating HDF5 files, this may take a few minutes...')
-        self.print('Files are being created for data files {} and system files {}'.format(options.data_filename, options.system_filename))
+        self.print('Files are being created for data files {} and system files {}'.format(kwargs['data_filename'], kwargs['system_filename']))
 
         # No need to create and close the files like in parallel, so create and keep them open
         for line in self.lineNumbers:
@@ -338,29 +339,34 @@ class Inference3D(myObject):
             line.uncache('additiveError')
         return out
 
-    def infer(self, dataset, user_parameters):
+    def infer(self, dataset, seed=None, index=None, **options):
 
         if self.parallel_access:
-            self.infer_mpi(dataset, user_parameters)
+            self.infer_mpi(dataset, **options)
         else:
-            self.infer_serial(dataset, user_parameters)
+            self.infer_serial(dataset, seed=seed, index=index, **options)
 
-    def infer_serial(self, dataset, options, seed=None):
+    def infer_serial(self, dataset, seed=None, index=None, **options):
 
         t0 = time.time()
-        dataset = dataset._initialize_sequential_reading(options.data_filename, options.system_filename)
+        dataset = dataset._initialize_sequential_reading(options['data_filename'], options['system_filename'])
 
         prng = np.random.RandomState(seed)
 
-        nPoints = dataset.nPoints
+        if index is None:
+            nPoints = dataset.nPoints
+            r = range(nPoints)
+        else:
+            nPoints = 1
+            r = range(index, index+1)
 
-        for i in range(nPoints):
+        for i in r:
             datapoint = dataset._read_record(i)
 
             # Pass through the line results file object if a parallel file system is in use.
             iLine = self.lineNumbers.searchsorted(datapoint.lineNumber)[0]
 
-            inference = Inference1D(datapoint, prng, options)
+            inference = Inference1D(datapoint, prng=prng, **options)
             inference.infer(hdf_file_handle=self.lines[iLine].hdfFile)
 
             e = time.time() - t0
@@ -370,7 +376,7 @@ class Inference3D(myObject):
             print("Remaining Points {}/{} || Elapsed Time: {} h:m:s || ETA {} h:m:s".format(nPoints-i-1, nPoints, elapsed, eta))
 
 
-    def infer_mpi(self, dataset, options):
+    def infer_mpi(self, dataset, **options):
 
         from mpi4py import MPI
         from ..base import MPI as myMPI
@@ -384,18 +390,18 @@ class Inference3D(myObject):
 
         # Carryout the master-worker tasks
         if (world.rank == 0):
-            self._infer_mpi_master_task(dataset, options)
+            self._infer_mpi_master_task(dataset, **options)
         else:
-            self._infer_mpi_worker_task(dataset.datapoint_type, options, prng)
+            self._infer_mpi_worker_task(dataset.datapoint_type, prng, **options)
 
-    def _infer_mpi_master_task(self, dataset, options):
+    def _infer_mpi_master_task(self, dataset, **options):
         """ Define a Send Recv Send procedure on the master """
 
         from mpi4py import MPI
         from ..base import MPI as myMPI
 
         # Prep the data for point by point reading
-        dataset = dataset._initialize_sequential_reading(options.data_filename, options.system_filename)
+        dataset = dataset._initialize_sequential_reading(options['data_filename'], options['system_filename'])
 
         # Set the total number of data points
         nPoints = dataset.nPoints
@@ -407,7 +413,7 @@ class Inference3D(myObject):
         # Send out the first indices to the workers
         for iWorker in range(1, world.size):
             # Get a datapoint from the file.
-            DataPoint = dataset._read_record()
+            DataPoint = dataset._read_record(nSent)
 
             # If DataPoint is None, then we reached the end of the file and no more points can be read in.
             if DataPoint is None:
@@ -438,7 +444,7 @@ class Inference3D(myObject):
             nFinished += 1
 
             # Read the next data point from the file
-            DataPoint = dataset._read_record()
+            DataPoint = dataset._read_record(nSent)
 
             # If DataPoint is None, then we reached the end of the file and no more points can be read in.
             if DataPoint is None:
@@ -452,6 +458,8 @@ class Inference3D(myObject):
                 world.send(continueRunning, dest=requestingRank)
                 DataPoint.Isend(dest=requestingRank, world=world, systems=DataPoint.system)
 
+                nSent += 1
+
             report = (nFinished % (world.size - 1)) == 0 or nFinished == nPoints
 
             if report:
@@ -460,7 +468,7 @@ class Inference3D(myObject):
                 eta = str(timedelta(seconds=(nPoints / nFinished-1) * e))
                 myMPI.print("Remaining Points {}/{} || Elapsed Time: {} h:m:s || ETA {} h:m:s".format(nPoints-nFinished, nPoints, elapsed, eta))
 
-    def _infer_mpi_worker_task(self, datapoint, options, prng):
+    def _infer_mpi_worker_task(self, datapoint, prng, **options):
         """ Define a wait run ping procedure for each worker """
 
         # Import here so serial code still works...
@@ -491,7 +499,7 @@ class Inference3D(myObject):
             # Pass through the line results file object if a parallel file system is in use.
             iLine = lineNumbers.searchsorted(datapoint.lineNumber)[0]
 
-            inference = Inference1D(datapoint, prng, options, world=world)
+            inference = Inference1D(datapoint, prng, world=world, **options)
             failed = inference.infer(hdf_file_handle=self.lines[iLine].hdfFile)
 
             # Ping the Master to request a new index
@@ -1051,7 +1059,6 @@ class Inference3D(myObject):
         lineIndex, fidIndex = self.lineIndex(fiducial=fiducial, index=index)
         return self.lines[lineIndex].inference_1d(fidIndex)
 
-
     def lineIndex(self, lineNumber=None, fiducial=None, index=None):
         """Get the line index """
         tmp = np.sum([not x is None for x in [lineNumber, fiducial, index]])
@@ -1059,13 +1066,12 @@ class Inference3D(myObject):
 
         index = np.atleast_1d(index)
 
-
         if not lineNumber is None:
             assert lineNumber in self.lineNumbers, ValueError("line {} not found in data set".format(lineNumber))
             return np.squeeze(np.where(self.lineNumbers == lineNumber)[0])
 
         if not fiducial is None:
-            return self.fiducialIndex(fiducial)[0]
+            return self.fiducialIndex(fiducial)
 
         assert np.all(index <= self.nPoints-1), IndexError('index {} is out of bounds for data point index with size {}'.format(index, self.nPoints))
 
@@ -1142,11 +1148,9 @@ class Inference3D(myObject):
                 index.append(ids)
 
         if np.size(index) > 0:
-            return np.hstack(lineIndex), np.hstack(index)
+            return np.squeeze(np.hstack(lineIndex)), np.squeeze(np.hstack(index))
 
         assert False, ValueError("fiducial not present in this data set")
-
-
 
     def fit_parameter_posterior_mpi(self, intervals=None, **kwargs):
 
