@@ -46,6 +46,7 @@ class Uniform(baseDistribution):
 
     @min.setter
     def min(self, values):
+        values = np.asarray(values)
         self._min = np.log(values) if self.log else deepcopy(values)
 
     @property
@@ -54,6 +55,7 @@ class Uniform(baseDistribution):
 
     @max.setter
     def max(self, values):
+        values = np.asarray(values)
         self._max = np.log(values) if self.log else deepcopy(values)
 
     @property

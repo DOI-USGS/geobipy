@@ -69,9 +69,10 @@ class MvLogNormal(MvNormal):
         if order == 1:
             if self.linearSpace:
                 x = np.log(x)
-            return cf.Ax(self.inverseVariance, x - self._mean)
+            return cf.Ax(self.precision, x-self._mean)
+
         elif order == 2:
-            return self.inverseVariance
+            return self.precision
 
     def rng(self, size = 1):
         return np.exp(super().rng(size)) if self.linearSpace else super().rng(size)

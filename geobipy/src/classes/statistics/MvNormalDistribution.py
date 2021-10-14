@@ -126,8 +126,16 @@ class MvNormal(baseDistribution):
     def variance(self):
         return self._variance
 
+    @variance.setter
+    def variance(self, values):
+        if np.ndim(values) == 1:
+            assert np.size(values) == self.ndim, ValueError("variance must have length {} when specifying 1D".format(self.ndim))
+            values = np.diag(values)
+
+        self._variance[:, :] = values
+
     @property
-    def inverseVariance(self):
+    def precision(self):
         return np.linalg.inv(self.variance)
 
     def __deepcopy__(self, memo={}):
@@ -144,6 +152,10 @@ class MvNormal(baseDistribution):
     #         return cf.Ax(self.inverseVariance, (x - self._mean)) * self.probability(x)
     #     elif order == 2:
     #         return cf.Ax(self.inverseVariance, self.probability(x))
+
+    def mahalanobis(self, x):
+        tmp = x - self.mean
+        return np.sqrt(np.dot(tmp, np.dot(self.precision, tmp)))
 
     def rng(self, size=1):
         """  """
@@ -174,9 +186,8 @@ class MvNormal(baseDistribution):
             # Start computing the exponent term
             # e^(-0.5*(x-mu)'*inv(cov)*(x-mu))                        (1)
             # Compute the multiplication on the right of equation 1
-            tmp = 0.5 * np.dot(xMu, np.dot(self.inverseVariance, xMu))
             # Probability Density Function
-            return -(0.5 * N) * np.log(2.0 * np.pi) - dv - tmp
+            return -(0.5 * N) * np.log(2.0 * np.pi) - dv - 0.5 * np.dot(xMu, np.dot(self.precision, xMu))
 
         else:
 
@@ -187,16 +198,12 @@ class MvNormal(baseDistribution):
                 'size of samples {} must equal number of distribution dimensions {} for a multivariate distribution'.format(N, nD))
             # For a diagonal matrix, the determinant is the product of the diagonal
             # entries
-            dv = cf.Det(self.variance)
-            # print(dv)
             # subtract the mean from the samples.
             xMu = x - self._mean
             # Take the inverse of the variance
-            tmp = cf.Inv(self.variance)
-            iv = cf.Ax(tmp, xMu)
-            exp = np.exp(-0.5 * np.dot(xMu, iv))
+            exp = np.exp(-0.5 * np.dot(xMu, cf.Ax(self.precision, xMu)))
             # Probability Density Function
-            prob = (1.0 / np.sqrt(((2.0 * np.pi)**N) * dv)) * exp
+            prob = (1.0 / np.sqrt(((2.0 * np.pi)**N) * cf.Det(self.variance))) * exp
             return prob
 
     @property

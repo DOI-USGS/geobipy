@@ -6,10 +6,11 @@ from copy import deepcopy
 import numpy as np
 from scipy.special import factorial
 from ..core import StatArray
+from .baseDistribution import baseDistribution
 
 
 
-class Order(object):
+class Order(baseDistribution):
     """ Class defining Order Statistics
     Specific application to Bayesian inversion of EM data
     """
