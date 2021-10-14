@@ -322,6 +322,15 @@ class DataPoint(Point):
         std = np.sqrt(additive_error**2.0 + (relative_error * self.predictedData)**2.0)
         return np.random.randn(self.nChannels) * std
 
+    def prior_derivative(self, order, model=None):
+
+        if order == 1:
+            return np.dot(self.J[self.active, :].T, self.predictedData.priorDerivative(order=1, i=self.active))
+        elif order == 2:
+            J = self.sensitivity(model)[self.active, :]
+            WdT_Wd = self.predictedData.priorDerivative(order=2)
+            return np.dot(J.T, np.dot(WdT_Wd, J))
+
     def init_posterior_plots(self, gs):
         """Initialize axes for posterior plots
 
@@ -372,10 +381,6 @@ class DataPoint(Point):
 
         self.relErr.plotPosteriors(ax=axes[2], **rel_error_kwargs)
         self.addErr.plotPosteriors(ax=axes[3], **add_error_kwargs)
-
-    def weightingMatrix(self, power=1.0):
-        """Return a diagonal data weighting matrix of the reciprocated data standard deviations."""
-        return np.diag(1.0 / self.std[self.active])
 
     def _systemIndices(self, system=0):
         """The slice indices for the requested system.
