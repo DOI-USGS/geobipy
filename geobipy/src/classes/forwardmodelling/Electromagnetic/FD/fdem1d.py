@@ -40,11 +40,11 @@ def fdem1dfwd(system, model1d, altitude):
     rx = np.empty(system.nFrequencies, dtype=np.float64)
 
     for i in range(system.nFrequencies):
-        tHeight[i] = altitude + system.transmitterLoops[i].z
-        rHeight[i] = -altitude + system.receiverLoops[i].z
-        tMom[i] = system.transmitterLoops[i].moment
-        rMom[i] = system.receiverLoops[i].moment
-        rx[i] = system.loopOffsets[i, 0]
+        tHeight[i] = altitude + system.transmitter[i].z
+        rHeight[i] = -(tHeight[i] + system.receiver[i].z)
+        tMom[i] = system.transmitter[i].moment
+        rMom[i] = system.receiver[i].moment
+        rx[i] = system.loop_offsets[i, 0]
     scl = tMom * rMom
 
     frequencies = np.asarray(system.frequencies)
@@ -52,7 +52,7 @@ def fdem1dfwd(system, model1d, altitude):
     kappa = np.asarray(model1d.magnetic_susceptibility)
     perm = np.asarray(model1d.magnetic_permeability)
     thickness = np.asarray(model1d.widths)
-    loopSeparation = np.asarray(system.loopSeparation)
+    loopSeparation = np.asarray(system.loop_separation)
 
     return nbFdem1dfwd(tid, frequencies, tHeight, rHeight, tMom, rx, loopSeparation, system.w0, system.lamda0, system.lamda02, system.w1, system.lamda1, system.lamda12, scl, conductivity, kappa, perm, thickness)
 
@@ -118,12 +118,13 @@ def fdem1dsen(system, model1d, altitude):
     tMom = np.zeros(system.nFrequencies)
     rMom = np.zeros(system.nFrequencies)
     rx = np.zeros(system.nFrequencies)
+
     for i in range(system.nFrequencies):
-        tHeight[i] = altitude + system.transmitterLoops[i].z
-        rHeight[i] = -altitude + system.transmitterLoops[i].z
-        tMom[i] = system.transmitterLoops[i].moment
-        rMom[i] = system.receiverLoops[i].moment
-        rx[i] = system.loopOffsets[i, 0]
+        tHeight[i] = altitude + system.transmitter[i].z
+        rHeight[i] = -(tHeight[i] + system.receiver[i].z)
+        tMom[i] = system.transmitter[i].moment
+        rMom[i] = system.receiver[i].moment
+        rx[i] = system.loop_offsets[i, 0]
     scl = tMom * rMom
 
     frequencies = np.asarray(system.frequencies)
@@ -131,7 +132,7 @@ def fdem1dsen(system, model1d, altitude):
     kappa = np.asarray(model1d.magnetic_susceptibility)
     perm = np.asarray(model1d.magnetic_permeability)
     thickness = np.asarray(model1d.widths)
-    loopSeparation = np.asarray(system.loopSeparation)
+    loopSeparation = np.asarray(system.loop_separation)
 
     return nbFdem1dsen(tid, frequencies, tHeight, rHeight, tMom, rx, loopSeparation, system.w0, system.lamda0, system.lamda02, system.w1, system.lamda1, system.lamda12, scl, conductivity, kappa, perm, thickness)
 

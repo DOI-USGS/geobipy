@@ -867,6 +867,7 @@ def safeEval(string):
     'TdemData',
     'FdemData',
     'TdemDataPoint',
+    'Tempest_datapoint',
     'FdemDataPoint',
     'TdemSystem',
     'FdemSystem',

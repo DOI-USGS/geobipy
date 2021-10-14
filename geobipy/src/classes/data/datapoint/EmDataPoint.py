@@ -3,6 +3,7 @@ from ...model.Model1D import Model1D
 from ....classes.core import StatArray
 from ...statistics.Histogram1D import Histogram1D
 from ...statistics.Histogram2D import Histogram2D
+from ...statistics.Distribution import Distribution
 from ....base import utilities as cf
 from ....base import plotting as cP
 from copy import deepcopy
@@ -98,12 +99,11 @@ class EmDataPoint(DataPoint):
         for i in range(nSamples):
             model._par[0] = c[i]
             self.forward(model)
-            PhiD[i] = self.dataMisfit(squared=True)
+            PhiD[i] = self.dataMisfit()
 
         i = np.argmin(PhiD)
         model._par[0] = c[i]
         return model
-
 
     def priorProbability(self, rErr, aErr, height, calibration, verbose=False):
         """Evaluate the probability for the EM data point given the specified attached priors
@@ -163,8 +163,7 @@ class EmDataPoint(DataPoint):
             return probability, np.asarray([P_relative, P_additive, P_height, P_calibration])
         return probability
 
-
-    def perturb(self, height, relativeError, additiveError, calibration):
+    def perturb(self):
         """Propose a new EM data point given the specified attached propsal distributions
 
         Parameters
@@ -194,26 +193,16 @@ class EmDataPoint(DataPoint):
             If a proposal has not been set on a requested parameter
 
         """
-        if (height):  # Update the candidate data elevation (if required)
-            self.perturbHeight()
+        self.perturbHeight()
+        self.perturbRelativeError()
+        self.perturbAdditiveError()
 
-        if (relativeError):
-            self.perturbRelativeError()
+        # # Generate new calibration errors
+        #     self.calibration[:] = self.calibration.proposal.rng(1)
+        #     # Update the mean of the proposed calibration errors
+        #     self.calibration.proposal.mean[:] = self.calibration
 
-        if (additiveError):
-            self.perturbAdditiveError()
-
-        # Update the data errors using the updated relative errors
-        if relativeError or additiveError:
-            self.updateErrors(self.relErr, self.addErr)
-
-        if (calibration):  # Update the calibration parameters for the candidate data (if required)
-            # Generate new calibration errors
-            self.calibration[:] = self.calibration.proposal.rng(1)
-            # Update the mean of the proposed calibration errors
-            self.calibration.proposal.mean[:] = self.calibration
-
-            self.calibrate()
+        #     self.calibrate()
 
     def perturbAdditiveError(self):
         if self.addErr.hasProposal:
@@ -263,7 +252,7 @@ class EmDataPoint(DataPoint):
         cP.ylabel('Data misfit')
 
 
-    def set_priors(self, height_prior=None, relative_error_prior=None, additive_error_prior=None):
+    def set_priors(self, height_prior=None, data_prior=None, relative_error_prior=None, additive_error_prior=None, **kwargs):
         """Set the priors on the datapoint's perturbable parameters
 
         Parameters
@@ -281,18 +270,53 @@ class EmDataPoint(DataPoint):
 
         """
 
-        if not height_prior is None:
-            self.z.set_prior(height_prior)
+        if height_prior is None:
+            if kwargs.get('solve_height', False):
+                height_prior = Distribution('Uniform', self.z - kwargs['maximum_height_change'], self.z + kwargs['maximum_height_change'], prng=kwargs['prng'])
 
-        if not relative_error_prior is None:
-            assert relative_error_prior.ndim == self.nSystems, ValueError("relative_error_prior must have {} dimensions".format(self.nSystems))
-            self.relErr.set_prior(relative_error_prior)
+        if data_prior is None:
+            data_prior = Distribution('MvLogNormal', self.data[self.active], self.std[self.active]**2.0, linearSpace=False, prng=kwargs['prng'])
 
-        if not additive_error_prior is None:
-            assert additive_error_prior.ndim == self.nSystems, ValueError("additive_error_prior must have {} dimensions".format(self.nSystems))
-            self.addErr.set_prior(additive_error_prior)
 
-    def setProposals(self, heightProposal=None, relativeErrorProposal=None, additiveErrorProposal=None):
+        # Define prior, proposal, posterior for relative error
+        if relative_error_prior is None:
+            if kwargs.get('solve_relative_error', False):
+                relative_error_prior = Distribution('Uniform', kwargs['minimum_relative_error'], kwargs['maximum_relative_error'], prng=kwargs['prng'])
+
+        # Define prior, proposal, posterior for additive error
+        if additive_error_prior is None:
+            if kwargs.get('solve_additive_error', False):
+                # log = Trisinstance(self, TdemDataPoint)
+                additive_error_prior = Distribution('Uniform', kwargs['minimum_additive_error'], kwargs['maximum_additive_error'], log=False, prng=kwargs['prng'])
+
+        self.set_height_prior(height_prior)
+
+        self.set_data_prior(data_prior)
+
+        self.set_relative_error_prior(relative_error_prior)
+
+        self.set_additive_error_prior(additive_error_prior)
+
+    def set_height_prior(self, prior):
+        if not prior is None:
+            self.z.prior = prior
+
+    def set_data_prior(self, prior):
+        if not prior is None:
+            self.predictedData.prior = prior
+
+    def set_relative_error_prior(self, prior):
+        if not prior is None:
+            assert prior.ndim == self.nSystems, ValueError("relative_error_prior must have {} dimensions".format(self.nSystems))
+            self.relErr.prior = prior
+
+    def set_additive_error_prior(self, prior):
+        if not prior is None:
+            assert prior.ndim == self.nSystems, ValueError("additive_error_prior must have {} dimensions".format(self.nSystems))
+            self.addErr.prior = prior
+
+
+    def set_proposals(self, height_proposal=None, relative_error_proposal=None, additive_error_proposal=None, **kwargs):
         """Set the proposals on the datapoint's perturbable parameters
 
         Parameters
@@ -310,11 +334,33 @@ class EmDataPoint(DataPoint):
 
         """
 
-        self.z.setProposal(heightProposal)
-        self.relErr.setProposal(relativeErrorProposal)
-        self.addErr.setProposal(additiveErrorProposal)
+        self.set_height_proposal(height_proposal, **kwargs)
+        self.set_relative_error_proposal(relative_error_proposal, **kwargs)
+        self.set_additive_error_proposal(additive_error_proposal, **kwargs)
 
-    def setPosteriors(self, log=None):
+
+    def set_height_proposal(self, proposal, **kwargs):
+
+        if proposal is None:
+            if kwargs['solve_height']:
+                proposal = Distribution('Normal', self.z.value, kwargs['height_proposal_variance'], prng=kwargs['prng'])
+
+        self.z.proposal = proposal
+
+    def set_relative_error_proposal(self, proposal, **kwargs):
+        if proposal is None:
+            if kwargs['solve_relative_error']:
+                proposal = Distribution('MvNormal', self.relErr, kwargs['relative_error_proposal_variance'], prng=kwargs['prng'])
+        self.relErr.proposal = proposal
+
+    def set_additive_error_proposal(self, proposal, **kwargs):
+        if proposal is None:
+            if kwargs['solve_additive_error']:
+                proposal = Distribution('MvLogNormal', self.addErr, kwargs['additive_error_proposal_variance'], linearSpace=False, prng=kwargs['prng'])
+
+        self.addErr.proposal = proposal
+
+    def set_posteriors(self, log=None):
         """ Set the posteriors based on the attached priors
 
         Parameters
@@ -323,37 +369,36 @@ class EmDataPoint(DataPoint):
 
         """
         # Create a histogram to set the height posterior.
-        self.setHeightPosterior()
+        self.set_height_posterior()
         # # Initialize the histograms for the relative errors
-        # self.set_predicted_data_posterior()
         # # Set the posterior for the data point.
-        # self.setAdditiveErrorPosterior(log=log)
-        self.setErrorPosterior(log=log)
+        self.set_relative_error_posterior()
+        self.set_additive_error_posterior(log=log)
 
         # self.set_predicted_data_posterior()
 
-    def setHeightPosterior(self):
+    def set_height_posterior(self):
         """
 
         """
         if self.z.hasPrior:
-            H = Histogram1D(edges = StatArray.StatArray(self.z.prior.bins(), name=self.z.name, units=self.z.units), relativeTo=self.z)
-            self.z.setPosterior(H)
+            self.z.posterior = Histogram1D(edges = StatArray.StatArray(self.z.prior.bins(), name=self.z.name, units=self.z.units), relativeTo=self.z)
 
-    def setErrorPosterior(self, log=None):
+    def set_relative_error_posterior(self):
         """
 
         """
-        if (not self.relErr.hasPrior) and (not self.addErr.hasPrior):
-            return
-
         if self.relErr.hasPrior:
-            rb = StatArray.StatArray(np.atleast_2d(self.relErr.prior.bins()), name=self.relErr.name, units=self.relErr.units)
-            self.relErr.setPosterior([Histogram1D(edges = rb[i, :]) for i in range(self.nSystems)])
+            bins = StatArray.StatArray(np.atleast_2d(self.relErr.prior.bins()), name=self.relErr.name, units=self.relErr.units)
+            self.relErr.posterior = [Histogram1D(edges = bins[i, :]) for i in range(self.nSystems)]
 
+    def set_additive_error_posterior(self, log=None):
+        """
+
+        """
         if self.addErr.hasPrior:
-            ab = StatArray.StatArray(np.atleast_2d(self.addErr.prior.bins()), name=self.addErr.name, units=self.data.units)
-            self.addErr.setPosterior([Histogram1D(edges = ab[i, :], log=log) for i in range(self.nSystems)])
+            bins = StatArray.StatArray(np.atleast_2d(self.addErr.prior.bins()), name=self.addErr.name, units=self.data.units)
+            self.addErr.posterior = [Histogram1D(edges = bins[i, :], log=log) for i in range(self.nSystems)]
 
     @property
     def summary(self):

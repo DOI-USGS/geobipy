@@ -111,7 +111,7 @@ try:
         # sensitivity if the model has changed since last time
         if modelChanged:
             E = Earth(model1d.par[:], model1d.widths[:-1])
-            G = Geometry(datapoint.z[0],
+            G = Geometry(datapoint.z.value,
                          datapoint.transmitter.roll, datapoint.transmitter.pitch, datapoint.transmitter.yaw,
                          datapoint.receiver.x - datapoint.transmitter.x,
                          datapoint.receiver.y - datapoint.transmitter.y,
@@ -133,12 +133,13 @@ try:
             iSys = datapoint._systemIndices(j)
             for i in range(np.size(ix)):  # For the specified layers
                 tmp = datapoint.system[j].derivative(datapoint.system[j].CONDUCTIVITYDERIVATIVE, ix[i] + 1)
+
                 # Store the necessary component
                 comps = []
                 if 'x' in datapoint.components_per_channel:
                     comps.append(tmp.SX)
                 if 'y' in datapoint.components_per_channel:
-                    comps.append(-tmp.SY)
+                    comps.append(tmp.SY)
                 if 'z' in datapoint.components_per_channel:
                     comps.append(-tmp.SZ)
                 J[iSys, i] = model1d.par[ix[i]] * np.hstack(comps)

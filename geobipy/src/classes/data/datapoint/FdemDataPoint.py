@@ -8,6 +8,7 @@ from .EmDataPoint import EmDataPoint
 from ...model.Model import Model
 from ...model.Model1D import Model1D
 from ...statistics.Histogram2D import Histogram2D
+from ...statistics.Distribution import Distribution
 from ....base.logging import myLogger
 from ...system.FdemSystem import FdemSystem
 import matplotlib.pyplot as plt
@@ -79,6 +80,17 @@ class FdemDataPoint(EmDataPoint):
         out._system = self._system
         # out.calibration = deepcopy(self.calibration)
         return out
+
+    @EmDataPoint.std.getter
+    def std(self):
+
+        tmp = (self.relErr * self.data)**2.0 + self.addErr**2.0
+        self._std = StatArray.StatArray(tmp, "Standard deviation", self.units)
+
+        if self.predictedData.hasPrior:
+            self.predictedData.prior.variance[np.diag_indices(np.sum(self.active))] = self._std[self.active]**2.0
+
+        return self._std
 
     @property
     def units(self):
@@ -249,12 +261,14 @@ class FdemDataPoint(EmDataPoint):
         """
         return self.system[system].frequencies[channel%self.nFrequencies[system]]
 
-    def set_priors(self, height_prior=None, data_prior=None, relative_error_prior=None, additive_error_prior=None):
+    def set_priors(self, height_prior=None, data_prior=None, relative_error_prior=None, additive_error_prior=None, **kwargs):
 
-        super().set_priors(height_prior, relative_error_prior, additive_error_prior)
+        super().set_priors(height_prior, relative_error_prior, additive_error_prior, **kwargs)
 
-        if not data_prior is None:
-            self.predictedData.set_prior(data_prior)
+        if data_prior is None:
+            data_prior = Distribution('MvLogNormal', self.data[self.active], self.std[self.active]**2.0, linearSpace=False, prng=kwargs['prng'])
+
+        self.predictedData.prior = data_prior
 
     def set_predicted_data_posterior(self):
         if self.predictedData.hasPrior:
@@ -270,9 +284,7 @@ class FdemDataPoint(EmDataPoint):
             # rto = 0.5 * (ybins[0] + ybins[-1])
             # ybins -= rto
 
-            H = Histogram2D(xEdges=xbins, xlog=10, yEdges=ybins, ylog=10)
-
-            self.predictedData.setPosterior(H)
+            self.predictedData.posterior = Histogram2D(xEdges=xbins, xlog=10, yEdges=ybins, ylog=10)
 
 
     def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
@@ -372,7 +384,6 @@ class FdemDataPoint(EmDataPoint):
             plt.sca(ax)
         else:
             ax = plt.gca()
-        plt.cla()
         cp.pretty(ax)
 
         cp.xlabel('Frequency (Hz)')
@@ -503,11 +514,11 @@ class FdemDataPoint(EmDataPoint):
         # Initialize the first conductivity
         model._par[0] = 10.0**c0
         self.forward(model)  # Forward model the EM data
-        PhiD1 = self.dataMisfit(squared=True)  # Compute the measure between observed and predicted data
+        PhiD1 = self.dataMisfit()  # Compute the measure between observed and predicted data
         # Initialize the second conductivity
         model._par[0] = 10.0**c1
         self.forward(model)  # Forward model the EM data
-        PhiD2 = self.dataMisfit(squared=True)  # Compute the measure between observed and predicted data
+        PhiD2 = self.dataMisfit()  # Compute the measure between observed and predicted data
         # Compute a relative change in the data misfit
         dPhiD = abs(PhiD2 - PhiD1) / PhiD2
         i = 1
@@ -516,7 +527,7 @@ class FdemDataPoint(EmDataPoint):
             cnew = 0.5 * (c0 + c1)  # Bisect the conductivities
             model._par[0] = 10.0**cnew
             self.forward(model)  # Forward model the EM data
-            PhiDnew = self.dataMisfit(squared=True)
+            PhiDnew = self.dataMisfit()
             if (PhiD2 > PhiDnew):
                 c1 = cnew
                 PhiD2 = PhiDnew

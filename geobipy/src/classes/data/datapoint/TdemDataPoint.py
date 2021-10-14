@@ -14,6 +14,7 @@ from ...system.TdemSystem_GAAEM import TdemSystem_GAAEM
 from ...system.filters.butterworth import butterworth
 from ...system.Waveform import Waveform
 from ...statistics.Histogram1D import Histogram1D
+from ...statistics.Distribution import Distribution
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -147,8 +148,7 @@ class TdemDataPoint(EmDataPoint):
     @transmitter.setter
     def transmitter(self, value):
         if not value is None:
-            assert isinstance(value, EmLoop), TypeError(
-                "transmitter must be of type EmLoop")
+            assert isinstance(value, EmLoop), TypeError("transmitter must be of type EmLoop")
             self._transmitter = value
 
     # @property
@@ -197,10 +197,54 @@ class TdemDataPoint(EmDataPoint):
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
         out._system = self._system
-        out._transmitter = self._transmitter
+        out._transmitter = deepcopy(self.transmitter)
         out._receiver = self._receiver
 
         return out
+
+    @EmDataPoint.std.getter
+    def std(self):
+        """ Updates the data errors
+
+        Assumes a t^-0.5 behaviour e.g. logarithmic gate averaging
+        V0 is assumed to be ln(Error @ 1ms)
+
+        Parameters
+        ----------
+        relativeErr : list of scalars or list of array_like
+            A fraction percentage that is multiplied by the observed data. The list should have length equal to the number of systems. The entries in each item can be scalar or array_like.
+        additiveErr : list of scalars or list of array_like
+            An absolute value of additive error. The list should have length equal to the number of systems. The entries in each item can be scalar or array_like.
+
+        Raises
+        ------
+        TypeError
+            If relativeErr or additiveErr is not a list
+        TypeError
+            If the length of relativeErr or additiveErr is not equal to the number of systems
+        TypeError
+            If any item in the relativeErr or additiveErr lists is not a scalar or array_like of length equal to the number of time channels
+        ValueError
+            If any relative or additive errors are <= 0.0
+        """
+
+        t0 = 0.5 * np.log(1e-3)  # Assign fixed t0 at 1ms
+        # For each system assign error levels using the user inputs
+        for i in range(self.nSystems):
+            iSys = self._systemIndices(system=i)
+
+            # Compute the relative error
+            rErr = self.relErr[i] * self.data[iSys]
+            aErr = np.exp(
+                np.log(self.addErr[i]) - 0.5 * np.log(self.off_time(i)) + t0)
+
+            self._std[iSys] = np.sqrt((rErr**2.0) + (aErr**2.0))
+
+        # Update the variance of the predicted data prior
+        if self.predictedData.hasPrior:
+            self.predictedData.prior.variance[np.diag_indices(np.sum(self.active))] = self._std[self.active]**2.0
+
+        return self._std
 
     @property
     def system_indices(self):
@@ -434,15 +478,10 @@ class TdemDataPoint(EmDataPoint):
 
         grp.create_dataset('nSystems', data=self.nSystems)
         for i in range(self.nSystems):
-            grp.create_dataset('System{}'.format(i), data=np.string_(
-                psplt(self.system[i].filename)[-1]))
+            grp.create_dataset('System{}'.format(i), data=np.string_(psplt(self.system[i].filename)[-1]))
 
-        self.transmitter.createHdf(
-            grp, 'T', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.receiver.createHdf(
-            grp, 'R', nRepeats=nRepeats, fillvalue=fillvalue)
-        # self.loopOffset.createHdf(
-        #     grp, 'loop_offset', nRepeats=nRepeats, fillvalue=fillvalue)
+        self.transmitter.createHdf(grp, 'T', nRepeats=nRepeats, fillvalue=fillvalue)
+        self.receiver.createHdf(grp, 'R', nRepeats=nRepeats, fillvalue=fillvalue)
 
         return grp
 
@@ -458,7 +497,6 @@ class TdemDataPoint(EmDataPoint):
 
         self.transmitter.writeHdf(grp, 'T', index=index)
         self.receiver.writeHdf(grp, 'R', index=index)
-        # self.loopOffset.writeHdf(grp, 'loop_offset', index=index)
 
     @classmethod
     def fromHdf(cls, grp, index=None, **kwargs):
@@ -471,10 +509,8 @@ class TdemDataPoint(EmDataPoint):
 
         self = super(TdemDataPoint, cls).fromHdf(grp, index)
 
-        self.transmitter = (eval(cf.safeEval(grp['T'].attrs.get('repr')))).fromHdf(
-            grp['T'], index=index)
-        self.receiver = (eval(cf.safeEval(grp['R'].attrs.get('repr')))).fromHdf(
-            grp['R'], index=index)
+        self.transmitter = (eval(cf.safeEval(grp['T'].attrs.get('repr')))).fromHdf(grp['T'], index=index)
+        self.receiver = (eval(cf.safeEval(grp['R'].attrs.get('repr')))).fromHdf(grp['R'], index=index)
 
         if 'loop_offset' in grp:
             loopOffset = StatArray.StatArray.fromHdf(grp['loop_offset'], index=index)
@@ -564,13 +600,13 @@ class TdemDataPoint(EmDataPoint):
 
         return ax
 
-    def plot_posteriors(self, axes=None, height_kwargs={}, data_kwargs={}, rel_error_kwargs={}, add_error_kwargs={}, **kwargs):
-        super().plot_posteriors(axes=axes,
-                                height_kwargs=height_kwargs,
-                                data_kwargs=data_kwargs,
-                                rel_error_kwargs=rel_error_kwargs,
-                                add_error_kwargs=add_error_kwargs,
-                                **kwargs)
+    # def plot_posteriors(self, axes=None, height_kwargs={}, data_kwargs={}, rel_error_kwargs={}, add_error_kwargs={}, **kwargs):
+    #     super().plot_posteriors(axes=axes,
+    #                             height_kwargs=height_kwargs,
+    #                             data_kwargs=data_kwargs,
+    #                             rel_error_kwargs=rel_error_kwargs,
+    #                             add_error_kwargs=add_error_kwargs,
+    #                             **kwargs)
 
     def plotPredicted(self, title='Time Domain EM Data', **kwargs):
 
@@ -692,105 +728,25 @@ class TdemDataPoint(EmDataPoint):
             return probability, np.asarray([P_relative, P_additive, P_height, P_calibration])
         return probability
 
-    def setPosteriors(self, log=10):
-        super().setPosteriors(log=log)
+    def set_posteriors(self, log=10):
+        super().set_posteriors(log=log)
 
-    def set_priors(self, height_prior=None, data_prior=None, relative_error_prior=None, additive_error_prior=None):
+    def set_priors(self, height_prior=None, data_prior=None, relative_error_prior=None, additive_error_prior=None, **kwargs):
 
-        super().set_priors(height_prior, relative_error_prior, additive_error_prior)
+        if kwargs.get('solve_additive_error', False):
+            additive_error_prior = Distribution('Uniform', kwargs['minimum_additive_error'], kwargs['maximum_additive_error'], log=10, prng=kwargs['prng'])
 
-        if not data_prior is None:
-            self.predictedData.set_prior(data_prior)
+        super().set_priors(height_prior, data_prior, relative_error_prior, additive_error_prior, **kwargs)
 
-    def updateErrors(self, relativeErr, additiveErr):
-        """ Updates the data errors
+        # if not data_prior is None:
+        #     self.predictedData.prior = data_prior
 
-        Assumes a t^-0.5 behaviour e.g. logarithmic gate averaging
-        V0 is assumed to be ln(Error @ 1ms)
+    def set_additive_error_proposal(self, proposal, **kwargs):
+        if proposal is None:
+            if kwargs.get('solve_additive_error', False):
+                proposal = Distribution('MvLogNormal', self.addErr, kwargs['additive_error_proposal_variance'], linearSpace=True, prng=kwargs['prng'])
 
-        Parameters
-        ----------
-        relativeErr : list of scalars or list of array_like
-            A fraction percentage that is multiplied by the observed data. The list should have length equal to the number of systems. The entries in each item can be scalar or array_like.
-        additiveErr : list of scalars or list of array_like
-            An absolute value of additive error. The list should have length equal to the number of systems. The entries in each item can be scalar or array_like.
-
-        Raises
-        ------
-        TypeError
-            If relativeErr or additiveErr is not a list
-        TypeError
-            If the length of relativeErr or additiveErr is not equal to the number of systems
-        TypeError
-            If any item in the relativeErr or additiveErr lists is not a scalar or array_like of length equal to the number of time channels
-        ValueError
-            If any relative or additive errors are <= 0.0
-        """
-        relativeErr = np.atleast_1d(relativeErr)
-        additiveErr = np.atleast_1d(additiveErr)
-
-        #assert (isinstance(relativeErr, list)), TypeError("relativeErr must be a list of size equal to the number of systems {}".format(self.nSystems))
-        assert (relativeErr.size == self.nSystems), TypeError(
-            "relativeErr must be a list of size equal to the number of systems {}".format(self.nSystems))
-
-        #assert (isinstance(additiveErr, list)), TypeError("additiveErr must be a list of size equal to the number of systems {}".format(self.nSystems))
-        assert (additiveErr.size == self.nSystems), TypeError(
-            "additiveErr must be a list of size equal to the number of systems {}".format(self.nSystems))
-
-        t0 = 0.5 * np.log(1e-3)  # Assign fixed t0 at 1ms
-        # For each system assign error levels using the user inputs
-        for i in range(self.nSystems):
-            assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], np.ndarray)), TypeError(
-                "relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
-            assert (isinstance(additiveErr[i], float) or isinstance(additiveErr[i], np.ndarray)), TypeError(
-                "additiveErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
-            assert (np.all(relativeErr[i] > 0.0)), ValueError(
-                "relativeErr for system {} cannot contain values <= 0.0.".format(i+1))
-            assert (np.all(additiveErr[i] > 0.0)), ValueError(
-                "additiveErr for system {} should contain values > 0.0. Make sure the values are in linear space".format(i+1))
-            iSys = self._systemIndices(system=i)
-
-            # Compute the relative error
-            rErr = relativeErr[i] * self.data[iSys]
-            aErr = np.exp(
-                np.log(additiveErr[i]) - 0.5 * np.log(self.off_time(i)) + t0)
-
-            self.std[iSys] = np.sqrt((rErr**2.0) + (aErr**2.0))
-
-        # Update the variance of the predicted data prior
-        if self.predictedData.hasPrior:
-            self.predictedData.prior.variance[np.diag_indices(np.sum(self.active))] = self.std[self.active]**2.0
-
-    def updateSensitivity(self, mod):
-        """ Compute an updated sensitivity matrix using a new model based on an existing matrix """
-
-        J1 = np.zeros([np.size(self.active), mod.nCells[0]])
-
-        perturbedLayer = mod.action[1]
-
-        if(mod.action[0] == 'none'):  # Do Nothing!
-            J1[:, :] = self.J[:, :]
-
-        elif (mod.action[0] == 'insert'):  # Created a layer
-            J1[:, :perturbedLayer] = self.J[:, :perturbedLayer]
-            J1[:, perturbedLayer + 2:] = self.J[:, perturbedLayer + 1:]
-            tmp = self.sensitivity(
-                mod, ix=[perturbedLayer, perturbedLayer + 1], modelChanged=True)
-            J1[:, perturbedLayer:perturbedLayer + 2] = tmp
-
-        elif(mod.action[0] == 'delete'):  # Deleted a layer
-            J1[:, :perturbedLayer] = self.J[:, :perturbedLayer]
-            J1[:, perturbedLayer + 1:] = self.J[:, perturbedLayer + 2:]
-            tmp = self.sensitivity(mod, ix=[perturbedLayer], modelChanged=True)
-            J1[:, perturbedLayer] = tmp[:, 0]
-
-        elif(mod.action[0] == 'perturb'):  # Perturbed a layer
-            J1[:, :perturbedLayer] = self.J[:, :perturbedLayer]
-            J1[:, perturbedLayer + 1:] = self.J[:, perturbedLayer + 1:]
-            tmp = self.sensitivity(mod, ix=[perturbedLayer], modelChanged=True)
-            J1[:, perturbedLayer] = tmp[:, 0]
-
-        self.J = J1
+        self.addErr.proposal = proposal
 
     def forward(self, mod):
         """ Forward model the data from the given model """

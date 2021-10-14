@@ -5,6 +5,7 @@ from ...classes.statistics.Histogram1D import Histogram1D
 from ...classes.statistics.Histogram2D import Histogram2D
 from ...classes.data.datapoint.FdemDataPoint import FdemDataPoint
 from ...classes.data.datapoint.TdemDataPoint import TdemDataPoint
+from ...classes.data.datapoint.Tempest_datapoint import Tempest_datapoint
 from ...classes.model.Model import Model
 from ...classes.model.Model1D import Model1D
 from ...classes.mesh.RectilinearMesh1D import RectilinearMesh1D

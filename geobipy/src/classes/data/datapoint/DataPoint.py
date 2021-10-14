@@ -8,6 +8,7 @@ from ....base import plotting as cP
 from ....base import MPI as myMPI
 from ...statistics.Histogram2D import Histogram2D
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
@@ -148,7 +149,13 @@ class DataPoint(Point):
         else:
             if np.size(values) == 1:
                 values = np.full(self.nSystems, fill_value=values)
-            assert np.size(values) == self.nSystems, ValueError("additiveError must have length {}".format(self.nSystems))
+            else:
+                values = np.asarray(values)
+            assert np.size(values) == self.nSystems, ValueError("additiveError must be a list of size equal to the number of systems {}".format(self.nSystems))
+            assert (np.all(values > 0.0)), ValueError("additiveErr must be > 0.0. Make sure the values are in linear space")
+            # assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], np.ndarray)), TypeError(
+            #     "relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
+
         self._addErr = StatArray.StatArray(values, '$\epsilon_{Additive}$', self.units)
 
     @property
@@ -272,9 +279,15 @@ class DataPoint(Point):
         else:
             if np.size(values) == 1:
                 values = np.full(self.nSystems, fill_value=values)
-            assert np.size(values) == self.nSystems, ValueError("relErr must have size {}".format(self.nSystems))
+            else:
+                values = np.asarray(values)
+            assert np.size(values) == self.nSystems, ValueError("relErr must be a list of size equal to the number of systems {}".format(self.nSystems))
+            assert (np.all(values > 0.0)), ValueError("relErr must be > 0.0.")
+            # assert (isinstance(additiveErr[i], float) or isinstance(additiveErr[i], np.ndarray)), TypeError(
+            #     "additiveErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
 
         self._relErr = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
+
 
     @property
     def std(self):
@@ -318,6 +331,8 @@ class DataPoint(Point):
             Gridspec to split
 
         """
+        if isinstance(gs, matplotlib.figure.Figure):
+            gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
 
         splt = gs.subgridspec(2, 2, width_ratios=[1, 4], height_ratios=[2, 1], wspace=0.3)
         ax = []
@@ -348,10 +363,13 @@ class DataPoint(Point):
         self.z.plotPosteriors(ax = axes[0], **height_kwargs)
 
         self.plot(ax=axes[1], **data_kwargs)
+        self.plotPredicted(color=cP.wellSeparated[0], ax=axes[1], **data_kwargs)
         if not best is None:
             best.plotPredicted(color=cP.wellSeparated[3], ax=axes[1], **data_kwargs)
+
         # data_kwargs['noColorbar'] = data_kwargs.get('noColorbar', True)
         # ax.append(self.predictedData.plotPosteriors(ax = axes[1], **data_kwargs))
+
         self.relErr.plotPosteriors(ax=axes[2], **rel_error_kwargs)
         self.addErr.plotPosteriors(ax=axes[3], **add_error_kwargs)
 
@@ -389,7 +407,7 @@ class DataPoint(Point):
         """
         return self.predictedData.probability(i=self.active, log=log)
 
-    def dataMisfit(self, squared=False):
+    def dataMisfit(self):
         """Compute the :math:`L_{2}` norm squared misfit between the observed and predicted data
 
         .. math::
@@ -408,40 +426,40 @@ class DataPoint(Point):
             The misfit value.
 
         """
-        assert not any(self._std[self.active] == 0.0), ValueError('Cannot compute the misfit when the data standard deviations are zero.')
+        # The data misfit is the mahalanobis distance of the multivariate distance.
+        # assert not any(self.std[self.active] <= 0.0), ValueError('Cannot compute the misfit when the data standard deviations are zero.')
         tmp2 = 1.0 / self.std[self.active]
-        PhiD = np.float64(np.sum((cf.Ax(tmp2, self.deltaD[self.active]))**2.0, dtype=np.float64))
-        return PhiD if squared else np.sqrt(PhiD)
+        return np.sqrt(np.float64(np.sum((cf.Ax(tmp2, self.deltaD[self.active]))**2.0, dtype=np.float64)))
 
 
-    def scaleJ(self, Jin, power=1.0):
-        """ Scales a matrix by the errors in the given data
+    # def scaleJ(self, Jin, power=1.0):
+    #     """ Scales a matrix by the errors in the given data
 
-        Useful if a sensitivity matrix is generated using one data point, but must be scaled by the errors in another.
+    #     Useful if a sensitivity matrix is generated using one data point, but must be scaled by the errors in another.
 
-        Parameters
-        ----------
-        Jin : array_like
-            2D array representing a matrix
-        power : float
-            Power to raise the error level too. Default is -1.0
+    #     Parameters
+    #     ----------
+    #     Jin : array_like
+    #         2D array representing a matrix
+    #     power : float
+    #         Power to raise the error level too. Default is -1.0
 
-        Returns
-        -------
-        Jout : array_like
-            Matrix scaled by the data errors
+    #     Returns
+    #     -------
+    #     Jout : array_like
+    #         Matrix scaled by the data errors
 
-        Raises
-        ------
-        ValueError
-            If the number of rows in Jin do not match the number of active channels in the datapoint
+    #     Raises
+    #     ------
+    #     ValueError
+    #         If the number of rows in Jin do not match the number of active channels in the datapoint
 
-        """
-        assert Jin.shape[0] == self.nActiveChannels, ValueError("Number of rows of Jin must match the number of active channels in the datapoint {}".format(self.nActiveChannels))
+    #     """
+    #     assert Jin.shape[0] == self.nActiveChannels, ValueError("Number of rows of Jin must match the number of active channels in the datapoint {}".format(self.nActiveChannels))
 
-        Jout = np.zeros(Jin.shape)
-        Jout[:, :] = Jin * (np.repeat(self._std[self.active, np.newaxis]**-power, Jout.shape[1], 1))
-        return Jout
+    #     Jout = np.zeros(Jin.shape)
+    #     Jout[:, :] = Jin * (np.repeat(self.std[self.active, np.newaxis]**-power, Jout.shape[1], 1))
+    #     return Jout
 
     @property
     def summary(self):
@@ -453,47 +471,9 @@ class DataPoint(Point):
                'z: {} \n'
                'elevation: {} \n'
                'Number of active channels: {} \n'
-               '{} {} {}').format(self._channelNames, self.x, self.y, self.z, self.elevation, self.nActiveChannels, self._data[self.active].summary, self._predictedData[self.active].summary, self._std[self.active].summary)
+               '{} {} {}').format(self._channelNames, self.x, self.y, self.z, self.elevation, self.nActiveChannels, self.data[self.active].summary, self.predictedData[self.active].summary, self.std[self.active].summary)
         return msg
 
-
-    def updateErrors(self, relativeErr, additiveErr):
-        """Updates the data errors.
-
-        Updates the standard deviation of the data errors using the following model
-
-        .. math::
-            \sqrt{(\mathbf{\epsilon}_{rel} \mathbf{d}^{obs})^{2} + \mathbf{\epsilon}^{2}_{add}},
-
-        where :math:`\mathbf{\epsilon}_{rel}` is the relative error, a percentage fraction and :math:`\mathbf{\epsilon}_{add}` is the additive error.
-
-        If the predicted data have been assigned a multivariate normal distribution, the variance of that distribution is also updated as the squared standard deviations.
-
-        Parameters
-        ----------
-        relativeErr : float or array_like
-            A fraction percentage that is multiplied by the observed data.
-        additiveErr : float or array_like
-            An absolute value of additive error.
-
-        Raises
-        ------
-        ValueError
-            If relativeError is <= 0.0
-        ValueError
-            If additiveError is <= 0.0
-
-        """
-        relativeErr = np.atleast_1d(relativeErr)
-        additiveErr = np.atleast_1d(additiveErr)
-        assert all(relativeErr > 0.0), ValueError("relativeErr must be > 0.0")
-        assert all(additiveErr > 0.0), ValueError("additiveErr must be > 0.0")
-
-        tmp = (relativeErr * self.data)**2.0 + additiveErr**2.0
-        self._std[:] = np.sqrt(tmp)
-
-        if self._predictedData.hasPrior:
-            self._predictedData.prior.variance[np.diag_indices(self.nActiveChannels)] = tmp[self.active]
 
 
     def createHdf(self, parent, myName, withPosterior=True, nRepeats=None, fillvalue=None):

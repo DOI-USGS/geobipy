@@ -13,6 +13,8 @@ from ...system.filters.butterworth import butterworth
 from ...system.Waveform import Waveform
 from ...statistics.Histogram1D import Histogram1D
 from ...statistics.Histogram2D import Histogram2D
+from ...statistics.Distribution import Distribution
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -81,17 +83,24 @@ class Tempest_datapoint(TdemDataPoint):
                  lineNumber=0.0, fiducial=0.0):
         """Initializer. """
 
+        self._system = None
         if system is None:
-            return
+            return super().__init__(x=x, y=y, z=z, elevation=elevation)
+        self.system = system
 
-        super().__init__(x=x, y=y, z=z, elevation=elevation,
-                         data=None, std=None, predictedData=None,
-                         system=system, transmitter_loop=transmitter_loop,
-                         receiver_loop=receiver_loop,
-                         lineNumber=lineNumber, fiducial=fiducial)
+        self.units = None
+
+        self._channels_per_system = self.n_components * self.nTimes
 
         self.primary_field = primary_field
         self.secondary_field = secondary_field
+
+        super().__init__(x=x, y=y, z=z, elevation=elevation,
+                         data=None, std=None, predictedData=None,
+                         system=system,
+                         transmitter_loop=transmitter_loop,
+                         receiver_loop=receiver_loop,
+                         lineNumber=lineNumber, fiducial=fiducial)
 
         self.predicted_primary_field = None
         self.predicted_secondary_field = None
@@ -104,6 +113,18 @@ class Tempest_datapoint(TdemDataPoint):
         out._predicted_secondary_field = deepcopy(self.predicted_secondary_field)
 
         return out
+
+    @TdemDataPoint.addErr.setter
+    def addErr(self, values):
+        if values is None:
+            values = self.nChannels
+        else:
+            values = np.asarray(values)
+            assert np.size(values) == self.nChannels, ValueError(("Tempest data must a have additive error values for all time gates and all components. \n"
+                                                              "addErr must have size {}").format(self.nChannels))
+            assert (np.all(values > 0.0)), ValueError("addErr must be > 0.0.")
+
+        self._addErr = StatArray.StatArray(values, '$\epsilon_{additive}x10^{2}$', self.units)
 
     @property
     def channels(self):
@@ -135,8 +156,10 @@ class Tempest_datapoint(TdemDataPoint):
         if values is None:
             values = 2*self.nSystems
         else:
-            assert values.size == 2*self.nSystems, ValueError(("Tempest data must a have relative error for the primary and secondary fields, for each system. \n"
-                                                              "relErr must have size {}").format(2*self.nSystems))
+            values = np.asarray(values)
+            assert np.size(values) == self.n_components*self.nSystems, ValueError(("Tempest data must a have relative error for the primary and secondary fields, for each system. \n"
+                                                              "relErr must have size {}").format(self.n_components*self.nSystems))
+            assert (np.all(values > 0.0)), ValueError("relErr must be > 0.0.")
 
         self._relErr = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
 
@@ -189,29 +212,117 @@ class Tempest_datapoint(TdemDataPoint):
 
         self._predicted_secondary_field = StatArray.StatArray(values, "Predicted secondary field", self.units)
 
+    @TdemDataPoint.std.getter
+    def std(self):
+        """ Compute the data errors. """
+
+        # For each system assign error levels using the user inputs
+        for i in range(self.nSystems):
+            for j in range(self.n_components):
+                ic = self._component_indices(j, i)
+                relative_error = self.relErr[(i*2)+j] * self.data[ic]
+
+                self._std[ic] = np.sqrt((relative_error**2.0) + (self.addErr[ic]**2.0))
+
+        # Update the variance of the predicted data prior
+        if self.predictedData.hasPrior:
+            self.predictedData.prior.variance[np.diag_indices(self.active.size)] = self._std[self.active]**2.0
+
+        return self._std
+
     @TdemDataPoint.units.setter
     def units(self, value):
-
         if value is None:
-            self._units = r"fT"
+            value = r"fT"
         else:
-            assert isinstance(value, str), TypeError('units must have type str')
-            self._units = value
+            assert isinstance(value, str), TypeError(
+                'units must have type str')
+        self._units = value
 
-    def likelihood(self, log):
-        """Compute the likelihood of the current predicted data given the observed data and assigned errors
+    def init_posterior_plots(self, gs):
+        """Initialize axes for posterior plots
 
-        Returns
-        -------
-        out : np.float64
-            Likelihood of the data point
+        Parameters
+        ----------
+        gs : matplotlib.gridspec.Gridspec
+            Gridspec to split
 
         """
-        return self.predictedData.probability(i=self.active, log=log)
+        if isinstance(gs, matplotlib.figure.Figure):
+            gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
+
+        splt = gs.subgridspec(2, 2, width_ratios=[1, 4], height_ratios=[2, 1], wspace=0.3)
+        ax = []
+        # Height axis
+        ax.append(plt.subplot(splt[0, 0]))
+        # Data axis
+        ax.append(plt.subplot(splt[0, 1]))
+
+        splt2 = splt[1, :].subgridspec(self.nSystems*self.n_components, 2, wspace=0.2)
+        # Relative error axes
+        ax.append([plt.subplot(splt2[i, 0]) for i in range(self.nSystems*self.n_components)])
+
+        # # Additive Error axes
+        # ax.append([None for i in range(self.nSystems*self.n_components)])
+
+        # Pitch axes
+        ax.append([plt.subplot(splt2[i, 1]) for i in range(self.nSystems)])
+
+        return ax
+
+    # def likelihood(self, log):
+    #     """Compute the likelihood of the current predicted data given the observed data and assigned errors
+
+    #     Returns
+    #     -------
+    #     out : np.float64
+    #         Likelihood of the data point
+
+    #     """
+    #     return self.predictedData.probability(i=self.active, log=log)
 
     def off_time(self, system=0):
         """ Return the window times in an StatArray """
         return self.system[system].off_time
+
+    def set_priors(self, height_prior=None, data_prior=None, relative_error_prior=None, additive_error_prior=None, transmitter_pitch_prior=None, **kwargs):
+
+        super().set_priors(height_prior, data_prior, relative_error_prior, additive_error_prior, **kwargs)
+
+        if transmitter_pitch_prior is None:
+            if kwargs.get('solve_transmitter_pitch', False):
+                transmitter_pitch_prior = Distribution('Uniform',
+                                                        self.transmitter.pitch - kwargs['maximum_transmitter_pitch_change'],
+                                                        self.transmitter.pitch + kwargs['maximum_transmitter_pitch_change'],
+                                                        prng=kwargs['prng'])
+
+        self.transmitter.set_priors(pitch_prior=transmitter_pitch_prior)
+
+    def set_relative_error_prior(self, prior):
+        if not prior is None:
+            assert prior.ndim == 2*self.nSystems, ValueError("relative_error_prior must have {} dimensions".format(self.nSystems))
+            self.relErr.prior = prior
+
+    def set_proposals(self, height_proposal=None, relative_error_proposal=None, additive_error_proposal=None, transmitter_pitch_proposal=None, **kwargs):
+
+        super().set_proposals(height_proposal, relative_error_proposal, additive_error_proposal, **kwargs)
+
+        if transmitter_pitch_proposal is None:
+            if kwargs.get('solve_transmitter_pitch', False):
+                transmitter_pitch_proposal = Distribution('Normal', self.transmitter.pitch.value, kwargs['transmitter_pitch_proposal_variance'], prng=kwargs['prng'])
+
+        self.transmitter.set_proposals(pitch_proposal=transmitter_pitch_proposal)
+
+    def set_posteriors(self, log=None):
+
+        super().set_posteriors(log=None)
+
+        self.transmitter.set_posteriors()
+
+    # def set_additive_error_prior(self, prior):
+    #     if not prior is None:
+    #         assert additive_error_prior.ndim == self.nChannels, ValueError("additive_error_prior must have {} dimensions".format(self.nChannels))
+    #         self.addErr.set_prior(prior)
 
     def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
         """ Create the hdf group metadata in file
@@ -221,18 +332,11 @@ class Tempest_datapoint(TdemDataPoint):
 
         grp = super().createHdf(parent, name, withPosterior, nRepeats, fillvalue)
         self.primary_field.createHdf(grp, 'primary_field', nRepeats=nRepeats, fillvalue=fillvalue)
+        self.secondary_field.createHdf(grp, 'secondary_field', nRepeats=nRepeats, fillvalue=fillvalue)
+        self.predicted_primary_field.createHdf(grp, 'predicted_primary_field', nRepeats=nRepeats, fillvalue=fillvalue)
+        self.predicted_secondary_field.createHdf(grp, 'predicted_secondary_field', nRepeats=nRepeats, fillvalue=fillvalue)
 
         return grp
-
-
-        # grp.create_dataset('nSystems', data=self.nSystems)
-        # for i in range(self.nSystems):
-        #     grp.create_dataset('System{}'.format(i), data=np.string_(psplt(self.system[i].fileName)[-1]))
-
-        # self.transmitter.createHdf(grp, 'T', nRepeats=nRepeats, fillvalue=fillvalue)
-        # self.receiver.createHdf(grp, 'R', nRepeats=nRepeats, fillvalue=fillvalue)
-        # self.loopOffset.createHdf(grp, 'loop_offset', nRepeats=nRepeats, fillvalue=fillvalue)
-
 
     def writeHdf(self, parent, name, withPosterior=True, index=None):
         """ Write the StatArray to an HDF object
@@ -245,15 +349,63 @@ class Tempest_datapoint(TdemDataPoint):
         grp = parent[name]
 
         self.primary_field.writeHdf(grp, 'primary_field', index=index)
+        self.secondary_field.writeHdf(grp, 'secondary_field', index=index)
+        self.predicted_primary_field.writeHdf(grp, 'predicted_primary_field', index=index)
+        self.predicted_secondary_field.writeHdf(grp, 'predicted_secondary_field', index=index)
 
-    def fromHdf(self, grp, index=None, **kwargs):
+    @classmethod
+    def fromHdf(cls, grp, index=None, **kwargs):
         """ Reads the object from a HDF group """
 
-        super.fromHdf(grp, index, **kwargs)
+        self = super(Tempest_datapoint, cls).fromHdf(grp, index, **kwargs)
 
         self._primary_field = StatArray.StatArray.fromHdf(grp['primary_field'], index=index)
+        self._secondary_field = StatArray.StatArray.fromHdf(grp['secondary_field'], index=index)
+        self._predicted_primary_field = StatArray.StatArray.fromHdf(grp['predicted_primary_field'], index=index)
+        self._predicted_secondary_field = StatArray.StatArray.fromHdf(grp['predicted_secondary_field'], index=index)
 
         return self
+
+    def perturb(self):
+        """Propose a new EM data point given the specified attached propsal distributions
+
+        Parameters
+        ----------
+        height : bool
+            Propose a new observation height.
+        relative_error : bool
+            Propose a new relative error.
+        additive_error : bool
+            Propose a new additive error.
+        pitch : bool
+            Propose new pitch.
+
+        Returns
+        -------
+        out : subclass of EmDataPoint
+            The proposed data point
+
+        Notes
+        -----
+        For each boolean, the associated proposal must have been set.
+
+        Raises
+        ------
+        TypeError
+            If a proposal has not been set on a requested parameter
+
+        """
+
+        super().perturb()
+
+        self.perturb_pitch()
+
+    def perturb_pitch(self):
+        if self.transmitter.pitch.hasProposal:
+            # Generate a new error
+            self.transmitter.pitch.perturb(imposePrior=True)
+            # Update the mean of the proposed errors
+            self.transmitter.pitch.proposal.mean = self.transmitter.pitch
 
     def plotWaveform(self,**kwargs):
         for i in range(self.nSystems):
@@ -271,14 +423,118 @@ class Tempest_datapoint(TdemDataPoint):
         kwargs['logX'] = 10
         return super().plot(**kwargs)
 
+    def plot_posteriors(self, axes=None, height_kwargs={}, data_kwargs={}, rel_error_kwargs={}, pitch_kwargs={}, **kwargs):
+
+        assert len(axes) == 4, ValueError("Must have length 3 list of axes for the posteriors. self.init_posterior_plots can generate them")
+
+        best = kwargs.pop('best', None)
+        if not best is None:
+            height_kwargs['line'] = best.z
+            rel_error_kwargs['line'] = best.relErr
+            # add_error_kwargs['line'] = best.addErr
+            pitch_kwargs['line'] = best.transmitter.pitch
+
+        height_kwargs['rotate'] = height_kwargs.get('rotate', True)
+        self.z.plotPosteriors(ax = axes[0], **height_kwargs)
+
+        self.plot(ax=axes[1], **data_kwargs)
+        self.plotPredicted(color=cp.wellSeparated[0], ax=axes[1], **data_kwargs)
+        if not best is None:
+            best.plotPredicted(color=cp.wellSeparated[3], ax=axes[1], **data_kwargs)
+
+        # data_kwargs['noColorbar'] = data_kwargs.get('noColorbar', True)
+        # ax.append(self.predictedData.plotPosteriors(ax = axes[1], **data_kwargs))
+
+        self.relErr.plotPosteriors(ax=axes[2], **rel_error_kwargs)
+        # self.addErr.plotPosteriors(ax=axes[3], **add_error_kwargs)
+
+        self.transmitter.pitch.plotPosteriors(ax = axes[3], **pitch_kwargs)
+
     def plotPredicted(self, **kwargs):
         kwargs['xscale'] = 'linear'
         kwargs['yscale'] = 'linear'
         kwargs['logX'] = 10
         return super().plotPredicted(**kwargs)
 
-    def setPosteriors(self):
+    def plot_secondary_field(self, title='Secondary field', **kwargs):
+
+        ax = kwargs.pop('ax', None)
+        ax = plt.gca() if ax is None else plt.sca(ax)
+        plt.cla()
+
+        kwargs['marker'] = kwargs.pop('marker', 'v')
+        kwargs['markersize'] = kwargs.pop('markersize', 7)
+        c = kwargs.pop('color', [cp.wellSeparated[i+1]
+                       for i in range(self.nSystems)])
+        mfc = kwargs.pop('markerfacecolor', [
+                         cp.wellSeparated[i+1] for i in range(self.nSystems)])
+        assert len(c) == self.nSystems, ValueError(
+            "color must be a list of length {}".format(self.nSystems))
+        assert len(mfc) == self.nSystems, ValueError(
+            "markerfacecolor must be a list of length {}".format(self.nSystems))
+        kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor', 'k')
+        kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth', 1.0)
+        kwargs['alpha'] = kwargs.pop('alpha', 0.8)
+        kwargs['linestyle'] = kwargs.pop('linestyle', 'none')
+        kwargs['linewidth'] = kwargs.pop('linewidth', 2)
+
+        xscale = kwargs.pop('xscale', 'log')
+        yscale = kwargs.pop('yscale', 'linear')
+
+        logx = kwargs.pop('logX', None)
+        logy = kwargs.pop('logY', None)
+
+        for i in range(self.nSystems):
+            system_times, _ = cf._log(self.off_time(i), logx)
+            for j in range(self.n_components):
+                ic = self._component_indices(j, i)
+                self.secondary_field[ic].plot(x=system_times, **kwargs)
+
+    def plot_predicted_secondary_field(self, title='Secondary field', **kwargs):
+        ax = kwargs.pop('ax', None)
+        ax = plt.gca() if ax is None else plt.sca(ax)
+
+        noLabels = kwargs.pop('nolabels', False)
+
+        if (not noLabels):
+            cp.xlabel('Time (s)')
+            cp.ylabel(cf.getNameUnits(self.predictedData))
+            cp.title(title)
+
+        kwargs['color'] = kwargs.pop('color', cp.wellSeparated[3])
+        kwargs['linewidth'] = kwargs.pop('linewidth', 2)
+        kwargs['alpha'] = kwargs.pop('alpha', 0.7)
+        xscale = kwargs.pop('xscale', 'log')
+        yscale = kwargs.pop('yscale', 'linear')
+
+        logx = kwargs.pop('logX', None)
+        logy = kwargs.pop('logY', None)
+
+        for i in range(self.nSystems):
+            system_times, _ = cf._log(self.off_time(i), logx)
+            for j in range(self.n_components):
+                ic = self._component_indices(j, i)
+                self.predicted_secondary_field[ic].plot(x=system_times, **kwargs)
+
+    def setPosteriors(self, log=None):
         return super().setPosteriors(log=None)
+
+    def set_relative_error_posterior(self):
+        if self.relErr.hasPrior:
+            rb = StatArray.StatArray(np.atleast_2d(self.relErr.prior.bins()), name=self.relErr.name, units=self.relErr.units)
+            self.relErr.posterior = [Histogram1D(edges = rb[i, :]) for i in range(self.nSystems*self.n_components)]
+
+    def set_additive_error_posterior(self, log=None):
+        if self.addErr.hasPrior:
+            ab = StatArray.StatArray(np.atleast_2d(self.addErr.prior.bins()), name=self.addErr.name, units=self.data.units)
+            self.addErr.posterior = [Histogram1D(edges = ab[i, :], log=log) for i in range(self.nSystems)]
+
+    # def set_priors(self, height_prior=None, data_prior=None, relative_error_prior=None, additive_error_prior=None):
+
+    #     super().set_priors(height_prior, None, relative_error_prior, additive_error_prior)
+
+    #     if not data_prior is None:
+    #         self.predictedData.set_prior(data_prior)
 
     # def set_predicted_data_posterior(self):
     #     if self.predictedData.hasPrior:
@@ -298,70 +554,6 @@ class Tempest_datapoint(TdemDataPoint):
     #         # self.z.setPosterior(H)
 
 
-    def updateErrors(self, relativeErr, additiveErr):
-        """ Updates the data errors
-
-        Assumes a t^-0.5 behaviour e.g. logarithmic gate averaging
-        V0 is assumed to be ln(Error @ 1ms)
-
-        Parameters
-        ----------
-        relativeErr : list of scalars or list of array_like
-            A fraction percentage that is multiplied by the observed data. The list should have length equal to the number of systems. The entries in each item can be scalar or array_like.
-        additiveErr : list of scalars or list of array_like
-            An absolute value of additive error. The list should have length equal to the number of systems. The entries in each item can be scalar or array_like.
-
-        Raises
-        ------
-        TypeError
-            If relativeErr or additiveErr is not a list
-        TypeError
-            If the length of relativeErr or additiveErr is not equal to the number of systems
-        TypeError
-            If any item in the relativeErr or additiveErr lists is not a scalar or array_like of length equal to the number of time channels
-        ValueError
-            If any relative or additive errors are <= 0.0
-        """
-        relativeErr = np.atleast_1d(relativeErr)
-        #assert (isinstance(relativeErr, list)), TypeError("relativeErr must be a list of size equal to the number of systems {}".format(self.nSystems))
-        assert (relativeErr.size == 2*self.nSystems), TypeError("relativeErr must be a list of size equal to the number of systems {}".format(2*self.nSystems))
-
-        additiveErr = np.atleast_1d(additiveErr)
-        #assert (isinstance(additiveErr, list)), TypeError("additiveErr must be a list of size equal to the number of systems {}".format(self.nSystems))
-        check = (self.nSystems, self.nChannels)
-        assert (additiveErr.size in check), TypeError("additiveErr must have size of one of these {}".format(check))
-
-        # For each system assign error levels using the user inputs
-        for i in range(self.nSystems):
-
-            primary_percentage = relativeErr[i*2]
-            secondary_percentage = relativeErr[(i*2)+1]
-
-            # assert (isinstance(primary_relative_error, float) or isinstance(primary_relative_error, np.ndarray)), TypeError("primary_relative_error for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
-            assert (np.all(primary_percentage > 0.0)), ValueError("primary_relative_error for system {} cannot contain values <= 0.0.".format(i+1))
-            # assert (isinstance(secondary_relative_error, float) or isinstance(secondary_relative_error, np.ndarray)), TypeError("secondary_relative_error for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
-            assert (np.all(secondary_percentage > 0.0)), ValueError("secondary_relative_error for system {} cannot contain values <= 0.0.".format(i+1))
-
-            # assert (isinstance(additiveErr[i], float) or isinstance(additiveErr[i], np.ndarray)), TypeError("additiveErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
-            assert (np.all(additiveErr[i] > 0.0)), ValueError("additiveErr for system {} should contain values > 0.0. Make sure the values are in linear space".format(i+1))
-            iSys = self._systemIndices(system=i)
-
-            # Compute the error on the primary field
-            p_relative_error = np.zeros(self.channels_per_system)
-            for j in range(self.n_components):
-                ptmp = primary_percentage * self.primary_field[i*2:(i*2)+2]
-                p_relative_error[self._component_indices(j, i)] = ptmp[j]
-
-            # Compute the relative error
-            s_relative_error = secondary_percentage * self.secondary_field[iSys]
-
-            s_additive_error = np.full_like(s_relative_error, fill_value=additiveErr[i])
-
-            self._std[iSys] = p_relative_error + np.sqrt((s_relative_error**2.0) + (s_additive_error**2.0))
-
-        # Update the variance of the predicted data prior
-        if self.secondary_field.hasPrior:
-            self.secondary_field.prior.variance[np.diag_indices(self.active.size)] = self._std[self.active]**2.0
 
     def updatePosteriors(self):
 
@@ -371,6 +563,9 @@ class Tempest_datapoint(TdemDataPoint):
         #     for i in range(self.n_components):
         #         j = self._component_indices(i, 0)
         #         self.predictedData.posterior.update_line(x=self.channels[j], y=self.predictedData[j])
+
+        if self.transmitter.pitch.hasPosterior:
+            self.transmitter.pitch.updatePosterior()
 
 
     def forward(self, mod):
@@ -384,16 +579,12 @@ class Tempest_datapoint(TdemDataPoint):
             self.predicted_primary_field[:] = np.r_[fm[i].PX, -fm[i].PZ]
             self.predicted_secondary_field[iSys] = np.hstack([fm[i].SX, -fm[i].SZ])  # Store the necessary component
 
-    # def sensitivity(self, mod):
-    #     """ Forward model the data from the given model """
 
-    #     assert isinstance(mod, Model1D), TypeError("Invalid model class for forward modeling [1D]")
-    #     fm = tdem1dfwd(self, mod)
+    def sensitivity(self, model, ix=None, modelChanged=True):
+        """ Compute the sensitivty matrix for the given model """
 
-    #     for i in range(self.nSystems):
-    #         iSys = self._systemIndices(i)
-    #         self.predicted_primary_field[:] = np.r_[fm[i].PX, -fm[i].PZ]
-    #         self.predicted_secondary_field[iSys] = np.hstack([fm[i].SX, -fm[i].SZ])  # Store the necessary component
+        assert isinstance(model, Model1D), TypeError("Invalid model class for sensitivity matrix [1D]")
+        return StatArray.StatArray(tdem1dsen(self, model, ix, modelChanged), 'Sensitivity', '$\\frac{V}{SAm^{3}}$')
 
 
     def _empymodForward(self, mod):

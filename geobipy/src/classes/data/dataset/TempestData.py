@@ -187,7 +187,6 @@ class TempestData(TdemData):
                                           radius=self.system[0].loopRadius()) for i in range(self.nPoints)]
 
 
-
             self.primary_field = np.vstack([np.asarray(gdf['X_PrimaryField']), np.asarray(gdf['Z_PrimaryField'])]).T
             self.secondary_field = np.hstack([np.asarray(gdf['EMX_NonHPRG']).T, np.asarray(gdf['EMZ_NonHPRG']).T])
 
@@ -236,7 +235,21 @@ class TempestData(TdemData):
         secondary_field = np.hstack([gdf['EMX_NonHPRG'][:, record], gdf['EMZ_NonHPRG'][:, record]])
         std = 0.1 * secondary_field
 
-        loopOffset = np.vstack([np.asarray(gdf['HSep_GPS'][record]), np.asarray(gdf['TSep_GPS'][record]), np.asarray(gdf['VSep_GPS'][record])]).T
+        transmitter_loop = CircularLoop(x=x, y=y, z=z,
+                                        pitch=np.float64(gdf['Tx_Pitch'][record]),
+                                        roll=np.float64(gdf['Tx_Roll'][record]),
+                                        yaw=np.float64(gdf['Tx_Yaw'][record]),
+                                        radius=self.system[0].loopRadius())
+
+        loopOffset = np.vstack([np.asarray(gdf['HSep_GPS'][record]), np.asarray(gdf['TSep_GPS'][record]), np.asarray(gdf['VSep_GPS'][record])])
+
+        receiver_loop = CircularLoop(x=transmitter_loop.x + loopOffset[0],
+                                     y=transmitter_loop.y + loopOffset[1],
+                                     z=transmitter_loop.z + loopOffset[2],
+                                     pitch=np.float64(gdf['Rx_Pitch'][record]),
+                                     roll=np.float64(gdf['Rx_Roll'][record]),
+                                     yaw=np.float64(gdf['Rx_Yaw'][record]),
+                                     radius=self.system[0].loopRadius())
 
         out = Tempest_datapoint(
                 lineNumber = np.float64(gdf['Line'][record]),
@@ -246,15 +259,9 @@ class TempestData(TdemData):
                 z = z,
                 elevation = np.float64(gdf['DTM'][record]),
                 # Assign the orientations of the acquisistion loops
-                transmitter_loop = CircularLoop(x=x, y=y, z=z,
-                                                pitch=np.float64(gdf['Tx_Pitch'][record]), roll=np.float64(gdf['Tx_Roll'][record]), yaw=np.float64(gdf['Tx_Yaw'][record]),
-                                                radius=self.system[0].loopRadius()),
+                transmitter_loop = transmitter_loop,
 
-                receiver_loop = CircularLoop(x=transmitter_loop.x + loopOffset[0],
-                                            y=transmitter_loop.y + loopOffset[1],
-                                            z=transmitter_loop.z + loopOffset[2],
-                                            pitch=np.float64(gdf['Rx_Pitch'][record]), roll=np.float64(gdf['Rx_Roll'][record]), yaw=np.float64(gdf['Rx_Yaw'][record]),
-                                            radius=self.system[0].loopRadius()),
+                receiver_loop = receiver_loop,
                 # loopOffset = np.hstack([np.float64(gdf['HSep_GPS'][record]), np.float64(gdf['TSep_GPS'][record]), np.float64(gdf['VSep_GPS'][record])]),
                 primary_field = primary_field,
                 secondary_field = secondary_field,
