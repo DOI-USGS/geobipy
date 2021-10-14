@@ -5,7 +5,6 @@ from scipy.stats import t
 from scipy.special import gamma
 import matplotlib.pyplot as plt
 from .Mixture import Mixture
-from smm import SMM
 from lmfit.models import StudentsTModel
 
 class mixStudentT(Mixture):
