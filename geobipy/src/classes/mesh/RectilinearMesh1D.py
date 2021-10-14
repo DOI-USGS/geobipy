@@ -929,8 +929,7 @@ class RectilinearMesh1D(Mesh):
 
         # Initialize the posterior histogram for the number of layers
         if nCells_posterior is None:
-            self.nCells.setPosterior(Histogram1D.Histogram1D(centres=StatArray.StatArray(
-                np.arange(0.0, self.max_cells + 1.0), name="# of Layers")))
+            self.nCells.posterior = Histogram1D.Histogram1D(centres=StatArray.StatArray(np.arange(0.0, self.max_cells + 1.0), name="# of Layers"))
 
         if edges_posterior is None:
 
@@ -942,7 +941,7 @@ class RectilinearMesh1D(Mesh):
                 0.9 * self.min_edge, 1.1 * self.max_edge, 0.5 * self.min_width), self.edges.name, self.edges.units)
 
             # Initialize the interface Depth Histogram
-            self.edges.setPosterior(Histogram1D.Histogram1D(edges=zGrd))
+            self.edges.posterior = Histogram1D.Histogram1D(edges=zGrd)
 
     def set_priors(self, min_edge, max_edge, max_cells, min_width=None, prng=None, n_cells_prior=None, edge_prior=None):
         """Setup the priors of the mesh.
@@ -1011,13 +1010,13 @@ class RectilinearMesh1D(Mesh):
         self._max_cells = np.int32(max_cells)
 
         # Assign a uniform distribution to the number of layers
-        self.nCells.set_prior('Uniform', 1, self.max_cells, prng=prng)
+        self.nCells.prior = Distribution('Uniform', 1, self.max_cells, prng=prng)
 
         # Set priors on the depth interfaces, given a number of layers
         i = np.arange(self.max_cells)
         dz = self.remainingSpace(i)
 
-        self.edges.set_prior('Order', denominator=dz)  # priZ
+        self.edges.prior = Distribution('Order', denominator=dz)  # priZ
 
     def set_proposals(self, probabilities, prng=None):
         """Setup the proposal distibution.

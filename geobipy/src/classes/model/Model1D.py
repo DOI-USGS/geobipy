@@ -563,8 +563,7 @@ class Model1D(RectilinearMesh1D):
         perturbedModel = deepcopy(remappedModel)
 
         # Assign a proposal distribution for the parameter using the mean and variance.
-        perturbedModel.par.setProposal('MvLogNormal', mean=np.exp(mean),
-                                                      variance=inverseHessian,
+        perturbedModel.par.proposal = Distribution('MvLogNormal', mean=np.exp(mean),
                                                       linearSpace=True,
                                                       prng=perturbedModel.par.proposal.prng)
 
@@ -587,7 +586,7 @@ class Model1D(RectilinearMesh1D):
         pGrd = StatArray.StatArray(p, self.par.name, self.par.units)
 
         # Set the posterior hitmap for conductivity vs depth
-        self.par.setPosterior(Hitmap2D(xEdges=pGrd, yEdges=self.edges.posterior.edges))
+        self.par.posterior = Hitmap2D(xEdges=pGrd, yEdges=self.edges.posterior.edges)
 
     def set_priors(self, halfSpaceValue, min_edge, max_edge, max_cells, parameterPrior, gradientPrior, parameterLimits=None, min_width=None, factor=10.0, dzVariance=1.5, prng=None):
         """Setup the priors of a 1D model.
@@ -635,7 +634,7 @@ class Model1D(RectilinearMesh1D):
 
         # if parameterPrior:
         # Assign the initial prior to the parameters
-        self.par.set_prior('MvLogNormal', mean=self._halfSpaceParameter,
+        self.par.prior = Distribution('MvLogNormal', mean=self._halfSpaceParameter,
                                          variance=np.log(1.0 + factor)**2.0,
                                          ndim=self.nCells,
                                          linearSpace=True,
@@ -643,7 +642,7 @@ class Model1D(RectilinearMesh1D):
 
         # if gradientPrior:
         # Assign the prior on the parameter gradient
-        self.dpar.set_prior('MvNormal', mean=0.0,
+        self.dpar.prior = Distribution('MvNormal', mean=0.0,
                                        variance=dzVariance,
                                        ndim=np.maximum(1, self.nCells-1),
                                        prng=prng)
@@ -670,7 +669,7 @@ class Model1D(RectilinearMesh1D):
         """
 
         super().set_proposals(probabilities, prng)
-        self.par.setProposal(parameterProposal)
+        self.par.proposal = parameterProposal
 
     def gradientProbability(self, log=True):
         """Evaluate the prior for the gradient of the parameter with depth

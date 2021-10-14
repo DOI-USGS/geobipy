@@ -4,6 +4,7 @@ from ...base import MPI as myMPI
 from .EmLoop import EmLoop
 from ...base import utilities as cf
 from ..core import StatArray
+from ..statistics.Histogram1D import Histogram1D
 from ...base.HDF.hdfWrite import write_nd
 
 class CircularLoop(EmLoop):
@@ -43,11 +44,11 @@ class CircularLoop(EmLoop):
         # Dipole moment of the loop
         self._moment = moment
         # Pitch of the loop
-        self._pitch = pitch
+        self.pitch = pitch
         # Roll of the loop
-        self._roll = roll
+        self.roll = roll
         # Yaw of the loop
-        self._yaw = yaw
+        self.yaw = yaw
         # Radius of the loop
         self._radius = radius
 
@@ -63,6 +64,10 @@ class CircularLoop(EmLoop):
     def pitch(self):
         return self._pitch
 
+    @pitch.setter
+    def pitch(self, value):
+        self._pitch = StatArray.StatArray(np.float64(value), 'Pitch', '$^{o}$')
+
     @property
     def radius(self):
         return self._radius
@@ -71,9 +76,17 @@ class CircularLoop(EmLoop):
     def roll(self):
         return self._roll
 
+    @roll.setter
+    def roll(self, value):
+        self._roll = StatArray.StatArray(np.float64(value), 'Roll', '$^{o}$')
+
     @property
     def yaw(self):
         return self._yaw
+
+    @yaw.setter
+    def yaw(self, value):
+        self._yaw = StatArray.StatArray(np.float64(value), 'Yaw', '$^{o}$')
 
     @property
     def orient(self):
@@ -120,6 +133,67 @@ class CircularLoop(EmLoop):
     # def hdf_name(self):
     #     """Create a reproducibility string that can be instantiated from a hdf file """
     #     return 'CircularLoop()'
+    def set_priors(self, x_prior=None, y_prior=None, z_prior=None, pitch_prior=None, roll_prior=None, yaw_prior=None, kwargs={}):
+
+        super().set_priors(x_prior, y_prior, z_prior, kwargs=kwargs)
+
+        if pitch_prior is not None:
+            self.pitch.prior = pitch_prior
+        if roll_prior is not None:
+            self.roll.prior = roll_prior
+        if yaw_prior is not None:
+            self.yaw.prior = yaw_prior
+
+    def set_proposals(self, x_proposal=None, y_proposal=None, z_proposal=None, pitch_proposal=None, roll_proposal=None, yaw_proposal=None, kwargs={}):
+
+        super().set_proposals(x_proposal, y_proposal, z_proposal, kwargs=kwargs)
+
+        if pitch_proposal is None:
+            if kwargs.get('solve_pitch', False):
+                pitch_proposal = Distribution('Normal', self.pitch.value, kwargs['pitch_proposal_variance'], prng=kwargs['prng'])
+
+        self.pitch.proposal = pitch_proposal
+
+        if roll_proposal is None:
+            if kwargs.get('solve_roll', False):
+                roll_proposal = Distribution('Normal', self.roll.value, kwargs['roll_proposal_variance'], prng=kwargs['prng'])
+
+        self.roll.proposal = roll_proposal
+
+        if yaw_proposal is None:
+            if kwargs.get('solve_yaw', False):
+                yaw_proposal = Distribution('Normal', self.yaw.value, kwargs['yaw_proposal_variance'], prng=kwargs['prng'])
+
+        self.yaw.proposal = yaw_proposal
+
+    def set_posteriors(self):
+
+        super().set_posteriors()
+
+        self.set_pitch_posterior()
+        self.set_roll_posterior()
+        self.set_yaw_posterior()
+
+    def set_pitch_posterior(self):
+        """
+
+        """
+        if self.pitch.hasPrior:
+            self.pitch.posterior = Histogram1D(edges = StatArray.StatArray(self.pitch.prior.bins(), name=self.pitch.name, units=self.pitch.units), relativeTo=self.pitch)
+
+    def set_roll_posterior(self):
+        """
+
+        """
+        if self.roll.hasPrior:
+            self.roll.posterior = Histogram1D(edges = StatArray.StatArray(self.roll.prior.bins(), name=self.roll.name, units=self.roll.units), relativeTo=self.roll)
+
+    def set_yaw_posterior(self):
+        """
+
+        """
+        if self.yaw.hasPrior:
+            self.yaw.posterior = Histogram1D(edges = StatArray.StatArray(self.yaw.prior.bins(), name=self.yaw.name, units=self.yaw.units), relativeTo=self.yaw)
 
     def createHdf(self, parent, name, nRepeats=None, fillvalue=None, withPosterior=False):
         """ Create the hdf group metadata in file

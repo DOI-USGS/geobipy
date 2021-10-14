@@ -81,6 +81,59 @@ class Point(myObject, ABC):
         self._z += dz
         return self
 
+    def set_priors(self, x_prior=None, y_prior=None, z_prior=None, kwargs={}):
+        if x_prior is not None:
+            self.x.prior = x_prior
+        if y_prior is not None:
+            self.y.prior = y_prior
+        if z_prior is not None:
+            self.z.prior = z_prior
+
+    def set_proposals(self, x_proposal=None, y_proposal=None, z_proposal=None, kwargs={}):
+
+        if x_proposal is None:
+            if kwargs.get('solve_x', False):
+                x_proposal = Distribution('Normal', self.x.value, kwargs['x_proposal_variance'], prng=kwargs['prng'])
+        self.x.proposal = x_proposal
+
+        if y_proposal is None:
+            if kwargs.get('solve_y', False):
+                y_proposal = Distribution('Normal', self.y.value, kwargs['y_proposal_variance'], prng=kwargs['prng'])
+        self.y.proposal = y_proposal
+
+        if z_proposal is None:
+            if kwargs.get('solve_z', False):
+                z_proposal = Distribution('Normal', self.z.value, kwargs['z_proposal_variance'], prng=kwargs['prng'])
+        self.z.proposal = z_proposal
+
+    def set_posteriors(self):
+
+        self.set_x_posterior()
+        self.set_y_posterior()
+        self.set_z_posterior()
+
+
+    def set_x_posterior(self):
+        """
+
+        """
+        if self.x.hasPrior:
+            self.x.posterior = Histogram1D(edges = StatArray.StatArray(self.x.prior.bins(), name=self.x.name, units=self.x.units), relativeTo=self.x)
+
+    def set_y_posterior(self):
+        """
+
+        """
+        if self.y.hasPrior:
+            self.y.posterior = Histogram1D(edges = StatArray.StatArray(self.y.prior.bins(), name=self.y.name, units=self.y.units), relativeTo=self.y)
+
+    def set_z_posterior(self):
+        """
+
+        """
+        if self.z.hasPrior:
+            self.z.posterior = Histogram1D(edges = StatArray.StatArray(self.z.prior.bins(), name=self.z.name, units=self.z.units), relativeTo=self.z)
+
     def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
