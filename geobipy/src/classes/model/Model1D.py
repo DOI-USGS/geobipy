@@ -84,7 +84,7 @@ class Model1D(RectilinearMesh1D):
         self.parameterBounds = None
         self._halfSpaceParameter = None
         self.Hitmap = None
-        self._inverseHessian = None
+        self._inverse_hessian = None
 
     @property
     def dpar(self):
@@ -95,8 +95,8 @@ class Model1D(RectilinearMesh1D):
             return self.par.posterior.getOpacityLevel(percentage, log=log)
 
     @property
-    def inverseHessian(self):
-        return self._inverseHessian
+    def inverse_hessian(self):
+        return self._inverse_hessian
 
     @property
     def magnetic_permeability(self):
@@ -135,7 +135,7 @@ class Model1D(RectilinearMesh1D):
         out._magnetic_permeability = deepcopy(self.magnetic_permeability)
         out._magnetic_susceptibility = deepcopy(self.magnetic_susceptibility)
         out.Hitmap = self.Hitmap
-        out._inverseHessian = deepcopy(self._inverseHessian)
+        out._inverse_hessian = deepcopy(self._inverse_hessian)
         out.parameterBounds = self.parameterBounds
         out._halfSpaceParameter = self._halfSpaceParameter
         return out
@@ -163,12 +163,12 @@ class Model1D(RectilinearMesh1D):
             out.Hitmap = self.Hitmap
         return out
 
-    def localParameterVariance(self, dataPoint=None):
+    def localParameterVariance(self, datapoint=None):
         """Generate a localized inverse Hessian matrix using a dataPoint and the current realization of the Model1D.
 
         Parameters
         ----------
-        dataPoint : geobipy.DataPoint, optional
+        datapoint : geobipy.DataPoint, optional
             The data point to use when computing the local estimate of the variance.
             If None, only the prior derivative is used.
 
@@ -180,21 +180,17 @@ class Model1D(RectilinearMesh1D):
         """
         assert self.par.hasPrior or self.dpar.hasPrior, Exception("Model must have either a parameter prior or gradient prior, use self.set_priors()")
 
-        if not dataPoint is None:
-            # Compute the sensitivity of the data to the perturbed model
-            J = dataPoint.sensitivity(self)[dataPoint.active, :]
-            Wd = dataPoint.weightingMatrix(power=1.0)
-            WdJ = np.dot(Wd, J)
-            WdJTWdJ = np.dot(WdJ.T, WdJ)
+        if not datapoint is None:
 
             # Propose new layer conductivities
-            self._inverseHessian = np.linalg.inv(WdJTWdJ + self.par.prior.derivative(x=None, order=2))
+            inverse_hessian = np.linalg.inv(datapoint.prior_derivative(model=self, order=2) + self.par.priorDerivative(order=2))
         else:
-            self._inverseHessian = self.par.prior.derivative(x=None, order=2)
+            inverse_hessian = np.linalg.inv(self.par.priorDerivative(order=2))
 
-        return self._inverseHessian
+        return inverse_hessian
 
-    def updateLocalParameterVariance(self, dataPoint=None):
+
+    def compute_local_inverse_hessian(self, dataPoint=None):
         """Generate a localized Hessian matrix using
         a dataPoint and the current realization of the Model1D.
 
@@ -212,16 +208,9 @@ class Model1D(RectilinearMesh1D):
         """
         # Compute a new parameter variance matrix if the structure of the model changed.
 
-        if (self.action[0] in ['insert', 'delete']):
+        if (self.action[0] in ['insert', 'delete'] or self.inverse_hessian is None):
             # Propose new layer conductivities
-            self.localParameterVariance(dataPoint)
-
-        else:  # There was no change in the model
-
-            if self.inverseHessian is None:
-                self.localParameterVariance(dataPoint)
-
-        return self.inverseHessian
+            self._inverse_hessian = self.localParameterVariance(dataPoint)
 
     def insert_edge(self, value, par=None, update_priors=False):
         """Insert a new edge into a model at a given location
@@ -302,6 +291,9 @@ class Model1D(RectilinearMesh1D):
             out.dpar.prior.ndim = np.maximum(1, out.nCells-1)
 
         return out
+
+    def prior_derivative(self, order):
+        return self.par.priorDerivative(order=order)
 
     def priorProbability(self, pPrior, gPrior, log=True, verbose=False):
         """Evaluate the prior probability for the 1D Model.
@@ -417,7 +409,7 @@ class Model1D(RectilinearMesh1D):
 
         return (p + p_prior + g_prior) if log else (p * p_prior * g_prior)
 
-    def proposalProbabilities(self, remappedModel, dataPoint=None):
+    def proposalProbabilities(self, remappedModel, datapoint=None):
         """Return the forward and reverse proposal probabilities for the model
 
         Returns the denominator and numerator for the model's components of the proposal ratio.
@@ -458,27 +450,30 @@ class Model1D(RectilinearMesh1D):
         # the data residual using the perturbed parameter values.
 
         # Compute the gradient according to the perturbed parameters and data residual
-        gradient = self.par.priorDerivative(order=1)
-        if not dataPoint is None:
-            gradient += np.dot(dataPoint.J[dataPoint.active, :].T, dataPoint.predictedData.priorDerivative(order=1, i=dataPoint.active))
+        # This is Wm'Wm(sigma - sigma_ref)
+        gradient = self.prior_derivative(order=1)
 
-        # if (not burnedIn):
-        #     SN_step_from_perturbed = 0.0
-        # else:
+        # todo:
+        # replace the par.priorDerivative with appropriate gradient
+
+        if not datapoint is None:
+            # The prior derivative is now J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref)
+            gradient += datapoint.prior_derivative(order=1)
+
         # Compute the stochastic newton offset.
         # The negative sign because we want to move downhill
-        SN_step_from_perturbed = 0.5 * np.dot(self._inverseHessian, gradient)
+        SN_step_from_perturbed = 0.5 * np.dot(self.inverse_hessian, gradient)
 
         prng = self.par.proposal.prng
 
         # Create a multivariate normal distribution centered on the shifted parameter values, and with variance computed from the forward step.
         # We don't recompute the variance using the perturbed parameters, because we need to check that we could in fact step back from
         # our perturbed parameters to the unperturbed parameters. This is the crux of the reversible jump.
-        tmp = Distribution('MvLogNormal', np.exp(np.log(self.par) - SN_step_from_perturbed), self.inverseHessian, linearSpace=True, prng=prng)
+        tmp = Distribution('MvLogNormal', np.exp(np.log(self.par) - SN_step_from_perturbed), self.inverse_hessian, linearSpace=True, prng=prng)
         # Probability of jumping from our perturbed parameter values to the unperturbed values.
-        proposal = tmp.probability(x=remappedModel.par, log=True)  # CUR.prop
+        proposal = tmp.probability(x=remappedModel.par, log=True)
 
-        tmp = Distribution('MvLogNormal', remappedModel.par, self.inverseHessian, linearSpace=True, prng=prng)
+        tmp = Distribution('MvLogNormal', remappedModel.par, self.inverse_hessian, linearSpace=True, prng=prng)
         proposal1 = tmp.probability(x=self.par, log=True)
 
         if self.action[0] == 'insert':
@@ -540,30 +535,29 @@ class Model1D(RectilinearMesh1D):
         remappedModel = super().perturb(verbose)
 
         # Update the local Hessian around the current model.
-        inverseHessian = remappedModel.updateLocalParameterVariance(datapoint)
+        remappedModel.compute_local_inverse_hessian(datapoint)
 
         # Proposing new parameter values
-        # Compute the gradient of the "deterministic" objective function using the unperturbed, remapped, parameter values.
-        gradient = remappedModel.par.priorDerivative(order=1)
+        # This is Wm'Wm(sigma - sigma_ref)
+        gradient = remappedModel.prior_derivative(order=1)
 
         if not datapoint is None:
-            gradient += np.dot(datapoint.J[datapoint.active, :].T, datapoint.predictedData.priorDerivative(order=1, i=datapoint.active))
-
-        # scaling = parameterCovarianceScaling * ((2.0 * np.float64(Mod1.nCells)) - 1)**(-1.0 / 3.0)
+            # The gradient is now J'Wd'(dPredicted-dObserved) + Wm'Wm(sigma - sigma_ref)
+            gradient += datapoint.prior_derivative(order=1)
 
         # Compute the Model perturbation
-        # The negative sign because we want to move "downhill"
-        # if (not burnedIn):
-        #     SN_step_from_unperturbed = 0.0
-        # else:
-        SN_step_from_unperturbed = 0.5 * np.dot(inverseHessian, gradient)
+        # This is the equivalent to the full newton gradient of the deterministic objective function.
+        # delta sigma = 0.5 * inv(J'Wd'WdJ + Wm'Wm)(J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref))
+        # This could be replaced with a CG solver for bigger problems.
+        dSigma = 0.5 * np.dot(remappedModel.inverse_hessian, gradient)
 
-        mean = np.log(remappedModel.par) - SN_step_from_unperturbed
+        mean = np.log(remappedModel.par) - dSigma
 
         perturbedModel = deepcopy(remappedModel)
 
         # Assign a proposal distribution for the parameter using the mean and variance.
         perturbedModel.par.proposal = Distribution('MvLogNormal', mean=np.exp(mean),
+                                                      variance=remappedModel.inverse_hessian,
                                                       linearSpace=True,
                                                       prng=perturbedModel.par.proposal.prng)
 
@@ -625,8 +619,7 @@ class Model1D(RectilinearMesh1D):
         if not parameterLimits is None:
             assert np.size(parameterLimits) == 2, ValueError(
                 "parameterLimits must have size 2.")
-            self.parameterBounds = Distribution(
-                'Uniform', parameterLimits[0], parameterLimits[1], log=True)
+            self.parameterBounds = Distribution('Uniform', parameterLimits[0], parameterLimits[1], log=True)
         else:
             self.parameterBounds = None
 
