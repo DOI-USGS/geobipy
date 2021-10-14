@@ -1254,10 +1254,13 @@ class StatArray(np.ndarray, myObject):
             assert np.size(ax) == self.nPosteriors, ValueError(
                 "Length of ax {} must equal number of attached posteriors {}".format(np.size(ax), self.nPosteriors))
             if np.size(ax) > 1:
+                if 'line' in kwargs:
+                    assert np.size(kwargs['line']) == np.size(ax), ValueError("line in kwargs must have size {}".format(np.size(ax)))
+                line = kwargs.pop('line', np.asarray([np.nan for i in range(np.size(ax))]))
                 for i in range(self.nPosteriors):
                     plt.sca(ax[i])
                     plt.cla()
-                    self.posterior[i].plot(**kwargs)
+                    self.posterior[i].plot(line=line[i], **kwargs)
             else:
                 if isinstance(ax, list):
                     ax = ax[0]
