@@ -178,8 +178,8 @@ D = TdemData.read_csv(dataFile, systemFile)
 # Get a datapoint from the dataset
 tdp = D.datapoint(0)
 
-plt.figure()
-tdp.plot()
+# plt.figure()
+# tdp.plot()
 
 ################################################################################
 # Using a time domain datapoint
@@ -194,33 +194,33 @@ mod = Model1D(edges=np.r_[0, 75.0, np.inf], parameters=par)
 # Forward model the data
 tdp.forward(mod)
 
-################################################################################
-plt.figure()
-plt.subplot(121)
-_ = mod.pcolor()
-plt.subplot(122)
-_ = tdp.plot()
-_ = tdp.plotPredicted()
-plt.tight_layout()
-plt.suptitle('new')
+# ################################################################################
+# plt.figure()
+# plt.subplot(121)
+# _ = mod.pcolor()
+# plt.subplot(122)
+# _ = tdp.plot()
+# _ = tdp.plotPredicted()
+# plt.tight_layout()
+# plt.suptitle('new')
 
-################################################################################
-plt.figure()
-tdp.plotDataResidual(xscale='log')
-plt.title('new')
+# ################################################################################
+# plt.figure()
+# tdp.plotDataResidual(xscale='log')
+# plt.title('new')
 
-################################################################################
-# Compute the sensitivity matrix for a given model
-J = tdp.sensitivity(mod)
-plt.figure()
-_ = np.abs(J).pcolor(equalize=True, log=10, flipY=True)
+# ################################################################################
+# # Compute the sensitivity matrix for a given model
+# J = tdp.sensitivity(mod)
+# plt.figure()
+# _ = np.abs(J).pcolor(equalize=True, log=10, flipY=True)
 
 ################################################################################
 # Attaching statistical descriptors to the datapoint
 # ++++++++++++++++++++++++++++++++++++++++++++++++++
 #
 # Define a multivariate log normal distribution as the prior on the predicted data.
-tdp.predictedData.set_prior('MvLogNormal', tdp.data[tdp.active], tdp.std[tdp.active]**2.0)
+tdp.predictedData.prior = Distribution('MvLogNormal', tdp.data[tdp.active], tdp.std[tdp.active]**2.0)
 
 ################################################################################
 # This allows us to evaluate the likelihood of the predicted data
@@ -228,23 +228,23 @@ print(tdp.likelihood(log=True))
 # Or the misfit
 print(tdp.dataMisfit())
 
-################################################################################
-# We can perform a quick search for the best fitting half space
-halfspace = tdp.find_best_halfspace()
-print('Best half space conductivity is {} $S/m$'.format(halfspace.par))
-plt.figure()
-_ = tdp.plot()
-_ = tdp.plotPredicted()
+# ################################################################################
+# # We can perform a quick search for the best fitting half space
+# halfspace = tdp.find_best_halfspace()
+# print('Best half space conductivity is {} $S/m$'.format(halfspace.par))
+# plt.figure()
+# _ = tdp.plot()
+# _ = tdp.plotPredicted()
 
-################################################################################
-# Compute the misfit between observed and predicted data
-print(tdp.dataMisfit())
+# ################################################################################
+# # Compute the misfit between observed and predicted data
+# print(tdp.dataMisfit())
 
-################################################################################
-# Plot the misfits for a range of half space conductivities
-plt.figure()
-_ = tdp.plotHalfSpaceResponses(-6.0, 4.0, 200)
-plt.title("Halfspace responses")
+# ################################################################################
+# # Plot the misfits for a range of half space conductivities
+# plt.figure()
+# _ = tdp.plotHalfSpaceResponses(-6.0, 4.0, 200)
+# plt.title("Halfspace responses")
 
 ################################################################################
 # We can attach priors to the height of the datapoint,
@@ -274,66 +274,66 @@ tdp.setPosteriors()
 ################################################################################
 # Perturb the datapoint and record the perturbations
 # Note we are not using the priors to accept or reject perturbations.
-for i in range(1000):
+for i in range(10):
     tdp.perturb(True, True, True, False)
     tdp.updatePosteriors()
 
+
 ################################################################################
 # Plot the posterior distributions
-plt.figure()
-_ = tdp.z.plotPosteriors()
+fig = plt.figure()
+ax = tdp.init_posterior_plots(fig)
+fig.tight_layout()
 
-################################################################################
+tdp.plot_posteriors(axes=ax, best=tdp)
+
+
+# ###############################################################################
+# # Aerotem example
+# # +++++++++++++++
+
+# # The data file name
+# dataFile=dataFolder + 'aerotem.txt'
+# # The EM system file name
+# systemFile=dataFolder + 'aerotem.stm'
+
+# ################################################################################
+# # Initialize and read an EM data set
+# D = TdemData.read_csv(dataFile, systemFile)
+
+# ################################################################################
+# # Get a datapoint from the dataset
+# tdp = D.datapoint(0)
 # plt.figure()
-# _ = tdp.errorPosterior[0].comboPlot(cmap='gray_r')
+# tdp.plot()
 
+# ################################################################################
+# # Using a time domain datapoint
+# # +++++++++++++++++++++++++++++
 
-###############################################################################
-# Aerotem example
-# +++++++++++++++
+# ################################################################################
+# # We can define a 1D layered earth model, and use it to predict some data
+# par = StatArray(np.r_[500.0, 20.0], "Conductivity", "$\frac{S}{m}$")
+# mod = Model1D(edges=np.r_[0.0, 75.0, np.inf], parameters=par)
 
-# The data file name
-dataFile=dataFolder + 'aerotem.txt'
-# The EM system file name
-systemFile=dataFolder + 'aerotem.stm'
+# ################################################################################
+# # Forward model the data
+# tdp.forward(mod)
 
-################################################################################
-# Initialize and read an EM data set
-D = TdemData.read_csv(dataFile, systemFile)
+# ################################################################################
+# plt.figure()
+# plt.subplot(121)
+# _ = mod.pcolor()
+# plt.subplot(122)
+# _ = tdp.plot()
+# _ = tdp.plotPredicted()
+# plt.tight_layout()
 
-################################################################################
-# Get a datapoint from the dataset
-tdp = D.datapoint(0)
-plt.figure()
-tdp.plot()
-
-################################################################################
-# Using a time domain datapoint
-# +++++++++++++++++++++++++++++
-
-################################################################################
-# We can define a 1D layered earth model, and use it to predict some data
-par = StatArray(np.r_[500.0, 20.0], "Conductivity", "$\frac{S}{m}$")
-mod = Model1D(edges=np.r_[0.0, 75.0, np.inf], parameters=par)
-
-################################################################################
-# Forward model the data
-tdp.forward(mod)
-
-################################################################################
-plt.figure()
-plt.subplot(121)
-_ = mod.pcolor()
-plt.subplot(122)
-_ = tdp.plot()
-_ = tdp.plotPredicted()
-plt.tight_layout()
-
-################################################################################
-# Compute the sensitivity matrix for a given model
-J = tdp.sensitivity(mod)
-plt.figure()
-_ = np.abs(J).pcolor(equalize=True, log=10, flipY=True)
+# ################################################################################
+# # Compute the sensitivity matrix for a given model
+# J = tdp.sensitivity(mod)
+# plt.figure()
+# _ = np.abs(J).pcolor(equalize=True, log=10, flipY=True)
 
 
 plt.show()

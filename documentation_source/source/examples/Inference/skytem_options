@@ -34,7 +34,7 @@ n_markov_chains = 10000
 # General GeoBIPy options.
 # -------------------------------------------------------
 # Interactively plot a single data point as it progresses
-interactive_plot = False
+interactive_plot = True
 # How often to update the plot. (lower is generally slower)
 update_plot_every = 1000
 # Save a PNG of the final results for each data point.
@@ -62,7 +62,7 @@ solve_relative_error = True
 # Use the prior on the additive data errors
 solve_additive_error = True
 # Use the prior on the data height
-solve_height = True
+solve_height = False
 # Use the prior on the calibration parameters for the data
 solve_calibration = False
 
@@ -129,7 +129,7 @@ maximum_height_change = 1.0
 # Proposal variance for the relative error
 relative_error_proposal_variance = [2.5e-7, 2.5e-7]
 # Proposal variance for the additive error
-additive_error_proposal_variance = 0.0025  #[0.0025, 0.0025]
+additive_error_proposal_variance = [0.0025, 0.0025]
 # Proposal variance of the elevation
 height_proposal_variance = 0.01
 

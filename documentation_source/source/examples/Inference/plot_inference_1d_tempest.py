@@ -1,6 +1,6 @@
 """
-1D Inference of Skytem Data
----------------------------
+1D Inference of Tempest Data
+----------------------------
 
 All plotting in GeoBIPy can be carried out using the 3D inference class
 
@@ -25,20 +25,20 @@ import shutil
 output_directory = "..//supplementary//time_domain_inversion//results"
 ################################################################################
 
-for filename in os.listdir(output_directory):
-    file_path = os.path.join(output_directory, filename)
-    try:
-        if os.path.isfile(file_path) or os.path.islink(file_path):
-            os.unlink(file_path)
-    except Exception as e:
-        print('Failed to delete %s. Reason: %s' % (file_path, e))
+# for filename in os.listdir(output_directory):
+#     file_path = os.path.join(output_directory, filename)
+#     try:
+#         if os.path.isfile(file_path) or os.path.islink(file_path):
+#             os.unlink(file_path)
+#     except Exception as e:
+#         print('Failed to delete %s. Reason: %s' % (file_path, e))
 
 ################################################################################
 # The parameter file defines the set of user parameters needed to run geobipy.
-parameter_file = "skytem_options"
+parameter_file = "tempest_options"
 ################################################################################
 
-# Here are the contents of the user parameter file.
+# # Here are the contents of the user parameter file.
 # with open(parameter_file, 'r') as f:
 #     print(f.read())
 
@@ -48,7 +48,7 @@ parameter_file = "skytem_options"
 # data point for time considerations.
 # You will notice however that the HDF files are created for multiple lines
 # inside the data file.
-serial_geobipy(parameter_file, output_directory, index=0, seed=10)
+# serial_geobipy(parameter_file, output_directory, index=10000)
 
 
 #%%
@@ -61,10 +61,9 @@ serial_geobipy(parameter_file, output_directory, index=0, seed=10)
 
 ################################################################################
 results_3d = Inference3D(directory=output_directory, system_file_path="..//supplementary//data")
-
 ################################################################################
 # We can grab the results for a single index or fiducial
-results_1d = results_3d.inference_1d(index=0)
+results_1d = results_3d.inference_1d(fiducial=results_3d.lines[3].fiducials[0])
 
 ################################################################################
 results_1d.plot()
