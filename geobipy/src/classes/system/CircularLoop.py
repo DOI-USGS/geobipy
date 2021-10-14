@@ -111,10 +111,6 @@ class CircularLoop(EmLoop):
             assert value in [0, 0.0, 1, 1.0, 2, 2.0], ValueError("orientation must be 0, 1, or 2")
             self._orient = np.float64(value)
 
-    def __deepcopy__(self, memo={}):
-        return CircularLoop(self.orient, self.moment, self.x, self.y, self.z, self.pitch, self.roll, self.yaw, self.radius)
-
-
     @property
     def summary(self):
         """Print a summary"""
@@ -130,9 +126,20 @@ class CircularLoop(EmLoop):
                "Radius: {}\n").format(self.orient, self.moment, self.x, self.y, self.z, self.pitch, self.roll, self.yaw)
         return msg
 
-    # def hdf_name(self):
-    #     """Create a reproducibility string that can be instantiated from a hdf file """
-    #     return 'CircularLoop()'
+    def __deepcopy__(self, memo={}):
+        result = type(self).__new__(type(self))
+        result.orient = deepcopy(self.orient)
+        result._moment = deepcopy(self.moment)
+        result._x = deepcopy(self.x)
+        result._y = deepcopy(self.y)
+        result._z = deepcopy(self.z)
+        result._pitch = deepcopy(self.pitch)
+        result._roll = deepcopy(self.roll)
+        result._yaw = deepcopy(self.yaw)
+        result._radius = deepcopy(self.radius)
+
+        return result
+
     def set_priors(self, x_prior=None, y_prior=None, z_prior=None, pitch_prior=None, roll_prior=None, yaw_prior=None, kwargs={}):
 
         super().set_priors(x_prior, y_prior, z_prior, kwargs=kwargs)
@@ -231,7 +238,6 @@ class CircularLoop(EmLoop):
 
         return cls(*tmp)
 
-
     def Bcast(self, world, root=0):
         """Broadcast using MPI
 
@@ -270,20 +276,3 @@ class CircularLoop(EmLoop):
             self.orient, self.moment,
             self.x,      self.y,    self.z,
             self.pitch,  self.roll, self.yaw, self.radius)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

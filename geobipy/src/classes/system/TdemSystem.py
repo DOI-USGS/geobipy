@@ -62,35 +62,35 @@ class TdemSystem(TdemSystem_GAAEM):
     def isGA(self):
         return False
 
-    @property
-    def loopOffset(self):
-        return self._loopOffset
+    # @property
+    # def loopOffset(self):
+    #     return self._loopOffset
 
-    @loopOffset.setter
-    def loopOffset(self, values):
-        if values is None:
-            self._loopOffset = StatArray.StatArray(3, "Loop Offset", "m")
-        else:
-            assert np.size(values) == 3, ValueError(
-                "loopOffset must have size 3 for offset in x, y, z.")
-            self._loopOffset = StatArray.StatArray(values, "Loop Offset", "m")
+    # @loopOffset.setter
+    # def loopOffset(self, values):
+    #     if values is None:
+    #         self._loopOffset = StatArray.StatArray(3, "Loop Offset", "m")
+    #     else:
+    #         assert np.size(values) == 3, ValueError(
+    #             "loopOffset must have size 3 for offset in x, y, z.")
+    #         self._loopOffset = StatArray.StatArray(values, "Loop Offset", "m")
 
     # @property
     # def nTimes(self):
     #     return np.size(self.off_times)
 
-    @property
-    def receiverLoop(self):
-        return self._receiverLoop
+    # @property
+    # def receiverLoop(self):
+    #     return self._receiverLoop
 
-    @receiverLoop.setter
-    def receiverLoop(self, value):
-        if value is None:
-            self._receiverLoop = CircularLoop()
-        else:
-            assert isinstance(value, EmLoop), TypeError(
-                "transmitterLoop must have type geobipy.EmLoop")
-            self._receiverLoop = deepcopy(values)
+    # @receiverLoop.setter
+    # def receiverLoop(self, value):
+    #     if value is None:
+    #         self._receiverLoop = CircularLoop()
+    #     else:
+    #         assert isinstance(value, EmLoop), TypeError(
+    #             "transmitterLoop must have type geobipy.EmLoop")
+    #         self._receiverLoop = deepcopy(values)
 
     @property
     def summary(self):
@@ -101,18 +101,18 @@ class TdemSystem(TdemSystem_GAAEM):
     # def times(self):
     #     return self.offTimes
 
-    @property
-    def transmitterLoop(self):
-        return self._transmitterLoop
+    # @property
+    # def transmitterLoop(self):
+    #     return self._transmitterLoop
 
-    @transmitterLoop.setter
-    def transmitterLoop(self, value):
-        if value is None:
-            self._transmitterLoop = CircularLoop()
-        else:
-            assert isinstance(value, EmLoop), TypeError(
-                "transmitterLoop must have type geobipy.EmLoop")
-            self._transmitterLoop = deepcopy(values)
+    # @transmitterLoop.setter
+    # def transmitterLoop(self, value):
+    #     if value is None:
+    #         self._transmitterLoop = CircularLoop()
+    #     else:
+    #         assert isinstance(value, EmLoop), TypeError(
+    #             "transmitterLoop must have type geobipy.EmLoop")
+    #         self._transmitterLoop = deepcopy(values)
 
     @classmethod
     def read(cls, system_filename):
