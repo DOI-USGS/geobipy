@@ -9,6 +9,7 @@ from ...base import plotting as cP
 from ...base import utilities as cF
 from .baseDistribution import baseDistribution
 from .Mixture import Mixture
+from .Histogram import Histogram
 import numpy as np
 from scipy.stats import binned_statistic
 import matplotlib as mpl
@@ -17,7 +18,7 @@ import matplotlib.gridspec as gridspec
 import progressbar
 
 
-class Histogram2D(RectilinearMesh2D):
+class Histogram2D(Histogram, RectilinearMesh2D):
     """ 2D Histogram class that can update and plot efficiently.
 
     Class extension to the RectilinearMesh2D.  The mesh defines the x and y axes, while the Histogram2D manages the counts.
@@ -46,7 +47,7 @@ class Histogram2D(RectilinearMesh2D):
         """ Instantiate a 2D histogram """
 
         # Instantiate the parent class
-        super().__init__(x=x, y=y, **kwargs)
+        RectilinearMesh2D.__init__(self, x=x, y=y, **kwargs)
 
 
         # Point counts to self.arr to make variable names more intuitive
@@ -153,7 +154,7 @@ class Histogram2D(RectilinearMesh2D):
             Contains the interval along the specified axis. Has size equal to self.shape[axis].
 
         """
-        return super()._percent_interval(self.counts, percent, log, axis)
+        return RectilinearMesh2D._percent_interval(self, self.counts, percent, log, axis)
 
     def credibleIntervals(self, percent=90.0, log=None, reciprocate=False, axis=0):
         """Gets the median and the credible intervals for the specified axis.
@@ -177,7 +178,7 @@ class Histogram2D(RectilinearMesh2D):
             Contains the upper interval along the specified axis. Has size equal to arr.shape[axis].
 
         """
-        return super()._credibleIntervals(values=self.counts, percent=percent, log=log, reciprocate=reciprocate, axis=axis)
+        return RectilinearMesh2D._credibleIntervals(self, values=self.counts, percent=percent, log=log, reciprocate=reciprocate, axis=axis)
 
     def credibleRange(self, percent=90.0, log=None, axis=0):
         """ Get the range of credibility with depth
@@ -193,7 +194,7 @@ class Histogram2D(RectilinearMesh2D):
             Axis along which to get the marginal histogram.
 
         """
-        return super()._credibleRange(self.counts, percent, log, axis)
+        return RectilinearMesh2D._credibleRange(self, self.counts, percent, log, axis)
 
     def marginalize(self, intervals=None, index=None, log=None, axis=0):
         """Get the marginal histogram along an axis
@@ -260,7 +261,7 @@ class Histogram2D(RectilinearMesh2D):
 
         """
 
-        return super()._mean(self.counts, log=log, axis=axis)
+        return RectilinearMesh2D._mean(self, self.counts, log=log, axis=axis)
 
     def median(self, log=None, axis=0):
         """Gets the median for the specified axis.
@@ -278,7 +279,7 @@ class Histogram2D(RectilinearMesh2D):
             The medians along the specified axis. Has size equal to arr.shape[axis].
 
         """
-        return super()._median(values=self.counts, log=log, axis=axis)
+        return RectilinearMesh2D._median(self, values=self.counts, log=log, axis=axis)
 
     def mode(self, log=None, axis=0):
         """Gets the mode for the specified axis.
@@ -611,7 +612,7 @@ class Histogram2D(RectilinearMesh2D):
 
         """
 
-        counts, intervals = super().intervalStatistic(
+        counts, intervals = RectilinearMesh2D.intervalStatistic(self,
             self._counts, intervals, axis, statistic)
 
         if axis == 0:
@@ -879,7 +880,7 @@ class Histogram2D(RectilinearMesh2D):
         kwargs['cmap'] = kwargs.pop('cmap', mpl.cm.Greys)
         interval_kwargs = kwargs.pop('credible_interval_kwargs', None)
 
-        ax = super().pcolor(self.counts, **kwargs)
+        ax = RectilinearMesh2D.pcolor(self, self.counts, **kwargs)
 
         if not interval_kwargs is None:
             self.plotCredibleIntervals(**interval_kwargs)
@@ -925,7 +926,7 @@ class Histogram2D(RectilinearMesh2D):
             cP.plot(self.x.centres, m, label='median', **kwargs)
 
     def update_line(self, x, y, **kwargs):
-        ix, iy = super().line_indices(x, y, **kwargs)
+        ix, iy = RectilinearMesh2D.line_indices(self, x, y, **kwargs)
         self.counts[iy, ix] += 1
 
     def update(self, xValues, yValues=None, trim=False):
@@ -967,7 +968,7 @@ class Histogram2D(RectilinearMesh2D):
         myName: Name of the group
         """
         # create a new group inside h5obj
-        grp = super().createHdf(parent, name, withPosterior, nRepeats, fillvalue)
+        grp = RectilinearMesh2D.createHdf(self, parent, name, withPosterior, nRepeats, fillvalue)
         self._counts.createHdf(
             grp, 'counts', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         return grp
@@ -978,7 +979,7 @@ class Histogram2D(RectilinearMesh2D):
         myName: object hdf name. Assumes createHdf has already been called
         create: optionally create the data set as well before writing
         """
-        super().writeHdf(parent, name, withPosterior, index)
+        RectilinearMesh2D.writeHdf(self, parent, name, withPosterior, index)
         self._counts.writeHdf(parent, name+'/counts',
                               withPosterior=withPosterior, index=index)
 

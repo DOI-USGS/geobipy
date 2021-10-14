@@ -54,6 +54,14 @@ class Point(myObject, ABC):
         P._z += other.z
         return P
 
+    def __deepcopy__(self, memo={}):
+        """ Define a deepcopy routine """
+        result = type(self).__new__(type(self))
+        result.x = deepcopy(self.x)
+        result.y = deepcopy(self.y)
+        result.z = deepcopy(self.z)
+        return result
+
     def __sub__(self, other):
         """ Subtract two points """
         P = deepcopy(self)
@@ -65,14 +73,6 @@ class Point(myObject, ABC):
     def distance(self, other, **kwargs):
         """Get the Lp norm distance between two points. """
         return np.linalg.norm(np.asarray([self.x, self.y, self.z])-np.asarray([other.x, other.y, other.z]), **kwargs)
-
-    def __deepcopy__(self, memo={}):
-        """ Define a deepcopy routine """
-        result = type(self).__new__(type(self))
-        result.x = self.x
-        result.y = self.y
-        result.z = self.z
-        return result
 
     def move(self, dx, dy, dz):
         """ Move the point by [dx,dy,dz] """

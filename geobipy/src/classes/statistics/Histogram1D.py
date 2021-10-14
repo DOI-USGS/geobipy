@@ -9,6 +9,7 @@ from .Distribution import Distribution
 from .mixNormal import mixNormal
 from .mixPearson import mixPearson
 from .mixStudentT import mixStudentT
+from .Histogram import Histogram
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
@@ -17,7 +18,7 @@ from lmfit import model
 from copy import deepcopy
 
 
-class Histogram1D(RectilinearMesh1D):
+class Histogram1D(Histogram, RectilinearMesh1D):
     """1D Histogram class that updates efficiently.
 
     Fast updating relies on knowing the bins ahead of time.
@@ -50,7 +51,7 @@ class Histogram1D(RectilinearMesh1D):
             raise Exception('woops')
 
         # Initialize the parent class
-        super().__init__(centres=centres, edges=edges, widths=widths, log=log, relativeTo=relativeTo)
+        RectilinearMesh1D.__init__(self, centres=centres, edges=edges, widths=widths, log=log, relativeTo=relativeTo)
 
         self._counts = StatArray.StatArray(self.nCells.value, 'Frequency', dtype=np.int64)
 
@@ -64,7 +65,7 @@ class Histogram1D(RectilinearMesh1D):
         assert np.shape(slic) == (), ValueError("slic must have one dimension.")
 
 
-        bins = super().__getitem__(slic).edges
+        bins = RectilinearMesh1D.__getitem__(self, slic).edges
 
         out = Histogram1D()
 
@@ -111,7 +112,7 @@ class Histogram1D(RectilinearMesh1D):
         return self._counts.sum()
 
     def __deepcopy__(self, memo={}):
-        out = super().__deepcopy__(memo)
+        out = RectilinearMesh1D.__deepcopy__(self, memo)
         # out = type(self)()
         # out._centres = self._centres.deepcopy()
         # out._edges = self._edges.deepcopy()
@@ -417,7 +418,7 @@ class Histogram1D(RectilinearMesh1D):
         geobipy.plotting.pcolor : For additional keywords
 
         """
-        return super().pcolor(self._counts, **kwargs)
+        return RectilinearMesh1D.pcolor(self, self._counts, **kwargs)
 
 
     def plot(self, rotate=False, flipX=False, flipY=False, trim=True, normalize=False, line=None, **kwargs):
@@ -464,7 +465,7 @@ class Histogram1D(RectilinearMesh1D):
         myName: Name of the group
         """
         # create a new group inside h5obj
-        grp = super().createHdf(parent, name, withPosterior, nRepeats, fillvalue)
+        grp = RectilinearMesh1D.createHdf(self, parent, name, withPosterior, nRepeats, fillvalue)
         # grp = self.create_hdf_group(parent, name)
         self._counts.createHdf(grp, 'counts', nRepeats=nRepeats, fillvalue=fillvalue)
 
@@ -475,7 +476,7 @@ class Histogram1D(RectilinearMesh1D):
         myName: object hdf name. Assumes createHdf has already been called
         create: optionally create the data set as well before writing
         """
-        super().writeHdf(parent, name, withPosterior, index=index)
+        RectilinearMesh1D.writeHdf(self, parent, name, withPosterior, index=index)
         grp = parent[name]
         self._counts.writeHdf(grp, 'counts', index=index)
 

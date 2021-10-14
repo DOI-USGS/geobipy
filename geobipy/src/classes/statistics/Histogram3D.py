@@ -10,6 +10,7 @@ from ...base import plotting as cP
 from ...base import utilities as cF
 from .baseDistribution import baseDistribution
 from .Mixture import Mixture
+from .Histogram import Histogram
 import numpy as np
 from scipy.stats import binned_statistic
 import matplotlib.pyplot as plt
@@ -17,7 +18,7 @@ import matplotlib.gridspec as gridspec
 import progressbar
 
 
-class Histogram3D(RectilinearMesh3D):
+class Histogram3D(Histogram, RectilinearMesh3D):
     """3D Histogram class that can update and plot efficiently.
 
     Class extension to the RectilinearMesh.  The mesh defines the x, y,and z axes, while the Histogram manages the counts.
@@ -44,7 +45,7 @@ class Histogram3D(RectilinearMesh3D):
         """ Instantiate a 2D histogram """
 
         # Instantiate the parent class
-        super().__init__(x, y, z, **kwargs)
+        RectilinearMesh3D.__init__(self, x, y, z, **kwargs)
 
         # Point counts to self.arr to make variable names more intuitive
         self._counts = StatArray.StatArray(self.shape, name='Frequency', dtype=np.int64)
@@ -83,7 +84,7 @@ class Histogram3D(RectilinearMesh3D):
 
         """
 
-        out = super().__getitem__(slic)
+        out = RectilinearMesh3D.__getitem__(self, slic)
 
         # assert np.shape(slic) == (3,), ValueError("slic must be over 3 dimensions.")
 
@@ -153,7 +154,7 @@ class Histogram3D(RectilinearMesh3D):
 
         """
 
-        super()._percent_interval(self.counts, percent, log, axis)
+        return RectilinearMesh3D._percent_interval(self, self.counts, percent, log, axis)
 
 
 
@@ -281,7 +282,7 @@ class Histogram3D(RectilinearMesh3D):
 
         """
 
-        return super()._mean(self.counts, log, axis)
+        return RectilinearMesh3D._mean(self, self.counts, log, axis)
 
 
     def median(self, log=None, axis=0):
@@ -300,7 +301,7 @@ class Histogram3D(RectilinearMesh3D):
             The medians along the specified axis. Has size equal to arr.shape[axis].
 
         """
-        return super()._median(self._counts, log, axis)
+        return RectilinearMesh3D._median(self, self._counts, log, axis)
 
 
     def mode(self, log=None, axis=0):
@@ -534,7 +535,7 @@ class Histogram3D(RectilinearMesh3D):
 
         track = kwargs.pop('track', True)
 
-        counts, intervals = super().intervalStatistic(self._counts, intervals, axis, 'sum')
+        counts, intervals = RectilinearMesh3D.intervalStatistic(self, self._counts, intervals, axis, 'sum')
 
         distributions = []
         active = []
@@ -615,7 +616,7 @@ class Histogram3D(RectilinearMesh3D):
 
         """
 
-        counts, intervals = super().intervalStatistic(self._counts, intervals, axis, statistic)
+        counts, intervals = RectilinearMesh3D.intervalStatistic(self, self._counts, intervals, axis, statistic)
 
         if axis == 0:
             out = Histogram2D(xEdges = self.x.edges, yEdges = StatArray.StatArray(np.asarray(intervals), name=self.y.name, units=self.y.units))
@@ -799,7 +800,7 @@ class Histogram3D(RectilinearMesh3D):
 
     def plot_pyvista(self, **kwargs):
 
-        pv_mesh = super().plot_pyvista(**kwargs)
+        pv_mesh = RectilinearMesh3D.plot_pyvista(self, **kwargs)
 
         pv_mesh.cell_arrays["counts"] = self.counts.flatten()
 
@@ -928,7 +929,7 @@ class Histogram3D(RectilinearMesh3D):
         myName: Name of the group
         """
         # create a new group inside h5obj
-        grp = super().createHdf(parent, name, withPosterior, nRepeats, fillvalue)
+        grp = RectilinearMesh3D.createHdf(self, parent, name, withPosterior, nRepeats, fillvalue)
         self._counts.createHdf(grp, 'counts', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         return grp
 
@@ -939,7 +940,7 @@ class Histogram3D(RectilinearMesh3D):
         myName: object hdf name. Assumes createHdf has already been called
         create: optionally create the data set as well before writing
         """
-        super().writeHdf(parent, name, withPosterior, index)
+        RectilinearMesh3D.writeHdf(self, parent, name, withPosterior, index)
         grp = h5obj.get(name)
         self._counts.writeHdf(grp, 'counts',  withPosterior=withPosterior, index=index)
 
