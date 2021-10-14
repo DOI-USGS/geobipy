@@ -698,6 +698,10 @@ class StatArray(np.ndarray, myObject):
         val = self.shape[axis] - np.flip(msk, axis=axis).argmax(axis=axis)
         return np.where(msk.any(axis=axis), val, invalid_val)
 
+    def mahalanobis(self):
+        assert self.hasPrior, ValueError("No prior attached")
+        return self.prior.mahalanobis(self)
+
     def normalize(self, axis=None):
         """Normalize to range 0 - 1. """
         mn = np.nanmin(self, axis=axis)
