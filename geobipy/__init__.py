@@ -182,7 +182,7 @@ def parallel_mpi(inputFile, output_directory, skipHDF5):
     output_directory = pathlib.Path(output_directory)
     assert output_directory.exists(), Exception("Make sure the output directory exists {}".format(output_directory))
 
-    options = user_parameters.read(inputFile)
+    kwargs = user_parameters.read(inputFile)
 
     # Everyone needs the system classes read in early.
     dataset = kwargs['data_type'](systems=kwargs['system_filename'])
