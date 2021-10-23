@@ -172,11 +172,10 @@ systemFile=[dataFolder + 'SkytemHM-SLV.stm', dataFolder + 'SkytemLM-SLV.stm']
 
 ################################################################################
 # Initialize and read an EM data set
-D = TdemData.read_csv(dataFile, systemFile)
-
-################################################################################
-# Get a datapoint from the dataset
-tdp = D.datapoint(0)
+# Prepare the dataset so that we can read a point at a time.
+Dataset = TdemData._initialize_sequential_reading(dataFile, systemFile)
+# Get a datapoint from the file.
+tdp = Dataset._read_record()
 
 # plt.figure()
 # tdp.plot()
@@ -219,6 +218,9 @@ tdp.forward(mod)
 # Attaching statistical descriptors to the datapoint
 # ++++++++++++++++++++++++++++++++++++++++++++++++++
 #
+# Set values of relative and additive error for both systems.
+tdp.relErr = [0.05, 0.05]
+tdp.addErr = [1e-11, 1e-12]
 # Define a multivariate log normal distribution as the prior on the predicted data.
 tdp.predictedData.prior = Distribution('MvLogNormal', tdp.data[tdp.active], tdp.std[tdp.active]**2.0)
 
@@ -250,10 +252,6 @@ print(tdp.dataMisfit())
 # We can attach priors to the height of the datapoint,
 # the relative error multiplier, and the additive error noise floor
 
-# Set values of relative and additive error for both systems.
-tdp.relErr = [0.05, 0.05]
-tdp.addErr = [1e-11, 1e-12]
-
 # Define the distributions used as priors.
 heightPrior = Distribution('Uniform', min=np.float64(tdp.z) - 2.0, max=np.float64(tdp.z) + 2.0)
 relativePrior = Distribution('Uniform', min=np.r_[0.01, 0.01], max=np.r_[0.5, 0.5])
@@ -265,17 +263,17 @@ tdp.set_priors(height_prior=heightPrior, relative_error_prior=relativePrior, add
 heightProposal = Distribution('Normal', mean=tdp.z, variance = 0.01)
 relativeProposal = Distribution('MvNormal', mean=tdp.relErr, variance=2.5e-4)
 additiveProposal = Distribution('MvLogNormal', mean=tdp.addErr, variance=2.5e-3, linearSpace=True)
-tdp.setProposals(heightProposal, relativeProposal, additiveProposal)
+tdp.set_proposals(heightProposal, relativeProposal, additiveProposal)
 
 ################################################################################
 # With priorss set we can auto generate the posteriors
-tdp.setPosteriors()
+tdp.set_posteriors()
 
 ################################################################################
 # Perturb the datapoint and record the perturbations
 # Note we are not using the priors to accept or reject perturbations.
 for i in range(10):
-    tdp.perturb(True, True, True, False)
+    tdp.perturb()
     tdp.updatePosteriors()
 
 
@@ -288,37 +286,43 @@ fig.tight_layout()
 tdp.plot_posteriors(axes=ax, best=tdp)
 
 
-# ###############################################################################
-# # Aerotem example
-# # +++++++++++++++
+###############################################################################
+# Aerotem example
+# +++++++++++++++
 
-# # The data file name
-# dataFile=dataFolder + 'aerotem.txt'
-# # The EM system file name
-# systemFile=dataFolder + 'aerotem.stm'
+# The data file name
+dataFile = dataFolder + 'aerotem.txt'
+# The EM system file name
+systemFile = dataFolder + 'aerotem.stm'
+
+################################################################################
+# Initialize and read an EM data set
+# Prepare the dataset so that we can read a point at a time.
+Dataset = TdemData._initialize_sequential_reading(dataFile, systemFile)
+# Get a datapoint from the file.
+tdp = Dataset._read_record()
 
 # ################################################################################
 # # Initialize and read an EM data set
 # D = TdemData.read_csv(dataFile, systemFile)
 
-# ################################################################################
-# # Get a datapoint from the dataset
-# tdp = D.datapoint(0)
-# plt.figure()
-# tdp.plot()
+################################################################################
+# Get a datapoint from the dataset
+plt.figure()
+tdp.plot()
 
-# ################################################################################
-# # Using a time domain datapoint
-# # +++++++++++++++++++++++++++++
+################################################################################
+# Using a time domain datapoint
+# +++++++++++++++++++++++++++++
 
-# ################################################################################
-# # We can define a 1D layered earth model, and use it to predict some data
-# par = StatArray(np.r_[500.0, 20.0], "Conductivity", "$\frac{S}{m}$")
-# mod = Model1D(edges=np.r_[0.0, 75.0, np.inf], parameters=par)
+################################################################################
+# We can define a 1D layered earth model, and use it to predict some data
+par = StatArray(np.r_[500.0, 20.0], "Conductivity", "$\frac{S}{m}$")
+mod = Model1D(edges=np.r_[0.0, 75.0, np.inf], parameters=par)
 
-# ################################################################################
-# # Forward model the data
-# tdp.forward(mod)
+################################################################################
+# Forward model the data
+tdp.forward(mod)
 
 # ################################################################################
 # plt.figure()
@@ -335,8 +339,79 @@ tdp.plot_posteriors(axes=ax, best=tdp)
 # plt.figure()
 # _ = np.abs(J).pcolor(equalize=True, log=10, flipY=True)
 
+################################################################################
+# Attaching statistical descriptors to the datapoint
+# ++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# Set values of relative and additive error for both systems.
+tdp.relErr = 0.05
+tdp.addErr = 1e-8
+# Define a multivariate log normal distribution as the prior on the predicted data.
+tdp.predictedData.prior = Distribution('MvLogNormal', tdp.data[tdp.active], tdp.std[tdp.active]**2.0)
 
-plt.show()
+################################################################################
+# This allows us to evaluate the likelihood of the predicted data
+print(tdp.likelihood(log=True))
+# Or the misfit
+print(tdp.dataMisfit())
+
+# ################################################################################
+# # We can perform a quick search for the best fitting half space
+# halfspace = tdp.find_best_halfspace()
+# print('Best half space conductivity is {} $S/m$'.format(halfspace.par))
+# plt.figure()
+# _ = tdp.plot()
+# _ = tdp.plotPredicted()
+
+# ################################################################################
+# # Compute the misfit between observed and predicted data
+# print(tdp.dataMisfit())
+
+# ################################################################################
+# # Plot the misfits for a range of half space conductivities
+# plt.figure()
+# _ = tdp.plotHalfSpaceResponses(-6.0, 4.0, 200)
+# plt.title("Halfspace responses")
+
+################################################################################
+# We can attach priors to the height of the datapoint,
+# the relative error multiplier, and the additive error noise floor
+
+# Define the distributions used as priors.
+heightPrior = Distribution('Uniform', min=np.float64(tdp.z) - 2.0, max=np.float64(tdp.z) + 2.0)
+relativePrior = Distribution('Uniform', min=0.01, max=0.5)
+additivePrior = Distribution('Uniform', min=1e-8, max=1e-5, log=True)
+tdp.set_priors(height_prior=heightPrior, relative_error_prior=relativePrior, additive_error_prior=additivePrior)
+
+################################################################################
+# In order to perturb our solvable parameters, we need to attach proposal distributions
+heightProposal = Distribution('Normal', mean=tdp.z, variance = 0.01)
+relativeProposal = Distribution('MvNormal', mean=tdp.relErr, variance=2.5e-4)
+additiveProposal = Distribution('MvLogNormal', mean=tdp.addErr, variance=2.5e-3, linearSpace=True)
+tdp.set_proposals(heightProposal, relativeProposal, additiveProposal)
+
+################################################################################
+# With priorss set we can auto generate the posteriors
+tdp.set_posteriors()
+
+################################################################################
+# Perturb the datapoint and record the perturbations
+# Note we are not using the priors to accept or reject perturbations.
+for i in range(10):
+    tdp.perturb()
+    tdp.updatePosteriors()
+
+
+################################################################################
+# Plot the posterior distributions
+fig = plt.figure()
+ax = tdp.init_posterior_plots(fig)
+fig.tight_layout()
+
+tdp.plot_posteriors(axes=ax, best=tdp)
+
+
+# plt.show()
 
 #%%
 # File Format for a time domain datapoint

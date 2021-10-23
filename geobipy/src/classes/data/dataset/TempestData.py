@@ -60,29 +60,119 @@ class TempestData(TdemData):
 
         self.primary_field = kwargs.get('primary_field', None)
         self.secondary_field = kwargs.get('secondary_field', None)
+        self.predicted_primary_field = kwargs.get('predicted_primary_field', None)
+        self.predicted_secondary_field = kwargs.get('predicted_secondary_field', None)
 
+    @TdemData.components.setter
+    def components(self, values):
+
+        if values is None:
+            values = ['x', 'z']
+        else:
+
+            if isinstance(values, str):
+                values = [values]
+
+            assert np.all([isinstance(x, str) for x in values]), TypeError('components_per_channel must be list of str')
+
+        self._components = values
+
+    @TdemData.data.getter
+    def data(self):
+        for i in range(self.n_components):
+            ic = self._component_indices(i, 0)
+            self._data[:, ic] = self.primary_field[:, i][:, None] + self.secondary_field[:, ic]
+        return self._data
 
     @property
-    def components_per_channel(self):
-        return self.system[0].components
-
-    # @TdemData.data.getter
-    # def data(self):
-    #     for ic in range(self.n_components):
-    #         slic = self._component_indices(ic, 0)
-    #         self._data[:, slic] = self.primary_field[:, ic][:, None] + self.secondary_field[:, slic]
-    #     return self._data
+    def datapoint_type(self):
+        return Tempest_datapoint
 
     @property
-    def nChannels(self):
-        return 2 * self.system[0].nTimes
+    def primary_field(self):
+        """The data. """
+        if np.size(self._primary_field, 0) == 0:
+            self._primary_field = StatArray.StatArray((self.nPoints, self.n_components), "Primary field", self.units)
+        return self._primary_field
 
-    # @TdemData.predictedData.getter
-    # def predictedData(self):
-    #     for ic in range(self.n_components):
-    #         slic = self._component_indices(ic, 0)
-    #         self._predictedData[:, slic] = self.primary_field[:, ic][:, None] + self.secondary_field[:, slic]
-    #     return self._predictedData
+
+    @primary_field.setter
+    def primary_field(self, values):
+        shp = (self.nPoints, self.n_components)
+        if values is None:
+            self._primary_field = StatArray.StatArray(shp, "Primary field", self.units)
+        else:
+            if self.nPoints == 0:
+                self.nPoints = np.size(values, 0)
+            # if self.nChannels == 0:
+            #     self.channels_per_system = np.size(values, 1)
+            shp = (self.nPoints, self.n_components)
+            assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("primary_field must have shape {}".format(shp))
+            self._primary_field = StatArray.StatArray(values)
+
+    @property
+    def predicted_primary_field(self):
+        """The data. """
+        if np.size(self._primary_field, 0) == 0:
+            self._primary_field = StatArray.StatArray((self.nPoints, self.n_components), "Primary field", self.units)
+        return self._primary_field
+
+
+    @predicted_primary_field.setter
+    def predicted_primary_field(self, values):
+        shp = (self.nPoints, self.n_components)
+        if values is None:
+            self._predicted_primary_field = StatArray.StatArray(shp, "Predicted primary field", self.units)
+        else:
+            if self.nPoints == 0:
+                self.nPoints = np.size(values, 0)
+            # if self.nChannels == 0:
+            #     self.channels_per_system = np.size(values, 1)
+            shp = (self.nPoints, self.n_components)
+            assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("predicted_primary_field must have shape {}".format(shp))
+            self._predicted_primary_field = StatArray.StatArray(values)
+
+    @property
+    def secondary_field(self):
+        """The data. """
+        if np.size(self._secondary_field, 0) == 0:
+            self._secondary_field = StatArray.StatArray((self.nPoints, self.nChannels), "Secondary field", self.units)
+        return self._secondary_field
+
+    @secondary_field.setter
+    def secondary_field(self, values):
+        shp = (self.nPoints, self.nChannels)
+        if values is None:
+            self._secondary_field = StatArray.StatArray(shp, "Secondary field", self.units)
+        else:
+            if self.nPoints == 0:
+                self.nPoints = np.size(values, 0)
+            if self.nChannels == 0:
+                self.channels_per_system = np.size(values, 1)
+            shp = (self.nPoints, self.nChannels)
+            assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("seconday_field must have shape {}".format(shp))
+            self._secondary_field = StatArray.StatArray(values)
+
+    @property
+    def predicted_secondary_field(self):
+        """The data. """
+        if np.size(self._secondary_field, 0) == 0:
+            self._predicted_secondary_field = StatArray.StatArray((self.nPoints, self.nChannels), "Predicted secondary field", self.units)
+        return self._predicted_secondary_field
+
+    @predicted_secondary_field.setter
+    def predicted_secondary_field(self, values):
+        shp = (self.nPoints, self.nChannels)
+        if values is None:
+            self._predicted_secondary_field = StatArray.StatArray(shp, "Predicted secondary field", self.units)
+        else:
+            if self.nPoints == 0:
+                self.nPoints = np.size(values, 0)
+            if self.nChannels == 0:
+                self.channels_per_system = np.size(values, 1)
+            shp = (self.nPoints, self.nChannels)
+            assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("predicted_seconday_field must have shape {}".format(shp))
+            self._predicted_secondary_field = StatArray.StatArray(values)
 
     def append(self, other):
 
@@ -91,7 +181,7 @@ class TempestData(TdemData):
         self.primary_field = np.hstack(self.primary_field, other.primary_field)
 
     @classmethod
-    def read_netcdf(cls, dataFilename, systemFilename):
+    def read_netcdf(cls, dataFilename, systemFilename, indices=None):
         """Reads the data and system parameters from file
 
         Parameters
@@ -147,38 +237,34 @@ class TempestData(TdemData):
 
         """
 
-        # if (isinstance(systemFilename, str)):
-        #     systemFilename = [systemFilename]
-
-        # nSystems = len(systemFilename)
-
-        # self.system =
+        if indices is None:
+            indices = np.s_[:]
 
         with h5py.File(dataFilename, 'r') as f:
             gdf = f['linedata']
 
-            self = cls(lineNumber=np.asarray(gdf['Line']),
-                        fiducial=np.asarray(gdf['Fiducial']),
-                        x=np.asarray(gdf['Easting']),
-                        y=np.asarray(gdf['Northing']),
-                        z=np.asarray(gdf['Tx_Height']),
-                        elevation=np.asarray(gdf['DTM']),
+            self = cls(lineNumber=np.asarray(gdf['Line'][indices]),
+                        fiducial=np.asarray(gdf['Fiducial'][indices]),
+                        x=np.asarray(gdf['Easting'][indices]),
+                        y=np.asarray(gdf['Northing'][indices]),
+                        z=np.asarray(gdf['Tx_Height'][indices]),
+                        elevation=np.asarray(gdf['DTM'][indices]),
                         systems=systemFilename)
 
             # Assign the orientations of the acquisistion loops
-            pitch = np.asarray(gdf['Tx_Pitch'])
-            roll = np.asarray(gdf['Tx_Roll'])
-            yaw = np.asarray(gdf['Tx_Yaw'])
+            pitch = np.asarray(gdf['Tx_Pitch'][indices])
+            roll = np.asarray(gdf['Tx_Roll'][indices])
+            yaw = np.asarray(gdf['Tx_Yaw'][indices])
 
             self.transmitter = [CircularLoop(x=self.x[i], y=self.y[i], z=self.z[i],
                                              pitch=pitch[i], roll=roll[i], yaw=yaw[i],
                                              radius=self.system[0].loopRadius()) for i in range(self.nPoints)]
 
-            pitch = np.asarray(gdf['Rx_Pitch'])
-            roll = np.asarray(gdf['Rx_Roll'])
-            yaw = np.asarray(gdf['Rx_Yaw'])
+            pitch = np.asarray(gdf['Rx_Pitch'][indices])
+            roll = np.asarray(gdf['Rx_Roll'][indices])
+            yaw = np.asarray(gdf['Rx_Yaw'][indices])
 
-            loopOffset = np.vstack([np.asarray(gdf['HSep_GPS']), np.asarray(gdf['TSep_GPS']), np.asarray(gdf['VSep_GPS'])]).T
+            loopOffset = np.vstack([np.asarray(gdf['HSep_GPS'][indices]), np.asarray(gdf['TSep_GPS'][indices]), np.asarray(gdf['VSep_GPS'][indices])]).T
 
             self.receiver = [CircularLoop(x=self.transmitter[i].x + loopOffset[i, 0],
                                           y=self.transmitter[i].y + loopOffset[i, 1],
@@ -186,9 +272,8 @@ class TempestData(TdemData):
                                           pitch=pitch[i], roll=roll[i], yaw=yaw[i],
                                           radius=self.system[0].loopRadius()) for i in range(self.nPoints)]
 
-
-            self.primary_field = np.vstack([np.asarray(gdf['X_PrimaryField']), np.asarray(gdf['Z_PrimaryField'])]).T
-            self.secondary_field = np.hstack([np.asarray(gdf['EMX_NonHPRG']).T, np.asarray(gdf['EMZ_NonHPRG']).T])
+            self.primary_field = np.vstack([np.asarray(gdf['X_PrimaryField'][indices]), np.asarray(gdf['Z_PrimaryField'][indices])]).T
+            self.secondary_field = np.hstack([np.asarray(gdf['EMX_NonHPRG'][:, indices]).T, np.asarray(gdf['EMZ_NonHPRG'][:, indices]).T])
 
             self.std = 0.1 * self.data
 
@@ -522,41 +607,6 @@ class TempestData(TdemData):
         return self
 
 
-
-    def _BcastSystem(self, world, root=0, system=None):
-        """Broadcast the TdemSystems.
-
-        The TD systems have a c++ backend.  The only way currently to instantiate a TdemSystem class is with a file that is read in.
-        Therefore, to broadcast the systems, I have to broadcast the file names of the systems and have each worker read in the system file.
-        However, if not system is None, I assume that system is a list of TdemSystem classes that already exists on each worker.
-        If system is provided, simply assign them when broadcasting the TdemData.
-
-        """
-
-        # Since the Time Domain EM Systems are C++ objects on the back end, I can't Broadcast them through C++ (Currently a C++ Noob)
-        # So instead, Broadcast the list of system file names saved in the TdemData Class and read the system files in on each worker.
-        # This is cumbersome, but only done once at the beginning of the MPI
-        # code.
-
-        if system is None:
-            if world.rank == root:
-                sfnTmp = []
-                for s in self.system:
-                    sfnTmp.append(s.fileName)
-            else:
-                sfnTmp = None
-            systemFilename = world.bcast(sfnTmp, root=root)
-
-            nSystems = len(systemFilename)
-
-            system = np.ndarray(nSystems, dtype=TdemSystem)
-            for i in range(nSystems):
-                    system[i] = TdemSystem(systemFilename[i])
-
-        return system
-
-
-
     def Bcast(self, world, root=0, system=None):
         """Broadcast the TdemData using MPI
 
@@ -565,159 +615,25 @@ class TempestData(TdemData):
 
         """
 
-        nPoints = myMPI.Bcast(self.nPoints, world, root=root)
-        nTimes = myMPI.Bcast(self.nTimes, world, root=root)
+        out = super().Bcast(world, root, system)
 
-        systems = self._BcastSystem(world, root=root, system=system)
+        out._primary_field = self.primary_field.Bcast(world, root=root)
+        out._secondary_field = self.secondary_field.Bcast(world, root=root)
+        out._predicted_primary_field = self.predicted_primary_field.Bcast(world, root=root)
+        out._predicted_secondary_field = self.predicted_secondary_field.Bcast(world, root=root)
 
-        # Instantiate a new Time Domain Data set on each worker
-        this = TdemData(nPoints, nTimes, systems)
-
-        # Broadcast the Data point id, line numbers and elevations
-        this._fiducial = self.fiducial.Bcast(world, root=root)
-        this._lineNumber = self.lineNumber.Bcast(world, root=root)
-        this._x = self.x.Bcast(world, root=root)
-        this._y = self.y.Bcast(world, root=root)
-        this._z = self.z.Bcast(world, root=root)
-        this._elevation = self.elevation.Bcast(world, root=root)
-        this._data = self._data.Bcast(world, root=root)
-        this._std = self._std.Bcast(world, root=root)
-        this._predictedData = self._predictedData.Bcast(world, root=root)
-
-        # Broadcast the Transmitter Loops.
-        if (world.rank == 0):
-            lTmp = [None] * self.nPoints
-            for i in range(self.nPoints):
-                lTmp[i] = str(self.T[i])
-        else:
-            lTmp = []
-        lTmp = myMPI.Bcast_list(lTmp, world)
-        if (world.rank == 0):
-            this.T = self.T
-        else:
-            for i in range(this.nPoints):
-                this.T[i] = eval(cF.safeEval(lTmp[i]))
-
-        # Broadcast the Reciever Loops.
-        if (world.rank == 0):
-            lTmp = [None] * self.nPoints
-            for i in range(self.nPoints):
-                lTmp[i] = str(self.R[i])
-        else:
-            lTmp = []
-        lTmp = myMPI.Bcast_list(lTmp, world)
-        if (world.rank == 0):
-            this.R = self.R
-        else:
-            for i in range(this.nPoints):
-                this.R[i] = eval(cF.safeEval(lTmp[i]))
-
-        # this.iActive = this.getActiveChannels()
-
-        return this
+        return out
 
 
     def Scatterv(self, starts, chunks, world, root=0, system=None):
         """ Scatterv the TdemData using MPI """
 
-        nTimes = myMPI.Bcast(self.nTimes, world, root=root)
+        out = super().Scatterv(starts, chunks, world, root)
 
-        systems = self._BcastSystem(world, root=root, system=system)
+        out.primary_field = self.primary_field.Scatterv(starts, chunks, world, root=root)
+        out.secondary_field = self.secondary_field.Scatterv(starts, chunks, world, root=root)
+        out.predicted_primary_field = self.predicted_primary_field.Scatterv(starts, chunks, world, root=root)
+        out.predicted_secondary_field = self.predicted_secondary_field.Scatterv(starts, chunks, world, root=root)
 
-        # Instantiate a new Time Domain Data set on each worker
-        this = TdemData(chunks[world.rank], nTimes, systems)
+        return out
 
-        # Broadcast the Data point id, line numbers and elevations
-        this._fiducial = self.fiducial.Scatterv(starts, chunks, world, root=root)
-        this._lineNumber = self.lineNumber.Scatterv(starts, chunks, world, root=root)
-        this._x = self.x.Scatterv(starts, chunks, world, root=root)
-        this._y = self.y.Scatterv(starts, chunks, world, root=root)
-        this._z = self.z.Scatterv(starts, chunks, world, root=root)
-        this._elevation = self.elevation.Scatterv(starts, chunks, world, root=root)
-        this._data = self._data.Scatterv(starts, chunks, world, root=root)
-        this._std = self._std.Scatterv(starts, chunks, world, root=root)
-        this._predictedData = self._predictedData.Scatterv(starts, chunks, world, root=root)
-
-        # Scatterv the Transmitter Loops.
-        if (world.rank == 0):
-            lTmp = [None] * self.nPoints
-            for i in range(self.nPoints):
-                lTmp[i] = str(self.T[i])
-        else:
-            lTmp = []
-        lTmp = myMPI.Scatterv_list(lTmp, starts, chunks, world)
-        if (world.rank == 0):
-            this.T[:] = self.T[:chunks[0]]
-        else:
-            for i in range(this.nPoints):
-                this.T[i] = eval(lTmp[i])
-
-        # Scatterv the Reciever Loops.
-        if (world.rank == 0):
-            lTmp = [None] * self.nPoints
-            for i in range(self.nPoints):
-                lTmp[i] = str(self.R[i])
-        else:
-            lTmp = []
-        lTmp = myMPI.Scatterv_list(lTmp, starts, chunks, world)
-        if (world.rank == 0):
-            this.R[:] = self.R[:chunks[0]]
-        else:
-            for i in range(this.nPoints):
-                this.R[i] = eval(lTmp[i])
-
-        # this.iActive = this.getActiveChannels()
-
-        return this
-
-
-    def write_csv(self, fileNames, std=False, predictedData=False):
-
-        if isinstance(fileNames, str):
-            fileNames = [fileNames]
-
-        assert len(fileNames) == self.nSystems, ValueError("fileNames must have length equal to the number of systems {}".format(self.nSystems))
-
-        for i in range(self.nSystems):
-
-            iSys = self._systemIndices(i)
-            # Create the header
-            header = "Line Fid Easting Northing Elevation Height txrx_dx txrx_dy txrx_dz TxPitch TxRoll TxYaw RxPitch RxRoll RxYaw "
-
-            for c in self.components_per_channel:
-                for x in range(self.nTimes[i]):
-                    header += "EM{}_NonHPRG[{}] ".format(c.upper(), x)
-
-            d = np.empty(self.nTimes[i])
-
-            if std:
-                for x in range(self.nTimes[i]):
-                    header += "OffErr[{}] ".format(x)
-                s = np.empty(self.nTimes[i])
-
-            with open(fileNames[i], 'w') as f:
-                f.write(header+"\n")
-                with np.printoptions(formatter={'float': '{: 0.15g}'.format}, suppress=True):
-                    for j in range(self.nPoints):
-
-                        x = np.asarray([self.lineNumber[j], self.fiducial[j], self.x[j], self.y[j], self.elevation[j], self.z[j],
-                                        self.loopOffset[j, 0], self.loopOffset[j, 1], self.loopOffset[j, 2],
-                                        self.transmitter[j].pitch, self.transmitter[j].roll, self.transmitter[j].yaw,
-                                        self.receiver[j].pitch, self.receiver[j].roll, self.receiver[j].yaw])
-
-                        if predictedData:
-                            d[:] = self.predictedData[j, iSys]
-                        else:
-                            d[:] = self.data[j, iSys]
-
-                        if std:
-                            s[:] = self.std[j, iSys]
-                            x = np.hstack([x, d, s])
-                        else:
-                            x = np.hstack([x, d])
-
-                        y = ""
-                        for a in x:
-                            y += "{} ".format(a)
-
-                        f.write(y + "\n")

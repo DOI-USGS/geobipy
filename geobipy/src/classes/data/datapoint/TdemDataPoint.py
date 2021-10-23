@@ -79,28 +79,58 @@ class TdemDataPoint(EmDataPoint):
                  system=None,
                  transmitter_loop=None, receiver_loop=None,
                  lineNumber=0.0, fiducial=0.0):
-        """Initializer. """
-
-        self._system = None
-        if system is None:
-            return super().__init__(x=x, y=y, z=z, elevation=elevation)
 
         self.system = system
 
         super().__init__(x=x, y=y, z=z, elevation=elevation,
-                         channels_per_system=self.nTimes, components_per_channel=self.components,
+                         components=self.components,
+                         channels_per_system=self.nTimes,
                          data=data, std=std, predictedData=predictedData,
                          lineNumber=lineNumber, fiducial=fiducial)
 
         self.transmitter = transmitter_loop
         self.receiver = receiver_loop
 
-        self.channelNames = ['Time {:.3e} s {}'.format(self.system[i].off_time[iTime], self.components_per_channel[k]) for k in range(
-            self.n_components) for i in range(self.nSystems) for iTime in range(self.nTimes[i])]
+        self.channelNames = None
 
-    @property
-    def components(self):
-        return self.system[0].components
+    @EmDataPoint.addErr.setter
+    def addErr(self, values):
+        if values is None:
+            values = self.nSystems
+        else:
+            if np.size(values) == 1:
+                values = np.full(self.nSystems, fill_value=values)
+            else:
+                values = np.asarray(values)
+            assert np.size(values) == self.nSystems, ValueError("additiveError must be a list of size equal to the number of systems {}".format(self.nSystems))
+            assert (np.all(values > 0.0)), ValueError("additiveErr must be > 0.0. Make sure the values are in linear space")
+            # assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], np.ndarray)), TypeError(
+            #     "relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
+
+        self._addErr = StatArray.StatArray(values, '$\epsilon_{Additive}$', self.units)
+
+    # @property
+    # def components(self):
+    #     return self.system[0].components
+
+    @EmDataPoint.channelNames.setter
+    def channelNames(self, values):
+        if values is None:
+            if self.system is None:
+                self._channelNames = ['None']
+                return
+
+
+            self._channelNames = []
+
+            for component in self.components:
+                for i in range(self.nSystems):
+                    for t in self.off_time(i):
+                        self._channelNames.append('Time {:.3e} s {}'.format(t, component))
+        else:
+            assert all((isinstance(x, str) for x in values))
+            assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
+            self._channelNames = values
 
     @property
     def channels(self):
@@ -122,12 +152,14 @@ class TdemDataPoint(EmDataPoint):
                 "receiver must be of type EmLoop")
             self._receiver = value
 
-    @property
-    def system(self):
-        return self._system
-
-    @system.setter
+    @EmDataPoint.system.setter
     def system(self, value):
+
+        if value is None:
+            self._system = None
+            self.components = None
+            self.channels_per_system = None
+            return
 
         if isinstance(value, (str, TdemSystem)):
             value = [value]
@@ -141,6 +173,9 @@ class TdemDataPoint(EmDataPoint):
             else:
                 self._system.append(sys)
 
+        self.components = self.system[0].components
+        self.channels_per_system = self.n_components * np.r_[[x.nTimes for x in self.system]]
+
     @property
     def transmitter(self):
         return self._transmitter
@@ -151,19 +186,13 @@ class TdemDataPoint(EmDataPoint):
             assert isinstance(value, EmLoop), TypeError("transmitter must be of type EmLoop")
             self._transmitter = value
 
-    # @property
-    # def components_per_channel(self):
-    #     return self.system[0].components
-
     @property
     def n_components(self):
-        if self._system is None:
-            return 1
-        return self.system[0].n_components
+        return np.size(self.components)
 
     @property
     def nTimes(self):
-        return np.asarray([x.nTimes for x in self.system])
+        return (self.channels_per_system / self.n_components).astype(np.int32)
 
     @property
     def nWindows(self):
@@ -177,10 +206,6 @@ class TdemDataPoint(EmDataPoint):
             assert isinstance(value, str), TypeError(
                 'units must have type str')
         self._units = value
-
-    # def off_time(self, system=0):
-    #     """ Return the window times in an StatArray """
-    #     return np.tile(self.system[system].off_time, 2)
 
     def off_time(self, system=0):
         """ Return the window times in an StatArray """
@@ -196,7 +221,7 @@ class TdemDataPoint(EmDataPoint):
 
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
-        out._system = self._system
+        out.system = self._system
         out._transmitter = deepcopy(self.transmitter)
         out._receiver = self._receiver
 
@@ -227,6 +252,8 @@ class TdemDataPoint(EmDataPoint):
         ValueError
             If any relative or additive errors are <= 0.0
         """
+
+        assert np.all(self.relErr > 0.0), ValueError('relErr must be > 0.0')
 
         t0 = 0.5 * np.log(1e-3)  # Assign fixed t0 at 1ms
         # For each system assign error levels using the user inputs
@@ -758,11 +785,11 @@ class TdemDataPoint(EmDataPoint):
         for i in range(self.nSystems):
             iSys = self._systemIndices(i)
             comps = []
-            if 'x' in self.components_per_channel:
+            if 'x' in self.components:
                 comps.append(fm[i].SX)
-            if 'y' in self.components_per_channel:
+            if 'y' in self.components:
                 comps.append(fm[i].SY)
-            if 'z' in self.components_per_channel:
+            if 'z' in self.components:
                 comps.append(-fm[i].SZ)
             self.predictedData[iSys] = np.hstack(comps)  # Store the necessary component
 
@@ -846,40 +873,28 @@ class TdemDataPoint(EmDataPoint):
 
     #     self._predictedData[:] = -simPEG_survey.dpred(mod.par)
 
-    def Isend(self, dest, world, systems=None):
-        tmp = np.asarray([self.x, self.y, self.z, self.elevation, self.nSystems,
-                         self.lineNumber, self.fiducial], dtype=np.float64)
-        myMPI.Isend(tmp, dest=dest, ndim=1, shape=(
-            10, ), dtype=np.float64, world=world)
+    def Isend(self, dest, world, **kwargs):
 
-        if systems is None:
-            for i in range(self.nSystems):
-                world.send(self.system[i].filename, dest=dest)
+        if not 'system' in kwargs:
+            # for i in range(self.nSystems):
+            system = [sys.filename for sys in self.system]
+            world.isend(system, dest=dest)
 
-        self.data.Isend(dest, world)
-        self.std.Isend(dest, world)
-        self.predictedData.Isend(dest, world)
+        super().Isend(dest, world)
+
         self.transmitter.Isend(dest, world)
         self.receiver.Isend(dest, world)
 
     @classmethod
-    def Irecv(cls, source, world, systems=None):
+    def Irecv(cls, source, world, **kwargs):
 
-        tmp = myMPI.Irecv(source=source, ndim=1, shape=(
-            7, ), dtype=np.float64, world=world)
+        if not 'system' in kwargs:
+            kwargs['system'] = world.irecv(source=source).wait()
 
-        if systems is None:
-            nSystems = np.int32(tmp[4])
+        out = super(TdemDataPoint, cls).Irecv(source, world, **kwargs)
+        # out.system = system
 
-            systems = []
-            for i in range(nSystems):
-                sys = world.recv(source=source)
-                systems.append(sys)
+        out._transmitter = CircularLoop.Irecv(source, world)
+        out._receiver = CircularLoop.Irecv(source, world)
 
-        d = StatArray.StatArray.Irecv(source, world)
-        s = StatArray.StatArray.Irecv(source, world)
-        p = StatArray.StatArray.Irecv(source, world)
-        transmitter = CircularLoop.Irecv(source, world)
-        receiver = CircularLoop.Irecv(source, world)
-        # loopOffset = tmp[-3:]
-        return cls(tmp[0], tmp[1], tmp[2], tmp[3], data=d, std=s, predictedData=p, system=systems, transmitter_loop=transmitter, receiver_loop=receiver, lineNumber=tmp[5], fiducial=tmp[6])
+        return out

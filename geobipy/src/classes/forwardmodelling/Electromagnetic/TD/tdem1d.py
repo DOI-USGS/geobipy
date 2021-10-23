@@ -152,11 +152,11 @@ try:
 
                 # Store the necessary component
                 comps = []
-                if 'x' in datapoint.components_per_channel:
+                if 'x' in datapoint.components:
                     comps.append(tmp.SX)
-                if 'y' in datapoint.components_per_channel:
+                if 'y' in datapoint.components:
                     comps.append(tmp.SY)
-                if 'z' in datapoint.components_per_channel:
+                if 'z' in datapoint.components:
                     comps.append(-tmp.SZ)
                 J[iSys, i] = model1d.par[ix[i]] * np.hstack(comps)
 

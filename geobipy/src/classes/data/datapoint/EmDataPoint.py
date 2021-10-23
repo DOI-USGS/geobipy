@@ -24,30 +24,18 @@ class EmDataPoint(DataPoint):
 
     """
 
-    def __init__(self, x=0.0, y=0.0, z=0.0, elevation=None, channels_per_system=1, components_per_channel=None, data=None, std=None, predictedData=None, channelNames=None, lineNumber=0.0, fiducial=0.0):
+    def __init__(self, x=0.0, y=0.0, z=0.0, elevation=None,
+                       components=None, channels_per_system=None,
+                       data=None, std=None, predictedData=None,
+                       channelNames=None,
+                       lineNumber=0.0, fiducial=0.0, **kwargs):
 
         super().__init__(x = x, y = y, z = z, elevation = elevation,
-                         channels_per_system = channels_per_system,
-                         components_per_channel = components_per_channel,
                          data = data, std = std, predictedData = predictedData,
-                         channelNames=channelNames, lineNumber=lineNumber, fiducial=fiducial)
+                         channelNames=channelNames, lineNumber=lineNumber, fiducial=fiducial, **kwargs)
 
         # Initialize the sensitivity matrix
         self.J = None
-
-    @property
-    def nSystems(self):
-        return np.size(self.channels_per_system)
-
-    def __deepcopy__(self, memo={}):
-        out = super().__deepcopy__(memo)
-
-        # StatArray of calibration parameters
-        # out.errorPosterior = self.errorPosterior
-        # Initialize the sensitivity matrix
-        out.J = deepcopy(self.J, memo)
-
-        return out
 
     @property
     def active(self):
@@ -59,9 +47,119 @@ class EmDataPoint(DataPoint):
             Indices into the observed data that are not NaN
 
         """
-        d = np.asarray(self.data)
+        d = self.data.copy()
         d[d <= 0.0] = np.nan
         return ~np.isnan(d)
+
+    @property
+    def channels_per_system(self):
+        return self._channels_per_system
+
+    @channels_per_system.setter
+    def channels_per_system(self, values):
+        if values is None:
+            values = np.zeros(1, dtype=np.int32)
+        else:
+            values = np.atleast_1d(np.asarray(values, dtype=np.int32))
+
+        self._channels_per_system = values
+
+    @property
+    def components(self):
+        return self._components
+
+    @components.setter
+    def components(self, values):
+
+        if values is None:
+            values = ['z']
+        else:
+
+            if isinstance(values, str):
+                values = [values]
+
+            assert np.all([isinstance(x, str) for x in values]), TypeError('components must be list of str')
+
+        self._components = values
+
+    @DataPoint.data.setter
+    def data(self, values):
+
+        if values is None:
+            values = self.nChannels
+        else:
+            assert np.size(values) == self.nChannels, ValueError("data must have size {}".format(self.nChannels))
+
+        self._data = StatArray.StatArray(values, "Data", self.units)
+
+    @property
+    def n_components(self):
+        return np.size(self.components)
+
+    @property
+    def nChannels(self):
+        return np.sum(self.channels_per_system)
+
+    @property
+    def nSystems(self):
+        return np.size(self.channels_per_system)
+
+    @DataPoint.predictedData.setter
+    def predictedData(self, values):
+        if values is None:
+            values = self.nChannels
+        else:
+            if isinstance(values, list):
+                assert len(values) == self.nSystems, ValueError("predictedData as a list must have {} elements".format(self.nSystems))
+                values = np.hstack(values)
+            assert values.size == self.nChannels, ValueError("Size of predictedData must equal total number of time channels {}".format(self.nChannels))
+        self._predictedData = StatArray.StatArray(values, "Predicted Data", self.units)
+
+    # @DataPoint.relErr.setter
+    # def relErr(self, values):
+    #     if values is None:
+    #         values = self.nSystems
+    #     else:
+    #         if np.size(values) == 1:
+    #             values = np.full(self.nSystems, fill_value=values)
+    #         else:
+    #             values = np.asarray(values)
+    #         assert np.size(values) == self.nSystems, ValueError("relErr must be a list of size equal to the number of systems {}".format(self.nSystems))
+    #         assert (np.all(values > 0.0)), ValueError("relErr must be > 0.0.")
+    #         # assert (isinstance(additiveErr[i], float) or isinstance(additiveErr[i], np.ndarray)), TypeError(
+    #         #     "additiveErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
+
+    #     self._relErr = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
+
+    # @DataPoint.std.setter
+    # def std(self, value):
+    #     if value is None:
+    #         value = np.ones(self.nChannels)
+    #     else:
+    #         if isinstance(value, list):
+    #             assert len(value) == self.nSystems, ValueError("std as a list must have {} elements".format(self.nSystems))
+    #             value = np.hstack(value)
+    #         assert value.size == self.nChannels, ValueError("Size of std must equal total number of time channels {}".format(nChannels))
+
+    #     self._std = StatArray.StatArray(value, "Standard deviation", self.units)
+
+    @property
+    def system(self):
+        return self._system
+
+    @property
+    def systemOffset(self):
+        return np.hstack([0, np.cumsum(self.channels_per_system)])
+
+    def __deepcopy__(self, memo={}):
+        out = super().__deepcopy__(memo)
+
+        # StatArray of calibration parameters
+        # out.errorPosterior = self.errorPosterior
+        # Initialize the sensitivity matrix
+        out.J = deepcopy(self.J, memo)
+
+        return out
 
     def find_best_halfspace(self, minConductivity=1e-4, maxConductivity=1e4, nSamples=100):
         """Computes the best value of a half space that fits the data.
@@ -272,22 +370,22 @@ class EmDataPoint(DataPoint):
 
         if height_prior is None:
             if kwargs.get('solve_height', False):
-                height_prior = Distribution('Uniform', self.z - kwargs['maximum_height_change'], self.z + kwargs['maximum_height_change'], prng=kwargs['prng'])
+                height_prior = Distribution('Uniform', self.z - kwargs['maximum_height_change'], self.z + kwargs['maximum_height_change'], prng=kwargs.get('prng'))
 
         if data_prior is None:
-            data_prior = Distribution('MvLogNormal', self.data[self.active], self.std[self.active]**2.0, linearSpace=False, prng=kwargs['prng'])
+            data_prior = Distribution('MvLogNormal', self.data[self.active], self.std[self.active]**2.0, linearSpace=False, prng=kwargs.get('prng'))
 
 
         # Define prior, proposal, posterior for relative error
         if relative_error_prior is None:
             if kwargs.get('solve_relative_error', False):
-                relative_error_prior = Distribution('Uniform', kwargs['minimum_relative_error'], kwargs['maximum_relative_error'], prng=kwargs['prng'])
+                relative_error_prior = Distribution('Uniform', kwargs['minimum_relative_error'], kwargs['maximum_relative_error'], prng=kwargs.get('prng'))
 
         # Define prior, proposal, posterior for additive error
         if additive_error_prior is None:
             if kwargs.get('solve_additive_error', False):
                 # log = Trisinstance(self, TdemDataPoint)
-                additive_error_prior = Distribution('Uniform', kwargs['minimum_additive_error'], kwargs['maximum_additive_error'], log=False, prng=kwargs['prng'])
+                additive_error_prior = Distribution('Uniform', kwargs['minimum_additive_error'], kwargs['maximum_additive_error'], log=False, prng=kwargs.get('prng'))
 
         self.set_height_prior(height_prior)
 

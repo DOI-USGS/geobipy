@@ -68,18 +68,15 @@ class FdemData(Data):
     def __init__(self, systems=None, **kwargs):
         """Instantiate the FdemData class. """
 
-        self._nPoints = 0
-
-        # if (systems is None):
-        #     return
-
         self.system = systems
 
-        # Data Class containing xyz and channel values
-        super().__init__(channels_per_system=2*self.nFrequencies, units="ppm", **kwargs)
+        kwargs['components'] = kwargs.get('components', self.components)
+        kwargs['channels_per_system'] = kwargs.get('channels_per_system', 2*self.nFrequencies)
+        # kwargs['components_per_channel'] = kwargs.get('components_per_channel', self.system[0].components)
+        kwargs['units'] = "ppm"
 
-        # Assign data names
-        self._data.name = 'Fdem Data'
+        # Data Class containing xyz and channel values
+        super().__init__(**kwargs)
 
         self.channelNames = kwargs.get('channel_names', None)
 
@@ -89,18 +86,15 @@ class FdemData(Data):
 
     @property
     def nFrequencies(self):
-        return np.asarray([s.nFrequencies for s in self.system])
-
+        return (self.channels_per_system / 2).astype(np.int32)
 
     @property
     def nSystems(self):
-        return np.size(self.system)
-
+        return np.size(self.channels_per_system)
 
     @property
     def magnetic(self):
         return self._magnetic
-
 
     @magnetic.setter
     def magnetic(self, values):
@@ -145,7 +139,8 @@ class FdemData(Data):
 
         if values is None:
             self._system = None
-            self._channels_per_system = 0
+            self.components = None
+            self.channels_per_system = None
             return
 
         if isinstance(values, (str, FdemSystem)):
@@ -162,21 +157,16 @@ class FdemData(Data):
             else:
                 self._system[i] = s
 
-        self._channels_per_system = np.asarray([2*s.nFrequencies for s in self.system])
+        self.components = None
+        self.channels_per_system = [2 * s.nFrequencies for s in self.system]
 
-
-    @property
-    def channelNames(self):
-        return self._channelNames
-
-
-    @channelNames.setter
+    @Data.channelNames.setter
     def channelNames(self, values):
         if values is None:
             self._channelNames = []
             for i in range(self.nSystems):
                 # Set the channel names
-                if not self.system[i] is None:
+                for ic in range(self.n_components):
                     for iFrequency in range(2*self.nFrequencies[i]):
                         self._channelNames.append('{} {} (Hz)'.format(self.getMeasurementType(iFrequency, i), self.getFrequency(iFrequency, i)))
         else:
@@ -391,7 +381,15 @@ class FdemData(Data):
         if not fNone:
             index = self.fiducial.searchsorted(fiducial)
 
-        return FdemDataPoint(self.x[index], self.y[index], self.z[index], self.elevation[index], self._data[index, :], self._std[index, :], system=self.system, lineNumber=self.lineNumber[index], fiducial=self.fiducial[index])
+        return FdemDataPoint(self.x[index],
+                             self.y[index],
+                             self.z[index],
+                             self.elevation[index],
+                             self._data[index, :],
+                             self._std[index, :],
+                             system=self.system,
+                             lineNumber=self.lineNumber[index],
+                             fiducial=self.fiducial[index])
 
 
     # def mapChannel(self, channel, *args, system=0, **kwargs):
@@ -564,6 +562,7 @@ class FdemData(Data):
             self.magnetic = None
 
         self.data = df[iD[0]].values
+
         if not iS[0] is None:
             self.std = df[iS[0]].values
         else:
@@ -958,7 +957,8 @@ class FdemData(Data):
 
         """
 
-        # npoints = myMPI.Bcast(self.nPoints, world, root=root)
+        out = super().Bcast(world, root=root)
+
         n_frequencies = myMPI.Bcast(self.nFrequencies, world, root=root)
         n_systems = myMPI.Bcast(self.nSystems, world, root=root)
 
@@ -967,19 +967,8 @@ class FdemData(Data):
         else:
             systems_null = [FdemSystem(None, None, None, n_frequencies = n_frequencies) for i in range(n_systems)]
 
-        systems = [sys.Bcast(world, root=root) for sys in systems_null]
+        out.systems = [sys.Bcast(world, root=root) for sys in systems_null]
 
-        out = FdemData(systems)
-
-        out._x = self.x.Bcast(world, root=root)
-        out._y = self.y.Bcast(world, root=root)
-        out._z = self.z.Bcast(world, root=root)
-        out._elevation = self.elevation.Bcast(world, root=root)
-        out._data = self.data.Bcast(world, root=root)
-        out._std = self.std.Bcast(world, root=root)
-        out._predictedData = self.predictedData.Bcast(world, root=root)
-        out._fiducial = self.fiducial.Bcast(world, root=root)
-        out._lineNumber = self.lineNumber.Bcast(world, root=root)
         return out
 
 
@@ -1024,6 +1013,8 @@ class FdemData(Data):
 
         """
 
+        out = super().Scatterv(starts, chunks, world, root=root)
+
         # npoints = myMPI.Bcast(self.nPoints, world, root=root)
         n_frequencies = myMPI.Bcast(self.nFrequencies, world, root=root)
         n_systems = myMPI.Bcast(self.nSystems, world, root=root)
@@ -1033,19 +1024,7 @@ class FdemData(Data):
         else:
             systems_null = [FdemSystem(None, None, None, n_frequencies = n_frequencies) for i in range(n_systems)]
 
-        systems = [sys.Bcast(world, root=root) for sys in systems_null]
-
-        out = FdemData(systems)
-
-        out._x = self.x.Scatterv(starts, chunks, world, root=root)
-        out._y = self.y.Scatterv(starts, chunks, world, root=root)
-        out._z = self.z.Scatterv(starts, chunks, world, root=root)
-        out._elevation = self.elevation.Scatterv(starts, chunks, world, root=root)
-        out._data = self.data.Scatterv(starts, chunks, world, root=root)
-        out._std = self.std.Scatterv(starts, chunks, world, root=root)
-        out._predictedData = self.predictedData.Scatterv(starts, chunks, world, root=root)
-        out._fiducial = self.fiducial.Scatterv(starts, chunks, world, root=root)
-        out._lineNumber = self.lineNumber.Scatterv(starts, chunks, world, root=root)
+        out.system = [sys.Bcast(world, root=root) for sys in systems_null]
 
         return out
 

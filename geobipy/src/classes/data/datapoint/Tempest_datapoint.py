@@ -81,19 +81,19 @@ class Tempest_datapoint(TdemDataPoint):
                  system=None,
                  transmitter_loop=None, receiver_loop=None,
                  lineNumber=0.0, fiducial=0.0):
-        """Initializer. """
 
-        self._system = None
-        if system is None:
-            return super().__init__(x=x, y=y, z=z, elevation=elevation)
-        self.system = system
-
+        # self._system = None
         self.units = None
 
-        self._channels_per_system = self.n_components * self.nTimes
+        # if system is None:
+        #     return super().__init__(x=x, y=y, z=z, elevation=elevation)
 
-        self.primary_field = primary_field
-        self.secondary_field = secondary_field
+        # self.system = system
+
+        # self.primary_field = None
+        # self.secondary_field = None
+        # self.predicted_primary_field = None
+        # self.predicted_secondary_field = None
 
         super().__init__(x=x, y=y, z=z, elevation=elevation,
                          data=None, std=None, predictedData=None,
@@ -102,8 +102,11 @@ class Tempest_datapoint(TdemDataPoint):
                          receiver_loop=receiver_loop,
                          lineNumber=lineNumber, fiducial=fiducial)
 
-        self.predicted_primary_field = None
-        self.predicted_secondary_field = None
+        self.primary_field = primary_field
+        self.secondary_field = secondary_field
+        self.predicted_primary_field = predicted_primary_field
+        self.predicted_secondary_field = predicted_secondary_field
+
 
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
@@ -154,11 +157,11 @@ class Tempest_datapoint(TdemDataPoint):
     @TdemDataPoint.relErr.setter
     def relErr(self, values):
         if values is None:
-            values = 2*self.nSystems
+            values = self.n_components * self.nSystems
         else:
             values = np.asarray(values)
-            assert np.size(values) == self.n_components*self.nSystems, ValueError(("Tempest data must a have relative error for the primary and secondary fields, for each system. \n"
-                                                              "relErr must have size {}").format(self.n_components*self.nSystems))
+            assert np.size(values) == self.n_components * self.nSystems, ValueError(("Tempest data must a have relative error for the primary and secondary fields, for each system. \n"
+                            "relErr must have size {}").format(self.n_components * self.nSystems))
             assert (np.all(values > 0.0)), ValueError("relErr must be > 0.0.")
 
         self._relErr = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
@@ -190,7 +193,6 @@ class Tempest_datapoint(TdemDataPoint):
 
     @predicted_primary_field.setter
     def predicted_primary_field(self, values):
-
         if values is None:
             values = self.n_components
         else:
@@ -204,7 +206,6 @@ class Tempest_datapoint(TdemDataPoint):
 
     @predicted_secondary_field.setter
     def predicted_secondary_field(self, values):
-
         if values is None:
             values = self.nChannels
         else:
@@ -226,7 +227,7 @@ class Tempest_datapoint(TdemDataPoint):
 
         # Update the variance of the predicted data prior
         if self.predictedData.hasPrior:
-            self.predictedData.prior.variance[np.diag_indices(self.active.size)] = self._std[self.active]**2.0
+            self.predictedData.prior.variance[np.diag_indices(np.sum(self.active))] = self._std[self.active]**2.0
 
         return self._std
 
@@ -574,10 +575,12 @@ class Tempest_datapoint(TdemDataPoint):
         assert isinstance(mod, Model1D), TypeError("Invalid model class for forward modeling [1D]")
         fm = tdem1dfwd(self, mod)
 
-        for i in range(self.nSystems):
-            iSys = self._systemIndices(i)
-            self.predicted_primary_field[:] = np.r_[fm[i].PX, -fm[i].PZ]
-            self.predicted_secondary_field[iSys] = np.hstack([fm[i].SX, -fm[i].SZ])  # Store the necessary component
+        self.predicted_primary_field[:] = np.r_[fm[0].PX, -fm[0].PZ]
+
+        # for i in range(self.nSystems):
+            # iSys = self._systemIndices(i)
+
+        self.predicted_secondary_field[:] = np.hstack([fm[0].SX, -fm[0].SZ])  # Store the necessary component
 
 
     def sensitivity(self, model, ix=None, modelChanged=True):
@@ -653,38 +656,24 @@ class Tempest_datapoint(TdemDataPoint):
 
     #     self._predictedData[:] = -simPEG_survey.dpred(mod.par)
 
-    def Isend(self, dest, world, systems=None):
-        tmp = np.asarray([self.x, self.y, self.z, self.elevation, self.nSystems, self.lineNumber, self.fiducial, *self.loopOffset], dtype=np.float64)
-        myMPI.Isend(tmp, dest=dest, ndim=1, shape=(10, ), dtype=np.float64, world=world)
+    def Isend(self, dest, world, **kwargs):
 
-        if systems is None:
-            for i in range(self.nSystems):
-                world.send(self.system[i].fileName, dest=dest)
+        super().Isend(dest, world, **kwargs)
 
-        self._data.Isend(dest, world)
-        self._std.Isend(dest, world)
-        self._predictedData.Isend(dest, world)
-        self.transmitter.Isend(dest, world)
-        self.receiver.Isend(dest, world)
+        self.primary_field.Isend(dest, world)
+        self.secondary_field.Isend(dest, world)
+        self.predicted_primary_field.Isend(dest, world)
+        self.predicted_secondary_field.Isend(dest, world)
 
-    def Irecv(self, source, world, systems=None):
 
-        tmp = myMPI.Irecv(source=source, ndim=1, shape=(10, ), dtype=np.float64, world=world)
+    @classmethod
+    def Irecv(cls, source, world, **kwargs):
 
-        if systems is None:
-            nSystems = np.int32(tmp[4])
+        out = super(Tempest_datapoint, cls).Irecv(source, world, **kwargs)
 
-            systems = []
-            for i in range(nSystems):
-                sys = world.recv(source=source)
-                systems.append(sys)
+        out._primary_field = StatArray.StatArray.Irecv(source, world)
+        out._secondary_field = StatArray.StatArray.Irecv(source, world)
+        out._predicted_primary_field = StatArray.StatArray.Irecv(source, world)
+        out._predicted_secondary_field = StatArray.StatArray.Irecv(source, world)
 
-        s = StatArray.StatArray(0)
-        d = s.Irecv(source, world)
-        s = s.Irecv(source, world)
-        p = s.Irecv(source, world)
-        c = CircularLoop()
-        transmitter = c.Irecv(source, world)
-        receiver = c.Irecv(source, world)
-        loopOffset  = tmp[-3:]
-        return TdemDataPoint(tmp[0], tmp[1], tmp[2], tmp[3], data=d, std=s, predictedData=p, system=systems, transmitter_loop=transmitter, receiver_loop=receiver, loopOffset=loopOffset, lineNumber=tmp[5], fiducial=tmp[6])
+        return out

@@ -188,13 +188,13 @@ class Inference3D(myObject):
 
             if (masterComm != MPI.COMM_NULL):
                 # Instantiate a new blank inference3d linked to the master
-                inference3d = Inference3D(self.directory, user_parameters.system_filename, world=masterComm)
+                inference3d = Inference3D(self.directory, kwargs['system_filename'], world=masterComm)
                 # Create the hdf5 files
-                inference3d._create_hdf5(data, user_parameters)
+                inference3d._create_hdf5(data, **kwargs)
 
             self.world.barrier()
             # Open the files with the full communicator
-            self.__init__(self.directory, user_parameters.system_filename, world=self.world)
+            self.__init__(self.directory, kwargs['system_filename'], world=self.world)
 
         else:
             self._create_hdf5(data, **kwargs)
@@ -413,17 +413,17 @@ class Inference3D(myObject):
         # Send out the first indices to the workers
         for iWorker in range(1, world.size):
             # Get a datapoint from the file.
-            DataPoint = dataset._read_record(nSent)
+            datapoint = dataset._read_record(nSent)
 
             # If DataPoint is None, then we reached the end of the file and no more points can be read in.
-            if DataPoint is None:
+            if datapoint is None:
                 # Send the kill switch to the worker to shut down.
                 continueRunning = False
                 world.send(continueRunning, dest=iWorker)
             else:
                 continueRunning = True
                 world.send(continueRunning, dest=iWorker)
-                DataPoint.Isend(dest=iWorker, world=world)
+                datapoint.Isend(dest=iWorker, world=world)
 
             nSent += 1
 
@@ -444,10 +444,10 @@ class Inference3D(myObject):
             nFinished += 1
 
             # Read the next data point from the file
-            DataPoint = dataset._read_record(nSent)
+            datapoint = dataset._read_record(nSent)
 
             # If DataPoint is None, then we reached the end of the file and no more points can be read in.
-            if DataPoint is None:
+            if datapoint is None:
                 # Send the kill switch to the worker to shut down.
                 # continueRunning[0] = 0 # Do not continue running
                 continueRunning = False
@@ -456,7 +456,7 @@ class Inference3D(myObject):
                 # continueRunning[0] = 1 # Yes, continue with the next point.
                 continueRunning = True
                 world.send(continueRunning, dest=requestingRank)
-                DataPoint.Isend(dest=requestingRank, world=world, systems=DataPoint.system)
+                datapoint.Isend(dest=requestingRank, world=world, system=datapoint.system)
 
                 nSent += 1
 
@@ -514,7 +514,7 @@ class Inference3D(myObject):
 
             # If we continue running, receive the next DataPoint. Otherwise, shutdown the rank
             if continueRunning:
-                datapoint = datapoint.Irecv(source=0, world=world, systems=datapoint.system)
+                datapoint = datapoint.Irecv(source=0, world=world, system=datapoint.system)
             else:
                 Go = False
 

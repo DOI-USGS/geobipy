@@ -56,21 +56,23 @@ class FdemDataPoint(EmDataPoint):
     def __init__(self, x=0.0, y=0.0, z=0.0, elevation=0.0, data=None, std=None, predictedData=None, system=None, lineNumber=0.0, fiducial=0.0):
         """Define initializer. """
 
-        self.units = None
-
-        self._system = None
-        if (system is None):
-            return super().__init__(x=x, y=y, z=z, elevation=elevation)
+        # self._system = None
+        # if (system is None):
+        #     return super().__init__(x=x, y=y, z=z, elevation=elevation)
 
         self.system = system
 
-        super().__init__(x=x, y=y, z=z, elevation=elevation, channels_per_system=2*self.nFrequencies, components_per_channel=None, data=data, std=std, predictedData=predictedData, lineNumber=lineNumber, fiducial=fiducial)
+        super().__init__(x=x, y=y, z=z, elevation=elevation,
+                         components=self.components,
+                         channels_per_system=2*self.nFrequencies,
+                         data=data, std=std, predictedData=predictedData,
+                         lineNumber=lineNumber, fiducial=fiducial)
 
         self._data.name = 'Frequency domain data'
 
         # StatArray of calibration parameters
         # The four columns are Bias,Variance,InphaseBias,QuadratureBias.
-        self.calibration = StatArray.StatArray([self.nChannels * 2], 'Calibration Parameters')
+        # self.calibration = StatArray.StatArray([self.nChannels * 2], 'Calibration Parameters')
 
         self.channelNames = None
 
@@ -81,16 +83,19 @@ class FdemDataPoint(EmDataPoint):
         # out.calibration = deepcopy(self.calibration)
         return out
 
-    @EmDataPoint.std.getter
-    def std(self):
+    # @EmDataPoint.std.getter
+    # def std(self):
 
-        tmp = (self.relErr * self.data)**2.0 + self.addErr**2.0
-        self._std = StatArray.StatArray(tmp, "Standard deviation", self.units)
+    #     tmp = (self.relErr * self.data)**2.0 + self.addErr**2.0
+    #     self._std = StatArray.StatArray(tmp, "Standard deviation", self.units)
 
-        if self.predictedData.hasPrior:
-            self.predictedData.prior.variance[np.diag_indices(np.sum(self.active))] = self._std[self.active]**2.0
+    #     print(tmp)
 
-        return self._std
+
+    #     if self.predictedData.hasPrior:
+    #         self.predictedData.prior.variance[np.diag_indices(np.sum(self.active))] = self._std[self.active]**2.0
+
+    #     return self._std
 
     @property
     def units(self):
@@ -111,6 +116,12 @@ class FdemDataPoint(EmDataPoint):
     @system.setter
     def system(self, value):
 
+        if value is None:
+            self._system = None
+            self.components = None
+            self.channels_per_system = None
+            return
+
         if isinstance(value, (str, FdemSystem)):
             value = [value]
 
@@ -125,13 +136,10 @@ class FdemDataPoint(EmDataPoint):
 
         self._system = systems
 
+        self.components = 'z'
+        self.channels_per_system = 2 * self.system[0].nFrequencies
 
-    @property
-    def channelNames(self):
-        return self._channelNames
-
-
-    @channelNames.setter
+    @EmDataPoint.channelNames.setter
     def channelNames(self, values):
         if values is None:
             if self.system is None:
@@ -150,7 +158,7 @@ class FdemDataPoint(EmDataPoint):
 
     @property
     def nFrequencies(self):
-        return np.asarray([x.nFrequencies for x in self.system])
+        return (self.channels_per_system / 2).astype(np.int32)
 
     @property
     def channels(self):
@@ -263,12 +271,8 @@ class FdemDataPoint(EmDataPoint):
 
     def set_priors(self, height_prior=None, data_prior=None, relative_error_prior=None, additive_error_prior=None, **kwargs):
 
-        super().set_priors(height_prior, relative_error_prior, additive_error_prior, **kwargs)
+        super().set_priors(height_prior, data_prior, relative_error_prior, additive_error_prior, **kwargs)
 
-        if data_prior is None:
-            data_prior = Distribution('MvLogNormal', self.data[self.active], self.std[self.active]**2.0, linearSpace=False, prng=kwargs['prng'])
-
-        self.predictedData.prior = data_prior
 
     def set_predicted_data_posterior(self):
         if self.predictedData.hasPrior:
@@ -581,28 +585,24 @@ class FdemDataPoint(EmDataPoint):
 
 
     def Isend(self, dest, world, systems=None):
-        tmp = np.asarray([self.x, self.y, self.z, self.elevation, self.nSystems, self.lineNumber, self.fiducial], dtype=np.float64)
-        myMPI.Isend(tmp, dest=dest, ndim=1, shape=(7, ), dtype=np.float64, world=world)
 
         if systems is None:
+            myMPI.Isend(self.nSystems, dest=dest, world=world)
             for i in range(self.nSystems):
                 self.system[i].Isend(dest=dest, world=world)
-        self._data.Isend(dest, world)
-        self._std.Isend(dest, world)
-        self._predictedData.Isend(dest, world)
+
+        super().Isend(dest, world)
 
     @classmethod
     def Irecv(cls, source, world, systems=None):
 
-        tmp = myMPI.Irecv(source=source, ndim=1, shape=(7, ), dtype=np.float64, world=world)
-
         if systems is None:
-            systems = [FdemSystem.Irecv(source=source, world=world) for i in range(np.int32(tmp[4]))]
+            nSystems = myMPI.Irecv(source=source, world=world)
+            systems = [FdemSystem.Irecv(source=source, world=world) for i in range(nSystems)]
 
-        d = StatArray.StatArray.Irecv(source, world)
-        s = StatArray.StatArray.Irecv(source, world)
-        p = StatArray.StatArray.Irecv(source, world)
+        out = super(FdemDataPoint, cls).Irecv(source, world, system=systems)
+        # out.system = systems
 
-        return cls(tmp[0], tmp[1], tmp[2], tmp[3], data=d, std=s, predictedData=p, system=systems, lineNumber=tmp[5], fiducial=tmp[6])
+        return out
 
 

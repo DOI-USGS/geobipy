@@ -202,41 +202,55 @@ class CircularLoop(EmLoop):
         if self.yaw.hasPrior:
             self.yaw.posterior = Histogram1D(edges = StatArray.StatArray(self.yaw.prior.bins(), name=self.yaw.name, units=self.yaw.units), relativeTo=self.yaw)
 
-    def createHdf(self, parent, name, nRepeats=None, fillvalue=None, withPosterior=False):
+    def createHdf(self, parent, myName, withPosterior=True, nRepeats=None, fillvalue=None):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
         """
         # create a new group inside h5obj
-        grp = self.create_hdf_group(parent, name)
+        grp = super().createHdf(parent, myName, withPosterior, nRepeats, fillvalue)
 
-        data = StatArray.StatArray(9).createHdf(grp, 'data', nRepeats=nRepeats, fillvalue=fillvalue)
+        self.pitch.createHdf(grp, 'pitch', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.roll.createHdf(grp, 'roll', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.yaw.createHdf(grp, 'yaw', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+
+        data = StatArray.StatArray(3).createHdf(grp, 'data', nRepeats=nRepeats, fillvalue=fillvalue)
 
 
-    def writeHdf(self, parent, name, withPosterior=False, index=None):
+    def writeHdf(self, parent, name, withPosterior=True, index=None):
         """ Write the StatArray to an HDF object
         parent: Upper hdf file or group
         myName: object hdf name. Assumes createHdf has already been called
         create: optionally create the data set as well before writing
         """
 
+        super().writeHdf(parent, name, withPosterior, index)
+
         grp = parent[name]
 
-        data = StatArray.StatArray(np.asarray([self._orient, self.moment, self.x, self.y, self.z, self.pitch, self.roll, self.yaw, self.radius], dtype=np.float64))
+        self.pitch.writeHdf(grp, 'pitch', index=index)
+        self.roll.writeHdf(grp, 'roll', index=index)
+        self.yaw.writeHdf(grp, 'yaw', index=index)
+
+        data = StatArray.StatArray(np.asarray([self._orient, self.moment, self.radius], dtype=np.float64))
         data.writeHdf(grp, 'data', index=index)
 
     @classmethod
     def fromHdf(cls, grp, index=None):
         """ Reads in the object from a HDF file """
 
-        item = grp['data']
+        out = super(CircularLoop, cls).fromHdf(grp, index)
 
-        if not 'repr' in item.attrs:
-            tmp = np.asarray(item[index, :])
-        else:
-            tmp = StatArray.StatArray.fromHdf(item, index=index)
+        out.pitch = StatArray.StatArray.fromHdf(grp['pitch'], index=index)
+        out.roll = StatArray.StatArray.fromHdf(grp['roll'], index=index)
+        out.yaw = StatArray.StatArray.fromHdf(grp['yaw'], index=index)
 
-        return cls(*tmp)
+        tmp = StatArray.StatArray.fromHdf(grp['data'], index=index)
+        out.orient = tmp[0]
+        out.moment = tmp[1]
+        out.radius = tmp[2]
+
+        return out
 
     def Bcast(self, world, root=0):
         """Broadcast using MPI
@@ -253,21 +267,46 @@ class CircularLoop(EmLoop):
 
         """
 
-        data = np.asarray([self._orient, self.moment, self.x, self.y, self.z, self.pitch, self.roll, self.yaw, self.radius], dtype=np.float64)
+        x = self.x.Bcast(world, root)
+        y = self.y.Bcast(world, root)
+        z = self.z.Bcast(world, root)
+        pitch = self.pitch.Bcast(world, root)
+        roll = self.roll.Bcast(world, root)
+        yaw = self.yaw.Bcast(world, root)
+
+        data = np.asarray([self._orient, self.moment, self.radius], dtype=np.float64)
         tData = myMPI.Bcast(data, world, root=root)
 
-        return CircularLoop(*tData)
+        return CircularLoop(orient=tData[0], moment=tData[1], x=x, y=y, z=z, pitch=pitch, roll=roll, yaw=yaw, radius=tData[2])
 
 
     def Isend(self, dest, world):
-        data = np.asarray([self._orient, self.moment, self.x, self.y, self.z, self.pitch, self.roll, self.yaw, self.radius], dtype=np.float64)
-        myMPI.Isend(data, dest=dest, ndim=1, shape=(9, ), dtype=np.float64, world=world)
+
+        super().Isend(dest, world)
+        data = np.asarray([self._orient, self.moment, self.radius], dtype=np.float64)
+        myMPI.Isend(data, dest=dest, ndim=1, shape=(3, ), dtype=np.float64, world=world)
+
+        self.pitch.Isend(dest, world)
+        self.roll.Isend(dest, world)
+        self.yaw.Isend(dest, world)
 
 
     @classmethod
     def Irecv(cls, source, world):
-        data = myMPI.Irecv(source=source, ndim=1, shape=(9, ), dtype=np.float64, world=world)
-        return cls(*data)
+
+        out = super(CircularLoop, cls).Irecv(source, world)
+
+        data = myMPI.Irecv(source=source, ndim=1, shape=(3, ), dtype=np.float64, world=world)
+
+        out.pitch = StatArray.StatArray.Irecv(source, world)
+        out.roll = StatArray.StatArray.Irecv(source, world)
+        out.yaw = StatArray.StatArray.Irecv(source, world)
+
+        out.orient = data[0]
+        out._moment = data[1]
+        out._radius = data[2]
+
+        return out
 
 
     def __str__(self):

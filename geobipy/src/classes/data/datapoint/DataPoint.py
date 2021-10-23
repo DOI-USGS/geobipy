@@ -50,17 +50,12 @@ class DataPoint(Point):
     """
 
     def __init__(self, x=0.0, y=0.0, z=0.0, elevation=None,
-                       channels_per_system=1, components_per_channel=None,
                        data=None, std=None, predictedData=None,
                        units=None, channelNames=None,
-                       lineNumber=0.0, fiducial=0.0):
+                       lineNumber=0.0, fiducial=0.0, **kwargs):
         """ Initialize the Data class """
 
-        super().__init__(x, y, z)
-
-        # Number of Channels
-        self.components_per_channel = components_per_channel
-        self._channels_per_system = np.atleast_1d(np.asarray(channels_per_system * self.n_components))
+        super().__init__(x, y, z, **kwargs)
 
         self.elevation = elevation
 
@@ -85,54 +80,16 @@ class DataPoint(Point):
         # self.errorPosterior = None
 
     @property
-    def components_per_channel(self):
-        return self._components_per_channel
+    def active(self):
+        """Gets the indices to the observed data values that are not NaN
 
-    @components_per_channel.setter
-    def components_per_channel(self, values):
-        if values is None:
-            self._components_per_channel = ['z']
-        else:
-            assert np.all([isinstance(x, str) for x in values]), TypeError('components_per_channel must be list of str')
-            self._components_per_channel = values
+        Returns
+        -------
+        out : array of ints
+            Indices into the observed data that are not NaN
 
-    @property
-    def n_components(self):
-        if self.components_per_channel is None:
-            return 1
-        return np.size(self.components_per_channel)
-
-    @property
-    def n_posteriors(self):
-        return self._n_error_posteriors + self.z.hasPosterior
-
-    @property
-    def _n_error_posteriors(self):
-        # if not self.errorPosterior is None:
-        #     return len(self.errorPosterior)
-        # else:
-        return self.nSystems * np.sum([x.hasPosterior for x in [self.relErr, self.addErr]])
-
-    def __deepcopy__(self, memo={}):
-
-        out = super().__deepcopy__(memo)
-
-        out._components_per_channel = deepcopy(self._components_per_channel, memo)
-        out._channels_per_system = deepcopy(self._channels_per_system, memo)
-
-        out._elevation = deepcopy(self.elevation, memo)
-        out._units = deepcopy(self.units, memo)
-        out._data = deepcopy(self.data, memo)
-        out._std = deepcopy(self.std, memo)
-        out._predictedData = deepcopy(self.predictedData, memo)
-        out._lineNumber = deepcopy(self.lineNumber, memo)
-        out._fiducial = deepcopy(self.fiducial, memo)
-        out._channelNames = deepcopy(self.channelNames, memo)
-        out._relErr = deepcopy(self.relErr, memo)
-        out._addErr = deepcopy(self.addErr, memo)
-        # out._errorPosterior = deepcopy(self.errorPosterior, memo)
-
-        return out
+        """
+        return ~np.isnan(self.data)
 
     @property
     def additive_error(self):
@@ -151,7 +108,7 @@ class DataPoint(Point):
                 values = np.full(self.nSystems, fill_value=values)
             else:
                 values = np.asarray(values)
-            assert np.size(values) == self.nSystems, ValueError("additiveError must be a list of size equal to the number of systems {}".format(self.nSystems))
+            assert np.size(values) == self.nSystems, ValueError("additiveError must have size 1")
             assert (np.all(values > 0.0)), ValueError("additiveErr must be > 0.0. Make sure the values are in linear space")
             # assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], np.ndarray)), TypeError(
             #     "relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
@@ -171,10 +128,6 @@ class DataPoint(Point):
             self._channelNames = values
 
     @property
-    def systemOffset(self):
-        return np.hstack([0, np.cumsum(self.channels_per_system)])
-
-    @property
     def fiducial(self):
         return self._fiducial
 
@@ -191,12 +144,15 @@ class DataPoint(Point):
         self._lineNumber = StatArray.StatArray(np.float64(value), 'Line number')
 
     @property
-    def channels_per_system(self):
-        return self._channels_per_system
+    def n_posteriors(self):
+        return self._n_error_posteriors + self.z.hasPosterior
 
     @property
-    def nSystems(self):
-        return np.size(self.channels_per_system)
+    def _n_error_posteriors(self):
+        # if not self.errorPosterior is None:
+        #     return len(self.errorPosterior)
+        # else:
+        return self.nSystems * np.sum([x.hasPosterior for x in [self.relErr, self.addErr]])
 
     @property
     def data(self):
@@ -204,12 +160,6 @@ class DataPoint(Point):
 
     @data.setter
     def data(self, values):
-
-        if values is None:
-            values = self.nChannels
-        else:
-            assert np.size(values) == self.nChannels, ValueError("data must have size {}".format(self.nChannels))
-
         self._data = StatArray.StatArray(values, "Data", self.units)
 
     @property
@@ -239,18 +189,21 @@ class DataPoint(Point):
         self._elevation = StatArray.StatArray(value, "Elevation", "m")
 
     @property
-    def nActiveChannels(self):
+    def n_active_channels(self):
         return self.active.size
 
     @property
     def nChannels(self):
-        return np.sum(self.channels_per_system)
+        return self.data.size
+
+    @property
+    def nSystems(self):
+        return 1
 
     @property
     def predictedData(self):
         """The predicted data. """
         return self._predictedData
-
 
     @predictedData.setter
     def predictedData(self, values):
@@ -258,10 +211,10 @@ class DataPoint(Point):
             values = self.nChannels
         else:
             if isinstance(values, list):
-                assert len(values) == self.nSystems, ValueError("predictedData as a list must have {} elements".format(self.nSystems))
+                assert len(values) == self.nSystems, ValueError("std as a list must have {} elements".format(self.nSystems))
                 values = np.hstack(values)
-            assert values.size == self.nChannels, ValueError("Size of predictedData must equal total number of time channels {}".format(self.nChannels))
-            # Mask invalid data values less than 0.0 to NaN
+            assert values.size == self.nChannels, ValueError("Size of std must equal total number of time channels {}".format(nChannels))
+
         self._predictedData = StatArray.StatArray(values, "Predicted Data", self.units)
 
     @property
@@ -275,7 +228,7 @@ class DataPoint(Point):
     @relErr.setter
     def relErr(self, values):
         if values is None:
-            values = self.nSystems
+            values = np.full(self.nSystems, fill_value=0.01)
         else:
             if np.size(values) == 1:
                 values = np.full(self.nSystems, fill_value=values)
@@ -288,15 +241,27 @@ class DataPoint(Point):
 
         self._relErr = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
 
-
     @property
     def std(self):
+        """ Compute the data errors. """
+
+        assert self.relErr > 0.0, ValueError("relErr must be > 0.0")
+
+        # For each system assign error levels using the user inputs
+        relative_error = self.relErr * self.data
+
+        self._std[:] = np.sqrt((relative_error**2.0) + (self.addErr**2.0))
+
+        # Update the variance of the predicted data prior
+        if self.predictedData.hasPrior:
+            self.predictedData.prior.variance[np.diag_indices(np.sum(self.active))] = self._std[self.active]**2.0
+
         return self._std
 
     @std.setter
     def std(self, value):
         if value is None:
-            value = np.ones(self.nChannels)
+            value = np.full(self.nChannels, fill_value=0.01)
         else:
             if isinstance(value, list):
                 assert len(value) == self.nSystems, ValueError("std as a list must have {} elements".format(self.nSystems))
@@ -316,6 +281,24 @@ class DataPoint(Point):
         else:
             assert isinstance(value, str), TypeError('units must have type str')
         self._units = value
+
+    def __deepcopy__(self, memo={}):
+
+        out = super().__deepcopy__(memo)
+
+        out._elevation = deepcopy(self.elevation, memo)
+        out._units = deepcopy(self.units, memo)
+        out._data = deepcopy(self.data, memo)
+        out._std = deepcopy(self.std, memo)
+        out._predictedData = deepcopy(self.predictedData, memo)
+        out._lineNumber = deepcopy(self.lineNumber, memo)
+        out._fiducial = deepcopy(self.fiducial, memo)
+        out._channelNames = deepcopy(self.channelNames, memo)
+        out._relErr = deepcopy(self.relErr, memo)
+        out._addErr = deepcopy(self.addErr, memo)
+        # out._errorPosterior = deepcopy(self.errorPosterior, memo)
+
+        return out
 
     def generate_noise(self, additive_error, relative_error):
 
@@ -476,7 +459,7 @@ class DataPoint(Point):
                'z: {} \n'
                'elevation: {} \n'
                'Number of active channels: {} \n'
-               '{} {} {}').format(self._channelNames, self.x, self.y, self.z, self.elevation, self.nActiveChannels, self.data[self.active].summary, self.predictedData[self.active].summary, self.std[self.active].summary)
+               '{} {} {}').format(self._channelNames, self.x, self.y, self.z, self.elevation, np.sum(self.active), self.data[self.active].summary, self.predictedData[self.active].summary, self.std[self.active].summary)
         return msg
 
 
@@ -488,8 +471,6 @@ class DataPoint(Point):
         """
         # create a new group inside h5obj
         grp = super().createHdf(parent, myName, withPosterior, nRepeats, fillvalue)
-
-        grp.create_dataset('channels_per_system', data=self.channels_per_system)
 
         self.fiducial.createHdf(grp, 'fiducial', nRepeats=nRepeats, fillvalue=fillvalue)
         self.lineNumber.createHdf(grp, 'line_number', nRepeats=nRepeats, fillvalue=fillvalue)
@@ -553,12 +534,14 @@ class DataPoint(Point):
 
         out.elevation = StatArray.StatArray.fromHdf(grp['e'], index=index)
 
-        if 'channels_per_system' in grp:
-            out._nChannelsPerSystem = np.asarray(grp['channels_per_system'])
+        # if 'channels_per_system' in grp:
+        #     out._channels_per_system = np.asarray(grp['channels_per_system'])
+        # if 'components_per_channel' in grp:
+        #     out._components_per_channel = np.asarray(grp['components_per_channel'])
 
-        out._data = StatArray.StatArray.fromHdf(grp['d'], index=index)
-        out._std = StatArray.StatArray.fromHdf(grp['s'], index=index)
-        out._predictedData = StatArray.StatArray.fromHdf(grp['p'], index=index)
+        out.data = StatArray.StatArray.fromHdf(grp['d'], index=index)
+        out.std = StatArray.StatArray.fromHdf(grp['s'], index=index)
+        out.predictedData = StatArray.StatArray.fromHdf(grp['p'], index=index)
 
         # if 'joint_error_posterior_0' in grp:
         #     i = 0
@@ -567,33 +550,41 @@ class DataPoint(Point):
         #         self.errorPosterior.append(Histogram2D.fromHdf(grp['joint_error_posterior_{}'.format(i)], index=index))
         #         i += 1
 
-        out._relErr = StatArray.StatArray.fromHdf(grp['relErr'], index=index)
-        out._addErr = StatArray.StatArray.fromHdf(grp['addErr'], index=index)
+        out.relErr = StatArray.StatArray.fromHdf(grp['relErr'], index=index)
+        out.addErr = StatArray.StatArray.fromHdf(grp['addErr'], index=index)
 
         return out
 
 
     def Isend(self, dest, world):
-        myMPI.Isend(self.channels_per_system, dest=dest, world=world)
-        tmp = np.hstack([self.x, self.y, self.z, self.elevation])
-        myMPI.Isend(tmp, dest=dest, world=world)
-        self._data.Isend(dest, world)
-        self._std.Isend(dest, world)
-        self._predictedData.Isend(dest, world)
-        world.isend(self._channelNames, dest=dest)
+
+        super().Isend(dest, world)
+
+        self.elevation.Isend(dest, world)
+        self.data.Isend(dest, world)
+        self.std.Isend(dest, world)
+        self.predictedData.Isend(dest, world)
+        self.lineNumber.Isend(dest, world)
+        self.fiducial.Isend(dest, world)
+        self.relErr.Isend(dest, world)
+        self.addErr.Isend(dest, world)
+        world.isend(self.channelNames, dest=dest)
 
 
     @classmethod
-    def Irecv(cls, source, world):
-        ncps = myMPI.Irecv(source=source, world=world)
-        tmp = myMPI.Irecv(source=source, world=world)
-        d = StatArray.StatArray.Irecv(source, world)
-        s = StatArray.StatArray.Irecv(source, world)
-        p = StatArray.StatArray.Irecv(source, world)
-        cn = world.irecv(source = 0).wait()
+    def Irecv(cls, source, world, **kwargs):
 
-        return cls(ncps,
-                   x=tmp[0], y=tmp[1], z=tmp[2], elevation=tmp[3],
-                   data=d, std=s, predictedData=p,
-                   channelNames=cn)
+        out = super(DataPoint, cls).Irecv(source, world, **kwargs)
+
+        out._elevation = StatArray.StatArray.Irecv(source, world)
+        out._data = StatArray.StatArray.Irecv(source, world)
+        out._std = StatArray.StatArray.Irecv(source, world)
+        out._predictedData = StatArray.StatArray.Irecv(source, world)
+        out._lineNumber = StatArray.StatArray.Irecv(source, world)
+        out._fiducial = StatArray.StatArray.Irecv(source, world)
+        out._relErr = StatArray.StatArray.Irecv(source, world)
+        out._addErr = StatArray.StatArray.Irecv(source, world)
+        out._channelNames = world.irecv(source=source).wait()
+
+        return out
 
