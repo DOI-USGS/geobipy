@@ -11,7 +11,7 @@ import numpy as np
 class Point(myObject, ABC):
     """ Class defining a point in 3D Euclidean space """
 
-    def __init__(self, x=0.0, y=0.0, z=0.0):
+    def __init__(self, x=0.0, y=0.0, z=0.0, **kwargs):
 
         """ Initialize the class """
 
@@ -166,17 +166,17 @@ class Point(myObject, ABC):
         y = StatArray.StatArray.fromHdf(grp['y'], index=index)
         z = StatArray.StatArray.fromHdf(grp['z'], index=index)
 
-        out = cls(x=x, y=y, z=z)
-        return out
+        return cls(x=x, y=y, z=z)
+
 
     def Isend(self, dest, world):
-        # tmp = np.empty(3, np.float64)
-        tmp = np.hstack([self.x, self.y, self.z])
-        world.Isend(tmp, dest=dest)
+        self.x.Isend(dest, world)
+        self.y.Isend(dest, world)
+        self.z.Isend(dest, world)
 
     @classmethod
-    def Irecv(cls, source, world):
-        tmp = np.empty(3, np.float64)
-        req = world.Irecv(tmp, source=source)
-        req.Wait()
-        return Point(tmp[0], tmp[1], tmp[2])
+    def Irecv(cls, source, world, **kwargs):
+        x = StatArray.StatArray.Irecv(source, world)
+        y = StatArray.StatArray.Irecv(source, world)
+        z = StatArray.StatArray.Irecv(source, world)
+        return cls(x=x, y=y, z=z, **kwargs)

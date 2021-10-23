@@ -1041,7 +1041,7 @@ class PointCloud3D(myObject):
         z = self.z.Bcast(world, root=root)
         e = self.elevation.Bcast(world, root=root)
         # N = MPI.Bcast(self._nPoints, world, root=root)
-        return PointCloud3D(x=x, y=y, z=z, elevation=e)
+        return type(self)(x=x, y=y, z=z, elevation=e)
 
 
     def Scatterv(self, starts, chunks, world, root=0):
@@ -1064,10 +1064,8 @@ class PointCloud3D(myObject):
             The PointCloud3D distributed amongst ranks.
 
         """
-
-        # N = chunks[world.rank]
         x = self.x.Scatterv(starts, chunks, world, root=root)
         y = self.y.Scatterv(starts, chunks, world, root=root)
         z = self.z.Scatterv(starts, chunks, world, root=root)
         e = self.elevation.Scatterv(starts, chunks, world, root=root)
-        return PointCloud3D(x=x, y=y, z=z, elevation=e)
+        return type(self)(x=x, y=y, z=z, elevation=e)
