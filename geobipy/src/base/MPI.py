@@ -771,6 +771,15 @@ def Scatterv_list(self, starts, chunks, world, root=0):
     if (world.rank == root):
         return self[:chunks[root]]
 
+def data_type_map(data_type):
+    from mpi4py import MPI
+
+    if data_type == np.float32:
+        return MPI.FLOAT
+    elif data_type == np.float64:
+        return MPI.DOUBLE
+    elif data_type == np.int:
+        return MPI.INT
 
 def Scatterv_numpy(self, starts, chunks, dtype, world, axis=0, root=0):
     """ScatterV a numpy array to all ranks in an MPI communicator.
@@ -802,9 +811,10 @@ def Scatterv_numpy(self, starts, chunks, dtype, world, axis=0, root=0):
     """
     # Broadcast the number of dimensions
     ndim = Bcast_1int(np.ndim(self), world, root=root)
+
     if (ndim == 1):  # For a 1D Array
         this = np.empty(chunks[world.rank], dtype=dtype)
-        world.Scatterv([self, chunks, starts, None], this[:], root=root)
+        world.Scatterv([self, chunks, starts, data_type_map(dtype)], this, root=root)
         return this
 
     # For a 2D Array
@@ -820,7 +830,7 @@ def Scatterv_numpy(self, starts, chunks, dtype, world, axis=0, root=0):
             else:
                 self_unpk = np.reshape(self.T, np.size(self))
         this_unpk = np.empty(tmpChunks[world.rank], dtype=dtype)
-        world.Scatterv([self_unpk, tmpChunks, tmpStarts, None], this_unpk, root=root)
+        world.Scatterv([self_unpk, tmpChunks, tmpStarts, data_type_map(dtype)], this_unpk, root=root)
         this = np.reshape(this_unpk, [chunks[world.rank], s])
 
         return this.T if axis == 1 else this
