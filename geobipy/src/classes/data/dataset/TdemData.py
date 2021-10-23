@@ -56,11 +56,12 @@ class TdemData(Data):
     def __init__(self, systems=None, **kwargs):
         """ Initialize the TDEM data """
 
-        # if systems is None:
+        # if not systems is None:
         #     return
 
         self.system = systems
 
+        kwargs['components'] = kwargs.get('components', self.components)
         kwargs['channels_per_system'] = kwargs.get('channels_per_system', self.nTimes)
         # kwargs['components_per_channel'] = kwargs.get('components_per_channel', self.system[0].components)
         kwargs['units'] = r"$\frac{V}{m^{2}}$"
@@ -69,9 +70,9 @@ class TdemData(Data):
         super().__init__(**kwargs)
 
         # StatArray of Transmitter loops
-        self.transmitter = kwargs.get('transmitter', None)
+        self.transmitter = kwargs.get('transmitter')
         # StatArray of Receiever loops
-        self.receiver = kwargs.get('receiver', None)
+        self.receiver = kwargs.get('receiver')
         # # Loop Offsets
         # self.loopOffset = kwargs.get('loopOffset', None)
 
@@ -111,12 +112,6 @@ class TdemData(Data):
     #             self._loopOffset = StatArray.StatArray(values, "Loop Offset")
 
     @property
-    def n_components(self):
-        if self.system is None:
-            return 0
-        return self.system[0].n_components
-
-    @property
     def nTimes(self):
         return self.channels_per_system
 
@@ -147,7 +142,8 @@ class TdemData(Data):
 
         if values is None:
             self._system = None
-            self._channels_per_system = 0
+            self.components = None
+            self.channels_per_system = None
             return
 
         if isinstance(values, (str, TdemSystem)):
@@ -164,7 +160,8 @@ class TdemData(Data):
             else:
                 self._system[i] = s
 
-        self._channels_per_system = np.asarray([s.nTimes for s in self.system])
+        self.components = self.system[0].components
+        self.channels_per_system = np.asarray([s.nTimes for s in self.system])
 
     @property
     def transmitter(self):
@@ -192,9 +189,17 @@ class TdemData(Data):
         self.T = np.hstack([self.T, other.T])
         self.R = np.hstack(self.R, other.R)
 
+    # def _component_indices(self, component=0, system=0):
+    #     assert component < self.n_components, ValueError("component must be < {}".format(self.n_components))
+    #     return np.s_[((self.nTimes*component)+(system*self.nChannels))[0]:(self.nTimes*(component+1)+(system*self.nChannels))[0]]
+
+    @property
+    def _ravel_index(self):
+        return np.cumsum(np.hstack([0, np.repeat(self.nTimes, self.n_components)]))
+
     def _component_indices(self, component=0, system=0):
-        assert component < self.n_components, ValueError("component must be < {}".format(self.n_components))
-        return np.s_[((self.nTimes*component)+(system*self.nChannels))[0]:(self.nTimes*(component+1)+(system*self.nChannels))[0]]
+        i = np.ravel_multi_index((component, system), (self.n_components, self.nSystems))
+        return np.s_[self._ravel_index[i]:self._ravel_index[i+1]]
 
     @classmethod
     def read_csv(cls, dataFilename, systemFilename):
@@ -514,11 +519,11 @@ class TdemData(Data):
 
     @property
     def nSystems(self):
-        return np.size(self.system)
+        return np.size(self.channels_per_system)
 
-    @property
-    def nChannelsPerSystem(self):
-        return np.asarray([s.nwindows() for s in self.system])
+    # @property
+    # def channels_per_system(self):
+    #     return np.asarray([s.nwindows() for s in self.system])
 
     def _read_record(self, record=None):
         """Reads a single data point from the data file.
@@ -890,106 +895,53 @@ class TdemData(Data):
         ----------
 
         """
+        out = super().Bcast(world, root)
 
-        # nPoints = myMPI.Bcast(self.nPoints, world, root=root)
-        # nTimes = myMPI.Bcast(self.nTimes, world, root=root)
+        out.system = self._BcastSystem(world, root=root, system=system)
 
-        systems = self._BcastSystem(world, root=root, system=system)
-
-        # Instantiate a new Time Domain Data set on each worker
-        this = TdemData(systems)
-
-        # Broadcast the Data point id, line numbers and elevations
-        this._fiducial = self.fiducial.Bcast(world, root=root)
-        this._lineNumber = self.lineNumber.Bcast(world, root=root)
-        this._x = self.x.Bcast(world, root=root)
-        this._y = self.y.Bcast(world, root=root)
-        this._z = self.z.Bcast(world, root=root)
-        this._elevation = self.elevation.Bcast(world, root=root)
-        this._data = self.data.Bcast(world, root=root)
-        this._std = self.std.Bcast(world, root=root)
-        this._predictedData = self.predictedData.Bcast(world, root=root)
-
+        transmitter = CircularLoop()
         # Broadcast the Transmitter Loops.
-        if (world.rank == 0):
-            lTmp = [str(self.transmitter[i]) for i in range(self.nPoints)]
-        else:
-            lTmp = []
-        lTmp = myMPI.Bcast_list(lTmp, world)
-        if (world.rank == 0):
-            this.transmitter = self.transmitter
-        else:
-            for i in range(this.nPoints):
-                this.transmitter[i] = eval(cF.safeEval(lTmp[i]))
+        for i in range(out.nPoints):
+            if (world.rank == 0):
+                transmitter = self.transmitter[i]
+            out.transmitter[i] = transmitter.Bcast(world, root)
 
-        # Broadcast the Reciever Loops.
-        if (world.rank == 0):
-            lTmp = [str(self.receiver[i]) for i in range(self.nPoints)]
-        else:
-            lTmp = []
-        lTmp = myMPI.Bcast_list(lTmp, world)
-        if (world.rank == 0):
-            this.receiver = self.receiver
-        else:
-            for i in range(this.nPoints):
-                this.receiver[i] = eval(cF.safeEval(lTmp[i]))
 
-        # this.iActive = this.getActiveChannels()
+        receiver = CircularLoop()
+        # Broadcast the Transmitter Loops.
+        for i in range(out.nPoints):
+            if (world.rank == 0):
+                receiver = self.receiver[i]
+            out.receiver[i] = receiver.Bcast(world, root)
 
-        return this
+        return out
 
     def Scatterv(self, starts, chunks, world, root=0, system=None):
         """ Scatterv the TdemData using MPI """
 
-        # nTimes = myMPI.Bcast(self.nTimes, world, root=root)
+        out = super().Scatterv(starts, chunks, world, root)
 
-        systems = self._BcastSystem(world, root=root, system=system)
-
-        # Instantiate a new Time Domain Data set on each worker
-        this = TdemData(systems)
-
-        # Broadcast the Data point id, line numbers and elevations
-        this._fiducial = self.fiducial.Scatterv(
-            starts, chunks, world, root=root)
-        this._lineNumber = self.lineNumber.Scatterv(
-            starts, chunks, world, root=root)
-        this._x = self.x.Scatterv(starts, chunks, world, root=root)
-        this._y = self.y.Scatterv(starts, chunks, world, root=root)
-        this._z = self.z.Scatterv(starts, chunks, world, root=root)
-        this._elevation = self.elevation.Scatterv(
-            starts, chunks, world, root=root)
-        this._data = self.data.Scatterv(starts, chunks, world, root=root)
-        this._std = self.std.Scatterv(starts, chunks, world, root=root)
-        this._predictedData = self.predictedData.Scatterv(
-            starts, chunks, world, root=root)
+        out.system = self._BcastSystem(world, root=root, system=system)
 
         # Scatterv the Transmitter Loops.
+        lTmp = []
         if (world.rank == 0):
-            lTmp = [str(self.transmitter[i]) for i in range(self.nPoints)]
-        else:
-            lTmp = []
+            lTmp = [self.transmitter[i] for i in range(self.nPoints)]
+
         lTmp = myMPI.Scatterv_list(lTmp, starts, chunks, world)
-        if (world.rank == 0):
-            this.transmitter = self.transmitter[:chunks[0]]
-        else:
-            for i in range(this.nPoints):
-                this.transmitter[i] = eval(lTmp[i])
+        for i in range(out.nPoints):
+            out.transmitter[i] = lTmp[i]
 
         # Scatterv the Reciever Loops.
+        lTmp = []
         if (world.rank == 0):
-            lTmp = [str(self.receiver[i]) for i in range(self.nPoints)]
-        else:
-            lTmp = []
+            lTmp = [self.receiver[i] for i in range(self.nPoints)]
+
         lTmp = myMPI.Scatterv_list(lTmp, starts, chunks, world)
-        if (world.rank == 0):
-            this.receiver = self.receiver[:chunks[0]]
-        else:
-            for i in range(this.nPoints):
-                this.receiver[i] = eval(lTmp[i])
+        for i in range(out.nPoints):
+            out.receiver[i] = lTmp[i]
 
-        # this.iActive = this.getActiveChannels()
-
-        return this
+        return out
 
     def write(self, fileNames, std=False, predictedData=False):
 

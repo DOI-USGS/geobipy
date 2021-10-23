@@ -62,10 +62,11 @@ class Data(PointCloud3D):
 
     """
 
-    def __init__(self, channels_per_system=1, x=None, y=None, z=None, elevation=None, data=None, std=None, predictedData=None, fiducial=None, lineNumber=None, units=None, channelNames=None, **kwargs):
+    def __init__(self, components=None, channels_per_system=1, x=None, y=None, z=None, elevation=None, data=None, std=None, predictedData=None, fiducial=None, lineNumber=None, units=None, channelNames=None, **kwargs):
         """ Initialize the Data class """
 
         # Number of Channels
+        self.components = components
         self.channels_per_system = channels_per_system
 
         super().__init__(x, y, z, elevation)
@@ -148,7 +149,30 @@ class Data(PointCloud3D):
 
     @channels_per_system.setter
     def channels_per_system(self, values):
-        self._channels_per_system = np.asarray(values, dtype=np.int32)
+        if values is None:
+            values = np.zeros(1, dtype=np.int32)
+        else:
+            values = np.atleast_1d(np.asarray(values, dtype=np.int32))
+
+        self._channels_per_system = values
+
+    @property
+    def components(self):
+        return self._components
+
+    @components.setter
+    def components(self, values):
+
+        if values is None:
+            values = ['z']
+        else:
+
+            if isinstance(values, str):
+                values = [values]
+
+            assert np.all([isinstance(x, str) for x in values]), TypeError('components_per_channel must be list of str')
+
+        self._components = values
 
     @property
     def data(self):
@@ -156,7 +180,6 @@ class Data(PointCloud3D):
         if np.size(self._data, 0) == 0:
             self._data = StatArray.StatArray((self.nPoints, self.nChannels), "Data", self.units)
         return self._data
-
 
     @data.setter
     def data(self, values):
@@ -166,7 +189,9 @@ class Data(PointCloud3D):
         else:
             if self.nPoints == 0:
                 self.nPoints = np.size(values, 0)
-                shp = (self.nPoints, self.nChannels)
+            if self.nChannels == 0:
+                self.channels_per_system = np.size(values, 1)
+            shp = (self.nPoints, self.nChannels)
             assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("data must have shape {}".format(shp))
             self._data = StatArray.StatArray(values)
 
@@ -225,7 +250,11 @@ class Data(PointCloud3D):
 
     @property
     def nChannels(self):
-        return np.sum(self.channels_per_system)
+        return np.sum(self.n_components * self.channels_per_system)
+
+    @property
+    def n_components(self):
+        return np.size(self.components)
 
     @property
     def nLines(self):
@@ -250,7 +279,9 @@ class Data(PointCloud3D):
         else:
             if self.nPoints == 0:
                 self.nPoints = np.size(values, 0)
-                shp = (self.nPoints, self.nChannels)
+            if self.nChannels == 0:
+                self.channels_per_system = np.size(values, 1)
+            shp = (self.nPoints, self.nChannels)
             assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("predictedData must have shape {}".format(shp))
             self._predictedData = StatArray.StatArray(values)
 
@@ -288,7 +319,9 @@ class Data(PointCloud3D):
         else:
             if self.nPoints == 0:
                 self.nPoints = np.size(values, 0)
-                shp = (self.nPoints, self.nChannels)
+            if self.nChannels == 0:
+                self.channels_per_system = np.size(values, 1)
+            shp = (self.nPoints, self.nChannels)
             assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("std must have shape {}".format(shp))
             self._std = StatArray.StatArray(values)
 
@@ -533,8 +566,7 @@ class Data(PointCloud3D):
         """
         assert np.size(i) == 1, ValueError("i must be a single integer")
         assert 0 <= i <= self.nPoints, ValueError("Must have 0 <= i <= {}".format(self.nPoints))
-        return DataPoint(self.channels_per_system,
-                         x=self.x[i], y=self.y[i], z=self.z[i], elevation=self.elevation[i],
+        return DataPoint(x=self.x[i], y=self.y[i], z=self.z[i], elevation=self.elevation[i],
                          data=self.data[i, :], std=self.std[i, :], predictedData=self.predictedData[i, :],
                          channelNames=self.channelNames)
 
@@ -1042,19 +1074,18 @@ class Data(PointCloud3D):
 
         """
 
-        pc3d = PointCloud3D.Bcast(self, world, root=root)
-        # nPoints = myMPI.Bcast(self.nPoints, world, root=root)
-        ncps = myMPI.Bcast(self.channels_per_system, world, root=root)
-        x = self.x.Bcast(world)
-        y = self.y.Bcast(world)
-        z = self.z.Bcast(world)
-        e = self.elevation.Bcast(world)
-        d = self._data.Bcast(world)
-        s = self._std.Bcast(world)
-        p = self._predictedData.Bcast(world)
+        out = super().Bcast(world, root=root)
 
-        return Data(ncps, x=x, y=y, z=z,elevation=e, data=d, std=s, predictedData=p)
+        out.components = world.bcast(self.components, root=root)
+        out.channels_per_system = myMPI.Bcast(self.channels_per_system, world, root=root)
 
+        out.fiducial = self.fiducial.Bcast(world, root=root)
+        out.lineNumber = self.lineNumber.Bcast(world, root=root)
+        out._data = self.data.Bcast(world, root=root)
+        out._std = self.std.Bcast(world, root=root)
+        out._predictedData = self.predictedData.Bcast(world, root=root)
+
+        return out
 
     def Scatterv(self, starts, chunks, world, root=0):
         """Scatterv a Data object using MPI
@@ -1076,12 +1107,12 @@ class Data(PointCloud3D):
             The Data distributed amongst ranks.
 
         """
-        ncps = myMPI.Bcast(self.channels_per_system, world, root=root)
-        x = self.x.Scatterv(starts, chunks, world, root=root)
-        y = self.y.Scatterv(starts, chunks, world, root=root)
-        z = self.z.Scatterv(starts, chunks, world, root=root)
-        e = self.elevation.Scatterv(starts, chunks, world, root=root)
-        d = self._data.Scatterv(starts, chunks, world, root=root)
-        s = self._std.Scatterv(starts, chunks, world, root=root)
-        p = self._predictedData.Scatterv(starts, chunks, world, root=root)
-        return Data(ncps, x=x, y=y, z=z, elevation=e, data=d, std=s, predictedData=p)
+        out = super().Scatterv(starts, chunks, world, root)
+
+        out.channels_per_system = myMPI.Bcast(self.channels_per_system, world, root=root)
+        out.fiducial = self.fiducial.Scatterv(starts, chunks, world, root=root)
+        out.lineNumber = self.lineNumber.Scatterv(starts, chunks, world, root=root)
+        out.data = self.data.Scatterv(starts, chunks, world, root=root)
+        out.std = self.std.Scatterv(starts, chunks, world, root=root)
+        out.predictedData = self.predictedData.Scatterv(starts, chunks, world, root=root)
+        return out
