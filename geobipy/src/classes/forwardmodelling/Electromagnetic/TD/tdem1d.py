@@ -105,6 +105,22 @@ try:
         # Forward model the data for each system
         return [datapoint.system[i].forwardmodel(G, E) for i in range(datapoint.nSystems)]
 
+    def ga_fm_dlogc(datapoint, model1d):
+        # Generate the Brodie Earth class
+        E = Earth(model1d.par[:], model1d.widths[:-1])
+
+        # Generate the Brodie Geometry class
+        G = Geometry(datapoint.z.value,
+                     datapoint.transmitter.roll, datapoint.transmitter.pitch.value, datapoint.transmitter.yaw,
+                     datapoint.receiver.x - datapoint.transmitter.x,
+                     datapoint.receiver.y - datapoint.transmitter.y,
+                     datapoint.receiver.z - datapoint.transmitter.z,
+                     #  datapoint.loopOffset[0], datapoint.loopOffset[1], datapoint.loopOffset[2],
+                     datapoint.receiver.roll, datapoint.receiver.pitch, datapoint.receiver.yaw)
+
+        # Forward model the data for each system
+        return [datapoint.system[i].fm_dlogc(G, E) for i in range(datapoint.nSystems)]
+
     def gaTdem1dsen(datapoint, model1d, ix=None, modelChanged=True):
         """ Compute the sensitivty matrix for a 1D layered earth model, optionally compute the responses for only the layers in ix """
         # Unfortunately the code requires forward modelled data to compute the
