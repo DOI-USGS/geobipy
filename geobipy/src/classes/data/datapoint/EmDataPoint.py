@@ -66,10 +66,15 @@ class EmDataPoint(DataPoint):
 
     @property
     def components(self):
-        return self._components
+        m = ('x', 'y', 'z')
+        return [m[x] for x in self._components]
 
     @components.setter
     def components(self, values):
+
+        m = {'x': 0,
+             'y': 1,
+             'z': 2}
 
         if values is None:
             values = ['z']
@@ -80,7 +85,7 @@ class EmDataPoint(DataPoint):
 
             assert np.all([isinstance(x, str) for x in values]), TypeError('components must be list of str')
 
-        self._components = values
+        self._components = np.asarray([m[x] for x in values], dtype=np.int32)
 
     @DataPoint.data.setter
     def data(self, values):

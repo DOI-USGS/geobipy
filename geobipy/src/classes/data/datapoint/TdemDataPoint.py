@@ -223,7 +223,7 @@ class TdemDataPoint(EmDataPoint):
         out = super().__deepcopy__(memo)
         out.system = self._system
         out._transmitter = deepcopy(self.transmitter)
-        out._receiver = self._receiver
+        out._receiver = deepcopy(self.receiver)
 
         return out
 

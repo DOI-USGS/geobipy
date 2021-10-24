@@ -286,6 +286,9 @@ class DataPoint(Point):
 
         out = super().__deepcopy__(memo)
 
+        out._components = deepcopy(self._components, memo)
+        out._channels_per_system = deepcopy(self.channels_per_system, memo)
+
         out._elevation = deepcopy(self.elevation, memo)
         out._units = deepcopy(self.units, memo)
         out._data = deepcopy(self.data, memo)
@@ -472,6 +475,9 @@ class DataPoint(Point):
         # create a new group inside h5obj
         grp = super().createHdf(parent, myName, withPosterior, nRepeats, fillvalue)
 
+        grp.create_dataset('channels_per_system', data=self.channels_per_system)
+        grp.create_dataset('components', data=self._components)
+
         self.fiducial.createHdf(grp, 'fiducial', nRepeats=nRepeats, fillvalue=fillvalue)
         self.lineNumber.createHdf(grp, 'line_number', nRepeats=nRepeats, fillvalue=fillvalue)
         self.elevation.createHdf(grp, 'e', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
@@ -534,10 +540,10 @@ class DataPoint(Point):
 
         out.elevation = StatArray.StatArray.fromHdf(grp['e'], index=index)
 
-        # if 'channels_per_system' in grp:
-        #     out._channels_per_system = np.asarray(grp['channels_per_system'])
-        # if 'components_per_channel' in grp:
-        #     out._components_per_channel = np.asarray(grp['components_per_channel'])
+        if 'channels_per_system' in grp:
+            out.channels_per_system = np.asarray(grp['channels_per_system'])
+        if 'components' in grp:
+            out._components = np.asarray(grp['components'])
 
         out.data = StatArray.StatArray.fromHdf(grp['d'], index=index)
         out.std = StatArray.StatArray.fromHdf(grp['s'], index=index)

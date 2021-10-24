@@ -246,9 +246,9 @@ class CircularLoop(EmLoop):
         out.yaw = StatArray.StatArray.fromHdf(grp['yaw'], index=index)
 
         tmp = StatArray.StatArray.fromHdf(grp['data'], index=index)
-        out.orient = tmp[0]
-        out.moment = tmp[1]
-        out.radius = tmp[2]
+        out._orient = tmp[0]
+        out._moment = tmp[1]
+        out._radius = tmp[2]
 
         return out
 
