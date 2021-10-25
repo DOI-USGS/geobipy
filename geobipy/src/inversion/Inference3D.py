@@ -444,7 +444,10 @@ class Inference3D(myObject):
             nFinished += 1
 
             # Read the next data point from the file
-            datapoint = dataset._read_record(nSent)
+            if nSent == nPoints:
+                datapoint = None
+            else:
+                datapoint = dataset._read_record(nSent)
 
             # If DataPoint is None, then we reached the end of the file and no more points can be read in.
             if datapoint is None:
