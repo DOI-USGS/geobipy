@@ -66,7 +66,7 @@ class CircularLoop(EmLoop):
 
     @pitch.setter
     def pitch(self, value):
-        self._pitch = StatArray.StatArray(np.float64(value), 'Pitch', '$^{o}$')
+        self._pitch = StatArray.StatArray(value, 'Pitch', '$^{o}$')
 
     @property
     def radius(self):
@@ -78,7 +78,7 @@ class CircularLoop(EmLoop):
 
     @roll.setter
     def roll(self, value):
-        self._roll = StatArray.StatArray(np.float64(value), 'Roll', '$^{o}$')
+        self._roll = StatArray.StatArray(value, 'Roll', '$^{o}$')
 
     @property
     def yaw(self):
@@ -86,7 +86,7 @@ class CircularLoop(EmLoop):
 
     @yaw.setter
     def yaw(self, value):
-        self._yaw = StatArray.StatArray(np.float64(value), 'Yaw', '$^{o}$')
+        self._yaw = StatArray.StatArray(value, 'Yaw', '$^{o}$')
 
     @property
     def orient(self):

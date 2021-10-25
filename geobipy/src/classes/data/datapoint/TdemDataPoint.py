@@ -98,12 +98,8 @@ class TdemDataPoint(EmDataPoint):
         if values is None:
             values = self.nSystems
         else:
-            if np.size(values) == 1:
-                values = np.full(self.nSystems, fill_value=values)
-            else:
-                values = np.asarray(values)
             assert np.size(values) == self.nSystems, ValueError("additiveError must be a list of size equal to the number of systems {}".format(self.nSystems))
-            assert (np.all(values > 0.0)), ValueError("additiveErr must be > 0.0. Make sure the values are in linear space")
+            assert (np.all(np.asarray(values) > 0.0)), ValueError("additiveErr must be > 0.0. Make sure the values are in linear space")
             # assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], np.ndarray)), TypeError(
             #     "relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
 
@@ -551,7 +547,7 @@ class TdemDataPoint(EmDataPoint):
 
         self.system = lst
 
-        self._channels_per_system = self.nTimes
+        # self._channels_per_system = self.nTimes
 
         return self
 

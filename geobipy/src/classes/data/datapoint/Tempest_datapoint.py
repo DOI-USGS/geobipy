@@ -122,10 +122,9 @@ class Tempest_datapoint(TdemDataPoint):
         if values is None:
             values = self.nChannels
         else:
-            values = np.asarray(values)
             assert np.size(values) == self.nChannels, ValueError(("Tempest data must a have additive error values for all time gates and all components. \n"
                                                               "addErr must have size {}").format(self.nChannels))
-            assert (np.all(values > 0.0)), ValueError("addErr must be > 0.0.")
+            assert (np.all(np.asarray(values) > 0.0)), ValueError("addErr must be > 0.0.")
 
         self._addErr = StatArray.StatArray(values, '$\epsilon_{additive}x10^{2}$', self.units)
 
@@ -159,10 +158,9 @@ class Tempest_datapoint(TdemDataPoint):
         if values is None:
             values = self.n_components * self.nSystems
         else:
-            values = np.asarray(values)
             assert np.size(values) == self.n_components * self.nSystems, ValueError(("Tempest data must a have relative error for the primary and secondary fields, for each system. \n"
                             "relErr must have size {}").format(self.n_components * self.nSystems))
-            assert (np.all(values > 0.0)), ValueError("relErr must be > 0.0.")
+            assert (np.all(np.asarray(values) > 0.0)), ValueError("relErr must be > 0.0.")
 
         self._relErr = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
 

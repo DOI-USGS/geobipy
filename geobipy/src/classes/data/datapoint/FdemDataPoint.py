@@ -319,12 +319,8 @@ class FdemDataPoint(EmDataPoint):
     def fromHdf(cls, grp, index=None, **kwargs):
         """ Reads the object from a HDF group """
 
-        system = FdemSystem.fromHdf(grp['sys'])
-
         out = super(FdemDataPoint, cls).fromHdf(grp, index)
-
-        out.system = system
-        out._channels_per_system = out.nFrequencies
+        out.system = FdemSystem.fromHdf(grp['sys'])
 
         return out
 

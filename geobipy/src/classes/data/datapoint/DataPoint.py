@@ -104,12 +104,8 @@ class DataPoint(Point):
         if values is None:
             values = self.nSystems
         else:
-            if np.size(values) == 1:
-                values = np.full(self.nSystems, fill_value=values)
-            else:
-                values = np.asarray(values)
             assert np.size(values) == self.nSystems, ValueError("additiveError must have size 1")
-            assert (np.all(values > 0.0)), ValueError("additiveErr must be > 0.0. Make sure the values are in linear space")
+            assert (np.all(np.asarray(values) > 0.0)), ValueError("additiveErr must be > 0.0. Make sure the values are in linear space")
             # assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], np.ndarray)), TypeError(
             #     "relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
 
@@ -227,15 +223,12 @@ class DataPoint(Point):
 
     @relErr.setter
     def relErr(self, values):
+
         if values is None:
             values = np.full(self.nSystems, fill_value=0.01)
         else:
-            if np.size(values) == 1:
-                values = np.full(self.nSystems, fill_value=values)
-            else:
-                values = np.asarray(values)
             assert np.size(values) == self.nSystems, ValueError("relErr must be a list of size equal to the number of systems {}".format(self.nSystems))
-            assert (np.all(values > 0.0)), ValueError("relErr must be > 0.0.")
+            assert (np.all(np.asarray(values) > 0.0)), ValueError("relErr must be > 0.0.")
             # assert (isinstance(additiveErr[i], float) or isinstance(additiveErr[i], np.ndarray)), TypeError(
             #     "additiveErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
 
@@ -530,7 +523,7 @@ class DataPoint(Point):
 
         out = super(DataPoint, cls).fromHdf(grp, index=index)
 
-        out.errorPosterior = None
+        # out.errorPosterior = None
 
         if 'fiducial' in grp:
             out.fiducial = StatArray.StatArray.fromHdf(grp['fiducial'], index=index)
