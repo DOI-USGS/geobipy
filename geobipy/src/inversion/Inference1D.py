@@ -245,6 +245,7 @@ class Inference1D(myObject):
     def initialize_datapoint(self, datapoint):
 
         self.datapoint = datapoint
+
         # ---------------------------------------
         # Set the statistical properties of the datapoint
         # ---------------------------------------
@@ -252,7 +253,7 @@ class Inference1D(myObject):
         self.datapoint.relErr = self.kwargs['initial_relative_error']
         self.datapoint.addErr = self.kwargs['initial_additive_error']
 
-        data_prior = Distribution('MvLogNormal', self.datapoint.data[self.datapoint.active], self.datapoint.std[self.datapoint.active]**2.0, linearSpace=False, prng=self.prng)
+        # data_prior = Distribution('MvLogNormal', self.datapoint.data[self.datapoint.active], self.datapoint.std[self.datapoint.active]**2.0, linearSpace=False, prng=self.prng)
 
 
         # Set the priors, proposals, and posteriors.
