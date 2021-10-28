@@ -580,9 +580,9 @@ class FdemDataPoint(EmDataPoint):
         return self.J
 
 
-    def Isend(self, dest, world, systems=None):
-
-        if systems is None:
+    def Isend(self, dest, world, **kwargs):
+        
+        if not 'system' in kwargs:
             myMPI.Isend(self.nSystems, dest=dest, world=world)
             for i in range(self.nSystems):
                 self.system[i].Isend(dest=dest, world=world)
@@ -590,15 +590,11 @@ class FdemDataPoint(EmDataPoint):
         super().Isend(dest, world)
 
     @classmethod
-    def Irecv(cls, source, world, systems=None):
+    def Irecv(cls, source, world, **kwargs):
 
-        if systems is None:
+        if not 'system' in kwargs:
             nSystems = myMPI.Irecv(source=source, world=world)
-            systems = [FdemSystem.Irecv(source=source, world=world) for i in range(nSystems)]
+            kwargs['system'] = [FdemSystem.Irecv(source=source, world=world) for i in range(nSystems)]
 
-        out = super(FdemDataPoint, cls).Irecv(source, world, system=systems)
-        # out.system = systems
-
-        return out
-
+        return super(FdemDataPoint, cls).Irecv(source, world, **kwargs)
 
