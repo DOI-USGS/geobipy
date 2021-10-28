@@ -591,12 +591,13 @@ class TdemData(Data):
 
         loopOffset = np.squeeze(dfs[0][self._iOffset[0]].values)
 
-        tloop = np.squeeze(dfs[0][self._iT[0]].values)
+        tloop = np.squeeze(dfs[0][self._iT[0]].values).astype(np.float64)
+        
         T = CircularLoop(x=data[2], y=data[3], z=data[4],
                          pitch=tloop[0], roll=tloop[1],yaw=tloop[2],
                          radius=self.system[0].loopRadius())
 
-        rloop = np.squeeze(dfs[0][self._iR[0]].values)
+        rloop = np.squeeze(dfs[0][self._iR[0]].values).astype(np.float64)
         R = CircularLoop(x=T.x + loopOffset[0],
                          y=T.y + loopOffset[1],
                          z=T.z + loopOffset[2],

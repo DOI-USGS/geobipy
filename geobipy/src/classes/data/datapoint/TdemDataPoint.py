@@ -888,7 +888,6 @@ class TdemDataPoint(EmDataPoint):
             kwargs['system'] = world.irecv(source=source).wait()
 
         out = super(TdemDataPoint, cls).Irecv(source, world, **kwargs)
-        # out.system = system
 
         out._transmitter = CircularLoop.Irecv(source, world)
         out._receiver = CircularLoop.Irecv(source, world)

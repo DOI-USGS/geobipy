@@ -567,7 +567,7 @@ class DataPoint(Point):
         self.fiducial.Isend(dest, world)
         self.relErr.Isend(dest, world)
         self.addErr.Isend(dest, world)
-        world.isend(self.channelNames, dest=dest)
+        # world.isend(self.channelNames, dest=dest)
 
 
     @classmethod
@@ -583,7 +583,7 @@ class DataPoint(Point):
         out._fiducial = StatArray.StatArray.Irecv(source, world)
         out._relErr = StatArray.StatArray.Irecv(source, world)
         out._addErr = StatArray.StatArray.Irecv(source, world)
-        out._channelNames = world.irecv(source=source).wait()
+        # out._channelNames = world.irecv(source=source).wait()
 
         return out
 

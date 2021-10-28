@@ -95,12 +95,12 @@ try:
 
         # Generate the Brodie Geometry class
         G = Geometry(datapoint.z[0],
-                     datapoint.transmitter.roll, datapoint.transmitter.pitch, datapoint.transmitter.yaw,
-                     datapoint.receiver.x - datapoint.transmitter.x,
-                     datapoint.receiver.y - datapoint.transmitter.y,
-                     datapoint.receiver.z - datapoint.transmitter.z,
+                     datapoint.transmitter.roll.value, datapoint.transmitter.pitch.value, datapoint.transmitter.yaw.value,
+                     datapoint.receiver.x.value - datapoint.transmitter.x.value,
+                     datapoint.receiver.y.value - datapoint.transmitter.y.value,
+                     datapoint.receiver.z.value - datapoint.transmitter.z.value,
                      #  datapoint.loopOffset[0], datapoint.loopOffset[1], datapoint.loopOffset[2],
-                     datapoint.receiver.roll, datapoint.receiver.pitch, datapoint.receiver.yaw)
+                     datapoint.receiver.roll.value, datapoint.receiver.pitch.value, datapoint.receiver.yaw.value)
 
         # Forward model the data for each system
         return [datapoint.system[i].forwardmodel(G, E) for i in range(datapoint.nSystems)]
@@ -111,12 +111,12 @@ try:
 
         # Generate the Brodie Geometry class
         G = Geometry(datapoint.z.value,
-                     datapoint.transmitter.roll, datapoint.transmitter.pitch.value, datapoint.transmitter.yaw,
-                     datapoint.receiver.x - datapoint.transmitter.x,
-                     datapoint.receiver.y - datapoint.transmitter.y,
-                     datapoint.receiver.z - datapoint.transmitter.z,
+                     datapoint.transmitter.roll.value, datapoint.transmitter.pitch.value, datapoint.transmitter.yaw.value,
+                     datapoint.receiver.x.value - datapoint.transmitter.x.value,
+                     datapoint.receiver.y.value - datapoint.transmitter.y.value,
+                     datapoint.receiver.z.value - datapoint.transmitter.z.value,
                      #  datapoint.loopOffset[0], datapoint.loopOffset[1], datapoint.loopOffset[2],
-                     datapoint.receiver.roll, datapoint.receiver.pitch, datapoint.receiver.yaw)
+                     datapoint.receiver.roll.value, datapoint.receiver.pitch.value, datapoint.receiver.yaw.value)
 
         # Forward model the data for each system
         return [datapoint.system[i].fm_dlogc(G, E) for i in range(datapoint.nSystems)]
@@ -127,12 +127,13 @@ try:
         # sensitivity if the model has changed since last time
         if modelChanged:
             E = Earth(model1d.par[:], model1d.widths[:-1])
+
             G = Geometry(datapoint.z.value,
-                         datapoint.transmitter.roll, datapoint.transmitter.pitch, datapoint.transmitter.yaw,
-                         datapoint.receiver.x - datapoint.transmitter.x,
-                         datapoint.receiver.y - datapoint.transmitter.y,
-                         datapoint.receiver.z - datapoint.transmitter.z,
-                         datapoint.receiver.roll, datapoint.receiver.pitch, datapoint.receiver.yaw)
+                         datapoint.transmitter.roll.value, datapoint.transmitter.pitch.value, datapoint.transmitter.yaw.value,
+                         datapoint.receiver.x.value - datapoint.transmitter.x.value,
+                         datapoint.receiver.y.value - datapoint.transmitter.y.value,
+                         datapoint.receiver.z.value - datapoint.transmitter.z.value,
+                         datapoint.receiver.roll.value, datapoint.receiver.pitch.value, datapoint.receiver.yaw.value)
 
             for i in range(datapoint.nSystems):
                 datapoint.system[i].forwardmodel(G, E)

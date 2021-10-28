@@ -273,9 +273,9 @@ if master:
     fdp = fd._read_record()
     for i in range(1, size):
         fdp1 = fd._read_record()
-        fdp1.Isend(dest=i, world=world, systems=systems)
+        fdp1.Isend(dest=i, world=world, system=systems)
 else:
-    fdp = FdemDataPoint.Irecv(source=0, world=world, systems=systems)
+    fdp = FdemDataPoint.Irecv(source=0, world=world, system=systems)
 
 assert np.allclose(fdp.data, fdSave.data[rank, :], equal_nan=True), Exception("Could not use FdemData.Isend/Irecv, with pre-existing system class. Rank {}".format(rank))
 

@@ -66,6 +66,7 @@ class CircularLoop(EmLoop):
 
     @pitch.setter
     def pitch(self, value):
+        assert isinstance(value, (StatArray.StatArray, float, np.float64)), TypeError("pitch must have type float")
         self._pitch = StatArray.StatArray(value, 'Pitch', '$^{o}$')
 
     @property
@@ -78,6 +79,7 @@ class CircularLoop(EmLoop):
 
     @roll.setter
     def roll(self, value):
+        assert isinstance(value, (StatArray.StatArray, float, np.float64)), TypeError("roll must have type float")
         self._roll = StatArray.StatArray(value, 'Roll', '$^{o}$')
 
     @property
@@ -86,6 +88,7 @@ class CircularLoop(EmLoop):
 
     @yaw.setter
     def yaw(self, value):
+        assert isinstance(value, (StatArray.StatArray, float, np.float64)), TypeError("yaw must have type float")
         self._yaw = StatArray.StatArray(value, 'Yaw', '$^{o}$')
 
     @property
