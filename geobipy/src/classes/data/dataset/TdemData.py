@@ -7,7 +7,7 @@
 
 """
 from copy import deepcopy
-from pandas import read_csv
+from pandas import DataFrame, read_csv
 from ...pointcloud.PointCloud3D import PointCloud3D
 from .Data import Data
 from ..datapoint.TdemDataPoint import TdemDataPoint
@@ -53,13 +53,13 @@ class TdemData(Data):
 
     """
 
-    def __init__(self, systems=None, **kwargs):
+    def __init__(self, system=None, **kwargs):
         """ Initialize the TDEM data """
 
         # if not systems is None:
         #     return
 
-        self.system = systems
+        self.system = system
 
         kwargs['components'] = kwargs.get('components', self.components)
         kwargs['channels_per_system'] = kwargs.get('channels_per_system', self.nTimes)
@@ -86,15 +86,20 @@ class TdemData(Data):
                 # Set the channel names
                 for ic in range(self.n_components):
                     for iTime in range(self.nTimes[i]):
-                        self._channelNames.append('Time {:.3e} s'.format(self.system[i].windows.centre[iTime]))
+                        self._channelNames.append('Time {:.3e}'.format(self.system[i].windows.centre[iTime]))
         else:
             assert all((isinstance(x, str) for x in values))
             assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
             self._channelNames = values
 
-    # @property
-    # def loopOffset(self):
-    #     return self._loopOffset
+    @property
+    def loopOffset(self):
+        offset = np.empty((self.nPoints, 3))
+        for i in range(self.nPoints):
+            offset[i, :] = np.r_[self.receiver[i].x - self.transmitter[i].x,
+                                 self.receiver[i].y - self.transmitter[i].y,
+                                 self.receiver[i].z - self.transmitter[i].z]
+        return offset
 
     # @loopOffset.setter
     # def loopOffset(self, values):
@@ -110,6 +115,24 @@ class TdemData(Data):
     #             self._loopOffset = deepcopy(values)
     #         else:
     #             self._loopOffset = StatArray.StatArray(values, "Loop Offset")
+
+    def _as_dict(self):
+        out, order = super()._as_dict()
+        out['tx_pitch'] = np.squeeze(np.asarray([x.pitch for x in self.transmitter]))
+        out['tx_roll'] = np.squeeze(np.asarray([x.roll for x in self.transmitter]))
+        out['tx_yaw'] = np.squeeze(np.asarray([x.yaw for x in self.transmitter]))
+
+        offset = self.loopOffset
+        for i, label in enumerate(['txrx_dx','txrx_dy','txrx_dz']):
+            out[label] = np.squeeze(offset[:, i])
+
+        out['rx_pitch'] = np.squeeze(np.asarray([x.pitch for x in self.receiver]))
+        out['rx_roll'] = np.squeeze(np.asarray([x.roll for x in self.receiver]))
+        out['rx_yaw'] = np.squeeze(np.asarray([x.yaw for x in self.receiver]))
+
+        order = [*order[:6], 'tx_pitch', 'tx_roll', 'tx_yaw', 'txrx_dx', 'txrx_dy', 'txrx_dz', 'rx_pitch', 'rx_roll', 'rx_yaw', *order[6:]]
+
+        return out, order
 
     @property
     def nTimes(self):
@@ -132,6 +155,17 @@ class TdemData(Data):
             #     self._receiver = values.deepcopy()
             # else:
             self._receiver = values #StatArray.StatArray(values, 'Receiver loops', dtype=CircularLoop)
+
+    @Data.std.getter
+    def std(self):
+        if np.size(self._std, 0) == 0:
+            self._std = StatArray.StatArray((self.nPoints, self.nChannels), "Standard deviation", self.units)
+
+        for i in range(self.nSystems):
+            j = self._systemIndices(i)
+            self._std[:, j] = np.sqrt((self.relative_error[:, i][:, None] * self.data[:, j])**2 + (self.additive_error[:, i]**2.0)[:, None])
+
+        return self._std
 
     @property
     def system(self):
@@ -568,7 +602,7 @@ class TdemData(Data):
                          z=T.z + loopOffset[2],
                          pitch=rloop[0], roll=rloop[1], yaw=rloop[2],
                          radius=self.system[0].loopRadius())
-
+ 
         out = TdemDataPoint(x=data[2], y=data[3], z=data[4], elevation=data[5],
                             data=D, std=S,
                             system=self.system,
@@ -773,8 +807,8 @@ class TdemData(Data):
                 cP.plot(x, self.data[:, i],
                         label=self.channelNames[i], **kwargs)
 
-        box = ax.get_position()
-        ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+        # box = ax.get_position()
+        # ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
 
         # Put a legend to the right of the current axis
         leg = ax.legend(loc='center left',
@@ -942,6 +976,13 @@ class TdemData(Data):
             out.receiver[i] = lTmp[i]
 
         return out
+
+    # def write_csv(self, filename, **kwargs):
+    #     kwargs['na_rep'] = 'nan'
+    #     kwargs['index'] = False
+    #     d, order = self._as_dict()
+    #     df = DataFrame(data=d)
+    #     df.to_csv(filename, **kwargs)
 
     def write(self, fileNames, std=False, predictedData=False):
 
