@@ -66,9 +66,10 @@ Univariate Normal Distribution
 
 
 
-.. image:: /examples/Distributions/images/sphx_glr_plot_distributions_001.png
-    :alt: plot distributions
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Distributions/images/sphx_glr_plot_distributions_001.png
+   :alt: plot distributions
+   :srcset: /examples/Distributions/images/sphx_glr_plot_distributions_001.png
+   :class: sphx-glr-single-img
 
 
 
@@ -98,7 +99,7 @@ Multivariate Normal Distribution
  .. code-block:: none
 
 
-    array([0.56551802, 1.62304052, 3.07721479])
+    array([-0.48283481,  2.20276967, -0.32471909])
 
 
 
@@ -140,7 +141,7 @@ Uniform Distribution
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.150 seconds)
+   **Total running time of the script:** ( 0 minutes  4.759 seconds)
 
 
 .. _sphx_glr_download_examples_Distributions_plot_distributions.py:

@@ -76,9 +76,10 @@ Plot only the grid lines of the mesh
 
 
 
-.. image:: /examples/Meshes/images/sphx_glr_plot_topo_rectilinear_mesh_2d_001.png
-    :alt: plot topo rectilinear mesh 2d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Meshes/images/sphx_glr_plot_topo_rectilinear_mesh_2d_001.png
+   :alt: plot topo rectilinear mesh 2d
+   :srcset: /examples/Meshes/images/sphx_glr_plot_topo_rectilinear_mesh_2d_001.png
+   :class: sphx-glr-single-img
 
 
 
@@ -111,9 +112,10 @@ Create some cell values
 
 
 
-.. image:: /examples/Meshes/images/sphx_glr_plot_topo_rectilinear_mesh_2d_002.png
-    :alt: plot topo rectilinear mesh 2d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Meshes/images/sphx_glr_plot_topo_rectilinear_mesh_2d_002.png
+   :alt: plot topo rectilinear mesh 2d
+   :srcset: /examples/Meshes/images/sphx_glr_plot_topo_rectilinear_mesh_2d_002.png
+   :class: sphx-glr-single-img
 
 
 
@@ -134,9 +136,10 @@ Mask the x axis cells by a distance
 
 
 
-.. image:: /examples/Meshes/images/sphx_glr_plot_topo_rectilinear_mesh_2d_003.png
-    :alt: plot topo rectilinear mesh 2d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Meshes/images/sphx_glr_plot_topo_rectilinear_mesh_2d_003.png
+   :alt: plot topo rectilinear mesh 2d
+   :srcset: /examples/Meshes/images/sphx_glr_plot_topo_rectilinear_mesh_2d_003.png
+   :class: sphx-glr-single-img
 
 
 
@@ -157,9 +160,10 @@ Mask the z axis cells by a distance
 
 
 
-.. image:: /examples/Meshes/images/sphx_glr_plot_topo_rectilinear_mesh_2d_004.png
-    :alt: plot topo rectilinear mesh 2d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Meshes/images/sphx_glr_plot_topo_rectilinear_mesh_2d_004.png
+   :alt: plot topo rectilinear mesh 2d
+   :srcset: /examples/Meshes/images/sphx_glr_plot_topo_rectilinear_mesh_2d_004.png
+   :class: sphx-glr-single-img
 
 
 
@@ -180,9 +184,10 @@ Mask axes by a distance
 
 
 
-.. image:: /examples/Meshes/images/sphx_glr_plot_topo_rectilinear_mesh_2d_005.png
-    :alt: plot topo rectilinear mesh 2d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Meshes/images/sphx_glr_plot_topo_rectilinear_mesh_2d_005.png
+   :alt: plot topo rectilinear mesh 2d
+   :srcset: /examples/Meshes/images/sphx_glr_plot_topo_rectilinear_mesh_2d_005.png
+   :class: sphx-glr-single-img
 
 
 
@@ -209,8 +214,8 @@ Compute the mean over an interval for the mesh.
  .. code-block:: none
 
 
-    (array([[0.57518886, 0.49029993, 0.64559199, ..., 0.65733809, 0.69144853,
-            0.57689676]]), [6.8, 12.4])
+    (array([[0.34869875, 0.44516482, 0.44740629, ..., 0.49652778, 0.34912802,
+            0.54045309]]), [6.8, 12.4])
 
 
 
@@ -275,8 +280,8 @@ Compute the mean over multiple intervals for the mesh.
  .. code-block:: none
 
 
-    (array([[0.57518886, 0.49029993, 0.64559199, ..., 0.65733809, 0.69144853,
-            0.57689676]]), [6.8, 12.4])
+    (array([[0.34869875, 0.44516482, 0.44740629, ..., 0.49652778, 0.34912802,
+            0.54045309]]), [6.8, 12.4])
 
 
 
@@ -300,9 +305,10 @@ Compute the mean over multiple intervals for the mesh.
 
 
 
-.. image:: /examples/Meshes/images/sphx_glr_plot_topo_rectilinear_mesh_2d_006.png
-    :alt: plot topo rectilinear mesh 2d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Meshes/images/sphx_glr_plot_topo_rectilinear_mesh_2d_006.png
+   :alt: plot topo rectilinear mesh 2d
+   :srcset: /examples/Meshes/images/sphx_glr_plot_topo_rectilinear_mesh_2d_006.png
+   :class: sphx-glr-single-img
 
 
 
@@ -327,7 +333,7 @@ rm.toVTK('test', cellData=values)
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.602 seconds)
+   **Total running time of the script:** ( 0 minutes  0.664 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_topo_rectilinear_mesh_2d.py:

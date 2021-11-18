@@ -128,9 +128,10 @@ Update the histogram counts
 
 
 
-.. image:: /examples/Statistics/images/sphx_glr_plot_histogram_2d_001.png
-    :alt: 2D Histogram
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Statistics/images/sphx_glr_plot_histogram_2d_001.png
+   :alt: 2D Histogram
+   :srcset: /examples/Statistics/images/sphx_glr_plot_histogram_2d_001.png
+   :class: sphx-glr-single-img
 
 
 
@@ -174,9 +175,10 @@ Note that the names of the variables are automatically displayed
 
 
 
-.. image:: /examples/Statistics/images/sphx_glr_plot_histogram_2d_002.png
-    :alt: Marginals along each axis
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Statistics/images/sphx_glr_plot_histogram_2d_002.png
+   :alt: Marginals along each axis
+   :srcset: /examples/Statistics/images/sphx_glr_plot_histogram_2d_002.png
+   :class: sphx-glr-single-img
 
 
 
@@ -198,9 +200,10 @@ sphinx_gallery_thumbnail_number = 3
 
 
 
-.. image:: /examples/Statistics/images/sphx_glr_plot_histogram_2d_003.png
-    :alt: plot histogram 2d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Statistics/images/sphx_glr_plot_histogram_2d_003.png
+   :alt: plot histogram 2d
+   :srcset: /examples/Statistics/images/sphx_glr_plot_histogram_2d_003.png
+   :class: sphx-glr-single-img
 
 
 
@@ -224,9 +227,10 @@ We can overlay the histogram with its credible intervals
 
 
 
-.. image:: /examples/Statistics/images/sphx_glr_plot_histogram_2d_004.png
-    :alt: 90% credible intervals overlain
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Statistics/images/sphx_glr_plot_histogram_2d_004.png
+   :alt: 90% credible intervals overlain
+   :srcset: /examples/Statistics/images/sphx_glr_plot_histogram_2d_004.png
+   :class: sphx-glr-single-img
 
 
 
@@ -274,9 +278,10 @@ Take the mean or median estimates from the histogram
 
 
 
-.. image:: /examples/Statistics/images/sphx_glr_plot_histogram_2d_005.png
-    :alt: Mean, median, and credible interval overlain
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Statistics/images/sphx_glr_plot_histogram_2d_005.png
+   :alt: Mean, median, and credible interval overlain
+   :srcset: /examples/Statistics/images/sphx_glr_plot_histogram_2d_005.png
+   :class: sphx-glr-single-img
 
 
 .. rst-class:: sphx-glr-script-out
@@ -286,7 +291,7 @@ Take the mean or median estimates from the histogram
  .. code-block:: none
 
 
-    <matplotlib.legend.Legend object at 0x15d07da60>
+    <matplotlib.legend.Legend object at 0x7fe8c1b80bb0>
 
 
 
@@ -312,110 +317,110 @@ Get the range between credible intervals
  .. code-block:: none
 
 
-    StatArray([[-5.49494949],
-               [-3.87878788],
-               [-3.55555556],
-               [-4.60606061],
-               [-2.98989899],
-               [-3.23232323],
-               [-2.98989899],
-               [-3.55555556],
-               [-4.04040404],
+    StatArray([[-3.23232323],
                [-3.47474747],
-               [-3.87878788],
-               [-3.87878788],
-               [-3.95959596],
-               [-4.04040404],
-               [-3.63636364],
-               [-3.87878788],
-               [-4.04040404],
-               [-4.12121212],
-               [-3.7979798 ],
-               [-4.12121212],
-               [-3.87878788],
-               [-3.7979798 ],
-               [-3.95959596],
-               [-3.95959596],
-               [-4.04040404],
-               [-3.95959596],
-               [-3.87878788],
-               [-3.87878788],
-               [-3.95959596],
-               [-3.95959596],
-               [-3.95959596],
-               [-3.95959596],
-               [-3.87878788],
-               [-3.87878788],
-               [-3.87878788],
-               [-3.95959596],
-               [-3.95959596],
-               [-3.87878788],
-               [-3.87878788],
-               [-3.95959596],
-               [-3.87878788],
-               [-3.87878788],
-               [-3.87878788],
-               [-3.87878788],
-               [-3.87878788],
-               [-3.95959596],
-               [-3.87878788],
-               [-3.95959596],
-               [-3.87878788],
-               [-3.87878788],
-               [-3.87878788],
-               [-3.87878788],
-               [-3.95959596],
-               [-3.87878788],
-               [-3.95959596],
-               [-3.95959596],
-               [-3.87878788],
-               [-3.95959596],
-               [-3.87878788],
-               [-3.87878788],
-               [-3.87878788],
-               [-3.95959596],
-               [-3.87878788],
-               [-3.87878788],
-               [-3.87878788],
-               [-3.87878788],
-               [-3.87878788],
-               [-3.87878788],
-               [-3.87878788],
-               [-3.95959596],
-               [-3.95959596],
-               [-3.87878788],
-               [-3.87878788],
-               [-3.95959596],
-               [-4.04040404],
-               [-3.87878788],
-               [-3.87878788],
-               [-3.87878788],
-               [-3.87878788],
-               [-4.04040404],
-               [-3.95959596],
-               [-3.95959596],
-               [-3.95959596],
-               [-3.71717172],
-               [-4.04040404],
-               [-3.87878788],
-               [-3.95959596],
-               [-4.04040404],
                [-3.55555556],
-               [-4.2020202 ],
-               [-3.7979798 ],
-               [-4.2020202 ],
-               [-3.95959596],
-               [-4.12121212],
-               [-3.95959596],
-               [-3.7979798 ],
-               [-3.15151515],
+               [-3.55555556],
                [-3.63636364],
-               [-3.71717172],
-               [-4.60606061],
-               [-2.90909091],
+               [-2.58585859],
+               [-3.95959596],
+               [-3.95959596],
+               [-3.7979798 ],
+               [-3.95959596],
                [-4.04040404],
+               [-4.36363636],
+               [-3.7979798 ],
+               [-3.87878788],
+               [-3.87878788],
+               [-3.87878788],
+               [-3.71717172],
+               [-3.87878788],
+               [-3.87878788],
+               [-4.04040404],
+               [-3.95959596],
+               [-3.87878788],
+               [-4.04040404],
+               [-4.04040404],
+               [-3.95959596],
+               [-3.87878788],
+               [-3.95959596],
+               [-3.87878788],
+               [-4.04040404],
+               [-3.87878788],
+               [-3.87878788],
+               [-3.95959596],
+               [-3.95959596],
+               [-3.87878788],
+               [-3.95959596],
+               [-3.87878788],
+               [-3.87878788],
+               [-3.87878788],
+               [-3.87878788],
+               [-3.87878788],
+               [-3.87878788],
+               [-3.87878788],
+               [-3.95959596],
+               [-3.95959596],
+               [-3.87878788],
+               [-3.95959596],
+               [-3.95959596],
+               [-3.87878788],
+               [-3.95959596],
+               [-3.95959596],
+               [-3.87878788],
+               [-3.87878788],
+               [-4.04040404],
+               [-3.87878788],
+               [-3.87878788],
+               [-3.87878788],
+               [-3.87878788],
+               [-3.95959596],
+               [-3.95959596],
+               [-3.95959596],
+               [-3.87878788],
+               [-3.87878788],
+               [-3.87878788],
+               [-3.95959596],
+               [-3.95959596],
+               [-3.87878788],
+               [-3.87878788],
+               [-3.87878788],
+               [-3.87878788],
+               [-3.87878788],
+               [-3.87878788],
+               [-3.95959596],
+               [-3.95959596],
+               [-4.04040404],
+               [-3.87878788],
+               [-3.95959596],
+               [-4.04040404],
+               [-3.87878788],
+               [-4.04040404],
+               [-3.87878788],
+               [-3.7979798 ],
+               [-3.87878788],
+               [-3.87878788],
+               [-3.87878788],
+               [-4.04040404],
+               [-3.87878788],
+               [-3.87878788],
+               [-3.87878788],
+               [-4.12121212],
+               [-3.7979798 ],
                [-3.47474747],
-               [-3.71717172]])
+               [-3.7979798 ],
+               [-3.63636364],
+               [-3.63636364],
+               [-4.2020202 ],
+               [-3.31313131],
+               [-4.04040404],
+               [-3.87878788],
+               [-4.12121212],
+               [-4.44444444],
+               [-3.7979798 ],
+               [-3.55555556],
+               [-4.44444444],
+               [-3.87878788]])
 
 
 
@@ -464,9 +469,10 @@ We can map the credible range to an opacity or transparency
 
 
 
-.. image:: /examples/Statistics/images/sphx_glr_plot_histogram_2d_006.png
-    :alt: plot histogram 2d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Statistics/images/sphx_glr_plot_histogram_2d_006.png
+   :alt: plot histogram 2d
+   :srcset: /examples/Statistics/images/sphx_glr_plot_histogram_2d_006.png
+   :class: sphx-glr-single-img
 
 
 
@@ -475,7 +481,7 @@ We can map the credible range to an opacity or transparency
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.949 seconds)
+   **Total running time of the script:** ( 0 minutes  6.168 seconds)
 
 
 .. _sphx_glr_download_examples_Statistics_plot_histogram_2d.py:

@@ -8,10 +8,10 @@
       <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../../_static/gallery.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../../_static/gallery-binder.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../../_static/gallery-dataframe.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../../_static/gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../_static/sg_gallery-rendered-html.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -115,7 +115,7 @@ size=&quot;8.0, 12.0&quot;;
 }
 <span class="target" id="module-geobipy.src.classes.data.datapoint.EmDataPoint"></span><dl class="py class">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.data.datapoint.EmDataPoint.</span></span><span class="sig-name descname"><span class="pre">EmDataPoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels_per_system</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">components_per_channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictedData</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channelNames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lineNumber</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fiducial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.data.datapoint.EmDataPoint.</span></span><span class="sig-name descname"><span class="pre">EmDataPoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">components</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels_per_system</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictedData</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channelNames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lineNumber</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fiducial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint" title="Permalink to this definition"></a></dt>
 <dd><p>Abstract EmDataPoint Class</p>
 <p>This is an abstract base class for TdemDataPoint and FdemDataPoint classes</p>
 <div class="admonition seealso">
@@ -161,7 +161,7 @@ The profile of data misfit vs halfspace conductivity is not quadratic, so a bise
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.perturb">
-<span class="sig-name descname"><span class="pre">perturb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relativeError</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additiveError</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.perturb" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">perturb</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.perturb" title="Permalink to this definition"></a></dt>
 <dd><p>Propose a new EM data point given the specified attached propsal distributions</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -203,6 +203,12 @@ The profile of data misfit vs halfspace conductivity is not quadratic, so a bise
 </dl>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.predictedData">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">predictedData</span></span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.predictedData" title="Permalink to this definition"></a></dt>
+<dd><p>The predicted data.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.priorProbability">
 <span class="sig-name descname"><span class="pre">priorProbability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rErr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aErr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.priorProbability" title="Permalink to this definition"></a></dt>
@@ -234,18 +240,18 @@ The profile of data misfit vs halfspace conductivity is not quadratic, so a bise
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setErrorPosterior">
-<span class="sig-name descname"><span class="pre">setErrorPosterior</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setErrorPosterior" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.set_additive_error_posterior">
+<span class="sig-name descname"><span class="pre">set_additive_error_posterior</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.set_additive_error_posterior" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setHeightPosterior">
-<span class="sig-name descname"><span class="pre">setHeightPosterior</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setHeightPosterior" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.set_height_posterior">
+<span class="sig-name descname"><span class="pre">set_height_posterior</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.set_height_posterior" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setPosteriors">
-<span class="sig-name descname"><span class="pre">setPosteriors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setPosteriors" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.set_posteriors">
+<span class="sig-name descname"><span class="pre">set_posteriors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.set_posteriors" title="Permalink to this definition"></a></dt>
 <dd><p>Set the posteriors based on the attached priors</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -255,8 +261,27 @@ The profile of data misfit vs halfspace conductivity is not quadratic, so a bise
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setProposals">
-<span class="sig-name descname"><span class="pre">setProposals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">heightProposal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relativeErrorProposal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additiveErrorProposal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.setProposals" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.set_priors">
+<span class="sig-name descname"><span class="pre">set_priors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">height_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative_error_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additive_error_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.set_priors" title="Permalink to this definition"></a></dt>
+<dd><p>Set the priors on the datapoint’s perturbable parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>heightPrior</strong> (<em>geobipy.baseDistribution</em><em>, </em><em>optional</em>) – The prior to attach to the height. Must be univariate</p></li>
+<li><p><strong>relativeErrorPrior</strong> (<em>geobipy.baseDistribution</em><em>, </em><em>optional</em>) – The prior to attach to the relative error.
+If the datapoint has only one system, relativeErrorPrior is univariate.
+If there are more than one system, relativeErrorPrior is multivariate.</p></li>
+<li><p><strong>additiveErrorPrior</strong> (<em>geobipy.baseDistribution</em><em>, </em><em>optional</em>) – The prior to attach to the relative error.
+If the datapoint has only one system, additiveErrorPrior is univariate.
+If there are more than one system, additiveErrorPrior is multivariate.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.set_proposals">
+<span class="sig-name descname"><span class="pre">set_proposals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">height_proposal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative_error_proposal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additive_error_proposal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.set_proposals" title="Permalink to this definition"></a></dt>
 <dd><p>Set the proposals on the datapoint’s perturbable parameters</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -274,23 +299,9 @@ If there are more than one system, additiveErrorProposal is multivariate.</p></l
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.set_priors">
-<span class="sig-name descname"><span class="pre">set_priors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">height_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative_error_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additive_error_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.set_priors" title="Permalink to this definition"></a></dt>
-<dd><p>Set the priors on the datapoint’s perturbable parameters</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>heightPrior</strong> (<em>geobipy.baseDistribution</em><em>, </em><em>optional</em>) – The prior to attach to the height. Must be univariate</p></li>
-<li><p><strong>relativeErrorPrior</strong> (<em>geobipy.baseDistribution</em><em>, </em><em>optional</em>) – The prior to attach to the relative error.
-If the datapoint has only one system, relativeErrorPrior is univariate.
-If there are more than one system, relativeErrorPrior is multivariate.</p></li>
-<li><p><strong>additiveErrorPrior</strong> (<em>geobipy.baseDistribution</em><em>, </em><em>optional</em>) – The prior to attach to the relative error.
-If the datapoint has only one system, additiveErrorPrior is univariate.
-If there are more than one system, additiveErrorPrior is multivariate.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
+<dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.set_relative_error_posterior">
+<span class="sig-name descname"><span class="pre">set_relative_error_posterior</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.set_relative_error_posterior" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint.summary">

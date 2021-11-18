@@ -44,16 +44,23 @@ Tempest dataset
 Reading in the Data
 +++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 18-25
+.. GENERATED FROM PYTHON SOURCE LINES 18-32
 
 .. code-block:: default
 
     dataFolder = "..//supplementary//Data//"
 
-    # The data file name
-    dataFiles = dataFolder + 'Tempest.nc'
-    # The EM system file name
-    systemFiles = dataFolder + 'Tempest.stm'
+    # # The data file name
+    # dataFiles = dataFolder + 'Tempest.nc'
+    # # The EM system file name
+    # systemFiles = dataFolder + 'Tempest.stm'
+
+    # ################################################################################
+    # # Read in the data from file
+    # TD = TempestData.read_netcdf(dataFiles, systemFiles)
+
+    # TD.write_csv(dataFolder + 'Tempest.csv')
+    TD = TempestData.read_csv(dataFolder + 'Tempest.csv', system_filename=dataFolder + 'Tempest.stm')
 
 
 
@@ -62,36 +69,11 @@ Reading in the Data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 26-27
-
-Read in the data from file
-
-.. GENERATED FROM PYTHON SOURCE LINES 27-29
-
-.. code-block:: default
-
-    TD = TempestData.read_netcdf(dataFiles, systemFiles)
-
-
-
-
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-    Warning: Your data contains values that are <= 0.0
-
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 30-31
+.. GENERATED FROM PYTHON SOURCE LINES 33-34
 
 Plot the locations of the data points
 
-.. GENERATED FROM PYTHON SOURCE LINES 31-35
+.. GENERATED FROM PYTHON SOURCE LINES 34-38
 
 .. code-block:: default
 
@@ -102,9 +84,10 @@ Plot the locations of the data points
 
 
 
-.. image:: /examples/Data/images/sphx_glr_plot_tempest_dataset_001.png
-    :alt: Scatter plot
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Data/images/sphx_glr_plot_tempest_dataset_001.png
+   :alt: Scatter plot
+   :srcset: /examples/Data/images/sphx_glr_plot_tempest_dataset_001.png
+   :class: sphx-glr-single-img
 
 
 .. rst-class:: sphx-glr-script-out
@@ -113,29 +96,32 @@ Plot the locations of the data points
 
  .. code-block:: none
 
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/utilities.py:865: RuntimeWarning: invalid value encountered in true_divide
+      equalized = (equalized - a1) / (a2 - a1)
 
     Text(0.5, 1.0, 'Scatter plot')
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 36-37
+.. GENERATED FROM PYTHON SOURCE LINES 39-40
 
 Plot all the data along the specified line
 
-.. GENERATED FROM PYTHON SOURCE LINES 37-41
+.. GENERATED FROM PYTHON SOURCE LINES 40-44
 
 .. code-block:: default
 
     plt.figure(figsize=(8,6))
-    _ = TD.plotLine(225401.0)
+    _ = TD.plotLine(0.0)
     plt.title('Line {}'.format(225401.0))
 
 
 
 
-.. image:: /examples/Data/images/sphx_glr_plot_tempest_dataset_002.png
-    :alt: Line 225401.0
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Data/images/sphx_glr_plot_tempest_dataset_002.png
+   :alt: Line 225401.0
+   :srcset: /examples/Data/images/sphx_glr_plot_tempest_dataset_002.png
+   :class: sphx-glr-single-img
 
 
 .. rst-class:: sphx-glr-script-out
@@ -149,24 +135,25 @@ Plot all the data along the specified line
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 42-43
+.. GENERATED FROM PYTHON SOURCE LINES 45-46
 
 Or, plot specific channels in the data
 
-.. GENERATED FROM PYTHON SOURCE LINES 43-47
+.. GENERATED FROM PYTHON SOURCE LINES 46-50
 
 .. code-block:: default
 
     plt.figure(figsize=(8,6))
-    _ = TD.plot(system=0, channels=[17, 18, 19])
+    _ = TD.plot(system=0, channels=[0, 6, 18])
     plt.title("3 channels of data")
 
 
 
 
-.. image:: /examples/Data/images/sphx_glr_plot_tempest_dataset_003.png
-    :alt: 3 channels of data
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Data/images/sphx_glr_plot_tempest_dataset_003.png
+   :alt: 3 channels of data
+   :srcset: /examples/Data/images/sphx_glr_plot_tempest_dataset_003.png
+   :class: sphx-glr-single-img
 
 
 .. rst-class:: sphx-glr-script-out
@@ -180,7 +167,7 @@ Or, plot specific channels in the data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 48-52
+.. GENERATED FROM PYTHON SOURCE LINES 51-55
 
 .. code-block:: default
 
@@ -191,9 +178,10 @@ Or, plot specific channels in the data
 
 
 
-.. image:: /examples/Data/images/sphx_glr_plot_tempest_dataset_004.png
-    :alt: Data as an array
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Data/images/sphx_glr_plot_tempest_dataset_004.png
+   :alt: Data as an array
+   :srcset: /examples/Data/images/sphx_glr_plot_tempest_dataset_004.png
+   :class: sphx-glr-single-img
 
 
 .. rst-class:: sphx-glr-script-out
@@ -207,21 +195,22 @@ Or, plot specific channels in the data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 53-58
+.. GENERATED FROM PYTHON SOURCE LINES 56-61
 
 .. code-block:: default
 
     plt.figure()
-    ax = TD.scatter2D(s=1.0, c=TD.dataChannel(system=0, channel=10), equalize=True)
+    ax = TD.scatter2D(s=1.0, c=TD.data[:, TD.channel_index(system=0, channel=10)], equalize=True)
     plt.axis('equal')
     plt.title("scatter plot of specific channel")
 
 
 
 
-.. image:: /examples/Data/images/sphx_glr_plot_tempest_dataset_005.png
-    :alt: scatter plot of specific channel
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Data/images/sphx_glr_plot_tempest_dataset_005.png
+   :alt: scatter plot of specific channel
+   :srcset: /examples/Data/images/sphx_glr_plot_tempest_dataset_005.png
+   :class: sphx-glr-single-img
 
 
 .. rst-class:: sphx-glr-script-out
@@ -230,27 +219,25 @@ Or, plot specific channels in the data
 
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/utilities.py:793: RuntimeWarning: invalid value encountered in true_divide
-      equalized = (equalized - a1) / (a2 - a1)
 
     Text(0.5, 1.0, 'scatter plot of specific channel')
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 59-60
+.. GENERATED FROM PYTHON SOURCE LINES 62-63
 
 TD.toVTK('TD1', format='binary')
 
-.. GENERATED FROM PYTHON SOURCE LINES 63-65
+.. GENERATED FROM PYTHON SOURCE LINES 66-68
 
 Obtain a line from the data set
 +++++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 65-67
+.. GENERATED FROM PYTHON SOURCE LINES 68-70
 
 .. code-block:: default
 
-    line = TD.line(225401.0)
+    line = TD.line(0.0)
 
 
 
@@ -259,20 +246,21 @@ Obtain a line from the data set
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 68-72
+.. GENERATED FROM PYTHON SOURCE LINES 71-75
 
 .. code-block:: default
 
     plt.figure()
-    _ = line.scatter2D(c = line.dataChannel(10))
+    _ = line.scatter2D()
     plt.title('Channel')
 
 
 
 
-.. image:: /examples/Data/images/sphx_glr_plot_tempest_dataset_006.png
-    :alt: Channel
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Data/images/sphx_glr_plot_tempest_dataset_006.png
+   :alt: Channel
+   :srcset: /examples/Data/images/sphx_glr_plot_tempest_dataset_006.png
+   :class: sphx-glr-single-img
 
 
 .. rst-class:: sphx-glr-script-out
@@ -286,44 +274,23 @@ Obtain a line from the data set
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 73-78
+.. GENERATED FROM PYTHON SOURCE LINES 76-81
 
 .. code-block:: default
 
     plt.figure()
-    _ = line.plot(xAxis='x', log=10)
+    _ = line.plot(xAxis='index', log=10)
     plt.title("All data along line")
 
     plt.show()
 
 
 
-.. image:: /examples/Data/images/sphx_glr_plot_tempest_dataset_007.png
-    :alt: All data along line
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Data/images/sphx_glr_plot_tempest_dataset_007.png
+   :alt: All data along line
+   :srcset: /examples/Data/images/sphx_glr_plot_tempest_dataset_007.png
+   :class: sphx-glr-single-img
 
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-    Values <= 0.0 have been masked before taking their log
-    Values <= 0.0 have been masked before taking their log
-    Values <= 0.0 have been masked before taking their log
-    Values <= 0.0 have been masked before taking their log
-    Values <= 0.0 have been masked before taking their log
-    Values <= 0.0 have been masked before taking their log
-    Values <= 0.0 have been masked before taking their log
-    Values <= 0.0 have been masked before taking their log
-    Values <= 0.0 have been masked before taking their log
-    Values <= 0.0 have been masked before taking their log
-    Values <= 0.0 have been masked before taking their log
-    Values <= 0.0 have been masked before taking their log
-    Values <= 0.0 have been masked before taking their log
-    Values <= 0.0 have been masked before taking their log
-    Values <= 0.0 have been masked before taking their log
 
 
 
@@ -331,7 +298,7 @@ Obtain a line from the data set
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  5.945 seconds)
+   **Total running time of the script:** ( 0 minutes  3.862 seconds)
 
 
 .. _sphx_glr_download_examples_Data_plot_tempest_dataset.py:

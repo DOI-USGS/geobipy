@@ -82,9 +82,10 @@ We can plot the grid lines of the mesh.
 
 
 
-.. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_001.png
-    :alt: plot rectilinear mesh 2d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_001.png
+   :alt: plot rectilinear mesh 2d
+   :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_001.png
+   :class: sphx-glr-single-img
 
 
 
@@ -149,9 +150,10 @@ Plot the x-y coordinates of the mesh
 
 
 
-.. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_002.png
-    :alt: plot rectilinear mesh 2d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_002.png
+   :alt: plot rectilinear mesh 2d
+   :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_002.png
+   :class: sphx-glr-single-img
 
 
 
@@ -171,9 +173,10 @@ Again, plot the grid. This time the z-coordinate dominates the plot.
 
 
 
-.. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_003.png
-    :alt: plot rectilinear mesh 2d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_003.png
+   :alt: plot rectilinear mesh 2d
+   :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_003.png
+   :class: sphx-glr-single-img
 
 
 
@@ -210,9 +213,10 @@ We can pcolor the mesh by providing cell values.
 
 
 
-.. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_004.png
-    :alt: plot rectilinear mesh 2d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_004.png
+   :alt: plot rectilinear mesh 2d
+   :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_004.png
+   :class: sphx-glr-single-img
 
 
 
@@ -233,9 +237,10 @@ Mask the x axis cells by a distance
 
 
 
-.. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_005.png
-    :alt: plot rectilinear mesh 2d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_005.png
+   :alt: plot rectilinear mesh 2d
+   :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_005.png
+   :class: sphx-glr-single-img
 
 
 
@@ -256,9 +261,10 @@ Mask the z axis cells by a distance
 
 
 
-.. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_006.png
-    :alt: plot rectilinear mesh 2d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_006.png
+   :alt: plot rectilinear mesh 2d
+   :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_006.png
+   :class: sphx-glr-single-img
 
 
 
@@ -279,9 +285,10 @@ Mask axes by a distance
 
 
 
-.. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_007.png
-    :alt: plot rectilinear mesh 2d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_007.png
+   :alt: plot rectilinear mesh 2d
+   :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_007.png
+   :class: sphx-glr-single-img
 
 
 
@@ -436,9 +443,10 @@ Slice the 2D mesh to retrieve either a 2D mesh or 1D mesh
 
 
 
-.. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_008.png
-    :alt: plot rectilinear mesh 2d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_008.png
+   :alt: plot rectilinear mesh 2d
+   :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_008.png
+   :class: sphx-glr-single-img
 
 
 
@@ -466,9 +474,10 @@ Resample a grid
 
 
 
-.. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_009.png
-    :alt: plot rectilinear mesh 2d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_009.png
+   :alt: plot rectilinear mesh 2d
+   :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_009.png
+   :class: sphx-glr-single-img
 
 
 .. rst-class:: sphx-glr-script-out
@@ -478,7 +487,7 @@ Resample a grid
  .. code-block:: none
 
 
-    (<AxesSubplot:xlabel='Easting (m)', ylabel='Depth (m)'>, <matplotlib.collections.QuadMesh object at 0x15cef6160>, <matplotlib.colorbar.Colorbar object at 0x15d88d2e0>)
+    (<AxesSubplot:xlabel='Easting (m)', ylabel='Depth (m)'>, <matplotlib.collections.QuadMesh object at 0x7fe86112b640>, <matplotlib.colorbar.Colorbar object at 0x7fe8704cfa90>)
 
 
 
@@ -516,9 +525,10 @@ We can plot the grid lines of the mesh.
 
 
 
-.. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_010.png
-    :alt: plot rectilinear mesh 2d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_010.png
+   :alt: plot rectilinear mesh 2d
+   :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_010.png
+   :class: sphx-glr-single-img
 
 
 
@@ -571,9 +581,10 @@ rm.pcolor(values = arr)
 
 
 
-.. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_011.png
-    :alt: plot rectilinear mesh 2d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_011.png
+   :alt: plot rectilinear mesh 2d
+   :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_011.png
+   :class: sphx-glr-single-img
 
 
 
@@ -582,7 +593,7 @@ rm.pcolor(values = arr)
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.314 seconds)
+   **Total running time of the script:** ( 0 minutes  1.521 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_2d.py:

@@ -80,7 +80,7 @@ We can read in a dataset and pull datapoints from it.
 
 For more information about the time domain data set, see :ref:`Time domain dataset`
 
-.. GENERATED FROM PYTHON SOURCE LINES 52-58
+.. GENERATED FROM PYTHON SOURCE LINES 52-69
 
 .. code-block:: default
 
@@ -91,24 +91,23 @@ For more information about the time domain data set, see :ref:`Time domain datas
     systemFile = dataFolder + 'Tempest.stm'
 
 
+    # Prepare the dataset so that we can read a point at a time.
+    Dataset = TempestData._initialize_sequential_reading(dataFile, systemFile)
+    # Get a datapoint from the file.
+    tdp = Dataset._read_record(0)
+
+
+    plt.figure()
+    tdp.plot()
 
 
 
 
 
-
-.. GENERATED FROM PYTHON SOURCE LINES 59-60
-
-Initialize and read an EM data set
-
-.. GENERATED FROM PYTHON SOURCE LINES 60-62
-
-.. code-block:: default
-
-    D = TempestData.read_netcdf(dataFile, systemFile)
-
-
-
+.. image-sg:: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_001.png
+   :alt: Time Domain EM Data
+   :srcset: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_001.png
+   :class: sphx-glr-single-img
 
 
 .. rst-class:: sphx-glr-script-out
@@ -117,47 +116,26 @@ Initialize and read an EM data set
 
  .. code-block:: none
 
-    Warning: Your data contains values that are <= 0.0
+
+    <AxesSubplot:title={'center':'Time Domain EM Data'}, xlabel='Time (s)', ylabel='Data (fT)'>
 
 
 
-
-.. GENERATED FROM PYTHON SOURCE LINES 63-64
-
-Get a datapoint from the dataset
-
-.. GENERATED FROM PYTHON SOURCE LINES 64-70
-
-.. code-block:: default
-
-    tdp = D.datapoint(0)
-
-    # plt.figure()
-    # tdp.plot()
-
-
-
-
-
-
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 71-73
+.. GENERATED FROM PYTHON SOURCE LINES 70-72
 
 Using a time domain datapoint
 +++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 75-76
+.. GENERATED FROM PYTHON SOURCE LINES 74-75
 
 We can define a 1D layered earth model, and use it to predict some data
 
-.. GENERATED FROM PYTHON SOURCE LINES 76-79
+.. GENERATED FROM PYTHON SOURCE LINES 75-78
 
 .. code-block:: default
 
-    par = StatArray(np.r_[500.0, 20.0], "Conductivity", "$\frac{S}{m}$")
-    mod = Model1D(edges=np.r_[0, 75.0, np.inf], parameters=par)
+    par = StatArray(np.r_[1/50.0, 1/100.0, 1/1000.0, 1/5.0, 1/1000.0, 1/800.0], "Conductivity", "$\frac{S}{m}$")
+    mod = Model1D(edges=np.r_[0, 20.0, 50.0, 100.0, 150.0, 250.0, np.inf], parameters=par)
 
 
 
@@ -166,11 +144,11 @@ We can define a 1D layered earth model, and use it to predict some data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 80-81
+.. GENERATED FROM PYTHON SOURCE LINES 79-80
 
 Forward model the data
 
-.. GENERATED FROM PYTHON SOURCE LINES 81-83
+.. GENERATED FROM PYTHON SOURCE LINES 80-82
 
 .. code-block:: default
 
@@ -183,13 +161,13 @@ Forward model the data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 84-93
+.. GENERATED FROM PYTHON SOURCE LINES 83-92
 
 .. code-block:: default
 
     plt.figure()
     plt.subplot(121)
-    _ = mod.pcolor()
+    _ = mod.pcolor(transpose=True)
     plt.subplot(122)
     _ = tdp.plot()
     _ = tdp.plotPredicted()
@@ -199,9 +177,10 @@ Forward model the data
 
 
 
-.. image:: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_001.png
-    :alt: Model and response, Time Domain EM Data
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_002.png
+   :alt: Model and response, Time Domain EM Data
+   :srcset: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_002.png
+   :class: sphx-glr-single-img
 
 
 .. rst-class:: sphx-glr-script-out
@@ -215,38 +194,17 @@ Forward model the data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 94-98
+.. GENERATED FROM PYTHON SOURCE LINES 93-96
 
-.. code-block:: default
+plt.figure()
+tdp.plotDataResidual(xscale='log')
+plt.title('data residual')
 
-    plt.figure()
-    tdp.plotDataResidual(xscale='log')
-    plt.title('data residual')
-
-
-
-
-.. image:: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_002.png
-    :alt: data residual
-    :class: sphx-glr-single-img
-
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-
-    Text(0.5, 1.0, 'data residual')
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 99-100
+.. GENERATED FROM PYTHON SOURCE LINES 98-99
 
 Compute the sensitivity matrix for a given model
 
-.. GENERATED FROM PYTHON SOURCE LINES 100-104
+.. GENERATED FROM PYTHON SOURCE LINES 99-103
 
 .. code-block:: default
 
@@ -257,26 +215,33 @@ Compute the sensitivity matrix for a given model
 
 
 
-.. image:: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_003.png
-    :alt: plot tempest datapoint
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_003.png
+   :alt: plot tempest datapoint
+   :srcset: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_003.png
+   :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 105-109
+.. GENERATED FROM PYTHON SOURCE LINES 104-108
 
 Attaching statistical descriptors to the datapoint
 ++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Define a multivariate log normal distribution as the prior on the predicted data.
+Set relative errors for the primary fields, and secondary fields.
 
-.. GENERATED FROM PYTHON SOURCE LINES 109-111
+.. GENERATED FROM PYTHON SOURCE LINES 108-116
 
 .. code-block:: default
 
-    tdp.predictedData.set_prior('MvLogNormal', tdp.data[tdp.active], tdp.std[tdp.active]**2.0)
+    tdp.relErr = np.r_[0.01, 0.05]
+
+    # Set the additive errors for
+    tdp.addErr = np.hstack([[0.011474, 0.012810, 0.008507, 0.005154, 0.004742, 0.004477, 0.004168, 0.003539, 0.003352, 0.003213, 0.003161, 0.003122, 0.002587, 0.002038, 0.002201],
+                           [0.007383, 0.005693, 0.005178, 0.003659, 0.003426, 0.003046, 0.003095, 0.003247, 0.002775, 0.002627, 0.002460, 0.002178, 0.001754, 0.001405, 0.001283]])
+    # Define a multivariate log normal distribution as the prior on the predicted data.
+    tdp.predictedData.prior = Distribution('MvLogNormal', tdp.data[tdp.active], tdp.std[tdp.active]**2.0)
 
 
 
@@ -285,11 +250,11 @@ Define a multivariate log normal distribution as the prior on the predicted data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 112-113
+.. GENERATED FROM PYTHON SOURCE LINES 117-118
 
 This allows us to evaluate the likelihood of the predicted data
 
-.. GENERATED FROM PYTHON SOURCE LINES 113-117
+.. GENERATED FROM PYTHON SOURCE LINES 118-122
 
 .. code-block:: default
 
@@ -307,40 +272,32 @@ This allows us to evaluate the likelihood of the predicted data
 
  .. code-block:: none
 
-    -139.95785764810176
-    14.992644973583653
+    -158.94319013150562
+    17.302474406320894
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 118-119
+.. GENERATED FROM PYTHON SOURCE LINES 123-124
 
-We can perform a quick search for the best fitting half space
+Plot the misfits for a range of half space conductivities
 
-.. GENERATED FROM PYTHON SOURCE LINES 119-133
+.. GENERATED FROM PYTHON SOURCE LINES 124-129
 
 .. code-block:: default
 
-    halfspace = tdp.find_best_halfspace()
-    print('Best half space conductivity is {} $S/m$'.format(halfspace.par))
     plt.figure()
-    _ = tdp.plot()
-    _ = tdp.plotPredicted()
+    plt.subplot(1, 2, 1)
+    _ = tdp.plotHalfSpaceResponses(-6.0, 4.0, 200)
+    plt.title("Halfspace responses")
 
 
 
 
-
-
-
-
-
-    plt.show()
-
-
-.. image:: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_004.png
-    :alt: Time Domain EM Data
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_004.png
+   :alt: Halfspace responses
+   :srcset: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_004.png
+   :class: sphx-glr-single-img
 
 
 .. rst-class:: sphx-glr-script-out
@@ -349,7 +306,126 @@ We can perform a quick search for the best fitting half space
 
  .. code-block:: none
 
-    Best half space conductivity is [0.17073526] $S/m$
+
+    Text(0.5, 1.0, 'Halfspace responses')
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 130-131
+
+We can perform a quick search for the best fitting half space
+
+.. GENERATED FROM PYTHON SOURCE LINES 131-152
+
+.. code-block:: default
+
+    halfspace = tdp.find_best_halfspace()
+    print('Best half space conductivity is {} $S/m$'.format(halfspace.par))
+    plt.subplot(1, 2, 2)
+    _ = tdp.plot()
+    _ = tdp.plotPredicted()
+
+    plt.figure()
+    tdp.plot_secondary_field()
+    tdp.plot_predicted_secondary_field()
+
+    # ################################################################################
+    # # We can attach priors to the height of the datapoint,
+    # # the relative error multiplier, and the additive error noise floor
+
+    # Define the distributions used as priors.
+    heightPrior = Distribution('Uniform', min=np.float64(tdp.z) - 1.0, max=np.float64(tdp.z) + 1.0)
+    relativePrior = Distribution('Uniform', min=np.r_[0.01, 0.01], max=np.r_[0.5, 0.5])
+    pitchPrior = Distribution('Uniform', min=tdp.transmitter.pitch - 5.0, max=tdp.transmitter.pitch + 5.0)
+    # additivePrior = Distribution('Uniform', min=np.r_[1e-12, 1e-13], max=np.r_[1e-10, 1e-11], log=True)
+    tdp.set_priors(height_prior=heightPrior, relative_error_prior=relativePrior, transmitter_pitch_prior=pitchPrior)#, additive_error_prior=additivePrior)
+
+
+
+
+.. rst-class:: sphx-glr-horizontal
+
+
+    *
+
+      .. image-sg:: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_005.png
+         :alt: Time Domain EM Data
+         :srcset: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_005.png
+         :class: sphx-glr-multi-img
+
+    *
+
+      .. image-sg:: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_006.png
+         :alt: Secondary field
+         :srcset: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_006.png
+         :class: sphx-glr-multi-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Best half space conductivity is [0.04641589] $S/m$
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 153-154
+
+In order to perturb our solvable parameters, we need to attach proposal distributions
+
+.. GENERATED FROM PYTHON SOURCE LINES 154-160
+
+.. code-block:: default
+
+    heightProposal = Distribution('Normal', mean=tdp.z, variance = 0.01)
+    relativeProposal = Distribution('MvNormal', mean=tdp.relErr, variance=2.5e-4)
+    transmitter_pitch_proposal = Distribution('Normal', mean=tdp.transmitter.pitch, variance = 0.01)
+    # additiveProposal = Distribution('MvLogNormal', mean=tdp.addErr, variance=2.5e-3, linearSpace=True)
+    tdp.set_proposals(heightProposal, relativeProposal, transmitter_pitch_proposal=transmitter_pitch_proposal)#, additiveProposal)
+
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 161-162
+
+With priorss set we can auto generate the posteriors
+
+.. GENERATED FROM PYTHON SOURCE LINES 162-164
+
+.. code-block:: default
+
+    tdp.set_posteriors()
+
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 165-167
+
+Perturb the datapoint and record the perturbations
+Note we are not using the priors to accept or reject perturbations.
+
+.. GENERATED FROM PYTHON SOURCE LINES 167-171
+
+.. code-block:: default
+
+    for i in range(10):
+        tdp.perturb()
+        tdp.updatePosteriors()
+
+    plt.show()
+
+
 
 
 
@@ -357,7 +433,7 @@ We can perform a quick search for the best fitting half space
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.683 seconds)
+   **Total running time of the script:** ( 0 minutes  1.811 seconds)
 
 
 .. _sphx_glr_download_examples_Datapoints_plot_tempest_datapoint.py:

@@ -8,10 +8,10 @@
       <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/gallery.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/gallery-binder.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/gallery-dataframe.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-rendered-html.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -380,8 +380,8 @@ Defaults to False.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.mapPlot">
-<span class="sig-name descname"><span class="pre">mapPlot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.mapPlot" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.map">
+<span class="sig-name descname"><span class="pre">map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.map" title="Permalink to this definition"></a></dt>
 <dd><p>Create a map of a parameter</p>
 </dd></dl>
 
@@ -435,7 +435,7 @@ If xAxis is ‘r3d’, returns cumulative distance along the line in 3D using x,
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.read_csv">
-<span class="sig-name descname"><span class="pre">read_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.read_csv" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">read_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D.read_csv" title="Permalink to this definition"></a></dt>
 <dd><p>Reads x y z co-ordinates from an ascii csv file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

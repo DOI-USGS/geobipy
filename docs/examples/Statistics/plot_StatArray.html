@@ -8,10 +8,10 @@
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery-binder.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery-dataframe.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -112,6 +112,7 @@ units, and allows us to attach statistical descriptors of the array.
 The direct extension to numpy maintains speed and functionality of numpy arrays.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">StatArray</span>
 <span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">Histogram1D</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">Distribution</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">h5py</span>
@@ -172,7 +173,7 @@ Name: 45.454
 
 Name: Density ($\frac{g}{cc}$)
     Shape: (1,)
-    Values: [-1.18554675]
+    Values: [1.89390965]
 </pre></div>
 </div>
 </section>
@@ -203,11 +204,11 @@ sample when we wish to perturb the variable
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Obtain an instantiation of a random number generator.</span>
 <span class="c1"># This is optional, but is an important consideration for parallel programming.</span>
 <span class="n">prng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">()</span>
-<span class="n">Density</span><span class="o">.</span><span class="n">set_prior</span><span class="p">(</span><span class="s1">&#39;Uniform&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
+<span class="n">Density</span><span class="o">.</span><span class="n">prior</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;Uniform&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>We can also attach a proposal distribution</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Density</span><span class="o">.</span><span class="n">setProposal</span><span class="p">(</span><span class="s1">&#39;Normal&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Density</span><span class="o">.</span><span class="n">proposal</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;Normal&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Class type of the prior: &quot;</span><span class="p">,</span><span class="nb">type</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">prior</span><span class="p">))</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Class type of the proposal: &quot;</span><span class="p">,</span><span class="nb">type</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">proposal</span><span class="p">))</span>
@@ -216,7 +217,7 @@ sample when we wish to perturb the variable
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: Density ($\frac{g}{cc}$)
     Shape: (1,)
-    Values: [-1.18554675]
+    Values: [1.89390965]
 Prior:
 Uniform Distribution:
   Min: :-2.0
@@ -245,7 +246,7 @@ Therefore each element is evaluated to get 3 probabilities, one for each element
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>0.9869024149315574
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>-0.8977410112465112
 </pre></div>
 </div>
 <p>From a sampling stand point we can either sample using only the proposal
@@ -254,7 +255,7 @@ Or we can only generate samples that simultaneously satisfy the prior.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[-0.95826117]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[2.39747661]
 </pre></div>
 </div>
 <p>We can perturb the variable by drawing from the attached proposal distribution.</p>
@@ -265,7 +266,7 @@ Or we can only generate samples that simultaneously satisfy the prior.</p>
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: Density ($\frac{g}{cc}$)
     Shape: (1,)
-    Values: [-1.92632668]
+    Values: [0.68339971]
 Prior:
 Uniform Distribution:
   Min: :-2.0
@@ -283,11 +284,10 @@ Variance: :1.0
 and a histogram can be attached to capture its posterior distribution.
 As an example, lets create a Histogram class with bins generated from the prior.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bins</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">prior</span><span class="o">.</span><span class="n">bins</span><span class="p">()</span>
-<span class="n">post</span> <span class="o">=</span> <span class="n">Histogram1D</span><span class="p">(</span><span class="n">edges</span><span class="o">=</span><span class="n">bins</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Attach the histogram</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Density</span><span class="o">.</span><span class="n">setPosterior</span><span class="p">(</span><span class="n">post</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Density</span><span class="o">.</span><span class="n">posterior</span> <span class="o">=</span> <span class="n">Histogram1D</span><span class="p">(</span><span class="n">edges</span><span class="o">=</span><span class="n">bins</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>In an iterative sense, we can propose and evaluate new values, and update the posterior</p>
@@ -303,14 +303,13 @@ As an example, lets create a Histogram class with bins generated from the prior.
 <span class="n">Density</span><span class="o">.</span><span class="n">summaryPlot</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="Prior, Proposal, Posterior" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_001.png" />
-</section>
+<img src="../../_images/sphx_glr_plot_StatArray_001.png" srcset="../../_images/sphx_glr_plot_StatArray_001.png" alt="Prior, Proposal, Posterior" class = "sphx-glr-single-img"/></section>
 <section id="attach-a-multivariate-normal-distribution-as-the-prior-and-proposal">
 <h2>Attach a multivariate normal distribution as the prior and proposal<a class="headerlink" href="#attach-a-multivariate-normal-distribution-as-the-prior-and-proposal" title="Permalink to this headline"></a></h2>
 <p>Attach the multivariate prior</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
 <span class="n">variance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
-<span class="n">Density</span><span class="o">.</span><span class="n">set_prior</span><span class="p">(</span><span class="s1">&#39;MvNormal&#39;</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">variance</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
+<span class="n">Density</span><span class="o">.</span><span class="n">prior</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;MvNormal&#39;</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">variance</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Since the prior is multivariate, the appropriate equations are used to
@@ -320,13 +319,13 @@ This produces a single probability.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>0.3684889866160113
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>0.2290813829641986
 </pre></div>
 </div>
 <p>Attach the multivariate proposal</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
 <span class="n">variance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
-<span class="n">Density</span><span class="o">.</span><span class="n">setProposal</span><span class="p">(</span><span class="s1">&#39;MvNormal&#39;</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">variance</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
+<span class="n">Density</span><span class="o">.</span><span class="n">proposal</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;MvNormal&#39;</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">variance</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Perturb the variables using the multivariate proposal.</p>
@@ -335,7 +334,7 @@ This produces a single probability.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&quot;Name: Density ($\\frac{g}{cc}$)\n    Shape: (1,)\n    Values: [-1.88269123]\nPrior:\nMV Normal Distribution:\nMean:\n[0.26739957]\nVariance:\n[[1.]]\nProposal:\nMV Normal Distribution:\nMean:\n[-0.36790694]\nVariance:\n[[1.]]\nPosterior:\n&lt;class &#39;geobipy.src.classes.statistics.Histogram1D.Histogram1D&#39;&gt;\nBins: \n&lt;property object at 0x129bf7860&gt;Counts:\nName: Frequency\n    Shape: (100,)\n    Values: [2 1 2 ... 3 3 1]\nValues are logged to base None\nRelative to: [0.]&quot;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&quot;Name: Density ($\\frac{g}{cc}$)\n    Shape: (1,)\n    Values: [1.3128459]\nPrior:\nMV Normal Distribution:\nMean:\n[-0.1130617]\nVariance:\n[[1.]]\nProposal:\nMV Normal Distribution:\nMean:\n[0.23027651]\nVariance:\n[[1.]]\nPosterior:\n&lt;class &#39;geobipy.src.classes.statistics.Histogram1D.Histogram1D&#39;&gt;\nBins: \n&lt;property object at 0x7fe8d12de770&gt;Counts:\nName: Frequency\n    Shape: (100,)\n    Values: [4 1 2 ... 1 0 2]\nValues are logged to base None\nRelative to: [0.]&quot;
 </pre></div>
 </div>
 </section>
@@ -582,20 +581,17 @@ All plotting functions can take matplotlib keywords</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_002.png" />
-<p>We can quickly plot a bar graph.</p>
+<img src="../../_images/sphx_glr_plot_StatArray_002.png" srcset="../../_images/sphx_glr_plot_StatArray_002.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>We can quickly plot a bar graph.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">bar</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="Density" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_003.png" />
-<p>We can scatter the contents of the StatArray if it is 1D</p>
+<img src="../../_images/sphx_glr_plot_StatArray_003.png" srcset="../../_images/sphx_glr_plot_StatArray_003.png" alt="Density" class = "sphx-glr-single-img"/><p>We can scatter the contents of the StatArray if it is 1D</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_004.png" />
-<section id="histogram-equalization">
+<img src="../../_images/sphx_glr_plot_StatArray_004.png" srcset="../../_images/sphx_glr_plot_StatArray_004.png" alt="plot StatArray" class = "sphx-glr-single-img"/><section id="histogram-equalization">
 <h3>Histogram Equalization<a class="headerlink" href="#histogram-equalization" title="Permalink to this headline"></a></h3>
 <p>A neat trick with colourmaps is histogram equalization.
 This approach forces all colours in the images to have an equal weight.
@@ -605,26 +601,19 @@ ends of whatever you are plotting. Just add the equalize keyword!</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">equalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_005.png" />
-<p>Take the log base(x) of the data</p>
+<img src="../../_images/sphx_glr_plot_StatArray_005.png" srcset="../../_images/sphx_glr_plot_StatArray_005.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>Take the log base(x) of the data</p>
 <p>We can also take the data to a log, log10, log2, or a custom number!</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span><span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span><span class="n">log</span><span class="o">=</span><span class="s1">&#39;e&#39;</span><span class="p">)</span> <span class="c1"># could also use log=&#39;e&#39;, log=2, log=x) where x is the base you require</span>
 </pre></div>
 </div>
-<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_006.png" />
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Values &lt;= 0.0 have been masked before taking their log
-</pre></div>
-</div>
-<p>X and Y axes</p>
+<img src="../../_images/sphx_glr_plot_StatArray_006.png" srcset="../../_images/sphx_glr_plot_StatArray_006.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>X and Y axes</p>
 <p>We can specify the x axis of the scatter plot.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">Time</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_007.png" />
-<p>Notice that I never specified the y axis, so the y axis defaulted to the values in the StatArray.
+<img src="../../_images/sphx_glr_plot_StatArray_007.png" srcset="../../_images/sphx_glr_plot_StatArray_007.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>Notice that I never specified the y axis, so the y axis defaulted to the values in the StatArray.
 In this case, any operations applied to the colours, are also applied to the y axis, e.g. log=10.
 When I take the values of Density to log base 10, because I do not specify the y plotting locations, those locations are similarly affected.</p>
 <p>I can however force the y co-ordinates by specifying it as input.
@@ -637,13 +626,7 @@ In the first subplot, the y axis is the same as the colourbar.</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">Time</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">Depth</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_008.png" />
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Values &lt;= 0.0 have been masked before taking their log
-Values &lt;= 0.0 have been masked before taking their log
-</pre></div>
-</div>
-<p>Point sizes</p>
+<img src="../../_images/sphx_glr_plot_StatArray_008.png" srcset="../../_images/sphx_glr_plot_StatArray_008.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>Point sizes</p>
 <p>Since the plotting functions take matplotlib keywords, I can also specify the size of each points.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">size</span><span class="p">))))</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
@@ -656,22 +639,12 @@ Values &lt;= 0.0 have been masked before taking their log
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">Time</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">Depth</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span><span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">sizeLegend</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">300</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_009.png" />
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Values &lt;= 0.0 have been masked before taking their log
-</pre></div>
-</div>
-<p>Of course we can still take the log, or equalize the colour histogram</p>
+<img src="../../_images/sphx_glr_plot_StatArray_009.png" srcset="../../_images/sphx_glr_plot_StatArray_009.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>Of course we can still take the log, or equalize the colour histogram</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">Time</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">Depth</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span><span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span><span class="n">equalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_010.png" />
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Values &lt;= 0.0 have been masked before taking their log
-</pre></div>
-</div>
-<p>Typically pcolor only works with 2D arrays. The StatArray has a pcolor method that will pcolor a 1D array</p>
+<img src="../../_images/sphx_glr_plot_StatArray_010.png" srcset="../../_images/sphx_glr_plot_StatArray_010.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>Typically pcolor only works with 2D arrays. The StatArray has a pcolor method that will pcolor a 1D array</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">221</span><span class="p">)</span>
 <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">()</span>
@@ -683,12 +656,7 @@ Values &lt;= 0.0 have been masked before taking their log
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">Time</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">equalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_011.png" />
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Values &lt;= 0.0 have been masked before taking their log
-</pre></div>
-</div>
-<p>We can add grid lines, and add opacity to each element in the pcolor image</p>
+<img src="../../_images/sphx_glr_plot_StatArray_011.png" srcset="../../_images/sphx_glr_plot_StatArray_011.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>We can add grid lines, and add opacity to each element in the pcolor image</p>
 <p>This is useful if the colour values need to be scaled by another variable e.g. variance.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">)</span>
@@ -698,14 +666,12 @@ Values &lt;= 0.0 have been masked before taking their log
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">a</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;jet&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_012.png" />
-<p>We can plot a histogram of the StatArray</p>
+<img src="../../_images/sphx_glr_plot_StatArray_012.png" srcset="../../_images/sphx_glr_plot_StatArray_012.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>We can plot a histogram of the StatArray</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_013.png" />
-<p>We can write the StatArray to a HDF5 file.  HDF5 files are binary files that can include compression.  They allow quick and easy access to parts of the file, and can also be written to and read from in parallel!</p>
+<img src="../../_images/sphx_glr_plot_StatArray_013.png" srcset="../../_images/sphx_glr_plot_StatArray_013.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>We can write the StatArray to a HDF5 file.  HDF5 files are binary files that can include compression.  They allow quick and easy access to parts of the file, and can also be written to and read from in parallel!</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;1Dtest.h5&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">Density</span><span class="o">.</span><span class="n">toHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
 </pre></div>
@@ -729,7 +695,7 @@ x has its own memory allocated (not a reference/pointer)?  True
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&#39;Name: Density ($\\frac{g}{cc}$)\n    Shape: (50, 100)\n    Values: [[-0.31233589  0.83361338  1.28079698 ...  2.03082302 -1.10196974\n   1.25030991]\n [-1.90942522 -0.41059787  1.96738363 ... -0.90151543 -0.39237267\n  -0.26895201]\n [ 0.8033263   0.6465585  -0.16514956 ...  0.33036225 -1.27594263\n  -1.06834095]\n ...\n [-0.97261329 -1.02987097  0.86935385 ...  0.18630102 -0.61988811\n  -0.22823936]\n [-1.05245934  0.12942245 -1.31521914 ...  0.40606742  1.20804847\n   1.5587342 ]\n [ 0.81990253  0.09905753  0.99534578 ...  0.80269833  1.02511856\n   0.36313707]]\n&#39;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&#39;Name: Density ($\\frac{g}{cc}$)\n    Shape: (50, 100)\n    Values: [[ 0.2578391   0.06423086  2.89067211 ...  1.38949627  1.00002246\n   0.42437745]\n [ 0.71865757 -1.44351093 -2.50074128 ... -0.55238025 -0.7257894\n  -0.77072145]\n [ 0.19307272  0.03664038  0.54741788 ...  0.91367198 -0.22983866\n  -1.3084926 ]\n ...\n [ 1.30411313 -1.58826262  2.2629556  ...  0.87880903 -2.19908292\n  -0.00368457]\n [-0.52868634 -0.54295258  1.43517379 ... -0.0489859  -0.38495306\n   2.17553058]\n [ 0.64759825  0.66592992  1.61048641 ... -1.48852135  1.47162409\n   0.06787013]]\n&#39;
 </pre></div>
 </div>
 <p>The StatArray Class’s functions work whether it is 1D or 2D</p>
@@ -738,14 +704,12 @@ x has its own memory allocated (not a reference/pointer)?  True
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">hist</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_014.png" />
-<p>And we can use pcolor to plot the 2D array</p>
+<img src="../../_images/sphx_glr_plot_StatArray_014.png" srcset="../../_images/sphx_glr_plot_StatArray_014.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>And we can use pcolor to plot the 2D array</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_015.png" />
-<p>The StatArray comes with extra plotting options</p>
+<img src="../../_images/sphx_glr_plot_StatArray_015.png" srcset="../../_images/sphx_glr_plot_StatArray_015.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>The StatArray comes with extra plotting options</p>
 <p>Here we specify the x and y axes for the 2D array using two other 1D StatArrays</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">101</span><span class="p">),</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;x Axis&#39;</span><span class="p">,</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;mm&#39;</span><span class="p">)</span>
@@ -753,20 +717,14 @@ x has its own memory allocated (not a reference/pointer)?  True
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_016.png" />
-<p>We can plot using a log10 scale, in this case, we have values that are less
+<img src="../../_images/sphx_glr_plot_StatArray_016.png" srcset="../../_images/sphx_glr_plot_StatArray_016.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>We can plot using a log10 scale, in this case, we have values that are less
 than or equal to 0.0.  Plotting with the log option will by default mask any
 of those values, and will let you know that it has done so!</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span><span class="n">log</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_017.png" />
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Values &lt;= 0.0 have been masked before taking their log
-</pre></div>
-</div>
-<p>A neat trick with colourmaps is histogram equalization.
+<img src="../../_images/sphx_glr_plot_StatArray_017.png" srcset="../../_images/sphx_glr_plot_StatArray_017.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>A neat trick with colourmaps is histogram equalization.
 This approach forces all colours in the image to have an equal amount.
 This distorts the colours, but can really highlight the lower and higher
 ends of whatever you are plotting</p>
@@ -774,18 +732,12 @@ ends of whatever you are plotting</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">equalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_018.png" />
-<p>We can equalize the log10 plot too :)</p>
+<img src="../../_images/sphx_glr_plot_StatArray_018.png" srcset="../../_images/sphx_glr_plot_StatArray_018.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>We can equalize the log10 plot too :)</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span><span class="n">equalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_019.png" />
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Values &lt;= 0.0 have been masked before taking their log
-</pre></div>
-</div>
-<p>We can add opacity to each pixel in the image</p>
+<img src="../../_images/sphx_glr_plot_StatArray_019.png" srcset="../../_images/sphx_glr_plot_StatArray_019.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>We can add opacity to each pixel in the image</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="s1">&#39;Opacity from 0.0 to 1.0&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -798,8 +750,7 @@ ends of whatever you are plotting</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">flipY</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_020.png" />
-<p>If the array potentially has a lot of white space around the edges, we can trim the image</p>
+<img src="../../_images/sphx_glr_plot_StatArray_020.png" srcset="../../_images/sphx_glr_plot_StatArray_020.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>If the array potentially has a lot of white space around the edges, we can trim the image</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Density</span><span class="p">[:</span><span class="mi">10</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mf">0.0</span>
 <span class="n">Density</span><span class="p">[</span><span class="o">-</span><span class="mi">10</span><span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mf">0.0</span>
 <span class="n">Density</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">10</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
@@ -811,8 +762,7 @@ ends of whatever you are plotting</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">trim</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_021.png" />
-<p>Create a stacked area plot of a 2D StatArray</p>
+<img src="../../_images/sphx_glr_plot_StatArray_021.png" srcset="../../_images/sphx_glr_plot_StatArray_021.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>Create a stacked area plot of a 2D StatArray</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">A</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span><span class="mi">100</span><span class="p">)),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Variable&#39;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;units&quot;</span><span class="p">)</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;x Axis&#39;</span><span class="p">,</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;mm&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
@@ -824,8 +774,7 @@ ends of whatever you are plotting</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="plot StatArray" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_StatArray_022.png" />
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  3.561 seconds)</p>
+<img src="../../_images/sphx_glr_plot_StatArray_022.png" srcset="../../_images/sphx_glr_plot_StatArray_022.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  5.661 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-statistics-plot-statarray-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/53dc65a717762d4693b891c0caabbde0/plot_StatArray.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_StatArray.py</span></code></a></p>

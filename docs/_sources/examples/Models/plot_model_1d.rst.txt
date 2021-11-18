@@ -205,7 +205,7 @@ We can evaluate the prior of the model using depths only
  .. code-block:: none
 
     Log probability of the Model given its priors:  -13.358381323561012
-    Log probability of the Model given its priors:  -18.64550324345332
+    Log probability of the Model given its priors:  -25.05990862823679
 
 
 
@@ -316,15 +316,17 @@ The proposal for the parameter values is fixed and centred around a single value
 
     *
 
-      .. image:: /examples/Models/images/sphx_glr_plot_model_1d_001.png
-          :alt: plot model 1d
-          :class: sphx-glr-multi-img
+      .. image-sg:: /examples/Models/images/sphx_glr_plot_model_1d_001.png
+         :alt: plot model 1d
+         :srcset: /examples/Models/images/sphx_glr_plot_model_1d_001.png
+         :class: sphx-glr-multi-img
 
     *
 
-      .. image:: /examples/Models/images/sphx_glr_plot_model_1d_002.png
-          :alt: plot model 1d
-          :class: sphx-glr-multi-img
+      .. image-sg:: /examples/Models/images/sphx_glr_plot_model_1d_002.png
+         :alt: plot model 1d
+         :srcset: /examples/Models/images/sphx_glr_plot_model_1d_002.png
+         :class: sphx-glr-multi-img
 
 
 
@@ -352,7 +354,7 @@ We can interpolate the Model to another mesh.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.492 seconds)
+   **Total running time of the script:** ( 0 minutes  3.126 seconds)
 
 
 .. _sphx_glr_download_examples_Models_plot_model_1d.py:

@@ -40,7 +40,7 @@ receivers = [CircularLoop(orient="z", moment=1.0, x=7.93, y=0.0, z=0.0, pitch=0.
 
 ##############################################################################
 # Instantiate the system for the data
-system = FdemSystem(frequencies=frequencies, transmitterLoops=transmitters, receiverLoops=receivers)
+system = FdemSystem(frequencies=frequencies, transmitter=transmitters, receiver=receivers)
 
 ##############################################################################
 # Create some data with random co-ordinates
@@ -48,7 +48,7 @@ x = np.random.randn(100)
 y = np.random.randn(100)
 z = np.random.randn(100)
 
-data = FdemData(x=x, y=-y, z=z, systems = system)
+data = FdemData(x=x, y=-y, z=z, system = system)
 
 #%%
 # Reading in the Data
@@ -71,30 +71,30 @@ FD1 = FdemData.read_csv(dataFile, systemFile)
 for name in FD1.channelNames:
     print(name)
 
-################################################################################
-# Get data points by slicing
-FDa = FD1[10:]
-FD1 = FD1[:10]
+# ################################################################################
+# # Get data points by slicing
+# FDa = FD1[10:]
+# FD1 = FD1[:10]
 
-################################################################################
-# Append data sets together
-FD1.append(FDa)
+# ################################################################################
+# # Append data sets together
+# FD1.append(FDa)
 
 
-################################################################################
-# Plot the locations of the data points
-plt.figure(figsize=(8,6))
-_ = FD1.scatter2D();
+# ################################################################################
+# # Plot the locations of the data points
+# plt.figure(figsize=(8,6))
+# _ = FD1.scatter2D();
 
-################################################################################
-# Plot all the data along the specified line
-plt.figure(figsize=(8,6))
-_ = FD1.plotLine(30010.0, log=10);
+# ################################################################################
+# # Plot all the data along the specified line
+# plt.figure(figsize=(8,6))
+# _ = FD1.plotLine(30010.0, log=10);
 
-################################################################################
-# Or, plot specific channels in the data
-plt.figure(figsize=(8,6))
-_ = FD1.plot(channels=[0,11,8], log=10, linewidth=0.5);
+# ################################################################################
+# # Or, plot specific channels in the data
+# plt.figure(figsize=(8,6))
+# _ = FD1.plot(channels=[0,11,8], log=10, linewidth=0.5);
 
 ################################################################################
 # Read in a second data set
@@ -103,13 +103,13 @@ FD2 = FdemData.read_csv(dataFilename=dataFolder + 'Resolve1.txt', systemFilename
 ################################################################################
 # We can create maps of the elevations in two separate figures
 plt.figure(figsize=(8,6))
-_ = FD1.mapPlot(dx=50.0, dy=50.0, mask = 200.0)
+_ = FD1.map(dx=50.0, dy=50.0, mask = 200.0)
 plt.axis('equal');
 
 ################################################################################
 
 plt.figure(figsize=(8,6))
-_ = FD2.mapPlot(dx=50.0, dy=50.0, mask = 200.0)
+_ = FD2.map(dx=50.0, dy=50.0, mask = 200.0)
 plt.axis('equal');
 
 ################################################################################
@@ -120,8 +120,8 @@ plt.axis('equal');
 # one of the channels as the colour.
 
 plt.figure(figsize=(8,6))
-_ = FD1.scatter2D(s=1.0, c=FD1.dataChannel(0))
-_ = FD2.scatter2D(s=1.0, c=FD2.dataChannel(0), cmap='jet');
+_ = FD1.scatter2D(s=1.0, c=FD1.data[:, 0])
+_ = FD2.scatter2D(s=1.0, c=FD2.data[:, 0], cmap='jet');
 
 ################################################################################
 # Or, interpolate the values to create a gridded "map". mapChannel will

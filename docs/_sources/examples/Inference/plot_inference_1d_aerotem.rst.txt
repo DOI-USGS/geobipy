@@ -23,7 +23,7 @@
 
 All plotting in GeoBIPy can be carried out using the 3D inference class
 
-.. GENERATED FROM PYTHON SOURCE LINES 9-15
+.. GENERATED FROM PYTHON SOURCE LINES 9-17
 
 .. code-block:: default
 
@@ -32,6 +32,8 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     from geobipy import example_path
     from geobipy import Inference3D
     import numpy as np
+    import os
+    import shutil
 
 
 
@@ -40,18 +42,18 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 16-20
+.. GENERATED FROM PYTHON SOURCE LINES 18-22
 
 Running GeoBIPy to invert data
 ++++++++++++++++++++++++++++++
 
 Define some directories and paths
 
-.. GENERATED FROM PYTHON SOURCE LINES 22-23
+.. GENERATED FROM PYTHON SOURCE LINES 24-25
 
 The directory where HDF files will be stored
 
-.. GENERATED FROM PYTHON SOURCE LINES 23-24
+.. GENERATED FROM PYTHON SOURCE LINES 25-26
 
 .. code-block:: default
 
@@ -63,11 +65,31 @@ The directory where HDF files will be stored
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 27-28
+.. GENERATED FROM PYTHON SOURCE LINES 27-36
+
+.. code-block:: default
+
+
+    for filename in os.listdir(output_directory):
+        file_path = os.path.join(output_directory, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+        except Exception as e:
+            print('Failed to delete %s. Reason: %s' % (file_path, e))
+
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 37-38
 
 The parameter file defines the set of user parameters needed to run geobipy.
 
-.. GENERATED FROM PYTHON SOURCE LINES 28-29
+.. GENERATED FROM PYTHON SOURCE LINES 38-39
 
 .. code-block:: default
 
@@ -79,7 +101,7 @@ The parameter file defines the set of user parameters needed to run geobipy.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 30-35
+.. GENERATED FROM PYTHON SOURCE LINES 40-45
 
 .. code-block:: default
 
@@ -134,7 +156,7 @@ The parameter file defines the set of user parameters needed to run geobipy.
     # General GeoBIPy options.
     # -------------------------------------------------------
     # Interactively plot a single data point as it progresses
-    interactive_plot = False
+    interactive_plot = True
     # How often to update the plot. (lower is generally slower)
     update_plot_every = 1000
     # Save a PNG of the final results for each data point.
@@ -200,7 +222,7 @@ The parameter file defines the set of user parameters needed to run geobipy.
     initial_relative_error = 0.05
     ## Relative Error Prior Details
     # Minimum Relative Error
-    minimum_relative_error = 0.05
+    minimum_relative_error = 0.01
     # Maximum Relative Error
     maximum_relative_error = 0.5
 
@@ -276,7 +298,7 @@ The parameter file defines the set of user parameters needed to run geobipy.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 36-41
+.. GENERATED FROM PYTHON SOURCE LINES 46-51
 
 To run geobipy in serial, simply call that function.
 Here we specify index 0 to only carry out a shortened inversion of a single
@@ -284,7 +306,7 @@ data point for time considerations.
 You will notice however that the HDF files are created for multiple lines
 inside the data file.
 
-.. GENERATED FROM PYTHON SOURCE LINES 41-44
+.. GENERATED FROM PYTHON SOURCE LINES 51-54
 
 .. code-block:: default
 
@@ -293,6 +315,11 @@ inside the data file.
 
 
 
+
+.. image-sg:: /examples/Inference/images/sphx_glr_plot_inference_1d_aerotem_001.png
+   :alt: Fiducial [354780.], Time Domain EM Data
+   :srcset: /examples/Inference/images/sphx_glr_plot_inference_1d_aerotem_001.png
+   :class: sphx-glr-single-img
 
 
 .. rst-class:: sphx-glr-script-out
@@ -305,36 +332,78 @@ inside the data file.
     Using user input file aerotem_options
     Output files will be produced at ..//supplementary//time_domain_inversion//results
     Creating HDF5 files, this may take a few minutes...
-    Files are being created for data files ['..//supplementary//data//aerotem_single.txt'] and system files ['..//supplementary//data//aerotem.stm']
+    Files are being created for data files ..//supplementary//data//aerotem_single.txt and system files ..//supplementary//data//aerotem.stm
     Created hdf5 file for line 1010 with 1 data points
-    i=0, k=2, 0.000 s/Model, 0.004 s Elapsed
+    i=0, k=2, 0.000 s/Model, 0.008 s Elapsed
 
-    i=1000, k=3, 0.005 s/Model, 4.943 s Elapsed
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+      tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+      tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+    i=1000, k=5, 0.007 s/Model, 7.264 s Elapsed
 
-    i=2000, k=6, 0.005 s/Model, 9.865 s Elapsed
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+      tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+      tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+    i=2000, k=7, 0.007 s/Model, 14.196 s Elapsed
 
-    i=3000, k=4, 0.005 s/Model, 14.875 s Elapsed
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+      tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+      tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+    i=3000, k=7, 0.007 s/Model, 21.572 s Elapsed
 
-    i=4000, k=4, 0.005 s/Model, 19.882 s Elapsed
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+      tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+      tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+    i=4000, k=6, 0.007 s/Model, 28.872 s Elapsed
 
-    i=5000, k=4, 0.005 s/Model, 24.930 s Elapsed
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+      tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+      tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+    i=5000, k=8, 0.007 s/Model, 36.267 s Elapsed
 
-    i=6000, k=6, 0.005 s/Model, 30.054 s Elapsed
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+      tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+      tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+    i=6000, k=7, 0.007 s/Model, 43.630 s Elapsed
 
-    i=7000, k=4, 0.005 s/Model, 35.137 s Elapsed
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+      tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+      tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+    i=7000, k=5, 0.007 s/Model, 50.930 s Elapsed
 
-    i=8000, k=4, 0.005 s/Model, 40.414 s Elapsed
+    i=8000, k=5, 0.008 s/Model, 59.071 s Elapsed
 
-    i=9000, k=6, 0.005 s/Model, 45.748 s Elapsed
+    i=9000, k=5, 0.008 s/Model, 67.438 s Elapsed
 
-    i=10000, k=7, 0.005 s/Model, 51.135 s Elapsed
+    i=10000, k=7, 0.008 s/Model, 75.745 s Elapsed
 
-    Remaining Points 0/1 || Elapsed Time: 0:00:51.378396 h:m:s || ETA 0:00:51.378396 h:m:s
+    i=11000, k=7, 0.009 s/Model, 84.415 s Elapsed
+
+    i=12000, k=6, 0.008 s/Model, 92.698 s Elapsed
+
+    i=13000, k=5, 0.008 s/Model, 100.983 s Elapsed
+
+    i=14000, k=5, 0.008 s/Model, 109.255 s Elapsed
+
+    i=15000, k=6, 0.008 s/Model, 117.555 s Elapsed
+
+    i=16000, k=7, 0.008 s/Model, 125.834 s Elapsed
+
+    i=17000, k=5, 0.009 s/Model, 134.405 s Elapsed
+
+    Remaining Points 0/1 || Elapsed Time: 0:02:15.613463 h:m:s || ETA 0:02:15.613463 h:m:s
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 45-51
+.. GENERATED FROM PYTHON SOURCE LINES 55-61
 
 Plotting the results for a single data point
 ++++++++++++++++++++++++++++++++++++++++++++
@@ -343,7 +412,7 @@ For the sake of plotting, we refer to a previously completed inversion.
 For space considerations we do not include those HDF files in this repository
 and simply use them for plotting.
 
-.. GENERATED FROM PYTHON SOURCE LINES 53-55
+.. GENERATED FROM PYTHON SOURCE LINES 63-65
 
 .. code-block:: default
 
@@ -356,11 +425,11 @@ and simply use them for plotting.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 56-57
+.. GENERATED FROM PYTHON SOURCE LINES 66-67
 
 We can grab the results for a single index or fiducial
 
-.. GENERATED FROM PYTHON SOURCE LINES 57-59
+.. GENERATED FROM PYTHON SOURCE LINES 67-69
 
 .. code-block:: default
 
@@ -373,7 +442,7 @@ We can grab the results for a single index or fiducial
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 60-63
+.. GENERATED FROM PYTHON SOURCE LINES 70-73
 
 .. code-block:: default
 
@@ -383,9 +452,10 @@ We can grab the results for a single index or fiducial
 
 
 
-.. image:: /examples/Inference/images/sphx_glr_plot_inference_1d_aerotem_001.png
-    :alt: , Time Domain EM Data
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Inference/images/sphx_glr_plot_inference_1d_aerotem_002.png
+   :alt: , Time Domain EM Data
+   :srcset: /examples/Inference/images/sphx_glr_plot_inference_1d_aerotem_002.png
+   :class: sphx-glr-single-img
 
 
 
@@ -394,7 +464,7 @@ We can grab the results for a single index or fiducial
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  55.359 seconds)
+   **Total running time of the script:** ( 2 minutes  17.631 seconds)
 
 
 .. _sphx_glr_download_examples_Inference_plot_inference_1d_aerotem.py:

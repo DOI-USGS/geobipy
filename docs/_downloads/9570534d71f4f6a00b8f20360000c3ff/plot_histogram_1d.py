@@ -105,6 +105,7 @@ H.update(x, trim=True)
 
 ################################################################################
 plt.figure()
+plt.subplot(211)
 _ = H.plot()
 
 
@@ -115,7 +116,7 @@ with h5py.File('h1d.h5', 'w') as f:
 with h5py.File('h1d.h5', 'r') as f:
     H1 = Histogram1D.fromHdf(f['h1d'])
 
-plt.figure()
+plt.subplot(212)
 _ = H1.plot()
 
 plt.show()

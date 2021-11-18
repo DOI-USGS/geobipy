@@ -92,15 +92,17 @@ Specify some cell centres in x and y
 
     *
 
-      .. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_3d_001.png
-          :alt: plot rectilinear mesh 3d
-          :class: sphx-glr-multi-img
+      .. image-sg:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_3d_001.png
+         :alt: plot rectilinear mesh 3d
+         :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_3d_001.png
+         :class: sphx-glr-multi-img
 
     *
 
-      .. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_3d_002.png
-          :alt: plot rectilinear mesh 3d
-          :class: sphx-glr-multi-img
+      .. image-sg:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_3d_002.png
+         :alt: plot rectilinear mesh 3d
+         :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_3d_002.png
+         :class: sphx-glr-multi-img
 
 
 .. rst-class:: sphx-glr-script-out
@@ -110,7 +112,7 @@ Specify some cell centres in x and y
  .. code-block:: none
 
 
-    (<AxesSubplot:xlabel='Easting (m)', ylabel='Northing (m)'>, <matplotlib.collections.QuadMesh object at 0x15d2ec2b0>, <matplotlib.colorbar.Colorbar object at 0x15cfc8d00>)
+    (<AxesSubplot:xlabel='Easting (m)', ylabel='Northing (m)'>, <matplotlib.collections.QuadMesh object at 0x7fe8807f1670>, <matplotlib.colorbar.Colorbar object at 0x7fe880766790>)
 
 
 
@@ -165,7 +167,7 @@ We can plot the mesh in 3D!
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.361 seconds)
+   **Total running time of the script:** ( 0 minutes  0.676 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_3d.py:

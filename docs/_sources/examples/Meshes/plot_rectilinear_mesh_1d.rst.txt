@@ -246,9 +246,10 @@ We can plot the grid of the mesh
 
 
 
-.. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_001.png
-    :alt: plot rectilinear mesh 1d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_001.png
+   :alt: plot rectilinear mesh 1d
+   :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_001.png
+   :class: sphx-glr-single-img
 
 
 
@@ -269,9 +270,10 @@ Or Pcolor the mesh showing. An array of cell values is used as the colour.
 
 
 
-.. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_002.png
-    :alt: plot rectilinear mesh 1d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_002.png
+   :alt: plot rectilinear mesh 1d
+   :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_002.png
+   :class: sphx-glr-single-img
 
 
 
@@ -294,9 +296,10 @@ Mask the mesh cells by a distance
 
 
 
-.. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_003.png
-    :alt: plot rectilinear mesh 1d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_003.png
+   :alt: plot rectilinear mesh 1d
+   :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_003.png
+   :class: sphx-glr-single-img
 
 
 
@@ -350,9 +353,10 @@ We can plot the grid of the mesh
 
 
 
-.. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_004.png
-    :alt: plot rectilinear mesh 1d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_004.png
+   :alt: plot rectilinear mesh 1d
+   :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_004.png
+   :class: sphx-glr-single-img
 
 
 
@@ -390,9 +394,10 @@ Or Pcolor the mesh showing. An array of cell values is used as the colour.
 
 
 
-.. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_005.png
-    :alt: plot rectilinear mesh 1d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_005.png
+   :alt: plot rectilinear mesh 1d
+   :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_005.png
+   :class: sphx-glr-single-img
 
 
 
@@ -472,9 +477,10 @@ Here we force the creation of a layer.
 
 
 
-.. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_006.png
-    :alt: plot rectilinear mesh 1d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_006.png
+   :alt: plot rectilinear mesh 1d
+   :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_006.png
+   :class: sphx-glr-single-img
 
 
 
@@ -528,15 +534,17 @@ We can then perturb the layers of the model
 
     *
 
-      .. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_007.png
-          :alt: plot rectilinear mesh 1d
-          :class: sphx-glr-multi-img
+      .. image-sg:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_007.png
+         :alt: plot rectilinear mesh 1d
+         :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_007.png
+         :class: sphx-glr-multi-img
 
     *
 
-      .. image:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_008.png
-          :alt: plot rectilinear mesh 1d
-          :class: sphx-glr-multi-img
+      .. image-sg:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_008.png
+         :alt: plot rectilinear mesh 1d
+         :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_1d_008.png
+         :class: sphx-glr-multi-img
 
 
 
@@ -545,7 +553,7 @@ We can then perturb the layers of the model
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.278 seconds)
+   **Total running time of the script:** ( 0 minutes  1.385 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_1d.py:

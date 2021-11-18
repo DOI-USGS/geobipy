@@ -8,10 +8,10 @@
       <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/gallery.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/gallery-binder.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/gallery-dataframe.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-rendered-html.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -355,14 +355,22 @@ with the dimension along <cite>axis</cite> removed.</p>
 ‘F’ means F-order, ‘A’ means ‘F’ if <cite>a</cite> is Fortran contiguous,
 ‘C’ otherwise. ‘K’ means match the layout of <cite>a</cite> as closely
 as possible. (Note that this function and <code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.copy()</span></code> are very
-similar, but have different default values for their order=
-arguments.)</p>
+similar but have different default values for their order=
+arguments, and this function always passes sub-classes through.)</p>
 </dd>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.copy</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.copyto</span></code></p>
+<dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.copy</span></code></dt><dd><p>Similar function with different default behavior</p>
+</dd>
+</dl>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.copyto</span></code></p>
 </div>
+<p class="rubric">Notes</p>
+<p>This function is the preferred method for creating an array copy.  The
+function <code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.copy()</span></code> is similar, but it defaults to using order ‘K’,
+and will not pass sub-classes through by default.</p>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">]],</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
 </pre></div>
@@ -795,6 +803,11 @@ and then reading the hdf contents via the object’s methods.</p>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.mahalanobis">
+<span class="sig-name descname"><span class="pre">mahalanobis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.mahalanobis" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.nPosteriors">
 <em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">nPosteriors</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.nPosteriors" title="Permalink to this definition"></a></dt>
@@ -1115,67 +1128,6 @@ Can take any other matplotlib arguments and keyword arguments e.g. markersize et
 <p class="admonition-title">See also</p>
 <dl class="simple">
 <dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">geobipy.plotting.Scatter2D</span></code></dt><dd><p>For additional keyword arguments you may use.</p>
-</dd>
-</dl>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.setPosterior">
-<span class="sig-name descname"><span class="pre">setPosterior</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">posterior</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.setPosterior" title="Permalink to this definition"></a></dt>
-<dd><p>Add a posterior for the StatArray.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>posterior</strong> (<em>geobipy.Histogram</em><em> or </em><em>list of geobipy.Histogram</em>) – <ul class="simple">
-<li><p>If a single Histogram is given, all values in the StatArray will be used in any updates.</p></li>
-<li><p>If a list is given, the size must equal the size of the StatArray’s first dimension.</p></li>
-</ul>
-</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.setProposal">
-<span class="sig-name descname"><span class="pre">setProposal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distributionType</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.setProposal" title="Permalink to this definition"></a></dt>
-<dd><p>Set a proposal distribution</p>
-<p>Adds a proposal by interfacing through the Distribution method rather than passing any subclasses of the baseDistribution class.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>distributionType</strong> (<em>str</em>) – The name of the distribution to set</p></li>
-<li><p><strong>*args</strong> – Variable length argument list.</p></li>
-<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
-</ul>
-</dd>
-</dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<dl class="simple">
-<dt><a class="reference internal" href="../statistics/Distribution.html#module-geobipy.src.classes.statistics.Distribution" title="geobipy.src.classes.statistics.Distribution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geobipy.src.classes.statistics.Distribution</span></code></a></dt><dd><p>For available distributions to instantiate</p>
-</dd>
-</dl>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.set_prior">
-<span class="sig-name descname"><span class="pre">set_prior</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distributionType</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.set_prior" title="Permalink to this definition"></a></dt>
-<dd><p>Set a prior distribution</p>
-<p>Adds a prior by interfacing through the Distribution method rather than passing any subclasses of the baseDistribution class.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>distributionType</strong> (<em>str</em>) – The name of the distribution to set.</p></li>
-<li><p><strong>*args</strong> – Variable length argument list.</p></li>
-<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
-</ul>
-</dd>
-</dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<dl class="simple">
-<dt><a class="reference internal" href="../statistics/Distribution.html#module-geobipy.src.classes.statistics.Distribution" title="geobipy.src.classes.statistics.Distribution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geobipy.src.classes.statistics.Distribution</span></code></a></dt><dd><p>For available distributions to instantiate.</p>
 </dd>
 </dl>
 </div>

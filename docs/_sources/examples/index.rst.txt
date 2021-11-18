@@ -385,10 +385,10 @@ Data
 
 .. only:: html
 
- .. figure:: /examples/Data/images/thumb/sphx_glr_plot_time_domain_dataset_thumb.png
+ .. figure:: /examples/Data/images/thumb/sphx_glr_plot_skytem_dataset_thumb.png
      :alt: Time domain dataset
 
-     :ref:`sphx_glr_examples_Data_plot_time_domain_dataset.py`
+     :ref:`sphx_glr_examples_Data_plot_skytem_dataset.py`
 
 .. raw:: html
 
@@ -398,7 +398,28 @@ Data
 .. toctree::
    :hidden:
 
-   /examples/Data/plot_time_domain_dataset
+   /examples/Data/plot_skytem_dataset
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Time domain dataset">
+
+.. only:: html
+
+ .. figure:: /examples/Data/images/thumb/sphx_glr_plot_aerotem_dataset_thumb.png
+     :alt: Time domain dataset
+
+     :ref:`sphx_glr_examples_Data_plot_aerotem_dataset.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/Data/plot_aerotem_dataset
 .. raw:: html
 
     <div class="sphx-glr-clear"></div>
@@ -417,10 +438,10 @@ Datapoints
 
 .. only:: html
 
- .. figure:: /examples/Datapoints/images/thumb/sphx_glr_plot_frequency_datapoint_thumb.png
+ .. figure:: /examples/Datapoints/images/thumb/sphx_glr_plot_resolve_datapoint_thumb.png
      :alt: Frequency domain datapoint
 
-     :ref:`sphx_glr_examples_Datapoints_plot_frequency_datapoint.py`
+     :ref:`sphx_glr_examples_Datapoints_plot_resolve_datapoint.py`
 
 .. raw:: html
 
@@ -430,7 +451,7 @@ Datapoints
 .. toctree::
    :hidden:
 
-   /examples/Datapoints/plot_frequency_datapoint
+   /examples/Datapoints/plot_resolve_datapoint
 
 .. raw:: html
 
@@ -459,10 +480,10 @@ Datapoints
 
 .. only:: html
 
- .. figure:: /examples/Datapoints/images/thumb/sphx_glr_plot_time_datapoint_thumb.png
+ .. figure:: /examples/Datapoints/images/thumb/sphx_glr_plot_skytem_datapoint_thumb.png
      :alt: Time Domain Datapoint Class
 
-     :ref:`sphx_glr_examples_Datapoints_plot_time_datapoint.py`
+     :ref:`sphx_glr_examples_Datapoints_plot_skytem_datapoint.py`
 
 .. raw:: html
 
@@ -472,7 +493,28 @@ Datapoints
 .. toctree::
    :hidden:
 
-   /examples/Datapoints/plot_time_datapoint
+   /examples/Datapoints/plot_skytem_datapoint
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Time Domain Datapoint Class">
+
+.. only:: html
+
+ .. figure:: /examples/Datapoints/images/thumb/sphx_glr_plot_aerotem_datapoint_thumb.png
+     :alt: Time Domain Datapoint Class
+
+     :ref:`sphx_glr_examples_Datapoints_plot_aerotem_datapoint.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/Datapoints/plot_aerotem_datapoint
 .. raw:: html
 
     <div class="sphx-glr-clear"></div>

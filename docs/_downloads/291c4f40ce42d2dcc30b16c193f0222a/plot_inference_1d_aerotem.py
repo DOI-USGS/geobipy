@@ -11,6 +11,8 @@ from geobipy import serial_geobipy
 from geobipy import example_path
 from geobipy import Inference3D
 import numpy as np
+import os
+import shutil
 
 #%%
 # Running GeoBIPy to invert data
@@ -22,6 +24,14 @@ import numpy as np
 # The directory where HDF files will be stored
 output_directory = "..//supplementary//time_domain_inversion//results"
 ################################################################################
+
+for filename in os.listdir(output_directory):
+    file_path = os.path.join(output_directory, filename)
+    try:
+        if os.path.isfile(file_path) or os.path.islink(file_path):
+            os.unlink(file_path)
+    except Exception as e:
+        print('Failed to delete %s. Reason: %s' % (file_path, e))
 
 ################################################################################
 # The parameter file defines the set of user parameters needed to run geobipy.

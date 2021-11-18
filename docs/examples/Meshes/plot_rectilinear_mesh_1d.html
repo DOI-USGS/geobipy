@@ -8,10 +8,10 @@
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery-binder.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery-dataframe.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -173,22 +173,19 @@ to download the full example code</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">(</span><span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot rectilinear mesh 1d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_1d_001.png" />
-<p>Or Pcolor the mesh showing. An array of cell values is used as the colour.</p>
+<img src="../../_images/sphx_glr_plot_rectilinear_mesh_1d_001.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_1d_001.png" alt="plot rectilinear mesh 1d" class = "sphx-glr-single-img"/><p>Or Pcolor the mesh showing. An array of cell values is used as the colour.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">arr</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">rm</span><span class="o">.</span><span class="n">nCells</span><span class="o">.</span><span class="n">value</span><span class="p">),</span> <span class="s2">&quot;Name&quot;</span><span class="p">,</span> <span class="s2">&quot;Units&quot;</span><span class="p">)</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot rectilinear mesh 1d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_1d_002.png" />
-<p>Mask the mesh cells by a distance</p>
+<img src="../../_images/sphx_glr_plot_rectilinear_mesh_1d_002.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_1d_002.png" alt="plot rectilinear mesh 1d" class = "sphx-glr-single-img"/><p>Mask the mesh cells by a distance</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rm_masked</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">arr2</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">mask_cells</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">arr</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">rm_masked</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">StatArray</span><span class="p">(</span><span class="n">arr2</span><span class="p">),</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot rectilinear mesh 1d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_1d_003.png" />
-</section>
+<img src="../../_images/sphx_glr_plot_rectilinear_mesh_1d_003.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_1d_003.png" alt="plot rectilinear mesh 1d" class = "sphx-glr-single-img"/></section>
 <section id="log-space-rectilinear-mesh">
 <h2>Log-space rectilinear mesh<a class="headerlink" href="#log-space-rectilinear-mesh" title="Permalink to this headline"></a></h2>
 <p>Instantiate a new 1D rectilinear mesh by specifying cell centres or edges.
@@ -204,8 +201,7 @@ Here we use edges</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">(</span><span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot rectilinear mesh 1d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_1d_004.png" />
-<p>Or Pcolor the mesh showing. An array of cell values is used as the colour.</p>
+<img src="../../_images/sphx_glr_plot_rectilinear_mesh_1d_004.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_1d_004.png" alt="plot rectilinear mesh 1d" class = "sphx-glr-single-img"/><p>Or Pcolor the mesh showing. An array of cell values is used as the colour.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">arr</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">rm</span><span class="o">.</span><span class="n">nCells</span><span class="o">.</span><span class="n">value</span><span class="p">),</span> <span class="s2">&quot;Name&quot;</span><span class="p">,</span> <span class="s2">&quot;Units&quot;</span><span class="p">)</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -228,8 +224,7 @@ Here we use edges</p>
 <span class="n">rm</span> <span class="o">=</span> <span class="n">RectilinearMesh1D</span><span class="p">(</span><span class="n">widths</span><span class="o">=</span><span class="n">widths</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot rectilinear mesh 1d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_1d_005.png" />
-</section>
+<img src="../../_images/sphx_glr_plot_rectilinear_mesh_1d_005.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_1d_005.png" alt="plot rectilinear mesh 1d" class = "sphx-glr-single-img"/></section>
 <section id="randomness-and-model-perturbations">
 <h2>Randomness and Model Perturbations<a class="headerlink" href="#randomness-and-model-perturbations" title="Permalink to this headline"></a></h2>
 <p>We can set the priors on the 1D model by assigning minimum and maximum layer
@@ -265,8 +260,7 @@ Here we force the creation of a layer.</p>
 <span class="n">rm</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="plot rectilinear mesh 1d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_1d_006.png" />
-<p>We can then perturb the layers of the model</p>
+<img src="../../_images/sphx_glr_plot_rectilinear_mesh_1d_006.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_1d_006.png" alt="plot rectilinear mesh 1d" class = "sphx-glr-single-img"/><p>We can then perturb the layers of the model</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000</span><span class="p">):</span>
     <span class="n">rm</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">perturb</span><span class="p">()</span>
     <span class="n">rm</span><span class="o">.</span><span class="n">update_posteriors</span><span class="p">()</span>
@@ -293,12 +287,10 @@ Here we force the creation of a layer.</p>
 </pre></div>
 </div>
 <ul class="sphx-glr-horizontal">
-<li><img alt="plot rectilinear mesh 1d" class="sphx-glr-multi-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_1d_007.png" />
-</li>
-<li><img alt="plot rectilinear mesh 1d" class="sphx-glr-multi-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_1d_008.png" />
-</li>
+<li><img src="../../_images/sphx_glr_plot_rectilinear_mesh_1d_007.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_1d_007.png" alt="plot rectilinear mesh 1d" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../_images/sphx_glr_plot_rectilinear_mesh_1d_008.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_1d_008.png" alt="plot rectilinear mesh 1d" class = "sphx-glr-multi-img"/></li>
 </ul>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  1.278 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  1.385 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-meshes-plot-rectilinear-mesh-1d-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/553c44c8f0a927032d89154ad011db0e/plot_rectilinear_mesh_1d.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_rectilinear_mesh_1d.py</span></code></a></p>
