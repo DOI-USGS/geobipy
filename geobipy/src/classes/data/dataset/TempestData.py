@@ -6,6 +6,7 @@
 .. moduleauthor:: Leon Foks
 
 """
+from pandas import read_csv
 from ...pointcloud.PointCloud3D import PointCloud3D
 from .TdemData import TdemData
 from ..datapoint.Tempest_datapoint import Tempest_datapoint
@@ -52,133 +53,360 @@ class TempestData(TdemData):
 
     """
 
-    def __init__(self, systems=None, **kwargs):
-        """ Initialize the TDEM data """
+    # def __init__(self, system=None, **kwargs):
+    #     """ Initialize the TDEM data """
 
-        # Data Class containing xyz and channel values
-        super().__init__(systems, **kwargs)
+    #     # Data Class containing xyz and channel values
+    #     super().__init__(system, **kwargs)
 
-        self.primary_field = kwargs.get('primary_field', None)
-        self.secondary_field = kwargs.get('secondary_field', None)
-        self.predicted_primary_field = kwargs.get('predicted_primary_field', None)
-        self.predicted_secondary_field = kwargs.get('predicted_secondary_field', None)
+    #     self.primary_field = kwargs.get('primary_field')
+    #     self.secondary_field = kwargs.get('secondary_field')
+    #     self.predicted_primary_field = kwargs.get('predicted_primary_field')
+    #     self.predicted_secondary_field = kwargs.get('predicted_secondary_field')
 
-    @TdemData.components.setter
-    def components(self, values):
+    # @TdemData.channelNames.setter
+    # def channelNames(self, values):
+    #     if values is None:
+    #         self._channelNames = []
+    #         for i in range(self.nSystems):
+    #             # Set the channel names
+    #             for ic in range(self.n_components):
+    #                 for iTime in range(self.nTimes[i]):
+    #                     self._channelNames.append('S{} time {:.3e}'.format(self.components[ic].upper(), self.system[i].windows.centre[iTime]))
+    #     else:
+    #         assert all((isinstance(x, str) for x in values))
+    #         assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
+    #         self._channelNames = values
 
-        if values is None:
-            values = ['x', 'z']
-        else:
+    # @TdemData.components.setter
+    # def components(self, values):
 
-            if isinstance(values, str):
-                values = [values]
+    #     if values is None:
+    #         values = ['x', 'z']
+    #     else:
 
-            assert np.all([isinstance(x, str) for x in values]), TypeError('components_per_channel must be list of str')
+    #         if isinstance(values, str):
+    #             values = [values]
 
-        self._components = values
+    #         assert np.all([isinstance(x, str) for x in values]), TypeError('components_per_channel must be list of str')
 
-    @TdemData.data.getter
-    def data(self):
-        for i in range(self.n_components):
-            ic = self._component_indices(i, 0)
-            self._data[:, ic] = self.primary_field[:, i][:, None] + self.secondary_field[:, ic]
-        return self._data
+    #     self._components = values
+
+    # @TdemData.data.getter
+    # def data(self):
+
+    #     if np.size(self._data, 0) == 0:
+    #         self._data = StatArray.StatArray((self.nPoints, self.nChannels), "Data", self.units)
+
+    #     for i in range(self.n_components):
+    #         ic = self._component_indices(i, 0)
+    #         self._data[:, ic] = self.primary_field[:, i][:, None] + self.secondary_field[:, ic]
+    #     return self._data
 
     @property
     def datapoint_type(self):
         return Tempest_datapoint
 
-    @property
-    def primary_field(self):
-        """The data. """
-        if np.size(self._primary_field, 0) == 0:
-            self._primary_field = StatArray.StatArray((self.nPoints, self.n_components), "Primary field", self.units)
-        return self._primary_field
+    # @property
+    # def primary_field(self):
+    #     """The data. """
+    #     if np.size(self._primary_field, 0) == 0:
+    #         self._primary_field = StatArray.StatArray((self.nPoints, self.n_components), "Primary field", self.units)
+    #     return self._primary_field
 
 
-    @primary_field.setter
-    def primary_field(self, values):
-        shp = (self.nPoints, self.n_components)
-        if values is None:
-            self._primary_field = StatArray.StatArray(shp, "Primary field", self.units)
-        else:
-            if self.nPoints == 0:
-                self.nPoints = np.size(values, 0)
-            # if self.nChannels == 0:
-            #     self.channels_per_system = np.size(values, 1)
-            shp = (self.nPoints, self.n_components)
-            assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("primary_field must have shape {}".format(shp))
-            self._primary_field = StatArray.StatArray(values)
+    # @primary_field.setter
+    # def primary_field(self, values):
+    #     shp = (self.nPoints, self.n_components)
+    #     if values is None:
+    #         self._primary_field = StatArray.StatArray(shp, "Primary field", self.units)
+    #     else:
+    #         if self.nPoints == 0:
+    #             self.nPoints = np.size(values, 0)
+    #         # if self.nChannels == 0:
+    #         #     self.channels_per_system = np.size(values, 1)
+    #         shp = (self.nPoints, self.n_components)
+    #         assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("primary_field must have shape {}".format(shp))
+    #         self._primary_field = StatArray.StatArray(values)
 
-    @property
-    def predicted_primary_field(self):
-        """The data. """
-        if np.size(self._primary_field, 0) == 0:
-            self._primary_field = StatArray.StatArray((self.nPoints, self.n_components), "Primary field", self.units)
-        return self._primary_field
+    # @property
+    # def predicted_primary_field(self):
+    #     """The data. """
+    #     if np.size(self._primary_field, 0) == 0:
+    #         self._primary_field = StatArray.StatArray((self.nPoints, self.n_components), "Primary field", self.units)
+    #     return self._primary_field
 
 
-    @predicted_primary_field.setter
-    def predicted_primary_field(self, values):
-        shp = (self.nPoints, self.n_components)
-        if values is None:
-            self._predicted_primary_field = StatArray.StatArray(shp, "Predicted primary field", self.units)
-        else:
-            if self.nPoints == 0:
-                self.nPoints = np.size(values, 0)
-            # if self.nChannels == 0:
-            #     self.channels_per_system = np.size(values, 1)
-            shp = (self.nPoints, self.n_components)
-            assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("predicted_primary_field must have shape {}".format(shp))
-            self._predicted_primary_field = StatArray.StatArray(values)
+    # @predicted_primary_field.setter
+    # def predicted_primary_field(self, values):
+    #     shp = (self.nPoints, self.n_components)
+    #     if values is None:
+    #         self._predicted_primary_field = StatArray.StatArray(shp, "Predicted primary field", self.units)
+    #     else:
+    #         if self.nPoints == 0:
+    #             self.nPoints = np.size(values, 0)
+    #         # if self.nChannels == 0:
+    #         #     self.channels_per_system = np.size(values, 1)
+    #         shp = (self.nPoints, self.n_components)
+    #         assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("predicted_primary_field must have shape {}".format(shp))
+    #         self._predicted_primary_field = StatArray.StatArray(values)
 
-    @property
-    def secondary_field(self):
-        """The data. """
-        if np.size(self._secondary_field, 0) == 0:
-            self._secondary_field = StatArray.StatArray((self.nPoints, self.nChannels), "Secondary field", self.units)
-        return self._secondary_field
+    # @property
+    # def secondary_field(self):
+    #     """The data. """
+    #     if np.size(self._secondary_field, 0) == 0:
+    #         self._secondary_field = StatArray.StatArray((self.nPoints, self.nChannels), "Secondary field", self.units)
+    #     return self._secondary_field
 
-    @secondary_field.setter
-    def secondary_field(self, values):
-        shp = (self.nPoints, self.nChannels)
-        if values is None:
-            self._secondary_field = StatArray.StatArray(shp, "Secondary field", self.units)
-        else:
-            if self.nPoints == 0:
-                self.nPoints = np.size(values, 0)
-            if self.nChannels == 0:
-                self.channels_per_system = np.size(values, 1)
-            shp = (self.nPoints, self.nChannels)
-            assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("seconday_field must have shape {}".format(shp))
-            self._secondary_field = StatArray.StatArray(values)
+    # @secondary_field.setter
+    # def secondary_field(self, values):
+    #     shp = (self.nPoints, self.nChannels)
+    #     if values is None:
+    #         self._secondary_field = StatArray.StatArray(shp, "Secondary field", self.units)
+    #     else:
+    #         if self.nPoints == 0:
+    #             self.nPoints = np.size(values, 0)
+    #         if self.nChannels == 0:
+    #             self.channels_per_system = np.size(values, 1)
+    #         shp = (self.nPoints, self.nChannels)
+    #         assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("seconday_field must have shape {}".format(shp))
+    #         self._secondary_field = StatArray.StatArray(values)
 
-    @property
-    def predicted_secondary_field(self):
-        """The data. """
-        if np.size(self._secondary_field, 0) == 0:
-            self._predicted_secondary_field = StatArray.StatArray((self.nPoints, self.nChannels), "Predicted secondary field", self.units)
-        return self._predicted_secondary_field
+    # @property
+    # def predicted_secondary_field(self):
+    #     """The data. """
+    #     if np.size(self._secondary_field, 0) == 0:
+    #         self._predicted_secondary_field = StatArray.StatArray((self.nPoints, self.nChannels), "Predicted secondary field", self.units)
+    #     return self._predicted_secondary_field
 
-    @predicted_secondary_field.setter
-    def predicted_secondary_field(self, values):
-        shp = (self.nPoints, self.nChannels)
-        if values is None:
-            self._predicted_secondary_field = StatArray.StatArray(shp, "Predicted secondary field", self.units)
-        else:
-            if self.nPoints == 0:
-                self.nPoints = np.size(values, 0)
-            if self.nChannels == 0:
-                self.channels_per_system = np.size(values, 1)
-            shp = (self.nPoints, self.nChannels)
-            assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("predicted_seconday_field must have shape {}".format(shp))
-            self._predicted_secondary_field = StatArray.StatArray(values)
+    # @predicted_secondary_field.setter
+    # def predicted_secondary_field(self, values):
+    #     shp = (self.nPoints, self.nChannels)
+    #     if values is None:
+    #         self._predicted_secondary_field = StatArray.StatArray(shp, "Predicted secondary field", self.units)
+    #     else:
+    #         if self.nPoints == 0:
+    #             self.nPoints = np.size(values, 0)
+    #         if self.nChannels == 0:
+    #             self.channels_per_system = np.size(values, 1)
+    #         shp = (self.nPoints, self.nChannels)
+    #         assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("predicted_seconday_field must have shape {}".format(shp))
+    #         self._predicted_secondary_field = StatArray.StatArray(values)
 
-    def append(self, other):
+    # @TdemData.std.getter
+    # def std(self):
+    #     """The data. """
+    #     if np.size(self._std, 0) == 0:
+    #         self._std = StatArray.StatArray((self.nPoints, self.nChannels), "Standard deviation", self.units)
 
-        super().append(self, other)
+    #     relative_error = self.relative_error * self.secondary_field
+    #     self._std = np.sqrt((relative_error**2.0) + (self.additive_error**2.0))
 
-        self.primary_field = np.hstack(self.primary_field, other.primary_field)
+    #     return self._std
+
+    def _as_dict(self):
+        out, order = super()._as_dict()
+
+        for i, name in enumerate(self.channelNames):
+            out[name.replace(' ', '_')] = self.secondary_field[:, i]
+
+        for i, c in enumerate(self.components):
+            out['P{}'.format(c.upper())] = self.primary_field[:, i]
+
+        order = [*order[:15], *['P{}'.format(c.upper()) for c in self.components], *order[15:]]
+
+        return out, order
+
+
+    # def append(self, other):
+
+    #     super().append(self, other)
+
+    #     self.primary_field = np.hstack(self.primary_field, other.primary_field)
+
+    @classmethod
+    def read_csv(cls, data_filename, system_filename):
+        """Reads the data and system parameters from file
+
+        Parameters
+        ----------
+        dataFilename : str or list of str
+            Time domain data file names
+        systemFilename : str or list of str
+            Time domain system file names
+
+        Notes
+        -----
+        File Format
+
+        The data columns are read in according to the column names in the first line.  The header line should contain at least the following column names. Extra columns may exist, but will be ignored. In this description, the column name or its alternatives are given followed by what the name represents. Optional columns are also described.
+
+        **Required columns**
+
+        line
+            Line number for the data point
+
+        id or fid
+            Id number of the data point, these be unique
+
+        x or northing or n
+            Northing co-ordinate of the data point
+
+        y or easting or e
+            Easting co-ordinate of the data point
+
+        z or dtm or dem\_elev or dem\_np or topo
+            Elevation of the ground at the data point
+
+        alt or laser or bheight
+            Altitude of the transmitter coil
+
+        Off[0] to Off[nWindows-1]  (with the number and brackets)
+           The measurements for each time specified in the accompanying system file under Receiver Window Times
+
+        **Optional columns**
+
+        If any loop orientation columns are omitted the loop is assumed to be horizontal.
+
+        TxPitch
+            Pitch of the transmitter loop
+        TxRoll
+            Roll of the transmitter loop
+        TxYaw
+            Yaw of the transmitter loop
+        RxPitch
+            Pitch of the receiver loop
+        RxRoll
+            Roll of the receiver loop
+        RxYaw
+            Yaw of the receiver loop
+
+        OffErr[0] to ErrOff[nWindows-1]
+            Error estimates for the data
+
+
+        See Also
+        --------
+        INFORMATION ON TD SYSTEMS
+
+
+        """
+
+        # Get the number of systems to use
+        if (isinstance(system_filename, str)):
+            system_filename = [system_filename]
+
+        nSystems = len(system_filename)
+
+        self = cls(system=system_filename)
+
+        self._nPoints, iC, iR, iT, iOffset, iSecondary, iStd, iPrimary = TempestData._csv_channels(data_filename)
+
+        assert len(iSecondary) == self.nChannels, Exception("Number of off time columns {} in {} does not match total number of times {} in system files \n {}".format(
+            len(iSecondary), data_filename, self.nChannels, self.fileInformation()))
+
+        if len(iStd) > 0:
+            assert len(iStd) == len(iSecondary), Exception("Number of Off time standard deviation estimates does not match number of Off time data columns in file {}. \n {}".format(data_filename, self.fileInformation()))
+
+        # Get all readable column indices for the first file.
+        channels = iC + iR + iT + iOffset + iSecondary + iPrimary
+        if len(iStd) > 0:
+            channels += iStd
+
+        # Read in the columns from the first data file
+        try:
+            df = read_csv(data_filename, usecols=channels, skipinitialspace = True)
+        except:
+            df = read_csv(data_filename, usecols=channels, delim_whitespace=True, skipinitialspace = True)
+        df = df.replace('NaN', np.nan)
+
+        # Assign columns to variables
+        self.lineNumber = df[iC[0]].values
+        self.fiducial = df[iC[1]].values
+        self.x = df[iC[2]].values
+        self.y = df[iC[3]].values
+        self.z = df[iC[4]].values
+        self.elevation = df[iC[5]].values
+
+        self.transmitter = None
+        for i in range(self.nPoints):
+            self.transmitter[i] = CircularLoop(x=self.x[i], y=self.y[i], z=self.z[i],
+                                               pitch=df[iT[0]].values[i], roll=df[iT[1]].values[i], yaw=df[iT[2]].values[i],
+                                               radius=self.system[0].loopRadius())
+
+        loopOffset = df[iOffset].values
+
+        # Assign the orientations of the acquisistion loops
+        self.receiver = None
+        for i in range(self.nPoints):
+            self.receiver[i] = CircularLoop(x = self.transmitter[i].x + loopOffset[i, 0],
+                                            y = self.transmitter[i].y + loopOffset[i, 1],
+                                            z = self.transmitter[i].z + loopOffset[i, 2],
+                                            pitch=df[iR[0]].values[i], roll=df[iR[1]].values[i], yaw=df[iR[2]].values[i],
+                                            radius=self.system[0].loopRadius())
+
+
+        self.primary_field[:, :] = df[iPrimary].values
+        self.secondary_field[:, :] = df[iSecondary].values
+        
+        # If the data error columns are given, assign them
+        self.std;
+        if len(iStd) > 0:
+            self._std[:, :] = df[iStd].values    
+
+        self.check()
+
+        return self
+
+    # def csv_channels(self, data_filename):
+    
+    #     self._nPoints, self._iC, self._iR, self._iT, self._iOffset, self._iD, self._iS = self._csv_channels(data_filename)
+
+    #     self._channels = []
+    #     for i in range(self.nSystems):
+    #         channels = self._iC[i] + self._iR[i] + self._iT[i] + self._iOffset[i] + self._iD[i]
+    #         if not self._iS[i] is None:
+    #             channels += self._iS[i]
+    #         self._channels.append(channels)
+
+    #     return self._channels
+
+    @staticmethod
+    def _csv_channels(data_filename):
+        """Reads the column indices for the co-ordinates, loop orientations, and data from the TdemData file.
+
+        Parameters
+        ----------
+        dataFilename : str or list of str
+            Path to the data file(s)
+        system : list of geobipy.TdemSystem
+            System class for each time domain acquisition system.
+
+        Returns
+        -------
+        indices : list of ints
+            Size 6 indices to line, fid, easting, northing, height, and elevation.
+        rLoopIndices : list of ints
+            Size 3 indices to pitch, roll, and yaw, for the receiver loop.
+        tLoopIndices : list of ints
+            Size 3 indices to pitch, roll, and yaw, for the transmitter loop.
+        offDataIndices : list of ints
+            Indices to the off time data columns.  Size == number of time windows.
+        offErrIndices : list of ints
+            Indices to the off time uncertainty estimate columns.  Size == number of time windows.
+
+        """
+        channels = fIO.get_column_name(data_filename)
+
+        primary_names = ('px', 'py', 'pz')
+        iPrimary = []
+        for channel in channels:
+            cTmp = channel.lower()
+            if cTmp in primary_names:
+                iPrimary.append(channel)
+        iPrimary.sort()
+
+        return *TdemData._csv_channels(data_filename), iPrimary
 
     @classmethod
     def read_netcdf(cls, dataFilename, systemFilename, indices=None):
@@ -249,7 +477,7 @@ class TempestData(TdemData):
                         y=np.asarray(gdf['Northing'][indices]),
                         z=np.asarray(gdf['Tx_Height'][indices]),
                         elevation=np.asarray(gdf['DTM'][indices]),
-                        systems=systemFilename)
+                        system=systemFilename)
 
             # Assign the orientations of the acquisistion loops
             pitch = np.asarray(gdf['Tx_Pitch'][indices])
@@ -374,56 +602,6 @@ class TempestData(TdemData):
             self._file.append(h5py.File(f, 'r'))
         self._nPoints = self._file[0]['linedata/Easting'].size
 
-    def _close_data_files(self):
-        for f in self._file:
-            if f.__bool__():
-                f.close()
-
-    def check(self):
-        if (np.any(self._data[~np.isnan(self._data)] <= 0.0)):
-            print("Warning: Your data contains values that are <= 0.0")
-
-    def estimateAdditiveError(self):
-        """ Uses the late times after 1ms to estimate the additive errors and error bounds in the data. """
-        for i in range(self.nSystems):
-            h = 'System {} \n'.format(i)
-            iS = self._systemIndices(i)
-            D = self._data[:, iS]
-            t = self.times(i)
-            i1ms = t.searchsorted(1e-3)
-
-            if (i1ms < t.size):
-                lateD = D[:, i1ms:]
-                if np.all(np.isnan(lateD)):
-                    j = i1ms - 1
-                    d = D[:, j]
-                    while np.all(np.isnan(d)) and j > 0:
-                        j -= 1
-                        d = D[:, j]
-
-                    h += 'All data values for times > 1ms are NaN \nUsing the last time gate with non-NaN values.\n'
-                else:
-                    d = lateD
-                    h += 'Using {} time gates after 1ms\n'.format(self.nTimes[i] - i1ms)
-
-            else:
-                h = 'System {} has no time gates after 1ms \nUsing the last time gate with non-NaN values. \n'.format(i)
-
-                j = -1
-                d = D[:, j]
-                while np.all(np.isnan(d)) and j > 0:
-                    j -= 1
-                    d = D[:, j]
-
-            s = np.nanstd(d)
-            h +=    '  Minimum: {} \n'\
-                    '  Maximum: {} \n'\
-                    '  Median:  {} \n'\
-                    '  Mean:    {} \n'\
-                    '  Std:     {} \n'\
-                    '  4Std:    {} \n'.format(np.nanmin(d), np.nanmax(d), np.nanmedian(d), np.nanmean(d), s, 4.0*s)
-            print(h)
-
     def datapoint(self, index=None, fiducial=None):
         """Get the ith data point from the data set
 
@@ -469,110 +647,29 @@ class TempestData(TdemData):
                              fiducial = self.fiducial[i],
                              )
 
-    def times(self, system=0):
-        """ Obtain the times from the system file """
-        assert 0 <= system < self.nSystems, ValueError('system must be in (0, {}]'.format(self.nSystems))
-        return StatArray.StatArray(self.system[system].windows.centre, 'Time', 'ms')
+    # def times(self, system=0):
+    #     """ Obtain the times from the system file """
+    #     assert 0 <= system < self.nSystems, ValueError('system must be in (0, {}]'.format(self.nSystems))
+    #     return StatArray.StatArray(self.system[system].windows.centre, 'Time', 'ms')
 
-    def __getitem__(self, i):
-        """ Define item getter for TdemData """
-        if not isinstance(i, slice):
-            i = np.unique(i)
-        return TempestData(self.system,
-                        x = self.x[i],
-                        y = self.y[i],
-                        z = self.z[i],
-                        elevation = self.elevation[i],
-                        lineNumber = self.lineNumber[i],
-                        fiducial = self.fiducial[i],
-                        transmitter = [self.transmitter[j] for j in i],
-                        receiver = [self.receiver[j] for j in i],
-                        secondary_field = self.secondary_field[i, :],
-                        primary_field = self.primary_field[i, :],
-                        std = self.std[i, :],
-                        channelNames = self.channelNames
-                        )
-
-    def fileInformation(self):
-        s =('\nThe data columns are read in according to the column names in the first line \n'
-            'The header line should contain at least the following column names. Extra columns may exist, but will be ignored \n'
-            'In this description, the column name or its alternatives are given followed by what the name represents \n'
-            'Optional columns are also described \n'
-            'Required columns'
-            'line \n'
-            '    Line number for the data point\n'
-            'id or fid \n'
-            '    Id number of the data point, these be unique\n'
-            'x or northing or n \n'
-            '    Northing co-ordinate of the data point, (m)\n'
-            'y or easting or e \n'
-            '    Easting co-ordinate of the data point, (m)\n'
-            'z or alt or laser or bheight \n'
-            '    Altitude of the transmitter coil above ground level (m)\n'
-            'dtm or dem_elev or dem_np \n'
-            '    Elevation of the ground at the data point (m)\n'
-            'txrx_dx \n'
-            '    Distance in x between transmitter and reciever (m)\n'
-            'txrx_dy \n'
-            '    Distance in y between transmitter and reciever (m)\n'
-            'txrx_dz \n'
-            '    Distance in z between transmitter and reciever (m)\n'
-            'TxPitch \n'
-            '    Pitch of the transmitter loop\n'
-            'TxRoll \n'
-            '    Roll of the transmitter loop\n'
-            'TxYaw \n'
-            '    Yaw of the transmitter loop\n'
-            'RxPitch \n'
-            '    Pitch of the receiver loop\n'
-            'RxRoll \n'
-            '    Roll of the receiver loop\n'
-            'RxYaw \n'
-            '    Yaw of the receiver loop\n'
-            'Off[0] Off[1] ... Off[nWindows]  - with the number and square brackets\n'
-            '    The measurements for each time specified in the accompanying system file under Receiver Window Times \n'
-            'Optional columns\n'
-            'OffErr[0] OffErr[1] ... Off[nWindows]\n'
-            '    Estimates of standard deviation for each off time measurement.')
-        return s
-
-
-    def plot(self, system=0, channels=None, xAxis='x', **kwargs):
-        """ Plots the data
-
-        Parameters
-        ----------
-        system : int
-            System to plot
-        channels : sequence of ints
-            Channels to plot
-
-        """
-
-        x = self.getXAxis(xAxis)
-
-        ax = plt.gca()
-        if channels is None:
-            nCols = self.nTimes[system]
-            for i in range(nCols):
-                i1 = self.systemOffset[system] + i
-                cP.plot(x, self.data[:, i1], label=self.channelNames[i1], **kwargs)
-        else:
-            channels = np.atleast_1d(channels)
-            for j, i in enumerate(channels):
-                cP.plot(x, self.data[:, i], label=self.channelNames[i], **kwargs)
-
-        box = ax.get_position()
-        ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
-
-        # Put a legend to the right of the current axis
-        leg=ax.legend(loc='center left', bbox_to_anchor=(1, 0.5),fancybox=True)
-        leg.set_title(self.data.getNameUnits())
-
-        plt.xlabel(cF.getNameUnits(x))
-
-
-
+    # def __getitem__(self, i):
+    #     """ Define item getter for TdemData """
+    #     if not isinstance(i, slice):
+    #         i = np.unique(i)
+    #     return TempestData(self.system,
+    #                     x = self.x[i],
+    #                     y = self.y[i],
+    #                     z = self.z[i],
+    #                     elevation = self.elevation[i],
+    #                     lineNumber = self.lineNumber[i],
+    #                     fiducial = self.fiducial[i],
+    #                     transmitter = [self.transmitter[j] for j in i],
+    #                     receiver = [self.receiver[j] for j in i],
+    #                     secondary_field = self.secondary_field[i, :],
+    #                     primary_field = self.primary_field[i, :],
+    #                     std = self.std[i, :],
+    #                     channelNames = self.channelNames
+    #                     )
 
     def fromHdf(self, grp, **kwargs):
         """ Reads the object from a HDF group """
@@ -607,33 +704,33 @@ class TempestData(TdemData):
         return self
 
 
-    def Bcast(self, world, root=0, system=None):
-        """Broadcast the TdemData using MPI
+    # def Bcast(self, world, root=0, system=None):
+    #     """Broadcast the TdemData using MPI
 
-        Parameters
-        ----------
+    #     Parameters
+    #     ----------
 
-        """
+    #     """
 
-        out = super().Bcast(world, root, system)
+    #     out = super().Bcast(world, root, system)
 
-        out._primary_field = self.primary_field.Bcast(world, root=root)
-        out._secondary_field = self.secondary_field.Bcast(world, root=root)
-        out._predicted_primary_field = self.predicted_primary_field.Bcast(world, root=root)
-        out._predicted_secondary_field = self.predicted_secondary_field.Bcast(world, root=root)
+    #     out._primary_field = self.primary_field.Bcast(world, root=root)
+    #     out._secondary_field = self.secondary_field.Bcast(world, root=root)
+    #     out._predicted_primary_field = self.predicted_primary_field.Bcast(world, root=root)
+    #     out._predicted_secondary_field = self.predicted_secondary_field.Bcast(world, root=root)
 
-        return out
+    #     return out
 
 
-    def Scatterv(self, starts, chunks, world, root=0, system=None):
-        """ Scatterv the TdemData using MPI """
+    # def Scatterv(self, starts, chunks, world, root=0, system=None):
+    #     """ Scatterv the TdemData using MPI """
 
-        out = super().Scatterv(starts, chunks, world, root)
+    #     out = super().Scatterv(starts, chunks, world, root)
 
-        out.primary_field = self.primary_field.Scatterv(starts, chunks, world, root=root)
-        out.secondary_field = self.secondary_field.Scatterv(starts, chunks, world, root=root)
-        out.predicted_primary_field = self.predicted_primary_field.Scatterv(starts, chunks, world, root=root)
-        out.predicted_secondary_field = self.predicted_secondary_field.Scatterv(starts, chunks, world, root=root)
+    #     out.primary_field = self.primary_field.Scatterv(starts, chunks, world, root=root)
+    #     out.secondary_field = self.secondary_field.Scatterv(starts, chunks, world, root=root)
+    #     out.predicted_primary_field = self.predicted_primary_field.Scatterv(starts, chunks, world, root=root)
+    #     out.predicted_secondary_field = self.predicted_secondary_field.Scatterv(starts, chunks, world, root=root)
 
-        return out
+    #     return out
 

@@ -16,6 +16,8 @@ from ...base import utilities as cF
 from scipy.sparse import (kron, diags)
 from scipy import interpolate
 
+
+
 try:
     from pyvtk import VtkData, CellData, Scalars, PolyData
 except:
@@ -251,9 +253,9 @@ class RectilinearMesh2D(Mesh):
         if isinstance(values, dict):
             # mesh of the z axis values
             values = RectilinearMesh1D.RectilinearMesh1D(
-                        centres=values.get('xCentres', None),
-                        edges=values.get('xEdges', None),
-                        log=values.get('xlog', None),
+                        centres=values.get('xCentres'),
+                        edges=values.get('xEdges'),
+                        log=values.get('xlog'),
                         relativeTo=values.get('xrelativeTo', 0.0))
         assert isinstance(values, RectilinearMesh1D.RectilinearMesh1D), TypeError('x must be a RectilinearMesh1D')
         self._x = values
@@ -268,9 +270,9 @@ class RectilinearMesh2D(Mesh):
         if isinstance(values, dict):
             # mesh of the z axis values
             values = RectilinearMesh1D.RectilinearMesh1D(
-                        centres=values.get('yCentres', None),
-                        edges=values.get('yEdges', None),
-                        log=values.get('ylog', None),
+                        centres=values.get('yCentres'),
+                        edges=values.get('yEdges'),
+                        log=values.get('ylog'),
                         relativeTo=values.get('yrelativeTo', 0.0))
 
         assert isinstance(values, RectilinearMesh1D.RectilinearMesh1D), TypeError('y must be a RectilinearMesh1D')
@@ -288,9 +290,9 @@ class RectilinearMesh2D(Mesh):
                 values = None
             else:
                 values = RectilinearMesh1D.RectilinearMesh1D(
-                        centres=values.get('zCentres', None),
-                        edges=values.get('zEdges', None),
-                        log=values.get('zlog', None),
+                        centres=values.get('zCentres'),
+                        edges=values.get('zEdges'),
+                        log=values.get('zlog'),
                         relativeTo=values.get('zrelativeTo', 0.0))
 
         if values is None:
@@ -777,6 +779,10 @@ class RectilinearMesh2D(Mesh):
             out[0, :] = self.z.cellIndex(y, clip=clip)
         return np.squeeze(out)
 
+    def line_indices(self, x, y):
+        i = self.cellIndices(x, y)
+        return cF.bresenham(i[0, :], i[1, :])
+
     def ravelIndices(self, ixy, order='C'):
         """Return a global index into a 1D array given the two cell indices in x and z.
 
@@ -812,75 +818,6 @@ class RectilinearMesh2D(Mesh):
         """
 
         return np.unravel_index(indices, self.shape, order=order)
-
-
-    # def pcolor(self, values, xAxis='x', **kwargs):
-    #     """Create a pseudocolour plot.
-
-    #     Can take any other matplotlib arguments and keyword arguments e.g. cmap etc.
-
-    #     Parameters
-    #     ----------
-    #     values : array_like
-    #         2D array of colour values
-    #     xAxis : str
-    #         If xAxis is 'x', the horizontal axis uses self.x
-    #         If xAxis is 'y', the horizontal axis uses self.y
-    #         If xAxis is 'r', the horizontal axis uses cumulative distance along the line
-
-    #     Other Parameters
-    #     ----------------
-    #     alpha : scalar or array_like, optional
-    #         If alpha is scalar, behaves like standard matplotlib alpha and opacity is applied to entire plot
-    #         If array_like, each pixel is given an individual alpha value.
-    #     log : 'e' or float, optional
-    #         Take the log of the colour to a base. 'e' if log = 'e', and a number e.g. log = 10.
-    #         Values in c that are <= 0 are masked.
-    #     equalize : bool, optional
-    #         Equalize the histogram of the colourmap so that all colours have an equal amount.
-    #     nbins : int, optional
-    #         Number of bins to use for histogram equalization.
-    #     xscale : str, optional
-    #         Scale the x axis? e.g. xscale = 'linear' or 'log'
-    #     yscale : str, optional
-    #         Scale the y axis? e.g. yscale = 'linear' or 'log'.
-    #     flipX : bool, optional
-    #         Flip the X axis
-    #     flipY : bool, optional
-    #         Flip the Y axis
-    #     grid : bool, optional
-    #         Plot the grid
-    #     noColorbar : bool, optional
-    #         Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.
-    #     trim : bool, optional
-    #         Set the x and y limits to the first and last non zero values along each axis.
-    #     x_mask : float, optional
-    #         Mask along the x axis using this distance.
-    #         Defaults to None.
-    #     z_mask : float, optional
-    #         Mask along the z axis using this distance.
-    #         Defaults to None.
-
-    #     See Also
-    #     --------
-    #     geobipy.plotting.pcolor : For non matplotlib keywords.
-    #     matplotlib.pyplot.pcolormesh : For additional keyword arguments you may use.
-
-    #     """
-
-    #     assert np.all(values.shape == self.shape), ValueError("values must have shape {}".format(self.shape))
-
-    #     x_mask = kwargs.pop('x_mask', None)
-    #     z_mask = kwargs.pop('z_mask', None)
-
-    #     if np.sum([x is None for x in [x_mask, z_mask]]) < 2:
-    #         masked, x_indices, z_indices, values = self.mask_cells(xAxis, x_mask, z_mask, values)
-    #         ax, pm, cb = cP.pcolor(values, x = masked.axis('x').edges, y = masked.z.edges, **kwargs)
-    #     else:
-    #         ax, pm, cb = cP.pcolor(values, x = self.axis(xAxis).edges, y = self.z.edges, **kwargs)
-
-
-    #     return ax, pm, cb
 
     def pcolor(self, values, xAxis='x', zAxis='absolute', **kwargs):
         """Create a pseudocolour plot of a 2D array using the mesh.

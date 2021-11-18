@@ -3,7 +3,7 @@ Module describing a Data Set where values are associated with an xyz co-ordinate
 """
 from copy import deepcopy
 import numpy as np
-from pandas import read_csv
+from pandas import DataFrame, read_csv
 from cached_property import cached_property
 from ....classes.core import StatArray
 from ....base import fileIO as fIO
@@ -67,7 +67,7 @@ class Data(PointCloud3D):
 
         # Number of Channels
         self.components = components
-        self.channels_per_system = channels_per_system
+        self._channels_per_system = np.atleast_1d(np.asarray(channels_per_system, dtype=np.int32)) 
 
         super().__init__(x, y, z, elevation)
 
@@ -78,6 +78,8 @@ class Data(PointCloud3D):
         self.std = std
         self.predictedData = predictedData
         self.channelNames = channelNames
+        self.relative_error = None
+        self.additive_error = None
 
         self.error_posterior = None
 
@@ -92,6 +94,15 @@ class Data(PointCloud3D):
                 channels[i] = 'fiducial'
 
         return channels
+
+    def _as_dict(self):
+        out, order = super()._as_dict()
+        out[self.fiducial.name.replace(' ', '_')] = self.fiducial
+        out[self.lineNumber.name.replace(' ', '_')] = self.lineNumber
+        for i, name in enumerate(self.channelNames):
+            out[name.replace(' ', '_')] = self.data[:, i]
+
+        return out, [self.lineNumber.name.replace(' ', '_'), self.fiducial.name.replace(' ', '_'), *order, *[x.replace(' ', '_') for x in self.channelNames]]
 
     @property
     def active(self):
@@ -143,18 +154,39 @@ class Data(PointCloud3D):
             assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
             self._channelNames = values
 
-    @property
-    def channels_per_system(self):
-        return self._channels_per_system
+    def channel_index(self, channel, system):
+        """Gets the data in the specified channel
 
-    @channels_per_system.setter
-    def channels_per_system(self, values):
-        if values is None:
-            values = np.zeros(1, dtype=np.int32)
-        else:
-            values = np.atleast_1d(np.asarray(values, dtype=np.int32))
+        Parameters
+        ----------
+        channel : int
+            Index of the channel to return
+            * If system is None, 0 <= channel < self.nChannels else 0 <= channel < self.nChannelsPerSystem[system]
+        system : int, optional
+            The system to obtain the channel from.
 
-        self._channels_per_system = values
+        Returns
+        -------
+        out : int
+            The index of the channel
+
+        """
+        assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+        assert channel < self.channels_per_system[system], ValueError("channel must be < {} for system {}".format(self.channels_per_system[system], system))
+        return self.systemOffset[system] + channel
+
+    # @property
+    # def channels_per_system(self):
+    #     return self._channels_per_system
+
+    # @channels_per_system.setter
+    # def channels_per_system(self, values):
+    #     if values is None:
+    #         values = np.zeros(1, dtype=np.int32)
+    #     else:
+    #         values = np.atleast_1d(np.asarray(values, dtype=np.int32))
+
+    #     self._channels_per_system = values
 
     @property
     def components(self):
@@ -212,6 +244,8 @@ class Data(PointCloud3D):
 
     @property
     def fiducial(self):
+        if np.size(self._fiducial) == 0:
+            self._fiducial = StatArray.StatArray(np.arange(self.nPoints), "Fiducial")
         return self._fiducial
 
     @fiducial.setter
@@ -229,6 +263,8 @@ class Data(PointCloud3D):
 
     @property
     def lineNumber(self):
+        if np.size(self._lineNumber) == 0:
+            self._lineNumber = StatArray.StatArray(self.nPoints, "Line number")
         return self._lineNumber
 
     @lineNumber.setter
@@ -250,7 +286,7 @@ class Data(PointCloud3D):
 
     @property
     def nChannels(self):
-        return np.sum(self.n_components * self.channels_per_system)
+        return np.sum(self.channels_per_system)
 
     @property
     def n_components(self):
@@ -309,6 +345,10 @@ class Data(PointCloud3D):
         """The data. """
         if np.size(self._std, 0) == 0:
             self._std = StatArray.StatArray((self.nPoints, self.nChannels), "Standard deviation", self.units)
+
+        relative_error = self.relative_error * self.data
+        self._std[:, :] = np.sqrt((relative_error**2.0) + (self.additive_error**2.0))
+
         return self._std
 
     @std.setter
@@ -355,6 +395,12 @@ class Data(PointCloud3D):
     def shape(self):
         return (self.nPoints, self.nChannels)
 
+    def __deepcopy__(self, memo={}):
+        out = super().__deepcopy__(memo)
+        out.data = deepcopy(self.data)
+        out.std = deepcopy(self.std)
+        out.predictedData = deepcopy(self.predictedData)
+        return out
 
     def addToVTK(self, vtk, prop=['data', 'predicted', 'std'], system=None):
         """Adds a member to a VTK handle.
@@ -392,7 +438,8 @@ class Data(PointCloud3D):
             for i in r:
                 vtk.point_data.append(Scalars(tmp[:, i], "{} {}".format(self.channelNames[i], tmp.getNameUnits())))
 
-    def _csv_channels(self, filename):
+    @staticmethod
+    def _csv_channels(filename):
         """Get the column indices from a csv file.
 
         Parameters
@@ -409,13 +456,12 @@ class Data(PointCloud3D):
 
         """
 
-        indices = []
 
         # Get the column headers of the data file
         channels = fIO.get_column_name(filename)
         nChannels = len(channels)
 
-        line_names = ('line', 'linenumber')
+        line_names = ('line', 'linenumber', 'line_number')
         fiducial_names = ('fid', 'fiducial', 'id')
 
         n = 0
@@ -432,35 +478,27 @@ class Data(PointCloud3D):
 
         assert n == 2, Exception("File {} must contain columns for line and fiducial. \n {}".format(filename, self.fileInformation()))
 
-        return super()._csv_channels(filename), labels
+        nPoints, ixyz = PointCloud3D._csv_channels(filename)
+        return nPoints, labels + ixyz
 
     def _open_csv_files(self, filename):
 
         channels = self.csv_channels(filename)
+        try:
+            df = read_csv(filename, index_col=False, usecols=channels, chunksize=1, skipinitialspace = True)
+        except:
+            df = read_csv(filename, index_col=False, usecols=channels, chunksize=1, delim_whitespace=True, skipinitialspace = True)
 
-        if isinstance(filename, str):
-            filename = [filename]
-
-        self._file = []
-        for i, f in enumerate(filename):
-            try:
-                df = read_csv(f, index_col=False, usecols=channels[i], chunksize=1, skipinitialspace = True)
-            except:
-                df = read_csv(f, index_col=False, usecols=channels[i], chunksize=1, delim_whitespace=True, skipinitialspace = True)
-
-            self._file.append(df)
+        self._file = df
 
     def _read_line_fiducial(self, filename):
 
-        if isinstance(filename, str):
-            filename = [filename]
-
-        _, channels = Data._csv_channels(self, filename[0])
+        _, channels = Data._csv_channels(filename)
 
         try:
-            df = read_csv(filename[0], index_col=False, usecols=channels, skipinitialspace = True)
+            df = read_csv(filename, index_col=False, usecols=channels, skipinitialspace = True)
         except:
-            df = read_csv(filename[0], index_col=False, usecols=channels, delim_whitespace=True, skipinitialspace = True)
+            df = read_csv(filename, index_col=False, usecols=channels, delim_whitespace=True, skipinitialspace = True)
 
         df = df.replace('NaN',np.nan)
         return df[channels[0]].values, df[channels[1]].values
@@ -481,7 +519,6 @@ class Data(PointCloud3D):
         """
 
         assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-
         return np.s_[self.systemOffset[system]:self.systemOffset[system+1]]
 
     def append(self, other):
@@ -525,29 +562,26 @@ class Data(PointCloud3D):
                    channelNames=self.channelNames)
         return out
 
-    def dataChannel(self, channel, system=None):
-        """Gets the data in the specified channel
+    # def dataChannel(self, channel, system=0):
+    #     """Gets the data in the specified channel
 
-        Parameters
-        ----------
-        channel : int
-            Index of the channel to return
-            * If system is None, 0 <= channel < self.nChannels else 0 <= channel < self.nChannelsPerSystem[system]
-        system : int, optional
-            The system to obtain the channel from.
+    #     Parameters
+    #     ----------
+    #     channel : int
+    #         Index of the channel to return
+    #         * If system is None, 0 <= channel < self.nChannels else 0 <= channel < self.nChannelsPerSystem[system]
+    #     system : int, optional
+    #         The system to obtain the channel from.
 
-        Returns
-        -------
-        out : geobipy.StatArray
-            The data channel
+    #     Returns
+    #     -------
+    #     out : geobipy.StatArray
+    #         The data channel
 
-        """
-
-        if system is None:
-            return StatArray.StatArray(self.data[:, channel], self._channelNames[channel], self.data.units)
-        else:
-            assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-            return StatArray.StatArray(self._data[:, self.systemOffset[system] + channel], self._channelNames[self.systemOffset[system] + channel], self.data.units)
+    #     """
+    #     assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+    #     assert channel < self.channels_per_system[system], ValueError("channel must be < {}".format(self.channels_per_system[system]))
+    #     return self.data[:, self.systemOffset[system] + channel]
 
 
     def datapoint(self, i):
@@ -594,54 +628,54 @@ class Data(PointCloud3D):
         return nPoints
 
 
-    def predictedDataChannel(self, channel, system=None):
-        """Gets the predicted data in the specified channel
+    # def predictedDataChannel(self, channel, system=None):
+    #     """Gets the predicted data in the specified channel
 
-        Parameters
-        ----------
-        channel : int
-            Index of the channel to return
-            * If system is None, 0 <= channel < self.nChannels else 0 <= channel < self.nChannelsPerSystem[system]
-        system : int, optional
-            The system to obtain the channel from.
+    #     Parameters
+    #     ----------
+    #     channel : int
+    #         Index of the channel to return
+    #         * If system is None, 0 <= channel < self.nChannels else 0 <= channel < self.nChannelsPerSystem[system]
+    #     system : int, optional
+    #         The system to obtain the channel from.
 
-        Returns
-        -------
-        out : geobipy.StatArray
-            The predicted data channel
+    #     Returns
+    #     -------
+    #     out : geobipy.StatArray
+    #         The predicted data channel
 
-        """
+    #     """
 
-        if system is None:
-            return StatArray.StatArray(self.predictedData[:, channel], "Predicted data {}".format(self.channelNames[channel]), self.predictedData.units)
-        else:
-            assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-            return StatArray.StatArray(self.predictedData[:, self.systemOffset[system] + channel], "Predicted data {}".format(self.channelNames[self.systemOffset[system] + channel]), self.predictedData.units)
+    #     if system is None:
+    #         return StatArray.StatArray(self.predictedData[:, channel], "Predicted data {}".format(self.channelNames[channel]), self.predictedData.units)
+    #     else:
+    #         assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+    #         return StatArray.StatArray(self.predictedData[:, self.systemOffset[system] + channel], "Predicted data {}".format(self.channelNames[self.systemOffset[system] + channel]), self.predictedData.units)
 
 
-    def stdChannel(self, channel, system=None):
-        """Gets the uncertainty in the specified channel
+    # def stdChannel(self, channel, system=None):
+    #     """Gets the uncertainty in the specified channel
 
-        Parameters
-        ----------
-        channel : int
-            Index of the channel to return
-            * If system is None, 0 <= channel < self.nChannels else 0 <= channel < self.nChannelsPerSystem[system]
-        system : int, optional
-            The system to obtain the channel from.
+    #     Parameters
+    #     ----------
+    #     channel : int
+    #         Index of the channel to return
+    #         * If system is None, 0 <= channel < self.nChannels else 0 <= channel < self.nChannelsPerSystem[system]
+    #     system : int, optional
+    #         The system to obtain the channel from.
 
-        Returns
-        -------
-        out : geobipy.StatArray
-            The uncertainty channel
+    #     Returns
+    #     -------
+    #     out : geobipy.StatArray
+    #         The uncertainty channel
 
-        """
+    #     """
 
-        if system is None:
-            return StatArray.StatArray(self.std[:, channel], "Std {}".format(self.channelNames[channel]), self.std.units)
-        else:
-            assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-            return StatArray.StatArray(self.std[:, self.systemOffset[system] + channel], "Std {}".format(self.channelNames[self.systemOffset[system] + channel]), self.std.units)
+    #     if system is None:
+    #         return StatArray.StatArray(self.std[:, channel], "Std {}".format(self.channelNames[channel]), self.std.units)
+    #     else:
+    #         assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+    #         return StatArray.StatArray(self.std[:, self.systemOffset[system] + channel], "Std {}".format(self.channelNames[self.systemOffset[system] + channel]), self.std.units)
 
 
     # def maketest(self, nPoints, nChannels):
@@ -679,9 +713,9 @@ class Data(PointCloud3D):
             assert 0 <= channel < self.channels_per_system[system], ValueError('Requested channel must be 0 <= channel {}'.format(self.channels_per_system[system]))
             channel = self.systemOffset[system] + channel
 
-        kwargs['values'] = self.dataChannel(channel)
+        kwargs['values'] = self.data[:, channel]
 
-        self.mapPlot(*args, **kwargs)
+        self.map(*args, **kwargs)
 
         cP.title(self.channelNames[channel])
 
@@ -708,7 +742,7 @@ class Data(PointCloud3D):
 
         kwargs['c'] = self.predictedDataChannel(channel)
 
-        self.mapPlot(*args, **kwargs)
+        self.map(*args, **kwargs)
 
         cP.title(self.channelNames[channel])
 
@@ -735,7 +769,7 @@ class Data(PointCloud3D):
 
         kwargs['c'] = self.stdChannel(channel)
 
-        self.mapPlot(*args, **kwargs)
+        self.map(*args, **kwargs)
 
         cP.title(self.channelNames[channel])
 
@@ -796,8 +830,8 @@ class Data(PointCloud3D):
 
         leg = None
         if legend:
-            box = ax.get_position()
-            ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+            # box = ax.get_position()
+            # ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
 
             # Put a legend to the right of the current axis
             leg = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5),fancybox=True)
@@ -865,83 +899,108 @@ class Data(PointCloud3D):
 
         return ax, legend
 
-
-    # def read(self, fname, columnIndex, nHeaders=0, nChannels=0):
-    #     """ Read the specified columns from an ascii file
-    #     cols[0,1,2,...] should be the indices of the x,y,z co-ordinates """
-    #     nCols = len(columnIndex)
-    #     #if any([cols < 0]): err.Emsg("Please specify the columns to read the first three indices should be xyz")
-    #     # Get the number of points
-    #     nLines = fIO.getNlines(fname, nHeaders)
-
-    #     # Get the names of the headers
-    #     names = fIO.getHeaderNames(fname, columnIndex)
-
-    #     # Get the number of Data if none was specified
-    #     if (nChannels == 0):
-    #         nChannels = nCols - 3
-    #     # Initialize the Data
-    #     Data.__init__(self, nChannels, channelNames=names[3:])
-
-    #     self.x.name = names[0]
-    #     self.y.name = names[1]
-    #     self.z.name = names[2]
-    #     # Read each line assign the values to the class
-    #     with open(fname) as f:
-    #         fIO.skipLines(f, nHeaders)  # Skip header lines
-    #         for j, line in enumerate(f):  # For each line in the file
-    #             values = fIO.getRealNumbersfromLine(line, columnIndex)  # grab the requested entries
-    #             # Assign values into object
-    #             self.x[j] = values[0]
-    #             self.y[j] = values[1]
-    #             self.z[j] = values[2]
-    #             self._data[j, ] = values[3:]
-
-    def updateErrors(self, relativeErr, additiveErr, system=None):
-        """Updates the data errors
-
-        Updates the standard deviation of the data errors using the following model
-
-        .. math::
-            \sqrt{(\mathbf{\epsilon}_{rel} \mathbf{d}^{obs})^{2} + \mathbf{\epsilon}^{2}_{add}},
-
-        where :math:`\mathbf{\epsilon}_{rel}` is the relative error, a percentage fraction and :math:`\mathbf{\epsilon}_{add}` is the additive error.
+    @classmethod
+    def read_csv(cls, data_filename, **kwargs):
+        """Reads the data and system parameters from file
 
         Parameters
         ----------
-        relativeErr : float
-            A fraction percentage that is multiplied by the observed data.
-        additiveErr : float
-            An absolute value of additive error.
+        dataFilename : str or list of str
+            Time domain data file names
+        systemFilename : str or list of str
+            Time domain system file names
 
-        Raises
-        ------
-        ValueError
-            If any relative or additive errors are <= 0.0
+        Notes
+        -----
+        File Format
+
+        The data columns are read in according to the column names in the first line.  The header line should contain at least the following column names. Extra columns may exist, but will be ignored. In this description, the column name or its alternatives are given followed by what the name represents. Optional columns are also described.
+
+        **Required columns**
+
+        line
+            Line number for the data point
+
+        id or fid
+            Id number of the data point, these be unique
+
+        x or northing or n
+            Northing co-ordinate of the data point
+
+        y or easting or e
+            Easting co-ordinate of the data point
+
+        z or dtm or dem\_elev or dem\_np or topo
+            Elevation of the ground at the data point
+
+        alt or laser or bheight
+            Altitude of the transmitter coil
+
+        Off[0] to Off[nWindows-1]  (with the number and brackets)
+           The measurements for each time specified in the accompanying system file under Receiver Window Times
+
+        **Optional columns**
+
+        If any loop orientation columns are omitted the loop is assumed to be horizontal.
+
+        TxPitch
+            Pitch of the transmitter loop
+        TxRoll
+            Roll of the transmitter loop
+        TxYaw
+            Yaw of the transmitter loop
+        RxPitch
+            Pitch of the receiver loop
+        RxRoll
+            Roll of the receiver loop
+        RxYaw
+            Yaw of the receiver loop
+
+        OffErr[0] to ErrOff[nWindows-1]
+            Error estimates for the data
+
+
+        See Also
+        --------
+        INFORMATION ON TD SYSTEMS
+
+
         """
 
-        relativeErr = np.atleast_1d(relativeErr)
-        additiveErr = np.atleast_1d(additiveErr)
-        # For each system assign error levels using the user inputs
-        assert all(relativeErr > 0.0), ValueError("relativeErr must be > 0.0")
-        assert all(additiveErr > 0.0), ValueError("additiveErr must be > 0.0")
+        self = cls(**kwargs)
 
-        if system is None:
-            if np.size(relativeErr) == 1:
-                self._std[:, :] = np.sqrt((relativeErr * self._data[:, :])**2.0 + additiveErr**2.0)
-            else:
-                assert np.size(relativeErr) == self.nSystems, ValueError("Size of relative error must equal nSystems {}".format(self.nSystems))
-                assert np.size(additiveErr) == self.nSystems, ValueError("Size of additive error must equal nSystems {}".format(self.nSystems))
+        self._nPoints, iC,  = Data._csv_channels(data_filename)
 
-                for i in range(self.nSystems):
-                    iSys = self._systemIndices(system)
-                    self._std[:, iSys] = np.sqrt((relativeErr[i] * self._data[:, iSys])**2.0 + additiveErr[i]**2.0)
+        assert len(iData) == self.nChannels, Exception("Number of off time columns {} in {} does not match total number of times {} in system files \n {}".format(
+            len(iData), data_filename, self.nChannels, self.fileInformation()))
 
-        else:
-            assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-            iSys = self._systemIndices(system)
+        if len(iStd) > 0:
+            assert len(iStd) == len(iData), Exception(
+                "Number of Off time standard deviation estimates does not match number of Off time data columns in file {}. \n {}".format(data_filename, self.fileInformation()))
 
-            self._std[:, iSys] = np.sqrt((relativeErr * self._data[:, iSys])**2.0 + additiveErr**2.0)
+        # Get all readable column indices for the first file.
+        channels = iC + iR + iT + iOffset + iData
+        if len(iStd) > 0:
+            channels += iStd
+
+        # Read in the columns from the first data file
+        try:
+            df = read_csv(data_filename, usecols=channels, skipinitialspace = True)
+        except:
+            df = read_csv(data_filename, usecols=channels, delim_whitespace=True, skipinitialspace = True)
+        df = df.replace('NaN', np.nan)
+
+        # Assign columns to variables
+        self.lineNumber = df[iC[0]].values
+        self.fiducial = df[iC[1]].values
+        self.x = df[iC[2]].values
+        self.y = df[iC[3]].values
+        self.z = df[iC[4]].values
+        self.elevation = df[iC[5]].values
+
+        self.check()
+
+        return self
 
 
     def toVTK(self, fileName, prop=['data', 'predicted', 'std'], system=None, format='binary'):
@@ -997,7 +1056,7 @@ class Data(PointCloud3D):
         return grp
 
 
-    def writeHdf(self, parent, name, withPosterior=True):
+    def writeHdf(self, parent, name, withPosterior=True, index=None):
         """ Write the StatArray to an HDF object
         parent: Upper hdf file or group
         myName: object hdf name. Assumes createHdf has already been called
@@ -1038,7 +1097,7 @@ class Data(PointCloud3D):
             self.lineNumber = StatArray.StatArray.fromHdf(grp['line_number'])
 
         if 'channels_per_system' in grp:
-            self._nChannelsPerSystem = np.asarray(grp['channels_per_system'])
+            self._channels_per_system = np.asarray(grp['channels_per_system'])
 
         self._data = StatArray.StatArray.fromHdf(grp['d'])
         self._std = StatArray.StatArray.fromHdf(grp['s'])
@@ -1055,6 +1114,14 @@ class Data(PointCloud3D):
         self._additive_error = StatArray.StatArray.fromHdf(grp['addErr'])
 
         return self
+
+    def write_csv(self, filename, **kwargs):
+        kwargs['na_rep'] = 'nan'
+        kwargs['index'] = False
+        d, order = self._as_dict()
+        kwargs['columns'] = order
+        df = DataFrame(data=d)
+        df.to_csv(filename, **kwargs)
 
 
     def Bcast(self, world, root=0):

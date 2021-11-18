@@ -10,6 +10,86 @@ from smm import SMM
 from numba import (jit, float64)
 _numba_settings = {'nopython': True, 'nogil': False, 'fastmath': True, 'cache': True}
 
+@jit(**_numba_settings)
+def bresenham(x, y):
+    n_segments = np.int32(len(x) - 1)
+    nTmp = np.int32(0)
+    for i in range(n_segments):
+        nx = np.abs(x[i+1] - x[i])
+        ny = np.abs(y[i+1] - y[i])
+        if nx == 0:
+            nx = 1
+        if ny == 0:
+            ny = 1
+        nTmp += nx * ny
+
+    points = np.zeros((2*nTmp, 2), dtype=np.int32)
+    j = 0
+    for i in range(n_segments):
+        # Setup initial conditions
+        x1 = x[i] 
+        y1 = y[i] 
+        x2 = x[i+1] 
+        y2 = y[i+1]
+        dx = x2 - x1
+        dy = y2 - y1
+
+        if dx == 0:
+            if y1 > y2:
+                y1, y2 = y2, y1
+            arr = np.arange(y1, y2+1, dtype=np.int32)
+            n = arr.size
+            points[j:j+n, 0] = x1
+            points[j:j+n, 1] = arr
+            j += n
+
+        elif dy == 0:
+            if x1 > x2:
+                x1, x2 = x2, x1
+            arr = np.arange(x1, x2+1, dtype=np.int32)
+            n = arr.size
+            points[j:j+n, 0] = arr
+            points[j:j+n, 1] = y1
+            j += n
+
+        if dx != 0 and dy != 0:
+
+            # Determine how steep the line is
+            is_steep = np.abs(dy) > np.abs(dx)
+
+            # Rotate line
+            if is_steep:
+                x1, y1 = y1, x1
+                x2, y2 = y2, x2
+
+            # Swap start and end points if necessary and store swap state
+            swapped = False
+            if x1 > x2:
+                x1, x2 = x2, x1
+                y1, y2 = y2, y1
+                swapped = True
+
+            # Recalculate differentials
+            dx = x2 - x1
+            dy = y2 - y1
+
+            # Calculate error
+            error = np.int32(dx / 2.0)
+            ystep = 1 if y1 < y2 else -1
+
+            # Iterate over bounding box generating points between start and end
+            iy = y1
+            for ix in range(x1, x2 + 1):
+                coord = (iy, ix) if is_steep else (ix, iy)
+                points[j, :] = coord
+                j += 1
+                error -= np.abs(dy)
+                if error < 0:
+                    iy += ystep
+                    error += dx
+
+    return points[:j, :]
+
 def interleave(a, b):
         """Interleave two arrays together like zip
 
@@ -203,7 +283,7 @@ def findFirstLastNotValue(this, values, invalid_val=-1):
 
     """
     values = np.atleast_1d(values)
-    out = np.empty([np.ndim(this), 2], dtype=np.int)
+    out = np.empty([np.ndim(this), 2], dtype=np.int32)
     mask = this != values[0]
     if values.size > 1:
         for i in range(1, values.size):
@@ -549,8 +629,7 @@ def tanh(this):
     """ Custom hyperbolic tangent, return correct overflow. """
 #    return np.tanh(this)
     tmp = np.exp(-2.0 * this)
-    that = (np.divide((1.0 - tmp), (1.0 + tmp)))
-    return that
+    return (np.divide((1.0 - tmp), (1.0 + tmp)))
 
 
 def _logLabel(log=None):
@@ -701,9 +780,13 @@ def _logArray(values, log=None):
 
     # Let the user know that values were masked in order to take the log
     i = np.s_[:]
+
+    if np.all(np.isnan(values)):
+        raise Exception("Entire array is nan")
+
     if (np.nanmin(values) <= 0.0):
         i = np.where(values > 0.0)
-        print(Warning('Values <= 0.0 have been masked before taking their log'))
+        # print(Warning('Values <= 0.0 have been masked before taking their log'))
 
     tmp = deepcopy(values)
     tmp[:] = np.nan

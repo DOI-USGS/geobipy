@@ -40,9 +40,10 @@ class MvLogNormal(MvNormal):
 
     """
 
+    
+
     def __init__(self, mean, variance, ndim=None, linearSpace=False, prng=None):
         """ Initialize a multivariate lognormal distribution. """
-
         if linearSpace:
             mean = np.log(mean)
         super().__init__(mean, variance, ndim, prng=prng)

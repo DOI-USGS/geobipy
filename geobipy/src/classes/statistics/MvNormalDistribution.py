@@ -77,7 +77,7 @@ class MvNormal(baseDistribution):
             assert np.size(variance) == 1, ValueError(
                 "When specifying ndim, variance must be a scalar.")
 
-            ndim = np.int(np.maximum(1, ndim))
+            ndim = np.int32(np.maximum(1, ndim))
             self._constant = True
             self._mean = np.full(ndim, fill_value=mean)
             self._variance = np.diag(np.full(ndim, fill_value=variance))
@@ -100,7 +100,7 @@ class MvNormal(baseDistribution):
 
     @ndim.setter
     def ndim(self, newDimension):
-        newDimension = np.int(newDimension)
+        newDimension = np.int32(newDimension)
         if newDimension == self.ndim:
             return
         assert newDimension > 0, ValueError("Cannot have zero dimensions.")

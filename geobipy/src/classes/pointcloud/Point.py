@@ -166,7 +166,7 @@ class Point(myObject, ABC):
         y = StatArray.StatArray.fromHdf(grp['y'], index=index)
         z = StatArray.StatArray.fromHdf(grp['z'], index=index)
 
-        return cls(x=x, y=y, z=z)
+        return cls(x=x, y=y, z=z, **kwargs)
 
 
     def Isend(self, dest, world):

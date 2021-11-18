@@ -18,7 +18,6 @@ from ....base import utilities as cf
 from ....base import MPI as myMPI
 from ....base import plotting as cp
 
-
 class FdemDataPoint(EmDataPoint):
     """Class defines a Frequency domain electromagnetic data point.
 
@@ -319,8 +318,8 @@ class FdemDataPoint(EmDataPoint):
     def fromHdf(cls, grp, index=None, **kwargs):
         """ Reads the object from a HDF group """
 
-        out = super(FdemDataPoint, cls).fromHdf(grp, index)
-        out.system = FdemSystem.fromHdf(grp['sys'])
+        system = FdemSystem.fromHdf(grp['sys'])
+        out = super(FdemDataPoint, cls).fromHdf(grp, index, system=system)
 
         return out
 
@@ -477,6 +476,11 @@ class FdemDataPoint(EmDataPoint):
 
     def updatePosteriors(self):
         super().updatePosteriors()
+
+        if self.predictedData.hasPosterior:
+            x = self.frequencies()
+            self.predictedData.posterior.update_with_line(x, self.predictedInphase())
+            self.predictedData.posterior.update_with_line(x, self.predictedQuadrature())
 
 
     def updateSensitivity(self, model):

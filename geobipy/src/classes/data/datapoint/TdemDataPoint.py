@@ -14,6 +14,7 @@ from ...system.TdemSystem_GAAEM import TdemSystem_GAAEM
 from ...system.filters.butterworth import butterworth
 from ...system.Waveform import Waveform
 from ...statistics.Histogram1D import Histogram1D
+from ...statistics.Histogram2D import Histogram2D
 from ...statistics.Distribution import Distribution
 import matplotlib.pyplot as plt
 import numpy as np
@@ -75,7 +76,9 @@ class TdemDataPoint(EmDataPoint):
     """
 
     def __init__(self, x=0.0, y=0.0, z=0.0, elevation=0.0,
-                 data=None, std=None, predictedData=None,
+                 primary_field=None, secondary_field=None,
+                 relative_error=None, additive_error=None, std=None,
+                 predicted_primary_field=None, predicted_secondary_field=None,
                  system=None,
                  transmitter_loop=None, receiver_loop=None,
                  lineNumber=0.0, fiducial=0.0):
@@ -85,11 +88,19 @@ class TdemDataPoint(EmDataPoint):
         super().__init__(x=x, y=y, z=z, elevation=elevation,
                          components=self.components,
                          channels_per_system=self.nTimes,
-                         data=data, std=std, predictedData=predictedData,
+                         data=None, std=std, predictedData=None,
                          lineNumber=lineNumber, fiducial=fiducial)
+
+        self.addErr = additive_error
+        self.relErr = relative_error
 
         self.transmitter = transmitter_loop
         self.receiver = receiver_loop
+
+        self.primary_field = primary_field
+        self.secondary_field = secondary_field
+        self.predicted_primary_field = predicted_primary_field
+        self.predicted_secondary_field = predicted_secondary_field
 
         self.channelNames = None
 
@@ -130,12 +141,67 @@ class TdemDataPoint(EmDataPoint):
 
     @property
     def channels(self):
-        return np.asarray([self.off_time(i) for i in range(self.nSystems)])
+        out = StatArray.StatArray(np.hstack([self.off_time(i) for i in range(self.nSystems)]), name='time', units='s')
+        return out
+
+    @property
+    def channels_per_system(self):
+        return self.n_components * self.nTimes
+
+    @EmDataPoint.data.getter
+    def data(self):
+        self._data = self.secondary_field
+        return self._data
 
     @property
     def loopOffset(self):
         diff = self.receiver - self.transmitter
         return np.r_[diff.x, diff.y, diff.z]
+
+    @EmDataPoint.predictedData.getter
+    def predictedData(self):
+        self._predictedData = self._predicted_secondary_field
+        return self._predictedData
+
+    @property
+    def predicted_primary_field(self):
+        return self._predicted_primary_field
+
+    @predicted_primary_field.setter
+    def predicted_primary_field(self, values):
+        if values is None:
+            values = self.n_components
+        else:
+            assert np.size(values) == self.n_components, ValueError("predicted primary field must have size {}".format(self.n_components))
+
+        self._predicted_primary_field = StatArray.StatArray(values, "Predicted primary field", self.units)
+
+    @property
+    def predicted_secondary_field(self):
+        return self._predicted_secondary_field
+
+    @predicted_secondary_field.setter
+    def predicted_secondary_field(self, values):
+        if values is None:
+            values = self.nChannels
+        else:
+            assert np.size(values) == self.nChannels, ValueError("predicted secondary field must have size {}".format(self.nChannels))
+
+        self._predicted_secondary_field = StatArray.StatArray(values, "Predicted secondary field", self.units)
+
+    @property
+    def primary_field(self):
+        return self._primary_field
+
+    @primary_field.setter
+    def primary_field(self, values):
+
+        if values is None:
+            values = self.n_components
+        else:
+            assert np.size(values) == self.n_components, ValueError("primary field must have size {}".format(self.n_components))
+
+        self._primary_field = StatArray.StatArray(values, "Primary field", self.units)
 
     @property
     def receiver(self):
@@ -148,13 +214,26 @@ class TdemDataPoint(EmDataPoint):
                 "receiver must be of type EmLoop")
             self._receiver = value
 
+    @property
+    def secondary_field(self):
+        return self._secondary_field
+
+    @secondary_field.setter
+    def secondary_field(self, values):
+
+        if values is None:
+            values = self.nChannels
+        else:
+            assert np.size(values) == self.nChannels, ValueError("Secondary field must have size {}".format(self.nChannels))
+
+        self._secondary_field = StatArray.StatArray(values, "Secondary field", self.units)
+
     @EmDataPoint.system.setter
     def system(self, value):
-
+        
         if value is None:
             self._system = None
             self.components = None
-            self.channels_per_system = None
             return
 
         if isinstance(value, (str, TdemSystem)):
@@ -170,7 +249,6 @@ class TdemDataPoint(EmDataPoint):
                 self._system.append(sys)
 
         self.components = self.system[0].components
-        self.channels_per_system = self.n_components * np.r_[[x.nTimes for x in self.system]]
 
     @property
     def transmitter(self):
@@ -188,7 +266,7 @@ class TdemDataPoint(EmDataPoint):
 
     @property
     def nTimes(self):
-        return (self.channels_per_system / self.n_components).astype(np.int32)
+        return np.asarray([x.nTimes for x in self.system])
 
     @property
     def nWindows(self):
@@ -220,6 +298,10 @@ class TdemDataPoint(EmDataPoint):
         out.system = self._system
         out._transmitter = deepcopy(self.transmitter)
         out._receiver = deepcopy(self.receiver)
+        out._primary_field = deepcopy(self.primary_field)
+        out._secondary_field = deepcopy(self.secondary_field)
+        out._predicted_primary_field = deepcopy(self.predicted_primary_field)
+        out._predicted_secondary_field = deepcopy(self.predicted_secondary_field)
 
         return out
 
@@ -251,17 +333,19 @@ class TdemDataPoint(EmDataPoint):
 
         assert np.all(self.relErr > 0.0), ValueError('relErr must be > 0.0')
 
+
         t0 = 0.5 * np.log(1e-3)  # Assign fixed t0 at 1ms
         # For each system assign error levels using the user inputs
         for i in range(self.nSystems):
             iSys = self._systemIndices(system=i)
 
             # Compute the relative error
-            rErr = self.relErr[i] * self.data[iSys]
-            aErr = np.exp(
-                np.log(self.addErr[i]) - 0.5 * np.log(self.off_time(i)) + t0)
+            rErr = self.relErr[i] * self.secondary_field[iSys]
+            aErr = np.exp(np.log(self.addErr[i]) - 0.5 * np.log(self.off_time(i)) + t0)
+            self._std[iSys] = np.sqrt((rErr**2.0) + (aErr[i]**2.0))
 
-            self._std[iSys] = np.sqrt((rErr**2.0) + (aErr**2.0))
+            # self._std[iSys] = np.sqrt((rErr**2.0) + (self.addErr[i]**2.0))
+
 
         # Update the variance of the predicted data prior
         if self.predictedData.hasPrior:
@@ -444,8 +528,8 @@ class TdemDataPoint(EmDataPoint):
 
     def __aarhus_frontgate(self, f):
         line = f.readline().strip().split()
-        nFilters = np.int(line[0])
-        frontGate = np.bool(np.int(line[1]))
+        nFilters = np.int32(line[0])
+        frontGate = np.bool(np.int32(line[1]))
         damping = np.float64(line[2])
 
         return nFilters, frontGate, damping
@@ -457,18 +541,18 @@ class TdemDataPoint(EmDataPoint):
         for i in range(nFilters):
             # Low Pass Filter
             line = f.readline().strip().split()
-            nLowPass = np.int(line[0])
+            nLowPass = np.int32(line[0])
             for j in range(nLowPass):
-                order = np.int(np.float(line[(2*j)+1]))
+                order = np.int32(np.float(line[(2*j)+1]))
                 frequency = np.float64(line[(2*j)+2])
                 b = butterworth(order, frequency, btype='low', analog=True)
                 filters.append(b)
 
             # High Pass Filter
             line = f.readline().strip().split()
-            nHighPass = np.int(line[0])
+            nHighPass = np.int32(line[0])
             for j in range(nHighPass):
-                order = np.int(np.floate(line[(2*j)+1]))
+                order = np.int32(np.floate(line[(2*j)+1]))
                 frequency = np.float64(line[(2*j)+2])
                 filters.append(butterworth(
                     order, frequency, btype='high', analog=True))
@@ -506,6 +590,11 @@ class TdemDataPoint(EmDataPoint):
         self.transmitter.createHdf(grp, 'T', nRepeats=nRepeats, fillvalue=fillvalue)
         self.receiver.createHdf(grp, 'R', nRepeats=nRepeats, fillvalue=fillvalue)
 
+        self.primary_field.createHdf(grp, 'primary_field', nRepeats=nRepeats, fillvalue=fillvalue)
+        self.secondary_field.createHdf(grp, 'secondary_field', nRepeats=nRepeats, fillvalue=fillvalue)
+        self.predicted_primary_field.createHdf(grp, 'predicted_primary_field', nRepeats=nRepeats, fillvalue=fillvalue)
+        self.predicted_secondary_field.createHdf(grp, 'predicted_secondary_field', nRepeats=nRepeats, fillvalue=fillvalue)
+
         return grp
 
     def writeHdf(self, parent, name, withPosterior=True, index=None):
@@ -521,6 +610,11 @@ class TdemDataPoint(EmDataPoint):
         self.transmitter.writeHdf(grp, 'T', index=index)
         self.receiver.writeHdf(grp, 'R', index=index)
 
+        self.primary_field.writeHdf(grp, 'primary_field', index=index)
+        self.secondary_field.writeHdf(grp, 'secondary_field', index=index)
+        self.predicted_primary_field.writeHdf(grp, 'predicted_primary_field', index=index)
+        self.predicted_secondary_field.writeHdf(grp, 'predicted_secondary_field', index=index)
+
     @classmethod
     def fromHdf(cls, grp, index=None, **kwargs):
         """ Reads the object from a HDF group """
@@ -529,8 +623,10 @@ class TdemDataPoint(EmDataPoint):
             "missing 1 required argument 'system_file_path', the path to directory containing system files")
 
         system_file_path = kwargs['system_file_path']
+        nSystems = np.int32(np.asarray(grp['nSystems']))
+        system_files = [join(system_file_path, str(np.asarray(grp['System{}'.format(i)]), 'utf-8')) for i in range(nSystems)]
 
-        self = super(TdemDataPoint, cls).fromHdf(grp, index)
+        self = super(TdemDataPoint, cls).fromHdf(grp, index, system=system_files)
 
         self.transmitter = (eval(cf.safeEval(grp['T'].attrs.get('repr')))).fromHdf(grp['T'], index=index)
         self.receiver = (eval(cf.safeEval(grp['R'].attrs.get('repr')))).fromHdf(grp['R'], index=index)
@@ -541,13 +637,10 @@ class TdemDataPoint(EmDataPoint):
             self.receiver.y = self.transmitter.y + loopOffset[1]
             self.receiver.z = self.transmitter.z + loopOffset[2]
 
-        nSystems = np.int(np.asarray(grp['nSystems']))
-
-        lst = [join(system_file_path, str(np.asarray(grp['System{}'.format(i)]), 'utf-8')) for i in range(nSystems)]
-
-        self.system = lst
-
-        # self._channels_per_system = self.nTimes
+        self._primary_field = StatArray.StatArray.fromHdf(grp['primary_field'], index=index)
+        self._secondary_field = StatArray.StatArray.fromHdf(grp['secondary_field'], index=index)
+        self._predicted_primary_field = StatArray.StatArray.fromHdf(grp['predicted_primary_field'], index=index)
+        self._predicted_secondary_field = StatArray.StatArray.fromHdf(grp['predicted_secondary_field'], index=index)
 
         return self
 
@@ -566,18 +659,13 @@ class TdemDataPoint(EmDataPoint):
         """
         ax = kwargs.pop('ax', None)
         ax = plt.gca() if ax is None else plt.sca(ax)
-        plt.cla()
 
         kwargs['marker'] = kwargs.pop('marker', 'v')
         kwargs['markersize'] = kwargs.pop('markersize', 7)
-        c = kwargs.pop('color', [cp.wellSeparated[i+1]
-                       for i in range(self.nSystems)])
-        mfc = kwargs.pop('markerfacecolor', [
-                         cp.wellSeparated[i+1] for i in range(self.nSystems)])
-        assert len(c) == self.nSystems, ValueError(
-            "color must be a list of length {}".format(self.nSystems))
-        assert len(mfc) == self.nSystems, ValueError(
-            "markerfacecolor must be a list of length {}".format(self.nSystems))
+        c = kwargs.pop('color', [cp.wellSeparated[i+1] for i in range(self.nSystems)])
+        mfc = kwargs.pop('markerfacecolor', [cp.wellSeparated[i+1] for i in range(self.nSystems)])
+        assert len(c) == self.nSystems, ValueError("color must be a list of length {}".format(self.nSystems))
+        assert len(mfc) == self.nSystems, ValueError("markerfacecolor must be a list of length {}".format(self.nSystems))
         kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor', 'k')
         kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth', 1.0)
         kwargs['alpha'] = kwargs.pop('alpha', 0.8)
@@ -587,20 +675,19 @@ class TdemDataPoint(EmDataPoint):
         xscale = kwargs.pop('xscale', 'log')
         yscale = kwargs.pop('yscale', 'log')
 
-        logx = kwargs.pop('logX', None)
-        logy = kwargs.pop('logY', None)
+        kwargs.pop('logX', None)
+        kwargs.pop('logY', None)
 
         for j in range(self.nSystems):
-            system_times, _ = cf._log(self.off_time(j), logx)
+            system_times = self.off_time(j)
 
             for k in range(self.n_components):
 
                 icomp = self._component_indices(k, j)
-                # component_times = system_times[icomp]
                 d = self.data[icomp]
 
                 if (with_error_bars):
-                    s = self._std[icomp]
+                    s = self.std[icomp]
                     plt.errorbar(system_times, d, yerr=s,
                                  color=c[j],
                                  markerfacecolor=mfc[j],
@@ -649,11 +736,11 @@ class TdemDataPoint(EmDataPoint):
         xscale = kwargs.pop('xscale', 'log')
         yscale = kwargs.pop('yscale', 'log')
 
-        logx = kwargs.pop('logX', None)
-        logy = kwargs.pop('logY', None)
+        kwargs.pop('logX', None)
+        kwargs.pop('logY', None)
 
         for j in range(self.nSystems):
-            system_times, _ = cf._log(self.off_time(j), logx)
+            system_times = self.off_time(j)
 
             for k in range(self.n_components):
                 iS = self._component_indices(k, j)
@@ -683,7 +770,7 @@ class TdemDataPoint(EmDataPoint):
             for k in range(self.n_components):
                 iS = self._component_indices(k, j)
                 active = self.active[iS]
-                (dD[iS][active]).plot(x=system_times[active], **kwargs)
+                (np.abs(dD[iS][active])).plot(x=system_times[active], **kwargs)
 
         plt.ylabel("|{}| ({})".format(dD.name, dD.units))
 
@@ -771,6 +858,36 @@ class TdemDataPoint(EmDataPoint):
 
         self.addErr.proposal = proposal
 
+    def set_predicted_data_posterior(self):
+        if self.predictedData.hasPrior:
+            times = np.log10(self.channels)
+            t0 = times.min()
+            t1 = times.max()
+            data = np.log10(self.data[self.active])
+            a = data.min()
+            b = data.max()
+
+            xbuf = 0.05*(t1 - t0)
+            xbins = StatArray.StatArray(np.logspace(t0-xbuf, t1+xbuf, 200), times.name, times.units)
+            buf = 0.5*(b - a)
+            ybins = StatArray.StatArray(np.logspace(a-buf, b+buf, 200), data.name, data.units)
+            # rto = 0.5 * (ybins[0] + ybins[-1])
+            # ybins -= rto
+
+            self.predictedData.posterior = Histogram2D(xEdges=xbins, xlog=10, yEdges=ybins, ylog=10)
+
+    def updatePosteriors(self):
+        super().updatePosteriors()
+
+        if self.predictedData.hasPosterior:
+            active = self.active
+            for i in range(self.nSystems):
+                x = self.off_time(i)
+                for j in range(self.n_components):   
+                    i_comp = self._component_indices(j, i)
+                    a = active[i_comp]
+                    self.predictedData.posterior.update_with_line(x[a], self.predictedData[i_comp][a])
+
     def forward(self, mod):
         """ Forward model the data from the given model """
 
@@ -780,14 +897,23 @@ class TdemDataPoint(EmDataPoint):
 
         for i in range(self.nSystems):
             iSys = self._systemIndices(i)
-            comps = []
+            primary = []
+            secondary = []
             if 'x' in self.components:
-                comps.append(fm[i].SX)
+                primary.append(fm[i].PX)
+                secondary.append(fm[i].SX)
             if 'y' in self.components:
-                comps.append(fm[i].SY)
+                primary.append(fm[i].PY)
+                secondary.append(fm[i].SY)
             if 'z' in self.components:
-                comps.append(-fm[i].SZ)
-            self.predictedData[iSys] = np.hstack(comps)  # Store the necessary component
+                primary.append(-fm[i].PZ)
+                secondary.append(-fm[i].SZ)
+
+            self.predicted_secondary_field[iSys] = np.hstack(secondary)  # Store the necessary component
+
+            s = np.s_[i * self.n_components: (i * self.n_components) + self.n_components]
+
+            self.predicted_primary_field[s] = np.hstack(primary)
 
     def fm_dlogc(self, mod):
         """ Forward model the data from the given model """
@@ -881,6 +1007,11 @@ class TdemDataPoint(EmDataPoint):
         self.transmitter.Isend(dest, world)
         self.receiver.Isend(dest, world)
 
+        self.primary_field.Isend(dest, world)
+        self.secondary_field.Isend(dest, world)
+        self.predicted_primary_field.Isend(dest, world)
+        self.predicted_secondary_field.Isend(dest, world)
+
     @classmethod
     def Irecv(cls, source, world, **kwargs):
 
@@ -891,5 +1022,10 @@ class TdemDataPoint(EmDataPoint):
 
         out._transmitter = CircularLoop.Irecv(source, world)
         out._receiver = CircularLoop.Irecv(source, world)
+
+        out._primary_field = StatArray.StatArray.Irecv(source, world)
+        out._secondary_field = StatArray.StatArray.Irecv(source, world)
+        out._predicted_primary_field = StatArray.StatArray.Irecv(source, world)
+        out._predicted_secondary_field = StatArray.StatArray.Irecv(source, world)
 
         return out

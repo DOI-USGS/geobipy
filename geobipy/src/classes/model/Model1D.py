@@ -246,9 +246,9 @@ class Model1D(RectilinearMesh1D):
 
         # Reset ChiE and ChiM
         out._magnetic_permeability = StatArray.StatArray(
-            np.int(out.nCells), "Electric Susceptibility", r"$\kappa$")
+            np.int32(out.nCells), "Electric Susceptibility", r"$\kappa$")
         out._magnetic_susceptibility = StatArray.StatArray(
-            np.int(out.nCells), "Magnetic Susceptibility", r"$\frac{H}{m}$")
+            np.int32(out.nCells), "Magnetic Susceptibility", r"$\frac{H}{m}$")
         # Resize the parameter gradient
         out._dpar = out.dpar.resize(out.par.size - 1)
 
@@ -281,8 +281,8 @@ class Model1D(RectilinearMesh1D):
         out._par = out.par.delete(i)
         out._par[i-1] = 0.5 * (self.par[i-1] + self.par[i])
         # Reset ChiE and ChiM
-        out._magnetic_permeability = out.magnetic_permeability.delete(i)
-        out._magnetic_susceptibility = out.magnetic_susceptibility.delete(i)
+        # out._magnetic_permeability = out.magnetic_permeability.delete(i)
+        # out._magnetic_susceptibility = out.magnetic_susceptibility.delete(i)
         # Resize the parameter gradient
         out._dpar = out.dpar.resize(out.par.size - 1)
 
@@ -706,7 +706,7 @@ class Model1D(RectilinearMesh1D):
         assert (self.dpar.hasPrior), TypeError(
             'No prior defined on parameter gradient. Use Model1D.dpar.addPrior() to set the prior.')
 
-        if np.int(self.nCells) == 1:
+        if np.int32(self.nCells) == 1:
             tmp = self.insert_edge(np.log(self.min_edge) + (0.5 * (self.max_edge - self.min_edge)))
             tmp.dpar[:] = (np.diff(np.log(tmp.par))) / (np.log(tmp.widths[:-1]) - np.log(self.min_width))
             probability = tmp.dpar.probability(log=log)

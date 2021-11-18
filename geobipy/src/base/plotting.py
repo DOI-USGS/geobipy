@@ -351,10 +351,13 @@ def hist(counts, bins, rotate=False, flipX=False, flipY=False, trim=True, normal
 
     centres = bins[:-1] + 0.5 * (np.diff(bins))
 
+    cnts = counts
     if normalize:
-        cnts = counts / np.trapz(counts, x = centres)
-    else:
-        cnts = counts
+        denom = np.trapz(counts, x = centres)
+        if np.all(denom > 0.0):
+            cnts = counts / denom
+        else:
+            return
 
     if (rotate):
         plt.barh(centres, cnts, height=width, align='center', **kwargs)
@@ -742,7 +745,7 @@ def _pcolormesh(X, Y, values, **kwargs):
 
     rang = values.max() - values.min()
     if not trim is None and rang > 0.0:
-        assert isinstance(trim, (float, np.float)), TypeError("trim must be a float")
+        assert isinstance(trim, (float, np.float32, np.float64)), TypeError("trim must be a float")
         bounds = cF.findFirstLastNotValue(values, trim)
         X = X[bounds[0, 0]:bounds[0, 1]+2, bounds[1, 0]:bounds[1, 1]+2]
         Y = Y[bounds[0, 0]:bounds[0, 1]+2, bounds[1, 0]:bounds[1, 1]+2]
