@@ -69,21 +69,21 @@ mesh.to_vtk('pointcloud_interpolated.vtk')
 
 plt.figure()
 plt.subplot(321)
-PC3D.mapPlot(dx=0.01, dy=0.01, method='ct')
+PC3D.map(dx=0.01, dy=0.01, method='ct')
 plt.subplot(322)
-PC3D.mapPlot(dx=0.01, dy=0.01, method='mc')
+PC3D.map(dx=0.01, dy=0.01, method='mc')
 
 plt.subplot(323)
-PC3D.mapPlot(dx=0.01, dy=0.01, method='ct', mask=0.03)
+PC3D.map(dx=0.01, dy=0.01, method='ct', mask=0.03)
 plt.subplot(324)
-PC3D.mapPlot(dx=0.01, dy=0.01, method='mc', mask=0.03)
+PC3D.map(dx=0.01, dy=0.01, method='mc', mask=0.03)
 ################################################################################
 # For lots of points, these surfaces can look noisy. Using a block filter will help
 PCsub = PC3D.block_median(0.005, 0.005)
 plt.subplot(325)
-PCsub.mapPlot(dx=0.01, dy=0.01, method='ct', mask=0.03)
+PCsub.map(dx=0.01, dy=0.01, method='ct', mask=0.03)
 plt.subplot(326)
-PCsub.mapPlot(dx=0.01, dy=0.01, method='mc', mask=0.03)
+PCsub.map(dx=0.01, dy=0.01, method='mc', mask=0.03)
 
 
 ################################################################################

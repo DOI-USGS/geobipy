@@ -28,7 +28,7 @@ system_filename = data_directory + "//aerotem.stm"
 data_type = TdemData
 
 # Maximum number of Markov Chains per data point.
-n_markov_chains = 100000
+n_markov_chains = 10000
 
 # -------------------------------------------------------
 # General GeoBIPy options.
@@ -36,7 +36,7 @@ n_markov_chains = 100000
 # Interactively plot a single data point as it progresses
 interactive_plot = True
 # How often to update the plot. (lower is generally slower)
-update_plot_every = 5000
+update_plot_every = 1000
 # Save a PNG of the final results for each data point.
 save_png = False
 # Save the results of the McMC inversion to HDF5 files. (Generally always True)

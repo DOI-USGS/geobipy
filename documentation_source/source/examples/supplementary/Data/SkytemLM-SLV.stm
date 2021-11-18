@@ -40,15 +40,10 @@ System Begin
 	Transmitter End
 
 	Receiver Begin
-		NumberOfWindows = 26
+		NumberOfWindows = 21
 		WindowWeightingScheme = AreaUnderCurve
 
 		WindowTimes Begin
-		    0.0000e+00 4.9000e-06
-		    5.2900e-06 6.9000e-06
-		    7.2900e-06 8.9000e-06
-		    9.2900e-06 1.0900e-05
-		    1.1290e-05 1.2900e-05
 		    1.3290e-05 1.4900e-05
 		    1.5290e-05 1.6900e-05
 		    1.7290e-05 2.0900e-05

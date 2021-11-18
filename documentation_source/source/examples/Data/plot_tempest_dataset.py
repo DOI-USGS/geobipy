@@ -17,14 +17,17 @@ from geobipy.src.classes.data.dataset.TempestData import TempestData
 ################################################################################
 dataFolder = "..//supplementary//Data//"
 
-# The data file name
-dataFiles = dataFolder + 'Tempest.nc'
-# The EM system file name
-systemFiles = dataFolder + 'Tempest.stm'
+# # The data file name
+# dataFiles = dataFolder + 'Tempest.nc'
+# # The EM system file name
+# systemFiles = dataFolder + 'Tempest.stm'
 
-################################################################################
-# Read in the data from file
-TD = TempestData.read_netcdf(dataFiles, systemFiles)
+# ################################################################################
+# # Read in the data from file
+# TD = TempestData.read_netcdf(dataFiles, systemFiles)
+
+# TD.write_csv(dataFolder + 'Tempest.csv')
+TD = TempestData.read_csv(dataFolder + 'Tempest.csv', system_filename=dataFolder + 'Tempest.stm')
 
 ################################################################################
 # Plot the locations of the data points
@@ -35,13 +38,13 @@ plt.title("Scatter plot")
 ################################################################################
 # Plot all the data along the specified line
 plt.figure(figsize=(8,6))
-_ = TD.plotLine(225401.0)
+_ = TD.plotLine(0.0)
 plt.title('Line {}'.format(225401.0))
 
 ################################################################################
 # Or, plot specific channels in the data
 plt.figure(figsize=(8,6))
-_ = TD.plot(system=0, channels=[17, 18, 19])
+_ = TD.plot(system=0, channels=[0, 6, 18])
 plt.title("3 channels of data")
 
 ################################################################################
@@ -51,7 +54,7 @@ plt.title('Data as an array')
 
 ################################################################################
 plt.figure()
-ax = TD.scatter2D(s=1.0, c=TD.dataChannel(system=0, channel=10), equalize=True)
+ax = TD.scatter2D(s=1.0, c=TD.data[:, TD.channel_index(system=0, channel=10)], equalize=True)
 plt.axis('equal')
 plt.title("scatter plot of specific channel")
 
@@ -62,16 +65,16 @@ plt.title("scatter plot of specific channel")
 #%%
 # Obtain a line from the data set
 # +++++++++++++++++++++++++++++++
-line = TD.line(225401.0)
+line = TD.line(0.0)
 
 ################################################################################
 plt.figure()
-_ = line.scatter2D(c = line.dataChannel(10))
+_ = line.scatter2D()
 plt.title('Channel')
 
 ################################################################################
 plt.figure()
-_ = line.plot(xAxis='x', log=10)
+_ = line.plot(xAxis='index', log=10)
 plt.title("All data along line")
 
 plt.show()

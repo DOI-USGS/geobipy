@@ -38,7 +38,7 @@ interactive_plot = True
 # How often to update the plot. (lower is generally slower)
 update_plot_every = 1000
 # Save a PNG of the final results for each data point.
-save_png = True
+save_png = False
 # Save the results of the McMC inversion to HDF5 files. (Generally always True)
 save_hdf5 = True
 
@@ -70,7 +70,7 @@ solve_height = False
 # Resolve calibration parameters
 solve_calibration = False
 # Tempest transmitter pitch
-solve_transmitter_pitch = False
+solve_transmitter_pitch = True
 
 # -------------------------------------------------------
 # Prior Details
@@ -117,8 +117,7 @@ maximum_relative_error = [0.5, 0.5]
 # to assign the initial data uncertainties.
 #initial_additive_error = (0.03, 0.026, 0.024, 0.020, 0.018, 0.017, 0.016, 0.015, 0.014, 0.013, 0.012, 0.011, 0.010, 0.009, 0.008,
 #                          0.015, 0.014, 0.013, 0.011, 0.009, 0.008, 0.0075, 0.007, 0.006, 0.0055, 0.005, 0.0045, 0.004, 0.0035, 0.003)
-initial_additive_error = (0.011474, 0.012810, 0.008507, 0.005154, 0.004742, 0.004477, 0.004168, 0.003539, 0.003352, 0.003213, 0.003161, 0.003122, 0.002587, 0.002038, 0.002201,
-                          0.007383, 0.005693, 0.005178, 0.003659, 0.003426, 0.003046, 0.003095, 0.003247, 0.002775, 0.002627, 0.002460, 0.002178, 0.001754, 0.001405, 0.001283)
+initial_additive_error = [0.011474, 0.012810, 0.008507, 0.005154, 0.004742, 0.004477, 0.004168, 0.003539, 0.003352, 0.003213, 0.003161, 0.003122, 0.002587, 0.002038, 0.002201, 0.007383, 0.005693, 0.005178, 0.003659, 0.003426, 0.003046, 0.003095, 0.003247, 0.002775, 0.002627, 0.002460, 0.002178, 0.001754, 0.001405, 0.001283]
 # Additive Error Prior Details
 # additive_error_prior = Distribution('Uniform', min=1.0, max=3.0)
 # Minimum Additive Error
