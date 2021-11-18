@@ -4,7 +4,7 @@ from ....classes.core import StatArray
 from ...model.Model1D import Model1D
 from .EmDataPoint import EmDataPoint
 from ...forwardmodelling.Electromagnetic.TD.tdem1d import (
-    tdem1dfwd, tdem1dsen, ga_fm_dlogc)
+    tdem1dfwd, tdem1dsen)
 from ...system.EmLoop import EmLoop
 from ...system.SquareLoop import SquareLoop
 from ...system.CircularLoop import CircularLoop
@@ -789,12 +789,12 @@ class TdemDataPoint(EmDataPoint):
                 comps.append(-fm[i].SZ)
             self.predictedData[iSys] = np.hstack(comps)  # Store the necessary component
 
-    def fm_dlogc(self, mod):
-        """ Forward model the data from the given model """
+    # def fm_dlogc(self, mod):
+    #     """ Forward model the data from the given model """
 
-        assert isinstance(mod, Model1D), TypeError(
-            "Invalid model class for forward modeling [1D]")
-        return ga_fm_dlogc(self, mod)
+    #     assert isinstance(mod, Model1D), TypeError(
+    #         "Invalid model class for forward modeling [1D]")
+    #     return ga_fm_dlogc(self, mod)
 
     def sensitivity(self, model, ix=None, modelChanged=True):
         """ Compute the sensitivty matrix for the given model """
