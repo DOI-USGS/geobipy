@@ -10,6 +10,7 @@ The direct extension to numpy maintains speed and functionality of numpy arrays.
 #%%
 from geobipy import StatArray
 from geobipy import Histogram1D
+from geobipy import Distribution
 import numpy as np
 import matplotlib.pyplot as plt
 import h5py

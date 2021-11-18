@@ -8,10 +8,10 @@
       <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/gallery.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/gallery-binder.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/gallery-dataframe.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-rendered-html.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -154,7 +154,7 @@ size=&quot;8.0, 12.0&quot;;
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.system.CircularLoop.CircularLoop.createHdf">
-<span class="sig-name descname"><span class="pre">createHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nRepeats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fillvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withPosterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop.createHdf" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">createHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">myName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withPosterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nRepeats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fillvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop.createHdf" title="Permalink to this definition"></a></dt>
 <dd><p>Create the hdf group metadata in file
 parent: HDF object to create a group inside
 myName: Name of the group</p>
@@ -166,6 +166,21 @@ myName: Name of the group</p>
 <dd><p>Reads in the object from a HDF file</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.system.CircularLoop.CircularLoop.set_pitch_posterior">
+<span class="sig-name descname"><span class="pre">set_pitch_posterior</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop.set_pitch_posterior" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.system.CircularLoop.CircularLoop.set_roll_posterior">
+<span class="sig-name descname"><span class="pre">set_roll_posterior</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop.set_roll_posterior" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.system.CircularLoop.CircularLoop.set_yaw_posterior">
+<span class="sig-name descname"><span class="pre">set_yaw_posterior</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop.set_yaw_posterior" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.system.CircularLoop.CircularLoop.summary">
 <em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">summary</span></span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop.summary" title="Permalink to this definition"></a></dt>
@@ -174,7 +189,7 @@ myName: Name of the group</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.system.CircularLoop.CircularLoop.writeHdf">
-<span class="sig-name descname"><span class="pre">writeHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withPosterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop.writeHdf" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">writeHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withPosterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.CircularLoop.CircularLoop.writeHdf" title="Permalink to this definition"></a></dt>
 <dd><p>Write the StatArray to an HDF object
 parent: Upper hdf file or group
 myName: object hdf name. Assumes createHdf has already been called

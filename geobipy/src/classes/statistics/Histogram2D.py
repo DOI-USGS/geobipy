@@ -925,9 +925,9 @@ class Histogram2D(Histogram, RectilinearMesh2D):
         else:
             cP.plot(self.x.centres, m, label='median', **kwargs)
 
-    def update_line(self, x, y, **kwargs):
-        ix, iy = RectilinearMesh2D.line_indices(self, x, y, **kwargs)
-        self.counts[iy, ix] += 1
+    def update_with_line(self, x, y):
+        j = RectilinearMesh2D.line_indices(self, x, y)
+        self.counts[j[:, 0], j[:, 1]] += 1
 
     def update(self, xValues, yValues=None, trim=False):
         """Update the histogram by counting the entry of values into the bins of the histogram.

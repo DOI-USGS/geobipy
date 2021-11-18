@@ -179,7 +179,7 @@ class Inference1D(myObject):
         # Model acceptance rate
         self.accepted = 0
 
-        n = 2 * np.int(self.n_markov_chains / 1000)
+        n = 2 * np.int32(self.n_markov_chains / 1000)
         self.acceptance_x = StatArray.StatArray(np.arange(1, n + 1) * 1000, name='Iteration #')
         self.acceptance_rate = StatArray.StatArray(n, name='% Acceptance')
 
@@ -254,7 +254,6 @@ class Inference1D(myObject):
         self.datapoint.addErr = self.kwargs['initial_additive_error']
 
         # data_prior = Distribution('MvLogNormal', self.datapoint.data[self.datapoint.active], self.datapoint.std[self.datapoint.active]**2.0, linearSpace=False, prng=self.prng)
-
 
         # Set the priors, proposals, and posteriors.
         self.datapoint.set_priors(**self.kwargs)
@@ -346,7 +345,6 @@ class Inference1D(myObject):
         else:
             proposal, proposal1 = perturbed_model.proposalProbabilities(remapped_model)
 
-
         posterior1 = prior1 + likelihood1
 
         prior_ratio = prior1 - self.prior
@@ -355,14 +353,13 @@ class Inference1D(myObject):
 
         proposal_ratio = proposal - proposal1
 
-        # try:
-        log_acceptance_ratio = np.float128(
-            prior_ratio + likelihood_ratio + proposal_ratio)
+        try:
+            log_acceptance_ratio = np.float128(prior_ratio + likelihood_ratio + proposal_ratio)
 
-        acceptance_probability = cF.expReal(log_acceptance_ratio)
-        # except:
-        #     log_acceptance_ratio = -np.inf
-        #     acceptance_probability = -1.0
+            acceptance_probability = cF.expReal(log_acceptance_ratio)
+        except:
+            log_acceptance_ratio = -np.inf
+            acceptance_probability = -1.0
 
         # If we accept the model
         accepted = acceptance_probability > self.prng.uniform()
@@ -376,6 +373,7 @@ class Inference1D(myObject):
 
             self.model = perturbed_model
             self.datapoint = perturbed_datapoint
+
 
     def infer(self, hdf_file_handle):
         """ Markov Chain Monte Carlo approach for inversion of geophysical data
@@ -441,7 +439,7 @@ class Inference1D(myObject):
         # Determine if we are burning in
         if (not self.burned_in):
             target_misfit = np.sum(self.datapoint.active)
-            if np.isclose(self.data_misfit, self.multiplier*target_misfit, rtol=1e-2, atol=1e-2) :  # datapoint.target_misfit
+            if np.isclose(self.data_misfit, self.multiplier*target_misfit, rtol=1e-1, atol=1e-2) :  # datapoint.target_misfit
                 self.burned_in = True  # Let the results know they are burned in
                 self.burned_in_iteration = self.iteration       # Save the burn in iteration to the results
                 self.best_iteration = self.iteration
@@ -457,7 +455,7 @@ class Inference1D(myObject):
 
         if (np.mod(self.iteration, self.update_plot_every) == 0):
             time_per_model = self.clk.lap() / self.update_plot_every
-            tmp = "i=%i, k=%i, %4.3f s/Model, %0.3f s Elapsed\n" % (self.iteration, np.float(self.model.nCells[0]), time_per_model, self.clk.timeinSeconds())
+            tmp = "i=%i, k=%i, %4.3f s/Model, %0.3f s Elapsed\n" % (self.iteration, np.float64(self.model.nCells[0]), time_per_model, self.clk.timeinSeconds())
             if (self.rank == 1):
                 print(tmp, flush=True)
 

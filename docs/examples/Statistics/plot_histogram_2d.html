@@ -8,10 +8,10 @@
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery-binder.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery-dataframe.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -132,8 +132,7 @@ saving as HDF5.</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="2D Histogram" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_histogram_2d_001.png" />
-<p>Generate marginal histograms along an axis</p>
+<img src="../../_images/sphx_glr_plot_histogram_2d_001.png" srcset="../../_images/sphx_glr_plot_histogram_2d_001.png" alt="2D Histogram" class = "sphx-glr-single-img"/><p>Generate marginal histograms along an axis</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">h1</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">marginalize</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">h2</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">marginalize</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
@@ -147,15 +146,13 @@ saving as HDF5.</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">h2</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="Marginals along each axis" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_histogram_2d_002.png" />
-<p>Create a combination plot with marginal histograms.
+<img src="../../_images/sphx_glr_plot_histogram_2d_002.png" srcset="../../_images/sphx_glr_plot_histogram_2d_002.png" alt="Marginals along each axis" class = "sphx-glr-single-img"/><p>Create a combination plot with marginal histograms.
 sphinx_gallery_thumbnail_number = 3</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">comboPlot</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot histogram 2d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_histogram_2d_003.png" />
-<p>We can overlay the histogram with its credible intervals</p>
+<img src="../../_images/sphx_glr_plot_histogram_2d_003.png" srcset="../../_images/sphx_glr_plot_histogram_2d_003.png" alt="plot histogram 2d" class = "sphx-glr-single-img"/><p>We can overlay the histogram with its credible intervals</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;90</span><span class="si">% c</span><span class="s2">redible intervals overlain&quot;</span><span class="p">)</span>
 <span class="n">H</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">)</span>
@@ -163,8 +160,7 @@ sphinx_gallery_thumbnail_number = 3</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">plotCredibleIntervals</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">percent</span><span class="o">=</span><span class="mf">95.0</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="90% credible intervals overlain" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_histogram_2d_004.png" />
-<p>Take the mean or median estimates from the histogram</p>
+<img src="../../_images/sphx_glr_plot_histogram_2d_004.png" srcset="../../_images/sphx_glr_plot_histogram_2d_004.png" alt="90% credible intervals overlain" class = "sphx-glr-single-img"/><p>Take the mean or median estimates from the histogram</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mean</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
 <span class="n">median</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
 </pre></div>
@@ -186,9 +182,8 @@ sphinx_gallery_thumbnail_number = 3</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="Mean, median, and credible interval overlain" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_histogram_2d_005.png" />
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend object at 0x15d07da60&gt;
+<img src="../../_images/sphx_glr_plot_histogram_2d_005.png" srcset="../../_images/sphx_glr_plot_histogram_2d_005.png" alt="Mean, median, and credible interval overlain" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend object at 0x7fe8c1b80bb0&gt;
 </pre></div>
 </div>
 <p>Get the range between credible intervals</p>
@@ -196,110 +191,110 @@ sphinx_gallery_thumbnail_number = 3</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>StatArray([[-5.49494949],
-           [-3.87878788],
-           [-3.55555556],
-           [-4.60606061],
-           [-2.98989899],
-           [-3.23232323],
-           [-2.98989899],
-           [-3.55555556],
-           [-4.04040404],
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>StatArray([[-3.23232323],
            [-3.47474747],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.95959596],
-           [-4.04040404],
-           [-3.63636364],
-           [-3.87878788],
-           [-4.04040404],
-           [-4.12121212],
-           [-3.7979798 ],
-           [-4.12121212],
-           [-3.87878788],
-           [-3.7979798 ],
-           [-3.95959596],
-           [-3.95959596],
-           [-4.04040404],
-           [-3.95959596],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.95959596],
-           [-3.95959596],
-           [-3.95959596],
-           [-3.95959596],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.95959596],
-           [-3.95959596],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.95959596],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.95959596],
-           [-3.87878788],
-           [-3.95959596],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.95959596],
-           [-3.87878788],
-           [-3.95959596],
-           [-3.95959596],
-           [-3.87878788],
-           [-3.95959596],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.95959596],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.95959596],
-           [-3.95959596],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.95959596],
-           [-4.04040404],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-4.04040404],
-           [-3.95959596],
-           [-3.95959596],
-           [-3.95959596],
-           [-3.71717172],
-           [-4.04040404],
-           [-3.87878788],
-           [-3.95959596],
-           [-4.04040404],
            [-3.55555556],
-           [-4.2020202 ],
-           [-3.7979798 ],
-           [-4.2020202 ],
-           [-3.95959596],
-           [-4.12121212],
-           [-3.95959596],
-           [-3.7979798 ],
-           [-3.15151515],
+           [-3.55555556],
            [-3.63636364],
-           [-3.71717172],
-           [-4.60606061],
-           [-2.90909091],
+           [-2.58585859],
+           [-3.95959596],
+           [-3.95959596],
+           [-3.7979798 ],
+           [-3.95959596],
            [-4.04040404],
+           [-4.36363636],
+           [-3.7979798 ],
+           [-3.87878788],
+           [-3.87878788],
+           [-3.87878788],
+           [-3.71717172],
+           [-3.87878788],
+           [-3.87878788],
+           [-4.04040404],
+           [-3.95959596],
+           [-3.87878788],
+           [-4.04040404],
+           [-4.04040404],
+           [-3.95959596],
+           [-3.87878788],
+           [-3.95959596],
+           [-3.87878788],
+           [-4.04040404],
+           [-3.87878788],
+           [-3.87878788],
+           [-3.95959596],
+           [-3.95959596],
+           [-3.87878788],
+           [-3.95959596],
+           [-3.87878788],
+           [-3.87878788],
+           [-3.87878788],
+           [-3.87878788],
+           [-3.87878788],
+           [-3.87878788],
+           [-3.87878788],
+           [-3.95959596],
+           [-3.95959596],
+           [-3.87878788],
+           [-3.95959596],
+           [-3.95959596],
+           [-3.87878788],
+           [-3.95959596],
+           [-3.95959596],
+           [-3.87878788],
+           [-3.87878788],
+           [-4.04040404],
+           [-3.87878788],
+           [-3.87878788],
+           [-3.87878788],
+           [-3.87878788],
+           [-3.95959596],
+           [-3.95959596],
+           [-3.95959596],
+           [-3.87878788],
+           [-3.87878788],
+           [-3.87878788],
+           [-3.95959596],
+           [-3.95959596],
+           [-3.87878788],
+           [-3.87878788],
+           [-3.87878788],
+           [-3.87878788],
+           [-3.87878788],
+           [-3.87878788],
+           [-3.95959596],
+           [-3.95959596],
+           [-4.04040404],
+           [-3.87878788],
+           [-3.95959596],
+           [-4.04040404],
+           [-3.87878788],
+           [-4.04040404],
+           [-3.87878788],
+           [-3.7979798 ],
+           [-3.87878788],
+           [-3.87878788],
+           [-3.87878788],
+           [-4.04040404],
+           [-3.87878788],
+           [-3.87878788],
+           [-3.87878788],
+           [-4.12121212],
+           [-3.7979798 ],
            [-3.47474747],
-           [-3.71717172]])
+           [-3.7979798 ],
+           [-3.63636364],
+           [-3.63636364],
+           [-4.2020202 ],
+           [-3.31313131],
+           [-4.04040404],
+           [-3.87878788],
+           [-4.12121212],
+           [-4.44444444],
+           [-3.7979798 ],
+           [-3.55555556],
+           [-4.44444444],
+           [-3.87878788]])
 </pre></div>
 </div>
 <p>We can map the credible range to an opacity or transparency</p>
@@ -328,8 +323,7 @@ sphinx_gallery_thumbnail_number = 3</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="plot histogram 2d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_histogram_2d_006.png" />
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  1.949 seconds)</p>
+<img src="../../_images/sphx_glr_plot_histogram_2d_006.png" srcset="../../_images/sphx_glr_plot_histogram_2d_006.png" alt="plot histogram 2d" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  6.168 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-statistics-plot-histogram-2d-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/066a96b3e7333f9a789eb7e687c45875/plot_histogram_2d.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_histogram_2d.py</span></code></a></p>

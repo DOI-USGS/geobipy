@@ -93,7 +93,7 @@ class EmDataPoint(DataPoint):
         if values is None:
             values = self.nChannels
         else:
-            assert np.size(values) == self.nChannels, ValueError("data must have size {}".format(self.nChannels))
+            assert np.size(values) == self.nChannels, ValueError("data must have size {} not {}".format(self.nChannels, np.size(values)))
 
         self._data = StatArray.StatArray(values, "Data", self.units)
 
@@ -119,34 +119,6 @@ class EmDataPoint(DataPoint):
                 values = np.hstack(values)
             assert values.size == self.nChannels, ValueError("Size of predictedData must equal total number of time channels {}".format(self.nChannels))
         self._predictedData = StatArray.StatArray(values, "Predicted Data", self.units)
-
-    # @DataPoint.relErr.setter
-    # def relErr(self, values):
-    #     if values is None:
-    #         values = self.nSystems
-    #     else:
-    #         if np.size(values) == 1:
-    #             values = np.full(self.nSystems, fill_value=values)
-    #         else:
-    #             values = np.asarray(values)
-    #         assert np.size(values) == self.nSystems, ValueError("relErr must be a list of size equal to the number of systems {}".format(self.nSystems))
-    #         assert (np.all(values > 0.0)), ValueError("relErr must be > 0.0.")
-    #         # assert (isinstance(additiveErr[i], float) or isinstance(additiveErr[i], np.ndarray)), TypeError(
-    #         #     "additiveErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
-
-    #     self._relErr = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
-
-    # @DataPoint.std.setter
-    # def std(self, value):
-    #     if value is None:
-    #         value = np.ones(self.nChannels)
-    #     else:
-    #         if isinstance(value, list):
-    #             assert len(value) == self.nSystems, ValueError("std as a list must have {} elements".format(self.nSystems))
-    #             value = np.hstack(value)
-    #         assert value.size == self.nChannels, ValueError("Size of std must equal total number of time channels {}".format(nChannels))
-
-    #     self._std = StatArray.StatArray(value, "Standard deviation", self.units)
 
     @property
     def system(self):
@@ -445,20 +417,20 @@ class EmDataPoint(DataPoint):
     def set_height_proposal(self, proposal, **kwargs):
 
         if proposal is None:
-            if kwargs['solve_height']:
+            if kwargs.get('solve_height', False):
                 proposal = Distribution('Normal', self.z.value, kwargs['height_proposal_variance'], prng=kwargs['prng'])
 
         self.z.proposal = proposal
 
     def set_relative_error_proposal(self, proposal, **kwargs):
         if proposal is None:
-            if kwargs['solve_relative_error']:
+            if kwargs.get('solve_relative_error', False):
                 proposal = Distribution('MvNormal', self.relErr, kwargs['relative_error_proposal_variance'], prng=kwargs['prng'])
         self.relErr.proposal = proposal
 
     def set_additive_error_proposal(self, proposal, **kwargs):
         if proposal is None:
-            if kwargs['solve_additive_error']:
+            if kwargs.get('solve_additive_error', False):
                 proposal = Distribution('MvLogNormal', self.addErr, kwargs['additive_error_proposal_variance'], linearSpace=False, prng=kwargs['prng'])
 
         self.addErr.proposal = proposal
@@ -478,7 +450,7 @@ class EmDataPoint(DataPoint):
         self.set_relative_error_posterior()
         self.set_additive_error_posterior(log=log)
 
-        # self.set_predicted_data_posterior()
+        self.set_predicted_data_posterior()
 
     def set_height_posterior(self):
         """

@@ -253,13 +253,14 @@ class DataPoint(Point):
 
     @std.setter
     def std(self, value):
+
         if value is None:
             value = np.full(self.nChannels, fill_value=0.01)
         else:
             if isinstance(value, list):
                 assert len(value) == self.nSystems, ValueError("std as a list must have {} elements".format(self.nSystems))
                 value = np.hstack(value)
-            assert value.size == self.nChannels, ValueError("Size of std must equal total number of time channels {}".format(nChannels))
+            assert value.size == self.nChannels, ValueError("Size of std must equal total number of time channels {}".format(self.nChannels))
 
         self._std = StatArray.StatArray(value, "Standard deviation", self.units)
 
@@ -350,13 +351,12 @@ class DataPoint(Point):
         height_kwargs['rotate'] = height_kwargs.get('rotate', True)
         self.z.plotPosteriors(ax = axes[0], **height_kwargs)
 
+        axes[1].cla()
+        self.predictedData.plotPosteriors(ax = axes[1], noColorbar=True, **data_kwargs)
         self.plot(ax=axes[1], **data_kwargs)
-        self.plotPredicted(color=cP.wellSeparated[0], ax=axes[1], **data_kwargs)
-        if not best is None:
-            best.plotPredicted(color=cP.wellSeparated[3], ax=axes[1], **data_kwargs)
-
-        # data_kwargs['noColorbar'] = data_kwargs.get('noColorbar', True)
-        # ax.append(self.predictedData.plotPosteriors(ax = axes[1], **data_kwargs))
+        
+        c = cP.wellSeparated[0] if best is None else cP.wellSeparated[3]
+        self.plotPredicted(color=c, ax=axes[1], **data_kwargs)
 
         self.relErr.plotPosteriors(ax=axes[2], **rel_error_kwargs)
         self.addErr.plotPosteriors(ax=axes[3], **add_error_kwargs)
@@ -468,8 +468,8 @@ class DataPoint(Point):
         # create a new group inside h5obj
         grp = super().createHdf(parent, myName, withPosterior, nRepeats, fillvalue)
 
-        grp.create_dataset('channels_per_system', data=self.channels_per_system)
-        grp.create_dataset('components', data=self._components)
+        # grp.create_dataset('channels_per_system', data=self.channels_per_system)
+        # grp.create_dataset('components', data=self._components)
 
         self.fiducial.createHdf(grp, 'fiducial', nRepeats=nRepeats, fillvalue=fillvalue)
         self.lineNumber.createHdf(grp, 'line_number', nRepeats=nRepeats, fillvalue=fillvalue)
@@ -521,7 +521,7 @@ class DataPoint(Point):
     def fromHdf(cls, grp, index=None, **kwargs):
         """ Reads the object from a HDF group """
 
-        out = super(DataPoint, cls).fromHdf(grp, index=index)
+        out = super(DataPoint, cls).fromHdf(grp, index=index, **kwargs)
 
         # out.errorPosterior = None
 
@@ -533,10 +533,10 @@ class DataPoint(Point):
 
         out.elevation = StatArray.StatArray.fromHdf(grp['e'], index=index)
 
-        if 'channels_per_system' in grp:
-            out.channels_per_system = np.asarray(grp['channels_per_system'])
-        if 'components' in grp:
-            out._components = np.asarray(grp['components'])
+        # if 'channels_per_system' in grp:
+        #     out.channels_per_system = np.asarray(grp['channels_per_system'])
+        # if 'components' in grp:
+        #     out._components = np.asarray(grp['components'])
 
         out.data = StatArray.StatArray.fromHdf(grp['d'], index=index)
         out.std = StatArray.StatArray.fromHdf(grp['s'], index=index)
@@ -586,4 +586,3 @@ class DataPoint(Point):
         # out._channelNames = world.irecv(source=source).wait()
 
         return out
-

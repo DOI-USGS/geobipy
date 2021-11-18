@@ -38,7 +38,7 @@ class Order(baseDistribution):
 
 
     def probability(self, x, log):
-        tmp = np.squeeze(self.pdf[np.int(x)])
+        tmp = np.squeeze(self.pdf[np.int32(x)])
 
         return np.log(tmp) if log else tmp
         # print('tmp {}'.format(tmp))

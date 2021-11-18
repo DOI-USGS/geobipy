@@ -8,10 +8,10 @@
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery-binder.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery-dataframe.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -24,7 +24,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="1D Inference of Resolve Data" href="plot_inference_1d_resolve.html" />
-    <link rel="prev" title="Time Domain Datapoint Class" href="../Datapoints/plot_time_datapoint.html" /> 
+    <link rel="prev" title="Time Domain Datapoint Class" href="../Datapoints/plot_aerotem_datapoint.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -108,6 +108,8 @@ to download the full example code</p>
 <span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">example_path</span>
 <span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">Inference3D</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
 </pre></div>
 </div>
 <section id="running-geobipy-to-invert-data">
@@ -115,6 +117,15 @@ to download the full example code</p>
 <p>Define some directories and paths</p>
 <p>The directory where HDF files will be stored</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">output_directory</span> <span class="o">=</span> <span class="s2">&quot;..//supplementary//time_domain_inversion//results&quot;</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">output_directory</span><span class="p">):</span>
+    <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_directory</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">islink</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Failed to delete </span><span class="si">%s</span><span class="s1">. Reason: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>The parameter file defines the set of user parameters needed to run geobipy.</p>
@@ -163,7 +174,7 @@ n_markov_chains = 10000
 # General GeoBIPy options.
 # -------------------------------------------------------
 # Interactively plot a single data point as it progresses
-interactive_plot = False
+interactive_plot = True
 # How often to update the plot. (lower is generally slower)
 update_plot_every = 1000
 # Save a PNG of the final results for each data point.
@@ -229,7 +240,7 @@ minimum_thickness = None
 initial_relative_error = 0.05
 ## Relative Error Prior Details
 # Minimum Relative Error
-minimum_relative_error = 0.05
+minimum_relative_error = 0.01
 # Maximum Relative Error
 maximum_relative_error = 0.5
 
@@ -311,36 +322,78 @@ inside the data file.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">serial_geobipy</span><span class="p">(</span><span class="n">parameter_file</span><span class="p">,</span> <span class="n">output_directory</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
+<img src="../../_images/sphx_glr_plot_inference_1d_aerotem_001.png" srcset="../../_images/sphx_glr_plot_inference_1d_aerotem_001.png" alt="Fiducial [354780.], Time Domain EM Data" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Running GeoBIPy in serial mode
 Using user input file aerotem_options
 Output files will be produced at ..//supplementary//time_domain_inversion//results
 Creating HDF5 files, this may take a few minutes...
-Files are being created for data files [&#39;..//supplementary//data//aerotem_single.txt&#39;] and system files [&#39;..//supplementary//data//aerotem.stm&#39;]
+Files are being created for data files ..//supplementary//data//aerotem_single.txt and system files ..//supplementary//data//aerotem.stm
 Created hdf5 file for line 1010 with 1 data points
-i=0, k=2, 0.000 s/Model, 0.004 s Elapsed
+i=0, k=2, 0.000 s/Model, 0.008 s Elapsed
 
-i=1000, k=3, 0.005 s/Model, 4.943 s Elapsed
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+i=1000, k=5, 0.007 s/Model, 7.264 s Elapsed
 
-i=2000, k=6, 0.005 s/Model, 9.865 s Elapsed
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+i=2000, k=7, 0.007 s/Model, 14.196 s Elapsed
 
-i=3000, k=4, 0.005 s/Model, 14.875 s Elapsed
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+i=3000, k=7, 0.007 s/Model, 21.572 s Elapsed
 
-i=4000, k=4, 0.005 s/Model, 19.882 s Elapsed
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+i=4000, k=6, 0.007 s/Model, 28.872 s Elapsed
 
-i=5000, k=4, 0.005 s/Model, 24.930 s Elapsed
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+i=5000, k=8, 0.007 s/Model, 36.267 s Elapsed
 
-i=6000, k=6, 0.005 s/Model, 30.054 s Elapsed
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+i=6000, k=7, 0.007 s/Model, 43.630 s Elapsed
 
-i=7000, k=4, 0.005 s/Model, 35.137 s Elapsed
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+i=7000, k=5, 0.007 s/Model, 50.930 s Elapsed
 
-i=8000, k=4, 0.005 s/Model, 40.414 s Elapsed
+i=8000, k=5, 0.008 s/Model, 59.071 s Elapsed
 
-i=9000, k=6, 0.005 s/Model, 45.748 s Elapsed
+i=9000, k=5, 0.008 s/Model, 67.438 s Elapsed
 
-i=10000, k=7, 0.005 s/Model, 51.135 s Elapsed
+i=10000, k=7, 0.008 s/Model, 75.745 s Elapsed
 
-Remaining Points 0/1 || Elapsed Time: 0:00:51.378396 h:m:s || ETA 0:00:51.378396 h:m:s
+i=11000, k=7, 0.009 s/Model, 84.415 s Elapsed
+
+i=12000, k=6, 0.008 s/Model, 92.698 s Elapsed
+
+i=13000, k=5, 0.008 s/Model, 100.983 s Elapsed
+
+i=14000, k=5, 0.008 s/Model, 109.255 s Elapsed
+
+i=15000, k=6, 0.008 s/Model, 117.555 s Elapsed
+
+i=16000, k=7, 0.008 s/Model, 125.834 s Elapsed
+
+i=17000, k=5, 0.009 s/Model, 134.405 s Elapsed
+
+Remaining Points 0/1 || Elapsed Time: 0:02:15.613463 h:m:s || ETA 0:02:15.613463 h:m:s
 </pre></div>
 </div>
 </section>
@@ -361,8 +414,7 @@ and simply use them for plotting.</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt=", Time Domain EM Data" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_inference_1d_aerotem_001.png" />
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  55.359 seconds)</p>
+<img src="../../_images/sphx_glr_plot_inference_1d_aerotem_002.png" srcset="../../_images/sphx_glr_plot_inference_1d_aerotem_002.png" alt=", Time Domain EM Data" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  17.631 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-inference-plot-inference-1d-aerotem-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/291c4f40ce42d2dcc30b16c193f0222a/plot_inference_1d_aerotem.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_inference_1d_aerotem.py</span></code></a></p>
@@ -379,7 +431,7 @@ and simply use them for plotting.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../Datapoints/plot_time_datapoint.html" class="btn btn-neutral float-left" title="Time Domain Datapoint Class" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../Datapoints/plot_aerotem_datapoint.html" class="btn btn-neutral float-left" title="Time Domain Datapoint Class" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="plot_inference_1d_resolve.html" class="btn btn-neutral float-right" title="1D Inference of Resolve Data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

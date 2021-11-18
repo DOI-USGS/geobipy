@@ -8,10 +8,10 @@
       <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/gallery.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/gallery-binder.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/gallery-dataframe.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-rendered-html.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -110,7 +110,10 @@ bgcolor=transparent;
 rankdir=LR;
 size=&quot;8.0, 12.0&quot;;
   &quot;ABC&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Helper class that provides a standard way to create an ABC using&quot;];
+  &quot;Histogram&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;];
+  &quot;myObject&quot; -&gt; &quot;Histogram&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
   &quot;Histogram2D&quot; [URL=&quot;Histogram2D.html#geobipy.src.classes.statistics.Histogram2D.Histogram2D&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;2D Histogram class that can update and plot efficiently.&quot;];
+  &quot;Histogram&quot; -&gt; &quot;Histogram2D&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
   &quot;RectilinearMesh2D&quot; -&gt; &quot;Histogram2D&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
   &quot;Hitmap2D&quot; [URL=&quot;#geobipy.src.classes.statistics.Hitmap2D.Hitmap2D&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defining a 2D hitmap whose cells are rectangular with linear sides&quot;];
   &quot;Histogram2D&quot; -&gt; &quot;Hitmap2D&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];

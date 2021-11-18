@@ -8,10 +8,10 @@
       <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../../_static/gallery.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../../_static/gallery-binder.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../../_static/gallery-dataframe.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../../_static/gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../_static/sg_gallery-rendered-html.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -114,7 +114,7 @@ size=&quot;8.0, 12.0&quot;;
 }
 <span class="target" id="module-geobipy.src.classes.data.datapoint.DataPoint"></span><dl class="py class">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.DataPoint.DataPoint">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.data.datapoint.DataPoint.</span></span><span class="sig-name descname"><span class="pre">DataPoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels_per_system</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">components_per_channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictedData</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channelNames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lineNumber</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fiducial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.data.datapoint.DataPoint.</span></span><span class="sig-name descname"><span class="pre">DataPoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictedData</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channelNames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lineNumber</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fiducial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint" title="Permalink to this definition"></a></dt>
 <dd><p>Class defines a data point.</p>
 <p>Contains an easting, northing, height, elevation, observed and predicted data, and uncertainty estimates for the data.</p>
 <p>DataPoint(x, y, z, elevation, nChannels, data, std, units)</p>
@@ -139,6 +139,20 @@ size=&quot;8.0, 12.0&quot;;
 </ul>
 </dd>
 </dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.DataPoint.DataPoint.active">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">active</span></span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.active" title="Permalink to this definition"></a></dt>
+<dd><p>Gets the indices to the observed data values that are not NaN</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>out</strong> – Indices into the observed data that are not NaN</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>array of ints</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.DataPoint.DataPoint.createHdf">
 <span class="sig-name descname"><span class="pre">createHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">myName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withPosterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nRepeats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fillvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.createHdf" title="Permalink to this definition"></a></dt>
@@ -149,7 +163,7 @@ myName: Name of the group</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.DataPoint.DataPoint.dataMisfit">
-<span class="sig-name descname"><span class="pre">dataMisfit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">squared</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.dataMisfit" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">dataMisfit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.dataMisfit" title="Permalink to this definition"></a></dt>
 <dd><p>Compute the <span class="math notranslate nohighlight">\(L_{2}\)</span> norm squared misfit between the observed and predicted data</p>
 <div class="math notranslate nohighlight">
 \[\| \mathbf{W}_{d} (\mathbf{d}^{obs}-\mathbf{d}^{pre})\|_{2}^{2},\]</div>
@@ -221,65 +235,16 @@ with size equal to the number of active channels.</p>
 <dd><p>The predicted data.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.DataPoint.DataPoint.scaleJ">
-<span class="sig-name descname"><span class="pre">scaleJ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Jin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.scaleJ" title="Permalink to this definition"></a></dt>
-<dd><p>Scales a matrix by the errors in the given data</p>
-<p>Useful if a sensitivity matrix is generated using one data point, but must be scaled by the errors in another.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>Jin</strong> (<em>array_like</em>) – 2D array representing a matrix</p></li>
-<li><p><strong>power</strong> (<em>float</em>) – Power to raise the error level too. Default is -1.0</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>Jout</strong> – Matrix scaled by the data errors</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>array_like</p>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><strong>ValueError</strong> – If the number of rows in Jin do not match the number of active channels in the datapoint</p>
-</dd>
-</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.DataPoint.DataPoint.std">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">std</span></span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.std" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the data errors.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.DataPoint.DataPoint.summary">
 <em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">summary</span></span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.summary" title="Permalink to this definition"></a></dt>
 <dd><p>Print a summary of the EMdataPoint</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.DataPoint.DataPoint.updateErrors">
-<span class="sig-name descname"><span class="pre">updateErrors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">relativeErr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additiveErr</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.updateErrors" title="Permalink to this definition"></a></dt>
-<dd><p>Updates the data errors.</p>
-<p>Updates the standard deviation of the data errors using the following model</p>
-<div class="math notranslate nohighlight">
-\[\sqrt{(\mathbf{\epsilon}_{rel} \mathbf{d}^{obs})^{2} + \mathbf{\epsilon}^{2}_{add}},\]</div>
-<p>where <span class="math notranslate nohighlight">\(\mathbf{\epsilon}_{rel}\)</span> is the relative error, a percentage fraction and <span class="math notranslate nohighlight">\(\mathbf{\epsilon}_{add}\)</span> is the additive error.</p>
-<p>If the predicted data have been assigned a multivariate normal distribution, the variance of that distribution is also updated as the squared standard deviations.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>relativeErr</strong> (<em>float</em><em> or </em><em>array_like</em>) – A fraction percentage that is multiplied by the observed data.</p></li>
-<li><p><strong>additiveErr</strong> (<em>float</em><em> or </em><em>array_like</em>) – An absolute value of additive error.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>ValueError</strong> – If relativeError is &lt;= 0.0</p></li>
-<li><p><strong>ValueError</strong> – If additiveError is &lt;= 0.0</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.DataPoint.DataPoint.weightingMatrix">
-<span class="sig-name descname"><span class="pre">weightingMatrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">power</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.DataPoint.DataPoint.weightingMatrix" title="Permalink to this definition"></a></dt>
-<dd><p>Return a diagonal data weighting matrix of the reciprocated data standard deviations.</p>
 </dd></dl>
 
 <dl class="py method">

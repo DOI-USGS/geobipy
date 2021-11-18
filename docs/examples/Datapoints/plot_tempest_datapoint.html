@@ -8,10 +8,10 @@
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery-binder.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery-dataframe.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -23,8 +23,8 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Time Domain Datapoint Class" href="plot_time_datapoint.html" />
-    <link rel="prev" title="Frequency domain datapoint" href="plot_frequency_datapoint.html" /> 
+    <link rel="next" title="Time Domain Datapoint Class" href="plot_skytem_datapoint.html" />
+    <link rel="prev" title="Frequency domain datapoint" href="plot_resolve_datapoint.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -55,14 +55,15 @@
 <li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#data">Data</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html#datapoints">Datapoints</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="plot_frequency_datapoint.html">Frequency domain datapoint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_resolve_datapoint.html">Frequency domain datapoint</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Tempest Datapoint Class</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#obtaining-a-datapoint-from-a-dataset">Obtaining a datapoint from a dataset</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#using-a-time-domain-datapoint">Using a time domain datapoint</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#attaching-statistical-descriptors-to-the-datapoint">Attaching statistical descriptors to the datapoint</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="plot_time_datapoint.html">Time Domain Datapoint Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_skytem_datapoint.html">Time Domain Datapoint Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_aerotem_datapoint.html">Time Domain Datapoint Class</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#inference">Inference</a></li>
@@ -105,11 +106,11 @@ to download the full example code</p>
 <span id="sphx-glr-examples-datapoints-plot-tempest-datapoint-py"></span><h1>Tempest Datapoint Class<a class="headerlink" href="#tempest-datapoint-class" title="Permalink to this headline"></a></h1>
 <p>There are three ways in which to create a time domain datapoint</p>
 <ol class="arabic simple">
-<li><p><a class="reference internal" href="plot_time_datapoint.html#instantiating-a-time-domain-datapoint"><span class="std std-ref">Instantiating a time domain datapoint</span></a></p></li>
+<li><p><span class="xref std std-ref">Instantiating a time domain datapoint</span></p></li>
 <li><p><span class="xref std std-ref">Reading a datapoint from a file</span></p></li>
-<li><p><a class="reference internal" href="plot_time_datapoint.html#obtaining-a-datapoint-from-a-dataset"><span class="std std-ref">Obtaining a datapoint from a dataset</span></a></p></li>
+<li><p><a class="reference internal" href="#obtaining-a-datapoint-from-a-dataset"><span class="std std-ref">Obtaining a datapoint from a dataset</span></a></p></li>
 </ol>
-<p>Once instantiated, see <a class="reference internal" href="plot_time_datapoint.html#id1"><span class="std std-ref">Using a time domain datapoint</span></a></p>
+<p>Once instantiated, see <a class="reference internal" href="#using-a-time-domain-datapoint"><span class="std std-ref">Using a time domain datapoint</span></a></p>
 <p>Credits:
 We would like to thank Ross Brodie at Geoscience Australia for his airborne time domain forward modeller
 <a class="reference external" href="https://github.com/GeoscienceAustralia/ga-aem">https://github.com/GeoscienceAustralia/ga-aem</a></p>
@@ -139,34 +140,33 @@ We would like to thank Ross Brodie at Geoscience Australia for his airborne time
 <h2>Obtaining a datapoint from a dataset<a class="headerlink" href="#obtaining-a-datapoint-from-a-dataset" title="Permalink to this headline"></a></h2>
 <p>More often than not, our observed data is stored in a file on disk.
 We can read in a dataset and pull datapoints from it.</p>
-<p>For more information about the time domain data set, see <a class="reference internal" href="../Data/plot_time_domain_dataset.html#time-domain-dataset"><span class="std std-ref">Time domain dataset</span></a></p>
+<p>For more information about the time domain data set, see <a class="reference internal" href="../Data/plot_skytem_dataset.html#time-domain-dataset"><span class="std std-ref">Time domain dataset</span></a></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># The data file name</span>
 <span class="n">dataFile</span> <span class="o">=</span> <span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;Tempest.nc&#39;</span>
 <span class="c1"># The EM system file name</span>
 <span class="n">systemFile</span> <span class="o">=</span> <span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;Tempest.stm&#39;</span>
-</pre></div>
-</div>
-<p>Initialize and read an EM data set</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">D</span> <span class="o">=</span> <span class="n">TempestData</span><span class="o">.</span><span class="n">read_netcdf</span><span class="p">(</span><span class="n">dataFile</span><span class="p">,</span> <span class="n">systemFile</span><span class="p">)</span>
-</pre></div>
-</div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Warning: Your data contains values that are &lt;= 0.0
-</pre></div>
-</div>
-<p>Get a datapoint from the dataset</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tdp</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">datapoint</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
-<span class="c1"># plt.figure()</span>
-<span class="c1"># tdp.plot()</span>
+
+<span class="c1"># Prepare the dataset so that we can read a point at a time.</span>
+<span class="n">Dataset</span> <span class="o">=</span> <span class="n">TempestData</span><span class="o">.</span><span class="n">_initialize_sequential_reading</span><span class="p">(</span><span class="n">dataFile</span><span class="p">,</span> <span class="n">systemFile</span><span class="p">)</span>
+<span class="c1"># Get a datapoint from the file.</span>
+<span class="n">tdp</span> <span class="o">=</span> <span class="n">Dataset</span><span class="o">.</span><span class="n">_read_record</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">tdp</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_tempest_datapoint_001.png" srcset="../../_images/sphx_glr_plot_tempest_datapoint_001.png" alt="Time Domain EM Data" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;AxesSubplot:title={&#39;center&#39;:&#39;Time Domain EM Data&#39;}, xlabel=&#39;Time (s)&#39;, ylabel=&#39;Data (fT)&#39;&gt;
 </pre></div>
 </div>
 </section>
 <section id="using-a-time-domain-datapoint">
 <h2>Using a time domain datapoint<a class="headerlink" href="#using-a-time-domain-datapoint" title="Permalink to this headline"></a></h2>
 <p>We can define a 1D layered earth model, and use it to predict some data</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">par</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mf">500.0</span><span class="p">,</span> <span class="mf">20.0</span><span class="p">],</span> <span class="s2">&quot;Conductivity&quot;</span><span class="p">,</span> <span class="s2">&quot;$</span><span class="se">\f</span><span class="s2">rac</span><span class="si">{S}{m}</span><span class="s2">$&quot;</span><span class="p">)</span>
-<span class="n">mod</span> <span class="o">=</span> <span class="n">Model1D</span><span class="p">(</span><span class="n">edges</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">75.0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">],</span> <span class="n">parameters</span><span class="o">=</span><span class="n">par</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">par</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="mf">50.0</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mf">100.0</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mf">1000.0</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mf">5.0</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mf">1000.0</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mf">800.0</span><span class="p">],</span> <span class="s2">&quot;Conductivity&quot;</span><span class="p">,</span> <span class="s2">&quot;$</span><span class="se">\f</span><span class="s2">rac</span><span class="si">{S}{m}</span><span class="s2">$&quot;</span><span class="p">)</span>
+<span class="n">mod</span> <span class="o">=</span> <span class="n">Model1D</span><span class="p">(</span><span class="n">edges</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">20.0</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mf">150.0</span><span class="p">,</span> <span class="mf">250.0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">],</span> <span class="n">parameters</span><span class="o">=</span><span class="n">par</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Forward model the data</p>
@@ -175,7 +175,7 @@ We can read in a dataset and pull datapoints from it.</p>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">)</span>
-<span class="n">_</span> <span class="o">=</span> <span class="n">mod</span><span class="o">.</span><span class="n">pcolor</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">mod</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">transpose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">)</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">tdp</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">tdp</span><span class="o">.</span><span class="n">plotPredicted</span><span class="p">()</span>
@@ -183,33 +183,30 @@ We can read in a dataset and pull datapoints from it.</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s1">&#39;Model and response&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="Model and response, Time Domain EM Data" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_tempest_datapoint_001.png" />
-<p class="sphx-glr-script-out">Out:</p>
+<img src="../../_images/sphx_glr_plot_tempest_datapoint_002.png" srcset="../../_images/sphx_glr_plot_tempest_datapoint_002.png" alt="Model and response, Time Domain EM Data" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Text(0.5, 0.98, &#39;Model and response&#39;)
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">tdp</span><span class="o">.</span><span class="n">plotDataResidual</span><span class="p">(</span><span class="n">xscale</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;data residual&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-<img alt="data residual" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_tempest_datapoint_002.png" />
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Text(0.5, 1.0, &#39;data residual&#39;)
-</pre></div>
-</div>
+<p>plt.figure()
+tdp.plotDataResidual(xscale=’log’)
+plt.title(‘data residual’)</p>
 <p>Compute the sensitivity matrix for a given model</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">J</span> <span class="o">=</span> <span class="n">tdp</span><span class="o">.</span><span class="n">sensitivity</span><span class="p">(</span><span class="n">mod</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">J</span><span class="p">)</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">equalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">flipY</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot tempest datapoint" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_tempest_datapoint_003.png" />
-</section>
+<img src="../../_images/sphx_glr_plot_tempest_datapoint_003.png" srcset="../../_images/sphx_glr_plot_tempest_datapoint_003.png" alt="plot tempest datapoint" class = "sphx-glr-single-img"/></section>
 <section id="attaching-statistical-descriptors-to-the-datapoint">
 <h2>Attaching statistical descriptors to the datapoint<a class="headerlink" href="#attaching-statistical-descriptors-to-the-datapoint" title="Permalink to this headline"></a></h2>
-<p>Define a multivariate log normal distribution as the prior on the predicted data.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tdp</span><span class="o">.</span><span class="n">predictedData</span><span class="o">.</span><span class="n">set_prior</span><span class="p">(</span><span class="s1">&#39;MvLogNormal&#39;</span><span class="p">,</span> <span class="n">tdp</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">tdp</span><span class="o">.</span><span class="n">active</span><span class="p">],</span> <span class="n">tdp</span><span class="o">.</span><span class="n">std</span><span class="p">[</span><span class="n">tdp</span><span class="o">.</span><span class="n">active</span><span class="p">]</span><span class="o">**</span><span class="mf">2.0</span><span class="p">)</span>
+<p>Set relative errors for the primary fields, and secondary fields.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tdp</span><span class="o">.</span><span class="n">relErr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">]</span>
+
+<span class="c1"># Set the additive errors for</span>
+<span class="n">tdp</span><span class="o">.</span><span class="n">addErr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([[</span><span class="mf">0.011474</span><span class="p">,</span> <span class="mf">0.012810</span><span class="p">,</span> <span class="mf">0.008507</span><span class="p">,</span> <span class="mf">0.005154</span><span class="p">,</span> <span class="mf">0.004742</span><span class="p">,</span> <span class="mf">0.004477</span><span class="p">,</span> <span class="mf">0.004168</span><span class="p">,</span> <span class="mf">0.003539</span><span class="p">,</span> <span class="mf">0.003352</span><span class="p">,</span> <span class="mf">0.003213</span><span class="p">,</span> <span class="mf">0.003161</span><span class="p">,</span> <span class="mf">0.003122</span><span class="p">,</span> <span class="mf">0.002587</span><span class="p">,</span> <span class="mf">0.002038</span><span class="p">,</span> <span class="mf">0.002201</span><span class="p">],</span>
+                       <span class="p">[</span><span class="mf">0.007383</span><span class="p">,</span> <span class="mf">0.005693</span><span class="p">,</span> <span class="mf">0.005178</span><span class="p">,</span> <span class="mf">0.003659</span><span class="p">,</span> <span class="mf">0.003426</span><span class="p">,</span> <span class="mf">0.003046</span><span class="p">,</span> <span class="mf">0.003095</span><span class="p">,</span> <span class="mf">0.003247</span><span class="p">,</span> <span class="mf">0.002775</span><span class="p">,</span> <span class="mf">0.002627</span><span class="p">,</span> <span class="mf">0.002460</span><span class="p">,</span> <span class="mf">0.002178</span><span class="p">,</span> <span class="mf">0.001754</span><span class="p">,</span> <span class="mf">0.001405</span><span class="p">,</span> <span class="mf">0.001283</span><span class="p">]])</span>
+<span class="c1"># Define a multivariate log normal distribution as the prior on the predicted data.</span>
+<span class="n">tdp</span><span class="o">.</span><span class="n">predictedData</span><span class="o">.</span><span class="n">prior</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;MvLogNormal&#39;</span><span class="p">,</span> <span class="n">tdp</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">tdp</span><span class="o">.</span><span class="n">active</span><span class="p">],</span> <span class="n">tdp</span><span class="o">.</span><span class="n">std</span><span class="p">[</span><span class="n">tdp</span><span class="o">.</span><span class="n">active</span><span class="p">]</span><span class="o">**</span><span class="mf">2.0</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This allows us to evaluate the likelihood of the predicted data</p>
@@ -219,34 +216,74 @@ We can read in a dataset and pull datapoints from it.</p>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>-139.95785764810176
-14.992644973583653
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>-158.94319013150562
+17.302474406320894
+</pre></div>
+</div>
+<p>Plot the misfits for a range of half space conductivities</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">tdp</span><span class="o">.</span><span class="n">plotHalfSpaceResponses</span><span class="p">(</span><span class="o">-</span><span class="mf">6.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Halfspace responses&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_tempest_datapoint_004.png" srcset="../../_images/sphx_glr_plot_tempest_datapoint_004.png" alt="Halfspace responses" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Text(0.5, 1.0, &#39;Halfspace responses&#39;)
 </pre></div>
 </div>
 <p>We can perform a quick search for the best fitting half space</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">halfspace</span> <span class="o">=</span> <span class="n">tdp</span><span class="o">.</span><span class="n">find_best_halfspace</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Best half space conductivity is </span><span class="si">{}</span><span class="s1"> $S/m$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">halfspace</span><span class="o">.</span><span class="n">par</span><span class="p">))</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">tdp</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">tdp</span><span class="o">.</span><span class="n">plotPredicted</span><span class="p">()</span>
 
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">tdp</span><span class="o">.</span><span class="n">plot_secondary_field</span><span class="p">()</span>
+<span class="n">tdp</span><span class="o">.</span><span class="n">plot_predicted_secondary_field</span><span class="p">()</span>
 
+<span class="c1"># ################################################################################</span>
+<span class="c1"># # We can attach priors to the height of the datapoint,</span>
+<span class="c1"># # the relative error multiplier, and the additive error noise floor</span>
 
-
-
-
-
-
+<span class="c1"># Define the distributions used as priors.</span>
+<span class="n">heightPrior</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;Uniform&#39;</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">tdp</span><span class="o">.</span><span class="n">z</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">tdp</span><span class="o">.</span><span class="n">z</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">relativePrior</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;Uniform&#39;</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">],</span> <span class="nb">max</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+<span class="n">pitchPrior</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;Uniform&#39;</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="n">tdp</span><span class="o">.</span><span class="n">transmitter</span><span class="o">.</span><span class="n">pitch</span> <span class="o">-</span> <span class="mf">5.0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">tdp</span><span class="o">.</span><span class="n">transmitter</span><span class="o">.</span><span class="n">pitch</span> <span class="o">+</span> <span class="mf">5.0</span><span class="p">)</span>
+<span class="c1"># additivePrior = Distribution(&#39;Uniform&#39;, min=np.r_[1e-12, 1e-13], max=np.r_[1e-10, 1e-11], log=True)</span>
+<span class="n">tdp</span><span class="o">.</span><span class="n">set_priors</span><span class="p">(</span><span class="n">height_prior</span><span class="o">=</span><span class="n">heightPrior</span><span class="p">,</span> <span class="n">relative_error_prior</span><span class="o">=</span><span class="n">relativePrior</span><span class="p">,</span> <span class="n">transmitter_pitch_prior</span><span class="o">=</span><span class="n">pitchPrior</span><span class="p">)</span><span class="c1">#, additive_error_prior=additivePrior)</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><img src="../../_images/sphx_glr_plot_tempest_datapoint_005.png" srcset="../../_images/sphx_glr_plot_tempest_datapoint_005.png" alt="Time Domain EM Data" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../_images/sphx_glr_plot_tempest_datapoint_006.png" srcset="../../_images/sphx_glr_plot_tempest_datapoint_006.png" alt="Secondary field" class = "sphx-glr-multi-img"/></li>
+</ul>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Best half space conductivity is [0.04641589] $S/m$
+</pre></div>
+</div>
+<p>In order to perturb our solvable parameters, we need to attach proposal distributions</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">heightProposal</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;Normal&#39;</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="n">tdp</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="n">variance</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">)</span>
+<span class="n">relativeProposal</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;MvNormal&#39;</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="n">tdp</span><span class="o">.</span><span class="n">relErr</span><span class="p">,</span> <span class="n">variance</span><span class="o">=</span><span class="mf">2.5e-4</span><span class="p">)</span>
+<span class="n">transmitter_pitch_proposal</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;Normal&#39;</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="n">tdp</span><span class="o">.</span><span class="n">transmitter</span><span class="o">.</span><span class="n">pitch</span><span class="p">,</span> <span class="n">variance</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">)</span>
+<span class="c1"># additiveProposal = Distribution(&#39;MvLogNormal&#39;, mean=tdp.addErr, variance=2.5e-3, linearSpace=True)</span>
+<span class="n">tdp</span><span class="o">.</span><span class="n">set_proposals</span><span class="p">(</span><span class="n">heightProposal</span><span class="p">,</span> <span class="n">relativeProposal</span><span class="p">,</span> <span class="n">transmitter_pitch_proposal</span><span class="o">=</span><span class="n">transmitter_pitch_proposal</span><span class="p">)</span><span class="c1">#, additiveProposal)</span>
+</pre></div>
+</div>
+<p>With priorss set we can auto generate the posteriors</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tdp</span><span class="o">.</span><span class="n">set_posteriors</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Perturb the datapoint and record the perturbations
+Note we are not using the priors to accept or reject perturbations.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="n">tdp</span><span class="o">.</span><span class="n">perturb</span><span class="p">()</span>
+    <span class="n">tdp</span><span class="o">.</span><span class="n">updatePosteriors</span><span class="p">()</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="Time Domain EM Data" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_tempest_datapoint_004.png" />
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Best half space conductivity is [0.17073526] $S/m$
-</pre></div>
-</div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  2.683 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  1.811 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-datapoints-plot-tempest-datapoint-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/439c06574d36795305525eb492c7861b/plot_tempest_datapoint.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_tempest_datapoint.py</span></code></a></p>
@@ -263,8 +300,8 @@ We can read in a dataset and pull datapoints from it.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="plot_frequency_datapoint.html" class="btn btn-neutral float-left" title="Frequency domain datapoint" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="plot_time_datapoint.html" class="btn btn-neutral float-right" title="Time Domain Datapoint Class" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="plot_resolve_datapoint.html" class="btn btn-neutral float-left" title="Frequency domain datapoint" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot_skytem_datapoint.html" class="btn btn-neutral float-right" title="Time Domain Datapoint Class" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

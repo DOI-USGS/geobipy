@@ -65,10 +65,10 @@ class FdemData(Data):
 
     """
 
-    def __init__(self, systems=None, **kwargs):
+    def __init__(self, system=None, **kwargs):
         """Instantiate the FdemData class. """
 
-        self.system = systems
+        self.system = system
 
         kwargs['components'] = kwargs.get('components', self.components)
         kwargs['channels_per_system'] = kwargs.get('channels_per_system', 2*self.nFrequencies)
@@ -86,7 +86,11 @@ class FdemData(Data):
 
     @property
     def nFrequencies(self):
-        return (self.channels_per_system / 2).astype(np.int32)
+        return np.atleast_1d(self.system[0].nFrequencies)
+
+    @property
+    def channels_per_system(self):
+        return 2 * self.nFrequencies
 
     @property
     def nSystems(self):
@@ -140,7 +144,6 @@ class FdemData(Data):
         if values is None:
             self._system = None
             self.components = None
-            self.channels_per_system = None
             return
 
         if isinstance(values, (str, FdemSystem)):
@@ -158,7 +161,6 @@ class FdemData(Data):
                 self._system[i] = s
 
         self.components = None
-        self.channels_per_system = [2 * s.nFrequencies for s in self.system]
 
     @Data.channelNames.setter
     def channelNames(self, values):
@@ -168,12 +170,11 @@ class FdemData(Data):
                 # Set the channel names
                 for ic in range(self.n_components):
                     for iFrequency in range(2*self.nFrequencies[i]):
-                        self._channelNames.append('{} {} (Hz)'.format(self.getMeasurementType(iFrequency, i), self.getFrequency(iFrequency, i)))
+                        self._channelNames.append('{} {}'.format(self.getMeasurementType(iFrequency, i), self.getFrequency(iFrequency, i)))
         else:
             assert all((isinstance(x, str) for x in values))
             assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
             self._channelNames = values
-
 
     def check(self):
         if (np.nanmin(self.data) <= 0.0):
@@ -285,7 +286,7 @@ class FdemData(Data):
             Either "In-Phase " or "Quadrature "
 
         """
-        return 'In-Phase' if channel < self.nFrequencies[system] else 'Quadrature'
+        return 'In_Phase' if channel < self.nFrequencies[system] else 'Quadrature'
 
 
     def getFrequency(self, channel, system=0):
@@ -385,8 +386,9 @@ class FdemData(Data):
                              self.y[index],
                              self.z[index],
                              self.elevation[index],
-                             self._data[index, :],
-                             self._std[index, :],
+                             self.data[index, :],
+                             self.std[index, :],
+                             self.predictedData[index, :],
                              system=self.system,
                              lineNumber=self.lineNumber[index],
                              fiducial=self.fiducial[index])
@@ -400,7 +402,7 @@ class FdemData(Data):
     #     tmp = self.getChannel(system, channel)
     #     kwargs['c'] = tmp
 
-    #     self.mapPlot(*args, **kwargs)
+    #     self.map(*args, **kwargs)
 
     #     cP.title(tmp.name)
 
@@ -473,7 +475,7 @@ class FdemData(Data):
         leg = ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), fancybox=True)
         leg.set_title('Frequency (Hz)')
 
-        ylabel ='{}In-Phase ({})'.format(cF._logLabel(kwargs['log']), l._data.units)
+        ylabel ='{}In_Phase ({})'.format(cF._logLabel(kwargs['log']), l._data.units)
         cP.ylabel(ylabel)
 
         ax = plt.subplot(212, sharex=ax1)
@@ -520,51 +522,46 @@ class FdemData(Data):
 
         """
         # Read in the EM System file
-        if (isinstance(dataFilename, str)):
-            dataFilename = [dataFilename]
-
-        nDatafiles = len(dataFilename)
 
         # Initialize the EMData Class
-        self = cls(systems=systemFilename)
+        self = cls(system=systemFilename)
 
-        assert nDatafiles == self.nSystems, Exception("Number of data files must match number of system files.")
+        # assert nDatafiles == self.nSystems, Exception("Number of data files must match number of system files.")
+        nPoints, iC, iData, iStd, powerline, magnetic = FdemData._csv_channels(dataFilename)
 
-        nPoints, iC, iD, iS, powerline, magnetic = self._csv_channels(dataFilename)
-
-        channels = iC[0] + iD[0]
-        if not iS[0] is None:
-            channels += iS[0]
+        channels = iC + iData
+        if len(iStd) > 0:
+            channels += iStd
 
         # Read in the columns from the first data file
         try:
-            df = read_csv(dataFilename[0], index_col=False, usecols=channels, skipinitialspace = True)
+            df = read_csv(dataFilename, index_col=False, usecols=channels, skipinitialspace = True)
         except:
-            df = read_csv(dataFilename[0], index_col=False, usecols=channels, delim_whitespace=True, skipinitialspace = True)
+            df = read_csv(dataFilename, index_col=False, usecols=channels, delim_whitespace=True, skipinitialspace = True)
         df = df.replace('NaN',np.nan)
 
         # Assign columns to variables
-        self.lineNumber = df[iC[0][0]].values
-        self.fiducial = df[iC[0][1]].values
-        self.x = df[iC[0][2]].values
-        self.y = df[iC[0][3]].values
-        self.z = df[iC[0][4]].values
-        self.elevation = df[iC[0][5]].values
+        self.lineNumber = df[iC[0]].values
+        self.fiducial = df[iC[1]].values
+        self.x = df[iC[2]].values
+        self.y = df[iC[3]].values
+        self.z = df[iC[4]].values
+        self.elevation = df[iC[5]].values
 
         if not powerline is None:
-            self.powerline = df[powerline[0]].values
+            self.powerline = df[powerline].values
         else:
             self.powerline = None
 
         if not magnetic is None:
-            self.magnetic = df[magnetic[0]].values
+            self.magnetic = df[magnetic].values
         else:
             self.magnetic = None
 
-        self.data = df[iD[0]].values
+        self.data = df[iData].values
 
-        if not iS[0] is None:
-            self.std = df[iS[0]].values
+        if len(iStd) > 0:
+            self.std = df[iStd].values
         else:
             self.std = 0.1 * self.data
 
@@ -593,19 +590,16 @@ class FdemData(Data):
     #     return channels
 
     def csv_channels(self, filename):
-        self._nPoints, self._iC, self._iD, self._iS, iP, iM = self._csv_channels(filename)
+        self._nPoints, self._iC, self._iData, self._iStd, iP, iM = self._csv_channels(filename)
 
-        self._channels = []
-        for i in range(self.nSystems):
-            channels = self._iC[i] + self._iD[i]
-            if not self._iS[i] is None:
-                channels += self._iS[i]
-            self._channels.append(channels)
+        self._channels = self._iC + self._iData
+        if len(self._iStd) > 0:
+            self._channels += self._iStd
 
         return self._channels
 
-
-    def _csv_channels(self, data_filename):
+    @staticmethod
+    def _csv_channels(data_filename):
         """Read in the header information for an FdemData file.
 
         Parameters
@@ -624,63 +618,45 @@ class FdemData(Data):
 
         """
 
-        location_channels = []
-        data_channels = []
-        error_channels = []
         powerline = None
         magnetic = None
 
-        if isinstance(data_filename, str):
-            data_filename = [data_filename]
+        nPoints, location_channels = Data._csv_channels(data_filename)
 
-        nPoints = self._csv_n_points(data_filename)
+        # Get the column headers of the data file
+        channels = fIO.get_column_name(data_filename)
+        nChannels = len(channels)
 
-        for k, f in enumerate(data_filename):
+        # To grab the EM data, skip the following header names. (More can be added to this)
+        # Initialize a column identifier for x y z
+        inPhase = []
+        quadrature = []
+        in_err = []
+        quad_err = []
+        for j, channel in enumerate(channels):
+            cTmp = channel.lower()
+            if cTmp in ['powerline']:
+                powerline = 'powerline'
 
-            ixyz, ilf = super()._csv_channels(f)
-            _loc_channels = ilf + ixyz
+            elif cTmp in ['magnetic']:
+                magnetic = 'magnetic'
 
-            # Get the column headers of the data file
-            channels = fIO.get_column_name(f)
-            nChannels = len(channels)
+            elif any(label in cTmp for label in ('i_', 'in_phase')):
+                if 'err' in cTmp:
+                    in_err.append(channel)
+                else:
+                    inPhase.append(channel)
 
-            # To grab the EM data, skip the following header names. (More can be added to this)
-            # Initialize a column identifier for x y z
-            inPhase = []
-            quadrature = []
-            in_err = []
-            quad_err = []
-            for j, channel in enumerate(channels):
-                cTmp = channel.lower()
-                if cTmp in ['powerline']:
-                    powerline = 'powerline'
-                elif cTmp in ['magnetic']:
-                    magnetic = 'magnetic'
-                elif 'i_' in cTmp:
-                    if 'err' in cTmp:
-                        in_err.append(channel)
-                    else:
-                        inPhase.append(channel)
-                elif 'q_' in cTmp:
-                    if 'err' in cTmp:
-                        quad_err.append(channel)
-                    else:
-                        quadrature.append(channel)
-
-            hasErrors = len(quad_err) > 0
+            elif any(label in cTmp for label in ('q_', 'quad')):
+                if 'err' in cTmp:
+                    quad_err.append(channel)
+                else:
+                    quadrature.append(channel)
 
 
-            assert len(inPhase) == self.system[k].nFrequencies, Exception("Data file must have {} inphase channels, header should be I_<Frequency> for each inphase column".format(self.system[k].nFrequencies))
-            assert len(quadrature) == self.system[k].nFrequencies, Exception("Data file must have {} quadrature channels, header should be Q_<Frequency> for each quadrature column".format(self.system[k].nFrequencies))
+        data_channels = inPhase + quadrature
 
-            _data_channels = inPhase + quadrature
-
-            _error_channels = in_err + quad_err if hasErrors else None
-
-            location_channels.append(_loc_channels)
-            data_channels.append(_data_channels)
-            error_channels.append(_error_channels)
-
+        error_channels = in_err + quad_err #if hasErrors else None
 
         return nPoints, location_channels, data_channels, error_channels, powerline, magnetic
 
@@ -699,7 +675,6 @@ class FdemData(Data):
 
         # Read in the EM System file
         self = cls(system_filename)
-
         self._data_filename = data_filename
         self._open_csv_files(data_filename)
 
@@ -739,37 +714,31 @@ class FdemData(Data):
         FdemData.__initLineByLineRead() must have already been run.
 
         """
-        # if self._file[0].closed:
-        #     return None
-
-        endOfFile = False
-        dfs = []
-        for i in range(self.nSystems):
-            try:
-                df = self._file[i].get_chunk()
-                df = df.replace('NaN',np.nan)
-                dfs.append(df)
-            except:
-                self._file[i].close()
-                endOfFile = True
+        try:
+            df = self._file.get_chunk()
+            df = df.replace('NaN',np.nan)
+            endOfFile = False
+        except:
+            self._file.close()
+            endOfFile = True
 
         if endOfFile:
             return None
 
-        D = np.squeeze(np.hstack([dfs[i][self._iD[i]].values for i in range(self.nSystems)]))
+        D = np.squeeze(df[self._iData].values)
 
-        if self._iS[0] is None:
-            S = 0.1 * D
+        if len(self._iStd) > 0:
+            S = np.squeeze(df[self._iStd].values)
         else:
-            S = np.squeeze(np.hstack([dfs[i][self._iS[i]].values for i in range(self.nSystems)]))
-
-        return FdemDataPoint(x=dfs[0][self._iC[0][2]].values,
-                             y=dfs[0][self._iC[0][3]].values,
-                             z=dfs[0][self._iC[0][4]].values,
-                             elevation=dfs[0][self._iC[0][5]].values,
+            S = 0.1 * D
+        
+        return FdemDataPoint(x=df[self._iC[2]].values,
+                             y=df[self._iC[3]].values,
+                             z=df[self._iC[4]].values,
+                             elevation=df[self._iC[5]].values,
                              data=D, std=S, system=self.system,
-                             lineNumber=dfs[0][self._iC[0][0]].values,
-                             fiducial=dfs[0][self._iC[0][1]].values)
+                             lineNumber=df[self._iC[0]].values,
+                             fiducial=df[self._iC[1]].values)
 
 
     def readAarhusFile(self, dataFilename):
@@ -1028,6 +997,8 @@ class FdemData(Data):
 
         return out
 
+    
+
 
     def write(self, fileNames, std=False, predictedData=False):
 
@@ -1036,53 +1007,58 @@ class FdemData(Data):
 
         assert len(fileNames) == self.nSystems, ValueError("fileNames must have length equal to the number of systems {}".format(self.nSystems))
 
-        for i, sys in enumerate(self.system):
-            # Create the header
-            header = "Line Fid Easting Northing Elevation Height "
+        import pandas as pd
 
-            for x in sys.frequencies:
-                header += "I_{0} Q_{0} ".format(x)
+        d = {'col1': [1, 2], 'col2': [3, 4]}
+        df = pd.DataFrame(data=d)
 
-            if not self.powerline is None:
-                header += 'Powerline '
-            if not self.magnetic is None:
-                header += 'Magnetic'
+        # for i, sys in enumerate(self.system):
+        #     # Create the header
+        #     header = "Line Fid Easting Northing Elevation Height "
 
-            d = np.empty(2*sys.nFrequencies)
+        #     for x in sys.frequencies:
+        #         header += "I_{0} Q_{0} ".format(x)
 
-            if std:
-                for x in sys.frequencies:
-                    header += "I_{0}_Err Q_{0}_Err ".format(x)
-                s = np.empty(2*sys.nFrequencies)
+        #     if not self.powerline is None:
+        #         header += 'Powerline '
+        #     if not self.magnetic is None:
+        #         header += 'Magnetic'
 
-            with open(fileNames[i], 'w') as f:
-                f.write(header+"\n")
-                with np.printoptions(formatter={'float': '{: 0.15g}'.format}, suppress=True):
-                    for j in range(self.nPoints):
+        #     d = np.empty(2*sys.nFrequencies)
 
-                        x = np.asarray([self.lineNumber[j], self.fiducial[j], self.x[j], self.y[j], self.elevation[j], self.z[j]])
+        #     if std:
+        #         for x in sys.frequencies:
+        #             header += "I_{0}_Err Q_{0}_Err ".format(x)
+        #         s = np.empty(2*sys.nFrequencies)
 
-                        if predictedData:
-                            d[0::2] = self.predictedData[j, :sys.nFrequencies]
-                            d[1::2] = self.predictedData[j, sys.nFrequencies:]
-                        else:
-                            d[0::2] = self.data[j, :sys.nFrequencies]
-                            d[1::2] = self.data[j, sys.nFrequencies:]
+        #     with open(fileNames[i], 'w') as f:
+        #         f.write(header+"\n")
+        #         with np.printoptions(formatter={'float': '{: 0.15g}'.format}, suppress=True):
+        #             for j in range(self.nPoints):
 
-                        if std:
-                            s[0::2] = self.std[j, :sys.nFrequencies]
-                            s[1::2] = self.std[j, sys.nFrequencies:]
-                            x = np.hstack([x, d, s])
-                        else:
-                            x = np.hstack([x, d])
+        #                 x = np.asarray([self.lineNumber[j], self.fiducial[j], self.x[j], self.y[j], self.elevation[j], self.z[j]])
 
-                        if not self.powerline is None:
-                            x = np.hstack([x, self.powerline[j]])
-                        if not self.magnetic is None:
-                            x = np.hstack([x, self.magnetic[j]])
+        #                 if predictedData:
+        #                     d[0::2] = self.predictedData[j, :sys.nFrequencies]
+        #                     d[1::2] = self.predictedData[j, sys.nFrequencies:]
+        #                 else:
+        #                     d[0::2] = self.data[j, :sys.nFrequencies]
+        #                     d[1::2] = self.data[j, sys.nFrequencies:]
 
-                        y = ""
-                        for a in x:
-                            y += "{} ".format(a)
+        #                 if std:
+        #                     s[0::2] = self.std[j, :sys.nFrequencies]
+        #                     s[1::2] = self.std[j, sys.nFrequencies:]
+        #                     x = np.hstack([x, d, s])
+        #                 else:
+        #                     x = np.hstack([x, d])
 
-                        f.write(y+"\n")
+        #                 if not self.powerline is None:
+        #                     x = np.hstack([x, self.powerline[j]])
+        #                 if not self.magnetic is None:
+        #                     x = np.hstack([x, self.magnetic[j]])
+
+        #                 y = ""
+        #                 for a in x:
+        #                     y += "{} ".format(a)
+
+        #                 f.write(y+"\n")

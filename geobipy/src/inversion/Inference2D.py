@@ -218,7 +218,6 @@ class Inference2D(myObject):
             _, cu = self.computeCredibleInterval(log=10)
             return cu
 
-
     def computeCredibleInterval(self, percent=95.0, log=None, track=True):
 
         s = 'percent={}'.format(percent)
@@ -267,6 +266,43 @@ class Inference2D(myObject):
             credibleUpper.toHdf(self.hdfFile, key)
 
         return credibleLower, credibleUpper
+
+    def compute_mean_parameter(self, log=None, track=True):
+    
+        mean_parameter = StatArray.StatArray(np.zeros(self.mesh.shape), 'Mean', self.parameterUnits)
+
+        grp = self.hdfFile['currentmodel/par/posterior']
+
+        if 'counts' in grp:
+            counts = grp['counts/data']
+            xc = grp['x/centres/data']
+            yc = grp['y/centres/data']
+
+        elif 'arr' in grp:
+            counts = grp['arr/data']
+            xc = grp['x/x/data']
+            yc = grp['y/x/data']
+
+        h = Hitmap2D(xCentres = StatArray.StatArray(np.r_[xc[0, :]]), yCentres = StatArray.StatArray(np.r_[yc[0, :]]))
+        mean_parameter[:, 0] = h.mean()
+
+        r = range(1, self.nPoints)
+        if track:
+            print('Computing mean', flush=True)
+            r = progressbar.progressbar(r)
+
+        for i in r:
+            h.x.xBinCentres = np.r_[xc[i, :]]
+            h._counts[:, :] = np.r_[counts[i, :, :]]
+            mean_parameter[:, i] = h.mean()
+
+        key = 'mean_parameter'
+        if key in self.hdfFile.keys():
+            mean_parameter.writeHdf(self.hdfFile, key)
+        else:
+            mean_parameter.toHdf(self.hdfFile, key)
+
+        return mean_parameter
 
 
     def credibleRange(self, slic=None):
@@ -351,7 +387,7 @@ class Inference2D(myObject):
         #         doi[i] = self.hitmap(0).z.centres[iCell - 1]
 
         if window > 1:
-            buffer = np.int(0.5 * window)
+            buffer = np.int32(0.5 * window)
             tmp = doi.rolling(np.mean, window)
             doi[buffer:-buffer] = tmp
             doi[:buffer] = tmp[0]
@@ -904,7 +940,10 @@ class Inference2D(myObject):
         return np.max(np.asarray(self.hdfFile["currentmodel/par/posterior/x/x/data"][:, -1]))
 
     def meanParameters(self, slic=None):
-        return StatArray.StatArray.fromHdf(self.hdfFile['meaninterp'], index=slic)
+        if not 'mean_parameter' in self.hdfFile:
+            self.compute_mean_parameter(log=10)
+        
+        return StatArray.StatArray.fromHdf(self.hdfFile['mean_parameter'], index=slic)
 
     @cached_property
     def mesh(self):

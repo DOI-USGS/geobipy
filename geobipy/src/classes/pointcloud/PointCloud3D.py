@@ -1,7 +1,7 @@
 from copy import deepcopy
 from ...classes.core.myObject import myObject
 import numpy as np
-from pandas import read_csv
+from pandas import DataFrame, read_csv
 from ...classes.core import StatArray
 from ...base import fileIO as fIO
 # from ...base import interpolation
@@ -73,10 +73,11 @@ class PointCloud3D(myObject):
 
     def __deepcopy__(self, memo={}):
         result = type(self).__new__(type(self))
-        result.x = self.x
-        result.y = self.y
-        result.z = self.z
-        results.elevation = self.elevation
+        result._nPoints = 0
+        result.x = deepcopy(self.x)
+        result.y = deepcopy(self.y)
+        result.z = deepcopy(self.z)
+        result.elevation = deepcopy(self.elevation)
         return result
 
     def __getitem__(self, i):
@@ -96,6 +97,14 @@ class PointCloud3D(myObject):
                             self.y[i],
                             self.z[i],
                             self.elevation[i])
+
+    def _as_dict(self):
+        return {self.x.name.replace(' ', '_'): self.x,
+                self.y.name.replace(' ', '_'): self.y,
+                self.z.name.replace(' ', '_'): self.z,
+                self.elevation.name.replace(' ', '_'): self.elevation}, \
+                [self.x.name.replace(' ', '_'), self.y.name.replace(' ', '_'), self.z.name.replace(' ', '_'), self.elevation.name.replace(' ', '_')]
+
 
     @property
     def x(self):
@@ -629,7 +638,7 @@ class PointCloud3D(myObject):
         return out, kwargs
 
 
-    def mapPlot(self, dx, dy, i=None, **kwargs):
+    def map(self, dx, dy, i=None, **kwargs):
         """ Create a map of a parameter """
 
         values = kwargs.pop('values', self.z)
@@ -732,7 +741,8 @@ class PointCloud3D(myObject):
             assert nPoints[i] == nPoints[0], Exception('Number of data points {} in file {} does not match {} in file {}'.format(nPoints[i], filename[i], nPoints[0], filename[0]))
         return nPoints[0]
 
-    def _csv_n_points(self, filename):
+    @staticmethod
+    def _csv_n_points(filename):
         """Read the number of points in a data file
 
         Parameters
@@ -746,16 +756,22 @@ class PointCloud3D(myObject):
             Number of observations.
 
         """
-        if isinstance(filename, str):
-            filename = [filename]
+        # if isinstance(filename, str):
+        #     filename = [filename]
 
-        nPoints = np.asarray([fIO.getNlines(df, 1) for df in filename])
+        # nPoints = np.asarray([fIO.getNlines(df, 1) for df in filename])
 
-        if nPoints.size > 1:
-            assert np.all(np.diff(nPoints) == 0), Exception('Number of data points must match in all data files')
-        return nPoints[0]
+        # if nPoints.size > 1:
+        #     assert np.all(np.diff(nPoints) == 0), Exception('Number of data points must match in all data files')
+        # return nPoints[0]
+        nPoints = fIO.getNlines(filename, 1)
 
-    def _csv_channels(self, filename):
+        # if nPoints.size > 1:
+            # assert np.all(np.diff(nPoints) == 0), Exception('Number of data points must match in all data files')
+        return nPoints
+
+    @staticmethod
+    def _csv_channels(filename):
         """Get the column indices from a csv file.
 
         Parameters
@@ -802,9 +818,10 @@ class PointCloud3D(myObject):
 
         assert not any([x is None for x in labels[:3]]), Exception("File must contain columns for easting, northing, height. May also have an elevation column \n {}".format(self.fileInformation()))
         assert n == 3 and len(labels) <= 4, Exception("File must contain columns for easting, northing, height. May also have an elevation column \n {}".format(self.fileInformation()))
-        return labels
+        return PointCloud3D._csv_n_points(filename), labels
 
-    def read_csv(self, filename):
+    @classmethod
+    def read_csv(cls, filename, **kwargs):
         """Reads x y z co-ordinates from an ascii csv file.
 
         Parameters
@@ -813,7 +830,7 @@ class PointCloud3D(myObject):
             Path to the file to read from.
 
         """
-        channels = self._csv_channels(filename)
+        nPoints, channels = PointCloud3D._csv_channels(filename)
 
         try:
             df = read_csv(filename, index_col=False, usecols=channels, skipinitialspace = True)
@@ -821,7 +838,7 @@ class PointCloud3D(myObject):
             df = read_csv(filename, index_col=False, usecols=channels, delim_whitespace=True, skipinitialspace = True)
         df = df.replace('NaN',np.nan)
 
-        self.__init__()
+        self = cls(**kwargs)
         self.x = df[channels[0]].values
         self.y = df[channels[1]].values
         self.z = df[channels[2]].values
@@ -1016,8 +1033,6 @@ class PointCloud3D(myObject):
         PointCloud3D.__init__(self, x, y, z, elevation)
 
         return self
-
-
 
     def Bcast(self, world, root=0):
         """Broadcast a PointCloud3D using MPI

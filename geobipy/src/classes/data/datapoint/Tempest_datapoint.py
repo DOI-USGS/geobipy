@@ -21,7 +21,7 @@ import numpy as np
 #from ....base import Error as Err
 from ....base import fileIO as fIO
 from ....base import utilities as cf
-from ....base import plotting as cp
+from ....base import plotting as cP
 from ....base import MPI as myMPI
 from os.path import split as psplt
 from os.path import join
@@ -74,49 +74,6 @@ class Tempest_datapoint(TdemDataPoint):
 
     """
 
-    def __init__(self, x=0.0, y=0.0, z=0.0, elevation=0.0,
-                 primary_field=None, secondary_field=None,
-                 std=None,
-                 predicted_primary_field=None, predicted_secondary_field=None,
-                 system=None,
-                 transmitter_loop=None, receiver_loop=None,
-                 lineNumber=0.0, fiducial=0.0):
-
-        # self._system = None
-        self.units = None
-
-        # if system is None:
-        #     return super().__init__(x=x, y=y, z=z, elevation=elevation)
-
-        # self.system = system
-
-        # self.primary_field = None
-        # self.secondary_field = None
-        # self.predicted_primary_field = None
-        # self.predicted_secondary_field = None
-
-        super().__init__(x=x, y=y, z=z, elevation=elevation,
-                         data=None, std=None, predictedData=None,
-                         system=system,
-                         transmitter_loop=transmitter_loop,
-                         receiver_loop=receiver_loop,
-                         lineNumber=lineNumber, fiducial=fiducial)
-
-        self.primary_field = primary_field
-        self.secondary_field = secondary_field
-        self.predicted_primary_field = predicted_primary_field
-        self.predicted_secondary_field = predicted_secondary_field
-
-
-    def __deepcopy__(self, memo={}):
-        out = super().__deepcopy__(memo)
-        out._primary_field = deepcopy(self.primary_field)
-        out._secondary_field = deepcopy(self.secondary_field)
-        out._predicted_primary_field = deepcopy(self.predicted_primary_field)
-        out._predicted_secondary_field = deepcopy(self.predicted_secondary_field)
-
-        return out
-
     @TdemDataPoint.addErr.setter
     def addErr(self, values):
         if values is None:
@@ -128,30 +85,25 @@ class Tempest_datapoint(TdemDataPoint):
 
         self._addErr = StatArray.StatArray(values, '$\epsilon_{additive}x10^{2}$', self.units)
 
-    @property
-    def channels(self):
-        return np.squeeze(np.asarray([np.tile(self.times(i), 2) for i in range(self.nSystems)]))
+    # @property
+    # def channels(self):
+    #     return np.squeeze(np.asarray([np.tile(self.off_time(i), 2) for i in range(self.nSystems)]))
 
     @TdemDataPoint.data.getter
     def data(self):
-        for i in range(self.n_components):
-            ic = self._component_indices(i, 0)
-            self._data[ic] = self.primary_field[i] + self.secondary_field[ic]
+        for j in range(self.nSystems):
+            for i in range(self.n_components):
+                ic = self._component_indices(i, j)
+                self._data[ic] = self.primary_field[i] + self.secondary_field[ic]
         return self._data
 
-    @property
-    def primary_field(self):
-        return self._primary_field
-
-    @primary_field.setter
-    def primary_field(self, values):
-
-        if values is None:
-            values = self.n_components
-        else:
-            assert np.size(values) == self.n_components, ValueError("primary field must have size {}".format(self.n_components))
-
-        self._primary_field = StatArray.StatArray(values, "Primary field", self.units)
+    @TdemDataPoint.predictedData.getter
+    def predictedData(self):
+        for j in range(self.nSystems):
+            for i in range(self.n_components):
+                ic = self._component_indices(i, j)
+                self._predictedData[ic] = self.predicted_primary_field[i] + self.predicted_secondary_field[ic]
+        return self._predictedData
 
     @TdemDataPoint.relErr.setter
     def relErr(self, values):
@@ -163,53 +115,6 @@ class Tempest_datapoint(TdemDataPoint):
             assert (np.all(np.asarray(values) > 0.0)), ValueError("relErr must be > 0.0.")
 
         self._relErr = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
-
-    @property
-    def secondary_field(self):
-        return self._secondary_field
-
-    @secondary_field.setter
-    def secondary_field(self, values):
-
-        if values is None:
-            values = self.nChannels
-        else:
-            assert np.size(values) == self.nChannels, ValueError("Secondary field must have size {}".format(self.nChannels))
-
-        self._secondary_field = StatArray.StatArray(values, "Secondary field", self.units)
-
-    @TdemDataPoint.predictedData.getter
-    def predictedData(self):
-        for i in range(self.n_components):
-            ic = self._component_indices(i, 0)
-            self._predictedData[ic] = self.predicted_primary_field[i] + self.predicted_secondary_field[ic]
-        return self._predictedData
-
-    @property
-    def predicted_primary_field(self):
-        return self._predicted_primary_field
-
-    @predicted_primary_field.setter
-    def predicted_primary_field(self, values):
-        if values is None:
-            values = self.n_components
-        else:
-            assert np.size(values) == self.n_components, ValueError("predicted primary field must have size {}".format(self.n_components))
-
-        self._predicted_primary_field = StatArray.StatArray(values, "Predicted primary field", self.units)
-
-    @property
-    def predicted_secondary_field(self):
-        return self._predicted_secondary_field
-
-    @predicted_secondary_field.setter
-    def predicted_secondary_field(self, values):
-        if values is None:
-            values = self.nChannels
-        else:
-            assert np.size(values) == self.nChannels, ValueError("predicted secondary field must have size {}".format(self.nChannels))
-
-        self._predicted_secondary_field = StatArray.StatArray(values, "Predicted secondary field", self.units)
 
     @TdemDataPoint.std.getter
     def std(self):
@@ -269,20 +174,6 @@ class Tempest_datapoint(TdemDataPoint):
 
         return ax
 
-    # def likelihood(self, log):
-    #     """Compute the likelihood of the current predicted data given the observed data and assigned errors
-
-    #     Returns
-    #     -------
-    #     out : np.float64
-    #         Likelihood of the data point
-
-    #     """
-    #     return self.predictedData.probability(i=self.active, log=log)
-
-    def off_time(self, system=0):
-        """ Return the window times in an StatArray """
-        return self.system[system].off_time
 
     def set_priors(self, height_prior=None, data_prior=None, relative_error_prior=None, additive_error_prior=None, transmitter_pitch_prior=None, **kwargs):
 
@@ -299,7 +190,7 @@ class Tempest_datapoint(TdemDataPoint):
 
     def set_relative_error_prior(self, prior):
         if not prior is None:
-            assert prior.ndim == 2*self.nSystems, ValueError("relative_error_prior must have {} dimensions".format(self.nSystems))
+            assert prior.ndim == self.n_components * self.nSystems, ValueError("relative_error_prior must have {} dimensions".format(self.n_components * self.nSystems))
             self.relErr.prior = prior
 
     def set_proposals(self, height_proposal=None, relative_error_proposal=None, additive_error_proposal=None, transmitter_pitch_proposal=None, **kwargs):
@@ -322,48 +213,6 @@ class Tempest_datapoint(TdemDataPoint):
     #     if not prior is None:
     #         assert additive_error_prior.ndim == self.nChannels, ValueError("additive_error_prior must have {} dimensions".format(self.nChannels))
     #         self.addErr.set_prior(prior)
-
-    def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
-        """ Create the hdf group metadata in file
-        parent: HDF object to create a group inside
-        myName: Name of the group
-        """
-
-        grp = super().createHdf(parent, name, withPosterior, nRepeats, fillvalue)
-        self.primary_field.createHdf(grp, 'primary_field', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.secondary_field.createHdf(grp, 'secondary_field', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.predicted_primary_field.createHdf(grp, 'predicted_primary_field', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.predicted_secondary_field.createHdf(grp, 'predicted_secondary_field', nRepeats=nRepeats, fillvalue=fillvalue)
-
-        return grp
-
-    def writeHdf(self, parent, name, withPosterior=True, index=None):
-        """ Write the StatArray to an HDF object
-        parent: Upper hdf file or group
-        myName: object hdf name. Assumes createHdf has already been called
-        create: optionally create the data set as well before writing
-        """
-        super().writeHdf(parent, name, withPosterior, index)
-
-        grp = parent[name]
-
-        self.primary_field.writeHdf(grp, 'primary_field', index=index)
-        self.secondary_field.writeHdf(grp, 'secondary_field', index=index)
-        self.predicted_primary_field.writeHdf(grp, 'predicted_primary_field', index=index)
-        self.predicted_secondary_field.writeHdf(grp, 'predicted_secondary_field', index=index)
-
-    @classmethod
-    def fromHdf(cls, grp, index=None, **kwargs):
-        """ Reads the object from a HDF group """
-
-        self = super(Tempest_datapoint, cls).fromHdf(grp, index, **kwargs)
-
-        self._primary_field = StatArray.StatArray.fromHdf(grp['primary_field'], index=index)
-        self._secondary_field = StatArray.StatArray.fromHdf(grp['secondary_field'], index=index)
-        self._predicted_primary_field = StatArray.StatArray.fromHdf(grp['predicted_primary_field'], index=index)
-        self._predicted_secondary_field = StatArray.StatArray.fromHdf(grp['predicted_secondary_field'], index=index)
-
-        return self
 
     def perturb(self):
         """Propose a new EM data point given the specified attached propsal distributions
@@ -411,15 +260,14 @@ class Tempest_datapoint(TdemDataPoint):
             if (self.nSystems > 1):
                 plt.subplot(2, 1, i + 1)
             plt.plot(self.system[i].waveform.time, self.system[i].waveform.current, **kwargs)
-            cp.xlabel('Time (s)')
-            cp.ylabel('Normalized Current (A)')
+            cP.xlabel('Time (s)')
+            cP.ylabel('Normalized Current (A)')
             plt.margins(0.1, 0.1)
 
 
     def plot(self, **kwargs):
-        kwargs['xscale'] = 'linear'
-        kwargs['yscale'] = 'linear'
-        kwargs['logX'] = 10
+        kwargs['xscale'] = kwargs.get('xscale', 'log')
+        kwargs['yscale'] = kwargs.get('yscale', 'linear')
         return super().plot(**kwargs)
 
     def plot_posteriors(self, axes=None, height_kwargs={}, data_kwargs={}, rel_error_kwargs={}, pitch_kwargs={}, **kwargs):
@@ -436,13 +284,11 @@ class Tempest_datapoint(TdemDataPoint):
         height_kwargs['rotate'] = height_kwargs.get('rotate', True)
         self.z.plotPosteriors(ax = axes[0], **height_kwargs)
 
+        self.predictedData.plotPosteriors(ax = axes[1], noColorbar=True, **data_kwargs)
         self.plot(ax=axes[1], **data_kwargs)
-        self.plotPredicted(color=cp.wellSeparated[0], ax=axes[1], **data_kwargs)
-        if not best is None:
-            best.plotPredicted(color=cp.wellSeparated[3], ax=axes[1], **data_kwargs)
-
-        # data_kwargs['noColorbar'] = data_kwargs.get('noColorbar', True)
-        # ax.append(self.predictedData.plotPosteriors(ax = axes[1], **data_kwargs))
+        
+        c = cP.wellSeparated[0] if best is None else cP.wellSeparated[3]
+        self.plotPredicted(color=c, ax=axes[1], **data_kwargs)
 
         self.relErr.plotPosteriors(ax=axes[2], **rel_error_kwargs)
         # self.addErr.plotPosteriors(ax=axes[3], **add_error_kwargs)
@@ -450,9 +296,8 @@ class Tempest_datapoint(TdemDataPoint):
         self.transmitter.pitch.plotPosteriors(ax = axes[3], **pitch_kwargs)
 
     def plotPredicted(self, **kwargs):
-        kwargs['xscale'] = 'linear'
-        kwargs['yscale'] = 'linear'
-        kwargs['logX'] = 10
+        kwargs['xscale'] = kwargs.get('xscale', 'log')
+        kwargs['yscale'] = kwargs.get('yscale', 'linear')
         return super().plotPredicted(**kwargs)
 
     def plot_secondary_field(self, title='Secondary field', **kwargs):
@@ -463,10 +308,10 @@ class Tempest_datapoint(TdemDataPoint):
 
         kwargs['marker'] = kwargs.pop('marker', 'v')
         kwargs['markersize'] = kwargs.pop('markersize', 7)
-        c = kwargs.pop('color', [cp.wellSeparated[i+1]
+        c = kwargs.pop('color', [cP.wellSeparated[i+1]
                        for i in range(self.nSystems)])
         mfc = kwargs.pop('markerfacecolor', [
-                         cp.wellSeparated[i+1] for i in range(self.nSystems)])
+                         cP.wellSeparated[i+1] for i in range(self.nSystems)])
         assert len(c) == self.nSystems, ValueError(
             "color must be a list of length {}".format(self.nSystems))
         assert len(mfc) == self.nSystems, ValueError(
@@ -496,11 +341,11 @@ class Tempest_datapoint(TdemDataPoint):
         noLabels = kwargs.pop('nolabels', False)
 
         if (not noLabels):
-            cp.xlabel('Time (s)')
-            cp.ylabel(cf.getNameUnits(self.predictedData))
-            cp.title(title)
+            cP.xlabel('Time (s)')
+            cP.ylabel(cf.getNameUnits(self.predictedData))
+            cP.title(title)
 
-        kwargs['color'] = kwargs.pop('color', cp.wellSeparated[3])
+        kwargs['color'] = kwargs.pop('color', cP.wellSeparated[3])
         kwargs['linewidth'] = kwargs.pop('linewidth', 2)
         kwargs['alpha'] = kwargs.pop('alpha', 0.7)
         xscale = kwargs.pop('xscale', 'log')
@@ -567,25 +412,26 @@ class Tempest_datapoint(TdemDataPoint):
             self.transmitter.pitch.updatePosterior()
 
 
-    def forward(self, mod):
-        """ Forward model the data from the given model """
+    # def forward(self, mod):
+    #     """ Forward model the data from the given model """
 
-        assert isinstance(mod, Model1D), TypeError("Invalid model class for forward modeling [1D]")
-        fm = tdem1dfwd(self, mod)
+    #     assert isinstance(mod, Model1D), TypeError("Invalid model class for forward modeling [1D]")
+    #     fm = tdem1dfwd(self, mod)
 
-        self.predicted_primary_field[:] = np.r_[fm[0].PX, -fm[0].PZ]
-
-        # for i in range(self.nSystems):
-            # iSys = self._systemIndices(i)
-
-        self.predicted_secondary_field[:] = np.hstack([fm[0].SX, -fm[0].SZ])  # Store the necessary component
+    #     self.predicted_primary_field[:] = np.r_[fm[0].PX, -fm[0].PZ]
 
 
-    def sensitivity(self, model, ix=None, modelChanged=True):
-        """ Compute the sensitivty matrix for the given model """
+    #     # for i in range(self.nSystems):
+    #         # iSys = self._systemIndices(i)
 
-        assert isinstance(model, Model1D), TypeError("Invalid model class for sensitivity matrix [1D]")
-        return StatArray.StatArray(tdem1dsen(self, model, ix, modelChanged), 'Sensitivity', '$\\frac{V}{SAm^{3}}$')
+    #     self.predicted_secondary_field[:] = np.hstack([fm[0].SX, -fm[0].SZ])  # Store the necessary component
+
+
+    # def sensitivity(self, model, ix=None, modelChanged=True):
+    #     """ Compute the sensitivty matrix for the given model """
+
+    #     assert isinstance(model, Model1D), TypeError("Invalid model class for sensitivity matrix [1D]")
+    #     return StatArray.StatArray(tdem1dsen(self, model, ix, modelChanged), 'Sensitivity', '$\\frac{V}{SAm^{3}}$')
 
 
     def _empymodForward(self, mod):
@@ -654,24 +500,24 @@ class Tempest_datapoint(TdemDataPoint):
 
     #     self._predictedData[:] = -simPEG_survey.dpred(mod.par)
 
-    def Isend(self, dest, world, **kwargs):
+    # def Isend(self, dest, world, **kwargs):
 
-        super().Isend(dest, world, **kwargs)
+    #     super().Isend(dest, world, **kwargs)
 
-        self.primary_field.Isend(dest, world)
-        self.secondary_field.Isend(dest, world)
-        self.predicted_primary_field.Isend(dest, world)
-        self.predicted_secondary_field.Isend(dest, world)
+    #     self.primary_field.Isend(dest, world)
+    #     self.secondary_field.Isend(dest, world)
+    #     self.predicted_primary_field.Isend(dest, world)
+    #     self.predicted_secondary_field.Isend(dest, world)
 
 
-    @classmethod
-    def Irecv(cls, source, world, **kwargs):
+    # @classmethod
+    # def Irecv(cls, source, world, **kwargs):
 
-        out = super(Tempest_datapoint, cls).Irecv(source, world, **kwargs)
+    #     out = super(Tempest_datapoint, cls).Irecv(source, world, **kwargs)
 
-        out._primary_field = StatArray.StatArray.Irecv(source, world)
-        out._secondary_field = StatArray.StatArray.Irecv(source, world)
-        out._predicted_primary_field = StatArray.StatArray.Irecv(source, world)
-        out._predicted_secondary_field = StatArray.StatArray.Irecv(source, world)
+    #     out._primary_field = StatArray.StatArray.Irecv(source, world)
+    #     out._secondary_field = StatArray.StatArray.Irecv(source, world)
+    #     out._predicted_primary_field = StatArray.StatArray.Irecv(source, world)
+    #     out._predicted_secondary_field = StatArray.StatArray.Irecv(source, world)
 
-        return out
+    #     return out

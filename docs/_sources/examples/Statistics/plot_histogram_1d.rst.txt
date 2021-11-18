@@ -93,9 +93,10 @@ Histogram with regular bins
 
 
 
-.. image:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_001.png
-    :alt: plot histogram 1d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_001.png
+   :alt: plot histogram 1d
+   :srcset: /examples/Statistics/images/sphx_glr_plot_histogram_1d_001.png
+   :class: sphx-glr-single-img
 
 
 
@@ -122,7 +123,7 @@ Get the median, and 95% confidence values
 
  .. code-block:: none
 
-    (0.030000000000000027, -1.53, 1.65)
+    (0.09000000000000008, -1.59, 1.5899999999999999)
 
 
 
@@ -232,9 +233,10 @@ Update the histogram
 
 
 
-.. image:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_002.png
-    :alt: plot histogram 1d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_002.png
+   :alt: plot histogram 1d
+   :srcset: /examples/Statistics/images/sphx_glr_plot_histogram_1d_002.png
+   :class: sphx-glr-single-img
 
 
 
@@ -256,9 +258,10 @@ We can plot the histogram as a pcolor plot
 
 
 
-.. image:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_003.png
-    :alt: plot histogram 1d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_003.png
+   :alt: plot histogram 1d
+   :srcset: /examples/Statistics/images/sphx_glr_plot_histogram_1d_003.png
+   :class: sphx-glr-single-img
 
 
 
@@ -367,11 +370,12 @@ The update takes in the numbers in linear space and takes their log=10
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 107-121
+.. GENERATED FROM PYTHON SOURCE LINES 107-122
 
 .. code-block:: default
 
     plt.figure()
+    plt.subplot(211)
     _ = H.plot()
 
 
@@ -382,26 +386,16 @@ The update takes in the numbers in linear space and takes their log=10
     with h5py.File('h1d.h5', 'r') as f:
         H1 = Histogram1D.fromHdf(f['h1d'])
 
-    plt.figure()
+    plt.subplot(212)
     _ = H1.plot()
 
     plt.show()
 
 
-.. rst-class:: sphx-glr-horizontal
-
-
-    *
-
-      .. image:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_004.png
-          :alt: plot histogram 1d
-          :class: sphx-glr-multi-img
-
-    *
-
-      .. image:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_005.png
-          :alt: plot histogram 1d
-          :class: sphx-glr-multi-img
+.. image-sg:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_004.png
+   :alt: plot histogram 1d
+   :srcset: /examples/Statistics/images/sphx_glr_plot_histogram_1d_004.png
+   :class: sphx-glr-single-img
 
 
 
@@ -410,7 +404,7 @@ The update takes in the numbers in linear space and takes their log=10
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.721 seconds)
+   **Total running time of the script:** ( 0 minutes  3.215 seconds)
 
 
 .. _sphx_glr_download_examples_Statistics_plot_histogram_1d.py:

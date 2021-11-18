@@ -94,15 +94,17 @@ Specify some cell centres in x and y
 
     *
 
-      .. image:: /examples/Models/images/sphx_glr_plot_model_2d_001.png
-          :alt: plot model 2d
-          :class: sphx-glr-multi-img
+      .. image-sg:: /examples/Models/images/sphx_glr_plot_model_2d_001.png
+         :alt: plot model 2d
+         :srcset: /examples/Models/images/sphx_glr_plot_model_2d_001.png
+         :class: sphx-glr-multi-img
 
     *
 
-      .. image:: /examples/Models/images/sphx_glr_plot_model_2d_002.png
-          :alt: plot model 2d
-          :class: sphx-glr-multi-img
+      .. image-sg:: /examples/Models/images/sphx_glr_plot_model_2d_002.png
+         :alt: plot model 2d
+         :srcset: /examples/Models/images/sphx_glr_plot_model_2d_002.png
+         :class: sphx-glr-multi-img
 
 
 
@@ -111,7 +113,7 @@ Specify some cell centres in x and y
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.526 seconds)
+   **Total running time of the script:** ( 0 minutes  0.299 seconds)
 
 
 .. _sphx_glr_download_examples_Models_plot_model_2d.py:

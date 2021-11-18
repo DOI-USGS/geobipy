@@ -909,7 +909,7 @@ class Inference3D(myObject):
 
     @cached_property
     def nActive(self):
-        nActive = np.empty(self.nPoint, dtype=np.int)
+        nActive = np.empty(self.nPoint, dtype=np.int32)
         Bar = progressbar.ProgressBar()
         for i in Bar(range(self.nLines)):
             nActive[self.lineIndices[i]] = self.lines[i].bestData.nActiveChannels
@@ -1549,7 +1549,7 @@ class Inference3D(myObject):
     def mapMarginalProbability(self, dx, dy, depth, index, **kwargs):
 
         z_slice = self._z_slice(depth)
-        self.pointcloud.mapPlot(dx = dx, dy = dy, values = self.marginalProbability[:, z_slice, index], **kwargs)
+        self.pointcloud.map(dx = dx, dy = dy, values = self.marginalProbability[:, z_slice, index], **kwargs)
 
     def percentageParameter(self, value, depth, depth2=None):
 

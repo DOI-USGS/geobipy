@@ -39,8 +39,8 @@ parameter_file = "skytem_options"
 ################################################################################
 
 # Here are the contents of the user parameter file.
-with open(parameter_file, 'r') as f:
-    print(f.read())
+# with open(parameter_file, 'r') as f:
+#     print(f.read())
 
 ################################################################################
 # To run geobipy in serial, simply call that function.
@@ -48,7 +48,7 @@ with open(parameter_file, 'r') as f:
 # data point for time considerations.
 # You will notice however that the HDF files are created for multiple lines
 # inside the data file.
-serial_geobipy(parameter_file, output_directory, index=0)
+serial_geobipy(parameter_file, output_directory, index=0, seed=10)
 
 
 #%%

@@ -8,10 +8,10 @@
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery-binder.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery-dataframe.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -128,8 +128,7 @@ do not follow a line that is parallel to either the “x” or “y” axis.</p>
 <span class="n">_</span>  <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot rectilinear mesh 2d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_001.png" />
-<p>Intersecting lines with a mesh</p>
+<img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_001.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_001.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-single-img"/><p>Intersecting lines with a mesh</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">rm</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -150,14 +149,12 @@ rm.pcolor(values = arr)</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">plotXY</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="plot rectilinear mesh 2d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_002.png" />
-<p>Again, plot the grid. This time the z-coordinate dominates the plot.</p>
+<img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_002.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_002.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-single-img"/><p>Again, plot the grid. This time the z-coordinate dominates the plot.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">(</span><span class="n">xAxis</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">flipY</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot rectilinear mesh 2d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_003.png" />
-<p>We can pcolor the mesh by providing cell values.</p>
+<img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_003.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_003.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-single-img"/><p>We can pcolor the mesh by providing cell values.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">rm</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">centres</span><span class="p">,</span> <span class="n">rm</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">centres</span><span class="p">)</span>
 <span class="n">arr</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">xx</span> <span class="o">**</span> <span class="mf">2.0</span> <span class="o">+</span> <span class="n">yy</span> <span class="o">**</span> <span class="mf">2.0</span><span class="p">)),</span> <span class="s2">&quot;Values&quot;</span><span class="p">)</span>
 
@@ -179,29 +176,25 @@ rm.pcolor(values = arr)</p>
 <span class="c1"># dax.pcolor(grid=True, flipY=True, linewidth=0.5)</span>
 </pre></div>
 </div>
-<img alt="plot rectilinear mesh 2d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_004.png" />
-<p>Mask the x axis cells by a distance</p>
+<img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_004.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_004.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-single-img"/><p>Mask the x axis cells by a distance</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rm_masked</span><span class="p">,</span> <span class="n">x_indices</span><span class="p">,</span> <span class="n">z_indices</span><span class="p">,</span> <span class="n">arr2</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">mask_cells</span><span class="p">(</span><span class="n">xAxis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">x_distance</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">arr</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">rm_masked</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">StatArray</span><span class="p">(</span><span class="n">arr2</span><span class="p">),</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flipY</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot rectilinear mesh 2d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_005.png" />
-<p>Mask the z axis cells by a distance</p>
+<img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_005.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_005.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-single-img"/><p>Mask the z axis cells by a distance</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rm_masked</span><span class="p">,</span> <span class="n">x_indices</span><span class="p">,</span> <span class="n">z_indices</span><span class="p">,</span> <span class="n">arr2</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">mask_cells</span><span class="p">(</span><span class="n">xAxis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">z_distance</span><span class="o">=</span><span class="mf">4.9</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">arr</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">rm_masked</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">StatArray</span><span class="p">(</span><span class="n">arr2</span><span class="p">),</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flipY</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot rectilinear mesh 2d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_006.png" />
-<p>Mask axes by a distance</p>
+<img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_006.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_006.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-single-img"/><p>Mask axes by a distance</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rm_masked</span><span class="p">,</span> <span class="n">x_indices</span><span class="p">,</span> <span class="n">z_indices</span><span class="p">,</span> <span class="n">arr2</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">mask_cells</span><span class="p">(</span><span class="n">xAxis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">x_distance</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">z_distance</span><span class="o">=</span><span class="mf">4.9</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">arr</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">rm_masked</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">StatArray</span><span class="p">(</span><span class="n">arr2</span><span class="p">),</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flipY</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot rectilinear mesh 2d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_007.png" />
-<p>We can perform some interval statistics on the cell values of the mesh
+<img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_007.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_007.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-single-img"/><p>We can perform some interval statistics on the cell values of the mesh
 Generate some values</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">rm</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">nCells</span><span class="o">+</span><span class="mi">1</span><span class="p">))[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span> <span class="n">rm</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">nCells</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 </pre></div>
@@ -263,8 +256,7 @@ Generate some values</p>
 <span class="n">rm4</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="plot rectilinear mesh 2d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_008.png" />
-<p>Resample a grid</p>
+<img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_008.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_008.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-single-img"/><p>Resample a grid</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">values</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="o">*</span><span class="n">rm</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
 <span class="n">rm2</span><span class="p">,</span> <span class="n">values2</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
 
@@ -277,9 +269,8 @@ Generate some values</p>
 <span class="n">rm2</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">values2</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot rectilinear mesh 2d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_009.png" />
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;AxesSubplot:xlabel=&#39;Easting (m)&#39;, ylabel=&#39;Depth (m)&#39;&gt;, &lt;matplotlib.collections.QuadMesh object at 0x15cef6160&gt;, &lt;matplotlib.colorbar.Colorbar object at 0x15d88d2e0&gt;)
+<img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_009.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_009.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;AxesSubplot:xlabel=&#39;Easting (m)&#39;, ylabel=&#39;Depth (m)&#39;&gt;, &lt;matplotlib.collections.QuadMesh object at 0x7fe86112b640&gt;, &lt;matplotlib.colorbar.Colorbar object at 0x7fe8704cfa90&gt;)
 </pre></div>
 </div>
 </section>
@@ -295,8 +286,7 @@ Generate some values</p>
 <span class="n">_</span>  <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot rectilinear mesh 2d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_010.png" />
-<p>Intersecting lines with a mesh</p>
+<img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_010.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_010.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-single-img"/><p>Intersecting lines with a mesh</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">]</span>
 <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">]</span>
 </pre></div>
@@ -322,8 +312,7 @@ rm.pcolor(values = arr)</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="plot rectilinear mesh 2d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_011.png" />
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  1.314 seconds)</p>
+<img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_011.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_011.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  1.521 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-meshes-plot-rectilinear-mesh-2d-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/48c7722b252e7ddf33d95322115dcaf5/plot_rectilinear_mesh_2d.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_rectilinear_mesh_2d.py</span></code></a></p>

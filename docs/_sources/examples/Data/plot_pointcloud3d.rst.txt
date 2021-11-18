@@ -111,16 +111,16 @@ Write a summary of the contents of the point cloud
     Number of Points: : 20000 
      Name: Easting (m)
         Shape: (20000,)
-        Values: [-0.47922496 -0.43630851 -0.42224989 ...  0.50951923  0.05859355
-      0.97674016]
+        Values: [-0.7820117  -0.80328821 -0.59999413 ...  0.73978731  0.97249522
+      0.44564713]
      Name: Northing (m)
         Shape: (20000,)
-        Values: [-0.5004413  -0.19860426 -0.8266278  ...  0.25984492  0.54400211
-      0.99412552]
+        Values: [-0.25952339 -0.90415602 -0.60350394 ...  0.60589684  0.14286906
+      0.05268352]
      Name: Height (m)
         Shape: (20000,)
-        Values: [ 0.04623349  0.07277066  0.07525046 ... -0.00544477  0.05371113
-     -0.00041814]
+        Values: [-0.78570091 -0.35014737 -0.28109098 ... -0.12446261 -0.01156324
+      0.00691635]
      Name: Elevation (m)
         Shape: (20000,)
         Values: [0. 0. 0. ... 0. 0. 0.]
@@ -152,7 +152,7 @@ Get a single location from the point as a 3x1 vector
 
  .. code-block:: none
 
-    <geobipy.src.classes.pointcloud.Point.Point object at 0x16333aaf0>
+    <geobipy.src.classes.pointcloud.Point.Point object at 0x7fe8d1dbea90>
 
 
 
@@ -172,9 +172,10 @@ Plot the locations with Height as colour
 
 
 
-.. image:: /examples/Data/images/sphx_glr_plot_pointcloud3d_001.png
-    :alt: plot pointcloud3d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Data/images/sphx_glr_plot_pointcloud3d_001.png
+   :alt: plot pointcloud3d
+   :srcset: /examples/Data/images/sphx_glr_plot_pointcloud3d_001.png
+   :class: sphx-glr-single-img
 
 
 .. rst-class:: sphx-glr-script-out
@@ -184,7 +185,7 @@ Plot the locations with Height as colour
  .. code-block:: none
 
 
-    (<AxesSubplot:xlabel='Easting (m)', ylabel='Northing (m)'>, <matplotlib.collections.PathCollection object at 0x163df4b80>, <matplotlib.colorbar.Colorbar object at 0x163e13fa0>)
+    (<AxesSubplot:xlabel='Easting (m)', ylabel='Northing (m)'>, <matplotlib.collections.PathCollection object at 0x7fe8c1981ca0>, <matplotlib.colorbar.Colorbar object at 0x7fe8d1f019d0>)
 
 
 
@@ -204,9 +205,10 @@ For example, plotting the size of the points according to the absolute value of 
 
 
 
-.. image:: /examples/Data/images/sphx_glr_plot_pointcloud3d_002.png
-    :alt: plot pointcloud3d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Data/images/sphx_glr_plot_pointcloud3d_002.png
+   :alt: plot pointcloud3d
+   :srcset: /examples/Data/images/sphx_glr_plot_pointcloud3d_002.png
+   :class: sphx-glr-single-img
 
 
 
@@ -235,11 +237,11 @@ Interpolate the points to a 2D rectilinear mesh
 
  .. code-block:: none
 
-    surface [WARNING]: 7230 unusable points were supplied; these will be ignored.
+    surface [WARNING]: 7316 unusable points were supplied; these will be ignored.
     surface [WARNING]: You should have pre-processed the data with block-mean, -median, or -mode.
     surface [WARNING]: Check that previous processing steps write results with enough decimals.
     surface [WARNING]: Possibly some data were half-way between nodes and subject to IEEE 754 rounding.
-    /Users/nfoks/miniconda3/envs/geobipy/lib/python3.9/site-packages/pyvista/core/dataset.py:1332: PyvistaDeprecationWarning: Use of `cell_arrays` is deprecated. Use `cell_data` instead.
+    /Users/nfoks/codes/repositories/pyvista/pyvista/core/dataset.py:1336: PyvistaDeprecationWarning: Use of `cell_arrays` is deprecated. Use `cell_data` instead.
       warnings.warn(
 
 
@@ -256,20 +258,21 @@ Grid the points using a triangulated CloughTocher, or minimum curvature interpol
 
     plt.figure()
     plt.subplot(321)
-    PC3D.mapPlot(dx=0.01, dy=0.01, method='ct')
+    PC3D.map(dx=0.01, dy=0.01, method='ct')
     plt.subplot(322)
-    PC3D.mapPlot(dx=0.01, dy=0.01, method='mc')
+    PC3D.map(dx=0.01, dy=0.01, method='mc')
 
     plt.subplot(323)
-    PC3D.mapPlot(dx=0.01, dy=0.01, method='ct', mask=0.03)
+    PC3D.map(dx=0.01, dy=0.01, method='ct', mask=0.03)
     plt.subplot(324)
-    PC3D.mapPlot(dx=0.01, dy=0.01, method='mc', mask=0.03)
+    PC3D.map(dx=0.01, dy=0.01, method='mc', mask=0.03)
 
 
 
-.. image:: /examples/Data/images/sphx_glr_plot_pointcloud3d_003.png
-    :alt: plot pointcloud3d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Data/images/sphx_glr_plot_pointcloud3d_003.png
+   :alt: plot pointcloud3d
+   :srcset: /examples/Data/images/sphx_glr_plot_pointcloud3d_003.png
+   :class: sphx-glr-single-img
 
 
 .. rst-class:: sphx-glr-script-out
@@ -278,16 +281,16 @@ Grid the points using a triangulated CloughTocher, or minimum curvature interpol
 
  .. code-block:: none
 
-    surface [WARNING]: 7230 unusable points were supplied; these will be ignored.
+    surface [WARNING]: 7316 unusable points were supplied; these will be ignored.
     surface [WARNING]: You should have pre-processed the data with block-mean, -median, or -mode.
     surface [WARNING]: Check that previous processing steps write results with enough decimals.
     surface [WARNING]: Possibly some data were half-way between nodes and subject to IEEE 754 rounding.
-    surface [WARNING]: 7230 unusable points were supplied; these will be ignored.
+    surface [WARNING]: 7316 unusable points were supplied; these will be ignored.
     surface [WARNING]: You should have pre-processed the data with block-mean, -median, or -mode.
     surface [WARNING]: Check that previous processing steps write results with enough decimals.
     surface [WARNING]: Possibly some data were half-way between nodes and subject to IEEE 754 rounding.
 
-    (<AxesSubplot:>, <matplotlib.collections.QuadMesh object at 0x1642bca30>, <matplotlib.colorbar.Colorbar object at 0x1642dc940>)
+    (<AxesSubplot:>, <matplotlib.collections.QuadMesh object at 0x7fe8c2335df0>, <matplotlib.colorbar.Colorbar object at 0x7fe8c1eff820>)
 
 
 
@@ -301,17 +304,18 @@ For lots of points, these surfaces can look noisy. Using a block filter will hel
 
     PCsub = PC3D.block_median(0.005, 0.005)
     plt.subplot(325)
-    PCsub.mapPlot(dx=0.01, dy=0.01, method='ct', mask=0.03)
+    PCsub.map(dx=0.01, dy=0.01, method='ct', mask=0.03)
     plt.subplot(326)
-    PCsub.mapPlot(dx=0.01, dy=0.01, method='mc', mask=0.03)
+    PCsub.map(dx=0.01, dy=0.01, method='mc', mask=0.03)
 
 
 
 
 
-.. image:: /examples/Data/images/sphx_glr_plot_pointcloud3d_004.png
-    :alt: plot pointcloud3d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Data/images/sphx_glr_plot_pointcloud3d_004.png
+   :alt: plot pointcloud3d
+   :srcset: /examples/Data/images/sphx_glr_plot_pointcloud3d_004.png
+   :class: sphx-glr-single-img
 
 
 .. rst-class:: sphx-glr-script-out
@@ -320,12 +324,12 @@ For lots of points, these surfaces can look noisy. Using a block filter will hel
 
  .. code-block:: none
 
-    surface [WARNING]: 5636 unusable points were supplied; these will be ignored.
+    surface [WARNING]: 5643 unusable points were supplied; these will be ignored.
     surface [WARNING]: You should have pre-processed the data with block-mean, -median, or -mode.
     surface [WARNING]: Check that previous processing steps write results with enough decimals.
     surface [WARNING]: Possibly some data were half-way between nodes and subject to IEEE 754 rounding.
 
-    (<AxesSubplot:>, <matplotlib.collections.QuadMesh object at 0x164754280>, <matplotlib.colorbar.Colorbar object at 0x164754fd0>)
+    (<AxesSubplot:>, <matplotlib.collections.QuadMesh object at 0x7fe8b1a855e0>, <matplotlib.colorbar.Colorbar object at 0x7fe8a1953f10>)
 
 
 
@@ -353,8 +357,8 @@ We can perform spatial searches on the 3D point cloud
 
  .. code-block:: none
 
-    (array([0.01314884, 0.01338945, 0.01604721, ..., 0.11296063, 0.11396336,
-           0.11410888]), array([16817, 11310,  9548, ..., 14692,  9410, 17097]))
+    (array([0.00798616, 0.00954673, 0.01506865, ..., 0.11202904, 0.1127142 ,
+           0.11317525]), array([ 1241, 15651, 12264, ..., 19615,   781, 16971]))
 
 
 
@@ -383,9 +387,10 @@ We can then obtain those points as another point cloud
 
 
 
-.. image:: /examples/Data/images/sphx_glr_plot_pointcloud3d_005.png
-    :alt: plot pointcloud3d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Data/images/sphx_glr_plot_pointcloud3d_005.png
+   :alt: plot pointcloud3d
+   :srcset: /examples/Data/images/sphx_glr_plot_pointcloud3d_005.png
+   :class: sphx-glr-single-img
 
 
 .. rst-class:: sphx-glr-script-out
@@ -395,7 +400,7 @@ We can then obtain those points as another point cloud
  .. code-block:: none
 
 
-    [<matplotlib.lines.Line2D object at 0x167569220>]
+    [<matplotlib.lines.Line2D object at 0x7fe8c266d700>]
 
 
 
@@ -424,7 +429,7 @@ Read in the xyz co-ordinates in columns 2,3,4 from a file. Skip 1 header line.
  .. code-block:: none
 
 
-    <geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D object at 0x1632f8f40>
+    <geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D object at 0x7fe8b1e54040>
 
 
 
@@ -440,9 +445,10 @@ Read in the xyz co-ordinates in columns 2,3,4 from a file. Skip 1 header line.
 
 
 
-.. image:: /examples/Data/images/sphx_glr_plot_pointcloud3d_006.png
-    :alt: plot pointcloud3d
-    :class: sphx-glr-single-img
+.. image-sg:: /examples/Data/images/sphx_glr_plot_pointcloud3d_006.png
+   :alt: plot pointcloud3d
+   :srcset: /examples/Data/images/sphx_glr_plot_pointcloud3d_006.png
+   :class: sphx-glr-single-img
 
 
 
@@ -474,7 +480,7 @@ when opened in Paraview (or other software)
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  4.599 seconds)
+   **Total running time of the script:** ( 0 minutes  4.019 seconds)
 
 
 .. _sphx_glr_download_examples_Data_plot_pointcloud3d.py:

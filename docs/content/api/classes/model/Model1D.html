@@ -8,10 +8,10 @@
       <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/gallery.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/gallery-binder.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/gallery-dataframe.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-rendered-html.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -163,6 +163,24 @@ at that depth and variance specified with variance.</p>
 <li><p><strong>Hitmap</strong> (<em>geobipy.Hitmap</em>) – Hitmap to convert the model to.
 Must be instantiated before calling so that the model can be interpolated correctly</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.model.Model1D.Model1D.compute_local_inverse_hessian">
+<span class="sig-name descname"><span class="pre">compute_local_inverse_hessian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataPoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.compute_local_inverse_hessian" title="Permalink to this definition"></a></dt>
+<dd><p>Generate a localized Hessian matrix using
+a dataPoint and the current realization of the Model1D.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dataPoint</strong> (<em>geobipy.DataPoint</em><em>, </em><em>optional</em>) – The data point to use when computing the local estimate of the variance.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – Hessian matrix</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array_like</p>
 </dd>
 </dl>
 </dd></dl>
@@ -365,11 +383,11 @@ If None, The value of the split layer is duplicated.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.model.Model1D.Model1D.localParameterVariance">
-<span class="sig-name descname"><span class="pre">localParameterVariance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataPoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.localParameterVariance" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">localParameterVariance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datapoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.localParameterVariance" title="Permalink to this definition"></a></dt>
 <dd><p>Generate a localized inverse Hessian matrix using a dataPoint and the current realization of the Model1D.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>dataPoint</strong> (<em>geobipy.DataPoint</em><em>, </em><em>optional</em>) – The data point to use when computing the local estimate of the variance.
+<dd class="field-odd"><p><strong>datapoint</strong> (<em>geobipy.DataPoint</em><em>, </em><em>optional</em>) – The data point to use when computing the local estimate of the variance.
 If None, only the prior derivative is used.</p>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -534,7 +552,7 @@ self.par to generate new values.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.model.Model1D.Model1D.proposalProbabilities">
-<span class="sig-name descname"><span class="pre">proposalProbabilities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remappedModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataPoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.proposalProbabilities" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">proposalProbabilities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remappedModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datapoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.proposalProbabilities" title="Permalink to this definition"></a></dt>
 <dd><p>Return the forward and reverse proposal probabilities for the model</p>
 <p>Returns the denominator and numerator for the model’s components of the proposal ratio.</p>
 <div class="math notranslate nohighlight" id="equation-proposal-numerator">
@@ -623,24 +641,6 @@ e.g. pWheel = [0.5, 0.25, 0.15, 0.1]</p></li>
 <dt class="sig sig-object py" id="geobipy.src.classes.model.Model1D.Model1D.unperturb">
 <span class="sig-name descname"><span class="pre">unperturb</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.unperturb" title="Permalink to this definition"></a></dt>
 <dd><p>After a model has had its structure perturbed, remap the model back its previous state. Used for the reversible jump McMC step.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geobipy.src.classes.model.Model1D.Model1D.updateLocalParameterVariance">
-<span class="sig-name descname"><span class="pre">updateLocalParameterVariance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataPoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model1D.Model1D.updateLocalParameterVariance" title="Permalink to this definition"></a></dt>
-<dd><p>Generate a localized Hessian matrix using
-a dataPoint and the current realization of the Model1D.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>dataPoint</strong> (<em>geobipy.DataPoint</em><em>, </em><em>optional</em>) – The data point to use when computing the local estimate of the variance.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>out</strong> – Hessian matrix</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>array_like</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">

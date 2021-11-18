@@ -101,7 +101,7 @@ class RectilinearMesh1D(Mesh):
         out._max_cells = self.max_cells
 
         out._event_proposal = self.event_proposal
-        out._action = self.action.copy()
+        out._action = deepcopy(self.action)
 
         return out
 
@@ -352,7 +352,6 @@ class RectilinearMesh1D(Mesh):
             The cell indices
 
         """
-
         values, dum = cF._log(np.atleast_1d(values).flatten(), self.log)
         values = values - self.relativeTo
 
@@ -401,7 +400,7 @@ class RectilinearMesh1D(Mesh):
         # Remove the interface depth
         out.edges = out.edges.delete(i)
 
-        out._action = ['delete', np.int(i), np.squeeze(self.edges[i])]
+        out._action = ['delete', np.int32(i), np.squeeze(self.edges[i])]
         return out
 
     def gradientMatrix(self):
@@ -441,7 +440,6 @@ class RectilinearMesh1D(Mesh):
         """
         # Get the index to insert the new layer
         i = self.edges.searchsorted(value)
-
         # Deepcopy the 1D Model
         out = deepcopy(self)
 
@@ -670,8 +668,7 @@ class RectilinearMesh1D(Mesh):
                 tries = 0
                 while (not suitable_width):  # Continue while the new layer is smaller than the minimum
                     # Get the new edge
-                    new_edge = np.exp(prng.uniform(
-                        np.log(self.min_edge), np.log(self.max_edge), 1))
+                    new_edge = np.exp(prng.uniform(np.log(self.min_edge), np.log(self.max_edge), 1))
                     # Insert the new depth
                     i = self.edges.searchsorted(new_edge)
                     z = self.edges.insert(i, new_edge)
@@ -723,7 +720,7 @@ class RectilinearMesh1D(Mesh):
                     out = deepcopy(self)
                     # z0[i] += dz  # Perturb the depth in the model
                     out.edges = z
-                    out._action = ['perturb', np.int(i), dz]
+                    out._action = ['perturb', np.int32(i), dz]
                     if verbose: print('perturb', out.edges)
                     return out
 

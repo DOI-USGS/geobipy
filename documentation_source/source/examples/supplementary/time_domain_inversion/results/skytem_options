@@ -20,9 +20,9 @@ data_directory = "..//supplementary//data"
 # The data_filename and system_filename options are single strings for single system dataset,
 # or a list of str for multi-system datasets like Skytem.
 # Data File Name.
-data_filename = [join(data_directory,'Skytem_Low_single.txt'), join(data_directory,'Skytem_High_single.txt')]
+data_filename = join(data_directory,'Skytem_small.csv')
 # System File Name.
-system_filename = [join(data_directory,'SkytemLM-SLV.stm'), join(data_directory,'SkytemHM-SLV.stm')]
+system_filename = [join(data_directory,'SkytemHM-SLV.stm'), join(data_directory,'SkytemLM-SLV.stm')]
 
 # Define the data type to invert
 data_type = TdemData
@@ -97,7 +97,7 @@ minimum_thickness = None
 # Assign an initial percentage relative Error
 # If the file contains no standard deviations, this will be used
 # to assign the initial data uncertainties.
-initial_relative_error = [0.03, 0.03]
+initial_relative_error = [0.05, 0.05]
 ## Relative Error Prior Details
 # Minimum Relative Error
 minimum_relative_error = [0.005, 0.005]
@@ -107,7 +107,7 @@ maximum_relative_error = [0.5, 0.5]
 # Assign an initial additive error level.
 # If the file contains no standard deviations, this will be used
 # to assign the initial data uncertainties.
-initial_additive_error = [2e-12,2e-13]
+initial_additive_error = [2e-12,2e-12]
 # Additive Error Prior Details
 # Minimum Additive Error
 minimum_additive_error = [1e-16, 1e-16]

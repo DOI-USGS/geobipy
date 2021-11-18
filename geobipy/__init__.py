@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -- coding: utf-8 --
-
 import os
 from os import getcwd
 from os import makedirs
@@ -151,7 +150,7 @@ def serial_geobipy(inputFile, output_directory, seed=None, index=None):
 
 def serial_dataset(output_directory, seed=None, index=None, **kwargs):
 
-    dataset = kwargs['data_type'](systems=kwargs['system_filename'])
+    dataset = kwargs['data_type'](system=kwargs['system_filename'])
 
     inference3d = Inference3D(output_directory, kwargs['system_filename'])
     inference3d.create_hdf5(dataset, **kwargs)
@@ -185,7 +184,7 @@ def parallel_mpi(inputFile, output_directory, skipHDF5):
     kwargs = user_parameters.read(inputFile)
 
     # Everyone needs the system classes read in early.
-    dataset = kwargs['data_type'](systems=kwargs['system_filename'])
+    dataset = kwargs['data_type'](system=kwargs['system_filename'])
 
     # Get the number of points in the file.
     if masterRank:

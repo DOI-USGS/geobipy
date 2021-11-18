@@ -59,6 +59,27 @@ class TdemSystem(TdemSystem_GAAEM):
         return np.size(self.components)
 
     @property
+    def n_channels(self):
+        return self.nTimes * self.n_components
+    
+    @property
+    def nTimes(self):
+        return self.off_time.size
+
+    @property
+    def off_time(self):
+        """Time windows."""
+        return self._off_time
+
+    @off_time.setter
+    def off_time(self, values):
+        # if values is None:
+        #     values = self.nTimes
+        # else:
+        #     assert np.size(values) == self.nTimes, ValueError("off_time must have size {}".format(self.nTimes))
+        self._off_time = StatArray.StatArray(values, "Time", "s")
+
+    @property
     def isGA(self):
         return False
 

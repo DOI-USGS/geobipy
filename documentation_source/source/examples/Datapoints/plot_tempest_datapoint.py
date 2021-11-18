@@ -61,16 +61,9 @@ Dataset = TempestData._initialize_sequential_reading(dataFile, systemFile)
 # Get a datapoint from the file.
 tdp = Dataset._read_record(0)
 
-# ################################################################################
-# # Initialize and read an EM data set
-# D = TempestData.read_netcdf(dataFile, systemFile)
 
-# ################################################################################
-# # Get a datapoint from the dataset
-# tdp = D.datapoint(0)
-
-# plt.figure()
-# tdp.plot()
+plt.figure()
+tdp.plot()
 
 
 ################################################################################
@@ -86,20 +79,20 @@ mod = Model1D(edges=np.r_[0, 20.0, 50.0, 100.0, 150.0, 250.0, np.inf], parameter
 # Forward model the data
 tdp.forward(mod)
 
-# ################################################################################
-# plt.figure()
-# plt.subplot(121)
-# _ = mod.pcolor(transpose=True)
-# plt.subplot(122)
-# _ = tdp.plot()
-# _ = tdp.plotPredicted()
-# plt.tight_layout()
-# plt.suptitle('Model and response')
+################################################################################
+plt.figure()
+plt.subplot(121)
+_ = mod.pcolor(transpose=True)
+plt.subplot(122)
+_ = tdp.plot()
+_ = tdp.plotPredicted()
+plt.tight_layout()
+plt.suptitle('Model and response')
 
-# ################################################################################
-# # plt.figure()
-# # tdp.plotDataResidual(xscale='log')
-# # plt.title('data residual')
+################################################################################
+# plt.figure()
+# tdp.plotDataResidual(xscale='log')
+# plt.title('data residual')
 
 ################################################################################
 # Compute the sensitivity matrix for a given model
@@ -126,49 +119,47 @@ print(tdp.likelihood(log=True))
 # Or the misfit
 print(tdp.dataMisfit())
 
-# ################################################################################
-# # Plot the misfits for a range of half space conductivities
-# plt.figure()
-# plt.subplot(1, 2, 1)
-# _ = tdp.plotHalfSpaceResponses(-6.0, 4.0, 200)
-# plt.title("Halfspace responses")
+################################################################################
+# Plot the misfits for a range of half space conductivities
+plt.figure()
+plt.subplot(1, 2, 1)
+_ = tdp.plotHalfSpaceResponses(-6.0, 4.0, 200)
+plt.title("Halfspace responses")
 
-# ################################################################################
-# # We can perform a quick search for the best fitting half space
-# halfspace = tdp.find_best_halfspace()
-# print('Best half space conductivity is {} $S/m$'.format(halfspace.par))
-# plt.subplot(1, 2, 2)
-# _ = tdp.plot()
-# _ = tdp.plotPredicted()
+################################################################################
+# We can perform a quick search for the best fitting half space
+halfspace = tdp.find_best_halfspace()
+print('Best half space conductivity is {} $S/m$'.format(halfspace.par))
+plt.subplot(1, 2, 2)
+_ = tdp.plot()
+_ = tdp.plotPredicted()
 
-# plt.figure()
-# tdp.plot_secondary_field()
-# tdp.plot_predicted_secondary_field()
+plt.figure()
+tdp.plot_secondary_field()
+tdp.plot_predicted_secondary_field()
 
 # ################################################################################
 # # We can attach priors to the height of the datapoint,
 # # the relative error multiplier, and the additive error noise floor
 
-
 # Define the distributions used as priors.
 heightPrior = Distribution('Uniform', min=np.float64(tdp.z) - 1.0, max=np.float64(tdp.z) + 1.0)
 relativePrior = Distribution('Uniform', min=np.r_[0.01, 0.01], max=np.r_[0.5, 0.5])
+pitchPrior = Distribution('Uniform', min=tdp.transmitter.pitch - 5.0, max=tdp.transmitter.pitch + 5.0)
 # additivePrior = Distribution('Uniform', min=np.r_[1e-12, 1e-13], max=np.r_[1e-10, 1e-11], log=True)
-tdp.set_priors(height_prior=heightPrior, relative_error_prior=relativePrior)#, additive_error_prior=additivePrior)
-
+tdp.set_priors(height_prior=heightPrior, relative_error_prior=relativePrior, transmitter_pitch_prior=pitchPrior)#, additive_error_prior=additivePrior)
 
 ################################################################################
 # In order to perturb our solvable parameters, we need to attach proposal distributions
 heightProposal = Distribution('Normal', mean=tdp.z, variance = 0.01)
 relativeProposal = Distribution('MvNormal', mean=tdp.relErr, variance=2.5e-4)
+transmitter_pitch_proposal = Distribution('Normal', mean=tdp.transmitter.pitch, variance = 0.01)
 # additiveProposal = Distribution('MvLogNormal', mean=tdp.addErr, variance=2.5e-3, linearSpace=True)
-tdp.set_proposals(heightProposal, relativeProposal)#, additiveProposal)
-
+tdp.set_proposals(heightProposal, relativeProposal, transmitter_pitch_proposal=transmitter_pitch_proposal)#, additiveProposal)
 
 ################################################################################
 # With priorss set we can auto generate the posteriors
 tdp.set_posteriors()
-
 
 ################################################################################
 # Perturb the datapoint and record the perturbations
@@ -176,42 +167,5 @@ tdp.set_posteriors()
 for i in range(10):
     tdp.perturb()
     tdp.updatePosteriors()
-
-# ################################################################################
-# # Plot the posterior distributions
-# fig = plt.figure()
-# ax = tdp.init_posterior_plots(fig)
-# fig.tight_layout()
-
-# tdp.plot_posteriors(axes=ax, best=tdp)
-
-# from gatdaem1d import tdlib;
-# from gatdaem1d import TDAEMSystem;
-# from gatdaem1d import Earth;
-# from gatdaem1d import Geometry;
-# from gatdaem1d import Response;
-
-# ############## T-DOMAIN - WORKS ######################################
-# #point to tdem .stm file
-
-# stm = TDAEMSystem(systemFile)
-
-# cond = [.1,10,100]
-# thick = [5,25]
-
-# E = Earth(mod.par,mod.widths[:-1])
-
-# G = Geometry(tx_height=146.34, tx_roll=1.13, tx_pitch=0.12, tx_yaw=-3.35, txrx_dx = -108.4, txrx_dy = 0.48, txrx_dz = -49.85, rx_roll=5.14, rx_pitch=1.26, rx_yaw=-4.05)
-
-# fm = stm.forwardmodel(G, E)
-
-# from pprint import pprint
-# pprint(fm.__dict__)
-
-# plt.figure()
-# plt.semilogx(stm.windows.centre, fm.PX + fm.SX)
-# plt.semilogx(stm.windows.centre, -fm.PZ - fm.SZ)
-
-# print(tdp.data)
 
 plt.show()

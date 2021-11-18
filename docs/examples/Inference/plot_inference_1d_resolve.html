@@ -8,10 +8,10 @@
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery-binder.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery-dataframe.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -167,13 +167,13 @@ system_filename = data_directory + &quot;//FdemSystem2.stm&quot;
 data_type = FdemData
 
 # Maximum number of Markov Chains per data point.
-n_markov_chains = 10000
+n_markov_chains = 20000
 
 # -------------------------------------------------------
 # General GeoBIPy options.
 # -------------------------------------------------------
 # Interactively plot a single data point as it progresses
-interactive_plot = False
+interactive_plot = True
 # How often to update the plot. (lower is generally slower)
 update_plot_every = 1000
 # Save a PNG of the final results for each data point.
@@ -317,40 +317,158 @@ inside the data file.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">serial_geobipy</span><span class="p">(</span><span class="n">parameter_file</span><span class="p">,</span> <span class="n">output_directory</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
+<img src="../../_images/sphx_glr_plot_inference_1d_resolve_001.png" srcset="../../_images/sphx_glr_plot_inference_1d_resolve_001.png" alt="Fiducial [30000], Frequency Domain EM Data" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Running GeoBIPy in serial mode
 Using user input file resolve_options
 Output files will be produced at ..//supplementary//frequency_domain_inversion//results
 Creating HDF5 files, this may take a few minutes...
-Files are being created for data files [&#39;..//supplementary//data//Resolve_single.txt&#39;] and system files [&#39;..//supplementary//data//FdemSystem2.stm&#39;]
+Files are being created for data files ..//supplementary//data//Resolve_single.txt and system files ..//supplementary//data//FdemSystem2.stm
 Created hdf5 file for line 30010 with 1 data points
-i=0, k=3, 0.000 s/Model, 0.007 s Elapsed
+i=0, k=2, 0.000 s/Model, 0.007 s Elapsed
 
-i=1000, k=3, 0.005 s/Model, 4.537 s Elapsed
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+i=1000, k=3, 0.008 s/Model, 7.870 s Elapsed
 
-i=2000, k=3, 0.005 s/Model, 9.116 s Elapsed
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+i=2000, k=3, 0.007 s/Model, 15.309 s Elapsed
 
-i=3000, k=3, 0.005 s/Model, 14.049 s Elapsed
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+i=3000, k=3, 0.008 s/Model, 22.883 s Elapsed
 
-i=4000, k=3, 0.005 s/Model, 18.976 s Elapsed
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+i=4000, k=3, 0.008 s/Model, 30.385 s Elapsed
 
-i=5000, k=2, 0.005 s/Model, 24.162 s Elapsed
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+i=5000, k=2, 0.008 s/Model, 37.893 s Elapsed
 
-i=6000, k=3, 0.005 s/Model, 29.100 s Elapsed
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+i=6000, k=3, 0.007 s/Model, 45.372 s Elapsed
 
-i=7000, k=2, 0.005 s/Model, 34.042 s Elapsed
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+i=7000, k=3, 0.008 s/Model, 52.907 s Elapsed
 
-i=8000, k=2, 0.005 s/Model, 39.149 s Elapsed
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+i=8000, k=3, 0.007 s/Model, 60.310 s Elapsed
 
-i=9000, k=6, 0.005 s/Model, 44.168 s Elapsed
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+i=9000, k=3, 0.008 s/Model, 67.961 s Elapsed
 
-i=10000, k=3, 0.005 s/Model, 49.152 s Elapsed
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+i=10000, k=3, 0.007 s/Model, 75.361 s Elapsed
 
-i=11000, k=5, 0.005 s/Model, 54.127 s Elapsed
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+i=11000, k=2, 0.008 s/Model, 82.980 s Elapsed
 
-i=12000, k=2, 0.005 s/Model, 59.048 s Elapsed
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+i=12000, k=2, 0.008 s/Model, 90.512 s Elapsed
 
-Remaining Points 0/1 || Elapsed Time: 0:00:59.697475 h:m:s || ETA 0:00:59.697475 h:m:s
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+i=13000, k=3, 0.007 s/Model, 97.926 s Elapsed
+
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+i=14000, k=3, 0.007 s/Model, 105.287 s Elapsed
+
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+i=15000, k=2, 0.007 s/Model, 112.776 s Elapsed
+
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+i=16000, k=2, 0.007 s/Model, 120.262 s Elapsed
+
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh2D.py:358: RuntimeWarning: invalid value encountered in true_divide
+  tmp = np.divide(cs, np.expand_dims(total, 1-axis))
+i=17000, k=3, 0.007 s/Model, 127.677 s Elapsed
+
+i=18000, k=2, 0.008 s/Model, 135.912 s Elapsed
+
+i=19000, k=2, 0.008 s/Model, 144.278 s Elapsed
+
+i=20000, k=3, 0.008 s/Model, 152.560 s Elapsed
+
+i=21000, k=2, 0.008 s/Model, 160.877 s Elapsed
+
+i=22000, k=2, 0.008 s/Model, 169.210 s Elapsed
+
+i=23000, k=2, 0.008 s/Model, 177.630 s Elapsed
+
+i=24000, k=2, 0.008 s/Model, 185.982 s Elapsed
+
+i=25000, k=2, 0.008 s/Model, 194.372 s Elapsed
+
+i=26000, k=3, 0.008 s/Model, 202.749 s Elapsed
+
+i=27000, k=2, 0.008 s/Model, 211.220 s Elapsed
+
+i=28000, k=2, 0.008 s/Model, 219.675 s Elapsed
+
+i=29000, k=3, 0.009 s/Model, 228.232 s Elapsed
+
+i=30000, k=2, 0.008 s/Model, 236.647 s Elapsed
+
+i=31000, k=2, 0.008 s/Model, 245.108 s Elapsed
+
+i=32000, k=2, 0.009 s/Model, 253.683 s Elapsed
+
+i=33000, k=3, 0.008 s/Model, 262.140 s Elapsed
+
+i=34000, k=2, 0.009 s/Model, 270.720 s Elapsed
+
+i=35000, k=3, 0.009 s/Model, 279.302 s Elapsed
+
+i=36000, k=2, 0.008 s/Model, 287.766 s Elapsed
+
+i=37000, k=3, 0.008 s/Model, 296.235 s Elapsed
+
+Remaining Points 0/1 || Elapsed Time: 0:04:56.685435 h:m:s || ETA 0:04:56.685435 h:m:s
 </pre></div>
 </div>
 </section>
@@ -371,8 +489,7 @@ and simply use them for plotting.</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt=", Frequency Domain EM Data" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_inference_1d_resolve_001.png" />
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  7.443 seconds)</p>
+<img src="../../_images/sphx_glr_plot_inference_1d_resolve_002.png" srcset="../../_images/sphx_glr_plot_inference_1d_resolve_002.png" alt=", Frequency Domain EM Data" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 5 minutes  2.241 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-inference-plot-inference-1d-resolve-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/e0fbb93eea90b33c2fa0953e29f0d5a0/plot_inference_1d_resolve.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_inference_1d_resolve.py</span></code></a></p>

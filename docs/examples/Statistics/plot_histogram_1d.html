@@ -8,10 +8,10 @@
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery-binder.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery-dataframe.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -133,13 +133,12 @@ saving as HDF5</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="plot histogram 1d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_histogram_1d_001.png" />
-<p>Get the median, and 95% confidence values</p>
+<img src="../../_images/sphx_glr_plot_histogram_1d_001.png" srcset="../../_images/sphx_glr_plot_histogram_1d_001.png" alt="plot histogram 1d" class = "sphx-glr-single-img"/><p>Get the median, and 95% confidence values</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">H</span><span class="o">.</span><span class="n">credibleIntervals</span><span class="p">(</span><span class="n">percent</span><span class="o">=</span><span class="mf">95.0</span><span class="p">))</span>
 </pre></div>
 </div>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(0.030000000000000027, -1.53, 1.65)
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(0.09000000000000008, -1.59, 1.5899999999999999)
 </pre></div>
 </div>
 </section>
@@ -170,15 +169,13 @@ saving as HDF5</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="plot histogram 1d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_histogram_1d_002.png" />
-<p>We can plot the histogram as a pcolor plot
+<img src="../../_images/sphx_glr_plot_histogram_1d_002.png" srcset="../../_images/sphx_glr_plot_histogram_1d_002.png" alt="plot histogram 1d" class = "sphx-glr-single-img"/><p>We can plot the histogram as a pcolor plot
 .</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">transpose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="plot histogram 1d" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_histogram_1d_003.png" />
-</section>
+<img src="../../_images/sphx_glr_plot_histogram_1d_003.png" srcset="../../_images/sphx_glr_plot_histogram_1d_003.png" alt="plot histogram 1d" class = "sphx-glr-single-img"/></section>
 <section id="histogram-with-linear-space-entries-that-are-logged-internally">
 <h2>Histogram with linear space entries that are logged internally<a class="headerlink" href="#histogram-with-linear-space-entries-that-are-logged-internally" title="Permalink to this headline"></a></h2>
 <p>Create some bins spaced logarithmically</p>
@@ -217,6 +214,7 @@ saving as HDF5</p>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 
 
@@ -227,19 +225,13 @@ saving as HDF5</p>
 <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;h1d.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">H1</span> <span class="o">=</span> <span class="n">Histogram1D</span><span class="o">.</span><span class="n">fromHdf</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;h1d&#39;</span><span class="p">])</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">)</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">H1</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<ul class="sphx-glr-horizontal">
-<li><img alt="plot histogram 1d" class="sphx-glr-multi-img" src="../../_images/sphx_glr_plot_histogram_1d_004.png" />
-</li>
-<li><img alt="plot histogram 1d" class="sphx-glr-multi-img" src="../../_images/sphx_glr_plot_histogram_1d_005.png" />
-</li>
-</ul>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.721 seconds)</p>
+<img src="../../_images/sphx_glr_plot_histogram_1d_004.png" srcset="../../_images/sphx_glr_plot_histogram_1d_004.png" alt="plot histogram 1d" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  3.215 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-statistics-plot-histogram-1d-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/9570534d71f4f6a00b8f20360000c3ff/plot_histogram_1d.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_histogram_1d.py</span></code></a></p>

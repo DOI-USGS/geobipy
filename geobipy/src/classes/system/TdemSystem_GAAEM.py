@@ -27,36 +27,16 @@ try:
             """ Nothing needed """
 
             # Check that the file exists, rBodies class does not handle errors
-            assert fIO.fileExists(
-                system_filename), 'Could not open file: ' + system_filename
+            assert fIO.fileExists(system_filename), 'Could not open file: ' + system_filename
 
             super().__init__(system_filename)
-            self._off_time = StatArray.StatArray(
-                self.windows.centre, name='Time', units='s')
+            self.off_time = self.windows.centre
             self.read_components(system_filename)
             self.filename = system_filename
 
         @property
         def isGA(self):
             return True
-
-        @property
-        def nTimes(self):
-            return self.off_time.size
-
-        @property
-        def off_time(self):
-            """Time windows."""
-            return self._off_time
-
-        @off_time.setter
-        def off_times(self, values):
-            if values is None:
-                self._off_time = StatArray.StatArray(self.nTimes, "Time", "s")
-            else:
-                assert np.size(values) == self.nTimes, ValueError(
-                    "off_time must have size {}".format(self.nTimes))
-                self._off_time = StatArray.StatArray(values, "Time", "s")
 
         @classmethod
         def read(cls, system_filename):
