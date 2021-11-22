@@ -26,8 +26,6 @@ def fdem1dfwd(system, model1d, altitude):
 
     """
 
-    # print('forward')
-    # print(model1d.action)
     assert altitude >= model1d.relativeTo, "Sensor altitude must be above the top of the model"
 
     # Create the indices of the coil orientations for the frequencies.

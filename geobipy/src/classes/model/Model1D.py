@@ -181,7 +181,6 @@ class Model1D(RectilinearMesh1D):
         assert self.par.hasPrior or self.dpar.hasPrior, Exception("Model must have either a parameter prior or gradient prior, use self.set_priors()")
 
         if not datapoint is None:
-
             # Propose new layer conductivities
             inverse_hessian = np.linalg.inv(datapoint.prior_derivative(model=self, order=2) + self.par.priorDerivative(order=2))
         else:
@@ -246,9 +245,9 @@ class Model1D(RectilinearMesh1D):
 
         # Reset ChiE and ChiM
         out._magnetic_permeability = StatArray.StatArray(
-            np.int32(out.nCells), "Electric Susceptibility", r"$\kappa$")
+            out.nCells.value, "Electric Susceptibility", r"$\kappa$")
         out._magnetic_susceptibility = StatArray.StatArray(
-            np.int32(out.nCells), "Magnetic Susceptibility", r"$\frac{H}{m}$")
+            out.nCells.value, "Magnetic Susceptibility", r"$\frac{H}{m}$")
         # Resize the parameter gradient
         out._dpar = out.dpar.resize(out.par.size - 1)
 
@@ -281,8 +280,8 @@ class Model1D(RectilinearMesh1D):
         out._par = out.par.delete(i)
         out._par[i-1] = 0.5 * (self.par[i-1] + self.par[i])
         # Reset ChiE and ChiM
-        # out._magnetic_permeability = out.magnetic_permeability.delete(i)
-        # out._magnetic_susceptibility = out.magnetic_susceptibility.delete(i)
+        out._magnetic_permeability = out.magnetic_permeability.delete(i)
+        out._magnetic_susceptibility = out.magnetic_susceptibility.delete(i)
         # Resize the parameter gradient
         out._dpar = out.dpar.resize(out.par.size - 1)
 
