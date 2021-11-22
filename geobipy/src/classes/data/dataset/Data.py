@@ -490,6 +490,7 @@ class Data(PointCloud3D):
             df = read_csv(filename, index_col=False, usecols=channels, chunksize=1, delim_whitespace=True, skipinitialspace = True)
 
         self._file = df
+        self._filename = filename
 
     def _read_line_fiducial(self, filename):
 

@@ -1093,7 +1093,6 @@ class Model1D(RectilinearMesh1D):
         """
 
         grp = super().createHdf(parent, name, withPosterior, nRepeats, fillvalue)
-
         self.par.createHdf(grp, 'par', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
 
     def writeHdf(self, h5obj, name, withPosterior=True, index=None):

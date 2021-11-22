@@ -681,7 +681,7 @@ class RectilinearMesh1D(Mesh):
                         tryAgain = True
                 if (not tryAgain):
                     out = self.insert_edge(new_edge, update_priors=True)
-                    if verbose: print('birth', out.edges)
+                    if verbose: print('insert', out.edges)
                     return out
 
             if (event == 1):  # Remove an edge

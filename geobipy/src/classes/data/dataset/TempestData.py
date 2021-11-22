@@ -360,53 +360,45 @@ class TempestData(TdemData):
 
     # def csv_channels(self, data_filename):
     
-    #     self._nPoints, self._iC, self._iR, self._iT, self._iOffset, self._iD, self._iS = self._csv_channels(data_filename)
+    #     self._nPoints, self._iC, self._iR, self._iT, self._iOffset, self._iData, self._iStd, self._iPrimary = TdemData._csv_channels(data_filename)
 
-    #     self._channels = []
-    #     for i in range(self.nSystems):
-    #         channels = self._iC[i] + self._iR[i] + self._iT[i] + self._iOffset[i] + self._iD[i]
-    #         if not self._iS[i] is None:
-    #             channels += self._iS[i]
-    #         self._channels.append(channels)
+    #     self._channels = self._iC + self._iR + self._iT + self._iOffset + self._iData
+    #     if len(self._iStd) > 0:
+    #         self._channels += self._iStd
+    #     self._channels += self._iPrimary
 
     #     return self._channels
 
-    @staticmethod
-    def _csv_channels(data_filename):
-        """Reads the column indices for the co-ordinates, loop orientations, and data from the TdemData file.
+    # @staticmethod
+    # def _csv_channels(data_filename):
+    #     """Reads the column indices for the co-ordinates, loop orientations, and data from the TdemData file.
 
-        Parameters
-        ----------
-        dataFilename : str or list of str
-            Path to the data file(s)
-        system : list of geobipy.TdemSystem
-            System class for each time domain acquisition system.
+    #     Parameters
+    #     ----------
+    #     dataFilename : str or list of str
+    #         Path to the data file(s)
+    #     system : list of geobipy.TdemSystem
+    #         System class for each time domain acquisition system.
 
-        Returns
-        -------
-        indices : list of ints
-            Size 6 indices to line, fid, easting, northing, height, and elevation.
-        rLoopIndices : list of ints
-            Size 3 indices to pitch, roll, and yaw, for the receiver loop.
-        tLoopIndices : list of ints
-            Size 3 indices to pitch, roll, and yaw, for the transmitter loop.
-        offDataIndices : list of ints
-            Indices to the off time data columns.  Size == number of time windows.
-        offErrIndices : list of ints
-            Indices to the off time uncertainty estimate columns.  Size == number of time windows.
+    #     Returns
+    #     -------
+    #     indices : list of ints
+    #         Size 6 indices to line, fid, easting, northing, height, and elevation.
+    #     rLoopIndices : list of ints
+    #         Size 3 indices to pitch, roll, and yaw, for the receiver loop.
+    #     tLoopIndices : list of ints
+    #         Size 3 indices to pitch, roll, and yaw, for the transmitter loop.
+    #     offDataIndices : list of ints
+    #         Indices to the off time data columns.  Size == number of time windows.
+    #     offErrIndices : list of ints
+    #         Indices to the off time uncertainty estimate columns.  Size == number of time windows.
 
-        """
-        channels = fIO.get_column_name(data_filename)
+    #     """
+    #     channels = fIO.get_column_name(data_filename)
 
-        primary_names = ('px', 'py', 'pz')
-        iPrimary = []
-        for channel in channels:
-            cTmp = channel.lower()
-            if cTmp in primary_names:
-                iPrimary.append(channel)
-        iPrimary.sort()
+        
 
-        return *TdemData._csv_channels(data_filename), iPrimary
+    #     return *TdemData._csv_channels(data_filename), iPrimary
 
     @classmethod
     def read_netcdf(cls, dataFilename, systemFilename, indices=None):
@@ -523,7 +515,7 @@ class TempestData(TdemData):
         """
 
         self = cls(system_filename)
-        self._data_filename = data_filename
+        # self._data_filename = data_filename
         self._open_data_files(data_filename)
         return self
 
@@ -540,7 +532,11 @@ class TempestData(TdemData):
         FdemData.__initLineByLineRead() must have already been run.
 
         """
-        gdf = self._file[0]['linedata']
+        if self._filename.endswith('.csv'):
+            out = super()._read_record(record)
+            return out
+
+        gdf = self._file['linedata']
         x = np.float64(gdf['Easting'][record])
         y = np.float64(gdf['Northing'][record])
         z = np.float64(gdf['Tx_Height'][record])
@@ -564,7 +560,7 @@ class TempestData(TdemData):
                                      yaw=np.float64(gdf['Rx_Yaw'][record]),
                                      radius=self.system[0].loopRadius())
 
-        out = Tempest_datapoint(
+        out = self.datapoint_type(
                 lineNumber = np.float64(gdf['Line'][record]),
                 fiducial = np.float64(gdf['Fiducial'][record]),
                 x = x,
@@ -583,69 +579,73 @@ class TempestData(TdemData):
 
         return out
 
-    def _read_line_fiducial(self, data_filename=None, system_filename=None):
+    def _read_line_fiducial(self, filename=None):
+        if filename is not None:
+            return super()._read_line_fiducial(filename)
         return self._read_variable(['Line', 'Fiducial'])
 
     def _read_variable(self, variable):
-        gdf = self._file[0]['linedata']
+        gdf = self._file['linedata']
 
         if isinstance(variable, str):
             variable = [variable]
 
         return [np.asarray(gdf[var]) for var in variable]
 
-    def _open_data_files(self, data_filename):
-        if isinstance(data_filename, str):
-            data_filename = [data_filename]
-        self._file = []
-        for f in data_filename:
-            self._file.append(h5py.File(f, 'r'))
-        self._nPoints = self._file[0]['linedata/Easting'].size
+    def _open_data_files(self, filename):
 
-    def datapoint(self, index=None, fiducial=None):
-        """Get the ith data point from the data set
+        if filename.endswith('.csv'):
+            super()._open_csv_files(filename)
+            return
 
-        Parameters
-        ----------
-        index : int, optional
-            Index of the data point to get.
-        fiducial : float, optional
-            Fiducial of the data point to get.
+        self._file = h5py.File(filename, 'r')
+        self._filename = filename
+        self._nPoints = self._file['linedata/Easting'].size
 
-        Returns
-        -------
-        out : geobipy.FdemDataPoint
-            The data point.
+    # def datapoint(self, index=None, fiducial=None):
+    #     """Get the ith data point from the data set
 
-        Raises
-        ------
-        Exception
-            If neither an index or fiducial are given.
+    #     Parameters
+    #     ----------
+    #     index : int, optional
+    #         Index of the data point to get.
+    #     fiducial : float, optional
+    #         Fiducial of the data point to get.
 
-        """
-        iNone = index is None
-        fNone = fiducial is None
+    #     Returns
+    #     -------
+    #     out : geobipy.FdemDataPoint
+    #         The data point.
 
-        assert not (iNone and fNone) ^ (not iNone and not fNone), Exception("Must specify either an index OR a fiducial.")
+    #     Raises
+    #     ------
+    #     Exception
+    #         If neither an index or fiducial are given.
 
-        if not fNone:
-            index = self.fiducial.searchsorted(fiducial)
+    #     """
+    #     iNone = index is None
+    #     fNone = fiducial is None
 
-        i = index
+    #     assert not (iNone and fNone) ^ (not iNone and not fNone), Exception("Must specify either an index OR a fiducial.")
 
-        return Tempest_datapoint(x = self.x[i],
-                             y = self.y[i],
-                             z = self.z[i],
-                             elevation = self.elevation[i],
-                             primary_field = self.primary_field[i, :],
-                             secondary_field = self.secondary_field[i, :],
-                             std = self.std[i, :],
-                             system = self.system,
-                             transmitter_loop = self.transmitter[i],
-                             receiver_loop = self.receiver[i],
-                             lineNumber = self.lineNumber[i],
-                             fiducial = self.fiducial[i],
-                             )
+    #     if not fNone:
+    #         index = self.fiducial.searchsorted(fiducial)
+
+    #     i = index
+
+    #     return Tempest_datapoint(x = self.x[i],
+    #                          y = self.y[i],
+    #                          z = self.z[i],
+    #                          elevation = self.elevation[i],
+    #                          primary_field = self.primary_field[i, :],
+    #                          secondary_field = self.secondary_field[i, :],
+    #                          std = self.std[i, :],
+    #                          system = self.system,
+    #                          transmitter_loop = self.transmitter[i],
+    #                          receiver_loop = self.receiver[i],
+    #                          lineNumber = self.lineNumber[i],
+    #                          fiducial = self.fiducial[i],
+                            #  )
 
     # def times(self, system=0):
     #     """ Obtain the times from the system file """
