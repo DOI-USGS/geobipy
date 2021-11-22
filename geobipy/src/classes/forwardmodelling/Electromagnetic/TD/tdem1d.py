@@ -138,11 +138,9 @@ try:
             for i in range(datapoint.nSystems):
                 datapoint.system[i].forwardmodel(G, E)
 
-        nCells = model1d.nCells.value
-
         if (ix is None):  # Generate a full matrix if the layers are not specified
-            ix = range(nCells)
-            J = np.zeros((datapoint.nChannels, nCells))
+            ix = range(model1d.nCells.value)
+            J = np.zeros((datapoint.nChannels, model1d.nCells.value))
         else:  # Partial matrix for specified layers
             J = np.zeros((datapoint.nChannels, np.size(ix)))
 
