@@ -437,7 +437,7 @@ class TdemData(Data):
 
         self = cls(system=system_filename)
 
-        self._nPoints, iC, iR, iT, iOffset, iData, iStd = self._csv_channels(data_filename)
+        self._nPoints, iC, iR, iT, iOffset, iData, iStd, iPrimary = self._csv_channels(data_filename)
 
         assert len(iData) == self.nChannels, Exception("Number of off time columns {} in {} does not match total number of times {} in system files \n {}".format(
             len(iData), data_filename, self.nChannels, self.fileInformation()))
@@ -450,6 +450,8 @@ class TdemData(Data):
         channels = iC + iR + iT + iOffset + iData
         if len(iStd) > 0:
             channels += iStd
+        if len(iPrimary) > 0:
+            channels += iPrimary
 
         # Read in the columns from the first data file
         try:
@@ -491,6 +493,9 @@ class TdemData(Data):
         self.std;
         if len(iStd) > 0:
             self._std[:, :] = df[iStd].values
+
+        if len(iPrimary) > 0:
+            self.primary_field = np.squeeze(df[iPrimary].values)
 
         # # Read in the data for the other systems.  Only read in the data and, if available, the errors
         # if len(data_filename) == 1:
@@ -546,11 +551,14 @@ class TdemData(Data):
 
     def csv_channels(self, data_filename):
 
-        self._nPoints, self._iC, self._iR, self._iT, self._iOffset, self._iData, self._iStd = TdemData._csv_channels(data_filename)
+        self._nPoints, self._iC, self._iR, self._iT, self._iOffset, self._iData, self._iStd, self._iPrimary = TdemData._csv_channels(data_filename)
 
         self._channels = self._iC + self._iR + self._iT + self._iOffset + self._iData
         if len(self._iStd) > 0:
             self._channels += self._iStd
+
+        if len(self._iPrimary) > 0:
+            self._channels += self._iPrimary
 
         return self._channels
 
@@ -600,6 +608,7 @@ class TdemData(Data):
         on_error = []
         off_channels = []
         off_error_channels = []
+        primary_channels = []
 
         # Check for each aspect of the data file and the number of columns
         for channel in channels:
@@ -623,6 +632,10 @@ class TdemData(Data):
                     off_error_channels.append(channel)
                 else:
                     off_channels.append(channel)
+            elif cTmp in ('px', 'py', 'pz'):
+                primary_channels.append(channel)
+            
+        primary_channels.sort()
 
         assert nr == 3, Exception(
             'Must have all three RxPitch, RxRoll, and RxYaw headers in data file {} if reciever orientation is specified. \n {}'.format(data_filename, TdemData.fileInformation()))
@@ -631,7 +644,7 @@ class TdemData(Data):
         assert no == 3, Exception(
             'Must have all three txrx_dx, txrx_dy, and txrx_dz headers in data file {} if transmitter-reciever loop separation is specified. \n {}'.format(data_filename, TdemData.fileInformation()))
 
-        return nPoints, location_channels, rLoop_channels, tLoop_channels, offset_channels, off_channels, off_error_channels
+        return nPoints, location_channels, rLoop_channels, tLoop_channels, offset_channels, off_channels, off_error_channels, primary_channels
 
     @classmethod
     def _initialize_sequential_reading(cls, data_filename, system_filename):
@@ -681,13 +694,16 @@ class TdemData(Data):
         if endOfFile:
             return None
 
-        D = np.squeeze(df[self._iData].values)
-
+        secondary_field = np.squeeze(df[self._iData].values)
 
         if len(self._iStd) == 0:
-            S = 0.1 * D
+            S = 0.1 * secondary_field
         else:
             S = np.squeeze(df[self._iStd].values)
+
+        primary_field = None
+        if len(self._iPrimary) > 0:
+            primary_field = np.squeeze(df[self._iPrimary].values)
 
         data = np.squeeze(df[self._iC].values)
 
@@ -706,13 +722,12 @@ class TdemData(Data):
                          pitch=rloop[0], roll=rloop[1], yaw=rloop[2],
                          radius=self.system[0].loopRadius())
 
-        out = TdemDataPoint(x=data[2], y=data[3], z=data[4], elevation=data[5],
-                            secondary_field=D, std=S,
-                            system=self.system,
-                            transmitter_loop=T, receiver_loop=R,
-                            lineNumber=data[0], fiducial=data[1])
-
-        return out
+        return self.datapoint_type(x=data[2], y=data[3], z=data[4], elevation=data[5],
+                        secondary_field=secondary_field, std=S,
+                        primary_field=primary_field,
+                        system=self.system,
+                        transmitter_loop=T, receiver_loop=R,
+                        lineNumber=data[0], fiducial=data[1])
 
     def check(self):
         if (np.any(self._data[~np.isnan(self._data)] <= 0.0)):
@@ -794,7 +809,7 @@ class TdemData(Data):
 
         i = index
 
-        return TdemDataPoint(self.x[i], self.y[i], self.z[i], self.elevation[i],
+        return self.datapoint_type(self.x[i], self.y[i], self.z[i], self.elevation[i],
                              self.primary_field[i, :], self.secondary_field[i, :],
                              relative_error=None, additive_error=None, std = self.std[i, :],
                              predicted_primary_field=None, predicted_secondary_field=None,
