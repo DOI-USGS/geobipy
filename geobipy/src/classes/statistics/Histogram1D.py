@@ -356,7 +356,7 @@ class Histogram1D(Histogram, RectilinearMesh1D):
             The samples.
 
         """
-        values = np.random.rand(np.int(nSamples)) * self.cdf[-1]
+        values = np.random.rand(np.int64(nSamples)) * self.cdf[-1]
         values = np.interp(values, np.hstack([0, self.cdf]), self.bins)
         values, dum = cF._log(values, log)
         return values

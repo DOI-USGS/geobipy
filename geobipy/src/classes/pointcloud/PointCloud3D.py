@@ -185,7 +185,7 @@ class PointCloud3D(myObject):
 
     @nPoints.setter
     def nPoints(self, value):
-        assert isinstance(value, np.int), TypeError("nPoints must be an integer")
+        assert isinstance(value, (int, np.int32, np.int64)), TypeError("nPoints must be an integer")
         self._nPoints = value
 
     @property

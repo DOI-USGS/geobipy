@@ -61,7 +61,8 @@ class FdemSystem(myObject):
         if values is None:
             values = np.empty((self.nFrequencies, 3))
             for i, (t, r) in enumerate(zip(self.transmitter, self.receiver)):
-                values[i, :] = [r.x - t.x, r.y - t.y, r.z - t.z]
+                tmp = np.r_[(r.x - t.x).value, (r.y - t.y).value, (r.z - t.z).value]
+                values[i, :] = tmp
         else:
             assert np.ndim(values) == 2, ValueError("loop_offsets must be 2D with shape (nFrequencies, 3) for offsets in x, y, and z.")
             assert np.size(values, 0) == self.nFrequencies and np.size(values, 1) == 3 , ValueError("loop_offsets must be 2D with shape (nFrequencies, 3) for offsets in x, y, and z.")
@@ -291,7 +292,7 @@ class FdemSystem(myObject):
     @classmethod
     def fromHdf(cls, grp):
         """ Reads the object from a HDF file """
-        nFreq = np.int(np.array(grp.get('nFreq')))
+        nFreq = np.int32(np.array(grp.get('nFreq')))
         frequencies = StatArray.StatArray.fromHdf(grp['freq'])
 
         if 'loopoffsets' in grp:

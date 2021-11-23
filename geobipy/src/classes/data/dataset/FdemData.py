@@ -820,7 +820,7 @@ class FdemData(Data):
                 if "number of channels" in line:
                     line = f.readline().strip('/')
                     nHeaderLines += 1
-                    nFrequencies = np.int(line)
+                    nFrequencies = np.int32(line)
                 if "frequencies" in line:
                     line = f.readline().strip('/').split()
                     nHeaderLines += 1

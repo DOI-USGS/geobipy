@@ -529,7 +529,7 @@ class TdemDataPoint(EmDataPoint):
     def __aarhus_frontgate(self, f):
         line = f.readline().strip().split()
         nFilters = np.int32(line[0])
-        frontGate = np.bool(np.int32(line[1]))
+        frontGate = bool(np.int32(line[1]))
         damping = np.float64(line[2])
 
         return nFilters, frontGate, damping

@@ -679,7 +679,7 @@ class TempestData(TdemData):
         system_file_path = kwargs.pop('system_file_path', None)
         assert (not system_file_path is None), ValueError("missing 1 required argument 'system_file_path', the path to directory containing system files")
 
-        nSystems = np.int(np.asarray(grp.get('nSystems')))
+        nSystems = np.int32(np.asarray(grp.get('nSystems')))
         systems = []
         for i in range(nSystems):
             # Get the system file name. h5py has to encode strings using utf-8, so decode it!
