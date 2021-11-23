@@ -207,9 +207,9 @@ def loadBalance1D_shrinkingArrays(N, nChunks):
         The size of each chunk.
 
     """
-    chunks = np.zeros(nChunks, dtype=np.int)
+    chunks = np.zeros(nChunks, dtype=np.int32)
     chunks[:] = N / nChunks
-    Nmod = np.int(N % nChunks)
+    Nmod = np.int32(N % nChunks)
     chunks[:Nmod] += 1
     starts = np.cumsum(chunks) - chunks[0]
     if (Nmod > 0):
@@ -388,7 +388,7 @@ def Irecv(source, world, dtype=None, ndim=None, shape=None):
         world.Recv(this, source=source)
     elif (ndim > 1): # Nd Array
         if shape is None:
-            shape = np.empty(ndim, dtype=np.int)
+            shape = np.empty(ndim, dtype=np.int32)
             world.Recv(shape, source=source)
         this = np.empty(shape, dtype=dtype)
         world.Recv(this, source=source)
