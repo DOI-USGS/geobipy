@@ -1722,7 +1722,7 @@ class StatArray(np.ndarray, myObject):
             k_ += 1
             go = go & (k_ <= k[1])
 
-        active = np.ones(best.n_components, dtype=np.bool)
+        active = np.ones(best.n_components, dtype=bool)
 
         means = np.squeeze(best.means_)
         try:
