@@ -4,6 +4,9 @@ from geobipy import Model1D
 import numpy as np
 import matplotlib.pyplot as plt
 
+# import warnings
+# warnings.filterwarnings('error')
+
 n_points = 100
 
 zwedge = np.linspace(10.0, 1.0, n_points)
@@ -90,7 +93,7 @@ ds.additive_error = np.full((n_points, 2), fill_value = 1e-12)
 dp = ds.datapoint(0)
 
 dp.relErr = [0.05, 0.05]
-dp.addErr = [1e-12, 1e-12]
+dp.addErr = [1e-13, 1e-13]
 
 
 for k in range(n_points):    
@@ -98,9 +101,9 @@ for k in range(n_points):
     mod = Model1D(widths=thk, parameters=sigma)
 
     dp.forward(mod)
-    dp.data = dp.predictedData
+    dp.secondary_field = dp.predictedData
     
-    dp.data += dp.std * np.random.randn(dp.nChannels)
+    dp.secondary_field += dp.std * np.random.randn(dp.nChannels)
     
     ds.secondary_field[k, :] = dp.data
 
@@ -112,6 +115,15 @@ plt.subplot(212, sharex=ax);
 plt.hlines(0.0, ds.x[0], ds.x[-1], 'k');
 plt.plot(ds.x, -zwedge, 'k');
 plt.plot(ds.x, -zdeep, 'k');
+
+d0 = ds.datapoint(0)
+d1 = ds.datapoint(99)
+plt.figure()
+plt.subplot(121)
+d0.plot()
+plt.subplot(122)
+d1.plot()
+
 
 plt.savefig('Skytem.png');
 
@@ -147,12 +159,12 @@ R = CircularLoop(x=T.x + 2.0,
 ds.receiver = [R] * ds.nPoints
 
 ds.relative_error = np.full((n_points, 1), fill_value = 0.05)
-ds.additive_error = np.full((n_points, 1), fill_value = 1e-7)
+ds.additive_error = np.full((n_points, 1), fill_value = 1e-8)
 
 dp = ds.datapoint(0)
 
 dp.relErr = 0.05
-dp.addErr = 1e-7
+dp.addErr = 1e-8
 
 
 for k in range(n_points):    
@@ -160,11 +172,11 @@ for k in range(n_points):
     mod = Model1D(widths=thk, parameters=sigma)
 
     dp.forward(mod)
-    dp.data = dp.predictedData
-    
-    dp.data += dp.std * np.random.randn(dp.nChannels)
-    
-    ds.data[k, :] = dp.data
+    dp.secondary_field = dp.predicted_secondary_field
+
+    dp.secondary_field += dp.std * np.random.randn(dp.nChannels)
+
+    ds.secondary_field[k, :] = dp.data
 
 plt.figure()
 ax = plt.subplot(211)
@@ -174,6 +186,18 @@ plt.subplot(212, sharex=ax)
 plt.hlines(0.0, ds.x[0], ds.x[-1], 'k')
 plt.plot(ds.x, -zwedge, 'k')
 plt.plot(ds.x, -zdeep, 'k')
+
+d0 = ds.datapoint(0)
+d0.relErr = 0.05
+d0.addErr = 1e-8
+d1 = ds.datapoint(99)
+d1.relErr = 0.05
+d1.addErr = 1e-8
+plt.figure()
+plt.subplot(121)
+d0.plot()
+plt.subplot(122)
+d1.plot()
 
 #%%
 ds.write_csv('../../documentation_source/source/examples/supplementary/Data/aerotem.csv')
@@ -217,15 +241,10 @@ for k in range(n_points):
     mod = Model1D(edges=edges, parameters=sigma)
 
     dp.forward(mod)
-    dp.primary_field = dp.predicted_primary_field
-    dp.secondary_field = dp.predicted_secondary_field
-    std = np.sqrt((0.05 * dp.secondary_field)**2 + dp.addErr**2)
-    noise = (np.random.randn(dp.nChannels) * std)
-    data = dp.data + noise
+    noise = (np.random.randn(dp.nChannels) * np.sqrt((0.05 * dp.predicted_secondary_field)**2 + dp.addErr**2))
 
-                      
-    ds.primary_field[k, :] = dp.primary_field
-    ds.secondary_field[k, :] = np.hstack([data[dp._component_indices(0, 0)] - dp.primary_field[0], data[dp._component_indices(1, 0)] - dp.primary_field[1]])
+    ds.primary_field[k, :] = dp.predicted_primary_field
+    ds.secondary_field[k, :] = dp.predicted_secondary_field + noise
       
 plt.figure()
 ax = plt.subplot(311)
@@ -244,3 +263,17 @@ ds.write_csv('../../documentation_source/source/examples/supplementary/Data/Temp
 from geobipy import TempestData
 ds = TempestData.read_csv('../../documentation_source/source/examples/supplementary/Data/Tempest.csv', '../../documentation_source/source/examples/supplementary/Data/Tempest.stm')
 
+# dp2 = ds.datapoint(0)
+# dp2.relErr = [0.05, 0.05]
+# dp2.addErr = [0.011474, 0.012810, 0.008507, 0.005154, 0.004742, 0.004477, 0.004168, 0.003539, 0.003352, 0.003213, 0.003161, 0.003122, 0.002587, 0.002038, 0.002201,
+#              0.007383, 0.005693, 0.005178, 0.003659, 0.003426, 0.003046, 0.003095, 0.003247, 0.002775, 0.002627, 0.002460, 0.002178, 0.001754, 0.001405, 0.001283]
+
+# print(dp2.primary_field)
+# print(dp2.secondary_field)
+# print(dp2.data)
+
+# plt.figure()
+# plt.subplot(122)
+# dp2.plot()
+
+plt.show()
