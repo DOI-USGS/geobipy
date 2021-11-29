@@ -65,7 +65,7 @@ class Model1D(RectilinearMesh1D):
     def __init__(self, centres=None, edges=None, widths=None, relativeTo=None, parameters=None, **kwargs):
         """Instantiate a new Model1D """
 
-        relativeTo = 0.0 if relativeTo is None else relativeTo
+        # relativeTo = 0.0 if relativeTo is None else relativeTo
 
         super().__init__(centres=centres, edges=edges, widths=widths, relativeTo=relativeTo)
 

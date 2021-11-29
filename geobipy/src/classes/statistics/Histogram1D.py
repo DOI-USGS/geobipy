@@ -44,7 +44,7 @@ class Histogram1D(Histogram, RectilinearMesh1D):
 
     """
 
-    def __init__(self, centres=None, edges=None, widths=None, log=None, relativeTo=0.0, values=None, **kwargs):
+    def __init__(self, centres=None, edges=None, widths=None, log=None, relativeTo=None, values=None, **kwargs):
         """ Initialize a histogram """
 
         if 'bins' in kwargs:

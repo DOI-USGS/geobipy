@@ -276,17 +276,15 @@ class FdemDataPoint(EmDataPoint):
     def set_predicted_data_posterior(self):
         if self.predictedData.hasPrior:
             freqs = np.log10(self.frequencies())
+            xbuf = 0.05*(freqs[-1] - freqs[0])
+            xbins = StatArray.StatArray(np.logspace(freqs[0]-xbuf, freqs[-1]+xbuf, 200), freqs.name, freqs.units)
+
             data = np.log10(self.data[self.active])
             a = data.min()
             b = data.max()
-
-            xbuf = 0.05*(freqs[-1] - freqs[0])
-            xbins = StatArray.StatArray(np.logspace(freqs[0]-xbuf, freqs[-1]+xbuf, 200), freqs.name, freqs.units)
             buf = 0.5*(b - a)
             ybins = StatArray.StatArray(np.logspace(a-buf, b+buf, 200), data.name, data.units)
-            # rto = 0.5 * (ybins[0] + ybins[-1])
-            # ybins -= rto
-
+            
             self.predictedData.posterior = Histogram2D(xEdges=xbins, xlog=10, yEdges=ybins, ylog=10)
 
 

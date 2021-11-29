@@ -465,7 +465,11 @@ class EmDataPoint(DataPoint):
         """
         if self.relErr.hasPrior:
             bins = StatArray.StatArray(np.atleast_2d(self.relErr.prior.bins()), name=self.relErr.name, units=self.relErr.units)
-            self.relErr.posterior = [Histogram1D(edges = bins[i, :]) for i in range(self.nSystems)]
+            posterior = []
+            for i in range(self.nSystems):
+                b = bins[i, :]
+                posterior.append(Histogram1D(edges = b, relativeTo=0.5*(b.max()-b.min())))
+            self.relErr.posterior = posterior
 
     def set_additive_error_posterior(self, log=None):
         """
@@ -473,7 +477,12 @@ class EmDataPoint(DataPoint):
         """
         if self.addErr.hasPrior:
             bins = StatArray.StatArray(np.atleast_2d(self.addErr.prior.bins()), name=self.addErr.name, units=self.data.units)
-            self.addErr.posterior = [Histogram1D(edges = bins[i, :], log=log) for i in range(self.nSystems)]
+
+            posterior = []
+            for i in range(self.nSystems):
+                b = bins[i, :]
+                posterior.append(Histogram1D(edges = b, log=log, relativeTo=0.5*(b.max()-b.min())))
+            self.addErr.posterior = posterior
 
     @property
     def summary(self):
