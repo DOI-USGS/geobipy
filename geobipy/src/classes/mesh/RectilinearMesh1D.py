@@ -12,6 +12,7 @@ from ..statistics.Distribution import Distribution
 from ..statistics import Histogram1D
 from scipy.sparse import diags
 from scipy import interpolate
+from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
@@ -854,10 +855,11 @@ class RectilinearMesh1D(Mesh):
 
         """
 
+        if isinstance(gs, Figure):
+            gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
+
         splt = gs.subgridspec(2, 1, height_ratios=[1, 4])
-        ax = []
-        ax.append(plt.subplot(splt[0, 0]))
-        ax.append(plt.subplot(splt[1, 0]))
+        ax = [plt.subplot(splt[0, 0]), plt.subplot(splt[1, 0])]
 
         for a in ax:
             cp.pretty(a)

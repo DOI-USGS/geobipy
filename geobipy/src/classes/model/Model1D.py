@@ -11,6 +11,7 @@ from ..statistics.Hitmap2D import Hitmap2D
 from ...base.logging import myLogger
 from ..statistics.Distribution import Distribution
 import numpy as np
+from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 from ...base import plotting as cP
 from ...base import utilities as cF
@@ -856,6 +857,9 @@ class Model1D(RectilinearMesh1D):
             Gridspec to split
 
         """
+
+        if isinstance(gs, Figure):
+            gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
 
         splt = gs.subgridspec(2, 2, height_ratios=[1, 4])
         splt2 = splt[1, :].subgridspec(1, 2, wspace=0.2)
