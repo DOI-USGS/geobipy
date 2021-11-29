@@ -928,7 +928,7 @@ class StatArray(np.ndarray, myObject):
         except:
             pass
         if self.hasPosterior:
-            out._posterior = deepcopy(self._posterior)
+            out.posterior = deepcopy(self.posterior)
         return out
 
     def perturb(self, i=np.s_[:], relative=False, imposePrior=False, log=False):

@@ -75,8 +75,6 @@ from .src.inversion.Inference2D import Inference2D
 from .src.inversion.Inference3D import Inference3D
 from .src.inversion.user_parameters import user_parameters
 
-from .src.example_path import example_path
-
 # Set an MPI failed tag
 dpFailed = 0
 # Set an MPI success tag

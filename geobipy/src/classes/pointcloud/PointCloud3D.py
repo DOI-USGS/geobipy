@@ -1008,7 +1008,6 @@ class PointCloud3D(myObject):
 
         return grp
 
-
     def writeHdf(self, parent, name, withPosterior=True):
         """ Write the StatArray to an HDF object
         parent: Upper hdf file or group
