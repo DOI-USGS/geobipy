@@ -566,7 +566,7 @@ class Model1D(RectilinearMesh1D):
 
         return remappedModel, perturbedModel
 
-    def setPosteriors(self):
+    def set_posteriors(self):
 
         super().set_posteriors()
 

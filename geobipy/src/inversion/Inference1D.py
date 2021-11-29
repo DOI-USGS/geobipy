@@ -307,7 +307,7 @@ class Inference1D(myObject):
                          self.kwargs['probability_of_no_change']]
         self.model.setProposals(probabilities, parameterProposal=parameterProposal, prng=self.prng)
 
-        self.model.setPosteriors()
+        self.model.set_posteriors()
 
     def accept_reject(self):
         """ Propose a new random model and accept or reject it """
@@ -706,8 +706,7 @@ class Inference1D(myObject):
 
         self.acceptance_rate.createHdf(parent,'rate',nRepeats=nPoints, fillvalue=np.nan)
 #        parent.create_dataset('rate', [nPoints,self.rate.size], dtype=self.rate.dtype)
-        self.data_misfit_v.createHdf(
-            parent, 'phids', nRepeats=nPoints, fillvalue=np.nan)
+        self.data_misfit_v.createHdf(parent, 'phids', nRepeats=nPoints, fillvalue=np.nan)
         #parent.create_dataset('phids', [nPoints,self.PhiDs.size], dtype=self.PhiDs.dtype)
 
         self.best_datapoint.createHdf(parent,'bestd', withPosterior=False, nRepeats=nPoints, fillvalue=np.nan)

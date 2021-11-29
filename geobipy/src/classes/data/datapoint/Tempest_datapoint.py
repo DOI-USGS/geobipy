@@ -360,8 +360,8 @@ class Tempest_datapoint(TdemDataPoint):
                 ic = self._component_indices(j, i)
                 self.predicted_secondary_field[ic].plot(x=system_times, **kwargs)
 
-    def setPosteriors(self, log=None):
-        return super().setPosteriors(log=None)
+    def set_posteriors(self, log=None):
+        return super().set_posteriors(log=None)
 
     def set_relative_error_posterior(self):
         if self.relErr.hasPrior:
