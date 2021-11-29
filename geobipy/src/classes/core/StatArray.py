@@ -1550,7 +1550,7 @@ class StatArray(np.ndarray, myObject):
                     self.posterior.writeHdf(grp, 'posterior', index=index)
 
     @classmethod
-    def fromHdf(cls, grp, name=None, index=None, verbose=False):
+    def fromHdf(cls, grp, name=None, index=None, skip_posterior=False):
         """Read the StatArray from a HDF group
 
         Given the HDF group object, read the contents into a StatArray.
@@ -1604,28 +1604,29 @@ class StatArray(np.ndarray, myObject):
         else:
             out = cls(d, name, units)
 
-        nPosteriors = 0
-        if 'nPosteriors' in grp:
-            nPosteriors = np.asarray(grp['nPosteriors'])
+        if not skip_posterior:
+            nPosteriors = 0
+            if 'nPosteriors' in grp:
+                nPosteriors = np.asarray(grp['nPosteriors'])
 
-        posterior = None
-        iTmp = index
-        if not index is None:
-            if np.ndim(index) > 0:
-                iTmp = index[0]
+            posterior = None
+            iTmp = index
+            if not index is None:
+                if np.ndim(index) > 0:
+                    iTmp = index[0]
 
-        if nPosteriors == 1:
-            posterior = hdfRead.read_item(grp['posterior'], index=iTmp)
+            if nPosteriors == 1:
+                posterior = hdfRead.read_item(grp['posterior'], index=iTmp)
 
-        elif nPosteriors > 1:
-            posterior = []
-            for i in range(nPosteriors):
-                posterior.append(hdfRead.read_item(grp['posterior{}'.format(i)], index=iTmp))
+            elif nPosteriors > 1:
+                posterior = []
+                for i in range(nPosteriors):
+                    posterior.append(hdfRead.read_item(grp['posterior{}'.format(i)], index=iTmp))
 
-        out.posterior = posterior
+            out.posterior = posterior
 
         if is_file:
-            f.close()
+            grp.close()
 
         return out
 
