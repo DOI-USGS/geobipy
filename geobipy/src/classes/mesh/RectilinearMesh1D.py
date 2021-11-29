@@ -52,7 +52,7 @@ class RectilinearMesh1D(Mesh):
         edges must be a geobipy.StatArray.
 
     """
-    def __init__(self, centres=None, edges=None, widths=None, log=None, relativeTo=0.0):
+    def __init__(self, centres=None, edges=None, widths=None, log=None, relativeTo=None):
         """ Initialize a 1D Rectilinear Mesh"""
         self._centres = None
         self._edges = None
@@ -303,10 +303,16 @@ class RectilinearMesh1D(Mesh):
 
     @property
     def relativeTo(self):
+        if self._relativeTo is None:
+            return StatArray.StatArray(0.0)
         return self._relativeTo
 
     @relativeTo.setter
     def relativeTo(self, value):
+        if value is None:
+            self._relativeTo = None
+            return
+
         if np.all(value > 0.0):
             value, _ = cF._log(value, self.log)
         self._relativeTo = StatArray.StatArray(value)
@@ -1092,13 +1098,14 @@ class RectilinearMesh1D(Mesh):
 
         self.nCells.createHdf(grp, 'nCells', withPosterior=withPosterior, nRepeats=nRepeats)
 
-        self.centres.createHdf(grp, 'centres', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        self.edges.createHdf(grp, 'edges', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-
         if not self.log is None:
             grp.create_dataset('log', data=self.log)
 
-        self.relativeTo.createHdf(grp, 'relativeTo', nRepeats=nRepeats, fillvalue=fillvalue)
+        if self._relativeTo is not None:
+            self.relativeTo.createHdf(grp, 'relativeTo', nRepeats=nRepeats, fillvalue=fillvalue)
+
+        self.centres.createHdf(grp, 'centres', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.edges.createHdf(grp, 'edges', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
 
         # Instantiate extra parameters for Markov chain perturbations.
         if not self.min_edge is None: grp.create_dataset('min_edge', data=self.min_edge)
@@ -1117,27 +1124,36 @@ class RectilinearMesh1D(Mesh):
         """
         grp = parent.get(name)
         self.nCells.writeHdf(grp, 'nCells',  withPosterior=withPosterior, index=index)
+        if self._relativeTo is not None:
+            self.relativeTo.writeHdf(grp, 'relativeTo', index=index)
+
         self.centres.writeHdf(grp, 'centres',  withPosterior=withPosterior, index=index)
         self.edges.writeHdf(grp, 'edges',  withPosterior=withPosterior, index=index)
-        self.relativeTo.writeHdf(grp, 'relativeTo', index=index)
+        
 
     @classmethod
     def fromHdf(cls, grp, index=None):
         """ Reads in the object froma HDF file """
 
+        # Get the number of cells of the mesh
         if 'nCells' in grp:
             tmp = StatArray.StatArray.fromHdf(grp['nCells'], index=index)
             nCells = tmp.astype(np.int32)
             nCells.copyStats(tmp)
+            assert nCells.size == 1, ValueError("Mesh was created with expanded memory\nIndex must be specified")
 
+        log = None
+        if 'log' in grp:
+            log = np.asscalar(np.asarray(grp['log']))
+
+        # If relativeTo is present, the edges/centres should be 1 dimensional
+        relativeTo = None
         if 'relativeTo' in grp:
             relativeTo = StatArray.StatArray.fromHdf(grp['relativeTo'], index=index)
         else:
             if 'top' in grp:
                 relativeTo = StatArray.StatArray.fromHdf(grp['top'], index=index)
-            else:
-                relativeTo = 0.0
-
+            
         edges = None
         if (('edges' in grp) or ('bins' in grp)):
             if 'edges' in grp:
@@ -1145,52 +1161,56 @@ class RectilinearMesh1D(Mesh):
             elif 'bins' in grp:
                 key = 'bins'
 
-            if np.ndim(grp[key+'/data']) == 2:
+            if (np.ndim(grp[key+'/data']) == 2):
+                # if index is None:
+                #     edges = StatArray.StatArray.fromHdf(grp[key])
+                # else:
+                
                 edges = StatArray.StatArray.fromHdf(grp[key], index=(index, np.s_[:nCells.value+1]))
             else:
                 edges = StatArray.StatArray.fromHdf(grp[key], index=np.s_[:nCells.value+1])
-
+                
         centres = None
-        if edges is None and (('centres' in grp) or ('x' in grp)):
-            key = 'centres' if not 'x' in grp else 'x'
-            if np.ndim(grp[key+'/data']) == 2:
-                centres = StatArray.StatArray.fromHdf(grp[key], index=(index, np.s_[:nCells.value]))
-            else:
-                centres = StatArray.StatArray.fromHdf(grp[key], index=np.s_[:nCells.value+1])
+        # if edges is None and (('centres' in grp) or ('x' in grp)):
+        #     key = 'centres' if not 'x' in grp else 'x'
+        #     if np.ndim(grp[key+'/data']) == 2:
+        #         centres = StatArray.StatArray.fromHdf(grp[key], index=(index, np.s_[:nCells.value]))
+        #     else:
+        #         centres = StatArray.StatArray.fromHdf(grp[key], index=np.s_[:nCells.value+1])
 
-        log = None
-        if 'log' in grp:
-            log = np.asscalar(np.asarray(grp['log']))
-
-        out = cls(centres, edges, widths=None)
+        out = cls(centres=centres, edges=edges, widths=None)
 
         out.log = log
         out.relativeTo = relativeTo
-        out.nCells = nCells
+        out._nCells = nCells
 
-        if 'min_width' in grp: out._min_width = np.array(grp.get('min_width'))
-        if 'min_edge' in grp: out._min_edge = np.array(grp.get('min_edge'))
-        if 'max_edge' in grp: out._max_edge = np.array(grp.get('max_edge'))
-        if 'max_cells' in grp: out._max_cells = np.array(grp.get('max_cells'))
+        if 'min_width' in grp: 
+            out._min_width = np.array(grp.get('min_width'))
+        if 'min_edge' in grp:
+            out._min_edge = np.array(grp.get('min_edge'))
+        if 'max_edge' in grp: 
+            out._max_edge = np.array(grp.get('max_edge'))
+        if 'max_cells' in grp: 
+            out._max_cells = np.array(grp.get('max_cells'))
 
         # if 'event_proposal' in grp: self._event_proposal = np.array(grp.get('event_proposal'))
 
-        if 'depth' in grp: # Old Model1D class
-            i = np.s_[index, :nCells.value]
-            tmp = StatArray.StatArray.fromHdf(grp['depth'], index=i)
-            edges = tmp.prepend(0.0)
-            edges[-1] = np.inf
-            edges.copyStats(tmp)
+        # if 'depth' in grp: # Old Model1D class
+        #     i = np.s_[index, :nCells.value]
+        #     tmp = StatArray.StatArray.fromHdf(grp['depth'], index=i)
+        #     edges = tmp.prepend(0.0)
+        #     edges[-1] = np.inf
+        #     edges.copyStats(tmp)
 
-            out  = cls(edges=edges)
-            out.nCells = nCells
-            # self.edges = edges
+        #     out  = cls(edges=edges)
+        #     out.nCells = nCells
+        #     # self.edges = edges
 
-            if 'minThk' in grp: out._min_width = np.array(grp.get('minThk'))
-            if 'hmin'   in grp: out._min_width = np.array(grp.get('hmin'))
-            if 'zmin'   in grp: out._min_edge = np.array(grp.get('zmin'))
-            if 'zmax'   in grp: out._max_edge = np.array(grp.get('zmax'))
-            if 'kmax'   in grp: out._max_cells = np.array(grp.get('kmax'))
+        #     if 'minThk' in grp: out._min_width = np.array(grp.get('minThk'))
+        #     if 'hmin'   in grp: out._min_width = np.array(grp.get('hmin'))
+        #     if 'zmin'   in grp: out._min_edge = np.array(grp.get('zmin'))
+        #     if 'zmax'   in grp: out._max_edge = np.array(grp.get('zmax'))
+        #     if 'kmax'   in grp: out._max_cells = np.array(grp.get('kmax'))
 
         return out
 
