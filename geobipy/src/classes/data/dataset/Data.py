@@ -1083,13 +1083,13 @@ class Data(PointCloud3D):
         self.relative_error.writeHdf(grp, 'relErr',  withPosterior=withPosterior, index=index)
         self.additive_error.writeHdf(grp, 'addErr',  withPosterior=withPosterior, index=index)
 
-
-    def fromHdf(self, grp, **kwargs):
+    @classmethod
+    def fromHdf(cls, grp, **kwargs):
         """ Reads the object from a HDF group """
 
-        super.fromHdf(grp)
+        self = super(Data, cls).fromHdf(grp, **kwargs)
 
-        self.errorPosterior = None
+        # self.errorPosterior = None
 
         if 'fiducial' in grp:
             self.fiducial = StatArray.StatArray.fromHdf(grp['fiducial'])
@@ -1097,22 +1097,23 @@ class Data(PointCloud3D):
         if 'line_number' in grp:
             self.lineNumber = StatArray.StatArray.fromHdf(grp['line_number'])
 
-        if 'channels_per_system' in grp:
-            self._channels_per_system = np.asarray(grp['channels_per_system'])
+        # if 'channels_per_system' in grp:
+        #     self._channels_per_system = np.asarray(grp['channels_per_system'])
 
-        self._data = StatArray.StatArray.fromHdf(grp['d'])
-        self._std = StatArray.StatArray.fromHdf(grp['s'])
-        self._predictedData = StatArray.StatArray.fromHdf(grp['p'])
 
-        if 'joint_error_posterior_0' in grp:
-            i = 0
-            self.errorPosterior = []
-            while 'joint_error_posterior_{}'.format(i) in grp:
-                self.errorPosterior.append(Histogram3D.fromHdf(grp['joint_error_posterior_{}'.format(i)]))
-                i += 1
+        self.data = StatArray.StatArray.fromHdf(grp['d'])
+        self.std = StatArray.StatArray.fromHdf(grp['s'])
+        self.predictedData = StatArray.StatArray.fromHdf(grp['p'], skip_posterior=True)
 
-        self._relative_error = StatArray.StatArray.fromHdf(grp['relErr'])
-        self._additive_error = StatArray.StatArray.fromHdf(grp['addErr'])
+        # if 'joint_error_posterior_0' in grp:
+        #     i = 0
+        #     self.errorPosterior = []
+        #     while 'joint_error_posterior_{}'.format(i) in grp:
+        #         self.errorPosterior.append(Histogram3D.fromHdf(grp['joint_error_posterior_{}'.format(i)]))
+        #         i += 1
+
+        self.relative_error = StatArray.StatArray.fromHdf(grp['relErr'], skip_posterior=True)
+        self.additive_error = StatArray.StatArray.fromHdf(grp['addErr'], skip_posterior=True)
 
         return self
 

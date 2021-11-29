@@ -884,16 +884,13 @@ class FdemData(Data):
 
         return system, nPoints, _columnIndex, _dataIndices, nHeaderLines, _powerline, _magnetic
 
-
-    def fromHdf(self, grp, **kwargs):
+    @classmethod
+    def fromHdf(cls, grp, **kwargs):
         """ Reads the object from a HDF group """
-
-        super.fromHdf(grp)
-        self.system = FdemSystem.fromHdf(grp['sys'])
-
-        return self
-
-
+        
+        system = FdemSystem.fromHdf(grp['sys'])
+        return super(FdemData, cls).fromHdf(grp, system=system)
+        
     def Bcast(self, world, root=0):
         """Broadcast the FdemData using MPI
 

@@ -1020,8 +1020,8 @@ class PointCloud3D(myObject):
         self.z.writeHdf(grp, 'z',  withPosterior=withPosterior)
         self.elevation.writeHdf(grp, 'elevation',  withPosterior=withPosterior)
 
-
-    def fromHdf(self, grp):
+    @classmethod
+    def fromHdf(cls, grp, **kwargs):
         """ Reads the object from a HDF group """
 
         x = StatArray.StatArray.fromHdf(grp['x'])
@@ -1029,9 +1029,7 @@ class PointCloud3D(myObject):
         z = StatArray.StatArray.fromHdf(grp['z'])
         elevation = StatArray.StatArray.fromHdf(grp['e'])
 
-        PointCloud3D.__init__(self, x, y, z, elevation)
-
-        return self
+        return cls(x=x, y=y, z=z, elevation=elevation, **kwargs)
 
     def Bcast(self, world, root=0):
         """Broadcast a PointCloud3D using MPI
