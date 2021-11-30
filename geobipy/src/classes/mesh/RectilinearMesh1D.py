@@ -1042,10 +1042,6 @@ class RectilinearMesh1D(Mesh):
 
         """
         probabilities = np.asarray(probabilities)
-        assert probabilities.size == 4, ValueError(
-            'probabilities must have size 4')
-        assert np.all(probabilities > 0.0), ValueError(
-            "probabilities must all be > 0.0")
         self._event_proposal = Distribution('Categorical', probabilities, [
                                             'insert', 'delete', 'perturb', 'none'], prng=prng)
 
@@ -1084,7 +1080,6 @@ class RectilinearMesh1D(Mesh):
 
             if (d.size > 0):
                 self.edges.posterior.update(d, trim=True)
-
 
     def hdfName(self):
         """ Reprodicibility procedure """
@@ -1155,6 +1150,9 @@ class RectilinearMesh1D(Mesh):
         else:
             if 'top' in grp:
                 relativeTo = StatArray.StatArray.fromHdf(grp['top'], index=index)
+
+        if relativeTo == 0.0:
+            relativeTo = None
             
         edges = None
         if (('edges' in grp) or ('bins' in grp)):
@@ -1164,10 +1162,7 @@ class RectilinearMesh1D(Mesh):
                 key = 'bins'
 
             if (np.ndim(grp[key+'/data']) == 2):
-                # if index is None:
-                #     edges = StatArray.StatArray.fromHdf(grp[key])
-                # else:
-                
+                                
                 edges = StatArray.StatArray.fromHdf(grp[key], index=(index, np.s_[:nCells.value+1]))
             else:
                 edges = StatArray.StatArray.fromHdf(grp[key], index=np.s_[:nCells.value+1])

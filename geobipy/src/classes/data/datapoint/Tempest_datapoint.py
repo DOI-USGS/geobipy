@@ -360,13 +360,15 @@ class Tempest_datapoint(TdemDataPoint):
                 ic = self._component_indices(j, i)
                 self.predicted_secondary_field[ic].plot(x=system_times, **kwargs)
 
-    def set_posteriors(self, log=None):
-        return super().set_posteriors(log=None)
-
     def set_relative_error_posterior(self):
+
         if self.relErr.hasPrior:
-            rb = StatArray.StatArray(np.atleast_2d(self.relErr.prior.bins()), name=self.relErr.name, units=self.relErr.units)
-            self.relErr.posterior = [Histogram1D(edges = rb[i, :]) for i in range(self.nSystems*self.n_components)]
+            bins = StatArray.StatArray(np.atleast_2d(self.relErr.prior.bins()), name=self.relErr.name, units=self.relErr.units)        
+            posterior = []
+            for i in range(self.nSystems*self.n_components):
+                b = bins[i, :]
+                posterior.append(Histogram1D(edges = b, relativeTo=0.5*(b.max()-b.min())))
+            self.relErr.posterior = posterior
 
     def set_additive_error_posterior(self, log=None):
         if self.addErr.hasPrior:
@@ -399,9 +401,9 @@ class Tempest_datapoint(TdemDataPoint):
 
 
 
-    def updatePosteriors(self):
+    def update_posteriors(self):
 
-        super().updatePosteriors()
+        super().update_posteriors()
 
         # if self.predictedData.hasPosterior:
         #     for i in range(self.n_components):

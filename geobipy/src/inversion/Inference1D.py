@@ -468,7 +468,7 @@ class Inference1D(myObject):
             self.model.updatePosteriors(0.5)#self.user_options.clip_ratio)
 
             # Update the height posterior
-            self.datapoint.updatePosteriors()
+            self.datapoint.update_posteriors()
 
         if (np.mod(self.iteration, 1000) == 0):
             ratePercent = 0.1 * np.float64(self.accepted)

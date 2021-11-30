@@ -464,7 +464,7 @@ class EmDataPoint(DataPoint):
 
         """
         if self.relErr.hasPrior:
-            bins = StatArray.StatArray(np.atleast_2d(self.relErr.prior.bins()), name=self.relErr.name, units=self.relErr.units)
+            bins = StatArray.StatArray(np.atleast_2d(self.relErr.prior.bins()), name=self.relErr.name, units=self.relErr.units)        
             posterior = []
             for i in range(self.nSystems):
                 b = bins[i, :]
@@ -497,7 +497,7 @@ class EmDataPoint(DataPoint):
         return msg
 
 
-    def updatePosteriors(self):
+    def update_posteriors(self):
         """Update any attached posteriors"""
 
         if self.z.hasPosterior:

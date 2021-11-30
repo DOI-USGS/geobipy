@@ -1020,7 +1020,7 @@ class Model1D(RectilinearMesh1D):
 
         return np.all(par > sLow) and np.all(par < sHigh)
 
-    def updatePosteriors(self, minimumRatio=0.5):
+    def update_posteriors(self, minimumRatio=0.5):
         """Update any attached posterior distributions.
 
         Parameters

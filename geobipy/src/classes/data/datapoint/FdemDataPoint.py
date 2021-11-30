@@ -472,8 +472,8 @@ class FdemDataPoint(EmDataPoint):
 
         return ax
 
-    def updatePosteriors(self):
-        super().updatePosteriors()
+    def update_posteriors(self):
+        super().update_posteriors()
 
         if self.predictedData.hasPosterior:
             x = self.frequencies()

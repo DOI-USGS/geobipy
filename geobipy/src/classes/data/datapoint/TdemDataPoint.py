@@ -876,8 +876,8 @@ class TdemDataPoint(EmDataPoint):
 
             self.predictedData.posterior = Histogram2D(xEdges=xbins, xlog=10, yEdges=ybins, ylog=10)
 
-    def updatePosteriors(self):
-        super().updatePosteriors()
+    def update_posteriors(self):
+        super().update_posteriors()
 
         if self.predictedData.hasPosterior:
             active = self.active
