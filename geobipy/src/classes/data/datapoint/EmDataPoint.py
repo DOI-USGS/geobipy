@@ -1,8 +1,10 @@
+from numpy.lib.function_base import meshgrid
 from .DataPoint import DataPoint
-from ...model.Model1D import Model1D
 from ....classes.core import StatArray
-from ...statistics.Histogram1D import Histogram1D
-from ...statistics.Histogram2D import Histogram2D
+from ...mesh.RectilinearMesh1D import RectilinearMesh1D
+from ...statistics.Histogram import Histogram
+from ...model.Model import Model
+# from ...statistics.Histogram2D import Histogram2D
 from ...statistics.Distribution import Distribution
 from ....base import utilities as cf
 from ....base import plotting as cP
@@ -138,6 +140,19 @@ class EmDataPoint(DataPoint):
 
         return out
 
+    @staticmethod
+    def new_model():
+        mesh = RectilinearMesh1D(edges=StatArray.StatArray(np.asarray([0.0, np.inf]), 'Depth', 'm'))
+        conductivity = StatArray.StatArray(mesh.nCells.item(), 'Conductivity', r'$\frac{S}{m}$')
+        magnetic_susceptibility = StatArray.StatArray(mesh.nCells.item(), "Magnetic Susceptibility", r"$\kappa$")
+        magnetic_permeability = StatArray.StatArray(mesh.nCells.item(), "Magnetic Permeability", "$\frac{H}{m}$")
+
+        out = Model(mesh=mesh, values=conductivity)
+        out.setattr('magnetic_susceptibility', magnetic_susceptibility)
+        out.setattr('magnetic_permeability', magnetic_permeability)
+
+        return out
+
     def find_best_halfspace(self, minConductivity=1e-4, maxConductivity=1e4, nSamples=100):
         """Computes the best value of a half space that fits the data.
 
@@ -167,17 +182,15 @@ class EmDataPoint(DataPoint):
 
         PhiD = np.zeros(nSamples)
 
-        e = StatArray.StatArray(np.asarray([0.0, np.inf]), 'Depth', 'm')
-        p = StatArray.StatArray(1, 'Conductivity', r'$\frac{S}{m}$')
-        model = Model1D(edges=e, parameters=p)
+        model = self.new_model()
 
         for i in range(nSamples):
-            model._par[0] = c[i]
+            model.values[0] = c[i]
             self.forward(model)
             PhiD[i] = self.dataMisfit()
 
         i = np.argmin(PhiD)
-        model._par[0] = c[i]
+        model.values[0] = c[i]
         return model
 
     def priorProbability(self, rErr, aErr, height, calibration, verbose=False):
@@ -317,10 +330,12 @@ class EmDataPoint(DataPoint):
         # tmp = deepcopy(self)
         c = StatArray.StatArray(np.logspace(minConductivity, maxConductivity, nSamples), 'Conductivity', '$S/m$')
         PhiD = StatArray.StatArray(c.size, 'Normalized Data Misfit', '')
-        mod = Model1D(1, edges=np.asarray([0.0, np.inf]))
+        
+        model = self.new_model()
+
         for i in range(c.size):
-            mod.par[0] = c[i]
-            self.forward(mod)
+            model.values[0] = c[i]
+            self.forward(model)
             PhiD[i] = self.dataMisfit()
         plt.loglog(c, PhiD, **kwargs)
         cP.xlabel(c.getNameUnits())
@@ -457,7 +472,8 @@ class EmDataPoint(DataPoint):
 
         """
         if self.z.hasPrior:
-            self.z.posterior = Histogram1D(edges = StatArray.StatArray(self.z.prior.bins(), name=self.z.name, units=self.z.units), relativeTo=self.z)
+            mesh = RectilinearMesh1D(edges = StatArray.StatArray(self.z.prior.bins(), name=self.z.name, units=self.z.units), relativeTo=self.z)
+            self.z.posterior = Histogram(mesh=mesh)
 
     def set_relative_error_posterior(self):
         """
@@ -468,7 +484,8 @@ class EmDataPoint(DataPoint):
             posterior = []
             for i in range(self.nSystems):
                 b = bins[i, :]
-                posterior.append(Histogram1D(edges = b, relativeTo=0.5*(b.max()-b.min())))
+                mesh = RectilinearMesh1D(edges = b, relativeTo=0.5*(b.max()-b.min()))
+                posterior.append(Histogram(mesh=mesh))
             self.relErr.posterior = posterior
 
     def set_additive_error_posterior(self, log=None):
@@ -481,7 +498,8 @@ class EmDataPoint(DataPoint):
             posterior = []
             for i in range(self.nSystems):
                 b = bins[i, :]
-                posterior.append(Histogram1D(edges = b, log=log, relativeTo=0.5*(b.max()-b.min())))
+                mesh = RectilinearMesh1D(edges = b, log=log, relativeTo=0.5*(b.max()-b.min()))
+                posterior.append(Histogram(mesh=mesh))
             self.addErr.posterior = posterior
 
     @property

@@ -346,8 +346,8 @@ class Data(PointCloud3D):
         if np.size(self._std, 0) == 0:
             self._std = StatArray.StatArray((self.nPoints, self.nChannels), "Standard deviation", self.units)
 
-        relative_error = self.relative_error * self.data
-        self._std[:, :] = np.sqrt((relative_error**2.0) + (self.additive_error**2.0))
+        relative_error = self.relative_error[:, None] * self.data
+        self._std[:, :] = np.sqrt((relative_error**2.0) + (self.additive_error[:, None]**2.0))
 
         return self._std
 
@@ -1038,50 +1038,38 @@ class Data(PointCloud3D):
         # create a new group inside h5obj
         grp = super().createHdf(parent, myName, withPosterior, fillvalue)
 
-        grp.create_dataset('channels_per_system', data=self.nChannelsPerSystem)
-
         self.fiducial.createHdf(grp, 'fiducial', fillvalue=fillvalue)
         self.lineNumber.createHdf(grp, 'line_number', fillvalue=fillvalue)
-        self.elevation.createHdf(grp, 'e', withPosterior=withPosterior, fillvalue=fillvalue)
-        self.data.createHdf(grp, 'd', withPosterior=withPosterior, fillvalue=fillvalue)
-        self.std.createHdf(grp, 's', withPosterior=withPosterior, fillvalue=fillvalue)
-        self.predictedData.createHdf(grp, 'p', withPosterior=withPosterior, fillvalue=fillvalue)
+        self.data.createHdf(grp, 'data', withPosterior=withPosterior, fillvalue=fillvalue)
+        self.std.createHdf(grp, 'std', withPosterior=withPosterior, fillvalue=fillvalue)
+        self.predictedData.createHdf(grp, 'predicted_data', withPosterior=withPosterior, fillvalue=fillvalue)
 
-        if not self.errorPosterior is None:
-            for i, x in enumerate(self.errorPosterior):
-                x.createHdf(grp, 'joint_error_posterior_{}'.format(i), fillvalue=fillvalue)
-
-        self.relErr.createHdf(grp, 'relErr', withPosterior=withPosterior, fillvalue=fillvalue)
-        self.addErr.createHdf(grp, 'addErr', withPosterior=withPosterior, fillvalue=fillvalue)
+        self.relative_error.createHdf(grp, 'relative_error', withPosterior=withPosterior, fillvalue=fillvalue)
+        self.additive_error.createHdf(grp, 'additive_error', withPosterior=withPosterior, fillvalue=fillvalue)
 
         return grp
 
 
-    def writeHdf(self, parent, name, withPosterior=True, index=None):
+    def writeHdf(self, parent, name, withPosterior=True):
         """ Write the StatArray to an HDF object
         parent: Upper hdf file or group
         myName: object hdf name. Assumes createHdf has already been called
         create: optionally create the data set as well before writing
         """
 
-        super().writeHdf(parent, name, withPosterior, index)
+        super().writeHdf(parent, name, withPosterior)
 
         grp = parent[name]
 
-        self.fiducial.writeHdf(grp, 'fiducial', index=index)
-        self.lineNumber.writeHdf(grp, 'line_number', index=index)
-        self.elevation.writeHdf(grp, 'e',  withPosterior=withPosterior, index=index)
+        self.fiducial.writeHdf(grp, 'fiducial')
+        self.lineNumber.writeHdf(grp, 'line_number')
 
-        self.data.writeHdf(grp, 'd',  withPosterior=withPosterior, index=index)
-        self.std.writeHdf(grp, 's',  withPosterior=withPosterior, index=index)
-        self.predictedData.writeHdf(grp, 'p',  withPosterior=withPosterior, index=index)
+        self.data.writeHdf(grp, 'data',  withPosterior=withPosterior)
+        self.std.writeHdf(grp, 'std',  withPosterior=withPosterior)
+        self.predictedData.writeHdf(grp, 'predicted_data',  withPosterior=withPosterior)
 
-        if not self.errorPosterior is None:
-            for i, x in enumerate(self.errorPosterior):
-                x.writeHdf(grp, 'joint_error_posterior_{}'.format(i), index=index)
-
-        self.relative_error.writeHdf(grp, 'relErr',  withPosterior=withPosterior, index=index)
-        self.additive_error.writeHdf(grp, 'addErr',  withPosterior=withPosterior, index=index)
+        self.relative_error.writeHdf(grp, 'relative_error',  withPosterior=withPosterior)
+        self.additive_error.writeHdf(grp, 'additive_error',  withPosterior=withPosterior)
 
     @classmethod
     def fromHdf(cls, grp, **kwargs):
@@ -1089,31 +1077,17 @@ class Data(PointCloud3D):
 
         self = super(Data, cls).fromHdf(grp, **kwargs)
 
-        # self.errorPosterior = None
-
         if 'fiducial' in grp:
             self.fiducial = StatArray.StatArray.fromHdf(grp['fiducial'])
-
         if 'line_number' in grp:
             self.lineNumber = StatArray.StatArray.fromHdf(grp['line_number'])
 
-        # if 'channels_per_system' in grp:
-        #     self._channels_per_system = np.asarray(grp['channels_per_system'])
+        self.data = StatArray.StatArray.fromHdf(grp['data'])
+        self.std = StatArray.StatArray.fromHdf(grp['std'])
+        self.predictedData = StatArray.StatArray.fromHdf(grp['predicted_data'])
 
-
-        self.data = StatArray.StatArray.fromHdf(grp['d'])
-        self.std = StatArray.StatArray.fromHdf(grp['s'])
-        self.predictedData = StatArray.StatArray.fromHdf(grp['p'], skip_posterior=True)
-
-        # if 'joint_error_posterior_0' in grp:
-        #     i = 0
-        #     self.errorPosterior = []
-        #     while 'joint_error_posterior_{}'.format(i) in grp:
-        #         self.errorPosterior.append(Histogram3D.fromHdf(grp['joint_error_posterior_{}'.format(i)]))
-        #         i += 1
-
-        self.relative_error = StatArray.StatArray.fromHdf(grp['relErr'], skip_posterior=True)
-        self.additive_error = StatArray.StatArray.fromHdf(grp['addErr'], skip_posterior=True)
+        self.relative_error = StatArray.StatArray.fromHdf(grp['relative_error'])
+        self.additive_error = StatArray.StatArray.fromHdf(grp['additive_error'])
 
         return self
 

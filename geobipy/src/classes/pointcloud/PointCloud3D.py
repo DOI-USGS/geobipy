@@ -258,7 +258,7 @@ class PointCloud3D(myObject):
         ay = RectilinearMesh1D(edges=y_grid)
         iy = ay.cellIndex(self.y)
 
-        return np.ravel_multi_index([ix, iy], (ax.nCells.value, ay.nCells.value))
+        return np.ravel_multi_index([ix, iy], (ax.nCells.item(), ay.nCells.item()))
 
 
     def block_mean(self, dx, dy, values=None):
@@ -435,7 +435,7 @@ class PointCloud3D(myObject):
             return distance
 
 
-    def interpolate(self, dx=None, dy=None, mesh=None, values=None , method='ct', mask = False, clip = True, i=None, block=False, **kwargs):
+    def interpolate(self, dx=None, dy=None, mesh=None, values=None , method='mc', mask = False, clip = True, i=None, block=False, **kwargs):
         """Interpolate values to a grid.
 
         The grid is automatically generated such that it is centred over the point cloud.
@@ -470,10 +470,6 @@ class PointCloud3D(myObject):
         -------
         geobipy.Model : Interpolated values.
         """
-
-        if values is None:
-            values = self.z
-
         if mesh is None:
             mesh = self.centred_mesh(dx, dy)
 
@@ -633,10 +629,9 @@ class PointCloud3D(myObject):
 
         vals = StatArray.StatArray(vals, name=cf.getName(values), units = cf.getUnits(values))
 
-        out = Model(mesh=mesh, values=vals)
+        out = Model(mesh=mesh, values=vals.T)
 
         return out, kwargs
-
 
     def map(self, dx, dy, i=None, **kwargs):
         """ Create a map of a parameter """
@@ -644,12 +639,11 @@ class PointCloud3D(myObject):
         values = kwargs.pop('values', self.z)
         mask = kwargs.pop('mask', None)
         clip = kwargs.pop('clip', True)
-        method = kwargs.pop('method', "ct").lower()
+        method = kwargs.pop('method', "mc").lower()
 
         values, _ = self.interpolate(dx, dy, values=values, mask=mask, method=method, i=i, clip=clip, **kwargs)
 
         return values.pcolor(**kwargs)
-
 
     def nearest(self, x, k=1, eps=0, p=2, radius=np.inf):
         """Obtain the k nearest neighbours
@@ -884,6 +878,7 @@ class PointCloud3D(myObject):
 
         kwargs['linewidth'] = kwargs.pop('linewidth', 0.1)
         kwargs['c'] = kwargs.pop('c', self.z)
+
         ax, sc, cbar = cP.scatter2D(self.x, y=self.y, **kwargs)
         return ax, sc, cbar
 
@@ -1023,6 +1018,9 @@ class PointCloud3D(myObject):
     @classmethod
     def fromHdf(cls, grp, **kwargs):
         """ Reads the object from a HDF group """
+
+        if kwargs.get('index') is not None:
+            return Point.fromHdf(grp, **kwargs)
 
         x = StatArray.StatArray.fromHdf(grp['x'])
         y = StatArray.StatArray.fromHdf(grp['y'])

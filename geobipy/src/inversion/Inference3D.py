@@ -20,7 +20,7 @@ from ..base import fileIO
 from ..base.MPI import loadBalance1D_shrinkingArrays
 
 from ..classes.statistics.Histogram1D import Histogram1D
-from ..classes.statistics.Hitmap2D import Hitmap2D
+# from ..classes.statistics.Hitmap2D import Hitmap2D
 from ..classes.statistics.mixPearson import mixPearson
 from ..classes.pointcloud.PointCloud3D import PointCloud3D
 from ..classes.mesh.RectilinearMesh3D import RectilinearMesh3D
@@ -1074,7 +1074,7 @@ class Inference3D(myObject):
             return np.squeeze(np.where(self.lineNumbers == lineNumber)[0])
 
         if not fiducial is None:
-            return self.fiducialIndex(fiducial)
+            return np.squeeze(self.fiducialIndex(fiducial))
 
         assert np.all(index <= self.nPoints-1), IndexError('index {} is out of bounds for data point index with size {}'.format(index, self.nPoints))
 
@@ -1687,7 +1687,7 @@ class Inference3D(myObject):
         # Do the first slice
         ax, pc, cb = self.plotdepth_slice(depth=self.zGrid.centres[0], variable=variable, **kwargs)
 
-        kwargs['noColorbar'] = True
+        kwargs['colorbar'] = False
 
         def animate(i):
             plt.title('{:.2f} m depth'.format(self.zGrid.centres[i]))
@@ -1710,7 +1710,7 @@ class Inference3D(myObject):
         # Do the first slice
         ax, pc, cb = self.mapdepth_slice(dx, dy, depth=self.zGrid.centres[0], variable=variable, **kwargs)
 
-        kwargs['noColorbar'] = True
+        kwargs['colorbar'] = False
 
         def animate(i):
             plt.title('{:.2f} m depth'.format(self.zGrid.centres[i]))
@@ -1734,7 +1734,7 @@ class Inference3D(myObject):
         # Do the first slice
         ax, pc, cb = self.map_highest_marginal(dx, dy, depth=self.zGrid.centres[0], **kwargs)
 
-        kwargs['noColorbar'] = True
+        kwargs['colorbar'] = False
 
         def animate(i):
             plt.title('{:.2f} m depth'.format(self.zGrid.centres[i]))

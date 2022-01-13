@@ -9,7 +9,6 @@ from ...base import plotting as cP
 from ...base import utilities as cF
 from .baseDistribution import baseDistribution
 from .Mixture import Mixture
-from .Histogram import Histogram
 import numpy as np
 from scipy.stats import binned_statistic
 import matplotlib as mpl
@@ -18,7 +17,7 @@ import matplotlib.gridspec as gridspec
 import progressbar
 
 
-class Histogram2D(Histogram, RectilinearMesh2D):
+class Histogram2D(RectilinearMesh2D):
     """ 2D Histogram class that can update and plot efficiently.
 
     Class extension to the RectilinearMesh2D.  The mesh defines the x and y axes, while the Histogram2D manages the counts.
@@ -357,16 +356,16 @@ class Histogram2D(Histogram, RectilinearMesh2D):
     def pdf(self, axis=None):
 
         if axis is None:
-            out = StatArray.StatArray(np.divide(self._counts, np.sum(self._counts)), 'Probability density')
+            out = StatArray.StatArray(np.divide(self.counts, np.sum(self.counts)), 'Probability density')
             out[np.isnan(out)] = 0.0
             return out
 
-        total = self._counts.sum(axis=1-axis)
+        total = self.counts.sum(axis=1-axis)
 
         if axis == 0:
-            out = StatArray.StatArray(np.divide(self._counts.T, total).T, 'Probability density')
+            out = StatArray.StatArray(np.divide(self.counts.T, total).T, 'Probability density')
         else:
-            out = StatArray.StatArray(np.divide(self._counts, total), 'Probability density')
+            out = StatArray.StatArray(np.divide(self.counts, total), 'Probability density')
         out[np.isnan(out)] = 0.0
         return out
 
@@ -457,7 +456,7 @@ class Histogram2D(Histogram, RectilinearMesh2D):
         self.gs = gridspec.GridSpec(5, 5)
         self.gs.update(wspace=0.3, hspace=0.3)
         ax = [plt.subplot(self.gs[1:, :4])]
-        self.pcolor(noColorbar=True, **kwargs)
+        self.pcolor(colorbar=False, **kwargs)
 
         ax.append(plt.subplot(self.gs[:1, :4]))
         h = self.marginalize(axis=0).plot()
@@ -468,7 +467,7 @@ class Histogram2D(Histogram, RectilinearMesh2D):
         ax[-1].spines["left"].set_visible(False)
 
         ax.append(plt.subplot(self.gs[1:, 4:]))
-        h = self.marginalize(axis=1).plot(rotate=True)
+        h = self.marginalize(axis=1).plot(transpose=True)
         plt.ylabel('')
         plt.xlabel('')
         plt.yticks([])
@@ -890,22 +889,6 @@ class Histogram2D(Histogram, RectilinearMesh2D):
     def plotCredibleIntervals(self, percent=95.0, log=None, reciprocate=False, axis=0, **kwargs):
 
         med, low, high = self.credibleIntervals(percent=percent, log=log, reciprocate=reciprocate, axis=axis)
-
-        c = kwargs.pop('color', '#5046C8')
-        ls = kwargs.pop('linestyle', 'dashed')
-        lw = kwargs.pop('linewidth', 2)
-        a = kwargs.pop('alpha', 0.6)
-
-        if axis == 0:
-            cP.plot(low, self.y.centres, color=c, linestyle=ls,
-                    linewidth=lw, alpha=a, **kwargs)
-            cP.plot(high, self.y.centres, color=c, linestyle=ls,
-                    linewidth=lw, alpha=a, **kwargs)
-        else:
-            cP.plot(self.x.centres, low, color=c, linestyle=ls,
-                    linewidth=lw, alpha=a, **kwargs)
-            cP.plot(self.x.centres, high, color=c, linestyle=ls,
-                    linewidth=lw, alpha=a, **kwargs)
 
     def plotMean(self, log=None, axis=0, **kwargs):
 

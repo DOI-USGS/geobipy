@@ -806,20 +806,20 @@ class StatArray(np.ndarray, myObject):
         np.set_printoptions(threshold=5)
 
         msg = ('Name: {}\n'
-               '    Shape: {}\n'
-               '    Values: {}\n').format(self.getNameUnits(), self.shape, self)
+               'Shape: {}\n'
+               'Values: {}\n').format(self.getNameUnits(), self.shape, self)
         if self.hasPrior:
-            msg += "Prior:\n{}".format(self.prior.summary)
+            msg += "Prior:\n{}".format(("|   "+self.prior.summary.replace("\n", "\n|   "))[:-4])
 
         if self.hasProposal:
-            msg += "Proposal:\n{}".format(self.proposal.summary)
+            msg += "Proposal:\n{}".format(("|   "+self.proposal.summary.replace("\n", "\n|   "))[:-4])
 
         if self.hasPosterior:
             if self.nPosteriors > 1:
                 for p in self.posterior:
-                    msg += "Posterior:\n{}".format(p.summary)
+                    msg += "Posterior:\n{}".format(("|   "+p.summary.replace("\n", "\n|   "))[:-4])
             else:
-                msg += "Posterior:\n{}".format(self.posterior.summary)
+                msg += "Posterior:\n{}".format(("|   "+self.posterior.summary.replace("\n", "\n|   "))[:-4])
 
         return msg
 
@@ -1389,7 +1389,7 @@ class StatArray(np.ndarray, myObject):
         """
         return(r'StatArray()')
 
-    def createHdf(self, h5obj, name, withPosterior=True, nRepeats=None, fillvalue=None):
+    def createHdf(self, h5obj, name, shape=None, withPosterior=True, add_axis=None, fillvalue=None):
         """Create the Metadata for a StatArray in a HDF file
 
         Creates a new group in a HDF file under h5obj.
@@ -1458,28 +1458,37 @@ class StatArray(np.ndarray, myObject):
         if not self._units is None:
             grp.attrs['units'] = self.units
 
-        if (nRepeats is None):
-            grp.create_dataset('data', self.shape,
-                               dtype=self.dtype, fillvalue=fillvalue)
+        if shape is not None:
+            grp.create_dataset('data', shape, dtype=self.dtype, fillvalue=fillvalue)
         else:
-            nRepeats = np.atleast_1d(nRepeats)
-            if (self.size == 1):
-                grp.create_dataset(
-                    'data', [*nRepeats], dtype=self.dtype, fillvalue=fillvalue)
+            if (add_axis is None):
+                grp.create_dataset('data', self.shape, dtype=self.dtype, fillvalue=fillvalue)
             else:
-                grp.create_dataset(
-                    'data', [*nRepeats, *self.shape], dtype=self.dtype, fillvalue=fillvalue)
+                if isinstance(add_axis, (int, np.int32, np.int64)):
+                    shap = np.atleast_1d(add_axis)
+                elif isinstance(add_axis, tuple):
+                    shap = add_axis
+                else:
+                    shap = add_axis.shape
+                
+                if (self.size == 1):
+                    grp.create_dataset('data', [*shap], dtype=self.dtype, fillvalue=fillvalue)
+                else:
+                    grp.create_dataset('data', [*shap, *self.shape], dtype=self.dtype, fillvalue=fillvalue)
 
         if withPosterior:
-            if self.hasPosterior:
-                grp.create_dataset('nPosteriors', data=self.nPosteriors)
-                if self.nPosteriors > 1:
-                    for i in range(self.nPosteriors):
-                        self.posterior[i].createHdf(grp, 'posterior{}'.format(
-                            i), nRepeats=nRepeats, fillvalue=fillvalue, withPosterior=False)
-                else:
-                    self.posterior.createHdf(
-                        grp, 'posterior', nRepeats=nRepeats, fillvalue=fillvalue, withPosterior=False)
+            self.create_posterior_hdf(grp, add_axis, fillvalue)
+
+        return grp
+
+    def create_posterior_hdf(self, grp, add_axis, fillvalue):
+        if self.hasPosterior:
+            grp.create_dataset('nPosteriors', data=self.nPosteriors)
+            if self.nPosteriors > 1:
+                for i in range(self.nPosteriors):
+                    self.posterior[i].createHdf(grp, 'posterior{}'.format(i), add_axis=add_axis, fillvalue=fillvalue, withPosterior=False)
+            else:
+                self.posterior.createHdf(grp, 'posterior', add_axis=add_axis, fillvalue=fillvalue, withPosterior=False)
 
     def writeHdf(self, h5obj, name, withPosterior=True, index=None):
         """Write the values of a StatArray to a HDF file
@@ -1533,17 +1542,22 @@ class StatArray(np.ndarray, myObject):
         write_nd(self, grp, 'data', index=index)
 
         if withPosterior:
-            if self.hasPosterior:
-                if np.ndim(index) > 0:
-                    index = index[0]
-                if self.nPosteriors > 1:
-                    for i in range(self.nPosteriors):
-                        self.posterior[i].writeHdf(grp, 'posterior{}'.format(i), index=index)
-                else:
-                    self.posterior.writeHdf(grp, 'posterior', index=index)
+            self.write_posterior_hdf(grp, index)
+        
+        return grp
+    
+    def write_posterior_hdf(self, grp, index=None):
+        if self.hasPosterior:
+            if np.ndim(index) > 0:
+                index = index[0]
+            if self.nPosteriors > 1:
+                for i in range(self.nPosteriors):
+                    self.posterior[i].writeHdf(grp, 'posterior{}'.format(i), index=index)
+            else:
+                self.posterior.writeHdf(grp, 'posterior', index=index)
 
     @classmethod
-    def fromHdf(cls, grp, name=None, index=None, skip_posterior=False):
+    def fromHdf(cls, grp, name=None, index=None, skip_posterior=False, posterior_index=None):
         """Read the StatArray from a HDF group
 
         Given the HDF group object, read the contents into a StatArray.
@@ -1556,7 +1570,6 @@ class StatArray(np.ndarray, myObject):
             If the group was created using the nRepeats option, index specifies the index'th entry from which to read the data.
 
         """
-
         is_file = False
         if isinstance(grp, str):
             grp = h5py.File(grp, 'r')
@@ -1564,7 +1577,6 @@ class StatArray(np.ndarray, myObject):
 
         if not name is None:
             grp = grp[name]
-
 
         if (index is None):
             d = np.asarray(grp['data'])
@@ -1598,30 +1610,37 @@ class StatArray(np.ndarray, myObject):
             out = cls(d, name, units)
 
         if not skip_posterior:
-            nPosteriors = 0
-            if 'nPosteriors' in grp:
-                nPosteriors = np.asarray(grp['nPosteriors'])
-
-            posterior = None
-            iTmp = index
-            if not index is None:
-                if np.ndim(index) > 0:
-                    iTmp = index[0]
-
-            if nPosteriors == 1:
-                posterior = hdfRead.read_item(grp['posterior'], index=iTmp)
-
-            elif nPosteriors > 1:
-                posterior = []
-                for i in range(nPosteriors):
-                    posterior.append(hdfRead.read_item(grp['posterior{}'.format(i)], index=iTmp))
-
-            out.posterior = posterior
+            if posterior_index is None:
+                posterior_index= index
+            out.posteriors_from_hdf(grp, posterior_index)
 
         if is_file:
             grp.close()
 
         return out
+
+    def posteriors_from_hdf(self, grp, index):
+        from ..statistics.Histogram import Histogram
+
+        nPosteriors = 0
+        if 'nPosteriors' in grp:
+            nPosteriors = np.asarray(grp['nPosteriors'])
+
+        posterior = None
+        iTmp = index
+        if not index is None:
+            if np.ndim(index) > 0:
+                iTmp = index[0]
+
+        if nPosteriors == 1:
+            posterior = Histogram.fromHdf(grp['posterior'], index=iTmp)
+
+        elif nPosteriors > 1:
+            posterior = []
+            for i in range(nPosteriors):
+                posterior.append(Histogram.fromHdf(grp['posterior{}'.format(i)], index=iTmp))
+
+        self.posterior = posterior
 
     # Classification Routines
 

@@ -3,6 +3,10 @@ Module describing a Point defined by x,y,z c-ordinates
 """
 from abc import ABC, abstractmethod
 from copy import deepcopy
+
+from ..mesh.RectilinearMesh1D import RectilinearMesh1D
+from ..statistics.Histogram import Histogram
+from ..statistics.Distribution import Distribution
 from ..core.myObject import myObject
 from ..core import StatArray
 import numpy as np
@@ -11,7 +15,7 @@ import numpy as np
 class Point(myObject, ABC):
     """ Class defining a point in 3D Euclidean space """
 
-    def __init__(self, x=0.0, y=0.0, z=0.0, **kwargs):
+    def __init__(self, x=0.0, y=0.0, z=0.0, elevation=0.0, **kwargs):
 
         """ Initialize the class """
 
@@ -21,6 +25,25 @@ class Point(myObject, ABC):
         self.y = y
         # z coordinate
         self.z = z
+
+        self.elevation = elevation
+
+    @property
+    def elevation(self):
+        return self._elevation
+
+    @elevation.setter
+    def elevation(self, value):
+        self._elevation = StatArray.StatArray(value, 'Elevation', 'm')
+
+    @property
+    def summary(self):
+        """ Print a summary of the EMdataPoint """
+        msg = ('x: {} \n'
+               'y: {} \n'
+               'z: {} \n'
+               'elevation: {} \n').format(self.x, self.y, self.z, self.elevation)
+        return msg
 
     @property
     def x(self):
@@ -52,15 +75,17 @@ class Point(myObject, ABC):
         P._x += other.x
         P._y += other.y
         P._z += other.z
+        P._elevation += other.elevation
         return P
 
     def __deepcopy__(self, memo={}):
         """ Define a deepcopy routine """
-        result = type(self).__new__(type(self))
-        result.x = deepcopy(self.x)
-        result.y = deepcopy(self.y)
-        result.z = deepcopy(self.z)
-        return result
+        out = type(self).__new__(type(self))
+        out.x = deepcopy(self.x, memo=memo)
+        out.y = deepcopy(self.y, memo=memo)
+        out.z = deepcopy(self.z, memo=memo)
+        out.elevation = deepcopy(self.elevation, memo=memo)
+        return out
 
     def __sub__(self, other):
         """ Subtract two points """
@@ -68,17 +93,19 @@ class Point(myObject, ABC):
         P._x -= other.x
         P._y -= other.y
         P._z -= other.z
+        P._elevation -= other.elevation
         return P
 
     def distance(self, other, **kwargs):
         """Get the Lp norm distance between two points. """
-        return np.linalg.norm(np.asarray([self.x, self.y, self.z])-np.asarray([other.x, other.y, other.z]), **kwargs)
+        return np.linalg.norm(np.asarray([self.x, self.y, self.z]) - np.asarray([other.x, other.y, other.z]), **kwargs)
 
     def move(self, dx, dy, dz):
         """ Move the point by [dx,dy,dz] """
         self._x += dx
         self._y += dy
         self._z += dz
+        self._elevation += dz
         return self
 
     def set_priors(self, x_prior=None, y_prior=None, z_prior=None, kwargs={}):
@@ -118,32 +145,39 @@ class Point(myObject, ABC):
 
         """
         if self.x.hasPrior:
-            self.x.posterior = Histogram1D(edges = StatArray.StatArray(self.x.prior.bins(), name=self.x.name, units=self.x.units), relativeTo=self.x)
+            mesh = RectilinearMesh1D(edges = StatArray.StatArray(self.x.prior.bins(), name=self.x.name, units=self.x.units), relativeTo=self.x)
+            self.x.posterior = Histogram(mesh=mesh)
 
     def set_y_posterior(self):
         """
 
         """
         if self.y.hasPrior:
-            self.y.posterior = Histogram1D(edges = StatArray.StatArray(self.y.prior.bins(), name=self.y.name, units=self.y.units), relativeTo=self.y)
+            mesh = RectilinearMesh1D(edges = StatArray.StatArray(self.y.prior.bins(), name=self.y.name, units=self.y.units), relativeTo=self.y)
+            self.y.posterior = Histogram(mesh=mesh)
 
     def set_z_posterior(self):
         """
 
         """
         if self.z.hasPrior:
-            self.z.posterior = Histogram1D(edges = StatArray.StatArray(self.z.prior.bins(), name=self.z.name, units=self.z.units), relativeTo=self.z)
+            mesh = RectilinearMesh1D(edges = StatArray.StatArray(self.z.prior.bins(), name=self.z.name, units=self.z.units), relativeTo=self.z)
+            self.z.posterior = Histogram(mesh=mesh)
 
-    def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
+    def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
         """
         # create a new group inside h5obj
         grp = self.create_hdf_group(parent, name)
-        self.x.createHdf(grp, 'x', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        self.y.createHdf(grp, 'y', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        self.z.createHdf(grp, 'z', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.x.createHdf(grp, 'x', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
+        self.y.createHdf(grp, 'y', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
+        self.z.createHdf(grp, 'z', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
+        self.elevation.createHdf(grp, 'elevation', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
+
+        if add_axis is not None:
+            grp.attrs['repr'] = "PointCloud3D"
 
         return grp
 
@@ -157,6 +191,7 @@ class Point(myObject, ABC):
         self.x.writeHdf(grp, 'x',  withPosterior=withPosterior, index=index)
         self.y.writeHdf(grp, 'y',  withPosterior=withPosterior, index=index)
         self.z.writeHdf(grp, 'z',  withPosterior=withPosterior, index=index)
+        self.elevation.writeHdf(grp, 'elevation',  withPosterior=withPosterior, index=index)
 
     @classmethod
     def fromHdf(cls, grp, index=None, **kwargs):
@@ -165,18 +200,21 @@ class Point(myObject, ABC):
         x = StatArray.StatArray.fromHdf(grp['x'], index=index)
         y = StatArray.StatArray.fromHdf(grp['y'], index=index)
         z = StatArray.StatArray.fromHdf(grp['z'], index=index)
+        elevation = StatArray.StatArray.fromHdf(grp['elevation'], index=index)
 
-        return cls(x=x, y=y, z=z, **kwargs)
+        return cls(x=x, y=y, z=z, elevation=elevation, **kwargs)
 
 
     def Isend(self, dest, world):
         self.x.Isend(dest, world)
         self.y.Isend(dest, world)
         self.z.Isend(dest, world)
+        self.elevation.Isend(dest, world)
 
     @classmethod
     def Irecv(cls, source, world, **kwargs):
         x = StatArray.StatArray.Irecv(source, world)
         y = StatArray.StatArray.Irecv(source, world)
         z = StatArray.StatArray.Irecv(source, world)
-        return cls(x=x, y=y, z=z, **kwargs)
+        e = StatArray.StatArray.Irecv(source, world)
+        return cls(x=x, y=y, z=z, elevation=e, **kwargs)

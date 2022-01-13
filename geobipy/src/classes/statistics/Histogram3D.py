@@ -10,7 +10,6 @@ from ...base import plotting as cP
 from ...base import utilities as cF
 from .baseDistribution import baseDistribution
 from .Mixture import Mixture
-from .Histogram import Histogram
 import numpy as np
 from scipy.stats import binned_statistic
 import matplotlib.pyplot as plt
@@ -18,7 +17,7 @@ import matplotlib.gridspec as gridspec
 import progressbar
 
 
-class Histogram3D(Histogram, RectilinearMesh3D):
+class Histogram3D(RectilinearMesh3D):
     """3D Histogram class that can update and plot efficiently.
 
     Class extension to the RectilinearMesh.  The mesh defines the x, y,and z axes, while the Histogram manages the counts.
@@ -471,7 +470,7 @@ class Histogram3D(Histogram, RectilinearMesh3D):
         self.gs = gridspec.GridSpec(5, 5)
         self.gs.update(wspace=0.3, hspace=0.3)
         ax = [plt.subplot(self.gs[1:, :4])]
-        self.pcolor(noColorbar = True, **kwargs)
+        self.pcolor(colorbar = False, **kwargs)
 
         ax.append(plt.subplot(self.gs[:1, :4]))
         h = self.marginalize(axis=0).plot()
@@ -480,7 +479,7 @@ class Histogram3D(Histogram, RectilinearMesh3D):
         ax[-1].spines["left"].set_visible(False)
 
         ax.append(plt.subplot(self.gs[1:, 4:]))
-        h = self.marginalize(axis=1).plot(rotate=True)
+        h = self.marginalize(axis=1).plot(transpose=True)
         plt.ylabel(''); plt.xlabel('')
         plt.yticks([]); plt.xticks([])
         ax[-1].spines["bottom"].set_visible(False)

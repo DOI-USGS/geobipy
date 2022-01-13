@@ -15,13 +15,13 @@ from ..base import fileIO as fIO
 import h5py
 from ..base.HDF.hdfWrite import write_nd
 from ..classes.core import StatArray
-from ..classes.statistics.Hitmap2D import Hitmap2D
+# from ..classes.statistics.Hitmap2D import Hitmap2D
 from ..classes.statistics.Histogram1D import Histogram1D
 from ..classes.statistics.Distribution import Distribution
 from ..classes.core.myObject import myObject
 from ..classes.data.datapoint.FdemDataPoint import FdemDataPoint
 from ..classes.data.datapoint.TdemDataPoint import TdemDataPoint
-from ..classes.model.Model1D import Model1D
+from ..classes.model.Model import Model
 from ..classes.core.Stopwatch import Stopwatch
 from ..base.HDF import hdfRead
 from cached_property import cached_property
@@ -110,7 +110,7 @@ class Inference1D(myObject):
         #     self.datapoint.calibrate()
 
         # Evaluate the prior for the current model
-        self.prior = self.model.priorProbability(
+        self.prior = self.model.prior_probability(
             self.kwargs['solve_parameter'],
             self.kwargs['solve_gradient']) + \
             self.datapoint.priorProbability(
@@ -179,8 +179,8 @@ class Inference1D(myObject):
         # Model acceptance rate
         self.accepted = 0
 
-        n = 2 * np.int32(self.n_markov_chains / 1000)
-        self.acceptance_x = StatArray.StatArray(np.arange(1, n + 1) * 1000, name='Iteration #')
+        n = 2 * np.int32(self.n_markov_chains / self._update_plot_every)
+        self.acceptance_x = StatArray.StatArray(np.arange(1, n + 1) * self._update_plot_every, name='Iteration #')
         self.acceptance_rate = StatArray.StatArray(n, name='% Acceptance')
 
 
@@ -206,13 +206,13 @@ class Inference1D(myObject):
         self.best_posterior = self.posterior
         self.best_iteration = np.int64(0)
 
-    @cached_property
-    def iteration(self):
-        return StatArray.StatArray(np.arange(2 * self._n_markov_chains), name="Iteration #", dtype=np.int64)
+    # @cached_property
+    # def iteration(self):
+    #     return StatArray.StatArray(np.arange(2 * self._n_markov_chains), name="Iteration #", dtype=np.int64)
 
     @cached_property
     def iz(self):
-        return np.arange(model.par.posterior.y.nCells.value)
+        return np.arange(self.model.values.posterior.y.nCells.value)
 
     @property
     def n_markov_chains(self):
@@ -258,7 +258,9 @@ class Inference1D(myObject):
         # Set the priors, proposals, and posteriors.
         self.datapoint.set_priors(**self.kwargs)
         self.datapoint.set_proposals(**self.kwargs)
+
         self.datapoint.set_posteriors()
+
 
         # Update the data errors based on user given parameters
         # if self.kwargs.solve_relative_error or self.kwargs.solve_additive_error:
@@ -275,15 +277,15 @@ class Inference1D(myObject):
 
         # Setup the model for perturbation
         self.model.set_priors(
-            halfspace.par[0],
-            self.kwargs['minimum_depth'],
-            self.kwargs['maximum_depth'],
-            self.kwargs['maximum_number_of_layers'],
-            self.kwargs['solve_parameter'],
-            self.kwargs['solve_gradient'],
+            mean_value=halfspace.values[0],
+            min_edge=self.kwargs['minimum_depth'],
+            max_edge=self.kwargs['maximum_depth'],
+            max_cells=self.kwargs['maximum_number_of_layers'],
+            parameterPrior=self.kwargs['solve_parameter'],
+            gradientPrior=self.kwargs['solve_gradient'],
             parameterLimits=self.kwargs.get('parameter_limits'),
             min_width=self.kwargs.get('minimum_thickness'),
-            factor=self.kwargs.get('factor', np.float64(10.0)), prng=self.prng
+            factor=self.kwargs.get('factor', 10.0), prng=self.prng
         )
 
         # Assign a Hitmap as a prior if one is given
@@ -294,18 +296,18 @@ class Inference1D(myObject):
         self.datapoint.forward(self.model)
 
         if self.kwargs['ignore_likelihood']:
-            inverseHessian = self.model.localParameterVariance()
+            inverseHessian = self.model.local_variance()
         else:
-            inverseHessian = self.model.localParameterVariance(self.datapoint)
+            inverseHessian = self.model.local_variance(self.datapoint)
 
         # Instantiate the proposal for the parameters.
-        parameterProposal = Distribution('MvLogNormal', self.model.par, inverseHessian, linearSpace=True, prng=self.prng)
+        parameterProposal = Distribution('MvLogNormal', self.model.values, inverseHessian, linearSpace=True, prng=self.prng)
 
         probabilities = [self.kwargs['probability_of_birth'],
                          self.kwargs['probability_of_death'],
                          self.kwargs['probability_of_perturb'],
                          self.kwargs['probability_of_no_change']]
-        self.model.setProposals(probabilities, parameterProposal=parameterProposal, prng=self.prng)
+        self.model.set_proposals(probabilities=probabilities, proposal=parameterProposal, prng=self.prng)
 
         self.model.set_posteriors()
 
@@ -329,7 +331,7 @@ class Inference1D(myObject):
         data_misfit1 = perturbed_datapoint.dataMisfit()**2.0
 
         # Evaluate the prior for the current model
-        prior1 = perturbed_model.priorProbability(self.kwargs['solve_parameter'], self.kwargs['solve_gradient'])
+        prior1 = perturbed_model.prior_probability(self.kwargs['solve_parameter'], self.kwargs['solve_gradient'])
         # Evaluate the prior for the current data
         prior1 += perturbed_datapoint.priorProbability(self.kwargs['solve_relative_error'], self.kwargs['solve_additive_error'], self.kwargs['solve_height'], False)#self.user_options.solveCalibration)
 
@@ -341,9 +343,9 @@ class Inference1D(myObject):
         likelihood1 = 1.0
         if not self.kwargs.get('ignore_likelihood', False):
             likelihood1 = perturbed_datapoint.likelihood(log=True)
-            proposal, proposal1 = perturbed_model.proposalProbabilities(remapped_model, perturbed_datapoint)
+            proposal, proposal1 = perturbed_model.proposal_probabilities(remapped_model, perturbed_datapoint)
         else:
-            proposal, proposal1 = perturbed_model.proposalProbabilities(remapped_model)
+            proposal, proposal1 = perturbed_model.proposal_probabilities(remapped_model)
 
         posterior1 = prior1 + likelihood1
 
@@ -371,10 +373,12 @@ class Inference1D(myObject):
             self.likelihood = likelihood1
             self.posterior = posterior1
 
+            del self.model
+            del self.datapoint
+
             self.model = perturbed_model
             self.datapoint = perturbed_datapoint
-
-
+        
     def infer(self, hdf_file_handle):
         """ Markov Chain Monte Carlo approach for inversion of geophysical data
         userParameters: User input parameters object
@@ -395,12 +399,10 @@ class Inference1D(myObject):
 
             # Accept or reject the new model
             self.accept_reject()
-
+            
             self.update()
-            #i, Mod, DataPoint, iBest, bestData, bestModel, multiplier, PhiD, posterior, posteriorComponents, ratioComponents, accepted, dimensionChange, userParameters.clipRatio)
 
             if self.interactive_plot:
-
                 self.plot("Fiducial {}".format(self.datapoint.fiducial), increment=self.kwargs['update_plot_every'])
 
             Go = self.iteration <= self.n_markov_chains + self.burned_in_iteration
@@ -430,15 +432,19 @@ class Inference1D(myObject):
 
     @property
     def hitmap(self):
-        return self.model.par.posterior
+        return self.model.values.posterior
 
     def update(self):
         """Update the posteriors of the McMC algorithm. """
 
-        self.data_misfit_v[self.iteration] = self.data_misfit
+        self.iteration += 1
+
+        self.data_misfit_v[self.iteration - 1] = self.data_misfit
+
         # Determine if we are burning in
         if (not self.burned_in):
             target_misfit = np.sum(self.datapoint.active)
+            # if self.data_misfit < target_misfit:
             if np.isclose(self.data_misfit, self.multiplier*target_misfit, rtol=1e-1, atol=1e-2) :  # datapoint.target_misfit
                 self.burned_in = True  # Let the results know they are burned in
                 self.burned_in_iteration = self.iteration       # Save the burn in iteration to the results
@@ -465,18 +471,15 @@ class Inference1D(myObject):
         if (self.burned_in):  # We need to update some plotting options
             # Added the layer depths to a list, we histogram this list every
             # iPlot iterations
-            self.model.updatePosteriors(0.5)#self.user_options.clip_ratio)
+            self.model.update_posteriors(0.5)#self.user_options.clip_ratio)
 
             # Update the height posterior
             self.datapoint.update_posteriors()
 
-        if (np.mod(self.iteration, 1000) == 0):
-            ratePercent = 0.1 * np.float64(self.accepted)
-
-            self.acceptance_rate[np.int32(self.iteration / 1000)] = ratePercent
+        if ((self.iteration > 0) and (np.mod(self.iteration, self.update_plot_every) == 0)):
+            acceptance_percent = 100.0 * np.float64(self.accepted) / np.float64(self.update_plot_every)
+            self.acceptance_rate[np.int32(self.iteration / self.update_plot_every)-1] = acceptance_percent
             self.accepted = 0
-
-        self.iteration += 1
 
     def initFigure(self, fig=None):
         """ Initialize the plotting region """
@@ -546,20 +549,21 @@ class Inference1D(myObject):
                     'normalize': True},
                 edges_kwargs={
                     'normalize': True,
-                    'rotate': True,
+                    'transpose': True,
                     'flipY': True,
                     'trim': False},
                 parameter_kwargs={
                     # 'reciprocateX':self.reciprocateParameter,
-                    'noColorbar': True,
+                    'colorbar': False,
                     'flipY': True,
                     'xscale': 'log',
                     'credible_interval_kwargs': {
                         # 'log':10,
                         # 'reciprocate':True
+                        'axis': 1
                     }
                 },
-                best=self.best_model)
+                best=self.model)
 
             self.datapoint.plot_posteriors(
                 axes=self.ax[3],
@@ -570,7 +574,7 @@ class Inference1D(myObject):
                     'normalize': True},
                 add_error_kwargs={
                     'normalize': True},
-                best=self.best_datapoint)
+                best=self.datapoint)
 
             cP.suptitle(title)
 
@@ -583,8 +587,9 @@ class Inference1D(myObject):
     def _plotAcceptanceVsIteration(self, **kwargs):
         """ Plots the acceptance percentage against iteration. """
 
-        i = np.s_[:np.int64(self.iteration / 1000)]
-        self.acceptance_rate.plot(self.acceptance_x, i=i,
+        i = np.s_[:np.int64(self.iteration / self.update_plot_every)]
+
+        self.acceptance_rate.plot(x=self.acceptance_x, i=i,
                        ax=self.ax[0],
                        marker='o',
                        alpha=0.7,
@@ -624,7 +629,7 @@ class Inference1D(myObject):
     # def _plotObservedPredictedData(self, **kwargs):
     #     """ Plot the observed and predicted data """
     #     if self.burnedIn:
-    #         # self.datapoint.predictedData.plotPosteriors(noColorbar=True)
+    #         # self.datapoint.predictedData.plotPosteriors(colorbar=False)
     #         self.datapoint.plot(**kwargs)
     #         self.bestDataPoint.plotPredicted(color=cP.wellSeparated[3], **kwargs)
     #     else:
@@ -669,7 +674,7 @@ class Inference1D(myObject):
         fiducials = StatArray.StatArray(np.sort(fiducials))
         nPoints = fiducials.size
 
-        grp = self.datapoint.createHdf(parent,'currentdatapoint', nRepeats=nPoints, fillvalue=np.nan)
+        grp = self.datapoint.createHdf(parent,'data', add_axis=nPoints, fillvalue=np.nan)
         fiducials.writeHdf(grp, 'fiducial')
 
         # Initialize and write the attributes that won't change
@@ -699,25 +704,24 @@ class Inference1D(myObject):
         parent.create_dataset('savetime',  shape=(nPoints), dtype=float, fillvalue=np.nan)
 
 
-        # self.meanInterp.createHdf(parent,'meaninterp', nRepeats=nPoints, fillvalue=np.nan)
-        # self.bestInterp.createHdf(parent,'bestinterp', nRepeats=nPoints, fillvalue=np.nan)
-        # self.opacityInterp.createHdf(parent,'opacityinterp',nRepeats=nPoints, fillvalue=np.nan)
+        # self.meanInterp.createHdf(parent,'meaninterp', add_axis=nPoints, fillvalue=np.nan)
+        # self.bestInterp.createHdf(parent,'bestinterp', add_axis=nPoints, fillvalue=np.nan)
+        # self.opacityInterp.createHdf(parent,'opacityinterp',add_axis=nPoints, fillvalue=np.nan)
 #        parent.create_dataset('opacityinterp', [nPoints,nz], dtype=np.float64)
 
-        self.acceptance_rate.createHdf(parent,'rate',nRepeats=nPoints, fillvalue=np.nan)
+        self.acceptance_rate.createHdf(parent,'rate',add_axis=nPoints, fillvalue=np.nan)
 #        parent.create_dataset('rate', [nPoints,self.rate.size], dtype=self.rate.dtype)
-        self.data_misfit_v.createHdf(parent, 'phids', nRepeats=nPoints, fillvalue=np.nan)
+        self.data_misfit_v.createHdf(parent, 'phids', add_axis=nPoints, fillvalue=np.nan)
         #parent.create_dataset('phids', [nPoints,self.PhiDs.size], dtype=self.PhiDs.dtype)
 
-        self.best_datapoint.createHdf(parent,'bestd', withPosterior=False, nRepeats=nPoints, fillvalue=np.nan)
+        # self.best_datapoint.createHdf(parent,'bestd', withPosterior=False, add_axis=nPoints, fillvalue=np.nan)
 
         # Since the 1D models change size adaptively during the inversion, we need to pad the HDF creation to the maximum allowable number of layers.
-        tmp = self.model.pad(self.model.max_cells)
+        tmp = self.model.pad(self.model.mesh.max_cells)
+        tmp.createHdf(parent, 'model', add_axis=nPoints, fillvalue=np.nan)
 
-        tmp.createHdf(parent, 'currentmodel', nRepeats=nPoints, fillvalue=np.nan)
-
-        tmp = self.best_model.pad(self.best_model.max_cells)
-        tmp.createHdf(parent, 'bestmodel', withPosterior=False, nRepeats=nPoints, fillvalue=np.nan)
+        # tmp = self.best_model.pad(self.best_model.mesh.max_cells)
+        # tmp.createHdf(parent, 'bestmodel', withPosterior=False, add_axis=nPoints, fillvalue=np.nan)
 
     def write_inference1d(self, parent, index=None):
         """ Given a HDF file initialized as line results, write the contents of results to the appropriate arrays """
@@ -728,7 +732,7 @@ class Inference1D(myObject):
 
         # Get the point index
         if index is None:
-            fiducials = StatArray.StatArray.fromHdf(parent['currentdatapoint/fiducial'])
+            fiducials = StatArray.StatArray.fromHdf(parent['data/fiducial'])
             index = fiducials.searchsorted(self.datapoint.fiducial)
 
         i = index
@@ -774,13 +778,15 @@ class Inference1D(myObject):
         # Add the data misfit
         self.data_misfit_v.writeHdf(hdfFile, 'phids', index=i)
 
-        self.datapoint.writeHdf(hdfFile,'currentdatapoint',  index=i)
+        # Write the data posteriors
+        self.datapoint.writeHdf(hdfFile,'data',  index=i)  
+        # Write the highest posterior data
+        self.best_datapoint.writeHdf(hdfFile,'data', withPosterior=False, index=i) 
 
-        self.best_datapoint.writeHdf(hdfFile,'bestd', withPosterior=False, index=i)
-
-        self.model.writeHdf(hdfFile,'currentmodel', index=i)
-
-        self.best_model.writeHdf(hdfFile,'bestmodel', withPosterior=False, index=i)
+        # Write the model posteriors
+        self.model.writeHdf(hdfFile,'model', index=i) 
+        # Write the highest posterior data
+        self.best_model.writeHdf(hdfFile,'model', withPosterior=False, index=i) 
 
 
     def read_fromH5Obj(self, h5obj, fName, grpName, system_file_path = ''):
@@ -798,16 +804,13 @@ class Inference1D(myObject):
 
         assert not (iNone and fNone) ^ (not iNone and not fNone), Exception("Must specify either an index OR a fiducial.")
 
-        fiducials = StatArray.StatArray.fromHdf(hdfFile['currentdatapoint/fiducial'])
-
         if not fNone:
+            fiducials = StatArray.StatArray.fromHdf(hdfFile['data/fiducial'])
             index = fiducials.searchsorted(fiducial)
 
         self = cls(None, None)
 
         s = np.s_[index, :]
-
-        self.fiducial = np.float64(fiducials[index])
 
         self._n_markov_chains = np.array(hdfFile.get('nmc'))
         self._update_plot_every = np.array(hdfFile.get('iplot'))
@@ -833,22 +836,22 @@ class Inference1D(myObject):
         self.data_misfit_v = hdfRead.readKeyFromFile(
             hdfFile, '', '/', 'phids', index=s)
 
-        self.best_datapoint = hdfRead.readKeyFromFile(
-            hdfFile, '', '/', 'bestd', index=index, system_file_path=system_file_path)
+        # self.best_datapoint = hdfRead.readKeyFromFile(
+        #     hdfFile, '', '/', 'bestd', index=index, system_file_path=system_file_path)
 
         self.datapoint = hdfRead.readKeyFromFile(
-            hdfFile, '', '/', 'currentdatapoint', index=index, system_file_path=system_file_path)
+            hdfFile, '', '/', 'data', index=index, system_file_path=system_file_path)
 
         self.model = hdfRead.readKeyFromFile(
-            hdfFile, '', '/', 'currentmodel', index=index)
+            hdfFile, '', '/', 'model', index=index)
 
-        self.Hitmap = self.model.par.posterior
+        self.Hitmap = self.model.values.posterior
         # self.currentModel._max_edge = np.log(self.Hitmap.y.centres[-1])
         # except:
         #     self.Hitmap = hdfRead.readKeyFromFile(hdfFile,'','/','hitmap', index=index)
 
-        self.best_model = hdfRead.readKeyFromFile(
-            hdfFile, '', '/', 'bestmodel', index=index)
+        # self.best_model = hdfRead.readKeyFromFile(
+        #     hdfFile, '', '/', 'bestmodel', index=index)
         # self.bestModel._max_edge = np.log(self.Hitmap.y.centres[-1])
 
         self.invTime = np.array(hdfFile.get('invtime')[index])
@@ -862,216 +865,7 @@ class Inference1D(myObject):
 
         self.plotMe = True
 
+        # self.fiducial = np.float64(fiducials[index])
+
         return self
 
-    # def verbose(self):
-    #     # if self.verbose & self.burnedIn:
-
-    #     if self.verbose:
-    #         self.verboseFigs = []
-    #         self.verboseAxs = []
-
-    #         # Posterior components
-    #         fig = plt.figure(facecolor='white', figsize=(10,7))
-    #         self.verboseFigs.append(fig)
-    #         self.verboseAxs.append(fig.add_subplot(511))
-    #         self.verboseAxs.append(fig.add_subplot(512))
-    #         self.verboseAxs.append(fig.add_subplot(513))
-
-    #         fig = plt.figure(facecolor='white', figsize=(10,7))
-    #         self.verboseFigs.append(fig)
-    #         for i in range(8):
-    #             self.verboseAxs.append(fig.add_subplot(8, 1, i+1))
-
-    #         # Cross Plots
-    #         fig = plt.figure(facecolor='white', figsize=(10,7))
-    #         self.verboseFigs.append(fig)
-    #         for i in range(4):
-    #             self.verboseAxs.append(fig.add_subplot(1, 4, i+1))
-
-    #         # ratios vs iteration number
-    #         fig = plt.figure(facecolor='white', figsize=(10,7))
-    #         self.verboseFigs.append(fig)
-    #         for i in range(5):
-    #             self.verboseAxs.append(fig.add_subplot(5, 1, i+1))
-
-    #         for ax in self.verboseAxs:
-    #             cP.pretty(ax)
-
-    #     plt.figure(self.verboseFigs[0].number)
-    #     plt.sca(self.verboseAxs[0])
-    #     plt.cla()
-    #     self.allRelErr[0, :].plot(self.iRange, i=np.s_[:self.i], c='k')
-    #     plt.sca(self.verboseAxs[1])
-    #     plt.cla()
-    #     self.allAddErr[0, :].plot(self.iRange, i=np.s_[:self.i], axis=1, c='k')
-    #     plt.sca(self.verboseAxs[2])
-    #     plt.cla()
-    #     self.allZ.plot(x=self.iRange, i=np.s_[:self.i], marker='o', linestyle='none', markersize=2, alpha=0.3, markeredgewidth=1)
-
-    #     # Posterior components plot Figure 1
-    #     labels=['nCells','depth','parameter','gradient','relative','additive','height','calibration']
-    #     plt.figure(self.verboseFigs[1].number)
-    #     for i in range(8):
-    #         plt.sca(self.verboseAxs[3 + i])
-    #         plt.cla()
-    #         self.posteriorComponents[i, :].plot(linewidth=0.5)
-    #         plt.ylabel('')
-    #         plt.title(labels[i])
-    #         if labels[i] == 'gradient':
-    #             plt.ylim([-30.0, 1.0])
-
-    #     ira = self.iRange[:np.int(1.2*self.n_markov_chains)][self.accepted]
-    #     irna = self.iRange[:np.int(1.2*self.n_markov_chains)][~self.accepted]
-
-    #     plt.figure(self.verboseFigs[3].number)
-    #     # Number of layers vs iteration
-    #     plt.sca(self.verboseAxs[15])
-    #     plt.cla()
-    #     self.allK[~self.accepted].plot(x = irna, marker='o', markersize=1,  linestyle='None', alpha=0.3, color='k')
-    #     self.allK[self.accepted].plot(x = ira, marker='o', markersize=1, linestyle='None', alpha=0.3)
-    #     plt.title('black = rejected')
-
-    #     plt.figure(self.verboseFigs[2].number)
-    #     # Cross plot of current vs candidate prior
-    #     plt.sca(self.verboseAxs[11])
-    #     plt.cla()
-    #     x = StatArray.StatArray(self.ratioComponents[0, :], 'Candidate Prior')
-    #     y = StatArray.StatArray(self.ratioComponents[1, :], 'Current Prior')
-
-    #     x[x == -np.inf] = np.nan
-    #     y[y == -np.inf] = np.nan
-    #     x[~self.accepted].plot(x = y[~self.accepted], linestyle='', marker='.', color='k', alpha=0.3)
-    #     x[self.accepted].plot(x = y[self.accepted], linestyle='', marker='.', alpha=0.3)
-    #     # v1 = np.maximum(np.minimum(np.nanmin(x), np.nanmin(y)), -20.0)
-    #     v2 = np.maximum(np.nanmax(x), np.nanmax(y))
-    #     v1 = v2 - 25.0
-    #     plt.xlim([v1, v2])
-    #     plt.ylim([v1, v2])
-    #     plt.plot([v1,v2], [v1,v2])
-
-    #     # Prior ratio vs iteration
-    #     plt.figure(self.verboseFigs[3].number)
-    #     plt.sca(self.verboseAxs[16])
-    #     plt.cla()
-    #     r = x - y
-    #     r[~self.accepted].plot(x = irna, marker='o', markersize=1, linestyle='None', alpha=0.3, color='k')
-    #     r[self.accepted].plot(x = ira, marker='o', markersize=1, linestyle='None', alpha=0.3)
-    #     plt.ylim([v1, 5.0])
-    #     cP.ylabel('Prior Ratio')
-
-    #     plt.figure(self.verboseFigs[2].number)
-    #     # Cross plot of the likelihood ratios
-    #     plt.sca(self.verboseAxs[12])
-    #     plt.cla()
-    #     x = StatArray.StatArray(self.ratioComponents[2, :], 'Candidate Likelihood')
-    #     y = StatArray.StatArray(self.ratioComponents[3, :], 'Current Likelihood')
-    #     x[~self.accepted].plot(x = y[~self.accepted], linestyle='', marker='.', color='k', alpha=0.3)
-    #     x[self.accepted].plot(x = y[self.accepted], linestyle='', marker='.', alpha=0.3)
-
-    #     v2 = np.maximum(np.nanmax(x), np.nanmax(y)) + 5.0
-    #     v1 = v2 - 200.0
-    #     # v1 = -100.0
-    #     # v2 = -55.0
-    #     plt.xlim([v1, v2])
-    #     plt.ylim([v1, v2])
-    #     plt.plot([v1, v2], [v1, v2])
-    #     plt.title('black = rejected')
-
-    #     plt.figure(self.verboseFigs[3].number)
-    #     # Likelihood ratio vs iteration
-    #     plt.sca(self.verboseAxs[17])
-    #     plt.cla()
-    #     r = x - y
-    #     r[~self.accepted].plot(x = irna, marker='o', markersize=1, linestyle='None', alpha=0.3, color='k')
-    #     r[self.accepted].plot(x = ira, marker='o', markersize=1, linestyle='None', alpha=0.3)
-    #     cP.ylabel('Likelihood Ratio')
-    #     plt.ylim([-20.0, 20.0])
-
-    #     plt.figure(self.verboseFigs[2].number)
-    #     # Cross plot of the proposal ratios
-    #     plt.sca(self.verboseAxs[13])
-    #     plt.cla()
-    #     y = StatArray.StatArray(self.ratioComponents[4, :], 'Current Proposal')
-    #     x = StatArray.StatArray(self.ratioComponents[5, :], 'Candidate Proposal')
-    #     x[~self.accepted].plot(x = y[~self.accepted], linestyle='', marker='.', color='k', alpha=0.3)
-    #     x[self.accepted].plot(x = y[self.accepted], linestyle='', marker='.', alpha=0.3)
-    #     # v1 = np.maximum(np.minimum(np.nanmin(x), np.nanmin(y)), -200.0)
-    #     v2 = np.maximum(np.nanmax(x), np.nanmax(y)) + 10.0
-    #     v1 = v2 - 60.0
-    #     v1 = -20.0
-    #     v2 = 20.0
-    #     # plt.plot([v1,v2], [v1,v2])
-    #     plt.xlim([v1, v2])
-    #     plt.ylim([v1, v2])
-
-    #     plt.figure(self.verboseFigs[2].number)
-    #     # Cross plot of the proposal ratios coloured by a change in dimension
-    #     plt.sca(self.verboseAxs[14])
-    #     plt.cla()
-    #     y = StatArray.StatArray(self.ratioComponents[4, :], 'Current Proposal')
-    #     x = StatArray.StatArray(self.ratioComponents[5, :], 'Candidate Proposal')
-    #     x[~self.dimensionChange].plot(x = y[~self.dimensionChange], linestyle='', marker='.', color='k', alpha=0.3)
-    #     x[self.dimensionChange].plot(x = y[self.dimensionChange], linestyle='', marker='.', alpha=0.3)
-    #     # v1 = np.maximum(np.minimum(np.nanmin(x), np.nanmin(y)), -200.0)
-    #     # v2 = np.maximum(np.nanmax(x), np.nanmax(y)) + 10.0
-    #     # v1 = v2 - 60.0
-
-    #     # plt.plot([v1,v2], [v1,v2])
-    #     plt.xlim([v1, v2])
-    #     plt.ylim([v1, v2])
-    #     plt.title('black = no dimension change')
-
-    #     plt.figure(self.verboseFigs[3].number)
-    #     # Proposal ratio vs iteration
-    #     plt.sca(self.verboseAxs[18])
-    #     plt.cla()
-    #     r = x - y
-    #     r[~self.accepted].plot(x = irna, marker='o', markersize=1, linestyle='None', alpha=0.3, color='k')
-    #     r[self.accepted].plot(x = ira, marker='o', markersize=1, linestyle='None', alpha=0.3)
-    #     cP.ylabel('Proposal Ratio')
-    #     plt.ylim([v1, v2])
-
-    #     # Acceptance ratio vs iteration
-    #     plt.sca(self.verboseAxs[19])
-    #     plt.cla()
-    #     x = StatArray.StatArray(self.ratioComponents[6, :], 'Acceptance Ratio')
-    #     x[~self.accepted].plot(x = irna, marker='o', markersize=1, linestyle='None', alpha=0.3, color='k')
-    #     x[self.accepted].plot(x = ira, marker='o', markersize=1, linestyle='None', alpha=0.3)
-    #     plt.ylim([-20.0, 20.0])
-
-    #     for fig in self.verboseFigs:
-    #         fig.canvas.draw()
-    #         fig.canvas.flush_events()
-
-        # if verbose:
-        #     n = np.int(1.2*self.n_markov_chains)
-        #     self.allRelErr = StatArray.StatArray(np.full([self.nSystems, n], np.nan), name='$\epsilon_{Relative}x10^{2}$', units='%')
-        #     self.allAddErr = StatArray.StatArray(np.full([self.nSystems, n], np.nan), name='$\epsilon_{Additive}$', units=dataPoint.data.units)
-        #     self.allZ = StatArray.StatArray(np.full(n, np.nan), name='Height', units='m')
-        #     self.allK = StatArray.StatArray(np.full(n, np.nan), name='Number of Layers')
-        #     self.posteriorComponents = StatArray.StatArray(np.full([8, n], np.nan), 'Components of the posterior')
-        #     self.ratioComponents = StatArray.StatArray(np.full([7, n], np.nan), 'log(Ratio Components)')
-        #     self.accepted = StatArray.StatArray(np.zeros(n, dtype=bool), name='Accepted')
-        #     self.dimensionChange = StatArray.StatArray(np.zeros(n, dtype=bool), name='Dimensions were changed')
-
-    # if (self.verbose):
-    #        fig = plt.figure(1)
-    #        fig.set_size_inches(19, 11)
-    #        figName = join(directory,str(fiducial) + '_rap.png')
-    #        plt.savefig(figName, dpi=dpi)
-
-    #        fig = plt.figure(2)
-    #        fig.set_size_inches(19, 11)
-    #        figName = join(directory,str(fiducial) + '_posterior_components.png')
-    #        plt.savefig(figName, dpi=dpi)
-
-    #        fig = plt.figure(3)
-    #        fig.set_size_inches(19, 11)
-    #        figName = join(directory,str(fiducial) + '_ratio_crossplot.png')
-    #        plt.savefig(figName, dpi=dpi)
-
-    #        fig = plt.figure(4)
-    #        fig.set_size_inches(19, 11)
-    #        figName = join(directory,str(fiducial) + '_ratios_vs_iteration.png')
-    #        plt.savefig(figName, dpi=dpi)

@@ -26,7 +26,7 @@ def fdem1dfwd(system, model1d, altitude):
 
     """
 
-    assert altitude >= model1d.relativeTo, "Sensor altitude must be above the top of the model"
+    assert altitude >= model1d.mesh.relativeTo, "Sensor altitude must be above the top of the model"
 
     # Create the indices of the coil orientations for the frequencies.
     tid = system.getTensorID()
@@ -46,10 +46,12 @@ def fdem1dfwd(system, model1d, altitude):
     scl = tMom * rMom
 
     frequencies = np.asarray(system.frequencies)
-    conductivity = np.asarray(model1d.par)
-    kappa = np.asarray(model1d.magnetic_susceptibility)
-    perm = np.asarray(model1d.magnetic_permeability)
-    thickness = np.asarray(model1d.widths)
+    conductivity = np.asarray(model1d.values)
+    # kappa = np.asarray(model1d.magnetic_susceptibility)
+    # perm = np.asarray(model1d.magnetic_permeability)
+    kappa = np.zeros(model1d.values.size)
+    perm = np.zeros(model1d.values.size)
+    thickness = np.asarray(model1d.mesh.widths)
     loopSeparation = np.asarray(system.loop_separation)
 
     return nbFdem1dfwd(tid, frequencies, tHeight, rHeight, tMom, rx, loopSeparation, system.w0, system.lamda0, system.lamda02, system.w1, system.lamda1, system.lamda12, scl, conductivity, kappa, perm, thickness)
@@ -106,7 +108,7 @@ def fdem1dsen(system, model1d, altitude):
 
     """
 
-    assert altitude >= model1d.relativeTo, "Sensor altitude must be above the top of the model"
+    assert altitude >= model1d.mesh.relativeTo, "Sensor altitude must be above the top of the model"
 
     # Create the indices of the coil orientations for the frequencies.
     tid = system.getTensorID()
@@ -126,10 +128,12 @@ def fdem1dsen(system, model1d, altitude):
     scl = tMom * rMom
 
     frequencies = np.asarray(system.frequencies)
-    conductivity = np.asarray(model1d.par)
-    kappa = np.asarray(model1d.magnetic_susceptibility)
-    perm = np.asarray(model1d.magnetic_permeability)
-    thickness = np.asarray(model1d.widths)
+    conductivity = np.asarray(model1d.values)
+    # kappa = np.asarray(model1d.magnetic_susceptibility)
+    # perm = np.asarray(model1d.magnetic_permeability)
+    kappa = np.zeros(model1d.values.size)
+    perm = np.zeros(model1d.values.size)
+    thickness = np.asarray(model1d.mesh.widths)
     loopSeparation = np.asarray(system.loop_separation)
 
     return nbFdem1dsen(tid, frequencies, tHeight, rHeight, tMom, rx, loopSeparation, system.w0, system.lamda0, system.lamda02, system.w1, system.lamda1, system.lamda12, scl, conductivity, kappa, perm, thickness)

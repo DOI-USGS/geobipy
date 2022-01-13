@@ -345,11 +345,11 @@ class DataPoint(Point):
             rel_error_kwargs['line'] = best.relErr
             add_error_kwargs['line'] = best.addErr
 
-        height_kwargs['rotate'] = height_kwargs.get('rotate', True)
+        height_kwargs['transpose'] = height_kwargs.get('transpose', True)
         self.z.plotPosteriors(ax = axes[0], **height_kwargs)
 
         axes[1].cla()
-        self.predictedData.plotPosteriors(ax = axes[1], noColorbar=True, **data_kwargs)
+        self.predictedData.plotPosteriors(ax = axes[1], colorbar=False, **data_kwargs)
         self.plot(ax=axes[1], **data_kwargs)
         
         c = cP.wellSeparated[0] if best is None else cP.wellSeparated[3]
@@ -447,42 +447,38 @@ class DataPoint(Point):
         """ Print a summary of the EMdataPoint """
         msg = ('Data Point: \n'
                'Channel Names {} \n'
-               'x: {} \n'
-               'y: {} \n'
-               'z: {} \n'
-               'elevation: {} \n'
                'Number of active channels: {} \n'
-               '{} {} {}').format(self._channelNames, self.x, self.y, self.z, self.elevation, np.sum(self.active), self.data[self.active].summary, self.predictedData[self.active].summary, self.std[self.active].summary)
+               '{} {} {}').format(self._channelNames, np.sum(self.active), self.data[self.active].summary, self.predictedData[self.active].summary, self.std[self.active].summary)
         return msg
 
 
 
-    def createHdf(self, parent, myName, withPosterior=True, nRepeats=None, fillvalue=None):
+    def createHdf(self, parent, myName, withPosterior=True, add_axis=None, fillvalue=None):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
         """
         # create a new group inside h5obj
-        grp = super().createHdf(parent, myName, withPosterior, nRepeats, fillvalue)
+        grp = super().createHdf(parent, myName, withPosterior, add_axis, fillvalue)
 
-        # grp.create_dataset('channels_per_system', data=self.channels_per_system)
-        # grp.create_dataset('components', data=self._components)
+        self.fiducial.createHdf(grp, 'fiducial', add_axis=add_axis, fillvalue=fillvalue)
+        self.lineNumber.createHdf(grp, 'line_number', add_axis=add_axis, fillvalue=fillvalue)
+        self.data.createHdf(grp, 'data', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
+        self.std.createHdf(grp, 'std', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
+        self.predictedData.createHdf(grp, 'predicted_data', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
+        self.relErr.createHdf(grp, 'relative_error', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
+        self.addErr.createHdf(grp, 'additive_error', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
 
-        self.fiducial.createHdf(grp, 'fiducial', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.lineNumber.createHdf(grp, 'line_number', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.data.createHdf(grp, 'd', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        self.std.createHdf(grp, 's', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        self.predictedData.createHdf(grp, 'p', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
 
         # if not self.errorPosterior is None:
         #     for i, x in enumerate(self.errorPosterior):
-        #         x.createHdf(grp, 'joint_error_posterior_{}'.format(i), nRepeats=nRepeats, fillvalue=fillvalue)
+        #         x.createHdf(grp, 'joint_error_posterior_{}'.format(i), add_axis=add_axis, fillvalue=fillvalue)
             # self.relErr.setPosterior([self.errorPosterior[i].marginalize(axis=1) for i in range(self.nSystems)])
             # self.addErr.setPosterior([self.errorPosterior[i].marginalize(axis=0) for i in range(self.nSystems)])
 
-        self.relErr.createHdf(grp, 'relErr', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        self.addErr.createHdf(grp, 'addErr', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-
+        if add_axis is not None:
+            grp.attrs['repr'] = 'Data'
+            
         return grp
 
 
@@ -499,9 +495,9 @@ class DataPoint(Point):
 
         self.fiducial.writeHdf(grp, 'fiducial', index=index)
         self.lineNumber.writeHdf(grp, 'line_number', index=index)
-        self.data.writeHdf(grp, 'd',  withPosterior=withPosterior, index=index)
-        self.std.writeHdf(grp, 's',  withPosterior=withPosterior, index=index)
-        self.predictedData.writeHdf(grp, 'p',  withPosterior=withPosterior, index=index)
+        self.data.writeHdf(grp, 'data',  withPosterior=withPosterior, index=index)
+        self.std.writeHdf(grp, 'std',  withPosterior=withPosterior, index=index)
+        self.predictedData.writeHdf(grp, 'predicted_data',  withPosterior=withPosterior, index=index)
 
         # if not self.errorPosterior is None:
         #     for i, x in enumerate(self.errorPosterior):
@@ -509,8 +505,8 @@ class DataPoint(Point):
             # self.relative_error.setPosterior([self.errorPosterior[i].marginalize(axis=1) for i in range(self.nSystems)])
             # self.additive_error.setPosterior([self.errorPosterior[i].marginalize(axis=0) for i in range(self.nSystems)])
 
-        self.relErr.writeHdf(grp, 'relErr',  withPosterior=withPosterior, index=index)
-        self.addErr.writeHdf(grp, 'addErr',  withPosterior=withPosterior, index=index)
+        self.relErr.writeHdf(grp, 'relative_error',  withPosterior=withPosterior, index=index)
+        self.addErr.writeHdf(grp, 'additive_error',  withPosterior=withPosterior, index=index)
 
     @classmethod
     def fromHdf(cls, grp, index=None, **kwargs):
@@ -518,23 +514,14 @@ class DataPoint(Point):
 
         out = super(DataPoint, cls).fromHdf(grp, index=index, **kwargs)
 
-        # out.errorPosterior = None
-
         if 'fiducial' in grp:
             out.fiducial = StatArray.StatArray.fromHdf(grp['fiducial'], index=index)
-
         if 'line_number' in grp:
             out.lineNumber = StatArray.StatArray.fromHdf(grp['line_number'], index=index)
 
-
-        # if 'channels_per_system' in grp:
-        #     out.channels_per_system = np.asarray(grp['channels_per_system'])
-        # if 'components' in grp:
-        #     out._components = np.asarray(grp['components'])
-
-        out.data = StatArray.StatArray.fromHdf(grp['d'], index=index)
-        out.std = StatArray.StatArray.fromHdf(grp['s'], index=index)
-        out.predictedData = StatArray.StatArray.fromHdf(grp['p'], index=index)
+        out.data = StatArray.StatArray.fromHdf(grp['data'], index=index)
+        out.std = StatArray.StatArray.fromHdf(grp['std'], index=index)
+        out.predictedData = StatArray.StatArray.fromHdf(grp['predicted_data'], index=index)
 
         # if 'joint_error_posterior_0' in grp:
         #     i = 0
@@ -543,8 +530,8 @@ class DataPoint(Point):
         #         self.errorPosterior.append(Histogram2D.fromHdf(grp['joint_error_posterior_{}'.format(i)], index=index))
         #         i += 1
 
-        out.relErr = StatArray.StatArray.fromHdf(grp['relErr'], index=index)
-        out.addErr = StatArray.StatArray.fromHdf(grp['addErr'], index=index)
+        out.relErr = StatArray.StatArray.fromHdf(grp['relative_error'], index=index)
+        out.addErr = StatArray.StatArray.fromHdf(grp['additive_error'], index=index)
 
         return out
 

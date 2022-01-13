@@ -132,6 +132,15 @@ class FdemData(Data):
             else:
                 self._powerline = StatArray.StatArray(values, "Powerline")
 
+    @Data.std.getter
+    def std(self):
+        if np.size(self._std, 0) == 0:
+            self._std = StatArray.StatArray((self.nPoints, self.nChannels), "Standard deviation", self.units)
+
+        if self.relative_error.max() > 0.0:
+            self._std[:, :] = np.sqrt((self.relative_error* self.data)**2 + (self.additive_error**2.0))
+
+        return self._std
 
     @property
     def system(self):
@@ -336,6 +345,7 @@ class FdemData(Data):
 
         if not isinstance(i, slice):
             i = np.unique(i)
+
         return FdemData(self.system,
                        x=self.x[i],
                        y=self.y[i],
@@ -884,9 +894,22 @@ class FdemData(Data):
 
         return system, nPoints, _columnIndex, _dataIndices, nHeaderLines, _powerline, _magnetic
 
+    def createHdf(self, parent, myName, withPosterior=True, fillvalue=None):
+        """ Create the hdf group metadata in file
+        parent: HDF object to create a group inside
+        myName: Name of the group
+        """
+        # create a new group inside h5obj
+        grp = super().createHdf(parent, myName, withPosterior, fillvalue)
+        self.system[0].toHdf(grp, 'sys')
+        return grp
+
     @classmethod
     def fromHdf(cls, grp, **kwargs):
         """ Reads the object from a HDF group """
+
+        if kwargs.get('index') is not None:
+            return FdemDataPoint.fromHdf(grp, **kwargs)
         
         system = FdemSystem.fromHdf(grp['sys'])
         return super(FdemData, cls).fromHdf(grp, system=system)

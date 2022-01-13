@@ -158,8 +158,6 @@ class TdemSystem(TdemSystem_GAAEM):
 
         """
 
-        tmin = np.log10(np.maximum(np.min(self.times) -
-                        np.max(self.waveform.time-self.delayTime), 1e-10))
-        tmax = np.log10(np.max(self.times) -
-                        np.min(self.waveform.time-self.delayTime))
+        tmin = np.log10(np.maximum(np.min(self.off_time) - np.max(self.waveform.time-self.delayTime), 1e-10))
+        tmax = np.log10(np.max(self.off_time) - np.min(self.waveform.time-self.delayTime))
         return np.logspace(tmin, tmax, self.nTimes+2)

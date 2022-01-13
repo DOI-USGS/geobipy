@@ -11,7 +11,8 @@ from ....base.logging import myLogger
 from ...system.TdemSystem import TdemSystem
 from ...system.filters.butterworth import butterworth
 from ...system.Waveform import Waveform
-from ...statistics.Histogram1D import Histogram1D
+from ...statistics.Histogram import Histogram
+from ...mesh.RectilinearMesh1D import RectilinearMesh1D
 from ...statistics.Histogram2D import Histogram2D
 from ...statistics.Distribution import Distribution
 import matplotlib
@@ -81,13 +82,9 @@ class Tempest_datapoint(TdemDataPoint):
         else:
             assert np.size(values) == self.nChannels, ValueError(("Tempest data must a have additive error values for all time gates and all components. \n"
                                                               "addErr must have size {}").format(self.nChannels))
-            assert (np.all(np.asarray(values) > 0.0)), ValueError("addErr must be > 0.0.")
+            # assert (np.all(np.asarray(values) > 0.0)), ValueError("addErr must be > 0.0.")
 
         self._addErr = StatArray.StatArray(values, '$\epsilon_{additive}x10^{2}$', self.units)
-
-    # @property
-    # def channels(self):
-    #     return np.squeeze(np.asarray([np.tile(self.off_time(i), 2) for i in range(self.nSystems)]))
 
     @TdemDataPoint.data.getter
     def data(self):
@@ -112,7 +109,7 @@ class Tempest_datapoint(TdemDataPoint):
         else:
             assert np.size(values) == self.n_components * self.nSystems, ValueError(("Tempest data must a have relative error for the primary and secondary fields, for each system. \n"
                             "relErr must have size {}").format(self.n_components * self.nSystems))
-            assert (np.all(np.asarray(values) > 0.0)), ValueError("relErr must be > 0.0.")
+            # assert (np.all(np.asarray(values) > 0.0)), ValueError("relErr must be > 0.0.")
 
         self._relErr = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
 
@@ -281,10 +278,10 @@ class Tempest_datapoint(TdemDataPoint):
             # add_error_kwargs['line'] = best.addErr
             pitch_kwargs['line'] = best.transmitter.pitch
 
-        height_kwargs['rotate'] = height_kwargs.get('rotate', True)
+        height_kwargs['tranpose'] = height_kwargs.get('transpose', True)
         self.z.plotPosteriors(ax = axes[0], **height_kwargs)
 
-        self.predictedData.plotPosteriors(ax = axes[1], noColorbar=True, **data_kwargs)
+        self.predictedData.plotPosteriors(ax = axes[1], colorbar=False, **data_kwargs)
         self.plot(ax=axes[1], **data_kwargs)
         
         c = cP.wellSeparated[0] if best is None else cP.wellSeparated[3]
@@ -367,39 +364,14 @@ class Tempest_datapoint(TdemDataPoint):
             posterior = []
             for i in range(self.nSystems*self.n_components):
                 b = bins[i, :]
-                posterior.append(Histogram1D(edges = b, relativeTo=0.5*(b.max()-b.min())))
+                mesh = RectilinearMesh1D(edges = b, relativeTo=0.5*(b.max()-b.min()))
+                posterior.append(Histogram(mesh=mesh))
             self.relErr.posterior = posterior
 
     def set_additive_error_posterior(self, log=None):
         if self.addErr.hasPrior:
             ab = StatArray.StatArray(np.atleast_2d(self.addErr.prior.bins()), name=self.addErr.name, units=self.data.units)
-            self.addErr.posterior = [Histogram1D(edges = ab[i, :], log=log) for i in range(self.nSystems)]
-
-    # def set_priors(self, height_prior=None, data_prior=None, relative_error_prior=None, additive_error_prior=None):
-
-    #     super().set_priors(height_prior, None, relative_error_prior, additive_error_prior)
-
-    #     if not data_prior is None:
-    #         self.predictedData.set_prior(data_prior)
-
-    # def set_predicted_data_posterior(self):
-    #     if self.predictedData.hasPrior:
-    #         times = np.log10(self.times(0))
-
-    #         xbuf = 0.05*(times[-1] - times[0])
-    #         xbins = np.logspace(times[0]-xbuf, times[-1]+xbuf, 200)
-    #         ybins = np.linspace(0.8*np.nanmin(self.data), 1.2*np.nanmax(self.data), 200)
-    #         # rto = 0.5 * (ybins[0] + ybins[-1])
-    #         # ybins -= rto
-
-    #         H = Histogram2D(xEdges=xbins, xlog=10, yEdges=ybins)
-
-    #         self.predictedData.setPosterior(H)
-
-    #         # H = Histogram2D(xEdges = StatArray.StatArray(self.z.prior.bins(), name=self.z.name, units=self.z.units), relativeTo=self.z)
-    #         # self.z.setPosterior(H)
-
-
+            # self.addErr.posterior = [Histogram1D(edges = ab[i, :], log=log) for i in range(self.nSystems)]
 
     def update_posteriors(self):
 
@@ -413,113 +385,15 @@ class Tempest_datapoint(TdemDataPoint):
         if self.transmitter.pitch.hasPosterior:
             self.transmitter.pitch.updatePosterior()
 
-
-    # def forward(self, mod):
-    #     """ Forward model the data from the given model """
-
-    #     assert isinstance(mod, Model1D), TypeError("Invalid model class for forward modeling [1D]")
-    #     fm = tdem1dfwd(self, mod)
-
-    #     self.predicted_primary_field[:] = np.r_[fm[0].PX, -fm[0].PZ]
-
-
-    #     # for i in range(self.nSystems):
-    #         # iSys = self._systemIndices(i)
-
-    #     self.predicted_secondary_field[:] = np.hstack([fm[0].SX, -fm[0].SZ])  # Store the necessary component
-
-
-    # def sensitivity(self, model, ix=None, modelChanged=True):
-    #     """ Compute the sensitivty matrix for the given model """
-
-    #     assert isinstance(model, Model1D), TypeError("Invalid model class for sensitivity matrix [1D]")
-    #     return StatArray.StatArray(tdem1dsen(self, model, ix, modelChanged), 'Sensitivity', '$\\frac{V}{SAm^{3}}$')
-
-
     def _empymodForward(self, mod):
 
         print('stuff')
 
-    # def _simPEGForward(self, mod):
+    def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
 
-    #     from SimPEG import Maps
-    #     from simpegEM1D import (EM1DSurveyTD, EM1D, set_mesh_1d)
-
-    #     mesh1D = set_mesh_1d(mod.depth)
-    #     expmap = Maps.ExpMap(mesh1D)
-    #     prob = EM1D(mesh1D, sigmaMap = expmap, chi = mod.chim)
-
-    #     if (self.dualMoment()):
-
-    #         print(self.system[0].loopRadius(), self.system[0].peakCurrent())
-
-    #         simPEG_survey = EM1DSurveyTD(
-    #             rx_location=np.array([0., 0., 0.]),
-    #             src_location=np.array([0., 0., 0.]),
-    #             topo=np.r_[0., 0., 0.],
-    #             depth=-mod.depth,
-    #             rx_type='dBzdt',
-    #             wave_type='general',
-    #             src_type='CircularLoop',
-    #             a=self.system[0].loopRadius(),
-    #             I=self.system[0].peakCurrent(),
-    #             time=self.system[0].windows.centre,
-    #             time_input_currents=self.system[0].waveform.transmitterTime,
-    #             input_currents=self.system[0].waveform.transmitterCurrent,
-    #             n_pulse=2,
-    #             base_frequency=self.system[0].baseFrequency(),
-    #             use_lowpass_filter=True,
-    #             high_cut_frequency=450000,
-    #             moment_type='dual',
-    #             time_dual_moment=self.system[1].windows.centre,
-    #             time_input_currents_dual_moment=self.system[1].waveform.transmitterTime,
-    #             input_currents_dual_moment=self.system[1].waveform.transmitterCurrent,
-    #             base_frequency_dual_moment=self.system[1].baseFrequency(),
-    #         )
-    #     else:
-
-    #         simPEG_survey = EM1DSurveyTD(
-    #             rx_location=np.array([0., 0., 0.]),
-    #             src_location=np.array([0., 0., 0.]),
-    #             topo=np.r_[0., 0., 0.],
-    #             depth=-mod.depth,
-    #             rx_type='dBzdt',
-    #             wave_type='general',
-    #             src_type='CircularLoop',
-    #             a=self.system[0].loopRadius(),
-    #             I=self.system[0].peakCurrent(),
-    #             time=self.system[0].windows.centre,
-    #             time_input_currents=self.system[0].waveform.transmitterTime,
-    #             input_currents=self.system[0].waveform.transmitterCurrent,
-    #             n_pulse=1,
-    #             base_frequency=self.system[0].baseFrequency(),
-    #             use_lowpass_filter=True,
-    #             high_cut_frequency=7e4,
-    #             moment_type='single',
-    #         )
-
-    #     prob.pair(simPEG_survey)
-
-    #     self._predictedData[:] = -simPEG_survey.dpred(mod.par)
-
-    # def Isend(self, dest, world, **kwargs):
-
-    #     super().Isend(dest, world, **kwargs)
-
-    #     self.primary_field.Isend(dest, world)
-    #     self.secondary_field.Isend(dest, world)
-    #     self.predicted_primary_field.Isend(dest, world)
-    #     self.predicted_secondary_field.Isend(dest, world)
-
-
-    # @classmethod
-    # def Irecv(cls, source, world, **kwargs):
-
-    #     out = super(Tempest_datapoint, cls).Irecv(source, world, **kwargs)
-
-    #     out._primary_field = StatArray.StatArray.Irecv(source, world)
-    #     out._secondary_field = StatArray.StatArray.Irecv(source, world)
-    #     out._predicted_primary_field = StatArray.StatArray.Irecv(source, world)
-    #     out._predicted_secondary_field = StatArray.StatArray.Irecv(source, world)
-
-    #     return out
+        grp = super().createHdf(parent, name, withPosterior, add_axis, fillvalue)
+        
+        if add_axis is not None:
+            grp.attrs['repr'] = 'TempestData'
+    
+        return grp

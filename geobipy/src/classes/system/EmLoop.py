@@ -17,8 +17,3 @@ class EmLoop(Point, ABC):
     def __init__(self, *args, **kwargs):
         return super().__init__(*args, **kwargs)
 
-    def __deepcopy__(self, memo={}):
-        """Required by subclasses"""
-        raise NotImplementedError("Abstract base class, not implemented")
-        # tmp = EmLoop(self.orient, self.moment, self.tx, self.ty, self.off, self.pitch, self.roll, self.yaw, self.radius)
-

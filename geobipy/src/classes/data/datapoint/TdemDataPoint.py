@@ -1,20 +1,19 @@
 from copy import deepcopy
-from abc import abstractmethod
+
 from ....classes.core import StatArray
-from ...model.Model1D import Model1D
+from ...model.Model import Model
 from .EmDataPoint import EmDataPoint
 from ...forwardmodelling.Electromagnetic.TD.tdem1d import (
     tdem1dfwd, tdem1dsen)
 from ...system.EmLoop import EmLoop
 from ...system.SquareLoop import SquareLoop
 from ...system.CircularLoop import CircularLoop
-from ....base.logging import myLogger
 from ...system.TdemSystem import TdemSystem
 from ...system.TdemSystem_GAAEM import TdemSystem_GAAEM
 from ...system.filters.butterworth import butterworth
 from ...system.Waveform import Waveform
-from ...statistics.Histogram1D import Histogram1D
-from ...statistics.Histogram2D import Histogram2D
+from ...mesh.RectilinearMesh2D import RectilinearMesh2D
+from ...statistics.Histogram import Histogram
 from ...statistics.Distribution import Distribution
 import matplotlib.pyplot as plt
 import numpy as np
@@ -110,7 +109,7 @@ class TdemDataPoint(EmDataPoint):
             values = self.nSystems
         else:
             assert np.size(values) == self.nSystems, ValueError("additiveError must be a list of size equal to the number of systems {}".format(self.nSystems))
-            assert (np.all(np.asarray(values) > 0.0)), ValueError("additiveErr must be > 0.0. Make sure the values are in linear space")
+            # assert (np.all(np.asarray(values) > 0.0)), ValueError("additiveErr must be > 0.0. Make sure the values are in linear space")
             # assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], np.ndarray)), TypeError(
             #     "relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
 
@@ -341,10 +340,10 @@ class TdemDataPoint(EmDataPoint):
 
             # Compute the relative error
             rErr = self.relErr[i] * self.secondary_field[iSys]
-            aErr = np.exp(np.log(self.addErr[i]) - 0.5 * np.log(self.off_time(i)) + t0)
-            self._std[iSys] = np.sqrt((rErr**2.0) + (aErr[i]**2.0))
+            # aErr = np.exp(np.log(self.addErr[i]) - 0.5 * np.log(self.off_time(i)) + t0)
+            # self._std[iSys] = np.sqrt((rErr**2.0) + (aErr[i]**2.0))
 
-            # self._std[iSys] = np.sqrt((rErr**2.0) + (self.addErr[i]**2.0))
+            self._std[iSys] = np.sqrt((rErr**2.0) + (self.addErr[i]**2.0))
 
 
         # Update the variance of the predicted data prior
@@ -575,25 +574,28 @@ class TdemDataPoint(EmDataPoint):
 
         return np.asarray(time), np.asarray(data), np.asarray(std)
 
-    def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
+    def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
         """
 
-        grp = super().createHdf(parent, name, withPosterior, nRepeats, fillvalue)
+        grp = super().createHdf(parent, name, withPosterior, add_axis, fillvalue)
 
         grp.create_dataset('nSystems', data=self.nSystems)
         for i in range(self.nSystems):
             grp.create_dataset('System{}'.format(i), data=np.string_(psplt(self.system[i].filename)[-1]))
 
-        self.transmitter.createHdf(grp, 'T', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.receiver.createHdf(grp, 'R', nRepeats=nRepeats, fillvalue=fillvalue)
+        self.transmitter.createHdf(grp, 'T', add_axis=add_axis, fillvalue=fillvalue)
+        self.receiver.createHdf(grp, 'R', add_axis=add_axis, fillvalue=fillvalue)
 
-        self.primary_field.createHdf(grp, 'primary_field', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.secondary_field.createHdf(grp, 'secondary_field', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.predicted_primary_field.createHdf(grp, 'predicted_primary_field', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.predicted_secondary_field.createHdf(grp, 'predicted_secondary_field', nRepeats=nRepeats, fillvalue=fillvalue)
+        self.primary_field.createHdf(grp, 'primary_field', add_axis=add_axis, fillvalue=fillvalue)
+        self.secondary_field.createHdf(grp, 'secondary_field', add_axis=add_axis, fillvalue=fillvalue)
+        self.predicted_primary_field.createHdf(grp, 'predicted_primary_field', add_axis=add_axis, fillvalue=fillvalue)
+        self.predicted_secondary_field.createHdf(grp, 'predicted_secondary_field', add_axis=add_axis, fillvalue=fillvalue)
+
+        if add_axis is not None:
+            grp.attrs['repr'] = 'TdemData'
 
         return grp
 
@@ -619,14 +621,17 @@ class TdemDataPoint(EmDataPoint):
     def fromHdf(cls, grp, index=None, **kwargs):
         """ Reads the object from a HDF group """
 
-        assert ('system_file_path' in kwargs), ValueError(
-            "missing 1 required argument 'system_file_path', the path to directory containing system files")
-
-        system_file_path = kwargs['system_file_path']
         nSystems = np.int32(np.asarray(grp['nSystems']))
-        system_files = [join(system_file_path, str(np.asarray(grp['System{}'.format(i)]), 'utf-8')) for i in range(nSystems)]
+        
+        systems = [None]*nSystems
+        for i in range(nSystems):
+            # Get the system file name. h5py has to encode strings using utf-8, so decode it!
+            txt = str(np.asarray(grp.get('System{}'.format(i))), 'utf-8')
+            with open('System{}'.format(i), 'w') as f:
+                f.write(txt)
+            systems[i] = 'System{}'.format(i)
 
-        self = super(TdemDataPoint, cls).fromHdf(grp, index, system=system_files)
+        self = super(TdemDataPoint, cls).fromHdf(grp, index, system=systems)
 
         self.transmitter = (eval(cf.safeEval(grp['T'].attrs.get('repr')))).fromHdf(grp['T'], index=index)
         self.receiver = (eval(cf.safeEval(grp['R'].attrs.get('repr')))).fromHdf(grp['R'], index=index)
@@ -723,9 +728,9 @@ class TdemDataPoint(EmDataPoint):
         ax = kwargs.pop('ax', None)
         ax = plt.gca() if ax is None else plt.sca(ax)
 
-        noLabels = kwargs.pop('nolabels', False)
+        labels = kwargs.pop('labels', True)
 
-        if (not noLabels):
+        if (labels):
             cp.xlabel('Time (s)')
             cp.ylabel(cf.getNameUnits(self.predictedData))
             cp.title(title)
@@ -874,7 +879,8 @@ class TdemDataPoint(EmDataPoint):
             # rto = 0.5 * (ybins[0] + ybins[-1])
             # ybins -= rto
 
-            self.predictedData.posterior = Histogram2D(xEdges=xbins, xlog=10, yEdges=ybins, ylog=10)
+            mesh = RectilinearMesh2D(xEdges=xbins, xlog=10, yEdges=ybins, ylog=10)
+            self.predictedData.posterior = Histogram(mesh=mesh)
 
     def update_posteriors(self):
         super().update_posteriors()
@@ -891,8 +897,8 @@ class TdemDataPoint(EmDataPoint):
     def forward(self, mod):
         """ Forward model the data from the given model """
 
-        assert isinstance(mod, Model1D), TypeError(
-            "Invalid model class for forward modeling [1D]")
+        assert isinstance(mod, Model), TypeError(
+            "Invalid model class {} for forward modeling [1D]".format(type(mod)))
         fm = tdem1dfwd(self, mod)
 
         for i in range(self.nSystems):
@@ -925,7 +931,7 @@ class TdemDataPoint(EmDataPoint):
     def sensitivity(self, model, ix=None, modelChanged=True):
         """ Compute the sensitivty matrix for the given model """
 
-        assert isinstance(model, Model1D), TypeError(
+        assert isinstance(model, Model), TypeError(
             "Invalid model class for sensitivity matrix [1D]")
         return StatArray.StatArray(tdem1dsen(self, model, ix, modelChanged), 'Sensitivity', '$\\frac{V}{SAm^{3}}$')
 

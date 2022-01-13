@@ -7,6 +7,7 @@
 
 """
 from copy import deepcopy
+from pathlib import Path
 from pandas import DataFrame, read_csv
 from ...pointcloud.PointCloud3D import PointCloud3D
 from .Data import Data
@@ -964,7 +965,7 @@ class TdemData(Data):
     @property
     def summary(self):
         """ Display a summary of the TdemData """
-        msg = PointCloud3D.summary(self, out=out)
+        msg = PointCloud3D.summary
         msg = "Tdem Data: \n"
         msg += "Number of Systems: :" + str(self.nSystems) + '\n'
         msg += self.lineNumber.summary
@@ -972,39 +973,75 @@ class TdemData(Data):
         msg += self.elevation.summary
         return msg
 
-    def fromHdf(self, grp, **kwargs):
+    def createHdf(self, parent, myName, withPosterior=True, fillvalue=None):
+        """ Create the hdf group metadata in file
+        parent: HDF object to create a group inside
+        myName: Name of the group
+        """
+        # create a new group inside h5obj
+        grp = super().createHdf(parent, myName, withPosterior, fillvalue)
+
+        grp.create_dataset('nSystems', data=self.nSystems)
+        for i in range(self.nSystems):
+            txt = np.string_(Path(self.system[i].filename).read_text())
+            grp.create_dataset('System{}'.format(i), data=txt)
+
+        self.transmitter[0].createHdf(grp, 'T', withPosterior=withPosterior, add_axis=self.nPoints, fillvalue=fillvalue)
+        self.receiver[0].createHdf(grp, 'R', withPosterior=withPosterior, add_axis=self.nPoints, fillvalue=fillvalue)
+
+        self.primary_field.createHdf(grp, 'primary_field', withPosterior=withPosterior, fillvalue=fillvalue)
+        self.secondary_field.createHdf(grp, 'secondary_field', withPosterior=withPosterior, fillvalue=fillvalue)
+        self.predicted_primary_field.createHdf(grp, 'predicted_primary_field', withPosterior=withPosterior, fillvalue=fillvalue)
+        self.predicted_secondary_field.createHdf(grp, 'predicted_secondary_field', withPosterior=withPosterior, fillvalue=fillvalue)
+
+        return grp
+
+    def writeHdf(self, parent, name, withPosterior=True):
+        """ Write the StatArray to an HDF object
+        parent: Upper hdf file or group
+        myName: object hdf name. Assumes createHdf has already been called
+        create: optionally create the data set as well before writing
+        """
+        super().writeHdf(parent, name, withPosterior)
+
+        grp = parent[name]
+
+        for i in range(self.nPoints):
+            self.transmitter[i].writeHdf(grp, 'T', index=i)
+        for i in range(self.nPoints):
+            self.receiver[i].writeHdf(grp, 'T', index=i)
+
+        self.primary_field.writeHdf(grp, 'primary_field', withPosterior=withPosterior)
+        self.secondary_field.writeHdf(grp, 'secondary_field', withPosterior=withPosterior)
+        self.predicted_primary_field.writeHdf(grp, 'predicted_primary_field', withPosterior=withPosterior)
+        self.predicted_secondary_field.writeHdf(grp, 'predicted_secondary_field', withPosterior=withPosterior)
+
+    @classmethod
+    def fromHdf(cls, grp, **kwargs):
         """ Reads the object from a HDF group """
 
-        assert ('system_file_path' in kwargs), ValueError(
-            "missing 1 required argument 'system_file_path', the path to directory containing system files")
-
-        system_file_path = kwargs.pop('system_file_path', None)
-        assert (not system_file_path is None), ValueError(
-            "missing 1 required argument 'system_file_path', the path to directory containing system files")
+        if kwargs.get('index') is not None:
+            return TdemDataPoint.fromHdf(grp, **kwargs)
 
         nSystems = np.int32(np.asarray(grp.get('nSystems')))
-        systems = []
+        
+        systems = [None]*nSystems
         for i in range(nSystems):
             # Get the system file name. h5py has to encode strings using utf-8, so decode it!
-            filename = str(np.asarray(grp.get('System{}'.format(i))), 'utf-8')
-            td = TdemSystem().read(system_file_path+"//"+filename)
-            systems.append(td)
+            txt = str(np.asarray(grp.get('System{}'.format(i))), 'utf-8')
+            with open('System{}'.format(i), 'w') as f:
+                f.write(txt)
+            systems[i] = 'System{}'.format(i)
 
-        super().fromHdf(grp)
+        self = super(TdemData, cls).fromHdf(grp, system=systems)
 
-        self.systems = systems
-
-        self._receiver = StatArray.StatArray(
-            self.nPoints, 'Receiver loops', dtype=CircularLoop)
-        tmp = np.asarray(grp['R/data'])
+        self._transmitter = StatArray.StatArray(self.nPoints, 'Transmitter loops', dtype=CircularLoop)
         for i in range(self.nPoints):
-            self._receiver[i] = CircularLoop(*tmp[i, :])
+            self._transmitter[i] = CircularLoop.fromHdf(grp['T'], index=i)
 
-        self._transmitter = StatArray.StatArray(
-            self.nPoints, 'Receiver loops', dtype=CircularLoop)
-        tmp = np.asarray(grp['T/data'])
+        self._receiver = StatArray.StatArray(self.nPoints, 'Receiver loops', dtype=CircularLoop)
         for i in range(self.nPoints):
-            self._transmitter[i] = CircularLoop(*tmp[i, :])
+            self._receiver[i] = CircularLoop.fromHdf(grp['R'], index=i)
 
         return self
 

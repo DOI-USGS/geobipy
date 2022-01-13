@@ -12,7 +12,7 @@ from ..classes.data.dataset.TempestData import TempestData
 from ..classes.data.datapoint.FdemDataPoint import FdemDataPoint
 from ..classes.data.datapoint.TdemDataPoint import TdemDataPoint
 from ..classes.data.datapoint.Tempest_datapoint import Tempest_datapoint
-from ..classes.statistics.Hitmap2D import Hitmap2D
+# from ..classes.statistics.Hitmap2D import Hitmap2D
 import numpy as np
 from ..base.utilities import isInt
 

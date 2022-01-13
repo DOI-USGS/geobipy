@@ -2,10 +2,10 @@ from copy import deepcopy
 import numpy as np
 from ...base import MPI as myMPI
 from .EmLoop import EmLoop
-from ...base import utilities as cf
 from ..core import StatArray
-from ..statistics.Histogram1D import Histogram1D
-from ...base.HDF.hdfWrite import write_nd
+from ..statistics.Distribution import Distribution
+from ..mesh.RectilinearMesh1D import RectilinearMesh1D
+from ..statistics.Histogram import Histogram
 
 class CircularLoop(EmLoop):
     """Defines a circular loop for EM acquisition systems
@@ -35,10 +35,10 @@ class CircularLoop(EmLoop):
 
     """
 
-    def __init__(self, orient="z", moment=1.0, x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0):
+    def __init__(self, orient="z", moment=1.0, x=0.0, y=0.0, z=0.0, elevation=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0, **kwargs):
         """ Initialize a loop in an EM system """
 
-        super().__init__(x, y, z)
+        super().__init__(x, y, z, elevation=elevation, **kwargs)
         # Orientation of the loop dipole
         self.orient = orient
         # Dipole moment of the loop
@@ -136,18 +136,15 @@ class CircularLoop(EmLoop):
         return msg
 
     def __deepcopy__(self, memo={}):
-        result = type(self).__new__(type(self))
-        result.orient = deepcopy(self.orient)
-        result._moment = deepcopy(self.moment)
-        result._x = deepcopy(self.x)
-        result._y = deepcopy(self.y)
-        result._z = deepcopy(self.z)
-        result._pitch = deepcopy(self.pitch)
-        result._roll = deepcopy(self.roll)
-        result._yaw = deepcopy(self.yaw)
-        result._radius = deepcopy(self.radius)
+        out = super().__deepcopy__(memo)
+        out.orient = deepcopy(self.orient, memo=memo)
+        out._moment = deepcopy(self.moment, memo=memo)
+        out._pitch = deepcopy(self.pitch, memo=memo)
+        out._roll = deepcopy(self.roll, memo=memo)
+        out._yaw = deepcopy(self.yaw, memo=memo)
+        out._radius = deepcopy(self.radius, memo=memo)
 
-        return result
+        return out
 
     def set_priors(self, x_prior=None, y_prior=None, z_prior=None, pitch_prior=None, roll_prior=None, yaw_prior=None, kwargs={}):
 
@@ -195,35 +192,40 @@ class CircularLoop(EmLoop):
 
         """
         if self.pitch.hasPrior:
-            self.pitch.posterior = Histogram1D(edges = StatArray.StatArray(self.pitch.prior.bins(), name=self.pitch.name, units=self.pitch.units), relativeTo=self.pitch)
+            mesh = RectilinearMesh1D(edges=StatArray.StatArray(self.pitch.prior.bins(), name=self.pitch.name, units=self.pitch.units), relativeTo=self.pitch)
+            self.pitch.posterior = Histogram(mesh=mesh)
 
     def set_roll_posterior(self):
         """
 
         """
         if self.roll.hasPrior:
-            self.roll.posterior = Histogram1D(edges = StatArray.StatArray(self.roll.prior.bins(), name=self.roll.name, units=self.roll.units), relativeTo=self.roll)
+            mesh = RectilinearMesh1D(edges = StatArray.StatArray(self.roll.prior.bins(), name=self.roll.name, units=self.roll.units), relativeTo=self.roll)
+            self.pitch.posterior = Histogram(mesh=mesh)
 
     def set_yaw_posterior(self):
         """
 
         """
         if self.yaw.hasPrior:
-            self.yaw.posterior = Histogram1D(edges = StatArray.StatArray(self.yaw.prior.bins(), name=self.yaw.name, units=self.yaw.units), relativeTo=self.yaw)
+            mesh = RectilinearMesh1D(edges=StatArray.StatArray(self.yaw.prior.bins(), name=self.yaw.name, units=self.yaw.units), relativeTo=self.yaw)
+            self.pitch.posterior = Histogram(mesh=mesh)
 
-    def createHdf(self, parent, myName, withPosterior=True, nRepeats=None, fillvalue=None):
+    def createHdf(self, parent, myName, withPosterior=True, add_axis=None, fillvalue=None):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
         """
         # create a new group inside h5obj
-        grp = super().createHdf(parent, myName, withPosterior, nRepeats, fillvalue)
+        grp = super().createHdf(parent, myName, withPosterior, add_axis, fillvalue)
+        if add_axis is not None:
+            grp.attrs['repr'] = 'CircularLoop'
 
-        self.pitch.createHdf(grp, 'pitch', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        self.roll.createHdf(grp, 'roll', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
-        self.yaw.createHdf(grp, 'yaw', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        self.pitch.createHdf(grp, 'pitch', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
+        self.roll.createHdf(grp, 'roll', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
+        self.yaw.createHdf(grp, 'yaw', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
 
-        data = StatArray.StatArray(3).createHdf(grp, 'data', nRepeats=nRepeats, fillvalue=fillvalue)
+        data = StatArray.StatArray(3).createHdf(grp, 'data', add_axis=add_axis, fillvalue=fillvalue)
 
 
     def writeHdf(self, parent, name, withPosterior=True, index=None):

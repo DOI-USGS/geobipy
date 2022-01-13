@@ -2,14 +2,16 @@
 Module describing a frequency domain EMData Point that contains a single measurement.
 """
 from copy import copy, deepcopy
+
+from geobipy.src.classes.mesh.RectilinearMesh1D import RectilinearMesh1D
 from ....classes.core import StatArray
 from ...forwardmodelling.Electromagnetic.FD.fdem1d import fdem1dfwd, fdem1dsen
 from .EmDataPoint import EmDataPoint
 from ...model.Model import Model
-from ...model.Model1D import Model1D
-from ...statistics.Histogram2D import Histogram2D
+from...mesh.RectilinearMesh1D import RectilinearMesh1D
+from...mesh.RectilinearMesh2D import RectilinearMesh2D
+from ...statistics.Histogram import Histogram
 from ...statistics.Distribution import Distribution
-from ....base.logging import myLogger
 from ...system.FdemSystem import FdemSystem
 import matplotlib.pyplot as plt
 import numpy as np
@@ -75,26 +77,11 @@ class FdemDataPoint(EmDataPoint):
 
         self.channelNames = None
 
-
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
         out._system = self._system
         # out.calibration = deepcopy(self.calibration)
         return out
-
-    # @EmDataPoint.std.getter
-    # def std(self):
-
-    #     tmp = (self.relErr * self.data)**2.0 + self.addErr**2.0
-    #     self._std = StatArray.StatArray(tmp, "Standard deviation", self.units)
-
-    #     print(tmp)
-
-
-    #     if self.predictedData.hasPrior:
-    #         self.predictedData.prior.variance[np.diag_indices(np.sum(self.active))] = self._std[self.active]**2.0
-
-    #     return self._std
 
     @property
     def units(self):
@@ -278,49 +265,46 @@ class FdemDataPoint(EmDataPoint):
             freqs = np.log10(self.frequencies())
             xbuf = 0.05*(freqs[-1] - freqs[0])
             xbins = StatArray.StatArray(np.logspace(freqs[0]-xbuf, freqs[-1]+xbuf, 200), freqs.name, freqs.units)
-
+    
             data = np.log10(self.data[self.active])
             a = data.min()
             b = data.max()
             buf = 0.5*(b - a)
             ybins = StatArray.StatArray(np.logspace(a-buf, b+buf, 200), data.name, data.units)
             
-            self.predictedData.posterior = Histogram2D(xEdges=xbins, xlog=10, yEdges=ybins, ylog=10)
+            mesh = RectilinearMesh2D(xEdges=xbins, xlog=10, yEdges=ybins, ylog=10)
+            self.predictedData.posterior = Histogram(mesh=mesh)
 
 
-    def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
+    def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
         """
-        grp = super().createHdf(parent, name, withPosterior, nRepeats, fillvalue)
-        # self.calibration.createHdf(grp, 'calibration', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        grp = super().createHdf(parent, name, withPosterior, add_axis, fillvalue)
+        # self.calibration.createHdf(grp, 'calibration', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
 
         self.system[0].toHdf(grp, 'sys')
 
+        if add_axis is not None:
+            grp.attrs['repr'] = 'FdemData'
+
         return grp
-
-    # def writeHdf(self, parent, name, withPosterior=True, index=None):
-    #     """ Write the StatArray to an HDF object
-    #     parent: Upper hdf file or group
-    #     myName: object hdf name. Assumes createHdf has already been called
-    #     create: optionally create the data set as well before writing
-    #     """
-    #     super().writeHdf(parent, name, withPosterior, index)
-
-    #     grp = parent[name]
-
-        # self.calibration.writeHdf(grp, 'calibration',  withPosterior=withPosterior, index=index)
 
     @classmethod
     def fromHdf(cls, grp, index=None, **kwargs):
         """ Reads the object from a HDF group """
 
+        if not 'Point' in grp.attrs['repr']:
+            assert index is not None, ValueError("Data saved as a dataset, specify an index")
+            # from ..dataset.FdemData import FdemData
+            # return FdemData.fromHdf(grp, **kwargs)
+
+
         system = FdemSystem.fromHdf(grp['sys'])
         out = super(FdemDataPoint, cls).fromHdf(grp, index, system=system)
 
         return out
-
 
     def calibrate(self, Predicted=True):
         """ Apply calibration factors to the data point """
@@ -450,9 +434,9 @@ class FdemDataPoint(EmDataPoint):
             ax = plt.gca()
         cp.pretty(ax)
 
-        noLabels = kwargs.pop('nolabels', False)
+        labels = kwargs.pop('labels', True)
 
-        if (not noLabels):
+        if (labels):
             cp.xlabel('Frequency (Hz)')
             cp.ylabel('Data (ppm)')
             cp.title(title)
@@ -478,7 +462,8 @@ class FdemDataPoint(EmDataPoint):
         if self.predictedData.hasPosterior:
             x = self.frequencies()
             self.predictedData.posterior.update_with_line(x, self.predictedInphase())
-            self.predictedData.posterior.update_with_line(x, self.predictedQuadrature())
+            
+            # self.predictedData.posterior.update_with_line(x, self.predictedQuadrature())
 
 
     def updateSensitivity(self, model):
@@ -486,66 +471,66 @@ class FdemDataPoint(EmDataPoint):
         self.J = self.sensitivity(model)
 
 
-    def FindBestHalfSpace(self, minConductivity=1e-6, maxConductivity=1e2, percentThreshold=1.0, maxIterations=100):
-        """Uses the bisection approach to find a half space conductivity that best matches the EM data by minimizing the data misfit
+    # def FindBestHalfSpace(self, minConductivity=1e-6, maxConductivity=1e2, percentThreshold=1.0, maxIterations=100):
+    #     """Uses the bisection approach to find a half space conductivity that best matches the EM data by minimizing the data misfit
 
-        Parameters
-        ----------
-        minConductivity : float
-            Minimum conductivity to start the search
-        maxConductivity : float
-            Maximum conductivity to start the search
-        percentThreshold : float, optional
-            Stopping criteria for the relative change in data fit
-        maxIterations : int, optional
-            Stop after this number of iterations
+    #     Parameters
+    #     ----------
+    #     minConductivity : float
+    #         Minimum conductivity to start the search
+    #     maxConductivity : float
+    #         Maximum conductivity to start the search
+    #     percentThreshold : float, optional
+    #         Stopping criteria for the relative change in data fit
+    #     maxIterations : int, optional
+    #         Stop after this number of iterations
 
-        Returns
-        -------
-        out : geobipy.Model1D
-            Best fitting halfspace model
+    #     Returns
+    #     -------
+    #     out : geobipy.Model1D
+    #         Best fitting halfspace model
 
-        """
-        percentThreshold = 0.01 * percentThreshold
-        c0 = np.log10(minConductivity)
-        c1 = np.log10(maxConductivity)
-        cnew = 0.5 * (c0 + c1)
-        # Initialize a single layer model
-        p = StatArray.StatArray(1, 'Conductivity', r'$\frac{S}{m}$')
-        model = Model1D(nCells=1, edges=np.asarray([0.0, np.inf]), parameters=p)
-        # Initialize the first conductivity
-        model._par[0] = 10.0**c0
-        self.forward(model)  # Forward model the EM data
-        PhiD1 = self.dataMisfit()  # Compute the measure between observed and predicted data
-        # Initialize the second conductivity
-        model._par[0] = 10.0**c1
-        self.forward(model)  # Forward model the EM data
-        PhiD2 = self.dataMisfit()  # Compute the measure between observed and predicted data
-        # Compute a relative change in the data misfit
-        dPhiD = abs(PhiD2 - PhiD1) / PhiD2
-        i = 1
-        # Continue until there is less than 1% change
-        while (dPhiD > percentThreshold and i < maxIterations):
-            cnew = 0.5 * (c0 + c1)  # Bisect the conductivities
-            model._par[0] = 10.0**cnew
-            self.forward(model)  # Forward model the EM data
-            PhiDnew = self.dataMisfit()
-            if (PhiD2 > PhiDnew):
-                c1 = cnew
-                PhiD2 = PhiDnew
-            elif (PhiD1 > PhiDnew):
-                c0 = cnew
-                PhiD1 = PhiDnew
-            dPhiD = abs(PhiD2 - PhiD1) / PhiD2
-            i += 1
+    #     """
+    #     percentThreshold = 0.01 * percentThreshold
+    #     c0 = np.log10(minConductivity)
+    #     c1 = np.log10(maxConductivity)
+    #     cnew = 0.5 * (c0 + c1)
+    #     # Initialize a single layer model
+    #     p = StatArray.StatArray(1, 'Conductivity', r'$\frac{S}{m}$')
+    #     model = Model(mesh=RectilinearMesh1D(edges=np.asarray([0.0, np.inf])), values=p)
+    #     # Initialize the first conductivity
+    #     model._values[0] = 10.0**c0
+    #     self.forward(model)  # Forward model the EM data
+    #     PhiD1 = self.dataMisfit()  # Compute the measure between observed and predicted data
+    #     # Initialize the second conductivity
+    #     model._values[0] = 10.0**c1
+    #     self.forward(model)  # Forward model the EM data
+    #     PhiD2 = self.dataMisfit()  # Compute the measure between observed and predicted data
+    #     # Compute a relative change in the data misfit
+    #     dPhiD = abs(PhiD2 - PhiD1) / PhiD2
+    #     i = 1
+    #     # Continue until there is less than 1% change
+    #     while (dPhiD > percentThreshold and i < maxIterations):
+    #         cnew = 0.5 * (c0 + c1)  # Bisect the conductivities
+    #         model._values[0] = 10.0**cnew
+    #         self.forward(model)  # Forward model the EM data
+    #         PhiDnew = self.dataMisfit()
+    #         if (PhiD2 > PhiDnew):
+    #             c1 = cnew
+    #             PhiD2 = PhiDnew
+    #         elif (PhiD1 > PhiDnew):
+    #             c0 = cnew
+    #             PhiD1 = PhiDnew
+    #         dPhiD = abs(PhiD2 - PhiD1) / PhiD2
+    #         i += 1
 
-        return model
+    #     return model
 
 
     def forward(self, mod):
         """ Forward model the data from the given model """
 
-        assert isinstance(mod, Model1D), TypeError("Invalid model class for forward modeling [1D]")
+        assert isinstance(mod, Model), TypeError("Invalid model class for forward modeling [1D]")
 
         self._forward1D(mod)
 
@@ -553,14 +538,14 @@ class FdemDataPoint(EmDataPoint):
     def sensitivity(self, mod):
         """ Compute the sensitivty matrix for the given model """
 
-        assert isinstance(mod, Model1D), TypeError("Invalid model class for sensitivity matrix [1D]")
+        assert isinstance(mod, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
 
         return StatArray.StatArray(self._sensitivity1D(mod), 'Sensitivity', '$\\frac{ppm.m}{S}$')
 
 
     def _forward1D(self, mod):
         """ Forward model the data from a 1D layered earth model """
-        assert np.isinf(mod.edges[-1]), ValueError('mod.edges must have last entry be infinity for forward modelling.')
+        assert np.isinf(mod.mesh.edges[-1]), ValueError('mod.edges must have last entry be infinity for forward modelling.')
         for i, s in enumerate(self.system):
             tmp = fdem1dfwd(s, mod, self.z[0])
             self._predictedData[:self.nFrequencies[i]] = tmp.real
@@ -571,10 +556,10 @@ class FdemDataPoint(EmDataPoint):
         """ Compute the sensitivty matrix for a 1D layered earth model """
         # Re-arrange the sensitivity matrix to Real:Imaginary vertical
         # concatenation
-        J = StatArray.StatArray((self.nChannels, mod.nCells.value), 'Sensitivity', '$\\frac{ppm.m}{S}$')
+        J = StatArray.StatArray((self.nChannels, mod.mesh.nCells.item()), 'Sensitivity', '$\\frac{ppm.m}{S}$')
 
         for j, s in enumerate(self.system):
-            Jtmp = fdem1dsen(s, mod, self.z.value)
+            Jtmp = fdem1dsen(s, mod, self.z.item())
             J[:self.nFrequencies[j], :] = Jtmp.real
             J[self.nFrequencies[j]:, :] = Jtmp.imag
 

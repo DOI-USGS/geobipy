@@ -2,12 +2,10 @@
 Module describing a 1 Dimensional layered Model
 """
 # from ...base import Error as Err
-from ...classes.core import StatArray
-from .Model import Model
+from ...classes.core.StatArray import StatArray
 from ..mesh.RectilinearMesh1D import RectilinearMesh1D
-from ..mesh import RectilinearMesh2D
-from ..statistics.Histogram1D import Histogram1D
-from ..statistics.Hitmap2D import Hitmap2D
+from ..mesh.RectilinearMesh2D import RectilinearMesh2D
+from ..statistics.Histogram import Histogram
 from ...base.logging import myLogger
 from ..statistics.Distribution import Distribution
 import numpy as np
@@ -67,6 +65,8 @@ class Model1D(RectilinearMesh1D):
 
         # relativeTo = 0.0 if relativeTo is None else relativeTo
 
+        
+
         super().__init__(centres=centres, edges=edges, widths=widths, relativeTo=relativeTo)
 
         # if (all((x is None for x in [centres, relativeTo, parameters, edges, widths]))):
@@ -76,11 +76,11 @@ class Model1D(RectilinearMesh1D):
         self.par = parameters
 
         # StatArray of the change in physical parameters
-        self._dpar = StatArray.StatArray(self.nCells.value - 1, 'Derivative', r"$\frac{"+self.par.units+"}{m}$")
+        self._dpar = StatArray(self.nCells.item() - 1, 'Derivative', r"$\frac{"+self.par.units+"}{m}$")
 
         # StatArray of magnetic properties.
-        self._magnetic_susceptibility = StatArray.StatArray(self.nCells.value, "Magnetic Susceptibility", r"$\kappa$")
-        self._magnetic_permeability = StatArray.StatArray(self.nCells.value, "Magnetic Permeability", "$\frac{H}{m}$")
+        self._magnetic_susceptibility = StatArray(self.nCells.item(), "Magnetic Susceptibility", r"$\kappa$")
+        self._magnetic_permeability = StatArray(self.nCells.item(), "Magnetic Permeability", "$\frac{H}{m}$")
 
         self.parameterBounds = None
         self._halfSpaceParameter = None
@@ -115,11 +115,11 @@ class Model1D(RectilinearMesh1D):
     def par(self, values):
 
         if values is None:
-            values = self.nCells.value
+            values = self.nCells.item()
         else:
-            assert values.size == self.nCells, ValueError('Size of parameters {} must equal {}'.format(values.size, self.nCells.value))
+            assert values.size == self.nCells, ValueError('Size of parameters {} must equal {}'.format(values.size, self.nCells.item()))
 
-        self._par = StatArray.StatArray(values)
+        self._par = StatArray(values)
 
     def __deepcopy__(self, memo={}):
         """Create a deepcopy
@@ -245,10 +245,8 @@ class Model1D(RectilinearMesh1D):
             out._par = out.par.insert(i, par)
 
         # Reset ChiE and ChiM
-        out._magnetic_permeability = StatArray.StatArray(
-            out.nCells.value, "Electric Susceptibility", r"$\kappa$")
-        out._magnetic_susceptibility = StatArray.StatArray(
-            out.nCells.value, "Magnetic Susceptibility", r"$\frac{H}{m}$")
+        out._magnetic_permeability = StatArray(out.nCells.item(), "Electric Susceptibility", r"$\kappa$")
+        out._magnetic_susceptibility = StatArray(out.nCells.item(), "Magnetic Susceptibility", r"$\frac{H}{m}$")
         # Resize the parameter gradient
         out._dpar = out.dpar.resize(out.par.size - 1)
 
@@ -497,7 +495,7 @@ class Model1D(RectilinearMesh1D):
         return proposal, proposal1
 
 
-    def perturb(self, datapoint=None, verbose=False):
+    def perturb(self, datapoint=None):
         """Perturb a model's structure and parameter values.
 
         Uses a stochastic newtown approach if a datapoint is provided.
@@ -517,7 +515,7 @@ class Model1D(RectilinearMesh1D):
             The model with perturbed structure and parameter values.
 
         """
-        return self.stochasticNewtonPerturbation(datapoint, verbose)
+        return self.stochasticNewtonPerturbation(datapoint)
 
     def squeeze(self, widths, parameters):
 
@@ -529,10 +527,10 @@ class Model1D(RectilinearMesh1D):
 
         return self
 
-    def stochasticNewtonPerturbation(self, datapoint=None, verbose=False):
+    def stochasticNewtonPerturbation(self, datapoint=None):
 
         # Perturb the structure of the model
-        remappedModel = super().perturb(verbose)
+        remappedModel = super().perturb()
 
         # Update the local Hessian around the current model.
         remappedModel.compute_local_inverse_hessian(datapoint)
@@ -577,10 +575,11 @@ class Model1D(RectilinearMesh1D):
             p = np.linspace(self.halfSpaceParameter - tmp,
                             self.halfSpaceParameter + tmp, 251)
 
-        pGrd = StatArray.StatArray(p, self.par.name, self.par.units)
+        pGrd = StatArray(p, self.par.name, self.par.units)
 
+        mesh = RectilinearMesh2D(xEdges=pGrd, yEdges=self.edges.posterior.mesh.edges)
         # Set the posterior hitmap for conductivity vs depth
-        self.par.posterior = Hitmap2D(xEdges=pGrd, yEdges=self.edges.posterior.edges)
+        self.par.posterior = Histogram(mesh=mesh)
 
     def set_priors(self, halfSpaceValue, min_edge, max_edge, max_cells, parameterPrior, gradientPrior, parameterLimits=None, min_width=None, factor=10.0, dzVariance=1.5, prng=None):
         """Setup the priors of a 1D model.
@@ -614,7 +613,7 @@ class Model1D(RectilinearMesh1D):
 
         """
 
-        super().set_priors(min_edge, max_edge, max_cells, min_width, prng)
+        super().set_priors(min_edge=min_edge, max_edge=max_edge, max_cells=max_cells, min_width=min_width, prng=prng)
 
         if not parameterLimits is None:
             assert np.size(parameterLimits) == 2, ValueError(
@@ -881,17 +880,23 @@ class Model1D(RectilinearMesh1D):
         if kwargs.get('edges_kwargs', {}).get('flipY', False) and parameter_kwargs.get('flipY', False):
             parameter_kwargs['flipY'] = False
 
-        ax = super().plot_posteriors(axes[:2], **kwargs)
+        super().plot_posteriors(axes[:2], **kwargs)
         axes[2].sharey(axes[1])
+    
         self.par.plotPosteriors(ax=axes[2], **parameter_kwargs)
 
         best = kwargs.pop('best', None)
-        if not best is None:
-            best.plot(xscale=parameter_kwargs.get('xscale', None), flipY=False, reciprocateX=parameter_kwargs.get('reciprocateX', None), noLabels=True, linewidth=1, color=cP.wellSeparated[3])
-            doi = self.par.posterior.getOpacityLevel(log=parameter_kwargs.get('logX', None))
+        if best is not None:
+            best.plot(xscale=parameter_kwargs.get('xscale', None), 
+                      flipY=False, 
+                      reciprocateX=parameter_kwargs.get('reciprocateX', None), 
+                      labels=False, 
+                      linewidth=1, 
+                      color=cP.wellSeparated[3])
+
+            doi = self.par.posterior.opacity_level(log=parameter_kwargs.get('logX', None), axis=1)
             plt.axhline(doi, color = '#5046C8', linestyle = 'dashed', linewidth = 1, alpha = 0.6)
-        #     plt.ylim(self.par.posterior.y.bounds[::-1])
-        return ax
+        return axes
 
     def evaluateHitmapPrior(self, Hitmap):
         """ Evaluates the model parameters against a hitmap.
@@ -961,7 +966,7 @@ class Model1D(RectilinearMesh1D):
 
         Hist.sum = np.sum(Hist.arr)
 
-    def update_parameter_posterior(self, axis=1):
+    def update_parameter_posterior(self, axis=0):
         """ Imposes a model's parameters with depth onto a 2D Hitmap.
 
         The cells that the parameter-depth profile passes through are accumulated by 1.
@@ -974,12 +979,13 @@ class Model1D(RectilinearMesh1D):
         """
         histogram = self.par.posterior
         # Interpolate the cell centres and parameter values to the 'axis' of the histogram
-        values = self.piecewise_constant_interpolate(self.par, histogram, axis=axis)
+        values = self.piecewise_constant_interpolate(self.par, histogram, axis=1-axis)
+
         # values is now histogram.axis(axis).nCells in length
         # interpolate those values to the opposite axis
-        i0 = histogram.cellIndex(values, axis=1-axis, clip=True)
+        i0 = histogram.cellIndex(values, axis=axis, clip=True)
 
-        ax = histogram.axis(axis)
+        ax = histogram.axis(1-axis)
         # Get the bounding indices depending on whether the mesh has open limits.
         if self.open_right:
             mx = ax.nCells
@@ -987,7 +993,7 @@ class Model1D(RectilinearMesh1D):
             mx = ax.cellIndex(self.edges[-1], clip=True)
         i1 = np.arange(mx)
 
-        histogram._counts[i1, i0] += 1
+        histogram.counts[i0, i1] += 1
 
     # def setReferenceHitmap(self, Hitmap):
     #     """ Assigns a Hitmap as the model's prior """
@@ -1034,7 +1040,7 @@ class Model1D(RectilinearMesh1D):
         # Update the hitmap posterior
         self.update_parameter_posterior(axis=0)
 
-    def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
+    def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
         """Create the Metadata for a Model1D in a HDF file
 
         Creates a new group in a HDF file under h5obj.
@@ -1044,7 +1050,7 @@ class Model1D(RectilinearMesh1D):
         b) createHdf must be called collectively,
         i.e., called by every core in the MPI communicator that was used to open the file.
         In order to create large amounts of empty space before writing to it in parallel,
-        the nRepeats parameter will extend the memory in the first dimension.
+        the add_axis parameter will extend the memory in the first dimension.
 
         Parameters
         ----------
@@ -1052,8 +1058,8 @@ class Model1D(RectilinearMesh1D):
             A HDF file or group object to create the contents in.
         name : str
             The name of the group to create.
-        nRepeats : int, optional
-            Inserts a first dimension into the first dimension of each attribute of the Model1D of length nRepeats.
+        add_axis : int, optional
+            Inserts a first dimension into the first dimension of each attribute of the Model1D of length add_axis.
             This can be used to extend the available memory of the Model1D so that multiple MPI ranks can write to
             their respective parts in the extended memory.
         fillvalue : number, optional
@@ -1079,7 +1085,7 @@ class Model1D(RectilinearMesh1D):
         >>> # This is a collective open of data in the file
         >>> f = h5py.File(fName,'w', driver='mpio',comm=world)
         >>> # Collective creation of space(padded by number of mpi ranks)
-        >>> tmp.createHdf(f, 'models', nRepeats=world.size)
+        >>> tmp.createHdf(f, 'models', add_axis=world.size)
 
         >>> world.barrier()
 
@@ -1094,9 +1100,8 @@ class Model1D(RectilinearMesh1D):
         >>> f.close()
 
         """
-
-        grp = super().createHdf(parent, name, withPosterior, nRepeats, fillvalue)
-        self.par.createHdf(grp, 'par', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
+        grp = super().createHdf(parent, name, withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
+        self.par.createHdf(grp, 'par', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
 
     def writeHdf(self, h5obj, name, withPosterior=True, index=None):
         """Create the Metadata for a Model1D in a HDF file
@@ -1174,6 +1179,6 @@ class Model1D(RectilinearMesh1D):
         """
         self = super(Model1D, cls).fromHdf(grp, index)
 
-        self._par = StatArray.StatArray.fromHdf(grp['par'], index=np.s_[index, :self.nCells.value])
+        self._par = StatArray.fromHdf(grp['par'], index=np.s_[index, :self.nCells.item()])
 
         return self

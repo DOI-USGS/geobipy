@@ -9,7 +9,6 @@ from .Distribution import Distribution
 from .mixNormal import mixNormal
 from .mixPearson import mixPearson
 from .mixStudentT import mixStudentT
-from .Histogram import Histogram
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
@@ -18,7 +17,7 @@ from lmfit import model
 from copy import deepcopy
 
 
-class Histogram1D(Histogram, RectilinearMesh1D):
+class Histogram1D(RectilinearMesh1D):
     """1D Histogram class that updates efficiently.
 
     Fast updating relies on knowing the bins ahead of time.
@@ -421,22 +420,25 @@ class Histogram1D(Histogram, RectilinearMesh1D):
         return RectilinearMesh1D.pcolor(self, self._counts, **kwargs)
 
 
-    def plot(self, rotate=False, flipX=False, flipY=False, trim=True, normalize=False, line=None, **kwargs):
+    def plot(self, flipX=False, flipY=False, trim=True, normalize=False, line=None, **kwargs):
         """ Plots the histogram """
         bins = self.edges_absolute
 
-        ax = cP.hist(self.counts, bins, rotate=rotate, flipX=flipX, flipY=flipY, trim=trim, normalize=normalize, **kwargs)
+        values = self.pdf if normalize else self.counts
+
+        ax = cP.bar(values, bins, flipX=flipX, flipY=flipY, trim=trim, **kwargs)
 
         if not line is None:
-            f = plt.axhline if rotate else plt.axvline
+            f = plt.axhline if kwargs.get('transpose', False) else plt.axvline
             if np.size(line) > 1:
                 [f(l, color=cP.wellSeparated[3], linewidth=1) for l in line]
             else:
                 f(line, color=cP.wellSeparated[3], linewidth=1)
+        
         return ax
 
 
-    def plot_as_line(self, rotate=False, flipX=False, flipY=False, trim=True, normalize=False, **kwargs):
+    def plot_as_line(self, transpose=False, flipX=False, flipY=False, trim=True, normalize=False, **kwargs):
 
         x = self.centres_absolute
         x1 = x

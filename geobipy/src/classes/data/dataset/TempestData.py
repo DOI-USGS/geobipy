@@ -53,156 +53,47 @@ class TempestData(TdemData):
 
     """
 
-    # def __init__(self, system=None, **kwargs):
-    #     """ Initialize the TDEM data """
+    @property
+    def additive_error(self):
+        """The data. """
+        if np.size(self._additive_error, 0) == 0:
+            self._additive_error = StatArray.StatArray((self.nPoints, self.nChannels), "Additive error", "%")
+        return self._additive_error
 
-    #     # Data Class containing xyz and channel values
-    #     super().__init__(system, **kwargs)
-
-    #     self.primary_field = kwargs.get('primary_field')
-    #     self.secondary_field = kwargs.get('secondary_field')
-    #     self.predicted_primary_field = kwargs.get('predicted_primary_field')
-    #     self.predicted_secondary_field = kwargs.get('predicted_secondary_field')
-
-    # @TdemData.channelNames.setter
-    # def channelNames(self, values):
-    #     if values is None:
-    #         self._channelNames = []
-    #         for i in range(self.nSystems):
-    #             # Set the channel names
-    #             for ic in range(self.n_components):
-    #                 for iTime in range(self.nTimes[i]):
-    #                     self._channelNames.append('S{} time {:.3e}'.format(self.components[ic].upper(), self.system[i].windows.centre[iTime]))
-    #     else:
-    #         assert all((isinstance(x, str) for x in values))
-    #         assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
-    #         self._channelNames = values
-
-    # @TdemData.components.setter
-    # def components(self, values):
-
-    #     if values is None:
-    #         values = ['x', 'z']
-    #     else:
-
-    #         if isinstance(values, str):
-    #             values = [values]
-
-    #         assert np.all([isinstance(x, str) for x in values]), TypeError('components_per_channel must be list of str')
-
-    #     self._components = values
-
-    # @TdemData.data.getter
-    # def data(self):
-
-    #     if np.size(self._data, 0) == 0:
-    #         self._data = StatArray.StatArray((self.nPoints, self.nChannels), "Data", self.units)
-
-    #     for i in range(self.n_components):
-    #         ic = self._component_indices(i, 0)
-    #         self._data[:, ic] = self.primary_field[:, i][:, None] + self.secondary_field[:, ic]
-    #     return self._data
+    @additive_error.setter
+    def additive_error(self, values):
+        shp = (self.nPoints, self.nChannels)
+        if values is None:
+            self._additive_error = StatArray.StatArray(np.ones(shp), "Additive error", "%")
+        else:
+            if self.nPoints == 0:
+                self.nPoints = np.size(values, 0)
+                shp = (self.nPoints, self.nChannels)
+            assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("additive_error must have shape {}".format(shp))
+            self._additive_error = StatArray.StatArray(values)
 
     @property
     def datapoint_type(self):
         return Tempest_datapoint
 
-    # @property
-    # def primary_field(self):
-    #     """The data. """
-    #     if np.size(self._primary_field, 0) == 0:
-    #         self._primary_field = StatArray.StatArray((self.nPoints, self.n_components), "Primary field", self.units)
-    #     return self._primary_field
+    @property
+    def relative_error(self):
+        """The data. """
+        if np.size(self._relative_error, 0) == 0:
+            self._relative_error = StatArray.StatArray((self.nPoints, self.n_components * self.nSystems), "Relative error", "%")
+        return self._relative_error
 
-
-    # @primary_field.setter
-    # def primary_field(self, values):
-    #     shp = (self.nPoints, self.n_components)
-    #     if values is None:
-    #         self._primary_field = StatArray.StatArray(shp, "Primary field", self.units)
-    #     else:
-    #         if self.nPoints == 0:
-    #             self.nPoints = np.size(values, 0)
-    #         # if self.nChannels == 0:
-    #         #     self.channels_per_system = np.size(values, 1)
-    #         shp = (self.nPoints, self.n_components)
-    #         assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("primary_field must have shape {}".format(shp))
-    #         self._primary_field = StatArray.StatArray(values)
-
-    # @property
-    # def predicted_primary_field(self):
-    #     """The data. """
-    #     if np.size(self._primary_field, 0) == 0:
-    #         self._primary_field = StatArray.StatArray((self.nPoints, self.n_components), "Primary field", self.units)
-    #     return self._primary_field
-
-
-    # @predicted_primary_field.setter
-    # def predicted_primary_field(self, values):
-    #     shp = (self.nPoints, self.n_components)
-    #     if values is None:
-    #         self._predicted_primary_field = StatArray.StatArray(shp, "Predicted primary field", self.units)
-    #     else:
-    #         if self.nPoints == 0:
-    #             self.nPoints = np.size(values, 0)
-    #         # if self.nChannels == 0:
-    #         #     self.channels_per_system = np.size(values, 1)
-    #         shp = (self.nPoints, self.n_components)
-    #         assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("predicted_primary_field must have shape {}".format(shp))
-    #         self._predicted_primary_field = StatArray.StatArray(values)
-
-    # @property
-    # def secondary_field(self):
-    #     """The data. """
-    #     if np.size(self._secondary_field, 0) == 0:
-    #         self._secondary_field = StatArray.StatArray((self.nPoints, self.nChannels), "Secondary field", self.units)
-    #     return self._secondary_field
-
-    # @secondary_field.setter
-    # def secondary_field(self, values):
-    #     shp = (self.nPoints, self.nChannels)
-    #     if values is None:
-    #         self._secondary_field = StatArray.StatArray(shp, "Secondary field", self.units)
-    #     else:
-    #         if self.nPoints == 0:
-    #             self.nPoints = np.size(values, 0)
-    #         if self.nChannels == 0:
-    #             self.channels_per_system = np.size(values, 1)
-    #         shp = (self.nPoints, self.nChannels)
-    #         assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("seconday_field must have shape {}".format(shp))
-    #         self._secondary_field = StatArray.StatArray(values)
-
-    # @property
-    # def predicted_secondary_field(self):
-    #     """The data. """
-    #     if np.size(self._secondary_field, 0) == 0:
-    #         self._predicted_secondary_field = StatArray.StatArray((self.nPoints, self.nChannels), "Predicted secondary field", self.units)
-    #     return self._predicted_secondary_field
-
-    # @predicted_secondary_field.setter
-    # def predicted_secondary_field(self, values):
-    #     shp = (self.nPoints, self.nChannels)
-    #     if values is None:
-    #         self._predicted_secondary_field = StatArray.StatArray(shp, "Predicted secondary field", self.units)
-    #     else:
-    #         if self.nPoints == 0:
-    #             self.nPoints = np.size(values, 0)
-    #         if self.nChannels == 0:
-    #             self.channels_per_system = np.size(values, 1)
-    #         shp = (self.nPoints, self.nChannels)
-    #         assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("predicted_seconday_field must have shape {}".format(shp))
-    #         self._predicted_secondary_field = StatArray.StatArray(values)
-
-    # @TdemData.std.getter
-    # def std(self):
-    #     """The data. """
-    #     if np.size(self._std, 0) == 0:
-    #         self._std = StatArray.StatArray((self.nPoints, self.nChannels), "Standard deviation", self.units)
-
-    #     relative_error = self.relative_error * self.secondary_field
-    #     self._std = np.sqrt((relative_error**2.0) + (self.additive_error**2.0))
-
-    #     return self._std
+    @relative_error.setter
+    def relative_error(self, values):
+        shp = (self.nPoints, self.n_components * self.nSystems)
+        if values is None:
+            self._relative_error = StatArray.StatArray(np.ones(shp), "Relative error", "%")
+        else:
+            if self.nPoints == 0:
+                self.nPoints = np.size(values, 0)
+                shp = (self.nPoints, self.n_components * self.nSystems)
+            assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("relative_error must have shape {}".format(shp))
+            self._relative_error = StatArray.StatArray(values)
 
     def _as_dict(self):
         out, order = super()._as_dict()
@@ -216,13 +107,6 @@ class TempestData(TdemData):
         order = [*order[:15], *['P{}'.format(c.upper()) for c in self.components], *order[15:]]
 
         return out, order
-
-
-    # def append(self, other):
-
-    #     super().append(self, other)
-
-    #     self.primary_field = np.hstack(self.primary_field, other.primary_field)
 
     @classmethod
     def read_csv(cls, data_filename, system_filename):
@@ -602,135 +486,12 @@ class TempestData(TdemData):
         self._filename = filename
         self._nPoints = self._file['linedata/Easting'].size
 
-    # def datapoint(self, index=None, fiducial=None):
-    #     """Get the ith data point from the data set
-
-    #     Parameters
-    #     ----------
-    #     index : int, optional
-    #         Index of the data point to get.
-    #     fiducial : float, optional
-    #         Fiducial of the data point to get.
-
-    #     Returns
-    #     -------
-    #     out : geobipy.FdemDataPoint
-    #         The data point.
-
-    #     Raises
-    #     ------
-    #     Exception
-    #         If neither an index or fiducial are given.
-
-    #     """
-    #     iNone = index is None
-    #     fNone = fiducial is None
-
-    #     assert not (iNone and fNone) ^ (not iNone and not fNone), Exception("Must specify either an index OR a fiducial.")
-
-    #     if not fNone:
-    #         index = self.fiducial.searchsorted(fiducial)
-
-    #     i = index
-
-    #     return Tempest_datapoint(x = self.x[i],
-    #                          y = self.y[i],
-    #                          z = self.z[i],
-    #                          elevation = self.elevation[i],
-    #                          primary_field = self.primary_field[i, :],
-    #                          secondary_field = self.secondary_field[i, :],
-    #                          std = self.std[i, :],
-    #                          system = self.system,
-    #                          transmitter_loop = self.transmitter[i],
-    #                          receiver_loop = self.receiver[i],
-    #                          lineNumber = self.lineNumber[i],
-    #                          fiducial = self.fiducial[i],
-                            #  )
-
-    # def times(self, system=0):
-    #     """ Obtain the times from the system file """
-    #     assert 0 <= system < self.nSystems, ValueError('system must be in (0, {}]'.format(self.nSystems))
-    #     return StatArray.StatArray(self.system[system].windows.centre, 'Time', 'ms')
-
-    # def __getitem__(self, i):
-    #     """ Define item getter for TdemData """
-    #     if not isinstance(i, slice):
-    #         i = np.unique(i)
-    #     return TempestData(self.system,
-    #                     x = self.x[i],
-    #                     y = self.y[i],
-    #                     z = self.z[i],
-    #                     elevation = self.elevation[i],
-    #                     lineNumber = self.lineNumber[i],
-    #                     fiducial = self.fiducial[i],
-    #                     transmitter = [self.transmitter[j] for j in i],
-    #                     receiver = [self.receiver[j] for j in i],
-    #                     secondary_field = self.secondary_field[i, :],
-    #                     primary_field = self.primary_field[i, :],
-    #                     std = self.std[i, :],
-    #                     channelNames = self.channelNames
-    #                     )
-
-    def fromHdf(self, grp, **kwargs):
+    @classmethod
+    def fromHdf(cls, grp, **kwargs):
         """ Reads the object from a HDF group """
 
-        assert ('system_file_path' in kwargs), ValueError("missing 1 required argument 'system_file_path', the path to directory containing system files")
+        if kwargs.get('index') is not None:
+            return Tempest_datapoint.fromHdf(grp, **kwargs)
 
-        system_file_path = kwargs.pop('system_file_path', None)
-        assert (not system_file_path is None), ValueError("missing 1 required argument 'system_file_path', the path to directory containing system files")
-
-        nSystems = np.int32(np.asarray(grp.get('nSystems')))
-        systems = []
-        for i in range(nSystems):
-            # Get the system file name. h5py has to encode strings using utf-8, so decode it!
-            filename = str(np.asarray(grp.get('System{}'.format(i))), 'utf-8')
-            td = TdemSystem().read(system_file_path+"//"+filename)
-            systems.append(td)
-
-        super().fromHdf(grp)
-
-        self.systems = systems
-
-        self._receiver = StatArray.StatArray(self.nPoints, 'Receiver loops', dtype=CircularLoop)
-        tmp = np.asarray(grp['R/data'])
-        for i in range(self.nPoints):
-            self._receiver[i] = CircularLoop(*tmp[i, :])
-
-        self._transmitter = StatArray.StatArray(self.nPoints, 'Receiver loops', dtype=CircularLoop)
-        tmp = np.asarray(grp['T/data'])
-        for i in range(self.nPoints):
-            self._transmitter[i] = CircularLoop(*tmp[i, :])
-
-        return self
-
-
-    # def Bcast(self, world, root=0, system=None):
-    #     """Broadcast the TdemData using MPI
-
-    #     Parameters
-    #     ----------
-
-    #     """
-
-    #     out = super().Bcast(world, root, system)
-
-    #     out._primary_field = self.primary_field.Bcast(world, root=root)
-    #     out._secondary_field = self.secondary_field.Bcast(world, root=root)
-    #     out._predicted_primary_field = self.predicted_primary_field.Bcast(world, root=root)
-    #     out._predicted_secondary_field = self.predicted_secondary_field.Bcast(world, root=root)
-
-    #     return out
-
-
-    # def Scatterv(self, starts, chunks, world, root=0, system=None):
-    #     """ Scatterv the TdemData using MPI """
-
-    #     out = super().Scatterv(starts, chunks, world, root)
-
-    #     out.primary_field = self.primary_field.Scatterv(starts, chunks, world, root=root)
-    #     out.secondary_field = self.secondary_field.Scatterv(starts, chunks, world, root=root)
-    #     out.predicted_primary_field = self.predicted_primary_field.Scatterv(starts, chunks, world, root=root)
-    #     out.predicted_secondary_field = self.predicted_secondary_field.Scatterv(starts, chunks, world, root=root)
-
-    #     return out
+        return super(TempestData, cls).fromHdf(grp)
 
