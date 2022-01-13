@@ -8,13 +8,9 @@ from ...base import utilities as cf
 from ...base import plotting as cP
 from ..statistics.Distribution import Distribution
 from ..statistics.baseDistribution import baseDistribution
-from ..statistics.Histogram import Histogram
 from .myObject import myObject
 from ...base.HDF.hdfWrite import write_nd
 from ...base import MPI as myMPI
-
-from ...base.HDF import hdfRead
-
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
@@ -217,13 +213,11 @@ class StatArray(np.ndarray, myObject):
 
         nP = np.size(value)
         if nP > 1:
-            assert nP == self.shape[0], ValueError("Number of posteriors must match size of StatArray's first dimension")
-            assert np.all([isinstance(x, Histogram) for x in value]), TypeError("Posterior must have type Histogram")
+            assert nP == self.shape[-1], ValueError("Number of posteriors must match size of StatArray's first dimension")
 
         if nP == 1:
             if isinstance(value, list):
                 value = value[0]
-                assert isinstance(value, Histogram), TypeError("Posterior must have type Histogram")
 
         self._posterior = value
 
@@ -772,8 +766,7 @@ class StatArray(np.ndarray, myObject):
         numpy.resize : For more information.
 
         """
-
-        if (np.all(np.shape(self) == new_shape)):
+        if (np.all(np.shape(self) == np.atleast_1d(new_shape))):
             return deepcopy(self)
         out = StatArray(np.resize(self, new_shape), self.name, self.units)
         if self.hasPrior:
@@ -899,7 +892,7 @@ class StatArray(np.ndarray, myObject):
         cnts, bins = np.histogram(
             self, bins=bins, range=range, normed=normed, weights=weights, density=density)
         bins = StatArray(bins, name=self.name, units=self.units)
-        cP.hist(cnts, bins, **kwargs)
+        cP.bar(cnts, bins, **kwargs)
 
     def pad(self, N):
         """ Copies the properties of a StatArray including all priors or proposals, but pads everything to the given size
@@ -1054,8 +1047,7 @@ class StatArray(np.ndarray, myObject):
         if self.nPosteriors > 1:
             for i in range(self.nPosteriors):
 
-                self._posterior[i].update(
-                    self.take(indices=i, axis=0), **kwargs)
+                self._posterior[i].update(self.take(indices=i, axis=0), **kwargs)
 
         else:
             self.posterior.update(np.squeeze(self), **kwargs)
@@ -1084,12 +1076,12 @@ class StatArray(np.ndarray, myObject):
         matplotlib.pyplot.bar : For additional keyword arguments you may use.
 
         """
-        if (i is None):
-            i = np.size(self)
         if (x is None):
-            x = StatArray(np.arange(i), name="Array index")
+            x = StatArray(np.arange(np.size(self)+1), name="Array index")
+        # if i is not None:
+        #     x = x[i]
 
-        return cP.bar(self, x, i, **kwargs)
+        return cP.bar(self, x, **kwargs)
 
     def pcolor(self, x=None, y=None, **kwargs):
         """Create a pseudocolour plot of the StatArray array, Actually uses pcolormesh for speed.
@@ -1270,6 +1262,7 @@ class StatArray(np.ndarray, myObject):
                     ax = ax[0]
                 plt.sca(ax)
                 plt.cla()
+
                 self.posterior.plot(**kwargs)
 
     @property
