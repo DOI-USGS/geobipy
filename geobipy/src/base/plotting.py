@@ -124,7 +124,6 @@ armytage = [
 # #plt.rcParams.update({'figure.autolayout': True})
 
 # import os
-# print(os.getcwd())
 # plt.style.use('./geobipy.mplstyle')
 
 def pretty(ax):
@@ -145,6 +144,57 @@ def pretty(ax):
     # Ensure that the axis ticks only show up on the bottom and left of the plot.
     ax.get_xaxis().tick_bottom()
     ax.get_yaxis().tick_left()
+
+def filter_color_kwargs(kwargs):
+    defaults = {'equalize' : False,
+                'clim_scaling' : None,
+                'colorbar' : True,
+                'cax' : None,
+                'cmap' : 'viridis',
+                'cmapIntervals' : None,
+                'clabel' : None,
+                'nBins' : 256,
+                'orientation' : 'vertical',
+                'alpha' : 1.0,
+                'alpha_color' : [1, 1, 1]}
+    out, kwargs = filter_kwargs(kwargs, defaults)
+    out['cmap'] = copy.copy(mpl.cm.get_cmap(out['cmap'], out['cmapIntervals']))
+    out['cmap'].set_bad(color='white')
+    return out, kwargs
+
+def filter_plotting_kwargs(kwargs):
+    defaults = {'transpose': False,
+                'xscale': 'linear',
+                'yscale': 'linear',
+                'flip' : False,
+                'flipX' : False, 
+                'flipY' : False,
+                'log' : None,
+                'logX' : None,
+                'logY' : None,
+                'trim' : None,
+                'reciprocateX' : False,
+                'reciprocateY' : False,
+                'labels' : True, 
+                'logBins' : False,
+                'grid' : False,
+                'shading' : 'auto',
+                'xlim' : None,
+                'ylim' : None,
+                'ax' : None,
+                'width' : None,
+                'legend_size' : None
+                }
+    out, kwargs = filter_kwargs(kwargs, defaults)
+    if out['grid']:
+        out['color'] = 'k'
+
+    return out, kwargs
+
+def filter_kwargs(kwargs, defaults):
+    tmp = copy.copy(kwargs)
+    subset = {k: tmp.pop(k, defaults[k]) for k in defaults.keys()}
+    return subset, tmp
 
 
 def xlabel(label, **kwargs):
@@ -240,76 +290,18 @@ def suptitle(label, **kwargs):
     """
     mpl.pyplot.suptitle(label, **kwargs)
 
-
-def bar(values, x=None, i=None, **kwargs):
+def bar(values, edges, **kwargs):
     """Plot a bar chart.
-
-    Plots a bar chart and auto labels it if x and values have type geobipy.StatArray
 
     Parameters
     ----------
     values : array_like or StatArray
-        The height of each bar.
-    x : array_like or StatArray, optional
-        The horizontal locations of the bars
-    i : sequence of ints, optional
-        Plot the ith indices of values, against the ith indices of x.
-
-    Returns
-    -------
-    ax
-        matplotlib .Axes
-
-    See Also
-    --------
-    matplotlib.pyplot.bar : For additional keyword arguments you may use.
-
-    """
-
-    if (i is None):
-        i = np.size(values)
-    if (x is None):
-        x = np.arange(i)
-    ax = kwargs.pop('ax', None)
-    if ax is None:
-        ax = plt.gca()
-    else:
-        plt.sca(ax)
-
-    pretty(ax)
-    plt.bar(x[:i], values[:i], color=wellSeparated[0], **kwargs)
-    title(cF.getName(values))
-    xlabel(cF.getName(x))
-    ylabel(cF.getNameUnits(values))
-    plt.margins(0.1, 0.1)
-
-    return ax
-
-
-def hist(counts, bins, rotate=False, flipX=False, flipY=False, trim=True, normalize=False, **kwargs):
-    """Plot a histogram.
-
-    Plot of histogram of values, if density is 1, a normal is fit to the values.
-    If values is an StatArray, the axes are automatically labelled.
-
-    Parameters
-    ----------
-    counts : array_like or StatArray
-        Compute the histogram of these values
-    bins : array_like or StatArray
-        Bins of the histogram
+        Bar values
+    edges : array_like or StatArray
+        edges of the bars
 
     Other Parameters
     ----------------
-    log : 'e' or float, optional
-        Take the log of the colour to a base. 'e' if log = 'e', and a number e.g. log = 10.
-        Values in c that are <= 0 are masked.
-    logBins : 'e' or float, optiona
-        Take the log of the bins.
-    reciprocateX : bool, optiona
-        Take the reciprocal of the x axis.
-    xscale : str, optional
-        Scale the x axis? e.g. xscale = 'linear' or 'log'.
 
     Returns
     -------
@@ -321,14 +313,12 @@ def hist(counts, bins, rotate=False, flipX=False, flipY=False, trim=True, normal
         matplotlib.pyplot.hist : For additional keyword arguments you may use.
 
     """
-
-    kwargs['color'] = kwargs.pop('color', wellSeparated[0])
-    kwargs['linewidth'] = kwargs.pop('linewidth', 0.5)
-    kwargs['edgecolor'] = kwargs.pop('edgecolor', 'k')
-    xscale = kwargs.pop('xscale', 'linear')
-    yscale = kwargs.pop('yscale', 'linear')
-    reciprocateX = kwargs.pop('reciprocateX', False)
-    logBins = kwargs.pop('logBins', False)
+    geobipy_kwargs, kwargs = filter_plotting_kwargs(kwargs)
+    color_kwargs, kwargs = filter_color_kwargs(kwargs)
+    
+    kwargs['color'] = kwargs.get('color', wellSeparated[0])
+    kwargs['linewidth'] = kwargs.get('linewidth', 0.5)
+    kwargs['edgecolor'] = kwargs.get('edgecolor', 'k')
 
     ax = kwargs.pop('ax', None)
     if ax is None:
@@ -338,117 +328,61 @@ def hist(counts, bins, rotate=False, flipX=False, flipY=False, trim=True, normal
 
     pretty(ax)
 
-    if reciprocateX:
-        bins = 1.0 / bins
+    if geobipy_kwargs['reciprocateX']:
+        bins = 1.0 / edges
 
-    if logBins:
-        bins, logLabel = cF._log(bins, logBins)
-        label = logLabel + cF.getNameUnits(bins)
+    if geobipy_kwargs['logBins']:
+        bins, logLabel = cF._log(edges, geobipy_kwargs['logBins'])
+        label = logLabel + cF.getNameUnits(edges)
     else:
-        label = cF.getNameUnits(bins)
+        label = cF.getNameUnits(edges)
 
-    width = np.abs(np.diff(bins))
+    width = np.abs(np.diff(edges))
+    centres = edges[:-1] + 0.5 * (np.diff(edges))
 
-    centres = bins[:-1] + 0.5 * (np.diff(bins))
-
-    cnts = counts
-    if normalize:
-        denom = np.trapz(counts, x = centres)
-        if np.all(denom > 0.0):
-            cnts = counts / denom
-        else:
-            return
-
-    if (rotate):
-        plt.barh(centres, cnts, height=width, align='center', **kwargs)
+    if (geobipy_kwargs['transpose']):
+        plt.barh(centres, values, height=width, align='center', **kwargs)
         ylabel(label)
-        if normalize:
-            xlabel('Density')
-        else:
-            xlabel('Frequency')
+        xlabel(cF.getNameUnits(values))
     else:
-        plt.bar(centres, cnts, width=width, align='center', **kwargs)
+        plt.bar(centres, values, width=width, align='center', **kwargs)
         xlabel(label)
-        if normalize:
-            ylabel('Density')
-        else:
-            ylabel('Frequency')
+        ylabel(cF.getNameUnits(values))
 
-    if all(counts == 0):
+    if all(values == 0):
         trim = False
+
     i0 = 0
     i1 = np.size(centres) - 1
-    if (trim):
-        while counts[i0] == 0:
+    trim = geobipy_kwargs['trim']
+    if (trim is not None):
+        while values[i0] == trim:
             i0 += 1
-        while counts[i1] == 0:
+        while values[i1] == trim:
             i1 -= 1
 
     if (i1 > i0):
-        if (rotate):
-            plt.ylim(bins[i0], bins[i1+1])
-            xscale, yscale = yscale, xscale
+        if (geobipy_kwargs['transpose']):
+            plt.ylim(edges[i0], edges[i1+1])
+            geobipy_kwargs['xscale'], geobipy_kwargs['yscale'] = geobipy_kwargs['yscale'], geobipy_kwargs['xscale']
         else:
-            plt.xlim(bins[i0], bins[i1+1])
+            plt.xlim(edges[i0], edges[i1+1])
 
-    if flipX:
+    if geobipy_kwargs['flipX']:
         ax.invert_xaxis()
 
-    if flipY:
+    if geobipy_kwargs['flipY']:
         ax.invert_yaxis()
 
-    plt.xscale(xscale)
-    plt.yscale(yscale)
+    plt.xscale(geobipy_kwargs['xscale'])
+    plt.yscale(geobipy_kwargs['yscale'])
 
-    if xscale == 'linear':
+    if geobipy_kwargs['xscale'] == 'linear':
         ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 2))
-    if yscale == 'linear':
+    if geobipy_kwargs['yscale'] == 'linear':
         ax.ticklabel_format(style='sci', axis='y', scilimits=(0, 2))
 
     return ax
-
-
-    def plotGrid(self, **kwargs):
-        """Plot a set of lines contained in a line collection. """
-
-        xscale = kwargs.pop('xscale','linear')
-        yscale = kwargs.pop('yscale','linear')
-        flipX = kwargs.pop('flipX',False)
-        flipY = kwargs.pop('flipY',False)
-        c = kwargs.pop('color', 'k')
-
-        ax = kwargs.pop('ax', None)
-        if ax is None:
-            ax = plt.gca()
-        else:
-            plt.sca(ax)
-        cP.pretty(ax)
-        ax.vlines(x = self.x.edges, ymin=self._zMesh[0, :], ymax=self._zMesh[-1, :], **kwargs)
-        segs = np.zeros([self.y.nEdges, self.x.nEdges, 2])
-        segs[:, :, 0] = np.repeat(self.x.edges[np.newaxis, :], self.y.nEdges, 0)
-        segs[:, :, 1] = np.repeat(self.y.edges[:, np.newaxis], self.x.nEdges, 1) + self.z.edges
-
-        ls = LineCollection(segs, color='k', linestyle='solid', **kwargs)
-        ax.add_collection(ls)
-
-        ax.set_xlim(self.x.displayLimits)
-        dz = 0.02 * np.abs(self._zMesh.max() - self._zMesh.min())
-        ax.set_ylim(self._zMesh.min() - dz, self._zMesh.max() + dz)
-
-
-        plt.xscale(xscale)
-        plt.yscale(yscale)
-        cP.xlabel(self.x._centres.cF.getNameUnits())
-        cP.ylabel(self.y._centres.cF.getNameUnits())
-
-        if flipX:
-            ax.invert_xaxis()
-            # ax.set_xlim(ax.get_xlim()[::-1])
-
-        if flipY:
-            ax.invert_yaxis()
-            # ax.set_ylim(ax.get_ylim()[::-1])
-
 
 def pcolor(values, x=None, y=None, **kwargs):
     """Create a pseudocolour plot of a 2D array, Actually uses pcolormesh for speed.
@@ -511,29 +445,22 @@ def pcolor(values, x=None, y=None, **kwargs):
     matplotlib.pyplot.pcolormesh : For additional keyword arguments you may use.
 
     """
-
-    kwargs['grid'] = kwargs.pop('grid', False)
-
-    recX = kwargs.pop('reciprocateX', False)
-    recY = kwargs.pop('reciprocateY', False)
-    logX = kwargs.pop('logX', None)
-    logY = kwargs.pop('logY', None)
-    transpose = kwargs.get('transpose', False)
-
+    geobipy_kwargs, _ = filter_plotting_kwargs(kwargs)
+    
     # Set the grid colour if specified
-    c = None
-    if kwargs['grid']:
-        c = kwargs.pop('color', 'k')
+    # c = None
+    # if kwargs['grid']:
+    #     c = kwargs.pop('color', 'k')
 
-    ax = kwargs.pop('ax', None)
-    if ax is None:
-        ax = plt.gca()
-    else:
-        if isinstance(ax, list):
-            ax = ax[0]
-        plt.sca(ax)
+    # ax = kwargs.pop('ax', None)
+    # if ax is None:
+    #     ax = plt.gca()
+    # else:
+    #     if isinstance(ax, list):
+    #         ax = ax[0]
+    #     plt.sca(ax)
 
-    pretty(ax)
+    # pretty(ax)
 
     if (x is None):
         mx = np.arange(np.size(values,1)+1)
@@ -553,20 +480,18 @@ def pcolor(values, x=None, y=None, **kwargs):
         else:
             assert y.size == values.shape[0]+1, ValueError('y must be size {}. Not {}'.format(values.shape[0]+1, y.size))
 
-    if transpose:
+    if geobipy_kwargs['transpose']:
         mx, my = my, mx
         values = values.T
 
-    if recX:
+    if geobipy_kwargs['reciprocateX']:
         mx = 1.0 / mx
 
-    if recY:
+    if geobipy_kwargs['reciprocateY']:
         my = 1.0 / my
 
-    if not logX is None:
-        mx, _ = cF._log(mx, logX)
-    if not logY is None:
-        my, _ = cF._log(my, logY)
+    mx, _ = cF._log(mx, geobipy_kwargs['logX'])
+    my, _ = cF._log(my, geobipy_kwargs['logY'])
 
     X, Y = np.meshgrid(mx, my)
 
@@ -587,8 +512,8 @@ def pcolormesh(X, Y, values, **kwargs):
 
     else:
         originalAlpha = kwargs.pop('alpha', None)
-        originalAlphaColour = kwargs.pop('alphaColour', [1, 1, 1])
-        kwargs['alphaColour'] = 'transparent'
+        originalAlphaColour = kwargs.pop('alpha_colour', [1, 1, 1])
+        kwargs['alpha_colour'] = 'transparent'
         kwargs.pop('cmap', None)
 
         classId = classes['id']
@@ -697,6 +622,157 @@ def _pcolormesh(X, Y, values, **kwargs):
 
     assert np.ndim(values) == 2, ValueError('Number of dimensions must be 2')
 
+    geobipy_kwargs, kwargs = filter_plotting_kwargs(kwargs)
+    color_kwargs, kwargs = filter_color_kwargs(kwargs)
+
+    kwargs['cmap'] = color_kwargs['cmap']
+
+    ax = geobipy_kwargs['ax']
+    if ax is None:
+        ax = plt.gca()
+    else:
+        plt.sca(ax)
+    pretty(ax)
+
+    # Gridlines
+    if 'edgecolor' in kwargs:
+        geobipy_kwargs['grid'] = True
+
+    if geobipy_kwargs['grid']:
+        kwargs['edgecolor'] = kwargs.pop('edgecolor', 'k')
+        kwargs['linewidth'] = kwargs.pop('linewidth', 2)
+
+    values = values.astype('float64')
+
+    rang = values.max() - values.min()
+    if not geobipy_kwargs['trim'] is None and rang > 0.0:
+        assert isinstance(geobipy_kwargs['trim'], (float, np.float32, np.float64)), TypeError("trim must be a float")
+        bounds = cF.findFirstLastNotValue(values, geobipy_kwargs['trim'])
+        X = X[bounds[0, 0]:bounds[0, 1]+2, bounds[1, 0]:bounds[1, 1]+2]
+        Y = Y[bounds[0, 0]:bounds[0, 1]+2, bounds[1, 0]:bounds[1, 1]+2]
+        values = values[bounds[0, 0]:bounds[0, 1]+1, bounds[1, 0]:bounds[1, 1]+1]
+
+    # if (geobipy_kwargs['log']):
+    values, logLabel = cF._log(values, geobipy_kwargs['log'])
+
+    if color_kwargs['equalize']:
+        assert color_kwargs['nBins'] > 0, ValueError('nBins must be greater than zero')
+        values, dummy = cF.histogramEqualize(values, nBins=color_kwargs['nBins'])
+
+    if color_kwargs['clim_scaling'] is not None:
+        values = cF.trim_by_percentile(values, color_kwargs['clim_scaling'])
+
+    Zm = ma.masked_invalid(values, copy=False)
+
+    if np.size(color_kwargs['alpha']) == 1:
+        pm = ax.pcolormesh(X, Y, Zm, alpha = color_kwargs['alpha'], **kwargs)
+    else:
+        assert np.all(color_kwargs['alpha'].shape == Zm.shape), ValueError("Alpha array must have shape {}".format(Zm.shape))
+        Zm[color_kwargs['alpha'] == 0.0] = np.nan
+        pm = ax.pcolormesh(X, Y, Zm, **kwargs)
+
+    plt.xscale(geobipy_kwargs['xscale'])
+    plt.yscale(geobipy_kwargs['yscale'])
+
+    if geobipy_kwargs['flipX']:
+        ax.invert_xaxis()
+
+    if geobipy_kwargs['flipY']:
+        ax.invert_yaxis()
+
+    if geobipy_kwargs['xlim'] is not None:
+        ax.set_xlim(geobipy_kwargs['xlim'])
+
+    if geobipy_kwargs['ylim'] is not None:
+        ax.set_ylim(geobipy_kwargs['ylim'])
+
+
+    cbar = None
+    if (color_kwargs['colorbar']):
+        if (color_kwargs['equalize']):
+            cbar = plt.colorbar(pm, extend='both', cax=color_kwargs['cax'], orientation=color_kwargs['orientation'])
+        else:
+            cbar = plt.colorbar(pm, cax=color_kwargs['cax'], orientation=color_kwargs['orientation'])
+
+        if color_kwargs['clabel'] is None:
+            if (geobipy_kwargs['log']):
+                clabel(cbar, logLabel + cF.getNameUnits(values))
+            else:
+                clabel(cbar, cF.getNameUnits(values))
+        else:
+            clabel(cbar, color_kwargs['clabel'])
+
+    if np.size(color_kwargs['alpha']) > 1:
+        if isinstance(color_kwargs['alpha_color'], str):
+            alpha_to_transparent(pm, color_kwargs['alpha'])
+        else:
+            alpha_to_colour(pm, color_kwargs['alpha'], np.asarray(color_kwargs['alpha_color']))
+
+    return ax, pm, cbar
+
+def pcolor_as_bar(X, Y, values, **kwargs):
+    """Create a pseudocolour plot of a 2D array, Actually uses pcolormesh for speed.
+
+    Create a colour plot of a 2D array.
+    If the arrays x, y, and values are geobipy.StatArray classes, the axes can be automatically labelled.
+    Can take any other matplotlib arguments and keyword arguments e.g. cmap etc.
+
+    Parameters
+    ----------
+    values : array_like or StatArray
+        A 2D array of colour values.
+    X : 1D array_like or StatArray, optional
+        Horizontal coordinates of the values edges.
+    Y : 1D array_like or StatArray, optional
+        Vertical coordinates of the values edges.
+
+    Other Parameters
+    ----------------
+    alpha : scalar or array_like, optional
+        If alpha is scalar, behaves like standard matplotlib alpha and opacity is applied to entire plot
+        If array_like, each pixel is given an individual alpha value.
+    alphaColour : 'trans' or length 3 array
+        If 'trans', low alpha values are mapped to transparency
+        If 3 array, each entry is the RGB value of a colour to map to, e.g. white = [1, 1, 1].
+    log : 'e' or float, optional
+        Take the log of the colour to a base. 'e' if log = 'e', and a number e.g. log = 10.
+        Values in c that are <= 0 are masked.
+    equalize : bool, optional
+        Equalize the histogram of the colourmap so that all colours have an equal amount.
+    nbins : int, optional
+        Number of bins to use for histogram equalization.
+    xscale : str, optional
+        Scale the x axis? e.g. xscale = 'linear' or 'log'
+    flipX : bool, optional
+        Flip the X axis
+    flipY : bool, optional
+        Flip the Y axis
+    grid : bool, optional
+        Plot the grid
+    noColorbar : bool, optional
+        Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.
+    trim : array_like, optional
+        Set the x and y limits to the first and last locations that don't equal the values in trim.
+    classes : dict, optional
+            A dictionary containing three entries.
+            classes['id'] : array_like of same shape as self containing the class id of each element in self.
+            classes['cmaps'] : list of matplotlib colourmaps.  The number of colourmaps should equal the number of classes.
+            classes['labels'] : list of str.  The length should equal the number of classes.
+            If classes is provided, alpha is ignored if provided.
+
+    Returns
+    -------
+    ax
+        matplotlib .Axes
+
+    See Also
+    --------
+    matplotlib.pyplot.pcolormesh : For additional keyword arguments you may use.
+
+    """
+
+    assert np.ndim(values) == 2, ValueError('Number of dimensions must be 2')
+
     ax = kwargs.pop('ax', None)
     if ax is None:
         ax = plt.gca()
@@ -718,7 +794,7 @@ def _pcolormesh(X, Y, values, **kwargs):
     # Colourbar
     equalize = kwargs.pop('equalize', False)
     clim_scaling = kwargs.pop('clim_scaling', None)
-    noColorBar = kwargs.pop('noColorbar', False)
+    colorbar = kwargs.pop('colorbar', False)
     cax = kwargs.pop('cax', None)
     cmap = kwargs.pop('cmap', 'viridis')
     cmapIntervals = kwargs.pop('cmapIntervals', None)
@@ -731,7 +807,7 @@ def _pcolormesh(X, Y, values, **kwargs):
     trim = kwargs.pop('trim', None)
     log = kwargs.pop('log', False)
     alpha = kwargs.pop('alpha', 1.0)
-    alphaColour = kwargs.pop('alphaColour', [1, 1, 1])
+    alphaColour = kwargs.pop('alpha_color', [1, 1, 1])
 
     # Gridlines
     grid = kwargs.pop('grid', False)
@@ -742,14 +818,6 @@ def _pcolormesh(X, Y, values, **kwargs):
         kwargs['linewidth'] = kwargs.pop('linewidth', 2)
 
     values = values.astype('float64')
-
-    rang = values.max() - values.min()
-    if not trim is None and rang > 0.0:
-        assert isinstance(trim, (float, np.float32, np.float64)), TypeError("trim must be a float")
-        bounds = cF.findFirstLastNotValue(values, trim)
-        X = X[bounds[0, 0]:bounds[0, 1]+2, bounds[1, 0]:bounds[1, 1]+2]
-        Y = Y[bounds[0, 0]:bounds[0, 1]+2, bounds[1, 0]:bounds[1, 1]+2]
-        values = values[bounds[0, 0]:bounds[0, 1]+1, bounds[1, 0]:bounds[1, 1]+1]
 
     if (log):
         values, logLabel = cF._log(values, log)
@@ -774,14 +842,6 @@ def _pcolormesh(X, Y, values, **kwargs):
     plt.xscale(xscale)
     plt.yscale(yscale)
 
-    if grid:
-        xlim = ax.get_xlim()
-        dz = 0.02 * np.abs(xlim[1] - xlim[0])
-        ax.set_xlim(xlim[0] - dz, xlim[1] + dz)
-        ylim = ax.get_ylim()
-        dz = 0.02 * np.abs(ylim[1] - ylim[0])
-        ax.set_ylim(ylim[0] - dz, ylim[1] + dz)
-
     if flipX:
         ax.invert_xaxis()
 
@@ -796,7 +856,7 @@ def _pcolormesh(X, Y, values, **kwargs):
 
 
     cbar = None
-    if (not noColorBar):
+    if (colorbar):
         if (equalize):
             cbar = plt.colorbar(pm, extend='both', cax=cax, orientation=orientation)
         else:
@@ -877,7 +937,7 @@ def pcolor_1D(values, y=None, **kwargs):
         Show the grid lines
     transpose : bool, optional
         Transpose the image
-    noColorBar : bool, optional
+    noColorbar : bool, optional
         Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.
 
     Returns
@@ -890,32 +950,8 @@ def pcolor_1D(values, y=None, **kwargs):
     matplotlib.pyplot.pcolormesh : For additional keyword arguments you may use.
 
     """
-
-#    assert np.ndim(values) == 2, ValueError('Number of dimensions must be 2')
-
-    equalize = kwargs.pop('equalize', False)
-
-    kwargs['shading'] = kwargs.pop('shading', 'auto')
-
-    log = kwargs.pop('log', False)
-    xscale = kwargs.pop('xscale', 'linear')
-    yscale = kwargs.pop('yscale', 'linear')
-
-    cl = kwargs.pop('clabel', None)
-    grid = kwargs.pop('grid', False)
-    flip = kwargs.pop('flip', False)
-    noColorBar = kwargs.pop('noColorbar', False)
-    alpha = kwargs.pop('alpha', 1.0)
-    width = kwargs.pop('width', None)
-    transpose = kwargs.pop('transpose', False)
-
-    xlim_u = kwargs.pop('xlim', None)
-    ylim_u = kwargs.pop('ylim', None)
-
-    # Set the grid colour if specified
-    c = None
-    if grid:
-        c = kwargs.pop('color', 'k')
+    geobipy_kwargs, kwargs = filter_plotting_kwargs(kwargs)
+    color_kwargs, kwargs = filter_color_kwargs(kwargs)
 
     # Get the figure axis
     ax = kwargs.pop('ax', None)
@@ -934,68 +970,64 @@ def pcolor_1D(values, y=None, **kwargs):
         mx = y
         my = np.asarray([0.0, 0.1*(np.nanmax(y)-np.nanmin(y))])
 
-    if not width is None:
-        assert width > 0.0, ValueError("width must be positive")
-        my[1] = width
+    if not geobipy_kwargs['width'] is None:
+        assert geobipy_kwargs['width'] > 0.0, ValueError("width must be positive")
+        my[1] = geobipy_kwargs['width']
 
     v = ma.masked_invalid(values)
-    if (log):
-        v,logLabel=cF._log(v,log)
+    if (geobipy_kwargs['log']):
+        v,logLabel = cF._log(v, geobipy_kwargs['log'])
 
     # Append with null values to correctly use pcolormesh
     # v = np.concatenate([np.atleast_2d(np.hstack([np.asarray(v),0])), np.atleast_2d(np.zeros(v.size+1))], axis=0)
     v = np.atleast_2d(v)
 
-    if equalize:
-        nBins = kwargs.pop('nbins',256)
-        assert nBins > 0, ValueError('nBins must be greater than zero')
-        v,dummy = cF.histogramEqualize(v, nBins=nBins)
-
-    # Zm = ma.masked_invalid(v, copy=False)
+    if color_kwargs['equalize']:
+        v, dummy = cF.histogramEqualize(v, nBins=color_kwargs['nBins'])
 
     X, Y = np.meshgrid(mx, my)
 
-    if transpose:
+    if geobipy_kwargs['transpose']:
         X, Y = Y, X
 
-    pm = ax.pcolormesh(X, Y, v, color=c, **kwargs)
+    pm = ax.pcolormesh(X, Y, v, color=geobipy_kwargs.get('color'), **kwargs)
 
     ax.set_aspect('equal')
 
-    if flip:
-        ax.invert_yaxis() if transpose else ax.invert_xaxis()
+    if geobipy_kwargs['flip']:
+        ax.invert_yaxis() if geobipy_kwargs['transpose'] else ax.invert_xaxis()
 
-    plt.xscale(xscale)
-    plt.yscale(yscale)
+    plt.xscale(geobipy_kwargs['xscale'])
+    plt.yscale(geobipy_kwargs['yscale'])
 
-    if transpose:
+    if geobipy_kwargs['transpose']:
         ylabel(cF.getNameUnits(y))
         ax.get_xaxis().set_ticks([])
     else:
         xlabel(cF.getNameUnits(y))
         ax.get_yaxis().set_ticks([])
 
-    if not xlim_u is None:
-        ax.set_xlim(xlim_u)
-    if not ylim_u is None:
-        ax.set_ylim(ylim_u)
+    if not geobipy_kwargs['xlim'] is None:
+        ax.set_xlim(geobipy_kwargs['xlim'])
+    if not geobipy_kwargs['ylim'] is None:
+        ax.set_ylim(geobipy_kwargs['ylim'])
 
-    if (not noColorBar):
-        if (equalize):
+    if (color_kwargs['colorbar']):
+        if (color_kwargs['equalize']):
             cbar = plt.colorbar(pm, extend='both')
         else:
             cbar = plt.colorbar(pm)
 
-        if cl is None:
-            if (log):
-                clabel(cbar,logLabel+cF.getNameUnits(values))
+        if color_kwargs['clabel'] is None:
+            if (geobipy_kwargs['log']):
+                clabel(cbar, logLabel + cF.getNameUnits(values))
             else:
-                clabel(cbar,cF.getNameUnits(values))
+                clabel(cbar, cF.getNameUnits(values))
         else:
-            clabel(cbar, cl)
+            clabel(cbar, color_kwargs['clabel'])
 
-    if np.size(alpha) > 1:
-        setAlphaPerPcolormeshPixel(pm, alpha)
+    if np.size(color_kwargs['alpha']) > 1:
+        setAlphaPerPcolormeshPixel(pm, color_kwargs['alpha'])
 
     return ax
 
@@ -1036,26 +1068,20 @@ def plot(x, y, **kwargs):
         matplotlib.pyplot.plot : For additional keyword arguments you may use.
 
     """
+    geobipy_kwargs, kwargs = filter_plotting_kwargs(kwargs)
+    color_kwargs, kwargs = filter_color_kwargs(kwargs)
 
-    xscale = kwargs.pop('xscale','linear')
-    yscale = kwargs.pop('yscale','linear')
-    flipX = kwargs.pop('flipX',False)
-    flipY = kwargs.pop('flipY',False)
-    labels = kwargs.pop('labels', True)
-    log = kwargs.pop('log', None)
-    reciprocateX = kwargs.pop('reciprocateX', False)
-
-    if reciprocateX:
+    if geobipy_kwargs['reciprocateX']:
         x = 1.0 / x
 
 
-    if (labels):
+    if (geobipy_kwargs['labels']):
         xl = cF.getNameUnits(x)
         yl = cF.getNameUnits(y)
 
     tmp = y
-    if (log):
-        tmp, logLabel = cF._log(y, log)
+    if (geobipy_kwargs['log']):
+        tmp, logLabel = cF._log(y, geobipy_kwargs['log'])
         yl = logLabel + yl
 
     ax = kwargs.pop('ax', None)
@@ -1070,24 +1096,24 @@ def plot(x, y, **kwargs):
     except:
         plt.plot(x, tmp.T, **kwargs)
 
-    plt.xscale(xscale)
-    plt.yscale(yscale)
+    plt.xscale(geobipy_kwargs['xscale'])
+    plt.yscale(geobipy_kwargs['yscale'])
 
-    if (labels):
+    if (geobipy_kwargs['labels']):
         xlabel(xl)
         ylabel(yl)
     plt.margins(0.1, 0.1)
 
-    if flipX:
+    if geobipy_kwargs['flipX']:
         ax.invert_xaxis()
 
-    if flipY:
+    if geobipy_kwargs['flipY']:
         ax.invert_yaxis()
 
-    if not xscale == 'log':
+    if not geobipy_kwargs['xscale'] == 'log':
         ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 2))
 
-    if not yscale == 'log':
+    if not geobipy_kwargs['yscale'] == 'log':
         ax.ticklabel_format(style='sci', axis='y', scilimits=(0, 2))
 
     return ax
@@ -1109,7 +1135,7 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
     y : 1D array_like or StatArray, optional
         Vertical locations of the points to plot, if y = None, then y = c.
     i : sequence of ints or numpy.slice, optional
-        Plot a subset of x, y, c, using the indices in i.
+        Plot a geobipy_kwargs of x, y, c, using the indices in i.
 
     Other Parameters
     ----------------
@@ -1126,7 +1152,7 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
             Flip the X axis
     flipY : bool, optional
         Flip the Y axis
-    noColorBar : bool, optional
+    noColorbar : bool, optional
         Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.
 
     Returns
@@ -1140,31 +1166,11 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
 
     """
 
+    geobipy_kwargs, kwargs = filter_plotting_kwargs(kwargs)
+    color_kwargs, kwargs = filter_color_kwargs(kwargs)
+
     if (i is None):
         i = np.s_[:]
-
-    # Pull options from kwargs to prevent silly crashes
-    log = kwargs.pop('log', False)
-    equalize = kwargs.pop('equalize', False)
-    xscale = kwargs.pop('xscale', 'linear')
-    yscale = kwargs.pop('yscale', 'linear')
-    sl = kwargs.pop('sizeLegend', None)
-
-    noColorBar = kwargs.pop('noColorbar', False)
-    cax = kwargs.pop('cax', None)
-    cmap = kwargs.pop('cmap', 'viridis')
-    cmapIntervals = kwargs.pop('cmapIntervals', None)
-    kwargs['cmap'] = mpl.cm.get_cmap(cmap, cmapIntervals)
-
-    flipx = kwargs.pop('flipX', False)
-    flipy = kwargs.pop('flipY', False)
-
-    kwargs.pop('color', None) # Remove color which could conflict with c
-
-    #c = kwargs.pop('c',None)
-    assert (not c is None), ValueError('Must specify colour with argument "c"')
-
-    _cLabel = kwargs.pop('clabel', cF.getNameUnits(c))
 
     standardColour = isinstance(c, (str, tuple))
 
@@ -1178,14 +1184,14 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
         xt = xt[iNaN]
 
     # Did the user ask for a log colour plot?
-    if (log and not standardColour):
-        c, logLabel = cF._log(c, log)
+    if (geobipy_kwargs['log'] and not standardColour):
+        c, logLabel = cF._log(c, geobipy_kwargs['log'])
 
     # Equalize the colours?
-    if equalize and not standardColour:
-        nBins = kwargs.pop('nbins', 256)
-        assert nBins > 0, ValueError('nBins must be greater than zero')
-        c, dummy = cF.histogramEqualize(c, nBins=nBins)
+    if color_kwargs['equalize'] and not standardColour:
+      tmp, dummy = cF.histogramEqualize(c, nBins=color_kwargs['nBins'])
+      if tmp is not None:
+          c = tmp
 
     # Get the yAxis values
     if (y is None):
@@ -1200,42 +1206,47 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
         ax = plt.gca()
     else:
         plt.sca(ax)
-
     pretty(ax)
-    f = plt.scatter(xt, yt, c = c, **kwargs)
+
+    f = plt.scatter(xt, yt, c = c, cmap=color_kwargs['cmap'], **kwargs)
 
     yl = cF.getNameUnits(yt)
 
     cbar = None
-    if (not noColorBar and not standardColour):
-        if (equalize):
-            cbar = plt.colorbar(f, extend='both', cax=cax)
+    if (color_kwargs['colorbar'] and not standardColour):
+        if (color_kwargs['equalize']):
+            cbar = plt.colorbar(f, extend='both', cax=color_kwargs['cax'])
         else:
-            cbar = plt.colorbar(f, cax=cax)
-        if (log):
-            _cLabel = logLabel + _cLabel
-            if y is None:
-                yl = logLabel + yl
+            cbar = plt.colorbar(f, cax=color_kwargs['cax'])
 
-        clabel(cbar, _cLabel)
+        if color_kwargs['clabel'] is None:
+            if (geobipy_kwargs['log']):
+                clabel(cbar, logLabel + cF.getNameUnits(c))
+                if y is None:
+                    yl = logLabel + yl
+            else:
+                clabel(cbar, cF.getNameUnits(c))
+        else:
+            clabel(cbar, color_kwargs['clabel'])
 
-    if ('s' in kwargs and not sl is None):
-        assert (not isinstance(sl, bool)), TypeError('sizeLegend must have type int, or array_like')
-        if (isinstance(sl, int)):
+    if ('s' in kwargs and not geobipy_kwargs['legend_size'] is None):
+        assert (not isinstance(geobipy_kwargs['legend_size'], bool)), TypeError('sizeLegend must have type int, or array_like')
+        if (isinstance(geobipy_kwargs['legend_size'], int)):
             tmp0 = np.nanmin(kwargs['s'])
             tmp1 = np.nanmax(kwargs['s'])
-            a = np.linspace(tmp0, tmp1, sl)
+            a = np.linspace(tmp0, tmp1, geobipy_kwargs['legend_size'])
         else:
-            a = sl
+            a = geobipy_kwargs['legend_size']
         sizeLegend(kwargs['s'], a)
 
-    if flipx:
+    if geobipy_kwargs['flipX']:
         ax.invert_xaxis()
-    if flipy:
+    if geobipy_kwargs['flipY']:
         ax.invert_yaxis()
 
-    plt.xscale(xscale)
-    plt.yscale(yscale)
+    plt.xscale(geobipy_kwargs['xscale'])
+    plt.yscale(geobipy_kwargs['yscale'])
+
     xlabel(cF.getNameUnits(x, 'x'))
     ylabel(yl)
     plt.margins(0.1, 0.1)
@@ -1377,36 +1388,30 @@ def step(x, y, **kwargs):
         ax = plt.gca()
     else:
         plt.sca(ax)
-
     pretty(ax)
 
-    flipX = kwargs.pop('flipX', False)
-    flipY = kwargs.pop('flipY', False)
-    noLabels = kwargs.pop('noLabels', False)
-    logx = kwargs.pop('logX', None)
-    logy = kwargs.pop('logY', None)
-    xscale = kwargs.pop('xscale', 'linear')
-    yscale = kwargs.pop('yscale', 'linear')
+    geobipy_kwargs, kwargs = filter_plotting_kwargs(kwargs)
+    color_kwargs, kwargs = filter_color_kwargs(kwargs)
 
-    kwargs['color'] = kwargs.pop('color', wellSeparated[3])
+    color_kwargs['color'] = color_kwargs.pop('color', wellSeparated[3])
 
-    x, _ = cF._log(x, logx)
-    y, _ = cF._log(y, logy)
+    x, _ = cF._log(x, geobipy_kwargs['logX'])
+    y, _ = cF._log(y, geobipy_kwargs['logY'])
 
     stp = plt.step(x=x, y=y, **kwargs)
 
-    if (flipX):
+    if geobipy_kwargs['flipX']:
         ax.invert_xaxis()
 
-    if (flipY):
+    if geobipy_kwargs['flipY']:
         ax.invert_yaxis()
 
-    if (not noLabels):
+    if (geobipy_kwargs['labels']):
         xlabel(cF.getNameUnits(x))
         ylabel(cF.getNameUnits(y))
 
-    plt.xscale(xscale)
-    plt.yscale(yscale)
+    plt.xscale(geobipy_kwargs['xscale'])
+    plt.yscale(geobipy_kwargs['yscale'])
 
     return ax, stp
 
