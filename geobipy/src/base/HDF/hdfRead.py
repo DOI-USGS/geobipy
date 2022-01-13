@@ -1,19 +1,5 @@
 import h5py
 import numpy as np
-from ...classes.core import StatArray
-from ...classes.statistics.Histogram1D import Histogram1D
-from ...classes.statistics.Histogram2D import Histogram2D
-from ...classes.data.datapoint.FdemDataPoint import FdemDataPoint
-from ...classes.data.datapoint.TdemDataPoint import TdemDataPoint
-from ...classes.data.datapoint.Tempest_datapoint import Tempest_datapoint
-from ...classes.model.Model import Model
-from ...classes.model.Model1D import Model1D
-from ...classes.mesh.RectilinearMesh1D import RectilinearMesh1D
-from ...classes.mesh.RectilinearMesh2D import RectilinearMesh2D
-from ...classes.mesh.RectilinearMesh3D import RectilinearMesh3D
-from ...classes.statistics.Hitmap2D import Hitmap2D
-from ...inversion.Inference1D import Inference1D
-from ...classes.system.CircularLoop import CircularLoop
 from ...base import utilities as cf
 #from .. import Error as Err
 
@@ -205,6 +191,22 @@ def read_item(h5obj, index=None, **kwargs):
         An object that has a .fromHdf() procedure or a numpy array of the returned variable.
 
     """
+    from ...classes.core import StatArray
+    from ...classes.statistics.Histogram import Histogram
+    from ...classes.data.datapoint.FdemDataPoint import FdemDataPoint
+    from ...classes.data.datapoint.TdemDataPoint import TdemDataPoint
+    from ...classes.data.datapoint.Tempest_datapoint import Tempest_datapoint
+    from ...classes.data.dataset.FdemData import FdemData
+    from ...classes.data.dataset.TdemData import TdemData
+    from ...classes.data.dataset.TempestData import TempestData
+    from ...classes.model.Model import Model
+    from ...classes.mesh.RectilinearMesh1D import RectilinearMesh1D
+    from ...classes.mesh.RectilinearMesh2D import RectilinearMesh2D
+    from ...classes.mesh.RectilinearMesh2D_stitched import RectilinearMesh2D_stitched
+    from ...classes.mesh.RectilinearMesh3D import RectilinearMesh3D
+    from ...inversion.Inference1D import Inference1D
+    from ...inversion.Inference2D import Inference2D
+    from ...classes.system.CircularLoop import CircularLoop
     s = h5obj.attrs.get('repr')
     if (not s is None):
 
