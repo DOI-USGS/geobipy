@@ -1004,7 +1004,7 @@ class PointCloud3D(myObject):
         self.x.createHdf(grp, 'x', withPosterior=withPosterior, fillvalue=fillvalue)
         self.y.createHdf(grp, 'y', withPosterior=withPosterior, fillvalue=fillvalue)
         self.z.createHdf(grp, 'z', withPosterior=withPosterior, fillvalue=fillvalue)
-        self.elevation.createHdf(grp, 'e', withPosterior=withPosterior, fillvalue=fillvalue)
+        self.elevation.createHdf(grp, 'elevation', withPosterior=withPosterior, fillvalue=fillvalue)
 
         return grp
 
@@ -1027,7 +1027,7 @@ class PointCloud3D(myObject):
         x = StatArray.StatArray.fromHdf(grp['x'])
         y = StatArray.StatArray.fromHdf(grp['y'])
         z = StatArray.StatArray.fromHdf(grp['z'])
-        elevation = StatArray.StatArray.fromHdf(grp['e'])
+        elevation = StatArray.StatArray.fromHdf(grp['elevation'])
 
         return cls(x=x, y=y, z=z, elevation=elevation, **kwargs)
 

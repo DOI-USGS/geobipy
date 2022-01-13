@@ -6,7 +6,7 @@ from ....classes.core import StatArray
 from ....base import utilities as cf
 from ....base import plotting as cP
 from ....base import MPI as myMPI
-from ...statistics.Histogram2D import Histogram2D
+from ...statistics.Histogram import Histogram
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -55,9 +55,7 @@ class DataPoint(Point):
                        lineNumber=0.0, fiducial=0.0, **kwargs):
         """ Initialize the Data class """
 
-        super().__init__(x, y, z, **kwargs)
-
-        self.elevation = elevation
+        super().__init__(x, y, z, elevation=elevation, **kwargs)
 
         self.units = units
 
@@ -105,7 +103,7 @@ class DataPoint(Point):
             values = self.nSystems
         else:
             assert np.size(values) == self.nSystems, ValueError("additiveError must have size 1")
-            assert (np.all(np.asarray(values) > 0.0)), ValueError("additiveErr must be > 0.0. Make sure the values are in linear space")
+            # assert (np.all(np.asarray(values) > 0.0)), ValueError("additiveErr must be > 0.0. Make sure the values are in linear space")
             # assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], np.ndarray)), TypeError(
             #     "relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
 
@@ -228,7 +226,7 @@ class DataPoint(Point):
             values = np.full(self.nSystems, fill_value=0.01)
         else:
             assert np.size(values) == self.nSystems, ValueError("relErr must be a list of size equal to the number of systems {}".format(self.nSystems))
-            assert (np.all(np.asarray(values) > 0.0)), ValueError("relErr must be > 0.0.")
+            # assert (np.all(np.asarray(values) > 0.0)), ValueError("relErr must be > 0.0.")
             # assert (isinstance(additiveErr[i], float) or isinstance(additiveErr[i], np.ndarray)), TypeError(
             #     "additiveErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
 
@@ -283,7 +281,6 @@ class DataPoint(Point):
         out._components = deepcopy(self._components, memo)
         out._channels_per_system = deepcopy(self.channels_per_system, memo)
 
-        out._elevation = deepcopy(self.elevation, memo)
         out._units = deepcopy(self.units, memo)
         out._data = deepcopy(self.data, memo)
         out._std = deepcopy(self.std, memo)
@@ -473,7 +470,6 @@ class DataPoint(Point):
 
         self.fiducial.createHdf(grp, 'fiducial', nRepeats=nRepeats, fillvalue=fillvalue)
         self.lineNumber.createHdf(grp, 'line_number', nRepeats=nRepeats, fillvalue=fillvalue)
-        self.elevation.createHdf(grp, 'e', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self.data.createHdf(grp, 'd', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self.std.createHdf(grp, 's', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
         self.predictedData.createHdf(grp, 'p', withPosterior=withPosterior, nRepeats=nRepeats, fillvalue=fillvalue)
@@ -503,7 +499,6 @@ class DataPoint(Point):
 
         self.fiducial.writeHdf(grp, 'fiducial', index=index)
         self.lineNumber.writeHdf(grp, 'line_number', index=index)
-        self.elevation.writeHdf(grp, 'e',  withPosterior=withPosterior, index=index)
         self.data.writeHdf(grp, 'd',  withPosterior=withPosterior, index=index)
         self.std.writeHdf(grp, 's',  withPosterior=withPosterior, index=index)
         self.predictedData.writeHdf(grp, 'p',  withPosterior=withPosterior, index=index)
@@ -531,7 +526,6 @@ class DataPoint(Point):
         if 'line_number' in grp:
             out.lineNumber = StatArray.StatArray.fromHdf(grp['line_number'], index=index)
 
-        out.elevation = StatArray.StatArray.fromHdf(grp['e'], index=index)
 
         # if 'channels_per_system' in grp:
         #     out.channels_per_system = np.asarray(grp['channels_per_system'])
@@ -559,7 +553,6 @@ class DataPoint(Point):
 
         super().Isend(dest, world)
 
-        self.elevation.Isend(dest, world)
         self.data.Isend(dest, world)
         self.std.Isend(dest, world)
         self.predictedData.Isend(dest, world)
@@ -575,7 +568,6 @@ class DataPoint(Point):
 
         out = super(DataPoint, cls).Irecv(source, world, **kwargs)
 
-        out._elevation = StatArray.StatArray.Irecv(source, world)
         out._data = StatArray.StatArray.Irecv(source, world)
         out._std = StatArray.StatArray.Irecv(source, world)
         out._predictedData = StatArray.StatArray.Irecv(source, world)
