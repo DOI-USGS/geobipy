@@ -861,6 +861,9 @@ def histogramEqualize(values, nBins=256):
     b1 = tmp.min()
     b2 = tmp.max()
 
+    if a1 == a2:
+        return None, None
+
     # Shifting the vector so that min(x) == 0
     equalized = (equalized - a1) / (a2 - a1)
 
@@ -1020,3 +1023,25 @@ def load_smm(filename, sort_by_means=True):
         degrees = degrees[order]
 
     return set_smm(weights, means, covariances, degrees)
+
+def reslice(slic, start=None, stop=None, step=None):
+    if all(x is None for x in [start, stop, step]):
+        return slic
+    
+    sta = slic.start
+    if start is not None:
+        if slic.start is not None:
+            sta = slic.start + start
+        else:
+            sta = start
+
+    stp = slic.stop
+    if stop is not None:
+        if slic.stop is not None:
+            stp = slic.stop + stop
+        else:
+            stp = stop
+        
+    ic = slic.step if step is not None else step
+    
+    return slice(sta, stp, ic)
