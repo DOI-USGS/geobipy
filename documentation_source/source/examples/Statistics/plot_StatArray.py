@@ -10,7 +10,9 @@ The direct extension to numpy maintains speed and functionality of numpy arrays.
 #%%
 from geobipy import StatArray
 from geobipy import Histogram1D
+from geobipy import Histogram
 from geobipy import Distribution
+from geobipy.src.classes.mesh.RectilinearMesh1D import RectilinearMesh1D
 import numpy as np
 import matplotlib.pyplot as plt
 import h5py
@@ -114,7 +116,7 @@ print(Density.summary)
 bins = Density.prior.bins()
 ################################################################################
 # Attach the histogram
-Density.posterior = Histogram1D(edges=bins)
+Density.posterior = Histogram(mesh = RectilinearMesh1D(edges=bins))
 
 ################################################################################
 # In an iterative sense, we can propose and evaluate new values, and update the posterior
@@ -160,6 +162,16 @@ Density.proposal = Distribution('MvNormal', mean, variance, prng=prng)
 
 Density.perturb()
 Density.summary
+
+with h5py.File('statarray.h5', 'w') as f:
+    Density.createHdf(f, 'statarray', withPosterior=True, add_axis=3)
+    Density.writeHdf(f, 'statarray', withPosterior=True, index=0)
+
+with h5py.File('statarray.h5', 'r') as f:
+    tmp = StatArray.fromHdf(f, 'statarray', index=0, skip_posterior=False)
+
+with h5py.File('statarray.h5', 'r') as f:
+    tmp = StatArray.fromHdf(f, 'statarray', skip_posterior=False)
 
 
 ################################################################################
@@ -430,11 +442,11 @@ s = np.ceil(100*(np.abs(np.random.randn(Density.size))))
 plt.figure()
 plt.tight_layout()
 ax1 = plt.subplot(211)
-Density.scatter(x=Time, y=Depth, s=s, alpha=0.7,edgecolor='k', sizeLegend=2)
+Density.scatter(x=Time, y=Depth, s=s, alpha=0.7,edgecolor='k', legend_size=2)
 plt.subplot(212, sharex=ax1)
 #Density.scatter(x=Time, y=Depth, s=s, alpha=0.7,edgecolor='k', sizeLegend=[1.0, 100, 200, 300])
 v = np.abs(Density)+1.0
-_ = Density.scatter(x=Time, y=Depth, s=s, alpha=0.7,edgecolor='k', sizeLegend=[1.0, 100, 200, 300], log=10)
+_ = Density.scatter(x=Time, y=Depth, s=s, alpha=0.7,edgecolor='k', legend_size=[1.0, 100, 200, 300], log=10)
 
 
 
@@ -569,9 +581,9 @@ a = StatArray(np.random.random(Density.shape), 'Opacity from 0.0 to 1.0')
 
 plt.figure()
 ax1 = plt.subplot(131)
-ax = Density.pcolor(x=x, y=y, flipY=True, linewidth=0.1, noColorbar=True)
+ax = Density.pcolor(x=x, y=y, flipY=True, linewidth=0.1, colorbar=False)
 plt.subplot(132, sharex=ax1, sharey=ax1)
-ax = Density.pcolor(x=x, y=y, alpha=a, flipY=True, linewidth=0.1, noColorbar=True)
+ax = Density.pcolor(x=x, y=y, alpha=a, flipY=True, linewidth=0.1, colorbar=False)
 plt.subplot(133, sharex=ax1, sharey=ax1)
 _ = a.pcolor(x=x, y=y, flipY=True)
 

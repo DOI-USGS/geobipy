@@ -28,14 +28,10 @@ from os.path import join
 import numpy as np
 import h5py
 import matplotlib.pyplot as plt
-from geobipy import hdfRead
-from geobipy import Waveform
-from geobipy import SquareLoop, CircularLoop
-from geobipy import butterworth
-from geobipy import TdemSystem
 from geobipy import TempestData
 # from geobipy import TemDataPoint
-from geobipy import Model1D
+from geobipy import RectilinearMesh1D
+from geobipy import Model
 from geobipy import StatArray
 from geobipy import Distribution
 
@@ -55,12 +51,24 @@ dataFile = dataFolder + 'Tempest.nc'
 # The EM system file name
 systemFile = dataFolder + 'Tempest.stm'
 
+# Prepare the dataset so that we can read a point at a time.
+Dataset = TempestData._initialize_sequential_reading(dataFile, systemFile)
+# Get a datapoint from the file.
+tdp = Dataset._read_record(0)
+
+print(tdp.summary)
+
+# The data file name
+dataFile = dataFolder + 'Tempest.csv'
+# The EM system file name
+systemFile = dataFolder + 'Tempest.stm'
 
 # Prepare the dataset so that we can read a point at a time.
 Dataset = TempestData._initialize_sequential_reading(dataFile, systemFile)
 # Get a datapoint from the file.
 tdp = Dataset._read_record(0)
 
+print(tdp.summary)
 
 plt.figure()
 tdp.plot()
@@ -73,7 +81,7 @@ tdp.plot()
 ################################################################################
 # We can define a 1D layered earth model, and use it to predict some data
 par = StatArray(np.r_[1/50.0, 1/100.0, 1/1000.0, 1/5.0, 1/1000.0, 1/800.0], "Conductivity", "$\frac{S}{m}$")
-mod = Model1D(edges=np.r_[0, 20.0, 50.0, 100.0, 150.0, 250.0, np.inf], parameters=par)
+mod = Model(mesh=RectilinearMesh1D(edges=np.r_[0, 20.0, 50.0, 100.0, 150.0, 250.0, np.inf]), values=par)
 
 ################################################################################
 # Forward model the data
@@ -129,7 +137,7 @@ plt.title("Halfspace responses")
 ################################################################################
 # We can perform a quick search for the best fitting half space
 halfspace = tdp.find_best_halfspace()
-print('Best half space conductivity is {} $S/m$'.format(halfspace.par))
+print('Best half space conductivity is {} $S/m$'.format(halfspace.values))
 plt.subplot(1, 2, 2)
 _ = tdp.plot()
 _ = tdp.plotPredicted()
@@ -166,6 +174,6 @@ tdp.set_posteriors()
 # Note we are not using the priors to accept or reject perturbations.
 for i in range(10):
     tdp.perturb()
-    tdp.updatePosteriors()
+    tdp.update_posteriors()
 
 plt.show()

@@ -11,6 +11,7 @@ from geobipy import PointCloud3D
 from os.path import join
 import numpy as np
 import matplotlib.pyplot as plt
+import h5py
 
 nPoints = 10000
 
@@ -59,7 +60,7 @@ ax = PC3D.scatter2D(s=100*np.abs(PC3D.z), edgecolor='k')
 
 ################################################################################
 # Interpolate the points to a 2D rectilinear mesh
-mesh, dum = PC3D.interpolate(0.01, 0.01, method='mc', mask=0.03)
+mesh, dum = PC3D.interpolate(0.01, 0.01, values=PC3D.z, method='mc', mask=0.03)
 
 # We can save that mesh to VTK
 mesh.to_vtk('pointcloud_interpolated.vtk')
@@ -123,15 +124,14 @@ PC3D.read_csv(filename=dataFolder + 'Resolve1.txt')
 plt.figure()
 f = PC3D.scatter2D(s=10)
 
-################################################################################
-# Export the 3D Pointcloud to a VTK file.
-#
-# In this case, I pass the height as point data so that the points are coloured
-# when opened in Paraview (or other software)
+with h5py.File('test.h5', 'w') as f:
+    PC3D.createHdf(f, 'test')
+    PC3D.writeHdf(f, 'test')
 
-################################################################################
+with h5py.File('test.h5', 'r') as f:
+    PC3D1 = PointCloud3D.fromHdf(f['test'])
 
-
-# PC3D.toVTK('testPoints', format='binary')
+with h5py.File('test.h5', 'r') as f:
+    point = PointCloud3D.fromHdf(f['test'], index=0)
 
 plt.show()

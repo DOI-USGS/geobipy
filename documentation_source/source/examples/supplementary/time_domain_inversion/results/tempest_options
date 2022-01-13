@@ -16,19 +16,19 @@ from os.path import join
 # General file structure information.
 # -------------------------------------------------------
 # Data folder
-data_directory = "..//supplementary//data"
+data_directory = "..//..//supplementary//data"
 # The data_filename and system_filename options are single strings for single system dataset,
 # or a list of str for multi-system datasets like Skytem.
 # Data File Name.
-data_filename = join(data_directory,'Skytem_single.csv')
+data_filename = join(data_directory,'Tempest.csv')
 # System File Name.
-system_filename = [join(data_directory,'SkytemHM-SLV.stm'), join(data_directory,'SkytemLM-SLV.stm')]
+system_filename = join(data_directory,'Tempest.stm')
 
 # Define the data type to invert
-data_type = TdemData
+data_type = TempestData
 
 # Maximum number of Markov Chains per data point.
-n_markov_chains = 10000
+n_markov_chains = 20000
 
 # -------------------------------------------------------
 # General GeoBIPy options.
@@ -60,11 +60,17 @@ solve_gradient = True
 # Use the prior on the relative data errors
 solve_relative_error = True
 # Use the prior on the additive data errors
-solve_additive_error = True
+solve_additive_error = False
 # Use the prior on the data height
 solve_height = False
-# Use the prior on the calibration parameters for the data
+
+# -------------------------------------------------------
+# Data type specific solving.
+# -------------------------------------------------------
+# Resolve calibration parameters
 solve_calibration = False
+# Tempest transmitter pitch
+solve_transmitter_pitch = True
 
 # -------------------------------------------------------
 # Prior Details
@@ -73,10 +79,11 @@ solve_calibration = False
 # -------------------------
 # Maximum number of layers in the 1D model
 maximum_number_of_layers = 30
+# depth_prior = Distribution('Uniform', min=1.0, max=350.0)
 # Minimum layer depth in metres
 minimum_depth = 1.0
 # Maximum layer depth in metres
-maximum_depth = 150.0
+maximum_depth = 350.0
 # Minimum layer thickness.
 # If minimumThickness: None, it will be autocalculated.
 minimum_thickness = None
@@ -99,23 +106,29 @@ minimum_thickness = None
 # to assign the initial data uncertainties.
 initial_relative_error = [0.05, 0.05]
 ## Relative Error Prior Details
+# relative_error_prior = Distribution('Uniform', min=[0.01, 0.01], max=[0.5, 0.5])
 # Minimum Relative Error
-minimum_relative_error = [0.005, 0.005]
+minimum_relative_error = [0.001, 0.001]
 # Maximum Relative Error
 maximum_relative_error = [0.5, 0.5]
 
 # Assign an initial additive error level.
 # If the file contains no standard deviations, this will be used
 # to assign the initial data uncertainties.
-initial_additive_error = [2e-12,2e-12]
+initial_additive_error = [0.03, 0.026, 0.024, 0.020, 0.018, 0.017, 0.016, 0.015, 0.014, 0.013, 0.012, 0.011, 0.010, 0.009, 0.008, 0.015, 0.014, 0.013, 0.011, 0.009, 0.008, 0.0075, 0.007, 0.006, 0.0055, 0.005, 0.0045, 0.004, 0.0035, 0.003]
+#initial_additive_error = [0.011474, 0.012810, 0.008507, 0.005154, 0.004742, 0.004477, 0.004168, 0.003539, 0.003352, 0.003213, 0.003161, 0.003122, 0.002587, 0.002038, 0.002201, 0.007383, 0.005693, 0.005178, 0.003659, 0.003426, 0.003046, 0.003095, 0.003247, 0.002775, 0.002627, 0.002460, 0.002178, 0.001754, 0.001405, 0.001283]
 # Additive Error Prior Details
+# additive_error_prior = Distribution('Uniform', min=1.0, max=3.0)
 # Minimum Additive Error
-minimum_additive_error = [1e-16, 1e-16]
+minimum_additive_error = 1.0
 # Maximum Relative Error
-maximum_additive_error = [1e-10, 1e-10]
+maximum_additive_error = 3.0
 
 # Elevation range allowed (m), either side of measured height
 maximum_height_change = 1.0
+
+# Transmitter pitch range allowed, either side of the measured pitch.
+maximum_transmitter_pitch_change = 5.0 # degrees
 
 # -------------------------------------------------------
 # Proposal details
@@ -127,11 +140,18 @@ maximum_height_change = 1.0
 # normal distributions with a mean equal to its value in the current model (of the Markov chain)
 # These variances are used when we randomly choose a new value for that given variable.
 # Proposal variance for the relative error
+# relative_error_proposal = Distribution('Normal', mean=[0.0, 0.0], variance=[2.5e-7, 2.5e-7])
 relative_error_proposal_variance = [2.5e-7, 2.5e-7]
 # Proposal variance for the additive error
-additive_error_proposal_variance = [0.0025, 0.0025]
+# additive_error_proposal = Distribution('Normal', mean=0.0, variance=0.0025)
+additive_error_proposal_variance = 0.0025  #[0.0025, 0.0025]
 # Proposal variance of the elevation
+# height_proposal = Distribution('Normal', mean=0.0, variance=0.01)
 height_proposal_variance = 0.01
+# Proposal variance of the pitch
+# transmitter_pitch_proposal = Distribution('Normal', mean=0.0, variance=0.0001)
+transmitter_pitch_proposal_variance = 0.01
+
 
 # Earth model proposal details
 # ----------------------------

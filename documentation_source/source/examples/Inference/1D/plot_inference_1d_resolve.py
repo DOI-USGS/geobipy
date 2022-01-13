@@ -8,7 +8,6 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
 #%%
 import matplotlib.pyplot as plt
 from geobipy import serial_geobipy
-from geobipy import example_path
 from geobipy import Inference3D
 import numpy as np
 import os
@@ -22,7 +21,7 @@ import shutil
 
 ################################################################################
 # The directory where HDF files will be stored
-output_directory = "..//supplementary//frequency_domain_inversion//results"
+output_directory = "..//..//supplementary//frequency_domain_inversion//results"
 ################################################################################
 
 for filename in os.listdir(output_directory):
@@ -39,8 +38,8 @@ parameter_file = "resolve_options"
 ################################################################################
 
 # Here are the contents of the user parameter file.
-with open(parameter_file, 'r') as f:
-    print(f.read())
+# with open(parameter_file, 'r') as f:
+#     print(f.read())
 
 ################################################################################
 # To run geobipy in serial, simply call that function.
@@ -48,7 +47,7 @@ with open(parameter_file, 'r') as f:
 # data point for time considerations.
 # You will notice however that the HDF files are created for multiple lines
 # inside the data file.
-serial_geobipy(parameter_file, output_directory, index=0)
+serial_geobipy(parameter_file, "./test", index=0)
 
 
 #%%
@@ -60,7 +59,7 @@ serial_geobipy(parameter_file, output_directory, index=0)
 # and simply use them for plotting.
 
 ################################################################################
-results_3d = Inference3D(directory=output_directory, system_file_path=example_path+"//supplementary//data")
+results_3d = Inference3D(directory="./test", system_file_path="..//..//supplementary//data")
 
 ################################################################################
 # We can grab the results for a single index or fiducial

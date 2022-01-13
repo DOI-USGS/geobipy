@@ -28,14 +28,9 @@ from os.path import join
 import numpy as np
 import h5py
 import matplotlib.pyplot as plt
-from geobipy import hdfRead
-from geobipy import Waveform
-from geobipy import SquareLoop, CircularLoop
-from geobipy import butterworth
-from geobipy import TdemSystem
 from geobipy import TdemData
-from geobipy import TdemDataPoint
-from geobipy import Model1D
+from geobipy import RectilinearMesh1D
+from geobipy import Model
 from geobipy import StatArray
 from geobipy import Distribution
 
@@ -74,7 +69,7 @@ tdp.plot()
 ################################################################################
 # We can define a 1D layered earth model, and use it to predict some data
 par = StatArray(np.r_[500.0, 20.0], "Conductivity", "$\frac{S}{m}$")
-mod = Model1D(edges=np.r_[0.0, 75.0, np.inf], parameters=par)
+mod = Model(RectilinearMesh1D(edges=np.r_[0.0, 75.0, np.inf]), values=par)
 
 ################################################################################
 # Forward model the data
@@ -114,7 +109,7 @@ print(tdp.dataMisfit())
 ################################################################################
 # We can perform a quick search for the best fitting half space
 halfspace = tdp.find_best_halfspace()
-print('Best half space conductivity is {} $S/m$'.format(halfspace.par))
+print('Best half space conductivity is {} $S/m$'.format(halfspace.values))
 plt.figure()
 _ = tdp.plot()
 _ = tdp.plotPredicted()
@@ -153,9 +148,9 @@ tdp.set_posteriors()
 ################################################################################
 # Perturb the datapoint and record the perturbations
 # Note we are not using the priors to accept or reject perturbations.
-for i in range(10):
+for i in range(1000):
     tdp.perturb()
-    tdp.updatePosteriors()
+    tdp.update_posteriors()
 
 ################################################################################
 # Plot the posterior distributions

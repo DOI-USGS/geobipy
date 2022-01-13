@@ -17,12 +17,12 @@ from os.path import join
 import numpy as np
 import h5py
 import matplotlib.pyplot as plt
-from geobipy import hdfRead
 from geobipy import CircularLoop
 from geobipy import FdemSystem
 from geobipy import FdemData
 from geobipy import FdemDataPoint
-from geobipy import Model1D
+from geobipy import RectilinearMesh1D
+from geobipy import Model
 from geobipy import StatArray
 from geobipy import Distribution
 
@@ -86,13 +86,14 @@ dataFile = dataFolder + 'Resolve2.txt'
 # The EM system file name
 systemFile = dataFolder + 'FdemSystem2.stm'
 
+#%%
 ################################################################################
 # Initialize and read an EM data set
 # Prepare the dataset so that we can read a point at a time.
 Dataset = FdemData._initialize_sequential_reading(dataFile, systemFile)
 # Get a datapoint from the file.
 fdp = Dataset._read_record()
-
+#%%
 
 # ################################################################################
 # # Initialize and read an EM data set
@@ -112,9 +113,9 @@ fdp = Dataset._read_record()
 # We can define a 1D layered earth model, and use it to predict some data
 nCells = 19
 par = StatArray(np.linspace(0.01, 0.1, nCells), "Conductivity", "$\frac{S}{m}$")
-thk = StatArray(np.ones(nCells) * 10.0)
-thk[-1] = np.inf
-mod = Model1D(nCells = nCells, parameters=par, widths=thk)
+depth = StatArray(np.arange(nCells+1) * 10.0, "Depth", 'm')
+depth[-1] = np.inf
+mod = Model(mesh=RectilinearMesh1D(edges=depth), values=par)
 
 ################################################################################
 # Forward model the data
@@ -123,7 +124,7 @@ fdp.forward(mod)
 ###############################################################################
 plt.figure()
 plt.subplot(121)
-_ = mod.pcolor()
+_ = mod.pcolor(transpose=True)
 plt.subplot(122)
 _ = fdp.plotPredicted()
 plt.tight_layout()
@@ -131,6 +132,7 @@ plt.tight_layout()
 ################################################################################
 # Compute the sensitivity matrix for a given model
 J = fdp.sensitivity(mod)
+
 plt.figure()
 _ = np.abs(J).pcolor(equalize=True, log=10, flipY=True)
 
@@ -159,8 +161,8 @@ plt.title("Halfspace responses");
 
 ################################################################################
 # We can perform a quick search for the best fitting half space
-halfspace = fdp.FindBestHalfSpace()
-print('Best half space conductivity is {} $S/m$'.format(halfspace.par))
+halfspace = fdp.find_best_halfspace()
+print('Best half space conductivity is {} $S/m$'.format(halfspace.values))
 plt.figure()
 _ = fdp.plot()
 _ = fdp.plotPredicted()
@@ -191,10 +193,19 @@ fdp.set_proposals(heightProposal, relativeProposal, additiveProposal)
 # With priors set we can auto generate the posteriors
 fdp.set_posteriors()
 
+print(fdp.predictedData.posterior.summary)
+
+nCells = 19
+par = StatArray(np.linspace(0.01, 0.1, nCells), "Conductivity", "$\frac{S}{m}$")
+depth = StatArray(np.arange(nCells+1) * 10.0, "Depth", 'm')
+depth[-1] = np.inf
+mod = Model(mesh=RectilinearMesh1D(edges=depth), values=par)
+fdp.forward(mod)
+
 # Perturb the datapoint and record the perturbations
-for i in range(10000):
+for i in range(1000):
     fdp.perturb()
-    fdp.updatePosteriors()
+    fdp.update_posteriors()
 
 ################################################################################
 # Plot the posterior distributions
@@ -205,14 +216,40 @@ fig.tight_layout()
 
 fdp.plot_posteriors(axes=ax, best=fdp)
 
-# import h5py
-# with h5py.File('fdp.h5', 'w') as f:
-#     fdp.toHdf(f, 'fdp', withPosterior=True)
+import h5py
+with h5py.File('fdp.h5', 'w') as f:
+    fdp.createHdf(f, 'fdp', withPosterior=True)
+    fdp.writeHdf(f, 'fdp', withPosterior=True)
 
-# with h5py.File('fdp.h5', 'r') as f:
-#     fdp1 = FdemDataPoint.fromHdf(f['fdp'])
+with h5py.File('fdp.h5', 'r') as f:
+    fdp1 = FdemDataPoint.fromHdf(f['fdp'])
 
+plt.figure()
+gs = fig.add_gridspec(nrows=1, ncols=1)
+ax = fdp1.init_posterior_plots(gs[0, 0])
+fig.tight_layout()
+fdp1.plot_posteriors(axes=ax, best=fdp1)
 
+import h5py
+with h5py.File('fdp.h5', 'w') as f:
+    fdp.createHdf(f, 'fdp', withPosterior=True, add_axis=np.arange(10))
 
+    for i in range(10):
+        fdp.writeHdf(f, 'fdp', withPosterior=True, index=i)
+
+from geobipy import FdemData
+with h5py.File('fdp.h5', 'r') as f:
+    fdp1 = FdemDataPoint.fromHdf(f['fdp'], index=0)
+    fdp2 = FdemData.fromHdf(f['fdp'])
+
+print(fdp1)
+print(fdp1.z.summary)
+
+plt.figure()
+gs = fig.add_gridspec(nrows=1, ncols=1)
+ax = fdp1.init_posterior_plots(gs[0, 0])
+fig.tight_layout()
+fdp1.plot_posteriors(axes=ax, best=fdp1)
 
 plt.show()
+# %%

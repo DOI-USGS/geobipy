@@ -1,4 +1,3 @@
-from os.path import join
 # General information about specifying parameters.
 # The following list of parameters can be given either a single value or a list of values
 # of length equal to the number of systems in the data. If one value is specified and there
@@ -16,19 +15,19 @@ from os.path import join
 # General file structure information.
 # -------------------------------------------------------
 # Data folder
-data_directory = "..//supplementary//data"
+data_directory = "..//..//supplementary//data"
 # The data_filename and system_filename options are single strings for single system dataset,
 # or a list of str for multi-system datasets like Skytem.
-# Data File Name.
-data_filename = data_directory + "//aerotem_single.txt"
-# System File Name.
-system_filename = data_directory + "//aerotem.stm"
+# Data File Name. If there are multiple, encompass them with [ ].
+data_filename = data_directory + "//Resolve_small.txt"
+# System File Name. If there are multiple, encompass them with [ ].
+system_filename = data_directory + "//FdemSystem2.stm"
 
 # Define the data type to invert
-data_type = TdemData
+data_type = FdemData
 
 # Maximum number of Markov Chains per data point.
-n_markov_chains = 10000
+n_markov_chains = 100000
 
 # -------------------------------------------------------
 # General GeoBIPy options.
@@ -36,7 +35,7 @@ n_markov_chains = 10000
 # Interactively plot a single data point as it progresses
 interactive_plot = True
 # How often to update the plot. (lower is generally slower)
-update_plot_every = 1000
+update_plot_every = 5000
 # Save a PNG of the final results for each data point.
 save_png = False
 # Save the results of the McMC inversion to HDF5 files. (Generally always True)
@@ -62,7 +61,7 @@ solve_relative_error = True
 # Use the prior on the additive data errors
 solve_additive_error = True
 # Use the prior on the data height
-solve_height = True
+solve_height = False
 # Use the prior on the calibration parameters for the data
 solve_calibration = False
 
@@ -76,7 +75,7 @@ maximum_number_of_layers = 30
 # Minimum layer depth in metres
 minimum_depth = 1.0
 # Maximum layer depth in metres
-maximum_depth = 350.0
+maximum_depth = 150.0
 # Minimum layer thickness.
 # If minimumThickness: None, it will be autocalculated.
 minimum_thickness = None
@@ -88,11 +87,7 @@ minimum_thickness = None
 # Data uncertainty priors are used if solveRelativeError or solveAdditiveError are True.
 # If the data file contains columns of the estimated standard deviations, they are used as the initial values
 # when starting an McMC inversion. If the file does not contain these estimates, then the initial
-# standard deviations are calculated using sqrt((relative * data)^2 + (additive)^2).
-
-# If there are multiple systems (e.g. Skytem, usually low and high moment, and hence 2 systems)
-# the relative and additive values below should have enough values to match the number of systems.
-# e.g. for Skytem, the initial_relative_error might = [0.03, 0.03],
+# values are used below as sqrt((relative * data)^2 + (additive)^2).
 
 # Assign an initial percentage relative Error
 # If the file contains no standard deviations, this will be used
@@ -100,19 +95,19 @@ minimum_thickness = None
 initial_relative_error = 0.05
 ## Relative Error Prior Details
 # Minimum Relative Error
-minimum_relative_error = 0.01
+minimum_relative_error = 0.001
 # Maximum Relative Error
 maximum_relative_error = 0.5
 
 # Assign an initial additive error level.
 # If the file contains no standard deviations, this will be used
 # to assign the initial data uncertainties.
-initial_additive_error = 1.0e-8
+initial_additive_error = 5.0
 # Additive Error Prior Details
 # Minimum Additive Error
-minimum_additive_error = 1.0e-10
+minimum_additive_error = 3.0
 # Maximum Relative Error
-maximum_additive_error = 10.0**-5.8
+maximum_additive_error = 20.0
 
 # Elevation range allowed (m), either side of measured height
 maximum_height_change = 1.0
@@ -129,7 +124,7 @@ maximum_height_change = 1.0
 # Proposal variance for the relative error
 relative_error_proposal_variance = 2.5e-7
 # Proposal variance for the additive error
-additive_error_proposal_variance = 0.0025  #[0.0025, 0.0025]
+additive_error_proposal_variance = 1.0e-4
 # Proposal variance of the elevation
 height_proposal_variance = 0.01
 

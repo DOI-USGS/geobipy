@@ -6,6 +6,8 @@
 # %%
 from copy import deepcopy
 from geobipy import StatArray
+from geobipy import RectilinearMesh1D
+from geobipy import Model
 from geobipy import Model1D
 from geobipy import Distribution
 from geobipy import FdemData
@@ -20,14 +22,16 @@ from geobipy import hdfRead
 
 # Make a test model with 10 layers, and increasing parameter values
 nLayers = 2
-par = StatArray(np.linspace(0.001, 0.02, nLayers),
-                "Conductivity", "$\\frac{S}{m}$")
+par = StatArray(np.linspace(0.001, 0.02, nLayers), "Conductivity", "$\\frac{S}{m}$")
 thk = StatArray(np.full(nLayers, fill_value=10.0))
 thk[-1] = np.inf
-mod = Model1D(parameters=par, widths=thk)
+mesh = RectilinearMesh1D(widths = thk)
 
-# plt.figure()
-# mod.plotGrid(transpose=True, flip=True)
+mod = Model(mesh = mesh, values=par)
+# mod = Model1D(parameters=par, widths=thk)
+
+plt.figure()
+mod.plotGrid(transpose=True, flip=True)
 
 ################################################################################
 # Randomness and Model Perturbations
@@ -39,7 +43,7 @@ mod = Model1D(parameters=par, widths=thk)
 # The halfSpaceValue is used as a reference value for the parameter prior.
 prng = np.random.RandomState(0)
 # Set the priors
-mod.set_priors(halfSpaceValue=0.01,
+mod.set_priors(mean_value=0.01,
               min_edge=1.0,
               max_edge=150.0,
               max_cells=30,
@@ -47,43 +51,34 @@ mod.set_priors(halfSpaceValue=0.01,
               gradientPrior=True,
               prng=prng)
 
-# plt.figure()
-# mod.plot(flipY=True)
-
 ################################################################################
 # We can evaluate the prior of the model using depths only
-print('Log probability of the Model given its priors: ',
-      mod.priorProbability(False, False, log=True))
+print('Log probability of the Model given its priors: ', mod.prior_probability(False, False, log=True))
 # Or with priors on its parameters, and parameter gradient with depth.
-print('Log probability of the Model given its priors: ',
-      mod.priorProbability(True, True, log=True))
+print('Log probability of the Model given its priors: ', mod.prior_probability(True, True, log=True))
 
 ################################################################################
 # To propose new models, we specify the probabilities of creating, removing, perturbing, and not changing
 # a layer interface
-pProposal = Distribution('LogNormal', 0.01, np.log(2.0)**2.0,
-                         linearSpace=True, prng=prng)
-mod.setProposals(probabilities=[0.25, 0.25, 0.5, 0.25],
-                 parameterProposal=pProposal, prng=prng)
+pProposal = Distribution('LogNormal', 0.01, np.log(2.0)**2.0, linearSpace=True, prng=prng)
+mod.set_proposals(probabilities=[0.25, 0.25, 0.5, 0.25], proposal=pProposal, prng=prng)
 
 ################################################################################
 # We can then perturb the layers of the model
 remapped, perturbed = mod.perturb()
 
-# ################################################################################
-# fig = plt.figure(figsize=(8, 6))
-# ax = plt.subplot(121)
-# mod.pcolor(transpose=True, flip=True)  # , grid=True)
-# ax = plt.subplot(122)
-# perturbed.pcolor(transpose=True, flip=True)  # , grid=True)
+################################################################################
+fig = plt.figure(figsize=(8, 6))
+ax = plt.subplot(121)
+mod.pcolor(transpose=True, flip=True, log=10)  # , grid=True)
+ax = plt.subplot(122)
+perturbed.pcolor(transpose=True, flip=True, log=10)  # , grid=True)
 
 ################################################################################
 # We can evaluate the prior of the model using depths only
-print('Log probability of the Model given its priors: ',
-      perturbed.priorProbability(False, False, log=True))
+print('Log probability of the Model given its priors: ',perturbed.prior_probability(False, False, log=True))
 # Or with priors on its parameters, and parameter gradient with depth.
-print('Log probability of the Model given its priors: ',
-      perturbed.priorProbability(True, True, log=True))
+print('Log probability of the Model given its priors: ',perturbed.prior_probability(True, True, log=True))
 
 
 # %%
@@ -102,59 +97,66 @@ print('Log probability of the Model given its priors: ',
 # Since we have already set the priors on the Model, we can set the posteriors
 # based on bins from from the priors.
 
-mod.setPosteriors()
+mod.set_posteriors()
 
 mod0 = deepcopy(mod)
 
 ################################################################################
 # Now we randomly perturb the model, and update its posteriors.
-mod.updatePosteriors()
+mod.update_posteriors()
 for i in range(1001):
     remapped, perturbed = mod.perturb()
 
     # And update the model posteriors
-    perturbed.updatePosteriors()
+    perturbed.update_posteriors()
 
     mod = perturbed
-
-# mod.par.posterior._counts[:, :] = np.random.randn(*mod.par.posterior.shape)
 
 ################################################################################
 # We can now plot the posteriors of the model.
 #
 # Remember in this case, we are simply perturbing the model structure and parameter values
 # The proposal for the parameter values is fixed and centred around a single value.
-fig = plt.figure(figsize=(8, 6))
+# fig = plt.figure(figsize=(8, 6))
 
-plt.subplot(131)
-mod.nCells.posterior.plot()
-ax = plt.subplot(132)
-mod.par.posterior.pcolor(cmap='gray_r', xscale='log', noColorbar=True, flipY=True)
-plt.subplot(133, sharey=ax)
-mod.edges.posterior.plot(rotate=True, flipY=True)
+# plt.subplot(131)
+# mod.nCells.posterior.plot()
+# ax = plt.subplot(132)
+# mod.values.posterior.pcolor(cmap='gray_r', colorbar=False, flipY=True, logX=10)
+# plt.subplot(133, sharey=ax)
+# mod.mesh.edges.posterior.plot(transpose=True, flipY=True)
+
+# plt.figure()
+# mod.plot_posteriors(**{"cmap": 'gray_r',
+#                   "xscale": 'log',
+#                   "noColorbar": True,
+#                   "flipY": True,
+#                   'credible_interval_kwargs':{'axis': 1, 
+#                                           'reciprocate': True,
+#                                           'xscale': 'log'}})
+# mod.par.posterior.plotCredibleIntervals(xscale='log', axis=1)
+
 
 fig = plt.figure(figsize=(8, 6))
-gs = fig.add_gridspec(nrows=1, ncols=1)
-ax = mod.init_posterior_plots(gs[0, 0])
+# gs = fig.add_gridspec(nrows=1, ncols=1)
+ax = mod.init_posterior_plots(fig)
 mod.plot_posteriors(axes=ax,
                     edges_kwargs = {
-                        "rotate":True,
+                        "transpose":True,
                         "flipY":True
                     },
                     parameter_kwargs = {
                         "cmap": 'gray_r',
                         "xscale": 'log',
-                        "noColorbar": True,
+                        "colorbar": False,
                         "flipY": True,
                         'credible_interval_kwargs':{
-                              'reciprocate':True
+                              'reciprocate':True,
+                              'axis': 1,
+                              'xscale': 'log'
                         }
                     },
                     best = mod)
 
-################################################################################
-# We can interpolate the Model to another mesh.
-mesh = mod.par.posterior
-x = mod.piecewise_constant_interpolate(mod.par, mesh, axis=1)
 
 plt.show()

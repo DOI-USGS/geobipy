@@ -1,6 +1,6 @@
 """
-1D Inference of Skytem Data
----------------------------
+1D Inference of Aerotem Data
+----------------------------
 
 All plotting in GeoBIPy can be carried out using the 3D inference class
 
@@ -8,7 +8,6 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
 #%%
 import matplotlib.pyplot as plt
 from geobipy import serial_geobipy
-from geobipy import example_path
 from geobipy import Inference3D
 import numpy as np
 import os
@@ -22,7 +21,7 @@ import shutil
 
 ################################################################################
 # The directory where HDF files will be stored
-output_directory = "..//supplementary//time_domain_inversion//results"
+output_directory = "..//..//supplementary//time_domain_inversion//results"
 ################################################################################
 
 for filename in os.listdir(output_directory):
@@ -35,12 +34,12 @@ for filename in os.listdir(output_directory):
 
 ################################################################################
 # The parameter file defines the set of user parameters needed to run geobipy.
-parameter_file = "skytem_options"
+parameter_file = "aerotem_options"
 ################################################################################
 
 # Here are the contents of the user parameter file.
-# with open(parameter_file, 'r') as f:
-#     print(f.read())
+with open(parameter_file, 'r') as f:
+    print(f.read())
 
 ################################################################################
 # To run geobipy in serial, simply call that function.
@@ -48,7 +47,7 @@ parameter_file = "skytem_options"
 # data point for time considerations.
 # You will notice however that the HDF files are created for multiple lines
 # inside the data file.
-serial_geobipy(parameter_file, output_directory, index=0, seed=10)
+serial_geobipy(parameter_file, output_directory, index=0)
 
 
 #%%
@@ -59,12 +58,12 @@ serial_geobipy(parameter_file, output_directory, index=0, seed=10)
 # For space considerations we do not include those HDF files in this repository
 # and simply use them for plotting.
 
-################################################################################
-results_3d = Inference3D(directory=output_directory, system_file_path="..//supplementary//data")
+# ################################################################################
+# results_3d = Inference3D(directory=output_directory, system_file_path="..//supplementary//data")
 
-################################################################################
-# We can grab the results for a single index or fiducial
-results_1d = results_3d.inference_1d(index=0)
+# ################################################################################
+# # We can grab the results for a single index or fiducial
+# results_1d = results_3d.inference_1d(index=0)
 
 ################################################################################
 results_1d.plot()

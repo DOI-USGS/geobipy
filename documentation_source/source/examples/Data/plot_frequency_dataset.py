@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from geobipy import CircularLoop
 from geobipy import FdemSystem
 from geobipy import FdemData
+import h5py
 import numpy as np
 
 
@@ -164,6 +165,18 @@ _ = L.scatter2D();
 # xAxis can be index, x, y, z, r2d, r3d
 plt.figure(figsize=(8,6))
 _ = FD1.plot(channels=[0,11,8], log=10, linewidth=0.5);
+
+
+with h5py.File('fdem.h5', 'w') as f:
+    FD1.createHdf(f, 'fdem')
+    FD1.writeHdf(f, 'fdem')
+
+with h5py.File('fdem.h5', 'r') as f:
+    FD3 = FdemData.fromHdf(f['fdem'])
+
+with h5py.File('fdem.h5', 'r') as f:
+    fdp = FdemData.fromHdf(f['fdem'], index=0)
+
 
 #%%
 # Obtain a single datapoint from the data set

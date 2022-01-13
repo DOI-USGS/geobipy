@@ -3,12 +3,12 @@ Tempest dataset
 --------------------
 """
 #%%
+import h5py
 from geobipy import plotting as cP
 from os.path import join
 import matplotlib.pyplot as plt
 import numpy as np
-from geobipy.src.classes.core.StatArray import StatArray
-from geobipy.src.classes.data.dataset.TempestData import TempestData
+from geobipy import TempestData
 
 #%%
 # Reading in the Data
@@ -58,8 +58,16 @@ ax = TD.scatter2D(s=1.0, c=TD.data[:, TD.channel_index(system=0, channel=10)], e
 plt.axis('equal')
 plt.title("scatter plot of specific channel")
 
-################################################################################
-# TD.toVTK('TD1', format='binary')
+
+with h5py.File('tdem.h5', 'w') as f:
+    TD.createHdf(f, 'tdem')
+    TD.writeHdf(f, 'tdem')
+
+with h5py.File('tdem.h5', 'r') as f:
+    TD3 = TempestData.fromHdf(f['tdem'])
+
+with h5py.File('tdem.h5', 'r') as f:
+    tdp = TempestData.fromHdf(f['tdem'], index=0)
 
 
 #%%

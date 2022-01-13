@@ -7,8 +7,9 @@ from geobipy import plotting as cP
 from os.path import join
 import matplotlib.pyplot as plt
 import numpy as np
-from geobipy.src.classes.core.StatArray import StatArray
-from geobipy.src.classes.data.dataset.TdemData import TdemData
+from geobipy import StatArray
+from geobipy import TdemData
+import h5py
 
 #%%
 # Reading in the Data
@@ -21,6 +22,11 @@ dataFiles=dataFolder + 'Skytem_small.csv'
 # dataFiles = dataFolder + 'Skytem.csv'
 # The EM system file name
 systemFiles=[dataFolder + 'SkytemHM-SLV.stm', dataFolder + 'SkytemLM-SLV.stm']
+
+from pathlib import Path
+for f in systemFiles[:1]:
+    txt = Path(f).read_text()
+    print(txt)
 
 ################################################################################
 # Read in the data from file
@@ -53,8 +59,16 @@ plt.figure(5)
 ax = TD.scatter2D(s=1.0, c=TD.secondary_field[:, TD.channel_index(system=0, channel=6)], equalize=True, log=10)
 plt.axis('equal')
 
-# ################################################################################
-# # TD.toVTK('TD1', format='binary')
+
+with h5py.File('tdem.h5', 'w') as f:
+    TD.createHdf(f, 'tdem')
+    TD.writeHdf(f, 'tdem')
+
+with h5py.File('tdem.h5', 'r') as f:
+    TD3 = TdemData.fromHdf(f['tdem'])
+
+with h5py.File('tdem.h5', 'r') as f:
+    tdp = TdemData.fromHdf(f['tdem'], index=0)
 
 
 #%%

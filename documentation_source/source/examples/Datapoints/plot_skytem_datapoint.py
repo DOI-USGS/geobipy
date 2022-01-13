@@ -61,9 +61,10 @@ Dataset = TdemData._initialize_sequential_reading(dataFile, systemFile)
 # Get a datapoint from the file.
 tdp = Dataset._read_record()
 
+print(tdp.secondary_field)
+print(tdp.primary_field)
+
 Dataset._file.close()
-# plt.figure()
-# tdp.plot()
 
 ################################################################################
 # Using a time domain datapoint
@@ -79,24 +80,24 @@ mod = Model1D(edges=np.r_[0, 75.0, np.inf], parameters=par)
 tdp.forward(mod)
 
 ################################################################################
-# plt.figure()
-# plt.subplot(121)
-# _ = mod.pcolor()
-# plt.subplot(122)
-# _ = tdp.plot()
-# _ = tdp.plotPredicted()
-# plt.tight_layout()
+plt.figure()
+plt.subplot(121)
+_ = mod.pcolor()
+plt.subplot(122)
+_ = tdp.plot()
+_ = tdp.plotPredicted()
+plt.tight_layout()
 
-# ################################################################################
-# plt.figure()
-# tdp.plotDataResidual(yscale='log', xscale='log')
-# plt.title('new')
+################################################################################
+plt.figure()
+tdp.plotDataResidual(yscale='log', xscale='log')
+plt.title('new')
 
-# ################################################################################
-# # Compute the sensitivity matrix for a given model
-# J = tdp.sensitivity(mod)
-# plt.figure()
-# _ = np.abs(J).pcolor(equalize=True, log=10, flipY=True)
+################################################################################
+# Compute the sensitivity matrix for a given model
+J = tdp.sensitivity(mod)
+plt.figure()
+_ = np.abs(J).pcolor(equalize=True, log=10, flipY=True)
 
 ################################################################################
 # Attaching statistical descriptors to the datapoint
@@ -116,18 +117,18 @@ print(tdp.dataMisfit())
 
 ################################################################################
 # Plot the misfits for a range of half space conductivities
-# plt.figure()
-# _ = tdp.plotHalfSpaceResponses(-6.0, 4.0, 200)
-# plt.title("Halfspace responses")
+plt.figure()
+_ = tdp.plotHalfSpaceResponses(-6.0, 4.0, 200)
+plt.title("Halfspace responses")
 
 ################################################################################
 # We can perform a quick search for the best fitting half space
 halfspace = tdp.find_best_halfspace()
 
-# print('Best half space conductivity is {} $S/m$'.format(halfspace.par))
-# plt.figure()
-# _ = tdp.plot()
-# _ = tdp.plotPredicted()
+print('Best half space conductivity is {} $S/m$'.format(halfspace.par))
+plt.figure()
+_ = tdp.plot()
+_ = tdp.plotPredicted()
 
 ################################################################################
 # Compute the misfit between observed and predicted data
@@ -138,17 +139,17 @@ print(tdp.dataMisfit())
 # the relative error multiplier, and the additive error noise floor
 
 # Define the distributions used as priors.
-# heightPrior = Distribution('Uniform', min=np.float64(tdp.z) - 2.0, max=np.float64(tdp.z) + 2.0)
-# relativePrior = Distribution('Uniform', min=np.r_[0.01, 0.01], max=np.r_[0.5, 0.5])
-# additivePrior = Distribution('Uniform', min=np.r_[1e-12, 1e-13], max=np.r_[1e-10, 1e-11], log=True)
-tdp.set_priors()#height_prior=heightPrior, relative_error_prior=relativePrior, additive_error_prior=additivePrior)
+heightPrior = Distribution('Uniform', min=np.float64(tdp.z) - 2.0, max=np.float64(tdp.z) + 2.0)
+relativePrior = Distribution('Uniform', min=np.r_[0.01, 0.01], max=np.r_[0.5, 0.5])
+additivePrior = Distribution('Uniform', min=np.r_[1e-12, 1e-13], max=np.r_[1e-10, 1e-11], log=True)
+tdp.set_priors(height_prior=heightPrior, relative_error_prior=relativePrior, additive_error_prior=additivePrior)
 
 ################################################################################
 # In order to perturb our solvable parameters, we need to attach proposal distributions
-# heightProposal = Distribution('Normal', mean=tdp.z, variance = 0.01)
-# relativeProposal = Distribution('MvNormal', mean=tdp.relErr, variance=2.5e-4)
-# additiveProposal = Distribution('MvLogNormal', mean=tdp.addErr, variance=2.5e-3, linearSpace=True)
-tdp.set_proposals()#heightProposal, relativeProposal, additiveProposal)
+heightProposal = Distribution('Normal', mean=tdp.z, variance = 0.01)
+relativeProposal = Distribution('MvNormal', mean=tdp.relErr, variance=2.5e-4)
+additiveProposal = Distribution('MvLogNormal', mean=tdp.addErr, variance=2.5e-3, linearSpace=True)
+tdp.set_proposals(heightProposal, relativeProposal, additiveProposal)
 
 ################################################################################
 # With priorss set we can auto generate the posteriors
@@ -159,7 +160,7 @@ tdp.set_posteriors()
 # Note we are not using the priors to accept or reject perturbations.
 for i in range(10):
     tdp.perturb()
-    tdp.updatePosteriors()
+    tdp.update_posteriors()
 
 
 ################################################################################

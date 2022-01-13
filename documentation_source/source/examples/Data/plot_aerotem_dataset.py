@@ -3,6 +3,7 @@ Time domain dataset
 --------------------
 """
 #%%
+import h5py
 from geobipy import plotting as cP
 from os.path import join
 import matplotlib.pyplot as plt
@@ -48,6 +49,16 @@ _ = TD.pcolor(system=0, log=10, xscale='log')
 plt.figure()
 ax = TD.scatter2D(s=1.0, c=TD.secondary_field[:, TD.channel_index(system=0, channel=6)], equalize=True, log=10)
 plt.axis('equal')
+
+with h5py.File('tdem.h5', 'w') as f:
+    TD.createHdf(f, 'tdem')
+    TD.writeHdf(f, 'tdem')
+
+with h5py.File('tdem.h5', 'r') as f:
+    TD3 = TdemData.fromHdf(f['tdem'])
+
+with h5py.File('tdem.h5', 'r') as f:
+    tdp = TdemData.fromHdf(f['tdem'], index=0)
 
 # Prepare the dataset so that we can read a point at a time.
 Dataset = TdemData._initialize_sequential_reading(dataFiles, systemFiles)

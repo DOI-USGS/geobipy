@@ -1,0 +1,83 @@
+System Begin
+	Name = Aerotem
+	Type = Time Domain
+
+	Transmitter Begin
+		NumberOfTurns = 5
+		PeakCurrent   = 397
+		LoopArea      = 115
+		BaseFrequency = 90
+		WaveFormCurrent Begin
+	    -1.9227e-03           0
+	    -0.9210e-03 1.0000e+00
+                      0            0
+             3.6329e-03            0
+		WaveFormCurrent End
+		WaveformDigitisingFrequency = 1474560
+	Transmitter End
+
+	Receiver Begin
+		NumberOfWindows = 34
+		WindowWeightingScheme = AreaUnderCurve
+
+		WindowTimes Begin
+			4.4218e-05   7.1996e-05
+   			7.1995e-05   9.9773e-05
+   			9.9773e-05   1.2755e-04
+			1.2755e-04   1.5533e-04
+			1.5533e-04   1.8311e-04
+			1.8311e-04   2.1088e-04
+			2.1088e-04   2.3866e-04
+			2.3866e-04   2.6644e-04
+			2.6644e-04   2.9422e-04
+			2.9422e-04   3.2200e-04
+			3.2200e-04   3.4977e-04
+			3.4977e-04   3.7755e-04
+			3.7755e-04   4.0533e-04
+			4.0533e-04   4.3311e-04
+			4.3311e-04   4.6088e-04
+			4.6088e-04   4.8866e-04
+			4.8866e-04   5.1644e-04
+			5.1644e-04   5.7200e-04
+			5.7200e-04   6.2755e-04
+			6.2755e-04   7.1088e-04
+			7.1088e-04   7.9422e-04
+			7.9422e-04   8.7755e-04
+			8.7755e-04   9.8866e-04
+		   	9.8866e-04   1.0998e-03
+			1.0998e-03   1.2387e-03
+			1.2387e-03   1.3776e-03
+			1.3776e-03   1.5442e-03
+			1.5442e-03   1.7109e-03
+			1.7109e-03   1.9331e-03
+			1.9331e-03   2.1553e-03
+			2.1553e-03   2.4053e-03
+			2.4053e-03   2.6831e-03
+			2.6831e-03   3.0164e-03
+			2.9970e-03   3.3970e-03
+		WindowTimes End
+
+		LowPassFilter Begin
+			CutOffFrequency = 70000
+			Order           = 1
+		LowPassFilter End
+
+	Receiver End
+
+	ForwardModelling Begin
+
+		OutputType = dB/dt
+
+		SaveDiagnosticFiles = no
+
+		XOutputScaling = 0
+		YOutputScaling = 0
+		ZOutputScaling = 1
+		SecondaryFieldNormalisation  =  none
+
+		FrequenciesPerDecade = 5
+		NumberOfAbsiccaInHankelTransformEvaluation = 21
+
+	ForwardModelling End
+
+System End
