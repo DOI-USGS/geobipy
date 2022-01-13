@@ -50,21 +50,16 @@ from .src.classes.system.filters.butterworth import butterworth
 # Meshes
 from .src.classes.mesh.RectilinearMesh1D import RectilinearMesh1D
 from .src.classes.mesh.RectilinearMesh2D import RectilinearMesh2D
+from .src.classes.mesh.RectilinearMesh2D_stitched import RectilinearMesh2D_stitched
 from .src.classes.mesh.RectilinearMesh3D import RectilinearMesh3D
 # Models
 from .src.classes.model.Model import Model
-from .src.classes.model.Model1D import Model1D
-# from .src.classes.model.AarhusModel import AarhusModel
 # Pointclouds
 from .src.classes.pointcloud.PointCloud3D import PointCloud3D
 from .src.classes.pointcloud.Point import Point
 # Statistics
 from .src.classes.statistics.Distribution import Distribution
-# from .src.classes.statistics.MvDistribution import MvDistribution
-from .src.classes.statistics.Histogram1D import Histogram1D
-from .src.classes.statistics.Histogram2D import Histogram2D
-from .src.classes.statistics.Histogram3D import Histogram3D
-from .src.classes.statistics.Hitmap2D import Hitmap2D
+from .src.classes.statistics.Histogram import Histogram
 from .src.classes.statistics.Mixture import Mixture
 from .src.classes.statistics.mixStudentT import mixStudentT
 from .src.classes.statistics.mixNormal import mixNormal
