@@ -112,8 +112,7 @@ class StatArray(np.ndarray, myObject):
             # Do some possible LateX checking. some Backslash operatores in LateX do not pass correctly as strings
             name = cf.str_to_raw(name)
         if (not units is None):
-            assert (isinstance(units, str)), TypeError(
-                'units must be a string')
+            assert (isinstance(units, str)), TypeError('units must be a string')
             # Do some possible LateX checking. some Backslash operatores in LateX do not pass correctly as strings
             units = cf.str_to_raw(units)
 
@@ -137,7 +136,6 @@ class StatArray(np.ndarray, myObject):
             if (shape.hasProposal):
                 self._proposal = deepcopy(shape._proposal)
             if (shape.hasPosterior):
-                # deepcopy(shape._posterior)
                 self._posterior = shape._posterior
             if name is None and not shape._name is None:
                 name = shape._name
@@ -354,15 +352,15 @@ class StatArray(np.ndarray, myObject):
 
         other = StatArray(self, dtype=self.dtype)
 
-        other._name = self._name
-        other._units = self._units
+        # other._name = self._name
+        # other._units = self._units
 
-        if (self.hasPrior):
-            other._prior = deepcopy(self._prior)
-        if (self.hasProposal):
-            other._proposal = deepcopy(self._proposal)
-        if (self.hasPosterior):
-            other._posterior = self._posterior  # deepcopy(self._posterior)
+        # if (self.hasPrior):
+        #     other._prior = deepcopy(self._prior)
+        # if (self.hasProposal):
+        #     other._proposal = deepcopy(self._proposal)
+        # if (self.hasPosterior):
+        #     other._posterior = self._posterior  # deepcopy(self._posterior)
 
         return other
 
@@ -766,14 +764,8 @@ class StatArray(np.ndarray, myObject):
         numpy.resize : For more information.
 
         """
-        if (np.all(np.shape(self) == np.atleast_1d(new_shape))):
-            return deepcopy(self)
         out = StatArray(np.resize(self, new_shape), self.name, self.units)
-        if self.hasPrior:
-            out._prior = deepcopy(self.prior)
-        if self.hasProposal:
-            out._proposal = deepcopy(self.proposal)
-
+        out.copyStats(self)
         return out
 
     def standardize(self, axis=None):
