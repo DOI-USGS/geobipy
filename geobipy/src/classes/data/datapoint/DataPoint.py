@@ -77,7 +77,7 @@ class DataPoint(Point):
 
         # self.errorPosterior = None
 
-    @property
+    @cached_property
     def active(self):
         """Gets the indices to the observed data values that are not NaN
 
