@@ -148,8 +148,8 @@ class EmDataPoint(DataPoint):
         magnetic_permeability = StatArray.StatArray(mesh.nCells.item(), "Magnetic Permeability", "$\frac{H}{m}$")
 
         out = Model(mesh=mesh, values=conductivity)
-        out.setattr('magnetic_susceptibility', magnetic_susceptibility)
-        out.setattr('magnetic_permeability', magnetic_permeability)
+        # out.setattr('magnetic_susceptibility', magnetic_susceptibility)
+        # out.setattr('magnetic_permeability', magnetic_permeability)
 
         return out
 

@@ -462,8 +462,7 @@ class FdemDataPoint(EmDataPoint):
         if self.predictedData.hasPosterior:
             x = self.frequencies()
             self.predictedData.posterior.update_with_line(x, self.predictedInphase())
-            
-            # self.predictedData.posterior.update_with_line(x, self.predictedQuadrature())
+            self.predictedData.posterior.update_with_line(x, self.predictedQuadrature())
 
 
     def updateSensitivity(self, model):
@@ -531,7 +530,6 @@ class FdemDataPoint(EmDataPoint):
         """ Forward model the data from the given model """
 
         assert isinstance(mod, Model), TypeError("Invalid model class for forward modeling [1D]")
-
         self._forward1D(mod)
 
 
@@ -539,7 +537,6 @@ class FdemDataPoint(EmDataPoint):
         """ Compute the sensitivty matrix for the given model """
 
         assert isinstance(mod, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
-
         return StatArray.StatArray(self._sensitivity1D(mod), 'Sensitivity', '$\\frac{ppm.m}{S}$')
 
 
