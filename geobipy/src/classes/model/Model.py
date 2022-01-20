@@ -29,9 +29,7 @@ class Model(myObject):
         self._gradient = None
 
         self.value_bounds = None
-        self._inverse_hessian = None
-
-        self.__values = []
+        # self._inverse_hessian = None
 
     def __getitem__(self, slic):
         mesh = self.mesh[slic]
@@ -50,7 +48,7 @@ class Model(myObject):
 
         out._gradient = deepcopy(self._gradient, memo=memo)
         out.value_bounds = self.value_bounds
-        out._inverse_hessian = deepcopy(self._inverse_hessian, memo=memo)
+        # out._inverse_hessian = deepcopy(self._inverse_hessian, memo=memo)
 
         # if len(self.__values) > 1:
         #     for k, v in zip(self.__values, self.cell_values[1:]):
@@ -79,12 +77,14 @@ class Model(myObject):
         where :math:`k_{max}` is a maximum number of layers, set to be far greater than the expected final solution.
 
         """
-        if self._gradient is None:
-            self._gradient = StatArray.StatArray(self.mesh.nCells.item()-1, 'Derivative', r"$\frac{"+self.values.units+"}{"+self.mesh.edges.units+"}$")
-            self._gradient[:] = self.mesh.gradient(values=self.values)
-        else:
-            self._gradient = self._gradient.resize(self.mesh.nCells.item()-1)
-            self._gradient[:] = self.mesh.gradient(values=self.values)
+        # if self._gradient is None:
+        #     self._gradient = StatArray.StatArray(self.mesh.nCells.item()-1, 'Derivative', r"$\frac{"+self.values.units+"}{"+self.mesh.edges.units+"}$")
+
+        gradient = StatArray.StatArray(self.mesh.gradient(values=self.values), 'Derivative', r"$\frac{"+self.values.units+"}{"+self.mesh.edges.units+"}$")
+        if self._gradient is not None:
+            gradient.copyStats(self._gradient)
+        
+        self._gradient = gradient
         return self._gradient
 
     # @gradient.setter
@@ -95,9 +95,9 @@ class Model(myObject):
 
     #     self._gradient = StatArray.StatArray(values)
     
-    @property
-    def inverse_hessian(self):
-        return self._inverse_hessian
+    # @property
+    # def inverse_hessian(self):
+    #     return self._inverse_hessian
 
     @property
     def mesh(self):
@@ -124,9 +124,9 @@ class Model(myObject):
         msg += "values:\n{}".format("|   "+(self.values.summary.replace("\n", "\n|   "))[:-4])
         return msg
 
-    @property
-    def cell_values(self):
-        return [self.values] + [getattr(self, v) for v in self.__values]
+    # @property
+    # def cell_values(self):
+    #     return [self.values] + [getattr(self, v) for v in self.__values]
 
     @property
     def values(self):
@@ -153,11 +153,11 @@ class Model(myObject):
     def z(self):
         return self.mesh.z
 
-    def setattr(self, name, values):
+    # def setattr(self, name, values):
 
-        assert np.all(values.shape == self.shape), ValueError("values must have shape {} not {}".format(self.shape, values.shape))
-        setattr(self, name, values)
-        self.__values.append(name)
+    #     assert np.all(values.shape == self.shape), ValueError("values must have shape {} not {}".format(self.shape, values.shape))
+    #     setattr(self, name, values)
+    #     self.__values.append(name)
 
     def animate(self, axis, filename, slic=None, **kwargs):
         return self.mesh._animate(self.values, axis, filename, slic, **kwargs)
@@ -166,6 +166,7 @@ class Model(myObject):
         return self.mesh.axis(*args, **kwargs)
 
     def bar(self, **kwargs):
+    
         return self.mesh.bar(self.values, **kwargs)
 
     def cellIndex(self, *args, **kwargs):
@@ -194,14 +195,15 @@ class Model(myObject):
 
         """
         # Compute a new parameter variance matrix if the structure of the model changed.
-
-        if (self.mesh.action[0] in ['insert', 'delete'] or self.inverse_hessian is None):
+        if (self.mesh.action[0] in ['insert', 'delete']):
             # Propose new layer conductivities
-            self._inverse_hessian = self.local_variance(observation)
-    
+            return self.local_variance(observation)
+        else:
+            return self.values.proposal.variance
+
     def delete_edge(self, i):
-        out, values = self.mesh.delete_edge(i, values=self.cell_values)
-        out = Model(mesh=out, values=values[0])
+        out, values = self.mesh.delete_edge(i, values=self.values)
+        out = Model(mesh=out, values=values)
 
         # if len(values) > 1:
         #     for k, v in zip(self.__values, values[1:]):
@@ -283,11 +285,11 @@ class Model(myObject):
 
     def insert_edge(self, edge, value=None):
 
-        out, values = self.mesh.insert_edge(edge, values=self.cell_values)
+        out, values = self.mesh.insert_edge(edge, values=self.values)
 
         if value is not None:
-            values[0][out.action[1]] = value
-        out = Model(mesh=out, values=values[0])
+            values[out.action[1]] = value
+        out = Model(mesh=out, values=values)
         out._gradient = self.gradient.resize(out.nCells.item() - 1)
 
         # if len(values) > 1:
@@ -382,10 +384,10 @@ class Model(myObject):
 
     def perturb_structure(self, update_priors=True):
         
-        remapped_mesh, remapped_values = self.mesh.perturb(values=self.cell_values)
-        remapped_model = Model(remapped_mesh, values=remapped_values[0])
+        remapped_mesh, remapped_values = self.mesh.perturb(values=self.values)
+        remapped_model = Model(remapped_mesh, values=remapped_values)
 
-        remapped_model.gradient.copyStats(self._gradient)
+        remapped_model._gradient = deepcopy(self._gradient)
 
         # if len(remapped_values) > 1:
         #     for k, v in zip(self.__values, remapped_values[1:]):
@@ -430,7 +432,7 @@ class Model(myObject):
                       linewidth=1, 
                       color=cP.wellSeparated[3])
 
-            doi = self.values.posterior.opacity_level(log=parameter_kwargs.get('logX', None), axis=1)
+            doi = self.values.posterior.opacity_level(percent=67.0, log=parameter_kwargs.get('logX', None), axis=1)
             plt.axhline(doi, color = '#5046C8', linestyle = 'dashed', linewidth = 1, alpha = 0.6)
         return axes
 
@@ -637,18 +639,18 @@ class Model(myObject):
 
         # Compute the stochastic newton offset.
         # The negative sign because we want to move downhill
-        SN_step_from_perturbed = 0.5 * np.dot(self.inverse_hessian, gradient)
+        SN_step_from_perturbed = 0.5 * np.dot(self.values.proposal.variance, gradient)
 
         prng = self.values.proposal.prng
 
         # Create a multivariate normal distribution centered on the shifted parameter values, and with variance computed from the forward step.
         # We don't recompute the variance using the perturbed parameters, because we need to check that we could in fact step back from
         # our perturbed parameters to the unperturbed parameters. This is the crux of the reversible jump.
-        tmp = Distribution('MvLogNormal', np.exp(np.log(self.values) - SN_step_from_perturbed), self.inverse_hessian, linearSpace=True, prng=prng)
+        tmp = Distribution('MvLogNormal', np.exp(np.log(self.values) - SN_step_from_perturbed), self.values.proposal.variance, linearSpace=True, prng=prng)
         # Probability of jumping from our perturbed parameter values to the unperturbed values.
         proposal = tmp.probability(x=remappedModel.values, log=True)
 
-        tmp = Distribution('MvLogNormal', remappedModel.values, self.inverse_hessian, linearSpace=True, prng=prng)
+        tmp = Distribution('MvLogNormal', remappedModel.values, self.values.proposal.variance, linearSpace=True, prng=prng)
         proposal1 = tmp.probability(x=self.values, log=True)
 
         action = self.mesh.action[0]
@@ -795,7 +797,7 @@ class Model(myObject):
         remapped_model = self.perturb_structure()
 
         # Update the local Hessian around the current model.
-        remapped_model.compute_local_inverse_hessian(observation)
+        inverse_hessian = remapped_model.compute_local_inverse_hessian(observation)
 
         # Proposing new parameter values
         # This is Wm'Wm(sigma - sigma_ref)
@@ -810,7 +812,7 @@ class Model(myObject):
         # This is the equivalent to the full newton gradient of the deterministic objective function.
         # delta sigma = 0.5 * inv(J'Wd'WdJ + Wm'Wm)(J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref))
         # This could be replaced with a CG solver for bigger problems like deterministic algorithms.
-        dSigma = 0.5 * np.dot(remapped_model.inverse_hessian, gradient)
+        dSigma = 0.5 * np.dot(inverse_hessian, gradient)
 
         mean = np.log(remapped_model.values) - dSigma
 
@@ -818,7 +820,7 @@ class Model(myObject):
 
         # Assign a proposal distribution for the parameter using the mean and variance.
         perturbed_model.values.proposal = Distribution('MvLogNormal', mean=np.exp(mean),
-                                                      variance=remapped_model.inverse_hessian,
+                                                      variance=inverse_hessian,
                                                       linearSpace=True,
                                                       prng=perturbed_model.values.proposal.prng)
 
