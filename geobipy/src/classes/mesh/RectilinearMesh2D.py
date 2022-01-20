@@ -420,10 +420,6 @@ class RectilinearMesh2D(Mesh):
 
     def __deepcopy__(self, memo={}):
         """ Define the deepcopy for the StatArray """
-        # relativeTo = self.relativeTo.edges if not self.relativeTo is None else None
-        # if self.xyz:
-        #     return RectilinearMesh2D(xEdges=self.x.edges, yEdges=self.y.edges, zEdges=self.z.edges, relativeToEdges=relativeTo)
-        # else:
         return RectilinearMesh2D(x=self.x, y=self.y, relativeTo=self.relativeTo)
 
     def edges(self, axis):
