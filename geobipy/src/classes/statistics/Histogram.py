@@ -219,10 +219,10 @@ class Histogram(Model):
         p = 0.01 * percent
         op = self.opacity(log=log, axis=axis)
         nz = op.size - 1
-        iC = 0
-        while op[iC] < p and iC < nz:
-            iC +=1
-        return self.y.centres[op.size - iC -1]
+        iC = nz
+        while op[iC] > p and iC >= 0:
+            iC -= 1
+        return self.y.centres[iC]
 
     def pcolor(self, **kwargs):
         kwargs['cmap'] = kwargs.get('cmap', 'gray_r')
