@@ -277,14 +277,14 @@ class Inference1D(myObject):
 
         # Setup the model for perturbation
         self.model.set_priors(
-            mean_value=halfspace.values[0],
+            mean_value=halfspace.values.item(),
             min_edge=self.kwargs['minimum_depth'],
             max_edge=self.kwargs['maximum_depth'],
             max_cells=self.kwargs['maximum_number_of_layers'],
             parameterPrior=self.kwargs['solve_parameter'],
             gradientPrior=self.kwargs['solve_gradient'],
-            parameterLimits=self.kwargs.get('parameter_limits'),
-            min_width=self.kwargs.get('minimum_thickness'),
+            parameterLimits=self.kwargs.get('parameter_limits', None),
+            min_width=self.kwargs.get('minimum_thickness', None),
             factor=self.kwargs.get('factor', 10.0), prng=self.prng
         )
 
@@ -295,13 +295,13 @@ class Inference1D(myObject):
         # Compute the predicted data
         self.datapoint.forward(self.model)
 
+        observation = self.datapoint
         if self.kwargs['ignore_likelihood']:
-            inverseHessian = self.model.local_variance()
-        else:
-            inverseHessian = self.model.local_variance(self.datapoint)
+            observation = None
+        local_variance = self.model.local_variance(observation)
 
         # Instantiate the proposal for the parameters.
-        parameterProposal = Distribution('MvLogNormal', self.model.values, inverseHessian, linearSpace=True, prng=self.prng)
+        parameterProposal = Distribution('MvLogNormal', mean=self.model.values, variance=local_variance, linearSpace=True, prng=self.prng)
 
         probabilities = [self.kwargs['probability_of_birth'],
                          self.kwargs['probability_of_death'],
@@ -316,10 +316,10 @@ class Inference1D(myObject):
         perturbed_datapoint = deepcopy(self.datapoint)
 
         # Perturb the current model
+        observation = perturbed_datapoint
         if self.kwargs.get('ignore_likelihood', False):
-            remapped_model, perturbed_model = self.model.perturb()
-        else:
-            remapped_model, perturbed_model = self.model.perturb(perturbed_datapoint)
+            observation = None
+        remapped_model, perturbed_model = self.model.perturb(observation)
 
         # Propose a new data point, using assigned proposal distributions
         perturbed_datapoint.perturb()
@@ -341,11 +341,11 @@ class Inference1D(myObject):
 
         # Compute the components of each acceptance ratio
         likelihood1 = 1.0
+        observation = None
         if not self.kwargs.get('ignore_likelihood', False):
             likelihood1 = perturbed_datapoint.likelihood(log=True)
-            proposal, proposal1 = perturbed_model.proposal_probabilities(remapped_model, perturbed_datapoint)
-        else:
-            proposal, proposal1 = perturbed_model.proposal_probabilities(remapped_model)
+            observation = perturbed_datapoint
+        proposal, proposal1 = perturbed_model.proposal_probabilities(remapped_model, perturbed_datapoint)
 
         posterior1 = prior1 + likelihood1
 
@@ -357,7 +357,6 @@ class Inference1D(myObject):
 
         try:
             log_acceptance_ratio = np.float128(prior_ratio + likelihood_ratio + proposal_ratio)
-
             acceptance_probability = cF.expReal(log_acceptance_ratio)
         except:
             log_acceptance_ratio = -np.inf
@@ -372,10 +371,6 @@ class Inference1D(myObject):
             self.prior = prior1
             self.likelihood = likelihood1
             self.posterior = posterior1
-
-            del self.model
-            del self.datapoint
-
             self.model = perturbed_model
             self.datapoint = perturbed_datapoint
         
