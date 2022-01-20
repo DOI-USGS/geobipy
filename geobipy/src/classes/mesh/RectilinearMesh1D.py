@@ -90,12 +90,11 @@ class RectilinearMesh1D(Mesh):
     def __deepcopy__(self, memo={}):
         out = type(self).__new__(type(self))
         out._nCells = deepcopy(self._nCells, memo=memo)
-        out._centres = deepcopy(self._centres, memo=memo)
-        out._edges = deepcopy(self._edges, memo=memo)
-        out._widths = deepcopy(self._widths, memo=memo)
         out.log = deepcopy(self.log, memo=memo)
         out._relativeTo = self._relativeTo
 
+        out.edges = self._edges
+                
         out._min_width = self.min_width
         out._min_edge = self.min_edge
         out._max_edge = self.max_edge
@@ -163,15 +162,11 @@ class RectilinearMesh1D(Mesh):
     @centres.setter
     def centres(self, values):
 
-        if not isinstance(values, StatArray.StatArray):
-            values = StatArray.StatArray(np.asarray(values).astype(np.float64), cF.getName(self._centres), cF.getUnits(self._centres))
-
+        values = StatArray.StatArray(values)
         values, _ = cF._log(values, log=self.log)
         values -= self.relativeTo
 
-        # values.name = cF._logLabel(self.log) + values.name
-
-        self._centres = deepcopy(values)
+        self._centres = values
         self._edges = self._centres.edges()
         self._widths = self._edges.diff()
 
@@ -198,15 +193,12 @@ class RectilinearMesh1D(Mesh):
 
     @edges.setter
     def edges(self, values):
-        if not isinstance(values, StatArray.StatArray):
-            values = StatArray.StatArray(np.asarray(values).astype(np.float64), cF.getName(self._edges), cF.getUnits(self._edges))
+        values = StatArray.StatArray(values)
 
         values, _ = cF._log(values, log=self.log)
         values -= self.relativeTo
 
-        # values.name = cF._logLabel(self.log) + values.name
-        # assert np.ndim(values) == 1, ValueError("edges must be 1D")
-        self._edges = deepcopy(values)
+        self._edges = values
         self._centres = values.internalEdges()
         self._widths = values.diff()
 
@@ -344,13 +336,12 @@ class RectilinearMesh1D(Mesh):
 
     @widths.setter
     def widths(self, values):
-        if not isinstance(values, StatArray.StatArray):
-            values = StatArray.StatArray(values)
+        values = StatArray.StatArray(values)
 
         assert np.all(values > 0.0), ValueError(
             "widths must be entirely positive")
 
-        self._widths = deepcopy(values)
+        self._widths = values
         self.edges = np.hstack([0.0, np.cumsum(values)])
 
     def _credibleIntervals(self, values, percent=90.0, log=None, reciprocate=False, axis=0):
@@ -947,6 +938,7 @@ class RectilinearMesh1D(Mesh):
         #     plt.text(0, h, s=r'$\downarrow \infty$', fontsize=12)
 
     def bar(self, values, **kwargs):
+    
         if self.log is not None:
             kwargs['xscale'] = 'log'
 
