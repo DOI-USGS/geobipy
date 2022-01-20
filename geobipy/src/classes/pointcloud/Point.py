@@ -81,10 +81,10 @@ class Point(myObject, ABC):
     def __deepcopy__(self, memo={}):
         """ Define a deepcopy routine """
         out = type(self).__new__(type(self))
-        out.x = deepcopy(self.x, memo=memo)
-        out.y = deepcopy(self.y, memo=memo)
-        out.z = deepcopy(self.z, memo=memo)
-        out.elevation = deepcopy(self.elevation, memo=memo)
+        out._x = deepcopy(self.x, memo=memo)
+        out._y = deepcopy(self.y, memo=memo)
+        out._z = deepcopy(self.z, memo=memo)
+        out._elevation = deepcopy(self.elevation, memo=memo)
         return out
 
     def __sub__(self, other):
