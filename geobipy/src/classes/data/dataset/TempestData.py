@@ -53,6 +53,11 @@ class TempestData(TdemData):
 
     """
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._file = None
+
     @property
     def additive_error(self):
         """The data. """
@@ -75,6 +80,10 @@ class TempestData(TdemData):
     @property
     def datapoint_type(self):
         return Tempest_datapoint
+
+    @property
+    def file(self):
+        return self._file
 
     @property
     def relative_error(self):
@@ -403,13 +412,6 @@ class TempestData(TdemData):
         self._open_data_files(data_filename)
         return self
 
-        # # Read in the EM System file
-        # self.system = system_filename
-
-        # self._open_data_files(data_filename)
-
-        # self._nPoints = self._file[0]['linedata/Easting'].size
-
     def _read_record(self, record):
         """Reads a single data point from the data file.
 
@@ -464,8 +466,9 @@ class TempestData(TdemData):
         return out
 
     def _read_line_fiducial(self, filename=None):
-        if filename is not None:
+        if self.file is None:
             return super()._read_line_fiducial(filename)
+        
         return self._read_variable(['Line', 'Fiducial'])
 
     def _read_variable(self, variable):
