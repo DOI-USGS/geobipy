@@ -933,6 +933,7 @@ def safeEval(string):
     'Model',
     'Model1D',
     'Hitmap',
+    'TempestData',
     'TdemData',
     'FdemData',
     'TdemDataPoint',
