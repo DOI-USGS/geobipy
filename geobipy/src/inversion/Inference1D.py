@@ -250,21 +250,12 @@ class Inference1D(myObject):
         # Set the statistical properties of the datapoint
         # ---------------------------------------
         # Set the prior on the data
-        self.datapoint.relErr = self.kwargs['initial_relative_error']
-        self.datapoint.addErr = self.kwargs['initial_additive_error']
-
-        # data_prior = Distribution('MvLogNormal', self.datapoint.data[self.datapoint.active], self.datapoint.std[self.datapoint.active]**2.0, linearSpace=False, prng=self.prng)
+        self.datapoint.initialize(**self.kwargs)
 
         # Set the priors, proposals, and posteriors.
         self.datapoint.set_priors(**self.kwargs)
         self.datapoint.set_proposals(**self.kwargs)
-
         self.datapoint.set_posteriors()
-
-
-        # Update the data errors based on user given parameters
-        # if self.kwargs.solve_relative_error or self.kwargs.solve_additive_error:
-        # self.datapoint.updateErrors(self.kwargs.initial_relative_error, self.kwargs.initial_additive_error)
 
     def initialize_model(self):
         # Find the conductivity of a half space model that best fits the data

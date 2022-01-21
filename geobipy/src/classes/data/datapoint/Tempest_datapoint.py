@@ -140,6 +140,12 @@ class Tempest_datapoint(TdemDataPoint):
                 'units must have type str')
         self._units = value
 
+    def initialize(self, **kwargs):
+        super().initialize(**kwargs)
+
+        if 'initial_transmitter_pitch' in kwargs:
+            self.transmitter.pitch = kwargs['initial_transmitter_pitch']
+
     def init_posterior_plots(self, gs):
         """Initialize axes for posterior plots
 

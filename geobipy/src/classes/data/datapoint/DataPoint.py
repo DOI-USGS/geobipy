@@ -6,7 +6,9 @@ from ....classes.core import StatArray
 from ....base import utilities as cf
 from ....base import plotting as cP
 from ....base import MPI as myMPI
+from ...statistics.Distribution import Distribution
 from ...statistics.Histogram import Histogram
+from ...mesh.RectilinearMesh1D import RectilinearMesh1D
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -294,6 +296,11 @@ class DataPoint(Point):
 
         return out
 
+    # def initialize(self, **kwargs):
+    
+    #     self.relErr[:] = self.kwargs['initial_relative_error']
+    #     self.addErr[:] = self.kwargs['initial_additive_error']
+
     def generate_noise(self, additive_error, relative_error):
 
         std = np.sqrt(additive_error**2.0 + (relative_error * self.predictedData)**2.0)
@@ -412,6 +419,150 @@ class DataPoint(Point):
         tmp2 = 1.0 / self.std[self.active]
         return np.sqrt(np.float64(np.sum((cf.Ax(tmp2, self.deltaD[self.active]))**2.0, dtype=np.float64)))
 
+    def initialize(self, **kwargs):
+        self.relErr = kwargs['initial_relative_error']
+        self.addErr = kwargs['initial_additive_error']
+
+
+    def set_priors(self, height_prior=None, relative_error_prior=None, additive_error_prior=None, data_prior=None, **kwargs):
+
+        if height_prior is None:
+            if kwargs.get('solve_height', False):
+                height_prior = Distribution('Uniform', self.z - kwargs['maximum_height_change'], self.z + kwargs['maximum_height_change'], prng=kwargs.get('prng'))
+
+        # Define prior, proposal, posterior for relative error
+        if relative_error_prior is None:
+            if kwargs.get('solve_relative_error', False):
+                relative_error_prior = Distribution('Uniform', kwargs['minimum_relative_error'], kwargs['maximum_relative_error'], prng=kwargs.get('prng'))
+
+        # Define prior, proposal, posterior for additive error
+        if additive_error_prior is None:
+            if kwargs.get('solve_additive_error', False):
+                # log = Trisinstance(self, TdemDataPoint)
+                additive_error_prior = Distribution('Uniform', kwargs['minimum_additive_error'], kwargs['maximum_additive_error'], log=False, prng=kwargs.get('prng'))
+        
+        if data_prior is None:
+            data_prior = Distribution('MvLogNormal', self.data[self.active], self.std[self.active]**2.0, linearSpace=False, prng=kwargs.get('prng'))
+
+        self.set_height_prior(height_prior)
+        self.set_relative_error_prior(relative_error_prior)
+        self.set_additive_error_prior(additive_error_prior)
+        self.set_data_prior(data_prior)
+        
+
+    def set_height_prior(self, prior):
+        if not prior is None:
+            self.z.prior = prior
+
+    def set_data_prior(self, prior):
+        if not prior is None:
+            self.predictedData.prior = prior
+
+    def set_relative_error_prior(self, prior):
+        if not prior is None:
+            assert prior.ndim == self.nSystems, ValueError("relative_error_prior must have {} dimensions".format(self.nSystems))
+            self.relErr.prior = prior
+
+    def set_additive_error_prior(self, prior):
+        if not prior is None:
+            assert prior.ndim == self.nSystems, ValueError("additive_error_prior must have {} dimensions".format(self.nSystems))
+            self.addErr.prior = prior
+
+    def set_proposals(self, height_proposal=None, relative_error_proposal=None, additive_error_proposal=None, **kwargs):
+        """Set the proposals on the datapoint's perturbable parameters
+
+        Parameters
+        ----------
+        heightProposal : geobipy.baseDistribution, optional
+            The proposal to attach to the height. Must be univariate
+        relativeErrorProposal : geobipy.baseDistribution, optional
+            The proposal to attach to the relative error.
+            If the datapoint has only one system, relativeErrorProposal is univariate.
+            If there are more than one system, relativeErrorProposal is multivariate.
+        additiveErrorProposal : geobipy.baseDistribution, optional
+            The proposal to attach to the relative error.
+            If the datapoint has only one system, additiveErrorProposal is univariate.
+            If there are more than one system, additiveErrorProposal is multivariate.
+
+        """
+
+        self.set_height_proposal(height_proposal, **kwargs)
+        self.set_relative_error_proposal(relative_error_proposal, **kwargs)
+        self.set_additive_error_proposal(additive_error_proposal, **kwargs)
+
+
+    def set_height_proposal(self, proposal, **kwargs):
+
+        if proposal is None:
+            if kwargs.get('solve_height', False):
+                proposal = Distribution('Normal', self.z.value, kwargs['height_proposal_variance'], prng=kwargs['prng'])
+
+        self.z.proposal = proposal
+
+    def set_relative_error_proposal(self, proposal, **kwargs):
+        if proposal is None:
+            if kwargs.get('solve_relative_error', False):
+                proposal = Distribution('MvNormal', self.relErr, kwargs['relative_error_proposal_variance'], prng=kwargs['prng'])
+        self.relErr.proposal = proposal
+
+    def set_additive_error_proposal(self, proposal, **kwargs):
+        if proposal is None:
+            if kwargs.get('solve_additive_error', False):
+                proposal = Distribution('MvLogNormal', self.addErr, kwargs['additive_error_proposal_variance'], linearSpace=False, prng=kwargs['prng'])
+
+        self.addErr.proposal = proposal
+
+    def set_posteriors(self, log=None):
+        """ Set the posteriors based on the attached priors
+
+        Parameters
+        ----------
+        log :
+
+        """
+        # Create a histogram to set the height posterior.
+        self.set_height_posterior()
+        # # Initialize the histograms for the relative errors
+        # # Set the posterior for the data point.
+        self.set_relative_error_posterior()
+        self.set_additive_error_posterior(log=log)
+
+        self.set_predicted_data_posterior()
+
+    def set_height_posterior(self):
+        """
+
+        """
+        if self.z.hasPrior:
+            mesh = RectilinearMesh1D(edges = StatArray.StatArray(self.z.prior.bins(), name=self.z.name, units=self.z.units), relativeTo=self.z)
+            self.z.posterior = Histogram(mesh=mesh)
+
+    def set_relative_error_posterior(self):
+        """
+
+        """
+        if self.relErr.hasPrior:
+            bins = StatArray.StatArray(np.atleast_2d(self.relErr.prior.bins()), name=self.relErr.name, units=self.relErr.units)        
+            posterior = []
+            for i in range(self.nSystems):
+                b = bins[i, :]
+                mesh = RectilinearMesh1D(edges = b, relativeTo=0.5*(b.max()-b.min()))
+                posterior.append(Histogram(mesh=mesh))
+            self.relErr.posterior = posterior
+
+    def set_additive_error_posterior(self, log=None):
+        """
+
+        """
+        if self.addErr.hasPrior:
+            bins = StatArray.StatArray(np.atleast_2d(self.addErr.prior.bins()), name=self.addErr.name, units=self.data.units)
+
+            posterior = []
+            for i in range(self.nSystems):
+                b = bins[i, :]
+                mesh = RectilinearMesh1D(edges = b, log=log, relativeTo=0.5*(b.max()-b.min()))
+                posterior.append(Histogram(mesh=mesh))
+            self.addErr.posterior = posterior
 
     # def scaleJ(self, Jin, power=1.0):
     #     """ Scales a matrix by the errors in the given data
