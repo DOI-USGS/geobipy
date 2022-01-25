@@ -42,7 +42,7 @@ class Inference2D(myObject):
     def __init__(self, hdf5_file_path=None, system_file_path=None, hdf5_file=None, mode='r+', world=None):
         """ Initialize the lineResults """
 
-        self._world = None
+        self._world = world
         if (hdf5_file_path is None): return
 
         assert not system_file_path is None, Exception("Please also specify the path to the system file")
