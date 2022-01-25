@@ -178,9 +178,9 @@ class Tempest_datapoint(TdemDataPoint):
         return ax
 
 
-    def set_priors(self, height_prior=None, data_prior=None, relative_error_prior=None, additive_error_prior=None, transmitter_pitch_prior=None, **kwargs):
+    def set_priors(self, height_prior=None, relative_error_prior=None, additive_error_prior=None, transmitter_pitch_prior=None, data_prior=None, **kwargs):
 
-        super().set_priors(height_prior, data_prior, relative_error_prior, additive_error_prior, **kwargs)
+        super().set_priors(height_prior, relative_error_prior, additive_error_prior, data_prior, **kwargs)
 
         if transmitter_pitch_prior is None:
             if kwargs.get('solve_transmitter_pitch', False):

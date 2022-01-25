@@ -3,7 +3,6 @@ Module describing a frequency domain EMData Point that contains a single measure
 """
 from copy import copy, deepcopy
 
-from geobipy.src.classes.mesh.RectilinearMesh1D import RectilinearMesh1D
 from ....classes.core import StatArray
 from ...forwardmodelling.Electromagnetic.FD.fdem1d import fdem1dfwd, fdem1dsen
 from .EmDataPoint import EmDataPoint
@@ -255,9 +254,9 @@ class FdemDataPoint(EmDataPoint):
         """
         return self.system[system].frequencies[channel%self.nFrequencies[system]]
 
-    def set_priors(self, height_prior=None, data_prior=None, relative_error_prior=None, additive_error_prior=None, **kwargs):
+    def set_priors(self, height_prior=None, relative_error_prior=None, additive_error_prior=None, data_prior=None, **kwargs):
 
-        super().set_priors(height_prior, data_prior, relative_error_prior, additive_error_prior, **kwargs)
+        super().set_priors(height_prior, relative_error_prior, additive_error_prior, data_prior, **kwargs)
 
 
     def set_predicted_data_posterior(self):

@@ -846,15 +846,12 @@ class TdemDataPoint(EmDataPoint):
     def set_posteriors(self, log=10):
         super().set_posteriors(log=log)
 
-    def set_priors(self, height_prior=None, data_prior=None, relative_error_prior=None, additive_error_prior=None, **kwargs):
+    def set_priors(self, height_prior=None, relative_error_prior=None, additive_error_prior=None, data_prior=None, **kwargs):
 
         if kwargs.get('solve_additive_error', False):
             additive_error_prior = Distribution('Uniform', kwargs['minimum_additive_error'], kwargs['maximum_additive_error'], log=10, prng=kwargs['prng'])
 
-        super().set_priors(height_prior, data_prior, relative_error_prior, additive_error_prior, **kwargs)
-
-        # if not data_prior is None:
-        #     self.predictedData.prior = data_prior
+        super().set_priors(height_prior, relative_error_prior, additive_error_prior, data_prior, **kwargs)
 
     def set_additive_error_proposal(self, proposal, **kwargs):
         if proposal is None:

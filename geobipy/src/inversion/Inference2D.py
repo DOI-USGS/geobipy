@@ -25,7 +25,7 @@ from ..base.MPI import loadBalance1D_shrinkingArrays
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from os.path import (split, join)
-from geobipy.src.inversion.Inference1D import Inference1D
+from .Inference1D import Inference1D
 import progressbar
 
 

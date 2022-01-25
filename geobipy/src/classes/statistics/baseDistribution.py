@@ -1,4 +1,4 @@
-from geobipy.src.classes.core.myObject import myObject
+from ..core.myObject import myObject
 from numpy.random import random as rng
 
 class baseDistribution(myObject):
