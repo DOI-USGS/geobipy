@@ -466,7 +466,7 @@ class TempestData(TdemData):
         return out
 
     def _read_line_fiducial(self, filename=None):
-        if self.file is None:
+        if filename.endswith('.csv'):
             return super()._read_line_fiducial(filename)
         
         return self._read_variable(['Line', 'Fiducial'])
