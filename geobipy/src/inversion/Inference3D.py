@@ -422,6 +422,8 @@ class Inference3D(myObject):
         nFinished = 0
         nSent = 0
 
+        count_array = np.zeros(self.world.size-1, dtype=np.int32)
+
         world = self.world
         # Send out the first indices to the workers
         for iWorker in range(1, world.size):
@@ -451,6 +453,7 @@ class Inference3D(myObject):
             status = MPI.Status()
             dummy = world.recv(source = MPI.ANY_SOURCE, tag = MPI.ANY_TAG, status = status)
             requestingRank = status.Get_source()
+            count_array[requestingRank-1] += 1
             # requestingRank = np.int(rankRecv[0])
             # dataPointProcessed = rankRecv[1]
 
@@ -476,13 +479,14 @@ class Inference3D(myObject):
 
                 nSent += 1
 
-            report = (nFinished % (world.size - 1)) == 0 or nFinished == nPoints
+            report = (nFinished % (world.size - 1)) == 0 or nFinished >= (nPoints - world.size)
 
             if report:
                 e = MPI.Wtime() - t0
                 elapsed = str(timedelta(seconds=e))
                 eta = str(timedelta(seconds=(nPoints / nFinished-1) * e))
                 myMPI.print("Remaining Points {}/{} || Elapsed Time: {} h:m:s || ETA {} h:m:s".format(nPoints-nFinished, nPoints, elapsed, eta))
+                myMPI.print("Count array \n{}".format(count_array))
 
     def _infer_mpi_worker_task(self, datapoint, prng, **options):
         """ Define a wait run ping procedure for each worker """
@@ -519,7 +523,6 @@ class Inference3D(myObject):
             failed = inference.infer(hdf_file_handle=self.lines[iLine].hdfFile)
 
             # Ping the Master to request a new index
-            t0 = MPI.Wtime()
             world.send(1, dest=0)
 
             # Wait till you are told whether to continue or not
