@@ -860,36 +860,36 @@ class TdemDataPoint(EmDataPoint):
 
         self.addErr.proposal = proposal
 
-    def set_predicted_data_posterior(self):
-        if self.predictedData.hasPrior:
-            times = np.log10(self.channels)
-            t0 = times.min()
-            t1 = times.max()
-            data = np.log10(self.data[self.active])
-            a = data.min()
-            b = data.max()
+    # def set_predicted_data_posterior(self):
+    #     if self.predictedData.hasPrior:
+    #         times = np.log10(self.channels)
+    #         t0 = times.min()
+    #         t1 = times.max()
+    #         data = np.log10(self.data[self.active])
+    #         a = data.min()
+    #         b = data.max()
 
-            xbuf = 0.05*(t1 - t0)
-            xbins = StatArray.StatArray(np.logspace(t0-xbuf, t1+xbuf, 200), times.name, times.units)
-            buf = 0.5*(b - a)
-            ybins = StatArray.StatArray(np.logspace(a-buf, b+buf, 200), data.name, data.units)
-            # rto = 0.5 * (ybins[0] + ybins[-1])
-            # ybins -= rto
+    #         xbuf = 0.05*(t1 - t0)
+    #         xbins = StatArray.StatArray(np.logspace(t0-xbuf, t1+xbuf, 200), times.name, times.units)
+    #         buf = 0.5*(b - a)
+    #         ybins = StatArray.StatArray(np.logspace(a-buf, b+buf, 200), data.name, data.units)
+    #         # rto = 0.5 * (ybins[0] + ybins[-1])
+    #         # ybins -= rto
 
-            mesh = RectilinearMesh2D(xEdges=xbins, xlog=10, yEdges=ybins, ylog=10)
-            self.predictedData.posterior = Histogram(mesh=mesh)
+    #         mesh = RectilinearMesh2D(xEdges=xbins, xlog=10, yEdges=ybins, ylog=10)
+    #         self.predictedData.posterior = Histogram(mesh=mesh)
 
     def update_posteriors(self):
         super().update_posteriors()
 
-        if self.predictedData.hasPosterior:
-            active = self.active
-            for i in range(self.nSystems):
-                x = self.off_time(i)
-                for j in range(self.n_components):   
-                    i_comp = self._component_indices(j, i)
-                    a = active[i_comp]
-                    self.predictedData.posterior.update_with_line(x[a], self.predictedData[i_comp][a])
+        # if self.predictedData.hasPosterior:
+        #     active = self.active
+        #     for i in range(self.nSystems):
+        #         x = self.off_time(i)
+        #         for j in range(self.n_components):   
+        #             i_comp = self._component_indices(j, i)
+        #             a = active[i_comp]
+        #             self.predictedData.posterior.update_with_line(x[a], self.predictedData[i_comp][a])
 
     def forward(self, mod):
         """ Forward model the data from the given model """

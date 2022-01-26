@@ -443,7 +443,7 @@ class DataPoint(Point):
         
         if data_prior is None:
             data_prior = Distribution('MvLogNormal', self.data[self.active], self.std[self.active]**2.0, linearSpace=False, prng=kwargs.get('prng'))
-
+        
         self.set_height_prior(height_prior)
         self.set_relative_error_prior(relative_error_prior)
         self.set_additive_error_prior(additive_error_prior)
@@ -527,7 +527,7 @@ class DataPoint(Point):
         self.set_relative_error_posterior()
         self.set_additive_error_posterior(log=log)
 
-        self.set_predicted_data_posterior()
+        # self.set_predicted_data_posterior()
 
     def set_height_posterior(self):
         """
