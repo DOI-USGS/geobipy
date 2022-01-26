@@ -157,7 +157,7 @@ def parallel_geobipy(inputFile, outputDir, skipHDF5):
 def parallel_mpi(inputFile, output_directory, skipHDF5):
 
     from mpi4py import MPI
-    from geobipy.src.base import MPI as myMPI
+    from .src.base import MPI as myMPI
 
     world = MPI.COMM_WORLD
     rank = world.rank
