@@ -3,6 +3,7 @@ Class to handle the HDF5 result files for a full data set.
  """
 import time
 from datetime import timedelta
+from typing import Type
 from ..base import Error as Err
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
@@ -92,13 +93,16 @@ class Inference3D(myObject):
         self._h5files = sorted(self._h5files)
 
     def _set_inference2d(self, system_file_path, mode='r+', world=None):
-        self._lines = []
-        self._lineNumbers = np.empty(self.nLines)
+        lines = []
+        lineNumbers = np.empty(self.nLines)
 
         for i, file in enumerate(self.h5files):
             LR = Inference2D(file, system_file_path=system_file_path, mode=mode, world=world)
-            self._lines.append(LR)
-            self._lineNumbers[i] = LR.line
+            lines.append(LR)
+            lineNumbers[i] = LR.line
+
+        self.lines = lines
+        self.lineNumbers = lineNumbers
 
     @property
     def world(self):
@@ -203,10 +207,10 @@ class Inference3D(myObject):
 
     def _create_hdf5(self, data, **kwargs):
 
-        if isinstance(data, Data):
-            return self._createHDF5_dataset(data, **kwargs)
-        else:
-            return self._createHDF5_datapoint(data, **kwargs)
+        # if isinstance(data, Data):
+        return self._createHDF5_dataset(data, **kwargs)
+        # else:
+        #     return self._createHDF5_datapoint(data, **kwargs)
 
     def _createHDF5_dataset(self, dataset, **kwargs):
 
@@ -285,11 +289,20 @@ class Inference3D(myObject):
     @property
     def lines(self):
         return self._lines
+    
+    @lines.setter
+    def lines(self, values):
+        assert all([isinstance(x, Inference2D) for x in values]), TypeError('lines must have type geobipy.Inference2D')
+        self._lines = values    
 
     @property
     def lineNumbers(self):
         return self._lineNumbers
 
+    @lineNumbers.setter
+    def lineNumbers(self, values):
+        assert np.unique(values).size == values.size, ValueError("Must assign unique line numbers")
+        self._lineNumbers = values
 
     @property
     def nLines(self):
