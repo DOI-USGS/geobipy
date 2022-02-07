@@ -251,7 +251,6 @@ class Inference1D(myObject):
         # ---------------------------------------
         # Set the prior on the data
         self.datapoint.initialize(**self.kwargs)
-
         # Set the priors, proposals, and posteriors.
         self.datapoint.set_priors(**self.kwargs)
         self.datapoint.set_proposals(**self.kwargs)

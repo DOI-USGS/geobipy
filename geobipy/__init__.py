@@ -1,23 +1,13 @@
 #!/usr/bin/env python
 # -- coding: utf-8 --
-import os
 from os import getcwd
 from os import makedirs
-from os.path import join
 import pathlib
 import argparse
-from importlib import import_module
 import sys
 import shutil
-import time
 from datetime import timedelta
 
-import h5py
-import numpy as np
-from numpy.random import randint
-
-# Set up shorter aliases for classes within geobipy
-# Base routines
 from .src.base import utilities
 from .src.base import plotting
 from .src.base import fileIO
