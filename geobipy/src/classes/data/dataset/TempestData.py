@@ -496,5 +496,5 @@ class TempestData(TdemData):
         if kwargs.get('index') is not None:
             return Tempest_datapoint.fromHdf(grp, **kwargs)
 
-        return super(TempestData, cls).fromHdf(grp)
+        return super(TempestData, cls).fromHdf(grp, **kwargs)
 
