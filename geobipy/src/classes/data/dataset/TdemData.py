@@ -1029,9 +1029,15 @@ class TdemData(Data):
         for i in range(nSystems):
             # Get the system file name. h5py has to encode strings using utf-8, so decode it!
             txt = str(np.asarray(grp.get('System{}'.format(i))), 'utf-8')
-            with open('System{}'.format(i), 'w') as f:
-                f.write(txt)
-            systems[i] = 'System{}'.format(i)
+
+            if '.stm' in txt:
+                path = kwargs['system_file_path']
+                systems[i] = path
+            else:
+
+                with open('System{}'.format(i), 'w') as f:
+                    f.write(txt)
+                systems[i] = 'System{}'.format(i)
 
         self = super(TdemData, cls).fromHdf(grp, system=systems)
 
