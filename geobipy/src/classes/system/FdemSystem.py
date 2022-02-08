@@ -217,7 +217,8 @@ class FdemSystem(myObject):
         "t/rx,y,z are the loop offsets from the observation locations in the data file. \n"
         return tmp
 
-    def getTensorID(self):
+    @property
+    def tensor_id(self):
         """ For each coil orientation pair, adds the index of the frequency to the appropriate list
         e.g. two coils at the i$^{th}$ frequency with 'x' as their orientation cause i to be added to the 'xx' list."""
         tid = np.zeros(self.nFrequencies, dtype=np.int32)
@@ -242,7 +243,8 @@ class FdemSystem(myObject):
                 tid[i] = 9
         return tid
 
-    def getComponentID(self):
+    @property
+    def component_id(self):
         """ For each coil orientation pair, adds the index of the frequency to the appropriate list
         e.g. two coils at the i$^{th}$ frequency with 'x' as their orientation cause i to be added to the 'xx' list."""
         xx, xy, xz, yx, yy, yz, zx, zy, zz = ([] for i in range(9))
