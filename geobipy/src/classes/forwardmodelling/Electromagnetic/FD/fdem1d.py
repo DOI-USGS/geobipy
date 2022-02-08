@@ -29,8 +29,6 @@ def fdem1dfwd(system, model1d, altitude):
     assert altitude >= model1d.mesh.relativeTo, "Sensor altitude must be above the top of the model"
 
     # Create the indices of the coil orientations for the frequencies.
-    tid = system.getTensorID()
-
     tHeight = np.empty(system.nFrequencies, dtype=np.float64)
     rHeight = np.empty(system.nFrequencies, dtype=np.float64)
     tMom = np.empty(system.nFrequencies, dtype=np.float64)
@@ -38,23 +36,23 @@ def fdem1dfwd(system, model1d, altitude):
     rx = np.empty(system.nFrequencies, dtype=np.float64)
 
     for i in range(system.nFrequencies):
-        tHeight[i] = altitude + system.transmitter[i].z
-        rHeight[i] = -(tHeight[i] + system.receiver[i].z)
+        tHeight[i] = altitude + system.transmitter[i].z.item()
+        rHeight[i] = -(tHeight[i] + system.receiver[i].z.item())
         tMom[i] = system.transmitter[i].moment
         rMom[i] = system.receiver[i].moment
         rx[i] = system.loop_offsets[i, 0]
     scl = tMom * rMom
 
-    frequencies = np.asarray(system.frequencies)
-    conductivity = np.asarray(model1d.values)
+    frequencies = np.asarray(system.frequencies, dtype=np.float64)
+    conductivity = np.asarray(model1d.values, dtype=np.float64)
     # kappa = np.asarray(model1d.magnetic_susceptibility)
     # perm = np.asarray(model1d.magnetic_permeability)
-    kappa = np.zeros(model1d.values.size)
-    perm = np.zeros(model1d.values.size)
-    thickness = np.asarray(model1d.mesh.widths)
-    loopSeparation = np.asarray(system.loop_separation)
-
-    return nbFdem1dfwd(tid, frequencies, tHeight, rHeight, tMom, rx, loopSeparation, system.w0, system.lamda0, system.lamda02, system.w1, system.lamda1, system.lamda12, scl, conductivity, kappa, perm, thickness)
+    kappa = np.zeros(model1d.values.size, dtype=np.float64)
+    perm = np.zeros(model1d.values.size, dtype=np.float64)
+    thickness = np.asarray(model1d.mesh.widths, dtype=np.float64)
+    loopSeparation = np.asarray(system.loop_separation, dtype=np.float64)
+    
+    return nbFdem1dfwd(system.tensor_id, frequencies, tHeight, rHeight, tMom, rx, loopSeparation, system.w0, system.lamda0, system.lamda02, system.w1, system.lamda1, system.lamda12, scl, conductivity, kappa, perm, thickness)
 
 
 # def ip1dfwd(S, mod, z0):
@@ -111,30 +109,28 @@ def fdem1dsen(system, model1d, altitude):
     assert altitude >= model1d.mesh.relativeTo, "Sensor altitude must be above the top of the model"
 
     # Create the indices of the coil orientations for the frequencies.
-    tid = system.getTensorID()
-
-    tHeight = np.zeros(system.nFrequencies)
-    rHeight = np.zeros(system.nFrequencies)
-    tMom = np.zeros(system.nFrequencies)
-    rMom = np.zeros(system.nFrequencies)
-    rx = np.zeros(system.nFrequencies)
+    tHeight = np.zeros(system.nFrequencies, dtype=np.float64)
+    rHeight = np.zeros(system.nFrequencies, dtype=np.float64)
+    tMom = np.zeros(system.nFrequencies, dtype=np.float64)
+    rMom = np.zeros(system.nFrequencies, dtype=np.float64)
+    rx = np.zeros(system.nFrequencies, dtype=np.float64)
 
     for i in range(system.nFrequencies):
-        tHeight[i] = altitude + system.transmitter[i].z
-        rHeight[i] = -(tHeight[i] + system.receiver[i].z)
+        tHeight[i] = altitude + system.transmitter[i].z.item()
+        rHeight[i] = -(tHeight[i] + system.receiver[i].z.item())
         tMom[i] = system.transmitter[i].moment
         rMom[i] = system.receiver[i].moment
         rx[i] = system.loop_offsets[i, 0]
     scl = tMom * rMom
 
-    frequencies = np.asarray(system.frequencies)
-    conductivity = np.asarray(model1d.values)
+    frequencies = np.asarray(system.frequencies, dtype=np.float64)
+    conductivity = np.asarray(model1d.values, dtype=np.float64)
     # kappa = np.asarray(model1d.magnetic_susceptibility)
     # perm = np.asarray(model1d.magnetic_permeability)
-    kappa = np.zeros(model1d.values.size)
-    perm = np.zeros(model1d.values.size)
-    thickness = np.asarray(model1d.mesh.widths)
-    loopSeparation = np.asarray(system.loop_separation)
+    kappa = np.zeros(model1d.values.size, dtype=np.float64)
+    perm = np.zeros(model1d.values.size, dtype=np.float64)
+    thickness = np.asarray(model1d.mesh.widths, dtype=np.float64)
+    loopSeparation = np.asarray(system.loop_separation, dtype=np.float64)
 
-    return nbFdem1dsen(tid, frequencies, tHeight, rHeight, tMom, rx, loopSeparation, system.w0, system.lamda0, system.lamda02, system.w1, system.lamda1, system.lamda12, scl, conductivity, kappa, perm, thickness)
+    return nbFdem1dsen(system.tensor_id, frequencies, tHeight, rHeight, tMom, rx, loopSeparation, system.w0, system.lamda0, system.lamda02, system.w1, system.lamda1, system.lamda12, scl, conductivity, kappa, perm, thickness)
 

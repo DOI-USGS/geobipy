@@ -3,7 +3,7 @@ Numba enabled frequency domain forward modelling
 Leon Foks
 June 2015
 """
-from numpy import (real, int64, float64, complex128)
+from numpy import (real, int32, float64, complex128)
 from numpy import (empty, zeros, ones, asarray)
 from numpy import (sqrt, exp)
 from numpy import pi
@@ -15,8 +15,8 @@ pi4 = float64(4.0 * pi)
 mu0 = float64(4.e-7 * pi)
 c = float64(299792458.0)
 eps0 = 1.0 / (mu0 * (c**2.0))
-nC0 = int64(120)
-nC1 = int64(140)
+nC0 = int32(120)
+nC1 = int32(140)
 
 from numba import jit
 _numba_settings = {'nopython': True, 'nogil': False, 'fastmath': True, 'cache': False}
@@ -24,8 +24,8 @@ _numba_settings = {'nopython': True, 'nogil': False, 'fastmath': True, 'cache': 
 @jit(**_numba_settings)
 def nbFdem1dfwd(tid, frequencies, tHeight, rHeight, moments, rx, separation, w0, lamda0, lamda02, w1, lamda1, lamda12, scale, conductivity, susceptibility, permeability, thickness):
 
-    nFrequencies = int64(len(frequencies))
-    nLayers = int64(len(conductivity))
+    nFrequencies = int32(len(frequencies))
+    nLayers = int32(len(conductivity))
 
     nL1 = nLayers + 1
 
@@ -71,8 +71,8 @@ def nbFdem1dfwd(tid, frequencies, tHeight, rHeight, moments, rx, separation, w0,
 @jit(**_numba_settings)
 def nbFdem1dsen(tid, frequencies, tHeight, rHeight, moments, rx, separation, w0, lamda0, lamda02, w1, lamda1, lamda12, scale, conductivity, susceptibility, permeability, thickness):
 
-    nFrequencies = int64(len(frequencies))
-    nLayers = int64(len(conductivity))
+    nFrequencies = int32(len(frequencies))
+    nLayers = int32(len(conductivity))
 
     nL1 = nLayers + 1
 
