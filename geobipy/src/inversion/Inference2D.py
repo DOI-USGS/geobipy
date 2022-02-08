@@ -1741,8 +1741,6 @@ class Inference2D(myObject):
             values.name = 'Resistivity'
             values.units = '$Omega m$'
 
-        print(kwargs)
-
         return self.plotXsection(values = values, **kwargs)
 
     def plotModeModel(self, **kwargs):
@@ -1768,8 +1766,6 @@ class Inference2D(myObject):
                     opacity[:indices[i], i] = 1.0
 
             kwargs['alpha'] = opacity
-
-        print(kwargs.pop('xAxis'))
 
         ax, pm, cb = self.mesh.pcolor(values = values, **kwargs)
         return ax, pm, cb
