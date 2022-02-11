@@ -26,11 +26,21 @@ class Histogram(Model):
 
     @property
     def pdf(self):
-        return Model(self.mesh, StatArray(self.values / np.sum(self.mesh.area * self.values), name='Density'))
+        out = Model(self.mesh)
+        if self.values.max() > 0:
+            out.values = StatArray(self.values / np.sum(self.mesh.area * self.values), name='Density')
+        else:
+            out.values = StatArray(out.mesh.shape, name='Density')
+        return out
 
     @property
     def pmf(self):
-        return Model(self.mesh, StatArray(self.values / np.sum(self.values), name='Mass'))
+        out = Model(self.mesh)
+        if self.values.max() > 0:
+            out.values = StatArray(self.values / np.sum(self.values), name='mass')
+        else:
+            out.values = StatArray(out.mesh.shape, name='mass')
+        return out
 
     @property
     def summary(self):
@@ -329,6 +339,10 @@ class Histogram(Model):
     def update_with_line(self, x, y):
         j = self.mesh.line_indices(x, y)
         self.counts[j[:, 0], j[:, 1]] += 1
+
+    def createHdf(self, *args, **kwargs):
+        return super().createHdf(*args, **kwargs)
+
 
     @classmethod
     def fromHdf(cls, grp, index=None):

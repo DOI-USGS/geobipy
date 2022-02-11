@@ -725,6 +725,10 @@ class StatArray(np.ndarray, myObject):
             i = 0
         return self.insert(i, values, axis=axis)
 
+    @property
+    def range(self):
+        return np.nanmax(self) - np.nanmin(self)
+
     def rescale(self, a, b):
         """Rescale to the interval (a, b)
 
