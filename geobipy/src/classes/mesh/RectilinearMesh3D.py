@@ -245,86 +245,6 @@ class RectilinearMesh3D(RectilinearMesh2D):
         plt.draw()
         anim.save(filename)
 
-    def _mean(self, values, log=None, axis=0):
-
-        a = self.axis(axis)
-        s = tuple([np.s_[:] if i == axis else None for i in range(self.ndim)])
-
-        t = np.sum(a.centres[s] * values, axis = axis)
-        s = values.sum(axis = axis)
-
-        i = np.where(s > 0.0)
-        out = StatArray.StatArray(t.shape)
-        out[i] = t[i] / s[i]
-
-        if log:
-            out, dum = utilities._log(out, log=log)
-
-        return out
-
-    def _median(self, values, log=None, axis=0):
-        """Gets the median for the specified axis.
-
-        Parameters
-        ----------
-        values : array_like
-            2D array to get the median.
-        log : 'e' or float, optional
-            Take the log of the median to a base. 'e' if log = 'e', or a number e.g. log = 10.
-        axis : int
-            Along which axis to obtain the median.
-
-        Returns
-        -------
-        med : array_like
-            Contains the medians along the specified axis. Has size equal to arr.shape[axis].
-
-        """
-        return self._percent_interval(values, 50.0, log, axis)
-
-    def _percent_interval(self, values, percent=95.0, log=None, axis=0):
-        """Gets the percent interval along axis.
-
-        Get the statistical interval, e.g. median is 50%.
-
-        Parameters
-        ----------
-        values : array_like
-            Valus used to compute interval like histogram counts.
-        percent : float
-            Interval percentage.  0.0 < percent < 100.0
-        log : 'e' or float, optional
-            Take the log of the interval to a base. 'e' if log = 'e', or a number e.g. log = 10.
-        axis : int
-            Along which axis to obtain the interval locations.
-
-        Returns
-        -------
-        interval : array_like
-            Contains the interval along the specified axis. Has size equal to self.shape[axis].
-
-        """
-        percent *= 0.01
-
-        # total of the counts
-        total = values.sum(axis=2-axis)
-        # Cumulative sum
-        cs = np.cumsum(values, axis=2-axis)
-        # Cumulative "probability"
-        d = np.expand_dims(total, 2-axis)
-        tmp = np.zeros_like(cs, dtype=np.float64)
-        np.divide(cs, d, out=tmp, where=d > 0.0)
-        # Find the interval
-        i = np.apply_along_axis(np.searchsorted, 2-axis, tmp, percent)
-        i[i == values.shape[2-axis]] = values.shape[2-axis]-1
-        # Obtain the values at those locations
-        out = self.axis(2-axis).centres[i]
-
-        if (not log is None):
-            out, dum = utilities._log(out, log=log)
-
-        return out
-
     def __deepcopy__(self, memo={}):
         """ Define the deepcopy for the StatArray """
         return RectilinearMesh3D(x=self.x, y=self.y, z=self.z)
@@ -481,6 +401,10 @@ class RectilinearMesh3D(RectilinearMesh2D):
             out[1, :] = self.y.cellIndex(y, clip=clip)
             out[2, :] = self.z.cellIndex(z, clip=clip)
         return np.squeeze(out)
+
+    def plotGrid(self):
+        raise NotImplementedError("Slice a 3D mesh before using plotGrid.")
+
 
 
     def ravelIndices(self, indices, order='C'):
@@ -639,9 +563,9 @@ class RectilinearMesh3D(RectilinearMesh2D):
         """
         # create a new group inside h5obj
         grp = self.create_hdf_group(parent, name)
-        self.x.createHdf(grp,'x', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
-        self.y.createHdf(grp,'y', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
-        self.z.createHdf(grp,'z', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
+        self.x.createHdf(grp, 'x', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
+        self.y.createHdf(grp, 'y', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
+        self.z.createHdf(grp, 'z', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
         if not self.relativeTo is None:
             self.relativeTo.createHdf(grp, 'relativeTo', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
 
@@ -661,23 +585,23 @@ class RectilinearMesh3D(RectilinearMesh2D):
             self.relativeTo.writeHdf(grp, 'relativeTo', withPosterior=withPosterior, index=index)
 
     @classmethod
-    def fromHdf(cls, grp, index=None):
+    def fromHdf(cls, grp, index=None, skip_posterior=False):
         """ Reads in the object from a HDF file """
 
         if index is None:
-            x = RectilinearMesh1D.fromHdf(grp['x'])
-            y = RectilinearMesh1D.fromHdf(grp['y'])
-            z = RectilinearMesh1D.fromHdf(grp['z'])
+            x = RectilinearMesh1D.fromHdf(grp['x'], skip_posterior=skip_posterior)
+            y = RectilinearMesh1D.fromHdf(grp['y'], skip_posterior=skip_posterior)
+            z = RectilinearMesh1D.fromHdf(grp['z'], skip_posterior=skip_posterior)
             
             relativeTo = None
             if 'relativeTo' in grp:
-                relativeTo = StatArray.StatArray.fromHdf(grp['relativeTo'])
+                relativeTo = StatArray.StatArray.fromHdf(grp['relativeTo'], skip_posterior=skip_posterior)
             out = cls(x=x, y=y, z=z, relativeTo=relativeTo)
         else:
             if isinstance(index, slice):
                 assert False, Exception('Cant slice into RectlilinearMesh3D yet from HDF.')
             else:
-                return RectilinearMesh2D.fromHdf(grp, index=index)
+                return RectilinearMesh2D.fromHdf(grp, index=index, skip_posterior=skip_posterior)
 
         return out
     

@@ -622,14 +622,17 @@ class TdemDataPoint(EmDataPoint):
         """ Reads the object from a HDF group """
 
         nSystems = np.int32(np.asarray(grp['nSystems']))
-        
+
         systems = [None]*nSystems
         for i in range(nSystems):
             # Get the system file name. h5py has to encode strings using utf-8, so decode it!
             txt = str(np.asarray(grp.get('System{}'.format(i))), 'utf-8')
-            with open('System{}'.format(i), 'w') as f:
-                f.write(txt)
-            systems[i] = 'System{}'.format(i)
+            if txt[-3:] == 'stm':
+                systems[i] = kwargs['system_file_path'] + txt
+            else:
+                with open('System{}'.format(i), 'w') as f:
+                    f.write(txt)
+                systems[i] = 'System{}'.format(i)
 
         self = super(TdemDataPoint, cls).fromHdf(grp, index, system=systems)
 

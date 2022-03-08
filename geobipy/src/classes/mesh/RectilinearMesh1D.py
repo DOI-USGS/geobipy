@@ -344,73 +344,76 @@ class RectilinearMesh1D(Mesh):
         self._widths = values
         self.edges = np.hstack([0.0, np.cumsum(values)])
 
-    def _credibleIntervals(self, values, percent=90.0, log=None, reciprocate=False, axis=0):
-        """Gets the median and the credible intervals for the specified axis.
+    def axis(self, axis):
+        return self
 
-        Parameters
-        ----------
-        values : array_like
-        Values to use to compute the intervals.
-        percent : float
-        Confidence percentage.
-        log : 'e' or float, optional
-        Take the log of the credible intervals to a base. 'e' if log = 'e', or a number e.g. log = 10.
-        axis : int
-        Along which axis to obtain the interval locations.
+    # def _credibleIntervals(self, values, percent=90.0, log=None, reciprocate=False, axis=0):
+    #     """Gets the median and the credible intervals for the specified axis.
 
-        Returns
-        -------
-        med : array_like
-        Contains the medians along the specified axis. Has size equal to arr.shape[axis].
-        low : array_like
-        Contains the lower interval along the specified axis. Has size equal to arr.shape[axis].
-        high : array_like
-        Contains the upper interval along the specified axis. Has size equal to arr.shape[axis].
+    #     Parameters
+    #     ----------
+    #     values : array_like
+    #     Values to use to compute the intervals.
+    #     percent : float
+    #     Confidence percentage.
+    #     log : 'e' or float, optional
+    #     Take the log of the credible intervals to a base. 'e' if log = 'e', or a number e.g. log = 10.
+    #     axis : int
+    #     Along which axis to obtain the interval locations.
 
-        """
+    #     Returns
+    #     -------
+    #     med : array_like
+    #     Contains the medians along the specified axis. Has size equal to arr.shape[axis].
+    #     low : array_like
+    #     Contains the lower interval along the specified axis. Has size equal to arr.shape[axis].
+    #     high : array_like
+    #     Contains the upper interval along the specified axis. Has size equal to arr.shape[axis].
 
-        percent = 0.5 * np.minimum(percent, 100.0 - percent)
+    #     """
 
-        tmp = self._percent_interval(values, np.r_[50.0, percent, 100.0-percent], log, reciprocate, axis)
+    #     percent = 0.5 * np.minimum(percent, 100.0 - percent)
 
-        return tmp[0], tmp[1], tmp[2]
+    #     tmp = self._percentile(values, np.r_[50.0, percent, 100.0-percent], log, reciprocate, axis)
 
-    def _percent_interval(self, values, percent=95.0, log=None, reciprocate=False, axis=0):
-        """Gets the percent interval along axis.
+    #     return tmp[0], tmp[1], tmp[2]
 
-        Get the statistical interval, e.g. median is 50%.
+    # def _percentile(self, values, percent=95.0, log=None, reciprocate=False, axis=0):
+    #     """Gets the percent interval along axis.
 
-        Parameters
-        ----------
-        values : array_like
-            Valus used to compute interval like histogram counts.
-        percent : float
-            Interval percentage.  0.0 < percent < 100.0
-        log : 'e' or float, optional
-            Take the log of the interval to a base. 'e' if log = 'e', or a number e.g. log = 10.
-        axis : int
-            Along which axis to obtain the interval locations.
+    #     Get the statistical interval, e.g. median is 50%.
 
-        Returns
-        -------
-        interval : array_like
-            Contains the interval along the specified axis. Has size equal to self.shape[axis].
+    #     Parameters
+    #     ----------
+    #     values : array_like
+    #         Valus used to compute interval like histogram counts.
+    #     percent : float
+    #         Interval percentage.  0.0 < percent < 100.0
+    #     log : 'e' or float, optional
+    #         Take the log of the interval to a base. 'e' if log = 'e', or a number e.g. log = 10.
+    #     axis : int
+    #         Along which axis to obtain the interval locations.
 
-        """
-        percent *= 0.01
+    #     Returns
+    #     -------
+    #     interval : array_like
+    #         Contains the interval along the specified axis. Has size equal to self.shape[axis].
 
-        # total of the counts
-        total = values.sum()
-        # Cumulative sum
-        cs = np.cumsum(values)
-        # Cumulative "probability"
-        tmp = np.divide(cs, total)
-        # Find the interval
-        i = np.searchsorted(tmp, percent)
-        # Obtain the values at those locations
-        out = self.centres[i]
+    #     """
+    #     percent *= 0.01
 
-        return out
+    #     # total of the counts
+    #     total = values.sum()
+    #     # Cumulative sum
+    #     cs = np.cumsum(values)
+    #     # Cumulative "probability"
+    #     tmp = np.divide(cs, total)
+    #     # Find the interval
+    #     i = np.searchsorted(tmp, percent)
+    #     # Obtain the values at those locations
+    #     out = self.centres[i]
+
+    #     return out
 
     def cellIndex(self, values, clip=False, trim=False):
         """ Get the index to the cell that each value in values falls in.
@@ -1355,17 +1358,17 @@ class RectilinearMesh1D(Mesh):
         
 
     @classmethod
-    def fromHdf(cls, grp, index=None, read_values=False):
+    def fromHdf(cls, grp, index=None, skip_posterior=False):
         """ Reads in the object froma HDF file """
 
         if '1D' in grp.attrs['repr']:
-            out = RectilinearMesh1D._1d_from_1d(grp)
+            out = RectilinearMesh1D._1d_from_1d(grp, skip_posterior=skip_posterior)
 
         elif 'stitched' in grp.attrs['repr']:
-            out = RectilinearMesh1D._1d_from_stitched(grp, index)
+            out = RectilinearMesh1D._1d_from_stitched(grp, index, skip_posterior=skip_posterior)
         else:
             if '2D' in grp.attrs['repr']:
-                out = RectilinearMesh1D._1d_from_2d(grp, index)
+                out = RectilinearMesh1D._1d_from_2d(grp, index, skip_posterior=skip_posterior)
             # if '3D' in grp.attrs['repr']:
             #     out = RectilinearMesh1D._1d_from_2d(grp, index) 
 
@@ -1381,12 +1384,12 @@ class RectilinearMesh1D(Mesh):
         return out        
 
     @classmethod
-    def _1d_from_1d(cls, grp):
+    def _1d_from_1d(cls, grp, skip_posterior=False):
         # Get the number of cells of the mesh.
         # If present, its a perturbable mesh
         nCells = None
         if 'nCells' in grp:
-            tmp = StatArray.StatArray.fromHdf(grp['nCells'])
+            tmp = StatArray.StatArray.fromHdf(grp['nCells'], skip_posterior=skip_posterior)
             nCells = tmp.astype(np.int32)
             nCells.copyStats(tmp)
             assert nCells.size == 1, ValueError("Mesh was created with expanded memory\nIndex must be specified")
@@ -1399,20 +1402,20 @@ class RectilinearMesh1D(Mesh):
         # If relativeTo is present, the edges/centres should be 1 dimensional
         relativeTo = None
         if 'relativeTo' in grp:
-            relativeTo = StatArray.StatArray.fromHdf(grp['relativeTo'])
+            relativeTo = StatArray.StatArray.fromHdf(grp['relativeTo'], skip_posterior=skip_posterior)
             if relativeTo == 0.0:
                 relativeTo = None
         
         s = None if nCells is None else np.s_[:nCells.item() + 1]
         pi = None if nCells is None else np.s_[:]
-        edges = StatArray.StatArray.fromHdf(grp['edges'], index=s, posterior_index=pi)
+        edges = StatArray.StatArray.fromHdf(grp['edges'], index=s, skip_posterior=skip_posterior, posterior_index=pi)
 
         out = cls(edges=edges)
 
         # centres = None
         if (edges is None) or (np.all(edges == 0.0)):
             s = None if nCells is None else np.s_[:nCells.item()]
-            centres = StatArray.StatArray.fromHdf(grp['centres'], index=s)
+            centres = StatArray.StatArray.fromHdf(grp['centres'], index=s, skip_posterior=skip_posterior)
             if not np.all(centres == 0.0):
                 out.centres = centres
 
@@ -1425,7 +1428,7 @@ class RectilinearMesh1D(Mesh):
         return out
 
     @classmethod
-    def _1d_from_2d(cls, grp, index):
+    def _1d_from_2d(cls, grp, index, skip_posterior=False):
 
         if index is None:
             assert False, ValueError("RectilinearMesh1D cannot be read from a RectilinearMesh2D without an index")
@@ -1440,17 +1443,17 @@ class RectilinearMesh1D(Mesh):
         # If relativeTo is present, the edges/centres should be 1 dimensional
         relativeTo = None
         if 'relativeTo' in grp:
-            relativeTo = StatArray.StatArray.fromHdf(grp['relativeTo'], index=index)
+            relativeTo = StatArray.StatArray.fromHdf(grp['relativeTo'], index=index, skip_posterior=skip_posterior)
             if relativeTo == 0.0:
                 relativeTo = None
         
-        edges = StatArray.StatArray.fromHdf(grp['y/edges'])
+        edges = StatArray.StatArray.fromHdf(grp['y/edges'], skip_posterior=skip_posterior)
             
         out = cls(edges=edges)
 
         # centres = None
         if (edges is None) or (np.all(edges == 0.0)):            
-            centres = StatArray.StatArray.fromHdf(grp['y/centres'])
+            centres = StatArray.StatArray.fromHdf(grp['y/centres'], skip_posterior=skip_posterior)
             if not np.all(centres == 0.0):
                 out.centres = centres
 
@@ -1460,7 +1463,7 @@ class RectilinearMesh1D(Mesh):
         return out
 
     @classmethod
-    def _1d_from_stitched(cls, grp, index):
+    def _1d_from_stitched(cls, grp, index, skip_posterior=False):
 
         if index is None:
             assert False, ValueError("RectilinearMesh1D cannot be read from a RectilinearMesh2D_stitched without an index")
@@ -1469,7 +1472,7 @@ class RectilinearMesh1D(Mesh):
 
         # Get the number of cells of the mesh.
         # If present, its a perturbable mesh
-        tmp = StatArray.StatArray.fromHdf(grp['nCells'], index=index)
+        tmp = StatArray.StatArray.fromHdf(grp['nCells'], index=index, skip_posterior=skip_posterior)
         nCells = tmp.astype(np.int32)
         nCells.copyStats(tmp)
 
@@ -1481,7 +1484,7 @@ class RectilinearMesh1D(Mesh):
         # If relativeTo is present, the edges/centres should be 1 dimensional
         relativeTo = None
         if 'relativeTo' in grp:
-            relativeTo = StatArray.StatArray.fromHdf(grp['relativeTo'], index=index)
+            relativeTo = StatArray.StatArray.fromHdf(grp['relativeTo'], index=index, skip_posterior=skip_posterior)
             if relativeTo == 0.0:
                 relativeTo = None
         
@@ -1489,7 +1492,7 @@ class RectilinearMesh1D(Mesh):
         s = (index, np.s_[:nCells.item() + 1])
         posterior_index = index
 
-        edges = StatArray.StatArray.fromHdf(grp['y/edges'], index=s, posterior_index=index)
+        edges = StatArray.StatArray.fromHdf(grp['y/edges'], index=s, skip_posterior=skip_posterior, posterior_index=index)
             
         out = cls(edges=edges)
 
@@ -1499,12 +1502,12 @@ class RectilinearMesh1D(Mesh):
 
         return out
 
-    def fromHdf_cell_values(self, grp, key, index=None):
+    def fromHdf_cell_values(self, grp, key, index=None, skip_posterior=False):
 
         s = np.s_[:self.nCells.item()]
         if index is not None:
             s = (index, s)
-        return StatArray.StatArray.fromHdf(grp, key, index=s)
+        return StatArray.StatArray.fromHdf(grp, key, index=s, skip_posterior=skip_posterior)
 
     @property
     def summary(self):

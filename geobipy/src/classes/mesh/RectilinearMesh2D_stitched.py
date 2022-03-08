@@ -224,18 +224,18 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
         return grp
 
     @classmethod
-    def fromHdf(cls, grp, index=None):
+    def fromHdf(cls, grp, index=None, skip_posterior=False):
         """ Reads in the object from a HDF file """
         from .RectilinearMesh1D import RectilinearMesh1D
         if index is None:
 
-            x = RectilinearMesh1D.fromHdf(grp['x'])
-            nCells = StatArray.StatArray.fromHdf(grp['nCells'])
-            edges = StatArray.StatArray.fromHdf(grp['y/edges'])
+            x = RectilinearMesh1D.fromHdf(grp['x'], skip_posterior=skip_posterior)
+            nCells = StatArray.StatArray.fromHdf(grp['nCells'], skip_posterior=skip_posterior)
+            edges = StatArray.StatArray.fromHdf(grp['y/edges'], skip_posterior=skip_posterior)
             
             relativeTo = None
             if 'relativeTo' in grp:
-                relativeTo = StatArray.StatArray.fromHdf(grp['relativeTo'])
+                relativeTo = StatArray.StatArray.fromHdf(grp['relativeTo'], skip_posterior=skip_posterior)
             
             out = cls(max_cells=edges.shape[1],  x=x, relativeTo=relativeTo)
 
@@ -243,7 +243,7 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
             out.y_edges = edges
         
         else:
-            return RectilinearMesh1D.fromHdf(grp, index=index)
+            return RectilinearMesh1D.fromHdf(grp, index=index, skip_posterior=skip_posterior)
         
         return out
 

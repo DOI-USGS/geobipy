@@ -76,7 +76,6 @@ class Histogram(Model):
 
     def cdf(self, axis=None):
     
-
         if axis is None:
             cdf = np.cumsum(self.values, axis=0)
             for i in range(1, self.ndim):
@@ -85,12 +84,9 @@ class Histogram(Model):
             total = self.values.sum(axis=axis)
             cdf = np.cumsum(self.values, axis=axis)
 
-            # s = [None if i == axis else np.s_[:] for i in range(self.ndim)]
-            # cdf = cdf / total[s]
-
         return Model(self.mesh, StatArray(cdf, name='Cumulative Density Function'))
 
-    def credibleIntervals(self, percent=90.0, log=None, reciprocate=False, axis=0):
+    def credible_intervals(self, percent=90.0, axis=0):
         """Gets the median and the credible intervals for the specified axis.
 
         Parameters
@@ -112,9 +108,9 @@ class Histogram(Model):
             Contains the upper interval along the specified axis. Has size equal to arr.shape[axis].
 
         """
-        return self.mesh._credibleIntervals(values=self.pmf.values, percent=percent, log=log, reciprocate=reciprocate, axis=axis)
+        return self.mesh._credible_intervals(values=self.pmf.values, percent=percent, axis=axis)
     
-    def credibleRange(self, percent=90.0, log=None, axis=0):
+    def credible_range(self, percent=90.0, log=None, axis=0):
         """ Get the range of credibility with depth
 
         Parameters
@@ -128,7 +124,7 @@ class Histogram(Model):
             Axis along which to get the marginal histogram.
 
         """
-        return self.mesh._credibleRange(self.counts, percent=percent, log=log, axis=axis)
+        return self.mesh._credible_range(self.counts, percent=percent, log=log, axis=axis)
 
     # def entropy(self, axis=None):
 
@@ -136,7 +132,7 @@ class Histogram(Model):
     #     pdf = pdf[pdf > 0.0]
     #     return StatArray(-(pdf * np.log(np.abs(pdf))).sum(), "Entropy")
 
-    def marginalize(self, log=None, axis=0):
+    def marginalize(self, axis=0):
         """Get the marginal histogram along an axis
 
         Parameters
@@ -162,7 +158,7 @@ class Histogram(Model):
         out.values = np.sum(self.counts, axis=axis)
         return out
 
-    def mean(self, log=None, axis=0):
+    def mean(self, axis=0):
         """Gets the mean along the given axis.
 
         This is not the true mean of the original samples. It is the best estimated mean using the binned counts multiplied by the axis bin centres.
@@ -180,7 +176,7 @@ class Histogram(Model):
             The means along the axis.
 
         """
-        return self.mesh._mean(self.counts, log=log, axis=axis)
+        return self.mesh._mean(self.counts, axis=axis)
 
     def median(self, log=None, axis=0):
         """Gets the median for the specified axis.
@@ -198,7 +194,7 @@ class Histogram(Model):
             The medians along the specified axis. Has size equal to arr.shape[axis].
 
         """
-        return self.mesh._median(values=self.counts, log=log, axis=axis)
+        return self.mesh._median(values=self.counts, axis=axis)
 
     def opacity(self, percent=95.0, log=None, axis=0):
         """Return an opacity between 0 and 1 based on the difference between credible invervals of the hitmap.
@@ -233,6 +229,30 @@ class Histogram(Model):
         while op[iC] > p and iC >= 0:
             iC -= 1
         return self.y.centres[iC]
+
+    def percentile(self, percent, log=None, reciprocate=False, axis=0):
+        """Gets the median and the credible intervals for the specified axis.
+
+        Parameters
+        ----------
+        percent : float
+            Confidence percentage.
+        log : 'e' or float, optional
+            Take the log of the credible intervals to a base. 'e' if log = 'e', or a number e.g. log = 10.
+        axis : int
+            Along which axis to obtain the interval locations.
+
+        Returns
+        -------
+        med : array_like
+            Contains the medians along the specified axis. Has size equal to arr.shape[axis].
+        low : array_like
+            Contains the lower interval along the specified axis. Has size equal to arr.shape[axis].
+        high : array_like
+            Contains the upper interval along the specified axis. Has size equal to arr.shape[axis].
+
+        """
+        return self.mesh._percentile(values=self.pmf.values, percent=percent, axis=axis)
 
     def pcolor(self, **kwargs):
         kwargs['cmap'] = kwargs.get('cmap', 'gray_r')
@@ -270,7 +290,9 @@ class Histogram(Model):
 
     def plotCredibleIntervals(self, percent=95.0, log=None, reciprocate=False, axis=0, **kwargs):
     
-        med, low, high = self.credibleIntervals(percent=percent, log=log, reciprocate=reciprocate, axis=axis)
+        med, low, high = self.credible_intervals(percent=percent, axis=axis)
+        low, _ = utilities._log(low, log)
+        high, _ = utilities._log(high, log)
 
         kwargs['color'] = '#5046C8'
         kwargs['linestyle'] = 'dashed'
@@ -285,13 +307,13 @@ class Histogram(Model):
 
     def plotMean(self, log=None, axis=0, **kwargs):
     
-        m = self.mean(log=log, axis=axis)
+        m = self.mean(axis=axis)
         kwargs['label'] = 'mean'
         self.mesh.plot_line(m, axis=axis, **kwargs)
 
     def plotMedian(self, log=None, axis=0, **kwargs):
 
-        m = self.median(log=log, axis=axis)
+        m = self.median(axis=axis)
         kwargs['label'] = 'median'
         self.mesh.plot_line(m, axis=axis, **kwargs)
 
@@ -317,7 +339,7 @@ class Histogram(Model):
 
         """
 
-        out = self.credibleRange(percent=percent, log=log, axis=axis)
+        out = self.credible_range(percent=percent, log=log, axis=axis)
         mn = np.nanmin(out)
         mx = np.nanmax(out)
         t = mx - mn
@@ -342,7 +364,6 @@ class Histogram(Model):
 
     def createHdf(self, *args, **kwargs):
         return super().createHdf(*args, **kwargs)
-
 
     @classmethod
     def fromHdf(cls, grp, index=None):

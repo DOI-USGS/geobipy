@@ -488,7 +488,6 @@ class Inference3D(myObject):
         """ Define a wait run ping procedure for each worker """
 
         # Import here so serial code still works...
-        from mpi4py import MPI
         from ..base import MPI as myMPI
 
         lineNumbers = self.lineNumbers

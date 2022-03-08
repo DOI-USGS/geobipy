@@ -86,6 +86,7 @@ class Inference1D(myObject):
         # ------------------------------------------------
         # Intialize the datapoint with the user parameters
         # ------------------------------------------------
+        self.halfspace = StatArray.StatArray(1, 'halfspace')
         self.initialize_datapoint(datapoint)
 
         # # Initialize the calibration parameters
@@ -259,6 +260,7 @@ class Inference1D(myObject):
     def initialize_model(self):
         # Find the conductivity of a half space model that best fits the data
         halfspace = self.datapoint.find_best_halfspace()
+        self.halfspace[0] = halfspace.values
 
         # Create an initial model for the first iteration
         # Initialize a 1D model with the half space conductivity
@@ -545,7 +547,7 @@ class Inference1D(myObject):
                     'credible_interval_kwargs': {
                         # 'log':10,
                         # 'reciprocate':True
-                        'axis': 1
+                        'axis': 0
                     }
                 },
                 best=self.model)
@@ -573,7 +575,7 @@ class Inference1D(myObject):
         """ Plots the acceptance percentage against iteration. """
 
         i = np.s_[:np.int64(self.iteration / self.update_plot_every)]
-
+    
         self.acceptance_rate.plot(x=self.acceptance_x, i=i,
                        ax=self.ax[0],
                        marker='o',
@@ -659,7 +661,7 @@ class Inference1D(myObject):
         fiducials = StatArray.StatArray(np.sort(fiducials))
         nPoints = fiducials.size
 
-        grp = self.datapoint.createHdf(parent,'data', add_axis=nPoints, fillvalue=np.nan)
+        grp = self.datapoint.createHdf(parent, 'data', add_axis=nPoints, fillvalue=np.nan)
         fiducials.writeHdf(grp, 'fiducial')
 
         # Initialize and write the attributes that won't change
@@ -694,10 +696,11 @@ class Inference1D(myObject):
         # self.opacityInterp.createHdf(parent,'opacityinterp',add_axis=nPoints, fillvalue=np.nan)
 #        parent.create_dataset('opacityinterp', [nPoints,nz], dtype=np.float64)
 
-        self.acceptance_rate.createHdf(parent,'rate',add_axis=nPoints, fillvalue=np.nan)
+        self.acceptance_rate.createHdf(parent,'rate', add_axis=nPoints, fillvalue=np.nan)
 #        parent.create_dataset('rate', [nPoints,self.rate.size], dtype=self.rate.dtype)
         self.data_misfit_v.createHdf(parent, 'phids', add_axis=nPoints, fillvalue=np.nan)
         #parent.create_dataset('phids', [nPoints,self.PhiDs.size], dtype=self.PhiDs.dtype)
+        self.halfspace.createHdf(parent, 'halfspace', add_axis=nPoints, fillvalue=np.nan)
 
         # self.best_datapoint.createHdf(parent,'bestd', withPosterior=False, add_axis=nPoints, fillvalue=np.nan)
 
@@ -767,6 +770,8 @@ class Inference1D(myObject):
         self.datapoint.writeHdf(hdfFile,'data',  index=i)  
         # Write the highest posterior data
         self.best_datapoint.writeHdf(hdfFile,'data', withPosterior=False, index=i) 
+
+        self.halfspace.writeHdf(hdfFile, 'halfspace', index=i)
 
         # Write the model posteriors
         self.model.writeHdf(hdfFile,'model', index=i) 

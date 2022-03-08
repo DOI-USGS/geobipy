@@ -812,7 +812,7 @@ class TdemData(Data):
 
         return self.datapoint_type(self.x[i], self.y[i], self.z[i], self.elevation[i],
                              self.primary_field[i, :], self.secondary_field[i, :],
-                             relative_error=None, additive_error=None, std = self.std[i, :],
+                             relative_error=self.relative_error[i, :], additive_error=self.additive_error[i, :], std = self.std[i, :],
                              predicted_primary_field=None, predicted_secondary_field=None,
                              system = self.system,
                              transmitter_loop = self.transmitter[i], receiver_loop = self.receiver[i],
@@ -887,6 +887,18 @@ class TdemData(Data):
              'OffErr[0] OffErr[1] ... Off[nWindows]\n'
              '    Estimates of standard deviation for each off time measurement.')
         return s
+
+    def find_best_halfspace(self, minConductivity=1e-4, maxConductivity=1e4, nSamples=100):
+
+        conductivity = np.zeros(self.nPoints)
+        for i in range(self.nPoints):
+            dp = self.datapoint(i)
+            mod = dp.find_best_halfspace(minConductivity, maxConductivity, nSamples)
+            conductivity[i] = mod.values.value
+
+        return conductivity
+
+
 
     def mapChannel(self, channel, system=0, *args, **kwargs):
         """ Create a map of the specified data channel """
@@ -1041,6 +1053,11 @@ class TdemData(Data):
                 systems[i] = 'System{}'.format(i)
 
         self = super(TdemData, cls).fromHdf(grp, system=systems)
+
+        self.primary_field = StatArray.StatArray.fromHdf(grp['primary_field'])
+        self.secondary_field = StatArray.StatArray.fromHdf(grp['secondary_field'])
+        self.predicted_primary_field = StatArray.StatArray.fromHdf(grp['predicted_primary_field'])
+        self.predicted_secondary_field = StatArray.StatArray.fromHdf(grp['predicted_secondary_field'])
 
         self._transmitter = StatArray.StatArray(self.nPoints, 'Transmitter loops', dtype=CircularLoop)
         for i in range(self.nPoints):

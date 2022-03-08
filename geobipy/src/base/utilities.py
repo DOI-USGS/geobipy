@@ -319,10 +319,13 @@ def getName(self, default=''):
     """
     if self is None:
         return default
-    if '_name' in self.__dict__:
-        return default if self._name is None else self.name
-    else:
-        return default
+    try:
+        if '_name' in self.__dict__:
+            return default if self._name is None else self.name
+        else:
+            return default
+    except:
+        return getattr(self, '_name', default)
 
 
 def getUnits(self, default=''):
@@ -343,12 +346,17 @@ def getUnits(self, default=''):
         A string containing the variable's units or the default.
 
     """
-    if self is None:
-        return default
-    if '_units' in self.__dict__:
-        return default if self._units is None else self.units
-    else:
-        return default
+    # return getattr(self, '_name', default)
+
+    try:
+        if self is None:
+            return default
+        if '_units' in self.__dict__:
+            return default if self._units is None else self.units
+        else:
+            return default
+    except:
+        return getattr(self, '_units', default)
 
 def getNameUnits(self, defaultName = '', defaultUnits = ''):
     """Tries to obtain any attached name and units to a variable. Any units are surrounded by round brackets.

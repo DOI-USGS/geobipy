@@ -293,110 +293,23 @@ class RectilinearMesh2D(Mesh):
         plt.draw()
         anim.save(filename)
 
-    def _mean(self, arr, log=None, axis=0):
-        a = self.axis(axis)
-        b = self.other_axis(axis)
+    # def _mean(self, arr, log=None, axis=0):
+    #     a = self.axis(axis)
+    #     b = self.other_axis(axis)
 
-        t = np.sum(np.repeat(np.expand_dims(b.centres, axis), a.nCells, axis) * arr, 1-axis)
-        s = arr.sum(axis = 1 - axis)
+    #     t = np.sum(np.repeat(np.expand_dims(b.centres, axis), a.nCells, axis) * arr, 1-axis)
+    #     s = arr.sum(axis = 1 - axis)
 
-        i = np.where(s > 0.0)[0]
-        out = np.zeros(t.size)
-        out[i] = t[i] / s[i]
+    #     i = np.where(s > 0.0)[0]
+    #     out = np.zeros(t.size)
+    #     out[i] = t[i] / s[i]
 
-        if log:
-            out, dum = utilities._log(out, log=log)
+    #     if log:
+    #         out, dum = utilities._log(out, log=log)
 
-        return out
+    #     return out
 
-    def _percent_interval(self, values, percent=95.0, log=None, reciprocate=False, axis=0):
-        """Gets the percent interval along axis.
-
-        Get the statistical interval, e.g. median is 50%.
-
-        Parameters
-        ----------
-        values : array_like
-            Values used to compute interval like histogram counts.
-        percent : float
-            Interval percentage.  0.0 < percent < 100.0
-        log : 'e' or float, optional
-            Take the log of the interval to a base. 'e' if log = 'e', or a number e.g. log = 10.
-        axis : int
-            Along which axis to obtain the interval locations.
-
-        Returns
-        -------
-        interval : array_like
-            Contains the interval along the specified axis. Has size equal to self.shape[axis].
-
-        """
-        percent *= 0.01
-
-        # total of the counts
-        total = values.sum(axis=1-axis)
-        # Cumulative sum
-        cs = np.cumsum(values, axis=1-axis)
-        # Cumulative "probability"
-        d = np.expand_dims(total, 1-axis)
-        tmp = np.zeros_like(cs, dtype=np.float64)
-        np.divide(cs, d, out=tmp, where=d > 0.0)
-        # Find the interval
-        i = np.apply_along_axis(np.searchsorted, 1-axis, tmp, percent)
-        i[i == values.shape[1-axis]] = values.shape[1-axis]-1
-        # Obtain the values at those locations
-        out = self.axis(1-axis).centres[i]
-
-        return out
-
-    def _credibleIntervals(self, values, percent=90.0, log=None, reciprocate=False, axis=0):
-        """Gets the median and the credible intervals for the specified axis.
-
-        Parameters
-        ----------
-        values : array_like
-        Values to use to compute the intervals.
-        percent : float
-        Confidence percentage.
-        log : 'e' or float, optional
-        Take the log of the credible intervals to a base. 'e' if log = 'e', or a number e.g. log = 10.
-        axis : int
-        Along which axis to obtain the interval locations.
-
-        Returns
-        -------
-        med : array_like
-        Contains the medians along the specified axis. Has size equal to arr.shape[axis].
-        low : array_like
-        Contains the lower interval along the specified axis. Has size equal to arr.shape[axis].
-        high : array_like
-        Contains the upper interval along the specified axis. Has size equal to arr.shape[axis].
-
-        """
-
-        percent = 0.5 * np.minimum(percent, 100.0 - percent)
-        tmp = self._percent_interval(values, np.r_[50.0, percent, 100.0-percent], log, reciprocate, axis)
-        return np.take(tmp, 0, 1-axis), np.take(tmp, 1, 1-axis), np.take(tmp, 2, 1-axis)
-
-    def _credibleRange(self, values, percent=90.0, log=None, axis=0):
-        """ Get the range of credibility
-
-        Parameters
-        ----------
-        values : array_like
-            Values to use to compute the range.
-        percent : float
-            Percent of the credible intervals
-        log : 'e' or float, optional
-            If None: The range is the difference in linear space of the credible intervals
-            If 'e' or float: The range is the difference in log space, or ratio in linear space.
-        axis : int
-            Axis along which to get the marginal histogram.
-
-        """
-        percent = 0.5 * np.minimum(percent, 100.0 - percent)
-        tmp = self._percent_interval(values, np.r_[100.0 - percent, percent], log=log, axis=axis)
-        return np.squeeze(np.diff(tmp, axis=1-axis))
+    
 
     def _median(self, values, log=None, axis=0):
         """Gets the median for the specified axis.
@@ -416,7 +329,7 @@ class RectilinearMesh2D(Mesh):
             Contains the medians along the specified axis. Has size equal to arr.shape[axis].
 
         """
-        return self._percent_interval(values=values, percent=50.0, log=log, axis=axis)
+        return self._percentile(values=values, percent=50.0, log=log, axis=axis)
 
     def __deepcopy__(self, memo={}):
         """ Define the deepcopy for the StatArray """
@@ -852,7 +765,8 @@ class RectilinearMesh2D(Mesh):
         y_mask = kwargs.pop('y_mask', None)
 
         if self.relativeTo is None or yAxis == 'relative':
-            if np.sum([x is None for x in [x_mask, y_mask]]) < 2:
+            # Need to expand the yaxis edges since they could be draped.
+            if (x_mask is not None) or (y_mask is not None):
                 masked, x_indices, z_indices, values = self.mask_cells(axis, x_mask, y_mask, values)
                 ax, pm, cb = cP.pcolor(values, x = masked.axis('x').edges, y = masked.z.edges, **kwargs)
             else:
@@ -862,11 +776,12 @@ class RectilinearMesh2D(Mesh):
                     kwargs['xscale'] = 'log'
                 else:
                     x = self.x.edges
+
                 if self.y.log is not None:
                     y = utilities._power(self.y.edges, self.y.log)
                     kwargs['yscale'] = 'log'
                 else:
-                    y = self.y.edges
+                    y = self.y.edges_absolute
 
                 ax, pm, cb = cP.pcolor(values.T, x = x, y = y, **kwargs)
 
@@ -952,19 +867,17 @@ class RectilinearMesh2D(Mesh):
             if flipY:
                 ax.set_ylim(ax.get_ylim()[::-1])
 
-    def plotrelativeTo(self, xAxis='x', centres=False, **kwargs):
+    def plot_relative_to(self, centres=False, **kwargs):
         """Plot the relativeTo of the mesh as a line. """
 
         kwargs['c'] = kwargs.pop('color', 'k')
         kwargs['linewidth'] = kwargs.pop('linewidth', 1.0)
 
-        xtmp = self.axis(xAxis).centres
-
         if centres:
-            self.relativeTo.centres.plot(xtmp, **kwargs)
+            self.relativeTo.plot(self.x.centres, **kwargs)
         else:
             re = self[:, 0].interpolate_centres_to_nodes(self.relativeTo)
-            re.plot(xtmp, **kwargs)
+            re.plot(self.x.edges, **kwargs)
 
     def plot_line(self, value, axis=0, **kwargs):
 
@@ -973,7 +886,7 @@ class RectilinearMesh2D(Mesh):
         lw = kwargs.pop('linewidth', 2)
         a = kwargs.pop('alpha', 0.6)
 
-        if axis == 1:
+        if axis == 0:
             cP.plot(value, self.y.centres, color=c, linestyle=ls,
                     linewidth=lw, alpha=a, **kwargs)
         else:
@@ -1070,12 +983,12 @@ class RectilinearMesh2D(Mesh):
 
 
     @classmethod
-    def fromHdf(cls, grp, index=None):
+    def fromHdf(cls, grp, index=None, skip_posterior=False):
         # from .RectilinearMesh3D import RectilinearMesh3D
 
         if 'stitched' in grp.attrs['repr']:
             from .RectilinearMesh2D_stitched import RectilinearMesh2D_stitched
-            return RectilinearMesh2D_stitched.fromHdf(grp, index)
+            return RectilinearMesh2D_stitched.fromHdf(grp, index, skip_posterior=skip_posterior)
 
         if '3D' in grp.attrs['repr']:
             if index is None:
@@ -1083,12 +996,12 @@ class RectilinearMesh2D(Mesh):
                 # return RectilinearMesh3D.fromHdf(grp)
 
             else: # Read a 2D mesh from 3D
-                x = RectilinearMesh1D.fromHdf(grp['y'])
-                y = RectilinearMesh1D.fromHdf(grp['z'])
+                x = RectilinearMesh1D.fromHdf(grp['y'], skip_posterior=skip_posterior)
+                y = RectilinearMesh1D.fromHdf(grp['z'], skip_posterior=skip_posterior)
 
                 relativeTo = None
                 if 'relativeTo' in grp:
-                    relativeTo = StatArray.StatArray.fromHdf(grp['relativeTo'], index=index)
+                    relativeTo = StatArray.StatArray.fromHdf(grp['relativeTo'], index=index, skip_posterior=skip_posterior)
 
                 out = cls(x=x, y=y)
                 out._relativeTo = relativeTo
@@ -1096,29 +1009,20 @@ class RectilinearMesh2D(Mesh):
         else:
             if index is not None:
 
-                return RectilinearMesh1D.fromHdf(grp, index=index)
+                return RectilinearMesh1D.fromHdf(grp, index=index, skip_posterior=skip_posterior)
             else:
-                x = RectilinearMesh1D.fromHdf(grp['x'])
-                y = RectilinearMesh1D.fromHdf(grp['y'])
+                x = RectilinearMesh1D.fromHdf(grp['x'], skip_posterior=skip_posterior)
+                y = RectilinearMesh1D.fromHdf(grp['y'], skip_posterior=skip_posterior)
                 relativeTo = None
                 if 'relativeTo' in grp:
-                    relativeTo = StatArray.StatArray.fromHdf(grp['relativeTo'])
+                    relativeTo = StatArray.StatArray.fromHdf(grp['relativeTo'], skip_posterior=skip_posterior)
 
                 out = cls(x=x, y=y)
                 out._relativeTo = relativeTo
                 return out
 
-    def fromHdf_cell_values(self, grp, key, index=None):
-    
-        # s = [np.s_[:x] for x in self.shape]
-        # if index is not None:
-        #     if np.size(index) > 1:
-        #         s = (*index, *s)
-        #     else:
-        #         s = (index, *s)
-
-
-        return StatArray.StatArray.fromHdf(grp, key, index=index)
+    def fromHdf_cell_values(self, grp, key, index=None, skip_posterior=False):
+        return StatArray.StatArray.fromHdf(grp, key, index=index, skip_posterior=skip_posterior)
             
 
     def range(self, axis):

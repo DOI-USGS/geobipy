@@ -44,8 +44,9 @@ class Model(myObject):
     def __deepcopy__(self, memo={}):
         mesh = deepcopy(self.mesh, memo=memo)
 
-        out = Model(mesh=mesh, values=self.values)
+        out = type(self)(mesh=mesh)
 
+        out._values = deepcopy(self.values, memo=memo)
         out._gradient = deepcopy(self._gradient, memo=memo)
         out.value_bounds = self.value_bounds
         # out._inverse_hessian = deepcopy(self._inverse_hessian, memo=memo)
@@ -203,7 +204,7 @@ class Model(myObject):
 
     def delete_edge(self, i):
         out, values = self.mesh.delete_edge(i, values=self.values)
-        out = Model(mesh=out, values=values)
+        out = type(self)(mesh=out, values=values)
 
         # if len(values) > 1:
         #     for k, v in zip(self.__values, values[1:]):
@@ -289,7 +290,7 @@ class Model(myObject):
 
         if value is not None:
             values[out.action[1]] = value
-        out = Model(mesh=out, values=values)
+        out = type(self)(mesh=out, values=values)
         out._gradient = self.gradient.resize(out.nCells.item() - 1)
 
         # if len(values) > 1:
@@ -345,8 +346,7 @@ class Model(myObject):
         """
         mesh = self.mesh.pad(shape)
         values = self.values.pad(shape)
-
-        out = Model(mesh=mesh, values=values)
+        out = type(self)(mesh=mesh, values=values)
 
         # for key in self.__values:
     
@@ -385,7 +385,7 @@ class Model(myObject):
     def perturb_structure(self, update_priors=True):
         
         remapped_mesh, remapped_values = self.mesh.perturb(values=self.values)
-        remapped_model = Model(remapped_mesh, values=remapped_values)
+        remapped_model = type(self)(remapped_mesh, values=remapped_values)
 
         remapped_model._gradient = deepcopy(self._gradient)
 
@@ -401,7 +401,12 @@ class Model(myObject):
 
         return remapped_model
 
+    def pcolor(self, **kwargs):
+        ### DO NOT CHANGE THIS TO PCOLOR
+        return self.mesh.pcolor(values=self.values, **kwargs)
+
     def plot(self, **kwargs):
+        ### DO NOT CHANGE THIS TO PCOLOR
         return self.mesh.plot(values=self.values, **kwargs)
 
     def plotGrid(self, **kwargs):
@@ -432,7 +437,7 @@ class Model(myObject):
                       linewidth=1, 
                       color=cP.wellSeparated[3])
 
-            doi = self.values.posterior.opacity_level(percent=67.0, log=parameter_kwargs.get('logX', None), axis=1)
+            doi = self.values.posterior.opacity_level(percent=67.0, log=parameter_kwargs.get('logX', None), axis=0)
             plt.axhline(doi, color = '#5046C8', linestyle = 'dashed', linewidth = 1, alpha = 0.6)
         return axes
 
@@ -687,16 +692,11 @@ class Model(myObject):
         self.mesh.set_posteriors(**kwargs)
 
         if values_posterior is None:
-            # if self.par.hasPrior:
-            # p = self.values.prior.bins(nBins=250, nStd=4.0, axis=0)
-            # else:
-            #     tmp = 4.0 * np.log(11.0)
-            #     p = np.linspace(self.halfSpaceParameter - tmp,
-            #                     self.halfSpaceParameter + tmp, 251)
-
-            values_grid = StatArray.StatArray(self.values.prior.bins(nBins=250, nStd=4.0, axis=0), self.values.name, self.values.units)
-
+            # TODO: THIS NEEDS SORTING mean[0]
+            relative_to = self.values.prior.mean[0]
+            values_grid = StatArray.StatArray(self.values.prior.bins(nBins=250, nStd=4.0, axis=0), self.values.name, self.values.units) - relative_to
             mesh = RectilinearMesh2D(xEdges=values_grid, yEdges=self.mesh.edges.posterior.mesh.edges)
+
             # Set the posterior hitmap for conductivity vs depth
             self.values.posterior = Histogram(mesh=mesh)
 
@@ -877,11 +877,12 @@ class Model(myObject):
 
     def resample(self, dx, dy):
         mesh, values = self.mesh.resample(dx, dy, self.values, kind='cubic')
-        return Model(mesh, values)
+        return type(self)(mesh, values)
 
     def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
         # create a new group inside h5obj
         grp = self.create_hdf_group(parent, name)
+
         self.mesh.createHdf(grp, 'mesh', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
         self.values.createHdf(grp, 'values', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
         return grp
@@ -891,9 +892,9 @@ class Model(myObject):
         self.values.writeHdf(parent, name+'/values',  withPosterior=withPosterior, index=index)
 
     @classmethod
-    def fromHdf(cls, grp, index=None):
+    def fromHdf(cls, grp, index=None, skip_posterior=False):
         """ Reads in the object from a HDF file """
-        mesh = hdfRead.read_item(grp['mesh'], index=index)
+        mesh = hdfRead.read_item(grp['mesh'], index=index, skip_posterior=skip_posterior)
         out = cls(mesh=mesh)
-        out._values = out.mesh.fromHdf_cell_values(grp, 'values', index=index)
+        out._values = out.mesh.fromHdf_cell_values(grp, 'values', index=index, skip_posterior=skip_posterior)
         return out
