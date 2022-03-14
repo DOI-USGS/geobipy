@@ -116,7 +116,6 @@ class MvLogNormal(MvNormal):
                     if not relative:
                         t += self._mean[i]
                     bins[i, :] = t
-                values = bins
             else:
                 bins = np.empty(nBins+1)
                 tmp = np.squeeze(nStd * self.std[axis, axis])
@@ -124,12 +123,11 @@ class MvLogNormal(MvNormal):
                 if not relative:
                     t += self._mean[axis]
                 bins[:] = t
-                values = bins
 
         else:
             tmp = nStd * self.std
-            values = np.squeeze(np.linspace(-tmp, tmp, nBins+1))
+            bins = np.squeeze(np.linspace(-tmp, tmp, nBins+1))
             if not relative:
-                values += self._mean
+                bins += self._mean
 
-        return StatArray.StatArray(np.exp(values)) if self.linearSpace else StatArray.StatArray(values)
+        return StatArray.StatArray(np.exp(bins)) if self.linearSpace else StatArray.StatArray(bins)
