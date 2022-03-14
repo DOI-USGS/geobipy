@@ -371,4 +371,4 @@ class Histogram(Model):
     @classmethod
     def fromHdf(cls, grp, index=None):
         """ Reads in the object from a HDF file """
-        return super(Histogram, cls).fromHdf(grp=grp, index=index)
+        return super(Histogram, cls).fromHdf(grp=grp, index=index, skip_posterior=True)
