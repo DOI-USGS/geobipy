@@ -447,38 +447,25 @@ def pcolor(values, x=None, y=None, **kwargs):
     """
     geobipy_kwargs, _ = filter_plotting_kwargs(kwargs)
     
-    # Set the grid colour if specified
-    # c = None
-    # if kwargs['grid']:
-    #     c = kwargs.pop('color', 'k')
-
-    # ax = kwargs.pop('ax', None)
-    # if ax is None:
-    #     ax = plt.gca()
-    # else:
-    #     if isinstance(ax, list):
-    #         ax = ax[0]
-    #     plt.sca(ax)
-
-    # pretty(ax)
-
     if (x is None):
         mx = np.arange(np.size(values,1)+1)
     else:
         mx = np.asarray(x)
-        if (x.size == values.shape[1]):
-            mx = x.edges()
-        else:
-            assert x.size == values.shape[1]+1, ValueError('x must be size {}. Not {}'.format(values.shape[1]+1, x.size))
+        if np.ndim(x) < 2:
+            if (x.size == values.shape[1]):
+                mx = x.edges()
+            else:
+                assert x.size == values.shape[1]+1, ValueError('x must be size {}. Not {}'.format(values.shape[1]+1, x.size))
 
     if (y is None):
         my = np.arange(np.size(values,0)+1)
     else:
         my = np.asarray(y)
-        if (y.size == values.shape[0]):
-            my = y.edges()
-        else:
-            assert y.size == values.shape[0]+1, ValueError('y must be size {}. Not {}'.format(values.shape[0]+1, y.size))
+        if np.ndim(y) < 2:
+            if (y.size == values.shape[0]):
+                my = y.edges()
+            else:
+                assert y.size == values.shape[0]+1, ValueError('y must be size {}. Not {}'.format(values.shape[0]+1, y.size))
 
     if geobipy_kwargs['transpose']:
         mx, my = my, mx
@@ -493,9 +480,10 @@ def pcolor(values, x=None, y=None, **kwargs):
     mx, _ = cF._log(mx, geobipy_kwargs['logX'])
     my, _ = cF._log(my, geobipy_kwargs['logY'])
 
-    X, Y = np.meshgrid(mx, my)
+    if np.ndim(mx) == 1 and np.ndim(my) == 1:
+        my, mx = np.meshgrid(mx, my)
 
-    ax, pm, cb = pcolormesh(X, Y, values, **kwargs)
+    ax, pm, cb = pcolormesh(X=mx, Y=my, values=values, **kwargs)
 
     xlabel(cF.getNameUnits(x))
     ylabel(cF.getNameUnits(y))
@@ -968,7 +956,12 @@ def pcolor_1D(values, y=None, **kwargs):
     else:
         assert y.size == values.size+1, ValueError('y must be size '+str(values.size+1))
         mx = y
-        my = np.asarray([0.0, 0.1*(np.nanmax(y)-np.nanmin(y))])
+        key = 'yscale' if geobipy_kwargs['transpose'] else 'xscale'
+        if geobipy_kwargs[key] == 'log':
+            tmp = np.log10(y)
+            my = np.asarray([0.0, 0.1*(np.nanmax(tmp)-np.nanmin(tmp))])
+        else:
+            my = np.asarray([0.0, 0.1*(np.nanmax(y)-np.nanmin(y))])
 
     if not geobipy_kwargs['width'] is None:
         assert geobipy_kwargs['width'] > 0.0, ValueError("width must be positive")
@@ -1073,7 +1066,6 @@ def plot(x, y, **kwargs):
 
     if geobipy_kwargs['reciprocateX']:
         x = 1.0 / x
-
 
     if (geobipy_kwargs['labels']):
         xl = cF.getNameUnits(x)
