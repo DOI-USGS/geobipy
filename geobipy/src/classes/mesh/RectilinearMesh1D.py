@@ -264,7 +264,7 @@ class RectilinearMesh1D(Mesh):
     @property
     def nCells(self):
         if self._nCells is None:
-            return np.int32(self.centres.size)
+            return np.int32(self._centres.size)
         return self._nCells
 
     @nCells.setter
@@ -740,8 +740,10 @@ class RectilinearMesh1D(Mesh):
         kwargs['y'] = kwargs.pop('y', self.plotting_edges)
 
         if self.log is not None:
-            kwargs['yscale'] = 'log'
-            kwargs['xscale'] = 'log'
+            if 'transpose' in kwargs:
+                kwargs['yscale'] = 'log'
+            else:
+                kwargs['xscale'] = 'log'
 
         ax = values.pcolor(**kwargs)
 
@@ -966,7 +968,7 @@ class RectilinearMesh1D(Mesh):
 
         values = StatArray.StatArray(np.full(self.nCells.item(), np.nan))
 
-        RectilinearMesh1D.pcolor(self, values=values, y=self.plotting_edges, **kwargs)
+        RectilinearMesh1D.pcolor(self, values=values, y=self.edges_absolute, **kwargs)
 
         # if self.open_left:
         #     h = y[-1] if kwargs.get('flip', False) else y[0]
@@ -1078,7 +1080,7 @@ class RectilinearMesh1D(Mesh):
         f = interpolate.interp1d(self.centres, values, kind=kind, fill_value="extrapolate")
         return mesh, f(mesh.centres)
 
-    def interpolate_centres_to_nodes(self, values, kind='cubic', **kwargs):
+    def interpolate_centres_to_nodes(self, values, kind='linear', **kwargs):
         kwargs['fill_value'] = kwargs.pop('fill_value', 'extrapolate')
         if values.size < 4:
             kind = 'linear'
@@ -1524,7 +1526,7 @@ class RectilinearMesh1D(Mesh):
         msg += "Cell Edges:\n{}".format("|   "+(self._edges.summary.replace("\n", "\n|    "))[:-4])
         msg = msg[:-1]
         msg += "log:\n{}".format("|   "+str(self.log)+'\n')
-        msg += "relativeTo:\n{}".format("|   "+str(self.relativeTo)+'\n')
+        msg += "relativeTo:\n{}".format("|   "+str(self._relativeTo)+'\n')
 
         return msg
 
