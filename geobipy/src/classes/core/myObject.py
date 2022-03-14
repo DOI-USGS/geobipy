@@ -48,9 +48,11 @@ class myObject(ABC):
     def hdf_name(self):
         return type(self).__name__
 
-    def create_hdf_group(self, h5obj, name):
+    def create_hdf_group(self, h5obj, name, hdf_name=None):
         grp = h5obj.create_group(name)
-        grp.attrs["repr"] = self.hdf_name
+        if hdf_name is None:
+            hdf_name = self.hdf_name
+        grp.attrs["repr"] = hdf_name
         return grp
 
     def toHdf(self, h5obj, name, withPosterior=False):
