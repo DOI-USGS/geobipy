@@ -156,7 +156,10 @@ class RectilinearMesh1D(Mesh):
 
     @property
     def centres_absolute(self):
-        return self._centres + self.relativeTo.value
+        if self.relativeTo.size == 1:
+            return cF._power(self.centres + self.relativeTo, self.log)
+        else:
+            return cF._power(np.repeat(self.centres[None, :], self.relativeTo.size, 0) + self.relativeTo, self.log)
 
     @centres.setter
     def centres(self, values):
@@ -187,8 +190,11 @@ class RectilinearMesh1D(Mesh):
 
     @property
     def edges_absolute(self):
-        # return self.edges + self.relativeTo.value
-        return cF._power(self.edges + self.relativeTo.value, self.log)
+        if self.relativeTo.size == 1:
+            return cF._power(self.edges + self.relativeTo, self.log)
+        else:
+            re = self.interpolate_centres_to_nodes(self.relativeTo)
+            return cF._power(np.repeat(self.edges[None, :], self.relativeTo.size+1, 0) + re, self.log)
 
     @edges.setter
     def edges(self, values):
