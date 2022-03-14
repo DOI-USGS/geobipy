@@ -430,6 +430,9 @@ class Inference2D(myObject):
             return self.marginal_probability((slic[0], slic[1], kwargs["index"]))
 
     @cached_property
+    def halfspace(self):
+        return StatArray.StatArray.fromHdf(self.hdfFile['halfspace'])
+    @cached_property
     def height(self):
         """Get the height of the observations. """
         return StatArray.StatArray.fromHdf(self.hdfFile['data/z'])

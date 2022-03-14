@@ -268,6 +268,9 @@ class Histogram(Model):
             values = self.pdf.values
 
         interval_kwargs = kwargs.pop('credible_interval_kwargs', None)
+        if interval_kwargs is not None:
+            interval_kwargs['xscale'] = kwargs.get('xscale', 'linear')
+            interval_kwargs['yscale'] = kwargs.get('yscale', 'linear')
 
         if self.ndim == 1:
             ax = self.bar(**kwargs)
@@ -288,11 +291,9 @@ class Histogram(Model):
 
             return ax, pm, cb
 
-    def plotCredibleIntervals(self, percent=95.0, log=None, reciprocate=False, axis=0, **kwargs):
+    def plotCredibleIntervals(self, percent=95.0, axis=0, **kwargs):
     
         med, low, high = self.credible_intervals(percent=percent, axis=axis)
-        low, _ = utilities._log(low, log)
-        high, _ = utilities._log(high, log)
 
         kwargs['color'] = '#5046C8'
         kwargs['linestyle'] = 'dashed'
@@ -368,4 +369,4 @@ class Histogram(Model):
     @classmethod
     def fromHdf(cls, grp, index=None):
         """ Reads in the object from a HDF file """
-        return super(Histogram, cls).fromHdf(grp=grp, index=index)
+        return super(Histogram, cls).fromHdf(grp=grp, index=index, skip_posterior=True)

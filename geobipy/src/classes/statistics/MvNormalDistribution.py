@@ -223,7 +223,7 @@ class MvNormal(baseDistribution):
         if (self.variance.ndim == 2):
             return MvNormal(np.zeros(N, dtype=self.mean.dtype), np.zeros([N, N], dtype=self.variance.dtype), prng=self.prng)
 
-    def bins(self, nBins=100, nStd=4.0, axis=None):
+    def bins(self, nBins=100, nStd=4.0, axis=None, relative=False):
         """Discretizes a range given the mean and variance of the distribution
 
         Parameters
@@ -241,27 +241,29 @@ class MvNormal(baseDistribution):
             The bin edges.
 
         """
-
         nStd = np.float64(nStd)
         nD = self.ndim
         if (nD > 1):
             if axis is None:
                 bins = np.empty([nD, nBins+1])
                 for i in range(nD):
-                    tmp = nStd * self.std[axis, axis]
-                    bins[i, :] = np.linspace(
-                        self._mean[i] - tmp, self._mean[i] + tmp, nBins+1)
-                values = np.squeeze(bins)
+                    tmp = np.squeeze(nStd * self.std[axis, axis])
+                    t = np.linspace(-tmp, tmp, nBins+1)
+                    if not relative:
+                        t += self._mean[i]
+                    bins[i, :] = t
             else:
                 bins = np.empty(nBins+1)
-                tmp = nStd * self.std[axis, axis]
-                bins[:] = np.linspace(
-                    self._mean[axis] - tmp, self._mean[axis] + tmp, nBins+1)
-                values = np.squeeze(bins)
+                tmp = np.squeeze(nStd * self.std[axis, axis])
+                t = np.linspace(-tmp, tmp, nBins+1)
+                if not relative:
+                    t += self._mean[axis]
+                bins[:] = t
 
         else:
-            tmp = nStd * self.std[axis, axis]
-            values = np.squeeze(np.linspace(
-                self._mean - tmp, self._mean + tmp, nBins+1))
+            tmp = nStd * self.std
+            bins = np.squeeze(np.linspace(-tmp, tmp, nBins+1))
+            if not relative:
+                bins += self._mean
 
         return StatArray.StatArray(values)

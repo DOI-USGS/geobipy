@@ -146,6 +146,6 @@ class Mesh(myObject):
         i = np.apply_along_axis(np.searchsorted, axis, tmp, percent)
         i[i == values.shape[axis]] = values.shape[axis]-1
         # Obtain the values at those locations
-        out = self.axis(axis).centres[i]
+        out = self.axis(axis).centres_absolute[i]
 
         return out

@@ -84,7 +84,7 @@ class MvLogNormal(MvNormal):
 
         return super().probability(x=x, log=log)
 
-    def bins(self, nBins=100, nStd=4.0, axis=None):
+    def bins(self, nBins=100, nStd=4.0, axis=None, relative=False):
         """Discretizes a range given the mean and variance of the distribution
 
         Parameters
@@ -102,4 +102,32 @@ class MvLogNormal(MvNormal):
             The bin edges.
 
         """
-        return np.exp(super().bins(nBins, nStd, axis)) if self.linearSpace else super().bins(nBins, nStd, axis)
+        # if not self.linearSpace:
+        #     return super().bins(nBins, nStd, axis)
+
+        nStd = np.float64(nStd)
+        nD = self.ndim
+        if (nD > 1):
+            if axis is None:
+                bins = np.empty([nD, nBins+1])
+                for i in range(nD):
+                    tmp = np.squeeze(nStd * self.std[axis, axis])
+                    t = np.linspace(-tmp, tmp, nBins+1)
+                    if not relative:
+                        t += self._mean[i]
+                    bins[i, :] = t
+            else:
+                bins = np.empty(nBins+1)
+                tmp = np.squeeze(nStd * self.std[axis, axis])
+                t = np.linspace(-tmp, tmp, nBins+1)
+                if not relative:
+                    t += self._mean[axis]
+                bins[:] = t
+
+        else:
+            tmp = nStd * self.std
+            bins = np.squeeze(np.linspace(-tmp, tmp, nBins+1))
+            if not relative:
+                bins += self._mean
+
+        return StatArray.StatArray(np.exp(bins)) if self.linearSpace else StatArray.StatArray(bins)

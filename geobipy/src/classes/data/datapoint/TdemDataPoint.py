@@ -628,7 +628,7 @@ class TdemDataPoint(EmDataPoint):
             # Get the system file name. h5py has to encode strings using utf-8, so decode it!
             txt = str(np.asarray(grp.get('System{}'.format(i))), 'utf-8')
             if txt[-3:] == 'stm':
-                systems[i] = kwargs['system_file_path'] + txt
+                systems[i] = join(kwargs['system_file_path'], txt)
             else:
                 with open('System{}'.format(i), 'w') as f:
                     f.write(txt)

@@ -540,7 +540,6 @@ class Inference1D(myObject):
                     'flipY': True,
                     'trim': False},
                 parameter_kwargs={
-                    # 'reciprocateX':self.reciprocateParameter,
                     'colorbar': False,
                     'flipY': True,
                     'xscale': 'log',
@@ -702,14 +701,9 @@ class Inference1D(myObject):
         #parent.create_dataset('phids', [nPoints,self.PhiDs.size], dtype=self.PhiDs.dtype)
         self.halfspace.createHdf(parent, 'halfspace', add_axis=nPoints, fillvalue=np.nan)
 
-        # self.best_datapoint.createHdf(parent,'bestd', withPosterior=False, add_axis=nPoints, fillvalue=np.nan)
-
         # Since the 1D models change size adaptively during the inversion, we need to pad the HDF creation to the maximum allowable number of layers.
         tmp = self.model.pad(self.model.mesh.max_cells)
         tmp.createHdf(parent, 'model', add_axis=nPoints, fillvalue=np.nan)
-
-        # tmp = self.best_model.pad(self.best_model.mesh.max_cells)
-        # tmp.createHdf(parent, 'bestmodel', withPosterior=False, add_axis=nPoints, fillvalue=np.nan)
 
     def write_inference1d(self, parent, index=None):
         """ Given a HDF file initialized as line results, write the contents of results to the appropriate arrays """
@@ -834,6 +828,9 @@ class Inference1D(myObject):
 
         self.model = hdfRead.readKeyFromFile(
             hdfFile, '', '/', 'model', index=index)
+
+        self.halfspace = hdfRead.readKeyFromFile(
+            hdfFile, '', '/', 'halfspace', index=index)
 
         self.Hitmap = self.model.values.posterior
         # self.currentModel._max_edge = np.log(self.Hitmap.y.centres[-1])

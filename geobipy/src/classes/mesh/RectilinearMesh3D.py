@@ -113,11 +113,11 @@ class RectilinearMesh3D(RectilinearMesh2D):
     def area(self):
         return np.outer(np.outer(self.x.widths, self.y.widths), self.z.widths)
 
-    @RectilinearMesh2D.relativeTo.setter
-    def relativeTo(self, values):
-        self._relativeTo = None
-        if not values is None:
-            self._relativeTo = StatArray.StatArray(values, "relativeTo", "m")
+    # @RectilinearMesh2D.relativeTo.setter
+    # def relativeTo(self, values):
+    #     self._relativeTo = None
+    #     if not values is None:
+    #         self._relativeTo = StatArray.StatArray(values, "relativeTo", "m")
 
     @property
     def z(self):
@@ -561,13 +561,14 @@ class RectilinearMesh3D(RectilinearMesh2D):
         parent: HDF object to create a group inside
         myName: Name of the group
         """
-        # create a new group inside h5obj
+        # create a new group inside parent
         grp = self.create_hdf_group(parent, name)
-        self.x.createHdf(grp, 'x', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
-        self.y.createHdf(grp, 'y', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
-        self.z.createHdf(grp, 'z', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
-        if not self.relativeTo is None:
-            self.relativeTo.createHdf(grp, 'relativeTo', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
+
+        self.x.createHdf(grp, 'x', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue, upcast=False)
+        self.y.createHdf(grp, 'y', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue, upcast=False)
+        self.z.createHdf(grp, 'z', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue, upcast=False)
+        # if not self.relativeTo is None:
+        #     self.relativeTo.createHdf(grp, 'relativeTo', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
 
         return grp
 
