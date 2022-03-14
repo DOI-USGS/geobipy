@@ -26,7 +26,7 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
     """Class defining stitched 1D rectilinear meshes.
     """
 
-    def __init__(self, max_cells, x=None, y=None, relativeTo=None, nCells=None, **kwargs):
+    def __init__(self, max_cells, x=None, relativeTo=None, nCells=None, **kwargs):
         """ Initialize a 2D Rectilinear Mesh"""
 
         self._max_cells = np.int32(max_cells)
@@ -59,8 +59,17 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
         return (self.x.nCells.item(), self.max_cells)
 
     @property
-    def y(self):
-        return self.y_edges
+    def summary(self):
+        """ Display a summary of the 3D Point Cloud """
+        msg = ("2D Stitched Rectilinear Mesh: \n"
+              "nCells: {} \nx\n{}").format(self.nCells.summary, self.x.summary)
+        # if not self.relativeTo is None:
+        #     msg += self.relativeTo.summary
+        return msg
+
+    # @property
+    # def y(self):
+    #     return self.y_edges
 
     @property
     def y_edges(self):
