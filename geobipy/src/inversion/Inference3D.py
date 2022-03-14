@@ -184,7 +184,6 @@ class Inference3D(myObject):
 
         """
         if self.parallel_access:
-
             from mpi4py import MPI
 
             # Split off a master communicator.
@@ -431,11 +430,9 @@ class Inference3D(myObject):
             # If DataPoint is None, then we reached the end of the file and no more points can be read in.
             if datapoint is None:
                 # Send the kill switch to the worker to shut down.
-                continueRunning = False
-                world.send(continueRunning, dest=iWorker)
+                world.send(False, dest=iWorker)
             else:
-                continueRunning = True
-                world.send(continueRunning, dest=iWorker)
+                world.send(True, dest=iWorker)
                 datapoint.Isend(dest=iWorker, world=world)
 
             nSent += 1
@@ -451,9 +448,7 @@ class Inference3D(myObject):
             status = MPI.Status()
             dummy = world.recv(source = MPI.ANY_SOURCE, tag = MPI.ANY_TAG, status = status)
             requestingRank = status.Get_source()
-            # requestingRank = np.int(rankRecv[0])
-            # dataPointProcessed = rankRecv[1]
-
+            
             nFinished += 1
 
             # Read the next data point from the file
@@ -465,18 +460,14 @@ class Inference3D(myObject):
             # If DataPoint is None, then we reached the end of the file and no more points can be read in.
             if datapoint is None:
                 # Send the kill switch to the worker to shut down.
-                # continueRunning[0] = 0 # Do not continue running
-                continueRunning = False
-                world.send(continueRunning, dest=requestingRank)
+                world.send(False, dest=requestingRank)
             else:
-                # continueRunning[0] = 1 # Yes, continue with the next point.
-                continueRunning = True
-                world.send(continueRunning, dest=requestingRank)
+                world.send(True, dest=requestingRank)
                 datapoint.Isend(dest=requestingRank, world=world, system=datapoint.system)
 
                 nSent += 1
 
-            report = (nFinished % (world.size - 1)) == 0 or nFinished >= (nPoints - 1)
+            report = ((nFinished % (world.size - 1)) == 0) or (nFinished >= nPoints)
 
             if report:
                 e = MPI.Wtime() - t0
@@ -515,16 +506,16 @@ class Inference3D(myObject):
             iLine = lineNumbers.searchsorted(datapoint.lineNumber)[0]
 
             inference = Inference1D(datapoint, prng, world=world, **options)
+
             failed = inference.infer(hdf_file_handle=self.lines[iLine].hdfFile)
+            if failed:
+                myMPI.print("datapoint {} failed to converge".format(datapoint.fiducial))
 
             # Ping the Master to request a new index
-            world.send(1, dest=0)
+            world.send('requesting', dest=0)
 
             # Wait till you are told whether to continue or not
             continueRunning = world.recv(source=0)
-
-            if failed:
-                myMPI.print("datapoint {} failed to converge".format(datapoint.fiducial))
 
             # If we continue running, receive the next DataPoint. Otherwise, shutdown the rank
             if continueRunning:

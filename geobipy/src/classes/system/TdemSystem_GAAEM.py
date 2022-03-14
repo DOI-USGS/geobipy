@@ -96,12 +96,12 @@ try:
                    "{}\n").format(self.fileName, self.times.summary)
             return msg
 
-
-except:
+except OSError as err:
     class TdemSystem_GAAEM(object):
 
         def __init__(self, *args, **kwargs):
             h = ("\nCould not import the time domain forward modeller from GA_AEM. \n"
+                 "\n{0}\n"
                  "Please see the package's README for instructions on how to install it \n"
-                 "Check that you have loaded the compiler that was used to compile the forward modeller\n")
+                 "Check that you have loaded the compiler that was used to compile the forward modeller\n").format(err)
             print(Warning(h))
