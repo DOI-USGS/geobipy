@@ -291,11 +291,9 @@ class Histogram(Model):
 
             return ax, pm, cb
 
-    def plotCredibleIntervals(self, percent=95.0, log=None, reciprocate=False, axis=0, **kwargs):
+    def plotCredibleIntervals(self, percent=95.0, axis=0, **kwargs):
     
         med, low, high = self.credible_intervals(percent=percent, axis=axis)
-        low, _ = utilities._log(low, log)
-        high, _ = utilities._log(high, log)
 
         kwargs['color'] = '#5046C8'
         kwargs['linestyle'] = 'dashed'
