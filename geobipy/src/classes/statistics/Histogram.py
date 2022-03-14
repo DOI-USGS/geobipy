@@ -268,6 +268,9 @@ class Histogram(Model):
             values = self.pdf.values
 
         interval_kwargs = kwargs.pop('credible_interval_kwargs', None)
+        if interval_kwargs is not None:
+            interval_kwargs['xscale'] = kwargs.get('xscale', 'linear')
+            interval_kwargs['yscale'] = kwargs.get('yscale', 'linear')
 
         if self.ndim == 1:
             ax = self.bar(**kwargs)
