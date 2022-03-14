@@ -309,7 +309,7 @@ class RectilinearMesh2D(Mesh):
 
     
 
-    def _median(self, values, log=None, axis=0):
+    def _median(self, values, axis=0):
         """Gets the median for the specified axis.
 
         Parameters
@@ -327,7 +327,7 @@ class RectilinearMesh2D(Mesh):
             Contains the medians along the specified axis. Has size equal to arr.shape[axis].
 
         """
-        return self._percentile(values=values, percent=50.0, log=log, axis=axis)
+        return self._percentile(values=values, percent=50.0, axis=axis)
 
     def __deepcopy__(self, memo={}):
         """ Define the deepcopy for the StatArray """
