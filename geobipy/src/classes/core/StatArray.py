@@ -1385,7 +1385,7 @@ class StatArray(np.ndarray, myObject):
         """
         return(r'StatArray()')
 
-    def createHdf(self, h5obj, name, shape=None, withPosterior=True, add_axis=None, fillvalue=None):
+    def createHdf(self, h5obj, name, shape=None, withPosterior=True, add_axis=None, fillvalue=None, upcast=True):
         """Create the Metadata for a StatArray in a HDF file
 
         Creates a new group in a HDF file under h5obj.
@@ -1473,18 +1473,18 @@ class StatArray(np.ndarray, myObject):
                     grp.create_dataset('data', [*shap, *self.shape], dtype=self.dtype, fillvalue=fillvalue)
 
         if withPosterior:
-            self.create_posterior_hdf(grp, add_axis, fillvalue)
+            self.create_posterior_hdf(grp, add_axis, fillvalue, upcast)
 
         return grp
 
-    def create_posterior_hdf(self, grp, add_axis, fillvalue):
+    def create_posterior_hdf(self, grp, add_axis, fillvalue, upcast):
         if self.hasPosterior:
             grp.create_dataset('nPosteriors', data=self.nPosteriors)
             if self.nPosteriors > 1:
                 for i in range(self.nPosteriors):
-                    self.posterior[i].createHdf(grp, 'posterior{}'.format(i), add_axis=add_axis, fillvalue=fillvalue, withPosterior=False)
+                    self.posterior[i].createHdf(grp, 'posterior{}'.format(i), add_axis=add_axis, fillvalue=fillvalue, withPosterior=False, upcast=upcast)
             else:
-                self.posterior.createHdf(grp, 'posterior', add_axis=add_axis, fillvalue=fillvalue, withPosterior=False)
+                self.posterior.createHdf(grp, 'posterior', add_axis=add_axis, fillvalue=fillvalue, withPosterior=False, upcast=upcast)
 
     def writeHdf(self, h5obj, name, withPosterior=True, index=None):
         """Write the values of a StatArray to a HDF file
@@ -1607,7 +1607,7 @@ class StatArray(np.ndarray, myObject):
 
         if not skip_posterior:
             if posterior_index is None:
-                posterior_index= index
+                posterior_index = index
             out.posteriors_from_hdf(grp, posterior_index)
 
         if is_file:
@@ -1622,9 +1622,13 @@ class StatArray(np.ndarray, myObject):
         if 'nPosteriors' in grp:
             nPosteriors = np.asarray(grp['nPosteriors'])
 
+        if nPosteriors == 0:
+            self.posterior = None
+            return
+
         posterior = None
         iTmp = index
-        if not index is None:
+        if index is not None:
             if np.ndim(index) > 0:
                 iTmp = index[0]
 
