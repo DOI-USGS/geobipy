@@ -113,11 +113,11 @@ class RectilinearMesh3D(RectilinearMesh2D):
     def area(self):
         return np.outer(np.outer(self.x.widths, self.y.widths), self.z.widths)
 
-    @RectilinearMesh2D.relativeTo.setter
-    def relativeTo(self, values):
-        self._relativeTo = None
-        if not values is None:
-            self._relativeTo = StatArray.StatArray(values, "relativeTo", "m")
+    # @RectilinearMesh2D.relativeTo.setter
+    # def relativeTo(self, values):
+    #     self._relativeTo = None
+    #     if not values is None:
+    #         self._relativeTo = StatArray.StatArray(values, "relativeTo", "m")
 
     @property
     def z(self):
