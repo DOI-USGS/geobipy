@@ -692,10 +692,13 @@ class Model(myObject):
         self.mesh.set_posteriors(**kwargs)
 
         if values_posterior is None:
-            # TODO: THIS NEEDS SORTING mean[0]
             relative_to = self.values.prior.mean[0]
-            values_grid = StatArray.StatArray(self.values.prior.bins(nBins=250, nStd=4.0, axis=0), self.values.name, self.values.units) - relative_to
-            mesh = RectilinearMesh2D(xEdges=values_grid, yEdges=self.mesh.edges.posterior.mesh.edges)
+            bins = StatArray.StatArray(self.values.prior.bins(nBins=250, nStd=4.0, axis=0), self.values.name, self.values.units)
+
+            xlog = None
+            if 'log' in type(self.values.prior).__name__.lower():
+                xlog = 10
+            mesh = RectilinearMesh2D(xEdges=bins, yEdges=self.mesh.edges.posterior.mesh.edges, xrelativeTo=relative_to, xlog=xlog)
 
             # Set the posterior hitmap for conductivity vs depth
             self.values.posterior = Histogram(mesh=mesh)
