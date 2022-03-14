@@ -924,20 +924,20 @@ class RectilinearMesh2D(Mesh):
 
         return pv.StructuredGrid(x, y, z)
 
-    def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
+    def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None, upcast=True):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
         """
         # create a new group inside h5obj
-        if add_axis is not None:
+        if (add_axis is not None) and (upcast):
             return self._create_hdf_3d(parent, name, withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
 
         grp = self.create_hdf_group(parent, name)
-        self.x.createHdf(grp, 'x', withPosterior=withPosterior, fillvalue=fillvalue)
-        self.y.createHdf(grp, 'y', withPosterior=withPosterior, fillvalue=fillvalue)
-        if not self.relativeTo is None:
-            self.relativeTo.createHdf(grp, 'relativeTo', withPosterior=withPosterior, fillvalue=fillvalue)
+        self.x.createHdf(grp, 'x', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue, upcast=upcast)
+        self.y.createHdf(grp, 'y', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue, upcast=upcast)
+        # if not self.relativeTo is None:
+        #     self.relativeTo.createHdf(grp, 'relativeTo', withPosterior=withPosterior, fillvalue=fillvalue)
 
         return grp
 
@@ -949,12 +949,13 @@ class RectilinearMesh2D(Mesh):
             x = add_axis
         x = RectilinearMesh1D(centres=x)
 
-        relativeTo = None if self._relativeTo is None else np.zeros((x.nCells, self.x.nCells))
+        # relativeTo = None if self._relativeTo is None else np.zeros((x.nCells, self.x.nCells))
 
-        mesh = RectilinearMesh3D(x=x, y=self.x, z=self.y, relativeTo=relativeTo)
+        out = self.create_hdf_group(parent, name, hdf_name='RectilinearMesh3D')
 
-        out = mesh.createHdf(parent, name, withPosterior=withPosterior, fillvalue=fillvalue)
-        x.writeHdf(out, 'x')
+        x.toHdf(out, 'x', withPosterior=withPosterior)
+        self.x.createHdf(out, 'y', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue, upcast=False)
+        self.y.createHdf(out, 'z', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue, upcast=False)
 
         return out
 
@@ -971,18 +972,15 @@ class RectilinearMesh2D(Mesh):
         self.x.writeHdf(grp, 'x',  withPosterior=withPosterior)
         self.y.writeHdf(grp, 'y',  withPosterior=withPosterior)
 
-        if not self.relativeTo is None:
-            self.relativeTo.writeHdf(grp, 'relativeTo',  withPosterior=withPosterior)
+        # if not self.relativeTo is None:
+        #     self.relativeTo.writeHdf(grp, 'relativeTo',  withPosterior=withPosterior)
 
     def _write_hdf_3d(self, parent, name, index, withPosterior=True):
         grp = parent[name]
         assert '3D' in grp.attrs['repr'], TypeError("HDF creation must have an axis added.")
 
-        self.x.writeHdf(grp, 'y',  withPosterior=withPosterior)
-        self.y.writeHdf(grp, 'z',  withPosterior=withPosterior)
-
-        if not self.relativeTo is None:
-            self.relativeTo.writeHdf(grp, 'relativeTo',  withPosterior=withPosterior, index=index)
+        self.x.writeHdf(grp, 'y', index=index, withPosterior=withPosterior, upcast=False)
+        self.y.writeHdf(grp, 'z', index=index, withPosterior=withPosterior, upcast=False)
 
 
     @classmethod
@@ -999,30 +997,20 @@ class RectilinearMesh2D(Mesh):
                 # return RectilinearMesh3D.fromHdf(grp)
 
             else: # Read a 2D mesh from 3D
-                x = RectilinearMesh1D.fromHdf(grp['y'], skip_posterior=skip_posterior)
-                y = RectilinearMesh1D.fromHdf(grp['z'], skip_posterior=skip_posterior)
-
-                relativeTo = None
-                if 'relativeTo' in grp:
-                    relativeTo = StatArray.StatArray.fromHdf(grp['relativeTo'], index=index, skip_posterior=skip_posterior)
+                x = RectilinearMesh1D.fromHdf(grp['y'], index=index, skip_posterior=skip_posterior)
+                y = RectilinearMesh1D.fromHdf(grp['z'], index=index, skip_posterior=skip_posterior)
 
                 out = cls(x=x, y=y)
-                out._relativeTo = relativeTo
                 return out
         else:
             if index is not None:
 
                 return RectilinearMesh1D.fromHdf(grp, index=index, skip_posterior=skip_posterior)
             else:
-                x = RectilinearMesh1D.fromHdf(grp['x'], skip_posterior=skip_posterior)
-                y = RectilinearMesh1D.fromHdf(grp['y'], skip_posterior=skip_posterior)
-                relativeTo = None
-                if 'relativeTo' in grp:
-                    relativeTo = StatArray.StatArray.fromHdf(grp['relativeTo'], skip_posterior=skip_posterior)
+                x = RectilinearMesh1D.fromHdf(grp['x'], index=index, skip_posterior=skip_posterior)
+                y = RectilinearMesh1D.fromHdf(grp['y'], index=index, skip_posterior=skip_posterior)
 
-                out = cls(x=x, y=y)
-                out._relativeTo = relativeTo
-                return out
+                return cls(x=x, y=y)
 
     def fromHdf_cell_values(self, grp, key, index=None, skip_posterior=False):
         return StatArray.StatArray.fromHdf(grp, key, index=index, skip_posterior=skip_posterior)

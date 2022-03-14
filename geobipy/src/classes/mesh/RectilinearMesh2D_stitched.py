@@ -214,21 +214,21 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
             else:
                 cP.clabel(cbar, cl)
 
-    def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
+    def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None, upcast=False):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
         """
         # create a new group inside h5obj
         grp = self.create_hdf_group(parent, name)
-        self.x.createHdf(grp, 'x', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
-        self.y_edges.createHdf(grp, 'y/edges', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
+        self.x.createHdf(grp, 'x', withPosterior=withPosterior, fillvalue=fillvalue, upcast=upcast)
+        self.y_edges.createHdf(grp, 'y/edges', withPosterior=withPosterior, fillvalue=fillvalue, upcast=upcast)
         
         if not self.relativeTo is None:
-            self.relativeTo.createHdf(grp, 'relativeTo', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
+            self.relativeTo.createHdf(grp, 'y/relativeTo', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue, upcast=upcast)
 
         if self._nCells is not None:
-            self.nCells.createHdf(grp, 'nCells', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
+            self.nCells.createHdf(grp, 'nCells', withPosterior=withPosterior, fillvalue=fillvalue, upcast=upcast)
 
         return grp
 
@@ -243,8 +243,8 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
             edges = StatArray.StatArray.fromHdf(grp['y/edges'], skip_posterior=skip_posterior)
             
             relativeTo = None
-            if 'relativeTo' in grp:
-                relativeTo = StatArray.StatArray.fromHdf(grp['relativeTo'], skip_posterior=skip_posterior)
+            if 'y/relativeTo' in grp:
+                relativeTo = StatArray.StatArray.fromHdf(grp['y/relativeTo'], skip_posterior=skip_posterior)
             
             out = cls(max_cells=edges.shape[1],  x=x, relativeTo=relativeTo)
 

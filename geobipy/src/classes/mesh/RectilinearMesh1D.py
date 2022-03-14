@@ -1258,35 +1258,30 @@ class RectilinearMesh1D(Mesh):
         """ Reprodicibility procedure """
         return('RectilinearMesh1D()')
 
-    def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
+    def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None, upcast=True):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
         """
-        # create a new group inside h5obj
-        if add_axis is not None:
-            return self._create_hdf_2d(parent, name, withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
 
+        # If another axis is given, upcast to a 2D mesh
+        if (add_axis is not None and upcast):
+            return self._create_hdf_2d(parent, name, withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
+            
+        # Otherwise mesh is 1D.
         grp = self.create_hdf_group(parent, name)
 
         if not self.log is None:
             grp.create_dataset('log', data=self.log)
 
-        if self._relativeTo is not None:
-            self.relativeTo.createHdf(grp, 'relativeTo', add_axis=add_axis, fillvalue=fillvalue)
-
-        self.centres.createHdf(grp, 'centres', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
-
-        self.edges.createHdf(grp, 'edges', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
-
         if self._nCells is not None:
             self.nCells.createHdf(grp, 'nCells', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
-
-            # # Instantiate extra parameters for Markov chain perturbations.
-            # grp.create_dataset('min_edge', data=self.min_edge)
-            # grp.create_dataset('max_edge', data=self.max_edge)
-            # grp.create_dataset('max_cells', data=self.max_cells)
-            # grp.create_dataset('min_width', data=self.min_width)
+            
+        if self._relativeTo is not None:
+            self.relativeTo.createHdf(grp, 'relativeTo', add_axis=add_axis, fillvalue=fillvalue)
+            
+        self.centres.toHdf(grp, 'centres', withPosterior=withPosterior)
+        self.edges.toHdf(grp, 'edges', withPosterior=withPosterior)
 
         return grp
 
@@ -1306,52 +1301,66 @@ class RectilinearMesh1D(Mesh):
 
         from .RectilinearMesh2D_stitched import RectilinearMesh2D_stitched
         from .RectilinearMesh2D import RectilinearMesh2D
+
         if isinstance(add_axis, (int, np.int_)):
             x = np.arange(add_axis, dtype=np.float64)
         else:
             x = add_axis
-        x = RectilinearMesh1D(centres=x)
-        relativeTo = None if self._relativeTo is None else StatArray.StatArray(np.zeros(x.nCells))
+        if not isinstance(x, RectilinearMesh1D):
+            x = RectilinearMesh1D(centres=x)
+        # if self._relativeTo is None:
 
-        if self._nCells is not None:
-            mesh = RectilinearMesh2D_stitched(x=x, y=self, max_cells=self.max_cells, relativeTo=relativeTo)
+        if self._nCells is None:
+            # out = mesh.createHdf(parent, name, withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue, upcast=False)
+            out = self.create_hdf_group(parent, name, hdf_name='RectilinearMesh2D')
+            x.toHdf(out, 'x', withPosterior=withPosterior)
+            self.createHdf(out, 'y', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue, upcast=False)
+
+        else:
+            mesh = RectilinearMesh2D_stitched(x=x, relativeTo=self.relativeTo, max_cells=self.max_cells)
             if self.nCells.hasPosterior:
                 mesh.nCells.posterior = Histogram.Histogram(mesh=RectilinearMesh2D(x=mesh.x, y=self.nCells.posterior.mesh))
             if self.edges.hasPosterior:
                 mesh.y_edges.posterior = Histogram.Histogram(mesh=RectilinearMesh2D(x=mesh.x, y=self.edges.posterior.mesh))
-        else:
-            mesh = RectilinearMesh2D(x=x, y=self, relativeTo=relativeTo)
 
-        out = mesh.createHdf(parent, name, withPosterior=withPosterior, fillvalue=fillvalue)
-        mesh.x.writeHdf(out, 'x')
-
+            out = mesh.createHdf(parent, name, withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue, upcast=False)
+            x.writeHdf(out, 'x', withPosterior=withPosterior)
+            
         return out
 
-    def writeHdf(self, parent, name, withPosterior=True, index=None):
+    def writeHdf(self, parent, name, withPosterior=True, index=None, upcast=True):
+
+        # grp = parent.get(name)
+
+        if (index is not None) and upcast:
+            return self._write_hdf_2d(parent, name, withPosterior=withPosterior, index=index)
+        else:
+            self._write_hdf_1d(parent, name, withPosterior=withPosterior, index=index)
+
+    def _write_hdf_1d(self, parent, name, withPosterior=True, index=None):
 
         grp = parent.get(name)
-        
-        if index is not None:
-            return self._write_hdf_2d(parent, name, withPosterior=withPosterior, index=index)
+
+        if index is None:
+            assert ('1D' in grp.attrs['repr']), Exception('Writing 1D mesh to 2D HDF entry requires an index')
 
         if self._nCells is not None:
             self.nCells.writeHdf(grp, 'nCells',  withPosterior=withPosterior, index=index)
 
         if self._relativeTo is not None:
+            # self.centres.writeHdf(grp, 'centres',  withPosterior=withPosterior, index=index)
+        # else:
             self.relativeTo.writeHdf(grp, 'relativeTo', index=index)
 
-        self.centres.writeHdf(grp, 'centres',  withPosterior=withPosterior, index=index)
-
         # Edges can have a posterior
-        self.edges.writeHdf(grp, 'edges',  withPosterior=withPosterior, index=index)
-
+        self.edges.writeHdf(grp, 'edges',  withPosterior=withPosterior)
 
     def _write_hdf_2d(self, parent, name, withPosterior=True, index=None):
 
         grp = parent.get(name)
 
         if self._relativeTo is not None:
-            self.relativeTo.writeHdf(grp, 'relativeTo', index=index)
+            self.relativeTo.writeHdf(grp, 'y/relativeTo', index=index)
 
         ind = None
         if self._nCells is not None:
@@ -1369,7 +1378,7 @@ class RectilinearMesh1D(Mesh):
         """ Reads in the object froma HDF file """
 
         if '1D' in grp.attrs['repr']:
-            out = RectilinearMesh1D._1d_from_1d(grp, skip_posterior=skip_posterior)
+            out = RectilinearMesh1D._1d_from_1d(grp, index, skip_posterior=skip_posterior)
 
         elif 'stitched' in grp.attrs['repr']:
             out = RectilinearMesh1D._1d_from_stitched(grp, index, skip_posterior=skip_posterior)
@@ -1391,12 +1400,13 @@ class RectilinearMesh1D(Mesh):
         return out        
 
     @classmethod
-    def _1d_from_1d(cls, grp, skip_posterior=False):
+    def _1d_from_1d(cls, grp, index, skip_posterior=False):
         # Get the number of cells of the mesh.
         # If present, its a perturbable mesh
         nCells = None
         if 'nCells' in grp:
-            tmp = StatArray.StatArray.fromHdf(grp['nCells'], skip_posterior=skip_posterior)
+            i = index if grp['nCells/data'].size > 1 else None
+            tmp = StatArray.StatArray.fromHdf(grp['nCells'], index=i, skip_posterior=skip_posterior)
             nCells = tmp.astype(np.int32)
             nCells.copyStats(tmp)
             assert nCells.size == 1, ValueError("Mesh was created with expanded memory\nIndex must be specified")
@@ -1409,22 +1419,27 @@ class RectilinearMesh1D(Mesh):
         # If relativeTo is present, the edges/centres should be 1 dimensional
         relativeTo = None
         if 'relativeTo' in grp:
-            relativeTo = StatArray.StatArray.fromHdf(grp['relativeTo'], skip_posterior=skip_posterior)
-            if relativeTo == 0.0:
-                relativeTo = None
-        
-        s = None if nCells is None else np.s_[:nCells.item() + 1]
-        pi = None if nCells is None else np.s_[:]
-        edges = StatArray.StatArray.fromHdf(grp['edges'], index=s, skip_posterior=skip_posterior, posterior_index=pi)
+            i = index if grp['relativeTo/data'].size > 1 else None
+            relativeTo = StatArray.StatArray.fromHdf(grp['relativeTo'], index=i, skip_posterior=skip_posterior)
+            
+            s = index if nCells is None else np.s_[:nCells.item() + 1]
+            pi = None #if nCells is None else np.s_[:]
+            # edges = StatArray.StatArray.fromHdf(grp['edges'], index=index, skip_posterior=skip_posterior, posterior_index=pi)
+
+        else:
+            s = None if nCells is None else np.s_[:nCells.item() + 1]
+            pi = None #if nCells is None else np.s_[:]
+
+        edges = StatArray.StatArray.fromHdf(grp['edges'], skip_posterior=skip_posterior, posterior_index=pi)
 
         out = cls(edges=edges)
 
         # centres = None
-        if (edges is None) or (np.all(edges == 0.0)):
-            s = None if nCells is None else np.s_[:nCells.item()]
-            centres = StatArray.StatArray.fromHdf(grp['centres'], index=s, skip_posterior=skip_posterior)
-            if not np.all(centres == 0.0):
-                out.centres = centres
+        # if (edges is None) or (np.all(edges == 0.0)):
+        #     s = None if nCells is None else np.s_[:nCells.item()]
+        #     centres = StatArray.StatArray.fromHdf(grp['centres'], skip_posterior=skip_posterior)
+            # if not np.all(centres == 0.0):
+            #     out.centres = centres
 
         out.relativeTo = relativeTo
         if nCells is not None:
@@ -1439,33 +1454,35 @@ class RectilinearMesh1D(Mesh):
 
         if index is None:
             assert False, ValueError("RectilinearMesh1D cannot be read from a RectilinearMesh2D without an index")
-            # from .RectilinearMesh2D import RectilinearMesh2D
-            # return RectilinearMesh2D.fromHdf(grp)
+
+        grp = grp['y']
 
         # If no index, we are reading in multiple models side by side.
         log = None
-        if 'y/log' in grp:
-            log = np.asscalar(np.asarray(grp['y/log']))
+        if 'log' in grp:
+            log = np.asscalar(np.asarray(grp['log']))
 
         # If relativeTo is present, the edges/centres should be 1 dimensional
         relativeTo = None
         if 'relativeTo' in grp:
             relativeTo = StatArray.StatArray.fromHdf(grp['relativeTo'], index=index, skip_posterior=skip_posterior)
-            if relativeTo == 0.0:
-                relativeTo = None
-        
-        edges = StatArray.StatArray.fromHdf(grp['y/edges'], skip_posterior=skip_posterior)
-            
+        #     edges = StatArray.StatArray.fromHdf(grp['edges'], skip_posterior=skip_posterior)
+        # else:
+
+        edges = StatArray.StatArray.fromHdf(grp['edges'], skip_posterior=skip_posterior)
+
         out = cls(edges=edges)
 
         # centres = None
-        if (edges is None) or (np.all(edges == 0.0)):            
-            centres = StatArray.StatArray.fromHdf(grp['y/centres'], skip_posterior=skip_posterior)
+        if (edges is None) or (np.all(edges == 0.0)):      
+            # if 'relativeTo' in grp:      
+            centres = StatArray.StatArray.fromHdf(grp['centres'], skip_posterior=skip_posterior)
+            # else:
+            #     centres = StatArray.StatArray.fromHdf(grp['centres'], index=index, skip_posterior=skip_posterior)
             if not np.all(centres == 0.0):
                 out.centres = centres
 
-        out.relativeTo = relativeTo
-
+        out._relativeTo = relativeTo
         out.log = log
         return out
 

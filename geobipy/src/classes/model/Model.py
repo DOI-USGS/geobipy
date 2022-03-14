@@ -882,11 +882,11 @@ class Model(myObject):
         mesh, values = self.mesh.resample(dx, dy, self.values, kind='cubic')
         return type(self)(mesh, values)
 
-    def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
+    def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None, upcast=True):
         # create a new group inside h5obj
         grp = self.create_hdf_group(parent, name)
 
-        self.mesh.createHdf(grp, 'mesh', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
+        self.mesh.createHdf(grp, 'mesh', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue, upcast=upcast)
         self.values.createHdf(grp, 'values', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
         return grp
 
