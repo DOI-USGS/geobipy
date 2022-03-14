@@ -1,7 +1,6 @@
 """ @RectilinearMesh1D_Class
 Module describing a 1D Rectilinear Mesh class
 """
-from os import read
 from .Mesh import Mesh
 from ...classes.core import StatArray
 from copy import deepcopy
