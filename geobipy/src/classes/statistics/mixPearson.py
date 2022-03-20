@@ -1,5 +1,6 @@
 
 import numpy as np
+from copy import deepcopy
 from ...classes.core import StatArray
 from scipy.stats import (multivariate_normal, norm)
 from scipy.special import beta
@@ -22,6 +23,10 @@ class mixPearson(Mixture):
         self.sigmas = sigmas
         self.exponents = exponents
         self.amplitudes = amplitudes
+
+    def __deepcopy__(self, memo={}):
+        out = type(self)()
+        out._params = deepcopy(self._params)
 
 
     @property

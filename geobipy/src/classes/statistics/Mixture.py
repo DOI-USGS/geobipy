@@ -53,11 +53,13 @@ class Mixture(myObject):
     def params(self, values):
         self._params = StatArray.StatArray(values)
 
-
-    def fit_to_curve(self, x, y, plot=False, debug=False, verbose=False, **kwargs):
+    def fit_to_curve(self, x, y, plot=False, debug=False, verbose=False, final=False, **kwargs):
         """Iteratively fits the histogram with an increasing number of distributions until the fit changes by less than a tolerance.
 
         """
+        import warnings
+        warnings.filterwarnings("error")
+
         if plot:
             import matplotlib.pyplot as plt
             if debug:
@@ -76,7 +78,6 @@ class Mixture(myObject):
         log = kwargs.pop('log', None)
         maxDistributions = kwargs.pop('max_distributions', np.inf)
         kwargs['method'] = kwargs.get('method', 'lbfgsb')
-
 
         x = StatArray.StatArray(x)
         edges = x.edges()
@@ -97,10 +98,20 @@ class Mixture(myObject):
         new_peak = np.argmax(tmp)
         x_guess = np.atleast_1d(centres[new_peak])
 
-        fit, pars = self._fit_GM_to_cuve(self.model, centres, edges, y, x_guess, verbose=verbose, **kwargs)
+        go = True
+        expon_guess = 20.0
+        fit = None
+        while go:
+            try:
+                fit, pars = self._fit_GM_to_cuve(self.model, centres, edges, y, x_guess, expon_guess=expon_guess, verbose=verbose, **kwargs)
+            except:
+                pass
+            expon_guess *= 2.0
+            go = expon_guess < 100.0 and fit is None
 
         x_guess = np.asarray([fit.params['g0_center']])
         sigma_guess = [fit.params['g0_sigma']]
+        # expon_guess = [fit.params['g0_expon']]
 
         kwargs['max_variance'] = centres[i95] - centres[i05]
 
@@ -112,12 +123,13 @@ class Mixture(myObject):
 
         # Get the location of the next peak
         s = fit.params['g0_fwhm'].value
+        # s = fit.params['g0_sigma'].value
         residual[np.abs(centres - fit.params['g0_center'].value) < 1.67*s] = 0.0
         residual[:i05] = 0.0
         residual[i95:] = 0.0
 
 
-        if plot or debug:
+        if (plot or debug) and not final:
             ax.plot(centres, y, '-.')
             ax.plot(centres, fit.best_fit)
             comps = fit.eval_components(x=centres)
@@ -126,8 +138,8 @@ class Mixture(myObject):
 
             if debug:
                 ax2.plot(centres, residual)
-                ax2.vlines(centres[i05], ymin=0.0, ymax=y.max())
-                ax2.vlines(centres[i95], ymin=0.0, ymax=y.max())
+                # ax2.vlines(centres[i05], ymin=0.0, ymax=y.max())
+                # ax2.vlines(centres[i95], ymin=0.0, ymax=y.max())
 
             fig.canvas.flush_events()
             fig.canvas.draw()
@@ -145,13 +157,19 @@ class Mixture(myObject):
         if plot and verbose:
             input('\nNext\n')
 
+        lmfit_barfed = False
         while go:
 
             x_guess = np.asarray([fit.params['g{}_center'.format(i)] for i in range(x_guess.size)])
             x_guess_test = np.hstack([x_guess, centres[new_peak]])
             x_guess_test = np.atleast_1d(centres[new_peak])
 
-            fit_test, pars_test = self._fit_GM_to_cuve(self.model, centres, edges, y, x_guess_test, previous_fit=fit, previous_pars=pars, verbose=verbose, **kwargs)
+            # try:
+            if verbose:
+                print('testing peaks', x_guess_test)
+
+
+            fit_test, pars_test = self._fit_GM_to_cuve(self.model, centres, edges, y, x_guess_test, expon_guess=expon_guess, previous_fit=fit, previous_pars=pars, verbose=verbose, **kwargs)
             n_tests = len(fit_test.components)
 
             residual = y - fit_test.best_fit
@@ -159,9 +177,11 @@ class Mixture(myObject):
             residual = np.abs(residual)
 
             fwhm = [fit_test.params['g{}_fwhm'.format(i)].value for i in range(n_tests)]
+            # sigma = [fit_test.params['g{}_sigma'.format(i)].value for i in range(n_tests)]
             # s = np.min(fwhm)
             for i in range(n_tests):
-                residual[np.abs(centres - fit_test.params['g{}_center'.format(i)].value) < fwhm[i]] = 0.0
+                residual[np.abs(centres - fit_test.params['g{}_center'.format(i)].value) < 1.67*fwhm[i]] = 0.0
+                # residual[np.abs(centres - fit_test.params['g{}_center'.format(i)].value) < 1.67*sigma[i]] = 0.0
             residual[:i05] = 0.0
             residual[i95:] = 0.0
 
@@ -172,7 +192,16 @@ class Mixture(myObject):
             accept_model = misfit_decreases and gradient_substantial
 
             if verbose:
-                print('testing peaks', x_guess_test)
+                print('test misfit', misfit_test)
+                print('misfit decreases', misfit_test[1] - misfit[1])
+                print('gradient substantial', mu, np.abs(misfit_test - misfit))
+
+                
+            # except:
+            #     print('failed for blah')
+            #     accept_model = False
+            #     lmfit_barfed = True
+
 
             go = accept_model
             if accept_model:
@@ -205,14 +234,14 @@ class Mixture(myObject):
                 x_guess = x_guess_test
 
             else:
-                if verbose:
+                if verbose and not lmfit_barfed:
                     print('\nmodel {}'.format(np.asarray(list(fit_test.best_values.values()))))
                     print('test not accepted')
                     print('misfit', misfit_test)
                     print('misfit change should be negative', misfit_test - misfit)
 
 
-            if plot or debug:
+            if (plot or debug) and not lmfit_barfed and not final:
                 ax.clear()
                 ax.plot(centres, y, '-.')
                 comps = fit_test.eval_components(x=centres)
@@ -271,26 +300,19 @@ class Mixture(myObject):
 
         return fit, pars
 
-
-    def _fit_GM_to_cuve(self, model, centres, edges, y, x_guess, sigma_guess=None, blocking_factor=1.0, previous_fit=None, previous_pars=None, verbose=False, **kwargs):
+    def _fit_GM_to_cuve(self, model, centres, edges, y, x_guess, sigma_guess=None, expon_guess=None, previous_fit=None, previous_pars=None, verbose=False, **kwargs):
 
         if previous_pars is None:
-            return self.__fit_wo_previous(model, centres, edges, y, x_guess, sigma_guess, blocking_factor, verbose,**kwargs)
+            return self.__fit_wo_previous(model, centres, edges, y, x_guess, sigma_guess=sigma_guess, expon_guess=expon_guess, verbose=verbose,**kwargs)
         else:
-            return self.__fit_w_previous(model, centres, edges, y, x_guess, sigma_guess, blocking_factor, previous_fit, previous_pars, verbose, **kwargs)
+            return self.__fit_w_previous(model, centres, edges, y, x_guess, sigma_guess, expon_guess=expon_guess,previous_fit=previous_fit, previous_pars=previous_pars, verbose=verbose, **kwargs)
 
-
-
-    def __fit_w_previous(self, model, centres, edges, y, x_guess, sigma_guess=None, blocking_factor=None, previous_fit=None, previous_pars=None, verbose=False, **kwargs):
+    def __fit_w_previous(self, model, centres, edges, y, x_guess, sigma_guess=None, expon_guess=None, previous_fit=None, previous_pars=None, verbose=False, **kwargs):
 
 
         mn_var = kwargs.pop('min_variance', (edges[1]-edges[0]))
         mx_var = kwargs.pop('max_variance', None)
-        if mx_var is None:
-            init = 1.0
-        else:
-            init = np.min([0.5 * mx_var, 1.0])
-
+        init = 1.0 if mx_var is None else np.min([0.5 * mx_var, 1.0])
 
         mod = previous_fit.components[0]
         n_previous = len(previous_fit.components)
@@ -304,12 +326,18 @@ class Mixture(myObject):
             pars.update(guess.make_params())
             mod += guess
 
-            pars['g{}_center'.format(i)].set(value=x_guess[j], vary=False)#, min=lower_edge[i], max=upper_edge[i])
+            k = np.searchsorted(edges, x_guess[j])
+            le = edges[np.maximum(0, k-2)]
+            ue = edges[np.minimum(edges.size, k+3)]
+
+            pars['g{}_center'.format(i)].set(value=x_guess[j], min=le, max=ue)
             pars['g{}_sigma'.format(i)].set(value=init, min=mn_var, max=mx_var)
-            pars['g{}_amplitude'.format(i)].set(value=1.0)
+            pars['g{}_amplitude'.format(i)].set(value=1.0, min=0.0)
+            tmp = 10.5 #if expon_guess is None else expon_guess
+            pars['g{}_expon'.format(i)].set(value=tmp, vary=False)
 
         if verbose:
-            print(pars)
+            print('fitting with', pars)
 
         init = mod.eval(pars, x=centres)
         out = mod.fit(y, pars, x=centres, **kwargs)
@@ -317,7 +345,7 @@ class Mixture(myObject):
         return out, pars
 
 
-    def __fit_wo_previous(self, model, centres, edges, y, x_guess, sigma_guess=None, blocking_factor=1.0, verbose=False, **kwargs):
+    def __fit_wo_previous(self, model, centres, edges, y, x_guess, expon_guess=None, sigma_guess=None, verbose=False, **kwargs):
 
         n_guesses = np.size(x_guess)
         # Create the first model
@@ -331,36 +359,24 @@ class Mixture(myObject):
 
         mn_var = kwargs.pop('min_variance', (edges[1]-edges[0]))
         mx_var = kwargs.pop('max_variance', None)
-        if mx_var is None:
-            init = 1.0
-        else:
-            init = np.min([0.5 * mx_var, 1.0])
-
-        # if sigma_guess is None:
-        #     sigma_guess = blocking_factor * np.full(n_guesses, mn_var)
+        init = 1.0 if mx_var is None else np.min([0.5 * mx_var, 1.0])
 
         # Sort the guesses and sigmas
         ix = np.argsort(x_guess)
 
-        # lower_edge = np.full(n_guesses, fill_value=edges[0])
-        # upper_edge = np.full(n_guesses, fill_value=edges[-1])
-
-
-        # if n_guesses > 1:
-        #     lower_edge = np.hstack([edges[0], x_guess[ix[:-1]] + sigma_guess[ix[:-1]]])
-        #     upper_guess = np.hstack([x_guess[ix[1:]] - sigma_guess[ix[1:]], edges[-1]])
-
-        #     for i in range(n_guesses):
-        #         print('{} < {} < {}'.format(lower_edge[ix[i]], x_guess[ix[i]], upper_edge[i]))
-
         for i in range(n_guesses):
-            pars['g{}_center'.format(i)].set(value=x_guess[ix[i]],vary=False)#, min=lower_edge[i], max=upper_edge[i])
+            k = np.searchsorted(edges, x_guess[ix[i]])
+            le = edges[np.maximum(0, k-2)]
+            ue = edges[np.minimum(edges.size, k+3)]
+
+            pars['g{}_center'.format(i)].set(value=x_guess[ix[i]], min=le, max=ue)
             pars['g{}_sigma'.format(i)].set(value=init, min=mn_var, max=mx_var)
             pars['g{}_amplitude'.format(i)].set(value=1.0, min=0.0)
-
+            tmp = 10.5 if expon_guess is None else expon_guess
+            pars['g{}_expon'.format(i)].set(value=tmp, vary=False)
 
         if verbose:
-            print(pars)
+            print('fitting with', pars)
 
         init = mod.eval(pars, x=centres)
         out = mod.fit(y, pars, x=centres, **kwargs)
@@ -368,7 +384,7 @@ class Mixture(myObject):
         return out, pars
 
 
-    def createHdf(self, h5obj, myName, nRepeats=None):
+    def createHdf(self, parent, name, add_axis=None):
         """Create space in a HDF file for mixtures
 
         Parameters
@@ -382,15 +398,13 @@ class Mixture(myObject):
             so that multiple MPI ranks can write to their respective parts in the extended memory.
 
         """
-        grp = h5obj.create_group(myName)
-        grp.attrs["repr"] = self.hdf_name
-
-        grp = self.params.createHdf(grp, 'params', nRepeats=nRepeats)
+        grp = self.create_hdf_group(parent, name)
+        grp = self.params.createHdf(grp, 'params', add_axis=add_axis)
 
         return grp
 
 
-    def writeHdf(self, h5obj, myName, index=None):
+    def writeHdf(self, parent, name, index=None):
         """Write the mixture to HDF.
 
         Parameters
@@ -403,10 +417,11 @@ class Mixture(myObject):
             If the group was created using the nRepeats option, index specifies the index'th entry at which to write the data
 
         """
-        self.params.writeHdf(h5obj, myName+'/params', index=index)
+        grp = parent.get(name)
+        self.params.writeHdf(grp, 'params', index=index)
 
 
-    def fromHdf(self, h5grp, index=None):
+    def fromHdf(self, grp, index=None):
         """Read the mixture from a HDF group
 
         Parameters
@@ -417,10 +432,7 @@ class Mixture(myObject):
             If the group was created using the nRepeats option, index specifies the index'th entry from which to read the data.
 
         """
+        # assert np.size(index) == np.size(item['data'].shape) - 1, ValueError('Need to specify a {}D index'.format(np.size(item['data'].shape)-1))
 
-        item = h5grp.get('params')
-
-        assert np.size(index) == np.size(item['data'].shape) - 1, ValueError('Need to specify a {}D index'.format(np.size(item['data'].shape)-1))
-
-        self.params = StatArray.StatArray().fromHdf(item, index=index)
+        self.params = StatArray.StatArray.fromHdf(grp['params'], index=index)
         return self.squeeze()

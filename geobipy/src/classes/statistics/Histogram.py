@@ -1,11 +1,13 @@
 import numpy as np
-from copy import copy
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+
+from mixPearson import mixPearson
 from ...base import utilities
 from ...base import plotting as cP
 from ..model.Model import Model
 from ..core.StatArray import StatArray
+import progressbar
 
 class Histogram(Model):
 
@@ -81,10 +83,54 @@ class Histogram(Model):
             for i in range(1, self.ndim):
                 cdf = np.cumsum(cdf, axis=i)
         else:
-            total = self.values.sum(axis=axis)
             cdf = np.cumsum(self.values, axis=axis)
+        cdf = cdf / cdf.max()
 
         return Model(self.mesh, StatArray(cdf, name='Cumulative Density Function'))
+
+    def compute_probability(self, distribution, log=None, log_probability=False, axis=0, **kwargs):
+        centres = self.mesh.centres(axis=axis)
+        centres, _ = utilities._log(centres, log)
+
+        if self.ndim == 3:
+            ax, bx = self.mesh.other_axis(axis)
+
+            a = [x for x in (0, 1, 2) if not x == axis]
+            b = [x for x in (0, 1, 2) if x == axis]
+
+            pdf = self.pdf.values
+
+            shp = list(self.shape)
+            shp[axis] = distribution.ndim
+
+            probability = np.zeros(shp)
+
+            track = kwargs.pop('track', True)
+
+            r = range(ax.nCells.item() * bx.nCells.item())
+            if track:
+                Bar = progressbar.ProgressBar()
+                r = Bar(r)
+
+            mesh_2d = self.mesh[:, 0, :]
+                
+            for i in r:
+                j = list(mesh_2d.unravelIndex(i))
+                j.insert(axis, np.s_[:])
+                j = tuple(j)
+                c_tmp = centres[j]
+                # print(j)
+                # print(c_tmp)
+                p = distribution.probability(c_tmp, log_probability)
+                # print(pdf[j])
+                # print(p)
+                joint_probability = np.dot(p, pdf[j])
+                probability[j] = joint_probability
+        
+        return probability
+
+    def compute_probability_mpi(self, distribution, log=None, log_probability=False, axis=0, **kwargs):
+        print('gfdgfd')
 
     def credible_intervals(self, percent=90.0, axis=0):
         """Gets the median and the credible intervals for the specified axis.
@@ -126,11 +172,92 @@ class Histogram(Model):
         """
         return self.mesh._credible_range(self.counts, percent=percent, log=log, axis=axis)
 
-    # def entropy(self, axis=None):
+    def estimate_std(self, n_samples, **kwargs):
+        return np.sqrt(self.estimate_variance(n_samples, **kwargs))
 
-    #     pdf = self.pdf(axis=axis)
-    #     pdf = pdf[pdf > 0.0]
-    #     return StatArray(-(pdf * np.log(np.abs(pdf))).sum(), "Entropy")
+    def estimate_variance(self, n_samples, **kwargs):
+        X = self.sample(n_samples, **kwargs)
+        return np.var(X)
+
+    def fit_mixture_to_pdf(self, mixture=mixPearson, axis=0, **kwargs):
+        if self.ndim == 1:
+            return self.fit_mixture_to_pdf_1d(mixture, **kwargs)
+        elif self.ndim == 2:
+            return self.fit_mixture_to_pdf_2d(mixture, axis=axis, **kwargs)
+        elif self.ndim == 3:
+            return self.fit_mixture_to_pdf_3d(mixture, axis=axis, **kwargs)
+
+    def fit_mixture_to_pdf_3d(self, mixture, axis, **kwargs):
+        ax, bx = self.mesh.other_axis(axis)
+
+        a = [x for x in (0, 1, 2) if not x == axis]
+        b = [x for x in (0, 1, 2) if x == axis]
+
+        mixtures = [None] * ax.nCells * bx.nCells
+        if np.all(self.values == 0):
+            return mixtures
+
+        track = kwargs.pop('track', True)
+
+        r = range(ax.nCells.item() * bx.nCells.item())
+        if track:
+            Bar = progressbar.ProgressBar()
+            r = Bar(r)
+            
+        slic = [np.s_[:] for i in range(3)]
+        mixtures = []
+        for i in r:
+            j = list(self.mesh.unravelIndex(i))
+            j[axis] = np.s_[:]
+            h = self[tuple(j)]
+            mixtures.append(h.fit_mixture_to_pdf(mixture=mixture, **kwargs))
+            
+        return mixtures
+
+    def fit_mixture_to_pdf_2d(self, mixture, axis, **kwargs):
+
+        ax = self.axis(axis)
+        mixtures = [None] * ax.nCells
+        if np.all(self.values == 0):
+            return mixtures
+
+        track = kwargs.pop('track', True)
+
+        r = range(ax.nCells.item())
+        if track:
+            Bar = progressbar.ProgressBar()
+            r = Bar(r)
+            
+        mixtures = []
+        for i in r:
+            h = self.take_along_axis(i, axis=axis)
+
+            mixtures.append(h.fit_mixture_to_pdf(mixture=mixture, **kwargs))
+            
+        return mixtures
+
+
+    def fit_mixture_to_pdf_1d(self, mixture, **kwargs):
+        """Find peaks in the histogram along an axis.
+
+        Parameters
+        ----------
+        intervals : array_like, optional
+            Accumulate the histogram between these invervals before finding peaks
+        axis : int, optional
+            Axis along which to find peaks.
+
+        """
+        if np.all(self.values == 0):
+            return None
+
+        values = self.pdf.values
+        smooth = kwargs.pop('smooth', None)
+        if smooth is not None:
+            values = self.pdf.values.smooth(smooth)
+
+
+        return mixture().fit_to_curve(x=self.mesh.centres_absolute, y=values, **kwargs)
 
     def marginalize(self, axis=0):
         """Get the marginal histogram along an axis
@@ -317,6 +444,29 @@ class Histogram(Model):
         m = self.median(axis=axis)
         kwargs['label'] = 'median'
         self.mesh.plot_line(m, axis=axis, **kwargs)
+
+    def sample(self, n_samples, log=None):
+        """Generates samples from the histogram.
+
+        A uniform distribution is used for each bin to generate samples.
+        The number of samples generated per bin is scaled by the count for that bin using the requested number of samples.
+
+        parameters
+        ----------
+        nSamples : int
+            Number of samples to generate.
+
+        Returns
+        -------
+        out : geobipy.StatArray
+            The samples.
+
+        """
+        cdf = self.cdf()
+        values = np.random.rand(np.int64(n_samples))
+        values = np.interp(values, np.hstack([0, cdf.values]), self.mesh.edges_absolute)
+        values, dum = utilities._log(values, log)
+        return values
 
     def transparency(self, percent=95.0, log=None, axis=0):
         """Return a transparency value between 0 and 1 based on the difference between credible invervals of the hitmap.
