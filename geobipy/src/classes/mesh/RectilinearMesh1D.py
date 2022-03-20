@@ -92,7 +92,7 @@ class RectilinearMesh1D(Mesh):
         out.log = deepcopy(self.log, memo=memo)
         out._relativeTo = self._relativeTo
 
-        out.edges = self._edges
+        out._edges = self._edges
                 
         out._min_width = self.min_width
         out._min_edge = self.min_edge
@@ -159,7 +159,8 @@ class RectilinearMesh1D(Mesh):
         if self.relativeTo.size == 1:
             return cF._power(self.centres + self.relativeTo, self.log)
         else:
-            return cF._power(np.repeat(self.centres[None, :], self.relativeTo.size, 0) + self.relativeTo, self.log)
+            return cF._power(np.repeat(self.relativeTo[:, None], self.centres.size, 1) + self.centres, self.log)
+            # return cF._power(np.repeat(self.centres[None, :], self.relativeTo.size, 0) + self.relativeTo, self.log)
 
     @centres.setter
     def centres(self, values):
@@ -264,7 +265,7 @@ class RectilinearMesh1D(Mesh):
     @property
     def nCells(self):
         if self._nCells is None:
-            return np.int32(self._centres.size)
+            return np.int32(self._edges.size) - 1
         return self._nCells
 
     @nCells.setter
@@ -940,6 +941,9 @@ class RectilinearMesh1D(Mesh):
         if (reciprocateX):
             par = 1.0 / par
 
+        if self.log is not None:
+            kwargs['yscale'] = 'log'
+
         ax, stp = cp.step(x=par, y=self.plotting_edges, **kwargs)
         # if self.hasHalfspace:
         #     h = 0.99*z[-1]
@@ -1414,14 +1418,14 @@ class RectilinearMesh1D(Mesh):
         # If no index, we are reading in multiple models side by side.
         log = None
         if 'log' in grp:
-            log = np.asscalar(np.asarray(grp['log']))
+            log = np.asarray(grp['log']).item()
 
         # If relativeTo is present, the edges/centres should be 1 dimensional
         relativeTo = None
         if 'relativeTo' in grp:
             i = index if grp['relativeTo/data'].size > 1 else None
             relativeTo = StatArray.StatArray.fromHdf(grp['relativeTo'], index=i, skip_posterior=skip_posterior)
-            
+
             s = index if nCells is None else np.s_[:nCells.item() + 1]
             pi = None #if nCells is None else np.s_[:]
             # edges = StatArray.StatArray.fromHdf(grp['edges'], index=index, skip_posterior=skip_posterior, posterior_index=pi)
