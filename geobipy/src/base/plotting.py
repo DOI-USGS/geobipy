@@ -1390,6 +1390,10 @@ def step(x, y, **kwargs):
     x, _ = cF._log(x, geobipy_kwargs['logX'])
     y, _ = cF._log(y, geobipy_kwargs['logY'])
 
+    if geobipy_kwargs['transpose']:
+        geobipy_kwargs['xscale'], geobipy_kwargs['yscale'] = geobipy_kwargs['yscale'], geobipy_kwargs['xscale']
+        x, y = y, x
+
     stp = plt.step(x=x, y=y, **kwargs)
 
     if geobipy_kwargs['flipX']:
