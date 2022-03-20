@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-from mixPearson import mixPearson
+from .mixPearson import mixPearson
 from ...base import utilities
 from ...base import plotting as cP
 from ..model.Model import Model
