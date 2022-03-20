@@ -20,8 +20,7 @@ from ..classes.core import StatArray
 from ..base import fileIO
 from ..base.MPI import loadBalance1D_shrinkingArrays
 
-from ..classes.statistics.Histogram1D import Histogram1D
-# from ..classes.statistics.Hitmap2D import Hitmap2D
+from ..classes.statistics.Histogram import Histogram
 from ..classes.statistics.mixPearson import mixPearson
 from ..classes.pointcloud.PointCloud3D import PointCloud3D
 from ..classes.mesh.RectilinearMesh3D import RectilinearMesh3D
@@ -800,6 +799,8 @@ class Inference3D(myObject):
     def dataMisfit(self):
         return self.bestData.dataMisfit()
 
+    def parameter_posterior(self, fiducial=None, index=None):
+        return self.hitmap(fiducial, index)
 
     def hitmap(self, fiducial=None, index=None):
         """Get the hitmap for the given fiducial or index
@@ -819,7 +820,7 @@ class Inference3D(myObject):
 
         """
         iLine, index = self.lineIndex(fiducial=fiducial, index=index)
-        return self.lines[iLine].hitmap(index=index)
+        return self.lines[iLine].parameter_posterior(index=index)
 
 
     @property
@@ -893,7 +894,7 @@ class Inference3D(myObject):
 
 
     def meanParameters(self, slic=None):
-        return StatArray.StatArray(np.vstack([line.meanParameters(slic) for line in self.lines]), name=self.lines[0].parameterName, units=self.lines[0].parameterUnits)
+        return StatArray.StatArray(np.vstack([line.mean_parameters(slic) for line in self.lines]), name=self.lines[0].parameterName, units=self.lines[0].parameterUnits)
 
     def mesh2d(self, dx, dy, **kwargs):
         return self.pointcloud.centred_mesh(dx, dy, **kwargs)
@@ -1166,24 +1167,19 @@ class Inference3D(myObject):
 
         assert False, ValueError("fiducial not present in this data set")
 
-    def fit_parameter_posterior_mpi(self, intervals=None, **kwargs):
+    def fit_mixture_to_pdf_mpi(self, intervals=None, **kwargs):
 
         from mpi4py import MPI
         from geobipy.src.base import MPI as myMPI
 
-        max_distributions = kwargs.get('max_distributions', 3)
+        kwargs['max_distributions'] = kwargs.get('max_distributions', 3)
         kwargs['track'] = False
-
-        if intervals is None:
-            intervals = self.hitmap(index=0).yBins
-
-        nIntervals = np.size(intervals) - 1
 
         hdfFile = h5py.File("fits.h5", 'w', driver='mpio', comm=self.world)
 
-        a = np.zeros(max_distributions)
+        a = np.zeros(kwargs['max_distributions'])
         mixture = mixPearson(a, a, a, a)
-        mixture.createHdf(hdfFile, 'fits', nRepeats=(self.nPoints, nIntervals))
+        mixture.createHdf(hdfFile, 'fits', add_axis=(self.nPoints, self.lines[0].mesh.y.nCells))
 
         if self.world.rank == 0:  ## Master Task
             nFinished = 0
@@ -1249,10 +1245,10 @@ class Inference3D(myObject):
                 Go = False
 
             while Go:
-                hm = self.hitmap(index=index)
+                hm = self.parameter_posterior(index=index)
 
                 if not np.all(hm.counts == 0):
-                    mixtures = hm.fit_estimated_pdf(iPoint=index, rank=self.world.rank, **kwargs)
+                    mixtures = hm.fit_mixture_to_pdf(mixture=mixPearson, **kwargs)
 
                     for j, m in enumerate(mixtures):
                         if not m is None:
@@ -1269,15 +1265,15 @@ class Inference3D(myObject):
                     Go = False
 
 
-    def fit_mixture(self, intervals, **kwargs):
+    def fit_mixture_to_pdf(self, intervals=None, **kwargs):
 
         if self.parallel_access:
-            return self.fit_mixture_mpi(intervals, **kwargs)
+            return self.fit_mixture_to_pdf_mpi(intervals, **kwargs)
         else:
-            return self.fit_mixture_serial(intervals, **kwargs)
+            return self.fit_mixture_to_pdf_serial(intervals, **kwargs)
 
 
-    def fit_mixture_serial(self, intervals, **kwargs):
+    def fit_mixture_to_pdf_serial(self, intervals, **kwargs):
         """Uses Mixture modelling to fit disrtibutions to the hitmaps for the specified intervals.
 
         The non-mpi version fits a aggregated hitmap for the entire line.
@@ -1296,35 +1292,9 @@ class Inference3D(myObject):
             For details on the fitting arguments.
 
         """
-        distributions = []
-        active = []
-        for line in self.lines:
-            d, a = line.lineHitmap.fit_mixture(intervals, **kwargs)
-            distributions.append(d)
-            active.append(a)
 
-        line = np.empty(0)
-        depths = np.empty(0)
-        means = np.empty(0)
-        variances = np.empty(0)
-        for i in range(0, self.nLines, 1):
-            dl = distributions[i]
-            al = active[i]
-            for j in range(len(dl)):
-                d = 0.5 * (intervals[j] + intervals[j+1])
-                means = np.squeeze(dl[j].means_[al[j]])
-                line = np.hstack([line, np.full(means.size, fill_value=self.lineNumbers[i])])
-                depths = np.hstack([depths, np.full(means.size, fill_value=d)])
-                means = np.hstack([means, means])
-                variances = np.hstack([variances, np.squeeze(dl[j].covariances_[al[j]])])
-
-        line = StatArray.StatArray(line, 'Line Number')
-        depths = StatArray.StatArray(depths, self.lines[0].mesh.z.name, self.lines[0].mesh.z.units)
-        means = StatArray.StatArray(means, "Mean "+ self.lines[0].parameterName, self.lines[0].parameterUnits)
-        variances = StatArray.StatArray(variances, "Variance", "("+self.lines[0].parameterUnits+")$^{2}$")
-
-        return line, depths, means, variances
-
+        hm = self.parameter_posterior(index=0)
+        return hm.fit_mixture_to_pdf(**kwargs)
 
     # def fit_mixture_mpi(self, intervals, **kwargs):
     #     """Uses Mixture modelling to fit disrtibutions to the hitmaps for the specified intervals.
