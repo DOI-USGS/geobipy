@@ -62,9 +62,8 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
     def summary(self):
         """ Display a summary of the 3D Point Cloud """
         msg = ("2D Stitched Rectilinear Mesh: \n"
-              "nCells: {} \nx\n{}").format(self.nCells.summary, self.x.summary)
-        # if not self.relativeTo is None:
-        #     msg += self.relativeTo.summary
+              "nCells: {} \nx\n{}y\n{}relativeTo\n{}").format(self.nCells.summary, self.x.summary, self.y_edges.summary, self.relativeTo.summary)
+
         return msg
 
     # @property
@@ -143,6 +142,8 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
         cmap.set_bad(color='white')
         orientation = kwargs.pop('orientation', 'vertical')
         log = kwargs.pop('log', False)
+        vmin = kwargs.pop('vmin', None)
+        vmax = kwargs.pop('vmax', None)
 
         grid = kwargs.pop('grid', False)
         if 'edgecolor' in kwargs:
@@ -154,12 +155,17 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
         if (log):
             values, logLabel = utilities._log(values, log)
 
+        if vmin is not None:
+            values[values < vmin] = vmin
+        if vmax is not None:
+            values[values > vmax] = vmax
+
         if equalize:
             nBins = kwargs.pop('nbins', 256)
             assert nBins > 0, ValueError('nBins must be greater than zero')
             values, dummy = utilities.histogramEqualize(values, nBins=nBins)
 
-        rescale = lambda y: (y - np.min(y)) / (np.max(y) - np.min(y))
+        rescale = lambda y: (y - np.nanmin(y)) / (np.nanmax(y) - np.nanmin(y))
         v = rescale(values)
 
         y_edges = utilities._power(self.y_edges, self.y_log)
@@ -196,10 +202,8 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
         cbar = None
         if (colorbar):
 
-            sm = mplcm.ScalarMappable(cmap=cmap, norm=plt.Normalize(np.min(values), np.max(values)))
+            sm = mplcm.ScalarMappable(cmap=cmap, norm=plt.Normalize(np.nanmin(values), np.nanmax(values)))
             sm.set_array([])
-
-            # cbar = plt.colorbar(sm)
 
             if (equalize):
                 cbar = plt.colorbar(sm, extend='both', cax=cax, orientation=orientation)
@@ -245,7 +249,9 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
             relativeTo = None
             if 'y/relativeTo' in grp:
                 relativeTo = StatArray.StatArray.fromHdf(grp['y/relativeTo'], skip_posterior=skip_posterior)
-            
+                if np.all(np.isnan(relativeTo)):
+                    relativeTo = None
+
             out = cls(max_cells=edges.shape[1],  x=x, relativeTo=relativeTo)
 
             out.nCells = nCells

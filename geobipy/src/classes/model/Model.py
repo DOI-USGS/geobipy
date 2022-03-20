@@ -402,7 +402,6 @@ class Model(myObject):
         return remapped_model
 
     def pcolor(self, **kwargs):
-        ### DO NOT CHANGE THIS TO PCOLOR
         return self.mesh.pcolor(values=self.values, **kwargs)
 
     def plot(self, **kwargs):
@@ -829,6 +828,11 @@ class Model(myObject):
         perturbed_model.values.perturb()
 
         return remapped_model, perturbed_model
+
+    def take_along_axis(self, i, axis):
+        s = [np.s_[:] for j in range(self.ndim)]
+        s[axis] = i
+        return self[tuple(s)]
 
     def to_vtk(self, filename):
         mesh = self.pyvista_mesh()
