@@ -549,6 +549,28 @@ def rolling_window(a, window):
     strides = a.strides + (a.strides[-1],)
     return np.lib.stride_tricks.as_strided(a, shape=shape, strides=strides)
 
+@jit(**_numba_settings)
+def smooth(x, a):
+    n = len(x)
+    b = 1.0 - a
+    sx = 1.0
+    sy = a
+    yi = 0.0
+    y = np.zeros(n)
+    yi = (sy * yi) + (sx * x[0])
+    y[0] = yi
+    for i in range(1, n-1):
+        yi = (a * yi) + (b * x[i])
+        y[i] = yi
+
+    sx = sx / (1.0 + a)
+    sy = sy / (1.0 + a)
+    yi = (sy * yi) + (sx * x[n-1])
+    y[n-1] = yi
+    for i in range(n-2, -1, -1):
+        yi = (a * yi) + (b * y[i])
+        y[i] = yi
+    return y
 
 def splitComplex(this):
     """Splits a vector of complex numbers into a vertical concatenation of the real and imaginary components.
