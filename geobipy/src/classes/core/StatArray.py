@@ -772,6 +772,28 @@ class StatArray(np.ndarray, myObject):
         out.copyStats(self)
         return out
 
+    def smooth(self, a):
+        n = self.size
+        b = 1.0 - a
+        sx = 1.0
+        sy = a
+        yi = 0.0
+        y = np.zeros(self.size)
+        yi = (sy * yi) + (sx * self[0])
+        y[0] = yi
+        for i in range(1, n-1):
+            yi = (a * yi) + (b * self[i])
+            y[i] = yi
+
+        sx = sx / (1.0 + a)
+        sy = sy / (1.0 + a)
+        yi = (sy * yi) + (sx * self[n-1])
+        y[n-1] = yi
+        for i in range(n-2, -1, -1):
+            yi = (a * yi) + (b * y[i])
+            y[i] = yi
+        return StatArray(y)
+
     def standardize(self, axis=None):
         """Standardize by subtracting the mean and dividing by the standard deviation. """
 
