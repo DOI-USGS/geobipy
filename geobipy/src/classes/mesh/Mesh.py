@@ -150,3 +150,9 @@ class Mesh(myObject):
         out = self.axis(axis).centres_absolute[i]
 
         return out
+
+    def remove_axis(self, axis):
+        tmp = [np.s_[:] for i in range(self.ndim)]
+        tmp[axis] = 0
+        tmp = tuple(tmp)
+        return self[tmp]
