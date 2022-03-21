@@ -112,25 +112,16 @@ class Histogram(Model):
                 Bar = progressbar.ProgressBar()
                 r = Bar(r)
 
-            mesh_2d = self.mesh[:, 0, :]
+            mesh_2d = self.mesh.remove_axis(axis)
                 
             for i in r:
                 j = list(mesh_2d.unravelIndex(i))
                 j.insert(axis, np.s_[:])
                 j = tuple(j)
-                c_tmp = centres[j]
-                # print(j)
-                # print(c_tmp)
-                p = distribution.probability(c_tmp, log_probability)
-                # print(pdf[j])
-                # print(p)
-                joint_probability = np.dot(p, pdf[j])
-                probability[j] = joint_probability
+                p = distribution.probability(centres[j], log_probability)
+                probability[j] = np.dot(p, pdf[j])
         
         return probability
-
-    def compute_probability_mpi(self, distribution, log=None, log_probability=False, axis=0, **kwargs):
-        print('gfdgfd')
 
     def credible_intervals(self, percent=90.0, axis=0):
         """Gets the median and the credible intervals for the specified axis.
