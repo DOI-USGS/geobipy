@@ -906,6 +906,9 @@ class Inference2D(myObject):
 
         return opacity
 
+    def compute_probability(self, distribution, log=None, log_probability=False, axis=0, **kwargs):
+        return self.parameter_posterior().compute_probability(distribution, log, log_probability, axis, **kwargs)
+
     @property
     def parameterName(self):
         return self.hdfFile['/model/values/posterior/mesh/y/edges'].attrs['name']
@@ -956,7 +959,6 @@ class Inference2D(myObject):
         """ Get the Relative error of the best data points """
         return StatArray.StatArray.fromHdf(self.hdfFile['data/relative_error'])
 
-
     @property
     def relativeErrorPosteriors(self):
         """ Get the Relative error of the best data points """
@@ -964,16 +966,10 @@ class Inference2D(myObject):
 
     def parameter_posterior(self, index=None, fiducial=None):
 
-        assert not (index is None and fiducial is None), Exception("Please specify either an integer index or a fiducial.")
-        assert index is None or fiducial is None, Exception("Only specify either an integer index or a fiducial.")
-
-        if not fiducial is None:
+        if fiducial is not None:
             assert fiducial in self.fiducials, ValueError("This fiducial {} is not available from this HDF5 file. The min max fids are {} to {}.".format(fiducial, self.fiducials.min(), self.fiducials.max()))
             # Get the point index
-            i = self.fiducials.searchsorted(fiducial)
-        else:
-            i = index
-            fiducial = self.fiducials[index]
+            index = self.fiducials.searchsorted(fiducial)
 
         return Histogram.fromHdf(self.hdfFile['/model/values/posterior'], index=index)
 

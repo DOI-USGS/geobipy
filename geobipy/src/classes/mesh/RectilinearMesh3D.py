@@ -538,13 +538,6 @@ class RectilinearMesh3D(RectilinearMesh2D):
         """
         return np.ravel_multi_index(indices, self.shape, order=order)
 
-    def remove_axis(self, axis):
-        tmp = list(np.s_[:, :, :])
-        tmp[axis] = 0
-        tmp = tuple(tmp)
-        return self[tmp]
-
-
     def unravelIndex(self, index, order='C'):
         """Return local indices given a global one.
 
