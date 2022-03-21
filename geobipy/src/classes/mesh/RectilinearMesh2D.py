@@ -470,9 +470,6 @@ class RectilinearMesh2D(Mesh):
         f = interpolate.interp2d(self.y.centres, self.x.centres, values, kind=kind)
         return mesh, f(mesh.y.centres, mesh.x.centres)
 
-    def remove_axis(self, axis):
-        return self.other_axis(axis)
-        
     def interpolate_centres_to_nodes(self, values, kind='cubic'):
         if self.x.nCells <= 3 or self.y.nCells <= 3:
             kind = 'linear'
