@@ -717,6 +717,9 @@ class Inference3D(myObject):
         local_mixture_h5.close()
         probabilities_h5.close()
 
+    def compute_probability(self, distribution, log=None, log_probability=False, axis=0, **kwargs):
+        return StatArray.StatArray(np.vstack([line.compute_probability(distribution, log=log, log_probability=log_probability, axis=axis, **kwargs) for line in self.lines]))
+            
     def cluster_fits_gmm(self, n_clusters, plot=False):
 
         std = np.std(self.fits[2], axis=0)
