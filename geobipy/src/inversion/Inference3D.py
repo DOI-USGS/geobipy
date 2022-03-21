@@ -1172,6 +1172,8 @@ class Inference3D(myObject):
         from mpi4py import MPI
         from geobipy.src.base import MPI as myMPI
 
+        rank = self.world.rank
+
         kwargs['max_distributions'] = kwargs.get('max_distributions', 3)
         kwargs['track'] = False
 
@@ -1181,7 +1183,7 @@ class Inference3D(myObject):
         mixture = mixPearson(a, a, a, a)
         mixture.createHdf(hdfFile, 'fits', add_axis=(self.nPoints, self.lines[0].mesh.y.nCells))
 
-        if self.world.rank == 0:  ## Master Task
+        if rank == 0:  ## Master Task
             nFinished = 0
             nSent = 0
 
@@ -1248,11 +1250,18 @@ class Inference3D(myObject):
                 hm = self.parameter_posterior(index=index)
 
                 if not np.all(hm.counts == 0):
-                    mixtures = hm.fit_mixture_to_pdf(mixture=mixPearson, **kwargs)
+                    
+                    try:
+                        mixtures = hm.fit_mixture_to_pdf(mixture=mixPearson, **kwargs)
 
-                    for j, m in enumerate(mixtures):
-                        if not m is None:
-                            m.writeHdf(hdfFile, 'fits', index=(index, j))
+                    except:
+                        print('rank {} point {} failed'.format(rank, index), flush=True)
+                        mixtures = None
+
+                    if mixtures is not None:
+                        for j, m in enumerate(mixtures):
+                            if not m is None:
+                                m.writeHdf(hdfFile, 'fits', index=(index, j))
 
                 self.world.send(1, dest=0)
                 # Wait till you are told whether to continue or not
