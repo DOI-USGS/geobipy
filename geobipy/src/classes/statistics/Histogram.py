@@ -120,6 +120,7 @@ class Histogram(Model):
                 j = tuple(j)
                 p = distribution.probability(centres[j], log_probability)
                 probability[j] = np.dot(p, pdf[j])
+            probability = probability / np.expand_dims(np.sum(probability, axis), axis=axis)
         
         return probability
 
