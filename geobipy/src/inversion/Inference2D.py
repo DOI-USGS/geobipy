@@ -2,6 +2,7 @@ import os
 import numpy as np
 import numpy.ma as ma
 import h5py
+from copy import deepcopy
 from cached_property import cached_property
 from datetime import timedelta
 from ..classes.core.myObject import myObject
@@ -269,43 +270,19 @@ class Inference2D(myObject):
             print('Computing Depth of Investigation', flush=True)
             r = progressbar.progressbar(r)
 
-        # from numba import (jit, float64)
-        # _numba_settings = {'nopython': True, 'nogil': False, 'fastmath': True, 'cache': True}
-
         @jit(**_numba_settings)
         def loop(axis, values, p):
             shp = np.shape(values)
-            out = np.empty(shp[1])
-            for i in range(shp[1]):
-                tmp = values[:, i]
-                j = shp[0] - 1
-                while tmp[j] < p and j >= 0:
+            out = np.empty(shp[0])
+            for i in range(shp[0]):
+                tmp = values[i, :]
+                j = shp[1] - 1
+                while tmp[j] < p and j >= 1:
                     j -= 1
-                out[i] = axis[j - 1]
+                out[i] = axis[i, j]
             return out
 
-        doi = loop(self.mesh.y.centres, self.opacity(), p)
-
-
-        # @jit
-        # def inner(values, p):
-        #     nz = len(values)
-        #     i = nz - 1
-        #     while values[i] < p and i >= 0:
-        #         i -= 1
-        #     return i
-
-        # opacity = self.opacity()
-
-        # for i in r:
-        #     tmp = opacity[:, i]
-        #     iCell = inner(tmp, p)
-        #     # iCell = nz - 1
-        #     # while tmp[iCell] < p and iCell >= 0:
-        #     #     iCell -= 1
-
-        #     if iCell >= 0:
-        #         doi[i] = self.hitmap(0).z.centres[iCell - 1]
+        doi = loop(self.mesh.y.centres_absolute, self.opacity(), p)
 
         if window > 1:
             buffer = np.int32(0.5 * window)
@@ -1175,7 +1152,6 @@ class Inference2D(myObject):
             cP.xlabel(xtmp.getNameUnits())
             cP.ylabel('Elevation (m)')
 
-
     def plotKlayers(self, **kwargs):
         """ Plot the number of layers in the best model for each data point """
         xAxis = kwargs.pop('xAxis', 'x')
@@ -1199,14 +1175,12 @@ class Inference2D(myObject):
 
         return out
 
-
     def plotKlayersPosteriors(self, **kwargs):
         """ Plot the horizontally stacked elevation histograms for each data point along the line """
 
         post = Histogram.fromHdf(self.hdfFile['/model/mesh/nCells/posterior'])
         ax, pm, cb = post.pcolor(**kwargs)
         cP.title('# of Layers posterior distributions')
-
 
     def plot_additive_error(self, **kwargs):
         """ Plot the relative errors of the data """
@@ -1237,7 +1211,6 @@ class Inference2D(myObject):
                     linestyle=ls,linewidth=lw,c=fc,
                     alpha = 0.7,label='System ' + str(1), **kwargs)
 
-
     def plot_additive_error_posterior(self, system=0, **kwargs):
         """ Plot the distributions of additive errors as an image for all data points in the line """
 
@@ -1254,7 +1227,6 @@ class Inference2D(myObject):
 
         cP.title('Additive error posterior distributions\nsystem {}'.format(system))
 
-
     def plot_confidence(self, **kwargs):
         """ Plot the opacity """
         kwargs['cmap'] = kwargs.get('cmap', 'plasma')
@@ -1262,7 +1234,6 @@ class Inference2D(myObject):
 
         cb.ax.set_yticklabels(['Less', '', '', '', '', 'More'])
         cb.set_label("Confidence")
-
 
     def plotError2DJointProbabilityDistribution(self, index, system=0, **kwargs):
         """ For a given index, obtains the posterior distributions of relative and additive error and creates the 2D joint probability distribution """
@@ -1276,7 +1247,6 @@ class Inference2D(myObject):
         joint.create2DjointProbabilityDistribution(rel[system],add[system])
 
         joint.pcolor(**kwargs)
-
 
     def plot_interfaces(self, cut=0.0, **kwargs):
         """ Plot a cross section of the layer depth histograms. Truncation is optional. """
@@ -1304,7 +1274,6 @@ class Inference2D(myObject):
 
         cP.title('Relative error posterior distributions\nsystem {}'.format(system))
 
-
     def plot_relative_error(self, **kwargs):
         """ Plot the relative errors of the data """
 
@@ -1329,15 +1298,11 @@ class Inference2D(myObject):
             kwargs['c'] = cP.wellSeparated[2]
             self.relativeError.plot(xtmp, alpha = 0.7, label='System {}'.format(1), **kwargs)
 
-
     def scatter2D(self, **kwargs):
         return self.data.scatter2D(**kwargs)
 
-
     def plot_total_error(self, channel, **kwargs):
         """ Plot the relative errors of the data """
-
-
         xAxis = kwargs.pop('xAxis', 'x')
 
         kwargs['marker'] = kwargs.pop('marker','o')
@@ -1360,7 +1325,6 @@ class Inference2D(myObject):
         H = Histogram(values=np.log10(self.totalError[:,channel]),nBins=nBins)
 
         H.plot(**kwargs)
-
 
     def histogram(self, nBins, depth=None, reciprocateParameter = False, bestModel = False, **kwargs):
         """ Compute a histogram of the model, optionally show the histogram for given depth ranges instead """
@@ -1410,7 +1374,6 @@ class Inference2D(myObject):
         h.plot(**kwargs)
         cP.title(title)
 
-
     def parameterHistogram(self, nBins, depth = None, depth2 = None, log=None):
         """ Compute a histogram of all the parameter values, optionally show the histogram for given depth ranges instead """
 
@@ -1454,7 +1417,6 @@ class Inference2D(myObject):
 
         return out
 
-
     def plotBestModel(self, **kwargs):
 
         values = self.bestParameters()
@@ -1465,12 +1427,10 @@ class Inference2D(myObject):
 
         return self.plot_cross_section(values = values, **kwargs)
 
-
     def plotHighestMarginal(self, useVariance=True, **kwargs):
 
         values = self.highestMarginal
         return self.plot_cross_section(values = values, **kwargs)
-
 
     def plot_marginal_probabilities(self, **kwargs):
 
@@ -1532,13 +1492,14 @@ class Inference2D(myObject):
         """ Plot a cross-section of the parameters """
 
         if kwargs.pop('useVariance', False):
-            opacity = self.opacity().copy()
+            opacity = deepcopy(self.opacity())
 
-            if kwargs.pop('only_below_doi', False):
+            if kwargs.pop('mask_below_doi', False):
                 indices = self.mesh.y.cellIndex(self.doi)
+                opacity[:, :] = 1.0
 
                 for i in range(self.nPoints):
-                    opacity[:indices[i], i] = 1.0
+                    opacity[i, :indices[i]] = 0.0
 
             kwargs['alpha'] = opacity
 
@@ -1553,7 +1514,6 @@ class Inference2D(myObject):
             marginal_probability = StatArray.StatArray.fromHdf(self.hdfFile['probabilities'], index=slic)
 
         return marginal_probability
-
 
     def read_fit_distributions(self, fit_file, mask_by_doi=True, components='amvd'):
 
