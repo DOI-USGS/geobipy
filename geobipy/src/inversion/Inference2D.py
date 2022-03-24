@@ -1172,7 +1172,7 @@ class Inference2D(myObject):
         tmp = self.getAttribute('layer posterior')
 
         x = StatArray.StatArray(np.arange(self.nPoints, dtype=np.float64), "Index")
-        out = Histogram2D(xCentres=x, yEdges=tmp.bins)
+        out = Histogram2D(x_centres=x, y_edges=tmp.bins)
         out._counts = tmp.counts.T
 
         return out

@@ -199,7 +199,7 @@ class AarhusModel(Model):
         depthEdges[-1] = 1.5 * depthEdges[-2]
 
 
-        self.mesh = TopoRectilinearMesh2D(xCentres=x[:nPoints], yCentres=y[:nPoints], zEdges=depthEdges, heightCentres=z[:nPoints])
+        self.mesh = TopoRectilinearMesh2D(x_centres=x[:nPoints], y_centres=y[:nPoints], z_edges=depthEdges, heightCentres=z[:nPoints])
         self.fid = StatArray(fid[:nPoints], 'Fiducial')
         self.rho = StatArray(rho[:, :nPoints], 'Resistivity', '$\Omega m$')
         self.doi = StatArray(doi[:nPoints], 'Depth of investigation', 'm')

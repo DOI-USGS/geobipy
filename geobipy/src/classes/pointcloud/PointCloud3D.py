@@ -350,7 +350,7 @@ class PointCloud3D(myObject):
 
         x_grid = self.centred_grid_nodes(self.bounds[:2], dx)
         y_grid = self.centred_grid_nodes(self.bounds[2:], dy)
-        return RectilinearMesh2D(xEdges=x_grid, yEdges=y_grid)
+        return RectilinearMesh2D(x_edges=x_grid, y_edges=y_grid)
 
 
     def centred_grid_nodes(self, bounds, spacing):

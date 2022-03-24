@@ -37,7 +37,7 @@ class RectilinearMesh2D(Mesh):
     x or y axis, like a typical line of data.
     If x, y, and z are specified, plots can be made against distance which calculated cumulatively between points.
 
-    RectilinearMesh2D([xCentres or xEdges], [yCentres or yEdges], [zCentres or zEdges])
+    RectilinearMesh2D([x_centres or x_edges], [y_centres or y_edges], [z_centres or z_edges])
 
     Parameters
     ----------
@@ -52,18 +52,18 @@ class RectilinearMesh2D(Mesh):
 
     Other Parameters
     ----------------
-    xCentres : geobipy.StatArray, optional
-        The locations of the centre of each cell in the "x" direction. Only xCentres or xEdges can be given.
-    xEdges : geobipy.StatArray, optional
-        The locations of the edges of each cell, including the outermost edges, in the "x" direction. Only xCentres or xEdges can be given.
-    yCentres : geobipy.StatArray, optional
-        The locations of the centre of each cell in the "y" direction. Only yCentres or yEdges can be given.
-    yEdges : geobipy.StatArray, optional
-        The locations of the edges of each cell, including the outermost edges, in the "y" direction. Only yCentres or yEdges can be given.
-    zCentres : geobipy.StatArray, optional
-        The locations of the centre of each cell in the "z" direction. Only zCentres or zEdges can be given.
-    zEdges : geobipy.StatArray, optional
-        The locations of the edges of each cell, including the outermost edges, in the "z" direction. Only zCentres or zEdges can be given.
+    x_centres : geobipy.StatArray, optional
+        The locations of the centre of each cell in the "x" direction. Only x_centres or x_edges can be given.
+    x_edges : geobipy.StatArray, optional
+        The locations of the edges of each cell, including the outermost edges, in the "x" direction. Only x_centres or x_edges can be given.
+    y_centres : geobipy.StatArray, optional
+        The locations of the centre of each cell in the "y" direction. Only y_centres or y_edges can be given.
+    y_edges : geobipy.StatArray, optional
+        The locations of the edges of each cell, including the outermost edges, in the "y" direction. Only y_centres or y_edges can be given.
+    z_centres : geobipy.StatArray, optional
+        The locations of the centre of each cell in the "z" direction. Only z_centres or z_edges can be given.
+    z_edges : geobipy.StatArray, optional
+        The locations of the edges of each cell, including the outermost edges, in the "z" direction. Only z_centres or z_edges can be given.
     [x, y, z]edgesMin : float, optional
         See geobipy.RectilinearMesh1D for edgesMin description.
     [x, y, z]edgesMax : float, optional
@@ -80,14 +80,18 @@ class RectilinearMesh2D(Mesh):
 
     """
 
-    def __init__(self, x=None, y=None, relativeTo=None, **kwargs):
+    def __init__(self, x=None, y=None, **kwargs):
         """ Initialize a 2D Rectilinear Mesh"""
 
         self._distance = None
         self.xyz = False
     
         self.x = kwargs if x is None else x
+        if 'x_relative_to' in kwargs:
+            self.x.relativeTo = kwargs['x_relative_to']
         self.y = kwargs if y is None else y
+        if 'y_relative_to' in kwargs:
+            self.y.relativeTo = kwargs['y_relative_to']
 
     def __getitem__(self, slic):
         """Allow slicing of the histogram.
@@ -233,10 +237,10 @@ class RectilinearMesh2D(Mesh):
         if isinstance(values, dict):
             # mesh of the z axis values
             values = RectilinearMesh1D(
-                        centres=values.get('xCentres'),
-                        edges=values.get('xEdges'),
-                        log=values.get('xlog'),
-                        relativeTo=values.get('xrelativeTo'))
+                        centres=values.get('x_centres'),
+                        edges=values.get('x_edges'),
+                        log=values.get('x_log'),
+                        relativeTo=values.get('x_relative_to'))
 
         assert isinstance(values, RectilinearMesh1D), TypeError('x must be a RectilinearMesh1D')
         self._x = values
@@ -250,10 +254,10 @@ class RectilinearMesh2D(Mesh):
         if isinstance(values, dict):
             # mesh of the z axis values
             values = RectilinearMesh1D(
-                        centres=values.get('yCentres'),
-                        edges=values.get('yEdges'),
-                        log=values.get('ylog'),
-                        relativeTo=values.get('yrelativeTo'))
+                        centres=values.get('y_centres'),
+                        edges=values.get('y_edges'),
+                        log=values.get('y_log'),
+                        relativeTo=values.get('y_relative_to'))
         assert isinstance(values, RectilinearMesh1D), TypeError('y must be a RectilinearMesh1D')
         self._y = values
 

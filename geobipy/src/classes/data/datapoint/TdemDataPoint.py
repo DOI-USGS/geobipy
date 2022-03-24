@@ -879,7 +879,7 @@ class TdemDataPoint(EmDataPoint):
     #         # rto = 0.5 * (ybins[0] + ybins[-1])
     #         # ybins -= rto
 
-    #         mesh = RectilinearMesh2D(xEdges=xbins, xlog=10, yEdges=ybins, ylog=10)
+    #         mesh = RectilinearMesh2D(x_edges=xbins, x_log=10, y_edges=ybins, y_log=10)
     #         self.predictedData.posterior = Histogram(mesh=mesh)
 
     def update_posteriors(self):

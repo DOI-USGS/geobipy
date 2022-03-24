@@ -271,7 +271,7 @@ class FdemDataPoint(EmDataPoint):
             buf = 0.5*(b - a)
             ybins = StatArray.StatArray(np.logspace(a-buf, b+buf, 200), data.name, data.units)
             
-            mesh = RectilinearMesh2D(xEdges=xbins, xlog=10, yEdges=ybins, ylog=10)
+            mesh = RectilinearMesh2D(x_edges=xbins, x_log=10, y_edges=ybins, y_log=10)
             self.predictedData.posterior = Histogram(mesh=mesh)
 
 

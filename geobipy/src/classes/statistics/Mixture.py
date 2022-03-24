@@ -80,6 +80,7 @@ class Mixture(myObject):
         kwargs['method'] = kwargs.get('method', 'lbfgsb')
 
         x = StatArray.StatArray(x)
+
         edges = x.edges()
         centres, dum = cF._log(x, log)
         edges, dum = cF._log(edges, log)

@@ -7,7 +7,6 @@ from ...forwardmodelling.Electromagnetic.TD.tdem1d import (tdem1dfwd, tdem1dsen)
 from ...system.EmLoop import EmLoop
 from ...system.SquareLoop import SquareLoop
 from ...system.CircularLoop import CircularLoop
-from ....base.logging import myLogger
 from ...system.TdemSystem import TdemSystem
 from ...system.filters.butterworth import butterworth
 from ...system.Waveform import Waveform

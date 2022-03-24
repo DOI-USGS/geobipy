@@ -10,7 +10,6 @@ from ....base import utilities as cf
 from ....base import plotting as cP
 from copy import deepcopy
 import numpy as np
-from ....base.logging import myLogger
 import matplotlib.pyplot as plt
 
 
