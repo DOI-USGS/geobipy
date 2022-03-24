@@ -245,7 +245,8 @@ class Inference2D(myObject):
         """ Get the best data """
         return hdfRead.read_item(self.hdfFile['data'], system_file_path = self.system_file_path)
 
-    @cached_property
+    # @cached_property
+    @property
     def doi(self):
         if 'doi' in self.hdfFile.keys():
             return StatArray.StatArray.fromHdf(self.hdfFile['doi'])
@@ -291,10 +292,11 @@ class Inference2D(myObject):
             doi[:buffer] = tmp[0]
             doi[-buffer:] = tmp[-1]
 
-        # if 'doi' in self.hdfFile.keys():
-        #     doi.writeHdf(self.hdfFile, 'doi')
-        # else:
-        #     doi.toHdf(self.hdfFile, 'doi')
+        if self.mode == 'r+':        
+            if 'doi' in self.hdfFile.keys():
+                doi.writeHdf(self.hdfFile, 'doi')
+            else:
+                doi.toHdf(self.hdfFile, 'doi')
 
         return doi
 

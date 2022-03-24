@@ -65,8 +65,6 @@ class Inference3D(myObject):
 
         self._mesh3d = None
         self.kdtree = None
-        self.doi = None
-        self.doi2D = None
         self._mean3D = None
         self.best3D = None
         self._facies = None
@@ -306,7 +304,6 @@ class Inference3D(myObject):
     @property
     def nLines(self):
         return np.size(self.h5files)
-
 
     def _get(self, variable, reciprocateParameter=False, **kwargs):
 
@@ -796,6 +793,10 @@ class Inference3D(myObject):
                 plt.plot(binCentres, pdf_individual[:, i], '--k', linewidth=1)
 
         return model
+
+    @cached_property
+    def doi(self):
+        return np.hstack([line.doi for line in self.lines])
 
 
     @cached_property
