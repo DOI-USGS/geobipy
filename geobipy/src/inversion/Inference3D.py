@@ -65,8 +65,6 @@ class Inference3D(myObject):
 
         self._mesh3d = None
         self.kdtree = None
-        self.doi = None
-        self.doi2D = None
         self._mean3D = None
         self.best3D = None
         self._facies = None
@@ -306,7 +304,6 @@ class Inference3D(myObject):
     @property
     def nLines(self):
         return np.size(self.h5files)
-
 
     def _get(self, variable, reciprocateParameter=False, **kwargs):
 
@@ -613,7 +610,7 @@ class Inference3D(myObject):
         i = pd.unique(i)
 
         values = self._get(variable)[:, i]
-        mesh2d = RectilinearMesh2D(xCentres=self.x[i], yCentres=self.y[i], zEdges=self.zGrid.edges, heightCentres=self.height[i])
+        mesh2d = RectilinearMesh2D(x_centres=self.x[i], y_centres=self.y[i], z_edges=self.zGrid.edges, heightCentres=self.height[i])
         slic = Model(mesh2d, values=values)
 
         return slic
@@ -822,6 +819,10 @@ class Inference3D(myObject):
         return model
 
     @cached_property
+    def doi(self):
+        return np.hstack([line.doi for line in self.lines])
+
+    @cached_property
     def dataMisfit(self):
         return self.bestData.dataMisfit()
 
@@ -941,7 +942,7 @@ class Inference3D(myObject):
         mesh = self.mesh2d(dx, dy)
         # Interpolate the draped surface of the mesh
         height, dum = self.pointcloud.interpolate(mesh=mesh, values=self.pointcloud.elevation, block=True, **kwargs)
-        return RectilinearMesh3D(xEdges=height.x.edges, yEdges=height.y.edges, zEdges=self.zGrid.edges, height=height.values)
+        return RectilinearMesh3D(x_edges=height.x.edges, y_edges=height.y.edges, z_edges=self.zGrid.edges, height=height.values)
 
     @cached_property
     def nActive(self):

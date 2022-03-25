@@ -3,7 +3,6 @@ Module defining a normal distribution with statistical procedures
 """
 #from copy import deepcopy
 import numpy as np
-from ...base.logging import myLogger
 from .NormalDistribution import Normal
 from scipy.stats import norm
 from ...base import plotting as cP

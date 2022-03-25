@@ -694,10 +694,10 @@ class Model(myObject):
             relative_to = self.values.prior.mean[0]
             bins = StatArray.StatArray(self.values.prior.bins(nBins=250, nStd=4.0, axis=0), self.values.name, self.values.units)
 
-            xlog = None
+            x_log = None
             if 'log' in type(self.values.prior).__name__.lower():
-                xlog = 10
-            mesh = RectilinearMesh2D(xEdges=bins, yEdges=self.mesh.edges.posterior.mesh.edges, xrelativeTo=relative_to, xlog=xlog)
+                x_log = 10
+            mesh = RectilinearMesh2D(x_edges=bins, y_edges=self.mesh.edges.posterior.mesh.edges, x_relative_To=relative_to, x_log=x_log)
 
             # Set the posterior hitmap for conductivity vs depth
             self.values.posterior = Histogram(mesh=mesh)

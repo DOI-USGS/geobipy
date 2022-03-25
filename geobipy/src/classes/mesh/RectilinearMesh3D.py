@@ -33,22 +33,22 @@ class RectilinearMesh3D(RectilinearMesh2D):
     x or y axis, like a typical line of data.
     If x, y, and z are specified, plots can be made against distance which calculated cumulatively between points.
 
-    RectilinearMesh2D([xCentres or xEdges], [yCentres or yEdges], [zCentres or zEdges])
+    RectilinearMesh2D([x_centres or x_edges], [y_centres or y_edges], [z_centres or z_edges])
 
     Parameters
     ----------
-    xCentres : geobipy.StatArray, optional
-        The locations of the centre of each cell in the "x" direction. Only xCentres or xEdges can be given.
-    xEdges : geobipy.StatArray, optional
-        The locations of the edges of each cell, including the outermost edges, in the "x" direction. Only xCentres or xEdges can be given.
-    yCentres : geobipy.StatArray, optional
-        The locations of the centre of each cell in the "y" direction. Only yCentres or yEdges can be given.
-    yEdges : geobipy.StatArray, optional
-        The locations of the edges of each cell, including the outermost edges, in the "y" direction. Only yCentres or yEdges can be given.
-    zCentres : geobipy.StatArray, optional
-        The locations of the centre of each cell in the "z" direction. Only zCentres or zEdges can be given.
-    zEdges : geobipy.StatArray, optional
-        The locations of the edges of each cell, including the outermost edges, in the "z" direction. Only zCentres or zEdges can be given.
+    x_centres : geobipy.StatArray, optional
+        The locations of the centre of each cell in the "x" direction. Only x_centres or x_edges can be given.
+    x_edges : geobipy.StatArray, optional
+        The locations of the edges of each cell, including the outermost edges, in the "x" direction. Only x_centres or x_edges can be given.
+    y_centres : geobipy.StatArray, optional
+        The locations of the centre of each cell in the "y" direction. Only y_centres or y_edges can be given.
+    y_edges : geobipy.StatArray, optional
+        The locations of the edges of each cell, including the outermost edges, in the "y" direction. Only y_centres or y_edges can be given.
+    z_centres : geobipy.StatArray, optional
+        The locations of the centre of each cell in the "z" direction. Only z_centres or z_edges can be given.
+    z_edges : geobipy.StatArray, optional
+        The locations of the edges of each cell, including the outermost edges, in the "z" direction. Only z_centres or z_edges can be given.
     relativeToCentres : geobipy.StatArray, optional
         The relativeTo of each point at the x, y locations. Only relativeToCentres or relativeToEdges can be given, not both.
         Has shape (y.nCells, x.nCells).
@@ -173,10 +173,10 @@ class RectilinearMesh3D(RectilinearMesh2D):
         if isinstance(values, dict):
             # mesh of the z axis values
             values = RectilinearMesh1D(
-                        centres=values.get('zCentres'),
-                        edges=values.get('zEdges'),
-                        log=values.get('zlog'),
-                        relativeTo=values.get('zrelativeTo'))
+                        centres=values.get('z_centres'),
+                        edges=values.get('z_edges'),
+                        log=values.get('z_log'),
+                        relativeTo=values.get('z_relative_to'))
 
         assert isinstance(values, RectilinearMesh1D), TypeError('z must be a RectilinearMesh1D')
         self._z = values

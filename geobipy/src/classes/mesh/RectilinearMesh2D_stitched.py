@@ -32,7 +32,7 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
         self._max_cells = np.int32(max_cells)
         self.x = kwargs if x is None else x
         self.y_edges = None
-        self.y_log = kwargs.get('ylog')
+        self.y_log = kwargs.get('y_log')
         self.relativeTo = relativeTo
 
         self.nCells = nCells
@@ -105,9 +105,9 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
             
             relativeTo = self.relativeTo[slic] if not self.relativeTo is None else None
             if self.xyz:
-                out = type(self)(xEdges=self._x.edges[slic0], yEdges=self._y.edges[slic0], zEdges=self._z_edges[slic0, :], relativeTo=relativeTo)
+                out = type(self)(x_edges=self._x.edges[slic0], y_edges=self._y.edges[slic0], z_edges=self._z_edges[slic0, :], relativeTo=relativeTo)
             else:
-                out = type(self)(xEdges=self._x.edges[slic0], yEdges=self._z_edges[slic0, :], relativeTo=relativeTo)
+                out = type(self)(x_edges=self._x.edges[slic0], y_edges=self._z_edges[slic0, :], relativeTo=relativeTo)
             out.nCells = self.nCells[slic]
             return out
 
