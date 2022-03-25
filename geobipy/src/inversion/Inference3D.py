@@ -717,8 +717,32 @@ class Inference3D(myObject):
         local_mixture_h5.close()
         probabilities_h5.close()
 
-    def compute_probability(self, distribution, log=None, log_probability=False, axis=0, **kwargs):
-        return StatArray.StatArray(np.vstack([line.compute_probability(distribution, log=log, log_probability=log_probability, axis=axis, **kwargs) for line in self.lines]))
+    def compute_probability(self, distribution, log=None, log_probability=False, axis=1, **kwargs):
+
+        if self.parallel_access:
+            filename = kwargs['filename']
+
+            hdfFile = h5py.File(filename, 'w', driver='mpio', comm=self.world)
+
+            StatArray.StatArray().createHdf(hdfFile, 'marginal_probabilities', shape=(self.nPoints, distribution.ndim, self.lines[0].mesh.y.nCells), fillvalue=np.nan)
+
+            r = range(self.line_starts[self.world.rank], self.line_ends[self.world.rank])
+            self.world.barrier()
+
+            if self.world.rank == 0:
+                Bar = progressbar.ProgressBar()
+                r = Bar(r)
+
+            for i in r:
+                p_local = self.lines[i].compute_probability(distribution, log=log, log_probability=log_probability, axis=axis, track=False, **kwargs)
+
+                p_local.writeHdf(hdfFile, 'marginal_probabilities', index=(self.lineIndices[i], np.s_[:], np.s_[:]))
+
+            self.world.barrier()
+            hdfFile.close()
+            
+        else:
+            return StatArray.StatArray(np.vstack([line.compute_probability(distribution, log=log, log_probability=log_probability, axis=axis, **kwargs) for line in self.lines]))
             
     def cluster_fits_gmm(self, n_clusters, plot=False):
 
@@ -797,7 +821,6 @@ class Inference3D(myObject):
 
         return model
 
-
     @cached_property
     def dataMisfit(self):
         return self.bestData.dataMisfit()
@@ -872,16 +895,15 @@ class Inference3D(myObject):
 
     @cached_property
     def interface_probability(self):
-        interfaces = StatArray.StatArray((self.zGrid.nCells.value, self.nPoints), name='P(interface)')
+        interfaces = StatArray.StatArray((self.nPoints, self.zGrid.nCells.item()), name='P(interface)')
 
         print("Reading Depth Posteriors", flush=True)
         Bar=progressbar.ProgressBar()
         for i in Bar(range(self.nLines)):
-            interfaces[:, self.lineIndices[i]] = self.lines[i].interface_probability().T
+            interfaces[self.lineIndices[i], :] = self.lines[i].interface_probability().values
             self.lines[i].uncache('interface_probability')
 
         return interfaces
-
 
     @property
     def lineIndices(self):
@@ -894,7 +916,6 @@ class Inference3D(myObject):
             i0 = i1
 
         return lineIndices
-
 
     def meanParameters(self, slic=None):
         return StatArray.StatArray(np.vstack([line.mean_parameters(slic) for line in self.lines]), name=self.lines[0].parameterName, units=self.lines[0].parameterUnits)
@@ -1054,7 +1075,6 @@ class Inference3D(myObject):
     def x(self):
         return self.pointcloud.x
 
-
     @property
     def y(self):
         return self.pointcloud.y
@@ -1124,6 +1144,9 @@ class Inference3D(myObject):
             bar = progressbar.ProgressBar()
             return bar(range(*args, **kwargs))
 
+    @property
+    def fiducials(self):
+        return StatArray.StatArray(np.hstack([line.fiducials for line in self.lines]), name='fiducials')
 
     def fiducial(self, index):
         """ Get the fiducial of the given data point """
@@ -1428,7 +1451,7 @@ class Inference3D(myObject):
     @property
     def zGrid(self):
         """ Gets the discretization in depth """
-        return self.lines[0].mesh.z
+        return self.lines[0].mesh.y
 
     def _z_slice(self, depth=None):
         return self.lines[0]._z_slice(depth)
