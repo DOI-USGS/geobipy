@@ -1371,8 +1371,8 @@ class RectilinearMesh1D(Mesh):
         if self._nCells is not None:
             self.nCells.writeHdf(grp, 'nCells',  withPosterior=withPosterior, index=index)
             ind = index
-        else:
-            self.centres.writeHdf(grp, 'y/centres',  withPosterior=withPosterior, index=ind)
+        # else:
+        #     self.centres.writeHdf(grp, 'y/centres',  withPosterior=withPosterior, index=ind)
 
         # Edges can have a posterior
         self.edges.writeHdf(grp, 'y/edges',  withPosterior=withPosterior, index=ind)
