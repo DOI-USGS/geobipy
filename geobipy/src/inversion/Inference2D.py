@@ -253,7 +253,7 @@ class Inference2D(myObject):
         else:
             return self.compute_DOI()
 
-    def compute_DOI(self, percent=67.0, window=1, track=True):
+    def compute_doi(self, percent=67.0, window=1, track=True):
         """ Get the DOI of the line depending on a percentage credible interval cutoff for each data point """
 
         self.uncache('doi')
@@ -291,6 +291,8 @@ class Inference2D(myObject):
             doi[buffer:-buffer] = tmp
             doi[:buffer] = tmp[0]
             doi[-buffer:] = tmp[-1]
+
+        doi = StatArray.StatArray(doi, 'Depth of investigation', 'm')
 
         if self.mode == 'r+':        
             if 'doi' in self.hdfFile.keys():
