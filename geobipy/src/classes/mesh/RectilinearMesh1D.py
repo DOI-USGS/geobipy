@@ -92,6 +92,7 @@ class RectilinearMesh1D(Mesh):
         out.log = deepcopy(self.log, memo=memo)
         out._relativeTo = self._relativeTo
 
+        out._centres = self._centres
         out._edges = self._edges
                 
         out._min_width = self.min_width
@@ -338,7 +339,7 @@ class RectilinearMesh1D(Mesh):
 
     @property
     def widths(self):
-        return self._widths
+        return np.abs(np.diff(self.edges))
 
     @widths.setter
     def widths(self, values):
