@@ -1284,7 +1284,7 @@ class RectilinearMesh1D(Mesh):
         if self._relativeTo is not None:
             self.relativeTo.createHdf(grp, 'relativeTo', add_axis=add_axis, fillvalue=fillvalue)
             
-        self.centres.toHdf(grp, 'centres', withPosterior=withPosterior)
+        # self.centres.toHdf(grp, 'centres', withPosterior=withPosterior)
         self.edges.toHdf(grp, 'edges', withPosterior=withPosterior)
 
         return grp
