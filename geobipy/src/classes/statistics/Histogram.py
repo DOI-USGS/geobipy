@@ -122,7 +122,7 @@ class Histogram(Model):
                 probability[j] = np.dot(p, pdf[j])
             probability = probability / np.expand_dims(np.sum(probability, axis), axis=axis)
         
-        return probability
+        return StatArray(probability, name='marginal_probability')
 
     def credible_intervals(self, percent=90.0, axis=0):
         """Gets the median and the credible intervals for the specified axis.
