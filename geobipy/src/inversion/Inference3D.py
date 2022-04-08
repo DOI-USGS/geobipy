@@ -120,49 +120,63 @@ class Inference3D(myObject):
 
     @cached_property
     def point_chunks(self):
-        assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
-        _point_starts, _point_chunks = loadBalance1D_shrinkingArrays(self.nPoints, self.world.size)
+        # assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
+        if self.parallel_access:
+            _, _point_chunks = loadBalance1D_shrinkingArrays(self.nPoints, self.world.size)
+        else:
+            _point_chunks = np.full(1, fill_value=self.nPoints, dtype=np.int32)
         return _point_chunks
 
     @property
     def point_ends(self):
-        assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
+        # assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
         return self.point_starts + self.point_chunks
 
     @cached_property
     def point_starts(self):
-        assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
-        _point_starts, _point_chunks = loadBalance1D_shrinkingArrays(self.nPoints, self.world.size)
+        # assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
+        if self.parallel_access:
+            _point_starts, _ = loadBalance1D_shrinkingArrays(self.nPoints, self.world.size)
+        else:
+            _point_starts = np.zeros(1, dtype=np.int32)
         return _point_starts
 
     @cached_property
     def line_chunks(self):
-        assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
-        _line_starts, _line_chunks = loadBalance1D_shrinkingArrays(self.nLines, self.world.size)
+        # assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
+        if self.parallel_access:
+            _, _line_chunks = loadBalance1D_shrinkingArrays(self.nLines, self.world.size)
+        else:
+            _line_chunks = np.full(1, fill_value=self.nLines, dtype=np.int32)
         return _line_chunks
 
     @property
     def line_ends(self):
-        assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
+        # assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
         return self.line_starts + self.line_chunks
 
     @cached_property
     def line_starts(self):
-        assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
-        _line_starts, _line_chunks = loadBalance1D_shrinkingArrays(self.nLines, self.world.size)
+        # assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
+        if self.parallel_access:
+            _line_starts, _ = loadBalance1D_shrinkingArrays(self.nLines, self.world.size)
+        else:
+            _line_starts = np.zeros(1, dtype=np.int32)
         return _line_starts
+
+    @property
+    def rank(self):
+        return self.world.rank if self.parallel_access else 0
 
     def open(self, mode='r+', world=None):
         """ Check whether the file is open """
         for line in self.lines:
             line.open(mode=mode, world=world)
 
-
     def close(self):
         """ Check whether the file is open """
         for line in self.lines:
             line.close()
-
 
     def create_hdf5(self, data, **kwargs):
         """Create HDF5 files based on the data
@@ -254,7 +268,7 @@ class Inference3D(myObject):
         if self.world is None:
             print(*args)
         else:
-            if self.world.rank == 0:
+            if self.rank == 0:
                 print(*args, flush=True)
 
     # @property
@@ -629,17 +643,29 @@ class Inference3D(myObject):
                 credibleUpper = StatArray.StatArray(np.zeros(line.mesh.shape), '{}% Credible Interval'.format(percent), line.parameterUnits)
                 credibleUpper.createHdf(line.hdfFile, key)
 
-        r = range(self.nLines)
         if self.parallel_access:
-            r = range(self.line_starts[self.world.rank], self.line_ends[self.world.rank])
             self.world.barrier()
 
-            if self.world.rank == 0:
-                Bar = progressbar.ProgressBar()
-                r = Bar(r)
+        r = self.loop_over(self.line_starts[self.rank], self.line_ends[self.rank])
 
         for i in r:
             self.lines[i].computeCredibleInterval(percent, log)
+
+    def compute_doi(self, *args, **kwargs):
+        """Compute the depth of investigation.
+        """
+        for line in self.lines:
+            if not 'doi' in line.hdfFile:
+                doi = StatArray.StatArray(line.nPoints, 'Depth of investigation', line.height.units)
+                doi.createHdf(line.hdfFile, 'doi')
+
+        if self.parallel_access:
+            self.world.barrier()
+            kwargs['track'] = False
+
+        r = self.loop_over(self.line_starts[self.rank], self.line_ends[self.rank])
+        for i in r:
+            self.lines[i].compute_doi(*args, **kwargs)
 
 
     def compute_MinsleyFoksBedrosian2020_P_lithology(self, global_mixture_hdf5, local_mixture_hdf5, log=None):
@@ -675,9 +701,9 @@ class Inference3D(myObject):
             probabilities_h5 = h5py.File('P_class.h5', 'w', driver='mpio', comm=self.world)
 
             starts, chunks = loadBalance1D_shrinkingArrays(self.nPoints, self.world.size)
-            r = range(starts[self.world.rank], starts[self.world.rank] + chunks[self.world.rank])
+            r = range(starts[self.rank], starts[self.rank] + chunks[self.rank])
 
-            if self.world.rank == 0:
+            if self.rank == 0:
                 Bar = progressbar.ProgressBar()
                 r = Bar(r)
 
@@ -723,10 +749,10 @@ class Inference3D(myObject):
 
             StatArray.StatArray().createHdf(hdfFile, 'marginal_probabilities', shape=(self.nPoints, distribution.ndim, self.lines[0].mesh.y.nCells), fillvalue=np.nan)
 
-            r = range(self.line_starts[self.world.rank], self.line_ends[self.world.rank])
+            r = range(self.line_starts[self.rank], self.line_ends[self.rank])
             self.world.barrier()
 
-            if self.world.rank == 0:
+            if self.rank == 0:
                 Bar = progressbar.ProgressBar()
                 r = Bar(r)
 
@@ -1014,9 +1040,7 @@ class Inference3D(myObject):
 
         return PointCloud3D(x, y, z, e)
 
-    def read_fit_distributions(self, fit_file, mask_by_doi=False, skip=None, components='mve', mean_limits=None):
-
-
+    def read_fit_distributions(self, fit_file, mask_by_doi=False, skip=None, components='mve', mean_limits=None, flatten=True):
         if skip is None:
             s = np.s_[:]
             skip = 1
@@ -1032,6 +1056,8 @@ class Inference3D(myObject):
             if 'e' in components:
                 exp_3D = np.asarray(f['/fits/params/data'][s, :, 3::4])
 
+        assert amp_3D.shape[0] == self.nPoints, Exception("fit file {} has {} fits, but the dataset has {} points".format(fit_file, amp_3D.shape[0], self.nPoints))
+
         z = self.zGrid.centres
         # d2D = np.repeat(d1D[None, :], mean_3D.shape[0], axis=0)
         z3D = np.repeat(np.repeat(z[None, :], mean_3D.shape[0], axis=0)[:, :, None], mean_3D.shape[2], axis=2)
@@ -1045,25 +1071,38 @@ class Inference3D(myObject):
             indices = z.searchsorted(self.doi[s])
 
             for i in range(amp_3D.shape[0]):
-                amplitudes[i, indices[i]:, :] = 0.0
+                amp_3D[i, indices[i]:, :] = 0.0
 
-        # Mask out nulls
-        i0, i1, i2 = amp_3D.nonzero()
+        if flatten:
+            # Mask out nulls
+            i0, i1, i2 = amp_3D.nonzero()
 
-        depth = z3D[i0, i1, i2].flatten()
-        amplitudes = amp_3D[i0, i1, i2].flatten()
-        means = variances = exponents = None
-        if 'm' in components:
-            means = mean_3D[i0, i1, i2].flatten()
-        if 'v' in components:
-            variances = var_3D[i0, i1, i2].flatten()
-        if 'e' in components:
-            exponents = exp_3D[i0, i1, i2].flatten()
+            depth = StatArray.StatArray(z3D[i0, i1, i2].flatten(), 'Depth')
+            amplitudes = StatArray.StatArray(amp_3D[i0, i1, i2].flatten(), 'Amplitude')
+            means = None
+            variances = None
+            exponents = None
+            if 'm' in components:
+                means = StatArray.StatArray(mean_3D[i0, i1, i2].flatten(), 'Mean')
+            if 'v' in components:
+                variances = StatArray.StatArray(var_3D[i0, i1, i2].flatten(), 'Variance')
+            if 'e' in components:
+                exponents = StatArray.StatArray(exp_3D[i0, i1, i2].flatten(), 'Exponent')
+        else:
+            depth = z3D
+            amplitudes = amp_3D
+            means = mean_3D
+            variances = var_3D
+            exponents = exp_3D
 
-        self.fits = (depth, amplitudes, means, variances, exponents)
-
-        return mean_3D
-
+        self.fits = {
+            'depth' : depth,
+            'amplitude' : amplitudes,
+            'mean' : means,
+            'variance' : variances,
+            'exponent' : exponents,
+        }
+        return self.fits
 
     def relativeError(self):
         op = np.vstack if self.nSystems > 1 else np.hstack
@@ -1136,7 +1175,7 @@ class Inference3D(myObject):
         if self.parallel_access:
             bar = range(*args, **kwargs)
 
-            if self.world.rank == 0:
+            if self.rank == 0:
                 Bar = progressbar.ProgressBar()
                 bar = Bar(bar)
             return bar
@@ -1199,7 +1238,7 @@ class Inference3D(myObject):
         from mpi4py import MPI
         from geobipy.src.base import MPI as myMPI
 
-        rank = self.world.rank
+        rank = self.rank
 
         kwargs['max_distributions'] = kwargs.get('max_distributions', 3)
         kwargs['track'] = False
@@ -1384,9 +1423,9 @@ class Inference3D(myObject):
     #     # Distribute the points amongst cores.
     #     starts, chunks = loadBalance1D_shrinkingArrays(self.nPoints, self.world.size)
 
-    #     chunk = chunks[self.world.rank]
+    #     chunk = chunks[self.rank]
     #     chunk = 10
-    #     i0 = starts[self.world.rank]
+    #     i0 = starts[self.rank]
     #     i1 = i0 + chunk
 
     #     iLine, index = self.lineIndex(index=np.arange(i0, i1))
@@ -1623,7 +1662,7 @@ class Inference3D(myObject):
 
         starts, chunks = loadBalance1D_shrinkingArrays(self.zGrid.nCells.value, self.world.size)
         ends = starts + chunks
-        tmp = self.depth_slice(depth=starts[self.world.rank], variable=variable, **kwargs)
+        tmp = self.depth_slice(depth=starts[self.rank], variable=variable, **kwargs)
         values, dum = self.interpolate(dx, dy, values=tmp, **kwargs)
         values.values, dum = cF._log(values.values, kwargs.get('log', None))
 
@@ -1634,9 +1673,9 @@ class Inference3D(myObject):
 
         self.world.barrier()
 
-        values.writeHdf(f, "{}".format(variable), index=starts[self.world.rank])
+        values.writeHdf(f, "{}".format(variable), index=starts[self.rank])
 
-        r = self.loop_over(starts[self.world.rank]+1, ends[self.world.rank])
+        r = self.loop_over(starts[self.rank]+1, ends[self.rank])
 
         for i in r:
             tmp = self.depth_slice(depth=i, variable=variable, **kwargs)
@@ -1679,7 +1718,7 @@ class Inference3D(myObject):
         starts, chunks = loadBalance1D_shrinkingArrays(self.zGrid.nCells.value, self.world.size)
         ends = starts + chunks
 
-        values, _, _ = self.interpolate_marginal(dx, dy, depth=starts[world.rank], **kwargs)
+        values, _, _ = self.interpolate_marginal(dx, dy, depth=starts[self.rank], **kwargs)
 
         f = h5py.File("marginal_probability_3d_{}_{}.h5".format(dx, dy), 'w', driver='mpio', comm=self.world)
 
@@ -1689,7 +1728,7 @@ class Inference3D(myObject):
 
         values.writeHdf(f, 'marginal_probability', index=starts[world.rank])
 
-        r = self.loop_over(starts[self.world.rank]+1, ends[self.world.rank])
+        r = self.loop_over(starts[self.rank]+1, ends[self.rank])
 
         for i in r:
             values, _, _ = self.interpolate_marginal(dx, dy, depth=i, **kwargs)
