@@ -11,7 +11,6 @@ import numpy as np
 import h5py
 from datetime import timedelta
 
-#import numpy.ma as ma
 from sklearn.mixture import GaussianMixture
 from smm import SMM
 from cached_property import cached_property
@@ -25,21 +24,16 @@ from ..classes.statistics.mixPearson import mixPearson
 from ..classes.pointcloud.PointCloud3D import PointCloud3D
 from ..classes.mesh.RectilinearMesh3D import RectilinearMesh3D
 from ..classes.model.Model import Model
-# from ..base import interpolation as interpolation
 from .Inference1D import Inference1D
 from .Inference2D import Inference2D
 
 from ..classes.data.dataset.Data import Data
 from ..classes.data.datapoint.DataPoint import DataPoint
-
-#from ..classes.statistics.Distribution import Distribution
 from ..base.HDF import hdfRead
 from ..base import plotting as cP
 from ..base import utilities as cF
 from os.path import join
 from scipy.spatial import Delaunay
-# from scipy.interpolate import CloughTocher2DInterpolator
-# from scipy.interpolate.interpnd import _ndim_coords_from_arrays
 
 from os import listdir
 import progressbar
@@ -822,6 +816,23 @@ class Inference3D(myObject):
     def doi(self):
         return np.hstack([line.doi for line in self.lines])
 
+    def compute_doi(self, *args, **kwargs):
+
+        if self.parallel_access:
+            self.close()
+            self.world.barrier()
+            r = self.loop_over(self.line_starts[self.world.rank], self.line_ends[self.worlf.rank])
+            for i in r:
+                line = self.lines[i]
+                line.open()
+                line.compute_doi(*args, **kwargs)
+
+            self.open(world=self.world)
+        else:
+            for line in self.lines:
+                line.compute_doi(*args, **kwargs)
+
+    
     @cached_property
     def dataMisfit(self):
         return self.bestData.dataMisfit()
