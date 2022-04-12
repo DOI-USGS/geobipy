@@ -341,11 +341,11 @@ def bar(values, edges, **kwargs):
     centres = edges[:-1] + 0.5 * (np.diff(edges))
 
     if (geobipy_kwargs['transpose']):
-        plt.barh(centres, values, height=width, align='center', **kwargs)
+        plt.barh(centres, values, height=width, align='center', alpha=color_kwargs['alpha'], **kwargs)
         ylabel(label)
         xlabel(cF.getNameUnits(values))
     else:
-        plt.bar(centres, values, width=width, align='center', **kwargs)
+        plt.bar(centres, values, width=width, align='center', alpha=color_kwargs['alpha'], **kwargs)
         xlabel(label)
         ylabel(cF.getNameUnits(values))
 
