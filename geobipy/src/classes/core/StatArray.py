@@ -700,7 +700,7 @@ class StatArray(np.ndarray, myObject):
         mx = np.nanmax(self, axis=axis)
 
         t = mx - mn
-        return (self - mn) / t
+        return np.divide((self - mn), t)
 
     def prepend(self, values, axis=0):
         """Prepend to a StatArray
