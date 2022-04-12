@@ -244,10 +244,9 @@ class Histogram(Model):
             return None
 
         values = self.pdf.values
-        smooth = kwargs.pop('smooth', None)
-        if smooth is not None:
-            values = self.pdf.values.smooth(smooth)
-
+        smooth = kwargs.pop('smooth', False)
+        if smooth:
+            values = self.pdf.values.smooth(0.5)
 
         return mixture().fit_to_curve(x=self.mesh.centres_absolute, y=values, **kwargs)
 
