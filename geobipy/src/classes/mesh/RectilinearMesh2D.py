@@ -106,14 +106,17 @@ class RectilinearMesh2D(Mesh):
                 axis = i
 
         if axis == -1:
-            # relativeTo = None
-            # if self.relativeTo is not None:
-            #     relativeTo = self.x.interpolate_centres_to_nodes(self.relativeTo)[slic[0]]
             out = type(self)(x=self.x[slic[0]], y=self.y[slic[1]])
             if self.x._relativeTo is not None:
-                out.x.relativeTo = self.x._relativeTo[slic[1]]
+                if self.x._relativeTo.size > 1:
+                    out.x.relativeTo = self.x._relativeTo[slic[1]]
+                else:
+                    out.x.relativeTo = self.x._relativeTo
             if self.y._relativeTo is not None:
-                out.y.relativeTo = self.y._relativeTo[slic[0]]
+                if self.y._relativeTo.size > 1:
+                    out.y.relativeTo = self.y._relativeTo[slic[0]]
+                else:
+                    out.y.relativeTo = self.y._relativeTo
             return out
 
         out = self.axis(1-axis)[slic[1-axis]]
