@@ -283,9 +283,10 @@ class Tempest_datapoint(TdemDataPoint):
             # add_error_kwargs['line'] = best.addErr
             pitch_kwargs['line'] = best.transmitter.pitch
 
-        height_kwargs['tranpose'] = height_kwargs.get('transpose', True)
+        height_kwargs['transpose'] = height_kwargs.get('transpose', True)
         self.z.plotPosteriors(ax = axes[0], **height_kwargs)
 
+        axes[1].clear()
         self.predictedData.plotPosteriors(ax = axes[1], colorbar=False, **data_kwargs)
         self.plot(ax=axes[1], **data_kwargs)
         
