@@ -465,6 +465,37 @@ class RectilinearMesh1D(Mesh):
     def cellIndices(self, *args, **kwargs):
         return self.cellIndex(*args, **kwargs)
 
+    def _compute_probability(self, distribution, pdf, log=None, log_probability=False, axis=0, **kwargs):
+        """Compute the marginal probability of a pdf with a distribution.
+
+        Parameters
+        ----------
+        distribution : geobipy.distribution
+            Distribution
+        pdf : array_like
+            PDF values usually taken from histogram.pdf.values
+        log : 'e' or float, optional
+            Take the log of the mesh centres to a base. 'e' if log = 'e', and a number e.g. log = 10.
+        log_probability : bool, optional
+            Compute log probability.
+
+        Returns
+        -------
+        out : array_like
+            Marginal probabilities
+
+        """
+        centres, _ = utilities._log(self.centres_absolute, log)
+
+        shp = (distribution.ndim, self.nCells.item)
+
+        probability = np.zeros(self.shape)
+        p = distribution.probability(centres, log_probability)
+        probability = np.dot(p, pdf)
+        probability = probability / np.expand_dims(np.sum(probability, 0), axis=0)
+    
+        return StatArray.StatArray(probability, name='marginal_probability')
+
     def delete_edge(self, i, values=None):
         """Delete an edge from the mesh
 
