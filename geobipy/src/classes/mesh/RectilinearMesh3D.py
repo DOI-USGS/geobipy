@@ -4,20 +4,14 @@ Module describing a 2D Rectilinear Mesh class with x and y axes specified
 from copy import deepcopy
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-from .Mesh import Mesh
 from ...classes.core import StatArray
 from .RectilinearMesh1D import RectilinearMesh1D
 from .RectilinearMesh2D import RectilinearMesh2D
 import numpy as np
 from scipy.stats import binned_statistic
-from ...base import plotting as cP
 from ...base import utilities
 from scipy.sparse import kron
-
-try:
-    from pyvtk import VtkData, CellData, Scalars, PolyData
-except:
-    pass
+import progressbar
 
 class RectilinearMesh3D(RectilinearMesh2D):
     """Class defining a 3D rectilinear mesh with cell centres and edges.

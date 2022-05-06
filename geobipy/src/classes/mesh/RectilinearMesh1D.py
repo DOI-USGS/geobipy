@@ -13,7 +13,6 @@ from scipy.sparse import diags
 from scipy import interpolate
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
 
 
 class RectilinearMesh1D(Mesh):

@@ -2,7 +2,6 @@
 Module describing a 2D Rectilinear Mesh class with x and y axes specified
 """
 from copy import deepcopy
-from importlib import reload
 
 from .Mesh import Mesh
 from ...classes.core import StatArray
@@ -14,14 +13,9 @@ from matplotlib.collections import LineCollection
 from scipy.stats import binned_statistic
 from ...base import plotting as cP
 from ...base import utilities
-# from ...base import geometry
 from scipy.sparse import (kron, diags)
 from scipy import interpolate
-
-try:
-    from pyvtk import VtkData, CellData, Scalars, PolyData
-except:
-    pass
+import progressbar
 
 class RectilinearMesh2D(Mesh):
     """Class defining a 2D rectilinear mesh with cell centres and edges.
