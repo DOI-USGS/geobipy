@@ -1571,9 +1571,10 @@ class StatArray(np.ndarray, myObject):
         """
         is_file = False
         if isinstance(grp, str):
-            grp = h5py.File(grp, 'r')
+            file = h5py.File(grp, 'r')
             is_file = True
-
+            grp = file
+            
         if not name is None:
             grp = grp[name]
 
@@ -1614,7 +1615,7 @@ class StatArray(np.ndarray, myObject):
             out.posteriors_from_hdf(grp, posterior_index)
 
         if is_file:
-            grp.close()
+            file.close()
 
         return out
 
