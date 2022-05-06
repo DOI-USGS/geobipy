@@ -658,31 +658,29 @@ class RectilinearMesh1D(Mesh):
             If values is given, values will be remapped to the masked mesh.
 
         """
-
         w = self.widths
         distance2 = distance
-        iBig = np.where(w >= distance2)
+        iBig = np.where(w >= distance)
         n_large = np.size(iBig)
         new_edges = np.full((self.nEdges + 2*n_large), fill_value=np.nan)
         indices = np.zeros(self.nCells.item(), dtype=np.int32)
 
-        x = np.asarray([-distance, +distance])
         k = 0
 
         for i in range(self.nCells.item()):
             new_edges[k] = self.edges[i]
             k += 1
             modified = False
-            if ((self.centres[i] - self.edges[i]) > distance):
-                new_edges[k] = self.centres[i] - distance
+            if (np.abs(self.centres[i] - self.edges[i]) > distance2):
+                new_edges[k] = self.centres[i] - distance2
                 indices[i] = k-1
                 modified = True
                 k += 1
             else:
                 indices[i] = k-1
 
-            if ((self.edges[i+1] - self.centres[i]) > distance):
-                new_edges[k] = self.centres[i] + distance
+            if (np.abs(self.edges[i+1] - self.centres[i]) > distance2):
+                new_edges[k] = self.centres[i] + distance2
                 indices[i] = k-1
                 mdified = True
                 k += 1
@@ -690,11 +688,10 @@ class RectilinearMesh1D(Mesh):
                 indices[i] = k-1
 
         new_edges[k] = self.edges[-1]
-
         new_edges = new_edges[~np.isnan(new_edges)]
         out = RectilinearMesh1D(edges=new_edges)
 
-        if not values is None:
+        if values is not None:
             out_values = np.full(out.nCells.item(), fill_value=np.nan)
             out_values[indices] = values
             return out, indices, out_values
