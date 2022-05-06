@@ -5,7 +5,7 @@ from .Mesh import Mesh
 from ...classes.core import StatArray
 from copy import deepcopy
 import numpy as np
-from ...base import utilities as cF
+from ...base import utilities
 from ...base import plotting as cp
 from ..statistics.Distribution import Distribution
 from ..statistics import Histogram
@@ -158,16 +158,16 @@ class RectilinearMesh1D(Mesh):
     @property
     def centres_absolute(self):
         if self.relativeTo.size == 1:
-            return cF._power(self.centres + self.relativeTo, self.log)
+            return utilities._power(self.centres + self.relativeTo, self.log)
         else:
-            return cF._power(np.repeat(self.relativeTo[:, None], self.centres.size, 1) + self.centres, self.log)
-            # return cF._power(np.repeat(self.centres[None, :], self.relativeTo.size, 0) + self.relativeTo, self.log)
+            return utilities._power(np.repeat(self.relativeTo[:, None], self.centres.size, 1) + self.centres, self.log)
+            # return utilities._power(np.repeat(self.centres[None, :], self.relativeTo.size, 0) + self.relativeTo, self.log)
 
     @centres.setter
     def centres(self, values):
 
         values = StatArray.StatArray(values)
-        values, _ = cF._log(values, log=self.log)
+        values, _ = utilities._log(values, log=self.log)
         values -= self.relativeTo
 
         self._centres = values
@@ -193,16 +193,16 @@ class RectilinearMesh1D(Mesh):
     @property
     def edges_absolute(self):
         if self.relativeTo.size == 1:
-            return cF._power(self.edges + self.relativeTo, self.log)
+            return utilities._power(self.edges + self.relativeTo, self.log)
         else:
             re = self.interpolate_centres_to_nodes(self.relativeTo)
-            return cF._power(np.repeat(self.edges[None, :], self.relativeTo.size+1, 0) + re, self.log)
+            return utilities._power(np.repeat(self.edges[None, :], self.relativeTo.size+1, 0) + re, self.log)
 
     @edges.setter
     def edges(self, values):
         values = StatArray.StatArray(values)
 
-        values, _ = cF._log(values, log=self.log)
+        values, _ = utilities._log(values, log=self.log)
         values -= self.relativeTo
 
         self._edges = values
@@ -326,7 +326,7 @@ class RectilinearMesh1D(Mesh):
             return
 
         if np.all(value > 0.0):
-            value, _ = cF._log(value, self.log)
+            value, _ = utilities._log(value, self.log)
         self._relativeTo = StatArray.StatArray(value)
 
     @property
@@ -440,7 +440,7 @@ class RectilinearMesh1D(Mesh):
             The cell indices
 
         """
-        values, dum = cF._log(np.atleast_1d(values).flatten(), self.log)
+        values, dum = utilities._log(np.atleast_1d(values).flatten(), self.log)
         values = values - self.relativeTo
 
         # Get the bin indices for all values
@@ -554,7 +554,7 @@ class RectilinearMesh1D(Mesh):
             Are the values inside.
 
         """
-        values, _ = cF._log(values, self.log)
+        values, _ = utilities._log(values, self.log)
         return (values >= self._edges[0]) & (values < self._edges[-1])
 
     def insert_edge(self, value, values=None):
@@ -597,11 +597,11 @@ class RectilinearMesh1D(Mesh):
         return out
 
     def is_left(self, value):
-        value, _ = cF._log(value, self.log)
+        value, _ = utilities._log(value, self.log)
         return value < self.edges[0]
 
     def is_right(self, value):
-        value, _ = cF._log(value, self.log)
+        value, _ = utilities._log(value, self.log)
         return value > self.edges[-1]
 
     def mask_cells(self, distance, values=None):
