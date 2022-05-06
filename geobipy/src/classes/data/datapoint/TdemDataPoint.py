@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 #from ....base import Error as Err
+from ....base.HDF.hdfRead import read_item
 from ....base import fileIO as fIO
 from ....base import utilities as cf
 from ....base import plotting as cp
@@ -618,7 +619,7 @@ class TdemDataPoint(EmDataPoint):
         self.predicted_secondary_field.writeHdf(grp, 'predicted_secondary_field', index=index)
 
     @classmethod
-    def fromHdf(cls, grp, index=None, **kwargs):
+    def fromHdf(cls, grp, **kwargs):
         """ Reads the object from a HDF group """
 
         nSystems = np.int32(np.asarray(grp['nSystems']))
@@ -634,21 +635,23 @@ class TdemDataPoint(EmDataPoint):
                     f.write(txt)
                 systems[i] = 'System{}'.format(i)
 
-        self = super(TdemDataPoint, cls).fromHdf(grp, index, system=systems)
+        self = super(TdemDataPoint, cls).fromHdf(grp, system=systems, **kwargs)
 
-        self.transmitter = (eval(cf.safeEval(grp['T'].attrs.get('repr')))).fromHdf(grp['T'], index=index)
-        self.receiver = (eval(cf.safeEval(grp['R'].attrs.get('repr')))).fromHdf(grp['R'], index=index)
+        self.transmitter = read_item(grp['T'], **kwargs)
+        self.receiver = read_item(grp['R'], **kwargs)
+        # self.transmitter = (eval(cf.safeEval(grp['T'].attrs.get('repr')))).fromHdf(grp['T'], **kwargs)
+        # self.receiver = (eval(cf.safeEval(grp['R'].attrs.get('repr')))).fromHdf(grp['R'], **kwargs)
 
         if 'loop_offset' in grp:
-            loopOffset = StatArray.StatArray.fromHdf(grp['loop_offset'], index=index)
+            loopOffset = StatArray.StatArray.fromHdf(grp['loop_offset'], **kwargs)
             self.receiver.x = self.transmitter.x + loopOffset[0]
             self.receiver.y = self.transmitter.y + loopOffset[1]
             self.receiver.z = self.transmitter.z + loopOffset[2]
 
-        self._primary_field = StatArray.StatArray.fromHdf(grp['primary_field'], index=index)
-        self._secondary_field = StatArray.StatArray.fromHdf(grp['secondary_field'], index=index)
-        self._predicted_primary_field = StatArray.StatArray.fromHdf(grp['predicted_primary_field'], index=index)
-        self._predicted_secondary_field = StatArray.StatArray.fromHdf(grp['predicted_secondary_field'], index=index)
+        self._primary_field = StatArray.StatArray.fromHdf(grp['primary_field'], **kwargs)
+        self._secondary_field = StatArray.StatArray.fromHdf(grp['secondary_field'], **kwargs)
+        self._predicted_primary_field = StatArray.StatArray.fromHdf(grp['predicted_primary_field'], **kwargs)
+        self._predicted_secondary_field = StatArray.StatArray.fromHdf(grp['predicted_secondary_field'], **kwargs)
 
         return self
 

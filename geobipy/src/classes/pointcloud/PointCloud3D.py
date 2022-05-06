@@ -58,16 +58,12 @@ class PointCloud3D(myObject):
 
         # # Number of points in the cloud
         self._nPoints = 0
-
         # StatArray of the x co-ordinates
         self.x = x
-
         # StatArray of the y co-ordinates
         self.y = y
-
         # StatArray of the z co-ordinates
         self.z = z
-
         # StatArray of elevation
         self.elevation = elevation
 
@@ -93,10 +89,16 @@ class PointCloud3D(myObject):
 
         """
         i = np.unique(i)
-        return PointCloud3D(self.x[i],
-                            self.y[i],
-                            self.z[i],
-                            self.elevation[i])
+
+        if np.size(i) == 1:
+            cls = self.single
+        else:
+            cls = type(self)
+
+        return cls(self.x[i],
+                   self.y[i],
+                   self.z[i],
+                   self.elevation[i])
 
     def _as_dict(self):
         return {self.x.name.replace(' ', '_'): self.x,
@@ -105,6 +107,9 @@ class PointCloud3D(myObject):
                 self.elevation.name.replace(' ', '_'): self.elevation}, \
                 [self.x.name.replace(' ', '_'), self.y.name.replace(' ', '_'), self.z.name.replace(' ', '_'), self.elevation.name.replace(' ', '_')]
 
+    @property
+    def single(self):
+        return Point
 
     @property
     def x(self):
@@ -122,7 +127,7 @@ class PointCloud3D(myObject):
                 self._x = deepcopy(values)
                 return
 
-        self._x = StatArray.StatArray(values, "Easting", "m")
+        self._x = StatArray.StatArray(values, "Easting", "m", dtype=np.float64)
 
     @property
     def y(self):
@@ -140,7 +145,7 @@ class PointCloud3D(myObject):
                 self._y = deepcopy(values)
                 return
 
-        self._y = StatArray.StatArray(values, "Northing", "m")
+        self._y = StatArray.StatArray(values, "Northing", "m", dtype=np.float64)
 
     @property
     def z(self):
@@ -158,7 +163,7 @@ class PointCloud3D(myObject):
                 self._z = deepcopy(values)
                 return
 
-        self._z = StatArray.StatArray(values, "Height", "m")
+        self._z = StatArray.StatArray(values, "Height", "m", dtype=np.float64)
 
     @property
     def elevation(self):
@@ -176,7 +181,7 @@ class PointCloud3D(myObject):
                 self._elevation = deepcopy(values)
                 return
 
-        self._elevation = StatArray.StatArray(values, "Elevation", "m")
+        self._elevation = StatArray.StatArray(values, "Elevation", "m", dtype=np.float64)
 
     @property
     def nPoints(self):
@@ -389,8 +394,7 @@ class PointCloud3D(myObject):
         """
         assert np.size(i) == 1, ValueError("i must be a single integer")
         assert 0 <= i <= self.nPoints, ValueError("Must have 0 <= i <= {}".format(self.nPoints))
-        return Point(self.x[i], self.y[i], self.z[i])
-
+        return Point(self.x[i], self.y[i], self.z[i], self.elevation[i])
 
     def getXAxis(self, xAxis='x'):
         """Obtain the xAxis against which to plot values.
@@ -914,7 +918,6 @@ class PointCloud3D(myObject):
 #        """ Interpolate values to a grid using radial basis functions """
 #        # Get the bounding box
 #        self.getBounds()
-#        print(self.bounds)
 #        # Get the discretization
 #        if (dx is None):
 #            tmp = np.min((self.bounds[1]-self.bounds[0], self.bounds[3]-self.bounds[2]))
@@ -1022,7 +1025,7 @@ class PointCloud3D(myObject):
         """ Reads the object from a HDF group """
 
         if kwargs.get('index') is not None:
-            return Point.fromHdf(grp, **kwargs)
+            return cls.single.fromHdf(grp, **kwargs)
 
         x = StatArray.StatArray.fromHdf(grp['x'])
         y = StatArray.StatArray.fromHdf(grp['y'])
@@ -1052,9 +1055,21 @@ class PointCloud3D(myObject):
         y = self.y.Bcast(world, root=root)
         z = self.z.Bcast(world, root=root)
         e = self.elevation.Bcast(world, root=root)
-        # N = MPI.Bcast(self._nPoints, world, root=root)
         return type(self)(x=x, y=y, z=z, elevation=e)
 
+    def Isend(self, dest, world):
+        self.x.Isend(dest, world)
+        self.y.Isend(dest, world)
+        self.z.Isend(dest, world)
+        self.elevation.Isend(dest, world)
+
+    @classmethod
+    def Irecv(cls, source, world, **kwargs):
+        x = StatArray.StatArray.Irecv(source, world)
+        y = StatArray.StatArray.Irecv(source, world)
+        z = StatArray.StatArray.Irecv(source, world)
+        e = StatArray.StatArray.Irecv(source, world)
+        return cls(x=x, y=y, z=z, elevation=e, **kwargs)
 
     def Scatterv(self, starts, chunks, world, root=0):
         """ScatterV a PointCloud3D using MPI

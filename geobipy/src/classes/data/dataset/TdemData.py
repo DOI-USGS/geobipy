@@ -8,12 +8,15 @@
 """
 from copy import deepcopy
 from pathlib import Path
-from pandas import DataFrame, read_csv
+from pandas import read_csv
+
+from ...system.CircularLoop import CircularLoop
+from ...system.CircularLoops import CircularLoops
 from ...pointcloud.PointCloud3D import PointCloud3D
 from .Data import Data
 from ..datapoint.TdemDataPoint import TdemDataPoint
 from ....classes.core import StatArray
-from ...system.CircularLoop import CircularLoop
+
 from ...system.TdemSystem import TdemSystem
 
 import numpy as np
@@ -53,6 +56,8 @@ class TdemData(Data):
         For information on file format
 
     """
+
+    single = TdemDataPoint
 
     def __init__(self, system=None, **kwargs):
         """ Initialize the TDEM data """
@@ -226,19 +231,15 @@ class TdemData(Data):
 
     @receiver.setter
     def receiver(self, values):
-
         if (values is None):
-            self._receiver = StatArray.StatArray(self.nPoints, 'Receiver loops', dtype=CircularLoop)
+            self._receiver = CircularLoops()
         else:
+            assert isinstance(values, CircularLoops), ValueError('receiver must have type geobipy.CircularLoops')
             if self.nPoints == 0:
-                self.nPoints = np.size(values)
-            assert np.size(values) == self.nPoints, ValueError("receiver must have shape {}".format(self.nPoints))
-            # if (isinstance(values, StatArray.StatArray)):
-            #     self._receiver = values.deepcopy()
-            # else:
-            self._receiver = StatArray.StatArray(self.nPoints, 'Receiver loops', dtype=CircularLoop)
-            for i in range(self.nPoints):
-                self._receiver[i] = values[i]
+                self.nPoints = values.nPoints
+            assert values.nPoints == self.nPoints, ValueError("receiver must have size {}".format(self.nPoints))
+            
+            self._receiver = values
 
     @property
     def secondary_field(self):
@@ -310,17 +311,14 @@ class TdemData(Data):
     def transmitter(self, values):
 
         if (values is None):
-            self._transmitter = StatArray.StatArray(self.nPoints, 'Transmitter loops', dtype=CircularLoop)
+            self._transmitter = CircularLoops()
         else:
+            assert isinstance(values, CircularLoops), ValueError('transmitter must have type geobipy.CircularLoops')
             if self.nPoints == 0:
-                self.nPoints = np.size(values)
-            assert np.size(values) == self.nPoints, ValueError("transmitter must have shape {}".format(self.nPoints))
-            # if (isinstance(values, StatArray.StatArray)):
-            #     self._transmitter = values.deepcopy()
-            # else:
-            self._transmitter = StatArray.StatArray(self.nPoints, 'Transmitter loops', dtype=CircularLoop)
-            for i in range(self.nPoints):
-                self._transmitter[i] = values[i]
+                self.nPoints = values.nPoints
+            assert values.nPoints == self.nPoints, ValueError("transmitter must have size {}".format(self.nPoints))
+            
+            self._transmitter = values
 
     def _as_dict(self):
         out, order = super()._as_dict()
@@ -469,22 +467,18 @@ class TdemData(Data):
         self.z = df[iC[4]].values
         self.elevation = df[iC[5]].values
 
-        self.transmitter = None
-        for i in range(self.nPoints):
-            self.transmitter[i] = CircularLoop(x=self.x[i], y=self.y[i], z=self.z[i],
-                                               pitch=df[iT[0]].values[i], roll=df[iT[1]].values[i], yaw=df[iT[2]].values[i],
-                                               radius=self.system[0].loopRadius())
+        self.transmitter = CircularLoops(x=self.x, y=self.y, z=self.z,
+                            pitch=df[iT[0]].values, roll=df[iT[1]].values, yaw=df[iT[2]].values,
+                            radius=np.full(self.nPoints, fill_value=self.system[0].loopRadius()))
 
         loopOffset = df[iOffset].values
 
         # Assign the orientations of the acquisistion loops
-        self.receiver = None
-        for i in range(self.nPoints):
-            self.receiver[i] = CircularLoop(x = self.transmitter[i].x + loopOffset[i, 0],
-                                            y = self.transmitter[i].y + loopOffset[i, 1],
-                                            z = self.transmitter[i].z + loopOffset[i, 2],
-                                            pitch=df[iR[0]].values[i], roll=df[iR[1]].values[i], yaw=df[iR[2]].values[i],
-                                            radius=self.system[0].loopRadius())
+        self.receiver = CircularLoops(x = self.transmitter.x + loopOffset[:, 0],
+                                     y = self.transmitter.y + loopOffset[:, 1],
+                                     z = self.transmitter.z + loopOffset[:, 2],
+                                     pitch=df[iR[0]].values, roll=df[iR[1]].values, yaw=df[iR[2]].values,
+                                     radius=np.full(self.nPoints, fill_value=self.system[0].loopRadius()))
 
         # Get the data values
         # iSys = self._systemIndices(0)
@@ -723,7 +717,7 @@ class TdemData(Data):
                          pitch=rloop[0], roll=rloop[1], yaw=rloop[2],
                          radius=self.system[0].loopRadius())
 
-        return self.datapoint_type(x=data[2], y=data[3], z=data[4], elevation=data[5],
+        return self.single(x=data[2], y=data[3], z=data[4], elevation=data[5],
                         secondary_field=secondary_field, std=S,
                         primary_field=primary_field,
                         system=self.system,
@@ -775,10 +769,6 @@ class TdemData(Data):
                     '  4Std:    {} \n'.format(np.nanmin(d), np.nanmax(d), np.nanmedian(d), np.nanmean(d), s, 4.0*s)
             print(h)
 
-    @property
-    def datapoint_type(self):
-        return TdemDataPoint
-
     def datapoint(self, index=None, fiducial=None):
         """Get the ith data point from the data set
 
@@ -810,7 +800,7 @@ class TdemData(Data):
 
         i = index
 
-        return self.datapoint_type(self.x[i], self.y[i], self.z[i], self.elevation[i],
+        return self.single(self.x[i], self.y[i], self.z[i], self.elevation[i],
                              self.primary_field[i, :], self.secondary_field[i, :],
                              relative_error=self.relative_error[i, :], additive_error=self.additive_error[i, :], std = self.std[i, :],
                              predicted_primary_field=None, predicted_secondary_field=None,
@@ -998,8 +988,8 @@ class TdemData(Data):
             txt = np.string_(Path(self.system[i].filename).read_text())
             grp.create_dataset('System{}'.format(i), data=txt)
 
-        self.transmitter[0].createHdf(grp, 'T', withPosterior=withPosterior, add_axis=self.nPoints, fillvalue=fillvalue)
-        self.receiver[0].createHdf(grp, 'R', withPosterior=withPosterior, add_axis=self.nPoints, fillvalue=fillvalue)
+        self.transmitter.createHdf(grp, 'T', withPosterior=withPosterior, fillvalue=fillvalue)
+        self.receiver.createHdf(grp, 'R', withPosterior=withPosterior, fillvalue=fillvalue)
 
         self.primary_field.createHdf(grp, 'primary_field', withPosterior=withPosterior, fillvalue=fillvalue)
         self.secondary_field.createHdf(grp, 'secondary_field', withPosterior=withPosterior, fillvalue=fillvalue)
@@ -1018,10 +1008,8 @@ class TdemData(Data):
 
         grp = parent[name]
 
-        for i in range(self.nPoints):
-            self.transmitter[i].writeHdf(grp, 'T', index=i)
-        for i in range(self.nPoints):
-            self.receiver[i].writeHdf(grp, 'T', index=i)
+        self.transmitter.writeHdf(grp, 'T', withPosterior=withPosterior)
+        self.receiver.writeHdf(grp, 'R', withPosterior=withPosterior)
 
         self.primary_field.writeHdf(grp, 'primary_field', withPosterior=withPosterior)
         self.secondary_field.writeHdf(grp, 'secondary_field', withPosterior=withPosterior)
@@ -1033,7 +1021,7 @@ class TdemData(Data):
         """ Reads the object from a HDF group """
 
         if kwargs.get('index') is not None:
-            return TdemDataPoint.fromHdf(grp, **kwargs)
+            return cls.single.fromHdf(grp, **kwargs)
 
         nSystems = np.int32(np.asarray(grp.get('nSystems')))
         
@@ -1059,13 +1047,8 @@ class TdemData(Data):
         self.predicted_primary_field = StatArray.StatArray.fromHdf(grp['predicted_primary_field'])
         self.predicted_secondary_field = StatArray.StatArray.fromHdf(grp['predicted_secondary_field'])
 
-        self._transmitter = StatArray.StatArray(self.nPoints, 'Transmitter loops', dtype=CircularLoop)
-        for i in range(self.nPoints):
-            self._transmitter[i] = CircularLoop.fromHdf(grp['T'], index=i)
-
-        self._receiver = StatArray.StatArray(self.nPoints, 'Receiver loops', dtype=CircularLoop)
-        for i in range(self.nPoints):
-            self._receiver[i] = CircularLoop.fromHdf(grp['R'], index=i)
+        self.transmitter = CircularLoops.fromHdf(grp['T'])
+        self.receiver = CircularLoops.fromHdf(grp['R'])
 
         return self
 

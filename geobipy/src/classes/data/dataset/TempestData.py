@@ -11,7 +11,7 @@ from ...pointcloud.PointCloud3D import PointCloud3D
 from .TdemData import TdemData
 from ..datapoint.Tempest_datapoint import Tempest_datapoint
 from ....classes.core import StatArray
-from ...system.CircularLoop import CircularLoop
+from ...system.CircularLoops import CircularLoops
 from ...system.TdemSystem import TdemSystem
 
 import numpy as np
@@ -53,6 +53,8 @@ class TempestData(TdemData):
 
     """
 
+    single = Tempest_datapoint
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -76,10 +78,6 @@ class TempestData(TdemData):
                 shp = (self.nPoints, self.nChannels)
             assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("additive_error must have shape {}".format(shp))
             self._additive_error = StatArray.StatArray(values)
-
-    @property
-    def datapoint_type(self):
-        return Tempest_datapoint
 
     @property
     def file(self):
@@ -242,22 +240,20 @@ class TempestData(TdemData):
         self.z = df[iC[4]].values
         self.elevation = df[iC[5]].values
 
-        self.transmitter = None
-        for i in range(self.nPoints):
-            self.transmitter[i] = CircularLoop(x=self.x[i], y=self.y[i], z=self.z[i],
-                                               pitch=df[iT[0]].values[i], roll=df[iT[1]].values[i], yaw=df[iT[2]].values[i],
-                                               radius=self.system[0].loopRadius())
+        self.transmitter = CircularLoops(x=self.x, 
+                                         y=self.y, 
+                                         z=self.z,
+                                         pitch=df[iT[0]].values, roll=df[iT[1]].values, yaw=df[iT[2]].values,
+                                         radius=np.full(self.nPoints, fill_value=self.system[0].loopRadius()))
 
         loopOffset = df[iOffset].values
 
         # Assign the orientations of the acquisistion loops
-        self.receiver = None
-        for i in range(self.nPoints):
-            self.receiver[i] = CircularLoop(x = self.transmitter[i].x + loopOffset[i, 0],
-                                            y = self.transmitter[i].y + loopOffset[i, 1],
-                                            z = self.transmitter[i].z + loopOffset[i, 2],
-                                            pitch=df[iR[0]].values[i], roll=df[iR[1]].values[i], yaw=df[iR[2]].values[i],
-                                            radius=self.system[0].loopRadius())
+        self.receiver = CircularLoops(x = self.transmitter.x + loopOffset[:, 0],
+                                      y = self.transmitter.y + loopOffset[:, 1],
+                                      z = self.transmitter.z + loopOffset[:, 2],
+                                      pitch=df[iR[0]].values, roll=df[iR[1]].values, yaw=df[iR[2]].values,
+                                      radius=np.full(self.nPoints, fill_value=self.system[0].loopRadius()))
 
 
         self.primary_field[:, :] = df[iPrimary].values
@@ -379,8 +375,8 @@ class TempestData(TdemData):
 
             self = cls(lineNumber=np.asarray(gdf['Line'][indices]),
                         fiducial=np.asarray(gdf['Fiducial'][indices]),
-                        x=np.asarray(gdf['Easting'][indices]),
-                        y=np.asarray(gdf['Northing'][indices]),
+                        x=np.asarray(gdf['Easting_Albers'][indices]),
+                        y=np.asarray(gdf['Northing_Albers'][indices]),
                         z=np.asarray(gdf['Tx_Height'][indices]),
                         elevation=np.asarray(gdf['DTM'][indices]),
                         system=systemFilename)
@@ -451,7 +447,7 @@ class TempestData(TdemData):
         secondary_field = np.hstack([gdf['EMX_NonHPRG'][:, record], gdf['EMZ_NonHPRG'][:, record]])
         std = 0.1 * secondary_field
 
-        transmitter_loop = CircularLoop(x=x, y=y, z=z,
+        transmitter_loop = CircularLoops(x=x, y=y, z=z,
                                         pitch=np.float64(gdf['Tx_Pitch'][record]),
                                         roll=np.float64(gdf['Tx_Roll'][record]),
                                         yaw=np.float64(gdf['Tx_Yaw'][record]),
@@ -459,15 +455,15 @@ class TempestData(TdemData):
 
         loopOffset = np.vstack([np.asarray(gdf['HSep_GPS'][record]), np.asarray(gdf['TSep_GPS'][record]), np.asarray(gdf['VSep_GPS'][record])])
 
-        receiver_loop = CircularLoop(x=transmitter_loop.x + loopOffset[0],
-                                     y=transmitter_loop.y + loopOffset[1],
-                                     z=transmitter_loop.z + loopOffset[2],
-                                     pitch=np.float64(gdf['Rx_Pitch'][record]),
-                                     roll=np.float64(gdf['Rx_Roll'][record]),
-                                     yaw=np.float64(gdf['Rx_Yaw'][record]),
-                                     radius=self.system[0].loopRadius())
+        receiver_loop = CircularLoops(x=transmitter_loop.x + loopOffset[0],
+                                      y=transmitter_loop.y + loopOffset[1],
+                                      z=transmitter_loop.z + loopOffset[2],
+                                      pitch=np.float64(gdf['Rx_Pitch'][record]),
+                                      roll=np.float64(gdf['Rx_Roll'][record]),
+                                      yaw=np.float64(gdf['Rx_Yaw'][record]),
+                                      radius=self.system[0].loopRadius())
 
-        out = self.datapoint_type(
+        out = self.single(
                 lineNumber = np.float64(gdf['Line'][record]),
                 fiducial = np.float64(gdf['Fiducial'][record]),
                 x = x,
@@ -515,7 +511,7 @@ class TempestData(TdemData):
         """ Reads the object from a HDF group """
 
         if kwargs.get('index') is not None:
-            return Tempest_datapoint.fromHdf(grp, **kwargs)
+            return cls.single.fromHdf(grp, **kwargs)
 
         return super(TempestData, cls).fromHdf(grp, **kwargs)
 
