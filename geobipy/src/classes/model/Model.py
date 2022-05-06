@@ -167,7 +167,6 @@ class Model(myObject):
         return self.mesh.axis(*args, **kwargs)
 
     def bar(self, **kwargs):
-    
         return self.mesh.bar(self.values, **kwargs)
 
     def cellIndex(self, *args, **kwargs):
@@ -441,7 +440,7 @@ class Model(myObject):
         return axes
 
     def pcolor(self, **kwargs):
-        """Plot the Histogram2D as an image
+        """Plot like an image
 
         Other Parameters
         ----------------
