@@ -885,6 +885,13 @@ class TdemDataPoint(EmDataPoint):
     #         mesh = RectilinearMesh2D(x_edges=xbins, x_log=10, y_edges=ybins, y_log=10)
     #         self.predictedData.posterior = Histogram(mesh=mesh)
 
+    @property
+    def summary(self):
+        msg = super().summary
+        msg += "transmitter:\n{}".format("|   "+(self.transmitter.summary.replace("\n", "\n|   "))[:-4])
+        msg += "receiver:\n{}".format("|   "+(self.receiver.summary.replace("\n", "\n|   "))[:-4])
+        return msg
+
     def update_posteriors(self):
         super().update_posteriors()
 
@@ -952,8 +959,6 @@ class TdemDataPoint(EmDataPoint):
     #     prob = EM1D(mesh1D, sigmaMap = expmap, chi = mod.chim)
 
     #     if (self.dualMoment()):
-
-    #         print(self.system[0].loopRadius(), self.system[0].peakCurrent())
 
     #         simPEG_survey = EM1DSurveyTD(
     #             rx_location=np.array([0., 0., 0.]),
