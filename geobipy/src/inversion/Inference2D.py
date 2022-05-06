@@ -53,6 +53,7 @@ class Inference2D(myObject):
         self.range = None
         self.system_file_path = system_file_path
         self._zPosterior = None
+        self._mesh = None
 
         self.fName = hdf5_file_path
         self.directory = split(hdf5_file_path)[0]
@@ -251,7 +252,7 @@ class Inference2D(myObject):
         if 'doi' in self.hdfFile.keys():
             return StatArray.StatArray.fromHdf(self.hdfFile['doi'])
         else:
-            return self.compute_DOI()
+            return self.compute_doi()
 
     def compute_doi(self, percent=67.0, window=1, track=True):
         """ Get the DOI of the line depending on a percentage credible interval cutoff for each data point """
@@ -813,22 +814,31 @@ class Inference2D(myObject):
 
         return self._mean_parameter
 
-
     @property
     def longest_coordinate(self):
+        if 0.8 < self.data.x.range / self.data.y.range < 1.2:
+            return np.sqrt(self.data.x**2.0 + self.data.y**2.0)
         return self.data.x if self.data.x.range > self.data.y.range else self.data.y
         
-    @cached_property
+    @property
     def mesh(self):
         """Get the 2D topo fitting rectilinear mesh. """
-        out = hdfRead.read_item(self.hdfFile['/model/mesh/y/edges/posterior/mesh'], skip_posterior=True)
+        if self._mesh is None:
+            out = hdfRead.read_item(self.hdfFile['/model/mesh/y/edges/posterior/mesh'], skip_posterior=True)
 
-        # Change positive depth to negative height
-        out.y.edges = StatArray.StatArray(-out.y.edges, name='Height', units=self.y.units)
-        out.y.relativeTo = self.elevation
+            # Change positive depth to negative height
+            out.y.edges = StatArray.StatArray(-out.y.edges, name='Height', units=self.y.units)
+            out.y.relativeTo = self.elevation
 
-        out.x.centres = self.longest_coordinate
-        return out
+            out.x.centres = self.longest_coordinate
+            self._mesh = out
+
+        return self._mesh
+
+    def change_mesh_axis(self, axis):
+        if self._mesh is None:
+            self.mesh
+        self._mesh.x.centres = self.x_axis(axis)
 
     @property
     def minParameter(self):
@@ -1001,9 +1011,13 @@ class Inference2D(myObject):
             ax = StatArray.StatArray(np.arange(self.nPoints, dtype=np.float64), 'Index')
         elif axis == 'fiducial':
             ax = self.fiducial
-        else:
-            ax = self.mesh.axis(axis)
-        return ax.centres if centres else ax.edges
+        elif axis == 'distance':
+            ax = StatArray.StatArray(np.sqrt((self.data.x - self.data.x[0])**2.0 + (self.data.y - self.data.y[0])**2.0), 'Distance', 'm')
+        elif axis == 'x':
+            ax = self.x
+        elif axis == 'y':
+            ax = self.y            
+        return ax
 
     @cached_property
     def y(self):
@@ -1494,12 +1508,15 @@ class Inference2D(myObject):
 
     def plot_cross_section(self, values, **kwargs):
         """ Plot a cross-section of the parameters """
+        mesh = self.mesh
+        if 'x_axis' in kwargs:
+            mesh = self.change_mesh_axis(kwargs.pop('x_axis'))
 
         if kwargs.pop('useVariance', False):
             opacity = deepcopy(self.opacity())
 
             if kwargs.pop('mask_below_doi', False):
-                indices = self.mesh.y.cellIndex(self.doi)
+                indices = mesh.y.cellIndex(self.doi)
                 opacity[:, :] = 1.0
 
                 for i in range(self.nPoints):
@@ -1507,7 +1524,7 @@ class Inference2D(myObject):
 
             kwargs['alpha'] = opacity
 
-        ax, pm, cb = self.mesh.pcolor(values = values, **kwargs)
+        ax, pm, cb = mesh.pcolor(values = values, **kwargs)
         return ax, pm, cb
 
     def marginal_probability(self, slic=None):

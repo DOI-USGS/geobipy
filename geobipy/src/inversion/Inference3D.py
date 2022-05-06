@@ -3,8 +3,6 @@ Class to handle the HDF5 result files for a full data set.
  """
 import time
 from datetime import timedelta
-from typing import Type
-from ..base import Error as Err
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import numpy as np
@@ -41,7 +39,7 @@ import progressbar
 class Inference3D(myObject):
     """ Class to define results from Inv_MCMC for a full data set """
 
-    def __init__(self, directory, system_file_path, files=None, world=None, mode='r+'):
+    def __init__(self, directory, system_file_path, files=None, mpi_enabled=False, mode='r+', world=None):
         """ Initialize the 3D inference
         directory = directory containing folders for each line of data results
         """
@@ -52,6 +50,13 @@ class Inference3D(myObject):
         self.bounds = None
 
         self._get_h5Files(directory, files)
+
+        if mpi_enabled:
+            if world is None:
+                from mpi4py import MPI
+                world = MPI.COMM_WORLD
+            else:
+                world = world
 
         self._set_inference2d(system_file_path, mode, world)
 
@@ -242,7 +247,7 @@ class Inference3D(myObject):
 
         # No need to create and close the files like in parallel, so create and keep them open
         for line in self.lineNumbers:
-            line_fiducials = fiducials[np.where(line_numbers == line)[0]]
+            line_sorted_fiducials = fiducials[np.where(line_numbers == line)[0]]
 
             kwargs = {}
             if self.parallel_access:
@@ -250,9 +255,9 @@ class Inference3D(myObject):
                 kwargs['comm'] = self.world
 
             with h5py.File(join(self.directory, '{}.h5'.format(line)), 'w', **kwargs) as f:
-                Inference2D().createHdf(f, line_fiducials, inference1d)
+                Inference2D().createHdf(f, line_sorted_fiducials, inference1d)
 
-            self.print('Created hdf5 file for line {} with {} data points'.format(line, line_fiducials.size))
+            self.print('Created hdf5 file for line {} with {} data points'.format(line, line_sorted_fiducials.size))
 
     def _createHDF5_datapoint(self, datapoint, userParameters):
 
@@ -356,14 +361,14 @@ class Inference3D(myObject):
             line.uncache('additiveError')
         return out
 
-    def infer(self, dataset, seed=None, index=None, **options):
+    def infer(self, dataset, seed=None, index=None, fiducial=None, line_number=None, **options):
 
         if self.parallel_access:
             self.infer_mpi(dataset, **options)
         else:
-            self.infer_serial(dataset, seed=seed, index=index, **options)
+            self.infer_serial(dataset, seed=seed, index=index, fiducial=fiducial, line_number=line_number, **options)
 
-    def infer_serial(self, dataset, seed=None, index=None, **options):
+    def infer_serial(self, dataset, seed=None, index=None, fiducial=None, line_number=None, **options):
 
         t0 = time.time()
         dataset = dataset._initialize_sequential_reading(options['data_filename'], options['system_filename'])
@@ -409,7 +414,7 @@ class Inference3D(myObject):
         if (world.rank == 0):
             self._infer_mpi_master_task(dataset, **options)
         else:
-            self._infer_mpi_worker_task(dataset.datapoint_type, prng, **options)
+            self._infer_mpi_worker_task(dataset.single, prng, **options)
 
     def _infer_mpi_master_task(self, dataset, **options):
         """ Define a Send Recv Send procedure on the master """
@@ -741,7 +746,7 @@ class Inference3D(myObject):
 
             hdfFile = h5py.File(filename, 'w', driver='mpio', comm=self.world)
 
-            StatArray.StatArray().createHdf(hdfFile, 'marginal_probabilities', shape=(self.nPoints, distribution.ndim, self.lines[0].mesh.y.nCells), fillvalue=np.nan)
+            StatArray.StatArray().createHdf(hdfFile, 'probabilities', shape=(self.nPoints, distribution.ndim, self.lines[0].mesh.y.nCells), fillvalue=np.nan)
 
             r = range(self.line_starts[self.rank], self.line_ends[self.rank])
             self.world.barrier()
@@ -753,7 +758,7 @@ class Inference3D(myObject):
             for i in r:
                 p_local = self.lines[i].compute_probability(distribution, log=log, log_probability=log_probability, axis=axis, track=False, **kwargs)
 
-                p_local.writeHdf(hdfFile, 'marginal_probabilities', index=(self.lineIndices[i], np.s_[:], np.s_[:]))
+                p_local.writeHdf(hdfFile, 'probabilities', index=(self.lineIndices[i], np.s_[:], np.s_[:]))
 
             self.world.barrier()
             hdfFile.close()
@@ -1131,7 +1136,7 @@ class Inference3D(myObject):
         return self.pointcloud.y
 
 
-    def inference_1d(self, fiducial=None, index=None):
+    def inference_1d(self, fiducial=None, index=None, line_index=None):
         """Get the inversion results for the given fiducial.
 
         Parameters
@@ -1146,6 +1151,9 @@ class Inference3D(myObject):
 
         """
         lineIndex, fidIndex = self.lineIndex(fiducial=fiducial, index=index)
+        if np.size(fidIndex) > 1:
+            assert line_index is not None, ValueError("Multiple fiducials found, please specify which line_index out of {}".format(lineIndex))
+            lineIndex = line_index
         return self.lines[lineIndex].inference_1d(fidIndex)
 
     def lineIndex(self, lineNumber=None, fiducial=None, index=None):
@@ -1897,6 +1905,11 @@ class Inference3D(myObject):
 
         return  self.map(dx = dx, dy = dy, mask = mask, clip = clip, values = self.relativeError[system, :], **kwargs)
 
+    def plot_cross_section(self, line_number, values, **kwargs):
+        line_index = self.lineNumbers.searchsorted(line_number)
+        indices = self.lineIndices[line_index]
+
+        return self.lines[line_index].plot_cross_section(values=values[indices, :], **kwargs)
 
     def plotdepth_slice(self, depth, variable, mask = None, clip = True, index=None, **kwargs):
         """ Create a depth slice through the recovered model """
