@@ -53,7 +53,7 @@ class Mixture(myObject):
     def params(self, values):
         self._params = StatArray.StatArray(values)
 
-    def fit_to_curve(self, x, y, plot=False, debug=False, verbose=False, final=False, **kwargs):
+    def fit_to_curve(self, x, y, n_components=None, plot=False, debug=False, verbose=False, final=False, **kwargs):
         """Iteratively fits the histogram with an increasing number of distributions until the fit changes by less than a tolerance.
 
         """
@@ -79,6 +79,9 @@ class Mixture(myObject):
         maxDistributions = kwargs.pop('max_distributions', np.inf)
         kwargs['method'] = kwargs.get('method', 'lbfgsb')
 
+        masking = kwargs.pop('masking', 1.67)
+        dynamic_weighting = kwargs.pop('dynamic_weighting', False)
+
         x = StatArray.StatArray(x)
 
         edges = x.edges()
@@ -102,13 +105,13 @@ class Mixture(myObject):
         go = True
         expon_guess = 20.0
         fit = None
-        while go:
-            try:
-                fit, pars = self._fit_GM_to_cuve(self.model, centres, edges, y, x_guess, expon_guess=expon_guess, verbose=verbose, **kwargs)
-            except:
-                pass
-            expon_guess *= 2.0
-            go = expon_guess < 100.0 and fit is None
+        # while go:
+            # try:
+        fit, pars = self._fit_GM_to_cuve(self.model, centres, edges, y, x_guess, expon_guess=expon_guess, verbose=verbose, **kwargs)
+            # except:
+            #     pass
+            # expon_guess *= 2.0
+            # go = expon_guess < 100.0 and fit is None
 
         x_guess = np.asarray([fit.params['g0_center']])
         sigma_guess = [fit.params['g0_sigma']]
@@ -125,10 +128,9 @@ class Mixture(myObject):
         # Get the location of the next peak
         s = fit.params['g0_fwhm'].value
         # s = fit.params['g0_sigma'].value
-        residual[np.abs(centres - fit.params['g0_center'].value) < 1.67*s] = 0.0
+        residual[np.abs(centres - fit.params['g0_center'].value) < masking*s] = 0.0
         residual[:i05] = 0.0
         residual[i95:] = 0.0
-
 
         if (plot or debug) and not final:
             ax.plot(centres, y, '-.')
@@ -145,9 +147,12 @@ class Mixture(myObject):
             fig.canvas.flush_events()
             fig.canvas.draw()
 
-        go = np.all(misfit > epsilon)
-        new_peak = np.argmax(residual)
-        go = go and (residual[new_peak] > 0.0) and (maxDistributions > 1)
+        if n_components is not None:
+            go = n_components > 1
+        else:
+            go = np.all(misfit > epsilon)
+            new_peak = np.argmax(residual)
+            go = go and (residual[new_peak] > 0.0) and (maxDistributions > 1)
 
         if verbose:
             print('first peak at {}'.format(x_guess))
@@ -181,7 +186,7 @@ class Mixture(myObject):
             # sigma = [fit_test.params['g{}_sigma'.format(i)].value for i in range(n_tests)]
             # s = np.min(fwhm)
             for i in range(n_tests):
-                residual[np.abs(centres - fit_test.params['g{}_center'.format(i)].value) < 1.67*fwhm[i]] = 0.0
+                residual[np.abs(centres - fit_test.params['g{}_center'.format(i)].value) < masking*fwhm[i]] = 0.0
                 # residual[np.abs(centres - fit_test.params['g{}_center'.format(i)].value) < 1.67*sigma[i]] = 0.0
             residual[:i05] = 0.0
             residual[i95:] = 0.0
@@ -203,8 +208,10 @@ class Mixture(myObject):
             #     accept_model = False
             #     lmfit_barfed = True
 
-
+            
             go = accept_model
+            if n_components is not None:
+                accept_model = True
             if accept_model:
                 # Test a new peak if its possible
                 new_peak = np.argmax(residual)
@@ -216,7 +223,10 @@ class Mixture(myObject):
 
                 under_limits = len(fit.components) < maxDistributions-1
 
-                go = valid_new_peak and under_limits and above_abs_threshold #and gradient_substantial
+                if n_components is not None:
+                    go = len(fit.components) < n_components - 1
+                else:
+                    go = valid_new_peak and under_limits and above_abs_threshold
 
                 if verbose:
                     print('\nmodel {}'.format(np.asarray(list(fit_test.best_values.values()))))
@@ -263,20 +273,6 @@ class Mixture(myObject):
             if plot and verbose and go:
                 input('Next')
 
-        # if verbose:
-        #     print('Final misfit with gaussians', misfit)
-
-        #     from lmfit.models import Pearson7Model
-        #     fit_test = self._fit_GM_to_cuve(Pearson7Model, centres, edges, y, iPeaks, **kwargs)
-        #     residual = y - fit_test.best_fit
-
-        #     misfit_test = np.r_[np.linalg.norm(residual, ord=np.inf), np.linalg.norm(residual, ord=2.0)] / fit_denominator
-
-        #     print('misfit with Pearson', misfit_test)
-
-        #     if np.any(misfit_test < misfit):
-        #         fit = fit_test
-
         if plot or debug:
             ax.clear()
             ax.plot(centres, y, '-.')
@@ -308,7 +304,7 @@ class Mixture(myObject):
         else:
             return self.__fit_w_previous(model, centres, edges, y, x_guess, sigma_guess, expon_guess=expon_guess,previous_fit=previous_fit, previous_pars=previous_pars, verbose=verbose, **kwargs)
 
-    def __fit_w_previous(self, model, centres, edges, y, x_guess, sigma_guess=None, expon_guess=None, previous_fit=None, previous_pars=None, verbose=False, **kwargs):
+    def __fit_w_previous(self, model, centres, edges, y, x_guess, sigma_guess=None, expon_guess=None, previous_fit=None, previous_pars=None, verbose=False, window=1, **kwargs):
 
 
         mn_var = kwargs.pop('min_variance', (edges[1]-edges[0]))
@@ -321,6 +317,7 @@ class Mixture(myObject):
             mod += previous_fit.components[i]
         pars = previous_pars
 
+        weights = np.full(y.size, fill_value=0.1)
         for j in range(np.size(x_guess)):
             i = j + n_previous
             guess = model(prefix='g{}_'.format(i))
@@ -328,14 +325,19 @@ class Mixture(myObject):
             mod += guess
 
             k = np.searchsorted(edges, x_guess[j])
-            le = edges[np.maximum(0, k-2)]
-            ue = edges[np.minimum(edges.size, k+3)]
+            le = edges[np.maximum(0, k-window)]
+            ue = edges[np.minimum(edges.size, k+window+1)]
+
+            weights[k-window:k+window+1] = 1.0
 
             pars['g{}_center'.format(i)].set(value=x_guess[j], min=le, max=ue)
             pars['g{}_sigma'.format(i)].set(value=init, min=mn_var, max=mx_var)
             pars['g{}_amplitude'.format(i)].set(value=1.0, min=0.0)
             tmp = 10.5 #if expon_guess is None else expon_guess
             pars['g{}_expon'.format(i)].set(value=tmp, vary=False)
+
+        kwargs['weights'] = weights
+
 
         if verbose:
             print('fitting with', pars)
@@ -346,7 +348,7 @@ class Mixture(myObject):
         return out, pars
 
 
-    def __fit_wo_previous(self, model, centres, edges, y, x_guess, expon_guess=None, sigma_guess=None, verbose=False, **kwargs):
+    def __fit_wo_previous(self, model, centres, edges, y, x_guess, expon_guess=None, sigma_guess=None, verbose=False, window=1, **kwargs):
 
         n_guesses = np.size(x_guess)
         # Create the first model
@@ -365,10 +367,13 @@ class Mixture(myObject):
         # Sort the guesses and sigmas
         ix = np.argsort(x_guess)
 
+        weights = np.full(y.size, fill_value=0.1)
         for i in range(n_guesses):
             k = np.searchsorted(edges, x_guess[ix[i]])
-            le = edges[np.maximum(0, k-2)]
-            ue = edges[np.minimum(edges.size, k+3)]
+            le = edges[np.maximum(0, k-window)]
+            ue = edges[np.minimum(edges.size, k+window+1)]
+
+            weights[k-window:k+window+1] = 1.0
 
             pars['g{}_center'.format(i)].set(value=x_guess[ix[i]], min=le, max=ue)
             pars['g{}_sigma'.format(i)].set(value=init, min=mn_var, max=mx_var)
@@ -376,8 +381,13 @@ class Mixture(myObject):
             tmp = 10.5 if expon_guess is None else expon_guess
             pars['g{}_expon'.format(i)].set(value=tmp, vary=False)
 
+        kwargs['weights'] = weights
+        
         if verbose:
             print('fitting with', pars)
+
+        print(pars)
+
 
         init = mod.eval(pars, x=centres)
         out = mod.fit(y, pars, x=centres, **kwargs)

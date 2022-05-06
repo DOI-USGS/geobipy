@@ -606,7 +606,7 @@ class Inference1D(myObject):
         if (self.burned_in):
             plt.axvline(self.burned_in_iteration, color='#C92641',
                         linestyle='dashed', linewidth=lw)
-            # plt.axvline(self.iBest, color=cP.wellSeparated[3])
+            # plt.axvline(self.best_iteration, color=cP.wellSeparated[3])
         plt.yscale('log')
         ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 

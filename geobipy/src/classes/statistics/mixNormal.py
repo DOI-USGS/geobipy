@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from .Mixture import Mixture
 from sklearn.mixture import GaussianMixture
 from lmfit.models import GaussianModel
+from copy import deepcopy
 
 class mixNormal(Mixture):
 
@@ -20,6 +21,9 @@ class mixNormal(Mixture):
         self.means = means
         self.sigmas = sigmas
 
+    def __deepcopy__(self, memo={}):
+        out = type(self)()
+        out._params = deepcopy(self._params)
 
     @property
     def amplitudes(self):

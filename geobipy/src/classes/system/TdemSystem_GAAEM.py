@@ -97,7 +97,7 @@ try:
             return msg
 
 
-except:
+except Exception as e: 
     class TdemSystem_GAAEM(object):
 
         def __init__(self, *args, **kwargs):
@@ -105,3 +105,5 @@ except:
                  "Please see the package's README for instructions on how to install it \n"
                  "Check that you have loaded the compiler that was used to compile the forward modeller\n")
             print(Warning(h))
+
+    print(e)
