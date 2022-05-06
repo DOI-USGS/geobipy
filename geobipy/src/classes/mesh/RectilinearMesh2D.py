@@ -627,15 +627,22 @@ class RectilinearMesh2D(Mesh):
 
         if self.x._relativeTo is not None:
             re = self.y.interpolate_centres_to_nodes(self.x.relativeTo)
-            out.x._relativeTo = np.interp(y.edges, self.y.edges, re)
+            if np.all(np.diff(self.y.edges) < 0.0):
+                vals = np.interp(x=y.centres[::-1], xp=self.y.edges[::-1], fp=re[::-1])[::-1]
+            else:
+                vals = np.interp(x=y.centres, xp=self.y.edges, fp=re)
+
+            out.x._relativeTo = vals
         
         if self.y._relativeTo is not None:
-
             re = self.x.interpolate_centres_to_nodes(self.y.relativeTo)
-            out.y._relativeTo = np.interp(x=x.centres, xp=self.x.edges, fp=re)
+            if np.all(np.diff(self.x.edges) < 0.0):
+                vals = np.interp(x=x.centres[::-1], xp=self.x.edges[::-1], fp=re[::-1])[::-1]
+            else:
+                vals = np.interp(x=x.centres, xp=self.x.edges, fp=re)
+            out.y._relativeTo = vals
 
         return out, x_indices, y_indices, out_values
-
 
     def _reconcile_intervals(self, intervals, axis=0):
 
@@ -811,7 +818,6 @@ class RectilinearMesh2D(Mesh):
         y_mask = kwargs.pop('y_mask', None)
 
         if (self.x._relativeTo is None) and (self.y._relativeTo is None):
-            # cP.pcolor(values, x=self.x.edges_absolute, y=self.y.edges_absolute, **kwargs)
             masked = self
             if np.sum([x is None for x in [x_mask, y_mask]]) < 2:
                 masked, x_indices, z_indices, values = self.mask_cells(axis, x_mask, y_mask, values)
@@ -835,6 +841,8 @@ class RectilinearMesh2D(Mesh):
             # Need to expand the yaxis edges since they could be draped.
             if (x_mask is not None) or (y_mask is not None):
                 masked, x_indices, z_indices, values = self.mask_cells(axis, x_mask, y_mask, values)
+                if 'alpha' in kwargs:
+                    _, _, _, kwargs['alpha'] = self.mask_cells(axis, x_mask, y_mask, kwargs['alpha'])
                 ax, pm, cb = masked.pcolor(values, **kwargs)
             else:
                 x = self.x_edges
