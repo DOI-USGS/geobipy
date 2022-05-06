@@ -35,6 +35,7 @@ from .src.classes.system.FdemSystem import FdemSystem
 from .src.classes.system.TdemSystem import TdemSystem
 from .src.classes.system.Waveform import Waveform
 from .src.classes.system.CircularLoop import CircularLoop
+from .src.classes.system.CircularLoops import CircularLoops
 from .src.classes.system.SquareLoop import SquareLoop
 from .src.classes.system.filters.butterworth import butterworth
 # Meshes
@@ -82,13 +83,15 @@ def checkCommandArguments():
     Parser.add_argument('--skipHDF5', dest='skipHDF5', default=False, help='Skip the creation of the HDF5 files.  Only do this if you know they have been created.')
     Parser.add_argument('--seed', dest='seed', type=int, default=None, help='Specify a single integer to fix the seed of the random number generator. Only used in serial mode.')
     Parser.add_argument('--index', dest='index', type=int, default=None, help='Invert this data point only. Only used in serial mode.')
+    Parser.add_argument('--fiducial', dest='fiducial', type=float, default=None, help='Invert this fiducial only. Only used in serial mode.')
+    Parser.add_argument('--line', dest='line_number', type=float, default=None, help='Invert the fiducial on this line. Only used in serial mode.')
 
     args = Parser.parse_args()
 
-    return args.inputFile, args.output_directory, args.skipHDF5, args.seed, args.index
+    return args.inputFile, args.output_directory, args.skipHDF5, args.seed, args.index, args.fiducial, args.line_number
 
 
-def serial_geobipy(inputFile, output_directory, seed=None, index=None):
+def serial_geobipy(inputFile, output_directory, seed=None, index=None, fiducial=None, line_number=None):
 
     print('Running GeoBIPy in serial mode')
     print('Using user input file {}'.format(inputFile))
@@ -114,7 +117,7 @@ def serial_geobipy(inputFile, output_directory, seed=None, index=None):
     # if isinstance(Dataset, DataPoint):
     #     serial_datapoint(userParameters, output_directory, seed=seed)
     # else:
-    serial_dataset(output_directory, seed=seed, index=index, **options)
+    serial_dataset(output_directory, seed=seed, index=index, fiducial=fiducial, line_number=line_number, **options)
 
 
 # def serial_datapoint(options, output_directory, seed=None):
@@ -131,14 +134,14 @@ def serial_geobipy(inputFile, output_directory, seed=None, index=None):
 #     infer(options, datapoint, prng=prng)
 
 
-def serial_dataset(output_directory, seed=None, index=None, **kwargs):
+def serial_dataset(output_directory, seed=None, index=None, fiducial=None, line_number=None, **kwargs):
 
     dataset = kwargs['data_type'](system=kwargs['system_filename'])
 
     inference3d = Inference3D(output_directory, kwargs['system_filename'])
     inference3d.create_hdf5(dataset, **kwargs)
 
-    inference3d.infer(dataset, seed=seed, index=index, **kwargs)
+    inference3d.infer(dataset, seed=seed, index=index, fiducial=fiducial, line_number=line_number, **kwargs)
 
 def parallel_geobipy(inputFile, outputDir, skipHDF5):
 
@@ -183,7 +186,7 @@ def parallel_mpi(inputFile, output_directory, skipHDF5):
     # Start keeping track of time.
     t0 = MPI.Wtime()
 
-    inference3d = Inference3D(output_directory, kwargs['system_filename'], world=world)
+    inference3d = Inference3D(output_directory, kwargs['system_filename'], mpi_enabled=True)
     inference3d.create_hdf5(dataset, **kwargs)
 
     myMPI.rankPrint(world, "Created hdf5 files in {} h:m:s".format(str(timedelta(seconds=MPI.Wtime()-t0))))
@@ -193,16 +196,16 @@ def parallel_mpi(inputFile, output_directory, skipHDF5):
 def geobipy():
     """Run the serial implementation of GeoBIPy. """
 
-    inputFile, output_directory, _, seed, index = checkCommandArguments()
+    inputFile, output_directory, _, seed, index, fiducial, line_number = checkCommandArguments()
     sys.path.append(getcwd())
 
-    serial_geobipy(inputFile, output_directory, seed, index)
+    serial_geobipy(inputFile, output_directory, seed, index, line_number)
 
 
 def geobipy_mpi():
     """Run the parallel implementation of GeoBIPy. """
 
-    inputFile, output_directory, skipHDF5, _, _ = checkCommandArguments()
+    inputFile, output_directory, skipHDF5, _, _, _, _ = checkCommandArguments()
     sys.path.append(getcwd())
 
     parallel_geobipy(inputFile, output_directory, skipHDF5)
