@@ -674,7 +674,6 @@ def _pcolormesh(X, Y, values, **kwargs):
     if geobipy_kwargs['ylim'] is not None:
         ax.set_ylim(geobipy_kwargs['ylim'])
 
-
     cbar = None
     if (color_kwargs['colorbar']):
         if (color_kwargs['equalize']):
@@ -1088,6 +1087,12 @@ def plot(x, y, **kwargs):
     except:
         plt.plot(x, tmp.T, **kwargs)
 
+    if geobipy_kwargs['xlim'] is not None:
+        ax.set_xlim(geobipy_kwargs['xlim'])
+
+    if geobipy_kwargs['ylim'] is not None:
+        ax.set_ylim(geobipy_kwargs['ylim'])
+        
     plt.xscale(geobipy_kwargs['xscale'])
     plt.yscale(geobipy_kwargs['yscale'])
 
