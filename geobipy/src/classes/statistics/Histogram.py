@@ -80,40 +80,7 @@ class Histogram(Model):
         return Model(self.mesh, StatArray(cdf, name='Cumulative Density Function'))
 
     def compute_probability(self, distribution, log=None, log_probability=False, axis=0, **kwargs):
-        centres = self.mesh.centres(axis=axis)
-        centres, _ = utilities._log(centres, log)
-
-        if self.ndim == 3:
-            ax, bx = self.mesh.other_axis(axis)
-
-            a = [x for x in (0, 1, 2) if not x == axis]
-            b = [x for x in (0, 1, 2) if x == axis]
-
-            pdf = self.pdf.values
-
-            shp = list(self.shape)
-            shp[axis] = distribution.ndim
-
-            probability = np.zeros(shp)
-
-            track = kwargs.pop('track', True)
-
-            r = range(ax.nCells.item() * bx.nCells.item())
-            if track:
-                Bar = progressbar.ProgressBar()
-                r = Bar(r)
-
-            mesh_2d = self.mesh.remove_axis(axis)
-                
-            for i in r:
-                j = list(mesh_2d.unravelIndex(i))
-                j.insert(axis, np.s_[:])
-                j = tuple(j)
-                p = distribution.probability(centres[j], log_probability)
-                probability[j] = np.dot(p, pdf[j])
-            probability = probability / np.expand_dims(np.sum(probability, axis), axis=axis)
-        
-        return StatArray(probability, name='marginal_probability')
+        return self.mesh._compute_probability(distribution, self.pdf.values, log, log_probability, axis, **kwargs)
 
     def credible_intervals(self, percent=90.0, axis=0):
         """Gets the median and the credible intervals for the specified axis.
