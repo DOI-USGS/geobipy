@@ -517,8 +517,10 @@ class PointCloud3D(myObject):
         # Create the CT function for interpolation
         f = CloughTocher2DInterpolator(XY, vTmp)
 
+        query = np.hstack([mesh.centres(axis=0).flatten(), mesh.centres(axis=1).flatten()])
+
         # Interpolate to the grid
-        vals = f(mesh.centres).reshape(*mesh.shape)
+        vals = f(query).reshape(*mesh.shape)
 
         # Reshape to a 2D array
         vals = StatArray.StatArray(vals, name=cf.getName(values), units = cf.getUnits(values))
