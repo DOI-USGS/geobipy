@@ -903,8 +903,10 @@ class PointCloud3D(myObject):
     @property
     def summary(self):
         """ Display a summary of the 3D Point Cloud """
-        msg = ("3D Point Cloud: \n"
-              "Number of Points: : {} \n {} {} {} {}").format(self.nPoints, self.x.summary, self.y.summary, self.z.summary, self.elevation.summary)
+        msg = ("{}: \n"
+              "Number of Points: : {} \n"
+              "{} {} {} {}").format(type(self).__name__, self.nPoints, 
+                                    self.x.summary, self.y.summary, self.z.summary, self.elevation.summary)
         return msg
 
 

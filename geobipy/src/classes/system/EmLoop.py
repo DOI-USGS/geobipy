@@ -16,4 +16,15 @@ class EmLoop(Point, ABC):
 
     def __init__(self, *args, **kwargs):
         return super().__init__(*args, **kwargs)
+    @property
+    def summary(self):
+        """Print a summary"""
+        msg = super().summary
 
+        msg += "orientation:\n{}\n".format("|   "+(self.orientation.replace("\n", "\n|   ")))
+        msg += "moment:\n{}".format("|   "+(self.moment.summary.replace("\n", "\n|   "))[:-4])
+        msg += "pitch:\n{}".format("|   "+(self.pitch.summary.replace("\n", "\n|   "))[:-4])
+        msg += "roll:\n{}".format("|   "+(self.roll.summary.replace("\n", "\n|   "))[:-4])
+        msg += "yaw:\n{}".format("|   "+(self.yaw.summary.replace("\n", "\n|   "))[:-4])
+
+        return msg

@@ -38,11 +38,13 @@ class Point(myObject, ABC):
 
     @property
     def summary(self):
-        """ Print a summary of the EMdataPoint """
-        msg = ('x: {} \n'
-               'y: {} \n'
-               'z: {} \n'
-               'elevation: {} \n').format(self.x, self.y, self.z, self.elevation)
+        """Summary of self """
+        msg =  "{}\n".format(type(self).__name__)
+        msg += "x:\n{}".format("|   "+(self.x.summary.replace("\n", "\n|   "))[:-4])
+        msg += "y:\n{}".format("|   "+(self.y.summary.replace("\n", "\n|   "))[:-4])
+        msg += "z:\n{}".format("|   "+(self.z.summary.replace("\n", "\n|   "))[:-4])
+        msg += "elevation:\n{}".format("|   "+(self.elevation.summary.replace("\n", "\n|   "))[:-4])
+
         return msg
 
     @property

@@ -123,16 +123,8 @@ class CircularLoop(EmLoop):
     @property
     def summary(self):
         """Print a summary"""
-        msg = ("EmLoop: \n"
-               "Orientation: {}\n"
-               "Moment: {}\n"
-               "X: {}\n"
-               "Y: {}\n"
-               "Z: {}\n"
-               "Pitch: {}\n"
-               "Roll: {}\n"
-               "Yaw: {}\n"
-               "Radius: {}\n").format(self.orient, self.moment, self.x, self.y, self.z, self.pitch, self.roll, self.yaw)
+        msg = super().summary
+        msg += "radius:\n{}".format("|   "+(self.radius.summary.replace("\n", "\n|   "))[:-4])
         return msg
 
     def __deepcopy__(self, memo={}):

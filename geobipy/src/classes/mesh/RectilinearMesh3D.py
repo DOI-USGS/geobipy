@@ -660,8 +660,8 @@ class RectilinearMesh3D(RectilinearMesh2D):
         """ Display a summary of the 3D Point Cloud """
         msg = ("3D Rectilinear Mesh: \n"
               "Shape: : {} \nx\n{}y\n{}z\n{}").format(self.shape, self.x.summary, self.y.summary, self.z.summary)
-        if not self.relativeTo is None:
-            msg += self.relativeTo.summary
+        # if not self.relativeTo is None:
+        #     msg += self.relativeTo.summary
         return msg
 
     def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):

@@ -912,8 +912,8 @@ class RectilinearMesh2D(Mesh):
     @property
     def summary(self):
         """ Display a summary of the 3D Point Cloud """
-        msg = ("2D Rectilinear Mesh: \n"
-              "Shape: : {} \nx\n{}y\n{}").format(self.shape, self.x.summary, self.y.summary)
+        msg = ("{}: \n"
+              "Shape: : {} \nx\n{}y\n{}").format(type(self).__name__, self.shape, self.x.summary, self.y.summary)
         # if not self.relativeTo is None:
         #     msg += self.relativeTo.summary
         return msg

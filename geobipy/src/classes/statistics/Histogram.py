@@ -44,15 +44,6 @@ class Histogram(Model):
             out.values = StatArray(out.mesh.shape, name='mass')
         return out
 
-    @property
-    def summary(self):
-        """Summary of self """
-        msg =  "Histogram\n"
-        msg += "mesh:\n{}".format("|   "+(self.mesh.summary.replace("\n", "\n|   "))[:-4])
-        msg += "counts:\n{}".format("|   "+(self.values.summary.replace("\n", "\n|   "))[:-4])
-
-        return msg
-
     @Model.values.setter
     def values(self, values):
         if values is None:

@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from cached_property import cached_property
-from copy import deepcopy
+from copy import copy, deepcopy
 from ...pointcloud.Point import Point
 from ....classes.core import StatArray
 from ....base import utilities as cf
@@ -596,13 +596,22 @@ class DataPoint(Point):
     @property
     def summary(self):
         """ Print a summary of the EMdataPoint """
-        msg = ('Data Point: \n'
-               'Channel Names {} \n'
-               'Number of active channels: {} \n'
-               '{} {} {}').format(self._channelNames, np.sum(self.active), self.data[self.active].summary, self.predictedData[self.active].summary, self.std[self.active].summary)
+        msg = super().summary
+        names = copy(self.channelNames)
+        j = np.arange(5, self.nChannels, 5)
+        for i in range(j.size):
+            names.insert(j[i]+i, '\n')
+
+        msg += "channel names:\n{}\n".format("|   "+(', '.join(names).replace("\n,", "\n|  ")))
+        msg += "data:\n{}".format("|   "+(self.data[self.active].summary.replace("\n", "\n|   "))[:-4])
+        msg += "predicted data:\n{}".format("|   "+(self.predictedData[self.active].summary.replace("\n", "\n|   "))[:-4])
+        msg += "std:\n{}".format("|   "+(self.std[self.active].summary.replace("\n", "\n|   "))[:-4])
+        msg += "line number:\n{}".format("|   "+(self.lineNumber.summary.replace("\n", "\n|   "))[:-4])
+        msg += "fiducial:\n{}".format("|   "+(self.fiducial.summary.replace("\n", "\n|   "))[:-4])
+        msg += "relative error:\n{}".format("|   "+(self.relative_error.summary.replace("\n", "\n|   "))[:-4])
+        msg += "additive error:\n{}".format("|   "+(self.additive_error.summary.replace("\n", "\n|   "))[:-4])
+
         return msg
-
-
 
     def createHdf(self, parent, myName, withPosterior=True, add_axis=None, fillvalue=None):
         """ Create the hdf group metadata in file
