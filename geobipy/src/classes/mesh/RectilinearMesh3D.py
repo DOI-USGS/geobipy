@@ -284,6 +284,39 @@ class RectilinearMesh3D(RectilinearMesh2D):
         plt.draw()
         anim.save(filename)
 
+    def _compute_probability(self, distribution, pdf, log, log_probability, axis=0, **kwargs):
+        centres = self.centres(axis=axis)
+        centres, _ = utilities._log(centres, log)
+
+        ax, bx = self.other_axis(axis)
+
+        a = [x for x in (0, 1, 2) if not x == axis]
+        b = [x for x in (0, 1, 2) if x == axis]
+
+        shp = list(self.shape)
+        shp[axis] = distribution.ndim
+
+        probability = np.zeros(shp)
+
+        track = kwargs.pop('track', True)
+
+        r = range(ax.nCells.item() * bx.nCells.item())
+        if track:
+            Bar = progressbar.ProgressBar()
+            r = Bar(r)
+
+        mesh_2d = self.remove_axis(axis)
+            
+        for i in r:
+            j = list(mesh_2d.unravelIndex(i))
+            j.insert(axis, np.s_[:])
+            j = tuple(j)
+            p = distribution.probability(centres[j], log_probability)
+            probability[j] = np.dot(p, pdf[j])
+        probability = probability / np.expand_dims(np.sum(probability, axis), axis=axis)
+    
+        return StatArray.StatArray(probability, name='marginal_probability')
+
     def __deepcopy__(self, memo={}):
         """ Define the deepcopy for the StatArray """
         return RectilinearMesh3D(x=self.x, y=self.y, z=self.z)

@@ -295,6 +295,43 @@ class RectilinearMesh2D(Mesh):
         plt.draw()
         anim.save(filename)
 
+    def _compute_probability(self, distribution, pdf, log, log_probability, axis=0, **kwargs):
+        centres = self.centres(axis=axis)
+        # print(centres)
+        centres, _ = utilities._log(centres, log)
+        # print(centres)
+        # print(centres.shape)
+
+        ax = self.other_axis(axis)
+
+        a = [x for x in (0, 1) if not x == axis]
+        b = [x for x in (0, 1) if x == axis]
+
+        shp = list(self.shape)
+        shp[axis] = distribution.ndim
+
+        probability = np.zeros(shp)
+
+        track = kwargs.pop('track', True)
+
+        r = range(ax.nCells.item())
+        if track:
+            Bar = progressbar.ProgressBar()
+            r = Bar(r)
+
+        mesh_1d = self.remove_axis(axis)
+            
+        for i in r:
+            j = [i]
+            j.insert(axis, np.s_[:])
+            j = tuple(j)
+            # print(j)
+            p = distribution.probability(centres[j], log_probability)
+            probability[j] = np.dot(p, pdf[j])
+        probability = probability / np.expand_dims(np.sum(probability, axis), axis=axis)
+    
+        return StatArray.StatArray(probability, name='marginal_probability')
+
     def _mean(self, values, axis=0):
         
         a = self.axis(axis)
