@@ -1104,9 +1104,7 @@ class RectilinearMesh1D(Mesh):
 
         if values is not None:
             values.plotPosteriors(ax=axes[2], **values_kwargs)
-
-            print('here')
-            print(values_kwargs)
+            
             if best is not None:
                 best.plot(xscale=values_kwargs.get('xscale', 'linear'), 
                         flipY=False, 
