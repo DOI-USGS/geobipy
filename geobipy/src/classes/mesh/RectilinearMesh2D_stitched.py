@@ -2,25 +2,17 @@
 Module describing a 2D Rectilinear Mesh class with x and y axes specified
 """
 from copy import copy, deepcopy
-from .Mesh import Mesh
+from matplotlib.figure import Figure
 from ...classes.core import StatArray
 from .RectilinearMesh2D import RectilinearMesh2D
 import numpy as np
 import matplotlib.cm as mplcm
 import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
-from matplotlib.collections import LineCollection
 from scipy.stats import binned_statistic
 from ...base import plotting as cP
 from ...base import utilities
 # from ...base import geometry
 from scipy.sparse import (kron, diags)
-from scipy import interpolate
-
-try:
-    from pyvtk import VtkData, CellData, Scalars, PolyData
-except:
-    pass
 
 class RectilinearMesh2D_stitched(RectilinearMesh2D):
     """Class defining stitched 1D rectilinear meshes.
@@ -110,6 +102,9 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
                 out = type(self)(x_edges=self._x.edges[slic0], y_edges=self._z_edges[slic0, :], relativeTo=relativeTo)
             out.nCells = self.nCells[slic]
             return out
+
+    def n_posteriors(self):
+        return np.sum([self.nCells.hasPosterior, self.y.edges.hasPosterior])
 
     def pcolor(self, values, **kwargs):
 
@@ -217,6 +212,60 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
                     cP.clabel(cbar, utilities.getNameUnits(values))
             else:
                 cP.clabel(cbar, cl)
+
+    def _init_posterior_plots(self, gs, values=None, sharex=None, sharey=None):
+        """Initialize axes for posterior plots
+
+        Parameters
+        ----------
+        gs : matplotlib.gridspec.Gridspec
+            Gridspec to split
+
+        """
+
+        if isinstance(gs, Figure):
+            gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0] 
+
+        if values is None:
+            splt = gs.subgridspec(1, 2)
+            ax = [plt.subplot(splt[0, 0], sharex=sharex, sharey=sharey)]
+            ax.append(plt.subplot(splt[0, 1], sharex=sharex, sharey=sharey))
+        else:
+            shape = (3, 2)
+            splt = gs.subgridspec(*shape)
+
+            ax = [plt.subplot(splt[np.unravel_index(i, shape)]) for i in range(5)]
+
+        for a in ax:
+            cP.pretty(a)
+
+        return ax        
+
+        for a in ax:
+            cP.pretty(a)
+
+        return ax
+
+    def plot_posteriors(self, axes=None, values=None, value_kwargs={}, **kwargs):
+        # assert len(axes) == 2, ValueError("Must have length 2 list of axes for the posteriors. self.init_posterior_plots can generate them")
+
+        # best = kwargs.get('best', None)
+        # if best is not None:
+        #     ncells_kwargs['line'] = best.nCells
+        #     edges_kwargs['line'] = best.edges[1:]
+
+        if axes is None:
+            fig = plt.gcf()
+            axes = self._init_posterior_plots(fig, values=values)
+
+        ncells_kwargs = kwargs.get('ncells_kwargs', {})
+        y_edges_kwargs = kwargs.get('y_edges_kwargs', {})
+        
+        self.nCells.plotPosteriors(ax = axes[0], **ncells_kwargs)
+
+        if kwargs.pop('flipY', False) :
+            y_edges_kwargs['flipY'] = True
+        self.y_edges.plotPosteriors(ax = axes[1], **y_edges_kwargs)
 
     def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None, upcast=False):
         """ Create the hdf group metadata in file

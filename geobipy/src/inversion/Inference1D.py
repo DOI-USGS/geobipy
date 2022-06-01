@@ -500,11 +500,12 @@ class Inference1D(myObject):
         for ax in self.ax[:2]:
             cP.pretty(ax)
 
-        self.ax[2] = self.model.init_posterior_plots(gs[1, 0])
+        self.ax[2] = self.model._init_posterior_plots(gs[1, 0])
         self.ax[3] = self.datapoint.init_posterior_plots(gs[1, 1])
 
         if self.interactive_plot:
             plt.show(block=False)
+            plt.interactive(True)
         # plt.draw()
 
     def plot(self, title="", increment=None):
@@ -532,14 +533,14 @@ class Inference1D(myObject):
 
             self.model.plot_posteriors(
                 axes=self.ax[2],
-                ncells_kwargs={
-                    'normalize': True},
+                # ncells_kwargs={
+                #     'normalize': True},
                 edges_kwargs={
-                    'normalize': True,
+                    # 'normalize': True,
                     'transpose': True,
-                    'flipY': True,
+                    # 'flipY': True,
                     'trim': False},
-                parameter_kwargs={
+                values_kwargs={
                     'colorbar': False,
                     'flipY': True,
                     'xscale': 'log',
@@ -553,13 +554,13 @@ class Inference1D(myObject):
 
             self.datapoint.plot_posteriors(
                 axes=self.ax[3],
-                height_kwargs={
-                    'normalize': True},
+                # height_kwargs={
+                #     'normalize': True},
                 data_kwargs={},
-                rel_error_kwargs={
-                    'normalize': True},
-                add_error_kwargs={
-                    'normalize': True},
+                # rel_error_kwargs={
+                #     'normalize': True},
+                # add_error_kwargs={
+                #     'normalize': True},
                 best=self.datapoint)
 
             cP.suptitle(title)

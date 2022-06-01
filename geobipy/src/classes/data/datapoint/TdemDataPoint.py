@@ -199,7 +199,7 @@ class TdemDataPoint(EmDataPoint):
         if values is None:
             values = self.n_components
         else:
-            assert np.size(values) == self.n_components, ValueError("primary field must have size {}".format(self.n_components))
+            assert np.size(values) == self.n_components * self.nSystems, ValueError("primary field must have size {}".format(self.n_components*self.nSystems))
 
         self._primary_field = StatArray.StatArray(values, "Primary field", self.units)
 
@@ -634,6 +634,7 @@ class TdemDataPoint(EmDataPoint):
                 with open('System{}'.format(i), 'w') as f:
                     f.write(txt)
                 systems[i] = 'System{}'.format(i)
+        kwargs.pop('system_file_path', None)
 
         self = super(TdemDataPoint, cls).fromHdf(grp, system=systems, **kwargs)
 

@@ -451,10 +451,9 @@ class FdemData(Data):
 
         """
 
-        kwargs['legend'] = kwargs.pop('legend', True)
         ax, legend = super().plot(xAxis, channels=channels, values=values, **kwargs)
 
-        if not legend is None:
+        if kwargs.get('legend', True):
             legend.set_title('Frequency (Hz)')
 
         return ax, legend

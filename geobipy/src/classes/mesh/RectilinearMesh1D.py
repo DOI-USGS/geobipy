@@ -342,13 +342,11 @@ class RectilinearMesh1D(Mesh):
 
     @widths.setter
     def widths(self, values):
-        values = StatArray.StatArray(values)
-
         assert np.all(values > 0.0), ValueError(
             "widths must be entirely positive")
 
         self._widths = values
-        self.edges = np.hstack([0.0, np.cumsum(values)])
+        self.edges =  StatArray.StatArray(np.hstack([0.0, np.cumsum(values)]), utilities.getName(values), utilities.getUnits(values))
 
     def axis(self, axis):
         return self
@@ -439,25 +437,38 @@ class RectilinearMesh1D(Mesh):
             The cell indices
 
         """
+
+        edges = self.edges
+
+        # Remove values that are out of bounds
+        if trim:
+            values = values[(values >= edges[0]) &
+                            (values < edges[-1])]
+
+        reversed = False
+        if self.edges[-1] < self.edges[0]:
+            reversed = True
+            edges = self.edges[::-1]
+
+
         values, dum = utilities._log(np.atleast_1d(values).flatten(), self.log)
         values = values - self.relativeTo
 
         # Get the bin indices for all values
-        iBin = np.atleast_1d(self.edges.searchsorted(values, side='right') - 1)
+        iBin = np.atleast_1d(edges.searchsorted(values, side='right') - 1)
 
-        # Remove indices that are out of bounds
-        if trim:
-            iBin = iBin[(values >= self.edges[0]) &
-                        (values < self.edges[-1])]
+        if reversed:
+            iBin = self.nCells - iBin
+
+        # Force out of bounds to be in bounds if we are clipping
+        if clip:
+            iBin = np.maximum(iBin, 0)
+            iBin = np.minimum(iBin, self.nCells.item() - 1)
+        # Make sure values outside the lower edge are -1
         else:
-            # Force out of bounds to be in bounds if we are clipping
-            if clip:
-                iBin = np.maximum(iBin, 0)
-                iBin = np.minimum(iBin, self.nCells.item() - 1)
-            # Make sure values outside the lower edge are -1
-            else:
-                iBin[values < self.edges[0]] = -1
-                iBin[values >= self.edges[-1]] = self.nCells.item()
+            if not trim:
+                iBin[values < edges[0]] = -1
+                iBin[values >= edges[-1]] = self.nCells.item()
 
         return np.squeeze(iBin)
 
@@ -972,6 +983,8 @@ class RectilinearMesh1D(Mesh):
         if self.log is not None:
             kwargs['yscale'] = 'log'
 
+        kwargs.pop('line', None)
+
         ax, stp = cp.step(x=par, y=self.plotting_edges, **kwargs)
         # if self.hasHalfspace:
         #     h = 0.99*z[-1]
@@ -1000,7 +1013,7 @@ class RectilinearMesh1D(Mesh):
 
         values = StatArray.StatArray(np.full(self.nCells.item(), np.nan))
 
-        RectilinearMesh1D.pcolor(self, values=values, y=self.edges_absolute, **kwargs)
+        self.pcolor(values=values, **kwargs)
 
         # if self.open_left:
         #     h = y[-1] if kwargs.get('flip', False) else y[0]
@@ -1022,6 +1035,7 @@ class RectilinearMesh1D(Mesh):
         kwargs.pop('axis', None)
 
         subset, kwargs = cp.filter_plotting_kwargs(kwargs)
+        color_kwargs, kwargs = cp.filter_color_kwargs(kwargs)
         f = plt.axhline if subset['transpose'] else plt.axvline
 
         if np.size(value) > 1:
@@ -1033,7 +1047,7 @@ class RectilinearMesh1D(Mesh):
     def n_posteriors(self):
         return np.sum([x.hasPosterior for x in [self.nCells, self.edges]])
 
-    def init_posterior_plots(self, gs):
+    def _init_posterior_plots(self, gs, values=None, sharex=None, sharey=None):
         """Initialize axes for posterior plots
 
         Parameters
@@ -1046,27 +1060,64 @@ class RectilinearMesh1D(Mesh):
         if isinstance(gs, Figure):
             gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
 
-        splt = gs.subgridspec(2, 1, height_ratios=[1, 4])
-        ax = [plt.subplot(splt[0, 0]), plt.subplot(splt[1, 0])]
+        if values is None:
+            splt = gs.subgridspec(2, 1)#, height_ratios=[1, 4])
+            ax = [plt.subplot(splt[0, 0]), plt.subplot(splt[1, 0], sharey=sharey)]
+        else:
+            splt = gs.subgridspec(2, 1, height_ratios=[1, 4])
+            ax = [plt.subplot(splt[0, :])] # ncells
 
+            splt2 = splt[1, :].subgridspec(1, 2, width_ratios=[2, 1])
+            ax2 = plt.subplot(splt2[1], sharey=sharey) # edges
+            if sharey is None:
+                sharey = ax2
+            ax3 = plt.subplot(splt2[0], sharex=sharex, sharey=sharey) # values
+            ax += [ax2, ax3]            
+        
         for a in ax:
             cp.pretty(a)
 
         return ax
 
-    def plot_posteriors(self, axes=None, ncells_kwargs={}, edges_kwargs={}, **kwargs):
-        assert len(axes) == 2, ValueError("Must have length 2 list of axes for the posteriors. self.init_posterior_plots can generate them")
+    def plot_posteriors(self, axes=None, values=None, values_kwargs={}, **kwargs):
+        # assert len(axes) == 2, ValueError("Must have length 2 list of axes for the posteriors. self.init_posterior_plots can generate them")
 
-        best = kwargs.get('best', None)
+        if axes is None:
+            fig = plt.gcf()
+            axes = self._init_posterior_plots(fig, values=values)
+
+        ncells_kwargs = kwargs.get('ncells_kwargs', {})
+        edges_kwargs = kwargs.get('edges_kwargs', {})
+
+        best = kwargs.pop('best', None)
         if best is not None:
-            ncells_kwargs['line'] = best.nCells
-            # ncells_kwargs['color'] = cp.wellSeparated[3]
-            edges_kwargs['line'] = best.edges[1:]
-            # edges_kwargs['color'] = cp.wellSeparated[3]
-        
-        self.nCells.plotPosteriors(ax = axes[0], **ncells_kwargs)
-        self.edges.plotPosteriors(ax = axes[1], **edges_kwargs)
+            tmp = best
+            if values is not None:
+                tmp = best.mesh
+            ncells_kwargs['line'] = tmp.nCells
+            edges_kwargs['line'] = tmp.edges
 
+        if self.nCells.hasPosterior:
+            self.nCells.plotPosteriors(ax = axes[0], **ncells_kwargs)
+        if self.edges.hasPosterior:
+            self.edges.plotPosteriors(ax = axes[1], **edges_kwargs)
+
+        if values is not None:
+            values.plotPosteriors(ax=axes[2], **values_kwargs)
+
+            print('here')
+            print(values_kwargs)
+            if best is not None:
+                best.plot(xscale=values_kwargs.get('xscale', 'linear'), 
+                        flipY=False, 
+                        reciprocateX=values_kwargs.get('reciprocateX', None), 
+                        labels=False, 
+                        linewidth=1, 
+                        color=cp.wellSeparated[3])
+
+                doi = values.posterior.opacity_level(percent=67.0, log=values_kwargs.get('logX', None), axis=0)
+                plt.axhline(doi, color = '#5046C8', linestyle = 'dashed', linewidth = 1, alpha = 0.6)
+        return axes
 
     def priorProbability(self, log=True, verbose=False):
         """Evaluate the prior probability for the mesh.

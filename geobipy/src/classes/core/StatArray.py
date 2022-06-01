@@ -1237,6 +1237,10 @@ class StatArray(np.ndarray, myObject):
         if not self.hasPosterior:
             return
 
+        kwargs['cmap'] = kwargs.get('cmap', 'gray_r')
+        kwargs['trim'] = kwargs.get('trim', 0.0)
+        kwargs['normalize'] = kwargs.get('normalize', True)
+
         if ax is None:
             if self.nPosteriors > 1:
                 for i in range(self.nPosteriors):
@@ -1251,11 +1255,12 @@ class StatArray(np.ndarray, myObject):
             if np.size(ax) > 1:
                 if 'line' in kwargs:
                     assert np.size(kwargs['line']) == np.size(ax), ValueError("line in kwargs must have size {}".format(np.size(ax)))
-                line = kwargs.pop('line', np.asarray([np.nan for i in range(np.size(ax))]))
+                # line = kwargs.pop('line', np.asarray([np.nan for i in range(np.size(ax))]))
                 for i in range(self.nPosteriors):
                     plt.sca(ax[i])
                     plt.cla()
-                    self.posterior[i].plot(line=line[i], **kwargs)
+                    # self.posterior[i].pdf.plot(line=line[i], **kwargs)
+                    self.posterior[i].plot(**kwargs)
             else:
                 if isinstance(ax, list):
                     ax = ax[0]

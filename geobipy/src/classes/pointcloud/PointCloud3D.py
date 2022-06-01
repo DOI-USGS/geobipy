@@ -194,6 +194,10 @@ class PointCloud3D(myObject):
         self._nPoints = value
 
     @property
+    def n_posteriors(self):
+        return self.x.nPosteriors + self.y.nPosteriors + self.z.nPosteriors
+
+    @property
     def scalar(self):
         assert self.size == 1, ValueError("Cannot return array as scalar")
         return self[0]

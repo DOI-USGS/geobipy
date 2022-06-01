@@ -122,6 +122,27 @@ class Histogram(Model):
         """
         return self.mesh._credible_range(self.counts, percent=percent, log=log, axis=axis)
 
+    def entropy(self, log=2, axis=None):
+
+        assert log in [2, 10, 'e'], ValueError("log must be one of [2, 'e', 10]")
+        pdf = self.pdf
+        logged, _ = utilities._log(pdf.values, log=log)
+        entropy = pdf.values * logged
+        entropy[np.isnan(entropy)] = 0.0
+
+        entropy = -entropy.sum(axis=axis)
+        
+        entropy.name = 'Entropy'
+
+        if log == 2:
+            entropy.units = 'bits'
+        elif log == 10:
+            entropy.units = 'bans'
+        elif log == 'e':
+            entropy.units = 'nats'
+
+        return Model(mesh=self.mesh.remove_axis(axis), values=entropy)
+
     def estimate_std(self, n_samples, **kwargs):
         return np.sqrt(self.estimate_variance(n_samples, **kwargs))
 
@@ -252,7 +273,8 @@ class Histogram(Model):
             The means along the axis.
 
         """
-        return self.mesh._mean(self.counts, axis=axis)
+        out = self.mesh.remove_axis(axis)
+        return Model(mesh=out, values=self.mesh._mean(self.counts, axis=axis))
 
     def median(self, log=None, axis=0):
         """Gets the median for the specified axis.
@@ -293,16 +315,20 @@ class Histogram(Model):
             Opacity along the axis.
 
         """
-        return 1.0 - self.transparency(percent=percent, log=log, axis=axis)
+        out = self.transparency(percent=percent, log=log, axis=axis)
+        out.values = 1.0 - out.values
+        out.name = 'Opacity'
+        return out
 
     def opacity_level(self, percent=95.0, log=None, axis=0):
         """ Get the index along axis 1 from the bottom up that corresponds to the percent opacity """
 
         p = 0.01 * percent
         op = self.opacity(log=log, axis=axis)
-        nz = op.size - 1
+
+        nz = op.nCells - 1
         iC = nz
-        while op[iC] > p and iC >= 0:
+        while op.values[iC] > p and iC >= 0:
             iC -= 1
         return self.y.centres[iC]
 
@@ -328,7 +354,7 @@ class Histogram(Model):
             Contains the upper interval along the specified axis. Has size equal to arr.shape[axis].
 
         """
-        return self.mesh._percentile(values=self.pmf.values, percent=percent, axis=axis)
+        return Model(self.mesh.remove_axis(axis), values=self.mesh._percentile(values=self.pmf.values, percent=percent, axis=axis))
 
     def pcolor(self, **kwargs):
         kwargs['cmap'] = kwargs.get('cmap', 'gray_r')
@@ -336,7 +362,6 @@ class Histogram(Model):
 
     def plot(self, line=None, **kwargs):
         """ Plots the histogram """
-
         kwargs['trim'] = kwargs.pop('trim', 0.0)
         
         values = self.counts
@@ -349,7 +374,7 @@ class Histogram(Model):
             interval_kwargs['yscale'] = kwargs.get('yscale', 'linear')
 
         if self.ndim == 1:
-            ax = self.bar(**kwargs)
+            ax = self.mesh.bar(values=values, **kwargs)
 
             if line is not None:
                 kwargs['color'] = kwargs.pop('linecolor', cP.wellSeparated[3])
@@ -439,14 +464,16 @@ class Histogram(Model):
 
         """
 
-        out = self.credible_range(percent=percent, log=log, axis=axis)
+        out = StatArray(self.credible_range(percent=percent, log=log, axis=axis), 'Transparency')
         mn = np.nanmin(out)
         mx = np.nanmax(out)
         t = mx - mn
         if t > 0.0:
-            return (out - mn) / t
+            out = (out - mn) / t
         else:
-            return out - mn
+            out -= mn
+
+        return Model(self.mesh.remove_axis(axis), values=out)
 
     def update(self, *args, **kwargs):
         iBin = self.mesh.cellIndices(*args, clip=True, **kwargs)

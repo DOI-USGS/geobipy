@@ -246,10 +246,9 @@ class FdemSystem(myObject):
     @classmethod
     def fromHdf(cls, grp):
         """ Reads the object from a HDF file """
-        # nFreq = np.int32(np.array(grp.get('nFreq')))
         frequencies = StatArray.StatArray.fromHdf(grp['freq'])
-        transmitter = StatArray.StatArray.fromHdf(grp['T'])
-        receiver = StatArray.StatArray.fromHdf(grp['R'])
+        transmitter = CircularLoops.fromHdf(grp['T'])
+        receiver = CircularLoops.fromHdf(grp['R'])
 
         out = cls(frequencies, transmitter, receiver)
         return out

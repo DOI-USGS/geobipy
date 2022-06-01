@@ -71,7 +71,7 @@ class Mesh(myObject):
         percent = 0.5 * np.minimum(percent, 100.0 - percent)
         tmp = self._percentile(values, np.r_[percent, 100.0 - percent], axis=axis)
         if self.axis(axis).log is not None:
-            tmp, _ = log_(tmp, log=log)
+            tmp, _ = log_(tmp, log=self.axis(axis).log)
         return np.squeeze(np.abs(np.diff(tmp, axis=axis)))
 
     def _mean(self, values, axis=0):
@@ -88,6 +88,9 @@ class Mesh(myObject):
             i = np.where(s > 0.0)
             out = StatArray.StatArray(t.shape)
             out[i] = t[i] / s[i]
+
+        out.name = a.name
+        out.units = a.units
 
         return out
 

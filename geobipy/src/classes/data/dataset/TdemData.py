@@ -89,20 +89,6 @@ class TdemData(Data):
 
         self.channelNames = kwargs.get('channel_names')
 
-    # @Data.channelNames.setter
-    # def channelNames(self, values):
-    #     if values is None:
-    #         self._channelNames = []
-    #         for i in range(self.nSystems):
-    #             # Set the channel names
-    #             for ic in range(self.n_components):
-    #                 for iTime in range(self.nTimes[i]):
-    #                     self._channelNames.append('Off time {:.3e}'.format(self.system[i].windows.centre[iTime]))
-    #     else:
-    #         assert all((isinstance(x, str) for x in values))
-    #         assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
-    #         self._channelNames = values
-
     @Data.channelNames.setter
     def channelNames(self, values):
         if values is None:
@@ -111,7 +97,8 @@ class TdemData(Data):
                 # Set the channel names
                 for ic in range(self.n_components):
                     for iTime in range(self.nTimes[i]):
-                        self._channelNames.append('S{} time {:.3e}'.format(self.components[ic].upper(), self.system[i].windows.centre[iTime]))
+                        s = 'S{}{} time {:.3e}'.format(i, self.components[ic].upper(), self.system[i].windows.centre[iTime])
+                        self._channelNames.append(s)
         else:
             assert all((isinstance(x, str) for x in values))
             assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
@@ -164,12 +151,12 @@ class TdemData(Data):
     def predicted_primary_field(self):
         """The data. """
         if np.size(self._predicted_primary_field, 0) == 0:
-            self._predicted_primary_field = StatArray.StatArray((self.nPoints, self.n_components), "Predicted Primary field", self.units)
+            self._predicted_primary_field = StatArray.StatArray((self.nPoints, self.n_components * self.nSystems), "Predicted Primary field", self.units)
         return self._predicted_primary_field
 
     @predicted_primary_field.setter
     def predicted_primary_field(self, values):
-        shp = (self.nPoints, self.n_components)
+        shp = (self.nPoints, self.n_components * self.nSystems)
         if values is None:
             self._predicted_primary_field = StatArray.StatArray(shp, "Predicted primary field", self.units)
         else:
@@ -177,7 +164,7 @@ class TdemData(Data):
                 self.nPoints = np.size(values, 0)
             # if self.nChannels == 0:
             #     self.channels_per_system = np.size(values, 1)
-            shp = (self.nPoints, self.n_components)
+            shp = (self.nPoints, self.n_components * self.nSystems)
             assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("predicted_primary_field must have shape {}".format(shp))
             self._predicted_primary_field = StatArray.StatArray(values)
 
@@ -207,12 +194,13 @@ class TdemData(Data):
     def primary_field(self):
         """The data. """
         if np.size(self._primary_field, 0) == 0:
-            self._primary_field = StatArray.StatArray((self.nPoints, self.nChannels), "Primary field", self.units)
+            self._primary_field = StatArray.StatArray((self.nPoints, self.n_components * self.nSystems), "Primary field", self.units)
         return self._primary_field
 
     @primary_field.setter
     def primary_field(self, values):
-        shp = (self.nPoints, self.nChannels)
+        shp = (self.nPoints, self.n_components * self.nSystems)
+
         if values is None:
             self._primary_field = StatArray.StatArray(shp, "Primary field", self.units)
         else:
@@ -220,10 +208,9 @@ class TdemData(Data):
                 self.nPoints = np.size(values, 0)
             # if self.nChannels == 0:
             #     self.channels_per_system = np.size(values, 1)
-            shp = (self.nPoints, self.nChannels)
+            shp = (self.nPoints, self.n_components * self.nSystems)
             assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("primary_field must have shape {}".format(shp))
             self._primary_field = StatArray.StatArray(values)  
-
 
     @property
     def receiver(self):
@@ -622,7 +609,7 @@ class TdemData(Data):
                     on_error.append(channel)
                 else:
                     on.append(channel)
-            elif any(x in cTmp for x in ("off_time", "sx_time", "sy_time", "sz_time")):
+            elif any(x in cTmp for x in ("off_time", "x_time", "y_time", "z_time")):
                 if 'err' in cTmp:
                     off_error_channels.append(channel)
                 else:
@@ -912,26 +899,29 @@ class TdemData(Data):
 
         """
 
+        legend = kwargs.pop('legend', True)
+        kwargs['yscale'] = kwargs.get('yscale', 'log')
+
         x = self.getXAxis(xAxis)
 
-        ax = plt.gca()
         if channels is None:
             i = self._systemIndices(system)
-            cP.plot(x, self.data[:, i],
-                    label=self.channelNames[i], **kwargs)
+            ax = cP.plot(x, self.data[:, i],
+                         label=self.channelNames[i], **kwargs)
         else:
             channels = np.atleast_1d(channels)
             for j, i in enumerate(channels):
-                cP.plot(x, self.data[:, i], label=self.channelNames[i], **kwargs)
-
-        # box = ax.get_position()
-        # ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
-
-        # Put a legend to the right of the current axis
-        leg = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), fancybox=True)
-        leg.set_title(self.data.getNameUnits())
+                ax = cP.plot(x, self.data[:, i], 
+                             label=self.channelNames[i], **kwargs)
 
         plt.xlabel(cF.getNameUnits(x))
+
+        # Put a legend to the right of the current axis
+        if legend:
+            leg = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), fancybox=True)
+            leg.set_title(self.data.getNameUnits())
+        
+        return ax        
 
     def plotLine(self, line, xAxis='index', **kwargs):
 
@@ -944,6 +934,10 @@ class TdemData(Data):
             j = self._systemIndices(i)
             kwargs['labels'] = line.channelNames[j]
             line.data[:, j].plot(x=x, **kwargs)
+
+    def plotPredicted(self, xAxis='index', channels=None, system=None, **kwargs):
+        kwargs['yscale'] = kwargs.get('yscale', 'log')
+        return super().plotPredicted(xAxis=xAxis, channels=channels, system=system, **kwargs)
 
     def plotWaveform(self, **kwargs):
         for i in range(self.nSystems):
@@ -1042,7 +1036,7 @@ class TdemData(Data):
 
         self = super(TdemData, cls).fromHdf(grp, system=systems)
 
-        self.primary_field = StatArray.StatArray.fromHdf(grp['primary_field'])
+        self.primary_field = None#StatArray.StatArray.fromHdf(grp['primary_field'])
         self.secondary_field = StatArray.StatArray.fromHdf(grp['secondary_field'])
         self.predicted_primary_field = StatArray.StatArray.fromHdf(grp['predicted_primary_field'])
         self.predicted_secondary_field = StatArray.StatArray.fromHdf(grp['predicted_secondary_field'])

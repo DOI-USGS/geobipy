@@ -7,19 +7,13 @@
 
 """
 from pandas import read_csv
-from ...pointcloud.PointCloud3D import PointCloud3D
+from matplotlib.figure import Figure
 from .TdemData import TdemData
 from ..datapoint.Tempest_datapoint import Tempest_datapoint
 from ....classes.core import StatArray
 from ...system.CircularLoops import CircularLoops
-from ...system.TdemSystem import TdemSystem
 
 import numpy as np
-from ....base import fileIO as fIO
-#from ....base import Error as Err
-from ....base import plotting as cP
-from ....base import utilities as cF
-from ....base import MPI as myMPI
 import matplotlib.pyplot as plt
 from os.path import join
 import h5py
@@ -83,26 +77,26 @@ class TempestData(TdemData):
     def file(self):
         return self._file
 
-    @property
-    def primary_field(self):
-        """The data. """
-        if np.size(self._primary_field, 0) == 0:
-            self._primary_field = StatArray.StatArray((self.nPoints, self.n_components * self.nSystems), "Primary field", self.units)
-        return self._primary_field
+    # @property
+    # def primary_field(self):
+    #     """The data. """
+    #     if np.size(self._primary_field, 0) == 0:
+    #         self._primary_field = StatArray.StatArray((self.nPoints, self.n_components * self.nSystems), "Primary field", self.units)
+    #     return self._primary_field
 
-    @primary_field.setter
-    def primary_field(self, values):
-        shp = (self.nPoints, self.n_components * self.nSystems)
-        if values is None:
-            self._primary_field = StatArray.StatArray(shp, "Primary field", self.units)
-        else:
-            if self.nPoints == 0:
-                self.nPoints = np.size(values, 0)
-            # if self.nChannels == 0:
-            #     self.channels_per_system = np.size(values, 1)
-            shp = (self.nPoints, self.n_components * self.nSystems)
-            assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("primary_field must have shape {}".format(shp))
-            self._primary_field = StatArray.StatArray(values)  
+    # @primary_field.setter
+    # def primary_field(self, values):
+    #     shp = (self.nPoints, self.n_components * self.nSystems)
+    #     if values is None:
+    #         self._primary_field = StatArray.StatArray(shp, "Primary field", self.units)
+    #     else:
+    #         if self.nPoints == 0:
+    #             self.nPoints = np.size(values, 0)
+    #         # if self.nChannels == 0:
+    #         #     self.channels_per_system = np.size(values, 1)
+    #         shp = (self.nPoints, self.n_components * self.nSystems)
+    #         assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("primary_field must have shape {}".format(shp))
+    #         self._primary_field = StatArray.StatArray(values)  
 
     @property
     def relative_error(self):
@@ -267,6 +261,47 @@ class TempestData(TdemData):
         self.check()
 
         return self
+
+    def init_posterior_plots(self, gs):
+        """Initialize axes for posterior plots
+
+        Parameters
+        ----------
+        gs : matplotlib.gridspec.Gridspec
+            Gridspec to split
+
+        """
+        if isinstance(gs, Figure):
+            gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
+
+        splt = gs.subgridspec(2, 2, wspace=0.3)
+        ax = []
+        # Height axis
+        ax.append(plt.subplot(splt[0, 0]))
+        # Data axis
+        ax.append(plt.subplot(splt[0, 1], sharex=ax[0]))
+
+        splt2 = splt[1, :].subgridspec(self.nSystems * self.n_components, 2, wspace=0.2)
+        # Relative error axes
+        ax.append([plt.subplot(splt2[i, 0], sharex=ax[0]) for i in range(self.n_components * self.nSystems)])
+        # # Additive Error axes
+        # ax.append([plt.subplot(splt2[i, 1], sharex=ax[0]) for i in range(self.nSystems)])
+        ax.append(plt.subplot(splt2[0, 1], sharex=ax[0]))
+
+        return ax    
+
+    def plot_posteriors(self, axes=None, height_kwargs={}, data_kwargs={}, rel_error_kwargs={}, transmitter_pitch_kwargs={}, **kwargs):
+        
+        assert len(axes) == 4, ValueError("Must have length 3 list of axes for the posteriors. self.init_posterior_plots can generate them")
+
+        self.z.plotPosteriors(ax = axes[0], **height_kwargs)
+
+        self.plot(ax=axes[1], legend=False, **data_kwargs)
+        self.plotPredicted(ax=axes[1], legend=False, **data_kwargs)
+
+        self.relative_error.plotPosteriors(ax=axes[2], **rel_error_kwargs)
+
+        self.transmitter.pitch.plotPosteriors(ax=axes[3], **transmitter_pitch_kwargs)
 
     # def csv_channels(self, data_filename):
     
@@ -513,5 +548,7 @@ class TempestData(TdemData):
         if kwargs.get('index') is not None:
             return cls.single.fromHdf(grp, **kwargs)
 
-        return super(TempestData, cls).fromHdf(grp, **kwargs)
+        out = super(TempestData, cls).fromHdf(grp, **kwargs)
+        out.primary_field = StatArray.StatArray.fromHdf(grp['primary_field'])
+        return 
 

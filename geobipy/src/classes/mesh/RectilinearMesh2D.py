@@ -10,6 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.collections import LineCollection
+from matplotlib.figure import Figure
 from scipy.stats import binned_statistic
 from ...base import plotting as cP
 from ...base import utilities
@@ -297,10 +298,7 @@ class RectilinearMesh2D(Mesh):
 
     def _compute_probability(self, distribution, pdf, log, log_probability, axis=0, **kwargs):
         centres = self.centres(axis=axis)
-        # print(centres)
         centres, _ = utilities._log(centres, log)
-        # print(centres)
-        # print(centres.shape)
 
         ax = self.other_axis(axis)
 
@@ -325,7 +323,6 @@ class RectilinearMesh2D(Mesh):
             j = [i]
             j.insert(axis, np.s_[:])
             j = tuple(j)
-            # print(j)
             p = distribution.probability(centres[j], log_probability)
             probability[j] = np.dot(p, pdf[j])
         probability = probability / np.expand_dims(np.sum(probability, axis), axis=axis)
@@ -351,6 +348,9 @@ class RectilinearMesh2D(Mesh):
             i = np.where(s > 0.0)
             out = StatArray.StatArray(t.shape)
             out[i] = t[i] / s[i]
+
+        out.name = a.name
+        out.units = a.units
 
         return out
 
@@ -834,9 +834,6 @@ class RectilinearMesh2D(Mesh):
             ax, pm, cb = cP.pcolormesh(xm, ym, values, **kwargs)
             cP.xlabel(xm.label)
             cP.ylabel(ym.label)
-
-            return ax, pm, cb
-
         else:
             # Need to expand the yaxis edges since they could be draped.
             if (x_mask is not None) or (y_mask is not None):
@@ -856,13 +853,15 @@ class RectilinearMesh2D(Mesh):
                 if y.shape[0] != x.shape[0]:
                     x = x.T
 
-                if np.all(values.shape == np.asarray(x.shape[::-1]) - 1):
-                    values = values.T
+                # if np.all(values.shape == np.asarray(x.shape[::-1]) - 1):
+                #     values = values.T
 
                 ax, pm, cb = cP.pcolor(x=x, y=y, values=values, **kwargs)
 
         return ax, pm, cb
 
+    def plot(self, *args, **kwargs):
+        return self.pcolor(*args, **kwargs)
 
     def plotGrid(self, **kwargs):
         """Plot the mesh grid lines.
@@ -936,18 +935,64 @@ class RectilinearMesh2D(Mesh):
 
     def plot_line(self, value, axis=0, **kwargs):
 
-        c = kwargs.pop('color', '#5046C8')
-        ls = kwargs.pop('linestyle', 'dashed')
-        lw = kwargs.pop('linewidth', 2)
-        a = kwargs.pop('alpha', 0.6)
-
         if axis == 0:
-            cP.plot(value, self.y.centres, color=c, linestyle=ls,
-                    linewidth=lw, alpha=a, **kwargs)
+            cP.plot(value, self.y.centres, **kwargs)
         else:
-            cP.plot(self.x.centres, value, color=c, linestyle=ls,
-                    linewidth=lw, alpha=a, **kwargs)
+            cP.plot(self.x.centres, value, **kwargs)
 
+    # def init_value_posterior_plots(self, gs, sharex=None, sharey=None):
+
+    #     if isinstance(gs, Figure):
+    #         gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0] 
+
+    #     shape = (3, 2)
+    #     splt = gs.subgridspec(*shape)
+
+    #     ax = [plt.subplot(splt[np.unravel_index(i, shape)]) for i in range(5)]
+
+    #     for a in ax:
+    #         cP.pretty(a)
+
+    #     return ax
+
+    # def plot_posteriors(self, axes, ncells_kwargs={}, y_edges_kwargs={}, **kwargs):
+    #     # assert len(axes) == 2, ValueError("Must have length 2 list of axes for the posteriors. self.init_posterior_plots can generate them")
+
+    #     # best = kwargs.get('best', None)
+    #     # if best is not None:
+    #     #     ncells_kwargs['line'] = best.nCells
+    #     #     edges_kwargs['line'] = best.edges[1:]
+        
+    #     self.nCells.plotPosteriors(ax = axes[0], **ncells_kwargs)
+    #     self.y.edges.plotPosteriors(ax = axes[1], **y_edges_kwargs)
+
+    def plot_value_posteriors(self, axes, values, axis, value_kwargs={}, **kwargs):
+        # assert len(axes) == 5, ValueError("Must have length 5 list of axes for the posteriors. self.init_posterior_plots can generate them")
+
+        # best = kwargs.get('best', None)
+        # if best is not None:
+        #     ncells_kwargs['line'] = best.nCells
+        #     edges_kwargs['line'] = best.edges[1:]
+
+        flipx = kwargs.pop('flipX', False)
+        flipy = kwargs.pop('flipY', False)
+
+        mean = values.posterior.mean(axis=axis)
+        mean.pcolor(ax=axes[0], **value_kwargs)
+        tmp = values.posterior.percentile(percent=5.0, axis=axis)
+        tmp.pcolor(ax=axes[2], **value_kwargs)
+        tmp = values.posterior.percentile(percent=95.0, axis=axis)
+        tmp.pcolor(ax=axes[4], **value_kwargs)
+        tmp = values.posterior.entropy(axis=axis)
+        tmp.pcolor(ax=axes[1])
+        tmp = values.posterior.opacity(axis=axis)
+        a, b, cb = tmp.pcolor(axis=axis, ax=axes[3], ticks=[0.0, 0.5, 1.0], cmap='plasma')
+        
+        if cb is not None:
+            labels = ['Less', '', 'More']
+            cb.ax.set_yticklabels(labels)
+            cb.set_label("Confidence")
+        
     @property
     def summary(self):
         """ Display a summary of the 3D Point Cloud """

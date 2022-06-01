@@ -259,30 +259,6 @@ class Model(myObject):
         else:
             return self.gradient.probability(log=log)
 
-    def init_posterior_plots(self, gs):
-        """Initialize axes for posterior plots
-
-        Parameters
-        ----------
-        gs : matplotlib.gridspec.Gridspec
-            Gridspec to split
-
-        """
-
-        if isinstance(gs, Figure):
-            gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
-
-        splt = gs.subgridspec(2, 2, height_ratios=[1, 4])
-        splt2 = splt[1, :].subgridspec(1, 2, wspace=0.2)
-        ax = [plt.subplot(splt[0, :])]
-        ax.append(plt.subplot(splt2[:, 1]))
-        ax.append(plt.subplot(splt2[:, 0]))
-
-        for a in ax:
-            cP.pretty(a)
-
-        return ax
-
     def insert_edge(self, edge, value=None):
 
         out, values = self.mesh.insert_edge(edge, values=self.values)
@@ -409,35 +385,20 @@ class Model(myObject):
 
     def plotGrid(self, **kwargs):
         return self.mesh.plotGrid(**kwargs)
+
+    def _init_posterior_plots(self, gs, sharex=None, sharey=None):
+        """Initialize axes for posterior plots
+
+        Parameters
+        ----------
+        gs : matplotlib.gridspec.Gridspec
+            Gridspec to split
+
+        """
+        return self.mesh._init_posterior_plots(gs, values=self.values, sharex=sharex, sharey=sharey)
     
-    def plot_posteriors(self, axes=None, parameter_kwargs={}, **kwargs):
-    
-        assert len(axes) == 3, ValueError(("Must have length 3 list of axes for the posteriors. \n"
-                                          "self.init_posterior_plots() can generate them"))
-
-        if kwargs.get('edges_kwargs', {}).get('flipY', False) and parameter_kwargs.get('flipY', False):
-            parameter_kwargs['flipY'] = False
-
-        best = kwargs.pop('best', None)
-        
-        if best is not None:
-            kwargs['best'] = best.mesh
-        self.mesh.plot_posteriors(axes[:2], **kwargs)
-        axes[2].sharey(axes[1])
-    
-        self.values.plotPosteriors(ax=axes[2], **parameter_kwargs)
-
-        if best is not None:
-            best.plot(xscale=parameter_kwargs.get('xscale', 'linear'), 
-                      flipY=False, 
-                      reciprocateX=parameter_kwargs.get('reciprocateX', None), 
-                      labels=False, 
-                      linewidth=1, 
-                      color=cP.wellSeparated[3])
-
-            doi = self.values.posterior.opacity_level(percent=67.0, log=parameter_kwargs.get('logX', None), axis=0)
-            plt.axhline(doi, color = '#5046C8', linestyle = 'dashed', linewidth = 1, alpha = 0.6)
-        return axes
+    def plot_posteriors(self, axes=None, values_kwargs={}, axis=0, **kwargs):
+        return self.mesh.plot_posteriors(axes, axis=axis, values=self.values, values_kwargs=values_kwargs, **kwargs)
 
     def pcolor(self, **kwargs):
         """Plot like an image
