@@ -365,7 +365,7 @@ class Inference1D(myObject):
             self.posterior = posterior1
             self.model = perturbed_model
             self.datapoint = perturbed_datapoint
-        
+
     def infer(self, hdf_file_handle):
         """ Markov Chain Monte Carlo approach for inversion of geophysical data
         userParameters: User input parameters object
@@ -482,7 +482,7 @@ class Inference1D(myObject):
 
         mngr = plt.get_current_fig_manager()
         try:
-            mng.frame.Maximize(True)
+            mngr.frame.Maximize(True)
         except:
             try:
                 mngr.window.showMaximized()

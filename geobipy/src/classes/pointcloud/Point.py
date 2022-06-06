@@ -206,7 +206,6 @@ class Point(myObject, ABC):
 
         return cls(x=x, y=y, z=z, elevation=elevation, **kwargs)
 
-
     def Isend(self, dest, world):
         self.x.Isend(dest, world)
         self.y.Isend(dest, world)
