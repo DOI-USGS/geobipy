@@ -118,7 +118,7 @@ class Uniform(baseDistribution):
         return msg
 
 
-    def bins(self, nBins=100, dim=None):
+    def bins(self, nBins=99, dim=None):
         """Discretizes a range given the min and max of the distribution
 
         Parameters

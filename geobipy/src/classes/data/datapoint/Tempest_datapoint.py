@@ -1,30 +1,17 @@
 from copy import deepcopy
 
 from ....classes.core import StatArray
-from ...model.Model1D import Model1D
 from .TdemDataPoint import TdemDataPoint
 from ...forwardmodelling.Electromagnetic.TD.tdem1d import (tdem1dfwd, tdem1dsen)
-from ...system.EmLoop import EmLoop
-from ...system.SquareLoop import SquareLoop
-from ...system.CircularLoop import CircularLoop
-from ...system.TdemSystem import TdemSystem
-from ...system.filters.butterworth import butterworth
-from ...system.Waveform import Waveform
 from ...statistics.Histogram import Histogram
 from ...mesh.RectilinearMesh1D import RectilinearMesh1D
-from ...statistics.Histogram2D import Histogram2D
 from ...statistics.Distribution import Distribution
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
-#from ....base import Error as Err
-from ....base import fileIO as fIO
 from ....base import utilities as cf
 from ....base import plotting as cP
-from ....base import MPI as myMPI
-from os.path import split as psplt
-from os.path import join
 
 
 class Tempest_datapoint(TdemDataPoint):
@@ -120,7 +107,7 @@ class Tempest_datapoint(TdemDataPoint):
         for i in range(self.nSystems):
             for j in range(self.n_components):
                 ic = self._component_indices(j, i)
-                relative_error = self.relErr[(i*2)+j] * self.data[ic]
+                relative_error = self.relErr[(i*self.n_components)+j] * self.data[ic]
 
                 self._std[ic] = np.sqrt((relative_error**2.0) + (self.addErr[ic]**2.0))
 
@@ -145,7 +132,7 @@ class Tempest_datapoint(TdemDataPoint):
         if 'initial_transmitter_pitch' in kwargs:
             self.transmitter.pitch = kwargs['initial_transmitter_pitch']
 
-    def init_posterior_plots(self, gs):
+    def _init_posterior_plots(self, gs):
         """Initialize axes for posterior plots
 
         Parameters
@@ -157,22 +144,29 @@ class Tempest_datapoint(TdemDataPoint):
         if isinstance(gs, matplotlib.figure.Figure):
             gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
 
-        splt = gs.subgridspec(2, 2, width_ratios=[1, 4], height_ratios=[2, 1], wspace=0.3)
+        splt = gs.subgridspec(2, 2, width_ratios=[1, 4], height_ratios=[3, 1], wspace=0.3)
         ax = []
         # Height axis
-        ax.append(plt.subplot(splt[0, 0]))
+        ax.append(self.z._init_posterior_plots(splt[0, 0]))
+        # ax.append(plt.subplot(splt[0, 0]))
         # Data axis
         ax.append(plt.subplot(splt[0, 1]))
 
-        splt2 = splt[1, :].subgridspec(self.nSystems*self.n_components, 2, wspace=0.2)
+        # splt2 = splt[1, :].subgridspec(self.nSystems*self.n_components, 2, wspace=0.2)
+        # tmp = [plt.subplot(splt2[0, 0])]
         # Relative error axes
-        ax.append([plt.subplot(splt2[i, 0]) for i in range(self.nSystems*self.n_components)])
+        # tmp += [plt.subplot(splt2[i, 0], sharex=tmp[0]) for i in range(1, self.nSystems*self.n_components)]
+        # ax.append(tmp)
+        ax.append(self.relative_error._init_posterior_plots(splt[1, 0]))
 
         # # Additive Error axes
         # ax.append([None for i in range(self.nSystems*self.n_components)])
 
         # Pitch axes
-        ax.append([plt.subplot(splt2[i, 1]) for i in range(self.nSystems)])
+        # tmp = [plt.subplot(splt2[0, 1])]
+        # tmp += [plt.subplot(splt2[i, 1], sharex=tmp[0]) for i in range(1, self.nSystems)]
+        # ax.append(tmp)
+        ax.append(self.transmitter.pitch._init_posterior_plots(splt[1, 1]))
 
         return ax
 
@@ -273,6 +267,12 @@ class Tempest_datapoint(TdemDataPoint):
         return super().plot(**kwargs)
 
     def plot_posteriors(self, axes=None, height_kwargs={}, data_kwargs={}, rel_error_kwargs={}, pitch_kwargs={}, **kwargs):
+
+        if axes is None:
+            axes = kwargs.pop('fig', plt.gcf())
+            
+        if not isinstance(axes, list):
+            axes = self._init_posterior_plots(axes)
 
         assert len(axes) == 4, ValueError("Must have length 3 list of axes for the posteriors. self.init_posterior_plots can generate them")
 

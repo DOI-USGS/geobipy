@@ -3,11 +3,7 @@ Class to store inversion results. Contains plotting and writing to file procedur
 """
 from copy import deepcopy
 from os.path import join
-import matplotlib as mpl
 import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
-from matplotlib.pyplot import pause
-from matplotlib.ticker import MaxNLocator
 from ..base import plotting as cP
 from ..base import utilities as cF
 import numpy as np
@@ -15,8 +11,6 @@ from ..base import fileIO as fIO
 import h5py
 from ..base.HDF.hdfWrite import write_nd
 from ..classes.core import StatArray
-# from ..classes.statistics.Hitmap2D import Hitmap2D
-from ..classes.statistics.Histogram1D import Histogram1D
 from ..classes.statistics.Distribution import Distribution
 from ..classes.core.myObject import myObject
 from ..classes.data.datapoint.FdemDataPoint import FdemDataPoint
@@ -334,10 +328,10 @@ class Inference1D(myObject):
         # Compute the components of each acceptance ratio
         likelihood1 = 1.0
         observation = None
-        if not self.kwargs.get('ignore_likelihood', False):
+        if not  self.kwargs.get('ignore_likelihood', False):
             likelihood1 = perturbed_datapoint.likelihood(log=True)
             observation = perturbed_datapoint
-        proposal, proposal1 = perturbed_model.proposal_probabilities(remapped_model, perturbed_datapoint)
+        proposal, proposal1 = perturbed_model.proposal_probabilities(remapped_model, observation)
 
         posterior1 = prior1 + likelihood1
 
@@ -501,7 +495,7 @@ class Inference1D(myObject):
             cP.pretty(ax)
 
         self.ax[2] = self.model._init_posterior_plots(gs[1, 0])
-        self.ax[3] = self.datapoint.init_posterior_plots(gs[1, 1])
+        self.ax[3] = self.datapoint._init_posterior_plots(gs[1, 1])
 
         if self.interactive_plot:
             plt.show(block=False)

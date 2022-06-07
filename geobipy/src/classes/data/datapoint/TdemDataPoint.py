@@ -12,18 +12,14 @@ from ...system.TdemSystem import TdemSystem
 from ...system.TdemSystem_GAAEM import TdemSystem_GAAEM
 from ...system.filters.butterworth import butterworth
 from ...system.Waveform import Waveform
-from ...mesh.RectilinearMesh2D import RectilinearMesh2D
-from ...statistics.Histogram import Histogram
 from ...statistics.Distribution import Distribution
 import matplotlib.pyplot as plt
 import numpy as np
 
 #from ....base import Error as Err
 from ....base.HDF.hdfRead import read_item
-from ....base import fileIO as fIO
 from ....base import utilities as cf
 from ....base import plotting as cp
-from ....base import MPI as myMPI
 from os.path import split as psplt
 from os.path import join
 
@@ -115,10 +111,6 @@ class TdemDataPoint(EmDataPoint):
             #     "relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
 
         self._addErr = StatArray.StatArray(values, '$\epsilon_{Additive}$', self.units)
-
-    # @property
-    # def components(self):
-    #     return self.system[0].components
 
     @EmDataPoint.channelNames.setter
     def channelNames(self, values):
@@ -672,8 +664,8 @@ class TdemDataPoint(EmDataPoint):
         ax = kwargs.pop('ax', None)
         ax = plt.gca() if ax is None else plt.sca(ax)
 
-        kwargs['marker'] = kwargs.pop('marker', 'v')
-        kwargs['markersize'] = kwargs.pop('markersize', 7)
+        markers = kwargs.pop('marker', ['o', 'x', 'v'])
+        kwargs['markersize'] = kwargs.pop('markersize', 5)
         c = kwargs.pop('color', [cp.wellSeparated[i+1] for i in range(self.nSystems)])
         mfc = kwargs.pop('markerfacecolor', [cp.wellSeparated[i+1] for i in range(self.nSystems)])
         assert len(c) == self.nSystems, ValueError("color must be a list of length {}".format(self.nSystems))
@@ -695,6 +687,8 @@ class TdemDataPoint(EmDataPoint):
 
             for k in range(self.n_components):
 
+                kwargs['marker'] = markers[self._components[k]]
+
                 icomp = self._component_indices(k, j)
                 d = self.data[icomp]
 
@@ -703,12 +697,12 @@ class TdemDataPoint(EmDataPoint):
                     plt.errorbar(system_times, d, yerr=s,
                                  color=c[j],
                                  markerfacecolor=mfc[j],
-                                 label='System: {}'.format(j+1),
+                                 label='System: {}{}'.format(j+1, self.components[k]),
                                  **kwargs)
                 else:
                     plt.plot(system_times, d,
                              markerfacecolor=mfc[j],
-                             label='System: {}'.format(j+1),
+                             label='System: {}{}'.format(j+1, self.components[k]),
                              **kwargs)
 
         plt.xscale(xscale)
@@ -717,18 +711,10 @@ class TdemDataPoint(EmDataPoint):
         cp.ylabel(cf.getNameUnits(self.data))
         cp.title(title)
 
-        if self.nSystems > 1:
+        if self.nSystems > 1 or self.n_components > 1:
             plt.legend()
 
         return ax
-
-    # def plot_posteriors(self, axes=None, height_kwargs={}, data_kwargs={}, rel_error_kwargs={}, add_error_kwargs={}, **kwargs):
-    #     super().plot_posteriors(axes=axes,
-    #                             height_kwargs=height_kwargs,
-    #                             data_kwargs=data_kwargs,
-    #                             rel_error_kwargs=rel_error_kwargs,
-    #                             add_error_kwargs=add_error_kwargs,
-    #                             **kwargs)
 
     def plotPredicted(self, title='Time Domain EM Data', **kwargs):
 

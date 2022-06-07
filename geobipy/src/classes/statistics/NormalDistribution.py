@@ -170,7 +170,7 @@ class Normal(baseDistribution):
 #        T2 = np.array(h5grp.get('variance'))
 #        return MvNormal(T1, T2)
 
-    def bins(self, nBins = 100, nStd=4.0):
+    def bins(self, nBins = 99, nStd=4.0):
         """ Discretizes a range given the mean and variance of the distribution """
         tmp = nStd * np.sqrt(self.variance)
         values = np.linspace(self._mean - tmp, self._mean + tmp, nBins+1)

@@ -228,25 +228,25 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
 
         if values is None:
             splt = gs.subgridspec(1, 2)
-            ax = [plt.subplot(splt[0, 0], sharex=sharex, sharey=sharey)]
-            ax.append(plt.subplot(splt[0, 1], sharex=sharex, sharey=sharey))
+            
         else:
-            shape = (3, 2)
+            shape = (4, 2)
             splt = gs.subgridspec(*shape)
 
-            ax = [plt.subplot(splt[np.unravel_index(i, shape)]) for i in range(5)]
+        ax = [plt.subplot(splt[0, 0], sharex=sharex, sharey=sharey)] # n_cells
+        sharex = ax[0] if sharex is None else sharex
+        ax.append(plt.subplot(splt[0, 1], sharex=sharex, sharey=sharey)) # y_edges
+        sharey = ax[1] if sharey is None else sharey
+        
+        if values is not None:
+            ax += [plt.subplot(splt[np.unravel_index(i, shape)], sharex=sharex, sharey=sharey) for i in range(2, 8)]
 
         for a in ax:
             cP.pretty(a)
 
         return ax        
 
-        for a in ax:
-            cP.pretty(a)
-
-        return ax
-
-    def plot_posteriors(self, axes=None, values=None, value_kwargs={}, **kwargs):
+    def plot_posteriors(self, axes=None, values=None, value_kwargs={}, sharex=None, sharey=None, **kwargs):
         # assert len(axes) == 2, ValueError("Must have length 2 list of axes for the posteriors. self.init_posterior_plots can generate them")
 
         # best = kwargs.get('best', None)
@@ -255,8 +255,10 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
         #     edges_kwargs['line'] = best.edges[1:]
 
         if axes is None:
-            fig = plt.gcf()
-            axes = self._init_posterior_plots(fig, values=values)
+            axes = kwargs.pop('fig', plt.gcf())
+
+        if not isinstance(axes, list):
+            axes = self._init_posterior_plots(axes, values=values, sharex=sharex, sharey=sharey)
 
         ncells_kwargs = kwargs.get('ncells_kwargs', {})
         y_edges_kwargs = kwargs.get('y_edges_kwargs', {})
@@ -266,6 +268,29 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
         if kwargs.pop('flipY', False) :
             y_edges_kwargs['flipY'] = True
         self.y_edges.plotPosteriors(ax = axes[1], **y_edges_kwargs)
+
+        if values is not None:
+            axis = value_kwargs.pop('axis', 1)
+            mean = values.posterior.mean(axis=axis)
+            mean.pcolor(ax=axes[2], **value_kwargs)
+            tmp = values.posterior.percentile(percent=5.0, axis=axis)
+            tmp.pcolor(ax=axes[4], **value_kwargs)
+            tmp = values.posterior.percentile(percent=95.0, axis=axis)
+            tmp.pcolor(ax=axes[6], **value_kwargs)
+            tmp = values.posterior.entropy(axis=axis)
+            tmp.pcolor(ax=axes[3])
+            tmp = values.posterior.opacity(axis=axis)
+            a, b, cb = tmp.pcolor(axis=axis, ax=axes[5], ticks=[0.0, 0.5, 1.0], cmap='plasma')
+            
+            if cb is not None:
+                labels = ['Less', '', 'More']
+                cb.ax.set_yticklabels(labels)
+                cb.set_label("Confidence")
+
+            mean.pcolor(ax=axes[7], alpha = tmp.values, **value_kwargs)
+        
+        return axes
+
 
     def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None, upcast=False):
         """ Create the hdf group metadata in file

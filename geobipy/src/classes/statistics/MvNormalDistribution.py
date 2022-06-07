@@ -237,7 +237,7 @@ class MvNormal(baseDistribution):
         if (self.variance.ndim == 2):
             return MvNormal(np.zeros(N, dtype=self.mean.dtype), np.zeros([N, N], dtype=self.variance.dtype), prng=self.prng)
 
-    def bins(self, nBins=100, nStd=4.0, axis=None, relative=False):
+    def bins(self, nBins=99, nStd=4.0, axis=None, relative=False):
         """Discretizes a range given the mean and variance of the distribution
 
         Parameters
@@ -280,4 +280,4 @@ class MvNormal(baseDistribution):
             if not relative:
                 bins += self._mean
 
-        return StatArray.StatArray(values)
+        return StatArray.StatArray(bins)

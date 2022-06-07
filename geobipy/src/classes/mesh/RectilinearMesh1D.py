@@ -1083,8 +1083,12 @@ class RectilinearMesh1D(Mesh):
         # assert len(axes) == 2, ValueError("Must have length 2 list of axes for the posteriors. self.init_posterior_plots can generate them")
 
         if axes is None:
-            fig = plt.gcf()
-            axes = self._init_posterior_plots(fig, values=values)
+            axes = kwargs.pop('fig', plt.gcf())
+
+        if not isinstance(axes, list):
+            axes = self._init_posterior_plots(axes, values=values)
+            
+        assert len(axes) >= 2, ValueError("axes must have length >= 2")
 
         ncells_kwargs = kwargs.get('ncells_kwargs', {})
         edges_kwargs = kwargs.get('edges_kwargs', {})
@@ -1103,8 +1107,9 @@ class RectilinearMesh1D(Mesh):
             self.edges.plotPosteriors(ax = axes[1], **edges_kwargs)
 
         if values is not None:
+            assert len(axes) == 3, ValueError("axes must have length == 3")
             values.plotPosteriors(ax=axes[2], **values_kwargs)
-            
+
             if best is not None:
                 best.plot(xscale=values_kwargs.get('xscale', 'linear'), 
                         flipY=False, 

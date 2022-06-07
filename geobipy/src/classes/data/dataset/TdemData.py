@@ -21,7 +21,6 @@ from ...system.TdemSystem import TdemSystem
 
 import numpy as np
 from ....base import fileIO as fIO
-#from ....base import Error as Err
 from ....base import plotting as cP
 from ....base import utilities as cF
 from ....base import MPI as myMPI
@@ -121,12 +120,17 @@ class TdemData(Data):
 
     @property
     def loopOffset(self):
-        offset = np.empty((self.nPoints, 3))
-        for i in range(self.nPoints):
-            offset[i, :] = np.r_[self.receiver[i].x - self.transmitter[i].x,
-                                 self.receiver[i].y - self.transmitter[i].y,
-                                 self.receiver[i].z - self.transmitter[i].z]
-        return offset
+
+        return np.vstack([self.receiver.x - self.transmitter.x,
+                          self.receiver.y - self.transmitter.y, 
+                          self.receiver.z - self.transmitter.z]).T
+
+        # offset = np.empty((self.nPoints, 3))
+        # for i in range(self.nPoints):
+        #     offset[i, :] = np.r_[self.receiver[i].x - self.transmitter[i].x,
+        #                          self.receiver[i].y - self.transmitter[i].y,
+        #                          self.receiver[i].z - self.transmitter[i].z]
+        # return offset
 
     # @loopOffset.setter
     # def loopOffset(self, values):

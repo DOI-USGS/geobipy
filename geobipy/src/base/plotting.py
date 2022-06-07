@@ -338,20 +338,8 @@ def bar(values, edges, line=None, **kwargs):
     else:
         label = cF.getNameUnits(edges)
 
-    width = np.abs(np.diff(edges))
-    centres = edges[:-1] + 0.5 * (np.diff(edges))
-
-    if (geobipy_kwargs['transpose']):
-        plt.barh(centres, values, height=width, align='center', alpha=color_kwargs['alpha'], **kwargs)
-        ylabel(label)
-        xlabel(cF.getNameUnits(values))
-    else:
-        plt.bar(centres, values, width=width, align='center', alpha=color_kwargs['alpha'], **kwargs)
-        xlabel(label)
-        ylabel(cF.getNameUnits(values))
-
     i0 = 0
-    i1 = np.size(centres) - 1
+    i1 = np.size(edges) - 2
     trim = geobipy_kwargs['trim']
 
     if all(values == 0):
@@ -362,13 +350,30 @@ def bar(values, edges, line=None, **kwargs):
             i0 += 1
         while values[i1] == trim:
             i1 -= 1
-
+    
     if (i1 > i0):
-        if (geobipy_kwargs['transpose']):
-            plt.ylim(edges[i0], edges[i1+1])
-            geobipy_kwargs['xscale'], geobipy_kwargs['yscale'] = geobipy_kwargs['yscale'], geobipy_kwargs['xscale']
-        else:
-            plt.xlim(edges[i0], edges[i1+1])
+        values = values[i0:i1]
+        edges = edges[i0:i1+1]
+
+    width = np.abs(np.diff(edges))
+    centres = edges[:-1] + 0.5 * (np.diff(edges))
+
+    if (geobipy_kwargs['transpose']):
+        plt.barh(centres, values, height=width, align='center', alpha=color_kwargs['alpha'], **kwargs)
+        ylabel(label)
+        xlabel(cF.getNameUnits(values))
+        geobipy_kwargs['xscale'], geobipy_kwargs['yscale'] = geobipy_kwargs['yscale'], geobipy_kwargs['xscale']
+    else:
+        plt.bar(centres, values, width=width, align='center', alpha=color_kwargs['alpha'], **kwargs)
+        xlabel(label)
+        ylabel(cF.getNameUnits(values))
+
+    # if (i1 > i0):
+    #     if (geobipy_kwargs['transpose']):
+    #         plt.ylim(edges[i0], edges[i1+1])
+    
+    #     else:
+    #         plt.xlim(edges[i0], edges[i1+1])
 
     if geobipy_kwargs['flipX']:
         ax.invert_xaxis()

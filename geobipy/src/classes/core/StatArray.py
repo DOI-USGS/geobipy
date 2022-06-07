@@ -1,4 +1,5 @@
 from copy import copy, deepcopy
+from matplotlib.axes import SubplotBase
 import numpy as np
 import h5py
 import scipy.stats as st
@@ -13,6 +14,7 @@ from ...base.HDF.hdfWrite import write_nd
 from ...base import MPI as myMPI
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+from matplotlib.figure import Figure
 
 
 class StatArray(np.ndarray, myObject):
@@ -1224,6 +1226,35 @@ class StatArray(np.ndarray, myObject):
 
         return cP.plot(x[j], self[i], **kwargs)
 
+    def _init_posterior_plots(self, gs):
+        """Initialize axes for posterior plots
+
+        Parameters
+        ----------
+        gs : matplotlib.gridspec.Gridspec
+            Gridspec to split
+
+        """
+        if not self.hasPosterior:
+            return
+
+        if isinstance(gs, Figure):
+            gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
+
+        if self.nPosteriors == 1:
+            ax = plt.subplot(gs)
+            cP.pretty(ax)
+
+        else:
+            gs = gs.subgridspec(self.nPosteriors, 1, hspace=1)
+            ax = [plt.subplot(gs[0, 0])]
+            ax += [plt.subplot(gs[i, 0], sharex=ax[0]) for i in range(1, self.nPosteriors)]
+
+            for a in ax:
+                cP.pretty(a)
+
+        return ax
+
     def plotPosteriors(self, ax=None, **kwargs):
         """Plot the posteriors of the StatArray.
 
@@ -1237,37 +1268,34 @@ class StatArray(np.ndarray, myObject):
         if not self.hasPosterior:
             return
 
+        if ax is None:
+            ax = kwargs.pop('fig', plt.gcf())
+            
+        if not isinstance(ax, (list, SubplotBase)):
+            ax = self._init_posterior_plots(ax)
+
         kwargs['cmap'] = kwargs.get('cmap', 'gray_r')
-        kwargs['trim'] = kwargs.get('trim', 0.0)
         kwargs['normalize'] = kwargs.get('normalize', True)
 
-        if ax is None:
-            if self.nPosteriors > 1:
-                for i in range(self.nPosteriors):
-                    plt.subplot(self.nPosteriors, 1, i+1)
-                    self.posterior[i].plot(**kwargs)
-            else:
-                self.posterior.plot(**kwargs)
-
-        else:
-            assert np.size(ax) == self.nPosteriors, ValueError(
-                "Length of ax {} must equal number of attached posteriors {}".format(np.size(ax), self.nPosteriors))
-            if np.size(ax) > 1:
-                if 'line' in kwargs:
-                    assert np.size(kwargs['line']) == np.size(ax), ValueError("line in kwargs must have size {}".format(np.size(ax)))
-                # line = kwargs.pop('line', np.asarray([np.nan for i in range(np.size(ax))]))
-                for i in range(self.nPosteriors):
-                    plt.sca(ax[i])
-                    plt.cla()
-                    # self.posterior[i].pdf.plot(line=line[i], **kwargs)
-                    self.posterior[i].plot(**kwargs)
-            else:
-                if isinstance(ax, list):
-                    ax = ax[0]
-                plt.sca(ax)
+        if np.size(ax) > 1:
+            assert np.size(ax) == self.nPosteriors, ValueError("Length of ax {} must equal number of attached posteriors {}".format(np.size(ax), self.nPosteriors))
+            if 'line' in kwargs:
+                assert np.size(kwargs['line']) == np.size(ax), ValueError("line in kwargs must have size {}".format(np.size(ax)))
+            line = kwargs.pop('line', np.asarray([np.nan for i in range(np.size(ax))]))
+            # kwargs['trim'] = kwargs.get('trim', None)
+            for i in range(self.nPosteriors):
+                plt.sca(ax[i])
                 plt.cla()
+                self.posterior[i].plot(line=line[i], **kwargs)
+        else:
+            if isinstance(ax, list):
+                ax = ax[0]
+            plt.sca(ax)
+            plt.cla()
 
-                self.posterior.plot(**kwargs)
+            # kwargs['trim'] = kwargs.get('trim', 0.0)
+
+            self.posterior.plot(**kwargs)
 
     @property
     def value(self):

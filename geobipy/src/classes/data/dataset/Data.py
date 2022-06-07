@@ -608,7 +608,7 @@ class Data(PointCloud3D):
                          data=self.data[i, :], std=self.std[i, :], predictedData=self.predictedData[i, :],
                          channelNames=self.channelNames)
 
-    def init_posterior_plots(self, gs):
+    def _init_posterior_plots(self, gs):
         """Initialize axes for posterior plots
 
         Parameters
@@ -845,7 +845,7 @@ class Data(PointCloud3D):
         ax = kwargs.get('ax', plt.gca())
         ax.set_prop_cycle(None)
 
-        if not values is None:
+        if values is not None:
             legend = False
             ax = super().plot(values=values, xAxis=xAxis, label=cf.getName(values), **kwargs)
 
@@ -870,7 +870,14 @@ class Data(PointCloud3D):
 
     def plot_posteriors(self, axes=None, height_kwargs={}, data_kwargs={}, rel_error_kwargs={}, add_error_kwargs={}, **kwargs):
     
-        assert len(axes) == 4, ValueError("Must have length 3 list of axes for the posteriors. self.init_posterior_plots can generate them")
+        if axes is None:
+            axes = kwargs.pop('fig', plt.gcf())
+            
+        if not isinstance(axes, list):
+            axes = self._init_posterior_plots(axes)
+            
+        assert len(axes) == 4, ValueError("axes must have length 4")
+        # assert len(axes) == 4, ValueError("Must have length 3 list of axes for the posteriors. self.init_posterior_plots can generate them")
 
         self.z.plotPosteriors(ax = axes[0], **height_kwargs)
 
@@ -879,6 +886,8 @@ class Data(PointCloud3D):
 
         self.relative_error.plotPosteriors(ax=axes[2], **rel_error_kwargs)
         self.additive_error.plotPosteriors(ax=axes[3], **add_error_kwargs)
+
+        return axes
 
     def plotPredicted(self, xAxis='index', channels=None, system=None, **kwargs):
         """Plots the specifed predicted data channels as a line plot.

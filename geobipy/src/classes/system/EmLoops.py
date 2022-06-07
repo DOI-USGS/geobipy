@@ -116,7 +116,7 @@ class EmLoops(PointCloud3D, ABC):
             assert np.size(values) == self.nPoints, ValueError("orientation must have size {}".format(self.nPoints))
             values = np.asarray([tmp[x.replace(" ", "")] for x in values])
 
-        self._orientation = StatArray.StatArray(values, "Orientation")
+        self._orientation = StatArray.StatArray(values, "Orientation", dtype=np.int32)
 
     @property
     def summary(self):

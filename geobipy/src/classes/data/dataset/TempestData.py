@@ -8,10 +8,13 @@
 """
 from pandas import read_csv
 from matplotlib.figure import Figure
+
+from geobipy.src.base import utilities
 from .TdemData import TdemData
 from ..datapoint.Tempest_datapoint import Tempest_datapoint
 from ....classes.core import StatArray
 from ...system.CircularLoops import CircularLoops
+from ....base import plotting as cP
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -262,7 +265,81 @@ class TempestData(TdemData):
 
         return self
 
-    def init_posterior_plots(self, gs):
+    def plot(self, system=0, channels=None, xAxis='index', **kwargs):
+        """ Plots the data
+
+        Parameters
+        ----------
+        system : int
+            System to plot
+        channels : sequence of ints
+            Channels to plot
+
+        """
+
+        legend = kwargs.pop('legend', True)
+        kwargs['yscale'] = kwargs.get('yscale', 'linear')
+
+        x = self.getXAxis(xAxis)
+
+        if channels is None:
+            i = self._systemIndices(system)
+            ax = cP.plot(x, self.secondary_field[:, i],
+                         label=self.channelNames[i], **kwargs)
+        else:
+            channels = np.atleast_1d(channels)
+            for j, i in enumerate(channels):
+                ax = cP.plot(x, self.secondary_field[:, i], 
+                             label=self.channelNames[i], **kwargs)
+
+        plt.xlabel(utilities.getNameUnits(x))
+
+        # Put a legend to the right of the current axis
+        if legend:
+            leg = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), fancybox=True)
+            leg.set_title(self.secondary_field.getNameUnits())
+        
+        return ax        
+
+
+    def plotPredicted(self, system=0, channels=None, xAxis='index', **kwargs):
+        """ Plots the data
+
+        Parameters
+        ----------
+        system : int
+            System to plot
+        channels : sequence of ints
+            Channels to plot
+
+        """
+
+        legend = kwargs.pop('legend', True)
+        kwargs['yscale'] = kwargs.get('yscale', 'linear')
+        kwargs['linestyle'] = kwargs.get('linestyle', '-.')
+
+        x = self.getXAxis(xAxis)
+
+        if channels is None:
+            i = self._systemIndices(system)
+            ax = cP.plot(x, self.predicted_secondary_field[:, i],
+                         label=self.channelNames[i], **kwargs)
+        else:
+            channels = np.atleast_1d(channels)
+            for j, i in enumerate(channels):
+                ax = cP.plot(x, self.predicted_secondary_field[:, i], 
+                             label=self.channelNames[i], **kwargs)
+
+        plt.xlabel(utilities.getNameUnits(x))
+
+        # Put a legend to the right of the current axis
+        if legend:
+            leg = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), fancybox=True)
+            leg.set_title(self.predicted_secondary_field.getNameUnits())
+        
+        return ax
+
+    def _init_posterior_plots(self, gs, sharex=None, sharey=None):
         """Initialize axes for posterior plots
 
         Parameters
@@ -277,22 +354,32 @@ class TempestData(TdemData):
         splt = gs.subgridspec(2, 2, wspace=0.3)
         ax = []
         # Height axis
-        ax.append(plt.subplot(splt[0, 0]))
+        ax.append(plt.subplot(splt[0, 0], sharex=sharex, sharey=sharey))
+
+        sharex = ax[0] if sharex is None else sharex
         # Data axis
-        ax.append(plt.subplot(splt[0, 1], sharex=ax[0]))
+        ax.append(plt.subplot(splt[0, 1], sharex=sharex))
 
         splt2 = splt[1, :].subgridspec(self.nSystems * self.n_components, 2, wspace=0.2)
         # Relative error axes
-        ax.append([plt.subplot(splt2[i, 0], sharex=ax[0]) for i in range(self.n_components * self.nSystems)])
+        ax_rel = [plt.subplot(splt2[0, 0], sharex=sharex)]
+        ax_rel += [plt.subplot(splt2[i, 0], sharex=ax_rel[0], sharey=ax_rel[0]) for i in range(1, self.n_components * self.nSystems)]
+        ax.append(ax_rel)
         # # Additive Error axes
-        # ax.append([plt.subplot(splt2[i, 1], sharex=ax[0]) for i in range(self.nSystems)])
-        ax.append(plt.subplot(splt2[0, 1], sharex=ax[0]))
+        ax.append(plt.subplot(splt2[0, 1], sharex=sharex))
 
-        return ax    
+        return ax
 
-    def plot_posteriors(self, axes=None, height_kwargs={}, data_kwargs={}, rel_error_kwargs={}, transmitter_pitch_kwargs={}, **kwargs):
+    def plot_posteriors(self, axes=None, height_kwargs={}, data_kwargs={}, rel_error_kwargs={}, transmitter_pitch_kwargs={}, sharex=None, sharey=None, **kwargs):
         
-        assert len(axes) == 4, ValueError("Must have length 3 list of axes for the posteriors. self.init_posterior_plots can generate them")
+        if axes is None:
+            axes = kwargs.pop('fig', plt.gcf())
+
+        if not isinstance(axes, list):
+            axes = self._init_posterior_plots(axes, sharex=sharex, sharey=sharey)
+            
+        # assert len(axes) == 4, ValueError("axes must have length 4")
+        # assert len(axes) == 4, ValueError("Must have length 3 list of axes for the posteriors. self.init_posterior_plots can generate them")
 
         self.z.plotPosteriors(ax = axes[0], **height_kwargs)
 
@@ -302,6 +389,8 @@ class TempestData(TdemData):
         self.relative_error.plotPosteriors(ax=axes[2], **rel_error_kwargs)
 
         self.transmitter.pitch.plotPosteriors(ax=axes[3], **transmitter_pitch_kwargs)
+
+        return axes
 
     # def csv_channels(self, data_filename):
     
@@ -550,5 +639,5 @@ class TempestData(TdemData):
 
         out = super(TempestData, cls).fromHdf(grp, **kwargs)
         out.primary_field = StatArray.StatArray.fromHdf(grp['primary_field'])
-        return 
+        return out
 

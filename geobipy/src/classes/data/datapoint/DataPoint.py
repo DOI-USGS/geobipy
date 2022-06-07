@@ -315,7 +315,7 @@ class DataPoint(Point):
             WdT_Wd = self.predictedData.priorDerivative(order=2)
             return np.dot(J.T, np.dot(WdT_Wd, J))
 
-    def init_posterior_plots(self, gs):
+    def _init_posterior_plots(self, gs):
         """Initialize axes for posterior plots
 
         Parameters
@@ -330,19 +330,24 @@ class DataPoint(Point):
         splt = gs.subgridspec(2, 2, width_ratios=[1, 4], height_ratios=[2, 1], wspace=0.3)
         ax = []
         # Height axis
-        ax.append(plt.subplot(splt[0, 0]))
+        ax.append(self.z._init_posterior_plots(splt[0, 0]))
         # Data axis
         ax.append(plt.subplot(splt[0, 1]))
 
-        splt2 = splt[1, :].subgridspec(self.nSystems, 2, wspace=0.2)
         # Relative error axes
-        ax.append([plt.subplot(splt2[i, 0]) for i in range(self.nSystems)])
+        ax.append(self.relative_error._init_posterior_plots(splt[1, 0]))
         # Additive Error axes
-        ax.append([plt.subplot(splt2[i, 1]) for i in range(self.nSystems)])
+        ax.append(self.additive_error._init_posterior_plots(splt[1, 1]))
 
         return ax
 
     def plot_posteriors(self, axes=None, height_kwargs={}, data_kwargs={}, rel_error_kwargs={}, add_error_kwargs={}, **kwargs):
+
+        if axes is None:
+            axes = kwargs.pop('fig', plt.gcf())
+            
+        if not isinstance(axes, list):
+            axes = self._init_posterior_plots(axes)
 
         assert len(axes) == 4, ValueError("Must have length 3 list of axes for the posteriors. self.init_posterior_plots can generate them")
 

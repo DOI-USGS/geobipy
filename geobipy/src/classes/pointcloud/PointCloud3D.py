@@ -95,10 +95,10 @@ class PointCloud3D(myObject):
         else:
             cls = type(self)
 
-        return cls(self.x[i],
-                   self.y[i],
-                   self.z[i],
-                   self.elevation[i])
+        return cls(x=self.x[i],
+                   y=self.y[i],
+                   z=self.z[i],
+                   elevation=self.elevation[i])
 
     def _as_dict(self):
         return {self.x.name.replace(' ', '_'): self.x,

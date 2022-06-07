@@ -940,31 +940,6 @@ class RectilinearMesh2D(Mesh):
         else:
             cP.plot(self.x.centres, value, **kwargs)
 
-    # def init_value_posterior_plots(self, gs, sharex=None, sharey=None):
-
-    #     if isinstance(gs, Figure):
-    #         gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0] 
-
-    #     shape = (3, 2)
-    #     splt = gs.subgridspec(*shape)
-
-    #     ax = [plt.subplot(splt[np.unravel_index(i, shape)]) for i in range(5)]
-
-    #     for a in ax:
-    #         cP.pretty(a)
-
-    #     return ax
-
-    # def plot_posteriors(self, axes, ncells_kwargs={}, y_edges_kwargs={}, **kwargs):
-    #     # assert len(axes) == 2, ValueError("Must have length 2 list of axes for the posteriors. self.init_posterior_plots can generate them")
-
-    #     # best = kwargs.get('best', None)
-    #     # if best is not None:
-    #     #     ncells_kwargs['line'] = best.nCells
-    #     #     edges_kwargs['line'] = best.edges[1:]
-        
-    #     self.nCells.plotPosteriors(ax = axes[0], **ncells_kwargs)
-    #     self.y.edges.plotPosteriors(ax = axes[1], **y_edges_kwargs)
 
     def plot_value_posteriors(self, axes, values, axis, value_kwargs={}, **kwargs):
         # assert len(axes) == 5, ValueError("Must have length 5 list of axes for the posteriors. self.init_posterior_plots can generate them")
