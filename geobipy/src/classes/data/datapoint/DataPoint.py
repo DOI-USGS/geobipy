@@ -705,14 +705,13 @@ class DataPoint(Point):
 
         super().Isend(dest, world)
 
-        self.data.Isend(dest, world)
-        self.std.Isend(dest, world)
-        self.predictedData.Isend(dest, world)
         self.lineNumber.Isend(dest, world)
         self.fiducial.Isend(dest, world)
+
         self.relErr.Isend(dest, world)
         self.addErr.Isend(dest, world)
-        # world.isend(self.channelNames, dest=dest)
+
+        # self.std.Isend(dest, world)
 
 
     @classmethod
@@ -720,13 +719,10 @@ class DataPoint(Point):
 
         out = super(DataPoint, cls).Irecv(source, world, **kwargs)
 
-        out._data = StatArray.StatArray.Irecv(source, world)
-        out._std = StatArray.StatArray.Irecv(source, world)
-        out._predictedData = StatArray.StatArray.Irecv(source, world)
         out._lineNumber = StatArray.StatArray.Irecv(source, world)
         out._fiducial = StatArray.StatArray.Irecv(source, world)
+
         out._relErr = StatArray.StatArray.Irecv(source, world)
         out._addErr = StatArray.StatArray.Irecv(source, world)
-        # out._channelNames = world.irecv(source=source).wait()
 
         return out

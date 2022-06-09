@@ -572,6 +572,9 @@ class FdemDataPoint(EmDataPoint):
 
         super().Isend(dest, world)
 
+        self.data.Isend(dest, world)
+        self.predictedData.Isend(dest, world)
+
     @classmethod
     def Irecv(cls, source, world, **kwargs):
 
@@ -579,5 +582,10 @@ class FdemDataPoint(EmDataPoint):
             nSystems = myMPI.Irecv(source=source, world=world)
             kwargs['system'] = [FdemSystem.Irecv(source=source, world=world) for i in range(nSystems)]
 
-        return super(FdemDataPoint, cls).Irecv(source, world, **kwargs)
+        out = super(FdemDataPoint, cls).Irecv(source, world, **kwargs)
+
+        out._data = StatArray.StatArray.Irecv(source, world)
+        out._predictedData = StatArray.StatArray.Irecv(source, world)
+
+        return out
 
