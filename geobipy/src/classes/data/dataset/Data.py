@@ -171,7 +171,7 @@ class Data(PointCloud3D):
 
         """
         assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-        assert channel < self.channels_per_system[system], ValueError("channel must be < {} for system {}".format(self.channels_per_system[system], system))
+        assert np.all(channel < self.channels_per_system[system]), ValueError("channel must be < {} for system {}".format(self.channels_per_system[system], system))
         return self.systemOffset[system] + channel
 
     # @property
@@ -805,7 +805,7 @@ class Data(PointCloud3D):
         cP.title(self.channelNames[channel])
 
 
-    def plot(self, xAxis='index', channels=None, values=None, system=None, **kwargs):
+    def plot(self, xAxis='index', channels=None, system=None, **kwargs):
         """Plots the specifed channels as a line plot.
 
         Plots the channels along a specified co-ordinate e.g. 'x'. A legend is auto generated.
@@ -845,19 +845,13 @@ class Data(PointCloud3D):
         ax = kwargs.get('ax', plt.gca())
         ax.set_prop_cycle(None)
 
-        if values is not None:
-            legend = False
-            ax = super().plot(values=values, xAxis=xAxis, label=cf.getName(values), **kwargs)
-
+        if system is None:
+            rTmp = np.s_[:] if channels is None else np.s_[channels]
         else:
-            if system is None:
-                rTmp = range(self.nChannels) if channels is None else channels
-            else:
-                assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-                rTmp = self._systemOffset[system] + channels
+            assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+            rTmp = self._systemIndices(system) if channels is None else channels + self._systemIndices(system).start
 
-            for i in rTmp:
-                ax = super().plot(values=self.data[:, i], xAxis=xAxis, label=self.channelNames[i], **kwargs)
+        ax = super().plot(values=self.data[:, rTmp], xAxis=xAxis, label=self.channelNames[rTmp], **kwargs)
 
         if legend:
             # Put a legend to the right of the current axis
@@ -931,13 +925,12 @@ class Data(PointCloud3D):
         ax.set_prop_cycle(None)
 
         if system is None:
-            rTmp = range(self.nChannels) if channels is None else channels
+            rTmp = np.s_[:] if channels is None else np.s_[channels]
         else:
             assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-            rTmp = self._systemOffset[system] + channels
+            rTmp = self._systemIndices(system) if channels is None else channels + self._systemIndices(system).start
 
-        for i in rTmp:
-            super().plot(values=self.predictedData[:, i], xAxis=xAxis, label=self.channelNames[i], **kwargs)
+        ax = super().plot(values=self.predictedData[:, rTmp], xAxis=xAxis, label=self.channelNames[rTmp], **kwargs)
 
         if legend:
             box = ax.get_position()

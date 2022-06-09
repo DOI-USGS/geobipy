@@ -325,18 +325,21 @@ class TdemDataPoint(EmDataPoint):
 
         assert np.all(self.relErr > 0.0), ValueError('relErr must be > 0.0')
 
-
         t0 = 0.5 * np.log(1e-3)  # Assign fixed t0 at 1ms
         # For each system assign error levels using the user inputs
         for i in range(self.nSystems):
-            iSys = self._systemIndices(system=i)
+            for j in range(self.n_components):
+                ic = self._component_indices(j, i)
+                relative_error = self.relErr[(i*self.n_components)+j] * self.secondary_field[ic]
+                variance = relative_error**2.0 + self.addErr[i]**2.0
+                self._std[ic] = np.sqrt(variance)
 
-            # Compute the relative error
-            rErr = self.relErr[i] * self.secondary_field[iSys]
-            # aErr = np.exp(np.log(self.addErr[i]) - 0.5 * np.log(self.off_time(i)) + t0)
-            # self._std[iSys] = np.sqrt((rErr**2.0) + (aErr[i]**2.0))
+            # # Compute the relative error
+            # rErr = self.relErr[i] * self.secondary_field[iSys]
+            # # aErr = np.exp(np.log(self.addErr[i]) - 0.5 * np.log(self.off_time(i)) + t0)
+            # # self._std[iSys] = np.sqrt((rErr**2.0) + (aErr[i]**2.0))
 
-            self._std[iSys] = np.sqrt((rErr**2.0) + (self.addErr[i]**2.0))
+            # self._std[iSys] = np.sqrt((rErr**2.0) + (self.addErr[i]**2.0))
 
 
         # Update the variance of the predicted data prior
@@ -918,12 +921,6 @@ class TdemDataPoint(EmDataPoint):
 
             self.predicted_primary_field[s] = np.hstack(primary)
 
-    # def fm_dlogc(self, mod):
-    #     """ Forward model the data from the given model """
-
-    #     assert isinstance(mod, Model1D), TypeError(
-    #         "Invalid model class for forward modeling [1D]")
-    #     return ga_fm_dlogc(self, mod)
 
     def sensitivity(self, model, ix=None, modelChanged=True):
         """ Compute the sensitivty matrix for the given model """

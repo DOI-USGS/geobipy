@@ -891,7 +891,7 @@ class TdemData(Data):
 
         cP.title(tmp.name)
 
-    def plot(self, system=0, channels=None, xAxis='index', **kwargs):
+    def plot(self, *args, **kwargs):
         """ Plots the data
 
         Parameters
@@ -903,33 +903,34 @@ class TdemData(Data):
 
         """
 
-        legend = kwargs.pop('legend', True)
+        # legend = kwargs.pop('legend', True)
         kwargs['yscale'] = kwargs.get('yscale', 'log')
+        return super().plot(*args, **kwargs)
 
-        x = self.getXAxis(xAxis)
+        # x = self.getXAxis(xAxis)
 
-        if channels is None:
-            i = self._systemIndices(system)
-            ax = cP.plot(x, self.data[:, i],
-                         label=self.channelNames[i], **kwargs)
-        else:
-            channels = np.atleast_1d(channels)
-            for j, i in enumerate(channels):
-                ax = cP.plot(x, self.data[:, i], 
-                             label=self.channelNames[i], **kwargs)
+        # if channels is None:
+        #     i = self._systemIndices(system)
+        #     ax = cP.plot(x, self.data[:, i],
+        #                  label=self.channelNames[i], **kwargs)
+        # else:
+        #     channels = np.atleast_1d(self.channel_index(channels, system))
+        #     for i in channels:
+        #         ax = cP.plot(x, self.data[:, i], label=self.channelNames[i], **kwargs)
 
-        plt.xlabel(cF.getNameUnits(x))
+        # plt.xlabel(cF.getNameUnits(x))
 
-        # Put a legend to the right of the current axis
-        if legend:
-            leg = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), fancybox=True)
-            leg.set_title(self.data.getNameUnits())
+        # # Put a legend to the right of the current axis
+        # if legend:
+        #     leg = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), fancybox=True)
+        #     leg.set_title(self.data.getNameUnits())
         
-        return ax        
+        # return ax        
 
     def plotLine(self, line, xAxis='index', **kwargs):
 
         line = self.line(line)
+        kwargs['yscale'] = kwargs.get('yscale', 'log')
 
         x = self.getXAxis(xAxis)
 
@@ -939,9 +940,9 @@ class TdemData(Data):
             kwargs['labels'] = line.channelNames[j]
             line.data[:, j].plot(x=x, **kwargs)
 
-    def plotPredicted(self, xAxis='index', channels=None, system=None, **kwargs):
+    def plotPredicted(self, *args, **kwargs):
         kwargs['yscale'] = kwargs.get('yscale', 'log')
-        return super().plotPredicted(xAxis=xAxis, channels=channels, system=system, **kwargs)
+        return super().plotPredicted(*args, **kwargs)
 
     def plotWaveform(self, **kwargs):
         for i in range(self.nSystems):
@@ -1040,9 +1041,12 @@ class TdemData(Data):
 
         self = super(TdemData, cls).fromHdf(grp, system=systems)
 
+        # sz = StatArray.StatArray.fromHdf(grp['predicted_secondary_field'])
+        # print(sz.min(), sz.max())
+
         self.primary_field = None#StatArray.StatArray.fromHdf(grp['primary_field'])
         self.secondary_field = StatArray.StatArray.fromHdf(grp['secondary_field'])
-        self.predicted_primary_field = StatArray.StatArray.fromHdf(grp['predicted_primary_field'])
+        self.predicted_primary_field = None#StatArray.StatArray.fromHdf(grp['predicted_primary_field'])
         self.predicted_secondary_field = StatArray.StatArray.fromHdf(grp['predicted_secondary_field'])
 
         self.transmitter = CircularLoops.fromHdf(grp['T'])

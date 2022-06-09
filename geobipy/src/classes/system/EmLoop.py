@@ -4,7 +4,8 @@ from ..core import StatArray
 from ..pointcloud.Point import Point
 from ..mesh.RectilinearMesh1D import RectilinearMesh1D
 from ..statistics.Histogram import Histogram
-from abc import ABC, abstractclassmethod
+from ..statistics.Distribution import Distribution
+from abc import ABC
 
 class EmLoop(Point, ABC):
     """Defines a loop in an EM system e.g. transmitter or reciever

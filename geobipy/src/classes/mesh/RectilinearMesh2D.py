@@ -941,32 +941,32 @@ class RectilinearMesh2D(Mesh):
             cP.plot(self.x.centres, value, **kwargs)
 
 
-    def plot_value_posteriors(self, axes, values, axis, value_kwargs={}, **kwargs):
-        # assert len(axes) == 5, ValueError("Must have length 5 list of axes for the posteriors. self.init_posterior_plots can generate them")
+    # def plot_value_posteriors(self, axes, values, axis, value_kwargs={}, **kwargs):
+    #     # assert len(axes) == 5, ValueError("Must have length 5 list of axes for the posteriors. self.init_posterior_plots can generate them")
 
-        # best = kwargs.get('best', None)
-        # if best is not None:
-        #     ncells_kwargs['line'] = best.nCells
-        #     edges_kwargs['line'] = best.edges[1:]
+    #     # best = kwargs.get('best', None)
+    #     # if best is not None:
+    #     #     ncells_kwargs['line'] = best.nCells
+    #     #     edges_kwargs['line'] = best.edges[1:]
 
-        flipx = kwargs.pop('flipX', False)
-        flipy = kwargs.pop('flipY', False)
+    #     flipx = kwargs.pop('flipX', False)
+    #     flipy = kwargs.pop('flipY', False)
 
-        mean = values.posterior.mean(axis=axis)
-        mean.pcolor(ax=axes[0], **value_kwargs)
-        tmp = values.posterior.percentile(percent=5.0, axis=axis)
-        tmp.pcolor(ax=axes[2], **value_kwargs)
-        tmp = values.posterior.percentile(percent=95.0, axis=axis)
-        tmp.pcolor(ax=axes[4], **value_kwargs)
-        tmp = values.posterior.entropy(axis=axis)
-        tmp.pcolor(ax=axes[1])
-        tmp = values.posterior.opacity(axis=axis)
-        a, b, cb = tmp.pcolor(axis=axis, ax=axes[3], ticks=[0.0, 0.5, 1.0], cmap='plasma')
+    #     mean = values.posterior.mean(axis=axis)
+    #     mean.pcolor(ax=axes[0], **value_kwargs)
+    #     tmp = values.posterior.percentile(percent=5.0, axis=axis)
+    #     tmp.pcolor(ax=axes[2], **value_kwargs)
+    #     tmp = values.posterior.percentile(percent=95.0, axis=axis)
+    #     tmp.pcolor(ax=axes[4], **value_kwargs)
+    #     tmp = values.posterior.entropy(axis=axis)
+    #     tmp.pcolor(ax=axes[1])
+    #     tmp = values.posterior.opacity(axis=axis)
+    #     a, b, cb = tmp.pcolor(axis=axis, ax=axes[3], ticks=[0.0, 0.5, 1.0], cmap='plasma')
         
-        if cb is not None:
-            labels = ['Less', '', 'More']
-            cb.ax.set_yticklabels(labels)
-            cb.set_label("Confidence")
+    #     if cb is not None:
+    #         labels = ['Less', '', 'More']
+    #         cb.ax.set_yticklabels(labels)
+    #         cb.set_label("Confidence")
         
     @property
     def summary(self):

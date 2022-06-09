@@ -339,22 +339,22 @@ def bar(values, edges, line=None, **kwargs):
         label = cF.getNameUnits(edges)
 
     i0 = 0
-    i1 = np.size(edges) - 2
+    i1 = np.size(values) - 1
     trim = geobipy_kwargs['trim']
 
     if all(values == 0):
         trim = None
-    
+
     if (trim is not None):
         while values[i0] == trim:
             i0 += 1
         while values[i1] == trim:
             i1 -= 1
-    
-    if (i1 > i0):
-        values = values[i0:i1]
-        edges = edges[i0:i1+1]
 
+    if (i1 >= i0):
+        values = values[i0:i1+1]
+        edges = edges[i0:i1+2]
+    
     width = np.abs(np.diff(edges))
     centres = edges[:-1] + 0.5 * (np.diff(edges))
 
@@ -367,13 +367,6 @@ def bar(values, edges, line=None, **kwargs):
         plt.bar(centres, values, width=width, align='center', alpha=color_kwargs['alpha'], **kwargs)
         xlabel(label)
         ylabel(cF.getNameUnits(values))
-
-    # if (i1 > i0):
-    #     if (geobipy_kwargs['transpose']):
-    #         plt.ylim(edges[i0], edges[i1+1])
-    
-    #     else:
-    #         plt.xlim(edges[i0], edges[i1+1])
 
     if geobipy_kwargs['flipX']:
         ax.invert_xaxis()

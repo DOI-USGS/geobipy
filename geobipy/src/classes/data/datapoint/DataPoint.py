@@ -241,13 +241,12 @@ class DataPoint(Point):
         assert self.relErr > 0.0, ValueError("relErr must be > 0.0")
 
         # For each system assign error levels using the user inputs
-        relative_error = self.relErr * self.data
-
-        self._std[:] = np.sqrt((relative_error**2.0) + (self.addErr**2.0))
+        variance = ((self.relErr * self.data)**2.0) + (self.addErr**2.0)
+        self._std[:] = np.sqrt(variance)
 
         # Update the variance of the predicted data prior
         if self.predictedData.hasPrior:
-            self.predictedData.prior.variance[np.diag_indices(np.sum(self.active))] = self._std[self.active]**2.0
+            self.predictedData.prior.variance[np.diag_indices(np.sum(self.active))] = variance[self.active]
 
         return self._std
 
@@ -422,7 +421,8 @@ class DataPoint(Point):
         # The data misfit is the mahalanobis distance of the multivariate distance.
         # assert not any(self.std[self.active] <= 0.0), ValueError('Cannot compute the misfit when the data standard deviations are zero.')
         tmp2 = 1.0 / self.std[self.active]
-        return np.sqrt(np.float64(np.sum((cf.Ax(tmp2, self.deltaD[self.active]))**2.0, dtype=np.float64)))
+        misfit = np.float64(np.sum((cf.Ax(tmp2, self.deltaD[self.active]))**2.0, dtype=np.float64))
+        return misfit
 
     def initialize(self, **kwargs):
         self.relErr = kwargs['initial_relative_error']

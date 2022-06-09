@@ -314,7 +314,7 @@ class Inference1D(myObject):
         perturbed_datapoint.forward(perturbed_model)
 
         # Compute the data misfit
-        data_misfit1 = perturbed_datapoint.dataMisfit()**2.0
+        data_misfit1 = perturbed_datapoint.dataMisfit()
 
         # Evaluate the prior for the current model
         prior1 = perturbed_model.prior_probability(self.kwargs['solve_parameter'], self.kwargs['solve_gradient'])
@@ -424,6 +424,7 @@ class Inference1D(myObject):
 
         # Determine if we are burning in
         if (not self.burned_in):
+            
             target_misfit = np.sum(self.datapoint.active)
             # if self.data_misfit < target_misfit:
             if np.isclose(self.data_misfit, self.multiplier*target_misfit, rtol=1e-1, atol=1e-2) :  # datapoint.target_misfit

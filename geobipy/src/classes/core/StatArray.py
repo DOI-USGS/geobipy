@@ -1293,8 +1293,6 @@ class StatArray(np.ndarray, myObject):
             plt.sca(ax)
             plt.cla()
 
-            # kwargs['trim'] = kwargs.get('trim', 0.0)
-
             self.posterior.plot(**kwargs)
 
     @property
