@@ -29,6 +29,7 @@ class TdemSystem(TdemSystem_GAAEM):
         """Instantiate"""
 
         if not system_filename is None:
+
             return super().__init__(system_filename)
 
         # self.offTimes = StatArray.StatArray(offTimes, 'Time', 's')
@@ -39,6 +40,7 @@ class TdemSystem(TdemSystem_GAAEM):
         self.waveform = waveform
         self.offTimeFilters = offTimeFilters
         self.delayTime = 1.8e-7
+        self._components = None
 
         self.modellingTimes, self.modellingFrequencies, self.ft, self.ftarg = empymod.utils.check_time(
             time=self.get_modellingTimes,          # Required times
