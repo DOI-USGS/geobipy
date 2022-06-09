@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from cached_property import cached_property
-from copy import deepcopy
+from copy import copy, deepcopy
 from ...pointcloud.Point import Point
 from ....classes.core import StatArray
 from ....base import utilities as cf
@@ -241,13 +241,12 @@ class DataPoint(Point):
         assert self.relErr > 0.0, ValueError("relErr must be > 0.0")
 
         # For each system assign error levels using the user inputs
-        relative_error = self.relErr * self.data
-
-        self._std[:] = np.sqrt((relative_error**2.0) + (self.addErr**2.0))
+        variance = ((self.relErr * self.data)**2.0) + (self.addErr**2.0)
+        self._std[:] = np.sqrt(variance)
 
         # Update the variance of the predicted data prior
         if self.predictedData.hasPrior:
-            self.predictedData.prior.variance[np.diag_indices(np.sum(self.active))] = self._std[self.active]**2.0
+            self.predictedData.prior.variance[np.diag_indices(np.sum(self.active))] = variance[self.active]
 
         return self._std
 
@@ -315,7 +314,7 @@ class DataPoint(Point):
             WdT_Wd = self.predictedData.priorDerivative(order=2)
             return np.dot(J.T, np.dot(WdT_Wd, J))
 
-    def init_posterior_plots(self, gs):
+    def _init_posterior_plots(self, gs):
         """Initialize axes for posterior plots
 
         Parameters
@@ -330,19 +329,24 @@ class DataPoint(Point):
         splt = gs.subgridspec(2, 2, width_ratios=[1, 4], height_ratios=[2, 1], wspace=0.3)
         ax = []
         # Height axis
-        ax.append(plt.subplot(splt[0, 0]))
+        ax.append(self.z._init_posterior_plots(splt[0, 0]))
         # Data axis
         ax.append(plt.subplot(splt[0, 1]))
 
-        splt2 = splt[1, :].subgridspec(self.nSystems, 2, wspace=0.2)
         # Relative error axes
-        ax.append([plt.subplot(splt2[i, 0]) for i in range(self.nSystems)])
+        ax.append(self.relative_error._init_posterior_plots(splt[1, 0]))
         # Additive Error axes
-        ax.append([plt.subplot(splt2[i, 1]) for i in range(self.nSystems)])
+        ax.append(self.additive_error._init_posterior_plots(splt[1, 1]))
 
         return ax
 
     def plot_posteriors(self, axes=None, height_kwargs={}, data_kwargs={}, rel_error_kwargs={}, add_error_kwargs={}, **kwargs):
+
+        if axes is None:
+            axes = kwargs.pop('fig', plt.gcf())
+            
+        if not isinstance(axes, list):
+            axes = self._init_posterior_plots(axes)
 
         assert len(axes) == 4, ValueError("Must have length 3 list of axes for the posteriors. self.init_posterior_plots can generate them")
 
@@ -417,7 +421,8 @@ class DataPoint(Point):
         # The data misfit is the mahalanobis distance of the multivariate distance.
         # assert not any(self.std[self.active] <= 0.0), ValueError('Cannot compute the misfit when the data standard deviations are zero.')
         tmp2 = 1.0 / self.std[self.active]
-        return np.sqrt(np.float64(np.sum((cf.Ax(tmp2, self.deltaD[self.active]))**2.0, dtype=np.float64)))
+        misfit = np.float64(np.sum((cf.Ax(tmp2, self.deltaD[self.active]))**2.0, dtype=np.float64))
+        return misfit
 
     def initialize(self, **kwargs):
         self.relErr = kwargs['initial_relative_error']
@@ -596,13 +601,22 @@ class DataPoint(Point):
     @property
     def summary(self):
         """ Print a summary of the EMdataPoint """
-        msg = ('Data Point: \n'
-               'Channel Names {} \n'
-               'Number of active channels: {} \n'
-               '{} {} {}').format(self._channelNames, np.sum(self.active), self.data[self.active].summary, self.predictedData[self.active].summary, self.std[self.active].summary)
+        msg = super().summary
+        names = copy(self.channelNames)
+        j = np.arange(5, self.nChannels, 5)
+        for i in range(j.size):
+            names.insert(j[i]+i, '\n')
+
+        msg += "channel names:\n{}\n".format("|   "+(', '.join(names).replace("\n,", "\n|  ")))
+        msg += "data:\n{}".format("|   "+(self.data[self.active].summary.replace("\n", "\n|   "))[:-4])
+        msg += "predicted data:\n{}".format("|   "+(self.predictedData[self.active].summary.replace("\n", "\n|   "))[:-4])
+        msg += "std:\n{}".format("|   "+(self.std[self.active].summary.replace("\n", "\n|   "))[:-4])
+        msg += "line number:\n{}".format("|   "+(self.lineNumber.summary.replace("\n", "\n|   "))[:-4])
+        msg += "fiducial:\n{}".format("|   "+(self.fiducial.summary.replace("\n", "\n|   "))[:-4])
+        msg += "relative error:\n{}".format("|   "+(self.relative_error.summary.replace("\n", "\n|   "))[:-4])
+        msg += "additive error:\n{}".format("|   "+(self.additive_error.summary.replace("\n", "\n|   "))[:-4])
+
         return msg
-
-
 
     def createHdf(self, parent, myName, withPosterior=True, add_axis=None, fillvalue=None):
         """ Create the hdf group metadata in file

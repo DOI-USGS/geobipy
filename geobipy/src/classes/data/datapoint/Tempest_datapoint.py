@@ -1,31 +1,17 @@
 from copy import deepcopy
 
 from ....classes.core import StatArray
-from ...model.Model1D import Model1D
 from .TdemDataPoint import TdemDataPoint
 from ...forwardmodelling.Electromagnetic.TD.tdem1d import (tdem1dfwd, tdem1dsen)
-from ...system.EmLoop import EmLoop
-from ...system.SquareLoop import SquareLoop
-from ...system.CircularLoop import CircularLoop
-from ....base.logging import myLogger
-from ...system.TdemSystem import TdemSystem
-from ...system.filters.butterworth import butterworth
-from ...system.Waveform import Waveform
 from ...statistics.Histogram import Histogram
 from ...mesh.RectilinearMesh1D import RectilinearMesh1D
-from ...statistics.Histogram2D import Histogram2D
 from ...statistics.Distribution import Distribution
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
-#from ....base import Error as Err
-from ....base import fileIO as fIO
 from ....base import utilities as cf
 from ....base import plotting as cP
-from ....base import MPI as myMPI
-from os.path import split as psplt
-from os.path import join
 
 
 class Tempest_datapoint(TdemDataPoint):
@@ -82,7 +68,6 @@ class Tempest_datapoint(TdemDataPoint):
         else:
             assert np.size(values) == self.nChannels, ValueError(("Tempest data must a have additive error values for all time gates and all components. \n"
                                                               "addErr must have size {}").format(self.nChannels))
-            # assert (np.all(np.asarray(values) > 0.0)), ValueError("addErr must be > 0.0.")
 
         self._addErr = StatArray.StatArray(values, '$\epsilon_{additive}x10^{2}$', self.units)
 
@@ -109,27 +94,8 @@ class Tempest_datapoint(TdemDataPoint):
         else:
             assert np.size(values) == self.n_components * self.nSystems, ValueError(("Tempest data must a have relative error for the primary and secondary fields, for each system. \n"
                             "relErr must have size {}").format(self.n_components * self.nSystems))
-            # assert (np.all(np.asarray(values) > 0.0)), ValueError("relErr must be > 0.0.")
 
         self._relErr = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
-
-    @TdemDataPoint.std.getter
-    def std(self):
-        """ Compute the data errors. """
-
-        # For each system assign error levels using the user inputs
-        for i in range(self.nSystems):
-            for j in range(self.n_components):
-                ic = self._component_indices(j, i)
-                relative_error = self.relErr[(i*2)+j] * self.data[ic]
-
-                self._std[ic] = np.sqrt((relative_error**2.0) + (self.addErr[ic]**2.0))
-
-        # Update the variance of the predicted data prior
-        if self.predictedData.hasPrior:
-            self.predictedData.prior.variance[np.diag_indices(np.sum(self.active))] = self._std[self.active]**2.0
-
-        return self._std
 
     @TdemDataPoint.units.setter
     def units(self, value):
@@ -146,7 +112,7 @@ class Tempest_datapoint(TdemDataPoint):
         if 'initial_transmitter_pitch' in kwargs:
             self.transmitter.pitch = kwargs['initial_transmitter_pitch']
 
-    def init_posterior_plots(self, gs):
+    def _init_posterior_plots(self, gs):
         """Initialize axes for posterior plots
 
         Parameters
@@ -158,25 +124,22 @@ class Tempest_datapoint(TdemDataPoint):
         if isinstance(gs, matplotlib.figure.Figure):
             gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
 
-        splt = gs.subgridspec(2, 2, width_ratios=[1, 4], height_ratios=[2, 1], wspace=0.3)
+        splt = gs.subgridspec(2, 2, width_ratios=[1, 4], height_ratios=[3, 1], wspace=0.3)
         ax = []
         # Height axis
-        ax.append(plt.subplot(splt[0, 0]))
+        ax.append(self.z._init_posterior_plots(splt[0, 0]))
         # Data axis
         ax.append(plt.subplot(splt[0, 1]))
 
-        splt2 = splt[1, :].subgridspec(self.nSystems*self.n_components, 2, wspace=0.2)
-        # Relative error axes
-        ax.append([plt.subplot(splt2[i, 0]) for i in range(self.nSystems*self.n_components)])
+        ax.append(self.relative_error._init_posterior_plots(splt[1, 0]))
 
         # # Additive Error axes
         # ax.append([None for i in range(self.nSystems*self.n_components)])
 
         # Pitch axes
-        ax.append([plt.subplot(splt2[i, 1]) for i in range(self.nSystems)])
+        ax.append(self.transmitter.pitch._init_posterior_plots(splt[1, 1]))
 
         return ax
-
 
     def set_priors(self, height_prior=None, relative_error_prior=None, additive_error_prior=None, transmitter_pitch_prior=None, data_prior=None, **kwargs):
 
@@ -212,11 +175,6 @@ class Tempest_datapoint(TdemDataPoint):
 
         self.transmitter.set_posteriors()
 
-    # def set_additive_error_prior(self, prior):
-    #     if not prior is None:
-    #         assert additive_error_prior.ndim == self.nChannels, ValueError("additive_error_prior must have {} dimensions".format(self.nChannels))
-    #         self.addErr.set_prior(prior)
-
     def perturb(self):
         """Propose a new EM data point given the specified attached propsal distributions
 
@@ -248,7 +206,6 @@ class Tempest_datapoint(TdemDataPoint):
         """
 
         super().perturb()
-
         self.perturb_pitch()
 
     def perturb_pitch(self):
@@ -267,13 +224,18 @@ class Tempest_datapoint(TdemDataPoint):
             cP.ylabel('Normalized Current (A)')
             plt.margins(0.1, 0.1)
 
-
     def plot(self, **kwargs):
         kwargs['xscale'] = kwargs.get('xscale', 'log')
         kwargs['yscale'] = kwargs.get('yscale', 'linear')
         return super().plot(**kwargs)
 
     def plot_posteriors(self, axes=None, height_kwargs={}, data_kwargs={}, rel_error_kwargs={}, pitch_kwargs={}, **kwargs):
+
+        if axes is None:
+            axes = kwargs.pop('fig', plt.gcf())
+            
+        if not isinstance(axes, list):
+            axes = self._init_posterior_plots(axes)
 
         assert len(axes) == 4, ValueError("Must have length 3 list of axes for the posteriors. self.init_posterior_plots can generate them")
 
@@ -284,9 +246,10 @@ class Tempest_datapoint(TdemDataPoint):
             # add_error_kwargs['line'] = best.addErr
             pitch_kwargs['line'] = best.transmitter.pitch
 
-        height_kwargs['tranpose'] = height_kwargs.get('transpose', True)
+        height_kwargs['transpose'] = height_kwargs.get('transpose', True)
         self.z.plotPosteriors(ax = axes[0], **height_kwargs)
 
+        axes[1].clear()
         self.predictedData.plotPosteriors(ax = axes[1], colorbar=False, **data_kwargs)
         self.plot(ax=axes[1], **data_kwargs)
         
@@ -374,19 +337,14 @@ class Tempest_datapoint(TdemDataPoint):
                 posterior.append(Histogram(mesh=mesh))
             self.relErr.posterior = posterior
 
-    def set_additive_error_posterior(self, log=None):
-        if self.addErr.hasPrior:
-            ab = StatArray.StatArray(np.atleast_2d(self.addErr.prior.bins()), name=self.addErr.name, units=self.data.units)
-            # self.addErr.posterior = [Histogram1D(edges = ab[i, :], log=log) for i in range(self.nSystems)]
+    # def set_additive_error_posterior(self, log=None):
+    #     if self.addErr.hasPrior:
+    #         ab = StatArray.StatArray(np.atleast_2d(self.addErr.prior.bins()), name=self.addErr.name, units=self.data.units)
+    #         # self.addErr.posterior = [Histogram1D(edges = ab[i, :], log=log) for i in range(self.nSystems)]
 
     def update_posteriors(self):
 
         super().update_posteriors()
-
-        # if self.predictedData.hasPosterior:
-        #     for i in range(self.n_components):
-        #         j = self._component_indices(i, 0)
-        #         self.predictedData.posterior.update_line(x=self.channels[j], y=self.predictedData[j])
 
         if self.transmitter.pitch.hasPosterior:
             self.transmitter.pitch.updatePosterior()

@@ -2,25 +2,17 @@
 Module describing a 2D Rectilinear Mesh class with x and y axes specified
 """
 from copy import copy, deepcopy
-from .Mesh import Mesh
+from matplotlib.figure import Figure
 from ...classes.core import StatArray
 from .RectilinearMesh2D import RectilinearMesh2D
 import numpy as np
 import matplotlib.cm as mplcm
 import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
-from matplotlib.collections import LineCollection
 from scipy.stats import binned_statistic
 from ...base import plotting as cP
 from ...base import utilities
 # from ...base import geometry
 from scipy.sparse import (kron, diags)
-from scipy import interpolate
-
-try:
-    from pyvtk import VtkData, CellData, Scalars, PolyData
-except:
-    pass
 
 class RectilinearMesh2D_stitched(RectilinearMesh2D):
     """Class defining stitched 1D rectilinear meshes.
@@ -32,7 +24,7 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
         self._max_cells = np.int32(max_cells)
         self.x = kwargs if x is None else x
         self.y_edges = None
-        self.y_log = kwargs.get('ylog')
+        self.y_log = kwargs.get('y_log')
         self.relativeTo = relativeTo
 
         self.nCells = nCells
@@ -62,9 +54,8 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
     def summary(self):
         """ Display a summary of the 3D Point Cloud """
         msg = ("2D Stitched Rectilinear Mesh: \n"
-              "nCells: {} \nx\n{}").format(self.nCells.summary, self.x.summary)
-        # if not self.relativeTo is None:
-        #     msg += self.relativeTo.summary
+              "nCells: {} \nx\n{}y\n{}relativeTo\n{}").format(self.nCells.summary, self.x.summary, self.y_edges.summary, self.relativeTo.summary)
+
         return msg
 
     # @property
@@ -106,11 +97,14 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
             
             relativeTo = self.relativeTo[slic] if not self.relativeTo is None else None
             if self.xyz:
-                out = type(self)(xEdges=self._x.edges[slic0], yEdges=self._y.edges[slic0], zEdges=self._z_edges[slic0, :], relativeTo=relativeTo)
+                out = type(self)(x_edges=self._x.edges[slic0], y_edges=self._y.edges[slic0], z_edges=self._z_edges[slic0, :], relativeTo=relativeTo)
             else:
-                out = type(self)(xEdges=self._x.edges[slic0], yEdges=self._z_edges[slic0, :], relativeTo=relativeTo)
+                out = type(self)(x_edges=self._x.edges[slic0], y_edges=self._z_edges[slic0, :], relativeTo=relativeTo)
             out.nCells = self.nCells[slic]
             return out
+
+    def n_posteriors(self):
+        return np.sum([self.nCells.hasPosterior, self.y.edges.hasPosterior])
 
     def pcolor(self, values, **kwargs):
 
@@ -143,6 +137,8 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
         cmap.set_bad(color='white')
         orientation = kwargs.pop('orientation', 'vertical')
         log = kwargs.pop('log', False)
+        vmin = kwargs.pop('vmin', None)
+        vmax = kwargs.pop('vmax', None)
 
         grid = kwargs.pop('grid', False)
         if 'edgecolor' in kwargs:
@@ -154,12 +150,17 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
         if (log):
             values, logLabel = utilities._log(values, log)
 
+        if vmin is not None:
+            values[values < vmin] = vmin
+        if vmax is not None:
+            values[values > vmax] = vmax
+
         if equalize:
             nBins = kwargs.pop('nbins', 256)
             assert nBins > 0, ValueError('nBins must be greater than zero')
             values, dummy = utilities.histogramEqualize(values, nBins=nBins)
 
-        rescale = lambda y: (y - np.min(y)) / (np.max(y) - np.min(y))
+        rescale = lambda y: (y - np.nanmin(y)) / (np.nanmax(y) - np.nanmin(y))
         v = rescale(values)
 
         y_edges = utilities._power(self.y_edges, self.y_log)
@@ -196,10 +197,8 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
         cbar = None
         if (colorbar):
 
-            sm = mplcm.ScalarMappable(cmap=cmap, norm=plt.Normalize(np.min(values), np.max(values)))
+            sm = mplcm.ScalarMappable(cmap=cmap, norm=plt.Normalize(np.nanmin(values), np.nanmax(values)))
             sm.set_array([])
-
-            # cbar = plt.colorbar(sm)
 
             if (equalize):
                 cbar = plt.colorbar(sm, extend='both', cax=cax, orientation=orientation)
@@ -213,6 +212,85 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
                     cP.clabel(cbar, utilities.getNameUnits(values))
             else:
                 cP.clabel(cbar, cl)
+
+    def _init_posterior_plots(self, gs, values=None, sharex=None, sharey=None):
+        """Initialize axes for posterior plots
+
+        Parameters
+        ----------
+        gs : matplotlib.gridspec.Gridspec
+            Gridspec to split
+
+        """
+
+        if isinstance(gs, Figure):
+            gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0] 
+
+        if values is None:
+            splt = gs.subgridspec(1, 2)
+            
+        else:
+            shape = (4, 2)
+            splt = gs.subgridspec(*shape)
+
+        ax = [plt.subplot(splt[0, 0], sharex=sharex, sharey=sharey)] # n_cells
+        sharex = ax[0] if sharex is None else sharex
+        ax.append(plt.subplot(splt[0, 1], sharex=sharex, sharey=sharey)) # y_edges
+        sharey = ax[1] if sharey is None else sharey
+        
+        if values is not None:
+            ax += [plt.subplot(splt[np.unravel_index(i, shape)], sharex=sharex, sharey=sharey) for i in range(2, 8)]
+
+        for a in ax:
+            cP.pretty(a)
+
+        return ax        
+
+    def plot_posteriors(self, axes=None, values=None, value_kwargs={}, sharex=None, sharey=None, **kwargs):
+        # assert len(axes) == 2, ValueError("Must have length 2 list of axes for the posteriors. self.init_posterior_plots can generate them")
+
+        # best = kwargs.get('best', None)
+        # if best is not None:
+        #     ncells_kwargs['line'] = best.nCells
+        #     edges_kwargs['line'] = best.edges[1:]
+
+        if axes is None:
+            axes = kwargs.pop('fig', plt.gcf())
+
+        if not isinstance(axes, list):
+            axes = self._init_posterior_plots(axes, values=values, sharex=sharex, sharey=sharey)
+
+        ncells_kwargs = kwargs.get('ncells_kwargs', {})
+        y_edges_kwargs = kwargs.get('y_edges_kwargs', {})
+        
+        self.nCells.plotPosteriors(ax = axes[0], **ncells_kwargs)
+
+        if kwargs.pop('flipY', False) :
+            y_edges_kwargs['flipY'] = True
+        self.y_edges.plotPosteriors(ax = axes[1], **y_edges_kwargs)
+
+        if values is not None:
+            axis = value_kwargs.pop('axis', 1)
+            mean = values.posterior.mean(axis=axis)
+            mean.pcolor(ax=axes[2], **value_kwargs)
+            tmp = values.posterior.percentile(percent=5.0, axis=axis)
+            tmp.pcolor(ax=axes[4], **value_kwargs)
+            tmp = values.posterior.percentile(percent=95.0, axis=axis)
+            tmp.pcolor(ax=axes[6], **value_kwargs)
+            tmp = values.posterior.entropy(axis=axis)
+            tmp.pcolor(ax=axes[3])
+            tmp = values.posterior.opacity(axis=axis)
+            a, b, cb = tmp.pcolor(axis=axis, ax=axes[5], ticks=[0.0, 0.5, 1.0], cmap='plasma')
+            
+            if cb is not None:
+                labels = ['Less', '', 'More']
+                cb.ax.set_yticklabels(labels)
+                cb.set_label("Confidence")
+
+            mean.pcolor(ax=axes[7], alpha = tmp.values, **value_kwargs)
+        
+        return axes
+
 
     def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None, upcast=False):
         """ Create the hdf group metadata in file
@@ -245,7 +323,9 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
             relativeTo = None
             if 'y/relativeTo' in grp:
                 relativeTo = StatArray.StatArray.fromHdf(grp['y/relativeTo'], skip_posterior=skip_posterior)
-            
+                if np.all(np.isnan(relativeTo)):
+                    relativeTo = None
+
             out = cls(max_cells=edges.shape[1],  x=x, relativeTo=relativeTo)
 
             out.nCells = nCells

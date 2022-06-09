@@ -8,17 +8,19 @@
 """
 from copy import deepcopy
 from pathlib import Path
-from pandas import DataFrame, read_csv
+from pandas import read_csv
+
+from ...system.CircularLoop import CircularLoop
+from ...system.CircularLoops import CircularLoops
 from ...pointcloud.PointCloud3D import PointCloud3D
 from .Data import Data
 from ..datapoint.TdemDataPoint import TdemDataPoint
 from ....classes.core import StatArray
-from ...system.CircularLoop import CircularLoop
+
 from ...system.TdemSystem import TdemSystem
 
 import numpy as np
 from ....base import fileIO as fIO
-#from ....base import Error as Err
 from ....base import plotting as cP
 from ....base import utilities as cF
 from ....base import MPI as myMPI
@@ -54,6 +56,8 @@ class TdemData(Data):
 
     """
 
+    single = TdemDataPoint
+
     def __init__(self, system=None, **kwargs):
         """ Initialize the TDEM data """
 
@@ -84,20 +88,6 @@ class TdemData(Data):
 
         self.channelNames = kwargs.get('channel_names')
 
-    # @Data.channelNames.setter
-    # def channelNames(self, values):
-    #     if values is None:
-    #         self._channelNames = []
-    #         for i in range(self.nSystems):
-    #             # Set the channel names
-    #             for ic in range(self.n_components):
-    #                 for iTime in range(self.nTimes[i]):
-    #                     self._channelNames.append('Off time {:.3e}'.format(self.system[i].windows.centre[iTime]))
-    #     else:
-    #         assert all((isinstance(x, str) for x in values))
-    #         assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
-    #         self._channelNames = values
-
     @Data.channelNames.setter
     def channelNames(self, values):
         if values is None:
@@ -106,7 +96,8 @@ class TdemData(Data):
                 # Set the channel names
                 for ic in range(self.n_components):
                     for iTime in range(self.nTimes[i]):
-                        self._channelNames.append('S{} time {:.3e}'.format(self.components[ic].upper(), self.system[i].windows.centre[iTime]))
+                        s = 'S{}{} time {:.3e}'.format(i, self.components[ic].upper(), self.system[i].windows.centre[iTime])
+                        self._channelNames.append(s)
         else:
             assert all((isinstance(x, str) for x in values))
             assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
@@ -129,12 +120,17 @@ class TdemData(Data):
 
     @property
     def loopOffset(self):
-        offset = np.empty((self.nPoints, 3))
-        for i in range(self.nPoints):
-            offset[i, :] = np.r_[self.receiver[i].x - self.transmitter[i].x,
-                                 self.receiver[i].y - self.transmitter[i].y,
-                                 self.receiver[i].z - self.transmitter[i].z]
-        return offset
+
+        return np.vstack([self.receiver.x - self.transmitter.x,
+                          self.receiver.y - self.transmitter.y, 
+                          self.receiver.z - self.transmitter.z]).T
+
+        # offset = np.empty((self.nPoints, 3))
+        # for i in range(self.nPoints):
+        #     offset[i, :] = np.r_[self.receiver[i].x - self.transmitter[i].x,
+        #                          self.receiver[i].y - self.transmitter[i].y,
+        #                          self.receiver[i].z - self.transmitter[i].z]
+        # return offset
 
     # @loopOffset.setter
     # def loopOffset(self, values):
@@ -159,12 +155,12 @@ class TdemData(Data):
     def predicted_primary_field(self):
         """The data. """
         if np.size(self._predicted_primary_field, 0) == 0:
-            self._predicted_primary_field = StatArray.StatArray((self.nPoints, self.n_components), "Predicted Primary field", self.units)
+            self._predicted_primary_field = StatArray.StatArray((self.nPoints, self.n_components * self.nSystems), "Predicted Primary field", self.units)
         return self._predicted_primary_field
 
     @predicted_primary_field.setter
     def predicted_primary_field(self, values):
-        shp = (self.nPoints, self.n_components)
+        shp = (self.nPoints, self.n_components * self.nSystems)
         if values is None:
             self._predicted_primary_field = StatArray.StatArray(shp, "Predicted primary field", self.units)
         else:
@@ -172,7 +168,7 @@ class TdemData(Data):
                 self.nPoints = np.size(values, 0)
             # if self.nChannels == 0:
             #     self.channels_per_system = np.size(values, 1)
-            shp = (self.nPoints, self.n_components)
+            shp = (self.nPoints, self.n_components * self.nSystems)
             assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("predicted_primary_field must have shape {}".format(shp))
             self._predicted_primary_field = StatArray.StatArray(values)
 
@@ -202,12 +198,13 @@ class TdemData(Data):
     def primary_field(self):
         """The data. """
         if np.size(self._primary_field, 0) == 0:
-            self._primary_field = StatArray.StatArray((self.nPoints, self.n_components), "Primary field", self.units)
+            self._primary_field = StatArray.StatArray((self.nPoints, self.n_components * self.nSystems), "Primary field", self.units)
         return self._primary_field
 
     @primary_field.setter
     def primary_field(self, values):
-        shp = (self.nPoints, self.n_components)
+        shp = (self.nPoints, self.n_components * self.nSystems)
+
         if values is None:
             self._primary_field = StatArray.StatArray(shp, "Primary field", self.units)
         else:
@@ -215,10 +212,9 @@ class TdemData(Data):
                 self.nPoints = np.size(values, 0)
             # if self.nChannels == 0:
             #     self.channels_per_system = np.size(values, 1)
-            shp = (self.nPoints, self.n_components)
+            shp = (self.nPoints, self.n_components * self.nSystems)
             assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("primary_field must have shape {}".format(shp))
             self._primary_field = StatArray.StatArray(values)  
-
 
     @property
     def receiver(self):
@@ -226,19 +222,15 @@ class TdemData(Data):
 
     @receiver.setter
     def receiver(self, values):
-
         if (values is None):
-            self._receiver = StatArray.StatArray(self.nPoints, 'Receiver loops', dtype=CircularLoop)
+            self._receiver = CircularLoops()
         else:
+            assert isinstance(values, CircularLoops), ValueError('receiver must have type geobipy.CircularLoops')
             if self.nPoints == 0:
-                self.nPoints = np.size(values)
-            assert np.size(values) == self.nPoints, ValueError("receiver must have shape {}".format(self.nPoints))
-            # if (isinstance(values, StatArray.StatArray)):
-            #     self._receiver = values.deepcopy()
-            # else:
-            self._receiver = StatArray.StatArray(self.nPoints, 'Receiver loops', dtype=CircularLoop)
-            for i in range(self.nPoints):
-                self._receiver[i] = values[i]
+                self.nPoints = values.nPoints
+            assert values.nPoints == self.nPoints, ValueError("receiver must have size {}".format(self.nPoints))
+            
+            self._receiver = values
 
     @property
     def secondary_field(self):
@@ -310,17 +302,14 @@ class TdemData(Data):
     def transmitter(self, values):
 
         if (values is None):
-            self._transmitter = StatArray.StatArray(self.nPoints, 'Transmitter loops', dtype=CircularLoop)
+            self._transmitter = CircularLoops()
         else:
+            assert isinstance(values, CircularLoops), ValueError('transmitter must have type geobipy.CircularLoops')
             if self.nPoints == 0:
-                self.nPoints = np.size(values)
-            assert np.size(values) == self.nPoints, ValueError("transmitter must have shape {}".format(self.nPoints))
-            # if (isinstance(values, StatArray.StatArray)):
-            #     self._transmitter = values.deepcopy()
-            # else:
-            self._transmitter = StatArray.StatArray(self.nPoints, 'Transmitter loops', dtype=CircularLoop)
-            for i in range(self.nPoints):
-                self._transmitter[i] = values[i]
+                self.nPoints = values.nPoints
+            assert values.nPoints == self.nPoints, ValueError("transmitter must have size {}".format(self.nPoints))
+            
+            self._transmitter = values
 
     def _as_dict(self):
         out, order = super()._as_dict()
@@ -469,22 +458,18 @@ class TdemData(Data):
         self.z = df[iC[4]].values
         self.elevation = df[iC[5]].values
 
-        self.transmitter = None
-        for i in range(self.nPoints):
-            self.transmitter[i] = CircularLoop(x=self.x[i], y=self.y[i], z=self.z[i],
-                                               pitch=df[iT[0]].values[i], roll=df[iT[1]].values[i], yaw=df[iT[2]].values[i],
-                                               radius=self.system[0].loopRadius())
+        self.transmitter = CircularLoops(x=self.x, y=self.y, z=self.z,
+                            pitch=df[iT[0]].values, roll=df[iT[1]].values, yaw=df[iT[2]].values,
+                            radius=np.full(self.nPoints, fill_value=self.system[0].loopRadius()))
 
         loopOffset = df[iOffset].values
 
         # Assign the orientations of the acquisistion loops
-        self.receiver = None
-        for i in range(self.nPoints):
-            self.receiver[i] = CircularLoop(x = self.transmitter[i].x + loopOffset[i, 0],
-                                            y = self.transmitter[i].y + loopOffset[i, 1],
-                                            z = self.transmitter[i].z + loopOffset[i, 2],
-                                            pitch=df[iR[0]].values[i], roll=df[iR[1]].values[i], yaw=df[iR[2]].values[i],
-                                            radius=self.system[0].loopRadius())
+        self.receiver = CircularLoops(x = self.transmitter.x + loopOffset[:, 0],
+                                     y = self.transmitter.y + loopOffset[:, 1],
+                                     z = self.transmitter.z + loopOffset[:, 2],
+                                     pitch=df[iR[0]].values, roll=df[iR[1]].values, yaw=df[iR[2]].values,
+                                     radius=np.full(self.nPoints, fill_value=self.system[0].loopRadius()))
 
         # Get the data values
         # iSys = self._systemIndices(0)
@@ -628,7 +613,7 @@ class TdemData(Data):
                     on_error.append(channel)
                 else:
                     on.append(channel)
-            elif any(x in cTmp for x in ("off_time", "sx_time", "sy_time", "sz_time")):
+            elif any(x in cTmp for x in ("off_time", "x_time", "y_time", "z_time")):
                 if 'err' in cTmp:
                     off_error_channels.append(channel)
                 else:
@@ -723,7 +708,7 @@ class TdemData(Data):
                          pitch=rloop[0], roll=rloop[1], yaw=rloop[2],
                          radius=self.system[0].loopRadius())
 
-        return self.datapoint_type(x=data[2], y=data[3], z=data[4], elevation=data[5],
+        return self.single(x=data[2], y=data[3], z=data[4], elevation=data[5],
                         secondary_field=secondary_field, std=S,
                         primary_field=primary_field,
                         system=self.system,
@@ -775,10 +760,6 @@ class TdemData(Data):
                     '  4Std:    {} \n'.format(np.nanmin(d), np.nanmax(d), np.nanmedian(d), np.nanmean(d), s, 4.0*s)
             print(h)
 
-    @property
-    def datapoint_type(self):
-        return TdemDataPoint
-
     def datapoint(self, index=None, fiducial=None):
         """Get the ith data point from the data set
 
@@ -810,7 +791,7 @@ class TdemData(Data):
 
         i = index
 
-        return self.datapoint_type(self.x[i], self.y[i], self.z[i], self.elevation[i],
+        return self.single(self.x[i], self.y[i], self.z[i], self.elevation[i],
                              self.primary_field[i, :], self.secondary_field[i, :],
                              relative_error=self.relative_error[i, :], additive_error=self.additive_error[i, :], std = self.std[i, :],
                              predicted_primary_field=None, predicted_secondary_field=None,
@@ -910,7 +891,7 @@ class TdemData(Data):
 
         cP.title(tmp.name)
 
-    def plot(self, system=0, channels=None, xAxis='index', **kwargs):
+    def plot(self, *args, **kwargs):
         """ Plots the data
 
         Parameters
@@ -922,30 +903,34 @@ class TdemData(Data):
 
         """
 
-        x = self.getXAxis(xAxis)
+        # legend = kwargs.pop('legend', True)
+        kwargs['yscale'] = kwargs.get('yscale', 'log')
+        return super().plot(*args, **kwargs)
 
-        ax = plt.gca()
-        if channels is None:
-            i = self._systemIndices(system)
-            cP.plot(x, self.data[:, i],
-                    label=self.channelNames[i], **kwargs)
-        else:
-            channels = np.atleast_1d(channels)
-            for j, i in enumerate(channels):
-                cP.plot(x, self.data[:, i], label=self.channelNames[i], **kwargs)
+        # x = self.getXAxis(xAxis)
 
-        # box = ax.get_position()
-        # ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+        # if channels is None:
+        #     i = self._systemIndices(system)
+        #     ax = cP.plot(x, self.data[:, i],
+        #                  label=self.channelNames[i], **kwargs)
+        # else:
+        #     channels = np.atleast_1d(self.channel_index(channels, system))
+        #     for i in channels:
+        #         ax = cP.plot(x, self.data[:, i], label=self.channelNames[i], **kwargs)
 
-        # Put a legend to the right of the current axis
-        leg = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), fancybox=True)
-        leg.set_title(self.data.getNameUnits())
+        # plt.xlabel(cF.getNameUnits(x))
 
-        plt.xlabel(cF.getNameUnits(x))
+        # # Put a legend to the right of the current axis
+        # if legend:
+        #     leg = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), fancybox=True)
+        #     leg.set_title(self.data.getNameUnits())
+        
+        # return ax        
 
     def plotLine(self, line, xAxis='index', **kwargs):
 
         line = self.line(line)
+        kwargs['yscale'] = kwargs.get('yscale', 'log')
 
         x = self.getXAxis(xAxis)
 
@@ -954,6 +939,10 @@ class TdemData(Data):
             j = self._systemIndices(i)
             kwargs['labels'] = line.channelNames[j]
             line.data[:, j].plot(x=x, **kwargs)
+
+    def plotPredicted(self, *args, **kwargs):
+        kwargs['yscale'] = kwargs.get('yscale', 'log')
+        return super().plotPredicted(*args, **kwargs)
 
     def plotWaveform(self, **kwargs):
         for i in range(self.nSystems):
@@ -998,8 +987,8 @@ class TdemData(Data):
             txt = np.string_(Path(self.system[i].filename).read_text())
             grp.create_dataset('System{}'.format(i), data=txt)
 
-        self.transmitter[0].createHdf(grp, 'T', withPosterior=withPosterior, add_axis=self.nPoints, fillvalue=fillvalue)
-        self.receiver[0].createHdf(grp, 'R', withPosterior=withPosterior, add_axis=self.nPoints, fillvalue=fillvalue)
+        self.transmitter.createHdf(grp, 'T', withPosterior=withPosterior, fillvalue=fillvalue)
+        self.receiver.createHdf(grp, 'R', withPosterior=withPosterior, fillvalue=fillvalue)
 
         self.primary_field.createHdf(grp, 'primary_field', withPosterior=withPosterior, fillvalue=fillvalue)
         self.secondary_field.createHdf(grp, 'secondary_field', withPosterior=withPosterior, fillvalue=fillvalue)
@@ -1018,10 +1007,8 @@ class TdemData(Data):
 
         grp = parent[name]
 
-        for i in range(self.nPoints):
-            self.transmitter[i].writeHdf(grp, 'T', index=i)
-        for i in range(self.nPoints):
-            self.receiver[i].writeHdf(grp, 'T', index=i)
+        self.transmitter.writeHdf(grp, 'T', withPosterior=withPosterior)
+        self.receiver.writeHdf(grp, 'R', withPosterior=withPosterior)
 
         self.primary_field.writeHdf(grp, 'primary_field', withPosterior=withPosterior)
         self.secondary_field.writeHdf(grp, 'secondary_field', withPosterior=withPosterior)
@@ -1033,7 +1020,7 @@ class TdemData(Data):
         """ Reads the object from a HDF group """
 
         if kwargs.get('index') is not None:
-            return TdemDataPoint.fromHdf(grp, **kwargs)
+            return cls.single.fromHdf(grp, **kwargs)
 
         nSystems = np.int32(np.asarray(grp.get('nSystems')))
         
@@ -1054,18 +1041,16 @@ class TdemData(Data):
 
         self = super(TdemData, cls).fromHdf(grp, system=systems)
 
-        self.primary_field = StatArray.StatArray.fromHdf(grp['primary_field'])
+        # sz = StatArray.StatArray.fromHdf(grp['predicted_secondary_field'])
+        # print(sz.min(), sz.max())
+
+        self.primary_field = None#StatArray.StatArray.fromHdf(grp['primary_field'])
         self.secondary_field = StatArray.StatArray.fromHdf(grp['secondary_field'])
-        self.predicted_primary_field = StatArray.StatArray.fromHdf(grp['predicted_primary_field'])
+        self.predicted_primary_field = None#StatArray.StatArray.fromHdf(grp['predicted_primary_field'])
         self.predicted_secondary_field = StatArray.StatArray.fromHdf(grp['predicted_secondary_field'])
 
-        self._transmitter = StatArray.StatArray(self.nPoints, 'Transmitter loops', dtype=CircularLoop)
-        for i in range(self.nPoints):
-            self._transmitter[i] = CircularLoop.fromHdf(grp['T'], index=i)
-
-        self._receiver = StatArray.StatArray(self.nPoints, 'Receiver loops', dtype=CircularLoop)
-        for i in range(self.nPoints):
-            self._receiver[i] = CircularLoop.fromHdf(grp['R'], index=i)
+        self.transmitter = CircularLoops.fromHdf(grp['T'])
+        self.receiver = CircularLoops.fromHdf(grp['R'])
 
         return self
 

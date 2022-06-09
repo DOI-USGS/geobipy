@@ -96,7 +96,7 @@ try:
                    "{}\n").format(self.fileName, self.times.summary)
             return msg
 
-except OSError as err:
+except Exception as e: 
     class TdemSystem_GAAEM(object):
 
         def __init__(self, *args, **kwargs):
@@ -105,3 +105,5 @@ except OSError as err:
                  "Please see the package's README for instructions on how to install it \n"
                  "Check that you have loaded the compiler that was used to compile the forward modeller\n").format(err)
             print(Warning(h))
+
+    print(e)

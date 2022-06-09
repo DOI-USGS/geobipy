@@ -1,5 +1,6 @@
 
 import numpy as np
+from copy import deepcopy
 from ...classes.core import StatArray
 from scipy.stats import (multivariate_normal, norm)
 from scipy.special import beta
@@ -17,12 +18,14 @@ class mixPearson(Mixture):
 
         self.params = np.zeros(self.n_solvable_parameters * np.size(means))
 
-
         self.means = means
         self.sigmas = sigmas
         self.exponents = exponents
         self.amplitudes = amplitudes
 
+    def __deepcopy__(self, memo={}):
+        out = type(self)()
+        out._params = deepcopy(self._params)
 
     @property
     def amplitudes(self):
@@ -95,6 +98,10 @@ class mixPearson(Mixture):
     def n_components(self):
         return self.means.size
 
+    @property
+    def ndim(self):
+        return self.means.size
+
     def squeeze(self):
 
         i = np.where(self.amplitudes > 0.0)[0]
@@ -110,7 +117,7 @@ class mixPearson(Mixture):
     def fit_to_curve(self, *args, **kwargs):
         fit, pars = super().fit_to_curve(*args, **kwargs)
         self.params = np.asarray(list(fit.best_values.values()))
-        return self
+        return fit, self
 
 
     def plot_components(self, x, log, ax=None, **kwargs):
@@ -128,9 +135,9 @@ class mixPearson(Mixture):
     def probability(self, x, log, component=None):
 
         if component is None:
-            out = StatArray.StatArray(np.empty([np.size(x), self.n_components]), "Probability Density")
+            out = StatArray.StatArray(np.empty([self.n_components, np.size(x)]), "Probability Density")
             for i in range(self.n_components):
-                out[:, i] =  self._probability(x, log, self.means[i], self.variances[i], self.exponents[i])
+                out[i, :] =  self._probability(x, log, self.means[i], self.variances[i], self.exponents[i])
             return out
         else:
             return self._probability(x, log, self.means[component], self.variances[component], self.exponents[component])

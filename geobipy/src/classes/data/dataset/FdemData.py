@@ -65,6 +65,8 @@ class FdemData(Data):
 
     """
 
+    single = FdemDataPoint
+
     def __init__(self, system=None, **kwargs):
         """Instantiate the FdemData class. """
 
@@ -359,10 +361,6 @@ class FdemData(Data):
                        powerline=self.powerline[i],
                        magnetic=self.magnetic[i])
 
-    @property
-    def datapoint_type(self):
-        return FdemDataPoint
-
     def datapoint(self, index=None, fiducial=None):
         """Get the ith data point from the data set
 
@@ -392,7 +390,7 @@ class FdemData(Data):
         if not fNone:
             index = self.fiducial.searchsorted(fiducial)
 
-        return FdemDataPoint(self.x[index],
+        return self.single(self.x[index],
                              self.y[index],
                              self.z[index],
                              self.elevation[index],
@@ -453,10 +451,9 @@ class FdemData(Data):
 
         """
 
-        kwargs['legend'] = kwargs.pop('legend', True)
         ax, legend = super().plot(xAxis, channels=channels, values=values, **kwargs)
 
-        if not legend is None:
+        if kwargs.get('legend', True):
             legend.set_title('Frequency (Hz)')
 
         return ax, legend
@@ -742,7 +739,7 @@ class FdemData(Data):
         else:
             S = 0.1 * D
         
-        return FdemDataPoint(x=df[self._iC[2]].values,
+        return self.single(x=df[self._iC[2]].values,
                              y=df[self._iC[3]].values,
                              z=df[self._iC[4]].values,
                              elevation=df[self._iC[5]].values,
@@ -909,7 +906,7 @@ class FdemData(Data):
         """ Reads the object from a HDF group """
 
         if kwargs.get('index') is not None:
-            return FdemDataPoint.fromHdf(grp, **kwargs)
+            return cls.single.fromHdf(grp, **kwargs)
         
         system = FdemSystem.fromHdf(grp['sys'])
         return super(FdemData, cls).fromHdf(grp, system=system)

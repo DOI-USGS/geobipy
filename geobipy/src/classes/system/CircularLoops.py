@@ -1,11 +1,13 @@
 from copy import deepcopy
 import numpy as np
+
+from .CircularLoop import CircularLoop
 from ...base import MPI as myMPI
-from .EmLoop import EmLoop
+from .EmLoops import EmLoops
 from ..core import StatArray
 from ..statistics.Distribution import Distribution
 
-class CircularLoop(EmLoop):
+class CircularLoops(EmLoops):
     """Defines a circular loop for EM acquisition systems
 
     CircularLoop(orient, moment, x, y, z, pitch, roll, yaw, radius)
@@ -32,11 +34,12 @@ class CircularLoop(EmLoop):
         Radius of the loop
 
     """
+    single = CircularLoop
 
-    def __init__(self, orient="z", moment=1.0, x=0.0, y=0.0, z=0.0, elevation=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0, **kwargs):
+    def __init__(self, orientation=None, moment=None, x=None, y=None, z=None, elevation=None, pitch=None, roll=None, yaw=None, radius=None, **kwargs):
         """ Initialize a loop in an EM system """
 
-        super().__init__(x, y, z, elevation=elevation, **kwargs)
+        super().__init__(x, y, z, elevation=elevation, orientation=orientation, moment=moment, pitch=pitch, roll=roll, yaw=yaw, **kwargs)
         # Radius of the loop
         self.radius = radius
 
@@ -46,56 +49,85 @@ class CircularLoop(EmLoop):
 
     @property
     def radius(self):
-        return self._radius    
+        return self._radius
 
     @radius.setter
-    def radius(self, value):
-        if not isinstance(value, StatArray.StatArray):
-            value = np.float64(value)
-        # assert isinstance(value, (StatArray.StatArray, float, np.float64)), TypeError("pitch must have type float")
-        self._radius = StatArray.StatArray(value, 'Radius', 'm')
+    def radius(self, values):
+        if (values is None):
+            values = self.nPoints
+        else:
+            if self.nPoints == 0:
+                self.nPoints = np.size(values)
+            assert np.size(values) == self.nPoints, ValueError("radius must have size {}".format(self.nPoints))
+            if (isinstance(values, StatArray.StatArray)):
+                self._radius = deepcopy(values)
+                return
+
+        self._radius = StatArray.StatArray(values, "Radius", "m")
 
     @property
     def summary(self):
         """Print a summary"""
-        msg = super().summary
-        msg += "radius:\n{}".format("|   "+(self.radius.summary.replace("\n", "\n|   "))[:-4])
+        msg = ("{}"
+                "Radius: {}\n"
+               ).format(super().summary, self.radius)
         return msg
 
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
-        out.radius = deepcopy(self.radius, memo=memo)
+        out._radius = deepcopy(self.radius, memo=memo)
+
         return out
 
-    def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
+    def __getitem__(self, i):
+        """Define get item
+
+        Parameters
+        ----------
+        i : ints or slice
+            The indices of the points in the pointcloud to return
+
+        out : geobipy.PointCloud3D
+            The potentially smaller point cloud
+
+        """
+        out = super().__getitem__(i)
+        i = np.unique(i)
+        out._radius = self.radius[i]
+        return out
+
+    def createHdf(self, parent, myName, withPosterior=True, fillvalue=None):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
         """
         # create a new group inside h5obj
-        grp = super().createHdf(parent, name, withPosterior, add_axis, fillvalue)
-        if add_axis is not None:
-            grp.attrs['repr'] = 'CircularLoops'
-        self.radius.createHdf(grp, 'radius', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
-        
-    def writeHdf(self, parent, name, withPosterior=True, index=None):
+        grp = super().createHdf(parent, myName, withPosterior, fillvalue)
+        self.radius.createHdf(grp, 'radius', withPosterior=withPosterior, fillvalue=fillvalue)
+
+
+    def writeHdf(self, parent, name, withPosterior):
         """ Write the StatArray to an HDF object
         parent: Upper hdf file or group
         myName: object hdf name. Assumes createHdf has already been called
         create: optionally create the data set as well before writing
         """
 
-        super().writeHdf(parent, name, withPosterior, index)
+        super().writeHdf(parent, name, withPosterior)
 
         grp = parent[name]
-        self.radius.writeHdf(grp, 'radius', index=index)
+        self.radius.writeHdf(grp, 'radius', withPosterior)        
 
     @classmethod
-    def fromHdf(cls, grp, index=None):
+    def fromHdf(cls, grp, **kwargs):
         """ Reads in the object from a HDF file """
 
-        out = super(CircularLoop, cls).fromHdf(grp, index)
-        out.radius = StatArray.StatArray.fromHdf(grp['radius'], index=index)
+        if kwargs.get('index') is not None:
+            return cls.single.fromHdf(grp, **kwargs)
+
+        out = super(CircularLoops, cls).fromHdf(grp)
+        out.radius = StatArray.StatArray.fromHdf(grp, 'radius')
+
         return out
 
     def Bcast(self, world, root=0):
@@ -126,14 +158,11 @@ class CircularLoop(EmLoop):
         return CircularLoop(orient=tData[0], moment=tData[1], x=x, y=y, z=z, pitch=pitch, roll=roll, yaw=yaw, radius=tData[2])
 
     def Isend(self, dest, world):
-
         super().Isend(dest, world)
         self.radius.Isend(dest, world)
 
     @classmethod
     def Irecv(cls, source, world):
-
-        out = super(CircularLoop, cls).Irecv(source, world)
-        out.radius = StatArray.StatArray.Irecv(source, world)
-
+        out = super(CircularLoops, cls).Irecv(source, world)
+        out._radius = StatArray.StatArray.Irecv(source, world)
         return out

@@ -3,11 +3,7 @@ Class to store inversion results. Contains plotting and writing to file procedur
 """
 from copy import deepcopy
 from os.path import join
-import matplotlib as mpl
 import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
-from matplotlib.pyplot import pause
-from matplotlib.ticker import MaxNLocator
 from ..base import plotting as cP
 from ..base import utilities as cF
 import numpy as np
@@ -15,8 +11,6 @@ from ..base import fileIO as fIO
 import h5py
 from ..base.HDF.hdfWrite import write_nd
 from ..classes.core import StatArray
-# from ..classes.statistics.Hitmap2D import Hitmap2D
-from ..classes.statistics.Histogram1D import Histogram1D
 from ..classes.statistics.Distribution import Distribution
 from ..classes.core.myObject import myObject
 from ..classes.data.datapoint.FdemDataPoint import FdemDataPoint
@@ -320,7 +314,7 @@ class Inference1D(myObject):
         perturbed_datapoint.forward(perturbed_model)
 
         # Compute the data misfit
-        data_misfit1 = perturbed_datapoint.dataMisfit()**2.0
+        data_misfit1 = perturbed_datapoint.dataMisfit()
 
         # Evaluate the prior for the current model
         prior1 = perturbed_model.prior_probability(self.kwargs['solve_parameter'], self.kwargs['solve_gradient'])
@@ -334,10 +328,10 @@ class Inference1D(myObject):
         # Compute the components of each acceptance ratio
         likelihood1 = 1.0
         observation = None
-        if not self.kwargs.get('ignore_likelihood', False):
+        if not  self.kwargs.get('ignore_likelihood', False):
             likelihood1 = perturbed_datapoint.likelihood(log=True)
             observation = perturbed_datapoint
-        proposal, proposal1 = perturbed_model.proposal_probabilities(remapped_model, perturbed_datapoint)
+        proposal, proposal1 = perturbed_model.proposal_probabilities(remapped_model, observation)
 
         posterior1 = prior1 + likelihood1
 
@@ -365,7 +359,7 @@ class Inference1D(myObject):
             self.posterior = posterior1
             self.model = perturbed_model
             self.datapoint = perturbed_datapoint
-        
+
     def infer(self, hdf_file_handle):
         """ Markov Chain Monte Carlo approach for inversion of geophysical data
         userParameters: User input parameters object
@@ -430,6 +424,7 @@ class Inference1D(myObject):
 
         # Determine if we are burning in
         if (not self.burned_in):
+            
             target_misfit = np.sum(self.datapoint.active)
             # if self.data_misfit < target_misfit:
             if np.isclose(self.data_misfit, self.multiplier*target_misfit, rtol=1e-1, atol=1e-2) :  # datapoint.target_misfit
@@ -482,7 +477,7 @@ class Inference1D(myObject):
 
         mngr = plt.get_current_fig_manager()
         try:
-            mng.frame.Maximize(True)
+            mngr.frame.Maximize(True)
         except:
             try:
                 mngr.window.showMaximized()
@@ -500,11 +495,12 @@ class Inference1D(myObject):
         for ax in self.ax[:2]:
             cP.pretty(ax)
 
-        self.ax[2] = self.model.init_posterior_plots(gs[1, 0])
-        self.ax[3] = self.datapoint.init_posterior_plots(gs[1, 1])
+        self.ax[2] = self.model._init_posterior_plots(gs[1, 0])
+        self.ax[3] = self.datapoint._init_posterior_plots(gs[1, 1])
 
         if self.interactive_plot:
             plt.show(block=False)
+            plt.interactive(True)
         # plt.draw()
 
     def plot(self, title="", increment=None):
@@ -532,14 +528,14 @@ class Inference1D(myObject):
 
             self.model.plot_posteriors(
                 axes=self.ax[2],
-                ncells_kwargs={
-                    'normalize': True},
+                # ncells_kwargs={
+                #     'normalize': True},
                 edges_kwargs={
-                    'normalize': True,
+                    # 'normalize': True,
                     'transpose': True,
-                    'flipY': True,
+                    # 'flipY': True,
                     'trim': False},
-                parameter_kwargs={
+                values_kwargs={
                     'colorbar': False,
                     'flipY': True,
                     'xscale': 'log',
@@ -553,13 +549,13 @@ class Inference1D(myObject):
 
             self.datapoint.plot_posteriors(
                 axes=self.ax[3],
-                height_kwargs={
-                    'normalize': True},
+                # height_kwargs={
+                #     'normalize': True},
                 data_kwargs={},
-                rel_error_kwargs={
-                    'normalize': True},
-                add_error_kwargs={
-                    'normalize': True},
+                # rel_error_kwargs={
+                #     'normalize': True},
+                # add_error_kwargs={
+                #     'normalize': True},
                 best=self.datapoint)
 
             cP.suptitle(title)
@@ -606,7 +602,7 @@ class Inference1D(myObject):
         if (self.burned_in):
             plt.axvline(self.burned_in_iteration, color='#C92641',
                         linestyle='dashed', linewidth=lw)
-            # plt.axvline(self.iBest, color=cP.wellSeparated[3])
+            # plt.axvline(self.best_iteration, color=cP.wellSeparated[3])
         plt.yscale('log')
         ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 

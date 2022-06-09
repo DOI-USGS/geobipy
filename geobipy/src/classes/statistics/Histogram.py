@@ -1,11 +1,13 @@
 import numpy as np
-from copy import copy
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+
+from .mixPearson import mixPearson
 from ...base import utilities
 from ...base import plotting as cP
 from ..model.Model import Model
 from ..core.StatArray import StatArray
+import progressbar
 
 class Histogram(Model):
 
@@ -42,15 +44,6 @@ class Histogram(Model):
             out.values = StatArray(out.mesh.shape, name='mass')
         return out
 
-    @property
-    def summary(self):
-        """Summary of self """
-        msg =  "Histogram\n"
-        msg += "mesh:\n{}".format("|   "+(self.mesh.summary.replace("\n", "\n|   "))[:-4])
-        msg += "counts:\n{}".format("|   "+(self.values.summary.replace("\n", "\n|   "))[:-4])
-
-        return msg
-
     @Model.values.setter
     def values(self, values):
         if values is None:
@@ -81,10 +74,13 @@ class Histogram(Model):
             for i in range(1, self.ndim):
                 cdf = np.cumsum(cdf, axis=i)
         else:
-            total = self.values.sum(axis=axis)
             cdf = np.cumsum(self.values, axis=axis)
+        cdf = cdf / cdf.max()
 
         return Model(self.mesh, StatArray(cdf, name='Cumulative Density Function'))
+
+    def compute_probability(self, distribution, log=None, log_probability=False, axis=0, **kwargs):
+        return self.mesh._compute_probability(distribution, self.pdf.values, log, log_probability, axis, **kwargs)
 
     def credible_intervals(self, percent=90.0, axis=0):
         """Gets the median and the credible intervals for the specified axis.
@@ -126,11 +122,112 @@ class Histogram(Model):
         """
         return self.mesh._credible_range(self.counts, percent=percent, log=log, axis=axis)
 
-    # def entropy(self, axis=None):
+    def entropy(self, log=2, axis=None):
 
-    #     pdf = self.pdf(axis=axis)
-    #     pdf = pdf[pdf > 0.0]
-    #     return StatArray(-(pdf * np.log(np.abs(pdf))).sum(), "Entropy")
+        assert log in [2, 10, 'e'], ValueError("log must be one of [2, 'e', 10]")
+        pdf = self.pdf
+        logged, _ = utilities._log(pdf.values, log=log)
+        entropy = pdf.values * logged
+        entropy[np.isnan(entropy)] = 0.0
+
+        entropy = -entropy.sum(axis=axis)
+        
+        entropy.name = 'Entropy'
+
+        if log == 2:
+            entropy.units = 'bits'
+        elif log == 10:
+            entropy.units = 'bans'
+        elif log == 'e':
+            entropy.units = 'nats'
+
+        return Model(mesh=self.mesh.remove_axis(axis), values=entropy)
+
+    def estimate_std(self, n_samples, **kwargs):
+        return np.sqrt(self.estimate_variance(n_samples, **kwargs))
+
+    def estimate_variance(self, n_samples, **kwargs):
+        X = self.sample(n_samples, **kwargs)
+        return np.var(X)
+
+    def fit_mixture_to_pdf(self, mixture=mixPearson, axis=0, **kwargs):
+        if self.ndim == 1:
+            return self.fit_mixture_to_pdf_1d(mixture, **kwargs)
+        elif self.ndim == 2:
+            return self.fit_mixture_to_pdf_2d(mixture, axis=axis, **kwargs)
+        elif self.ndim == 3:
+            return self.fit_mixture_to_pdf_3d(mixture, axis=axis, **kwargs)
+
+    def fit_mixture_to_pdf_3d(self, mixture, axis, **kwargs):
+        ax, bx = self.mesh.other_axis(axis)
+
+        a = [x for x in (0, 1, 2) if not x == axis]
+        b = [x for x in (0, 1, 2) if x == axis]
+
+        mixtures = [None] * ax.nCells * bx.nCells
+        if np.all(self.values == 0):
+            return mixtures
+
+        track = kwargs.pop('track', True)
+
+        r = range(ax.nCells.item() * bx.nCells.item())
+        if track:
+            Bar = progressbar.ProgressBar()
+            r = Bar(r)
+            
+        slic = [np.s_[:] for i in range(3)]
+        mixtures = []
+        for i in r:
+            j = list(self.mesh.unravelIndex(i))
+            j[axis] = np.s_[:]
+            h = self[tuple(j)]
+            mixtures.append(h.fit_mixture_to_pdf(mixture=mixture, **kwargs))
+            
+        return mixtures
+
+    def fit_mixture_to_pdf_2d(self, mixture, axis, **kwargs):
+
+        ax = self.axis(axis)
+        mixtures = [None] * ax.nCells
+        if np.all(self.values == 0):
+            return mixtures
+
+        track = kwargs.pop('track', True)
+
+        r = range(ax.nCells.item())
+        if track:
+            Bar = progressbar.ProgressBar()
+            r = Bar(r)
+            
+        mixtures = []
+        for i in r:
+            h = self.take_along_axis(i, axis=axis)
+
+            mixtures.append(h.fit_mixture_to_pdf(mixture=mixture, **kwargs))
+            
+        return mixtures
+
+
+    def fit_mixture_to_pdf_1d(self, mixture, **kwargs):
+        """Find peaks in the histogram along an axis.
+
+        Parameters
+        ----------
+        intervals : array_like, optional
+            Accumulate the histogram between these invervals before finding peaks
+        axis : int, optional
+            Axis along which to find peaks.
+
+        """
+        if np.all(self.values == 0):
+            return None
+
+        values = self.pdf.values
+        smooth = kwargs.pop('smooth', False)
+        if smooth:
+            values = self.pdf.values.smooth(0.5)
+
+        return mixture().fit_to_curve(x=self.mesh.centres_absolute, y=values, **kwargs)
 
     def marginalize(self, axis=0):
         """Get the marginal histogram along an axis
@@ -176,7 +273,8 @@ class Histogram(Model):
             The means along the axis.
 
         """
-        return self.mesh._mean(self.counts, axis=axis)
+        out = self.mesh.remove_axis(axis)
+        return Model(mesh=out, values=self.mesh._mean(self.counts, axis=axis))
 
     def median(self, log=None, axis=0):
         """Gets the median for the specified axis.
@@ -217,16 +315,20 @@ class Histogram(Model):
             Opacity along the axis.
 
         """
-        return 1.0 - self.transparency(percent=percent, log=log, axis=axis)
+        out = self.transparency(percent=percent, log=log, axis=axis)
+        out.values = 1.0 - out.values
+        out.name = 'Opacity'
+        return out
 
     def opacity_level(self, percent=95.0, log=None, axis=0):
         """ Get the index along axis 1 from the bottom up that corresponds to the percent opacity """
 
         p = 0.01 * percent
         op = self.opacity(log=log, axis=axis)
-        nz = op.size - 1
+
+        nz = op.nCells - 1
         iC = nz
-        while op[iC] > p and iC >= 0:
+        while op.values[iC] > p and iC >= 0:
             iC -= 1
         return self.y.centres[iC]
 
@@ -252,7 +354,7 @@ class Histogram(Model):
             Contains the upper interval along the specified axis. Has size equal to arr.shape[axis].
 
         """
-        return self.mesh._percentile(values=self.pmf.values, percent=percent, axis=axis)
+        return Model(self.mesh.remove_axis(axis), values=self.mesh._percentile(values=self.pmf.values, percent=percent, axis=axis))
 
     def pcolor(self, **kwargs):
         kwargs['cmap'] = kwargs.get('cmap', 'gray_r')
@@ -260,7 +362,6 @@ class Histogram(Model):
 
     def plot(self, line=None, **kwargs):
         """ Plots the histogram """
-
         kwargs['trim'] = kwargs.pop('trim', 0.0)
         
         values = self.counts
@@ -273,7 +374,7 @@ class Histogram(Model):
             interval_kwargs['yscale'] = kwargs.get('yscale', 'linear')
 
         if self.ndim == 1:
-            ax = self.bar(**kwargs)
+            ax = self.mesh.bar(values=values, **kwargs)
 
             if line is not None:
                 kwargs['color'] = kwargs.pop('linecolor', cP.wellSeparated[3])
@@ -318,6 +419,29 @@ class Histogram(Model):
         kwargs['label'] = 'median'
         self.mesh.plot_line(m, axis=axis, **kwargs)
 
+    def sample(self, n_samples, log=None):
+        """Generates samples from the histogram.
+
+        A uniform distribution is used for each bin to generate samples.
+        The number of samples generated per bin is scaled by the count for that bin using the requested number of samples.
+
+        parameters
+        ----------
+        nSamples : int
+            Number of samples to generate.
+
+        Returns
+        -------
+        out : geobipy.StatArray
+            The samples.
+
+        """
+        cdf = self.cdf()
+        values = np.random.rand(np.int64(n_samples))
+        values = np.interp(values, np.hstack([0, cdf.values]), self.mesh.edges_absolute)
+        values, dum = utilities._log(values, log)
+        return values
+
     def transparency(self, percent=95.0, log=None, axis=0):
         """Return a transparency value between 0 and 1 based on the difference between credible invervals of the hitmap.
 
@@ -340,14 +464,16 @@ class Histogram(Model):
 
         """
 
-        out = self.credible_range(percent=percent, log=log, axis=axis)
+        out = StatArray(self.credible_range(percent=percent, log=log, axis=axis), 'Transparency')
         mn = np.nanmin(out)
         mx = np.nanmax(out)
         t = mx - mn
         if t > 0.0:
-            return (out - mn) / t
+            out = (out - mn) / t
         else:
-            return out - mn
+            out -= mn
+
+        return Model(self.mesh.remove_axis(axis), values=out)
 
     def update(self, *args, **kwargs):
         iBin = self.mesh.cellIndices(*args, clip=True, **kwargs)

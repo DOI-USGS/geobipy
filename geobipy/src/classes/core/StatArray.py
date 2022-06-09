@@ -1,4 +1,5 @@
 from copy import copy, deepcopy
+from matplotlib.axes import SubplotBase
 import numpy as np
 import h5py
 import scipy.stats as st
@@ -13,6 +14,7 @@ from ...base.HDF.hdfWrite import write_nd
 from ...base import MPI as myMPI
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+from matplotlib.figure import Figure
 
 
 class StatArray(np.ndarray, myObject):
@@ -700,7 +702,7 @@ class StatArray(np.ndarray, myObject):
         mx = np.nanmax(self, axis=axis)
 
         t = mx - mn
-        return (self - mn) / t
+        return np.divide((self - mn), t)
 
     def prepend(self, values, axis=0):
         """Prepend to a StatArray
@@ -771,6 +773,9 @@ class StatArray(np.ndarray, myObject):
         out = StatArray(np.resize(self, new_shape), self.name, self.units)
         out.copyStats(self)
         return out
+
+    def smooth(self, a):
+        return StatArray(cf.smooth(self, a))
 
     def standardize(self, axis=None):
         """Standardize by subtracting the mean and dividing by the standard deviation. """
@@ -1221,6 +1226,35 @@ class StatArray(np.ndarray, myObject):
 
         return cP.plot(x[j], self[i], **kwargs)
 
+    def _init_posterior_plots(self, gs):
+        """Initialize axes for posterior plots
+
+        Parameters
+        ----------
+        gs : matplotlib.gridspec.Gridspec
+            Gridspec to split
+
+        """
+        if not self.hasPosterior:
+            return
+
+        if isinstance(gs, Figure):
+            gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
+
+        if self.nPosteriors == 1:
+            ax = plt.subplot(gs)
+            cP.pretty(ax)
+
+        else:
+            gs = gs.subgridspec(self.nPosteriors, 1, hspace=1)
+            ax = [plt.subplot(gs[0, 0])]
+            ax += [plt.subplot(gs[i, 0], sharex=ax[0]) for i in range(1, self.nPosteriors)]
+
+            for a in ax:
+                cP.pretty(a)
+
+        return ax
+
     def plotPosteriors(self, ax=None, **kwargs):
         """Plot the posteriors of the StatArray.
 
@@ -1235,31 +1269,31 @@ class StatArray(np.ndarray, myObject):
             return
 
         if ax is None:
-            if self.nPosteriors > 1:
-                for i in range(self.nPosteriors):
-                    plt.subplot(self.nPosteriors, 1, i+1)
-                    self.posterior[i].plot(**kwargs)
-            else:
-                self.posterior.plot(**kwargs)
+            ax = kwargs.pop('fig', plt.gcf())
+            
+        if not isinstance(ax, (list, SubplotBase)):
+            ax = self._init_posterior_plots(ax)
 
-        else:
-            assert np.size(ax) == self.nPosteriors, ValueError(
-                "Length of ax {} must equal number of attached posteriors {}".format(np.size(ax), self.nPosteriors))
-            if np.size(ax) > 1:
-                if 'line' in kwargs:
-                    assert np.size(kwargs['line']) == np.size(ax), ValueError("line in kwargs must have size {}".format(np.size(ax)))
-                line = kwargs.pop('line', np.asarray([np.nan for i in range(np.size(ax))]))
-                for i in range(self.nPosteriors):
-                    plt.sca(ax[i])
-                    plt.cla()
-                    self.posterior[i].plot(line=line[i], **kwargs)
-            else:
-                if isinstance(ax, list):
-                    ax = ax[0]
-                plt.sca(ax)
+        kwargs['cmap'] = kwargs.get('cmap', 'gray_r')
+        kwargs['normalize'] = kwargs.get('normalize', True)
+
+        if np.size(ax) > 1:
+            assert np.size(ax) == self.nPosteriors, ValueError("Length of ax {} must equal number of attached posteriors {}".format(np.size(ax), self.nPosteriors))
+            if 'line' in kwargs:
+                assert np.size(kwargs['line']) == np.size(ax), ValueError("line in kwargs must have size {}".format(np.size(ax)))
+            line = kwargs.pop('line', np.asarray([np.nan for i in range(np.size(ax))]))
+            # kwargs['trim'] = kwargs.get('trim', None)
+            for i in range(self.nPosteriors):
+                plt.sca(ax[i])
                 plt.cla()
+                self.posterior[i].plot(line=line[i], **kwargs)
+        else:
+            if isinstance(ax, list):
+                ax = ax[0]
+            plt.sca(ax)
+            plt.cla()
 
-                self.posterior.plot(**kwargs)
+            self.posterior.plot(**kwargs)
 
     @property
     def value(self):
@@ -1568,9 +1602,10 @@ class StatArray(np.ndarray, myObject):
         """
         is_file = False
         if isinstance(grp, str):
-            grp = h5py.File(grp, 'r')
+            file = h5py.File(grp, 'r')
             is_file = True
-
+            grp = file
+            
         if not name is None:
             grp = grp[name]
 
@@ -1611,7 +1646,7 @@ class StatArray(np.ndarray, myObject):
             out.posteriors_from_hdf(grp, posterior_index)
 
         if is_file:
-            grp.close()
+            file.close()
 
         return out
 

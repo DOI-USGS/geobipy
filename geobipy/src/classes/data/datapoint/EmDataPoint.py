@@ -10,7 +10,6 @@ from ....base import utilities as cf
 from ....base import plotting as cP
 from copy import deepcopy
 import numpy as np
-from ....base.logging import myLogger
 import matplotlib.pyplot as plt
 
 
@@ -340,19 +339,6 @@ class EmDataPoint(DataPoint):
         plt.loglog(c, PhiD, **kwargs)
         cP.xlabel(c.getNameUnits())
         cP.ylabel('Data misfit')
-
-    @property
-    def summary(self):
-        msg = ("{} \n"
-                "Line number: {} \n"
-                "Fiducial: {}\n"
-                "Relative Error {}\n"
-                "Additive Error {}\n").format(super().summary, self.lineNumber, self.fiducial, self.relErr.summary, self.addErr.summary)
-        for s in self.system:
-            msg += s.summary
-
-        return msg
-
 
     def update_posteriors(self):
         """Update any attached posteriors"""

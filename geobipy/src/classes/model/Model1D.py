@@ -6,7 +6,6 @@ from ...classes.core.StatArray import StatArray
 from ..mesh.RectilinearMesh1D import RectilinearMesh1D
 from ..mesh.RectilinearMesh2D import RectilinearMesh2D
 from ..statistics.Histogram import Histogram
-from ...base.logging import myLogger
 from ..statistics.Distribution import Distribution
 import numpy as np
 from matplotlib.figure import Figure
@@ -577,7 +576,7 @@ class Model1D(RectilinearMesh1D):
 
         pGrd = StatArray(p, self.par.name, self.par.units)
 
-        mesh = RectilinearMesh2D(xEdges=pGrd, yEdges=self.edges.posterior.mesh.edges)
+        mesh = RectilinearMesh2D(x_edges=pGrd, y_edges=self.edges.posterior.mesh.edges)
         # Set the posterior hitmap for conductivity vs depth
         self.par.posterior = Histogram(mesh=mesh)
 

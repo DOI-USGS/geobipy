@@ -5,7 +5,6 @@ Module defining a categorical distribution with statistical procedures
 """
 #from copy import deepcopy
 import numpy as np
-from ...base.logging import myLogger
 from .baseDistribution import baseDistribution
 from scipy.stats import norm
 from ...base import plotting as cP

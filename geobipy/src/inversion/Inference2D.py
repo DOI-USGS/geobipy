@@ -2,6 +2,7 @@ import os
 import numpy as np
 import numpy.ma as ma
 import h5py
+from copy import deepcopy
 from cached_property import cached_property
 from datetime import timedelta
 from ..classes.core.myObject import myObject
@@ -16,7 +17,7 @@ from ..classes.mesh.RectilinearMesh2D import RectilinearMesh2D
 from ..classes.data.dataset.FdemData import FdemData
 from ..classes.data.dataset.TdemData import TdemData
 from ..classes.data.dataset.TempestData import TempestData
-from ..classes.model.Model1D import Model1D
+from ..classes.model.Model import Model
 from ..base.HDF import hdfRead
 from ..base import plotting as cP
 from ..base import utilities as cF
@@ -52,6 +53,7 @@ class Inference2D(myObject):
         self.range = None
         self.system_file_path = system_file_path
         self._zPosterior = None
+        self._mesh = None
 
         self.fName = hdf5_file_path
         self.directory = split(hdf5_file_path)[0]
@@ -60,6 +62,7 @@ class Inference2D(myObject):
         self.hdfFile = None
         if (hdf5_file is None): # Open the file
             self.open(mode, world)
+            self.mode = mode
         else:
             self.hdfFile = hdf5_file
         self._indices = None
@@ -109,42 +112,42 @@ class Inference2D(myObject):
             self._y.units = 'km'
 
 
-    def crossplotErrors(self, system=0, **kwargs):
-        """ Create a crossplot of the relative errors against additive errors for the most probable data point, for each data point along the line """
-        kwargs['marker'] = kwargs.pop('marker','o')
-        kwargs['markersize'] = kwargs.pop('markersize',5)
-        kwargs['markerfacecolor'] = kwargs.pop('markerfacecolor',None)
-        kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor','k')
-        kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth',1.0)
-        kwargs['linestyle'] = kwargs.pop('linestyle','none')
-        kwargs['linewidth'] = kwargs.pop('linewidth',0.0)
+    # def crossplotErrors(self, system=0, **kwargs):
+    #     """ Create a crossplot of the relative errors against additive errors for the most probable data point, for each data point along the line """
+    #     kwargs['marker'] = kwargs.pop('marker','o')
+    #     kwargs['markersize'] = kwargs.pop('markersize',5)
+    #     kwargs['markerfacecolor'] = kwargs.pop('markerfacecolor',None)
+    #     kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor','k')
+    #     kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth',1.0)
+    #     kwargs['linestyle'] = kwargs.pop('linestyle','none')
+    #     kwargs['linewidth'] = kwargs.pop('linewidth',0.0)
 
-        if (self.nSystems > 1):
-            r = range(self.nSystems)
-            for i in r:
-                fc = cP.wellSeparated[i+2]
-                cP.plot(x=self.relativeError[:,i], y=self.additiveError[:,i], c=fc,
-                    alpha = 0.7,label='System ' + str(i + 1), **kwargs)
+    #     if (self.nSystems > 1):
+    #         r = range(self.nSystems)
+    #         for i in r:
+    #             fc = cP.wellSeparated[i+2]
+    #             cP.plot(x=self.relativeError[:,i], y=self.additiveError[:,i], c=fc,
+    #                 alpha = 0.7,label='System ' + str(i + 1), **kwargs)
 
-            plt.legend()
+    #         plt.legend()
 
-        else:
-            fc = cP.wellSeparated[2]
-            cP.plot(x=self.relativeError, y=self.additiveError, c=fc,
-                    alpha = 0.7,label='System ' + str(1), **kwargs)
+    #     else:
+    #         fc = cP.wellSeparated[2]
+    #         cP.plot(x=self.relativeError, y=self.additiveError, c=fc,
+    #                 alpha = 0.7,label='System ' + str(1), **kwargs)
 
-        cP.xlabel(self.relativeError.getNameUnits())
-        cP.ylabel(self.additiveError.getNameUnits())
+    #     cP.xlabel(self.relativeError.getNameUnits())
+    #     cP.ylabel(self.additiveError.getNameUnits())
 
     @cached_property
     def additiveError(self):
         """ Get the Additive error of the best data points """
-        return StatArray.StatArray.fromHdf(self.hdfFile['data/addErr'])
+        return StatArray.StatArray.fromHdf(self.hdfFile['data/additive_error'])
 
 
     @property
     def additiveErrorPosteriors(self):
-        return self.data._addErr.posterior
+        return self.data.additive_error.posterior
 
     def uncache(self, variable):
 
@@ -161,18 +164,18 @@ class Inference2D(myObject):
 
     def compute_relative_error_opacity(self, percent=95.0, log=None):
 
-        self.relErr_opacity = self.compute_posterior_opacity(self.relativeErrorPosteriors, percent, log)
+        self.relative_error_opacity = self.compute_posterior_opacity(self.relativeErrorPosteriors, percent, log)
 
-    def compute_posterior_opacity(self, posterior, percent=95.0, log=None):
-        opacity = StatArray.StatArray(np.zeros(self.nPoints))
+    # def compute_posterior_opacity(self, posterior, percent=95.0, log=None):
+    #     opacity = StatArray.StatArray(np.zeros(self.nPoints))
 
-        for i in range(self.nPoints):
-            h = Histogram1D(edges = self.additiveErrorPosteriors._edges + self.additiveErrorPosteriors.relativeTo[i])
-            h._counts[:] = self.additiveErrorPosteriors.counts[i, :]
-            opacity[i] = h.credibleRange(percent, log)
+    #     for i in range(self.nPoints):
+    #         h = Histogram1D(edges = self.additiveErrorPosteriors._edges + self.additiveErrorPosteriors.relativeTo[i])
+    #         h._counts[:] = self.additiveErrorPosteriors.counts[i, :]
+    #         opacity[i] = h.credibleRange(percent, log)
 
-        opacity = opacity.normalize()
-        return 1.0 - opacity
+    #     opacity = opacity.normalize()
+    #     return 1.0 - opacity
 
     @cached_property
     def bestData(self):
@@ -185,9 +188,6 @@ class Inference2D(myObject):
         elif "TdemDataPoint" in dtype:
             bestData = TdemData.fromHdf(self.hdfFile[attr[0]], system_file_path = self.system_file_path)
         return bestData
-
-    def bestParameters(self, slic=None):
-        return StatArray.StatArray.fromHdf(self.hdfFile['bestinterp'], index=slic).T
 
     @cached_property
     def best_halfspace(self, log=None):
@@ -205,15 +205,15 @@ class Inference2D(myObject):
         if key in self.hdfFile.keys():
             return StatArray.StatArray.fromHdf(self.hdfFile[key], index=slic)
         else:
-            h = Histogram.fromHdf(self.hdfFile['model/values/posterior'])
+            h = self.parameter_posterior()
             ci = h.percentile(percent=percent, axis=1)
-            if key in self.hdfFile.keys():
-                ci.writeHdf(self.hdfFile, key)
-            else:
-                ci.toHdf(self.hdfFile, key)
 
+            if self.mode == 'r+':
+                if key in self.hdfFile.keys():
+                    ci.writeHdf(self.hdfFile, key)
+                else:
+                    ci.toHdf(self.hdfFile, key)
             return ci
-
 
     def credible_interval(self, percent=90.0):
         percent = 0.5 * np.minimum(percent, 100.0 - percent)
@@ -221,15 +221,17 @@ class Inference2D(myObject):
 
     def compute_mean_parameter(self, log=None, track=True):
             
-        # mean_parameter = StatArray.StatArray(np.zeros(self.mesh.shape), 'Mean', self.parameterUnits)
-        posterior = hdfRead.read_item(self.hdfFile['model/values/posterior'])
+        posterior = self.parameter_posterior()
         mean = posterior.mean(axis=1)
 
-        key = 'mean_parameter'
-        if key in self.hdfFile.keys():
-            mean.writeHdf(self.hdfFile, key)
-        else:
-            mean.toHdf(self.hdfFile, key)
+        if self.mode == 'r+':
+            key = 'mean_parameter'
+            if key in self.hdfFile.keys():
+                mean.writeHdf(self.hdfFile, key)
+            else:
+                mean.toHdf(self.hdfFile, key)
+            self.hdfFile[key].attrs['name'] = mean.name
+            self.hdfFile[key].attrs['units'] = mean.units
 
         return mean
 
@@ -244,23 +246,22 @@ class Inference2D(myObject):
         """ Get the best data """
         return hdfRead.read_item(self.hdfFile['data'], system_file_path = self.system_file_path)
 
-    @cached_property
+    # @cached_property
+    @property
     def doi(self):
         if 'doi' in self.hdfFile.keys():
             return StatArray.StatArray.fromHdf(self.hdfFile['doi'])
         else:
-            return self.compute_DOI()
+            return self.compute_doi()
 
-    def compute_DOI(self, percent=67.0, window=1, track=True):
+    def compute_doi(self, percent=67.0, smooth=None, track=True):
         """ Get the DOI of the line depending on a percentage credible interval cutoff for each data point """
 
         self.uncache('doi')
-
-        assert window > 0, ValueError("window must be >= 1")
         assert 0.0 < percent < 100.0, ValueError("Must have 0.0 < percent < 100.0")
 
         nz = self.mesh.y.nCells
-        doi = StatArray.StatArray(np.full(self.nPoints, fill_value=self.mesh.y.edges[-1]), 'Depth of investigation', self.height.units)
+        # doi = np.empty(self.nPoints)
 
         p = 0.01 * percent
 
@@ -269,55 +270,29 @@ class Inference2D(myObject):
             print('Computing Depth of Investigation', flush=True)
             r = progressbar.progressbar(r)
 
-        # from numba import (jit, float64)
-        # _numba_settings = {'nopython': True, 'nogil': False, 'fastmath': True, 'cache': True}
-
         @jit(**_numba_settings)
         def loop(axis, values, p):
             shp = np.shape(values)
-            out = np.empty(shp[1])
-            for i in range(shp[1]):
-                tmp = values[:, i]
-                j = shp[0] - 1
-                while tmp[j] < p and j >= 0:
+            out = np.empty(shp[0])
+            for i in range(shp[0]):
+                tmp = values[i, :]
+                j = shp[1] - 1
+                while tmp[j] < p and j >= 1:
                     j -= 1
-                out[i] = axis[j - 1]
+                out[i] = axis[i, j]
             return out
 
-        doi = loop(self.mesh.y.centres, self.opacity(), p)
+        doi = loop(self.mesh.y.centres_absolute, self.opacity(), p)
+        doi = StatArray.StatArray(doi, 'Depth of investigation', 'm')
 
-
-        # @jit
-        # def inner(values, p):
-        #     nz = len(values)
-        #     i = nz - 1
-        #     while values[i] < p and i >= 0:
-        #         i -= 1
-        #     return i
-
-        # opacity = self.opacity()
-
-        # for i in r:
-        #     tmp = opacity[:, i]
-        #     iCell = inner(tmp, p)
-        #     # iCell = nz - 1
-        #     # while tmp[iCell] < p and iCell >= 0:
-        #     #     iCell -= 1
-
-        #     if iCell >= 0:
-        #         doi[i] = self.hitmap(0).z.centres[iCell - 1]
-
-        if window > 1:
-            buffer = np.int32(0.5 * window)
-            tmp = doi.rolling(np.mean, window)
-            doi[buffer:-buffer] = tmp
-            doi[:buffer] = tmp[0]
-            doi[-buffer:] = tmp[-1]
-
-        # if 'doi' in self.hdfFile.keys():
-        #     doi.writeHdf(self.hdfFile, 'doi')
-        # else:
-        #     doi.toHdf(self.hdfFile, 'doi')
+        if smooth is not None:
+            doi = doi.smooth(smooth)
+        
+        if self.mode == 'r+':        
+            if 'doi' in self.hdfFile.keys():
+                doi.writeHdf(self.hdfFile, 'doi')
+            else:
+                doi.toHdf(self.hdfFile, 'doi')
 
         return doi
 
@@ -338,24 +313,28 @@ class Inference2D(myObject):
         """ Get the elevation of the data points """
         return StatArray.StatArray.fromHdf(self.hdfFile['data/elevation'])
 
-    def extract1DModel(self, values, index=None, fiducial=None):
-        """ Obtain the results for the given iD number """
+    @property
+    def entropy(self):
+        return self.parameter_posterior().entropy(axis=1)
 
-        assert not (index is None and fiducial is None), Exception("Please specify either an integer index or a fiducial.")
-        assert index is None or fiducial is None, Exception("Only specify either an integer index or a fiducial.")
+    # def extract1DModel(self, values, index=None, fiducial=None):
+    #     """ Obtain the results for the given iD number """
 
-        if not fiducial is None:
-            assert fiducial in self.fiducials, ValueError("This fiducial {} is not available from this HDF5 file. The min max fids are {} to {}.".format(fiducial, self.fiducials.min(), self.fiducials.max()))
-            # Get the point index
-            i = self.fiducials.searchsorted(fiducial)
-        else:
-            i = index
-            fiducial = self.fiducials[index]
+    #     assert not (index is None and fiducial is None), Exception("Please specify either an integer index or a fiducial.")
+    #     assert index is None or fiducial is None, Exception("Only specify either an integer index or a fiducial.")
 
-        depth = self.mesh.z.edges[:-1]
-        parameter = values[:, i]
+    #     if not fiducial is None:
+    #         assert fiducial in self.fiducials, ValueError("This fiducial {} is not available from this HDF5 file. The min max fids are {} to {}.".format(fiducial, self.fiducials.min(), self.fiducials.max()))
+    #         # Get the point index
+    #         i = self.fiducials.searchsorted(fiducial)
+    #     else:
+    #         i = index
+    #         fiducial = self.fiducials[index]
 
-        return Model1D(self.mesh.z.nCells, depth=depth, parameters=parameter, hasHalfspace=False)
+    #     depth = self.mesh.z.edges[:-1]
+    #     parameter = values[:, i]
+
+    #     return Model1D(self.mesh.z.nCells, depth=depth, parameters=parameter, hasHalfspace=False)
 
     def fiducialIndex(self, fiducial):
 
@@ -432,6 +411,7 @@ class Inference2D(myObject):
     @cached_property
     def halfspace(self):
         return StatArray.StatArray.fromHdf(self.hdfFile['halfspace'])
+
     @cached_property
     def height(self):
         """Get the height of the observations. """
@@ -458,53 +438,53 @@ class Inference2D(myObject):
         """ Get the id numbers of the data points in the line results file """
         return StatArray.StatArray.fromHdf(self.hdfFile['data/fiducial'])
 
-    def fit_gaussian_mixture(self, intervals, **kwargs):
+    # def fit_gaussian_mixture(self, intervals, **kwargs):
 
-        distributions = []
+    #     distributions = []
 
-        hm = deepcopy(self.hitmap(0))
-        counts = np.asarray(self.hdfFile['model/values/posterior/arr/data'])
+    #     hm = deepcopy(self.hitmap(0))
+    #     counts = np.asarray(self.hdfFile['model/values/posterior/arr/data'])
 
-        # Bar = progressbar.ProgressBar()
-        for i in range(self.nPoints):
+    #     # Bar = progressbar.ProgressBar()
+    #     for i in range(self.nPoints):
 
-            try:
-                dpDistributions = hm.fitMajorPeaks(intervals, **kwargs)
-                distributions.append(dpDistributions)
-            except:
-                pass
+    #         try:
+    #             dpDistributions = hm.fitMajorPeaks(intervals, **kwargs)
+    #             distributions.append(dpDistributions)
+    #         except:
+    #             pass
 
-            hm._counts = counts[i, :, :]
+    #         hm._counts = counts[i, :, :]
 
-        return distributions
+    #     return distributions
 
 
-    def fitMajorPeaks(self, intervals, **kwargs):
-        """Fit distributions to the major peaks in each hitmap along the line.
+    # def fitMajorPeaks(self, intervals, **kwargs):
+    #     """Fit distributions to the major peaks in each hitmap along the line.
 
-        Parameters
-        ----------
-        intervals : array_like, optional
-            Accumulate the histogram between these invervals before finding peaks
+    #     Parameters
+    #     ----------
+    #     intervals : array_like, optional
+    #         Accumulate the histogram between these invervals before finding peaks
 
-        """
-        distributions = []
+    #     """
+    #     distributions = []
 
-        hm = deepcopy(self.hitmap(0))
-        counts = np.asarray(self.hdfFile['model/values/posterior/arr/data'])
+    #     hm = deepcopy(self.hitmap(0))
+    #     counts = np.asarray(self.hdfFile['model/values/posterior/arr/data'])
 
-        # Bar = progressbar.ProgressBar()
-        for i in range(self.nPoints):
+    #     # Bar = progressbar.ProgressBar()
+    #     for i in range(self.nPoints):
 
-            try:
-                dpDistributions = hm.fitMajorPeaks(intervals, **kwargs)
-                distributions.append(dpDistributions)
-            except:
-                pass
+    #         try:
+    #             dpDistributions = hm.fitMajorPeaks(intervals, **kwargs)
+    #             distributions.append(dpDistributions)
+    #         except:
+    #             pass
 
-            hm._counts = counts[i, :, :]
+    #         hm._counts = counts[i, :, :]
 
-        return distributions
+    #     return distributions
 
     def fit_estimated_pdf(self, intervals=None, external_files=True, **kwargs):
         """Uses Mixture modelling to fit disrtibutions to the hitmaps for the specified intervals.
@@ -528,7 +508,7 @@ class Inference2D(myObject):
         kwargs['track'] = False
 
         if intervals is None:
-            intervals = self.hitmap(0).yBins
+            intervals = self.mesh.y.edges
 
         nIntervals = np.size(intervals) - 1
 
@@ -568,15 +548,15 @@ class Inference2D(myObject):
         if external_files:
             hdfFile.close()
 
-    def fit_interface_posterior(self, **kwargs):
+    # def fit_interface_posterior(self, **kwargs):
 
-        fit_interfaces = np.zeros(self.interfacePosterior.shape)
-        for i in progressbar.progressbar(range(self.nPoints)):
-            h1 = self.interfacePosterior[:, i]
-            vest = h1.estimateVariance(100000, log=10)
-            fit, f, p = h1.fit_estimated_pdf(mixture_type='pearson', smooth=vest, mask=0.5, epsilon=1e-1, mu=1e-5, method='lbfgsb', max_distributions=self.nLayers[i]-1)
-            fit_interfaces[:, i] = fit.probability(h1.binCentres, log=False).sum(axis=1)
-        return fit_interface
+    #     fit_interfaces = np.zeros(self.interfacePosterior.shape)
+    #     for i in progressbar.progressbar(range(self.nPoints)):
+    #         h1 = self.interfacePosterior[:, i]
+    #         vest = h1.estimateVariance(100000, log=10)
+    #         fit, f, p = h1.fit_estimated_pdf(mixture_type='pearson', smooth=vest, mask=0.5, epsilon=1e-1, mu=1e-5, method='lbfgsb', max_distributions=self.nLayers[i]-1)
+    #         fit_interfaces[:, i] = fit.probability(h1.binCentres, log=False).sum(axis=1)
+    #     return fit_interface
 
 
     def fit_estimated_pdf_mpi(self, intervals=None, external_files=True, **kwargs):
@@ -757,39 +737,39 @@ class Inference2D(myObject):
         return out
 
 
-    def identifyPeaks(self, depths, nBins = 250, width=4, limits=None):
-        """Identifies peaks in the parameter posterior for each depth in depths.
+    # def identifyPeaks(self, depths, nBins = 250, width=4, limits=None):
+    #     """Identifies peaks in the parameter posterior for each depth in depths.
 
-        Parameters
-        ----------
-        depths : array_like
-            Depth intervals to identify peaks between.
+    #     Parameters
+    #     ----------
+    #     depths : array_like
+    #         Depth intervals to identify peaks between.
 
-        Returns
-        -------
+    #     Returns
+    #     -------
 
-        """
+    #     """
 
-        from scipy.signal import find_peaks
+    #     from scipy.signal import find_peaks
 
-        assert np.size(depths) > 2, ValueError("Depths must have size > 1.")
+    #     assert np.size(depths) > 2, ValueError("Depths must have size > 1.")
 
-        tmp = self.lineHitmap.intervalStatistic(axis=0, intervals = depths, statistic='sum')
+    #     tmp = self.lineHitmap.intervalStatistic(axis=0, intervals = depths, statistic='sum')
 
-        depth = np.zeros(0)
-        parameter = np.zeros(0)
+    #     depth = np.zeros(0)
+    #     parameter = np.zeros(0)
 
-        # # Bar = progressbar.ProgressBar()
-        # # for i in Bar(range(self.nPoints)):
-        for i in range(tmp.y.nCells):
-            peaks, _ = find_peaks(tmp.counts[i, :],  width=width)
-            values = tmp.x.centres[peaks]
-            if not limits is None:
-                values = values[(values > limits[0]) & (values < limits[1])]
-            parameter = np.hstack([parameter, values])
-            depth = np.hstack([depth, np.full(values.size, fill_value=0.5*(depths[i]+depths[i+1]))])
+    #     # # Bar = progressbar.ProgressBar()
+    #     # # for i in Bar(range(self.nPoints)):
+    #     for i in range(tmp.y.nCells):
+    #         peaks, _ = find_peaks(tmp.counts[i, :],  width=width)
+    #         values = tmp.x.centres[peaks]
+    #         if not limits is None:
+    #             values = values[(values > limits[0]) & (values < limits[1])]
+    #         parameter = np.hstack([parameter, values])
+    #         depth = np.hstack([depth, np.full(values.size, fill_value=0.5*(depths[i]+depths[i+1]))])
 
-        return np.asarray([depth, parameter]).T
+    #     return np.asarray([depth, parameter]).T
 
     def interface_probability(self, slic=None):
         """ Get the layer interfaces from the layer depth histograms """
@@ -825,75 +805,52 @@ class Inference2D(myObject):
     #     return np.max(np.asarray(self.hdfFile["model/values/posterior/mesh/x/edges/data"][:, -1]))
 
     def mean_parameters(self, slic=None):
-        # if not 'mean_parameter' in self.hdfFile:
-        return self.compute_mean_parameter(log=10)
+        if not 'mean_parameter' in self.hdfFile:
+            self._mean_parameter = self.compute_mean_parameter(log=10)
+        else:
+            # g = self.hdfFile['mean_parameter']
+            # print(g.attrs['repr'])
+            self._mean_parameter = StatArray.StatArray.fromHdf(self.hdfFile['mean_parameter'])
+
+        return self._mean_parameter
+
+    @property
+    def longest_coordinate(self):
+        if 0.8 < self.data.x.range / self.data.y.range < 1.2:
+            return np.sqrt(self.data.x**2.0 + self.data.y**2.0)
+        return self.data.x if self.data.x.range > self.data.y.range else self.data.y
         
-    @cached_property
+    @property
     def mesh(self):
         """Get the 2D topo fitting rectilinear mesh. """
-        out = hdfRead.read_item(self.hdfFile['/model/mesh/y/edges/posterior/mesh'], skip_posterior=True)
+        if self._mesh is None:
+            out = hdfRead.read_item(self.hdfFile['/model/mesh/y/edges/posterior/mesh'], skip_posterior=True)
 
-        # Change positive depth to negative height
-        out.y.edges = StatArray.StatArray(-out.y.edges, name='Height', units=self.y.units)
-        out.relativeTo = self.elevation
+            # Change positive depth to negative height
+            out.y.edges = StatArray.StatArray(-out.y.edges, name='Height', units=self.y.units)
+            out.y.relativeTo = self.elevation
 
-        if self.data.x.range > self.data.y.range:
-            out.x.centres = self.data.x
-        else:
-            out.x.centres = self.data.y
-        return out
+            out.x.centres = self.longest_coordinate
+            self._mesh = out
+
+        return self._mesh
+
+    def change_mesh_axis(self, axis):
+        if self._mesh is None:
+            self.mesh
+        self._mesh.x.centres = self.x_axis(axis)
 
     @property
     def minParameter(self):
         """ Get the mean model of the parameters """
         return np.min(np.asarray(self.hdfFile["model/values/posterior/x/x/data"][:, 0]))
 
-    # @cached_property
-    # def modeParameter(self):
-    #     """ """
-    #     # Read in the opacity if present
-    #     if "mode_parameter" in self.hdfFile.keys():
-    #         return StatArray.StatArray.fromHdf(self.hdfFile['mode_parameter'])
-    #     else:
-    #         return self.computeModeParameter()
-
-
-    # def computeModeParameter(self):
-
-    #     if 'modeParameter' in self.__dict__:
-    #         del self.__dict__['modeParameter']
-
-    #     modeParameter = StatArray.StatArray(np.zeros(self.mesh.shape), self.parameterName, self.parameterUnits)
-
-    #     loc = 'model/values/posterior'
-    #     a = np.asarray(self.hdfFile[loc+'/arr/data'])
-    #     try:
-    #         b = np.asarray(self.hdfFile[loc+'/x/data'])
-    #     except:
-    #         b = np.asarray(self.hdfFile[loc+'/x/x/data'])
-
-    #     try:
-    #         c = np.asarray(self.hdfFile[loc+'/y/data'])
-    #     except:
-    #         c = np.asarray(self.hdfFile[loc+'/y/x/data'])
-
-    #     h = Hitmap2D(xBinCentres = StatArray.StatArray(b[0, :]), yBinCentres = StatArray.StatArray(c[0, :]))
-    #     h._counts[:, :] = a[0, :, :]
-    #     modeParameter[:, 0] = h.mode()
-
-    #     print('Computing Mode Parameter', flush=True)
-    #     for i in progressbar.progressbar(range(1, self.nPoints)):
-    #         h.x.xBinCentres = b[i, :]
-    #         h._counts[:, :] = a[i, :, :]
-    #         modeParameter[:, i] = h.mode()
-
-
-    #     if 'mode_parameter' in self.hdfFile.keys():
-    #         modeParameter.writeHdf(self.hdfFile, 'mode_parameter')
-    #     else:
-    #         modeParameter.toHdf(self.hdfFile, 'mode_parameter')
-
-    #     return modeParameter
+    @cached_property
+    def model(self):
+        out = Model.fromHdf(self.hdfFile['/model'], skip_posterior=False)
+        out.mesh.relativeTo = self.elevation
+        out.mesh.x.centres = self.longest_coordinate
+        return out
 
     @cached_property
     def nLayers(self):
@@ -916,28 +873,24 @@ class Inference2D(myObject):
                 slic = slic[::-1]
             return StatArray.StatArray.fromHdf(self.hdfFile['opacity'], index=slic)
         else:
-            return self.computeOpacity()
-
+            return self.compute_opacity()
 
     def compute_opacity(self, percent=90.0, log=10, multiplier=0.5):
 
         self.uncache('opacity')
 
-        low, high = self.credible_interval(percent)
+        opacity = self.parameter_posterior().opacity(percent, log, axis=1)
 
-        low, _ = cF._log(low, log)
-        high, _ = cF._log(high, log)
-
-        range = high - low
-
-        opacity = 1.0 - StatArray.StatArray(range, "Opacity", "").normalize(axis=0)
-
-        if 'opacity' in self.hdfFile.keys():
-            opacity.writeHdf(self.hdfFile, 'opacity')
-        else:
-            opacity.toHdf(self.hdfFile, 'opacity')
+        if self.mode == 'r+':
+            if 'opacity' in self.hdfFile.keys():
+                opacity.writeHdf(self.hdfFile, 'opacity')
+            else:
+                opacity.toHdf(self.hdfFile, 'opacity')
 
         return opacity
+
+    def compute_probability(self, distribution, log=None, log_probability=False, axis=0, **kwargs):
+        return self.parameter_posterior().compute_probability(distribution, log, log_probability, axis, **kwargs)
 
     @property
     def parameterName(self):
@@ -947,39 +900,39 @@ class Inference2D(myObject):
     def parameterUnits(self):
         return self.hdfFile['/model/values/posterior/mesh/y/edges'].attrs['units']
 
-    def percentageParameter(self, value, depth=None, depth2=None, progress=False):
+    # def percentageParameter(self, value, depth=None, depth2=None, progress=False):
 
-        # Get the depth grid
-        if (not depth is None):
-            assert depth <= self.mesh.z.edges[-1], 'Depth is greater than max depth '+str(self.mesh.z.edges[-1])
-            j = self.mesh.z.cellIndex(depth)
-            k = j+1
-            if (not depth2 is None):
-                assert depth2 <= self.mesh.z.edges[-1], 'Depth2 is greater than max depth '+str(self.mesh.z.edges[-1])
-                assert depth <= depth2, 'Depth2 must be >= depth'
-                k = self.mesh.z.cellIndex(depth2)
+    #     # Get the depth grid
+    #     if (not depth is None):
+    #         assert depth <= self.mesh.z.edges[-1], 'Depth is greater than max depth '+str(self.mesh.z.edges[-1])
+    #         j = self.mesh.z.cellIndex(depth)
+    #         k = j+1
+    #         if (not depth2 is None):
+    #             assert depth2 <= self.mesh.z.edges[-1], 'Depth2 is greater than max depth '+str(self.mesh.z.edges[-1])
+    #             assert depth <= depth2, 'Depth2 must be >= depth'
+    #             k = self.mesh.z.cellIndex(depth2)
 
-        percentage = StatArray.StatArray(np.empty(self.nPoints), name="Probability of {} > {:0.2f}".format(self.parameterName, value), units = self.parameterUnits)
+    #     percentage = StatArray.StatArray(np.empty(self.nPoints), name="Probability of {} > {:0.2f}".format(self.parameterName, value), units = self.parameterUnits)
 
-        if depth:
-            counts = self.hdfFile['model/values/posterior/arr/data'][:, j:k, :]
-            # return StatArray.StatArray(np.sum(counts[:, :, pj:]) / np.sum(counts) * 100.0, name="Probability of {} > {:0.2f}".format(self.meanParameters.name, value), units = self.meanParameters.units)
-        else:
-            counts = self.hdfFile['model/values/posterior/arr/data']
+    #     if depth:
+    #         counts = self.hdfFile['model/values/posterior/arr/data'][:, j:k, :]
+    #         # return StatArray.StatArray(np.sum(counts[:, :, pj:]) / np.sum(counts) * 100.0, name="Probability of {} > {:0.2f}".format(self.meanParameters.name, value), units = self.meanParameters.units)
+    #     else:
+    #         counts = self.hdfFile['model/values/posterior/arr/data']
 
-        parameters = RectilinearMesh1D.fromHdf(self.hdfFile['model/values/posterior/x'])
+    #     parameters = RectilinearMesh1D.fromHdf(self.hdfFile['model/values/posterior/x'])
 
-        Bar = progressbar.ProgressBar()
-        print('Computing P(X > value)', flush=True)
-        for i in Bar(range(self.nPoints)):
-            p = RectilinearMesh1D(edges=parameters.edges[i, :])
-            pj = p.cellIndex(value)
+    #     Bar = progressbar.ProgressBar()
+    #     print('Computing P(X > value)', flush=True)
+    #     for i in Bar(range(self.nPoints)):
+    #         p = RectilinearMesh1D(edges=parameters.edges[i, :])
+    #         pj = p.cellIndex(value)
 
-            cTmp = counts[i, :, :]
+    #         cTmp = counts[i, :, :]
 
-            percentage[i] = np.sum(cTmp[:, pj:]) / cTmp.sum()
+    #         percentage[i] = np.sum(cTmp[:, pj:]) / cTmp.sum()
 
-        return percentage
+    #     return percentage
 
     def read(self, key, **kwargs):
         return hdfRead.read_item(self.hdfFile, key, **kwargs)
@@ -987,28 +940,30 @@ class Inference2D(myObject):
     @cached_property
     def relativeError(self):
         """ Get the Relative error of the best data points """
-        return StatArray.StatArray.fromHdf(self.hdfFile['data/relErr'])
-
+        return StatArray.StatArray.fromHdf(self.hdfFile['data/relative_error'])
 
     @property
     def relativeErrorPosteriors(self):
         """ Get the Relative error of the best data points """
-        return self.data.relErr.posterior
+        return self.data.relative_error.posterior
 
-    # def hitmap(self, index=None, fiducial=None):
+    def parameter_posterior(self, index=None, fiducial=None):
 
-    #     assert not (index is None and fiducial is None), Exception("Please specify either an integer index or a fiducial.")
-    #     assert index is None or fiducial is None, Exception("Only specify either an integer index or a fiducial.")
+        if fiducial is not None:
+            assert fiducial in self.fiducials, ValueError("This fiducial {} is not available from this HDF5 file. The min max fids are {} to {}.".format(fiducial, self.fiducials.min(), self.fiducials.max()))
+            # Get the point index
+            index = self.fiducials.searchsorted(fiducial)
 
-    #     if not fiducial is None:
-    #         assert fiducial in self.fiducials, ValueError("This fiducial {} is not available from this HDF5 file. The min max fids are {} to {}.".format(fiducial, self.fiducials.min(), self.fiducials.max()))
-    #         # Get the point index
-    #         i = self.fiducials.searchsorted(fiducial)
-    #     else:
-    #         i = index
-    #         fiducial = self.fiducials[index]
+        return Histogram.fromHdf(self.hdfFile['/model/values/posterior'], index=index)
 
-    #     return self.getAttribute('Hit map', index = i)
+    def ncells_posterior(self, index=None, fiducial=None):
+    
+        if fiducial is not None:
+            assert fiducial in self.fiducials, ValueError("This fiducial {} is not available from this HDF5 file. The min max fids are {} to {}.".format(fiducial, self.fiducials.min(), self.fiducials.max()))
+            # Get the point index
+            index = self.fiducials.searchsorted(fiducial)
+
+        return Histogram.fromHdf(self.hdfFile['/model/mesh/nCells/posterior'], index=index)
 
 
     def inference_1d(self, index=None, fiducial=None, reciprocateParameter=False):
@@ -1048,88 +1003,75 @@ class Inference2D(myObject):
         elif axis == 'y':
             ax = self.y
         elif axis == 'z':
-            return self.mesh.y
+            ax = self.mesh.y
+        elif axis == 'distance':
+            ax = StatArray.StatArray(np.sqrt((self.data.x - self.data.x[0])**2.0 + (self.data.y - self.data.y[0])**2.0), 'Distance', 'm')
         return ax
 
-    def x_axis(self, axis, centres=False):
+    # def x_axis(self, axis, centres=False):
 
-        if axis == 'index':
-            ax = StatArray.StatArray(np.arange(self.nPoints, dtype=np.float64), 'Index')
-        elif axis == 'fiducial':
-            ax = self.fiducial
-        else:
-            ax = self.mesh.axis(axis)
-        return ax.centres if centres else ax.edges
+    #     if axis == 'index':
+    #         ax = StatArray.StatArray(np.arange(self.nPoints, dtype=np.float64), 'Index')
+    #     elif axis == 'fiducial':
+    #         ax = self.fiducial
+    #     elif axis == 'distance':
+    #         ax = StatArray.StatArray(np.sqrt((self.data.x - self.data.x[0])**2.0 + (self.data.y - self.data.y[0])**2.0), 'Distance', 'm')
+    #     elif axis == 'x':
+    #         ax = self.x
+    #     elif axis == 'y':
+    #         ax = self.y            
+    #     return ax
 
     @cached_property
     def y(self):
         """ Get the Y co-ordinates (Easting) """
         return StatArray.StatArray.fromHdf(self.hdfFile['data/y'])
 
-    def pcolorDataResidual(self, abs=False, **kwargs):
-        """ Plot a channel of data as points """
+    # def pcolorDataResidual(self, abs=False, **kwargs):
+    #     """ Plot a channel of data as points """
 
-        xAxis = kwargs.pop('xAxis', 'x')
+    #     # xAxis = kwargs.pop('xAxis', 'x')
 
-        xtmp = self.x_axis(xAxis, centres=False)
+    #     xtmp = self.axis(xAxis, centres=False)
 
-        values = self.bestData.deltaD.T
+    #     values = self.bestData.deltaD.T
 
-        if abs:
-            values = values.abs()
+    #     if abs:
+    #         values = values.abs()
 
-        cP.pcolor(values, x=xtmp, y=StatArray.StatArray(np.arange(self.bestData.predictedData.shape[1]), name='Channel'), **kwargs)
-
-
-    def pcolorObservedData(self, **kwargs):
-        """ Plot a channel of data as points """
-
-        xAxis = kwargs.pop('xAxis', 'x')
-
-        xtmp = self.x_axis(xAxis, centres=False)
-
-        cP.pcolor(self.bestData.data.T, x=xtmp, y=StatArray.StatArray(np.arange(self.bestData.predictedData.shape[1]), name='Channel'), **kwargs)
+    #     cP.pcolor(values, x=xtmp, y=StatArray.StatArray(np.arange(self.bestData.predictedData.shape[1]), name='Channel'), **kwargs)
 
 
-    def pcolorPredictedData(self, **kwargs):
-        """ Plot a channel of data as points """
+    # def pcolorObservedData(self, **kwargs):
+    #     """ Plot a channel of data as points """
 
-        xAxis = kwargs.pop('xAxis', 'x')
-
-        xtmp = self.x_axis(xAxis, centres=False)
-
-        cP.pcolor(self.bestData.predictedData.T, x=xtmp, y=StatArray.StatArray(np.arange(self.bestData.predictedData.shape[1]), name='Channel'), **kwargs)
+    #     cP.pcolor(self.bestData.data.T, x=self.mesh.x, y=StatArray.StatArray(np.arange(self.bestData.predictedData.shape[1]), name='Channel'), **kwargs)
 
 
-    def plotPredictedData(self, channel=None, **kwargs):
-        """ Plot a channel of the best predicted data as points """
+    # def pcolorPredictedData(self, **kwargs):
+    #     """ Plot a channel of data as points """
 
-        xAxis = kwargs.pop('xAxis', 'x')
+    #     cP.pcolor(self.bestData.predictedData.T, x=self.mesh.x, y=StatArray.StatArray(np.arange(self.bestData.predictedData.shape[1]), name='Channel'), **kwargs)
 
-        xtmp = self.x_axis(xAxis, centres=True)
 
-        if channel is None:
-            channel = np.s_[:]
+    # def plotPredictedData(self, channel=None, **kwargs):
+    #     """ Plot a channel of the best predicted data as points """
 
-        cP.plot(xtmp, self.bestData.predictedData[:, channel], **kwargs)
+    #     if channel is None:
+    #         channel = np.s_[:]
+
+    #     cP.plot(self.mesh.x, self.bestData.predictedData[:, channel], **kwargs)
 
     def plot_data_elevation(self, **kwargs):
         """ Adds the data elevations to a plot """
 
-        axis = kwargs.pop('axis', 'x')
+        # axis = kwargs.pop('axis', 'x')
         labels = kwargs.pop('labels', True)
-        kwargs['color'] = kwargs.pop('color','k')
-        kwargs['linewidth'] = kwargs.pop('linewidth',0.5)
-
-        (self.elevation + self.height).plot(x=self.axis(axis), **kwargs)
-
+        kwargs['color'] = kwargs.pop('color', 'k')
+        kwargs['linewidth'] = kwargs.pop('linewidth', 0.5)
 
     def plotDataResidual(self, channel=None, abs=False, **kwargs):
         """ Plot a channel of the observed data as points """
-
-        xAxis = kwargs.pop('xAxis', 'x')
-
-        xtmp = self.x_axis(xAxis, centres=True)
 
         if channel is None:
             channel = np.s_[:]
@@ -1139,18 +1081,15 @@ class Inference2D(myObject):
         if abs:
             values = values.abs()
 
-        cP.plot(xtmp, values, **kwargs)
+        self.mesh.plot_line(values, axis=1, **kwargs)
 
-    def plotDoi(self, percent=67.0, window=1, **kwargs):
+    def plot_doi(self, **kwargs):
 
-        xAxis = kwargs.pop('xAxis', 'x')
         labels = kwargs.pop('labels', True)
-        kwargs['color'] = kwargs.pop('color','k')
-        kwargs['linewidth'] = kwargs.pop('linewidth',0.5)
+        kwargs['color'] = kwargs.pop('color', 'k')
+        kwargs['linewidth'] = kwargs.pop('linewidth', 0.5)
 
-        xtmp = self.x_axis(xAxis, centres=True)
-
-        (self.elevation - self.doi).plot(x=xtmp, **kwargs)
+        self.mesh.plot_line(self.doi, axis=1, **kwargs)
 
     def plot_elevation(self, **kwargs):
 
@@ -1158,110 +1097,74 @@ class Inference2D(myObject):
         kwargs['color'] = kwargs.pop('color','k')
         kwargs['linewidth'] = kwargs.pop('linewidth',0.5)
 
-        self.mesh.plot_relative_to(centres=True, **kwargs)
+        self.mesh.plot_relative_to(**kwargs)
 
         # if (labels):
         #     cP.xlabel(xtmp.getNameUnits())
         #     cP.ylabel('Elevation (m)')
 
-    def plotHeightPosteriors(self, **kwargs):
-        """ Plot the horizontally stacked elevation histograms for each data point along the line """
+    # def plotHighlightedObservationLocations(self, fiducial, **kwargs):
 
-        xAxis = kwargs.pop('xAxis', 'x')
+    #     labels = kwargs.pop('labels', True)
+    #     kwargs['marker'] = kwargs.pop('marker','*')
+    #     kwargs['color'] = kwargs.pop('color',cP.wellSeparated[1])
+    #     kwargs['linestyle'] = kwargs.pop('linestyle','none')
+    #     kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor','k')
+    #     kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth','0.1')
+    #     xAxis = kwargs.pop('xAxis', 'x')
 
-        xtmp = self.x_axis(xAxis)
+    #     xtmp = self.x_axis(xAxis)
 
-        post = self.heightPosterior
+    #     i = self.fiducials.searchsorted(fiducial)
 
-        c = post.counts.T
-        c = np.divide(c, np.max(c,0), casting='unsafe')
+    #     tmp = self.height.reshape(self.height.size) + self.elevation
 
-        ax1 = plt.subplot(111)
-        c.pcolor(xtmp, y=post.bins, colorbar=False, **kwargs)
+    #     plt.plot(xtmp[i], tmp[i], **kwargs)
 
-        ax2 = ax1.twinx()
+    #     if (labels):
+    #         cP.xlabel(xtmp.getNameUnits())
+    #         cP.ylabel('Elevation (m)')
 
-        c = cP.wellSeparated[0]
-        post.relativeTo.plot(xtmp.internalEdges(), c=c, ax=ax2, label=self.bestData.z.getNameUnits())
+    # def plotKlayers(self, **kwargs):
+    #     """ Plot the number of layers in the best model for each data point """
+    #     xAxis = kwargs.pop('xAxis', 'x')
+    #     kwargs['marker'] = kwargs.pop('marker','o')
+    #     kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor','k')
+    #     kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth', 1.0)
+    #     kwargs['linestyle'] = kwargs.pop('linestyle','none')
 
-        ax2.set_ylabel(self.bestData.z.getNameUnits(), color=c)
-        ax2.tick_params(axis='y', labelcolor=c)
-        plt.legend()
+    #     xtmp = self.x_axis(xAxis)
+    #     self.nLayers.plot(xtmp, **kwargs)
+    #     # cP.ylabel(self.nLayers.getNameUnits())
+    #     cP.title('# of Layers in Best Model')
 
-        cP.title('Data height posterior distributions')
+    # @property
+    # def kLayers_posterior(self):
+    #     tmp = self.getAttribute('layer posterior')
 
-    def plotHighlightedObservationLocations(self, fiducial, **kwargs):
+    #     x = StatArray.StatArray(np.arange(self.nPoints, dtype=np.float64), "Index")
+    #     out = Histogram2D(x_centres=x, y_edges=tmp.bins)
+    #     out._counts = tmp.counts.T
 
-        labels = kwargs.pop('labels', True)
-        kwargs['marker'] = kwargs.pop('marker','*')
-        kwargs['color'] = kwargs.pop('color',cP.wellSeparated[1])
-        kwargs['linestyle'] = kwargs.pop('linestyle','none')
-        kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor','k')
-        kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth','0.1')
-        xAxis = kwargs.pop('xAxis', 'x')
+    #     return out
 
-        xtmp = self.x_axis(xAxis)
+    # def plotKlayersPosteriors(self, **kwargs):
+    #     """ Plot the horizontally stacked elevation histograms for each data point along the line """
 
-        i = self.fiducials.searchsorted(fiducial)
+    #     post = Histogram.fromHdf(self.hdfFile['/model/mesh/nCells/posterior'])
+    #     ax, pm, cb = post.pcolor(**kwargs)
+    #     cP.title('# of Layers posterior distributions')
 
-        tmp = self.height.reshape(self.height.size) + self.elevation
-
-        plt.plot(xtmp[i], tmp[i], **kwargs)
-
-        if (labels):
-            cP.xlabel(xtmp.getNameUnits())
-            cP.ylabel('Elevation (m)')
-
-
-    def plotKlayers(self, **kwargs):
-        """ Plot the number of layers in the best model for each data point """
+    def plot_additive_error(self, **kwargs):
+        """ Plot the additive errors of the data """
         xAxis = kwargs.pop('xAxis', 'x')
         kwargs['marker'] = kwargs.pop('marker','o')
+        kwargs['markersize'] = kwargs.pop('markersize',5)
+        kwargs['markerfacecolor'] = kwargs.pop('markerfacecolor',None)
         kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor','k')
-        kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth', 1.0)
-        kwargs['linestyle'] = kwargs.pop('linestyle','none')
-
-        xtmp = self.x_axis(xAxis)
-        self.nLayers.plot(xtmp, **kwargs)
-        # cP.ylabel(self.nLayers.getNameUnits())
-        cP.title('# of Layers in Best Model')
-
-    @property
-    def kLayers_posterior(self):
-        tmp = self.getAttribute('layer posterior')
-
-        x = StatArray.StatArray(np.arange(self.nPoints, dtype=np.float64), "Index")
-        out = Histogram2D(xCentres=x, yEdges=tmp.bins)
-        out._counts = tmp.counts.T
-
-        return out
-
-
-    def plotKlayersPosteriors(self, **kwargs):
-        """ Plot the horizontally stacked elevation histograms for each data point along the line """
-
-        post = self.getAttribute('layer posterior')
-
-        xAxis = kwargs.pop('xAxis', 'x')
-
-        xtmp = self.x_axis(xAxis)
-
-        c = post.counts.T
-        c = np.divide(c, np.max(c,0), casting='unsafe')
-        ax, pm, cb = c.pcolor(xtmp, y=post.binCentres[0, :], **kwargs)
-        cP.title('# of Layers posterior distributions')
-
-
-    def plotAdditiveError(self, **kwargs):
-        """ Plot the relative errors of the data """
-        xAxis = kwargs.pop('xAxis', 'x')
-        m = kwargs.pop('marker','o')
-        ms = kwargs.pop('markersize',5)
-        mfc = kwargs.pop('markerfacecolor',None)
-        mec = kwargs.pop('markeredgecolor','k')
-        mew = kwargs.pop('markeredgewidth',1.0)
-        ls = kwargs.pop('linestyle','-')
-        lw = kwargs.pop('linewidth',1.0)
+        kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth',1.0)
+        kwargs['linestyle'] = kwargs.pop('linestyle','-')
+        kwargs['linewidth'] = kwargs.pop('linewidth',1.0)
 
         xtmp = self.x_axis(xAxis, centres=True)
 
@@ -1269,127 +1172,84 @@ class Inference2D(myObject):
             r = range(self.nSystems)
             for i in r:
                 fc = cP.wellSeparated[i+2]
-                cP.plot(xtmp, y=self.additiveError[:,i],
-                    marker=m,markersize=ms,markerfacecolor=mfc,markeredgecolor=mec,markeredgewidth=mew,
-                    linestyle=ls,linewidth=lw,c=fc,
-                    alpha = 0.7,label='System ' + str(i + 1), **kwargs)
+                self.mesh.plot_line(self.additiveError[:, i], axis=1, 
+                c=fc,
+                alpha = 0.7,label='System ' + str(i + 1),
+                **kwargs)
             plt.legend()
         else:
             fc = cP.wellSeparated[2]
-            cP.plot(xtmp, y=self.additiveError,
-                    marker=m,markersize=ms,markerfacecolor=mfc,markeredgecolor=mec,markeredgewidth=mew,
-                    linestyle=ls,linewidth=lw,c=fc,
+            self.mesh.ploy_line(self.additiveError, axis=1,
+                    c=fc,
                     alpha = 0.7,label='System ' + str(1), **kwargs)
 
-        # cP.xlabel(xtmp.getNameUnits())
-        # cP.ylabel(self.additiveError.getNameUnits())
-
-
-
-    def plotAdditiveErrorPosteriors(self, system=0, **kwargs):
+    def plot_additive_error_posterior(self, system=0, **kwargs):
         """ Plot the distributions of additive errors as an image for all data points in the line """
-
-        xAxis = kwargs.pop('xAxis', 'x')
-
-        xtmp = self.x_axis(xAxis)
 
         if self.nSystems > 1:
             post = self.additiveErrorPosteriors[system]
         else:
             post = self.additiveErrorPosteriors
 
-        c = post.counts.T
-        c = np.divide(c, np.max(c, 0), casting='unsafe')
+        post.pcolor(**kwargs)
 
-        # if post.isRelative:
-        #     if np.all(post.relativeTo == post.relativeTo[0]):
-        #         y = post.binCentres + post.relativeTo[0]
-        #     else:
-        #         stuff = 2
-        # else:
-        y = post._centres
-        c.pcolor(xtmp, y=y, **kwargs)
-        cP.title('Additive error posterior distributions for system {}'.format(system))
+        cP.title('Additive error posterior distributions\nsystem {}'.format(system))
 
-
-    def plotConfidence(self, **kwargs):
+    def plot_confidence(self, **kwargs):
         """ Plot the opacity """
         kwargs['cmap'] = kwargs.get('cmap', 'plasma')
-        ax, pm, cb = self.plot_cross_section(values = self.opacity(), **kwargs)
+        
+        ax, pm, cb = self.plot_cross_section(values = self.opacity(), ticks=[0.0, 0.5, 1.0], **kwargs)
 
-        cb.ax.set_yticklabels(['Less', '', '', '', '', 'More'])
-        cb.set_label("Confidence")
+        if cb is not None:
+            labels = ['Less', '', 'More']
+            cb.ax.set_yticklabels(labels)
+            cb.set_label("Confidence")
 
+    def plot_entropy(self, **kwargs):
+        kwargs['cmap'] = kwargs.get('cmap', 'hot')
+        
+        return self.plot_cross_section(values = self.entropy, **kwargs)
 
-    def plotError2DJointProbabilityDistribution(self, index, system=0, **kwargs):
-        """ For a given index, obtains the posterior distributions of relative and additive error and creates the 2D joint probability distribution """
+    # def plotError2DJointProbabilityDistribution(self, index, system=0, **kwargs):
+    #     """ For a given index, obtains the posterior distributions of relative and additive error and creates the 2D joint probability distribution """
 
-        # Read in the histogram of relative error for the data point
-        rel = self.getAttribute('Relative error histogram', index=index)
-        # Read in the histogram of additive error for the data point
-        add = self.getAttribute('Additive error histogram', index=index)
+    #     # Read in the histogram of relative error for the data point
+    #     rel = self.getAttribute('Relative error histogram', index=index)
+    #     # Read in the histogram of additive error for the data point
+    #     add = self.getAttribute('Additive error histogram', index=index)
 
-        joint = Histogram2D()
-        joint.create2DjointProbabilityDistribution(rel[system],add[system])
+    #     joint = Histogram2D()
+    #     joint.create2DjointProbabilityDistribution(rel[system],add[system])
 
-        joint.pcolor(**kwargs)
+    #     joint.pcolor(**kwargs)
 
-
-    def plotInterfaces(self, cut=0.0, **kwargs):
+    def plot_interfaces(self, cut=0.0, **kwargs):
         """ Plot a cross section of the layer depth histograms. Truncation is optional. """
 
-        kwargs['colorbar'] = kwargs.pop('colorbar', False)
+        kwargs['cmap'] = kwargs.get('cmap', 'gray_r')
 
-        self.plot_cross_section(values=self.interface_probability(), **kwargs)
+        return self.plot_cross_section(values=self.interface_probability().values, **kwargs)
 
-
-
-    def plotObservedData(self, channel=None, **kwargs):
-        """ Plot a channel of the observed data as points """
-
-        xAxis = kwargs.pop('xAxis', 'x')
-
-        xtmp = self.x_axis(xAxis, centres=True)
-
-        if channel is None:
-            channel = np.s_[:]
-
-        cP.plot(xtmp, self.bestData.data[:, channel], **kwargs)
-
-
-    def plotOpacity(self, **kwargs):
+    def plot_opacity(self, **kwargs):
         """ Plot the opacity """
-        self.plot_cross_section(values = self.opacity, **kwargs)
+        return self.plot_cross_section(values = self.opacity, **kwargs)
 
-
-    def plotRelativeErrorPosteriors(self, system=0, **kwargs):
+    def plot_relative_error_posterior(self, system=0, **kwargs):
         """ Plot the distributions of relative errors as an image for all data points in the line """
-
-        xAxis = kwargs.pop('xAxis', 'x')
-
-        xtmp = self.x_axis(xAxis)
 
         if self.nSystems > 1:
             post = self.relativeErrorPosteriors[system]
         else:
             post = self.relativeErrorPosteriors
 
-        c = post.counts.T
-        c = np.divide(c, np.max(c,0), casting='unsafe')
+        kwargs['trim'] = kwargs.get('trim', 0.0)
 
-        # if post.isRelative:
-        #     if np.all(post.relativeTo == post.relativeTo[0]):
-        #         y = post.binCentres + post.relativeTo[0]
-        #     else:
-        #         stuff = 2
-        # else:
-        y = post._centres #[0, :]
-        c.pcolor(xtmp, y=y, **kwargs)
+        post.pcolor(**kwargs)
 
-        cP.title('Relative error posterior distributions for system {}'.format(system))
+        cP.title('Relative error posterior distributions\nsystem {}'.format(system))
 
-
-    def plotRelativeError(self, **kwargs):
+    def plot_relative_error(self, **kwargs):
         """ Plot the relative errors of the data """
 
         xAxis = kwargs.pop('xAxis', 'x')
@@ -1400,30 +1260,24 @@ class Inference2D(myObject):
         kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth',1.0)
         kwargs['linestyle'] = kwargs.pop('linestyle','-')
         kwargs['linewidth'] = kwargs.pop('linewidth',1.0)
-
-        xtmp = self.x_axis(xAxis)
 
         if (self.nSystems > 1):
             r = range(self.nSystems)
             for i in r:
                 kwargs['c'] = cP.wellSeparated[i+2]
-                self.relativeError[:, i].plot(xtmp,
-                    alpha = 0.7, label='System {}'.format(i + 1), **kwargs)
+                self.mesh.plot_line(self.relativeError[:, i], axis=1, 
+                alpha = 0.7, label='System {}'.format(i + 1), **kwargs)
             plt.legend()
         else:
             kwargs['c'] = cP.wellSeparated[2]
-            self.relativeError.plot(xtmp,
-                    alpha = 0.7, label='System {}'.format(1), **kwargs)
-
+            self.mesh.plot_line(self.relativeError[:, i], axis=1, 
+                alpha = 0.7, label='System {}'.format(1), **kwargs)
 
     def scatter2D(self, **kwargs):
         return self.data.scatter2D(**kwargs)
 
-
-    def plotTotalError(self, channel, **kwargs):
+    def plot_total_error(self, channel, **kwargs):
         """ Plot the relative errors of the data """
-
-
         xAxis = kwargs.pop('xAxis', 'x')
 
         kwargs['marker'] = kwargs.pop('marker','o')
@@ -1434,44 +1288,17 @@ class Inference2D(myObject):
         kwargs['linestyle'] = kwargs.pop('linestyle','-')
         kwargs['linewidth'] = kwargs.pop('linewidth',1.0)
 
-        xtmp = self.x_axis(xAxis)
 
-#        if (self.nSystems > 1):
-#            r = range(self.nSystems)
-#            for i in r:
-#                fc = cP.wellSeparated[i+2]
-#                cP.plot(x=self.xPlot, y=self.additiveError[:,i],
-#                    marker=m,markersize=ms,markerfacecolor=mfc,markeredgecolor=mec,markeredgewidth=mew,
-#                    linestyle=ls,linewidth=lw,c=fc,
-#                    alpha = 0.7,label='System ' + str(i + 1), **kwargs)
-#        else:
         fc = cP.wellSeparated[2]
-        self.totalError[:,channel].plot(xtmp,
-                alpha = 0.7, label='Channel ' + str(channel), **kwargs)
-
-#        cP.xlabel(self.xPlot.getNameUnits())
-#        cP.ylabel(self.additiveError.getNameUnits())
-#        plt.legend()
-
+        self.mesh.plot_line(self.totalError[:, channel], alpha = 0.7, label='Channel ' + str(channel), **kwargs)
 
     def plotTotalErrorDistributions(self, channel=0, nBins=100, **kwargs):
         """ Plot the distributions of relative errors as an image for all data points in the line """
         self.setAlonglineAxis(self.plotAgainst)
 
-        H = Histogram1D(values=np.log10(self.totalError[:,channel]),nBins=nBins)
+        H = Histogram(values=np.log10(self.totalError[:,channel]),nBins=nBins)
 
         H.plot(**kwargs)
-
-#        if self.nSystems > 1:
-#            c = tmp[system].counts.T
-#            c = np.divide(c, np.max(c,0), casting='unsafe')
-#            c.pcolor(x=self.xPlot, y=tmp[system].bins, **kwargs)
-#            cP.title('Relative error posterior distributions for system '+str(system))
-#        else:
-#            c = tmp.counts.T
-#            c = np.divide(c, np.max(c,0), casting='unsafe')
-#            c.pcolor(x=self.xPlot, y=tmp.bins, **kwargs)
-#            cP.title('Relative error posterior distributions')
 
     def histogram(self, nBins, depth=None, reciprocateParameter = False, bestModel = False, **kwargs):
         """ Compute a histogram of the model, optionally show the histogram for given depth ranges instead """
@@ -1502,32 +1329,24 @@ class Inference2D(myObject):
             vals = self.bestParameters(z_slice)
             title = 'Best model values depth = {}'.format(depth)
         else:
-            vals = self.meanParameters(z_slice)
+            vals = self.mean_parameters(z_slice)
             title = 'Mean model values depth = {}'.format(depth)
 
-        # vals = model[:, cell1:cell2+1].deepcopy()
+        log = kwargs.pop('log', None)
 
-        log = kwargs.pop('log',False)
-
-        if (reciprocateParameter):
-            i = np.where(vals > 0.0)[0]
-            vals[i] = 1.0 / vals[i]
-            name = 'Resistivity'
-            units = '$Omega m$'
-        else:
-            name = 'Conductivity'
-            units = '$Sm^{-1}$'
-
+        f = np.linspace
+        vals2 = vals
         if (log):
-            vals, logLabel = cF._log(vals,log)
-            name = logLabel + name
-        binEdges = StatArray.StatArray(np.linspace(np.nanmin(vals), np.nanmax(vals), nBins+1), name, units)
+            vals2, logLabel = cF._log(vals,log)
+            # name = logLabel + name
+            f = np.logspace
 
-        h = Histogram1D(edges = binEdges)
+        mesh = RectilinearMesh1D(edges = StatArray.StatArray(f(np.nanmin(vals2), np.nanmax(vals2), nBins+1)), log=log)
+
+        h = Histogram(mesh=mesh)
         h.update(vals)
         h.plot(**kwargs)
         cP.title(title)
-
 
     def parameterHistogram(self, nBins, depth = None, depth2 = None, log=None):
         """ Compute a histogram of all the parameter values, optionally show the histogram for given depth ranges instead """
@@ -1558,7 +1377,6 @@ class Inference2D(myObject):
 
         out = Histogram1D(edges=bins, log=log)
 
-
         # Bar = progressbar.ProgressBar()
         # for i in Bar(range(self.nPoints)):
         for i in range(self.nPoints):
@@ -1572,7 +1390,6 @@ class Inference2D(myObject):
 
         return out
 
-
     def plotBestModel(self, **kwargs):
 
         values = self.bestParameters()
@@ -1583,12 +1400,35 @@ class Inference2D(myObject):
 
         return self.plot_cross_section(values = values, **kwargs)
 
+    def plot_cross_section(self, values, **kwargs):
+        """ Plot a cross-section of the parameters """
+        mesh = self.mesh
+        if 'x_axis' in kwargs:
+            mesh = self.change_mesh_axis(kwargs.pop('x_axis'))
+
+        if kwargs.pop('useVariance', False):
+            opacity = deepcopy(self.opacity())
+            # opacity = deepcopy(self.entropy)
+            # opacity = 1.0 - opacity.normalize()
+            kwargs['alpha'] = opacity
+        
+        if kwargs.pop('mask_below_doi', False):
+            opacity = kwargs.get('alpha')
+            if kwargs.get('alpha') is None:
+                opacity = np.ones(mesh.shape)
+
+            indices = mesh.y.cellIndex(self.doi + mesh.y.relativeTo)
+
+            for i in range(self.nPoints):
+                opacity[i, indices[i]:] = 0.0
+            kwargs['alpha'] = opacity
+
+        return mesh.pcolor(values = values, **kwargs)
 
     def plotHighestMarginal(self, useVariance=True, **kwargs):
 
         values = self.highestMarginal
         return self.plot_cross_section(values = values, **kwargs)
-
 
     def plot_marginal_probabilities(self, **kwargs):
 
@@ -1646,22 +1486,11 @@ class Inference2D(myObject):
 
         return self.plot_cross_section(values = values.T, **kwargs)
 
-    def plot_cross_section(self, values, **kwargs):
-        """ Plot a cross-section of the parameters """
+    def plot_percentile(self, percent, **kwargs):
+        posterior = self.parameter_posterior()
+        percentile = posterior.percentile(percent, axis=1)
 
-        if kwargs.pop('useVariance', False):
-            opacity = self.opacity().copy()
-
-            if kwargs.pop('only_below_doi', False):
-                indices = self.mesh.y.cellIndex(self.doi)
-
-                for i in range(self.nPoints):
-                    opacity[:indices[i], i] = 1.0
-
-            kwargs['alpha'] = opacity
-
-        ax, pm, cb = self.mesh.pcolor(values = values, **kwargs)
-        return ax, pm, cb
+        return self.plot_cross_section(values=percentile, **kwargs)
 
     def marginal_probability(self, slic=None):
 
@@ -1671,7 +1500,6 @@ class Inference2D(myObject):
             marginal_probability = StatArray.StatArray.fromHdf(self.hdfFile['probabilities'], index=slic)
 
         return marginal_probability
-
 
     def read_fit_distributions(self, fit_file, mask_by_doi=True, components='amvd'):
 
@@ -1858,66 +1686,6 @@ class Inference2D(myObject):
         R.plot(forcePlot=True)
 
 
-    def plotSummary(self, data, fiducial, **kwargs):
-
-        R = self.inference_1d(fiducial=fiducial)
-
-        cWidth = 3
-
-        nCols = 15 + (3 * R.nSystems) + 1
-
-        gs = gridspec.GridSpec(18, nCols)
-        gs.update(wspace=20.0, hspace=20.0)
-        ax = [None]*(7+(2*R.nSystems))
-
-        ax[0] = plt.subplot(gs[:3, :nCols - 10 - (R.nSystems * 3)]) # Data misfit vs iteration
-        R._plotMisfitVsIteration(markersize=1, marker='.',)
-
-
-        ax[1] = plt.subplot(gs[3:6, :nCols - 10 - (R.nSystems * 3)]) # Histogram of # of layers
-        R._plotNumberOfLayersPosterior()
-
-
-        ax[2] = plt.subplot(gs[6:12, :nCols - 13]) # Site Map
-        data.scatter2D(c='k', s=1)
-        line = data.getLine(line=self.line)
-        line.scatter2D(c='cyan')
-        cP.plot(R.bestDataPoint.x, R.bestDataPoint.y, color='r', marker='o')
-
-
-        ax[3] = plt.subplot(gs[6:12, nCols - 13:nCols - 10]) # Data Point
-        R._plotObservedPredictedData()
-        plt.title('')
-
-
-        ax[4] = plt.subplot(gs[:12, nCols - 10: nCols - 4]) # Hitmap
-        R._plotHitmapPosterior()
-
-
-        ax[5] = plt.subplot(gs[:12, nCols - 4: nCols-1]) # Interface histogram
-        R._plotLayerDepthPosterior()
-
-
-        ax[6] = plt.subplot(gs[12:, :]) # cross section
-        self.plot_cross_section(**kwargs)
-
-
-        for i in range(R.nSystems):
-
-            j0 = nCols - 10 - (R.nSystems* 3) + (i * 3)
-            j1 = j0 + 3
-
-            ax[7+(2*i)] = plt.subplot(gs[:3, j0:j1])
-            R._plotRelativeErrorPosterior(system=i)
-            cP.title('System ' + str(i + 1))
-
-            # Update the histogram of additive data errors
-            ax[7+(2*i)-1] = plt.subplot(gs[3:6, j0:j1])
-            # ax= plt.subplot(self.gs[3:6, 2 * self.nSystemstems + j])
-            R._plotAdditiveErrorPosterior(system=i)
-
-
-
     def toVtk(self, fileName, format='binary'):
         """Write the parameter cross-section to an unstructured grid vtk file
 
@@ -2002,9 +1770,9 @@ class Inference2D(myObject):
             elif (low == '# of systems'):
                 res.append('nsystems')
             elif (low == 'additive error'):
-                res.append('data/addErr')
+                res.append('data/additive_error')
             elif (low == 'relative error'):
-                res.append('data/relErr')
+                res.append('data/relative_error')
             elif (low == 'best model'):
                 res.append('model')
             elif (low == 'meaninterp'):
@@ -2028,11 +1796,11 @@ class Inference2D(myObject):
             elif (low == 'relative error posterior'):
                 if (nSys is None): nSys = hdfRead.readKeyFromFile(self.hdfFile, self.fName, '/','nsystems')
                 for i in range(nSys):
-                    res.append('data/relErr/posterior' +str(i))
+                    res.append('data/relative_error/posterior' +str(i))
             elif (low == 'additive error posterior'):
                 if (nSys is None): nSys = hdfRead.readKeyFromFile(self.hdfFile, self.fName, '/','nsystems')
                 for i in range(nSys):
-                    res.append('data/addErr/posterior' +str(i))
+                    res.append('data/additive_error/posterior' +str(i))
             elif (low == 'inversion time'):
                 res.append('invtime')
             elif (low == 'saving time'):

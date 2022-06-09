@@ -7,10 +7,16 @@ import h5py
 from sklearn.mixture import GaussianMixture
 from smm import SMM
 
-from numba import (jit, float64)
-_numba_settings = {'nopython': True, 'nogil': False, 'fastmath': True, 'cache': True}
+from numba import (njit, jit, float64)
+_jit_settings = {'nopython': True, 'nogil': False, 'fastmath': True, 'cache': True}
+_njit_settings = {'nogil': False, 'fastmath': True, 'cache': True}
 
-@jit(**_numba_settings)
+from numba.pycc import CC
+
+cc = CC('test')
+cc.verbose = True
+@njit(**_njit_settings)
+@cc.export('bresenham', 'f8[:, :](f8[:], f8[:])')
 def bresenham(x, y):
     n_segments = np.int32(len(x) - 1)
     nTmp = np.int32(0)
@@ -382,7 +388,7 @@ def cosSin1(x, y, a, p):
     """Simple function for creating tests. """
     return x * (1.0 - x) * np.cos(a * np.pi * x) * np.sin(a * np.pi * y**p)**p
 
-@jit(**_numba_settings)
+@njit(**_njit_settings)
 def reorder_3d_for_pyvista(values):
     shp = np.shape(values)
     arr = np.zeros(shp[0] * shp[1] * shp[2], dtype=float64)
@@ -543,12 +549,59 @@ def LogDet(A, N=1.0):
         d = np.linalg.slogdet(A)
         return d[0] * d[1]
 
+@njit(**_njit_settings)
+def set_rows_at(values, indices, out):
+    for i in range(len(indices)):
+        out[indices[i], :] = values[i, :]
+    return out
+
+@njit(**_njit_settings)
+def set_columns_at(values, indices, out):
+    for i in range(len(indices)):
+        out[:, indices[i]] = values[:, i]
+    return out
 
 def rolling_window(a, window):
     shape = a.shape[:-1] + (a.shape[-1] - window + 1, window)
     strides = a.strides + (a.strides[-1],)
     return np.lib.stride_tricks.as_strided(a, shape=shape, strides=strides)
 
+@njit(**_njit_settings)
+def smooth(x, a):
+    """Smooth x by an LTI gaussian filter, forwards and backwards pass.
+
+    Parameters
+    ----------
+    x : array_like
+        signal to process
+    a : scalar between 0.0 and 1.0
+        Weight
+
+    Returns
+    -------
+    out : array_like
+        Smoothed signal
+    """
+    n = len(x)
+    b = 1.0 - a
+    sx = 1.0
+    sy = a
+    yi = 0.0
+    y = np.zeros(n)
+    yi = (sy * yi) + (sx * x[0])
+    y[0] = yi
+    for i in range(1, n-1):
+        yi = (a * yi) + (b * x[i])
+        y[i] = yi
+
+    sx = sx / (1.0 + a)
+    sy = sy / (1.0 + a)
+    yi = (sy * yi) + (sx * x[n-1])
+    y[n-1] = yi
+    for i in range(n-2, -1, -1):
+        yi = (a * yi) + (b * y[i])
+        y[i] = yi
+    return y
 
 def splitComplex(this):
     """Splits a vector of complex numbers into a vertical concatenation of the real and imaginary components.
@@ -915,7 +968,6 @@ def _power(values, exponent=None):
         The values to power exponent
 
     """
-
     if exponent is None:
         return values
     if exponent == 'e':
@@ -937,10 +989,10 @@ def safeEval(string):
         string = string.replace('EmLoop', 'CircularLoop')
         return string
 
-    allowed = ('Histogram',
+    allowed = (
+    'Histogram',
     'Model',
     'Model1D',
-    'Hitmap',
     'TempestData',
     'TdemData',
     'FdemData',
@@ -950,6 +1002,7 @@ def safeEval(string):
     'TdemSystem',
     'FdemSystem',
     'CircularLoop',
+    'CircularLoops',
     'RectilinearMesh')
 
     if (any(x in string for x in allowed)):

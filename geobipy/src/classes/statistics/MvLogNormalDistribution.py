@@ -84,7 +84,7 @@ class MvLogNormal(MvNormal):
 
         return super().probability(x=x, log=log)
 
-    def bins(self, nBins=100, nStd=4.0, axis=None, relative=False):
+    def bins(self, nBins=99, nStd=4.0, axis=None, relative=False):
         """Discretizes a range given the mean and variance of the distribution
 
         Parameters

@@ -7,19 +7,16 @@
 
 """
 from pandas import read_csv
-from ...pointcloud.PointCloud3D import PointCloud3D
+from matplotlib.figure import Figure
+
+from geobipy.src.base import utilities
 from .TdemData import TdemData
 from ..datapoint.Tempest_datapoint import Tempest_datapoint
 from ....classes.core import StatArray
-from ...system.CircularLoop import CircularLoop
-from ...system.TdemSystem import TdemSystem
+from ...system.CircularLoops import CircularLoops
+from ....base import plotting as cP
 
 import numpy as np
-from ....base import fileIO as fIO
-#from ....base import Error as Err
-from ....base import plotting as cP
-from ....base import utilities as cF
-from ....base import MPI as myMPI
 import matplotlib.pyplot as plt
 from os.path import join
 import h5py
@@ -53,6 +50,8 @@ class TempestData(TdemData):
 
     """
 
+    single = Tempest_datapoint
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -78,12 +77,29 @@ class TempestData(TdemData):
             self._additive_error = StatArray.StatArray(values)
 
     @property
-    def datapoint_type(self):
-        return Tempest_datapoint
-
-    @property
     def file(self):
         return self._file
+
+    # @property
+    # def primary_field(self):
+    #     """The data. """
+    #     if np.size(self._primary_field, 0) == 0:
+    #         self._primary_field = StatArray.StatArray((self.nPoints, self.n_components * self.nSystems), "Primary field", self.units)
+    #     return self._primary_field
+
+    # @primary_field.setter
+    # def primary_field(self, values):
+    #     shp = (self.nPoints, self.n_components * self.nSystems)
+    #     if values is None:
+    #         self._primary_field = StatArray.StatArray(shp, "Primary field", self.units)
+    #     else:
+    #         if self.nPoints == 0:
+    #             self.nPoints = np.size(values, 0)
+    #         # if self.nChannels == 0:
+    #         #     self.channels_per_system = np.size(values, 1)
+    #         shp = (self.nPoints, self.n_components * self.nSystems)
+    #         assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("primary_field must have shape {}".format(shp))
+    #         self._primary_field = StatArray.StatArray(values)  
 
     @property
     def relative_error(self):
@@ -221,22 +237,20 @@ class TempestData(TdemData):
         self.z = df[iC[4]].values
         self.elevation = df[iC[5]].values
 
-        self.transmitter = None
-        for i in range(self.nPoints):
-            self.transmitter[i] = CircularLoop(x=self.x[i], y=self.y[i], z=self.z[i],
-                                               pitch=df[iT[0]].values[i], roll=df[iT[1]].values[i], yaw=df[iT[2]].values[i],
-                                               radius=self.system[0].loopRadius())
+        self.transmitter = CircularLoops(x=self.x, 
+                                         y=self.y, 
+                                         z=self.z,
+                                         pitch=df[iT[0]].values, roll=df[iT[1]].values, yaw=df[iT[2]].values,
+                                         radius=np.full(self.nPoints, fill_value=self.system[0].loopRadius()))
 
         loopOffset = df[iOffset].values
 
         # Assign the orientations of the acquisistion loops
-        self.receiver = None
-        for i in range(self.nPoints):
-            self.receiver[i] = CircularLoop(x = self.transmitter[i].x + loopOffset[i, 0],
-                                            y = self.transmitter[i].y + loopOffset[i, 1],
-                                            z = self.transmitter[i].z + loopOffset[i, 2],
-                                            pitch=df[iR[0]].values[i], roll=df[iR[1]].values[i], yaw=df[iR[2]].values[i],
-                                            radius=self.system[0].loopRadius())
+        self.receiver = CircularLoops(x = self.transmitter.x + loopOffset[:, 0],
+                                      y = self.transmitter.y + loopOffset[:, 1],
+                                      z = self.transmitter.z + loopOffset[:, 2],
+                                      pitch=df[iR[0]].values, roll=df[iR[1]].values, yaw=df[iR[2]].values,
+                                      radius=np.full(self.nPoints, fill_value=self.system[0].loopRadius()))
 
 
         self.primary_field[:, :] = df[iPrimary].values
@@ -250,6 +264,133 @@ class TempestData(TdemData):
         self.check()
 
         return self
+
+    def plot(self, system=0, channels=None, xAxis='index', **kwargs):
+        """ Plots the data
+
+        Parameters
+        ----------
+        system : int
+            System to plot
+        channels : sequence of ints
+            Channels to plot
+
+        """
+
+        legend = kwargs.pop('legend', True)
+        kwargs['yscale'] = kwargs.get('yscale', 'linear')
+
+        x = self.getXAxis(xAxis)
+
+        if channels is None:
+            i = self._systemIndices(system)
+            ax = cP.plot(x, self.secondary_field[:, i],
+                         label=self.channelNames[i], **kwargs)
+        else:
+            channels = np.atleast_1d(channels)
+            for j, i in enumerate(channels):
+                ax = cP.plot(x, self.secondary_field[:, i], 
+                             label=self.channelNames[i], **kwargs)
+
+        plt.xlabel(utilities.getNameUnits(x))
+
+        # Put a legend to the right of the current axis
+        if legend:
+            leg = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), fancybox=True)
+            leg.set_title(self.secondary_field.getNameUnits())
+        
+        return ax        
+
+
+    def plotPredicted(self, system=0, channels=None, xAxis='index', **kwargs):
+        """ Plots the data
+
+        Parameters
+        ----------
+        system : int
+            System to plot
+        channels : sequence of ints
+            Channels to plot
+
+        """
+
+        legend = kwargs.pop('legend', True)
+        kwargs['yscale'] = kwargs.get('yscale', 'linear')
+        kwargs['linestyle'] = kwargs.get('linestyle', '-.')
+
+        x = self.getXAxis(xAxis)
+
+        if channels is None:
+            i = self._systemIndices(system)
+            ax = cP.plot(x, self.predicted_secondary_field[:, i],
+                         label=self.channelNames[i], **kwargs)
+        else:
+            channels = np.atleast_1d(channels)
+            for j, i in enumerate(channels):
+                ax = cP.plot(x, self.predicted_secondary_field[:, i], 
+                             label=self.channelNames[i], **kwargs)
+
+        plt.xlabel(utilities.getNameUnits(x))
+
+        # Put a legend to the right of the current axis
+        if legend:
+            leg = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), fancybox=True)
+            leg.set_title(self.predicted_secondary_field.getNameUnits())
+        
+        return ax
+
+    def _init_posterior_plots(self, gs, sharex=None, sharey=None):
+        """Initialize axes for posterior plots
+
+        Parameters
+        ----------
+        gs : matplotlib.gridspec.Gridspec
+            Gridspec to split
+
+        """
+        if isinstance(gs, Figure):
+            gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
+
+        splt = gs.subgridspec(2, 2, wspace=0.3)
+        ax = []
+        # Height axis
+        ax.append(plt.subplot(splt[0, 0], sharex=sharex, sharey=sharey))
+
+        sharex = ax[0] if sharex is None else sharex
+        # Data axis
+        ax.append(plt.subplot(splt[0, 1], sharex=sharex))
+
+        splt2 = splt[1, :].subgridspec(self.nSystems * self.n_components, 2, wspace=0.2)
+        # Relative error axes
+        ax_rel = [plt.subplot(splt2[0, 0], sharex=sharex)]
+        ax_rel += [plt.subplot(splt2[i, 0], sharex=ax_rel[0], sharey=ax_rel[0]) for i in range(1, self.n_components * self.nSystems)]
+        ax.append(ax_rel)
+        # # Additive Error axes
+        ax.append(plt.subplot(splt2[0, 1], sharex=sharex))
+
+        return ax
+
+    def plot_posteriors(self, axes=None, height_kwargs={}, data_kwargs={}, rel_error_kwargs={}, transmitter_pitch_kwargs={}, sharex=None, sharey=None, **kwargs):
+        
+        if axes is None:
+            axes = kwargs.pop('fig', plt.gcf())
+
+        if not isinstance(axes, list):
+            axes = self._init_posterior_plots(axes, sharex=sharex, sharey=sharey)
+            
+        # assert len(axes) == 4, ValueError("axes must have length 4")
+        # assert len(axes) == 4, ValueError("Must have length 3 list of axes for the posteriors. self.init_posterior_plots can generate them")
+
+        self.z.plotPosteriors(ax = axes[0], **height_kwargs)
+
+        self.plot(ax=axes[1], legend=False, **data_kwargs)
+        self.plotPredicted(ax=axes[1], legend=False, **data_kwargs)
+
+        self.relative_error.plotPosteriors(ax=axes[2], **rel_error_kwargs)
+
+        self.transmitter.pitch.plotPosteriors(ax=axes[3], **transmitter_pitch_kwargs)
+
+        return axes
 
     # def csv_channels(self, data_filename):
     
@@ -358,8 +499,8 @@ class TempestData(TdemData):
 
             self = cls(lineNumber=np.asarray(gdf['Line'][indices]),
                         fiducial=np.asarray(gdf['Fiducial'][indices]),
-                        x=np.asarray(gdf['Easting'][indices]),
-                        y=np.asarray(gdf['Northing'][indices]),
+                        x=np.asarray(gdf['Easting_Albers'][indices]),
+                        y=np.asarray(gdf['Northing_Albers'][indices]),
                         z=np.asarray(gdf['Tx_Height'][indices]),
                         elevation=np.asarray(gdf['DTM'][indices]),
                         system=systemFilename)
@@ -430,7 +571,7 @@ class TempestData(TdemData):
         secondary_field = np.hstack([gdf['EMX_NonHPRG'][:, record], gdf['EMZ_NonHPRG'][:, record]])
         std = 0.1 * secondary_field
 
-        transmitter_loop = CircularLoop(x=x, y=y, z=z,
+        transmitter_loop = CircularLoops(x=x, y=y, z=z,
                                         pitch=np.float64(gdf['Tx_Pitch'][record]),
                                         roll=np.float64(gdf['Tx_Roll'][record]),
                                         yaw=np.float64(gdf['Tx_Yaw'][record]),
@@ -438,15 +579,15 @@ class TempestData(TdemData):
 
         loopOffset = np.vstack([np.asarray(gdf['HSep_GPS'][record]), np.asarray(gdf['TSep_GPS'][record]), np.asarray(gdf['VSep_GPS'][record])])
 
-        receiver_loop = CircularLoop(x=transmitter_loop.x + loopOffset[0],
-                                     y=transmitter_loop.y + loopOffset[1],
-                                     z=transmitter_loop.z + loopOffset[2],
-                                     pitch=np.float64(gdf['Rx_Pitch'][record]),
-                                     roll=np.float64(gdf['Rx_Roll'][record]),
-                                     yaw=np.float64(gdf['Rx_Yaw'][record]),
-                                     radius=self.system[0].loopRadius())
+        receiver_loop = CircularLoops(x=transmitter_loop.x + loopOffset[0],
+                                      y=transmitter_loop.y + loopOffset[1],
+                                      z=transmitter_loop.z + loopOffset[2],
+                                      pitch=np.float64(gdf['Rx_Pitch'][record]),
+                                      roll=np.float64(gdf['Rx_Roll'][record]),
+                                      yaw=np.float64(gdf['Rx_Yaw'][record]),
+                                      radius=self.system[0].loopRadius())
 
-        out = self.datapoint_type(
+        out = self.single(
                 lineNumber = np.float64(gdf['Line'][record]),
                 fiducial = np.float64(gdf['Fiducial'][record]),
                 x = x,
@@ -494,7 +635,9 @@ class TempestData(TdemData):
         """ Reads the object from a HDF group """
 
         if kwargs.get('index') is not None:
-            return Tempest_datapoint.fromHdf(grp, **kwargs)
+            return cls.single.fromHdf(grp, **kwargs)
 
-        return super(TempestData, cls).fromHdf(grp, **kwargs)
+        out = super(TempestData, cls).fromHdf(grp, **kwargs)
+        out.primary_field = StatArray.StatArray.fromHdf(grp['primary_field'])
+        return out
 

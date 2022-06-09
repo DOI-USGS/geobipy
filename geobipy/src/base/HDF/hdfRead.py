@@ -207,6 +207,7 @@ def read_item(h5obj, index=None, **kwargs):
     from ...inversion.Inference1D import Inference1D
     from ...inversion.Inference2D import Inference2D
     from ...classes.system.CircularLoop import CircularLoop
+    from ...classes.system.CircularLoops import CircularLoops
     s = h5obj.attrs.get('repr')
     if (not s is None):
 

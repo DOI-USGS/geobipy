@@ -4,15 +4,14 @@ Module describing a Data Set where values are associated with an xyz co-ordinate
 from copy import deepcopy
 import numpy as np
 from pandas import DataFrame, read_csv
-from cached_property import cached_property
 from ....classes.core import StatArray
 from ....base import fileIO as fIO
 from ....base import utilities as cf
 from ....base import plotting as cP
 from ...pointcloud.PointCloud3D import PointCloud3D
 from ..datapoint.DataPoint import DataPoint
-from ....classes.core.myObject import myObject
 from ....base import MPI as myMPI
+from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
 try:
@@ -172,7 +171,7 @@ class Data(PointCloud3D):
 
         """
         assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-        assert channel < self.channels_per_system[system], ValueError("channel must be < {} for system {}".format(self.channels_per_system[system], system))
+        assert np.all(channel < self.channels_per_system[system]), ValueError("channel must be < {} for system {}".format(self.channels_per_system[system], system))
         return self.systemOffset[system] + channel
 
     # @property
@@ -295,6 +294,10 @@ class Data(PointCloud3D):
     @property
     def nLines(self):
         return np.unique(self.lineNumber).size
+
+    @property
+    def n_posteriors(self):
+        return super().n_posteriors + self.relative_error.n_posteriors + self.additive_error.n_posteriors + self.receiver.n_posteriors + self.transmitter.n_posteriors
 
     @property
     def nSystems(self):
@@ -605,6 +608,33 @@ class Data(PointCloud3D):
                          data=self.data[i, :], std=self.std[i, :], predictedData=self.predictedData[i, :],
                          channelNames=self.channelNames)
 
+    def _init_posterior_plots(self, gs):
+        """Initialize axes for posterior plots
+
+        Parameters
+        ----------
+        gs : matplotlib.gridspec.Gridspec
+            Gridspec to split
+
+        """
+        if isinstance(gs, Figure):
+            gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
+
+        splt = gs.subgridspec(2, 2, wspace=0.3)
+        ax = []
+        # Height axis
+        ax.append(plt.subplot(splt[0, 0]))
+        # Data axis
+        ax.append(plt.subplot(splt[0, 1], sharex=ax[0]))
+
+        splt2 = splt[1, :].subgridspec(self.nSystems, 2, wspace=0.2)
+        # Relative error axes
+        ax.append([plt.subplot(splt2[i, 0], sharex=ax[0]) for i in range(self.nSystems)])
+        # Additive Error axes
+        ax.append([plt.subplot(splt2[i, 1], sharex=ax[0]) for i in range(self.nSystems)])
+
+        return ax    
+
 
     def line(self, line):
         """ Get the data from the given line number """
@@ -775,7 +805,7 @@ class Data(PointCloud3D):
         cP.title(self.channelNames[channel])
 
 
-    def plot(self, xAxis='index', channels=None, values=None, system=None, **kwargs):
+    def plot(self, xAxis='index', channels=None, system=None, **kwargs):
         """Plots the specifed channels as a line plot.
 
         Plots the channels along a specified co-ordinate e.g. 'x'. A legend is auto generated.
@@ -811,35 +841,47 @@ class Data(PointCloud3D):
         geobipy.plotting.plot : For additional keyword arguments
 
         """
-
         legend = kwargs.pop('legend', True)
-        ax = kwargs.pop('ax', plt.gca())
+        ax = kwargs.get('ax', plt.gca())
+        ax.set_prop_cycle(None)
 
-        if not values is None:
-            legend = False
-            ax = super().plot(values=values, xAxis=xAxis, label=cf.getName(values), **kwargs)
-
+        if system is None:
+            rTmp = np.s_[:] if channels is None else np.s_[channels]
         else:
-            if system is None:
-                rTmp = range(self.nChannels) if channels is None else channels
-            else:
-                assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-                rTmp = self._systemOffset[system] + channels
+            assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+            rTmp = self._systemIndices(system) if channels is None else channels + self._systemIndices(system).start
 
-            for i in rTmp:
-                super().plot(values=self.data[:, i], xAxis=xAxis, label=self.channelNames[i], **kwargs)
+        ax = super().plot(values=self.data[:, rTmp], xAxis=xAxis, label=self.channelNames[rTmp], **kwargs)
 
-        leg = None
         if legend:
-            # box = ax.get_position()
-            # ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
-
             # Put a legend to the right of the current axis
             leg = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5),fancybox=True)
             leg.set_title(self._data.getNameUnits())
+        else:
+            leg = None
 
         return ax, leg
 
+    def plot_posteriors(self, axes=None, height_kwargs={}, data_kwargs={}, rel_error_kwargs={}, add_error_kwargs={}, **kwargs):
+    
+        if axes is None:
+            axes = kwargs.pop('fig', plt.gcf())
+            
+        if not isinstance(axes, list):
+            axes = self._init_posterior_plots(axes)
+            
+        assert len(axes) == 4, ValueError("axes must have length 4")
+        # assert len(axes) == 4, ValueError("Must have length 3 list of axes for the posteriors. self.init_posterior_plots can generate them")
+
+        self.z.plotPosteriors(ax = axes[0], **height_kwargs)
+
+        self.plot(ax=axes[1], legend=False, **data_kwargs)
+        self.plotPredicted(ax=axes[1], legend=False, **data_kwargs)
+
+        self.relative_error.plotPosteriors(ax=axes[2], **rel_error_kwargs)
+        self.additive_error.plotPosteriors(ax=axes[3], **add_error_kwargs)
+
+        return axes
 
     def plotPredicted(self, xAxis='index', channels=None, system=None, **kwargs):
         """Plots the specifed predicted data channels as a line plot.
@@ -876,27 +918,29 @@ class Data(PointCloud3D):
 
         """
 
-        noLegend = kwargs.pop('noLegend', False)
+        legend = kwargs.pop('legend', True)
+        kwargs['linestyle'] = kwargs.get('linestyle', '-.')
+
+        ax = kwargs.get('ax', plt.gca())
+        ax.set_prop_cycle(None)
 
         if system is None:
-            rTmp = range(self.nChannels) if channels is None else channels
+            rTmp = np.s_[:] if channels is None else np.s_[channels]
         else:
             assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-            rTmp = self._systemOffset[system] + channels
+            rTmp = self._systemIndices(system) if channels is None else channels + self._systemIndices(system).start
 
-        ax = plt.gca()
+        ax = super().plot(values=self.predictedData[:, rTmp], xAxis=xAxis, label=self.channelNames[rTmp], **kwargs)
 
-        for i in rTmp:
-            super().plot(values=self._predictedData[:, i], xAxis=xAxis, label=self.channelNames[i], **kwargs)
-
-        legend = None
-        if not noLegend:
+        if legend:
             box = ax.get_position()
             ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
 
             # Put a legend to the right of the current axis
             legend = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5),fancybox=True)
-            legend.set_title(self._predictedData.getNameUnits())
+            legend.set_title(self.predictedData.getNameUnits())
+        else:
+            legend = None
 
         return ax, legend
 
@@ -1095,6 +1139,9 @@ class Data(PointCloud3D):
         kwargs['na_rep'] = 'nan'
         kwargs['index'] = False
         d, order = self._as_dict()
+        from pprint import pprint
+        # pprint(d)
+        # print(order)
         kwargs['columns'] = order
         df = DataFrame(data=d)
         df.to_csv(filename, **kwargs)

@@ -72,6 +72,11 @@ def write_nd_indexed(arr, h5obj, myName, index):
 
     assert nda <= 6, ValueError('Can only write arr of 6 dimensions or less')
     assert ndi <= 3, ValueError("Can only use indices of 3 dimensions or less")
+
+    if (nda == ndi) and (nda == ds.ndim):
+        ds[index] = arr
+        return
+
     assert ndi + nda == ds.ndim or (ndi == 1 and nda == 1), ValueError("index must have {} dimensions".format(ds.ndim - nda))
 
     i = index

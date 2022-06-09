@@ -12,17 +12,14 @@ from ...system.TdemSystem import TdemSystem
 from ...system.TdemSystem_GAAEM import TdemSystem_GAAEM
 from ...system.filters.butterworth import butterworth
 from ...system.Waveform import Waveform
-from ...mesh.RectilinearMesh2D import RectilinearMesh2D
-from ...statistics.Histogram import Histogram
 from ...statistics.Distribution import Distribution
 import matplotlib.pyplot as plt
 import numpy as np
 
 #from ....base import Error as Err
-from ....base import fileIO as fIO
+from ....base.HDF.hdfRead import read_item
 from ....base import utilities as cf
 from ....base import plotting as cp
-from ....base import MPI as myMPI
 from os.path import split as psplt
 from os.path import join
 
@@ -115,10 +112,6 @@ class TdemDataPoint(EmDataPoint):
 
         self._addErr = StatArray.StatArray(values, '$\epsilon_{Additive}$', self.units)
 
-    # @property
-    # def components(self):
-    #     return self.system[0].components
-
     @EmDataPoint.channelNames.setter
     def channelNames(self, values):
         if values is None:
@@ -198,7 +191,7 @@ class TdemDataPoint(EmDataPoint):
         if values is None:
             values = self.n_components
         else:
-            assert np.size(values) == self.n_components, ValueError("primary field must have size {}".format(self.n_components))
+            assert np.size(values) == self.n_components * self.nSystems, ValueError("primary field must have size {}".format(self.n_components*self.nSystems))
 
         self._primary_field = StatArray.StatArray(values, "Primary field", self.units)
 
@@ -332,18 +325,21 @@ class TdemDataPoint(EmDataPoint):
 
         assert np.all(self.relErr > 0.0), ValueError('relErr must be > 0.0')
 
-
         t0 = 0.5 * np.log(1e-3)  # Assign fixed t0 at 1ms
         # For each system assign error levels using the user inputs
         for i in range(self.nSystems):
-            iSys = self._systemIndices(system=i)
+            for j in range(self.n_components):
+                ic = self._component_indices(j, i)
+                relative_error = self.relErr[(i*self.n_components)+j] * self.secondary_field[ic]
+                variance = relative_error**2.0 + self.addErr[i]**2.0
+                self._std[ic] = np.sqrt(variance)
 
-            # Compute the relative error
-            rErr = self.relErr[i] * self.secondary_field[iSys]
-            # aErr = np.exp(np.log(self.addErr[i]) - 0.5 * np.log(self.off_time(i)) + t0)
-            # self._std[iSys] = np.sqrt((rErr**2.0) + (aErr[i]**2.0))
+            # # Compute the relative error
+            # rErr = self.relErr[i] * self.secondary_field[iSys]
+            # # aErr = np.exp(np.log(self.addErr[i]) - 0.5 * np.log(self.off_time(i)) + t0)
+            # # self._std[iSys] = np.sqrt((rErr**2.0) + (aErr[i]**2.0))
 
-            self._std[iSys] = np.sqrt((rErr**2.0) + (self.addErr[i]**2.0))
+            # self._std[iSys] = np.sqrt((rErr**2.0) + (self.addErr[i]**2.0))
 
 
         # Update the variance of the predicted data prior
@@ -618,7 +614,7 @@ class TdemDataPoint(EmDataPoint):
         self.predicted_secondary_field.writeHdf(grp, 'predicted_secondary_field', index=index)
 
     @classmethod
-    def fromHdf(cls, grp, index=None, **kwargs):
+    def fromHdf(cls, grp, **kwargs):
         """ Reads the object from a HDF group """
 
         nSystems = np.int32(np.asarray(grp['nSystems']))
@@ -633,22 +629,25 @@ class TdemDataPoint(EmDataPoint):
                 with open('System{}'.format(i), 'w') as f:
                     f.write(txt)
                 systems[i] = 'System{}'.format(i)
+        kwargs.pop('system_file_path', None)
 
-        self = super(TdemDataPoint, cls).fromHdf(grp, index, system=systems)
+        self = super(TdemDataPoint, cls).fromHdf(grp, system=systems, **kwargs)
 
-        self.transmitter = (eval(cf.safeEval(grp['T'].attrs.get('repr')))).fromHdf(grp['T'], index=index)
-        self.receiver = (eval(cf.safeEval(grp['R'].attrs.get('repr')))).fromHdf(grp['R'], index=index)
+        self.transmitter = read_item(grp['T'], **kwargs)
+        self.receiver = read_item(grp['R'], **kwargs)
+        # self.transmitter = (eval(cf.safeEval(grp['T'].attrs.get('repr')))).fromHdf(grp['T'], **kwargs)
+        # self.receiver = (eval(cf.safeEval(grp['R'].attrs.get('repr')))).fromHdf(grp['R'], **kwargs)
 
         if 'loop_offset' in grp:
-            loopOffset = StatArray.StatArray.fromHdf(grp['loop_offset'], index=index)
+            loopOffset = StatArray.StatArray.fromHdf(grp['loop_offset'], **kwargs)
             self.receiver.x = self.transmitter.x + loopOffset[0]
             self.receiver.y = self.transmitter.y + loopOffset[1]
             self.receiver.z = self.transmitter.z + loopOffset[2]
 
-        self._primary_field = StatArray.StatArray.fromHdf(grp['primary_field'], index=index)
-        self._secondary_field = StatArray.StatArray.fromHdf(grp['secondary_field'], index=index)
-        self._predicted_primary_field = StatArray.StatArray.fromHdf(grp['predicted_primary_field'], index=index)
-        self._predicted_secondary_field = StatArray.StatArray.fromHdf(grp['predicted_secondary_field'], index=index)
+        self._primary_field = StatArray.StatArray.fromHdf(grp['primary_field'], **kwargs)
+        self._secondary_field = StatArray.StatArray.fromHdf(grp['secondary_field'], **kwargs)
+        self._predicted_primary_field = StatArray.StatArray.fromHdf(grp['predicted_primary_field'], **kwargs)
+        self._predicted_secondary_field = StatArray.StatArray.fromHdf(grp['predicted_secondary_field'], **kwargs)
 
         return self
 
@@ -668,8 +667,8 @@ class TdemDataPoint(EmDataPoint):
         ax = kwargs.pop('ax', None)
         ax = plt.gca() if ax is None else plt.sca(ax)
 
-        kwargs['marker'] = kwargs.pop('marker', 'v')
-        kwargs['markersize'] = kwargs.pop('markersize', 7)
+        markers = kwargs.pop('marker', ['o', 'x', 'v'])
+        kwargs['markersize'] = kwargs.pop('markersize', 5)
         c = kwargs.pop('color', [cp.wellSeparated[i+1] for i in range(self.nSystems)])
         mfc = kwargs.pop('markerfacecolor', [cp.wellSeparated[i+1] for i in range(self.nSystems)])
         assert len(c) == self.nSystems, ValueError("color must be a list of length {}".format(self.nSystems))
@@ -691,6 +690,8 @@ class TdemDataPoint(EmDataPoint):
 
             for k in range(self.n_components):
 
+                kwargs['marker'] = markers[self._components[k]]
+
                 icomp = self._component_indices(k, j)
                 d = self.data[icomp]
 
@@ -699,12 +700,12 @@ class TdemDataPoint(EmDataPoint):
                     plt.errorbar(system_times, d, yerr=s,
                                  color=c[j],
                                  markerfacecolor=mfc[j],
-                                 label='System: {}'.format(j+1),
+                                 label='System: {}{}'.format(j+1, self.components[k]),
                                  **kwargs)
                 else:
                     plt.plot(system_times, d,
                              markerfacecolor=mfc[j],
-                             label='System: {}'.format(j+1),
+                             label='System: {}{}'.format(j+1, self.components[k]),
                              **kwargs)
 
         plt.xscale(xscale)
@@ -713,18 +714,10 @@ class TdemDataPoint(EmDataPoint):
         cp.ylabel(cf.getNameUnits(self.data))
         cp.title(title)
 
-        if self.nSystems > 1:
+        if self.nSystems > 1 or self.n_components > 1:
             plt.legend()
 
         return ax
-
-    # def plot_posteriors(self, axes=None, height_kwargs={}, data_kwargs={}, rel_error_kwargs={}, add_error_kwargs={}, **kwargs):
-    #     super().plot_posteriors(axes=axes,
-    #                             height_kwargs=height_kwargs,
-    #                             data_kwargs=data_kwargs,
-    #                             rel_error_kwargs=rel_error_kwargs,
-    #                             add_error_kwargs=add_error_kwargs,
-    #                             **kwargs)
 
     def plotPredicted(self, title='Time Domain EM Data', **kwargs):
 
@@ -879,8 +872,15 @@ class TdemDataPoint(EmDataPoint):
     #         # rto = 0.5 * (ybins[0] + ybins[-1])
     #         # ybins -= rto
 
-    #         mesh = RectilinearMesh2D(xEdges=xbins, xlog=10, yEdges=ybins, ylog=10)
+    #         mesh = RectilinearMesh2D(x_edges=xbins, x_log=10, y_edges=ybins, y_log=10)
     #         self.predictedData.posterior = Histogram(mesh=mesh)
+
+    @property
+    def summary(self):
+        msg = super().summary
+        msg += "transmitter:\n{}".format("|   "+(self.transmitter.summary.replace("\n", "\n|   "))[:-4])
+        msg += "receiver:\n{}".format("|   "+(self.receiver.summary.replace("\n", "\n|   "))[:-4])
+        return msg
 
     def update_posteriors(self):
         super().update_posteriors()
@@ -921,12 +921,6 @@ class TdemDataPoint(EmDataPoint):
 
             self.predicted_primary_field[s] = np.hstack(primary)
 
-    # def fm_dlogc(self, mod):
-    #     """ Forward model the data from the given model """
-
-    #     assert isinstance(mod, Model1D), TypeError(
-    #         "Invalid model class for forward modeling [1D]")
-    #     return ga_fm_dlogc(self, mod)
 
     def sensitivity(self, model, ix=None, modelChanged=True):
         """ Compute the sensitivty matrix for the given model """
@@ -949,8 +943,6 @@ class TdemDataPoint(EmDataPoint):
     #     prob = EM1D(mesh1D, sigmaMap = expmap, chi = mod.chim)
 
     #     if (self.dualMoment()):
-
-    #         print(self.system[0].loopRadius(), self.system[0].peakCurrent())
 
     #         simPEG_survey = EM1DSurveyTD(
     #             rx_location=np.array([0., 0., 0.]),

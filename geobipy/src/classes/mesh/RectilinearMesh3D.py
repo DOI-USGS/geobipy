@@ -4,20 +4,14 @@ Module describing a 2D Rectilinear Mesh class with x and y axes specified
 from copy import deepcopy
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-from .Mesh import Mesh
 from ...classes.core import StatArray
 from .RectilinearMesh1D import RectilinearMesh1D
 from .RectilinearMesh2D import RectilinearMesh2D
 import numpy as np
 from scipy.stats import binned_statistic
-from ...base import plotting as cP
 from ...base import utilities
 from scipy.sparse import kron
-
-try:
-    from pyvtk import VtkData, CellData, Scalars, PolyData
-except:
-    pass
+import progressbar
 
 class RectilinearMesh3D(RectilinearMesh2D):
     """Class defining a 3D rectilinear mesh with cell centres and edges.
@@ -33,22 +27,22 @@ class RectilinearMesh3D(RectilinearMesh2D):
     x or y axis, like a typical line of data.
     If x, y, and z are specified, plots can be made against distance which calculated cumulatively between points.
 
-    RectilinearMesh2D([xCentres or xEdges], [yCentres or yEdges], [zCentres or zEdges])
+    RectilinearMesh2D([x_centres or x_edges], [y_centres or y_edges], [z_centres or z_edges])
 
     Parameters
     ----------
-    xCentres : geobipy.StatArray, optional
-        The locations of the centre of each cell in the "x" direction. Only xCentres or xEdges can be given.
-    xEdges : geobipy.StatArray, optional
-        The locations of the edges of each cell, including the outermost edges, in the "x" direction. Only xCentres or xEdges can be given.
-    yCentres : geobipy.StatArray, optional
-        The locations of the centre of each cell in the "y" direction. Only yCentres or yEdges can be given.
-    yEdges : geobipy.StatArray, optional
-        The locations of the edges of each cell, including the outermost edges, in the "y" direction. Only yCentres or yEdges can be given.
-    zCentres : geobipy.StatArray, optional
-        The locations of the centre of each cell in the "z" direction. Only zCentres or zEdges can be given.
-    zEdges : geobipy.StatArray, optional
-        The locations of the edges of each cell, including the outermost edges, in the "z" direction. Only zCentres or zEdges can be given.
+    x_centres : geobipy.StatArray, optional
+        The locations of the centre of each cell in the "x" direction. Only x_centres or x_edges can be given.
+    x_edges : geobipy.StatArray, optional
+        The locations of the edges of each cell, including the outermost edges, in the "x" direction. Only x_centres or x_edges can be given.
+    y_centres : geobipy.StatArray, optional
+        The locations of the centre of each cell in the "y" direction. Only y_centres or y_edges can be given.
+    y_edges : geobipy.StatArray, optional
+        The locations of the edges of each cell, including the outermost edges, in the "y" direction. Only y_centres or y_edges can be given.
+    z_centres : geobipy.StatArray, optional
+        The locations of the centre of each cell in the "z" direction. Only z_centres or z_edges can be given.
+    z_edges : geobipy.StatArray, optional
+        The locations of the edges of each cell, including the outermost edges, in the "z" direction. Only z_centres or z_edges can be given.
     relativeToCentres : geobipy.StatArray, optional
         The relativeTo of each point at the x, y locations. Only relativeToCentres or relativeToEdges can be given, not both.
         Has shape (y.nCells, x.nCells).
@@ -70,13 +64,13 @@ class RectilinearMesh3D(RectilinearMesh2D):
 
     """
 
-    def __init__(self, x=None, y=None, z=None, relativeTo=None, **kwargs):
+    def __init__(self, x=None, y=None, z=None, **kwargs):
         """ Initialize a 2D Rectilinear Mesh"""
 
         self.x = kwargs if x is None else x
         self.y = kwargs if y is None else y
         self.z = kwargs if z is None else z
-        self.relativeTo = relativeTo
+        # self.relativeTo = relativeTo
 
     def __getitem__(self, slic):
         """Slice into the mesh. """
@@ -91,33 +85,78 @@ class RectilinearMesh3D(RectilinearMesh2D):
         assert not len(axis) == 3, ValueError("Slic cannot be a single cell")
 
         if len(axis) == 0:
-            relativeTo = None if self.relativeTo is None else self.relativeTo[slic[0], slic[1]]
-            out = type(self)(x=self.x[slic[0]], y=self.y[slic[1]], z=self.z[slic[2]], relativeTo=relativeTo)
+            out = type(self)(x=self.x[slic[0]], y=self.y[slic[1]], z=self.z[slic[2]])
             return out
 
         if len(axis) == 1:
             a = [x for x in (0, 1, 2) if not x in axis]
             b = [x for x in (0, 1, 2) if x in axis]
-            relativeTo = None
-            if b[0] != 2:
-                relativeTo = None if self.relativeTo is None else self.relativeTo[slic[0], slic[1]]
-            out = RectilinearMesh2D(x=self.axis(a[0])[slic[a[0]]], y=self.axis(a[1])[slic[a[1]]], relativeTo=relativeTo)
+
+            x = self.axis(a[0])
+            y = self.axis(a[1])
+
+            out = RectilinearMesh2D(x=x[slic[a[0]]], y=y[slic[a[1]]])
+            if x._relativeTo is not None:
+                if x._relativeTo.size > 1:
+                    if x.relativeTo.size == self.shape[b[0]]:
+                        out.x.relativeTo = x.relativeTo[slic[b[0]]]
+            if y._relativeTo is not None:
+                if y._relativeTo.size > 1:
+                    if y.relativeTo.size == self.shape[b[0]]:
+                        out.y.relativeTo = y.relativeTo[slic[b[0]]]
 
         else:
-            a = [x for x in (0, 1, 2) if not x in axis][0]
-            out = self.axis(a)[slic[a]]
+            a = [x for x in (0, 1, 2) if not x in axis]
+            b = [x for x in (0, 1, 2) if x in axis]
+            out = self.axis(a[0])[slic[a[0]]]
+            if out._relativeTo is not None:
+                out.relativeTo = out.relativeTo[slic[b[0]]]
 
         return out
 
+    def centres(self, axis):
+        if axis == 0:
+            return self.x_centres
+        elif axis == 1:
+            return self.y_centres
+        else:
+            return self.z_centres
+    
+    def edges(self, axis):
+        if axis == 0:
+            return self.x_edges
+        elif axis == 1:
+            return self.y_edges
+        else:
+            return self.z_edges
+
     @property
     def area(self):
-        return np.outer(np.outer(self.x.widths, self.y.widths), self.z.widths)
+        return np.outer(self.x.widths, self.y.widths)[:, :, None] * self.z.widths
 
-    # @RectilinearMesh2D.relativeTo.setter
-    # def relativeTo(self, values):
-    #     self._relativeTo = None
-    #     if not values is None:
-    #         self._relativeTo = StatArray.StatArray(values, "relativeTo", "m")
+    @property
+    def x_centres(self):
+        return np.repeat(super().x_centres[:, :, None], self.z.nCells, 2)
+
+    @property
+    def y_centres(self):
+        return np.repeat(super().y_centres[:, :, None], self.z.nCells, 2)
+
+    @property
+    def z_centres(self):
+        return np.repeat(np.repeat(self.z.centres_absolute[None, :], self.y.nCells, 0)[None, :, :], self.x.nCells, 0)
+
+    @property
+    def x_edges(self):
+        return np.repeat(super().x_edges[:, :, None], self.z.nEdges, 2)
+
+    @property
+    def y_edges(self):
+        return np.repeat(super().y_edges[:, :, None], self.z.nEdges, 2)
+
+    @property
+    def z_edges(self):
+        return np.repeat(np.repeat(self.z.edges_absolute[None, :], self.y.nEdges, 0)[None, :, :], self.x.nEdges, 0)
 
     @property
     def z(self):
@@ -128,10 +167,10 @@ class RectilinearMesh3D(RectilinearMesh2D):
         if isinstance(values, dict):
             # mesh of the z axis values
             values = RectilinearMesh1D(
-                        centres=values.get('zCentres'),
-                        edges=values.get('zEdges'),
-                        log=values.get('zlog'),
-                        relativeTo=values.get('zrelativeTo'))
+                        centres=values.get('z_centres'),
+                        edges=values.get('z_edges'),
+                        log=values.get('z_log'),
+                        relativeTo=values.get('z_relative_to'))
 
         assert isinstance(values, RectilinearMesh1D), TypeError('z must be a RectilinearMesh1D')
         self._z = values
@@ -245,13 +284,51 @@ class RectilinearMesh3D(RectilinearMesh2D):
         plt.draw()
         anim.save(filename)
 
+    def _compute_probability(self, distribution, pdf, log, log_probability, axis=0, **kwargs):
+        centres = self.centres(axis=axis)
+        centres, _ = utilities._log(centres, log)
+
+        ax, bx = self.other_axis(axis)
+
+        a = [x for x in (0, 1, 2) if not x == axis]
+        b = [x for x in (0, 1, 2) if x == axis]
+
+        shp = list(self.shape)
+        shp[axis] = distribution.ndim
+
+        probability = np.zeros(shp)
+
+        track = kwargs.pop('track', True)
+
+        r = range(ax.nCells.item() * bx.nCells.item())
+        if track:
+            Bar = progressbar.ProgressBar()
+            r = Bar(r)
+
+        mesh_2d = self.remove_axis(axis)
+            
+        for i in r:
+            j = list(mesh_2d.unravelIndex(i))
+            j.insert(axis, np.s_[:])
+            j = tuple(j)
+            p = distribution.probability(centres[j], log_probability)
+            probability[j] = np.dot(p, pdf[j])
+        probability = probability / np.expand_dims(np.sum(probability, axis), axis=axis)
+    
+        return StatArray.StatArray(probability, name='marginal_probability')
+
     def __deepcopy__(self, memo={}):
         """ Define the deepcopy for the StatArray """
         return RectilinearMesh3D(x=self.x, y=self.y, z=self.z)
 
     def edges(self, axis):
         """ Gets the cell edges in the given dimension """
-        return self.axis(axis).edges
+        if axis == 0:
+            return self.x_edges
+        elif axis == 1:
+            return self.y_edges
+        else:
+            return self.z_edges
 
     def getXAxis(self, axis='x', centres=False):
         assert axis in ['x', 'y', 'z', 'r'], Exception("axis must be either 'x', 'y', 'z', 'r'")
@@ -402,6 +479,71 @@ class RectilinearMesh3D(RectilinearMesh2D):
             out[2, :] = self.z.cellIndex(z, clip=clip)
         return np.squeeze(out)
 
+    def _mean(self, values, axis=0):
+        
+        a = self.axis(axis)
+        if a._relativeTo is None:
+            return super()._mean(values, axis)
+
+        s = tuple([np.s_[:] if i == axis else None for i in range(self.ndim)])
+
+        centres = self.centres(axis)        
+
+        t = np.sum(centres * values, axis = axis)
+        s = values.sum(axis = axis)
+
+        if t.size == 1:
+            out = t / s
+        else:
+            i = np.where(s > 0.0)
+            out = StatArray.StatArray(t.shape)
+            out[i] = t[i] / s[i]
+
+        return out
+
+    def _percentile(self, values, percent=95.0, axis=0):
+        """Gets the percent interval along axis.
+
+        Get the statistical interval, e.g. median is 50%.
+
+        Parameters
+        ----------
+        values : array_like
+            Values used to compute interval like histogram counts.
+        percent : float
+            Interval percentage.  0.0 < percent < 100.0
+        log : 'e' or float, optional
+            Take the log of the interval to a base. 'e' if log = 'e', or a number e.g. log = 10.
+        axis : int
+            Along which axis to obtain the interval locations.
+
+        Returns
+        -------
+        interval : array_like
+            Contains the interval along the specified axis. Has size equal to self.shape[axis].
+
+        """
+        percent *= 0.01
+
+        # total of the counts
+        total = values.sum(axis=axis)
+        # Cumulative sum
+        cs = np.cumsum(values, axis=axis)
+        # Cumulative "probability"
+        d = np.expand_dims(total, axis)
+        tmp = np.zeros_like(cs, dtype=np.float64)
+        np.divide(cs, d, out=tmp, where=d > 0.0)
+        # Find the interval
+        i = np.apply_along_axis(np.searchsorted, axis, tmp, percent)
+        i[i == values.shape[axis]] = values.shape[axis]-1
+
+        centres = self.centres(axis)
+
+        if np.size(percent) == 1:
+            i = np.expand_dims(i, axis=axis)
+        return np.squeeze(np.take_along_axis(centres, i, axis=axis))
+        
+
     def plotGrid(self):
         raise NotImplementedError("Slice a 3D mesh before using plotGrid.")
 
@@ -423,15 +565,8 @@ class RectilinearMesh3D(RectilinearMesh2D):
         """
         return np.ravel_multi_index(indices, self.shape, order=order)
 
-    def remove_axis(self, axis):
-        tmp = list(np.s_[:, :, :])
-        tmp[axis] = 0
-        tmp = tuple(tmp)
-        return self[tmp]
-
-
-    def unravelIndex(self, indices, order='C'):
-        """Return a global index into a 1D array given the two cell indices in x and z.
+    def unravelIndex(self, index, order='C'):
+        """Return local indices given a global one.
 
         Parameters
         ----------
@@ -446,7 +581,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
 
         """
 
-        return np.unravel_index(indices, self.shape, order=order)
+        return np.unravel_index(index, self.shape, order=order)
 
 
     # def pcolor(self, values, xAxis='x', **kwargs):
@@ -552,8 +687,8 @@ class RectilinearMesh3D(RectilinearMesh2D):
         """ Display a summary of the 3D Point Cloud """
         msg = ("3D Rectilinear Mesh: \n"
               "Shape: : {} \nx\n{}y\n{}z\n{}").format(self.shape, self.x.summary, self.y.summary, self.z.summary)
-        if not self.relativeTo is None:
-            msg += self.relativeTo.summary
+        # if not self.relativeTo is None:
+        #     msg += self.relativeTo.summary
         return msg
 
     def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
@@ -582,8 +717,8 @@ class RectilinearMesh3D(RectilinearMesh2D):
         self.x.writeHdf(grp, 'x',  withPosterior=withPosterior, index=index)
         self.y.writeHdf(grp, 'y',  withPosterior=withPosterior, index=index)
         self.z.writeHdf(grp, 'z',  withPosterior=withPosterior, index=index)
-        if not self.relativeTo is None:
-            self.relativeTo.writeHdf(grp, 'relativeTo', withPosterior=withPosterior, index=index)
+        # if not self.relativeTo is None:
+        #     self.relativeTo.writeHdf(grp, 'relativeTo', withPosterior=withPosterior, index=index)
 
     @classmethod
     def fromHdf(cls, grp, index=None, skip_posterior=False):
@@ -594,10 +729,10 @@ class RectilinearMesh3D(RectilinearMesh2D):
             y = RectilinearMesh1D.fromHdf(grp['y'], skip_posterior=skip_posterior)
             z = RectilinearMesh1D.fromHdf(grp['z'], skip_posterior=skip_posterior)
             
-            relativeTo = None
-            if 'relativeTo' in grp:
-                relativeTo = StatArray.StatArray.fromHdf(grp['relativeTo'], skip_posterior=skip_posterior)
-            out = cls(x=x, y=y, z=z, relativeTo=relativeTo)
+            # relativeTo = None
+            # if 'relativeTo' in grp:
+            #     relativeTo = StatArray.StatArray.fromHdf(grp['relativeTo'], skip_posterior=skip_posterior)
+            out = cls(x=x, y=y, z=z)
         else:
             if isinstance(index, slice):
                 assert False, Exception('Cant slice into RectlilinearMesh3D yet from HDF.')
