@@ -1,14 +1,13 @@
 """ @MvNormalDistribution
 Module defining a multivariate normal distribution with statistical procedures
 """
-#from copy import deepcopy
+from copy import deepcopy
 import numpy as np
 from ...base import utilities as cf
 from .baseDistribution import baseDistribution
 from .NormalDistribution import Normal
 from ..core import StatArray
 from scipy.stats import multivariate_normal
-
 
 class MvNormal(baseDistribution):
     """Class extension to geobipy.baseDistribution
@@ -37,7 +36,8 @@ class MvNormal(baseDistribution):
 
     """
 
-    def __init__(self, mean, variance, ndim=None, prng=None):
+
+    def __init__(self, mean, variance, ndim=None, prng=None, **kwargs):
         """ Initialize a normal distribution
         mu:     :Mean of the distribution
         sigma:  :Standard deviation of the distribution
@@ -50,7 +50,7 @@ class MvNormal(baseDistribution):
         baseDistribution.__init__(self, prng)
 
         if ndim is None:
-            self._mean = np.copy(mean)
+            self._mean = deepcopy(mean)
 
             # Variance
             ndim = np.ndim(variance)
@@ -169,17 +169,18 @@ class MvNormal(baseDistribution):
                        variance=self.variance[axis, axis])
             return d.probability(x, log)
 
+        N = x.size
+        nD = self.mean.size
+
+        if N != nD:
+            probability = np.empty((nD, *x.shape))
+            for i in range(nD):
+                d = Normal(mean=self._mean[i], variance=self.variance[i, i])
+
+                probability[i, :] = d.probability(x, log)
+            return probability
+
         if log:
-
-            N = np.size(x)
-            nD = self.mean.size
-
-            if N != nD:
-                probability = np.empty((nD, *x.shape))
-                for i in range(nD):
-                    probability[i, :] = self.probability(x, log, axis=i)
-                return probability
-
             # assert (N == nD), TypeError(
             #     'size of samples {} must equal number of distribution dimensions {} for a multivariate distribution'.format(N, nD))
 
@@ -197,17 +198,6 @@ class MvNormal(baseDistribution):
             return -(0.5 * N) * np.log(2.0 * np.pi) - dv - 0.5 * np.dot(xMu, np.dot(self.precision, xMu))
 
         else:
-
-            N = x.size
-            nD = self.mean.size
-
-            if N != nD:
-                probability = np.empty((nD, *x.shape))
-                for i in range(nD):
-                    probability[i, :] = self.probability(x, log, axis=i)
-                return probability
-
-            
             # assert (N == nD), TypeError(
             #     'size of samples {} must equal number of distribution dimensions {} for a multivariate distribution'.format(N, nD))
             # For a diagonal matrix, the determinant is the product of the diagonal
@@ -222,10 +212,9 @@ class MvNormal(baseDistribution):
 
     @property
     def summary(self):
-        msg = ('MV Normal Distribution:\n'
-               'Mean:\n{}\n'
-               'Variance:\n{}\n').format(str(self.mean), str(self.variance))
-
+        msg =  "{}\n".format(type(self).__name__)
+        msg += '    Mean:{}\n'.format(self._mean)
+        msg += 'Variance:{}\n'.format(self._variance)
         return msg
 
     def pad(self, N):

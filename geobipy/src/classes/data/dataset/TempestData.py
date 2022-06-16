@@ -13,6 +13,7 @@ from geobipy.src.base import utilities
 from .TdemData import TdemData
 from ..datapoint.Tempest_datapoint import Tempest_datapoint
 from ....classes.core import StatArray
+from ...system.CircularLoop import CircularLoop
 from ...system.CircularLoops import CircularLoops
 from ....base import plotting as cP
 
@@ -284,12 +285,12 @@ class TempestData(TdemData):
 
         if channels is None:
             i = self._systemIndices(system)
-            ax = cP.plot(x, self.secondary_field[:, i],
+            ax = cP.plot(x, self.data[:, i],
                          label=self.channelNames[i], **kwargs)
         else:
             channels = np.atleast_1d(channels)
             for j, i in enumerate(channels):
-                ax = cP.plot(x, self.secondary_field[:, i], 
+                ax = cP.plot(x, self.data[:, i], 
                              label=self.channelNames[i], **kwargs)
 
         plt.xlabel(utilities.getNameUnits(x))
@@ -297,7 +298,7 @@ class TempestData(TdemData):
         # Put a legend to the right of the current axis
         if legend:
             leg = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), fancybox=True)
-            leg.set_title(self.secondary_field.getNameUnits())
+            leg.set_title(self.data.getNameUnits())
         
         return ax        
 
@@ -322,12 +323,12 @@ class TempestData(TdemData):
 
         if channels is None:
             i = self._systemIndices(system)
-            ax = cP.plot(x, self.predicted_secondary_field[:, i],
+            ax = cP.plot(x, self.predictedData[:, i],
                          label=self.channelNames[i], **kwargs)
         else:
             channels = np.atleast_1d(channels)
             for j, i in enumerate(channels):
-                ax = cP.plot(x, self.predicted_secondary_field[:, i], 
+                ax = cP.plot(x, self.predictedData[:, i], 
                              label=self.channelNames[i], **kwargs)
 
         plt.xlabel(utilities.getNameUnits(x))
@@ -335,7 +336,7 @@ class TempestData(TdemData):
         # Put a legend to the right of the current axis
         if legend:
             leg = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), fancybox=True)
-            leg.set_title(self.predicted_secondary_field.getNameUnits())
+            leg.set_title(self.predictedData.getNameUnits())
         
         return ax
 
@@ -571,7 +572,7 @@ class TempestData(TdemData):
         secondary_field = np.hstack([gdf['EMX_NonHPRG'][:, record], gdf['EMZ_NonHPRG'][:, record]])
         std = 0.1 * secondary_field
 
-        transmitter_loop = CircularLoops(x=x, y=y, z=z,
+        transmitter_loop = CircularLoop(x=x, y=y, z=z,
                                         pitch=np.float64(gdf['Tx_Pitch'][record]),
                                         roll=np.float64(gdf['Tx_Roll'][record]),
                                         yaw=np.float64(gdf['Tx_Yaw'][record]),
@@ -579,7 +580,7 @@ class TempestData(TdemData):
 
         loopOffset = np.vstack([np.asarray(gdf['HSep_GPS'][record]), np.asarray(gdf['TSep_GPS'][record]), np.asarray(gdf['VSep_GPS'][record])])
 
-        receiver_loop = CircularLoops(x=transmitter_loop.x + loopOffset[0],
+        receiver_loop = CircularLoop(x=transmitter_loop.x + loopOffset[0],
                                       y=transmitter_loop.y + loopOffset[1],
                                       z=transmitter_loop.z + loopOffset[2],
                                       pitch=np.float64(gdf['Rx_Pitch'][record]),

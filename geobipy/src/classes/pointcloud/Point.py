@@ -166,6 +166,17 @@ class Point(myObject, ABC):
             mesh = RectilinearMesh1D(edges = StatArray.StatArray(self.z.prior.bins(), name=self.z.name, units=self.z.units), relativeTo=self.z)
             self.z.posterior = Histogram(mesh=mesh)
 
+    def update_posteriors(self):
+
+        if self.x.hasPosterior:
+            self.x.updatePosterior()
+
+        if self.y.hasPosterior:
+            self.y.updatePosterior()
+    
+        if self.z.hasPosterior:
+            self.z.updatePosterior()
+
     def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside

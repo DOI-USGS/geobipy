@@ -63,7 +63,6 @@ class RectilinearMesh1D(Mesh):
         self.nCells = None
 
         # assert (not(not centres is None and not edges is None)), Exception('Cannot instantiate with both centres and edges values')
-
         if not widths is None:
             self.widths = widths
         else:
@@ -164,10 +163,10 @@ class RectilinearMesh1D(Mesh):
 
     @centres.setter
     def centres(self, values):
-
         values = StatArray.StatArray(values)
         values, _ = utilities._log(values, log=self.log)
-        values -= self.relativeTo
+        if self.relativeTo.size == 1:
+            values -= self.relativeTo
 
         self._centres = values
         self._edges = self._centres.edges()
@@ -202,7 +201,9 @@ class RectilinearMesh1D(Mesh):
         values = StatArray.StatArray(values)
 
         values, _ = utilities._log(values, log=self.log)
-        values -= self.relativeTo
+
+        if self.relativeTo.size == 1:
+            values -= self.relativeTo
 
         self._edges = values
         self._centres = values.internalEdges()
@@ -1170,8 +1171,14 @@ class RectilinearMesh1D(Mesh):
         kwargs['fill_value'] = kwargs.pop('fill_value', 'extrapolate')
         if values.size < 4:
             kind = 'linear'
-        f = interpolate.interp1d(self.centres, values, kind=kind, **kwargs)
-        return f(self.edges)
+
+        if np.ndim(values) == 1:
+            f = interpolate.interp1d(self.centres, values, kind=kind, **kwargs)
+            return f(self.edges)
+        elif np.ndim(values) == 2:
+            raise NotImplementedError('Needs work')
+            axis = np.searchsorted(values.shape, self.nCells)
+
 
     def set_posteriors(self, nCells_posterior=None, edges_posterior=None):
 
@@ -1631,7 +1638,7 @@ class RectilinearMesh1D(Mesh):
         msg += "Cell Edges:\n{}".format("|   "+(self._edges.summary.replace("\n", "\n|    "))[:-4])
         msg = msg[:-1]
         msg += "log:\n{}".format("|   "+str(self.log)+'\n')
-        msg += "relativeTo:\n{}".format("|   "+str(self._relativeTo)+'\n')
+        msg += "relativeTo:\n{}".format("|   "+(self.relativeTo.summary.replace("\n", "\n|    "))[:-4])
 
         return msg
 

@@ -325,7 +325,6 @@ class TdemDataPoint(EmDataPoint):
 
         assert np.all(self.relErr > 0.0), ValueError('relErr must be > 0.0')
 
-        t0 = 0.5 * np.log(1e-3)  # Assign fixed t0 at 1ms
         # For each system assign error levels using the user inputs
         for i in range(self.nSystems):
             for j in range(self.n_components):
@@ -927,7 +926,9 @@ class TdemDataPoint(EmDataPoint):
 
         assert isinstance(model, Model), TypeError(
             "Invalid model class for sensitivity matrix [1D]")
-        return StatArray.StatArray(tdem1dsen(self, model, ix, modelChanged), 'Sensitivity', '$\\frac{V}{SAm^{3}}$')
+        J = StatArray.StatArray(tdem1dsen(self, model, ix, modelChanged), 'Sensitivity', '$\\frac{V}{SAm^{3}}$')
+        # print(J)
+        return J
 
     def _empymodForward(self, mod):
 

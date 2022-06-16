@@ -21,7 +21,7 @@ class Normal(baseDistribution):
         The variance of the distribution
 
     """
-    def __init__(self, mean, variance, log=False, prng=None):
+    def __init__(self, mean, variance, log=False, prng=None, **kwargs):
         """Instantiate a Normal distribution """
         # assert np.size(mean) == 1, 'Univariate Normal mean must have size = 1'
         # assert np.size(variance) == 1, 'Univariate Normal variance must have size = 1'
@@ -128,9 +128,9 @@ class Normal(baseDistribution):
 
     @property
     def summary(self):
-        msg = 'Normal Distribution: \n'
-        msg += '    Mean: :' + str(self.mean) + '\n'
-        msg += 'Variance: :' + str(self.variance) + '\n'
+        msg =  "{}\n".format(type(self).__name__)
+        msg += '    Mean:{}\n'.format(self.mean)
+        msg += 'Variance:{}\n'.format(self.variance)
         return msg
 
 #    def hdfName(self):

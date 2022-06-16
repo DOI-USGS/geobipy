@@ -3,6 +3,7 @@ Module describing a Model
 """
 import numpy as np
 from copy import deepcopy
+
 from ...base.utilities import reslice
 from ...base import plotting as cP
 from matplotlib.figure import Figure
@@ -34,12 +35,12 @@ class Model(myObject):
     def __getitem__(self, slic):
         mesh = self.mesh[slic]
         out = type(self)(mesh, values = self.values[slic])
-        out._gradient = self.gradient[reslice(slic, stop = -1)]
+        # out._gradient = self.gradient[reslice(slic, stop = -1)]
 
         # if len(self.__values) > 1:
         #     for k, v in zip(self.__values, self.cell_values[1:]):
         #         out.setattr(k, v[slic])
-        return 
+        return out
 
     def __deepcopy__(self, memo={}):
         mesh = deepcopy(self.mesh, memo=memo)

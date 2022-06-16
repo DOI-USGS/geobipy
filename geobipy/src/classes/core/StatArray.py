@@ -213,7 +213,7 @@ class StatArray(np.ndarray, myObject):
 
         nP = np.size(value)
         if nP > 1:
-            assert nP == self.shape[-1], ValueError("Number of posteriors must match size of StatArray's first dimension")
+            assert nP == self.shape[-1] or (self.shape[-1]%nP == 0), ValueError("Number of posteriors must match size of StatArray's first dimension")
 
         if nP == 1:
             if isinstance(value, list):
@@ -1025,6 +1025,7 @@ class StatArray(np.ndarray, myObject):
         assert self.hasPrior, TypeError('No prior defined on variable {}. Use StatArray.set_prior()'.format(self.name))
 
         p = self.probability(x=proposed, log=log)
+
         num = -np.inf if log else 0.0
         while p == num:
             proposed = self.proposal.rng(nSamples)

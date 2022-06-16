@@ -74,9 +74,6 @@ class RectilinearMesh3D(RectilinearMesh2D):
 
     def __getitem__(self, slic):
         """Slice into the mesh. """
-
-        # slic0 = slic
-        # slic = []
         axis = []
         for i, x in enumerate(slic):
             if isinstance(x, (np.integer, int)):
@@ -84,28 +81,26 @@ class RectilinearMesh3D(RectilinearMesh2D):
 
         assert not len(axis) == 3, ValueError("Slic cannot be a single cell")
 
-        if len(axis) == 0:
+        if len(axis) == 0: # Returning a 3D mesh
             out = type(self)(x=self.x[slic[0]], y=self.y[slic[1]], z=self.z[slic[2]])
             return out
 
-        if len(axis) == 1:
+        if len(axis) == 1: # Returning a 2D mesh
             a = [x for x in (0, 1, 2) if not x in axis]
             b = [x for x in (0, 1, 2) if x in axis]
 
             x = self.axis(a[0])
             y = self.axis(a[1])
-
+        
             out = RectilinearMesh2D(x=x[slic[a[0]]], y=y[slic[a[1]]])
             if x._relativeTo is not None:
                 if x._relativeTo.size > 1:
-                    if x.relativeTo.size == self.shape[b[0]]:
-                        out.x.relativeTo = x.relativeTo[slic[b[0]]]
+                    out.x.relativeTo = np.take(x.relativeTo, slic[b[0]], np.minimum(1, b[0]))
             if y._relativeTo is not None:
                 if y._relativeTo.size > 1:
-                    if y.relativeTo.size == self.shape[b[0]]:
-                        out.y.relativeTo = y.relativeTo[slic[b[0]]]
+                    out.y.relativeTo = np.take(y.relativeTo, slic[b[0]], np.minimum(1, b[0]))
 
-        else:
+        else: # Returning a 1D mesh
             a = [x for x in (0, 1, 2) if not x in axis]
             b = [x for x in (0, 1, 2) if x in axis]
             out = self.axis(a[0])[slic[a[0]]]
@@ -146,17 +141,32 @@ class RectilinearMesh3D(RectilinearMesh2D):
     def z_centres(self):
         return np.repeat(np.repeat(self.z.centres_absolute[None, :], self.y.nCells, 0)[None, :, :], self.x.nCells, 0)
 
+    @RectilinearMesh2D.x.setter
+    def x(self, values):
+        RectilinearMesh2D.x.fset(self, values)
+        if self.x._relativeTo is not None:
+            assert np.all(self.x.relativeTo.shape == self.shape[1:]), "z axis relative to must have shape {}".format(self.shape[1:])
+
     @property
     def x_edges(self):
-        return np.repeat(super().x_edges[:, :, None], self.z.nEdges, 2)
+        return utilities._power(self.x.relativeTo[None, :, :] + self.x.edges, self.x.log)
+
+    @RectilinearMesh2D.y.setter
+    def y(self, values):
+        RectilinearMesh2D.y.fset(self, values)
+
+        if self.y._relativeTo is not None:
+            assert np.all(self.y.relativeTo.shape == self.shape[::2]), "z axis relative to must have shape {}".format(self.shape[::2])
 
     @property
     def y_edges(self):
-        return np.repeat(super().y_edges[:, :, None], self.z.nEdges, 2)
+        return utilities._power(self.y.relativeTo[:, None, :] + self.y.edges, self.y.log)
 
     @property
     def z_edges(self):
-        return np.repeat(np.repeat(self.z.edges_absolute[None, :], self.y.nEdges, 0)[None, :, :], self.x.nEdges, 0)
+        return utilities._power(self.z.relativeTo[:, :, None] + self.z.edges, self.z.log)
+
+        # return np.repeat(np.repeat(self.z.edges_absolute[None, :], self.y.nEdges, 0)[None, :, :], self.x.nEdges, 0)
 
     @property
     def z(self):
@@ -174,6 +184,9 @@ class RectilinearMesh3D(RectilinearMesh2D):
 
         assert isinstance(values, RectilinearMesh1D), TypeError('z must be a RectilinearMesh1D')
         self._z = values
+
+        if self.z._relativeTo is not None:
+            assert np.all(self.z.relativeTo.shape == self.shape[:2]), "z axis relative to must have shape {}".format(self.shape[:2])
 
     def other_axis(self, axis):
 
@@ -655,10 +668,10 @@ class RectilinearMesh3D(RectilinearMesh2D):
         import pyvista as pv
 
         x, y, z = np.meshgrid(self.x.edges, self.y.edges, self.z.edges, indexing='xy')
-        z = -z
-        if not self.relativeTo is None:
-            nz = self[:, :, 0].interpolate_centres_to_nodes(self.relativeTo)
-            z = nz[:, :, None] + z
+        # z = -z
+        # if not self.relativeTo is None:
+        #     nz = self[:, :, 0].interpolate_centres_to_nodes(self.relativeTo)
+        #     z = nz[:, :, None] + z
 
 
         mesh = pv.StructuredGrid(x, y, z)

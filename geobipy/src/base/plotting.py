@@ -481,7 +481,7 @@ def pcolor(values, x=None, y=None, **kwargs):
     my, _ = cF._log(my, geobipy_kwargs['logY'])
 
     if np.ndim(mx) == 1 and np.ndim(my) == 1:
-        my, mx = np.meshgrid(mx, my)
+        mx, my = np.meshgrid(mx, my)
 
     ax, pm, cb = pcolormesh(X=mx, Y=my, values=values, **kwargs)
 

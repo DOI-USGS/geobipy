@@ -5,6 +5,7 @@ from .TdemDataPoint import TdemDataPoint
 from ...forwardmodelling.Electromagnetic.TD.tdem1d import (tdem1dfwd, tdem1dsen)
 from ...statistics.Histogram import Histogram
 from ...mesh.RectilinearMesh1D import RectilinearMesh1D
+from ...mesh.RectilinearMesh2D import RectilinearMesh2D
 from ...statistics.Distribution import Distribution
 import matplotlib
 import matplotlib.pyplot as plt
@@ -97,6 +98,49 @@ class Tempest_datapoint(TdemDataPoint):
 
         self._relErr = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
 
+    @TdemDataPoint.std.getter
+    def std(self):
+        """ Updates the data errors
+
+        Assumes a t^-0.5 behaviour e.g. logarithmic gate averaging
+        V0 is assumed to be ln(Error @ 1ms)
+
+        Parameters
+        ----------
+        relativeErr : list of scalars or list of array_like
+            A fraction percentage that is multiplied by the observed data. The list should have length equal to the number of systems. The entries in each item can be scalar or array_like.
+        additiveErr : list of scalars or list of array_like
+            An absolute value of additive error. The list should have length equal to the number of systems. The entries in each item can be scalar or array_like.
+
+        Raises
+        ------
+        TypeError
+            If relativeErr or additiveErr is not a list
+        TypeError
+            If the length of relativeErr or additiveErr is not equal to the number of systems
+        TypeError
+            If any item in the relativeErr or additiveErr lists is not a scalar or array_like of length equal to the number of time channels
+        ValueError
+            If any relative or additive errors are <= 0.0
+        """
+
+        assert np.all(self.relErr > 0.0), ValueError('relErr must be > 0.0')
+
+        # For each system assign error levels using the user inputs
+        for i in range(self.nSystems):
+            for j in range(self.n_components):
+                ic = self._component_indices(j, i)
+                relative_error = self.relErr[(i*self.n_components)+j] * self.secondary_field[ic]
+                variance = relative_error**2.0 + self.addErr[i]**2.0
+                self._std[ic] = np.sqrt(variance)
+
+
+        # Update the variance of the predicted data prior
+        if self.predictedData.hasPrior:
+            self.predictedData.prior.variance[np.diag_indices(np.sum(self.active))] = self._std[self.active]**2.0
+
+        return self._std
+
     @TdemDataPoint.units.setter
     def units(self, value):
         if value is None:
@@ -124,20 +168,34 @@ class Tempest_datapoint(TdemDataPoint):
         if isinstance(gs, matplotlib.figure.Figure):
             gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
 
-        splt = gs.subgridspec(2, 2, width_ratios=[1, 4], height_ratios=[3, 1], wspace=0.3)
+        n = np.sum([self.relative_error.hasPosterior, self.additive_error.hasPosterior, self.transmitter.pitch.hasPosterior])
+
+        splt = gs.subgridspec(2, n, height_ratios=[2, 1], wspace=0.3)
         ax = []
         # Height axis
-        ax.append(self.z._init_posterior_plots(splt[0, 0]))
+        ax.append(self.z._init_posterior_plots(splt[0, :1]))
         # Data axis
-        ax.append(plt.subplot(splt[0, 1]))
+        ax.append(plt.subplot(splt[0, 1:]))
 
-        ax.append(self.relative_error._init_posterior_plots(splt[1, 0]))
+        i = 0
+        # Relative error axes
+        tmp = self.relative_error._init_posterior_plots(splt[1, i])
+        if tmp is not None:
+            i += 1
+        ax.append(tmp)
 
-        # # Additive Error axes
-        # ax.append([None for i in range(self.nSystems*self.n_components)])
+        # Additive Error axes
+        tmp = self.additive_error._init_posterior_plots(splt[1, i])
+        if tmp is not None:
+            i += 1
+            for j in range(self.nSystems):
+                others = np.s_[(j * self.n_components):(j * self.n_components)+self.n_components]
+                tmp[1].get_shared_y_axes().join(tmp[1], *tmp[others])  
+        ax.append(tmp)
 
         # Pitch axes
-        ax.append(self.transmitter.pitch._init_posterior_plots(splt[1, 1]))
+        tmp = self.transmitter.pitch._init_posterior_plots(splt[1, i])
+        ax.append(tmp)
 
         return ax
 
@@ -158,6 +216,12 @@ class Tempest_datapoint(TdemDataPoint):
         if not prior is None:
             assert prior.ndim == self.n_components * self.nSystems, ValueError("relative_error_prior must have {} dimensions".format(self.n_components * self.nSystems))
             self.relErr.prior = prior
+
+    def set_additive_error_prior(self, prior):
+        if not prior is None:
+            assert prior.ndim == self.nChannels, ValueError("additive_error_prior must have {} dimensions".format(self.nChannels))
+            self.addErr.prior = prior
+    
 
     def set_proposals(self, height_proposal=None, relative_error_proposal=None, additive_error_proposal=None, transmitter_pitch_proposal=None, **kwargs):
 
@@ -229,7 +293,7 @@ class Tempest_datapoint(TdemDataPoint):
         kwargs['yscale'] = kwargs.get('yscale', 'linear')
         return super().plot(**kwargs)
 
-    def plot_posteriors(self, axes=None, height_kwargs={}, data_kwargs={}, rel_error_kwargs={}, pitch_kwargs={}, **kwargs):
+    def plot_posteriors(self, axes=None, height_kwargs={}, data_kwargs={}, rel_error_kwargs={}, add_error_kwargs={}, pitch_kwargs={}, **kwargs):
 
         if axes is None:
             axes = kwargs.pop('fig', plt.gcf())
@@ -237,7 +301,7 @@ class Tempest_datapoint(TdemDataPoint):
         if not isinstance(axes, list):
             axes = self._init_posterior_plots(axes)
 
-        assert len(axes) == 4, ValueError("Must have length 3 list of axes for the posteriors. self.init_posterior_plots can generate them")
+        assert len(axes) == 5, ValueError("Must have length 5 list of axes for the posteriors. self.init_posterior_plots can generate them")
 
         best = kwargs.pop('best', None)
         if not best is None:
@@ -257,9 +321,11 @@ class Tempest_datapoint(TdemDataPoint):
         self.plotPredicted(color=c, ax=axes[1], **data_kwargs)
 
         self.relErr.plotPosteriors(ax=axes[2], **rel_error_kwargs)
-        # self.addErr.plotPosteriors(ax=axes[3], **add_error_kwargs)
 
-        self.transmitter.pitch.plotPosteriors(ax = axes[3], **pitch_kwargs)
+        add_error_kwargs['colorbar'] = False
+        self.addErr.plotPosteriors(ax=axes[3], **add_error_kwargs)
+
+        self.transmitter.pitch.plotPosteriors(ax = axes[4], **pitch_kwargs)
 
     def plotPredicted(self, **kwargs):
         kwargs['xscale'] = kwargs.get('xscale', 'log')
@@ -337,10 +403,22 @@ class Tempest_datapoint(TdemDataPoint):
                 posterior.append(Histogram(mesh=mesh))
             self.relErr.posterior = posterior
 
-    # def set_additive_error_posterior(self, log=None):
-    #     if self.addErr.hasPrior:
-    #         ab = StatArray.StatArray(np.atleast_2d(self.addErr.prior.bins()), name=self.addErr.name, units=self.data.units)
-    #         # self.addErr.posterior = [Histogram1D(edges = ab[i, :], log=log) for i in range(self.nSystems)]
+    def set_additive_error_prior(self, prior):
+        if not prior is None:
+            assert prior.ndim == self.nChannels, ValueError("additive_error_prior must have {} dimensions".format(self.nChannels))
+            self.addErr.prior = prior
+
+    def set_additive_error_posterior(self, log=None):
+        if self.addErr.hasPrior:
+            bins = RectilinearMesh1D(edges=StatArray.StatArray(self.addErr.prior.bins()[0, :], name=self.addErr.name, units=self.data.units), log=10)
+            posterior = []
+            for j in range(self.nSystems):
+                system_times = RectilinearMesh1D(centres=self.off_time(j), log=10)
+                for k in range(self.n_components):
+                    # icomp = self._component_indices(k, j)
+                    mesh = RectilinearMesh2D(x=system_times, y=bins)
+                    posterior.append(Histogram(mesh=mesh))
+            self.addErr.posterior = posterior
 
     def update_posteriors(self):
 
@@ -348,6 +426,16 @@ class Tempest_datapoint(TdemDataPoint):
 
         if self.transmitter.pitch.hasPosterior:
             self.transmitter.pitch.updatePosterior()
+
+    def update_additive_error_posterior(self):
+        if self.additive_error.hasPosterior:
+            i = 0
+            for j in range(self.nSystems):
+                system_times = self.off_time(j)
+                for k in range(self.n_components):
+                    icomp = self._component_indices(k, j)
+                    self.additive_error.posterior[i].update(x=system_times, y=self.additive_error[icomp])
+                    i += 1
 
     def _empymodForward(self, mod):
 

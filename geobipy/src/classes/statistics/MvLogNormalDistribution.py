@@ -78,11 +78,11 @@ class MvLogNormal(MvNormal):
     def rng(self, size = 1):
         return np.exp(super().rng(size)) if self.linearSpace else super().rng(size)
 
-    def probability(self, x, log):
+    def probability(self, x, log, axis=None):
         if self.linearSpace:
             x = np.log(x)
 
-        return super().probability(x=x, log=log)
+        return super().probability(x=x, log=log, axis=axis)
 
     def bins(self, nBins=99, nStd=4.0, axis=None, relative=False):
         """Discretizes a range given the mean and variance of the distribution

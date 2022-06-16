@@ -53,14 +53,13 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
     @property
     def summary(self):
         """ Display a summary of the 3D Point Cloud """
+
         msg = ("2D Stitched Rectilinear Mesh: \n"
-              "nCells: {} \nx\n{}y\n{}relativeTo\n{}").format(self.nCells.summary, self.x.summary, self.y_edges.summary, self.relativeTo.summary)
+              "nCells:{}\n"
+              "x\n{}"
+              "y\n{}").format(self.nCells.summary, self.x.summary, self.y_edges.summary)
 
         return msg
-
-    # @property
-    # def y(self):
-    #     return self.y_edges
 
     @property
     def y_edges(self):
@@ -70,7 +69,7 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
     def y_edges(self, values):
 
         if values is None:
-            values = (self.x.nCells, self.max_cells)
+            values = (self.x.nCells, self.max_cells+1)
         else:
             
             assert np.ndim(values) == 2, ValueError("y_edges must have 2 dimensions")
@@ -80,14 +79,22 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
 
         self._y_edges = StatArray.StatArray(values)
 
+    @property
+    def plotting_edges(self):
+        out = copy(self.y_edges)
+        if np.any(self.y_edges[:, -1] == np.inf):
+            i = np.argwhere(self.y_edges[:, -1] == np.inf)
+            out[i, -1] = 1.1 * np.max(out[i, -2])
+        return out
+
     def __getitem__(self, slic):
         """Allow slicing of the histogram."""
         from .RectilinearMesh1D import RectilinearMesh1D
-        assert np.shape(slic) == (1,), ValueError("slic must be over 2 dimensions.")
+        # assert np.shape(slic) == (1,), ValueError("slic must be over 1 dimensions.")
 
         if isinstance(slic, (int, np.integer)):
-            relativeTo = self.relativeTo[slic] if not self.relativeTo is None else None
-            return RectilinearMesh1D(edges=self._z[slic, :self.nCells[slic]+2], relativeTo=relativeTo)
+            relativeTo = self.x._relativeTo[slic] if not self.x._relativeTo is None else None
+            return RectilinearMesh1D(edges=self.y_edges[slic, :self.nCells[slic]+2], relativeTo=relativeTo)
 
         else:
             slic0 = slic
@@ -163,7 +170,9 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
         rescale = lambda y: (y - np.nanmin(y)) / (np.nanmax(y) - np.nanmin(y))
         v = rescale(values)
 
-        y_edges = utilities._power(self.y_edges, self.y_log)
+        y_edges = self.plotting_edges
+
+        y_edges = utilities._power(y_edges, self.y_log)
 
         # First
         bottom = y_edges[:, 0].copy()
@@ -187,6 +196,9 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
         
         plt.xscale(xscale)
         plt.yscale(yscale)
+
+        cP.xlabel(self.x.label)
+        cP.ylabel(self.y_edges.label)
 
         if flipX:
             ax.invert_xaxis()
@@ -326,7 +338,7 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
                 if np.all(np.isnan(relativeTo)):
                     relativeTo = None
 
-            out = cls(max_cells=edges.shape[1],  x=x, relativeTo=relativeTo)
+            out = cls(max_cells=edges.shape[1]-1,  x=x, relativeTo=relativeTo)
 
             out.nCells = nCells
             out.y_edges = edges

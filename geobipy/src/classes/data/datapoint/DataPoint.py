@@ -513,7 +513,7 @@ class DataPoint(Point):
     def set_additive_error_proposal(self, proposal, **kwargs):
         if proposal is None:
             if kwargs.get('solve_additive_error', False):
-                proposal = Distribution('MvLogNormal', self.addErr, kwargs['additive_error_proposal_variance'], linearSpace=False, prng=kwargs['prng'])
+                proposal = Distribution('MvNormal', self.addErr, kwargs['additive_error_proposal_variance'], linearSpace=False, prng=kwargs['prng'])
 
         self.addErr.proposal = proposal
 

@@ -1139,9 +1139,6 @@ class Data(PointCloud3D):
         kwargs['na_rep'] = 'nan'
         kwargs['index'] = False
         d, order = self._as_dict()
-        from pprint import pprint
-        # pprint(d)
-        # print(order)
         kwargs['columns'] = order
         df = DataFrame(data=d)
         df.to_csv(filename, **kwargs)

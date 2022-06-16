@@ -419,7 +419,7 @@ class FdemData(Data):
     #     # cP.title(self._channelNames[channel])
 
 
-    def plot(self, xAxis='index', channels=None, values=None, **kwargs):
+    def plot(self, xAxis='index', channels=None, **kwargs):
         """Plots the specifed channels as a line plot.
 
         Plots the channels along a specified co-ordinate e.g. 'x'. A legend is auto generated.
@@ -451,7 +451,7 @@ class FdemData(Data):
 
         """
 
-        ax, legend = super().plot(xAxis, channels=channels, values=values, **kwargs)
+        ax, legend = super().plot(xAxis, channels=channels, **kwargs)
 
         if kwargs.get('legend', True):
             legend.set_title('Frequency (Hz)')

@@ -29,7 +29,6 @@ class LogNormal(Normal):
         super().__init__(mean, variance, prng=prng)
         self.linearSpace = linearSpace
 
-
     @property
     def mean(self):
         return np.exp(self._mean) if self.linearSpace else self._mean
@@ -42,11 +41,9 @@ class LogNormal(Normal):
     def ndim(self):
         return 1
 
-
     @property
     def multivariate(self):
         return False
-
 
     @property
     def variance(self):
@@ -125,13 +122,6 @@ class LogNormal(Normal):
             return StatArray.StatArray(norm.logpdf(x, loc = self._mean, scale = self.variance), "Probability Density")
         else:
             return StatArray.StatArray(norm.pdf(x, loc = self._mean, scale = self.variance), "Probability Density")
-
-    @property
-    def summary(self):
-        msg = 'Normal Distribution: \n'
-        msg += '    Mean: :' + str(self.mean) + '\n'
-        msg += 'Variance: :' + str(self.variance) + '\n'
-        return msg
 
 #    def hdfName(self):
 #        """ Create the group name for an HDF file """

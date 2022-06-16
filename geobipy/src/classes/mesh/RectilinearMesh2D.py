@@ -84,6 +84,7 @@ class RectilinearMesh2D(Mesh):
         self.x = kwargs if x is None else x
         if 'x_relative_to' in kwargs:
             self.x.relativeTo = kwargs['x_relative_to']
+
         self.y = kwargs if y is None else y
         if 'y_relative_to' in kwargs:
             self.y.relativeTo = kwargs['y_relative_to']
@@ -878,7 +879,6 @@ class RectilinearMesh2D(Mesh):
         kwargs['yscale'] = kwargs.pop('yscale', 'linear' if self.y.log is None else 'log')
 
         if (self.x._relativeTo is None) and (self.y._relativeTo is None):
-    
             tmp = StatArray.StatArray(np.full(self.shape, fill_value=np.nan)).T
             tmp.pcolor(x=self.x.edges_absolute, y=self.y.edges_absolute, grid=True, colorbar=False, **kwargs)
 
@@ -1044,9 +1044,6 @@ class RectilinearMesh2D(Mesh):
         self.x.writeHdf(grp, 'x',  withPosterior=withPosterior)
         self.y.writeHdf(grp, 'y',  withPosterior=withPosterior)
 
-        # if not self.relativeTo is None:
-        #     self.relativeTo.writeHdf(grp, 'relativeTo',  withPosterior=withPosterior)
-
     def _write_hdf_3d(self, parent, name, index, withPosterior=True):
         grp = parent[name]
         assert '3D' in grp.attrs['repr'], TypeError("HDF creation must have an axis added.")
@@ -1109,7 +1106,7 @@ class RectilinearMesh2D(Mesh):
             if self.x.relativeTo.size == 1:
                 out = np.repeat(self.x.centres_absolute[:, None], self.y.nCells, 1)
             else:
-                edges = np.repeat(self.x.relativeTo[None, :], self.x.nCells, 0) + self.x.centres
+                edges = self.x.relativeTo + self.x.centres[:, None]
                 out = utilities._power(edges, self.x.log)
 
         return out
@@ -1133,7 +1130,7 @@ class RectilinearMesh2D(Mesh):
                 x_edges = np.repeat(self.x.edges_absolute[:, None], self.y.nEdges, 1)
             else:
                 re = self.y.interpolate_centres_to_nodes(self.x.relativeTo)
-                edges = np.repeat(re[None, :], self.x.nEdges, 0) + self.x.edges
+                edges = np.repeat(re[None, :], self.x.nEdges, 0) + self.x.edges[:, None]
                 x_edges = utilities._power(edges, self.x.log)
 
         return x_edges
@@ -1170,8 +1167,8 @@ class RectilinearMesh2D(Mesh):
             if self.y.relativeTo.size == 1:
                 y_edges = np.repeat(self.y.edges_absolute[None, :], self.x.nEdges, 0)
             else:
-                re = self.x.interpolate_centres_to_nodes(self.y.relativeTo, kind='linear')
-                edges = np.repeat(re[:, None], self.y.nEdges, 1) + self.y.edges
+                re = self.x.interpolate_centres_to_nodes(self.y.relativeTo)
+                edges = np.repeat(re[:, None], self.y.nEdges, 1) + self.y.edges[None, :]
                 y_edges = utilities._power(edges, self.y.log)
 
         return y_edges

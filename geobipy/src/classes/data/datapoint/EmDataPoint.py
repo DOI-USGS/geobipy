@@ -343,11 +343,17 @@ class EmDataPoint(DataPoint):
     def update_posteriors(self):
         """Update any attached posteriors"""
 
-        if self.z.hasPosterior:
-            self.z.updatePosterior()
+        super().update_posteriors()
 
         if self.relErr.hasPosterior:
             self.relErr.updatePosterior()
 
-        if self.addErr.hasPosterior:
-            self.addErr.updatePosterior()
+        self.update_additive_error_posterior()
+
+    def update_relative_error_posterior(self):
+        if self.relative_error.hasPosterior:
+            self.relative_error.updatePosterior()
+
+    def update_additive_error_posterior(self):
+        if self.additive_error.hasPosterior:
+            self.additive_error.updatePosterior()
