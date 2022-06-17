@@ -1027,6 +1027,7 @@ class StatArray(np.ndarray, myObject):
         p = self.probability(x=proposed, log=log)
 
         num = -np.inf if log else 0.0
+        tries = 0
         while p == num:
             proposed = self.proposal.rng(nSamples)
 
@@ -1034,6 +1035,9 @@ class StatArray(np.ndarray, myObject):
                 proposed = self + proposed
 
             p = self.probability(x=proposed, log=log)
+            tries += 1
+            if tries == 10:
+                break
 
         return proposed[i] if mv else proposed
 
