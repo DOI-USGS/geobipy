@@ -70,7 +70,15 @@ class RectilinearMesh3D(RectilinearMesh2D):
         self.x = kwargs if x is None else x
         self.y = kwargs if y is None else y
         self.z = kwargs if z is None else z
-        # self.relativeTo = relativeTo
+
+        if self.x._relativeTo is not None:
+            assert np.all(self.x.relativeTo.shape == self.shape[1:]), "x axis relative to must have shape {}".format(self.shape[1:])
+
+        if self.y._relativeTo is not None:
+            assert np.all(self.y.relativeTo.shape == self.shape[::2]), "y axis relative to must have shape {}".format(self.shape[::2])
+
+        if self.z._relativeTo is not None:
+            assert np.all(self.z.relativeTo.shape == self.shape[:2]), "z axis relative to must have shape {}".format(self.shape[:2])
 
     def __getitem__(self, slic):
         """Slice into the mesh. """
@@ -89,23 +97,47 @@ class RectilinearMesh3D(RectilinearMesh2D):
             a = [x for x in (0, 1, 2) if not x in axis]
             b = [x for x in (0, 1, 2) if x in axis]
 
-            x = self.axis(a[0])
-            y = self.axis(a[1])
-        
-            out = RectilinearMesh2D(x=x[slic[a[0]]], y=y[slic[a[1]]])
+            x = deepcopy(self.axis(a[0]))
             if x._relativeTo is not None:
                 if x._relativeTo.size > 1:
-                    out.x.relativeTo = np.take(x.relativeTo, slic[b[0]], np.minimum(1, b[0]))
+
+                    if a[0] == 0:
+                        if b[0] == 1:
+                            axis = 0
+                        if b[0] == 2:
+                            axis = 1
+                    elif a[0] == 1:
+                        if b[0] == 0:
+                            axis = 0                
+                        if b[0] == 2:
+                            axis = 'OOPS'
+                    x.relativeTo = np.take(x.relativeTo, slic[b[0]], axis)
+
+            y = deepcopy(self.axis(a[1]))
             if y._relativeTo is not None:
                 if y._relativeTo.size > 1:
-                    out.y.relativeTo = np.take(y.relativeTo, slic[b[0]], np.minimum(1, b[0]))
+                    if a[1] == 1:
+                        if b[0] == 0:
+                            axis = 0
+                        elif b[0] == 2:
+                            axis = 1
+                    elif a[1] == 2:
+                        if b[0] == 0:
+                            axis = 0
+                        elif b[0] == 1:
+                            axis = 1
+
+                    y.relativeTo = np.take(y.relativeTo, slic[b[0]], axis)
+            
+            out = RectilinearMesh2D(x=x[slic[a[0]]], y=y[slic[a[1]]])
 
         else: # Returning a 1D mesh
             a = [x for x in (0, 1, 2) if not x in axis]
             b = [x for x in (0, 1, 2) if x in axis]
+
             out = self.axis(a[0])[slic[a[0]]]
             if out._relativeTo is not None:
-                out.relativeTo = out.relativeTo[slic[b[0]]]
+                out.relativeTo = out.relativeTo[slic[b[0]], slic[b[1]]]
 
         return out
 
@@ -141,22 +173,9 @@ class RectilinearMesh3D(RectilinearMesh2D):
     def z_centres(self):
         return np.repeat(np.repeat(self.z.centres_absolute[None, :], self.y.nCells, 0)[None, :, :], self.x.nCells, 0)
 
-    @RectilinearMesh2D.x.setter
-    def x(self, values):
-        RectilinearMesh2D.x.fset(self, values)
-        if self.x._relativeTo is not None:
-            assert np.all(self.x.relativeTo.shape == self.shape[1:]), "z axis relative to must have shape {}".format(self.shape[1:])
-
     @property
     def x_edges(self):
         return utilities._power(self.x.relativeTo[None, :, :] + self.x.edges, self.x.log)
-
-    @RectilinearMesh2D.y.setter
-    def y(self, values):
-        RectilinearMesh2D.y.fset(self, values)
-
-        if self.y._relativeTo is not None:
-            assert np.all(self.y.relativeTo.shape == self.shape[::2]), "z axis relative to must have shape {}".format(self.shape[::2])
 
     @property
     def y_edges(self):
@@ -165,8 +184,6 @@ class RectilinearMesh3D(RectilinearMesh2D):
     @property
     def z_edges(self):
         return utilities._power(self.z.relativeTo[:, :, None] + self.z.edges, self.z.log)
-
-        # return np.repeat(np.repeat(self.z.edges_absolute[None, :], self.y.nEdges, 0)[None, :, :], self.x.nEdges, 0)
 
     @property
     def z(self):
@@ -185,8 +202,8 @@ class RectilinearMesh3D(RectilinearMesh2D):
         assert isinstance(values, RectilinearMesh1D), TypeError('z must be a RectilinearMesh1D')
         self._z = values
 
-        if self.z._relativeTo is not None:
-            assert np.all(self.z.relativeTo.shape == self.shape[:2]), "z axis relative to must have shape {}".format(self.shape[:2])
+        # if self.z._relativeTo is not None:
+        #     assert np.all(self.z.relativeTo.shape == self.shape[:2]), "z axis relative to must have shape {}".format(self.shape[:2])
 
     def other_axis(self, axis):
 

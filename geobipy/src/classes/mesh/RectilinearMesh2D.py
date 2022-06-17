@@ -82,12 +82,13 @@ class RectilinearMesh2D(Mesh):
         self.xyz = False
     
         self.x = kwargs if x is None else x
-        if 'x_relative_to' in kwargs:
-            self.x.relativeTo = kwargs['x_relative_to']
-
         self.y = kwargs if y is None else y
-        if 'y_relative_to' in kwargs:
-            self.y.relativeTo = kwargs['y_relative_to']
+
+        if self.x._relativeTo is not None:
+            assert np.any([s == self.shape[1] for s in self.x.relativeTo.shape]), "x axis relative to must have shape {}".format(self.shape[1])
+
+        if self.y._relativeTo is not None:
+            assert np.any([s == self.shape[0] for s in self.y.relativeTo.shape]), "y axis relative to must have shape {}".format(self.shape[0])
 
     def __getitem__(self, slic):
         """Allow slicing of the histogram.
