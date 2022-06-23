@@ -710,8 +710,7 @@ class DataPoint(Point):
 
         self.relErr.Isend(dest, world)
         self.addErr.Isend(dest, world)
-
-        # self.std.Isend(dest, world)
+        self.std.Isend(dest, world)
 
 
     @classmethod
@@ -724,5 +723,7 @@ class DataPoint(Point):
 
         out._relErr = StatArray.StatArray.Irecv(source, world)
         out._addErr = StatArray.StatArray.Irecv(source, world)
+
+        out._std = StatArray.StatArray.Irecv(source, world)
 
         return out
