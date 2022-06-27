@@ -87,8 +87,8 @@ class TdemDataPoint(EmDataPoint):
                          data=None, std=std, predictedData=None,
                          lineNumber=lineNumber, fiducial=fiducial)
 
-        self.addErr = additive_error
-        self.relErr = relative_error
+        self.additive_error = additive_error
+        self.relative_error = relative_error
 
         self.transmitter = transmitter_loop
         self.receiver = receiver_loop
@@ -100,17 +100,17 @@ class TdemDataPoint(EmDataPoint):
 
         self.channelNames = None
 
-    @EmDataPoint.addErr.setter
-    def addErr(self, values):
+    @EmDataPoint.additive_error.setter
+    def additive_error(self, values):
         if values is None:
             values = self.nSystems
         else:
-            assert np.size(values) == self.nSystems, ValueError("additiveError must be a list of size equal to the number of systems {}".format(self.nSystems))
+            assert np.size(values) == self.nSystems, ValueError("additive_error must be a list of size equal to the number of systems {}".format(self.nSystems))
             # assert (np.all(np.asarray(values) > 0.0)), ValueError("additiveErr must be > 0.0. Make sure the values are in linear space")
             # assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], np.ndarray)), TypeError(
             #     "relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
 
-        self._addErr = StatArray.StatArray(values, '$\epsilon_{Additive}$', self.units)
+        self._additive_error = StatArray.StatArray(values, '$\epsilon_{Additive}$', self.units)
 
     @EmDataPoint.channelNames.setter
     def channelNames(self, values):
@@ -323,22 +323,22 @@ class TdemDataPoint(EmDataPoint):
             If any relative or additive errors are <= 0.0
         """
 
-        assert np.all(self.relErr > 0.0), ValueError('relErr must be > 0.0')
+        assert np.all(self.relative_error > 0.0), ValueError('relErr must be > 0.0')
 
         # For each system assign error levels using the user inputs
         for i in range(self.nSystems):
             for j in range(self.n_components):
                 ic = self._component_indices(j, i)
-                relative_error = self.relErr[(i*self.n_components)+j] * self.secondary_field[ic]
-                variance = relative_error**2.0 + self.addErr[i]**2.0
+                relative_error = self.relative_error[(i*self.n_components)+j] * self.secondary_field[ic]
+                variance = relative_error**2.0 + self.additive_error[i]**2.0
                 self._std[ic] = np.sqrt(variance)
 
             # # Compute the relative error
-            # rErr = self.relErr[i] * self.secondary_field[iSys]
-            # # aErr = np.exp(np.log(self.addErr[i]) - 0.5 * np.log(self.off_time(i)) + t0)
+            # rErr = self.relative_error[i] * self.secondary_field[iSys]
+            # # aErr = np.exp(np.log(self.additive_error[i]) - 0.5 * np.log(self.off_time(i)) + t0)
             # # self._std[iSys] = np.sqrt((rErr**2.0) + (aErr[i]**2.0))
 
-            # self._std[iSys] = np.sqrt((rErr**2.0) + (self.addErr[i]**2.0))
+            # self._std[iSys] = np.sqrt((rErr**2.0) + (self.additive_error[i]**2.0))
 
 
         # Update the variance of the predicted data prior
@@ -821,11 +821,11 @@ class TdemDataPoint(EmDataPoint):
             probability += P_height
 
         if rErr:  # Relative Errors
-            P_relative = self.relErr.probability(log=True)
+            P_relative = self.relative_error.probability(log=True)
             errProbability += P_relative
 
         if aErr:  # Additive Errors
-            P_additive = self.addErr.probability(log=True)
+            P_additive = self.additive_error.probability(log=True)
             errProbability += P_additive
 
         if calibration:  # Calibration parameters
@@ -851,9 +851,9 @@ class TdemDataPoint(EmDataPoint):
     def set_additive_error_proposal(self, proposal, **kwargs):
         if proposal is None:
             if kwargs.get('solve_additive_error', False):
-                proposal = Distribution('MvLogNormal', self.addErr, kwargs['additive_error_proposal_variance'], linearSpace=True, prng=kwargs['prng'])
+                proposal = Distribution('MvLogNormal', self.additive_error, kwargs['additive_error_proposal_variance'], linearSpace=True, prng=kwargs['prng'])
 
-        self.addErr.proposal = proposal
+        self.additive_error.proposal = proposal
 
     # def set_predicted_data_posterior(self):
     #     if self.predictedData.hasPrior:

@@ -62,15 +62,15 @@ class Tempest_datapoint(TdemDataPoint):
 
     """
 
-    @TdemDataPoint.addErr.setter
-    def addErr(self, values):
+    @TdemDataPoint.additive_error.setter
+    def additive_error(self, values):
         if values is None:
             values = self.nChannels
         else:
             assert np.size(values) == self.nChannels, ValueError(("Tempest data must a have additive error values for all time gates and all components. \n"
-                                                              "addErr must have size {}").format(self.nChannels))
+                                                              "additive_error must have size {}").format(self.nChannels))
 
-        self._addErr = StatArray.StatArray(values, '$\epsilon_{additive}x10^{2}$', self.units)
+        self._additive_error = StatArray.StatArray(values, '$\epsilon_{additive}x10^{2}$', self.units)
 
     @TdemDataPoint.data.getter
     def data(self):
@@ -88,15 +88,15 @@ class Tempest_datapoint(TdemDataPoint):
                 self._predictedData[ic] = self.predicted_primary_field[i] + self.predicted_secondary_field[ic]
         return self._predictedData
 
-    @TdemDataPoint.relErr.setter
-    def relErr(self, values):
+    @TdemDataPoint.relative_error.setter
+    def relative_error(self, values):
         if values is None:
             values = self.n_components * self.nSystems
         else:
             assert np.size(values) == self.n_components * self.nSystems, ValueError(("Tempest data must a have relative error for the primary and secondary fields, for each system. \n"
-                            "relErr must have size {}").format(self.n_components * self.nSystems))
+                            "relative_error must have size {}").format(self.n_components * self.nSystems))
 
-        self._relErr = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
+        self._relative_error = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
 
     @TdemDataPoint.std.getter
     def std(self):
@@ -124,14 +124,14 @@ class Tempest_datapoint(TdemDataPoint):
             If any relative or additive errors are <= 0.0
         """
 
-        assert np.all(self.relErr > 0.0), ValueError('relErr must be > 0.0')
+        assert np.all(self.relative_error > 0.0), ValueError('relative_error must be > 0.0')
 
         # For each system assign error levels using the user inputs
         for i in range(self.nSystems):
             for j in range(self.n_components):
                 ic = self._component_indices(j, i)
-                relative_error = self.relErr[(i*self.n_components)+j] * self.secondary_field[ic]
-                variance = relative_error**2.0 + self.addErr[i]**2.0
+                relative_error = self.relative_error[(i*self.n_components)+j] * self.secondary_field[ic]
+                variance = relative_error**2.0 + self.additive_error[i]**2.0
                 self._std[ic] = np.sqrt(variance)
 
 
@@ -215,12 +215,12 @@ class Tempest_datapoint(TdemDataPoint):
     def set_relative_error_prior(self, prior):
         if not prior is None:
             assert prior.ndim == self.n_components * self.nSystems, ValueError("relative_error_prior must have {} dimensions".format(self.n_components * self.nSystems))
-            self.relErr.prior = prior
+            self.relative_error.prior = prior
 
     def set_additive_error_prior(self, prior):
         if not prior is None:
             assert prior.ndim == self.nChannels, ValueError("additive_error_prior must have {} dimensions".format(self.nChannels))
-            self.addErr.prior = prior
+            self.additive_error.prior = prior
     
 
     def set_proposals(self, height_proposal=None, relative_error_proposal=None, additive_error_proposal=None, transmitter_pitch_proposal=None, **kwargs):
@@ -306,8 +306,8 @@ class Tempest_datapoint(TdemDataPoint):
         best = kwargs.pop('best', None)
         if not best is None:
             height_kwargs['line'] = best.z
-            rel_error_kwargs['line'] = best.relErr
-            # add_error_kwargs['line'] = best.addErr
+            rel_error_kwargs['line'] = best.relative_error
+            # add_error_kwargs['line'] = best.additive_error
             pitch_kwargs['line'] = best.transmitter.pitch
 
         height_kwargs['transpose'] = height_kwargs.get('transpose', True)
@@ -320,10 +320,10 @@ class Tempest_datapoint(TdemDataPoint):
         c = cP.wellSeparated[0] if best is None else cP.wellSeparated[3]
         self.plotPredicted(color=c, ax=axes[1], **data_kwargs)
 
-        self.relErr.plotPosteriors(ax=axes[2], **rel_error_kwargs)
+        self.relative_error.plotPosteriors(ax=axes[2], **rel_error_kwargs)
 
         add_error_kwargs['colorbar'] = False
-        self.addErr.plotPosteriors(ax=axes[3], **add_error_kwargs)
+        self.additive_error.plotPosteriors(ax=axes[3], **add_error_kwargs)
 
         self.transmitter.pitch.plotPosteriors(ax = axes[4], **pitch_kwargs)
 
@@ -394,23 +394,23 @@ class Tempest_datapoint(TdemDataPoint):
 
     def set_relative_error_posterior(self):
 
-        if self.relErr.hasPrior:
-            bins = StatArray.StatArray(np.atleast_2d(self.relErr.prior.bins()), name=self.relErr.name, units=self.relErr.units)        
+        if self.relative_error.hasPrior:
+            bins = StatArray.StatArray(np.atleast_2d(self.relative_error.prior.bins()), name=self.relative_error.name, units=self.relative_error.units)        
             posterior = []
             for i in range(self.nSystems*self.n_components):
                 b = bins[i, :]
                 mesh = RectilinearMesh1D(edges = b, relativeTo=0.5*(b.max()-b.min()))
                 posterior.append(Histogram(mesh=mesh))
-            self.relErr.posterior = posterior
+            self.relative_error.posterior = posterior
 
     def set_additive_error_prior(self, prior):
         if not prior is None:
             assert prior.ndim == self.nChannels, ValueError("additive_error_prior must have {} dimensions".format(self.nChannels))
-            self.addErr.prior = prior
+            self.additive_error.prior = prior
 
     def set_additive_error_posterior(self, log=None):
-        if self.addErr.hasPrior:
-            bins = RectilinearMesh1D(edges=StatArray.StatArray(self.addErr.prior.bins()[0, :], name=self.addErr.name, units=self.data.units), log=10)
+        if self.additive_error.hasPrior:
+            bins = RectilinearMesh1D(edges=StatArray.StatArray(self.additive_error.prior.bins()[0, :], name=self.additive_error.name, units=self.data.units), log=10)
             posterior = []
             for j in range(self.nSystems):
                 system_times = RectilinearMesh1D(centres=self.off_time(j), log=10)
@@ -418,7 +418,7 @@ class Tempest_datapoint(TdemDataPoint):
                     # icomp = self._component_indices(k, j)
                     mesh = RectilinearMesh2D(x=system_times, y=bins)
                     posterior.append(Histogram(mesh=mesh))
-            self.addErr.posterior = posterior
+            self.additive_error.posterior = posterior
 
     def update_posteriors(self):
 

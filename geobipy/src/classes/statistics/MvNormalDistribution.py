@@ -198,6 +198,17 @@ class MvNormal(baseDistribution):
             return -(0.5 * N) * np.log(2.0 * np.pi) - dv - 0.5 * np.dot(xMu, np.dot(self.precision, xMu))
 
         else:
+
+            N = x.size
+            nD = self.mean.size
+
+            if N != nD:
+                probability = np.empty((nD, *x.shape))
+                for i in range(nD):
+                    probability[i, :] = self.probability(x, log, axis=i)
+                return probability
+
+            
             # assert (N == nD), TypeError(
             #     'size of samples {} must equal number of distribution dimensions {} for a multivariate distribution'.format(N, nD))
             # For a diagonal matrix, the determinant is the product of the diagonal

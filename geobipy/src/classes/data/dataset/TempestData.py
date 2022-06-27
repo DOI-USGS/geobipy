@@ -511,9 +511,9 @@ class TempestData(TdemData):
             roll = np.asarray(gdf['Tx_Roll'][indices])
             yaw = np.asarray(gdf['Tx_Yaw'][indices])
 
-            self.transmitter = [CircularLoop(x=self.x[i], y=self.y[i], z=self.z[i],
-                                             pitch=pitch[i], roll=roll[i], yaw=yaw[i],
-                                             radius=self.system[0].loopRadius()) for i in range(self.nPoints)]
+            self.transmitter = CircularLoops(x=self.x, y=self.y, z=self.z,
+                                             pitch=pitch, roll=roll, yaw=yaw,
+                                             radius=np.full(self.nPoints, fill_value=self.system[0].loopRadius()))
 
             pitch = np.asarray(gdf['Rx_Pitch'][indices])
             roll = np.asarray(gdf['Rx_Roll'][indices])
@@ -521,11 +521,11 @@ class TempestData(TdemData):
 
             loopOffset = np.vstack([np.asarray(gdf['HSep_GPS'][indices]), np.asarray(gdf['TSep_GPS'][indices]), np.asarray(gdf['VSep_GPS'][indices])]).T
 
-            self.receiver = [CircularLoop(x=self.transmitter[i].x + loopOffset[i, 0],
-                                          y=self.transmitter[i].y + loopOffset[i, 1],
-                                          z=self.transmitter[i].z + loopOffset[i, 2],
-                                          pitch=pitch[i], roll=roll[i], yaw=yaw[i],
-                                          radius=self.system[0].loopRadius()) for i in range(self.nPoints)]
+            self.receiver = CircularLoops(x=self.transmitter.x + loopOffset[:, 0],
+                                          y=self.transmitter.y + loopOffset[:, 1],
+                                          z=self.transmitter.z + loopOffset[:, 2],
+                                          pitch=pitch, roll=roll, yaw=yaw,
+                                          radius=np.full(self.nPoints, fill_value=self.system[0].loopRadius()))
 
             self.primary_field = np.vstack([np.asarray(gdf['X_PrimaryField'][indices]), np.asarray(gdf['Z_PrimaryField'][indices])]).T
             self.secondary_field = np.hstack([np.asarray(gdf['EMX_NonHPRG'][:, indices]).T, np.asarray(gdf['EMZ_NonHPRG'][:, indices]).T])

@@ -74,8 +74,8 @@ class DataPoint(Point):
 
         self.channelNames = channelNames
 
-        self.relErr = None
-        self.addErr = None
+        self.relative_error = None
+        self.additive_error = None
 
         # self.errorPosterior = None
 
@@ -93,23 +93,19 @@ class DataPoint(Point):
 
     @property
     def additive_error(self):
-        return self._addErr
+        return self._additive_error
 
-    @property
-    def addErr(self):
-        return self._addErr
-
-    @addErr.setter
-    def addErr(self, values):
+    @additive_error.setter
+    def additive_error(self, values):
         if values is None:
             values = self.nSystems
         else:
-            assert np.size(values) == self.nSystems, ValueError("additiveError must have size 1")
+            assert np.size(values) == self.nSystems, ValueError("additive_error must have size 1")
             # assert (np.all(np.asarray(values) > 0.0)), ValueError("additiveErr must be > 0.0. Make sure the values are in linear space")
             # assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], np.ndarray)), TypeError(
             #     "relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
 
-        self._addErr = StatArray.StatArray(values, '$\epsilon_{Additive}$', self.units)
+        self._additive_error = StatArray.StatArray(values, '$\epsilon_{Additive}$', self.units)
 
     @property
     def channelNames(self):
@@ -148,7 +144,7 @@ class DataPoint(Point):
         # if not self.errorPosterior is None:
         #     return len(self.errorPosterior)
         # else:
-        return self.nSystems * np.sum([x.hasPosterior for x in [self.relErr, self.addErr]])
+        return self.nSystems * np.sum([x.hasPosterior for x in [self.relative_error, self.additive_error]])
 
     @property
     def data(self):
@@ -215,33 +211,29 @@ class DataPoint(Point):
 
     @property
     def relative_error(self):
-        return self._relErr
+        return self._relative_error
 
-    @property
-    def relErr(self):
-        return self._relErr
-
-    @relErr.setter
-    def relErr(self, values):
+    @relative_error.setter
+    def relative_error(self, values):
 
         if values is None:
             values = np.full(self.nSystems, fill_value=0.01)
         else:
-            assert np.size(values) == self.nSystems, ValueError("relErr must be a list of size equal to the number of systems {}".format(self.nSystems))
+            assert np.size(values) == self.nSystems, ValueError("relative_error must be a list of size equal to the number of systems {}".format(self.nSystems))
             # assert (np.all(np.asarray(values) > 0.0)), ValueError("relErr must be > 0.0.")
             # assert (isinstance(additiveErr[i], float) or isinstance(additiveErr[i], np.ndarray)), TypeError(
             #     "additiveErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
 
-        self._relErr = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
+        self._relative_error = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
 
     @property
     def std(self):
         """ Compute the data errors. """
 
-        assert self.relErr > 0.0, ValueError("relErr must be > 0.0")
+        assert self.relative_error > 0.0, ValueError("relative_error must be > 0.0")
 
         # For each system assign error levels using the user inputs
-        variance = ((self.relErr * self.data)**2.0) + (self.addErr**2.0)
+        variance = ((self.relative_error * self.data)**2.0) + (self.additive_error**2.0)
         self._std[:] = np.sqrt(variance)
 
         # Update the variance of the predicted data prior
@@ -284,21 +276,22 @@ class DataPoint(Point):
 
         out._units = deepcopy(self.units, memo)
         out._data = deepcopy(self.data, memo)
+        out._relative_error = deepcopy(self.relative_error, memo)
+        out._additive_error = deepcopy(self.additive_error, memo)
         out._std = deepcopy(self.std, memo)
         out._predictedData = deepcopy(self.predictedData, memo)
         out._lineNumber = deepcopy(self.lineNumber, memo)
         out._fiducial = deepcopy(self.fiducial, memo)
         out._channelNames = deepcopy(self.channelNames, memo)
-        out._relErr = deepcopy(self.relErr, memo)
-        out._addErr = deepcopy(self.addErr, memo)
+        
         # out._errorPosterior = deepcopy(self.errorPosterior, memo)
 
         return out
 
     # def initialize(self, **kwargs):
     
-    #     self.relErr[:] = self.kwargs['initial_relative_error']
-    #     self.addErr[:] = self.kwargs['initial_additive_error']
+    #     self.relative_error[:] = self.kwargs['initial_relative_error']
+    #     self.additive_error[:] = self.kwargs['initial_additive_error']
 
     def generate_noise(self, additive_error, relative_error):
 
@@ -353,8 +346,8 @@ class DataPoint(Point):
         best = kwargs.pop('best', None)
         if not best is None:
             height_kwargs['line'] = best.z
-            rel_error_kwargs['line'] = best.relErr
-            add_error_kwargs['line'] = best.addErr
+            rel_error_kwargs['line'] = best.relative_error
+            add_error_kwargs['line'] = best.additive_error
 
         height_kwargs['transpose'] = height_kwargs.get('transpose', True)
         self.z.plotPosteriors(ax = axes[0], **height_kwargs)
@@ -366,8 +359,8 @@ class DataPoint(Point):
         c = cP.wellSeparated[0] if best is None else cP.wellSeparated[3]
         self.plotPredicted(color=c, ax=axes[1], **data_kwargs)
 
-        self.relErr.plotPosteriors(ax=axes[2], **rel_error_kwargs)
-        self.addErr.plotPosteriors(ax=axes[3], **add_error_kwargs)
+        self.relative_error.plotPosteriors(ax=axes[2], **rel_error_kwargs)
+        self.additive_error.plotPosteriors(ax=axes[3], **add_error_kwargs)
 
     def _systemIndices(self, system=0):
         """The slice indices for the requested system.
@@ -425,8 +418,8 @@ class DataPoint(Point):
         return misfit
 
     def initialize(self, **kwargs):
-        self.relErr = kwargs['initial_relative_error']
-        self.addErr = kwargs['initial_additive_error']
+        self.relative_error = kwargs['initial_relative_error']
+        self.additive_error = kwargs['initial_additive_error']
 
 
     def set_priors(self, height_prior=None, relative_error_prior=None, additive_error_prior=None, data_prior=None, **kwargs):
@@ -466,12 +459,12 @@ class DataPoint(Point):
     def set_relative_error_prior(self, prior):
         if not prior is None:
             assert prior.ndim == self.nSystems, ValueError("relative_error_prior must have {} dimensions".format(self.nSystems))
-            self.relErr.prior = prior
+            self.relative_error.prior = prior
 
     def set_additive_error_prior(self, prior):
         if not prior is None:
             assert prior.ndim == self.nSystems, ValueError("additive_error_prior must have {} dimensions".format(self.nSystems))
-            self.addErr.prior = prior
+            self.additive_error.prior = prior
 
     def set_proposals(self, height_proposal=None, relative_error_proposal=None, additive_error_proposal=None, **kwargs):
         """Set the proposals on the datapoint's perturbable parameters
@@ -507,15 +500,15 @@ class DataPoint(Point):
     def set_relative_error_proposal(self, proposal, **kwargs):
         if proposal is None:
             if kwargs.get('solve_relative_error', False):
-                proposal = Distribution('MvNormal', self.relErr, kwargs['relative_error_proposal_variance'], prng=kwargs['prng'])
-        self.relErr.proposal = proposal
+                proposal = Distribution('MvNormal', self.relative_error, kwargs['relative_error_proposal_variance'], prng=kwargs['prng'])
+        self.relative_error.proposal = proposal
 
     def set_additive_error_proposal(self, proposal, **kwargs):
         if proposal is None:
             if kwargs.get('solve_additive_error', False):
-                proposal = Distribution('MvNormal', self.addErr, kwargs['additive_error_proposal_variance'], linearSpace=False, prng=kwargs['prng'])
+                proposal = Distribution('MvNormal', self.additive_error, kwargs['additive_error_proposal_variance'], linearSpace=False, prng=kwargs['prng'])
 
-        self.addErr.proposal = proposal
+        self.additive_error.proposal = proposal
 
     def set_posteriors(self, log=None):
         """ Set the posteriors based on the attached priors
@@ -546,28 +539,28 @@ class DataPoint(Point):
         """
 
         """
-        if self.relErr.hasPrior:
-            bins = StatArray.StatArray(np.atleast_2d(self.relErr.prior.bins()), name=self.relErr.name, units=self.relErr.units)        
+        if self.relative_error.hasPrior:
+            bins = StatArray.StatArray(np.atleast_2d(self.relative_error.prior.bins()), name=self.relative_error.name, units=self.relative_error.units)        
             posterior = []
             for i in range(self.nSystems):
                 b = bins[i, :]
                 mesh = RectilinearMesh1D(edges = b, relativeTo=0.5*(b.max()-b.min()))
                 posterior.append(Histogram(mesh=mesh))
-            self.relErr.posterior = posterior
+            self.relative_error.posterior = posterior
 
     def set_additive_error_posterior(self, log=None):
         """
 
         """
-        if self.addErr.hasPrior:
-            bins = StatArray.StatArray(np.atleast_2d(self.addErr.prior.bins()), name=self.addErr.name, units=self.data.units)
+        if self.additive_error.hasPrior:
+            bins = StatArray.StatArray(np.atleast_2d(self.additive_error.prior.bins()), name=self.additive_error.name, units=self.data.units)
 
             posterior = []
             for i in range(self.nSystems):
                 b = bins[i, :]
                 mesh = RectilinearMesh1D(edges = b, log=log, relativeTo=0.5*(b.max()-b.min()))
                 posterior.append(Histogram(mesh=mesh))
-            self.addErr.posterior = posterior
+            self.additive_error.posterior = posterior
 
     # def scaleJ(self, Jin, power=1.0):
     #     """ Scales a matrix by the errors in the given data
@@ -631,15 +624,15 @@ class DataPoint(Point):
         self.data.createHdf(grp, 'data', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
         self.std.createHdf(grp, 'std', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
         self.predictedData.createHdf(grp, 'predicted_data', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
-        self.relErr.createHdf(grp, 'relative_error', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
-        self.addErr.createHdf(grp, 'additive_error', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
+        self.relative_error.createHdf(grp, 'relative_error', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
+        self.additive_error.createHdf(grp, 'additive_error', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
 
 
         # if not self.errorPosterior is None:
         #     for i, x in enumerate(self.errorPosterior):
         #         x.createHdf(grp, 'joint_error_posterior_{}'.format(i), add_axis=add_axis, fillvalue=fillvalue)
-            # self.relErr.setPosterior([self.errorPosterior[i].marginalize(axis=1) for i in range(self.nSystems)])
-            # self.addErr.setPosterior([self.errorPosterior[i].marginalize(axis=0) for i in range(self.nSystems)])
+            # self.relative_error.setPosterior([self.errorPosterior[i].marginalize(axis=1) for i in range(self.nSystems)])
+            # self.additive_error.setPosterior([self.errorPosterior[i].marginalize(axis=0) for i in range(self.nSystems)])
 
         if add_axis is not None:
             grp.attrs['repr'] = 'Data'
@@ -670,8 +663,8 @@ class DataPoint(Point):
             # self.relative_error.setPosterior([self.errorPosterior[i].marginalize(axis=1) for i in range(self.nSystems)])
             # self.additive_error.setPosterior([self.errorPosterior[i].marginalize(axis=0) for i in range(self.nSystems)])
 
-        self.relErr.writeHdf(grp, 'relative_error',  withPosterior=withPosterior, index=index)
-        self.addErr.writeHdf(grp, 'additive_error',  withPosterior=withPosterior, index=index)
+        self.relative_error.writeHdf(grp, 'relative_error',  withPosterior=withPosterior, index=index)
+        self.additive_error.writeHdf(grp, 'additive_error',  withPosterior=withPosterior, index=index)
 
     @classmethod
     def fromHdf(cls, grp, index=None, **kwargs):
@@ -695,8 +688,8 @@ class DataPoint(Point):
         #         self.errorPosterior.append(Histogram2D.fromHdf(grp['joint_error_posterior_{}'.format(i)], index=index))
         #         i += 1
 
-        out.relErr = StatArray.StatArray.fromHdf(grp['relative_error'], index=index)
-        out.addErr = StatArray.StatArray.fromHdf(grp['additive_error'], index=index)
+        out.relative_error = StatArray.StatArray.fromHdf(grp['relative_error'], index=index)
+        out.additive_error = StatArray.StatArray.fromHdf(grp['additive_error'], index=index)
 
         return out
 
@@ -708,9 +701,9 @@ class DataPoint(Point):
         self.lineNumber.Isend(dest, world)
         self.fiducial.Isend(dest, world)
 
-        self.relErr.Isend(dest, world)
-        self.addErr.Isend(dest, world)
-        self.std.Isend(dest, world)
+        self.relative_error.Isend(dest, world)
+        self.additive_error.Isend(dest, world)
+        # self.std.Isend(dest, world)
 
 
     @classmethod
@@ -721,9 +714,9 @@ class DataPoint(Point):
         out._lineNumber = StatArray.StatArray.Irecv(source, world)
         out._fiducial = StatArray.StatArray.Irecv(source, world)
 
-        out._relErr = StatArray.StatArray.Irecv(source, world)
-        out._addErr = StatArray.StatArray.Irecv(source, world)
+        out._relative_error = StatArray.StatArray.Irecv(source, world)
+        out._additive_error = StatArray.StatArray.Irecv(source, world)
 
-        out._std = StatArray.StatArray.Irecv(source, world)
+        # out._std = StatArray.StatArray.Irecv(source, world)
 
         return out

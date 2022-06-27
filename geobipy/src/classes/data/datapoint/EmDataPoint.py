@@ -232,10 +232,10 @@ class EmDataPoint(DataPoint):
         P_calibration = np.float64(0.0)
 
         if rErr:  # Relative Errors
-            P_relative = self.relErr.probability(log=True)
+            P_relative = self.relative_error.probability(log=True)
             errProbability += P_relative
         if aErr:  # Additive Errors
-            P_additive = self.addErr.probability(log=True)
+            P_additive = self.additive_error.probability(log=True)
             errProbability += P_additive
 
         probability += errProbability
@@ -292,11 +292,11 @@ class EmDataPoint(DataPoint):
         #     self.calibrate()
 
     def perturbAdditiveError(self):
-        if self.addErr.hasProposal:
+        if self.additive_error.hasProposal:
             # Generate a new error
-            self.addErr.perturb(imposePrior=True, log=True)
+            self.additive_error.perturb(imposePrior=True, log=True)
             # Update the mean of the proposed errors
-            self.addErr.proposal.mean = self.addErr
+            self.additive_error.proposal.mean = self.additive_error
 
     def perturbHeight(self):
         if self.z.hasProposal:
@@ -306,11 +306,11 @@ class EmDataPoint(DataPoint):
             self.z.proposal.mean = self.z
 
     def perturbRelativeError(self):
-        if self.relErr.hasProposal:
+        if self.relative_error.hasProposal:
             # Generate a new error
-            self.relErr.perturb(imposePrior=True, log=True)
+            self.relative_error.perturb(imposePrior=True, log=True)
             # Update the mean of the proposed errors
-            self.relErr.proposal.mean = self.relErr
+            self.relative_error.proposal.mean = self.relative_error
 
     def plotHalfSpaceResponses(self, minConductivity=-4.0, maxConductivity=2.0, nSamples=100, **kwargs):
         """Plots the reponses of different half space models.
@@ -345,8 +345,8 @@ class EmDataPoint(DataPoint):
 
         super().update_posteriors()
 
-        if self.relErr.hasPosterior:
-            self.relErr.updatePosterior()
+        if self.relative_error.hasPosterior:
+            self.relative_error.updatePosterior()
 
         self.update_additive_error_posterior()
 

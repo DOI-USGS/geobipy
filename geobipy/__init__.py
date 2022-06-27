@@ -85,8 +85,14 @@ def checkCommandArguments():
     Parser.add_argument('--index', dest='index', type=int, default=None, help='Invert this data point only. Only used in serial mode.')
     Parser.add_argument('--fiducial', dest='fiducial', type=float, default=None, help='Invert this fiducial only. Only used in serial mode.')
     Parser.add_argument('--line', dest='line_number', type=float, default=None, help='Invert the fiducial on this line. Only used in serial mode.')
+    Parser.add_argument('--verbose', dest='verbose', default=False, help='Throw warnings as errors.')
+
 
     args = Parser.parse_args()
+
+    if args.verbose:
+        import warnings
+        warnings.filterwarnings("error")
 
     return args.inputFile, args.output_directory, args.skipHDF5, args.seed, args.index, args.fiducial, args.line_number
 
