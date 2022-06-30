@@ -37,8 +37,8 @@ class Inference1D(myObject):
         Whether to save a png of each single data point results. Don't do this in parallel please.
     dataPoint : geobipy.dataPoint
         Datapoint to use in the inversion.
-        The relative error prior must have been set with dataPoint.relErr.set_prior()
-        The additive error prior must have been set with dataPoint.addErr.set_prior()
+        The relative error prior must have been set with dataPoint.relative_error.set_prior()
+        The additive error prior must have been set with dataPoint.additive_error.set_prior()
         The height prior must have been set with dataPoint.z.set_prior()
     model : geobipy.model
         Model representing the subsurface.
@@ -447,7 +447,7 @@ class Inference1D(myObject):
             if (self.rank == 1):
                 print(tmp, flush=True)
 
-            if (not self.burned_in and not self.datapoint.relErr.hasPrior):
+            if (not self.burned_in and not self.datapoint.relative_error.hasPrior):
                 self.multiplier *= self.kwargs['multiplier']
 
         if (self.burned_in):  # We need to update some plotting options
