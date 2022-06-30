@@ -220,7 +220,7 @@ class DataPoint(Point):
             values = np.full(self.nSystems, fill_value=0.01)
         else:
             assert np.size(values) == self.nSystems, ValueError("relative_error must be a list of size equal to the number of systems {}".format(self.nSystems))
-            # assert (np.all(np.asarray(values) > 0.0)), ValueError("relErr must be > 0.0.")
+            # assert (np.all(np.asarray(values) > 0.0)), ValueError("relative_error must be > 0.0.")
             # assert (isinstance(additiveErr[i], float) or isinstance(additiveErr[i], np.ndarray)), TypeError(
             #     "additiveErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
 

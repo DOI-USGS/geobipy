@@ -323,7 +323,7 @@ class TdemDataPoint(EmDataPoint):
             If any relative or additive errors are <= 0.0
         """
 
-        assert np.all(self.relative_error > 0.0), ValueError('relErr must be > 0.0')
+        assert np.all(self.relative_error > 0.0), ValueError('relative_error must be > 0.0')
 
         # For each system assign error levels using the user inputs
         for i in range(self.nSystems):
