@@ -1819,7 +1819,7 @@ class Inference3D(myObject):
         if useVariance:
             for line in self.lines:
                 line.compute_additive_error_opacity()
-            alpha = np.hstack([line.addErr_opacity for line in self.lines])
+            alpha = np.hstack([line.additive_error_opacity for line in self.lines])
             kwargs['alpha'] = alpha
 
         return self.map(dx = dx, dy = dy, mask = mask, clip = clip, values = self.additiveError[system, :], **kwargs)
@@ -1891,7 +1891,7 @@ class Inference3D(myObject):
         if useVariance:
             for line in self.lines:
                 line.compute_relative_error_opacity()
-            alpha = np.hstack([line.relErr_opacity for line in self.lines])
+            alpha = np.hstack([line.relative_error_opacity for line in self.lines])
             kwargs['alpha'] = alpha
 
         return  self.map(dx = dx, dy = dy, mask = mask, clip = clip, values = self.relativeError[system, :], **kwargs)
