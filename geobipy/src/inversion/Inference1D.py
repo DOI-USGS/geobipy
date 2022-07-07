@@ -4,18 +4,19 @@ Class to store inversion results. Contains plotting and writing to file procedur
 from copy import deepcopy
 from os.path import join
 import matplotlib.pyplot as plt
+
 from ..base import plotting as cP
 from ..base import utilities as cF
 import numpy as np
-from ..base import fileIO as fIO
 import h5py
-from ..base.HDF.hdfWrite import write_nd
 from ..classes.core import StatArray
 from ..classes.statistics.Distribution import Distribution
+from ..classes.statistics.Histogram import Histogram
 from ..classes.core.myObject import myObject
-from ..classes.data.datapoint.FdemDataPoint import FdemDataPoint
-from ..classes.data.datapoint.TdemDataPoint import TdemDataPoint
-from ..classes.model.Model import Model
+# from ..classes.data.datapoint.FdemDataPoint import FdemDataPoint
+# from ..classes.data.datapoint.TdemDataPoint import TdemDataPoint
+from ..classes.mesh.RectilinearMesh1D import RectilinearMesh1D
+# from ..classes.model.Model import Model
 from ..classes.core.Stopwatch import Stopwatch
 from ..base.HDF import hdfRead
 from cached_property import cached_property
@@ -98,7 +99,7 @@ class Inference1D(myObject):
         self.initialize_model()
 
         # Compute the data misfit
-        self.data_misfit = datapoint.dataMisfit()**2.0
+        self.data_misfit = datapoint.dataMisfit()
 
         # # Calibrate the response if it is being solved for
         # if (self.kwargs.solveCalibration):
@@ -136,6 +137,13 @@ class Inference1D(myObject):
 
         self.data_misfit_v = StatArray.StatArray(2 * self._n_markov_chains, name='Data Misfit')
         self.data_misfit_v[0] = self.data_misfit
+
+        target = np.sum(self.datapoint.active)
+
+        self.data_misfit_v.prior = Distribution('chi2', df=target)
+
+        edges = StatArray.StatArray(np.linspace(1, 2*target))
+        self.data_misfit_v.posterior = Histogram(mesh = RectilinearMesh1D(edges=edges))
 
         # Initialize a stopwatch to keep track of time
         self.clk = Stopwatch()
@@ -451,6 +459,8 @@ class Inference1D(myObject):
                 self.multiplier *= self.kwargs['multiplier']
 
         if (self.burned_in):  # We need to update some plotting options
+            self.data_misfit_v.posterior.update(self.data_misfit, trim=True)
+
             # Added the layer depths to a list, we histogram this list every
             # iPlot iterations
             self.model.update_posteriors(0.5)#self.user_options.clip_ratio)
@@ -490,10 +500,12 @@ class Inference1D(myObject):
         gs = self.fig.add_gridspec(2, 2, height_ratios=(1, 6))
         self.ax = [None] * 4
 
-        self.ax[0] = plt.subplot(gs[0, 0])  # Acceptance Rate 0
-        self.ax[1] = plt.subplot(gs[0, 1])  # Data misfit vs iteration 1
-        for ax in self.ax[:2]:
-            cP.pretty(ax)
+        self.ax[0] = cP.pretty(plt.subplot(gs[0, 0]))  # Acceptance Rate 0
+
+        splt = gs[0, 1].subgridspec(1, 2, width_ratios=[4, 1])
+        ax = [plt.subplot(splt[0, 0])]
+        ax.append(plt.subplot(splt[0, 1]))#, sharey=ax[0]))
+        self.ax[1] = ax  # Data misfit vs iteration 1 and posterior
 
         self.ax[2] = self.model._init_posterior_plots(gs[1, 0])
         self.ax[3] = self.datapoint._init_posterior_plots(gs[1, 1])
@@ -586,7 +598,7 @@ class Inference1D(myObject):
     def _plotMisfitVsIteration(self, **kwargs):
         """ Plot the data misfit against iteration. """
 
-        kwargs['ax'] = self.ax[1]
+        kwargs['ax'] = self.ax[1][0]
         m = kwargs.pop('marker', '.')
         ms = kwargs.pop('markersize', 2)
         a = kwargs.pop('alpha', 0.7)
@@ -607,6 +619,17 @@ class Inference1D(myObject):
         ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 
         plt.xlim([0, self.iRange[self.iteration]])
+
+        kwargs = {'ax' : self.ax[1][1],
+                  'normalize' : True}
+        self.ax[1][1].cla()
+        ax = self.data_misfit_v.posterior.plot(transpose=True, **kwargs)
+        ylim = ax.get_ylim()
+        ax = self.data_misfit_v.prior.plotPDF(ax=self.ax[1][1], transpose=True, c='#C92641', linestyle='dashed')
+
+        plt.hlines(np.sum(self.datapoint.active), xmin=0.0, xmax=0.5*ax.get_xlim()[1], color='#C92641', linestyle='dashed')
+        ax.set_ylim(ylim)
+
 
     # def _plotObservedPredictedData(self, **kwargs):
     #     """ Plot the observed and predicted data """
