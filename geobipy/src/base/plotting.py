@@ -158,7 +158,7 @@ def filter_color_kwargs(kwargs):
                 'nBins' : 256,
                 'orientation' : 'vertical',
                 'alpha' : 1.0,
-                'alpha_color' : [1, 1, 1], 
+                'alpha_color' : [1, 1, 1],
                 'ticks': None}
     out, kwargs = filter_kwargs(kwargs, defaults)
     out['cmap'] = copy.copy(mpl.cm.get_cmap(out['cmap'], out['cmapIntervals']))
@@ -170,7 +170,7 @@ def filter_plotting_kwargs(kwargs):
                 'xscale': 'linear',
                 'yscale': 'linear',
                 'flip' : False,
-                'flipX' : False, 
+                'flipX' : False,
                 'flipY' : False,
                 'log' : None,
                 'logX' : None,
@@ -178,7 +178,7 @@ def filter_plotting_kwargs(kwargs):
                 'trim' : None,
                 'reciprocateX' : False,
                 'reciprocateY' : False,
-                'labels' : True, 
+                'labels' : True,
                 'logBins' : False,
                 'grid' : False,
                 'shading' : 'auto',
@@ -318,7 +318,7 @@ def bar(values, edges, line=None, **kwargs):
     """
     geobipy_kwargs, kwargs = filter_plotting_kwargs(kwargs)
     color_kwargs, kwargs = filter_color_kwargs(kwargs)
-    
+
     kwargs['color'] = kwargs.get('color', wellSeparated[0])
     kwargs['linewidth'] = kwargs.get('linewidth', 0.5)
     kwargs['edgecolor'] = kwargs.get('edgecolor', 'k')
@@ -356,7 +356,7 @@ def bar(values, edges, line=None, **kwargs):
     if (i1 >= i0):
         values = values[i0:i1+1]
         edges = edges[i0:i1+2]
-    
+
     width = np.abs(np.diff(edges))
     centres = edges[:-1] + 0.5 * (np.diff(edges))
 
@@ -448,7 +448,7 @@ def pcolor(values, x=None, y=None, **kwargs):
 
     """
     geobipy_kwargs, _ = filter_plotting_kwargs(kwargs)
-    
+
     if (x is None):
         mx = np.arange(np.size(values,1)+1)
     else:
@@ -1052,7 +1052,7 @@ def plot(x, y, **kwargs):
 
     if geobipy_kwargs['ylim'] is not None:
         ax.set_ylim(geobipy_kwargs['ylim'])
-        
+
     ax.set_xscale(geobipy_kwargs['xscale'])
     ax.set_yscale(geobipy_kwargs['yscale'])
 

@@ -388,7 +388,7 @@ class Inference1D(myObject):
 
             # Accept or reject the new model
             self.accept_reject()
-            
+
             self.update()
 
             if self.interactive_plot:
@@ -432,10 +432,10 @@ class Inference1D(myObject):
 
         # Determine if we are burning in
         if (not self.burned_in):
-            
             target_misfit = np.sum(self.datapoint.active)
+
             # if self.data_misfit < target_misfit:
-            if np.isclose(self.data_misfit, self.multiplier*target_misfit, rtol=1e-1, atol=1e-2) :  # datapoint.target_misfit
+            if np.isclose(self.data_misfit, self.multiplier*target_misfit, rtol=1e-1, atol=1e-2):
                 self.burned_in = True  # Let the results know they are burned in
                 self.burned_in_iteration = self.iteration       # Save the burn in iteration to the results
                 self.best_iteration = self.iteration
@@ -582,7 +582,7 @@ class Inference1D(myObject):
         """ Plots the acceptance percentage against iteration. """
 
         i = np.s_[:np.int64(self.iteration / self.update_plot_every)]
-    
+
         self.acceptance_rate.plot(x=self.acceptance_x, i=i,
                        ax=self.ax[0],
                        marker='o',
@@ -780,16 +780,16 @@ class Inference1D(myObject):
         self.data_misfit_v.writeHdf(hdfFile, 'phids', index=i)
 
         # Write the data posteriors
-        self.datapoint.writeHdf(hdfFile,'data',  index=i)  
+        self.datapoint.writeHdf(hdfFile,'data',  index=i)
         # Write the highest posterior data
-        self.best_datapoint.writeHdf(hdfFile,'data', withPosterior=False, index=i) 
+        self.best_datapoint.writeHdf(hdfFile,'data', withPosterior=False, index=i)
 
         self.halfspace.writeHdf(hdfFile, 'halfspace', index=i)
 
         # Write the model posteriors
-        self.model.writeHdf(hdfFile,'model', index=i) 
+        self.model.writeHdf(hdfFile,'model', index=i)
         # Write the highest posterior data
-        self.best_model.writeHdf(hdfFile,'model', withPosterior=False, index=i) 
+        self.best_model.writeHdf(hdfFile,'model', withPosterior=False, index=i)
 
 
     def read_fromH5Obj(self, h5obj, fName, grpName, system_file_path = ''):
@@ -874,4 +874,3 @@ class Inference1D(myObject):
         # self.fiducial = np.float64(fiducials[index])
 
         return self
-
