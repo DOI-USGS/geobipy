@@ -8,6 +8,7 @@ from numpy.random import RandomState
 from .baseDistribution import baseDistribution
 from .CategoricalDistribution import Categorical
 from .NormalDistribution import Normal
+from .ChiSquaredDistribution import ChiSquared
 from .LogNormalDistribution import LogNormal
 from .MvNormalDistribution import MvNormal
 from .MvLogNormalDistribution import MvLogNormal
@@ -69,6 +70,9 @@ def Distribution(distributionType, *args, **kwargs):
     if (tName == 'uniform'):
         return Uniform(*args, **kwargs)
 
+    elif (tName == 'chi2'):
+        return ChiSquared(*args, **kwargs)
+
     elif (tName == 'normal'):
         return Normal(*args, **kwargs)
 
@@ -101,4 +105,3 @@ def Distribution(distributionType, *args, **kwargs):
 
     else:
         assert False, Exception('Please choose an appropriate distribution [Uniform, Normal, MvNormal, Gamma, Order, Categorical]')
-
