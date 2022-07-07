@@ -84,8 +84,6 @@ class Normal(baseDistribution):
         else:
             return (0.5 / self.variance**2.0) * ((x - self._mean)**2.0 - self.variance) * self.probability(x)
 
-
-
     def rng(self, size=1):
         """Generate random numbers
 
@@ -102,9 +100,7 @@ class Normal(baseDistribution):
         """
         size = (size, self.mean.size)
         values = np.squeeze(self.prng.normal(size=size, loc=self._mean, scale=self.variance))
-
         return np.exp(values) if self.log else values
-
 
     def plotPDF(self, log=False, **kwargs):
 
@@ -114,6 +110,8 @@ class Normal(baseDistribution):
 
         cP.plot(bins, self.probability(bins, log=log), label=t, **kwargs)
 
+    def ppf(self, alpha):
+        return norm.ppf(alpha, loc=self._mean, scale=self.variance)
 
     def probability(self, x, log):
         """ For a realization x, compute the probability """
@@ -176,4 +174,3 @@ class Normal(baseDistribution):
         values = np.linspace(self._mean - tmp, self._mean + tmp, nBins+1)
 
         return StatArray.StatArray(np.exp(values)) if self.log else StatArray.StatArray(values)
-
