@@ -145,6 +145,8 @@ def pretty(ax):
     ax.get_xaxis().tick_bottom()
     ax.get_yaxis().tick_left()
 
+    return ax
+
 def filter_color_kwargs(kwargs):
     defaults = {'equalize' : False,
                 'clim_scaling' : None,
@@ -1017,6 +1019,10 @@ def plot(x, y, **kwargs):
     geobipy_kwargs, kwargs = filter_plotting_kwargs(kwargs)
     color_kwargs, kwargs = filter_color_kwargs(kwargs)
 
+
+    if geobipy_kwargs['transpose']:
+        y, x = x, y
+
     if geobipy_kwargs['reciprocateX']:
         x = 1.0 / x
 
@@ -1037,7 +1043,7 @@ def plot(x, y, **kwargs):
     pretty(ax)
 
     # try:
-    ax.plot(x, tmp, **kwargs)
+    ax.plot(x, y, **kwargs)
     # except:
     #     plt.plot(x, tmp.T, **kwargs)
 
