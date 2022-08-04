@@ -5,16 +5,12 @@ import numpy as np
 from copy import deepcopy
 
 from ...base.utilities import reslice
-from ...base import plotting as cP
-from matplotlib.figure import Figure
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
 from ..core.myObject import myObject
 from ...base.HDF import hdfRead
-from ...base import utilities
 from ..core import StatArray
 from ..mesh.Mesh import Mesh
 from ..statistics.Distribution import Distribution
+from ..statistics.baseDistribution import baseDistribution
 
 class Model(myObject):
     """Generic model class with an attached mesh.
@@ -540,17 +536,17 @@ class Model(myObject):
         #     self.evaluateHitmapPrior(self.Hitmap)
 
         # Probability of parameter
-        p_prior = 0.0 if log else 1.0
+        value_prior = 0.0 if log else 1.0
         if pPrior:
-            p_prior = self.values.probability(log=log)
+            value_prior = self.values.probability(log=log)
 
         # Probability of model gradient
-        g_prior = 0.0 if log else 1.0
+        gradient_prior = 0.0 if log else 1.0
         if gPrior:
-            g_prior = self.gradient_probability(log=log)
+            gradient_prior = self.gradient_probability(log=log)
 
-        return (p + p_prior + g_prior) if log else (p * p_prior * g_prior)
-    
+        return (p + value_prior + gradient_prior) if log else (p * value_prior * gradient_prior)
+
     def proposal_probabilities(self, remappedModel, observation=None):
         """Return the forward and reverse proposal probabilities for the model
 
