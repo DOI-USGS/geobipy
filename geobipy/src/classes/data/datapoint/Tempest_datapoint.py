@@ -267,46 +267,6 @@ class Tempest_datapoint(TdemDataPoint):
 
         return ax
 
-    def set_priors(self, height_prior=None, relative_error_prior=None, additive_error_prior=None, transmitter_pitch_prior=None, data_prior=None, **kwargs):
-
-        super().set_priors(height_prior, relative_error_prior, additive_error_prior, data_prior, **kwargs)
-
-        if transmitter_pitch_prior is None:
-            if kwargs.get('solve_transmitter_pitch', False):
-                transmitter_pitch_prior = Distribution('Uniform',
-                                                        self.transmitter.pitch - kwargs['maximum_transmitter_pitch_change'],
-                                                        self.transmitter.pitch + kwargs['maximum_transmitter_pitch_change'],
-                                                        prng=kwargs['prng'])
-
-        self.transmitter.set_priors(pitch_prior=transmitter_pitch_prior)
-
-    def set_relative_error_prior(self, prior):
-        if not prior is None:
-            assert prior.ndim == self.n_components * self.nSystems, ValueError("relative_error_prior must have {} dimensions".format(self.n_components * self.nSystems))
-            self.relative_error.prior = prior
-
-    def set_additive_error_prior(self, prior):
-        if not prior is None:
-            assert prior.ndim == self.nChannels, ValueError("additive_error_prior must have {} dimensions".format(self.nChannels))
-            self.additive_error.prior = prior
-    
-
-    def set_proposals(self, height_proposal=None, relative_error_proposal=None, additive_error_proposal=None, transmitter_pitch_proposal=None, **kwargs):
-
-        super().set_proposals(height_proposal, relative_error_proposal, additive_error_proposal, **kwargs)
-
-        if transmitter_pitch_proposal is None:
-            if kwargs.get('solve_transmitter_pitch', False):
-                transmitter_pitch_proposal = Distribution('Normal', self.transmitter.pitch.value, kwargs['transmitter_pitch_proposal_variance'], prng=kwargs['prng'])
-
-        self.transmitter.set_proposals(pitch_proposal=transmitter_pitch_proposal)
-
-    def set_posteriors(self, log=None):
-
-        super().set_posteriors(log=None)
-
-        self.transmitter.set_posteriors()
-
     def perturb(self):
         """Propose a new EM data point given the specified attached propsal distributions
 
@@ -460,6 +420,46 @@ class Tempest_datapoint(TdemDataPoint):
                 ic = self._component_indices(j, i)
                 self.predicted_secondary_field[ic].plot(x=system_times, **kwargs)
 
+    def set_priors(self, height_prior=None, relative_error_prior=None, additive_error_prior=None, transmitter_pitch_prior=None, data_prior=None, **kwargs):
+
+        super().set_priors(height_prior, relative_error_prior, additive_error_prior, data_prior, **kwargs)
+
+        if transmitter_pitch_prior is None:
+            if kwargs.get('solve_transmitter_pitch', False):
+                transmitter_pitch_prior = Distribution('Uniform',
+                                                        self.transmitter.pitch - kwargs['maximum_transmitter_pitch_change'],
+                                                        self.transmitter.pitch + kwargs['maximum_transmitter_pitch_change'],
+                                                        prng=kwargs['prng'])
+
+        self.transmitter.set_priors(pitch_prior=transmitter_pitch_prior)
+
+    def set_relative_error_prior(self, prior):
+        if not prior is None:
+            assert prior.ndim == self.n_components * self.nSystems, ValueError("relative_error_prior must have {} dimensions".format(self.n_components * self.nSystems))
+            self.relative_error.prior = prior
+
+    def set_additive_error_prior(self, prior):
+        if not prior is None:
+            assert prior.ndim == self.nChannels, ValueError("additive_error_prior must have {} dimensions".format(self.nChannels))
+            self.additive_error.prior = prior
+
+
+    def set_proposals(self, height_proposal=None, relative_error_proposal=None, additive_error_proposal=None, transmitter_pitch_proposal=None, **kwargs):
+
+        super().set_proposals(height_proposal, relative_error_proposal, additive_error_proposal, **kwargs)
+
+        if transmitter_pitch_proposal is None:
+            if kwargs.get('solve_transmitter_pitch', False):
+                transmitter_pitch_proposal = Distribution('Normal', self.transmitter.pitch.value, kwargs['transmitter_pitch_proposal_variance'], prng=kwargs['prng'])
+
+        self.transmitter.set_proposals(pitch_proposal=transmitter_pitch_proposal)
+
+    def set_posteriors(self, log=None):
+
+        super().set_posteriors(log=log)
+
+        self.transmitter.set_posteriors()
+
     def set_relative_error_posterior(self):
 
         if self.relative_error.hasPrior:
@@ -470,11 +470,6 @@ class Tempest_datapoint(TdemDataPoint):
                 mesh = RectilinearMesh1D(edges = b, relativeTo=0.5*(b.max()-b.min()))
                 posterior.append(Histogram(mesh=mesh))
             self.relative_error.posterior = posterior
-
-    def set_additive_error_prior(self, prior):
-        if not prior is None:
-            assert prior.ndim == self.nChannels, ValueError("additive_error_prior must have {} dimensions".format(self.nChannels))
-            self.additive_error.prior = prior
 
     def set_additive_error_posterior(self, log=None):
         if self.additive_error.hasPrior:
