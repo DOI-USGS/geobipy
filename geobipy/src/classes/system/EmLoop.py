@@ -51,8 +51,11 @@ class EmLoop(Point, ABC):
     def pitch(self, value):
         if not isinstance(value, StatArray.StatArray):
             value = np.float64(value)
-        # assert isinstance(value, (StatArray.StatArray, float, np.float64)), TypeError("pitch must have type float")
-        self._pitch = StatArray.StatArray(value, 'Pitch', '$^{o}$')
+
+        if '_pitch' in self.__dict__:
+            self._pitch[0] = value
+        else:
+            self._pitch = StatArray.StatArray(value, 'Pitch', '$^{o}$')
 
     @property
     def roll(self):
@@ -62,8 +65,10 @@ class EmLoop(Point, ABC):
     def roll(self, value):
         if not isinstance(value, StatArray.StatArray):
             value = np.float64(value)
-        # assert isinstance(value, (StatArray.StatArray, float, np.float64)), TypeError("roll must have type float")
-        self._roll = StatArray.StatArray(value, 'Roll', '$^{o}$')
+        if '_roll' in self.__dict__:
+            self._roll[0] = value
+        else:
+            self._roll = StatArray.StatArray(value, 'Roll', '$^{o}$')
 
     @property
     def yaw(self):
@@ -73,8 +78,11 @@ class EmLoop(Point, ABC):
     def yaw(self, value):
         if not isinstance(value, StatArray.StatArray):
             value = np.float64(value)
-        # assert isinstance(value, (StatArray.StatArray, float, np.float64)), TypeError("yaw must have type float")
-        self._yaw = StatArray.StatArray(value, 'Yaw', '$^{o}$')
+
+        if '_yaw' in self.__dict__:
+            self._yaw[0] = value
+        else:
+            self._yaw = StatArray.StatArray(value, 'Yaw', '$^{o}$')
 
     @property
     def orientation(self):
@@ -95,7 +103,7 @@ class EmLoop(Point, ABC):
                 value = 1
             else:
                 value = 2
-        
+
         assert 0 <= value <= 2, ValueError("orientation must be 0, 1, or 2")
         self._orientation = StatArray.StatArray(1, dtype=np.int8) + value
 
@@ -122,7 +130,7 @@ class EmLoop(Point, ABC):
         return out
 
     def set_priors(self, x_prior=None, y_prior=None, z_prior=None, pitch_prior=None, roll_prior=None, yaw_prior=None, kwargs={}):
-        
+
         super().set_priors(x_prior, y_prior, z_prior, kwargs=kwargs)
 
         if pitch_prior is not None:
@@ -167,7 +175,7 @@ class EmLoop(Point, ABC):
 
         """
         if self.pitch.hasPrior:
-            mesh = RectilinearMesh1D(edges=StatArray.StatArray(self.pitch.prior.bins(), name=self.pitch.name, units=self.pitch.units), relativeTo=self.pitch)
+            mesh = RectilinearMesh1D(edges=StatArray.StatArray(self.pitch.prior.bins(199), name=self.pitch.name, units=self.pitch.units), relativeTo=self.pitch)
             self.pitch.posterior = Histogram(mesh=mesh)
 
     def set_roll_posterior(self):
@@ -232,7 +240,7 @@ class EmLoop(Point, ABC):
         return out
 
     def Isend(self, dest, world):
-    
+
         super().Isend(dest, world)
 
         self.pitch.Isend(dest, world)

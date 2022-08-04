@@ -4,6 +4,7 @@ from ....classes.core import StatArray
 from .TdemDataPoint import TdemDataPoint
 from ...forwardmodelling.Electromagnetic.TD.tdem1d import (tdem1dfwd, tdem1dsen)
 from ...statistics.Histogram import Histogram
+from ...model.Model import Model
 from ...mesh.RectilinearMesh1D import RectilinearMesh1D
 from ...mesh.RectilinearMesh2D import RectilinearMesh2D
 from ...statistics.Distribution import Distribution
@@ -70,7 +71,7 @@ class Tempest_datapoint(TdemDataPoint):
             assert np.size(values) == self.nChannels, ValueError(("Tempest data must a have additive error values for all time gates and all components. \n"
                                                               "additive_error must have size {}").format(self.nChannels))
 
-        self._additive_error = StatArray.StatArray(values, '$\epsilon_{additive}x10^{2}$', self.units)
+        self._additive_error = StatArray.StatArray(values, '$\epsilon_{additive}$', self.units)
 
     @TdemDataPoint.data.getter
     def data(self):
@@ -91,12 +92,12 @@ class Tempest_datapoint(TdemDataPoint):
     @TdemDataPoint.relative_error.setter
     def relative_error(self, values):
         if values is None:
-            values = self.n_components * self.nSystems
+            values = np.full(self.n_components * self.nSystems, fill_value=0.01)
         else:
             assert np.size(values) == self.n_components * self.nSystems, ValueError(("Tempest data must a have relative error for the primary and secondary fields, for each system. \n"
                             "relative_error must have size {}").format(self.n_components * self.nSystems))
 
-        self._relative_error = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
+        self._relative_error = StatArray.StatArray(values, '$\epsilon_{Relative}$', '%')
 
     @TdemDataPoint.std.getter
     def std(self):
@@ -150,6 +151,73 @@ class Tempest_datapoint(TdemDataPoint):
                 'units must have type str')
         self._units = value
 
+    def halfspace_misfit(self, conductivity_range, n_samples=100, pitch_range=None):
+        assert conductivity_range[1] > conductivity_range[0], ValueError("Maximum conductivity must be greater than the minimum")
+        conductivity = RectilinearMesh1D(centres = np.logspace(*(np.log10(conductivity_range)), n_samples+1), log=10)
+
+        if pitch_range is None:
+            misfit = Model(mesh=conductivity)
+            model = self.new_model()
+
+            for i in range(conductivity.nCells):
+                model.values[0] = conductivity.centres_absolute[i]
+                self.forward(model)
+                misfit.values[i] = self.dataMisfit()
+
+        else:
+            pitch = RectilinearMesh1D(centres = np.linspace(*pitch_range, n_samples))
+            misfit = Model(mesh = RectilinearMesh2D(x=conductivity, y=pitch))
+
+            model = self.new_model()
+            for i in range(conductivity.nCells):
+                model.values[0] = conductivity.centres_absolute[i]
+                for j in range(pitch.nCells):
+                    self.transmitter.pitch = pitch.centres[j]
+
+                    self.forward(model)
+                    misfit.values[i, j] = self.dataMisfit()
+
+        return misfit
+
+    def find_best_halfspace(self, conductivity=1.0, pitch=0.0):
+        """Computes the best value of a half space that fits the data.
+
+        Carries out a brute force search of the halfspace conductivity that best fits the data.
+        The profile of data misfit vs halfspace conductivity is not quadratic, so a bisection will not work.
+
+        Parameters
+        ----------
+        minConductivity : float, optional
+            The minimum conductivity to search over
+        maxConductivity : float, optional
+            The maximum conductivity to search over
+        nSamples : int, optional
+            The number of values between the min and max
+
+        Returns
+        -------
+        out : np.float64
+            The best fitting log10 conductivity for the half space
+
+        """
+        from scipy.optimize import minimize
+
+        dp = deepcopy(self)
+
+        def minimize_me(x):
+            model = dp.new_model()
+            model.values[0] = x[0]
+            dp.transmitter.pitch = x[1]
+            dp.forward(model)
+            return dp.dataMisfit()
+
+        out = minimize(minimize_me, [conductivity, pitch], method='Nelder-Mead', bounds=((0.0, np.inf),(-90.0, 90.0)))
+
+        model = self.new_model()
+        model.values[0] = out.x[0]
+        self.transmitter.pitch = out.x[1]
+        return model
+
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
 
@@ -198,46 +266,6 @@ class Tempest_datapoint(TdemDataPoint):
         ax.append(tmp)
 
         return ax
-
-    def set_priors(self, height_prior=None, relative_error_prior=None, additive_error_prior=None, transmitter_pitch_prior=None, data_prior=None, **kwargs):
-
-        super().set_priors(height_prior, relative_error_prior, additive_error_prior, data_prior, **kwargs)
-
-        if transmitter_pitch_prior is None:
-            if kwargs.get('solve_transmitter_pitch', False):
-                transmitter_pitch_prior = Distribution('Uniform',
-                                                        self.transmitter.pitch - kwargs['maximum_transmitter_pitch_change'],
-                                                        self.transmitter.pitch + kwargs['maximum_transmitter_pitch_change'],
-                                                        prng=kwargs['prng'])
-
-        self.transmitter.set_priors(pitch_prior=transmitter_pitch_prior)
-
-    def set_relative_error_prior(self, prior):
-        if not prior is None:
-            assert prior.ndim == self.n_components * self.nSystems, ValueError("relative_error_prior must have {} dimensions".format(self.n_components * self.nSystems))
-            self.relative_error.prior = prior
-
-    def set_additive_error_prior(self, prior):
-        if not prior is None:
-            assert prior.ndim == self.nChannels, ValueError("additive_error_prior must have {} dimensions".format(self.nChannels))
-            self.additive_error.prior = prior
-    
-
-    def set_proposals(self, height_proposal=None, relative_error_proposal=None, additive_error_proposal=None, transmitter_pitch_proposal=None, **kwargs):
-
-        super().set_proposals(height_proposal, relative_error_proposal, additive_error_proposal, **kwargs)
-
-        if transmitter_pitch_proposal is None:
-            if kwargs.get('solve_transmitter_pitch', False):
-                transmitter_pitch_proposal = Distribution('Normal', self.transmitter.pitch.value, kwargs['transmitter_pitch_proposal_variance'], prng=kwargs['prng'])
-
-        self.transmitter.set_proposals(pitch_proposal=transmitter_pitch_proposal)
-
-    def set_posteriors(self, log=None):
-
-        super().set_posteriors(log=None)
-
-        self.transmitter.set_posteriors()
 
     def perturb(self):
         """Propose a new EM data point given the specified attached propsal distributions
@@ -392,6 +420,46 @@ class Tempest_datapoint(TdemDataPoint):
                 ic = self._component_indices(j, i)
                 self.predicted_secondary_field[ic].plot(x=system_times, **kwargs)
 
+    def set_priors(self, height_prior=None, relative_error_prior=None, additive_error_prior=None, transmitter_pitch_prior=None, data_prior=None, **kwargs):
+
+        super().set_priors(height_prior, relative_error_prior, additive_error_prior, data_prior, **kwargs)
+
+        if transmitter_pitch_prior is None:
+            if kwargs.get('solve_transmitter_pitch', False):
+                transmitter_pitch_prior = Distribution('Uniform',
+                                                        self.transmitter.pitch - kwargs['maximum_transmitter_pitch_change'],
+                                                        self.transmitter.pitch + kwargs['maximum_transmitter_pitch_change'],
+                                                        prng=kwargs['prng'])
+
+        self.transmitter.set_priors(pitch_prior=transmitter_pitch_prior)
+
+    def set_relative_error_prior(self, prior):
+        if not prior is None:
+            assert prior.ndim == self.n_components * self.nSystems, ValueError("relative_error_prior must have {} dimensions".format(self.n_components * self.nSystems))
+            self.relative_error.prior = prior
+
+    def set_additive_error_prior(self, prior):
+        if not prior is None:
+            assert prior.ndim == self.nChannels, ValueError("additive_error_prior must have {} dimensions".format(self.nChannels))
+            self.additive_error.prior = prior
+
+
+    def set_proposals(self, height_proposal=None, relative_error_proposal=None, additive_error_proposal=None, transmitter_pitch_proposal=None, **kwargs):
+
+        super().set_proposals(height_proposal, relative_error_proposal, additive_error_proposal, **kwargs)
+
+        if transmitter_pitch_proposal is None:
+            if kwargs.get('solve_transmitter_pitch', False):
+                transmitter_pitch_proposal = Distribution('Normal', self.transmitter.pitch.value, kwargs['transmitter_pitch_proposal_variance'], prng=kwargs['prng'])
+
+        self.transmitter.set_proposals(pitch_proposal=transmitter_pitch_proposal)
+
+    def set_posteriors(self, log=None):
+
+        super().set_posteriors(log=log)
+
+        self.transmitter.set_posteriors()
+
     def set_relative_error_posterior(self):
 
         if self.relative_error.hasPrior:
@@ -402,11 +470,6 @@ class Tempest_datapoint(TdemDataPoint):
                 mesh = RectilinearMesh1D(edges = b, relativeTo=0.5*(b.max()-b.min()))
                 posterior.append(Histogram(mesh=mesh))
             self.relative_error.posterior = posterior
-
-    def set_additive_error_prior(self, prior):
-        if not prior is None:
-            assert prior.ndim == self.nChannels, ValueError("additive_error_prior must have {} dimensions".format(self.nChannels))
-            self.additive_error.prior = prior
 
     def set_additive_error_posterior(self, log=None):
         if self.additive_error.hasPrior:

@@ -1,24 +1,14 @@
-import matplotlib as mpl
+# import matplotlib as mpl
 #mpl.use('TkAgg')
-import matplotlib.mlab as mlab
+from matplotlib.cm import get_cmap
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
-import pylab as py
-from matplotlib.collections import LineCollection as lc
-from matplotlib.patches import Circle
-from matplotlib.collections import PatchCollection
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-from matplotlib.colors import ListedColormap
+from matplotlib.colors import ListedColormap, Colormap
+
 import matplotlib.gridspec as gridspec
 import numpy as np
-import numpy.ma as ma
-from .fileIO import deleteFile
-from ..base import Error as Err
-from ..base import utilities as cF # (cF.getName, cF.getUnits, cF.getNameUnits, cF.histogramEqualize, cF._log, cF.findFirstLastNotValue)
-from cycler import cycler
-import scipy as sp
-import copy
-from ..classes.core import StatArray
+from ..base import utilities
+from copy import copy
 
 def make_colourmap(seq, cname):
     """Generate a Linear Segmented colourmap
@@ -94,38 +84,6 @@ armytage = [
 "#e3bbb5","#b9e6af","#e0917b","#6ad33f","#3811c6","#93d58d","#c6dec7","#ead3c6",
 "#f0b98d","#08ef97","#c00fcf","#9cded6","#ead5e7","#e1ebf3","#e1c4f6","#9cd4f7"]
 
-
-#==============================================
-# Generate default properties for GeoBIPy
-#==============================================
-
-# label_size = 8
-
-# try:
-#     mpl.axes.rcParams['ytick.labelsize'] = label_size
-# except:
-#     assert not Err.isIpython(), 'Please use %matplotlib inline for ipython notebook on the very first line'
-
-# myFonts = {'fontsize': 8}
-# mpl.rc('axes', labelsize=label_size)
-# mpl.rc('xtick', labelsize=label_size)
-# mpl.rc('ytick', labelsize=label_size)
-# # mpl.rc('axes', labelsize='small')
-
-# mpl.rc('lines', linewidth=2, markersize=5, markeredgewidth=2, color=wellSeparated[0])
-# mpl.rcParams['boxplot.flierprops.markerfacecolor'] = wellSeparated[0]
-# mpl.rcParams['grid.alpha'] = 0.1
-# mpl.rcParams['axes.prop_cycle'] = cycler('color', wellSeparated)
-# mpl.rcParams['image.cmap'] = 'viridis'
-# plt.rcParams['figure.facecolor'] = 'white'
-# mpl.rcParams['figure.titlesize'] = 'small'
-# plt.rcParams['axes.facecolor'] = 'white'
-# plt.rcParams['savefig.facecolor'] = 'white'
-# #plt.rcParams.update({'figure.autolayout': True})
-
-# import os
-# plt.style.use('./geobipy.mplstyle')
-
 def pretty(ax):
     """Make a plot with nice axes.
 
@@ -161,7 +119,7 @@ def filter_color_kwargs(kwargs):
                 'alpha_color' : [1, 1, 1],
                 'ticks': None}
     out, kwargs = filter_kwargs(kwargs, defaults)
-    out['cmap'] = copy.copy(mpl.cm.get_cmap(out['cmap'], out['cmapIntervals']))
+    out['cmap'] = copy(get_cmap(out['cmap'], out['cmapIntervals']))
     out['cmap'].set_bad(color='white')
     return out, kwargs
 
@@ -186,7 +144,8 @@ def filter_plotting_kwargs(kwargs):
                 'ylim' : None,
                 'ax' : None,
                 'width' : None,
-                'legend_size' : None
+                'legend_size' : None,
+                'hillshade' : None
                 }
     out, kwargs = filter_kwargs(kwargs, defaults)
     if out['grid']:
@@ -195,7 +154,7 @@ def filter_plotting_kwargs(kwargs):
     return out, kwargs
 
 def filter_kwargs(kwargs, defaults):
-    tmp = copy.copy(kwargs)
+    tmp = copy(kwargs)
     subset = {k: tmp.pop(k, defaults[k]) for k in defaults.keys()}
     return subset, tmp
 
@@ -209,7 +168,7 @@ def xlabel(label, **kwargs):
         The x label.
 
     """
-    mpl.pyplot.xlabel(label, **kwargs)
+    plt.xlabel(label, **kwargs)
 
 
 def ylabel(label, **kwargs):
@@ -221,7 +180,7 @@ def ylabel(label, **kwargs):
         The y label.
 
     """
-    mpl.pyplot.ylabel(label, **kwargs)
+    plt.ylabel(label, **kwargs)
 
 
 def clabel(cb, label, **kwargs):
@@ -269,6 +228,70 @@ def generate_subplots(n, ax=None):
             ax = ax2
     return ax
 
+def hillshade(arr, azimuth=30, altitude=30):
+    """Create hillshade from a numpy array containing elevation data.
+
+    Taken from https://github.com/royalosyin/Work-with-DEM-data-using-Python-from-Simple-to-Complicated/blob/master/ex07-Hillshade%20from%20a%20Digital%20Elevation%20Model%20(DEM).ipynb
+
+    Parameters
+    ----------
+    arr : numpy array of shape (rows, columns)
+        Numpy array containing elevation values to be used to created hillshade.
+    azimuth : float (default=30)
+        The desired azimuth for the hillshade.
+    altitude : float (default=30)
+        The desired sun angle altitude for the hillshade.
+
+    Returns
+    -------
+    numpy array
+        A numpy array containing hillshade values.
+
+    Example
+    -------
+    .. plot::
+        >>> import matplotlib.pyplot as plt
+        >>> import rasterio as rio
+        >>> import earthpy.spatial as es
+        >>> from earthpy.io import path_to_example
+        >>> with rio.open(path_to_example('rmnp-dem.tif')) as src:
+        ...     dem = src.read()
+        >>> print(dem.shape)
+        (1, 187, 152)
+        >>> squeezed_dem = dem.squeeze() # remove first dimension
+        >>> print(squeezed_dem.shape)
+        (187, 152)
+        >>> shade = es.hillshade(squeezed_dem)
+        >>> plt.imshow(shade, cmap="Greys")
+        <matplotlib.image.AxesImage object at 0x...>
+    """
+    try:
+        x, y = np.gradient(arr)
+    except:
+        raise ValueError("Input array should be two-dimensional")
+
+    if azimuth <= 360.0:
+        azimuth = 360.0 - azimuth
+        azimuthrad = azimuth * np.pi / 180.0
+    else:
+        raise ValueError(
+            "Azimuth value should be less than or equal to 360 degrees"
+        )
+
+    if altitude <= 90.0:
+        altituderad = altitude * np.pi / 180.0
+    else:
+        raise ValueError(
+            "Altitude value should be less than or equal to 90 degrees"
+        )
+
+    slope = np.pi / 2.0 - np.arctan(np.sqrt(x * x + y * y))
+    aspect = np.arctan2(-x, y)
+
+    shaded = np.sin(altituderad) * np.sin(slope) + np.cos(altituderad) * np.cos(slope) * np.cos((azimuthrad - np.pi / 2.0) - aspect)
+
+    return 255 * (shaded + 1) / 2
+
 
 def title(label, **kwargs):
     """Create a title with default fontsizes
@@ -279,7 +302,7 @@ def title(label, **kwargs):
         The title.
 
     """
-    mpl.pyplot.title(label, **kwargs)
+    plt.title(label, **kwargs)
 
 
 def suptitle(label, **kwargs):
@@ -291,7 +314,7 @@ def suptitle(label, **kwargs):
         The suptitle.
 
     """
-    mpl.pyplot.suptitle(label, **kwargs)
+    plt.suptitle(label, **kwargs)
 
 def bar(values, edges, line=None, **kwargs):
     """Plot a bar chart.
@@ -335,10 +358,10 @@ def bar(values, edges, line=None, **kwargs):
         bins = 1.0 / edges
 
     if geobipy_kwargs['logBins']:
-        bins, logLabel = cF._log(edges, geobipy_kwargs['logBins'])
-        label = logLabel + cF.getNameUnits(edges)
+        bins, logLabel = utilities._log(edges, geobipy_kwargs['logBins'])
+        label = logLabel + utilities.getNameUnits(edges)
     else:
-        label = cF.getNameUnits(edges)
+        label = utilities.getNameUnits(edges)
 
     i0 = 0
     i1 = np.size(values) - 1
@@ -363,12 +386,12 @@ def bar(values, edges, line=None, **kwargs):
     if (geobipy_kwargs['transpose']):
         plt.barh(centres, values, height=width, align='center', alpha=color_kwargs['alpha'], **kwargs)
         ylabel(label)
-        xlabel(cF.getNameUnits(values))
+        xlabel(utilities.getNameUnits(values))
         geobipy_kwargs['xscale'], geobipy_kwargs['yscale'] = geobipy_kwargs['yscale'], geobipy_kwargs['xscale']
     else:
         plt.bar(centres, values, width=width, align='center', alpha=color_kwargs['alpha'], **kwargs)
         xlabel(label)
-        ylabel(cF.getNameUnits(values))
+        ylabel(utilities.getNameUnits(values))
 
     if geobipy_kwargs['flipX']:
         ax.invert_xaxis()
@@ -479,16 +502,16 @@ def pcolor(values, x=None, y=None, **kwargs):
     if geobipy_kwargs['reciprocateY']:
         my = 1.0 / my
 
-    mx, _ = cF._log(mx, geobipy_kwargs['logX'])
-    my, _ = cF._log(my, geobipy_kwargs['logY'])
+    mx, _ = utilities._log(mx, geobipy_kwargs['logX'])
+    my, _ = utilities._log(my, geobipy_kwargs['logY'])
 
     if np.ndim(mx) == 1 and np.ndim(my) == 1:
         mx, my = np.meshgrid(mx, my)
 
     ax, pm, cb = pcolormesh(X=mx, Y=my, values=values, **kwargs)
 
-    xlabel(cF.getNameUnits(x))
-    ylabel(cF.getNameUnits(y))
+    xlabel(utilities.getNameUnits(x))
+    ylabel(utilities.getNameUnits(y))
 
     return ax, pm, cb
 
@@ -530,7 +553,7 @@ def pcolormesh(X, Y, values, **kwargs):
             cn = classNumber[i]
             cmap = cmaps[i]
             cmaptmp = cmap
-            if not isinstance(cmap, mpl.colors.Colormap):
+            if not isinstance(cmap, Colormap):
                 cmaptmp = white_to_colour(cmap)
             label = labels[i]
 
@@ -637,24 +660,27 @@ def _pcolormesh(X, Y, values, **kwargs):
     rang = values.max() - values.min()
     if not geobipy_kwargs['trim'] is None and rang > 0.0:
         assert isinstance(geobipy_kwargs['trim'], (float, np.float32, np.float64)), TypeError("trim must be a float")
-        bounds = cF.findFirstLastNotValue(values, geobipy_kwargs['trim'])
+        bounds = utilities.findFirstLastNotValue(values, geobipy_kwargs['trim'])
         X = X[bounds[0, 0]:bounds[0, 1]+2, bounds[1, 0]:bounds[1, 1]+2]
         Y = Y[bounds[0, 0]:bounds[0, 1]+2, bounds[1, 0]:bounds[1, 1]+2]
         values = values[bounds[0, 0]:bounds[0, 1]+1, bounds[1, 0]:bounds[1, 1]+1]
 
     # if (geobipy_kwargs['log']):
-    values, logLabel = cF._log(values, geobipy_kwargs['log'])
+    values, logLabel = utilities._log(values, geobipy_kwargs['log'])
 
     if color_kwargs['equalize']:
         assert color_kwargs['nBins'] > 0, ValueError('nBins must be greater than zero')
-        values, dummy = cF.histogramEqualize(values, nBins=color_kwargs['nBins'])
+        values, dummy = utilities.histogramEqualize(values, nBins=color_kwargs['nBins'])
 
     if color_kwargs['clim_scaling'] is not None:
-        values = cF.trim_by_percentile(values, color_kwargs['clim_scaling'])
+        values = utilities.trim_by_percentile(values, color_kwargs['clim_scaling'])
 
-    Zm = ma.masked_invalid(values, copy=False)
+    if geobipy_kwargs['hillshade'] is not None:
+        kw = geobipy_kwargs['hillshade'] if isinstance(geobipy_kwargs['hillshade'], dict) else {}
+        values = hillshade(values, azimuth=kw.pop('azimuth', 30), altitude=kw.pop('altitude', 30))
 
-    pm = ax.pcolormesh(X, Y, Zm, alpha = color_kwargs['alpha'], **kwargs)
+    Zm = np.ma.masked_invalid(values, copy=False)
+    pm = ax.pcolormesh(X, Y, values, alpha = color_kwargs['alpha'], **kwargs)
 
     plt.xscale(geobipy_kwargs['xscale'])
     plt.yscale(geobipy_kwargs['yscale'])
@@ -680,9 +706,9 @@ def _pcolormesh(X, Y, values, **kwargs):
 
         if color_kwargs['clabel'] is None:
             if (geobipy_kwargs['log']):
-                clabel(cbar, logLabel + cF.getNameUnits(values))
+                clabel(cbar, logLabel + utilities.getNameUnits(values))
             else:
-                clabel(cbar, cF.getNameUnits(values))
+                clabel(cbar, utilities.getNameUnits(values))
         else:
             clabel(cbar, color_kwargs['clabel'])
 
@@ -776,7 +802,7 @@ def pcolor_as_bar(X, Y, values, **kwargs):
     cax = kwargs.pop('cax', None)
     cmap = kwargs.pop('cmap', 'viridis')
     cmapIntervals = kwargs.pop('cmapIntervals', None)
-    kwargs['cmap'] = copy.copy(mpl.cm.get_cmap(cmap, cmapIntervals))
+    kwargs['cmap'] = copy(get_cmap(cmap, cmapIntervals))
     kwargs['cmap'].set_bad(color='white')
     orientation = kwargs.pop('orientation', 'vertical')
     cl = kwargs.pop('clabel', None)
@@ -798,17 +824,17 @@ def pcolor_as_bar(X, Y, values, **kwargs):
     values = values.astype('float64')
 
     if (log):
-        values, logLabel = cF._log(values, log)
+        values, logLabel = utilities._log(values, log)
 
     if equalize:
         nBins = kwargs.pop('nbins', 256)
         assert nBins > 0, ValueError('nBins must be greater than zero')
-        values, dummy = cF.histogramEqualize(values, nBins=nBins)
+        values, dummy = utilities.histogramEqualize(values, nBins=nBins)
 
     if not clim_scaling is None:
-        values = cF.trim_by_percentile(values, clim_scaling)
+        values = utilities.trim_by_percentile(values, clim_scaling)
 
-    Zm = ma.masked_invalid(values, copy=False)
+    Zm = np.ma.masked_invalid(values, copy=False)
 
     pm = ax.pcolormesh(X, Y, Zm, alpha = alpha, **kwargs)
 
@@ -837,9 +863,9 @@ def pcolor_as_bar(X, Y, values, **kwargs):
 
         if cl is None:
             if (log):
-                clabel(cbar, logLabel + cF.getNameUnits(values))
+                clabel(cbar, logLabel + utilities.getNameUnits(values))
             else:
-                clabel(cbar, cF.getNameUnits(values))
+                clabel(cbar, utilities.getNameUnits(values))
         else:
             clabel(cbar, cl)
 
@@ -922,16 +948,16 @@ def pcolor_1D(values, y=None, **kwargs):
         assert geobipy_kwargs['width'] > 0.0, ValueError("width must be positive")
         my[1] = geobipy_kwargs['width']
 
-    v = ma.masked_invalid(values)
+    v = np.ma.masked_invalid(values)
     if (geobipy_kwargs['log']):
-        v,logLabel = cF._log(v, geobipy_kwargs['log'])
+        v,logLabel = utilities._log(v, geobipy_kwargs['log'])
 
     # Append with null values to correctly use pcolormesh
     # v = np.concatenate([np.atleast_2d(np.hstack([np.asarray(v),0])), np.atleast_2d(np.zeros(v.size+1))], axis=0)
     v = np.atleast_2d(v)
 
     if color_kwargs['equalize']:
-        v, dummy = cF.histogramEqualize(v, nBins=color_kwargs['nBins'])
+        v, dummy = utilities.histogramEqualize(v, nBins=color_kwargs['nBins'])
 
     X, Y = np.meshgrid(mx, my)
 
@@ -949,10 +975,10 @@ def pcolor_1D(values, y=None, **kwargs):
     plt.yscale(geobipy_kwargs['yscale'])
 
     if geobipy_kwargs['transpose']:
-        ylabel(cF.getNameUnits(y))
+        ylabel(utilities.getNameUnits(y))
         ax.get_xaxis().set_ticks([])
     else:
-        xlabel(cF.getNameUnits(y))
+        xlabel(utilities.getNameUnits(y))
         ax.get_yaxis().set_ticks([])
 
     if not geobipy_kwargs['xlim'] is None:
@@ -968,9 +994,9 @@ def pcolor_1D(values, y=None, **kwargs):
 
         if color_kwargs['clabel'] is None:
             if (geobipy_kwargs['log']):
-                clabel(cbar, logLabel + cF.getNameUnits(values))
+                clabel(cbar, logLabel + utilities.getNameUnits(values))
             else:
-                clabel(cbar, cF.getNameUnits(values))
+                clabel(cbar, utilities.getNameUnits(values))
         else:
             clabel(cbar, color_kwargs['clabel'])
 
@@ -1027,12 +1053,12 @@ def plot(x, y, **kwargs):
         x = 1.0 / x
 
     if (geobipy_kwargs['labels']):
-        xl = cF.getNameUnits(x)
-        yl = cF.getNameUnits(y)
+        xl = utilities.getNameUnits(x)
+        yl = utilities.getNameUnits(y)
 
     tmp = y
     if (geobipy_kwargs['log']):
-        tmp, logLabel = cF._log(y, geobipy_kwargs['log'])
+        tmp, logLabel = utilities._log(y, geobipy_kwargs['log'])
         yl = logLabel + yl
 
     ax = geobipy_kwargs['ax']
@@ -1144,11 +1170,11 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
 
     # Did the user ask for a log colour plot?
     if (geobipy_kwargs['log'] and not standardColour):
-        c, logLabel = cF._log(c, geobipy_kwargs['log'])
+        c, logLabel = utilities._log(c, geobipy_kwargs['log'])
 
     # Equalize the colours?
     if color_kwargs['equalize'] and not standardColour:
-      tmp, dummy = cF.histogramEqualize(c, nBins=color_kwargs['nBins'])
+      tmp, dummy = utilities.histogramEqualize(c, nBins=color_kwargs['nBins'])
       if tmp is not None:
           c = tmp
 
@@ -1169,7 +1195,7 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
 
     f = plt.scatter(xt, yt, c = c, cmap=color_kwargs['cmap'], **kwargs)
 
-    yl = cF.getNameUnits(yt)
+    yl = utilities.getNameUnits(yt)
 
     cbar = None
     if (color_kwargs['colorbar'] and not standardColour):
@@ -1180,11 +1206,11 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
 
         if color_kwargs['clabel'] is None:
             if (geobipy_kwargs['log']):
-                clabel(cbar, logLabel + cF.getNameUnits(c))
+                clabel(cbar, logLabel + utilities.getNameUnits(c))
                 if y is None:
                     yl = logLabel + yl
             else:
-                clabel(cbar, cF.getNameUnits(c))
+                clabel(cbar, utilities.getNameUnits(c))
         else:
             clabel(cbar, color_kwargs['clabel'])
 
@@ -1206,7 +1232,7 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
     plt.xscale(geobipy_kwargs['xscale'])
     plt.yscale(geobipy_kwargs['yscale'])
 
-    xlabel(cF.getNameUnits(x, 'x'))
+    xlabel(utilities.getNameUnits(x, 'x'))
     ylabel(yl)
     plt.margins(0.1, 0.1)
     plt.grid(True)
@@ -1258,8 +1284,8 @@ def sizeLegend(values, intervals=None, **kwargs):
     ls = kwargs.pop('labelspacing', 1)
 
     for x in intervals:
-        plt.scatter([], [], c=c, alpha=a, s=x, label=str(x) + ' ' + cF.getUnits(values))
-    plt.legend(scatterpoints=sp, frameon=f, labelspacing=ls, title=cF.getName(values), **kwargs)
+        plt.scatter([], [], c=c, alpha=a, s=x, label=str(x) + ' ' + utilities.getUnits(values))
+    plt.legend(scatterpoints=sp, frameon=f, labelspacing=ls, title=utilities.getName(values), **kwargs)
 
 
 def stackplot2D(x, y, labels=[], colors=tatarize, **kwargs):
@@ -1310,8 +1336,8 @@ def stackplot2D(x, y, labels=[], colors=tatarize, **kwargs):
 
     plt.xscale(xscale)
     plt.yscale(yscale)
-    xlabel(cF.getNameUnits(x))
-    ylabel(cF.getNameUnits(y))
+    xlabel(utilities.getNameUnits(x))
+    ylabel(utilities.getNameUnits(y))
     plt.margins(0.1, 0.1)
 
     return ax
@@ -1354,8 +1380,8 @@ def step(x, y, **kwargs):
         plt.sca(ax)
     pretty(ax)
 
-    x, _ = cF._log(x, geobipy_kwargs['logX'])
-    y, _ = cF._log(y, geobipy_kwargs['logY'])
+    x, _ = utilities._log(x, geobipy_kwargs['logX'])
+    y, _ = utilities._log(y, geobipy_kwargs['logY'])
 
     if geobipy_kwargs['transpose']:
         geobipy_kwargs['xscale'], geobipy_kwargs['yscale'] = geobipy_kwargs['yscale'], geobipy_kwargs['xscale']
@@ -1370,8 +1396,8 @@ def step(x, y, **kwargs):
         ax.invert_yaxis()
 
     if (geobipy_kwargs['labels']):
-        xlabel(cF.getNameUnits(x))
-        ylabel(cF.getNameUnits(y))
+        xlabel(utilities.getNameUnits(x))
+        ylabel(utilities.getNameUnits(y))
 
     plt.xscale(geobipy_kwargs['xscale'])
     plt.yscale(geobipy_kwargs['yscale'])
@@ -1389,10 +1415,12 @@ def pause(interval):
         Pause for *interval* seconds.
 
     """
+    from matplotlib.rcsetup import interactive_bk
+    from matplotlib._pylab_helpers import Gcf
 
     backend = plt.rcParams['backend']
-    if backend in mpl.rcsetup.interactive_bk:
-        figManager = mpl._pylab_helpers.Gcf.get_active()
+    if backend in interactive_bk:
+        figManager = Gcf.get_active()
         if figManager is not None:
             canvas = figManager.canvas
             if canvas.figure.stale:

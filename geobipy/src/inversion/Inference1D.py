@@ -81,7 +81,6 @@ class Inference1D(myObject):
         # ------------------------------------------------
         # Intialize the datapoint with the user parameters
         # ------------------------------------------------
-        self.halfspace = StatArray.StatArray(1, 'halfspace')
         self.initialize_datapoint(datapoint)
 
         # # Initialize the calibration parameters
@@ -249,6 +248,8 @@ class Inference1D(myObject):
 
         self.datapoint = datapoint
 
+        _ = self.datapoint.find_best_halfspace()
+
         # ---------------------------------------
         # Set the statistical properties of the datapoint
         # ---------------------------------------
@@ -262,7 +263,7 @@ class Inference1D(myObject):
     def initialize_model(self):
         # Find the conductivity of a half space model that best fits the data
         halfspace = self.datapoint.find_best_halfspace()
-        self.halfspace[0] = halfspace.values
+        self.halfspace = StatArray.StatArray(halfspace.values, 'halfspace')
 
         # Create an initial model for the first iteration
         # Initialize a 1D model with the half space conductivity
@@ -313,6 +314,7 @@ class Inference1D(myObject):
         observation = perturbed_datapoint
         if self.kwargs.get('ignore_likelihood', False):
             observation = None
+
         remapped_model, perturbed_model = self.model.perturb(observation)
 
         # Propose a new data point, using assigned proposal distributions

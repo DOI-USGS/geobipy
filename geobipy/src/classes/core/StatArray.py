@@ -808,7 +808,9 @@ class StatArray(np.ndarray, myObject):
 
         msg = ('Name: {}\n'
                'Shape: {}\n'
-               'Values: {}\n').format(self.getNameUnits(), self.shape, self)
+               'Values: {}\n'
+               'min: {}\n'
+               'max: {}\n').format(self.getNameUnits(), self.shape, self, self.min(), self.max())
         if self.hasPrior:
             msg += "Prior:\n{}".format(("|   "+self.prior.summary.replace("\n", "\n|   "))[:-4])
 
