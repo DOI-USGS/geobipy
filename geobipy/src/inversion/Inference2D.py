@@ -160,7 +160,7 @@ class Inference2D(myObject):
 
     def compute_additive_error_opacity(self, percent=95.0, log=None):
 
-        self.addErr_opacity = self.compute_posterior_opacity(self.additiveErrorPosteriors, percent, log)
+        self.additive_error_opacity = self.compute_posterior_opacity(self.additiveErrorPosteriors, percent, log)
 
     def compute_relative_error_opacity(self, percent=95.0, log=None):
 
