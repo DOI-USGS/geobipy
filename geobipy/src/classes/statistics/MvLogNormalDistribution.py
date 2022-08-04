@@ -3,7 +3,7 @@ Module defining a multivariate normal distribution with statistical procedures
 """
 #from copy import deepcopy
 import numpy as np
-from ...base  import utilities as cf
+from ...base  import utilities
 from .baseDistribution import baseDistribution
 from ..core import StatArray
 from .MvNormalDistribution import MvNormal
@@ -70,7 +70,7 @@ class MvLogNormal(MvNormal):
         if order == 1:
             if self.linearSpace:
                 x = np.log(x)
-            return cf.Ax(self.precision, x-self._mean)
+            return utilities.Ax(self.precision, x-self._mean)
 
         elif order == 2:
             return self.precision
@@ -109,9 +109,9 @@ class MvLogNormal(MvNormal):
         nD = self.ndim
         if (nD > 1):
             if axis is None:
-                bins = np.empty([nD, nBins+1])
+                bins = StatArray.StatArray(np.empty([nD, nBins+1]), name=utilities.getName(self.mean), units=utilities.getUnits(self.mean))
                 for i in range(nD):
-                    tmp = np.squeeze(nStd * self.std[axis, axis])
+                    tmp = np.squeeze(nStd * self.std[i, i])
                     t = np.linspace(-tmp, tmp, nBins+1)
                     if not relative:
                         t += self._mean[i]
@@ -130,4 +130,14 @@ class MvLogNormal(MvNormal):
             if not relative:
                 bins += self._mean
 
-        return StatArray.StatArray(np.exp(bins)) if self.linearSpace else StatArray.StatArray(bins)
+        return (np.exp(bins)) if self.linearSpace else StatArray.StatArray(bins)
+
+    @property
+    def summary(self):
+        msg =  "{}\n".format(type(self).__name__)
+        if self.linearSpace:
+            msg += '    Mean:log{}\n'.format(self.mean)
+        else:
+            msg += '    Mean:{}\n'.format(self.mean)
+        msg += 'Variance:{}\n'.format(self._variance)
+        return msg
