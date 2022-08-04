@@ -411,7 +411,7 @@ class DataPoint(Point):
             The misfit value.
 
         """
-        # The data misfit is the mahalanobis distance of the multivariate distance.
+        # The data misfit is the mahalanobis distance of the multivariate distribution.
         # assert not any(self.std[self.active] <= 0.0), ValueError('Cannot compute the misfit when the data standard deviations are zero.')
         tmp2 = 1.0 / self.std[self.active]
         misfit = np.float64(np.sum((cf.Ax(tmp2, self.deltaD[self.active]))**2.0, dtype=np.float64))
