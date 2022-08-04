@@ -1149,12 +1149,12 @@ class RectilinearMesh1D(Mesh):
 
         """
         # Probability of the number of layers
-        P_nCells = self.nCells.probability(log=log)
+        p_nCells = self.nCells.probability(log=log)
 
         # Probability of depth given nCells
-        P_edges = self.edges.probability(x=self.nCells.item()-1, log=log)
+        p_edges = self.edges.probability(x=self.nCells.item()-1, log=log)
 
-        return (P_nCells + P_edges) if log else (P_nCells * P_edges)
+        return (p_nCells + p_edges) if log else (p_nCells * p_edges)
 
     def remainingSpace(self, n_cells):
         return (self.max_edge - self.min_edge) - n_cells * self.min_width

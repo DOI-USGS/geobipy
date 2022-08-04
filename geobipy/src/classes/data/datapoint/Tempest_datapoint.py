@@ -4,6 +4,7 @@ from ....classes.core import StatArray
 from .TdemDataPoint import TdemDataPoint
 from ...forwardmodelling.Electromagnetic.TD.tdem1d import (tdem1dfwd, tdem1dsen)
 from ...statistics.Histogram import Histogram
+from ...model.Model import Model
 from ...mesh.RectilinearMesh1D import RectilinearMesh1D
 from ...mesh.RectilinearMesh2D import RectilinearMesh2D
 from ...statistics.Distribution import Distribution
@@ -70,7 +71,7 @@ class Tempest_datapoint(TdemDataPoint):
             assert np.size(values) == self.nChannels, ValueError(("Tempest data must a have additive error values for all time gates and all components. \n"
                                                               "additive_error must have size {}").format(self.nChannels))
 
-        self._additive_error = StatArray.StatArray(values, '$\epsilon_{additive}x10^{2}$', self.units)
+        self._additive_error = StatArray.StatArray(values, '$\epsilon_{additive}$', self.units)
 
     @TdemDataPoint.data.getter
     def data(self):
@@ -91,12 +92,12 @@ class Tempest_datapoint(TdemDataPoint):
     @TdemDataPoint.relative_error.setter
     def relative_error(self, values):
         if values is None:
-            values = self.n_components * self.nSystems
+            values = np.full(self.n_components * self.nSystems, fill_value=0.01)
         else:
             assert np.size(values) == self.n_components * self.nSystems, ValueError(("Tempest data must a have relative error for the primary and secondary fields, for each system. \n"
                             "relative_error must have size {}").format(self.n_components * self.nSystems))
 
-        self._relative_error = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
+        self._relative_error = StatArray.StatArray(values, '$\epsilon_{Relative}$', '%')
 
     @TdemDataPoint.std.getter
     def std(self):
