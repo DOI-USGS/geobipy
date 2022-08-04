@@ -151,6 +151,73 @@ class Tempest_datapoint(TdemDataPoint):
                 'units must have type str')
         self._units = value
 
+    def halfspace_misfit(self, conductivity_range, n_samples=100, pitch_range=None):
+        assert conductivity_range[1] > conductivity_range[0], ValueError("Maximum conductivity must be greater than the minimum")
+        conductivity = RectilinearMesh1D(centres = np.logspace(*(np.log10(conductivity_range)), n_samples+1), log=10)
+
+        if pitch_range is None:
+            misfit = Model(mesh=conductivity)
+            model = self.new_model()
+
+            for i in range(conductivity.nCells):
+                model.values[0] = conductivity.centres_absolute[i]
+                self.forward(model)
+                misfit.values[i] = self.dataMisfit()
+
+        else:
+            pitch = RectilinearMesh1D(centres = np.linspace(*pitch_range, n_samples))
+            misfit = Model(mesh = RectilinearMesh2D(x=conductivity, y=pitch))
+
+            model = self.new_model()
+            for i in range(conductivity.nCells):
+                model.values[0] = conductivity.centres_absolute[i]
+                for j in range(pitch.nCells):
+                    self.transmitter.pitch = pitch.centres[j]
+
+                    self.forward(model)
+                    misfit.values[i, j] = self.dataMisfit()
+
+        return misfit
+
+    def find_best_halfspace(self, conductivity=1.0, pitch=0.0):
+        """Computes the best value of a half space that fits the data.
+
+        Carries out a brute force search of the halfspace conductivity that best fits the data.
+        The profile of data misfit vs halfspace conductivity is not quadratic, so a bisection will not work.
+
+        Parameters
+        ----------
+        minConductivity : float, optional
+            The minimum conductivity to search over
+        maxConductivity : float, optional
+            The maximum conductivity to search over
+        nSamples : int, optional
+            The number of values between the min and max
+
+        Returns
+        -------
+        out : np.float64
+            The best fitting log10 conductivity for the half space
+
+        """
+        from scipy.optimize import minimize
+
+        dp = deepcopy(self)
+
+        def minimize_me(x):
+            model = dp.new_model()
+            model.values[0] = x[0]
+            dp.transmitter.pitch = x[1]
+            dp.forward(model)
+            return dp.dataMisfit()
+
+        out = minimize(minimize_me, [conductivity, pitch], method='Nelder-Mead', bounds=((0.0, np.inf),(-90.0, 90.0)))
+
+        model = self.new_model()
+        model.values[0] = out.x[0]
+        self.transmitter.pitch = out.x[1]
+        return model
+
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
 
