@@ -87,5 +87,9 @@ class user_parameters(dict):
             f = '\n'.join(f.readlines())
             exec(f, global_dict, options)
 
-        return cls(**options)
+        for key, value in options.items():
+            if isinstance(value, list):
+                if not isinstance(value[0], str):
+                    options[key] = np.asarray(value)
 
+        return cls(**options)
