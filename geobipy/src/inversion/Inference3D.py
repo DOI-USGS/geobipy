@@ -64,6 +64,7 @@ class Inference3D(myObject):
         self.best3D = None
         self._facies = None
         self.system_file_path = system_file_path
+        self.nPoints
 
     def __deepcopy__(self, memo={}):
         return None
@@ -86,15 +87,15 @@ class Inference3D(myObject):
 
     def _set_inference2d(self, system_file_path, mode='r+', world=None):
         lines = []
-        lineNumbers = np.empty(self.nLines)
+        lineNumber = np.empty(self.nLines)
 
         for i, file in enumerate(self.h5files):
             LR = Inference2D(file, system_file_path=system_file_path, mode=mode, world=world)
             lines.append(LR)
-            lineNumbers[i] = LR.line
+            lineNumber[i] = LR.line
 
         self.lines = lines
-        self.lineNumbers = lineNumbers
+        self.lineNumber = lineNumber
 
     @property
     def world(self):
@@ -225,10 +226,8 @@ class Inference3D(myObject):
         # Get a datapoint from the file.
         datapoint = dataset._read_record(record=0)
 
-        line_numbers, fiducials = dataset._read_line_fiducial(kwargs['data_filename'])
-
         # Get the line numbers in the data
-        self._lineNumbers = np.sort(np.unique(line_numbers))
+        self._lineNumber = np.sort(np.unique(dataset.lineNumber))
 
         # Initialize the user parameters
         # options = options.userParameters(datapoint)
@@ -241,8 +240,8 @@ class Inference3D(myObject):
         self.print('Files are being created for data files {} and system files {}'.format(kwargs['data_filename'], kwargs['system_filename']))
 
         # No need to create and close the files like in parallel, so create and keep them open
-        for line in self.lineNumbers:
-            line_sorted_fiducials = fiducials[np.where(line_numbers == line)[0]]
+        for line in self.lineNumber:
+            line_sorted_fiducials = dataset.fiducial[np.where(dataset.lineNumber == line)[0]]
 
             kwargs = {}
             if self.parallel_access:
@@ -294,20 +293,20 @@ class Inference3D(myObject):
     @property
     def lines(self):
         return self._lines
-    
+
     @lines.setter
     def lines(self, values):
         assert all([isinstance(x, Inference2D) for x in values]), TypeError('lines must have type geobipy.Inference2D')
-        self._lines = values    
+        self._lines = values
 
     @property
-    def lineNumbers(self):
-        return self._lineNumbers
+    def lineNumber(self):
+        return self._lineNumber
 
-    @lineNumbers.setter
-    def lineNumbers(self, values):
+    @lineNumber.setter
+    def lineNumber(self, values):
         assert np.unique(values).size == values.size, ValueError("Must assign unique line numbers")
-        self._lineNumbers = values
+        self._lineNumber = values
 
     @property
     def nLines(self):
@@ -381,7 +380,7 @@ class Inference3D(myObject):
             datapoint = dataset._read_record(i)
 
             # Pass through the line results file object if a parallel file system is in use.
-            iLine = self.lineNumbers.searchsorted(datapoint.lineNumber)[0]
+            iLine = self.lineNumber.searchsorted(datapoint.lineNumber)[0]
 
             inference = Inference1D(datapoint, prng=prng, **options)
             inference.infer(hdf_file_handle=self.lines[iLine].hdfFile)
@@ -486,7 +485,7 @@ class Inference3D(myObject):
         # Import here so serial code still works...
         from ..base import MPI as myMPI
 
-        lineNumbers = self.lineNumbers
+        lineNumber = self.lineNumber
         Inference2D = self.lines
         world = self.world
 
@@ -508,7 +507,7 @@ class Inference3D(myObject):
             # paras.check(datapoint)
 
             # Pass through the line results file object if a parallel file system is in use.
-            iLine = lineNumbers.searchsorted(datapoint.lineNumber)[0]
+            iLine = lineNumber.searchsorted(datapoint.lineNumber)[0]
 
             inference = Inference1D(datapoint, prng, world=world, **options)
 
@@ -1150,11 +1149,11 @@ class Inference3D(myObject):
 
         index = np.atleast_1d(index)
 
-        if not lineNumber is None:
-            assert lineNumber in self.lineNumbers, ValueError("line {} not found in data set".format(lineNumber))
-            return np.squeeze(np.where(self.lineNumbers == lineNumber)[0])
+        if lineNumber is not None:
+            assert lineNumber in self.lineNumber, ValueError("line {} not found in data set".format(lineNumber))
+            return np.squeeze(np.where(self.lineNumber == lineNumber)[0])
 
-        if not fiducial is None:
+        if fiducial is not None:
             return np.squeeze(self.fiducialIndex(fiducial))
 
         assert np.all(index <= self.nPoints-1), IndexError('index {} is out of bounds for data point index with size {}'.format(index, self.nPoints))
@@ -1893,7 +1892,7 @@ class Inference3D(myObject):
         return  self.map(dx = dx, dy = dy, mask = mask, clip = clip, values = self.relativeError[system, :], **kwargs)
 
     def plot_cross_section(self, line_number, values, **kwargs):
-        line_index = self.lineNumbers.searchsorted(line_number)
+        line_index = self.lineNumber.searchsorted(line_number)
         indices = self.lineIndices[line_index]
 
         return self.lines[line_index].plot_cross_section(values=values[indices, :], **kwargs)
