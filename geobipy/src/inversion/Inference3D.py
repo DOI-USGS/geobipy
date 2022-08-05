@@ -17,7 +17,6 @@ from ..classes.core import StatArray
 from ..base import fileIO
 from ..base.MPI import loadBalance1D_shrinkingArrays
 
-from ..classes.statistics.Histogram import Histogram
 from ..classes.statistics.mixPearson import mixPearson
 from ..classes.pointcloud.PointCloud3D import PointCloud3D
 from ..classes.mesh.RectilinearMesh3D import RectilinearMesh3D
@@ -25,13 +24,10 @@ from ..classes.model.Model import Model
 from .Inference1D import Inference1D
 from .Inference2D import Inference2D
 
-from ..classes.data.dataset.Data import Data
-from ..classes.data.datapoint.DataPoint import DataPoint
 from ..base.HDF import hdfRead
 from ..base import plotting as cP
 from ..base import utilities as cF
 from os.path import join
-from scipy.spatial import Delaunay
 
 from os import listdir
 import progressbar
