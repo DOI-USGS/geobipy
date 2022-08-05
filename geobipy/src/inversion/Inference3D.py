@@ -370,8 +370,6 @@ class Inference3D(myObject):
         prng = np.random.RandomState(seed)
 
         if index is None:
-            nPoints = dataset.nPoints
-            r = range(nPoints)
 
             if fiducial is not None:
                 index = np.squeeze(np.argwhere((dataset.lineNumber == line_number) & (dataset.fiducial == fiducial)))
