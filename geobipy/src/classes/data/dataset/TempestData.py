@@ -610,8 +610,8 @@ class TempestData(TdemData):
     def _read_line_fiducial(self, filename=None):
         if filename.endswith('.csv'):
             return super()._read_line_fiducial(filename)
-        
-        return self._read_variable(['Line', 'Fiducial'])
+
+        self.lineNumber, self.fiducial = self._read_variable(['Line', 'Fiducial'])
 
     def _read_variable(self, variable):
         gdf = self._file['linedata']
@@ -629,7 +629,7 @@ class TempestData(TdemData):
 
         self._file = h5py.File(filename, 'r')
         self._filename = filename
-        self._nPoints = self._file['linedata/Easting'].size
+        self.lineNumber, self.fiducial = self._read_variable(['Line', 'Fiducial'])
 
     @classmethod
     def fromHdf(cls, grp, **kwargs):

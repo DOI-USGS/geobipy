@@ -495,17 +495,20 @@ class Data(PointCloud3D):
         self._file = df
         self._filename = filename
 
+        self._read_line_fiducial(filename)
+
     def _read_line_fiducial(self, filename):
 
         _, channels = Data._csv_channels(filename)
 
         try:
-            df = read_csv(filename, index_col=False, usecols=channels, skipinitialspace = True)
+            df = read_csv(filename, index_col=False, usecols=channels[:2], skipinitialspace = True)
         except:
-            df = read_csv(filename, index_col=False, usecols=channels, delim_whitespace=True, skipinitialspace = True)
+            df = read_csv(filename, index_col=False, usecols=channels[:2], delim_whitespace=True, skipinitialspace = True)
 
         df = df.replace('NaN',np.nan)
-        return df[channels[0]].values, df[channels[1]].values
+        self.lineNumber = df[channels[0]].values
+        self.fiducial = df[channels[1]].values
 
     def _systemIndices(self, system=0):
         """The slice indices for the requested system.
