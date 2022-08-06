@@ -1039,7 +1039,8 @@ class StatArray(np.ndarray, myObject):
             p = self.probability(x=proposed, log=log)
             tries += 1
             if tries == 10:
-                break
+                # print("Could not propose values for {}. Continually produced P(X)={}".format(self.summary, num), flush=True)
+                return np.asarray(self[i]) if mv else self.item()
 
         return proposed[i] if mv else proposed
 
