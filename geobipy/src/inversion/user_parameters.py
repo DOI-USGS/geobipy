@@ -42,7 +42,7 @@ class user_parameters(dict):
         self['multiplier'] = kwargs.get('multiplier', np.float64(1.0))
         if self['multiplier'] is None:
             self['multiplier'] = np.float64(1.0)
-        
+
         self['stochastic_newton'] = ~kwargs.get('ignore_likelihood', False)
         self['factor'] = kwargs.get('factor', np.float64(10.0))
         if self['factor'] is None:
