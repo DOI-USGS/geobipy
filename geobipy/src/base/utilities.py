@@ -33,9 +33,9 @@ def bresenham(x, y):
     j = 0
     for i in range(n_segments):
         # Setup initial conditions
-        x1 = x[i] 
-        y1 = y[i] 
-        x2 = x[i+1] 
+        x1 = x[i]
+        y1 = y[i]
+        x2 = x[i+1]
         y2 = y[i+1]
         dx = x2 - x1
         dy = y2 - y1
