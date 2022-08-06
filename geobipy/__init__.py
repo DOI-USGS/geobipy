@@ -205,7 +205,7 @@ def geobipy():
     inputFile, output_directory, _, seed, index, fiducial, line_number = checkCommandArguments()
     sys.path.append(getcwd())
 
-    serial_geobipy(inputFile, output_directory, seed, index, line_number)
+    serial_geobipy(inputFile, output_directory, seed, index, fiducial, line_number)
 
 
 def geobipy_mpi():
