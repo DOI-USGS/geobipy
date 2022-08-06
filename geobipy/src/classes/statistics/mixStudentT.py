@@ -89,7 +89,7 @@ class mixStudentT(Mixture):
 
     @property
     def n_components(self):
-        return self.means.size
+        return np.size(self.means)
 
 
     def fit_to_data(self, X, mean_bounds=None, variance_bounds=None, k=[1, 5], tolerance=0.05, **kwargs):

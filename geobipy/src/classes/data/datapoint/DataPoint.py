@@ -205,7 +205,7 @@ class DataPoint(Point):
             if isinstance(values, list):
                 assert len(values) == self.nSystems, ValueError("std as a list must have {} elements".format(self.nSystems))
                 values = np.hstack(values)
-            assert values.size == self.nChannels, ValueError("Size of std must equal total number of time channels {}".format(nChannels))
+            assert np.size(values) == self.nChannels, ValueError("Size of std must equal total number of time channels {}".format(self.nChannels))
 
         self._predictedData = StatArray.StatArray(values, "Predicted Data", self.units)
 
@@ -251,7 +251,7 @@ class DataPoint(Point):
             if isinstance(value, list):
                 assert len(value) == self.nSystems, ValueError("std as a list must have {} elements".format(self.nSystems))
                 value = np.hstack(value)
-            assert value.size == self.nChannels, ValueError("Size of std must equal total number of time channels {}".format(self.nChannels))
+            assert np.size(value) == self.nChannels, ValueError("Size of std must equal total number of time channels {}".format(self.nChannels))
 
         self._std = StatArray.StatArray(value, "Standard deviation", self.units)
 

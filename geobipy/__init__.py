@@ -8,17 +8,17 @@ import sys
 import shutil
 from datetime import timedelta
 
-from .src.base import utilities
-from .src.base import plotting
-from .src.base import fileIO
-from .src.base import interpolation
+# from .src.base import utilities
+# from .src.base import plotting
+# from .src.base import fileIO
+# from .src.base import interpolation
 
-from .src.base.HDF import hdfRead
-from .src.base.HDF import hdfWrite
+# from .src.base.HDF import hdfRead
+# from .src.base.HDF import hdfWrite
 # Classes within geobipy
 # Core
 from .src.classes.core.StatArray import StatArray
-from .src.classes.core.Stopwatch import Stopwatch
+# from .src.classes.core.Stopwatch import Stopwatch
 # Data points
 from .src.classes.data.datapoint.DataPoint import DataPoint
 from .src.classes.data.datapoint.EmDataPoint import EmDataPoint

@@ -112,8 +112,8 @@ def interleave(a, b):
             Interleaved arrays
 
         """
-        assert a.size == b.size, ValueError("other must have size {}".format(a.size))
-        out = np.empty((a.size + b.size), dtype=a.dtype)
+        assert np.size(a) == np.size(b), ValueError("other must have size {}".format(np.size(a)))
+        out = np.empty((np.size(a) + np.size(b)), dtype=a.dtype)
         out[0::2] = a
         out[1::2] = b
         return out

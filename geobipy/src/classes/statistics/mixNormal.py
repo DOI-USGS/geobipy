@@ -78,7 +78,7 @@ class mixNormal(Mixture):
 
     @property
     def n_components(self):
-        return self.means.size
+        return np.size(self.means)
 
 
     def fit_to_curve(self, *args, **kwargs):

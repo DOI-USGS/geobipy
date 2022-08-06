@@ -722,7 +722,7 @@ class StatArray(np.ndarray, myObject):
         """
 
         try:
-            i = np.zeros(values.size)
+            i = np.zeros(np.size(values))
         except:
             i = 0
         return self.insert(i, values, axis=axis)
@@ -1152,7 +1152,7 @@ class StatArray(np.ndarray, myObject):
         if (not y is None):
             assert (isinstance(y, StatArray)), TypeError(
                 "y must be a StatArray")
-            if y.size == self.size:
+            if np.size(y) == self.size:
                 try:
                     my = y.edges()
                 except:
@@ -1165,7 +1165,7 @@ class StatArray(np.ndarray, myObject):
             if (not x is None):
                 assert (isinstance(x, StatArray)), TypeError(
                     "x must be a StatArray")
-                if x.size == self.size:
+                if np.size(x) == self.size:
                     try:
                         mx = x.edges()
                     except:
@@ -1336,7 +1336,7 @@ class StatArray(np.ndarray, myObject):
         if (x is None):
             x = StatArray(np.arange(self.size), 'Array Index')
         else:
-            assert x.size == self.size, ValueError(
+            assert np.size(x) == self.size, ValueError(
                 'x must be size '+str(self.size))
 
         if (y is None):
@@ -1389,7 +1389,7 @@ class StatArray(np.ndarray, myObject):
         if (x is None):
             x = StatArray(np.arange(self.shape[axis]), 'Array Index')
         else:
-            assert x.size == self.shape[axis], ValueError(
+            assert np.size(x) == self.shape[axis], ValueError(
                 'x must be size '+str(self.shape[axis]))
 
         if (i is None):

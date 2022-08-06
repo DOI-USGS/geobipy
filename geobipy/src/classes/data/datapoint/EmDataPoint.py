@@ -118,7 +118,7 @@ class EmDataPoint(DataPoint):
             if isinstance(values, list):
                 assert len(values) == self.nSystems, ValueError("predictedData as a list must have {} elements".format(self.nSystems))
                 values = np.hstack(values)
-            assert values.size == self.nChannels, ValueError("Size of predictedData must equal total number of time channels {}".format(self.nChannels))
+            assert np.size(values) == self.nChannels, ValueError("Size of predictedData must equal total number of time channels {}".format(self.nChannels))
         self._predictedData = StatArray.StatArray(values, "Predicted Data", self.units)
 
     @property
@@ -328,14 +328,15 @@ class EmDataPoint(DataPoint):
 
         # tmp = deepcopy(self)
         c = StatArray.StatArray(np.logspace(minConductivity, maxConductivity, nSamples), 'Conductivity', '$S/m$')
-        PhiD = StatArray.StatArray(c.size, 'Normalized Data Misfit', '')
-        
+        PhiD = StatArray.StatArray(np.size(c), 'Normalized Data Misfit', '')
+
         model = self.new_model()
 
-        for i in range(c.size):
+        for i in range(np.size(c)):
             model.values[0] = c[i]
             self.forward(model)
             PhiD[i] = self.dataMisfit()
+
         plt.loglog(c, PhiD, **kwargs)
         cP.xlabel(c.getNameUnits())
         cP.ylabel('Data misfit')

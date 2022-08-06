@@ -989,7 +989,7 @@ class PointCloud3D(myObject):
             if isinstance(pointData, list):
                 for p in pointData:
                     assert isinstance(p, StatArray.StatArray), TypeError("pointData entries must be a geobipy.StatArray")
-                    assert p.size == self.nPoints, ValueError("pointData entries must have size {}".format(self.nPoints))
+                    assert np.size(p) == self.nPoints, ValueError("pointData entries must have size {}".format(self.nPoints))
                     assert p.hasLabels(), ValueError("StatArray needs a name")
                     vtk.point_data.append(Scalars(p, p.getNameUnits()))
             else:

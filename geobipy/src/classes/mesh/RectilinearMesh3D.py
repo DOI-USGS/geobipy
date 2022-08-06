@@ -522,7 +522,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
         t = np.sum(centres * values, axis = axis)
         s = values.sum(axis = axis)
 
-        if t.size == 1:
+        if np.size(t) == 1:
             out = t / s
         else:
             i = np.where(s > 0.0)

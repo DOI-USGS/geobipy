@@ -96,11 +96,11 @@ class mixPearson(Mixture):
 
     @property
     def n_components(self):
-        return self.means.size
+        return np.size(self.means)
 
     @property
     def ndim(self):
-        return self.means.size
+        return np.size(self.means)
 
     def squeeze(self):
 

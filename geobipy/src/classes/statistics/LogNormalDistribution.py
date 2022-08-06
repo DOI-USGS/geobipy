@@ -97,7 +97,7 @@ class LogNormal(Normal):
             numpy.ndarray
 
         """
-        size = (size, self.mean.size)
+        size = (size, np.size(self.mean))
         values = np.squeeze(self.prng.normal(size=size, loc=self._mean, scale=self.variance))
 
         return np.exp(values) if self.linearSpace else values
