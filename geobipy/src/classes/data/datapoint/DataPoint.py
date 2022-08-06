@@ -224,6 +224,8 @@ class DataPoint(Point):
             # assert (isinstance(additiveErr[i], float) or isinstance(additiveErr[i], np.ndarray)), TypeError(
             #     "additiveErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
 
+        assert np.all(values > 0.0), ValueError("Relative error {} must be > 0.0".format(values))
+
         self._relative_error = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
 
     @property

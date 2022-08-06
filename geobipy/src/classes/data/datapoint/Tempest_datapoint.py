@@ -97,6 +97,8 @@ class Tempest_datapoint(TdemDataPoint):
             assert np.size(values) == self.n_components * self.nSystems, ValueError(("Tempest data must a have relative error for the primary and secondary fields, for each system. \n"
                             "relative_error must have size {}").format(self.n_components * self.nSystems))
 
+        assert np.all(values > 0.0), ValueError("Relative error {} must be > 0.0".format(values))
+
         self._relative_error = StatArray.StatArray(values, '$\epsilon_{Relative}$', '%')
 
     @TdemDataPoint.std.getter
@@ -326,7 +328,7 @@ class Tempest_datapoint(TdemDataPoint):
 
         if axes is None:
             axes = kwargs.pop('fig', plt.gcf())
-            
+
         if not isinstance(axes, list):
             axes = self._init_posterior_plots(axes)
 
@@ -345,7 +347,7 @@ class Tempest_datapoint(TdemDataPoint):
         axes[1].clear()
         self.predictedData.plotPosteriors(ax = axes[1], colorbar=False, **data_kwargs)
         self.plot(ax=axes[1], **data_kwargs)
-        
+
         c = cP.wellSeparated[0] if best is None else cP.wellSeparated[3]
         self.plotPredicted(color=c, ax=axes[1], **data_kwargs)
 
@@ -444,7 +446,6 @@ class Tempest_datapoint(TdemDataPoint):
             assert prior.ndim == self.nChannels, ValueError("additive_error_prior must have {} dimensions".format(self.nChannels))
             self.additive_error.prior = prior
 
-
     def set_proposals(self, height_proposal=None, relative_error_proposal=None, additive_error_proposal=None, transmitter_pitch_proposal=None, **kwargs):
 
         super().set_proposals(height_proposal, relative_error_proposal, additive_error_proposal, **kwargs)
@@ -464,7 +465,7 @@ class Tempest_datapoint(TdemDataPoint):
     def set_relative_error_posterior(self):
 
         if self.relative_error.hasPrior:
-            bins = StatArray.StatArray(np.atleast_2d(self.relative_error.prior.bins()), name=self.relative_error.name, units=self.relative_error.units)        
+            bins = StatArray.StatArray(np.atleast_2d(self.relative_error.prior.bins()), name=self.relative_error.name, units=self.relative_error.units)
             posterior = []
             for i in range(self.nSystems*self.n_components):
                 b = bins[i, :]
@@ -508,8 +509,8 @@ class Tempest_datapoint(TdemDataPoint):
     def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
 
         grp = super().createHdf(parent, name, withPosterior, add_axis, fillvalue)
-        
+
         if add_axis is not None:
             grp.attrs['repr'] = 'TempestData'
-    
+
         return grp
