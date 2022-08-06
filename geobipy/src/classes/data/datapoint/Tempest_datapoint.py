@@ -205,6 +205,8 @@ class Tempest_datapoint(TdemDataPoint):
         from scipy.optimize import minimize
 
         dp = deepcopy(self)
+        dp.relative_error[:] = 0.01
+        dp.additive_error[:] = 0.0
 
         def minimize_me(x):
             model = dp.new_model()
