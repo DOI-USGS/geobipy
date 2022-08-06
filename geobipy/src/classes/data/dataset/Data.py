@@ -66,7 +66,7 @@ class Data(PointCloud3D):
 
         # Number of Channels
         self.components = components
-        self._channels_per_system = np.atleast_1d(np.asarray(channels_per_system, dtype=np.int32)) 
+        self._channels_per_system = np.atleast_1d(np.asarray(channels_per_system, dtype=np.int32))
 
         super().__init__(x, y, z, elevation)
 
@@ -633,7 +633,7 @@ class Data(PointCloud3D):
         # Additive Error axes
         ax.append([plt.subplot(splt2[i, 1], sharex=ax[0]) for i in range(self.nSystems)])
 
-        return ax    
+        return ax
 
 
     def line(self, line):
@@ -863,13 +863,13 @@ class Data(PointCloud3D):
         return ax, leg
 
     def plot_posteriors(self, axes=None, height_kwargs={}, data_kwargs={}, rel_error_kwargs={}, add_error_kwargs={}, **kwargs):
-    
+
         if axes is None:
             axes = kwargs.pop('fig', plt.gcf())
-            
+
         if not isinstance(axes, list):
             axes = self._init_posterior_plots(axes)
-            
+
         assert len(axes) == 4, ValueError("axes must have length 4")
         # assert len(axes) == 4, ValueError("Must have length 3 list of axes for the posteriors. self.init_posterior_plots can generate them")
 

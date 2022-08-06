@@ -152,7 +152,3 @@ class mixPearson(Mixture):
             return StatArray.StatArray(np.log(p), "Probability Density")
         else:
             return StatArray.StatArray(p, "Probability Density")
-
-
-
-

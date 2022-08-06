@@ -108,7 +108,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
                             axis = 1
                     elif a[0] == 1:
                         if b[0] == 0:
-                            axis = 0                
+                            axis = 0
                         if b[0] == 2:
                             axis = 'OOPS'
                     x.relativeTo = np.take(x.relativeTo, slic[b[0]], axis)
@@ -128,7 +128,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
                             axis = 1
 
                     y.relativeTo = np.take(y.relativeTo, slic[b[0]], axis)
-            
+
             out = RectilinearMesh2D(x=x[slic[a[0]]], y=y[slic[a[1]]])
 
         else: # Returning a 1D mesh
@@ -148,7 +148,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
             return self.y_centres
         else:
             return self.z_centres
-    
+
     def edges(self, axis):
         if axis == 0:
             return self.x_edges
@@ -336,7 +336,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
             r = Bar(r)
 
         mesh_2d = self.remove_axis(axis)
-            
+
         for i in r:
             j = list(mesh_2d.unravelIndex(i))
             j.insert(axis, np.s_[:])
@@ -344,7 +344,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
             p = distribution.probability(centres[j], log_probability)
             probability[j] = np.dot(p, pdf[j])
         probability = probability / np.expand_dims(np.sum(probability, axis), axis=axis)
-    
+
         return StatArray.StatArray(probability, name='marginal_probability')
 
     def __deepcopy__(self, memo={}):
@@ -510,14 +510,14 @@ class RectilinearMesh3D(RectilinearMesh2D):
         return np.squeeze(out)
 
     def _mean(self, values, axis=0):
-        
+
         a = self.axis(axis)
         if a._relativeTo is None:
             return super()._mean(values, axis)
 
         s = tuple([np.s_[:] if i == axis else None for i in range(self.ndim)])
 
-        centres = self.centres(axis)        
+        centres = self.centres(axis)
 
         t = np.sum(centres * values, axis = axis)
         s = values.sum(axis = axis)
@@ -572,7 +572,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
         if np.size(percent) == 1:
             i = np.expand_dims(i, axis=axis)
         return np.squeeze(np.take_along_axis(centres, i, axis=axis))
-        
+
 
     def plotGrid(self):
         raise NotImplementedError("Slice a 3D mesh before using plotGrid.")
@@ -758,7 +758,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
             x = RectilinearMesh1D.fromHdf(grp['x'], skip_posterior=skip_posterior)
             y = RectilinearMesh1D.fromHdf(grp['y'], skip_posterior=skip_posterior)
             z = RectilinearMesh1D.fromHdf(grp['z'], skip_posterior=skip_posterior)
-            
+
             # relativeTo = None
             # if 'relativeTo' in grp:
             #     relativeTo = StatArray.StatArray.fromHdf(grp['relativeTo'], skip_posterior=skip_posterior)
@@ -770,7 +770,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
                 return RectilinearMesh2D.fromHdf(grp, index=index, skip_posterior=skip_posterior)
 
         return out
-    
+
     def xRange(self):
         """ Get the range of x
 

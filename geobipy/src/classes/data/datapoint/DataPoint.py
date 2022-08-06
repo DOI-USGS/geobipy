@@ -283,13 +283,13 @@ class DataPoint(Point):
         out._lineNumber = deepcopy(self.lineNumber, memo)
         out._fiducial = deepcopy(self.fiducial, memo)
         out._channelNames = deepcopy(self.channelNames, memo)
-        
+
         # out._errorPosterior = deepcopy(self.errorPosterior, memo)
 
         return out
 
     # def initialize(self, **kwargs):
-    
+
     #     self.relative_error[:] = self.kwargs['initial_relative_error']
     #     self.additive_error[:] = self.kwargs['initial_additive_error']
 
@@ -337,7 +337,7 @@ class DataPoint(Point):
 
         if axes is None:
             axes = kwargs.pop('fig', plt.gcf())
-            
+
         if not isinstance(axes, list):
             axes = self._init_posterior_plots(axes)
 
@@ -355,7 +355,7 @@ class DataPoint(Point):
         axes[1].cla()
         self.predictedData.plotPosteriors(ax = axes[1], colorbar=False, **data_kwargs)
         self.plot(ax=axes[1], **data_kwargs)
-        
+
         c = cP.wellSeparated[0] if best is None else cP.wellSeparated[3]
         self.plotPredicted(color=c, ax=axes[1], **data_kwargs)
 
@@ -438,15 +438,15 @@ class DataPoint(Point):
             if kwargs.get('solve_additive_error', False):
                 # log = Trisinstance(self, TdemDataPoint)
                 additive_error_prior = Distribution('Uniform', kwargs['minimum_additive_error'], kwargs['maximum_additive_error'], log=False, prng=kwargs.get('prng'))
-        
+
         if data_prior is None:
             data_prior = Distribution('MvLogNormal', self.data[self.active], self.std[self.active]**2.0, linearSpace=False, prng=kwargs.get('prng'))
-        
+
         self.set_height_prior(height_prior)
         self.set_relative_error_prior(relative_error_prior)
         self.set_additive_error_prior(additive_error_prior)
         self.set_data_prior(data_prior)
-        
+
 
     def set_height_prior(self, prior):
         if not prior is None:
@@ -540,7 +540,7 @@ class DataPoint(Point):
 
         """
         if self.relative_error.hasPrior:
-            bins = StatArray.StatArray(np.atleast_2d(self.relative_error.prior.bins()), name=self.relative_error.name, units=self.relative_error.units)        
+            bins = StatArray.StatArray(np.atleast_2d(self.relative_error.prior.bins()), name=self.relative_error.name, units=self.relative_error.units)
             posterior = []
             for i in range(self.nSystems):
                 b = bins[i, :]
@@ -636,7 +636,7 @@ class DataPoint(Point):
 
         if add_axis is not None:
             grp.attrs['repr'] = 'Data'
-            
+
         return grp
 
 

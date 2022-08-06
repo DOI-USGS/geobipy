@@ -384,6 +384,8 @@ class Inference3D(myObject):
             nPoints = 1
             r = range(index, index+1)
 
+
+
         for i in r:
             datapoint = dataset._read_record(i)
 
@@ -460,7 +462,7 @@ class Inference3D(myObject):
             status = MPI.Status()
             dummy = world.recv(source = MPI.ANY_SOURCE, tag = MPI.ANY_TAG, status = status)
             requestingRank = status.Get_source()
-            
+
             nFinished += 1
 
             # Read the next data point from the file
@@ -756,10 +758,10 @@ class Inference3D(myObject):
 
             self.world.barrier()
             hdfFile.close()
-            
+
         else:
             return StatArray.StatArray(np.vstack([line.compute_probability(distribution, log=log, log_probability=log_probability, axis=axis, **kwargs) for line in self.lines]))
-            
+
     def cluster_fits_gmm(self, n_clusters, plot=False):
 
         std = np.std(self.fits[2], axis=0)
@@ -857,7 +859,7 @@ class Inference3D(myObject):
             for line in self.lines:
                 line.compute_doi(*args, **kwargs)
 
-    
+
     @cached_property
     def dataMisfit(self):
         return self.bestData.dataMisfit()
@@ -1329,7 +1331,7 @@ class Inference3D(myObject):
                 hm = self.parameter_posterior(index=index)
 
                 if not np.all(hm.counts == 0):
-                    
+
                     try:
                         mixtures = hm.fit_mixture_to_pdf(mixture=mixPearson, **kwargs)
 
@@ -1471,7 +1473,7 @@ class Inference3D(myObject):
 
     #         counter += 1
     #         if counter == nUpdate:
-    #             print('rank {}, line/fiducial {}/{}, iteration {}/{},  time/dp {} h:m:s'.format(world.rank, self.lineNumbers[iL], line.fiducials[ind], i+1, chunk, str(timedelta(seconds=MPI.Wtime()-t0)/nUpdate)), flush=True)
+    #             print('rank {}, line/fiducial {}/{}, iteration {}/{},  time/dp {} h:m:s'.format(world.rank, self.lineNumber[iL], line.fiducials[ind], i+1, chunk, str(timedelta(seconds=MPI.Wtime()-t0)/nUpdate)), flush=True)
     #             t0 = MPI.Wtime()
     #             counter = 0
 

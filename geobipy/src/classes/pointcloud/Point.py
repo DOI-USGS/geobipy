@@ -141,7 +141,6 @@ class Point(myObject, ABC):
         self.set_y_posterior()
         self.set_z_posterior()
 
-
     def set_x_posterior(self):
         """
 
@@ -173,7 +172,7 @@ class Point(myObject, ABC):
 
         if self.y.hasPosterior:
             self.y.updatePosterior()
-    
+
         if self.z.hasPosterior:
             self.z.updatePosterior()
 

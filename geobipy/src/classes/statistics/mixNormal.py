@@ -138,7 +138,3 @@ class mixNormal(Mixture):
 
     def _assign_from_mixture(self, mixture):
         self.__init__(np.squeeze(mixture.means_), np.sqrt(np.squeeze(mixture.covariances_)), amplitudes=np.squeeze(mixture.weights_))
-
-
-
-

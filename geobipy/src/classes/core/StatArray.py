@@ -1002,8 +1002,7 @@ class StatArray(np.ndarray, myObject):
 
         """
 
-        assert (self.hasProposal), TypeError(
-                                   'No proposal defined on variable {}. Use StatArray.setProposal()'.format(self.name))
+        assert (self.hasProposal), TypeError('No proposal defined on variable {}. Use StatArray.setProposal()'.format(self.name))
 
         mv = self.proposal.multivariate
 
@@ -1278,7 +1277,7 @@ class StatArray(np.ndarray, myObject):
 
         if ax is None:
             ax = kwargs.pop('fig', plt.gcf())
-            
+
         if not isinstance(ax, (list, SubplotBase)):
             ax = self._init_posterior_plots(ax)
 
@@ -1508,7 +1507,7 @@ class StatArray(np.ndarray, myObject):
                     shap = add_axis
                 else:
                     shap = add_axis.shape
-                
+
                 if (self.size == 1):
                     grp.create_dataset('data', [*shap], dtype=self.dtype, fillvalue=fillvalue)
                 else:
@@ -1581,9 +1580,9 @@ class StatArray(np.ndarray, myObject):
 
         if withPosterior:
             self.write_posterior_hdf(grp, index)
-        
+
         return grp
-    
+
     def write_posterior_hdf(self, grp, index=None):
         if self.hasPosterior:
             if np.ndim(index) > 0:
@@ -1613,7 +1612,7 @@ class StatArray(np.ndarray, myObject):
             file = h5py.File(grp, 'r')
             is_file = True
             grp = file
-            
+
         if not name is None:
             grp = grp[name]
 

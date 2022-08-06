@@ -1072,7 +1072,7 @@ def load_smm(filename, sort_by_means=True):
 def reslice(slic, start=None, stop=None, step=None):
     if all(x is None for x in [start, stop, step]):
         return slic
-    
+
     sta = slic.start
     if start is not None:
         if slic.start is not None:
@@ -1086,7 +1086,7 @@ def reslice(slic, start=None, stop=None, step=None):
             stp = slic.stop + stop
         else:
             stp = stop
-        
+
     ic = slic.step if step is not None else step
-    
+
     return slice(sta, stp, ic)

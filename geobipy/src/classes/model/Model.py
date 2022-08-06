@@ -53,7 +53,7 @@ class Model(myObject):
         #         out.setattr(k, deepcopy(v, memo=memo))
 
         return out
-    
+
     @property
     def gradient(self):
         """Compute the gradient
@@ -81,18 +81,18 @@ class Model(myObject):
         gradient = StatArray.StatArray(self.mesh.gradient(values=self.values), 'Derivative', r"$\frac{"+self.values.units+"}{"+self.mesh.edges.units+"}$")
         if self._gradient is not None:
             gradient.copyStats(self._gradient)
-        
+
         self._gradient = gradient
         return self._gradient
 
     # @gradient.setter
     # def gradient(self, values):
     #     if values is None:
-    #         
+    #
     #         return
 
     #     self._gradient = StatArray.StatArray(values)
-    
+
     # @property
     # def inverse_hessian(self):
     #     return self._inverse_hessian
@@ -298,7 +298,7 @@ class Model(myObject):
         #     hessian += self.gradient.priorDerivative(order=2)
 
         if not observation is None:
-            hessian += observation.prior_derivative(model=self, order=2)        
+            hessian += observation.prior_derivative(model=self, order=2)
 
         return np.linalg.inv(hessian)
 
@@ -321,7 +321,7 @@ class Model(myObject):
         out = type(self)(mesh=mesh, values=values)
 
         # for key in self.__values:
-    
+
         #     out.setattr(key, getattr(self, key).pad(shape))
 
 
@@ -355,7 +355,7 @@ class Model(myObject):
         return self.stochastic_newton_perturbation(datapoint)
 
     def perturb_structure(self, update_priors=True):
-        
+
         remapped_mesh, remapped_values = self.mesh.perturb(values=self.values)
         remapped_model = type(self)(remapped_mesh, values=remapped_values)
 
@@ -393,7 +393,7 @@ class Model(myObject):
 
         """
         return self.mesh._init_posterior_plots(gs, values=self.values, sharex=sharex, sharey=sharey)
-    
+
     def plot_posteriors(self, axes=None, values_kwargs={}, axis=0, **kwargs):
         return self.mesh.plot_posteriors(axes, axis=axis, values=self.values, values_kwargs=values_kwargs, **kwargs)
 
@@ -644,7 +644,7 @@ class Model(myObject):
 
         from ..mesh.RectilinearMesh2D import RectilinearMesh2D
         from ..statistics.Histogram import Histogram
-    
+
         self.mesh.set_posteriors(**kwargs)
 
         if values_posterior is None:
@@ -719,7 +719,7 @@ class Model(myObject):
     def set_values_prior(self, prior):
         if prior is not None:
             self.values.prior = prior
-    
+
     def set_gradient_prior(self, prior):
         if prior is not None:
             self.gradient.prior = prior
@@ -749,7 +749,7 @@ class Model(myObject):
         self.values.proposal = proposal
 
     def stochastic_newton_perturbation(self, observation=None):
-    
+
         # Perturb the structure of the model
         remapped_model = self.perturb_structure()
 
@@ -794,7 +794,7 @@ class Model(myObject):
     def to_vtk(self, filename):
         mesh = self.pyvista_mesh()
         mesh.save(filename)
-    
+
     def update_posteriors(self, ratio=0.5):
         """Update any attached posterior distributions.
 

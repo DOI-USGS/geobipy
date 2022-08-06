@@ -242,6 +242,7 @@ class EmDataPoint(DataPoint):
         if height:  # Elevation
             P_height = (self.z.probability(log=True))
             probability += P_height
+
         if calibration:  # Calibration parameters
             P_calibration = self.calibration.probability(log=True)
             probability += P_calibration

@@ -166,4 +166,3 @@ class LogNormal(Normal):
         values = np.linspace(self._mean - tmp, self._mean + tmp, nBins+1)
 
         return StatArray.StatArray(np.exp(values)) if self.linearSpace else StatArray.StatArray(values)
-

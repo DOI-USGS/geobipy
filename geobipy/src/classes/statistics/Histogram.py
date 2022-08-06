@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib as mpl
-import matplotlib.pyplot as plt
 
 from .mixPearson import mixPearson
 from ...base import utilities
@@ -14,7 +13,7 @@ class Histogram(Model):
     def __init__(self, mesh=None, values=None):
         """ Instantiate a 2D histogram """
         super().__init__(mesh=mesh)
-        
+
         if not values is None:
             self.update(values)
 
@@ -68,7 +67,7 @@ class Histogram(Model):
         return super().bar(**kwargs)
 
     def cdf(self, axis=None):
-    
+
         if axis is None:
             cdf = np.cumsum(self.values, axis=0)
             for i in range(1, self.ndim):
@@ -105,7 +104,7 @@ class Histogram(Model):
 
         """
         return self.mesh._credible_intervals(values=self.pmf.values, percent=percent, axis=axis)
-    
+
     def credible_range(self, percent=90.0, log=None, axis=0):
         """ Get the range of credibility with depth
 
@@ -131,7 +130,7 @@ class Histogram(Model):
         entropy[np.isnan(entropy)] = 0.0
 
         entropy = -entropy.sum(axis=axis)
-        
+
         entropy.name = 'Entropy'
 
         if log == 2:
@@ -174,7 +173,7 @@ class Histogram(Model):
         if track:
             Bar = progressbar.ProgressBar()
             r = Bar(r)
-            
+
         slic = [np.s_[:] for i in range(3)]
         mixtures = []
         for i in r:
@@ -182,7 +181,7 @@ class Histogram(Model):
             j[axis] = np.s_[:]
             h = self[tuple(j)]
             mixtures.append(h.fit_mixture_to_pdf(mixture=mixture, **kwargs))
-            
+
         return mixtures
 
     def fit_mixture_to_pdf_2d(self, mixture, axis, **kwargs):
@@ -198,13 +197,13 @@ class Histogram(Model):
         if track:
             Bar = progressbar.ProgressBar()
             r = Bar(r)
-            
+
         mixtures = []
         for i in r:
             h = self.take_along_axis(i, axis=axis)
 
             mixtures.append(h.fit_mixture_to_pdf(mixture=mixture, **kwargs))
-            
+
         return mixtures
 
 
@@ -363,7 +362,7 @@ class Histogram(Model):
     def plot(self, line=None, **kwargs):
         """ Plots the histogram """
         kwargs['trim'] = kwargs.pop('trim', 0.0)
-        
+
         values = self.counts
         if kwargs.pop('normalize', False):
             values = self.pdf.values
@@ -393,7 +392,7 @@ class Histogram(Model):
             return ax, pm, cb
 
     def plotCredibleIntervals(self, percent=95.0, axis=0, **kwargs):
-    
+
         med, low, high = self.credible_intervals(percent=percent, axis=axis)
 
         kwargs['color'] = '#5046C8'
@@ -408,7 +407,7 @@ class Histogram(Model):
         self.mesh.plot_line(high, axis=axis, **kwargs)
 
     def plotMean(self, log=None, axis=0, **kwargs):
-    
+
         m = self.mean(axis=axis)
         kwargs['label'] = 'mean'
         self.mesh.plot_line(m, axis=axis, **kwargs)

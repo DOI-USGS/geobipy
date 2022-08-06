@@ -216,6 +216,7 @@ class Tempest_datapoint(TdemDataPoint):
         model = self.new_model()
         model.values[0] = out.x[0]
         self.transmitter.pitch = out.x[1]
+
         return model
 
     def initialize(self, **kwargs):
@@ -258,7 +259,7 @@ class Tempest_datapoint(TdemDataPoint):
             i += 1
             for j in range(self.nSystems):
                 others = np.s_[(j * self.n_components):(j * self.n_components)+self.n_components]
-                tmp[1].get_shared_y_axes().join(tmp[1], *tmp[others])  
+                tmp[1].get_shared_y_axes().join(tmp[1], *tmp[others])
         ax.append(tmp)
 
         # Pitch axes

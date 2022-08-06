@@ -222,7 +222,7 @@ class TdemDataPoint(EmDataPoint):
 
     @EmDataPoint.system.setter
     def system(self, value):
-        
+
         if value is None:
             self._system = None
             self.components = None
@@ -888,7 +888,7 @@ class TdemDataPoint(EmDataPoint):
         #     active = self.active
         #     for i in range(self.nSystems):
         #         x = self.off_time(i)
-        #         for j in range(self.n_components):   
+        #         for j in range(self.n_components):
         #             i_comp = self._component_indices(j, i)
         #             a = active[i_comp]
         #             self.predictedData.posterior.update_with_line(x[a], self.predictedData[i_comp][a])

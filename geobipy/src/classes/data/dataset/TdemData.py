@@ -122,7 +122,7 @@ class TdemData(Data):
     def loopOffset(self):
 
         return np.vstack([self.receiver.x - self.transmitter.x,
-                          self.receiver.y - self.transmitter.y, 
+                          self.receiver.y - self.transmitter.y,
                           self.receiver.z - self.transmitter.z]).T
 
         # offset = np.empty((self.nPoints, 3))
@@ -214,7 +214,7 @@ class TdemData(Data):
             #     self.channels_per_system = np.size(values, 1)
             shp = (self.nPoints, self.n_components * self.nSystems)
             assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("primary_field must have shape {}".format(shp))
-            self._primary_field = StatArray.StatArray(values)  
+            self._primary_field = StatArray.StatArray(values)
 
     @property
     def receiver(self):
@@ -229,7 +229,7 @@ class TdemData(Data):
             if self.nPoints == 0:
                 self.nPoints = values.nPoints
             assert values.nPoints == self.nPoints, ValueError("receiver must have size {}".format(self.nPoints))
-            
+
             self._receiver = values
 
     @property
@@ -308,7 +308,7 @@ class TdemData(Data):
             if self.nPoints == 0:
                 self.nPoints = values.nPoints
             assert values.nPoints == self.nPoints, ValueError("transmitter must have size {}".format(self.nPoints))
-            
+
             self._transmitter = values
 
     def _as_dict(self):
@@ -511,7 +511,7 @@ class TdemData(Data):
         #     if len(iStd) > 0:
         #         self.std[:, iSys] = df[iStd].values
         #     else:
-        #         self.std[:, iSys] = 0.1 * self.secondary_field[:, iSys]   
+        #         self.std[:, iSys] = 0.1 * self.secondary_field[:, iSys]
 
         self.check()
 
@@ -620,7 +620,7 @@ class TdemData(Data):
                     off_channels.append(channel)
             elif cTmp in ('px', 'py', 'pz'):
                 primary_channels.append(channel)
-            
+
         primary_channels.sort()
 
         assert nr == 3, Exception(
@@ -648,6 +648,7 @@ class TdemData(Data):
         self = cls(system_filename)
         self._data_filename = data_filename
         self._open_csv_files(data_filename)
+
         return self
 
     def _open_csv_files(self, filename):
@@ -668,7 +669,7 @@ class TdemData(Data):
         FdemData.__initLineByLineRead() must have already been run.
 
         """
-        
+
         try:
             df = self._file.get_chunk()
             df = df.replace('NaN', np.nan)
@@ -683,9 +684,9 @@ class TdemData(Data):
         secondary_field = np.squeeze(df[self._iData].values)
 
         if len(self._iStd) == 0:
-            S = 0.1 * secondary_field
+            std = 0.1 * secondary_field
         else:
-            S = np.squeeze(df[self._iStd].values)
+            std = np.squeeze(df[self._iStd].values)
 
         primary_field = None
         if len(self._iPrimary) > 0:
@@ -696,7 +697,7 @@ class TdemData(Data):
         loopOffset = np.squeeze(df[self._iOffset].values)
 
         tloop = np.squeeze(df[self._iT].values).astype(np.float64)
-        
+
         T = CircularLoop(x=data[2], y=data[3], z=data[4],
                          pitch=tloop[0], roll=tloop[1],yaw=tloop[2],
                          radius=self.system[0].loopRadius())
@@ -709,7 +710,7 @@ class TdemData(Data):
                          radius=self.system[0].loopRadius())
 
         return self.single(x=data[2], y=data[3], z=data[4], elevation=data[5],
-                        secondary_field=secondary_field, std=S,
+                        secondary_field=secondary_field, std=std,
                         primary_field=primary_field,
                         system=self.system,
                         transmitter_loop=T, receiver_loop=R,
@@ -924,8 +925,8 @@ class TdemData(Data):
         # if legend:
         #     leg = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), fancybox=True)
         #     leg.set_title(self.data.getNameUnits())
-        
-        # return ax        
+
+        # return ax
 
     def plotLine(self, line, xAxis='index', **kwargs):
 
@@ -1023,7 +1024,7 @@ class TdemData(Data):
             return cls.single.fromHdf(grp, **kwargs)
 
         nSystems = np.int32(np.asarray(grp.get('nSystems')))
-        
+
         systems = [None]*nSystems
         for i in range(nSystems):
             # Get the system file name. h5py has to encode strings using utf-8, so decode it!

@@ -165,8 +165,3 @@ class mixStudentT(Mixture):
 
     def _assign_from_mixture(self, mixture):
         self.__init__(np.squeeze(mixture.means), np.squeeze(mixture.covariances), np.squeeze(mixture.degrees), amplitudes=np.squeeze(mixture.weights))
-
-
-
-
-

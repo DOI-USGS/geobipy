@@ -92,7 +92,7 @@ class RectilinearMesh1D(Mesh):
 
         out._centres = self._centres
         out._edges = self._edges
-                
+
         out._min_width = self.min_width
         out._min_edge = self.min_edge
         out._max_edge = self.max_edge
@@ -504,7 +504,7 @@ class RectilinearMesh1D(Mesh):
         p = distribution.probability(centres, log_probability)
         probability = np.dot(p, pdf)
         probability = probability / np.expand_dims(np.sum(probability, 0), axis=0)
-    
+
         return StatArray.StatArray(probability, name='marginal_probability')
 
     def delete_edge(self, i, values=None):
@@ -537,7 +537,7 @@ class RectilinearMesh1D(Mesh):
 
         out._action = ['delete', np.int32(i), np.squeeze(self.edges[i])]
         # if self._nCells is not None:
-        #     self._nCells[0] += 
+        #     self._nCells[0] +=
 
         if values is not None:
             values = deepcopy(values)
@@ -552,7 +552,7 @@ class RectilinearMesh1D(Mesh):
                 values = values.delete(i)
                 values[i-1] = val
             return out, values
-            
+
         return out
 
     def gradient(self, values):
@@ -630,7 +630,7 @@ class RectilinearMesh1D(Mesh):
             values = deepcopy(values)
             if isinstance(values, list):
                 for j in range(len(values)):
-                    values[j] = values[j].insert(i, values[j][i-1])    
+                    values[j] = values[j].insert(i, values[j][i-1])
             else:
                 values = values.insert(i, values[i-1])
 
@@ -994,7 +994,7 @@ class RectilinearMesh1D(Mesh):
         #     plt.text(0, h, s=r'$\downarrow \infty$', fontsize=12)
 
     def bar(self, values, **kwargs):
-    
+
         if self.log is not None:
             kwargs['xscale'] = 'log'
 
@@ -1073,8 +1073,8 @@ class RectilinearMesh1D(Mesh):
             if sharey is None:
                 sharey = ax2
             ax3 = plt.subplot(splt2[0], sharex=sharex, sharey=sharey) # values
-            ax += [ax2, ax3]            
-        
+            ax += [ax2, ax3]
+
         for a in ax:
             cp.pretty(a)
 
@@ -1088,7 +1088,7 @@ class RectilinearMesh1D(Mesh):
 
         if not isinstance(axes, list):
             axes = self._init_posterior_plots(axes, values=values)
-            
+
         assert len(axes) >= 2, ValueError("axes must have length >= 2")
 
         ncells_kwargs = kwargs.get('ncells_kwargs', {})
@@ -1112,11 +1112,11 @@ class RectilinearMesh1D(Mesh):
             values.plotPosteriors(ax=axes[2], **values_kwargs)
 
             if best is not None:
-                best.plot(xscale=values_kwargs.get('xscale', 'linear'), 
-                        flipY=False, 
-                        reciprocateX=values_kwargs.get('reciprocateX', None), 
-                        labels=False, 
-                        linewidth=1, 
+                best.plot(xscale=values_kwargs.get('xscale', 'linear'),
+                        flipY=False,
+                        reciprocateX=values_kwargs.get('reciprocateX', None),
+                        labels=False,
+                        linewidth=1,
                         color=cp.wellSeparated[3])
 
                 doi = values.posterior.opacity_level(percent=67.0, log=values_kwargs.get('logX', None), axis=0)
@@ -1306,9 +1306,9 @@ class RectilinearMesh1D(Mesh):
 
         """
         probabilities = np.asarray(probabilities)
-        self._event_proposal = Distribution('Categorical', 
-                                            probabilities, 
-                                            ['insert', 'delete', 'perturb', 'none'], 
+        self._event_proposal = Distribution('Categorical',
+                                            probabilities,
+                                            ['insert', 'delete', 'perturb', 'none'],
                                             prng=prng)
 
     def unperturb(self):
@@ -1360,7 +1360,7 @@ class RectilinearMesh1D(Mesh):
         # If another axis is given, upcast to a 2D mesh
         if (add_axis is not None and upcast):
             return self._create_hdf_2d(parent, name, withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
-            
+
         # Otherwise mesh is 1D.
         grp = self.create_hdf_group(parent, name)
 
@@ -1369,10 +1369,10 @@ class RectilinearMesh1D(Mesh):
 
         if self._nCells is not None:
             self.nCells.createHdf(grp, 'nCells', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
-            
+
         if self._relativeTo is not None:
             self.relativeTo.createHdf(grp, 'relativeTo', add_axis=add_axis, fillvalue=fillvalue)
-            
+
         # self.centres.toHdf(grp, 'centres', withPosterior=withPosterior)
         self.edges.toHdf(grp, 'edges', withPosterior=withPosterior)
 
@@ -1418,7 +1418,7 @@ class RectilinearMesh1D(Mesh):
 
             out = mesh.createHdf(parent, name, withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue, upcast=False)
             x.writeHdf(out, 'x', withPosterior=withPosterior)
-            
+
         return out
 
     def writeHdf(self, parent, name, withPosterior=True, index=None, upcast=True):
@@ -1464,7 +1464,7 @@ class RectilinearMesh1D(Mesh):
 
         # Edges can have a posterior
         self.edges.writeHdf(grp, 'y/edges',  withPosterior=withPosterior, index=ind)
-        
+
 
     @classmethod
     def fromHdf(cls, grp, index=None, skip_posterior=False):
@@ -1479,18 +1479,18 @@ class RectilinearMesh1D(Mesh):
             if '2D' in grp.attrs['repr']:
                 out = RectilinearMesh1D._1d_from_2d(grp, index, skip_posterior=skip_posterior)
             # if '3D' in grp.attrs['repr']:
-            #     out = RectilinearMesh1D._1d_from_2d(grp, index) 
+            #     out = RectilinearMesh1D._1d_from_2d(grp, index)
 
-        if 'min_width' in grp: 
+        if 'min_width' in grp:
             out._min_width = np.array(grp.get('min_width'))
         if 'min_edge' in grp:
             out._min_edge = np.array(grp.get('min_edge'))
-        if 'max_edge' in grp: 
+        if 'max_edge' in grp:
             out._max_edge = np.array(grp.get('max_edge'))
-        if 'max_cells' in grp: 
+        if 'max_cells' in grp:
             out._max_cells = np.array(grp.get('max_cells'))
 
-        return out        
+        return out
 
     @classmethod
     def _1d_from_1d(cls, grp, index, skip_posterior=False):
@@ -1567,8 +1567,8 @@ class RectilinearMesh1D(Mesh):
         out = cls(edges=edges)
 
         # centres = None
-        if (edges is None) or (np.all(edges == 0.0)):      
-            # if 'relativeTo' in grp:      
+        if (edges is None) or (np.all(edges == 0.0)):
+            # if 'relativeTo' in grp:
             centres = StatArray.StatArray.fromHdf(grp['centres'], skip_posterior=skip_posterior)
             # else:
             #     centres = StatArray.StatArray.fromHdf(grp['centres'], index=index, skip_posterior=skip_posterior)
@@ -1604,13 +1604,13 @@ class RectilinearMesh1D(Mesh):
             relativeTo = StatArray.StatArray.fromHdf(grp['relativeTo'], index=index, skip_posterior=skip_posterior)
             if relativeTo == 0.0:
                 relativeTo = None
-        
-            
+
+
         s = (index, np.s_[:nCells.item() + 1])
         posterior_index = index
 
         edges = StatArray.StatArray.fromHdf(grp['y/edges'], index=s, skip_posterior=skip_posterior, posterior_index=index)
-            
+
         out = cls(edges=edges)
 
         out.relativeTo = relativeTo

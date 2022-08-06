@@ -70,7 +70,6 @@ run = 2
 # Set an MPI exit tag
 killSwitch = 9
 
-
 def checkCommandArguments():
     """Check the users command line arguments. """
     import warnings
@@ -215,4 +214,3 @@ def geobipy_mpi():
     sys.path.append(getcwd())
 
     parallel_geobipy(inputFile, output_directory, skipHDF5)
-

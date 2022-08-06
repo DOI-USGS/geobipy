@@ -100,7 +100,7 @@ class TempestData(TdemData):
     #         #     self.channels_per_system = np.size(values, 1)
     #         shp = (self.nPoints, self.n_components * self.nSystems)
     #         assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("primary_field must have shape {}".format(shp))
-    #         self._primary_field = StatArray.StatArray(values)  
+    #         self._primary_field = StatArray.StatArray(values)
 
     @property
     def relative_error(self):
@@ -238,8 +238,8 @@ class TempestData(TdemData):
         self.z = df[iC[4]].values
         self.elevation = df[iC[5]].values
 
-        self.transmitter = CircularLoops(x=self.x, 
-                                         y=self.y, 
+        self.transmitter = CircularLoops(x=self.x,
+                                         y=self.y,
                                          z=self.z,
                                          pitch=df[iT[0]].values, roll=df[iT[1]].values, yaw=df[iT[2]].values,
                                          radius=np.full(self.nPoints, fill_value=self.system[0].loopRadius()))
@@ -256,11 +256,11 @@ class TempestData(TdemData):
 
         self.primary_field[:, :] = df[iPrimary].values
         self.secondary_field[:, :] = df[iSecondary].values
-        
+
         # If the data error columns are given, assign them
         self.std;
         if len(iStd) > 0:
-            self._std[:, :] = df[iStd].values    
+            self._std[:, :] = df[iStd].values
 
         self.check()
 
@@ -290,7 +290,7 @@ class TempestData(TdemData):
         else:
             channels = np.atleast_1d(channels)
             for j, i in enumerate(channels):
-                ax = cP.plot(x, self.data[:, i], 
+                ax = cP.plot(x, self.data[:, i],
                              label=self.channelNames[i], **kwargs)
 
         plt.xlabel(utilities.getNameUnits(x))
@@ -299,8 +299,8 @@ class TempestData(TdemData):
         if legend:
             leg = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), fancybox=True)
             leg.set_title(self.data.getNameUnits())
-        
-        return ax        
+
+        return ax
 
 
     def plotPredicted(self, system=0, channels=None, xAxis='index', **kwargs):
@@ -328,7 +328,7 @@ class TempestData(TdemData):
         else:
             channels = np.atleast_1d(channels)
             for j, i in enumerate(channels):
-                ax = cP.plot(x, self.predictedData[:, i], 
+                ax = cP.plot(x, self.predictedData[:, i],
                              label=self.channelNames[i], **kwargs)
 
         plt.xlabel(utilities.getNameUnits(x))
@@ -337,7 +337,7 @@ class TempestData(TdemData):
         if legend:
             leg = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), fancybox=True)
             leg.set_title(self.predictedData.getNameUnits())
-        
+
         return ax
 
     def _init_posterior_plots(self, gs, sharex=None, sharey=None):
@@ -372,13 +372,13 @@ class TempestData(TdemData):
         return ax
 
     def plot_posteriors(self, axes=None, height_kwargs={}, data_kwargs={}, rel_error_kwargs={}, transmitter_pitch_kwargs={}, sharex=None, sharey=None, **kwargs):
-        
+
         if axes is None:
             axes = kwargs.pop('fig', plt.gcf())
 
         if not isinstance(axes, list):
             axes = self._init_posterior_plots(axes, sharex=sharex, sharey=sharey)
-            
+
         # assert len(axes) == 4, ValueError("axes must have length 4")
         # assert len(axes) == 4, ValueError("Must have length 3 list of axes for the posteriors. self.init_posterior_plots can generate them")
 
@@ -394,7 +394,7 @@ class TempestData(TdemData):
         return axes
 
     # def csv_channels(self, data_filename):
-    
+
     #     self._nPoints, self._iC, self._iR, self._iT, self._iOffset, self._iData, self._iStd, self._iPrimary = TdemData._csv_channels(data_filename)
 
     #     self._channels = self._iC + self._iR + self._iT + self._iOffset + self._iData
@@ -431,7 +431,7 @@ class TempestData(TdemData):
     #     """
     #     channels = fIO.get_column_name(data_filename)
 
-        
+
 
     #     return *TdemData._csv_channels(data_filename), iPrimary
 
@@ -641,4 +641,3 @@ class TempestData(TdemData):
         out = super(TempestData, cls).fromHdf(grp, **kwargs)
         out.primary_field = StatArray.StatArray.fromHdf(grp['primary_field'])
         return out
-

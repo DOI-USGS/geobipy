@@ -220,7 +220,7 @@ class Inference2D(myObject):
         return self.percentile(percent), self.percentile(100.0-percent)
 
     def compute_mean_parameter(self, log=None, track=True):
-            
+
         posterior = self.parameter_posterior()
         mean = posterior.mean(axis=1)
 
@@ -287,8 +287,8 @@ class Inference2D(myObject):
 
         if smooth is not None:
             doi = doi.smooth(smooth)
-        
-        if self.mode == 'r+':        
+
+        if self.mode == 'r+':
             if 'doi' in self.hdfFile.keys():
                 doi.writeHdf(self.hdfFile, 'doi')
             else:
@@ -357,7 +357,7 @@ class Inference2D(myObject):
             out = []
         if isinstance(grp, (Group, File)):
             if 'posterior' in grp.keys():
-                out.append(grp['posterior'].name)            
+                out.append(grp['posterior'].name)
             if 'nPosteriors' in grp.keys():
                 npost = np.int32(grp['nPosteriors'])
                 if npost > 1:
@@ -367,7 +367,7 @@ class Inference2D(myObject):
                 out = self.find_posteriors(grp[k], out)
         else:
             return out
-        
+
         return out
 
     def _get(self, variable, reciprocateParameter=False, slic=None, **kwargs):
@@ -819,7 +819,7 @@ class Inference2D(myObject):
         if 0.8 < self.data.x.range / self.data.y.range < 1.2:
             return np.sqrt(self.data.x**2.0 + self.data.y**2.0)
         return self.data.x if self.data.x.range > self.data.y.range else self.data.y
-        
+
     @property
     def mesh(self):
         """Get the 2D topo fitting rectilinear mesh. """
@@ -957,7 +957,7 @@ class Inference2D(myObject):
         return Histogram.fromHdf(self.hdfFile['/model/values/posterior'], index=index)
 
     def ncells_posterior(self, index=None, fiducial=None):
-    
+
         if fiducial is not None:
             assert fiducial in self.fiducials, ValueError("This fiducial {} is not available from this HDF5 file. The min max fids are {} to {}.".format(fiducial, self.fiducials.min(), self.fiducials.max()))
             # Get the point index
@@ -1019,7 +1019,7 @@ class Inference2D(myObject):
     #     elif axis == 'x':
     #         ax = self.x
     #     elif axis == 'y':
-    #         ax = self.y            
+    #         ax = self.y
     #     return ax
 
     @cached_property
@@ -1172,7 +1172,7 @@ class Inference2D(myObject):
             r = range(self.nSystems)
             for i in r:
                 fc = cP.wellSeparated[i+2]
-                self.mesh.plot_line(self.additiveError[:, i], axis=1, 
+                self.mesh.plot_line(self.additiveError[:, i], axis=1,
                 c=fc,
                 alpha = 0.7,label='System ' + str(i + 1),
                 **kwargs)
@@ -1198,7 +1198,7 @@ class Inference2D(myObject):
     def plot_confidence(self, **kwargs):
         """ Plot the opacity """
         kwargs['cmap'] = kwargs.get('cmap', 'plasma')
-        
+
         ax, pm, cb = self.plot_cross_section(values = self.opacity(), ticks=[0.0, 0.5, 1.0], **kwargs)
 
         if cb is not None:
@@ -1208,7 +1208,7 @@ class Inference2D(myObject):
 
     def plot_entropy(self, **kwargs):
         kwargs['cmap'] = kwargs.get('cmap', 'hot')
-        
+
         return self.plot_cross_section(values = self.entropy, **kwargs)
 
     # def plotError2DJointProbabilityDistribution(self, index, system=0, **kwargs):
@@ -1265,12 +1265,12 @@ class Inference2D(myObject):
             r = range(self.nSystems)
             for i in r:
                 kwargs['c'] = cP.wellSeparated[i+2]
-                self.mesh.plot_line(self.relativeError[:, i], axis=1, 
+                self.mesh.plot_line(self.relativeError[:, i], axis=1,
                 alpha = 0.7, label='System {}'.format(i + 1), **kwargs)
             plt.legend()
         else:
             kwargs['c'] = cP.wellSeparated[2]
-            self.mesh.plot_line(self.relativeError[:, i], axis=1, 
+            self.mesh.plot_line(self.relativeError[:, i], axis=1,
                 alpha = 0.7, label='System {}'.format(1), **kwargs)
 
     def scatter2D(self, **kwargs):
@@ -1411,7 +1411,7 @@ class Inference2D(myObject):
             # opacity = deepcopy(self.entropy)
             # opacity = 1.0 - opacity.normalize()
             kwargs['alpha'] = opacity
-        
+
         if kwargs.pop('mask_below_doi', False):
             opacity = kwargs.get('alpha')
             if kwargs.get('alpha') is None:
