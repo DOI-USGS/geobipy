@@ -181,7 +181,7 @@ class Tempest_datapoint(TdemDataPoint):
 
         return misfit
 
-    def find_best_halfspace(self, conductivity=1.0, pitch=0.0):
+    def find_best_halfspace(self, conductivity=1000.0, pitch=-10.0):
         """Computes the best value of a half space that fits the data.
 
         Carries out a brute force search of the halfspace conductivity that best fits the data.
@@ -208,16 +208,16 @@ class Tempest_datapoint(TdemDataPoint):
         dp.relative_error[:] = 0.01
         dp.additive_error[:] = 0.0
 
+        model = dp.new_model()
+
         def minimize_me(x):
-            model = dp.new_model()
             model.values[0] = x[0]
             dp.transmitter.pitch = x[1]
             dp.forward(model)
             return dp.dataMisfit()
 
-        out = minimize(minimize_me, [conductivity, pitch], method='Nelder-Mead', bounds=((0.0, np.inf),(-90.0, 90.0)))
+        out = minimize(minimize_me, [conductivity, pitch], method='Nelder-Mead', bounds=((0.0, np.inf),(-90.0, 90.0)), options={'maxiter':10000})
 
-        model = self.new_model()
         model.values[0] = out.x[0]
         self.transmitter.pitch = out.x[1]
 
