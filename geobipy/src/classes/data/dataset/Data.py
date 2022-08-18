@@ -258,7 +258,7 @@ class Data(PointCloud3D):
             if (isinstance(values, StatArray.StatArray)):
                 self._fiducial = deepcopy(values)
             else:
-                self._fiducial = StatArray.StatArray(values, "Fiducial")
+                self._fiducial = StatArray.StatArray(values.astype(np.float64), "Fiducial")
 
     @property
     def lineNumber(self):
@@ -328,14 +328,14 @@ class Data(PointCloud3D):
     def relative_error(self):
         """The data. """
         if np.size(self._relative_error, 0) == 0:
-            self._relative_error = StatArray.StatArray((self.nPoints, self.nSystems), "Relative error", "%")
+            self._relative_error = StatArray.StatArray(np.full((self.nPoints, self.nSystems), fill_value=0.01), "Relative error", "%")
         return self._relative_error
 
     @relative_error.setter
     def relative_error(self, values):
         shp = (self.nPoints, self.nSystems)
         if values is None:
-            self._relative_error = StatArray.StatArray(np.ones(shp), "Relative error", "%")
+            self._relative_error = StatArray.StatArray(np.full(shp, fill_value=0.01), "Relative error", "%")
         else:
             if self.nPoints == 0:
                 self.nPoints = np.size(values, 0)
