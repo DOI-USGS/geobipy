@@ -181,7 +181,7 @@ class Tempest_datapoint(TdemDataPoint):
 
         return misfit
 
-    def find_best_halfspace(self, conductivity=1000.0, pitch=-10.0):
+    def find_best_halfspace(self):
         """Computes the best value of a half space that fits the data.
 
         Carries out a brute force search of the halfspace conductivity that best fits the data.
@@ -205,8 +205,6 @@ class Tempest_datapoint(TdemDataPoint):
         from scipy.optimize import minimize
 
         dp = deepcopy(self)
-        dp.relative_error[:] = 0.01
-        dp.additive_error[:] = 0.0
 
         model = dp.new_model()
 
@@ -216,10 +214,19 @@ class Tempest_datapoint(TdemDataPoint):
             dp.forward(model)
             return dp.dataMisfit()
 
-        out = minimize(minimize_me, [conductivity, pitch], method='Nelder-Mead', bounds=((0.0, np.inf),(-90.0, 90.0)), options={'maxiter':10000})
+        conductivities = np.logspace(-8, 5, 12)
+        pitch = np.linspace(-20.0, 20.0, 12)
 
-        model.values[0] = out.x[0]
-        self.transmitter.pitch = out.x[1]
+        out = np.empty((conductivities.size, 3))
+
+        for i in range(conductivities.size):
+            tmp = minimize(minimize_me, [conductivities[i], pitch[i]], method='Nelder-Mead', bounds=((0.0, np.inf),(-90.0, 90.0)), options={'maxiter':10000})
+            out[i, :] = tmp.x[0], tmp.x[1], tmp.fun
+
+        j = np.argmin(out[:, 2])
+
+        model.values[0] = out[j, 0]
+        self.transmitter.pitch = out[j, 1]
 
         return model
 
