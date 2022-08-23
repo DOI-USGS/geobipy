@@ -776,67 +776,6 @@ class TdemDataPoint(EmDataPoint):
 
         cp.title(title)
 
-    def priorProbability(self, rErr, aErr, height, calibration, verbose=False):
-        """Evaluate the probability for the EM data point given the specified attached priors
-
-        Parameters
-        ----------
-        rEerr : bool
-            Include the relative error when evaluating the prior
-        aEerr : bool
-            Include the additive error when evaluating the prior
-        height : bool
-            Include the elevation when evaluating the prior
-        calibration : bool
-            Include the calibration parameters when evaluating the prior
-        verbose : bool
-            Return the components of the probability, i.e. the individually evaluated priors
-
-        Returns
-        -------
-        out : np.float64
-            The evaluation of the probability using all assigned priors
-
-        Notes
-        -----
-        For each boolean, the associated prior must have been set.
-
-        Raises
-        ------
-        TypeError
-            If a prior has not been set on a requested parameter
-
-        """
-        probability = np.float64(0.0)
-        errProbability = np.float64(0.0)
-
-        P_relative = np.float64(0.0)
-        P_additive = np.float64(0.0)
-        P_height = np.float64(0.0)
-        P_calibration = np.float64(0.0)
-
-        probability += errProbability
-        if height:  # Elevation
-            P_height = (self.z.probability(log=True))
-            probability += P_height
-
-        if rErr:  # Relative Errors
-            P_relative = self.relative_error.probability(log=True)
-            errProbability += P_relative
-
-        if aErr:  # Additive Errors
-            P_additive = self.additive_error.probability(log=True)
-            errProbability += P_additive
-
-        if calibration:  # Calibration parameters
-            P_calibration = self.calibration.probability(log=True)
-            probability += P_calibration
-
-        probability = np.float64(probability)
-
-        if verbose:
-            return probability, np.asarray([P_relative, P_additive, P_height, P_calibration])
-        return probability
 
     def set_posteriors(self, log=10):
         super().set_posteriors(log=log)

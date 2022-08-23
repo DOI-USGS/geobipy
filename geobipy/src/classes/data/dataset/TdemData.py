@@ -971,7 +971,7 @@ class TdemData(Data):
         msg = "Tdem Data: \n"
         msg += "Number of Systems: :" + str(self.nSystems) + '\n'
         msg += self.lineNumber.summary
-        msg += self.id.summary
+        msg += self.fiducial.summary
         msg += self.elevation.summary
         return msg
 

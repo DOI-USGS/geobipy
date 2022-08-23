@@ -358,8 +358,12 @@ class DataPoint(Point):
         self.predictedData.plotPosteriors(ax = axes[1], colorbar=False, **data_kwargs)
         self.plot(ax=axes[1], **data_kwargs)
 
-        c = cP.wellSeparated[0] if best is None else cP.wellSeparated[3]
-        self.plotPredicted(color=c, ax=axes[1], **data_kwargs)
+        if best is None:
+            c = cP.wellSeparated[0]
+            self.plotPredicted(color=c, ax=axes[1], **data_kwargs)
+        else:
+            c = cP.wellSeparated[3]
+            best.plotPredicted(color=c, ax=axes[1], **data_kwargs)
 
         self.relative_error.plotPosteriors(ax=axes[2], **rel_error_kwargs)
         self.additive_error.plotPosteriors(ax=axes[3], **add_error_kwargs)
