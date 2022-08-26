@@ -340,8 +340,13 @@ class Inference1D(myObject):
         observation = None
         if not  self.kwargs.get('ignore_likelihood', False):
             likelihood1 = perturbed_datapoint.likelihood(log=True)
-            observation = perturbed_datapoint
+            observation = deepcopy(perturbed_datapoint)
         proposal, proposal1 = perturbed_model.proposal_probabilities(remapped_model, observation)
+
+        print('data misfit', data_misfit1)
+        print('prior', prior1)
+        print('proposal', proposal, proposal1)
+        print('likelihood', likelihood1)
 
         posterior1 = prior1 + likelihood1
 

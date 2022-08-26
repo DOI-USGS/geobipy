@@ -261,6 +261,8 @@ class RectilinearMesh1D(Mesh):
 
     @property
     def min_width(self):
+        if self._min_width is None:
+            return 1.0
         return self._min_width
 
     @property
