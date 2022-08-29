@@ -523,7 +523,7 @@ class Inference3D(myObject):
 
             failed = inference.infer(hdf_file_handle=self.lines[iLine].hdfFile)
             if failed:
-                myMPI.print("datapoint {} failed to converge".format(datapoint.fiducial))
+                myMPI.print("datapoint {} {} failed to converge".format(datapoint.lineNumber, datapoint.fiducial))
 
             # Ping the Master to request a new index
             world.send('requesting', dest=0)

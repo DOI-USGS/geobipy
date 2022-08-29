@@ -343,11 +343,6 @@ class Inference1D(myObject):
             observation = deepcopy(perturbed_datapoint)
         proposal, proposal1 = perturbed_model.proposal_probabilities(remapped_model, observation)
 
-        print('data misfit', data_misfit1)
-        print('prior', prior1)
-        print('proposal', proposal, proposal1)
-        print('likelihood', likelihood1)
-
         posterior1 = prior1 + likelihood1
 
         prior_ratio = prior1 - self.prior
