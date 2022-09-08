@@ -251,19 +251,38 @@ class RectilinearMesh1D(Mesh):
     def max_cells(self):
         return self._max_cells
 
+    @max_cells.setter
+    def max_cells(self, value):
+        assert value > 0, ValueError('max_cells must be > 0')
+        self._max_cells = np.int32(value)
+
     @property
     def max_edge(self):
         return self._max_edge
 
+    @max_edge.setter
+    def max_edge(self, value):
+        self._max_edge = np.float64(value)
+
     @property
     def min_edge(self):
         return self._min_edge
+
+    @min_edge.setter
+    def min_edge(self, value):
+        self._min_edge = np.float64(value)
 
     @property
     def min_width(self):
         if self._min_width is None:
             return 1.0
         return self._min_width
+
+    @min_width.setter
+    def min_width(self, value):
+        self._min_width = value
+        if value is None:
+            self._min_width = (self.max_edge - self.min_edge) / (2.0 * self.max_cells)
 
     @property
     def nCells(self):
@@ -977,6 +996,7 @@ class RectilinearMesh1D(Mesh):
 
         """
         reciprocateX = kwargs.pop("reciprocateX", False)
+        # kwargs['transpose'] = kwargs.get('transpose', True)
 
         # Repeat the last entry since we are plotting against edges
         par = values.append(values[-1])
