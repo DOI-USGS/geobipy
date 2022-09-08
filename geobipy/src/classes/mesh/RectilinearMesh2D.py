@@ -934,13 +934,20 @@ class RectilinearMesh2D(Mesh):
         return self.axis(axis).relativeTo.plot(x = self.other_axis(axis).centres, **kwargs)
 
 
-    def plot_line(self, value, axis=0, **kwargs):
+    # def plot_line(self, value, axis=0, **kwargs):
 
+    #     raise Exception('here')
+    #     if axis == 0:
+    #         cP.plot(value, self.y.centres, **kwargs)
+    #     else:
+    #         cP.plot(self.x.centres, value, **kwargs)
+
+    def plot_line(self, values, **kwargs):
+        axis = kwargs.pop('axis', 1)
         if axis == 0:
-            cP.plot(value, self.y.centres, **kwargs)
+            cP.hlines(values, xmin=self.x.edges_absolute[:-1], xmax=self.x.edges_absolute[1:], **kwargs)
         else:
-            cP.plot(self.x.centres, value, **kwargs)
-
+            cP.vlines(values, ymin=self.y.edges_absolute[:-1], ymax=self.y.edges_absolute[1:], **kwargs)
 
     # def plot_value_posteriors(self, axes, values, axis, value_kwargs={}, **kwargs):
     #     # assert len(axes) == 5, ValueError("Must have length 5 list of axes for the posteriors. self.init_posterior_plots can generate them")

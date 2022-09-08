@@ -750,6 +750,14 @@ class StatArray(np.ndarray, myObject):
 
         return (((b - a) * (self - self.min())) / (self.max() - self.min())) + a
 
+    def reset_posteriors(self):
+        np = self.nPosteriors
+        if np > 1:
+            for post in self.posterior:
+                post.reset()
+        elif np == 1:
+            self.posterior.reset()
+
     def resize(self, new_shape):
         """Resize a StatArray
 
@@ -1285,15 +1293,15 @@ class StatArray(np.ndarray, myObject):
         kwargs['normalize'] = kwargs.get('normalize', True)
 
         if np.size(ax) > 1:
-            assert np.size(ax) == self.nPosteriors, ValueError("Length of ax {} must equal number of attached posteriors {}".format(np.size(ax), self.nPosteriors))
-            if 'line' in kwargs:
-                assert np.size(kwargs['line']) == np.size(ax), ValueError("line in kwargs must have size {}".format(np.size(ax)))
-            line = kwargs.pop('line', np.asarray([np.nan for i in range(np.size(ax))]))
-            # kwargs['trim'] = kwargs.get('trim', None)
+            assert len(ax) == self.nPosteriors, ValueError("Length of ax {} must equal number of attached posteriors {}".format(np.size(ax), self.nPosteriors))
+            if 'overlay' in kwargs:
+                assert len(kwargs['overlay']) == len(ax), ValueError("line in kwargs must have size {}".format(len(ax)))
+            overlay = kwargs.pop('overlay', np.asarray([None for i in range(len(ax))]))
+
             for i in range(self.nPosteriors):
                 plt.sca(ax[i])
                 plt.cla()
-                self.posterior[i].plot(line=line[i], **kwargs)
+                self.posterior[i].plot(overlay=overlay[i], **kwargs)
         else:
             if isinstance(ax, list):
                 ax = ax[0]

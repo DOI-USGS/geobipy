@@ -162,6 +162,12 @@ class EmLoop(Point, ABC):
 
         self.yaw.proposal = yaw_proposal
 
+    def reset_posteriors(self):
+        super().reset_posteriors()
+        self.pitch.reset_posteriors()
+        self.roll.reset_posteriors()
+        self.yaw.reset_posteriors()
+
     def set_posteriors(self):
 
         super().set_posteriors()

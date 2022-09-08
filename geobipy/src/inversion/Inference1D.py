@@ -272,12 +272,12 @@ class Inference1D(myObject):
 
         # Setup the model for perturbation
         self.model.set_priors(
-            mean_value=halfspace.values.item(),
+            value_mean=halfspace.values.item(),
             min_edge=self.kwargs['minimum_depth'],
             max_edge=self.kwargs['maximum_depth'],
             max_cells=self.kwargs['maximum_number_of_layers'],
-            parameterPrior=self.kwargs['solve_parameter'],
-            gradientPrior=self.kwargs['solve_gradient'],
+            solve_value=True, #self.kwargs['solve_parameter'],
+            solve_gradient=self.kwargs['solve_gradient'],
             parameterLimits=self.kwargs.get('parameter_limits', None),
             min_width=self.kwargs.get('minimum_thickness', None),
             factor=self.kwargs.get('factor', 10.0), prng=self.prng
@@ -445,6 +445,9 @@ class Inference1D(myObject):
                 self.best_datapoint = deepcopy(self.datapoint)
                 self.best_posterior = self.posterior
 
+                self.data_misfit_v.reset_posteriors()
+                self.model.reset_posteriors()
+                self.datapoint.reset_posteriors()
         if (self.posterior > self.best_posterior):
             self.best_iteration = self.iteration
             self.best_model = deepcopy(self.model)
@@ -460,15 +463,15 @@ class Inference1D(myObject):
             if (not self.burned_in and not self.datapoint.relative_error.hasPrior):
                 self.multiplier *= self.kwargs['multiplier']
 
-        if (self.burned_in):  # We need to update some plotting options
-            self.data_misfit_v.posterior.update(self.data_misfit, trim=True)
+        # if (self.burned_in):  # We need to update some plotting options
+        self.data_misfit_v.posterior.update(self.data_misfit, trim=True)
 
-            # Added the layer depths to a list, we histogram this list every
-            # iPlot iterations
-            self.model.update_posteriors(0.5)#self.user_options.clip_ratio)
+        # Added the layer depths to a list, we histogram this list every
+        # iPlot iterations
+        self.model.update_posteriors(0.5)#self.user_options.clip_ratio)
 
-            # Update the height posterior
-            self.datapoint.update_posteriors()
+        # Update the height posterior
+        self.datapoint.update_posteriors()
 
         if ((self.iteration > 0) and (np.mod(self.iteration, self.update_plot_every) == 0)):
             acceptance_percent = 100.0 * np.float64(self.accepted) / np.float64(self.update_plot_every)
@@ -540,26 +543,26 @@ class Inference1D(myObject):
             # Update the data misfit vs iteration
             self._plotMisfitVsIteration()
 
+            overlay = self.best_model if self.burned_in else self.model
+
             self.model.plot_posteriors(
                 axes=self.ax[2],
                 # ncells_kwargs={
                 #     'normalize': True},
                 edges_kwargs={
-                    # 'normalize': True,
                     'transpose': True,
-                    # 'flipY': True,
                     'trim': False},
                 values_kwargs={
                     'colorbar': False,
                     'flipY': True,
                     'xscale': 'log',
                     'credible_interval_kwargs': {
-                        # 'log':10,
-                        # 'reciprocate':True
-                        'axis': 0
+                        'axis': 1
                     }
                 },
-                best=self.model)
+                overlay=overlay)
+
+            overlay = self.best_datapoint if self.burned_in else self.datapoint
 
             self.datapoint.plot_posteriors(
                 axes=self.ax[3],
@@ -570,7 +573,7 @@ class Inference1D(myObject):
                 #     'normalize': True},
                 # add_error_kwargs={
                 #     'normalize': True},
-                best=self.datapoint)
+                overlay=overlay)
 
             cP.suptitle(title)
 

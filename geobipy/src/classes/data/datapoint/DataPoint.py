@@ -345,11 +345,11 @@ class DataPoint(Point):
 
         assert len(axes) == 4, ValueError("Must have length 3 list of axes for the posteriors. self.init_posterior_plots can generate them")
 
-        best = kwargs.pop('best', None)
-        if not best is None:
-            height_kwargs['line'] = best.z
-            rel_error_kwargs['line'] = best.relative_error
-            add_error_kwargs['line'] = best.additive_error
+        ovelay = kwargs.pop('ovelay', None)
+        if not ovelay is None:
+            height_kwargs['overlay'] = ovelay.z
+            rel_error_kwargs['overlay'] = ovelay.relative_error
+            add_error_kwargs['overlay'] = ovelay.additive_error
 
         height_kwargs['transpose'] = height_kwargs.get('transpose', True)
         self.z.plotPosteriors(ax = axes[0], **height_kwargs)
@@ -358,12 +358,12 @@ class DataPoint(Point):
         self.predictedData.plotPosteriors(ax = axes[1], colorbar=False, **data_kwargs)
         self.plot(ax=axes[1], **data_kwargs)
 
-        if best is None:
+        if ovelay is None:
             c = cP.wellSeparated[0]
             self.plotPredicted(color=c, ax=axes[1], **data_kwargs)
         else:
             c = cP.wellSeparated[3]
-            best.plotPredicted(color=c, ax=axes[1], **data_kwargs)
+            ovelay.plotPredicted(color=c, ax=axes[1], **data_kwargs)
 
         self.relative_error.plotPosteriors(ax=axes[2], **rel_error_kwargs)
         self.additive_error.plotPosteriors(ax=axes[3], **add_error_kwargs)
@@ -515,6 +515,11 @@ class DataPoint(Point):
                 proposal = Distribution('MvNormal', self.additive_error, kwargs['additive_error_proposal_variance'], linearSpace=False, prng=kwargs['prng'])
 
         self.additive_error.proposal = proposal
+
+    def reset_posteriors(self):
+        self.z.reset_posteriors()
+        self.relative_error.reset_posteriors()
+        self.additive_error.reset_posteriors()
 
     def set_posteriors(self, log=None):
         """ Set the posteriors based on the attached priors

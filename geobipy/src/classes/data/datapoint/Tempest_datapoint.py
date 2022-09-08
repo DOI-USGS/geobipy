@@ -174,67 +174,72 @@ class Tempest_datapoint(TdemDataPoint):
             for i in range(conductivity.nCells):
                 model.values[0] = conductivity.centres_absolute[i]
                 for j in range(pitch.nCells):
-                    self.transmitter.pitch = pitch.centres[j]
+                    self.receiver.pitch = pitch.centres[j]
 
                     self.forward(model)
                     misfit.values[i, j] = self.dataMisfit()
 
         return misfit
 
-    def find_best_halfspace(self):
-        """Computes the best value of a half space that fits the data.
+    # def find_best_halfspace(self):
+    #     """Computes the best value of a half space that fits the data.
 
-        Carries out a brute force search of the halfspace conductivity that best fits the data.
-        The profile of data misfit vs halfspace conductivity is not quadratic, so a bisection will not work.
+    #     Carries out a brute force search of the halfspace conductivity that best fits the data.
+    #     The profile of data misfit vs halfspace conductivity is not quadratic, so a bisection will not work.
 
-        Parameters
-        ----------
-        minConductivity : float, optional
-            The minimum conductivity to search over
-        maxConductivity : float, optional
-            The maximum conductivity to search over
-        nSamples : int, optional
-            The number of values between the min and max
+    #     Parameters
+    #     ----------
+    #     minConductivity : float, optional
+    #         The minimum conductivity to search over
+    #     maxConductivity : float, optional
+    #         The maximum conductivity to search over
+    #     nSamples : int, optional
+    #         The number of values between the min and max
 
-        Returns
-        -------
-        out : np.float64
-            The best fitting log10 conductivity for the half space
+    #     Returns
+    #     -------
+    #     out : np.float64
+    #         The best fitting log10 conductivity for the half space
 
-        """
-        from scipy.optimize import minimize
+    #     """
+    #     from scipy.optimize import minimize
 
-        dp = deepcopy(self)
+    #     dp = deepcopy(self)
+    #     # dp.relative_error[:] = 0.01
+    #     # dp.additive_error[:] = 0.0
 
-        model = dp.new_model()
+    #     model = dp.new_model()
 
-        def minimize_me(x):
-            model.values[0] = x[0]
-            dp.transmitter.pitch = x[1]
-            dp.forward(model)
-            return dp.dataMisfit()
+    #     def minimize_me(x):
+    #         model.values[0] = x[0]
+    #         dp.receiver.pitch = x[1]
+    #         dp.forward(model)
+    #         return dp.dataMisfit()
 
-        conductivities = np.logspace(-8, 5, 12)
-        pitch = np.linspace(-20.0, 20.0, 12)
+    #     conductivities = np.logspace(-8, 5, 12)
+    #     pitch = np.linspace(-20.0, 20.0, 12)
 
-        out = np.empty((conductivities.size, 3))
+    #     out = np.empty((conductivities.size, 3))
 
-        for i in range(conductivities.size):
-            tmp = minimize(minimize_me, [conductivities[i], pitch[i]], method='Nelder-Mead', bounds=((0.0, np.inf),(-90.0, 90.0)), options={'maxiter':10000})
-            out[i, :] = tmp.x[0], tmp.x[1], tmp.fun
+    #     for i in range(conductivities.size):
+    #         tmp = minimize(minimize_me, [conductivities[i], pitch[i]], method='Nelder-Mead', bounds=((0.0, np.inf),(-90.0, 90.0)), options={'maxiter':10000, 'fatol':1e-6})
+    #         out[i, :] = tmp.x[0], tmp.x[1], tmp.fun
 
-        j = np.argmin(out[:, 2])
+    #     j = np.argmin(out[:, 2])
 
-        model.values[0] = out[j, 0]
-        self.transmitter.pitch = out[j, 1]
+    #     # tmp = minimize(minimize_me, [out[j, 0], out[j, 1]], method='Nelder-Mead', bounds=((0.0, np.inf),(-90.0, 90.0)), options={'maxiter':10000, 'fatol':1e-12, 'xatol':1e-6})
+    #     # print(tmp)
 
-        return model
+    #     model.values[0] = out[j, 0]
+    #     self.receiver.pitch = out[j, 1]
+
+    #     return model
 
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
 
-        if 'initial_transmitter_pitch' in kwargs:
-            self.transmitter.pitch = kwargs['initial_transmitter_pitch']
+        if 'initial_receiver_pitch' in kwargs:
+            self.receiver.pitch = kwargs['initial_receiver_pitch']
 
     def _init_posterior_plots(self, gs):
         """Initialize axes for posterior plots
@@ -248,33 +253,64 @@ class Tempest_datapoint(TdemDataPoint):
         if isinstance(gs, matplotlib.figure.Figure):
             gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
 
-        n = np.sum([self.relative_error.hasPosterior, self.additive_error.hasPosterior, self.transmitter.pitch.hasPosterior])
+        columns = np.r_[self.relative_error.hasPosterior, self.additive_error.hasPosterior, self.receiver.pitch.hasPosterior]
 
-        splt = gs.subgridspec(2, n, height_ratios=[2, 1], wspace=0.3)
+        n_rows = 1
+        height_ratios = None
+        if np.any(columns):
+            n_rows = 2
+            height_ratios = (2, 1)
+
+        splt = gs.subgridspec(n_rows, 1, height_ratios=height_ratios, wspace=0.3)
+
+        n_cols = 1
+        width_ratios = None
+        if self.z.hasPosterior:
+            n_cols = 2
+            width_ratios = (1, 3)
+
+        splt0 = splt[0].subgridspec(1, n_cols, width_ratios=width_ratios)
+
         ax = []
+        i = 0
+        tmp = None
+        if self.z.hasPosterior:
+            tmp = self.z._init_posterior_plots(splt0[0])
+            i = 1
         # Height axis
-        ax.append(self.z._init_posterior_plots(splt[0, :1]))
+        ax.append(tmp)
         # Data axis
-        ax.append(plt.subplot(splt[0, 1:]))
+        ax.append(plt.subplot(splt0[i]))
+
+        n_cols = columns.sum()
+
+        if n_cols > 0:
+            splt0 = splt[1].subgridspec(1, n_cols)
 
         i = 0
-        # Relative error axes
-        tmp = self.relative_error._init_posterior_plots(splt[1, i])
-        if tmp is not None:
-            i += 1
+        tmp = None
+        if self.relative_error.hasPosterior:
+            # Relative error axes
+            tmp = self.relative_error._init_posterior_plots(splt0[0, i])
+            if tmp is not None:
+                i += 1
         ax.append(tmp)
 
         # Additive Error axes
-        tmp = self.additive_error._init_posterior_plots(splt[1, i])
-        if tmp is not None:
-            i += 1
-            for j in range(self.nSystems):
-                others = np.s_[(j * self.n_components):(j * self.n_components)+self.n_components]
-                tmp[1].get_shared_y_axes().join(tmp[1], *tmp[others])
+        tmp = None
+        if self.additive_error.hasPosterior:
+            tmp = self.additive_error._init_posterior_plots(splt0[0, i])
+            if tmp is not None:
+                i += 1
+                for j in range(self.nSystems):
+                    others = np.s_[(j * self.n_components):(j * self.n_components)+self.n_components]
+                    tmp[1].get_shared_y_axes().join(tmp[1], *tmp[others])
         ax.append(tmp)
 
         # Pitch axes
-        tmp = self.transmitter.pitch._init_posterior_plots(splt[1, i])
+        tmp = None
+        if self.receiver.pitch.hasPosterior:
+            tmp = self.receiver.pitch._init_posterior_plots(splt0[0, i])
         ax.append(tmp)
 
         return ax
@@ -313,11 +349,11 @@ class Tempest_datapoint(TdemDataPoint):
         self.perturb_pitch()
 
     def perturb_pitch(self):
-        if self.transmitter.pitch.hasProposal:
+        if self.receiver.pitch.hasProposal:
             # Generate a new error
-            self.transmitter.pitch.perturb(imposePrior=True)
+            self.receiver.pitch.perturb(imposePrior=True)
             # Update the mean of the proposed errors
-            self.transmitter.pitch.proposal.mean = self.transmitter.pitch
+            self.receiver.pitch.proposal.mean = self.receiver.pitch
 
     def plotWaveform(self,**kwargs):
         for i in range(self.nSystems):
@@ -343,12 +379,14 @@ class Tempest_datapoint(TdemDataPoint):
 
         assert len(axes) == 5, ValueError("Must have length 5 list of axes for the posteriors. self.init_posterior_plots can generate them")
 
-        best = kwargs.pop('best', None)
-        if not best is None:
-            height_kwargs['line'] = best.z
-            rel_error_kwargs['line'] = best.relative_error
-            # add_error_kwargs['line'] = best.additive_error
-            pitch_kwargs['line'] = best.transmitter.pitch
+        overlay = kwargs.pop('overlay', None)
+        if not overlay is None:
+                height_kwargs['overlay'] = overlay.z
+                rel_error_kwargs['overlay'] = overlay.relative_error
+                add_error_kwargs['overlay'] = [overlay.additive_error[i] for i in self.component_indices]
+                add_error_kwargs['axis'] = 0
+                pitch_kwargs['overlay'] = overlay.receiver.pitch
+
 
         height_kwargs['transpose'] = height_kwargs.get('transpose', True)
         self.z.plotPosteriors(ax = axes[0], **height_kwargs)
@@ -357,7 +395,7 @@ class Tempest_datapoint(TdemDataPoint):
         self.predictedData.plotPosteriors(ax = axes[1], colorbar=False, **data_kwargs)
         self.plot(ax=axes[1], **data_kwargs)
 
-        c = cP.wellSeparated[0] if best is None else cP.wellSeparated[3]
+        c = cP.wellSeparated[0] if overlay is None else cP.wellSeparated[3]
         self.plotPredicted(color=c, ax=axes[1], **data_kwargs)
 
         self.relative_error.plotPosteriors(ax=axes[2], **rel_error_kwargs)
@@ -365,7 +403,7 @@ class Tempest_datapoint(TdemDataPoint):
         add_error_kwargs['colorbar'] = False
         self.additive_error.plotPosteriors(ax=axes[3], **add_error_kwargs)
 
-        self.transmitter.pitch.plotPosteriors(ax = axes[4], **pitch_kwargs)
+        self.receiver.pitch.plotPosteriors(ax = axes[4], **pitch_kwargs)
 
     def plotPredicted(self, **kwargs):
         kwargs['xscale'] = kwargs.get('xscale', 'log')
@@ -432,18 +470,18 @@ class Tempest_datapoint(TdemDataPoint):
                 ic = self._component_indices(j, i)
                 self.predicted_secondary_field[ic].plot(x=system_times, **kwargs)
 
-    def set_priors(self, height_prior=None, relative_error_prior=None, additive_error_prior=None, transmitter_pitch_prior=None, data_prior=None, **kwargs):
+    def set_priors(self, height_prior=None, relative_error_prior=None, additive_error_prior=None, receiver_pitch_prior=None, data_prior=None, **kwargs):
 
         super().set_priors(height_prior, relative_error_prior, additive_error_prior, data_prior, **kwargs)
 
-        if transmitter_pitch_prior is None:
-            if kwargs.get('solve_transmitter_pitch', False):
-                transmitter_pitch_prior = Distribution('Uniform',
-                                                        self.transmitter.pitch - kwargs['maximum_transmitter_pitch_change'],
-                                                        self.transmitter.pitch + kwargs['maximum_transmitter_pitch_change'],
+        if receiver_pitch_prior is None:
+            if kwargs.get('solve_receiver_pitch', False):
+                receiver_pitch_prior = Distribution('Uniform',
+                                                        self.receiver.pitch - kwargs['maximum_receiver_pitch_change'],
+                                                        self.receiver.pitch + kwargs['maximum_receiver_pitch_change'],
                                                         prng=kwargs['prng'])
 
-        self.transmitter.set_priors(pitch_prior=transmitter_pitch_prior)
+        self.receiver.set_priors(pitch_prior=receiver_pitch_prior)
 
     def set_relative_error_prior(self, prior):
         if not prior is None:
@@ -455,21 +493,25 @@ class Tempest_datapoint(TdemDataPoint):
             assert prior.ndim == self.nChannels, ValueError("additive_error_prior must have {} dimensions".format(self.nChannels))
             self.additive_error.prior = prior
 
-    def set_proposals(self, height_proposal=None, relative_error_proposal=None, additive_error_proposal=None, transmitter_pitch_proposal=None, **kwargs):
+    def set_proposals(self, height_proposal=None, relative_error_proposal=None, additive_error_proposal=None, receiver_pitch_proposal=None, **kwargs):
 
         super().set_proposals(height_proposal, relative_error_proposal, additive_error_proposal, **kwargs)
 
-        if transmitter_pitch_proposal is None:
-            if kwargs.get('solve_transmitter_pitch', False):
-                transmitter_pitch_proposal = Distribution('Normal', self.transmitter.pitch.value, kwargs['transmitter_pitch_proposal_variance'], prng=kwargs['prng'])
+        if receiver_pitch_proposal is None:
+            if kwargs.get('solve_receiver_pitch', False):
+                receiver_pitch_proposal = Distribution('Normal', self.receiver.pitch.value, kwargs['receiver_pitch_proposal_variance'], prng=kwargs['prng'])
 
-        self.transmitter.set_proposals(pitch_proposal=transmitter_pitch_proposal)
+        self.receiver.set_proposals(pitch_proposal=receiver_pitch_proposal)
+
+    def reset_posteriors(self):
+        super().reset_posteriors()
+        self.receiver.reset_posteriors()
 
     def set_posteriors(self, log=None):
 
         super().set_posteriors(log=log)
 
-        self.transmitter.set_posteriors()
+        self.receiver.set_posteriors()
 
     def set_relative_error_posterior(self):
 
@@ -498,8 +540,8 @@ class Tempest_datapoint(TdemDataPoint):
 
         super().update_posteriors()
 
-        if self.transmitter.pitch.hasPosterior:
-            self.transmitter.pitch.updatePosterior()
+        if self.receiver.pitch.hasPosterior:
+            self.receiver.pitch.updatePosterior()
 
     def update_additive_error_posterior(self):
         if self.additive_error.hasPosterior:

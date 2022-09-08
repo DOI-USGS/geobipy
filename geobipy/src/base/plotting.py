@@ -1005,6 +1005,95 @@ def pcolor_1D(values, y=None, **kwargs):
 
     return ax
 
+def hlines(*args, **kwargs):
+    """Plot y against x
+
+    If x and y are StatArrays, the axes are automatically labelled.
+
+    Parameters
+    ----------
+    x : array_like or StatArray
+        The abcissa
+    y : array_like or StatArray
+        The ordinate, can be upto 2 dimensions.
+
+    Other Parameters
+    ----------------
+    log : 'e' or float, optional
+        Take the log of the colour to a base. 'e' if log = 'e', and a number e.g. log = 10.
+        Values in c that are <= 0 are masked.
+    xscale : str, optional
+        Scale the x axis? e.g. xscale = 'linear' or 'log'.
+    flipX : bool, optional
+        Flip the X axis
+    flipY : bool, optional
+        Flip the Y axis
+    labels : bool, optional
+        Plot the labels? Default is True.
+
+    Returns
+    -------
+    ax
+        matplotlib.Axes
+
+    See Also
+    --------
+        matplotlib.pyplot.plot : For additional keyword arguments you may use.
+
+    """
+    geobipy_kwargs, kwargs = filter_plotting_kwargs(kwargs)
+    color_kwargs, kwargs = filter_color_kwargs(kwargs)
+
+    kwargs['linestyles'] = kwargs.pop('linestyle', 'solid')
+
+    if 'linecolor' in kwargs:
+        kwargs['color'] = kwargs.pop('linecolor')
+
+    return plt.hlines(*args, **kwargs)
+
+def vlines(*args, **kwargs):
+    """Plot y against x
+
+    If x and y are StatArrays, the axes are automatically labelled.
+
+    Parameters
+    ----------
+    x : array_like or StatArray
+        The abcissa
+    y : array_like or StatArray
+        The ordinate, can be upto 2 dimensions.
+
+    Other Parameters
+    ----------------
+    log : 'e' or float, optional
+        Take the log of the colour to a base. 'e' if log = 'e', and a number e.g. log = 10.
+        Values in c that are <= 0 are masked.
+    xscale : str, optional
+        Scale the x axis? e.g. xscale = 'linear' or 'log'.
+    flipX : bool, optional
+        Flip the X axis
+    flipY : bool, optional
+        Flip the Y axis
+    labels : bool, optional
+        Plot the labels? Default is True.
+
+    Returns
+    -------
+    ax
+        matplotlib.Axes
+
+    See Also
+    --------
+        matplotlib.pyplot.plot : For additional keyword arguments you may use.
+
+    """
+    geobipy_kwargs, kwargs = filter_plotting_kwargs(kwargs)
+    color_kwargs, kwargs = filter_color_kwargs(kwargs)
+
+    if 'linecolor' in kwargs:
+        kwargs['color'] = kwargs.pop('linecolor')
+
+    return plt.vlines(*args, **kwargs)
 
 def plot(x, y, **kwargs):
     """Plot y against x

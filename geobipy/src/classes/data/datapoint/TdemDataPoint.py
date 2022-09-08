@@ -285,6 +285,10 @@ class TdemDataPoint(EmDataPoint):
         i = np.ravel_multi_index((component, system), (self.n_components, self.nSystems))
         return np.s_[self._ravel_index[i]:self._ravel_index[i+1]]
 
+    @property
+    def component_indices(self):
+        return [self._component_indices(comp, sys) for comp in range(self.n_components) for sys in range(self.nSystems)]
+
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
         out.system = self._system

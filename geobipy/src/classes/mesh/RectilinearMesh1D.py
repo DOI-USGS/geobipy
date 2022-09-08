@@ -1041,9 +1041,16 @@ class RectilinearMesh1D(Mesh):
         color_kwargs, kwargs = cp.filter_color_kwargs(kwargs)
         f = plt.axhline if subset['transpose'] else plt.axvline
 
+        linecolor = kwargs.pop('linecolor', 'y')
+
         if np.size(value) > 1:
-            [f(l, **kwargs) for l in value]
+            if isinstance(linecolor, list):
+                [f(l, color=c, **kwargs) for l, c in zip(value, linecolor)]
+            else:
+                kwargs['color'] = linecolor
+                [f(l, **kwargs) for l in value]
         else:
+            kwargs['color'] = linecolor
             f(value, **kwargs)
 
     @property
@@ -1096,13 +1103,13 @@ class RectilinearMesh1D(Mesh):
         ncells_kwargs = kwargs.get('ncells_kwargs', {})
         edges_kwargs = kwargs.get('edges_kwargs', {})
 
-        best = kwargs.pop('best', None)
-        if best is not None:
-            tmp = best
+        overlay = kwargs.pop('overlay', None)
+        if overlay is not None:
+            tmp = overlay
             if values is not None:
-                tmp = best.mesh
-            ncells_kwargs['line'] = tmp.nCells
-            edges_kwargs['line'] = tmp.edges
+                tmp = overlay.mesh
+            ncells_kwargs['overlay'] = tmp.nCells
+            edges_kwargs['overlay'] = tmp.edges
 
         if self.nCells.hasPosterior:
             self.nCells.plotPosteriors(ax = axes[0], **ncells_kwargs)
@@ -1113,8 +1120,8 @@ class RectilinearMesh1D(Mesh):
             assert len(axes) == 3, ValueError("axes must have length == 3")
             values.plotPosteriors(ax=axes[2], **values_kwargs)
 
-            if best is not None:
-                best.plot(xscale=values_kwargs.get('xscale', 'linear'),
+            if overlay is not None:
+                overlay.plot(xscale=values_kwargs.get('xscale', 'linear'),
                         flipY=False,
                         reciprocateX=values_kwargs.get('reciprocateX', None),
                         labels=False,
@@ -1181,6 +1188,9 @@ class RectilinearMesh1D(Mesh):
             raise NotImplementedError('Needs work')
             axis = np.searchsorted(values.shape, self.nCells)
 
+    def reset_posteriors(self):
+        self.nCells.reset_posteriors()
+        self.edges.reset_posteriors()
 
     def set_posteriors(self, nCells_posterior=None, edges_posterior=None):
 
@@ -1253,30 +1263,25 @@ class RectilinearMesh1D(Mesh):
         RectilinearMesh1D.perturb : For a description of the perturbation cycle.
 
         """
-        if n_cells_prior is None:
-            if kwargs.get('solve_n_cells', True):
-                self._nCells = StatArray.StatArray(1, 'Number of cells', dtype=np.int32) + self.centres.size
-                self.nCells.prior = Distribution('Uniform', 1, kwargs['max_cells'], prng=kwargs['prng'])
 
         if edges_prior is None:
             if kwargs.get('solve_edges', True):
-                assert kwargs['max_cells'] > 0, ValueError("max_cells must be > 0")
-                self._max_cells = kwargs['max_cells']
 
-                if (kwargs.get('min_width') is None):
-                    # Assign a minimum possible thickness
-                    self._min_width = (kwargs['max_edge'] - kwargs['min_edge']) / (2 * kwargs['max_cells'])
-                else:
-                    self._min_width = kwargs['min_width']
+                assert all(x in kwargs for x in ('max_cells', 'min_edge', 'max_edge')), ValueError("No edges_prior distribution given, must specify keywords 'max_cells', 'min_edge', 'max_edge', 'min_width'")
 
-                self._min_edge = kwargs['min_edge']  # Assign the log of the min depth
-                self._max_edge = kwargs['max_edge']  # Assign the log of the max depth
-                self._max_cells = np.int32(kwargs['max_cells'])
+                self.max_cells = kwargs['max_cells']
+                self.min_edge = kwargs.pop('min_edge')  # Assign the log of the min depth
+                self.max_edge = kwargs.pop('max_edge')  # Assign the log of the max depth
+                self.min_width = kwargs.pop('min_width', None)
 
                 # Set priors on the depth interfaces, given a number of layers
                 dz = self.remainingSpace(np.arange(self.max_cells))
-
                 self.edges.prior = Distribution('Order', denominator=dz)
+
+        if n_cells_prior is None:
+            if kwargs.get('solve_n_cells', True):
+                self._nCells = StatArray.StatArray(1, 'Number of cells', dtype=np.int32) + self.centres.size
+                self.nCells.prior = Distribution('Uniform', 1, kwargs.pop('max_cells'), prng=kwargs.get('prng'))
 
         self.set_n_cells_prior(n_cells_prior)
         self.set_edges_prior(edges_prior)
@@ -1289,7 +1294,7 @@ class RectilinearMesh1D(Mesh):
         if prior is not None:
             self.edges.prior = prior
 
-    def set_proposals(self, probabilities, prng=None):
+    def set_proposals(self, probabilities, **kwargs):
         """Setup the proposal distibution.
 
         Parameters
@@ -1311,7 +1316,7 @@ class RectilinearMesh1D(Mesh):
         self._event_proposal = Distribution('Categorical',
                                             probabilities,
                                             ['insert', 'delete', 'perturb', 'none'],
-                                            prng=prng)
+                                            prng=kwargs.get('prng', None))
 
     def unperturb(self):
         """After a mesh has had its structure perturbed, remap back its previous state. Used for the reversible jump McMC step.

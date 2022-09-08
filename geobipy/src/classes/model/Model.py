@@ -394,6 +394,10 @@ class Model(myObject):
         """
         return self.mesh._init_posterior_plots(gs, values=self.values, sharex=sharex, sharey=sharey)
 
+    def reset_posteriors(self):
+        self.mesh.reset_posteriors()
+        self.values.reset_posteriors()
+
     def plot_posteriors(self, axes=None, values_kwargs={}, axis=0, **kwargs):
         return self.mesh.plot_posteriors(axes, axis=axis, values=self.values, values_kwargs=values_kwargs, **kwargs)
 
@@ -695,23 +699,27 @@ class Model(myObject):
 
         self.value_bounds = None
         if kwargs.get('parameterLimits') is not None:
-            assert np.size(kwargs['parameterLimits']) == 2, ValueError("parameterLimits must have size 2.")
-            self.value_bounds = Distribution('Uniform', kwargs['parameterLimits'][0], kwargs['parameterLimits'][1], log=True)
+            # assert np.size(kwargs['parameterLimits']) == 2, ValueError("parameterLimits must have size 2.")
+            self.value_bounds = Distribution('Uniform', *kwargs['parameterLimits'], log=True)
 
         if values_prior is None:
-            # Assign the initial prior to the parameters
-            values_prior = Distribution('MvLogNormal', mean=kwargs['mean_value'],
-                                            variance=np.log(1.0+kwargs.get('factor', 10.0))**2.0,
-                                            ndim=self.mesh.nCells,
-                                            linearSpace=True,
-                                            prng=kwargs.get('prng'))
+            if kwargs.get('solve_value', False):
+                assert 'value_mean' in kwargs, ValueError("No value_prior given, must specify keywords 'value_mean'")
+                # Assign the initial prior to the parameters
+                values_prior = Distribution('MvLogNormal', mean=kwargs['value_mean'],
+                                                variance=np.log(1.0+kwargs.get('factor', 10.0))**2.0,
+                                                ndim=self.mesh.nCells,
+                                                linearSpace=True,
+                                                prng=kwargs.get('prng'))
 
-        # if gradientPrior:
-        # Assign the prior on the parameter gradient
-        self.gradient.prior = Distribution('MvNormal', mean=0.0,
-                                       variance=kwargs.get('dzVariance', 1.5),
-                                       ndim=np.maximum(1, self.mesh.nCells-1),
-                                       prng=kwargs.get('prng'))
+        if gradient_prior is None:
+            if kwargs.get('solve_gradient', False):
+                # Wz = self.mesh.gradient_matrix()
+
+                self.gradient.prior = Distribution('MvNormal', mean=0.0,
+                                            variance=kwargs.get('gradient_variance', 1.5),
+                                            ndim=np.maximum(1, self.mesh.nCells-1),
+                                            prng=kwargs.get('prng'))
 
         self.set_values_prior(values_prior)
         self.set_gradient_prior(gradient_prior)
@@ -746,6 +754,13 @@ class Model(myObject):
         """
 
         self.mesh.set_proposals(**kwargs)
+
+        if proposal is None:
+            local_variance = self.local_variance(kwargs.get('observation', None))
+
+            # Instantiate the proposal for the parameters.
+            proposal = Distribution('MvLogNormal', mean=self.values, variance=local_variance, linearSpace=True, prng=kwargs.get('prng', None))
+
         self.values.proposal = proposal
 
     def stochastic_newton_perturbation(self, observation=None):

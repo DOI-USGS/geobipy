@@ -359,7 +359,7 @@ class Histogram(Model):
         kwargs['cmap'] = kwargs.get('cmap', 'gray_r')
         return super().pcolor(**kwargs)
 
-    def plot(self, line=None, **kwargs):
+    def plot(self, overlay=None, **kwargs):
         """ Plots the histogram """
         kwargs['trim'] = kwargs.pop('trim', 0.0)
 
@@ -372,12 +372,14 @@ class Histogram(Model):
             interval_kwargs['xscale'] = kwargs.get('xscale', 'linear')
             interval_kwargs['yscale'] = kwargs.get('yscale', 'linear')
 
+        linecolor = kwargs.pop('linecolor', cP.wellSeparated[3])
+
         if self.ndim == 1:
             ax = self.mesh.bar(values=values, **kwargs)
 
-            if line is not None:
-                kwargs['color'] = kwargs.pop('linecolor', cP.wellSeparated[3])
-                self.mesh.plot_line(line, **kwargs)
+            if overlay is not None:
+                kwargs['linecolor'] = linecolor
+                self.mesh.plot_line(overlay, **kwargs)
 
             if interval_kwargs is not None:
                 self.plotCredibleIntervals(**interval_kwargs)
@@ -386,18 +388,23 @@ class Histogram(Model):
             kwargs['cmap'] = kwargs.pop('cmap', mpl.cm.Greys)
             ax, pm, cb = self.mesh.pcolor(values=values, **kwargs)
 
+            if overlay is not None:
+                kwargs['linecolor'] = linecolor
+                self.mesh.plot_line(overlay, **kwargs)
+
             if interval_kwargs is not None:
+
                 self.plotCredibleIntervals(**interval_kwargs)
 
             return ax, pm, cb
 
     def plotCredibleIntervals(self, percent=95.0, axis=0, **kwargs):
 
-        med, low, high = self.credible_intervals(percent=percent, axis=axis)
+        med, low, high = self.credible_intervals(percent=percent, axis=self.ndim-axis-1)
 
         kwargs['color'] = '#5046C8'
-        kwargs['linestyle'] = 'dashed'
-        kwargs['linewidth'] = 2
+        kwargs['linestyles'] = 'dashed'
+        kwargs['linewidth'] = 1
         kwargs['alpha'] = 0.6
 
         p = 0.5 * np.minimum(percent, 100.0-percent)
@@ -417,6 +424,9 @@ class Histogram(Model):
         m = self.median(axis=axis)
         kwargs['label'] = 'median'
         self.mesh.plot_line(m, axis=axis, **kwargs)
+
+    def reset(self):
+        self.values[:] = 0
 
     def sample(self, n_samples, log=None):
         """Generates samples from the histogram.

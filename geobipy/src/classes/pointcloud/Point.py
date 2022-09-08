@@ -135,6 +135,11 @@ class Point(myObject, ABC):
                 z_proposal = Distribution('Normal', self.z.value, kwargs['z_proposal_variance'], prng=kwargs['prng'])
         self.z.proposal = z_proposal
 
+    def reset_posteriors(self):
+        self.x.reset_posteriors()
+        self.y.reset_posteriors()
+        self.z.reset_posteriors()
+
     def set_posteriors(self):
 
         self.set_x_posterior()
