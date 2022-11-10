@@ -472,6 +472,9 @@ class Tempest_datapoint(TdemDataPoint):
 
     def set_priors(self, height_prior=None, relative_error_prior=None, additive_error_prior=None, receiver_pitch_prior=None, data_prior=None, **kwargs):
 
+        # if data_prior is None:
+        #     data_prior = Distribution('MvLogNormal', self.secondary_field[self.active], self.std[self.active]**2.0, linearSpace=False, prng=kwargs.get('prng'))
+
         super().set_priors(height_prior, relative_error_prior, additive_error_prior, data_prior, **kwargs)
 
         if receiver_pitch_prior is None:
