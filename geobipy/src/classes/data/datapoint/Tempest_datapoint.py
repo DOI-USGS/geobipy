@@ -159,7 +159,7 @@ class Tempest_datapoint(TdemDataPoint):
 
         if pitch_range is None:
             misfit = Model(mesh=conductivity)
-            model = self.new_model()
+            model = self.new_model
 
             for i in range(conductivity.nCells):
                 model.values[0] = conductivity.centres_absolute[i]
@@ -170,7 +170,7 @@ class Tempest_datapoint(TdemDataPoint):
             pitch = RectilinearMesh1D(centres = np.linspace(*pitch_range, n_samples))
             misfit = Model(mesh = RectilinearMesh2D(x=conductivity, y=pitch))
 
-            model = self.new_model()
+            model = self.new_model
             for i in range(conductivity.nCells):
                 model.values[0] = conductivity.centres_absolute[i]
                 for j in range(pitch.nCells):
@@ -208,7 +208,7 @@ class Tempest_datapoint(TdemDataPoint):
     #     # dp.relative_error[:] = 0.01
     #     # dp.additive_error[:] = 0.0
 
-    #     model = dp.new_model()
+    #     model = dp.new_model
 
     #     def minimize_me(x):
     #         model.values[0] = x[0]

@@ -139,8 +139,8 @@ class EmDataPoint(DataPoint):
 
         return out
 
-    @staticmethod
-    def new_model():
+    @property
+    def new_model(self):
         mesh = RectilinearMesh1D(edges=StatArray.StatArray(np.asarray([0.0, np.inf]), 'Depth', 'm'))
         conductivity = StatArray.StatArray(mesh.nCells.item(), 'Conductivity', r'$\frac{S}{m}$')
         magnetic_susceptibility = StatArray.StatArray(mesh.nCells.item(), "Magnetic Susceptibility", r"$\kappa$")
@@ -181,7 +181,7 @@ class EmDataPoint(DataPoint):
 
         PhiD = np.zeros(nSamples)
 
-        model = self.new_model()
+        model = self.new_model
 
         for i in range(nSamples):
             model.values[0] = c[i]
@@ -331,7 +331,7 @@ class EmDataPoint(DataPoint):
         c = StatArray.StatArray(np.logspace(minConductivity, maxConductivity, nSamples), 'Conductivity', '$S/m$')
         PhiD = StatArray.StatArray(np.size(c), 'Normalized Data Misfit', '')
 
-        model = self.new_model()
+        model = self.new_model
 
         for i in range(np.size(c)):
             model.values[0] = c[i]
