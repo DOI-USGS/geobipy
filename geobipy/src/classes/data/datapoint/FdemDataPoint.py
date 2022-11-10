@@ -458,10 +458,10 @@ class FdemDataPoint(EmDataPoint):
     def update_posteriors(self):
         super().update_posteriors()
 
-        if self.predictedData.hasPosterior:
-            x = self.frequencies()
-            self.predictedData.posterior.update_with_line(x, self.predictedInphase())
-            self.predictedData.posterior.update_with_line(x, self.predictedQuadrature())
+    #     if self.predictedData.hasPosterior:
+    #         x = self.frequencies()
+    #         self.predictedData.posterior.update_with_line(x, self.predictedInphase())
+    #         self.predictedData.posterior.update_with_line(x, self.predictedQuadrature())
 
 
     def updateSensitivity(self, model):
