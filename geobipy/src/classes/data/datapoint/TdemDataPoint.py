@@ -867,11 +867,8 @@ class TdemDataPoint(EmDataPoint):
     def sensitivity(self, model, ix=None, modelChanged=True):
         """ Compute the sensitivty matrix for the given model """
 
-        assert isinstance(model, Model), TypeError(
-            "Invalid model class for sensitivity matrix [1D]")
-        J = StatArray.StatArray(tdem1dsen(self, model, ix, modelChanged), 'Sensitivity', '$\\frac{V}{SAm^{3}}$')
-        # print(J)
-        return J
+        assert isinstance(model, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
+        return StatArray.StatArray(tdem1dsen(self, model, ix, modelChanged), 'Sensitivity', '$\\frac{V}{SAm^{3}}$')
 
     def _empymodForward(self, mod):
 
