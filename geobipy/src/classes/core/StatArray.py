@@ -825,12 +825,12 @@ class StatArray(np.ndarray, myObject):
         if self.hasProposal:
             msg += "Proposal:\n{}".format(("|   "+self.proposal.summary.replace("\n", "\n|   "))[:-4])
 
-        if self.hasPosterior:
-            if self.nPosteriors > 1:
-                for p in self.posterior:
-                    msg += "Posterior:\n{}".format(("|   "+p.summary.replace("\n", "\n|   "))[:-4])
-            else:
-                msg += "Posterior:\n{}".format(("|   "+self.posterior.summary.replace("\n", "\n|   "))[:-4])
+        # if self.hasPosterior:
+        #     if self.nPosteriors > 1:
+        #         for p in self.posterior:
+        #             msg += "Posterior:\n{}".format(("|   "+p.summary.replace("\n", "\n|   "))[:-4])
+        #     else:
+        #         msg += "Posterior:\n{}".format(("|   "+self.posterior.summary.replace("\n", "\n|   "))[:-4])
 
         return msg
 
