@@ -80,7 +80,7 @@ class RectilinearMesh2D(Mesh):
 
         self._distance = None
         self.xyz = False
-    
+
         self.x = kwargs if x is None else x
         self.y = kwargs if y is None else y
 
@@ -135,7 +135,7 @@ class RectilinearMesh2D(Mesh):
         if axis == 0:
             return self.x_centres
         return self.y_centres
-        
+
 
     @property
     def distance(self):
@@ -262,7 +262,7 @@ class RectilinearMesh2D(Mesh):
         self._y = values
 
     def _animate(self, values, axis, filename, slic=None, **kwargs):
-        
+
         fig = kwargs.pop('fig', plt.figure(figsize=(9, 9)))
 
         if slic is None:
@@ -320,7 +320,7 @@ class RectilinearMesh2D(Mesh):
             r = Bar(r)
 
         mesh_1d = self.remove_axis(axis)
-            
+
         for i in r:
             j = [i]
             j.insert(axis, np.s_[:])
@@ -328,11 +328,11 @@ class RectilinearMesh2D(Mesh):
             p = distribution.probability(centres[j], log_probability)
             probability[j] = np.dot(p, pdf[j])
         probability = probability / np.expand_dims(np.sum(probability, axis), axis=axis)
-    
+
         return StatArray.StatArray(probability, name='marginal_probability')
 
     def _mean(self, values, axis=0):
-        
+
         a = self.axis(axis)
         if a._relativeTo is None:
             return super()._mean(values, axis)
@@ -635,7 +635,7 @@ class RectilinearMesh2D(Mesh):
                 vals = np.interp(x=y.centres, xp=self.y.edges, fp=re)
 
             out.x._relativeTo = vals
-        
+
         if self.y._relativeTo is not None:
             re = self.x.interpolate_centres_to_nodes(self.y.relativeTo)
             if np.all(np.diff(self.x.edges) < 0.0):
@@ -970,12 +970,12 @@ class RectilinearMesh2D(Mesh):
     #     tmp.pcolor(ax=axes[1])
     #     tmp = values.posterior.opacity(axis=axis)
     #     a, b, cb = tmp.pcolor(axis=axis, ax=axes[3], ticks=[0.0, 0.5, 1.0], cmap='plasma')
-        
+
     #     if cb is not None:
     #         labels = ['Less', '', 'More']
     #         cb.ax.set_yticklabels(labels)
     #         cb.set_label("Confidence")
-        
+
     @property
     def summary(self):
         """ Display a summary of the 3D Point Cloud """
@@ -1091,7 +1091,7 @@ class RectilinearMesh2D(Mesh):
 
     def fromHdf_cell_values(self, grp, key, index=None, skip_posterior=False):
         return StatArray.StatArray.fromHdf(grp, key, index=index, skip_posterior=skip_posterior)
-            
+
 
     def range(self, axis):
         return self.axis(axis).range
