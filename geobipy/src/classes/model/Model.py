@@ -122,9 +122,17 @@ class Model(myObject):
         msg += "values:\n{}".format("|   "+(self.values.summary.replace("\n", "\n|   "))[:-4])
         return msg
 
-    # @property
-    # def cell_values(self):
-    #     return [self.values] + [getattr(self, v) for v in self.__values]
+    @property
+    def prior(self):
+        return self._prior
+
+    @prior.setter
+    def prior(self, value):
+        if value is None:
+            self._prior = None
+            return
+        assert isinstance(value, Model), TypeError('Model prior must have type Model')
+        self._prior = value
 
     @property
     def values(self):
@@ -274,7 +282,7 @@ class Model(myObject):
     def interpolate_centres_to_nodes(self, kind='cubic', **kwargs):
         return self.mesh.interpolate_centres_to_nodes(self.values, kind=kind, **kwargs)
 
-    def local_variance(self, observation=None):
+    def local_precision(self, observation=None):
         """Generate a localized inverse Hessian matrix using a dataPoint and the current realization of the Model1D.
 
         Parameters
@@ -292,15 +300,33 @@ class Model(myObject):
         assert self.values.hasPrior or self.gradient.hasPrior, Exception("Model must have either a parameter prior or gradient prior, use self.set_priors()")
 
         # if self.values.hasPrior:
-        hessian = self.values.priorDerivative(order=2)
+        hessian = self.prior_derivative(order=2)
 
         # if self.gradient.hasPrior:
         #     hessian += self.gradient.priorDerivative(order=2)
 
         if not observation is None:
-            hessian += observation.prior_derivative(model=self, order=2)
+            vals = observation.prior_derivative(model=self, order=2)
+            hessian += vals
 
-        return np.linalg.inv(hessian)
+        return hessian
+
+    def local_variance(self, observation=None):
+        """Generate a localized inverse Hessian matrix using a dataPoint and the current realization of the Model1D.
+
+        Parameters
+        ----------
+        datapoint : geobipy.DataPoint, optional
+            The data point to use when computing the local estimate of the variance.
+            If None, only the prior derivative is used.
+
+        Returns
+        -------
+        out : array_like
+            Inverse Hessian matrix
+
+        """
+        return np.linalg.inv(self.local_precision(observation))
 
     def pad(self, shape):
         """Copies the properties of a model including all priors or proposals, but pads memory to the given size
@@ -332,7 +358,11 @@ class Model(myObject):
         #     out.Hitmap = self.Hitmap
         return out
 
-    def perturb(self, datapoint=None):
+    def map_to_pdf(self, pdf, log=False, axis=0):
+        assert isinstance(self.values, baseDistribution), TypeError("values must have type geobipy.basDistribution")
+        return self.mesh.map_to_pdf(distribution=self.values, pdf=pdf, log=log, axis=axis)
+
+    def perturb(self, observation=None):
         """Perturb a model's structure and parameter values.
 
         Uses a stochastic newtown approach if a datapoint is provided.
@@ -341,7 +371,7 @@ class Model(myObject):
 
         Parameters
         ----------
-        dataPoint : geobipy.DataPoint, optional
+        observation : geobipy.DataPoint, optional
             The datapoint to use to perturb using a stochastic Newton approach.
 
         Returns
@@ -352,7 +382,7 @@ class Model(myObject):
             The model with perturbed structure and parameter values.
 
         """
-        return self.stochastic_newton_perturbation(datapoint)
+        return self.stochastic_newton_perturbation(observation)
 
     def perturb_structure(self, update_priors=True):
 
@@ -548,6 +578,10 @@ class Model(myObject):
         gradient_prior = 0.0 if log else 1.0
         if gPrior:
             gradient_prior = self.gradient_probability(log=log)
+
+        # model_prior = 0.0 if log else 1.0
+        # if self.prior is not None:
+        #     #
 
         return (p + value_prior + gradient_prior) if log else (p * value_prior * gradient_prior)
 
@@ -797,7 +831,7 @@ class Model(myObject):
                                                       prng=perturbed_model.values.proposal.prng)
 
         # Generate new conductivities
-        perturbed_model.values.perturb()
+        perturbed_model.values.perturb()#imposePrior=True)
 
         return remapped_model, perturbed_model
 
