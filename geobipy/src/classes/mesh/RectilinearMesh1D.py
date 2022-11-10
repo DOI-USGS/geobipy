@@ -7,6 +7,7 @@ from copy import deepcopy
 import numpy as np
 from ...base import utilities
 from ...base import plotting as cp
+from ..statistics.baseDistribution import baseDistribution
 from ..statistics.Distribution import Distribution
 from ..statistics import Histogram
 from scipy.sparse import diags
@@ -373,6 +374,37 @@ class RectilinearMesh1D(Mesh):
     def axis(self, axis):
         return self
 
+    def map_to_pdf(self, distribution, pdf, log=False, axis=0):
+        """ Creates a Hitmap from the model given the variance of each layer.
+
+        For each depth, creates a normal distribution with a mean equal to the interpolated parameter
+        at that depth and variance specified with variance.
+
+        Parameters
+        ----------
+        variance : array_like
+            The variance of each layer
+        Hitmap : geobipy.Hitmap
+            Hitmap to convert the model to.
+            Must be instantiated before calling so that the model can be interpolated correctly
+
+        """
+        assert (distribution.ndim == self.nCells), ValueError('size of variance must equal number of cells')
+
+        ax = pdf.mesh.axis(axis)
+
+        other = pdf.mesh.other_axis(axis)
+
+        cells_per_layer = np.diff(ax.cellIndex(self.edges))
+        pdfs = distribution.probability(other.centres_absolute, log=False)
+        pdf.values = (np.repeat(pdfs, cells_per_layer, axis=pdf.mesh.ndim-axis-1)).T
+
+        pdf.values = StatArray.StatArray(pdf.values / (np.sum(pdf.values) * pdf.mesh.area), 'Density')
+        assert np.isclose(np.sum(pdf.values * pdf.mesh.area), 1.0), Exception("pdf does not sum to 1.0")
+
+        return pdf
+
+
     # def _credibleIntervals(self, values, percent=90.0, log=None, reciprocate=False, axis=0):
     #     """Gets the median and the credible intervals for the specified axis.
 
@@ -528,6 +560,11 @@ class RectilinearMesh1D(Mesh):
 
         return StatArray.StatArray(probability, name='marginal_probability')
 
+    def create_pdf(self, distribution):
+
+        assert isinstance(distribution, baseDistribution), TypeError('distribution must have type geobipy.baseDistribution')
+        assert distribution.ndim == self.nCells, TypeError('distribution must have {} dimensions, is has {}'.format(self.nCells, distribution.ndim))
+
     def delete_edge(self, i, values=None):
         """Delete an edge from the mesh
 
@@ -599,9 +636,16 @@ class RectilinearMesh1D(Mesh):
         if self.nCells.item() > 1:
             return (np.diff(np.log(values))) / (np.log(self.widths[:-1]) - np.log(self.min_width))
 
-    def gradientMatrix(self):
-        tmp = 1.0/np.sqrt(self.centreTocentre)
-        return diags([tmp, -tmp], [0, 1], shape=(self.nCells.item()-1, self.nCells.item()))
+    # @property
+    # def gradient_operator(self):
+    #     # centres = np.asarray(self.centres)
+    #     # centres[-1] = centres[-2] + self.widths[-1]
+    #     # print(centres)
+    #     tmp = 1.0/(np.log(self.widths[:-1]) - np.log(self.min_width))
+    #     Wz = np.asarray((diags([tmp, -tmp], [0, 1], shape=(self.nCells.item()-1, self.nCells.item()))).todense())
+    #     # tmp = 1.0/np.sqrt(self.centreTocentre)
+    #     # return diags([tmp, -tmp], [0, 1], shape=(self.nCells.item()-1, self.nCells.item()))
+    #     return Wz
 
     def in_bounds(self, values):
         """Return whether values are inside the cell edges
