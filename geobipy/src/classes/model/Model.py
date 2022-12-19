@@ -159,6 +159,14 @@ class Model(myObject):
     def z(self):
         return self.mesh.z
 
+    @property
+    def Earth(self):
+        try:
+            from gatdaem1d import Earth
+        except Exception as e:
+            raise Exception("{}\n gatdaem1d is not installed. Please see instructions".format(e))
+
+        return Earth(self.values[:], self.mesh.widths[:-1])
 
 
     def animate(self, axis, filename, slic=None, **kwargs):

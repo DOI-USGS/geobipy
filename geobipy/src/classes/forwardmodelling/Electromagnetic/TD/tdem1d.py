@@ -85,86 +85,59 @@ def empymod_tdem1dsen(datapoint, model1d, ix=None):
     return datapoint.J
 
 
-try:
-    from gatdaem1d import Earth
-    from gatdaem1d import Geometry
+def gaTdem1dfwd(datapoint, model1d):
+    # Generate the Brodie Earth class
+    E = model1d.Earth
 
-    def gaTdem1dfwd(datapoint, model1d):
-        # Generate the Brodie Earth class
-        E = Earth(model1d.values[:], model1d.mesh.widths[:-1])
+    G = datapoint.loop_pair.Geometry
 
-        # Generate the Brodie Geometry class
-        G = Geometry(datapoint.z[0],
-                     datapoint.transmitter.roll.item(), datapoint.transmitter.pitch.item(), datapoint.transmitter.yaw.item(),
-                     datapoint.receiver.x.item() - datapoint.transmitter.x.item(),
-                     datapoint.receiver.y.item() - datapoint.transmitter.y.item(),
-                     datapoint.receiver.z.item() - datapoint.transmitter.z.item(),
-                     #  datapoint.loopOffset[0], datapoint.loopOffset[1], datapoint.loopOffset[2],
-                     datapoint.receiver.roll.item(), datapoint.receiver.pitch.item(), datapoint.receiver.yaw.item())
+    # Forward model the data for each system
+    return [datapoint.system[i].forwardmodel(G, E) for i in range(datapoint.nSystems)]
 
-        # Forward model the data for each system
-        return [datapoint.system[i].forwardmodel(G, E) for i in range(datapoint.nSystems)]
+def ga_fm_dlogc(datapoint, model1d):
+    # Generate the Brodie Earth class
+    E = model1d.Earth
 
-    def ga_fm_dlogc(datapoint, model1d):
-        # Generate the Brodie Earth class
-        E = Earth(model1d.values[:], model1d.mesh.widths[:-1])
+    G = datapoint.loop_pair.Geometry
 
-        # Generate the Brodie Geometry class
-        G = Geometry(datapoint.z.item(),
-                     datapoint.transmitter.roll.item(), datapoint.transmitter.pitch.item(), datapoint.transmitter.yaw.item(),
-                     datapoint.receiver.x.item() - datapoint.transmitter.x.item(),
-                     datapoint.receiver.y.item() - datapoint.transmitter.y.item(),
-                     datapoint.receiver.z.item() - datapoint.transmitter.z.item(),
-                     #  datapoint.loopOffset[0], datapoint.loopOffset[1], datapoint.loopOffset[2],
-                     datapoint.receiver.roll.item(), datapoint.receiver.pitch.item(), datapoint.receiver.yaw.item())
+    # Forward model the data for each system
+    return [datapoint.system[i].fm_dlogc(G, E) for i in range(datapoint.nSystems)]
 
-        # Forward model the data for each system
-        return [datapoint.system[i].fm_dlogc(G, E) for i in range(datapoint.nSystems)]
+def gaTdem1dsen(datapoint, model1d, ix=None, modelChanged=True):
+    """ Compute the sensitivty matrix for a 1D layered earth model,
+    optionally compute the responses for only the layers in ix """
+    # Unfortunately the code requires forward modelled data to compute the
+    # sensitivity if the model has changed since last time
 
-    def gaTdem1dsen(datapoint, model1d, ix=None, modelChanged=True):
-        """ Compute the sensitivty matrix for a 1D layered earth model, optionally compute the responses for only the layers in ix """
-        # Unfortunately the code requires forward modelled data to compute the
-        # sensitivity if the model has changed since last time
-        if modelChanged:
-            E = Earth(model1d.values[:], model1d.mesh.widths[:-1])
+    if modelChanged:
+        _ = gaTdem1dfwd(datapoint, model1d)
 
-            G = Geometry(datapoint.z.item(),
-                         datapoint.transmitter.roll.item(), datapoint.transmitter.pitch.item(), datapoint.transmitter.yaw.item(),
-                         datapoint.receiver.x.item() - datapoint.transmitter.x.item(),
-                         datapoint.receiver.y.item() - datapoint.transmitter.y.item(),
-                         datapoint.receiver.z.item() - datapoint.transmitter.z.item(),
-                         datapoint.receiver.roll.item(), datapoint.receiver.pitch.item(), datapoint.receiver.yaw.item())
+    if (ix is None):  # Generate a full matrix if the layers are not specified
+        ix = range(model1d.mesh.nCells.item())
+        J = np.zeros((datapoint.nChannels, model1d.mesh.nCells.item()))
+    else:  # Partial matrix for specified layers
+        J = np.zeros((datapoint.nChannels, np.size(ix)))
 
-            for i in range(datapoint.nSystems):
-                datapoint.system[i].forwardmodel(G, E)
+    for j in range(datapoint.nSystems):  # For each system
+        iSys = datapoint._systemIndices(j)
+        for i in range(np.size(ix)):  # For the specified layers
+            tmp = datapoint.system[j].derivative(datapoint.system[j].CONDUCTIVITYDERIVATIVE, ix[i] + 1)
 
-        if (ix is None):  # Generate a full matrix if the layers are not specified
-            ix = range(model1d.mesh.nCells.item())
-            J = np.zeros((datapoint.nChannels, model1d.mesh.nCells.item()))
-        else:  # Partial matrix for specified layers
-            J = np.zeros((datapoint.nChannels, np.size(ix)))
+            # Store the necessary component
+            comps = []
+            if 'x' in datapoint.components:
+                comps.append(tmp.SX)
+            if 'y' in datapoint.components:
+                comps.append(tmp.SY)
+            if 'z' in datapoint.components:
+                comps.append(-tmp.SZ)
+            J[iSys, i] = model1d.values[ix[i]] * np.hstack(comps)
 
-        for j in range(datapoint.nSystems):  # For each system
-            iSys = datapoint._systemIndices(j)
-            for i in range(np.size(ix)):  # For the specified layers
-                tmp = datapoint.system[j].derivative(datapoint.system[j].CONDUCTIVITYDERIVATIVE, ix[i] + 1)
+    return J
 
-                # Store the necessary component
-                comps = []
-                if 'x' in datapoint.components:
-                    comps.append(tmp.SX)
-                if 'y' in datapoint.components:
-                    comps.append(tmp.SY)
-                if 'z' in datapoint.components:
-                    comps.append(-tmp.SZ)
-                J[iSys, i] = model1d.values[ix[i]] * np.hstack(comps)
+# except Exception as e:
+#     def gaTdem1dfwd(*args, **kwargs):
+#         raise Exception("{}\n gatdaem1d is not installed. Please see instructions".format(e))
 
-        datapoint.J = J #[datapoint.active, :]
-        return datapoint.J
-
-except:
-    def gaTdem1dfwd(*args, **kwargs):
-        raise Exception("gatdaem1d is not installed. Please see instructions")
-
-    def gaTdem1dsen(*args, **kwargs):
-        raise Exception("gatdaem1d is not installed. Please see instructions")
+#     def gaTdem1dsen(*args, **kwargs):
+#         raise Exception("{}\n gatdaem1d is not installed. Please see instructions".format(e))
