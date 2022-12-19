@@ -11,7 +11,6 @@ from ...model.Model import Model
 from .EmDataPoint import EmDataPoint
 from ...forwardmodelling.Electromagnetic.TD.tdem1d import (
     tdem1dfwd, tdem1dsen)
-from ...system.EmLoop import EmLoop
 from ...system.SquareLoop import SquareLoop
 from ...system.CircularLoop import CircularLoop
 from ...system.Loop_pair import Loop_pair
@@ -22,7 +21,6 @@ from ...system.Waveform import Waveform
 from ...statistics.Distribution import Distribution
 
 #from ....base import Error as Err
-from ....base.HDF.hdfRead import read_item
 from ....base import utilities as cf
 from ....base import plotting as cp
 
@@ -997,7 +995,8 @@ class TdemDataPoint(EmDataPoint):
         """ Compute the sensitivty matrix for the given model """
 
         assert isinstance(model, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
-        return StatArray.StatArray(tdem1dsen(self, model, ix, modelChanged), 'Sensitivity', '$\\frac{V}{SAm^{3}}$')
+        self._sensitivity_matrix = StatArray.StatArray(tdem1dsen(self, model, ix, modelChanged), 'Sensitivity', '$\\frac{V}{SAm^{3}}$')
+        return self.sensitivity_matrix
 
     def _empymodForward(self, mod):
 
