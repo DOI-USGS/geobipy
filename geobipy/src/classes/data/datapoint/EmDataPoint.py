@@ -192,98 +192,6 @@ class EmDataPoint(DataPoint):
         model.values[0] = c[i]
         return model
 
-    def priorProbability(self, rErr, aErr, height, calibration, verbose=False):
-        """Evaluate the probability for the EM data point given the specified attached priors
-
-        Parameters
-        ----------
-        rEerr : bool
-            Include the relative error when evaluating the prior
-        aEerr : bool
-            Include the additive error when evaluating the prior
-        height : bool
-            Include the elevation when evaluating the prior
-        calibration : bool
-            Include the calibration parameters when evaluating the prior
-        verbose : bool
-            Return the components of the probability, i.e. the individually evaluated priors
-
-        Returns
-        -------
-        out : np.float64
-            The evaluation of the probability using all assigned priors
-
-        Notes
-        -----
-        For each boolean, the associated prior must have been set.
-
-        Raises
-        ------
-        TypeError
-            If a prior has not been set on a requested parameter
-
-        """
-        probability = np.float64(0.0)
-        errProbability = np.float64(0.0)
-
-        P_relative = np.float64(0.0)
-        P_additive = np.float64(0.0)
-        P_height = np.float64(0.0)
-        P_calibration = np.float64(0.0)
-
-        if rErr:  # Relative Errors
-            P_relative = self.relative_error.probability(log=True)
-            errProbability += P_relative
-        if aErr:  # Additive Errors
-            P_additive = self.additive_error.probability(log=True)
-            errProbability += P_additive
-
-        probability += errProbability
-        if height:  # Elevation
-            P_height = (self.z.probability(log=True))
-            probability += P_height
-
-        if calibration:  # Calibration parameters
-            P_calibration = self.calibration.probability(log=True)
-            probability += P_calibration
-
-        if verbose:
-            return probability, np.asarray([P_relative, P_additive, P_height, P_calibration])
-        return probability
-
-    def perturb(self):
-        """Propose a new EM data point given the specified attached propsal distributions
-
-        Parameters
-        ----------
-        newHeight : bool
-            Propose a new observation height.
-        newRelativeError : bool
-            Propose a new relative error.
-        newAdditiveError : bool
-            Propose a new additive error.
-
-        newCalibration : bool
-            Propose new calibration parameters.
-
-        Returns
-        -------
-        out : subclass of EmDataPoint
-            The proposed data point
-
-        Notes
-        -----
-        For each boolean, the associated proposal must have been set.
-
-        Raises
-        ------
-        TypeError
-            If a proposal has not been set on a requested parameter
-
-        """
-        self.perturbHeight()
-        self.perturbRelativeError()
-        self.perturbAdditiveError()
 
         # # Generate new calibration errors
         #     self.calibration[:] = self.calibration.proposal.rng(1)
@@ -291,27 +199,6 @@ class EmDataPoint(DataPoint):
         #     self.calibration.proposal.mean[:] = self.calibration
 
         #     self.calibrate()
-
-    def perturbAdditiveError(self):
-        if self.additive_error.hasProposal:
-            # Generate a new error
-            self.additive_error.perturb(imposePrior=True, log=True)
-            # Update the mean of the proposed errors
-            self.additive_error.proposal.mean = self.additive_error
-
-    def perturbHeight(self):
-        if self.z.hasProposal:
-            # Generate a new elevation
-            self.z.perturb(imposePrior=True, log=True)
-            # Update the mean of the proposed elevation
-            self.z.proposal.mean = self.z
-
-    def perturbRelativeError(self):
-        if self.relative_error.hasProposal:
-            # Generate a new error
-            self.relative_error.perturb(imposePrior=True, log=True)
-            # Update the mean of the proposed errors
-            self.relative_error.proposal.mean = self.relative_error
 
     def plotHalfSpaceResponses(self, minConductivity=-4.0, maxConductivity=2.0, nSamples=100, **kwargs):
         """Plots the reponses of different half space models.
@@ -348,14 +235,12 @@ class EmDataPoint(DataPoint):
         super().update_posteriors()
 
         if self.relative_error.hasPosterior:
-            self.relative_error.updatePosterior()
+            self.relative_error.update_posterior()
 
         self.update_additive_error_posterior()
 
     def update_relative_error_posterior(self):
-        if self.relative_error.hasPosterior:
-            self.relative_error.updatePosterior()
+        self.relative_error.update_posterior()
 
     def update_additive_error_posterior(self):
-        if self.additive_error.hasPosterior:
-            self.additive_error.updatePosterior()
+        self.additive_error.update_posterior()
