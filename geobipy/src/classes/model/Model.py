@@ -45,7 +45,7 @@ class Model(myObject):
 
         out._values = deepcopy(self.values, memo=memo)
         out._gradient = deepcopy(self._gradient, memo=memo)
-        out.value_bounds = self.value_bounds
+        out.value_bounds = deepcopy(self.value_bounds)
         # out._inverse_hessian = deepcopy(self._inverse_hessian, memo=memo)
 
         # if len(self.__values) > 1:
@@ -159,11 +159,7 @@ class Model(myObject):
     def z(self):
         return self.mesh.z
 
-    # def setattr(self, name, values):
 
-    #     assert np.all(values.shape == self.shape), ValueError("values must have shape {} not {}".format(self.shape, values.shape))
-    #     setattr(self, name, values)
-    #     self.__values.append(name)
 
     def animate(self, axis, filename, slic=None, **kwargs):
         return self.mesh._animate(self.values, axis, filename, slic, **kwargs)
@@ -200,11 +196,11 @@ class Model(myObject):
 
         """
         # Compute a new parameter variance matrix if the structure of the model changed.
-        if (self.mesh.action[0] in ['insert', 'delete']):
+        # if (self.mesh.action[0] in ['insert', 'delete']):
             # Propose new layer conductivities
-            return self.local_variance(observation)
-        else:
-            return self.values.proposal.variance
+        return self.local_variance(observation)
+        # else:
+        #     return self.values.proposal.variance
 
     def delete_edge(self, i):
         out, values = self.mesh.delete_edge(i, values=self.values)
@@ -255,8 +251,8 @@ class Model(myObject):
             The probability given the prior on the gradient of the parameters with depth.
 
         """
-        assert (self.gradient.hasPrior), TypeError(
-            'No prior defined on parameter gradient. Use Model1D.dpar.addPrior() to set the prior.')
+        # if not self.gradient.hasPrior:
+        #     return 0.0 if log else 1.0
 
         if self.nCells.item() == 1:
             tmp = self.insert_edge(np.log(self.mesh.min_edge) + (0.5 * (self.mesh.max_edge - self.mesh.min_edge)))
@@ -272,10 +268,6 @@ class Model(myObject):
             values[out.action[1]] = value
         out = type(self)(mesh=out, values=values)
         out._gradient = self.gradient.resize(out.nCells.item() - 1)
-
-        # if len(values) > 1:
-        #     for k, v in zip(self.__values, values[1:]):
-        #         out.setattr(k, v)
 
         return out
 
@@ -299,14 +291,10 @@ class Model(myObject):
         """
         assert self.values.hasPrior or self.gradient.hasPrior, Exception("Model must have either a parameter prior or gradient prior, use self.set_priors()")
 
-        # if self.values.hasPrior:
         hessian = self.prior_derivative(order=2)
 
-        # if self.gradient.hasPrior:
-        #     hessian += self.gradient.priorDerivative(order=2)
-
         if not observation is None:
-            vals = observation.prior_derivative(model=self, order=2)
+            vals = observation.prior_derivative(order=2)
             hessian += vals
 
         return hessian
@@ -384,6 +372,53 @@ class Model(myObject):
         """
         return self.stochastic_newton_perturbation(observation)
 
+    def stochastic_newton_perturbation(self, observation=None):
+
+        # Perturb the structure of the model
+
+        remapped_model = self.perturb_structure()
+
+        if observation is not None:
+            if remapped_model.mesh.action[0] != 'none':
+                observation.sensitivity(remapped_model)
+
+        # Update the local Hessian around the current model.
+        # inv(J'Wd'WdJ + Wm'Wm)
+        inverse_hessian = remapped_model.compute_local_inverse_hessian(observation)
+
+        # Proposing new parameter values
+        # This is Wm'Wm(sigma - sigma_ref)
+        # Need to have the gradient be a part of this too.
+        gradient = remapped_model.values.priorDerivative(order=1)
+
+        if not observation is None:
+            # The gradient is now J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref)
+            tmp = observation.prior_derivative(order=1)
+            gradient += tmp
+
+        # Compute the Model perturbation
+        # This is the equivalent to the full newton gradient of the deterministic objective function.
+        # delta sigma = 0.5 * inv(J'Wd'WdJ + Wm'Wm)(J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref))
+        # This could be replaced with a CG solver for bigger problems like deterministic algorithms.
+        dSigma = 0.5 * np.dot(inverse_hessian, gradient)
+
+        mean = np.log(remapped_model.values) - dSigma
+
+        perturbed_model = deepcopy(remapped_model)
+
+        # Assign a proposal distribution for the parameter using the mean and variance.
+        perturbed_model.values.proposal = Distribution('MvLogNormal', mean=np.exp(mean),
+                                                      variance=inverse_hessian,
+                                                      linearSpace=True,
+                                                      prng=perturbed_model.values.proposal.prng)
+
+
+
+        # Generate new conductivities
+        perturbed_model.values.perturb()#imposePrior=True)
+
+        return remapped_model, perturbed_model
+
     def perturb_structure(self, update_priors=True):
 
         remapped_mesh, remapped_values = self.mesh.perturb(values=self.values)
@@ -391,11 +426,9 @@ class Model(myObject):
 
         remapped_model._gradient = deepcopy(self._gradient)
 
-        # if len(remapped_values) > 1:
-        #     for k, v in zip(self.__values, remapped_values[1:]):
-        #         remapped_model.setattr(k, v)
-
         # if update_priors:
+        if self.value_bounds is not None:
+            remapped_model.value_bounds = self.value_bounds
         if remapped_model.values.hasPrior:
             remapped_model.values.prior.ndim = remapped_model.nCells.item()
         if remapped_model.gradient.hasPrior:
@@ -467,7 +500,7 @@ class Model(myObject):
     def prior_derivative(self, order):
         return self.values.priorDerivative(order=order)
 
-    def prior_probability(self, pPrior, gPrior, log=True):
+    def probability(self, solve_value, solve_gradient):
         """Evaluate the prior probability for the 1D Model.
 
         The following equation describes the components of the prior that correspond to the Model1D,
@@ -558,32 +591,26 @@ class Model(myObject):
 
         # Check that the parameters are within the limits if they are bound
         if not self.value_bounds is None:
-            pInBounds = self.value_bounds.probability(x=self.values, log=log)
+            pInBounds = self.value_bounds.probability(x=self.values, log=True)
             if np.any(np.isinf(pInBounds)):
                 return -np.inf
 
         # Get the structural prior probability
-        p = self.mesh.priorProbability(log=log)
+        probability = self.mesh.probability
 
         # Evaluate the prior based on the assigned hitmap
         # if (not self.Hitmap is None):
         #     self.evaluateHitmapPrior(self.Hitmap)
 
         # Probability of parameter
-        value_prior = 0.0 if log else 1.0
-        if pPrior:
-            value_prior = self.values.probability(log=log)
+        if solve_value: # if self.values.hasPrior
+            probability += self.values.probability(log=True)
 
         # Probability of model gradient
-        gradient_prior = 0.0 if log else 1.0
-        if gPrior:
-            gradient_prior = self.gradient_probability(log=log)
+        if solve_gradient: # if self.gradient.hasPrior
+            probability += self.gradient_probability(log=True)
 
-        # model_prior = 0.0 if log else 1.0
-        # if self.prior is not None:
-        #     #
-
-        return (p + value_prior + gradient_prior) if log else (p * value_prior * gradient_prior)
+        return probability
 
     def proposal_probabilities(self, remappedModel, observation=None):
         """Return the forward and reverse proposal probabilities for the model
@@ -796,44 +823,6 @@ class Model(myObject):
             proposal = Distribution('MvLogNormal', mean=self.values, variance=local_variance, linearSpace=True, prng=kwargs.get('prng', None))
 
         self.values.proposal = proposal
-
-    def stochastic_newton_perturbation(self, observation=None):
-
-        # Perturb the structure of the model
-        remapped_model = self.perturb_structure()
-
-        # Update the local Hessian around the current model.
-        inverse_hessian = remapped_model.compute_local_inverse_hessian(observation)
-
-        # Proposing new parameter values
-        # This is Wm'Wm(sigma - sigma_ref)
-        # Need to have the gradient be a part of this too.
-        gradient = remapped_model.values.priorDerivative(order=1)
-
-        if not observation is None:
-            # The gradient is now J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref)
-            gradient += observation.prior_derivative(order=1)
-
-        # Compute the Model perturbation
-        # This is the equivalent to the full newton gradient of the deterministic objective function.
-        # delta sigma = 0.5 * inv(J'Wd'WdJ + Wm'Wm)(J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref))
-        # This could be replaced with a CG solver for bigger problems like deterministic algorithms.
-        dSigma = 0.5 * np.dot(inverse_hessian, gradient)
-
-        mean = np.log(remapped_model.values) - dSigma
-
-        perturbed_model = deepcopy(remapped_model)
-
-        # Assign a proposal distribution for the parameter using the mean and variance.
-        perturbed_model.values.proposal = Distribution('MvLogNormal', mean=np.exp(mean),
-                                                      variance=inverse_hessian,
-                                                      linearSpace=True,
-                                                      prng=perturbed_model.values.proposal.prng)
-
-        # Generate new conductivities
-        perturbed_model.values.perturb()#imposePrior=True)
-
-        return remapped_model, perturbed_model
 
     def take_along_axis(self, i, axis):
         s = [np.s_[:] for j in range(self.ndim)]
