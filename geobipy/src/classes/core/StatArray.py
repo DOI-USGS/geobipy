@@ -1055,10 +1055,13 @@ class StatArray(np.ndarray, myObject):
         wd = cf.rolling_window(self, window)
         return StatArray(numpyFunction(wd, -1), self.name, self.units)
 
-    def updatePosterior(self, **kwargs):
+    def update_posterior(self, **kwargs):
         """Adds the current values of the StatArray to the attached posterior. """
-        assert (self.hasPosterior), TypeError(
-            'No posterior defined on variable {}. Use StatArray.setPosterior()'.format(self.name))
+        if not self.hasPosterior:
+            return
+
+        # assert (self.hasPosterior), TypeError(
+        #     'No posterior defined on variable {}. Use StatArray.setPosterior()'.format(self.name))
 
         if self.nPosteriors > 1:
             for i in range(self.nPosteriors):
