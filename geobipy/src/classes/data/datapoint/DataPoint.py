@@ -137,7 +137,7 @@ class DataPoint(Point):
 
     @property
     def n_posteriors(self):
-        return self._n_error_posteriors + self.z.hasPosterior
+        return super().n_posteriors + self._n_error_posteriors
 
     @property
     def _n_error_posteriors(self):
@@ -309,7 +309,53 @@ class DataPoint(Point):
             WdT_Wd = self.predictedData.priorDerivative(order=2)
             return np.dot(J.T, np.dot(WdT_Wd, J))
 
-    def _init_posterior_plots(self, gs):
+    @property
+    def probability(self):
+        """Evaluate the probability for the EM data point given the specified attached priors
+
+        Parameters
+        ----------
+        rEerr : bool
+            Include the relative error when evaluating the prior
+        aEerr : bool
+            Include the additive error when evaluating the prior
+        height : bool
+            Include the elevation when evaluating the prior
+        calibration : bool
+            Include the calibration parameters when evaluating the prior
+        verbose : bool
+            Return the components of the probability, i.e. the individually evaluated priors
+
+        Returns
+        -------
+        out : np.float64
+            The evaluation of the probability using all assigned priors
+
+        Notes
+        -----
+        For each boolean, the associated prior must have been set.
+
+        Raises
+        ------
+        TypeError
+            If a prior has not been set on a requested parameter
+
+        """
+        probability = super().probability
+
+        if self.relative_error.hasPrior:  # Relative Errors
+            probability += self.relative_error.probability(log=True)
+
+        if self.additive_error.hasPrior:  # Additive Errors
+            probability += self.additive_error.probability(log=True)
+
+        # P_calibration = np.float64(0.0)
+        # if calibration:  # Calibration parameters
+        #     P_calibration = self.calibration.probability(log=True)
+        #     probability += P_calibration
+        return probability
+
+    def _init_posterior_plots(self, gs=None):
         """Initialize axes for posterior plots
 
         Parameters
@@ -318,13 +364,17 @@ class DataPoint(Point):
             Gridspec to split
 
         """
-        if isinstance(gs, matplotlib.figure.Figure):
+        if gs is None:
+            gs = plt.figure()
+
+        if isinstance(gs, Figure):
             gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
 
+        # Split the top and bottom
         splt = gs.subgridspec(2, 2, width_ratios=[1, 4], height_ratios=[2, 1], wspace=0.3)
         ax = []
-        # Height axis
-        ax.append(self.z._init_posterior_plots(splt[0, 0]))
+        # Point posteriors
+        ax.append(super()._init_posterior_plots(splt[0, 0]))
         # Data axis
         ax.append(plt.subplot(splt[0, 1]))
 
@@ -345,11 +395,11 @@ class DataPoint(Point):
 
         assert len(axes) == 4, ValueError("Must have length 3 list of axes for the posteriors. self.init_posterior_plots can generate them")
 
-        ovelay = kwargs.pop('ovelay', None)
-        if not ovelay is None:
-            height_kwargs['overlay'] = ovelay.z
-            rel_error_kwargs['overlay'] = ovelay.relative_error
-            add_error_kwargs['overlay'] = ovelay.additive_error
+        overlay = kwargs.pop('overlay', None)
+        if not overlay is None:
+            height_kwargs['overlay'] = overlay.z
+            rel_error_kwargs['overlay'] = overlay.relative_error
+            add_error_kwargs['overlay'] = overlay.additive_error
 
         height_kwargs['transpose'] = height_kwargs.get('transpose', True)
         self.z.plotPosteriors(ax = axes[0], **height_kwargs)
@@ -358,12 +408,12 @@ class DataPoint(Point):
         self.predictedData.plotPosteriors(ax = axes[1], colorbar=False, **data_kwargs)
         self.plot(ax=axes[1], **data_kwargs)
 
-        if ovelay is None:
+        if overlay is None:
             c = cP.wellSeparated[0]
             self.plotPredicted(color=c, ax=axes[1], **data_kwargs)
         else:
             c = cP.wellSeparated[3]
-            ovelay.plotPredicted(color=c, ax=axes[1], **data_kwargs)
+            overlay.plotPredicted(color=c, ax=axes[1], **data_kwargs)
 
         self.relative_error.plotPosteriors(ax=axes[2], **rel_error_kwargs)
         self.additive_error.plotPosteriors(ax=axes[3], **add_error_kwargs)
@@ -427,12 +477,53 @@ class DataPoint(Point):
         self.relative_error = kwargs['initial_relative_error']
         self.additive_error = kwargs['initial_additive_error']
 
+    def perturb(self):
+        """Propose a new EM data point given the specified attached propsal distributions
 
-    def set_priors(self, height_prior=None, relative_error_prior=None, additive_error_prior=None, data_prior=None, **kwargs):
+        Parameters
+        ----------
+        newHeight : bool
+            Propose a new observation height.
+        newRelativeError : bool
+            Propose a new relative error.
+        newAdditiveError : bool
+            Propose a new additive error.
 
-        if height_prior is None:
-            if kwargs.get('solve_height', False):
-                height_prior = Distribution('Uniform', self.z - kwargs['maximum_height_change'], self.z + kwargs['maximum_height_change'], prng=kwargs.get('prng'))
+        newCalibration : bool
+            Propose new calibration parameters.
+
+        Returns
+        -------
+        out : subclass of EmDataPoint
+            The proposed data point
+
+        Notes
+        -----
+        For each boolean, the associated proposal must have been set.
+
+        Raises
+        ------
+        TypeError
+            If a proposal has not been set on a requested parameter
+
+        """
+        super().perturb()
+
+        if self.relative_error.hasProposal:
+            # Generate a new error
+            self.relative_error.perturb(imposePrior=True, log=True)
+            # Update the mean of the proposed errors
+            self.relative_error.proposal.mean = self.relative_error
+
+        if self.additive_error.hasProposal:
+            # Generate a new error
+            self.additive_error.perturb(imposePrior=True, log=True)
+            # Update the mean of the proposed errors
+            self.additive_error.proposal.mean = self.additive_error
+
+    def set_priors(self, relative_error_prior=None, additive_error_prior=None, data_prior=None, **kwargs):
+
+        super().set_priors(**kwargs)
 
         # Define prior, proposal, posterior for relative error
         if relative_error_prior is None:
@@ -446,17 +537,11 @@ class DataPoint(Point):
                 additive_error_prior = Distribution('Uniform', kwargs['minimum_additive_error'], kwargs['maximum_additive_error'], log=False, prng=kwargs.get('prng'))
 
         if data_prior is None:
-            data_prior = Distribution('MvLogNormal', self.data[self.active], self.std[self.active]**2.0, linearSpace=False, prng=kwargs.get('prng'))
+            data_prior = Distribution('MvNormal', self.data[self.active], self.std[self.active]**2.0, prng=kwargs.get('prng'))
 
-        self.set_height_prior(height_prior)
         self.set_relative_error_prior(relative_error_prior)
         self.set_additive_error_prior(additive_error_prior)
         self.set_data_prior(data_prior)
-
-
-    def set_height_prior(self, prior):
-        if not prior is None:
-            self.z.prior = prior
 
     def set_data_prior(self, prior):
         if not prior is None:
@@ -472,7 +557,7 @@ class DataPoint(Point):
             assert prior.ndim == self.nSystems, ValueError("additive_error_prior must have {} dimensions".format(self.nSystems))
             self.additive_error.prior = prior
 
-    def set_proposals(self, height_proposal=None, relative_error_proposal=None, additive_error_proposal=None, **kwargs):
+    def set_proposals(self, relative_error_proposal=None, additive_error_proposal=None, **kwargs):
         """Set the proposals on the datapoint's perturbable parameters
 
         Parameters
@@ -489,19 +574,9 @@ class DataPoint(Point):
             If there are more than one system, additiveErrorProposal is multivariate.
 
         """
-
-        self.set_height_proposal(height_proposal, **kwargs)
+        super().set_proposals(**kwargs)
         self.set_relative_error_proposal(relative_error_proposal, **kwargs)
         self.set_additive_error_proposal(additive_error_proposal, **kwargs)
-
-
-    def set_height_proposal(self, proposal, **kwargs):
-
-        if proposal is None:
-            if kwargs.get('solve_height', False):
-                proposal = Distribution('Normal', self.z.value, kwargs['height_proposal_variance'], prng=kwargs['prng'])
-
-        self.z.proposal = proposal
 
     def set_relative_error_proposal(self, proposal, **kwargs):
         if proposal is None:
@@ -530,21 +605,13 @@ class DataPoint(Point):
 
         """
         # Create a histogram to set the height posterior.
-        self.set_height_posterior()
+        super().set_posteriors()
         # # Initialize the histograms for the relative errors
         # # Set the posterior for the data point.
         self.set_relative_error_posterior()
         self.set_additive_error_posterior(log=log)
 
         # self.set_predicted_data_posterior()
-
-    def set_height_posterior(self):
-        """
-
-        """
-        if self.z.hasPrior:
-            mesh = RectilinearMesh1D(edges = StatArray.StatArray(self.z.prior.bins(), name=self.z.name, units=self.z.units), relativeTo=self.z)
-            self.z.posterior = Histogram(mesh=mesh)
 
     def set_relative_error_posterior(self):
         """
