@@ -671,7 +671,15 @@ class TdemData(Data):
         """
 
         try:
-            df = self._file.get_chunk()
+            if record is None:
+                df = self._file.get_chunk()
+            else:
+                df = self._file.get_chunk()
+                i = 1
+                while i <= record:
+                    df = self._file.get_chunk()
+                    i += 1
+
             df = df.replace('NaN', np.nan)
             endOfFile = False
         except:
