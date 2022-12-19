@@ -105,14 +105,10 @@ class Inference1D(myObject):
         #     self.datapoint.calibrate()
 
         # Evaluate the prior for the current model
-        self.prior = self.model.prior_probability(
-            self.kwargs['solve_parameter'],
-            self.kwargs['solve_gradient']) + \
-            self.datapoint.priorProbability(
-            self.kwargs['solve_relative_error'],
-            self.kwargs['solve_additive_error'],
-            self.kwargs['solve_height'],
-            False)# self.kwargs.solveCalibration)
+        self.prior = self.model.probability(self.kwargs['solve_parameter'],
+                                            self.kwargs['solve_gradient'])
+
+        self.prior += self.datapoint.probability
 
         # Initialize the burned in state
         self.burned_in_iteration = self._n_markov_chains
@@ -293,6 +289,9 @@ class Inference1D(myObject):
         observation = self.datapoint
         if self.kwargs['ignore_likelihood']:
             observation = None
+        else:
+            observation.sensitivity(self.model)
+
         local_variance = self.model.local_variance(observation)
 
         # Instantiate the proposal for the parameters.
@@ -308,6 +307,7 @@ class Inference1D(myObject):
 
     def accept_reject(self):
         """ Propose a new random model and accept or reject it """
+
         perturbed_datapoint = deepcopy(self.datapoint)
 
         # Perturb the current model
@@ -327,9 +327,9 @@ class Inference1D(myObject):
         data_misfit1 = perturbed_datapoint.dataMisfit()
 
         # Evaluate the prior for the current model
-        prior1 = perturbed_model.prior_probability(self.kwargs['solve_parameter'], self.kwargs['solve_gradient'])
+        prior1 = perturbed_model.probability(self.kwargs['solve_parameter'], self.kwargs['solve_gradient'])
         # Evaluate the prior for the current data
-        prior1 += perturbed_datapoint.priorProbability(self.kwargs['solve_relative_error'], self.kwargs['solve_additive_error'], self.kwargs['solve_height'], False)#self.user_options.solveCalibration)
+        prior1 += perturbed_datapoint.probability
 
         # Test for early rejection
         if (prior1 == -np.inf):
@@ -341,6 +341,7 @@ class Inference1D(myObject):
         if not  self.kwargs.get('ignore_likelihood', False):
             likelihood1 = perturbed_datapoint.likelihood(log=True)
             observation = deepcopy(perturbed_datapoint)
+
         proposal, proposal1 = perturbed_model.proposal_probabilities(remapped_model, observation)
 
         posterior1 = prior1 + likelihood1
@@ -369,6 +370,7 @@ class Inference1D(myObject):
             self.posterior = posterior1
             self.model = perturbed_model
             self.datapoint = perturbed_datapoint
+            self.datapoint.sensitivity(self.model, modelChanged=False)
 
     def infer(self, hdf_file_handle):
         """ Markov Chain Monte Carlo approach for inversion of geophysical data
@@ -588,16 +590,19 @@ class Inference1D(myObject):
 
         i = np.s_[:np.int64(self.iteration / self.update_plot_every)]
 
-        self.acceptance_rate.plot(x=self.acceptance_x, i=i,
-                       ax=self.ax[0],
-                       marker='o',
-                       alpha=0.7,
-                       linestyle='none',
-                       markeredgecolor='k',
-                       color='k'
-                       )
-        # cP.xlabel('Iteration #')
-        # cP.ylabel('% Acceptance')
+        acceptance_rate = self.acceptance_rate[i]
+        i_positive = np.argwhere(acceptance_rate > 0.0)
+        i_zero = np.argwhere(acceptance_rate == 0.0)
+
+        kwargs['ax'] = self.ax[0]
+        kwargs['marker'] = kwargs.get('marker', 'o')
+        kwargs['alpha'] = kwargs.get('alpha', 0.7)
+        kwargs['linestyle'] = kwargs.get('linestyle', 'none')
+        kwargs['markeredgecolor'] = kwargs.get('markeredgecolor', 'k')
+
+        self.acceptance_rate[i_positive].plot(x=self.acceptance_x[i_positive], color='k', **kwargs)
+        self.acceptance_rate[i_zero].plot(x=self.acceptance_x[i_zero], color='r', **kwargs)
+
         self.ax[0].ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 
     def _plotMisfitVsIteration(self, **kwargs):
