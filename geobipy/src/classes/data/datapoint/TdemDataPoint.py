@@ -1,4 +1,10 @@
+from os.path import split as psplt
+from os.path import join
 from copy import deepcopy
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
+
 
 from ....classes.core import StatArray
 from ...model.Model import Model
@@ -8,21 +14,17 @@ from ...forwardmodelling.Electromagnetic.TD.tdem1d import (
 from ...system.EmLoop import EmLoop
 from ...system.SquareLoop import SquareLoop
 from ...system.CircularLoop import CircularLoop
+from ...system.Loop_pair import Loop_pair
 from ...system.TdemSystem import TdemSystem
 from ...system.TdemSystem_GAAEM import TdemSystem_GAAEM
 from ...system.filters.butterworth import butterworth
 from ...system.Waveform import Waveform
 from ...statistics.Distribution import Distribution
-import matplotlib.pyplot as plt
-import numpy as np
 
 #from ....base import Error as Err
 from ....base.HDF.hdfRead import read_item
 from ....base import utilities as cf
 from ....base import plotting as cp
-from os.path import split as psplt
-from os.path import join
-
 
 class TdemDataPoint(EmDataPoint):
     """ Initialize a Time domain EMData Point
@@ -90,8 +92,7 @@ class TdemDataPoint(EmDataPoint):
         self.additive_error = additive_error
         self.relative_error = relative_error
 
-        self.transmitter = transmitter_loop
-        self.receiver = receiver_loop
+        self.loop_pair = Loop_pair(transmitter_loop, receiver_loop)
 
         self.primary_field = primary_field
         self.secondary_field = secondary_field
@@ -146,9 +147,13 @@ class TdemDataPoint(EmDataPoint):
         return self._data
 
     @property
-    def loopOffset(self):
-        diff = self.receiver - self.transmitter
-        return np.r_[diff.x, diff.y, diff.z]
+    def loop_pair(self):
+        return self._loop_pair
+
+    @loop_pair.setter
+    def loop_pair(self, value):
+        assert isinstance(value, Loop_pair), TypeError("loop_pair must be a Loop_pair")
+        self._loop_pair = value
 
     @EmDataPoint.predictedData.getter
     def predictedData(self):
@@ -197,14 +202,14 @@ class TdemDataPoint(EmDataPoint):
 
     @property
     def receiver(self):
-        return self._receiver
+        return self.loop_pair.receiver
 
-    @receiver.setter
-    def receiver(self, value):
-        if not value is None:
-            assert isinstance(value, EmLoop), TypeError(
-                "receiver must be of type EmLoop")
-            self._receiver = value
+    # @receiver.setter
+    # def receiver(self, value):
+    #     if not value is None:
+    #         assert isinstance(value, EmLoop), TypeError(
+    #             "receiver must be of type EmLoop")
+    #         self._receiver = value
 
     @property
     def secondary_field(self):
@@ -244,13 +249,13 @@ class TdemDataPoint(EmDataPoint):
 
     @property
     def transmitter(self):
-        return self._transmitter
+        return self.loop_pair.transmitter
 
-    @transmitter.setter
-    def transmitter(self, value):
-        if not value is None:
-            assert isinstance(value, EmLoop), TypeError("transmitter must be of type EmLoop")
-            self._transmitter = value
+    # @transmitter.setter
+    # def transmitter(self, value):
+    #     if not value is None:
+    #         assert isinstance(value, EmLoop), TypeError("transmitter must be of type EmLoop")
+    #         self._transmitter = value
 
     @property
     def n_components(self):
@@ -292,8 +297,7 @@ class TdemDataPoint(EmDataPoint):
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
         out.system = self._system
-        out._transmitter = deepcopy(self.transmitter)
-        out._receiver = deepcopy(self.receiver)
+        out._loop_pair = deepcopy(self.loop_pair)
         out._primary_field = deepcopy(self.primary_field)
         out._secondary_field = deepcopy(self.secondary_field)
         out._predicted_primary_field = deepcopy(self.predicted_primary_field)
@@ -585,8 +589,7 @@ class TdemDataPoint(EmDataPoint):
         for i in range(self.nSystems):
             grp.create_dataset('System{}'.format(i), data=np.string_(psplt(self.system[i].filename)[-1]))
 
-        self.transmitter.createHdf(grp, 'T', add_axis=add_axis, fillvalue=fillvalue)
-        self.receiver.createHdf(grp, 'R', add_axis=add_axis, fillvalue=fillvalue)
+        self.loop_pair.createHdf(grp, 'loop_pair', add_axis=add_axis, fillvalue=fillvalue)
 
         self.primary_field.createHdf(grp, 'primary_field', add_axis=add_axis, fillvalue=fillvalue)
         self.secondary_field.createHdf(grp, 'secondary_field', add_axis=add_axis, fillvalue=fillvalue)
@@ -608,11 +611,8 @@ class TdemDataPoint(EmDataPoint):
 
         grp = parent[name]
 
-        self.transmitter.writeHdf(grp, 'T', index=index)
-        self.receiver.writeHdf(grp, 'R', index=index)
+        self.loop_pair.writeHdf(grp, 'loop_pair', index=index)
 
-        self.primary_field.writeHdf(grp, 'primary_field', index=index)
-        self.secondary_field.writeHdf(grp, 'secondary_field', index=index)
         self.predicted_primary_field.writeHdf(grp, 'predicted_primary_field', index=index)
         self.predicted_secondary_field.writeHdf(grp, 'predicted_secondary_field', index=index)
 
@@ -636,16 +636,7 @@ class TdemDataPoint(EmDataPoint):
 
         self = super(TdemDataPoint, cls).fromHdf(grp, system=systems, **kwargs)
 
-        self.transmitter = read_item(grp['T'], **kwargs)
-        self.receiver = read_item(grp['R'], **kwargs)
-        # self.transmitter = (eval(cf.safeEval(grp['T'].attrs.get('repr')))).fromHdf(grp['T'], **kwargs)
-        # self.receiver = (eval(cf.safeEval(grp['R'].attrs.get('repr')))).fromHdf(grp['R'], **kwargs)
-
-        if 'loop_offset' in grp:
-            loopOffset = StatArray.StatArray.fromHdf(grp['loop_offset'], **kwargs)
-            self.receiver.x = self.transmitter.x + loopOffset[0]
-            self.receiver.y = self.transmitter.y + loopOffset[1]
-            self.receiver.z = self.transmitter.z + loopOffset[2]
+        self.loop_pair = Loop_pair.fromHdf(grp['loop_pair'], **kwargs)
 
         self._primary_field = StatArray.StatArray.fromHdf(grp['primary_field'], **kwargs)
         self._secondary_field = StatArray.StatArray.fromHdf(grp['secondary_field'], **kwargs)
@@ -653,6 +644,120 @@ class TdemDataPoint(EmDataPoint):
         self._predicted_secondary_field = StatArray.StatArray.fromHdf(grp['predicted_secondary_field'], **kwargs)
 
         return self
+
+    def perturb(self):
+        super().perturb()
+        self.loop_pair.perturb()
+
+    def _init_posterior_plots(self, gs=None):
+        """Initialize axes for posterior plots
+
+        Parameters
+        ----------
+        gs : matplotlib.gridspec.Gridspec
+            Gridspec to split
+
+        """
+        if gs is None:
+            gs = plt.figure()
+
+        if isinstance(gs, Figure):
+            gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
+
+        n_rows = 1
+        if any([self.relative_error.hasPosterior & self.additive_error.hasPosterior, self.transmitter.hasPosteriors, self.receiver.hasPosteriors]):
+            n_rows = 2
+
+        splt = gs.subgridspec(n_rows, 1, wspace=0.3)
+
+        n_cols = 1
+        if self.relative_error.hasPosterior or self.additive_error.hasPosterior:
+            n_cols = 2
+            width_ratios = (1, 2)
+
+        ## Top row of plot
+        splt_top = splt[0].subgridspec(1, n_cols, width_ratios=width_ratios)
+
+        ax = []
+        # Data axis
+        ax.append(plt.subplot(splt_top[-1]))
+
+        tmp = []
+        if self.relative_error.hasPosterior:
+            # Relative error axes
+            tmp = self.relative_error._init_posterior_plots(splt_top[0])
+        ax.append(tmp)
+
+        if not self.relative_error.hasPosterior & self.additive_error.hasPosterior:
+
+            tmp = self.additive_error._init_posterior_plots(splt_top[0])
+            ax.append(tmp)
+
+        ## Bottom row of plot
+        n_cols += (self.transmitter.hasPosteriors or self.receiver.hasPosteriors)
+
+        if n_cols > 0:
+            width_ratios = (1, 2)
+            if (self.relative_error.hasPosterior & self.additive_error.hasPosterior) + self.transmitter.hasPosteriors + self.receiver.hasPosteriors == 3:
+                width_ratios = (1, 2)
+            splt_bottom = splt[1].subgridspec(1, n_cols, width_ratios=width_ratios)
+        else:
+            splt_bottom = []
+
+        i = 0
+        # Additive Error axes
+        if self.relative_error.hasPosterior & self.additive_error.hasPosterior:
+            tmp = self.additive_error._init_posterior_plots(splt_bottom[i])
+
+            if tmp is not None:
+                i += 1
+            #     for j in range(self.nSystems):
+            #         others = np.s_[(j * self.n_components):(j * self.n_components)+self.n_components]
+            #         tmp[1].get_shared_y_axes().join(tmp[1], *tmp[others])
+            ax.append(tmp)
+
+        # Loop pair
+        tmp = []
+        if self.transmitter.hasPosteriors or self.receiver.hasPosteriors:
+            tmp = self.loop_pair._init_posterior_plots(splt_bottom[i])
+        ax.append(tmp)
+
+        return ax
+
+    def plot_posteriors(self, axes=None, **kwargs):
+
+        if axes is None:
+            axes = kwargs.pop('fig', plt.gcf())
+
+        if not isinstance(axes, list):
+            axes = self._init_posterior_plots(axes)
+
+        assert len(axes) == 4, ValueError("length {} axes must have length 4 list for the posteriors. self.init_posterior_plots can generate them".format(len(axes)))
+
+        # point_kwargs = kwargs.pop('point_kwargs', {})
+        data_kwargs = kwargs.pop('data_kwargs', {})
+        rel_error_kwargs = kwargs.pop('rel_error_kwargs', {})
+        add_error_kwargs = kwargs.pop('add_error_kwargs', {})
+
+        overlay = kwargs.get('overlay')
+        if not overlay is None:
+                # point_kwargs['overlay'] = overlay
+                rel_error_kwargs['overlay'] = overlay.relative_error
+                add_error_kwargs['overlay'] = overlay.additive_error
+
+        axes[0].clear()
+        self.predictedData.plotPosteriors(ax = axes[0], colorbar=False, **data_kwargs)
+        self.plot(ax=axes[0], **data_kwargs)
+
+        c = cp.wellSeparated[0] if overlay is None else cp.wellSeparated[3]
+        self.plotPredicted(color=c, ax=axes[0], **data_kwargs)
+
+        self.relative_error.plotPosteriors(ax=axes[1], **rel_error_kwargs)
+
+        add_error_kwargs['colorbar'] = False
+        self.additive_error.plotPosteriors(ax=axes[2], **add_error_kwargs)
+
+        self.loop_pair.plot_posteriors(axes = axes[3], **kwargs)
 
     def plotWaveform(self, **kwargs):
         for i in range(self.nSystems):
@@ -780,16 +885,32 @@ class TdemDataPoint(EmDataPoint):
 
         cp.title(title)
 
+    @property
+    def probability(self):
+        return super().probability + self.loop_pair.probability
 
     def set_posteriors(self, log=10):
         super().set_posteriors(log=log)
 
-    def set_priors(self, height_prior=None, relative_error_prior=None, additive_error_prior=None, data_prior=None, **kwargs):
+        self.loop_pair.set_posteriors()
 
-        if kwargs.get('solve_additive_error', False):
-            additive_error_prior = Distribution('Uniform', kwargs['minimum_additive_error'], kwargs['maximum_additive_error'], log=10, prng=kwargs['prng'])
+    def reset_posteriors(self):
+        super().reset_posteriors()
+        self.loop_pair.reset_posteriors()
 
-        super().set_priors(height_prior, relative_error_prior, additive_error_prior, data_prior, **kwargs)
+    def set_priors(self, relative_error_prior=None, additive_error_prior=None, data_prior=None, **kwargs):
+
+        if additive_error_prior is None:
+            if kwargs.get('solve_additive_error', False):
+                additive_error_prior = Distribution('Uniform', kwargs['minimum_additive_error'], kwargs['maximum_additive_error'], log=10, prng=kwargs['prng'])
+
+        if data_prior is None:
+            data_prior = Distribution('MvNormal', self.data[self.active], self.std[self.active]**2.0, prng=kwargs.get('prng'))
+
+        super().set_priors(relative_error_prior, additive_error_prior, data_prior, **kwargs)
+
+        self.loop_pair.set_priors(**kwargs)
+
 
     def set_additive_error_proposal(self, proposal, **kwargs):
         if proposal is None:
@@ -797,6 +918,12 @@ class TdemDataPoint(EmDataPoint):
                 proposal = Distribution('MvLogNormal', self.additive_error, kwargs['additive_error_proposal_variance'], linearSpace=True, prng=kwargs['prng'])
 
         self.additive_error.proposal = proposal
+
+    def set_proposals(self, relative_error_proposal=None, additive_error_proposal=None, **kwargs):
+
+        super().set_proposals(relative_error_proposal, additive_error_proposal, **kwargs)
+
+        self.loop_pair.set_proposals(**kwargs)
 
     # def set_predicted_data_posterior(self):
     #     if self.predictedData.hasPrior:
@@ -819,13 +946,15 @@ class TdemDataPoint(EmDataPoint):
 
     @property
     def summary(self):
-        msg = super().summary
-        msg += "transmitter:\n{}".format("|   "+(self.transmitter.summary.replace("\n", "\n|   "))[:-4])
-        msg += "receiver:\n{}".format("|   "+(self.receiver.summary.replace("\n", "\n|   "))[:-4])
+        msg = super().summary + self.loop_pair.summary
         return msg
 
     def update_posteriors(self):
         super().update_posteriors()
+        self.loop_pair.update_posteriors()
+
+    # def update_posteriors(self):
+    #     super().update_posteriors()
 
         # if self.predictedData.hasPosterior:
         #     active = self.active
@@ -836,12 +965,12 @@ class TdemDataPoint(EmDataPoint):
         #             a = active[i_comp]
         #             self.predictedData.posterior.update_with_line(x[a], self.predictedData[i_comp][a])
 
-    def forward(self, mod):
+    def forward(self, model):
         """ Forward model the data from the given model """
 
-        assert isinstance(mod, Model), TypeError(
-            "Invalid model class {} for forward modeling [1D]".format(type(mod)))
-        fm = tdem1dfwd(self, mod)
+        assert isinstance(model, Model), TypeError(
+            "Invalid model class {} for forward modeling [1D]".format(type(model)))
+        fm = tdem1dfwd(self, model)
 
         for i in range(self.nSystems):
             iSys = self._systemIndices(i)
@@ -943,8 +1072,7 @@ class TdemDataPoint(EmDataPoint):
 
         super().Isend(dest, world)
 
-        self.transmitter.Isend(dest, world)
-        self.receiver.Isend(dest, world)
+        self.loop_pair.Isend(dest, world)
 
         self.primary_field.Isend(dest, world)
         self.secondary_field.Isend(dest, world)
@@ -959,8 +1087,7 @@ class TdemDataPoint(EmDataPoint):
 
         out = super(TdemDataPoint, cls).Irecv(source, world, **kwargs)
 
-        out._transmitter = CircularLoop.Irecv(source, world)
-        out._receiver = CircularLoop.Irecv(source, world)
+        out._loop_pair = Loop_pair.Irecv(source, world)
 
         out._primary_field = StatArray.StatArray.Irecv(source, world)
         out._secondary_field = StatArray.StatArray.Irecv(source, world)

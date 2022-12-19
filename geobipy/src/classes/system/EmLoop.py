@@ -1,5 +1,7 @@
 import numpy as np
 from copy import deepcopy
+from matplotlib.figure import Figure
+from matplotlib.pyplot import gcf
 from ..core import StatArray
 from ..pointcloud.Point import Point
 from ..mesh.RectilinearMesh1D import RectilinearMesh1D
@@ -33,6 +35,10 @@ class EmLoop(Point, ABC):
         self.yaw = yaw
 
     @property
+    def hasPosteriors(self):
+        return self.n_posteriors > 0
+
+    @property
     def moment(self):
         return self._moment
 
@@ -42,6 +48,10 @@ class EmLoop(Point, ABC):
             value = np.float64(value)
         # assert isinstance(value, (StatArray.StatArray, float, np.float64)), TypeError("pitch must have type float")
         self._moment = StatArray.StatArray(value, 'Moment')
+
+    @property
+    def n_posteriors(self):
+        return super().n_posteriors + self.pitch.hasPosterior + self.roll.hasPosterior + self.yaw.hasPosterior
 
     @property
     def pitch(self):
@@ -129,20 +139,72 @@ class EmLoop(Point, ABC):
         out._yaw = deepcopy(self.yaw, memo=memo)
         return out
 
-    def set_priors(self, x_prior=None, y_prior=None, z_prior=None, pitch_prior=None, roll_prior=None, yaw_prior=None, kwargs={}):
+    def perturb(self):
+        """Propose a new point given the attached propsal distributions
+        """
+        super().perturb()
 
-        super().set_priors(x_prior, y_prior, z_prior, kwargs=kwargs)
+        if self.pitch.hasPosterior:
+                self.pitch.perturb(imposePrior=True, log=True)
+                # Update the mean of the proposed elevation
+                self.pitch.proposal.mean = self.pitch
 
-        if pitch_prior is not None:
-            self.pitch.prior = pitch_prior
-        if roll_prior is not None:
-            self.roll.prior = roll_prior
-        if yaw_prior is not None:
-            self.yaw.prior = yaw_prior
+        if self.roll.hasPosterior:
+                self.roll.perturb(imposePrior=True, log=True)
+                # Update the mean of the proposed elevation
+                self.roll.proposal.mean = self.roll
 
-    def set_proposals(self, x_proposal=None, y_proposal=None, z_proposal=None, pitch_proposal=None, roll_proposal=None, yaw_proposal=None, kwargs={}):
+        if self.yaw.hasPosterior:
+                self.yaw.perturb(imposePrior=True, log=True)
+                # Update the mean of the proposed elevation
+                self.yaw.proposal.mean = self.yaw
 
-        super().set_proposals(x_proposal, y_proposal, z_proposal, kwargs=kwargs)
+    @property
+    def probability(self):
+        probability = super().probability
+
+        if self.pitch.hasPrior:
+            probability += self.pitch.probability(log=True)
+
+        if self.roll.hasPrior:
+            probability += self.roll.probability(log=True)
+
+        if self.yaw.hasPrior:
+            probability += self.yaw.probability(log=True)
+
+        return probability
+
+    def set_priors(self, x_prior=None, y_prior=None, z_prior=None, pitch_prior=None, roll_prior=None, yaw_prior=None, **kwargs):
+
+        super().set_priors(x_prior, y_prior, z_prior, **kwargs)
+
+        if pitch_prior is None:
+            if kwargs.get('solve_pitch', False):
+                pitch_prior = Distribution('Uniform',
+                                            self.pitch - kwargs['maximum_pitch_change'],
+                                            self.pitch + kwargs['maximum_pitch_change'],
+                                            prng=kwargs['prng'])
+        self.pitch.prior = pitch_prior
+
+        if roll_prior is None:
+            if kwargs.get('solve_roll', False):
+                roll_prior = Distribution('Uniform',
+                                            self.roll - kwargs['maximum_roll_change'],
+                                            self.roll + kwargs['maximum_roll_change'],
+                                            prng=kwargs['prng'])
+        self.roll.prior = roll_prior
+
+        if yaw_prior is None:
+            if kwargs.get('solve_yaw', False):
+                yaw_prior = Distribution('Uniform',
+                                            self.yaw - kwargs['maximum_yaw_change'],
+                                            self.yaw + kwargs['maximum_yaw_change'],
+                                            prng=kwargs['prng'])
+        self.yaw.prior = yaw_prior
+
+    def set_proposals(self, x_proposal=None, y_proposal=None, z_proposal=None, pitch_proposal=None, roll_proposal=None, yaw_proposal=None, **kwargs):
+
+        super().set_proposals(x_proposal, y_proposal, z_proposal, **kwargs)
 
         if pitch_proposal is None:
             if kwargs.get('solve_pitch', False):
@@ -190,7 +252,7 @@ class EmLoop(Point, ABC):
         """
         if self.roll.hasPrior:
             mesh = RectilinearMesh1D(edges = StatArray.StatArray(self.roll.prior.bins(), name=self.roll.name, units=self.roll.units), relativeTo=self.roll)
-            self.pitch.posterior = Histogram(mesh=mesh)
+            self.roll.posterior = Histogram(mesh=mesh)
 
     def set_yaw_posterior(self):
         """
@@ -198,14 +260,78 @@ class EmLoop(Point, ABC):
         """
         if self.yaw.hasPrior:
             mesh = RectilinearMesh1D(edges=StatArray.StatArray(self.yaw.prior.bins(), name=self.yaw.name, units=self.yaw.units), relativeTo=self.yaw)
-            self.pitch.posterior = Histogram(mesh=mesh)
+            self.yaw.posterior = Histogram(mesh=mesh)
+
+    def update_posteriors(self):
+
+        super().update_posteriors()
+        self.pitch.update_posterior()
+        self.roll.update_posterior()
+        self.yaw.update_posterior()
+
+    def _init_posterior_plots(self, gs):
+        """Initialize axes for posterior plots
+
+        Parameters
+        ----------
+        gs : matplotlib.gridspec.Gridspec
+            Gridspec to split
+
+        """
+        if isinstance(gs, Figure):
+            gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
+
+        shp = (np.minimum(3, self.n_posteriors), np.ceil(self.n_posteriors / 3).astype(np.int32))
+        splt = gs.subgridspec(*shp, wspace=0.3, hspace=1.0)
+
+        ax = []
+        if super().hasPosteriors:
+            ax = super()._init_posterior_plots(splt[:super().n_posteriors, 0])
+
+        k = 0
+        for c in [self.pitch, self.roll, self.yaw]:
+            if c.hasPosterior:
+                j = super().n_posteriors + k
+                s = np.unravel_index(j, shp, order='F')
+                ax.append(c._init_posterior_plots(splt[s[0], s[1]]))
+                k += 1
+
+        return ax
+
+    def plot_posteriors(self, axes=None, **kwargs):
+
+        if axes is None:
+            axes = kwargs.pop('fig', gcf())
+
+        if not isinstance(axes, list):
+            axes = self._init_posterior_plots(axes)
+
+        assert len(axes) == self.n_posteriors, ValueError("Must have length {} list of axes for the posteriors. self._init_posterior_plots can generate them.".format(self.n_posteriors))
+
+        super().plot_posteriors(axes[:super().n_posteriors], **kwargs)
+
+        pitch_kwargs = kwargs.pop('pitch_kwargs', {})
+        roll_kwargs = kwargs.pop('roll_kwargs', {})
+        yaw_kwargs = kwargs.pop('yaw_kwargs', {})
+
+        overlay = kwargs.pop('overlay', None)
+        if not overlay is None:
+            pitch_kwargs['overlay'] = overlay.pitch
+            roll_kwargs['overlay'] = overlay.roll
+            yaw_kwargs['overlay'] = overlay.yaw
+
+        i = super().n_posteriors
+        for c, kw in zip([self.pitch, self.roll, self.yaw], [pitch_kwargs, roll_kwargs, yaw_kwargs]):
+            if c.hasPosterior:
+                c.plotPosteriors(ax = axes[i], **kw)
+                i += 1
 
     def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
         """
-        grp = super().createHdf(parent, name, withPosterior=True, add_axis=add_axis, fillvalue=fillvalue)
+        grp = super().createHdf(parent, name, withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
         self.pitch.createHdf(grp, 'pitch', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
         self.roll.createHdf(grp, 'roll', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
         self.yaw.createHdf(grp, 'yaw', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)

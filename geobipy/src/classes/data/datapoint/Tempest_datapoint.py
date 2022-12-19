@@ -1,4 +1,6 @@
-from copy import deepcopy
+from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
+import numpy as np
 
 from ....classes.core import StatArray
 from .TdemDataPoint import TdemDataPoint
@@ -7,14 +9,9 @@ from ...statistics.Histogram import Histogram
 from ...model.Model import Model
 from ...mesh.RectilinearMesh1D import RectilinearMesh1D
 from ...mesh.RectilinearMesh2D import RectilinearMesh2D
-from ...statistics.Distribution import Distribution
-import matplotlib
-import matplotlib.pyplot as plt
-import numpy as np
 
 from ....base import utilities as cf
 from ....base import plotting as cP
-
 
 class Tempest_datapoint(TdemDataPoint):
     """ Initialize a Tempest Time domain data point
@@ -241,7 +238,7 @@ class Tempest_datapoint(TdemDataPoint):
         if 'initial_receiver_pitch' in kwargs:
             self.receiver.pitch = kwargs['initial_receiver_pitch']
 
-    def _init_posterior_plots(self, gs):
+    def _init_posterior_plots(self, gs=None):
         """Initialize axes for posterior plots
 
         Parameters
@@ -250,110 +247,96 @@ class Tempest_datapoint(TdemDataPoint):
             Gridspec to split
 
         """
-        if isinstance(gs, matplotlib.figure.Figure):
+        if gs is None:
+            gs = plt.figure()
+
+        if isinstance(gs, Figure):
             gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
 
-        columns = np.r_[self.relative_error.hasPosterior, self.additive_error.hasPosterior, self.receiver.pitch.hasPosterior]
-
         n_rows = 1
-        height_ratios = None
-        if np.any(columns):
+        if (self.relative_error.hasPosterior & self.additive_error.hasPosterior) or any([self.transmitter.hasPosteriors, self.receiver.hasPosteriors]):
             n_rows = 2
-            height_ratios = (2, 1)
 
-        splt = gs.subgridspec(n_rows, 1, height_ratios=height_ratios, wspace=0.3)
+        splt = gs.subgridspec(n_rows, 1, wspace=0.3)
 
         n_cols = 1
         width_ratios = None
-        if self.z.hasPosterior:
+        if self.relative_error.hasPosterior or self.additive_error.hasPosterior:
             n_cols = 2
-            width_ratios = (1, 3)
+            width_ratios = (1, 2)
 
-        splt0 = splt[0].subgridspec(1, n_cols, width_ratios=width_ratios)
+        ## Top row of plot
+        splt_top = splt[0].subgridspec(1, n_cols, width_ratios=width_ratios)
 
         ax = []
-        i = 0
-        tmp = None
-        if self.z.hasPosterior:
-            tmp = self.z._init_posterior_plots(splt0[0])
-            i = 1
-        # Height axis
-        ax.append(tmp)
         # Data axis
-        ax.append(plt.subplot(splt0[i]))
+        ax.append(plt.subplot(splt_top[-1]))
 
-        n_cols = columns.sum()
-
-        if n_cols > 0:
-            splt0 = splt[1].subgridspec(1, n_cols)
-
-        i = 0
-        tmp = None
+        tmp = []
         if self.relative_error.hasPosterior:
             # Relative error axes
-            tmp = self.relative_error._init_posterior_plots(splt0[0, i])
-            if tmp is not None:
-                i += 1
+            tmp = self.relative_error._init_posterior_plots(splt_top[0])
         ax.append(tmp)
 
-        # Additive Error axes
-        tmp = None
-        if self.additive_error.hasPosterior:
-            tmp = self.additive_error._init_posterior_plots(splt0[0, i])
-            if tmp is not None:
-                i += 1
-                for j in range(self.nSystems):
-                    others = np.s_[(j * self.n_components):(j * self.n_components)+self.n_components]
-                    tmp[1].get_shared_y_axes().join(tmp[1], *tmp[others])
-        ax.append(tmp)
+        if not self.relative_error.hasPosterior & self.additive_error.hasPosterior:
 
-        # Pitch axes
-        tmp = None
-        if self.receiver.pitch.hasPosterior:
-            tmp = self.receiver.pitch._init_posterior_plots(splt0[0, i])
-        ax.append(tmp)
+            tmp = self.additive_error._init_posterior_plots(splt_top[0])
+            ax.append(tmp)
+
+        ## Bottom row of plot
+        n_cols = np.sum([self.relative_error.hasPosterior & self.additive_error.hasPosterior, self.transmitter.hasPosteriors, self.loop_pair.hasPosteriors, self.receiver.hasPosteriors])
+
+        if n_cols > 0:
+            splt_bottom = splt[1].subgridspec(1, n_cols)
+
+            i = 0
+            # Additive Error axes
+            if self.relative_error.hasPosterior & self.additive_error.hasPosterior:
+                tmp = []
+                tmp = self.additive_error._init_posterior_plots(splt_bottom[i])
+                if tmp is not None:
+                    i += 1
+                    for j in range(self.nSystems):
+                        others = np.s_[(j * self.n_components):(j * self.n_components)+self.n_components]
+                        tmp[1].get_shared_y_axes().join(tmp[1], *tmp[others])
+                ax.append(tmp)
+
+            # Loop pair
+            ax.append(self.loop_pair._init_posterior_plots(splt_bottom[i:]))
 
         return ax
 
-    def perturb(self):
-        """Propose a new EM data point given the specified attached propsal distributions
+    # def perturb(self):
+    #     """Propose a new EM data point given the specified attached propsal distributions
 
-        Parameters
-        ----------
-        height : bool
-            Propose a new observation height.
-        relative_error : bool
-            Propose a new relative error.
-        additive_error : bool
-            Propose a new additive error.
-        pitch : bool
-            Propose new pitch.
+    #     Parameters
+    #     ----------
+    #     height : bool
+    #         Propose a new observation height.
+    #     relative_error : bool
+    #         Propose a new relative error.
+    #     additive_error : bool
+    #         Propose a new additive error.
+    #     pitch : bool
+    #         Propose new pitch.
 
-        Returns
-        -------
-        out : subclass of EmDataPoint
-            The proposed data point
+    #     Returns
+    #     -------
+    #     out : subclass of EmDataPoint
+    #         The proposed data point
 
-        Notes
-        -----
-        For each boolean, the associated proposal must have been set.
+    #     Notes
+    #     -----
+    #     For each boolean, the associated proposal must have been set.
 
-        Raises
-        ------
-        TypeError
-            If a proposal has not been set on a requested parameter
+    #     Raises
+    #     ------
+    #     TypeError
+    #         If a proposal has not been set on a requested parameter
 
-        """
+    #     """
 
-        super().perturb()
-        self.perturb_pitch()
-
-    def perturb_pitch(self):
-        if self.receiver.pitch.hasProposal:
-            # Generate a new error
-            self.receiver.pitch.perturb(imposePrior=True)
-            # Update the mean of the proposed errors
-            self.receiver.pitch.proposal.mean = self.receiver.pitch
+    #     super().perturb()
 
     def plotWaveform(self,**kwargs):
         for i in range(self.nSystems):
@@ -369,7 +352,7 @@ class Tempest_datapoint(TdemDataPoint):
         kwargs['yscale'] = kwargs.get('yscale', 'linear')
         return super().plot(**kwargs)
 
-    def plot_posteriors(self, axes=None, height_kwargs={}, data_kwargs={}, rel_error_kwargs={}, add_error_kwargs={}, pitch_kwargs={}, **kwargs):
+    def plot_posteriors(self, axes=None, **kwargs):
 
         if axes is None:
             axes = kwargs.pop('fig', plt.gcf())
@@ -377,33 +360,33 @@ class Tempest_datapoint(TdemDataPoint):
         if not isinstance(axes, list):
             axes = self._init_posterior_plots(axes)
 
-        assert len(axes) == 5, ValueError("Must have length 5 list of axes for the posteriors. self.init_posterior_plots can generate them")
+        assert len(axes) == 4, ValueError("Must have length 4 list of axes for the posteriors. self.init_posterior_plots can generate them")
 
-        overlay = kwargs.pop('overlay', None)
+        # point_kwargs = kwargs.pop('point_kwargs', {})
+        data_kwargs = kwargs.pop('data_kwargs', {})
+        rel_error_kwargs = kwargs.pop('rel_error_kwargs', {})
+        add_error_kwargs = kwargs.pop('add_error_kwargs', {})
+
+        overlay = kwargs.get('overlay', None)
         if not overlay is None:
-                height_kwargs['overlay'] = overlay.z
+                # point_kwargs['overlay'] = overlay
                 rel_error_kwargs['overlay'] = overlay.relative_error
                 add_error_kwargs['overlay'] = [overlay.additive_error[i] for i in self.component_indices]
                 add_error_kwargs['axis'] = 0
-                pitch_kwargs['overlay'] = overlay.receiver.pitch
 
-
-        height_kwargs['transpose'] = height_kwargs.get('transpose', True)
-        self.z.plotPosteriors(ax = axes[0], **height_kwargs)
-
-        axes[1].clear()
-        self.predictedData.plotPosteriors(ax = axes[1], colorbar=False, **data_kwargs)
-        self.plot(ax=axes[1], **data_kwargs)
+        axes[0].clear()
+        self.predictedData.plotPosteriors(ax = axes[0], colorbar=False, **data_kwargs)
+        self.plot(ax=axes[0], **data_kwargs)
 
         c = cP.wellSeparated[0] if overlay is None else cP.wellSeparated[3]
-        self.plotPredicted(color=c, ax=axes[1], **data_kwargs)
+        self.plotPredicted(color=c, ax=axes[0], **data_kwargs)
 
-        self.relative_error.plotPosteriors(ax=axes[2], **rel_error_kwargs)
+        self.relative_error.plotPosteriors(ax=axes[1], **rel_error_kwargs)
 
         add_error_kwargs['colorbar'] = False
-        self.additive_error.plotPosteriors(ax=axes[3], **add_error_kwargs)
+        self.additive_error.plotPosteriors(ax=axes[2], **add_error_kwargs)
 
-        self.receiver.pitch.plotPosteriors(ax = axes[4], **pitch_kwargs)
+        self.loop_pair.plot_posteriors(axes = axes[3], **kwargs)
 
     def plotPredicted(self, **kwargs):
         kwargs['xscale'] = kwargs.get('xscale', 'log')
@@ -470,21 +453,13 @@ class Tempest_datapoint(TdemDataPoint):
                 ic = self._component_indices(j, i)
                 self.predicted_secondary_field[ic].plot(x=system_times, **kwargs)
 
-    def set_priors(self, height_prior=None, relative_error_prior=None, additive_error_prior=None, receiver_pitch_prior=None, data_prior=None, **kwargs):
+    def set_priors(self, relative_error_prior=None, additive_error_prior=None, data_prior=None, **kwargs):
 
-        # if data_prior is None:
-        #     data_prior = Distribution('MvLogNormal', self.secondary_field[self.active], self.std[self.active]**2.0, linearSpace=False, prng=kwargs.get('prng'))
+        # if additive_error_prior is None:
+        #     if kwargs.get('solve_additive_error', False):
+        #         additive_error_prior = Distribution('Uniform', kwargs['minimum_additive_error'], kwargs['maximum_additive_error'], prng=kwargs['prng'])
 
-        super().set_priors(height_prior, relative_error_prior, additive_error_prior, data_prior, **kwargs)
-
-        if receiver_pitch_prior is None:
-            if kwargs.get('solve_receiver_pitch', False):
-                receiver_pitch_prior = Distribution('Uniform',
-                                                        self.receiver.pitch - kwargs['maximum_receiver_pitch_change'],
-                                                        self.receiver.pitch + kwargs['maximum_receiver_pitch_change'],
-                                                        prng=kwargs['prng'])
-
-        self.receiver.set_priors(pitch_prior=receiver_pitch_prior)
+        super().set_priors(relative_error_prior, additive_error_prior, data_prior, **kwargs)
 
     def set_relative_error_prior(self, prior):
         if not prior is None:
@@ -496,25 +471,8 @@ class Tempest_datapoint(TdemDataPoint):
             assert prior.ndim == self.nChannels, ValueError("additive_error_prior must have {} dimensions".format(self.nChannels))
             self.additive_error.prior = prior
 
-    def set_proposals(self, height_proposal=None, relative_error_proposal=None, additive_error_proposal=None, receiver_pitch_proposal=None, **kwargs):
-
-        super().set_proposals(height_proposal, relative_error_proposal, additive_error_proposal, **kwargs)
-
-        if receiver_pitch_proposal is None:
-            if kwargs.get('solve_receiver_pitch', False):
-                receiver_pitch_proposal = Distribution('Normal', self.receiver.pitch.value, kwargs['receiver_pitch_proposal_variance'], prng=kwargs['prng'])
-
-        self.receiver.set_proposals(pitch_proposal=receiver_pitch_proposal)
-
-    def reset_posteriors(self):
-        super().reset_posteriors()
-        self.receiver.reset_posteriors()
-
     def set_posteriors(self, log=None):
-
         super().set_posteriors(log=log)
-
-        self.receiver.set_posteriors()
 
     def set_relative_error_posterior(self):
 
@@ -538,13 +496,6 @@ class Tempest_datapoint(TdemDataPoint):
                     mesh = RectilinearMesh2D(x=system_times, y=bins)
                     posterior.append(Histogram(mesh=mesh))
             self.additive_error.posterior = posterior
-
-    def update_posteriors(self):
-
-        super().update_posteriors()
-
-        if self.receiver.pitch.hasPosterior:
-            self.receiver.pitch.updatePosterior()
 
     def update_additive_error_posterior(self):
         if self.additive_error.hasPosterior:
