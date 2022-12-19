@@ -304,12 +304,14 @@ class DataPoint(Point):
         std = np.sqrt(additive_error**2.0 + (relative_error * self.predictedData)**2.0)
         return np.random.randn(self.nChannels) * std
 
-    def prior_derivative(self, order, model=None):
+    def prior_derivative(self, order):
+
+        J = self.sensitivity_matrix[self.active, :]
 
         if order == 1:
-            return np.dot(self.J[self.active, :].T, self.predictedData.priorDerivative(order=1, i=self.active))
+            return np.dot(J.T, self.predictedData.priorDerivative(order=1, i=self.active))
+
         elif order == 2:
-            J = self.sensitivity(model)[self.active, :]
             WdT_Wd = self.predictedData.priorDerivative(order=2)
             return np.dot(J.T, np.dot(WdT_Wd, J))
 
