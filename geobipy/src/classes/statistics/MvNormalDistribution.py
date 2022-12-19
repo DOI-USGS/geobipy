@@ -145,6 +145,15 @@ class MvNormal(baseDistribution):
         else:
             return MvNormal(mean=self.mean, variance=self.variance, prng=self.prng)
 
+    def derivative(self, x, order):
+
+        assert order in [1, 2], ValueError("Order must be 1 or 2.")
+        if order == 1:
+            return cf.Ax(self.precision, x - self._mean)
+
+        elif order == 2:
+            return self.precision
+
     # def derivative(self, x, order):
 
     #     assert order in [1, 2], ValueError("Order must be 1 or 2.")
@@ -165,7 +174,7 @@ class MvNormal(baseDistribution):
         """ For a realization x, compute the probability """
 
         if not axis is None:
-            d = Normal(mean=self.mean[axis],
+            d = Normal(mean=self._mean[axis],
                        variance=self.variance[axis, axis])
             return d.probability(x, log)
 

@@ -65,15 +65,10 @@ class MvLogNormal(MvNormal):
             return MvLogNormal(mean=self.mean, variance=self.variance, linearSpace=self.linearSpace, prng=self.prng)
 
     def derivative(self, x, order):
+        if self.linearSpace:
+            x = np.log(x)
+        return super().derivative(x, order)
 
-        assert order in [1, 2], ValueError("Order must be 1 or 2.")
-        if order == 1:
-            if self.linearSpace:
-                x = np.log(x)
-            return utilities.Ax(self.precision, x-self._mean)
-
-        elif order == 2:
-            return self.precision
 
     def rng(self, size = 1):
         return np.exp(super().rng(size)) if self.linearSpace else super().rng(size)
