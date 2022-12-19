@@ -10,6 +10,8 @@ from ..statistics.Distribution import Distribution
 from ..core.myObject import myObject
 from ..core import StatArray
 import numpy as np
+from matplotlib.figure import Figure
+from matplotlib.pyplot import gcf
 
 
 class Point(myObject, ABC):
@@ -35,6 +37,14 @@ class Point(myObject, ABC):
     @elevation.setter
     def elevation(self, value):
         self._elevation = StatArray.StatArray(value, 'Elevation', 'm')
+
+    @property
+    def hasPosteriors(self):
+        return (self.x.hasPosterior + self.y.hasPosterior + self.z.hasPosterior) > 0
+
+    @property
+    def n_posteriors(self):
+        return self.x.hasPosterior + self.y.hasPosterior + self.z.hasPosterior
 
     @property
     def summary(self):
@@ -110,29 +120,95 @@ class Point(myObject, ABC):
         self._elevation += dz
         return self
 
-    def set_priors(self, x_prior=None, y_prior=None, z_prior=None, kwargs={}):
-        if x_prior is not None:
-            self.x.prior = x_prior
-        if y_prior is not None:
-            self.y.prior = y_prior
-        if z_prior is not None:
-            self.z.prior = z_prior
+    def perturb(self):
+        """Propose a new point given the attached propsal distributions
+        """
 
-    def set_proposals(self, x_proposal=None, y_proposal=None, z_proposal=None, kwargs={}):
+        for c in [self.x, self.y, self.z]:
+            if c.hasPosterior:
+                c.perturb(imposePrior=True, log=True)
+                # Update the mean of the proposed elevation
+                c.proposal.mean = c
+
+    @property
+    def probability(self):
+        """Evaluate the probability for the EM data point given the specified attached priors
+
+        Parameters
+        ----------
+        rEerr : bool
+            Include the relative error when evaluating the prior
+        aEerr : bool
+            Include the additive error when evaluating the prior
+        height : bool
+            Include the elevation when evaluating the prior
+        calibration : bool
+            Include the calibration parameters when evaluating the prior
+        verbose : bool
+            Return the components of the probability, i.e. the individually evaluated priors
+
+        Returns
+        -------
+        out : np.float64
+            The evaluation of the probability using all assigned priors
+
+        Notes
+        -----
+        For each boolean, the associated prior must have been set.
+
+        Raises
+        ------
+        TypeError
+            If a prior has not been set on a requested parameter
+
+        """
+        probability = np.float64(0.0)
+
+        if self.x.hasPrior:
+            probability += self.x.probability(log=True)
+
+        if self.y.hasPrior:
+            probability += self.y.probability(log=True)
+
+        if self.z.hasPrior:
+            probability += self.z.probability(log=True)
+
+        return probability
+
+    def set_priors(self, x_prior=None, y_prior=None, z_prior=None, **kwargs):
+
+        if x_prior is None:
+            if kwargs.get('solve_x', False):
+                x_prior = Distribution('Uniform', self.x - kwargs['maximum_x_change'], self.x + kwargs['maximum_x_change'], prng=kwargs.get('prng'))
+
+        if y_prior is None:
+            if kwargs.get('solve_y', False):
+                y_prior = Distribution('Uniform', self.y - kwargs['maximum_y_change'], self.y + kwargs['maximum_y_change'], prng=kwargs.get('prng'))
+
+        if z_prior is None:
+            if kwargs.get('solve_z', False):
+                z_prior = Distribution('Uniform', self.z - kwargs['maximum_z_change'], self.z + kwargs['maximum_z_change'], prng=kwargs.get('prng'))
+
+        self.x.prior = x_prior
+        self.y.prior = y_prior
+        self.z.prior = z_prior
+
+    def set_proposals(self, x_proposal=None, y_proposal=None, z_proposal=None, **kwargs):
 
         if x_proposal is None:
             if kwargs.get('solve_x', False):
                 x_proposal = Distribution('Normal', self.x.value, kwargs['x_proposal_variance'], prng=kwargs['prng'])
-        self.x.proposal = x_proposal
 
         if y_proposal is None:
             if kwargs.get('solve_y', False):
                 y_proposal = Distribution('Normal', self.y.value, kwargs['y_proposal_variance'], prng=kwargs['prng'])
-        self.y.proposal = y_proposal
 
         if z_proposal is None:
             if kwargs.get('solve_z', False):
                 z_proposal = Distribution('Normal', self.z.value, kwargs['z_proposal_variance'], prng=kwargs['prng'])
+
+        self.x.proposal = x_proposal
+        self.y.proposal = y_proposal
         self.z.proposal = z_proposal
 
     def reset_posteriors(self):
@@ -171,15 +247,66 @@ class Point(myObject, ABC):
             self.z.posterior = Histogram(mesh=mesh)
 
     def update_posteriors(self):
+        self.x.update_posterior()
+        self.y.update_posterior()
+        self.z.update_posterior()
 
-        if self.x.hasPosterior:
-            self.x.updatePosterior()
+    def _init_posterior_plots(self, gs=None):
+        """Initialize axes for posterior plots
 
-        if self.y.hasPosterior:
-            self.y.updatePosterior()
+        Parameters
+        ----------
+        gs : matplotlib.gridspec.Gridspec
+            Gridspec to split
 
-        if self.z.hasPosterior:
-            self.z.updatePosterior()
+        """
+        if gs is None:
+            gs = Figure()
+
+        if isinstance(gs, Figure):
+            gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
+
+        n_posteriors = self.x.hasPosterior + self.y.hasPosterior + self.z.hasPosterior
+        splt = gs.subgridspec(n_posteriors, 1, wspace=0.3, hspace=1.0)
+
+        ax = []
+        i = 0
+        for c in [self.x, self.y, self.z]:
+            if c.hasPosterior:
+                ax.append(c._init_posterior_plots(splt[i]))
+                i += 1
+
+        return ax
+
+    def plot_posteriors(self, axes=None, **kwargs):
+
+        if axes is None:
+            axes = kwargs.pop('fig', gcf())
+
+        if not isinstance(axes, list):
+            axes = self._init_posterior_plots(axes)
+
+        n_posteriors = self.x.hasPosterior + self.y.hasPosterior + self.z.hasPosterior
+        assert len(axes) == n_posteriors, ValueError("Must have length {} list of axes for the posteriors. self._init_posterior_plots can generate them.".format(n_posteriors))
+
+        x_kwargs = kwargs.pop('x_kwargs', {})
+        y_kwargs = kwargs.pop('y_kwargs', {})
+        z_kwargs = kwargs.pop('z_kwargs', {})
+
+        overlay = kwargs.pop('overlay', None)
+        if not overlay is None:
+            x_kwargs['overlay'] = overlay.x
+            y_kwargs['overlay'] = overlay.y
+            z_kwargs['overlay'] = overlay.z
+
+        if ~self.x.hasPosterior & ~self.y.hasPosterior & self.z.hasPosterior:
+            z_kwargs['transpose'] = z_kwargs.get('transpose', True)
+
+        i = 0
+        for c, kw in zip([self.x, self.y, self.z], [x_kwargs, y_kwargs, z_kwargs]):
+            if c.hasPosterior:
+                c.plotPosteriors(ax = axes[i], **kw)
+                i += 1
 
     def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
         """ Create the hdf group metadata in file
