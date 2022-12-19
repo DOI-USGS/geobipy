@@ -91,8 +91,9 @@ class RectilinearMesh1D(Mesh):
         out.log = deepcopy(self.log, memo=memo)
         out._relativeTo = self._relativeTo
 
-        out._centres = self._centres
-        out._edges = self._edges
+        out._centres = deepcopy(self._centres, memo=memo)
+        out._edges = deepcopy(self._edges, memo=memo)
+        out._widths = deepcopy(self._widths, memo=memo)
 
         out._min_width = self.min_width
         out._min_edge = self.min_edge
@@ -967,7 +968,6 @@ class RectilinearMesh1D(Mesh):
 
                 if (not tryAgain):
                     out = deepcopy(self)
-                    # z0[i] += dz  # Perturb the depth in the model
                     out.edges = z
                     out._action = ['perturb', np.int32(i), dz]
                     if values is not None:
@@ -1196,7 +1196,8 @@ class RectilinearMesh1D(Mesh):
                 plt.axhline(doi, color = '#5046C8', linestyle = 'dashed', linewidth = 1, alpha = 0.6)
         return axes
 
-    def priorProbability(self, log=True, verbose=False):
+    @property
+    def probability(self):
         """Evaluate the prior probability for the mesh.
 
         The following equation describes the components of the prior that correspond to the Model1D,
@@ -1222,12 +1223,11 @@ class RectilinearMesh1D(Mesh):
 
         """
         # Probability of the number of layers
-        p_nCells = self.nCells.probability(log=log)
+        probability = self.nCells.probability(log=True)
 
         # Probability of depth given nCells
-        p_edges = self.edges.probability(x=self.nCells.item()-1, log=log)
-
-        return (p_nCells + p_edges) if log else (p_nCells * p_edges)
+        probability += self.edges.probability(x=self.nCells.item()-1, log=True)
+        return probability
 
     def remainingSpace(self, n_cells):
         return (self.max_edge - self.min_edge) - n_cells * self.min_width
@@ -1403,7 +1403,7 @@ class RectilinearMesh1D(Mesh):
     def update_posteriors(self, values=None, ratio=None):
 
         # Update the number of layeres posterior
-        self.nCells.updatePosterior()
+        self.nCells.update_posterior()
 
         # Update the layer interface histogram
         if (self.nCells.item() > 1):
