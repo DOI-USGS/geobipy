@@ -10,7 +10,7 @@ from ...statistics.Distribution import Distribution
 from ...statistics.Histogram import Histogram
 from ...mesh.RectilinearMesh1D import RectilinearMesh1D
 import numpy as np
-import matplotlib
+from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
@@ -77,7 +77,7 @@ class DataPoint(Point):
         self.relative_error = None
         self.additive_error = None
 
-        # self.errorPosterior = None
+        self._sensitivity_matrix = None
 
     @cached_property
     def active(self):
@@ -229,6 +229,10 @@ class DataPoint(Point):
         self._relative_error = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
 
     @property
+    def sensitivity_matrix(self):
+        return self._sensitivity_matrix
+
+    @property
     def std(self):
         """ Compute the data errors. """
 
@@ -286,7 +290,7 @@ class DataPoint(Point):
         out._fiducial = deepcopy(self.fiducial, memo)
         out._channelNames = deepcopy(self.channelNames, memo)
 
-        # out._errorPosterior = deepcopy(self.errorPosterior, memo)
+        out._sensitivity_matrix = deepcopy(self._sensitivity_matrix)
 
         return out
 
