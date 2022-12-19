@@ -35,9 +35,6 @@ class EmDataPoint(DataPoint):
                          data = data, std = std, predictedData = predictedData,
                          channelNames=channelNames, lineNumber=lineNumber, fiducial=fiducial, **kwargs)
 
-        # Initialize the sensitivity matrix
-        self.J = None
-
     @property
     def active(self):
         """Gets the indices to the observed data values that are not NaN
@@ -128,16 +125,6 @@ class EmDataPoint(DataPoint):
     @property
     def systemOffset(self):
         return np.hstack([0, np.cumsum(self.channels_per_system)])
-
-    def __deepcopy__(self, memo={}):
-        out = super().__deepcopy__(memo)
-
-        # StatArray of calibration parameters
-        # out.errorPosterior = self.errorPosterior
-        # Initialize the sensitivity matrix
-        out.J = deepcopy(self.J, memo)
-
-        return out
 
     @property
     def new_model(self):
