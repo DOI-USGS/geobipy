@@ -30,7 +30,7 @@ def tdem1dfwd(datapoint, model1d):
     assert datapoint.z[0] >= model1d.mesh.relativeTo, "Sensor altitude must be above the top of the model"
 
     heightTolerance = 0.0
-    if (datapoint.z > heightTolerance):
+    if (datapoint.transmitter.z > heightTolerance):
         assert isinstance(datapoint.system[0], TdemSystem_GAAEM), TypeError(
             "For airborne data, system must be type TdemSystem_GAAEM")
         return gaTdem1dfwd(datapoint, model1d)
@@ -42,7 +42,7 @@ def tdem1dfwd(datapoint, model1d):
 def tdem1dsen(datapoint, model1d, ix=None, modelChanged=True):
 
     heightTolerance = 0.0
-    if (datapoint.z > heightTolerance):
+    if (datapoint.transmitter.z > heightTolerance):
         assert isinstance(datapoint.system[0], TdemSystem_GAAEM), TypeError(
             "For airborne data, system must be type TdemSystem_GAAEM")
         return gaTdem1dsen(datapoint, model1d, ix, modelChanged)
