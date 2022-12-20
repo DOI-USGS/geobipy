@@ -787,8 +787,6 @@ class DataPoint(Point):
 
         self.relative_error.Isend(dest, world)
         self.additive_error.Isend(dest, world)
-        # self.std.Isend(dest, world)
-
 
     @classmethod
     def Irecv(cls, source, world, **kwargs):
@@ -800,7 +798,5 @@ class DataPoint(Point):
 
         out._relative_error = StatArray.StatArray.Irecv(source, world)
         out._additive_error = StatArray.StatArray.Irecv(source, world)
-
-        # out._std = StatArray.StatArray.Irecv(source, world)
 
         return out

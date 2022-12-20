@@ -11,11 +11,16 @@ from ...base.HDF.hdfRead import read_item
 
 class Loop_pair(Point):
 
-    def __init__(self, transmitter, receiver):
+    def __init__(self, transmitter=None, receiver=None, **kwargs):
 
-        super().__init__(StatArray.StatArray(receiver.x - transmitter.x, 'x offset', 'm'),
-                         StatArray.StatArray(receiver.y - transmitter.y, 'y offset', 'm'),
-                         StatArray.StatArray(receiver.z - transmitter.z, 'z offset', 'm'))
+        super().__init__(**kwargs)
+        self.x.name = 'x offset'
+        self.y.name = 'y offset'
+        self.z.name = 'z offset'
+
+        if transmitter is None and receiver is None:
+            return
+
         self.transmitter = transmitter
         self.receiver = receiver
 
