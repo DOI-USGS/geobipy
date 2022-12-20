@@ -318,7 +318,7 @@ class Inference1D(myObject):
         try:
             remapped_model, perturbed_model = self.model.perturb(observation)
         except:
-            print("fiducial FAILED", observation.fiducial, flush=True)
+            print("fiducial FAILED", observation.line_number, observation.fiducial, flush=True)
             print("RANK", self.rank, flush=True)
             raise Exception('bodsiadui')
 
