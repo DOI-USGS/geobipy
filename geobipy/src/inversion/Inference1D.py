@@ -315,7 +315,12 @@ class Inference1D(myObject):
         if self.kwargs.get('ignore_likelihood', False):
             observation = None
 
-        remapped_model, perturbed_model = self.model.perturb(observation)
+        try:
+            remapped_model, perturbed_model = self.model.perturb(observation)
+        except:
+            print("fiducial FAILED", observation.fiducial, flush=True)
+            print("RANK", self.rank, flush=True)
+            raise Exception('bodsiadui')
 
         # Propose a new data point, using assigned proposal distributions
         perturbed_datapoint.perturb()
