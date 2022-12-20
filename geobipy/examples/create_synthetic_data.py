@@ -20,7 +20,7 @@ n_points = 100
 zwedge = np.linspace(10.0, 1.0, n_points)
 zdeep = np.linspace(50.0, 200.0, n_points)
 
-conductivity = StatArray([0.005, 0.05, 0.2], name="Conductivity", units='$\\frac{S}{m}$')
+conductivity = StatArray([0.005, 0.05, 1.0], name="Conductivity", units='$\\frac{S}{m}$')
 
 # Create distributions for three lithology classes
 lithology_distribution = Distribution('MvLogNormal',
@@ -38,7 +38,10 @@ mesh.y_edges.name, mesh.y_edges.units = 'Depth', 'm'
 
 wedge_model = Model(mesh=mesh, values=np.repeat(lithology_distribution.mean[None, :], n_points, 0))
 
-#%%
+plt.figure()
+wedge_model.pcolor(flipY=True)
+plt.savefig('Wedge.png')
+
 def create_resolve():
     from geobipy import FdemData, FdemSystem
 
@@ -79,7 +82,6 @@ def create_resolve():
 
     ds = FdemData.read_csv('../../documentation_source/source/examples/supplementary/data/resolve.csv', '../../documentation_source/source/examples/supplementary/data/FdemSystem2.stm')
 
-#%%
 def create_skytem():
     from geobipy import TdemData, TdemSystem, CircularLoops
 
@@ -145,7 +147,6 @@ def create_skytem():
                         ['../../documentation_source/source/examples/supplementary/data/SkytemHM-SLV.stm',
                         '../../documentation_source/source/examples/supplementary/data/SkytemLM-SLV.stm'])
 
-#%%
 def create_aerotem():
     from geobipy import TdemData, TdemSystem, CircularLoop
 
@@ -203,7 +204,6 @@ def create_aerotem():
 
     TdemData.read_csv('../../documentation_source/source/examples/supplementary/data/aerotem.csv', '../../documentation_source/source/examples/supplementary/data/aerotem.stm')
 
-#%%
 def create_tempest():
     from geobipy import TempestData, TdemSystem, CircularLoop
 
@@ -214,20 +214,21 @@ def create_tempest():
     ds.y = np.zeros(n_points)
     ds.z = np.full(n_points, fill_value = 120.0)
     ds.elevation = np.zeros(n_points)
+    ds.fiducial = np.arange(n_points)
 
     ds.transmitter = CircularLoops(x=ds.x, y=ds.y, z=ds.z,
-                    pitch = np.random.uniform(low=-10.0, high=10.0, size=n_points),
-                    roll = np.random.uniform(low=-25.0, high=25.0, size=n_points),
-                    yaw = np.random.uniform(low=-15.0, high=15.0, size=n_points),
+                    pitch = np.zeros(n_points), #pitch = np.random.uniform(low=-10.0, high=10.0, size=n_points),
+                    roll = np.zeros(n_points), #roll = np.random.uniform(low=-25.0, high=25.0, size=n_points),
+                    yaw = np.zeros(n_points), #yaw = np.random.uniform(low=-15.0, high=15.0, size=n_points),
                     #  pitch=0.0, roll=0.0, yaw=0.0,
                     radius=np.full(n_points, fill_value=ds.system[0].loopRadius()))
 
     ds.receiver = CircularLoops(x=ds.transmitter.x - 107.0,
                     y=ds.transmitter.y + 0.0,
                     z=ds.transmitter.z - 45.0,
-                    pitch = np.random.uniform(low=-5.0, high=5.0, size=n_points),
-                    roll = np.random.uniform(low=-10.0, high=10.0, size=n_points),
-                    yaw = np.random.uniform(low=-5.0, high=5.0, size=n_points),
+                    pitch = np.zeros(n_points), #pitch = np.random.uniform(low=-5.0, high=5.0, size=n_points),
+                    roll = np.zeros(n_points), #roll = np.random.uniform(low=-10.0, high=10.0, size=n_points),
+                    yaw = np.zeros(n_points), #yaw = np.random.uniform(low=-5.0, high=5.0, size=n_points),
                     radius=np.full(n_points, fill_value=ds.system[0].loopRadius()))
 
     ds.relative_error = np.repeat(np.r_[0.05, 0.05][None, :], n_points, 0)
@@ -253,9 +254,9 @@ def create_tempest():
     # Add noise to various solvable parameters
 
     # ds.z += np.random.uniform(low=-5.0, high=5.0, size=n_points)
-    # ds.receiver.x += np.random.normal(loc=0.0, scale=1.8**2.0, size=n_points)
-    ds.receiver.z += np.random.normal(loc = 0.0, scale = 2.0**2.0, size=n_points)
-    ds.receiver.pitch += np.random.normal(loc = 0.0, scale = 0.5**2.0, size=n_points)
+    ds.receiver.x += np.random.normal(loc=0.0, scale=1.0**2.0, size=n_points)
+    ds.receiver.z += np.random.normal(loc = 0.0, scale = 1.0**2.0, size=n_points)
+    ds.receiver.pitch += np.random.normal(loc = 0.0, scale = 1.5**2.0, size=n_points)
     # ds.receiver.roll += np.random.normal(loc = 0.0, scale = 0.5**2.0, size=n_points)
     # ds.receiver.yaw += np.random.normal(loc = 0.0, scale = 0.5**2.0, size=n_points)
 
@@ -290,4 +291,4 @@ def create_tempest():
 # create_aerotem()
 create_tempest()
 
-plt.show()
+# plt.show()
