@@ -217,18 +217,17 @@ def create_tempest():
     ds.fiducial = np.arange(n_points)
 
     ds.transmitter = CircularLoops(x=ds.x, y=ds.y, z=ds.z,
-                    pitch = np.zeros(n_points), #pitch = np.random.uniform(low=-10.0, high=10.0, size=n_points),
-                    roll = np.zeros(n_points), #roll = np.random.uniform(low=-25.0, high=25.0, size=n_points),
-                    yaw = np.zeros(n_points), #yaw = np.random.uniform(low=-15.0, high=15.0, size=n_points),
-                    #  pitch=0.0, roll=0.0, yaw=0.0,
+                    pitch = np.random.uniform(low=-10.0, high=10.0, size=n_points),
+                    roll = np.random.uniform(low=-25.0, high=25.0, size=n_points),
+                    yaw = np.random.uniform(low=-15.0, high=15.0, size=n_points),
                     radius=np.full(n_points, fill_value=ds.system[0].loopRadius()))
 
     ds.receiver = CircularLoops(x=ds.transmitter.x - 107.0,
                     y=ds.transmitter.y + 0.0,
                     z=ds.transmitter.z - 45.0,
-                    pitch = np.zeros(n_points), #pitch = np.random.uniform(low=-5.0, high=5.0, size=n_points),
-                    roll = np.zeros(n_points), #roll = np.random.uniform(low=-10.0, high=10.0, size=n_points),
-                    yaw = np.zeros(n_points), #yaw = np.random.uniform(low=-5.0, high=5.0, size=n_points),
+                    pitch = np.random.uniform(low=-5.0, high=5.0, size=n_points),
+                    roll = np.random.uniform(low=-10.0, high=10.0, size=n_points),
+                    yaw = np.random.uniform(low=-5.0, high=5.0, size=n_points),
                     radius=np.full(n_points, fill_value=ds.system[0].loopRadius()))
 
     ds.relative_error = np.repeat(np.r_[0.05, 0.05][None, :], n_points, 0)
