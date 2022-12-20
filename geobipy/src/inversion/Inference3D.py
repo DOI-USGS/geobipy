@@ -437,7 +437,7 @@ class Inference3D(myObject):
         # Send out the first indices to the workers
         for iWorker in range(1, world.size):
             # Get a datapoint from the file.
-            datapoint = dataset._read_record(nSent)
+            datapoint = dataset._read_record()
 
             # If DataPoint is None, then we reached the end of the file and no more points can be read in.
             if datapoint is None:
@@ -467,7 +467,7 @@ class Inference3D(myObject):
             if nSent == nPoints:
                 datapoint = None
             else:
-                datapoint = dataset._read_record(nSent)
+                datapoint = dataset._read_record()
 
             # If DataPoint is None, then we reached the end of the file and no more points can be read in.
             if datapoint is None:
