@@ -326,10 +326,14 @@ class Inference1D(myObject):
         # Compute the data misfit
         data_misfit1 = perturbed_datapoint.dataMisfit()
 
-        # Evaluate the prior for the current model
-        prior1 = perturbed_model.probability(self.kwargs['solve_parameter'], self.kwargs['solve_gradient'])
         # Evaluate the prior for the current data
-        prior1 += perturbed_datapoint.probability
+        prior1 = perturbed_datapoint.probability
+        # Test for early rejection
+        if (prior1 == -np.inf):
+            return
+
+        # Evaluate the prior for the current model
+        prior1 += perturbed_model.probability(self.kwargs['solve_parameter'], self.kwargs['solve_gradient'])
 
         # Test for early rejection
         if (prior1 == -np.inf):
@@ -370,6 +374,7 @@ class Inference1D(myObject):
             self.posterior = posterior1
             self.model = perturbed_model
             self.datapoint = perturbed_datapoint
+            # Reset the sensitivity locally to the newly accepted model
             self.datapoint.sensitivity(self.model, modelChanged=False)
 
     def infer(self, hdf_file_handle):
