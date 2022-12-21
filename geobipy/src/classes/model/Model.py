@@ -409,6 +409,8 @@ class Model(myObject):
         # delta sigma = 0.5 * inv(J'Wd'WdJ + Wm'Wm)(J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref))
         # This could be replaced with a CG solver for bigger problems like deterministic algorithms.
         dSigma = 0.5 * np.dot(inverse_hessian, gradient)
+        mask = np.abs(dSigma) > 6.0
+        dSigma[mask] = np.sign(dSigma)[mask] * 6.0
 
         mean = np.log(remapped_model.values) - dSigma
 
