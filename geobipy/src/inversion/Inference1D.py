@@ -230,6 +230,8 @@ class Inference1D(myObject):
             self._prng = np.random.RandomState()
         else:
             self._prng = value
+
+        self.seed = self.prng.get_state()
         self.kwargs['prng'] = self.prng
 
     @property
