@@ -303,7 +303,7 @@ class TempestData(TdemData):
         return ax
 
 
-    def plotPredicted(self, system=0, channels=None, xAxis='index', **kwargs):
+    def plot_predicted(self, system=0, channels=None, xAxis='index', **kwargs):
         """ Plots the data
 
         Parameters
@@ -385,7 +385,7 @@ class TempestData(TdemData):
         self.z.plotPosteriors(ax = axes[0], **height_kwargs)
 
         self.plot(ax=axes[1], legend=False, **data_kwargs)
-        self.plotPredicted(ax=axes[1], legend=False, **data_kwargs)
+        self.plot_predicted(ax=axes[1], legend=False, **data_kwargs)
 
         self.relative_error.plotPosteriors(ax=axes[2], **rel_error_kwargs)
 

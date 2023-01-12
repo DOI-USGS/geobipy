@@ -81,7 +81,7 @@ plt.subplot(121)
 _ = mod.pcolor()
 plt.subplot(122)
 _ = tdp.plot()
-_ = tdp.plotPredicted()
+_ = tdp.plot_predicted()
 plt.tight_layout()
 
 ################################################################################
@@ -112,7 +112,7 @@ halfspace = tdp.find_best_halfspace()
 print('Best half space conductivity is {} $S/m$'.format(halfspace.values))
 plt.figure()
 _ = tdp.plot()
-_ = tdp.plotPredicted()
+_ = tdp.plot_predicted()
 
 ################################################################################
 # Compute the misfit between observed and predicted data

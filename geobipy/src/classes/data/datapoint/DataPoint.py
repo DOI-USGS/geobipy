@@ -416,10 +416,10 @@ class DataPoint(Point):
 
         if overlay is None:
             c = cP.wellSeparated[0]
-            self.plotPredicted(color=c, ax=axes[1], **data_kwargs)
+            self.plot_predicted(color=c, ax=axes[1], **data_kwargs)
         else:
             c = cP.wellSeparated[3]
-            overlay.plotPredicted(color=c, ax=axes[1], **data_kwargs)
+            overlay.plot_predicted(color=c, ax=axes[1], **data_kwargs)
 
         self.relative_error.plotPosteriors(ax=axes[2], **rel_error_kwargs)
         self.additive_error.plotPosteriors(ax=axes[3], **add_error_kwargs)

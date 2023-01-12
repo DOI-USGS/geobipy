@@ -658,11 +658,11 @@ class Inference1D(myObject):
     #     if self.burnedIn:
     #         # self.datapoint.predictedData.plotPosteriors(colorbar=False)
     #         self.datapoint.plot(**kwargs)
-    #         self.bestDataPoint.plotPredicted(color=cP.wellSeparated[3], **kwargs)
+    #         self.bestDataPoint.plot_predicted(color=cP.wellSeparated[3], **kwargs)
     #     else:
 
     #         self.datapoint.plot(**kwargs)
-    #         self.datapoint.plotPredicted(color='g', **kwargs)
+    #         self.datapoint.plot_predicted(color='g', **kwargs)
 
     def saveToLines(self, h5obj):
         """ Save the results to a HDF5 object for a line """

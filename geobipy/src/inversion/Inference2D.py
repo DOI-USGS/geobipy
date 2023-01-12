@@ -1054,7 +1054,7 @@ class Inference2D(myObject):
     #     cP.pcolor(self.bestData.predictedData.T, x=self.mesh.x, y=StatArray.StatArray(np.arange(self.bestData.predictedData.shape[1]), name='Channel'), **kwargs)
 
 
-    # def plotPredictedData(self, channel=None, **kwargs):
+    # def plot_predictedData(self, channel=None, **kwargs):
     #     """ Plot a channel of the best predicted data as points """
 
     #     if channel is None:

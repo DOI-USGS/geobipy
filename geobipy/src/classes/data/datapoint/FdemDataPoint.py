@@ -254,9 +254,9 @@ class FdemDataPoint(EmDataPoint):
         """
         return self.system[system].frequencies[channel%self.nFrequencies[system]]
 
-    def set_priors(self, height_prior=None, relative_error_prior=None, additive_error_prior=None, data_prior=None, **kwargs):
+    def set_priors(self, relative_error_prior=None, additive_error_prior=None, data_prior=None, **kwargs):
 
-        super().set_priors(height_prior, relative_error_prior, additive_error_prior, data_prior, **kwargs)
+        super().set_priors(relative_error_prior, additive_error_prior, data_prior, **kwargs)
 
 
     def set_predicted_data_posterior(self):
@@ -264,13 +264,13 @@ class FdemDataPoint(EmDataPoint):
             freqs = np.log10(self.frequencies())
             xbuf = 0.05*(freqs[-1] - freqs[0])
             xbins = StatArray.StatArray(np.logspace(freqs[0]-xbuf, freqs[-1]+xbuf, 200), freqs.name, freqs.units)
-    
+
             data = np.log10(self.data[self.active])
             a = data.min()
             b = data.max()
             buf = 0.5*(b - a)
             ybins = StatArray.StatArray(np.logspace(a-buf, b+buf, 200), data.name, data.units)
-            
+
             mesh = RectilinearMesh2D(x_edges=xbins, x_log=10, y_edges=ybins, y_log=10)
             self.predictedData.posterior = Histogram(mesh=mesh)
 
@@ -406,7 +406,7 @@ class FdemDataPoint(EmDataPoint):
         return ax
 
 
-    def plotPredicted(self, title='Frequency Domain EM Data', system=0, **kwargs):
+    def plot_predicted(self, title='Frequency Domain EM Data', system=0, **kwargs):
         """ Plot the predicted Inphase and Quadrature Data
 
         Parameters
@@ -532,7 +532,7 @@ class FdemDataPoint(EmDataPoint):
         self._forward1D(mod)
 
 
-    def sensitivity(self, mod):
+    def sensitivity(self, mod, **kwargs):
         """ Compute the sensitivty matrix for the given model """
 
         assert isinstance(mod, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
@@ -552,19 +552,18 @@ class FdemDataPoint(EmDataPoint):
         """ Compute the sensitivty matrix for a 1D layered earth model """
         # Re-arrange the sensitivity matrix to Real:Imaginary vertical
         # concatenation
-        J = StatArray.StatArray((self.nChannels, mod.mesh.nCells.item()), 'Sensitivity', '$\\frac{ppm.m}{S}$')
+        self._sensitivity_matrix = StatArray.StatArray((self.nChannels, mod.mesh.nCells.item()), 'Sensitivity', '$\\frac{ppm.m}{S}$')
 
         for j, s in enumerate(self.system):
             Jtmp = fdem1dsen(s, mod, self.z.item())
-            J[:self.nFrequencies[j], :] = Jtmp.real
-            J[self.nFrequencies[j]:, :] = Jtmp.imag
+            self._sensitivity_matrix[:self.nFrequencies[j], :] = Jtmp.real
+            self._sensitivity_matrix[self.nFrequencies[j]:, :] = Jtmp.imag
 
-        self.J = J
-        return self.J
+        return self.sensitivity_matrix
 
 
     def Isend(self, dest, world, **kwargs):
-        
+
         if not 'system' in kwargs:
             myMPI.Isend(self.nSystems, dest=dest, world=world)
             for i in range(self.nSystems):
@@ -588,4 +587,3 @@ class FdemDataPoint(EmDataPoint):
         out._predictedData = StatArray.StatArray.Irecv(source, world)
 
         return out
-

@@ -253,20 +253,21 @@ class Point(myObject, ABC):
 
     def _init_posterior_plots(self, gs=None):
         """Initialize axes for posterior plots
-
         Parameters
         ----------
         gs : matplotlib.gridspec.Gridspec
             Gridspec to split
-
         """
+        n_posteriors = self.x.hasPosterior + self.y.hasPosterior + self.z.hasPosterior
+        if n_posteriors == 0:
+            return []
+
         if gs is None:
             gs = Figure()
 
         if isinstance(gs, Figure):
             gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
 
-        n_posteriors = self.x.hasPosterior + self.y.hasPosterior + self.z.hasPosterior
         splt = gs.subgridspec(n_posteriors, 1, wspace=0.3, hspace=1.0)
 
         ax = []
@@ -280,13 +281,16 @@ class Point(myObject, ABC):
 
     def plot_posteriors(self, axes=None, **kwargs):
 
+        n_posteriors = self.x.hasPosterior + self.y.hasPosterior + self.z.hasPosterior
+        if n_posteriors == 0:
+            return
+
         if axes is None:
             axes = kwargs.pop('fig', gcf())
 
         if not isinstance(axes, list):
             axes = self._init_posterior_plots(axes)
 
-        n_posteriors = self.x.hasPosterior + self.y.hasPosterior + self.z.hasPosterior
         assert len(axes) == n_posteriors, ValueError("Must have length {} list of axes for the posteriors. self._init_posterior_plots can generate them.".format(n_posteriors))
 
         x_kwargs = kwargs.pop('x_kwargs', {})

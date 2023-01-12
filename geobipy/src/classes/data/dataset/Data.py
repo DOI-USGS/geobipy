@@ -879,14 +879,14 @@ class Data(PointCloud3D):
         self.z.plotPosteriors(ax = axes[0], **height_kwargs)
 
         self.plot(ax=axes[1], legend=False, **data_kwargs)
-        self.plotPredicted(ax=axes[1], legend=False, **data_kwargs)
+        self.plot_predicted(ax=axes[1], legend=False, **data_kwargs)
 
         self.relative_error.plotPosteriors(ax=axes[2], **rel_error_kwargs)
         self.additive_error.plotPosteriors(ax=axes[3], **add_error_kwargs)
 
         return axes
 
-    def plotPredicted(self, xAxis='index', channels=None, system=None, **kwargs):
+    def plot_predicted(self, xAxis='index', channels=None, system=None, **kwargs):
         """Plots the specifed predicted data channels as a line plot.
 
         Plots the channels along a specified co-ordinate e.g. 'x'. A legend is auto generated.

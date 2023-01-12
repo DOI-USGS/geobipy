@@ -949,9 +949,9 @@ class TdemData(Data):
             kwargs['labels'] = line.channelNames[j]
             line.data[:, j].plot(x=x, **kwargs)
 
-    def plotPredicted(self, *args, **kwargs):
+    def plot_predicted(self, *args, **kwargs):
         kwargs['yscale'] = kwargs.get('yscale', 'log')
-        return super().plotPredicted(*args, **kwargs)
+        return super().plot_predicted(*args, **kwargs)
 
     def plotWaveform(self, **kwargs):
         for i in range(self.nSystems):

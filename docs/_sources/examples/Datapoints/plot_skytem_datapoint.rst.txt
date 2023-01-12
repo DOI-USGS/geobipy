@@ -167,7 +167,7 @@ plt.subplot(121)
 _ = mod.pcolor()
 plt.subplot(122)
 _ = tdp.plot()
-_ = tdp.plotPredicted()
+_ = tdp.plot_predicted()
 plt.tight_layout()
 
 .. GENERATED FROM PYTHON SOURCE LINES 89-101
@@ -264,7 +264,7 @@ We can perform a quick search for the best fitting half space
     # print('Best half space conductivity is {} $S/m$'.format(halfspace.par))
     # plt.figure()
     # _ = tdp.plot()
-    # _ = tdp.plotPredicted()
+    # _ = tdp.plot_predicted()
 
 
 

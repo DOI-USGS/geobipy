@@ -170,7 +170,7 @@ Forward model the data
     _ = mod.pcolor(transpose=True)
     plt.subplot(122)
     _ = tdp.plot()
-    _ = tdp.plotPredicted()
+    _ = tdp.plot_predicted()
     plt.tight_layout()
     plt.suptitle('Model and response')
 
@@ -323,7 +323,7 @@ We can perform a quick search for the best fitting half space
     print('Best half space conductivity is {} $S/m$'.format(halfspace.par))
     plt.subplot(1, 2, 2)
     _ = tdp.plot()
-    _ = tdp.plotPredicted()
+    _ = tdp.plot_predicted()
 
     plt.figure()
     tdp.plot_secondary_field()

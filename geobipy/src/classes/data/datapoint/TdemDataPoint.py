@@ -748,7 +748,7 @@ class TdemDataPoint(EmDataPoint):
         self.plot(ax=axes[0], **data_kwargs)
 
         c = cp.wellSeparated[0] if overlay is None else cp.wellSeparated[3]
-        self.plotPredicted(color=c, ax=axes[0], **data_kwargs)
+        self.plot_predicted(color=c, ax=axes[0], **data_kwargs)
 
         self.relative_error.plotPosteriors(ax=axes[1], **rel_error_kwargs)
 
@@ -825,7 +825,7 @@ class TdemDataPoint(EmDataPoint):
 
         return ax
 
-    def plotPredicted(self, title='Time Domain EM Data', **kwargs):
+    def plot_predicted(self, title='Time Domain EM Data', **kwargs):
 
         ax = kwargs.pop('ax', None)
         ax = plt.gca() if ax is None else plt.sca(ax)

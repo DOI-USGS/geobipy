@@ -379,7 +379,7 @@ class Tempest_datapoint(TdemDataPoint):
         self.plot(ax=axes[0], **data_kwargs)
 
         c = cP.wellSeparated[0] if overlay is None else cP.wellSeparated[3]
-        self.plotPredicted(color=c, ax=axes[0], **data_kwargs)
+        self.plot_predicted(color=c, ax=axes[0], **data_kwargs)
 
         self.relative_error.plotPosteriors(ax=axes[1], **rel_error_kwargs)
 
@@ -388,10 +388,10 @@ class Tempest_datapoint(TdemDataPoint):
 
         self.loop_pair.plot_posteriors(axes = axes[3], **kwargs)
 
-    def plotPredicted(self, **kwargs):
+    def plot_predicted(self, **kwargs):
         kwargs['xscale'] = kwargs.get('xscale', 'log')
         kwargs['yscale'] = kwargs.get('yscale', 'linear')
-        return super().plotPredicted(**kwargs)
+        return super().plot_predicted(**kwargs)
 
     def plot_secondary_field(self, title='Secondary field', **kwargs):
 
