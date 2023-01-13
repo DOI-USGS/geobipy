@@ -30,7 +30,7 @@
     "repositoryURL": "https://github.com/usgs/geobipy.git",
     "vcs": "git",
 
-    "laborHours": x,
+    "laborHours": -1,
 
     "tags": [
       "python",
