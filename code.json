@@ -11,23 +11,23 @@
       "licenses": [
         {
           "name": "Public Domain, CC0-1.0",
-          "URL": "https://github.com/usgs/geobipy/blob/master/LICENSE.md"
+          "URL": "https://github.com/DOI-USGS/geobipy/blob/master/LICENSE.md"
         },
 	      {
 	        "name": "GPL v2",
-          "URL": "https://github.com/usgs/geobipy/blob/master/LICENSE-GPLv2.md"
+          "URL": "https://github.com/DOI-USGS/geobipy/blob/master/LICENSE-GPLv2.md"
         },
         {
 	        "name": "BSD",
-          "URL": "https://github.com/usgs/geobipy/blob/master/LICENSE-BSD.md"
+          "URL": "https://github.com/DOI-USGS/geobipy/blob/master/LICENSE-BSD.md"
         }
       ]
     },
 
-    "homepageURL": "https://github.com/usgs/geobipy",
-    "downloadURL": "https://github.com/usgs/geobipy",
-    "disclaimerURL": "https://github.com/usgs/geobipy/blob/master/DISCLAIMER.md",
-    "repositoryURL": "https://github.com/usgs/geobipy.git",
+    "homepageURL": "https://github.com/DOI-USGS/geobipy",
+    "downloadURL": "https://github.com/DOI-USGS/geobipy",
+    "disclaimerURL": "https://github.com/DOI-USGS/geobipy/blob/master/DISCLAIMER.md",
+    "repositoryURL": "https://github.com/DOI-USGS/geobipy.git",
     "vcs": "git",
 
     "laborHours": -1,
