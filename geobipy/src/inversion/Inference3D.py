@@ -240,6 +240,7 @@ class Inference3D(myObject):
         self.print('Files are being created for data files {} and system files {}'.format(kwargs['data_filename'], kwargs['system_filename']))
 
         # No need to create and close the files like in parallel, so create and keep them open
+        s = 0
         for line in self.lineNumber:
             line_sorted_fiducials = dataset.fiducial[np.where(dataset.lineNumber == line)[0]]
 
@@ -252,6 +253,8 @@ class Inference3D(myObject):
                 Inference2D().createHdf(f, line_sorted_fiducials, inference1d)
 
             self.print('Created hdf5 file for line {} with {} data points'.format(line, line_sorted_fiducials.size))
+            s += line_sorted_fiducials.size
+        self.print('Created hdf5 files {} total data points'.format(s))
 
     def _createHDF5_datapoint(self, datapoint, userParameters):
 
@@ -437,7 +440,7 @@ class Inference3D(myObject):
         # Send out the first indices to the workers
         for iWorker in range(1, world.size):
             # Get a datapoint from the file.
-            datapoint = dataset._read_record(nSent)
+            datapoint = dataset._read_record(nSent, mpi_enabled=True)
 
             # If DataPoint is None, then we reached the end of the file and no more points can be read in.
             if datapoint is None:
@@ -467,7 +470,7 @@ class Inference3D(myObject):
             if nSent == nPoints:
                 datapoint = None
             else:
-                datapoint = dataset._read_record(nSent)
+                datapoint = dataset._read_record(nSent, mpi_enabled=True)
 
             # If DataPoint is None, then we reached the end of the file and no more points can be read in.
             if datapoint is None:
