@@ -16,6 +16,7 @@ from ...pointcloud.PointCloud3D import PointCloud3D
 from .Data import Data
 from ..datapoint.TdemDataPoint import TdemDataPoint
 from ....classes.core import StatArray
+from ...system.Loop_pair import Loop_pair
 
 from ...system.TdemSystem import TdemSystem
 
@@ -663,7 +664,7 @@ class TdemData(Data):
     def channels_per_system(self):
         return self.n_components * self.nTimes
 
-    def _read_record(self, record=None):
+    def _read_record(self, record=None, mpi_enabled=False):
         """Reads a single data point from the data file.
 
         FdemData.__initLineByLineRead() must have already been run.
@@ -675,10 +676,11 @@ class TdemData(Data):
                 df = self._file.get_chunk()
             else:
                 df = self._file.get_chunk()
-                i = 1
-                while i <= record:
-                    df = self._file.get_chunk()
-                    i += 1
+                if not mpi_enabled:
+                    i = 1
+                    while i <= record:
+                        df = self._file.get_chunk()
+                        i += 1
 
             df = df.replace('NaN', np.nan)
             endOfFile = False
@@ -900,7 +902,7 @@ class TdemData(Data):
 
         cP.title(tmp.name)
 
-    def plot(self, *args, **kwargs):
+    def plot_data(self, *args, **kwargs):
         """ Plots the data
 
         Parameters
@@ -914,7 +916,7 @@ class TdemData(Data):
 
         # legend = kwargs.pop('legend', True)
         kwargs['yscale'] = kwargs.get('yscale', 'log')
-        return super().plot(*args, **kwargs)
+        return super().plot_data(*args, **kwargs)
 
         # x = self.getXAxis(xAxis)
 
@@ -1057,9 +1059,7 @@ class TdemData(Data):
         self.secondary_field = StatArray.StatArray.fromHdf(grp['secondary_field'])
         self.predicted_primary_field = None#StatArray.StatArray.fromHdf(grp['predicted_primary_field'])
         self.predicted_secondary_field = StatArray.StatArray.fromHdf(grp['predicted_secondary_field'])
-
-        self.transmitter = CircularLoops.fromHdf(grp['T'])
-        self.receiver = CircularLoops.fromHdf(grp['R'])
+        self.loop_pair = Loop_pair.fromHdf(grp['loop_pair'])
 
         return self
 

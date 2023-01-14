@@ -667,6 +667,8 @@ class PointCloud3D(myObject):
         assert (not self.kdtree is None), TypeError('kdtree has not been set, use self.setKdTree()')
         return self.kdtree.query(x, k, eps, p, distance_upper_bound=radius)
 
+    def plot_data_elevation(self, **kwargs):
+        self.plot(values = self.z + self.elevation, **kwargs)
 
     def plot(self, values, xAxis='index', **kwargs):
         """Line plot of values against a co-ordinate.

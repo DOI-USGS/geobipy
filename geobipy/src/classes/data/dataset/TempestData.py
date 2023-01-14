@@ -561,7 +561,7 @@ class TempestData(TdemData):
 
         """
         if self._filename.endswith('.csv'):
-            out = super()._read_record()
+            out = super()._read_record(record)
             return out
 
         assert record is not None, ValueError("Need to provide a record index for netcdf files")

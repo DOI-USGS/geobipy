@@ -808,7 +808,7 @@ class Data(PointCloud3D):
         cP.title(self.channelNames[channel])
 
 
-    def plot(self, xAxis='index', channels=None, system=None, **kwargs):
+    def plot_data(self, xAxis='index', channels=None, system=None, **kwargs):
         """Plots the specifed channels as a line plot.
 
         Plots the channels along a specified co-ordinate e.g. 'x'. A legend is auto generated.

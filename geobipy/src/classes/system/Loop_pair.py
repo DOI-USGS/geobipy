@@ -5,11 +5,13 @@ import matplotlib.pyplot as plt
 
 from ..core import StatArray
 from ..pointcloud.Point import Point
+from ..pointcloud.PointCloud3D import PointCloud3D
 from .EmLoop import EmLoop
+from .EmLoops import EmLoops
 from .CircularLoop import CircularLoop
 from ...base.HDF.hdfRead import read_item
 
-class Loop_pair(Point):
+class Loop_pair(Point, PointCloud3D):
 
     def __init__(self, transmitter=None, receiver=None, **kwargs):
 
@@ -50,7 +52,7 @@ class Loop_pair(Point):
     @transmitter.setter
     def transmitter(self, value):
         if value is not None:
-            assert isinstance(value, EmLoop), TypeError('transmitter must be a geobipy.EmLoop')
+            assert isinstance(value, (EmLoop, EmLoops)), TypeError('transmitter must be a geobipy.EmLoop')
             self._transmitter = value
 
     @property
@@ -60,12 +62,12 @@ class Loop_pair(Point):
     @receiver.setter
     def receiver(self, value):
         if value is not None:
-            assert isinstance(value, EmLoop), TypeError('transmitter must be a geobipy.EmLoop')
+            assert isinstance(value, (EmLoop, EmLoops)), TypeError('transmitter must be a geobipy.EmLoop')
             self._receiver = value
 
-            self.x[0] = self.receiver.x - self.transmitter.x
-            self.y[0] = self.receiver.y - self.transmitter.y
-            self.z[0] = self.receiver.z - self.transmitter.z
+            self.x[:] = self.receiver.x - self.transmitter.x
+            self.y[:] = self.receiver.y - self.transmitter.y
+            self.z[:] = self.receiver.z - self.transmitter.z
 
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
