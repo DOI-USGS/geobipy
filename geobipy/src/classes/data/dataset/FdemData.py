@@ -715,14 +715,23 @@ class FdemData(Data):
     #     df = df.replace('NaN',np.nan)
     #     return df[self._iC[0][0]].values, df[self._iC[0][1]].values
 
-    def _read_record(self, record=None):
+    def _read_record(self, record=None, mpi_enabled=False):
         """Reads a single data point from the data file.
 
         FdemData.__initLineByLineRead() must have already been run.
 
         """
         try:
-            df = self._file.get_chunk()
+            if record is None:
+                df = self._file.get_chunk()
+            else:
+                df = self._file.get_chunk()
+                if not mpi_enabled:
+                    i = 1
+                    while i <= record:
+                        df = self._file.get_chunk()
+                        i += 1
+
             df = df.replace('NaN',np.nan)
             endOfFile = False
         except:
@@ -738,7 +747,7 @@ class FdemData(Data):
             S = np.squeeze(df[self._iStd].values)
         else:
             S = 0.1 * D
-        
+
         return self.single(x=df[self._iC[2]].values,
                              y=df[self._iC[3]].values,
                              z=df[self._iC[4]].values,
@@ -907,10 +916,10 @@ class FdemData(Data):
 
         if kwargs.get('index') is not None:
             return cls.single.fromHdf(grp, **kwargs)
-        
+
         system = FdemSystem.fromHdf(grp['sys'])
         return super(FdemData, cls).fromHdf(grp, system=system)
-        
+
     def Bcast(self, world, root=0):
         """Broadcast the FdemData using MPI
 
@@ -1014,7 +1023,7 @@ class FdemData(Data):
 
         return out
 
-    
+
 
 
     def write(self, fileNames, std=False, predictedData=False):

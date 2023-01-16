@@ -554,14 +554,14 @@ class TempestData(TdemData):
         self._open_data_files(data_filename)
         return self
 
-    def _read_record(self, record=None):
+    def _read_record(self, record=None, mpi_enabled=False):
         """Reads a single data point from the data file.
 
         FdemData.__initLineByLineRead() must have already been run.
 
         """
         if self._filename.endswith('.csv'):
-            out = super()._read_record(record)
+            out = super()._read_record(record, mpi_enabled=mpi_enabled)
             return out
 
         assert record is not None, ValueError("Need to provide a record index for netcdf files")
