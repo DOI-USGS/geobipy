@@ -611,6 +611,9 @@ class TdemDataPoint(EmDataPoint):
 
         self.loop_pair.writeHdf(grp, 'loop_pair', index=index)
 
+        self.primary_field.writeHdf(grp, 'primary_field', index=index)
+        self.secondary_field.writeHdf(grp, 'secondary_field', index=index)
+
         self.predicted_primary_field.writeHdf(grp, 'predicted_primary_field', index=index)
         self.predicted_secondary_field.writeHdf(grp, 'predicted_secondary_field', index=index)
 
