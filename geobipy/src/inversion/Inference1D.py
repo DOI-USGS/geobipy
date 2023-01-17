@@ -210,7 +210,7 @@ class Inference1D(myObject):
 
     @cached_property
     def iz(self):
-        return np.arange(self.model.values.posterior.y.nCells.value)
+        return np.arange(self.model.values.posterior.y.nCells.item())
 
     @property
     def n_markov_chains(self):
@@ -246,7 +246,7 @@ class Inference1D(myObject):
 
         self.datapoint = datapoint
 
-        _ = self.datapoint.find_best_halfspace()
+        # _ = self.datapoint.find_best_halfspace()
 
         # ---------------------------------------
         # Set the statistical properties of the datapoint
@@ -266,7 +266,8 @@ class Inference1D(myObject):
         # Create an initial model for the first iteration
         # Initialize a 1D model with the half space conductivity
         # Assign the depth to the interface as half the bounds
-        self.model = halfspace.insert_edge(0.5 * (self.kwargs['maximum_depth'] + self.kwargs['minimum_depth']))
+        # self.model = halfspace.insert_edge(0.5 * (self.kwargs['maximum_depth'] + self.kwargs['minimum_depth']))
+        self.model = deepcopy(halfspace)
 
         # Setup the model for perturbation
         self.model.set_priors(
@@ -309,6 +310,9 @@ class Inference1D(myObject):
 
     def accept_reject(self):
         """ Propose a new random model and accept or reject it """
+        # print('Incoming')
+        # print(self.model.values)
+        # print(self.datapoint.relative_error, self.datapoint.additive_error)
 
         perturbed_datapoint = deepcopy(self.datapoint)
 
@@ -317,6 +321,7 @@ class Inference1D(myObject):
         if self.kwargs.get('ignore_likelihood', False):
             observation = None
 
+        # print(observation.sensitivity_matrix.min(), observation.sensitivity_matrix.max())
         try:
             remapped_model, perturbed_model = self.model.perturb(observation)
         except:
@@ -326,6 +331,11 @@ class Inference1D(myObject):
 
         # Propose a new data point, using assigned proposal distributions
         perturbed_datapoint.perturb()
+        # print(observation.sensitivity_matrix.min(), observation.sensitivity_matrix.max())
+
+        # print(perturbed_model.mesh._action)
+        # print(perturbed_model.values)
+        # print(perturbed_datapoint.relative_error, perturbed_datapoint.additive_error)
 
         # Forward model the data from the candidate model
         perturbed_datapoint.forward(perturbed_model)
@@ -363,6 +373,8 @@ class Inference1D(myObject):
 
         proposal_ratio = proposal - proposal1
 
+        # print(prior_ratio, likelihood_ratio, proposal_ratio)
+
         try:
             log_acceptance_ratio = np.float128(prior_ratio + likelihood_ratio + proposal_ratio)
             acceptance_probability = cF.expReal(log_acceptance_ratio)
@@ -383,6 +395,9 @@ class Inference1D(myObject):
             self.datapoint = perturbed_datapoint
             # Reset the sensitivity locally to the newly accepted model
             self.datapoint.sensitivity(self.model, modelChanged=False)
+
+        # print(accepted)
+        # input('fdsfds')
 
     def infer(self, hdf_file_handle):
         """ Markov Chain Monte Carlo approach for inversion of geophysical data
@@ -656,7 +671,7 @@ class Inference1D(myObject):
     # def _plotObservedPredictedData(self, **kwargs):
     #     """ Plot the observed and predicted data """
     #     if self.burnedIn:
-    #         # self.datapoint.predictedData.plotPosteriors(colorbar=False)
+    #         # self.datapoint.predictedData.plot_posteriors(colorbar=False)
     #         self.datapoint.plot(**kwargs)
     #         self.bestDataPoint.plot_predicted(color=cP.wellSeparated[3], **kwargs)
     #     else:
@@ -848,30 +863,25 @@ class Inference1D(myObject):
         self.nSystems = np.array(hdfFile.get('nsystems'))
         self.acceptance_x = hdfRead.readKeyFromFile(hdfFile, '', '/', 'ratex')
 
-        self.iteration = hdfRead.readKeyFromFile(
-            hdfFile, '', '/', 'i', index=index)
-        self.burned_in_iteration = hdfRead.readKeyFromFile(
-            hdfFile, '', '/', 'iburn', index=index)
-        self.burned_in = hdfRead.readKeyFromFile(
-            hdfFile, '', '/', 'burnedin', index=index)
+        self.iteration = hdfRead.readKeyFromFile(hdfFile, '', '/', 'i', index=index)
+        self.burned_in_iteration = hdfRead.readKeyFromFile(hdfFile, '', '/', 'iburn', index=index)
+        self.burned_in = hdfRead.readKeyFromFile(hdfFile, '', '/', 'burnedin', index=index)
         # self.doi = hdfRead.readKeyFromFile(hdfFile,'','/','doi', index=index)
-        self.multiplier = hdfRead.readKeyFromFile(
-            hdfFile, '', '/', 'multiplier', index=index)
+        self.multiplier = hdfRead.readKeyFromFile(hdfFile, '', '/', 'multiplier', index=index)
         self.acceptance_rate = hdfRead.readKeyFromFile(hdfFile, '', '/', 'rate', index=s)
-        self.data_misfit_v = hdfRead.readKeyFromFile(
-            hdfFile, '', '/', 'phids', index=s)
-
         # self.best_datapoint = hdfRead.readKeyFromFile(
         #     hdfFile, '', '/', 'bestd', index=index, system_file_path=system_file_path)
 
-        self.datapoint = hdfRead.readKeyFromFile(
-            hdfFile, '', '/', 'data', index=index, system_file_path=system_file_path)
+        self.datapoint = hdfRead.readKeyFromFile(hdfFile, '', '/', 'data', index=index, system_file_path=system_file_path)
+        self.best_datapoint = self.datapoint
 
-        self.model = hdfRead.readKeyFromFile(
-            hdfFile, '', '/', 'model', index=index)
+        self.data_misfit_v = hdfRead.readKeyFromFile(hdfFile, '', '/', 'phids', index=s)
+        self.data_misfit_v.prior = Distribution('chi2', df=np.sum(self.datapoint.active))
 
-        self.halfspace = hdfRead.readKeyFromFile(
-            hdfFile, '', '/', 'halfspace', index=index)
+        self.model = hdfRead.readKeyFromFile(hdfFile, '', '/', 'model', index=index)
+        self.best_model = self.model
+
+        self.halfspace = hdfRead.readKeyFromFile(hdfFile, '', '/', 'halfspace', index=index)
 
         self.Hitmap = self.model.values.posterior
         # self.currentModel._max_edge = np.log(self.Hitmap.y.centres[-1])

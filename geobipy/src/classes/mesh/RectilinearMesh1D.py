@@ -885,7 +885,14 @@ class RectilinearMesh1D(Mesh):
         """
         assert (not self.event_proposal is None), ValueError('Please set the proposals with RectilinearMesh1D.setProposals()')
 
-        prng = self.nCells.prior.prng
+        # event_proposal = self.event_proposal
+        # if probability is not None:
+        #     event_proposal = Distribution('Categorical',
+        #                                   probability,
+        #                                   ['insert', 'delete', 'perturb', 'none'],
+        #                                   prng=self.nCells.prior.prng)
+
+        prng = self.event_proposal.prng
 
         nTries = 10
         # This outer loop will allow the perturbation to change types. e.g. if the loop is stuck in a birthing
@@ -1176,13 +1183,13 @@ class RectilinearMesh1D(Mesh):
             edges_kwargs['overlay'] = tmp.edges
 
         if self.nCells.hasPosterior:
-            self.nCells.plotPosteriors(ax = axes[0], **ncells_kwargs)
+            self.nCells.plot_posteriors(ax = axes[0], **ncells_kwargs)
         if self.edges.hasPosterior:
-            self.edges.plotPosteriors(ax = axes[1], **edges_kwargs)
+            self.edges.plot_posteriors(ax = axes[1], **edges_kwargs)
 
         if values is not None:
             assert len(axes) == 3, ValueError("axes must have length == 3")
-            values.plotPosteriors(ax=axes[2], **values_kwargs)
+            values.plot_posteriors(ax=axes[2], **values_kwargs)
 
             if overlay is not None:
                 overlay.plot(xscale=values_kwargs.get('xscale', 'linear'),
@@ -1624,7 +1631,7 @@ class RectilinearMesh1D(Mesh):
         # If no index, we are reading in multiple models side by side.
         log = None
         if 'log' in grp:
-            log = np.asscalar(np.asarray(grp['log']))
+            log = np.asarray(grp['log']).item()
 
         # If relativeTo is present, the edges/centres should be 1 dimensional
         relativeTo = None

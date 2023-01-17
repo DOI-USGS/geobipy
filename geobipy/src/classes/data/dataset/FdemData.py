@@ -419,7 +419,7 @@ class FdemData(Data):
     #     # cP.title(self._channelNames[channel])
 
 
-    def plot(self, xAxis='index', channels=None, **kwargs):
+    def plot_data(self, xAxis='index', channels=None, **kwargs):
         """Plots the specifed channels as a line plot.
 
         Plots the channels along a specified co-ordinate e.g. 'x'. A legend is auto generated.

@@ -65,9 +65,9 @@ class Loop_pair(Point, PointCloud3D):
             assert isinstance(value, (EmLoop, EmLoops)), TypeError('transmitter must be a geobipy.EmLoop')
             self._receiver = value
 
-            self.x[:] = self.receiver.x - self.transmitter.x
-            self.y[:] = self.receiver.y - self.transmitter.y
-            self.z[:] = self.receiver.z - self.transmitter.z
+            self.x = self.receiver.x - self.transmitter.x
+            self.y = self.receiver.y - self.transmitter.y
+            self.z = self.receiver.z - self.transmitter.z
 
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)

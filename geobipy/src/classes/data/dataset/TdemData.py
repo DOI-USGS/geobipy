@@ -886,7 +886,7 @@ class TdemData(Data):
         for i in range(self.nPoints):
             dp = self.datapoint(i)
             mod = dp.find_best_halfspace(minConductivity, maxConductivity, nSamples)
-            conductivity[i] = mod.values.value
+            conductivity[i] = mod.values.item()
 
         return conductivity
 

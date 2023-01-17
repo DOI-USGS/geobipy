@@ -382,14 +382,14 @@ class TempestData(TdemData):
         # assert len(axes) == 4, ValueError("axes must have length 4")
         # assert len(axes) == 4, ValueError("Must have length 3 list of axes for the posteriors. self.init_posterior_plots can generate them")
 
-        self.z.plotPosteriors(ax = axes[0], **height_kwargs)
+        self.z.plot_posteriors(ax = axes[0], **height_kwargs)
 
         self.plot(ax=axes[1], legend=False, **data_kwargs)
         self.plot_predicted(ax=axes[1], legend=False, **data_kwargs)
 
-        self.relative_error.plotPosteriors(ax=axes[2], **rel_error_kwargs)
+        self.relative_error.plot_posteriors(ax=axes[2], **rel_error_kwargs)
 
-        self.transmitter.pitch.plotPosteriors(ax=axes[3], **transmitter_pitch_kwargs)
+        self.transmitter.pitch.plot_posteriors(ax=axes[3], **transmitter_pitch_kwargs)
 
         return axes
 

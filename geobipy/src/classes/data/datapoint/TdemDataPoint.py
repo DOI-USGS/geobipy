@@ -747,16 +747,16 @@ class TdemDataPoint(EmDataPoint):
                 add_error_kwargs['overlay'] = overlay.additive_error
 
         axes[0].clear()
-        self.predictedData.plotPosteriors(ax = axes[0], colorbar=False, **data_kwargs)
+        self.predictedData.plot_posteriors(ax = axes[0], colorbar=False, **data_kwargs)
         self.plot(ax=axes[0], **data_kwargs)
 
         c = cp.wellSeparated[0] if overlay is None else cp.wellSeparated[3]
         self.plot_predicted(color=c, ax=axes[0], **data_kwargs)
 
-        self.relative_error.plotPosteriors(ax=axes[1], **rel_error_kwargs)
+        self.relative_error.plot_posteriors(ax=axes[1], **rel_error_kwargs)
 
         add_error_kwargs['colorbar'] = False
-        self.additive_error.plotPosteriors(ax=axes[2], **add_error_kwargs)
+        self.additive_error.plot_posteriors(ax=axes[2], **add_error_kwargs)
 
         self.loop_pair.plot_posteriors(axes = axes[3], **kwargs)
 

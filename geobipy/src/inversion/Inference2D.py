@@ -230,8 +230,8 @@ class Inference2D(myObject):
                 mean.writeHdf(self.hdfFile, key)
             else:
                 mean.toHdf(self.hdfFile, key)
-            self.hdfFile[key].attrs['name'] = mean.name
-            self.hdfFile[key].attrs['units'] = mean.units
+            self.hdfFile[key].attrs['name'] = mean.values.name
+            self.hdfFile[key].attrs['units'] = mean.values.units
 
         return mean
 
@@ -282,7 +282,7 @@ class Inference2D(myObject):
                 out[i] = axis[i, j]
             return out
 
-        doi = loop(self.mesh.y.centres_absolute, self.opacity(), p)
+        doi = loop(self.mesh.y.centres_absolute, self.opacity().values, p)
         doi = StatArray.StatArray(doi, 'Depth of investigation', 'm')
 
         if smooth is not None:
@@ -778,7 +778,13 @@ class Inference2D(myObject):
 
     @property
     def interfacePosterior(self):
-        return Histogram.fromHdf(self.hdfFile['model/mesh/y/edges/posterior'])
+        out = Histogram.fromHdf(self.hdfFile['model/mesh/y/edges/posterior'])
+
+        if out.mesh.y.name == "Depth":
+            out.mesh.y.edges = StatArray.StatArray(-out.mesh.y.edges, name='elevation', units=out.mesh.y.units)
+        out.mesh.y.relativeTo = self.data.elevation
+
+        return out
 
     # def compute_interface_probability(self):
     #     maxCount = self.interfacePosterior.counts.max()
@@ -810,7 +816,7 @@ class Inference2D(myObject):
         else:
             # g = self.hdfFile['mean_parameter']
             # print(g.attrs['repr'])
-            self._mean_parameter = StatArray.StatArray.fromHdf(self.hdfFile['mean_parameter'])
+            self._mean_parameter = Model.fromHdf(self.hdfFile['mean_parameter'])
 
         return self._mean_parameter
 
@@ -848,6 +854,8 @@ class Inference2D(myObject):
     @cached_property
     def model(self):
         out = Model.fromHdf(self.hdfFile['/model'], skip_posterior=False)
+
+        out.mesh.y_edges = StatArray.StatArray(-out.mesh.y_edges, name='elevation', units=self.mean_parameters().mesh.y.units)
         out.mesh.relativeTo = self.elevation
         out.mesh.x.centres = self.longest_coordinate
         return out
@@ -871,7 +879,7 @@ class Inference2D(myObject):
         if "opacity" in self.hdfFile.keys():
             if not slic is None:
                 slic = slic[::-1]
-            return StatArray.StatArray.fromHdf(self.hdfFile['opacity'], index=slic)
+            return Model.fromHdf(self.hdfFile['opacity'], index=slic)
         else:
             return self.compute_opacity()
 
@@ -954,7 +962,13 @@ class Inference2D(myObject):
             # Get the point index
             index = self.fiducials.searchsorted(fiducial)
 
-        return Histogram.fromHdf(self.hdfFile['/model/values/posterior'], index=index)
+        out = Histogram.fromHdf(self.hdfFile['/model/values/posterior'], index=index)
+
+        if out.mesh.z.name == "Depth":
+            out.mesh.z.edges = StatArray.StatArray(-out.mesh.z.edges, name='elevation', units=out.mesh.z.units)
+        out.mesh.z.relativeTo = np.repeat(self.data.elevation[:, None], out.mesh.shape[1], 1)
+
+        return out
 
     def ncells_posterior(self, index=None, fiducial=None):
 
@@ -1070,6 +1084,8 @@ class Inference2D(myObject):
         kwargs['color'] = kwargs.pop('color', 'k')
         kwargs['linewidth'] = kwargs.pop('linewidth', 0.5)
 
+        self.data.plot_data_elevation(**kwargs)
+
     def plotDataResidual(self, channel=None, abs=False, **kwargs):
         """ Plot a channel of the observed data as points """
 
@@ -1097,63 +1113,18 @@ class Inference2D(myObject):
         kwargs['color'] = kwargs.pop('color','k')
         kwargs['linewidth'] = kwargs.pop('linewidth',0.5)
 
-        self.mesh.plot_relative_to(**kwargs)
+        self.data.plot(values=self.data.elevation, **kwargs)
 
-        # if (labels):
-        #     cP.xlabel(xtmp.getNameUnits())
-        #     cP.ylabel('Elevation (m)')
 
-    # def plotHighlightedObservationLocations(self, fiducial, **kwargs):
+    def plot_k_layers(self, **kwargs):
+        """ Plot the number of layers in the best model for each data point """
+        xAxis = kwargs.pop('xAxis', 'x')
 
-    #     labels = kwargs.pop('labels', True)
-    #     kwargs['marker'] = kwargs.pop('marker','*')
-    #     kwargs['color'] = kwargs.pop('color',cP.wellSeparated[1])
-    #     kwargs['linestyle'] = kwargs.pop('linestyle','none')
-    #     kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor','k')
-    #     kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth','0.1')
-    #     xAxis = kwargs.pop('xAxis', 'x')
+        post = self.model.nCells.posterior
+        post.mesh.x.centres = self.longest_coordinate
+        post.plot(overlay=self.model.nCells, axis=0)
+        cP.title('P(# of Layers)')
 
-    #     xtmp = self.x_axis(xAxis)
-
-    #     i = self.fiducials.searchsorted(fiducial)
-
-    #     tmp = self.height.reshape(self.height.size) + self.elevation
-
-    #     plt.plot(xtmp[i], tmp[i], **kwargs)
-
-    #     if (labels):
-    #         cP.xlabel(xtmp.getNameUnits())
-    #         cP.ylabel('Elevation (m)')
-
-    # def plotKlayers(self, **kwargs):
-    #     """ Plot the number of layers in the best model for each data point """
-    #     xAxis = kwargs.pop('xAxis', 'x')
-    #     kwargs['marker'] = kwargs.pop('marker','o')
-    #     kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor','k')
-    #     kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth', 1.0)
-    #     kwargs['linestyle'] = kwargs.pop('linestyle','none')
-
-    #     xtmp = self.x_axis(xAxis)
-    #     self.nLayers.plot(xtmp, **kwargs)
-    #     # cP.ylabel(self.nLayers.getNameUnits())
-    #     cP.title('# of Layers in Best Model')
-
-    # @property
-    # def kLayers_posterior(self):
-    #     tmp = self.getAttribute('layer posterior')
-
-    #     x = StatArray.StatArray(np.arange(self.nPoints, dtype=np.float64), "Index")
-    #     out = Histogram2D(x_centres=x, y_edges=tmp.bins)
-    #     out._counts = tmp.counts.T
-
-    #     return out
-
-    # def plotKlayersPosteriors(self, **kwargs):
-    #     """ Plot the horizontally stacked elevation histograms for each data point along the line """
-
-    #     post = Histogram.fromHdf(self.hdfFile['/model/mesh/nCells/posterior'])
-    #     ax, pm, cb = post.pcolor(**kwargs)
-    #     cP.title('# of Layers posterior distributions')
 
     def plot_additive_error(self, **kwargs):
         """ Plot the additive errors of the data """
@@ -1199,17 +1170,19 @@ class Inference2D(myObject):
         """ Plot the opacity """
         kwargs['cmap'] = kwargs.get('cmap', 'plasma')
 
-        ax, pm, cb = self.plot_cross_section(values = self.opacity(), ticks=[0.0, 0.5, 1.0], **kwargs)
+        # ax, pm, cb = self.plot_cross_section(values = self.opacity(), ticks=[0.0, 0.5, 1.0], **kwargs)
+        ax, pm, cb = self.opacity().pcolor(ticks=[0.0, 0.5, 1.0], **kwargs)
 
         if cb is not None:
             labels = ['Less', '', 'More']
             cb.ax.set_yticklabels(labels)
             cb.set_label("Confidence")
 
+
     def plot_entropy(self, **kwargs):
         kwargs['cmap'] = kwargs.get('cmap', 'hot')
 
-        return self.plot_cross_section(values = self.entropy, **kwargs)
+        self.entropy.pcolor(**kwargs)
 
     # def plotError2DJointProbabilityDistribution(self, index, system=0, **kwargs):
     #     """ For a given index, obtains the posterior distributions of relative and additive error and creates the 2D joint probability distribution """
@@ -1390,15 +1363,8 @@ class Inference2D(myObject):
 
         return out
 
-    def plotBestModel(self, **kwargs):
-
-        values = self.bestParameters()
-        if (kwargs.pop('reciprocateParameter', False)):
-            values = 1.0 / values
-            values.name = 'Resistivity'
-            values.units = '$Omega m$'
-
-        return self.plot_cross_section(values = values, **kwargs)
+    def plot_best_model(self, **kwargs):
+        return self.model.pcolor(**kwargs);
 
     def plot_cross_section(self, values, **kwargs):
         """ Plot a cross-section of the parameters """
@@ -1468,13 +1434,29 @@ class Inference2D(myObject):
 
     def plot_mean_model(self, **kwargs):
 
-        values = self.mean_parameters()
-        if (kwargs.pop('reciprocateParameter', False)):
-            values = 1.0 / values
-            values.name = 'Resistivity'
-            values.units = '$Omega m$'
+        model = self.mean_parameters()
 
-        return self.plot_cross_section(values = values, **kwargs)
+        if kwargs.pop('use_variance', False):
+            kwargs['alpha'] = self.opacity().values
+
+        if kwargs.pop('mask_below_doi', False):
+            self.doi_mask(model, **kwargs)
+
+        return model.pcolor(**kwargs)
+
+    def doi_mask(self, model, **kwargs):
+        opacity = kwargs.get('alpha', None)
+        if opacity is None:
+            opacity = np.ones(model.mesh.shape)
+        else:
+            opacity = opacity.copy()
+
+        indices = model.mesh.y.cellIndex(self.doi + model.mesh.y.relativeTo)
+
+        for i in range(self.nPoints):
+            opacity[i, indices[i]:] = 0.0
+
+        return opacity
 
     def plotModeModel(self, **kwargs):
 
@@ -1490,7 +1472,7 @@ class Inference2D(myObject):
         posterior = self.parameter_posterior()
         percentile = posterior.percentile(percent, axis=1)
 
-        return self.plot_cross_section(values=percentile, **kwargs)
+        return percentile.pcolor(**kwargs)
 
     def marginal_probability(self, slic=None):
 
@@ -1678,13 +1660,11 @@ class Inference2D(myObject):
 
         return out
 
-
     def plot_inference_1d(self, fiducial):
         """ Plot the geobipy results for the given data point """
         R = self.inference_1d(fiducial=fiducial)
-        R.initFigure(forcePlot=True)
-        R.plot(forcePlot=True)
-
+        R.initFigure()
+        R.plot()
 
     def toVtk(self, fileName, format='binary'):
         """Write the parameter cross-section to an unstructured grid vtk file

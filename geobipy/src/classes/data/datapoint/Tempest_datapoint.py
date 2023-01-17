@@ -1,5 +1,5 @@
 from matplotlib.figure import Figure
-import matplotlib.pyplot as plt
+from matplotlib.pyplot import figure, subplot, gcf, gca, sca, cla, plot, margins
 import numpy as np
 
 from ....classes.core import StatArray
@@ -131,7 +131,7 @@ class Tempest_datapoint(TdemDataPoint):
             for j in range(self.n_components):
                 ic = self._component_indices(j, i)
                 relative_error = self.relative_error[(i*self.n_components)+j] * self.secondary_field[ic]
-                variance = relative_error**2.0 + self.additive_error[i]**2.0
+                variance = relative_error**2.0 + self.additive_error[ic]**2.0
                 self._std[ic] = np.sqrt(variance)
 
 
@@ -248,7 +248,7 @@ class Tempest_datapoint(TdemDataPoint):
 
         """
         if gs is None:
-            gs = plt.figure()
+            gs = figure()
 
         if isinstance(gs, Figure):
             gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
@@ -270,7 +270,7 @@ class Tempest_datapoint(TdemDataPoint):
 
         ax = []
         # Data axis
-        ax.append(plt.subplot(splt_top[-1]))
+        ax.append(subplot(splt_top[-1]))
 
         tmp = []
         if self.relative_error.hasPosterior:
@@ -341,11 +341,11 @@ class Tempest_datapoint(TdemDataPoint):
     def plotWaveform(self,**kwargs):
         for i in range(self.nSystems):
             if (self.nSystems > 1):
-                plt.subplot(2, 1, i + 1)
-            plt.plot(self.system[i].waveform.time, self.system[i].waveform.current, **kwargs)
+                subplot(2, 1, i + 1)
+            plot(self.system[i].waveform.time, self.system[i].waveform.current, **kwargs)
             cP.xlabel('Time (s)')
             cP.ylabel('Normalized Current (A)')
-            plt.margins(0.1, 0.1)
+            margins(0.1, 0.1)
 
     def plot(self, **kwargs):
         kwargs['xscale'] = kwargs.get('xscale', 'log')
@@ -355,7 +355,7 @@ class Tempest_datapoint(TdemDataPoint):
     def plot_posteriors(self, axes=None, **kwargs):
 
         if axes is None:
-            axes = kwargs.pop('fig', plt.gcf())
+            axes = kwargs.pop('fig', gcf())
 
         if not isinstance(axes, list):
             axes = self._init_posterior_plots(axes)
@@ -375,16 +375,16 @@ class Tempest_datapoint(TdemDataPoint):
                 add_error_kwargs['axis'] = 0
 
         axes[0].clear()
-        self.predictedData.plotPosteriors(ax = axes[0], colorbar=False, **data_kwargs)
+        self.predictedData.plot_posteriors(ax = axes[0], colorbar=False, **data_kwargs)
         self.plot(ax=axes[0], **data_kwargs)
 
         c = cP.wellSeparated[0] if overlay is None else cP.wellSeparated[3]
         self.plot_predicted(color=c, ax=axes[0], **data_kwargs)
 
-        self.relative_error.plotPosteriors(ax=axes[1], **rel_error_kwargs)
+        self.relative_error.plot_posteriors(ax=axes[1], **rel_error_kwargs)
 
         add_error_kwargs['colorbar'] = False
-        self.additive_error.plotPosteriors(ax=axes[2], **add_error_kwargs)
+        self.additive_error.plot_posteriors(ax=axes[2], **add_error_kwargs)
 
         self.loop_pair.plot_posteriors(axes = axes[3], **kwargs)
 
@@ -396,8 +396,8 @@ class Tempest_datapoint(TdemDataPoint):
     def plot_secondary_field(self, title='Secondary field', **kwargs):
 
         ax = kwargs.pop('ax', None)
-        ax = plt.gca() if ax is None else plt.sca(ax)
-        plt.cla()
+        ax = gca() if ax is None else sca(ax)
+        cla()
 
         kwargs['marker'] = kwargs.pop('marker', 'v')
         kwargs['markersize'] = kwargs.pop('markersize', 7)
@@ -429,7 +429,7 @@ class Tempest_datapoint(TdemDataPoint):
 
     def plot_predicted_secondary_field(self, title='Secondary field', **kwargs):
         ax = kwargs.pop('ax', None)
-        ax = plt.gca() if ax is None else plt.sca(ax)
+        ax = gca() if ax is None else sca(ax)
 
         noLabels = kwargs.pop('nolabels', False)
 

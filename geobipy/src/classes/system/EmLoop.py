@@ -208,19 +208,19 @@ class EmLoop(Point, ABC):
 
         if pitch_proposal is None:
             if kwargs.get('solve_pitch', False):
-                pitch_proposal = Distribution('Normal', self.pitch.value, kwargs['pitch_proposal_variance'], prng=kwargs['prng'])
+                pitch_proposal = Distribution('Normal', self.pitch.item(), kwargs['pitch_proposal_variance'], prng=kwargs['prng'])
 
         self.pitch.proposal = pitch_proposal
 
         if roll_proposal is None:
             if kwargs.get('solve_roll', False):
-                roll_proposal = Distribution('Normal', self.roll.value, kwargs['roll_proposal_variance'], prng=kwargs['prng'])
+                roll_proposal = Distribution('Normal', self.roll.item(), kwargs['roll_proposal_variance'], prng=kwargs['prng'])
 
         self.roll.proposal = roll_proposal
 
         if yaw_proposal is None:
             if kwargs.get('solve_yaw', False):
-                yaw_proposal = Distribution('Normal', self.yaw.value, kwargs['yaw_proposal_variance'], prng=kwargs['prng'])
+                yaw_proposal = Distribution('Normal', self.yaw.item(), kwargs['yaw_proposal_variance'], prng=kwargs['prng'])
 
         self.yaw.proposal = yaw_proposal
 
@@ -323,7 +323,7 @@ class EmLoop(Point, ABC):
         i = super().n_posteriors
         for c, kw in zip([self.pitch, self.roll, self.yaw], [pitch_kwargs, roll_kwargs, yaw_kwargs]):
             if c.hasPosterior:
-                c.plotPosteriors(ax = axes[i], **kw)
+                c.plot_posteriors(ax = axes[i], **kw)
                 i += 1
 
     def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):

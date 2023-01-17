@@ -407,11 +407,10 @@ class DataPoint(Point):
             rel_error_kwargs['overlay'] = overlay.relative_error
             add_error_kwargs['overlay'] = overlay.additive_error
 
-        height_kwargs['transpose'] = height_kwargs.get('transpose', True)
-        self.z.plotPosteriors(ax = axes[0], **height_kwargs)
+        super().plot_posteriors(ax=axes[0], **kwargs)
 
         axes[1].cla()
-        self.predictedData.plotPosteriors(ax = axes[1], colorbar=False, **data_kwargs)
+        self.predictedData.plot_posteriors(ax = axes[1], colorbar=False, **data_kwargs)
         self.plot(ax=axes[1], **data_kwargs)
 
         if overlay is None:
@@ -421,8 +420,8 @@ class DataPoint(Point):
             c = cP.wellSeparated[3]
             overlay.plot_predicted(color=c, ax=axes[1], **data_kwargs)
 
-        self.relative_error.plotPosteriors(ax=axes[2], **rel_error_kwargs)
-        self.additive_error.plotPosteriors(ax=axes[3], **add_error_kwargs)
+        self.relative_error.plot_posteriors(ax=axes[2], **rel_error_kwargs)
+        self.additive_error.plot_posteriors(ax=axes[3], **add_error_kwargs)
 
     def _systemIndices(self, system=0):
         """The slice indices for the requested system.

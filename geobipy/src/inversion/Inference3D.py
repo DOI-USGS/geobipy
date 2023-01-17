@@ -372,6 +372,10 @@ class Inference3D(myObject):
 
         prng = np.random.RandomState(seed)
 
+        # np.save('test_seed', prng.get_state())
+        # prng.set_state(tuple(np.load('test_seed.npy', allow_pickle=True)))
+        # prng.set_state(tuple(np.load('seed.npy', allow_pickle=True)))
+
         if index is None:
 
             if fiducial is not None:
@@ -519,10 +523,10 @@ class Inference3D(myObject):
 
             # Pass through the line results file object if a parallel file system is in use.
             iLine = lineNumber.searchsorted(datapoint.lineNumber)[0]
-
             inference = Inference1D(datapoint, prng, world=world, **options)
 
             failed = inference.infer(hdf_file_handle=self.lines[iLine].hdfFile)
+
             if failed:
                 myMPI.print("datapoint {} {} failed to converge".format(datapoint.lineNumber, datapoint.fiducial))
                 np.save('Converge_fail_seed_{}_{}'.format(datapoint.lineNumber, datapoint.fiducial), inference.seed)

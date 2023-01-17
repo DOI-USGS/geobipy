@@ -209,7 +209,7 @@ class RectilinearMesh2D(Mesh):
             ravelled cell node locations.
 
         """
-        out = np.zeros((self.nNodes.value, 2))
+        out = np.zeros((self.nNodes.item(), 2))
         out[:, 0] = np.tile(self.x.edges, self.y.nNodes.value)
         out[:, 1] = self.y.edges.repeat(self.x.nNodes.value)
         return out

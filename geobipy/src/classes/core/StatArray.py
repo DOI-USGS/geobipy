@@ -192,7 +192,7 @@ class StatArray(np.ndarray, myObject):
             self._name = values
 
     @property
-    def nPosteriors(self):
+    def n_posteriors(self):
         if self.hasPosterior:
             return np.size(self._posterior)
         return 0
@@ -696,6 +696,12 @@ class StatArray(np.ndarray, myObject):
         assert self.hasPrior, ValueError("No prior attached")
         return self.prior.mahalanobis(self)
 
+    def nanmin(self):
+        return np.nanmin(self)
+
+    def nanmax(self):
+        return np.nanmax(self)
+
     def normalize(self, axis=None):
         """Normalize to range 0 - 1. """
         mn = np.nanmin(self, axis=axis)
@@ -751,7 +757,7 @@ class StatArray(np.ndarray, myObject):
         return (((b - a) * (self - self.min())) / (self.max() - self.min())) + a
 
     def reset_posteriors(self):
-        np = self.nPosteriors
+        np = self.n_posteriors
         if np > 1:
             for post in self.posterior:
                 post.reset()
@@ -814,11 +820,14 @@ class StatArray(np.ndarray, myObject):
         """
         np.set_printoptions(threshold=5)
 
-        msg = ('Name: {}\n'
+        if self.size == 0:
+            return "None"
+
+        msg = ('Name: {} {}\n'
                'Shape: {}\n'
                'Values: {}\n'
                'min: {}\n'
-               'max: {}\n').format(self.getNameUnits(), self.shape, self, self.min(), self.max())
+               'max: {}\n').format(self.getNameUnits(), hex(id(self)), self.shape, self, self.min(), self.max())
         if self.hasPrior:
             msg += "Prior:\n{}".format(("|   "+self.prior.summary.replace("\n", "\n|   "))[:-4])
 
@@ -826,7 +835,7 @@ class StatArray(np.ndarray, myObject):
             msg += "Proposal:\n{}".format(("|   "+self.proposal.summary.replace("\n", "\n|   "))[:-4])
 
         # if self.hasPosterior:
-        #     if self.nPosteriors > 1:
+        #     if self.n_posteriors > 1:
         #         for p in self.posterior:
         #             msg += "Posterior:\n{}".format(("|   "+p.summary.replace("\n", "\n|   "))[:-4])
         #     else:
@@ -1063,8 +1072,8 @@ class StatArray(np.ndarray, myObject):
         # assert (self.hasPosterior), TypeError(
         #     'No posterior defined on variable {}. Use StatArray.setPosterior()'.format(self.name))
 
-        if self.nPosteriors > 1:
-            for i in range(self.nPosteriors):
+        if self.n_posteriors > 1:
+            for i in range(self.n_posteriors):
 
                 self._posterior[i].update(self.take(indices=i, axis=0), **kwargs)
 
@@ -1259,21 +1268,21 @@ class StatArray(np.ndarray, myObject):
         if isinstance(gs, Figure):
             gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
 
-        if self.nPosteriors == 1:
+        if self.n_posteriors == 1:
             ax = plt.subplot(gs)
             cP.pretty(ax)
 
         else:
-            gs = gs.subgridspec(self.nPosteriors, 1, hspace=1)
+            gs = gs.subgridspec(self.n_posteriors, 1, hspace=1)
             ax = [plt.subplot(gs[0, 0])]
-            ax += [plt.subplot(gs[i, 0], sharex=ax[0]) for i in range(1, self.nPosteriors)]
+            ax += [plt.subplot(gs[i, 0], sharex=ax[0]) for i in range(1, self.n_posteriors)]
 
             for a in ax:
                 cP.pretty(a)
 
         return ax
 
-    def plotPosteriors(self, ax=None, **kwargs):
+    def plot_posteriors(self, ax=None, **kwargs):
         """Plot the posteriors of the StatArray.
 
         Parameters
@@ -1287,7 +1296,7 @@ class StatArray(np.ndarray, myObject):
             return
 
         if ax is None:
-            ax = kwargs.pop('fig', plt.gcf())
+            ax = kwargs.pop('fig', plt.gca())
 
         if not isinstance(ax, (list, SubplotBase)):
             ax = self._init_posterior_plots(ax)
@@ -1296,12 +1305,12 @@ class StatArray(np.ndarray, myObject):
         kwargs['normalize'] = kwargs.get('normalize', True)
 
         if np.size(ax) > 1:
-            assert len(ax) == self.nPosteriors, ValueError("Length of ax {} must equal number of attached posteriors {}".format(np.size(ax), self.nPosteriors))
+            assert len(ax) == self.n_posteriors, ValueError("Length of ax {} must equal number of attached posteriors {}".format(np.size(ax), self.n_posteriors))
             if 'overlay' in kwargs:
                 assert len(kwargs['overlay']) == len(ax), ValueError("line in kwargs must have size {}".format(len(ax)))
             overlay = kwargs.pop('overlay', np.asarray([None for i in range(len(ax))]))
 
-            for i in range(self.nPosteriors):
+            for i in range(self.n_posteriors):
                 plt.sca(ax[i])
                 plt.cla()
                 self.posterior[i].plot(overlay=overlay[i], **kwargs)
@@ -1312,10 +1321,6 @@ class StatArray(np.ndarray, myObject):
             plt.cla()
 
             self.posterior.plot(**kwargs)
-
-    @property
-    def value(self):
-        return self.item()
 
     def scatter(self, x=None, y=None, i=None, **kwargs):
         """Create a 2D scatter plot.
@@ -1506,23 +1511,25 @@ class StatArray(np.ndarray, myObject):
         if not self._units is None:
             grp.attrs['units'] = self.units
 
-        if shape is not None:
+        # if shape is not None:
+        #     grp.create_dataset('data', shape, dtype=self.dtype, fillvalue=fillvalue)
+        # else:
+        if (add_axis is None):
+            shape = self.shape if shape is None else shape
             grp.create_dataset('data', shape, dtype=self.dtype, fillvalue=fillvalue)
         else:
-            if (add_axis is None):
-                grp.create_dataset('data', self.shape, dtype=self.dtype, fillvalue=fillvalue)
+            if isinstance(add_axis, (int, np.int32, np.int64)):
+                shap = np.atleast_1d(add_axis)
+            elif isinstance(add_axis, tuple):
+                shap = add_axis
             else:
-                if isinstance(add_axis, (int, np.int32, np.int64)):
-                    shap = np.atleast_1d(add_axis)
-                elif isinstance(add_axis, tuple):
-                    shap = add_axis
-                else:
-                    shap = add_axis.shape
+                shap = add_axis.shape
 
-                if (self.size == 1):
-                    grp.create_dataset('data', [*shap], dtype=self.dtype, fillvalue=fillvalue)
-                else:
-                    grp.create_dataset('data', [*shap, *self.shape], dtype=self.dtype, fillvalue=fillvalue)
+            if (self.size == 1):
+                grp.create_dataset('data', [*shap], dtype=self.dtype, fillvalue=fillvalue)
+            else:
+                shape = shape = self.shape if shape is None else shape
+                grp.create_dataset('data', [*shap, *shape], dtype=self.dtype, fillvalue=fillvalue)
 
         if withPosterior:
             self.create_posterior_hdf(grp, add_axis, fillvalue, upcast)
@@ -1531,9 +1538,9 @@ class StatArray(np.ndarray, myObject):
 
     def create_posterior_hdf(self, grp, add_axis, fillvalue, upcast):
         if self.hasPosterior:
-            grp.create_dataset('nPosteriors', data=self.nPosteriors)
-            if self.nPosteriors > 1:
-                for i in range(self.nPosteriors):
+            grp.create_dataset('n_posteriors', data=self.n_posteriors)
+            if self.n_posteriors > 1:
+                for i in range(self.n_posteriors):
                     self.posterior[i].createHdf(grp, 'posterior{}'.format(i), add_axis=add_axis, fillvalue=fillvalue, withPosterior=False, upcast=upcast)
             else:
                 self.posterior.createHdf(grp, 'posterior', add_axis=add_axis, fillvalue=fillvalue, withPosterior=False, upcast=upcast)
@@ -1587,10 +1594,12 @@ class StatArray(np.ndarray, myObject):
 
         """
         grp = h5obj.get(name)
-        write_nd(self, grp, 'data', index=index)
 
-        if withPosterior:
-            self.write_posterior_hdf(grp, index)
+        if self.size > 0:
+            write_nd(self, grp, 'data', index=index)
+
+            if withPosterior:
+                self.write_posterior_hdf(grp, index)
 
         return grp
 
@@ -1598,8 +1607,8 @@ class StatArray(np.ndarray, myObject):
         if self.hasPosterior:
             if np.ndim(index) > 0:
                 index = index[0]
-            if self.nPosteriors > 1:
-                for i in range(self.nPosteriors):
+            if self.n_posteriors > 1:
+                for i in range(self.n_posteriors):
                     self.posterior[i].writeHdf(grp, 'posterior{}'.format(i), index=index)
             else:
                 self.posterior.writeHdf(grp, 'posterior', index=index)
@@ -1671,11 +1680,13 @@ class StatArray(np.ndarray, myObject):
     def posteriors_from_hdf(self, grp, index):
         from ..statistics.Histogram import Histogram
 
-        nPosteriors = 0
+        n_posteriors = 0
+        if 'n_posteriors' in grp:
+            n_posteriors = np.asarray(grp['n_posteriors'])
         if 'nPosteriors' in grp:
-            nPosteriors = np.asarray(grp['nPosteriors'])
+            n_posteriors = np.asarray(grp['nPosteriors'])
 
-        if nPosteriors == 0:
+        if n_posteriors == 0:
             self.posterior = None
             return
 
@@ -1685,18 +1696,17 @@ class StatArray(np.ndarray, myObject):
             if np.ndim(index) > 0:
                 iTmp = index[0]
 
-        if nPosteriors == 1:
+        if n_posteriors == 1:
             posterior = Histogram.fromHdf(grp['posterior'], index=iTmp)
 
-        elif nPosteriors > 1:
+        elif n_posteriors > 1:
             posterior = []
-            for i in range(nPosteriors):
+            for i in range(n_posteriors):
                 posterior.append(Histogram.fromHdf(grp['posterior{}'.format(i)], index=iTmp))
 
         self.posterior = posterior
 
     # Classification Routines
-
     def kMeans(self, nClusters, standardize=False, nIterations=10, plot=False, **kwargs):
         """ Perform K-Means clustering on the StatArray """
         if (standardize):
