@@ -393,10 +393,10 @@ def reorder_3d_for_pyvista(values):
     shp = np.shape(values)
     arr = np.zeros(shp[0] * shp[1] * shp[2], dtype=float64)
     ii = 0
-    for i in range(shp[0]): #z
-        for k in range(shp[2]): #x
+    for i in range(shp[2]): #z
+        for k in range(shp[0]): #x
             for j in range(shp[1]): #y
-                arr[ii] = values[i, j, k]
+                arr[ii] = values[k, j, i]
                 ii += 1
     return arr
 

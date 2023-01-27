@@ -712,7 +712,7 @@ class Model(myObject):
 
     def pyvista_mesh(self, **kwargs):
         mesh = self.mesh.pyvista_mesh(**kwargs)
-        mesh.cell_arrays[self.values.label] = self.mesh._reorder_for_pyvista(self.values)
+        mesh.cell_data[self.values.label] = self.mesh._reorder_for_pyvista(self.values)
         return mesh
 
     def set_posteriors(self, values_posterior=None, **kwargs):

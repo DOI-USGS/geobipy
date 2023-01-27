@@ -595,7 +595,7 @@ class Inference3D(myObject):
     def marginalProbability(self):
 
         mp = self.lines[0].marginal_probability()
-        marginalProbability = StatArray.StatArray((self.nPoints, self.zGrid.nCells.value, mp.shape[-1]), name=mp.name, units=mp.units)
+        marginalProbability = StatArray.StatArray((self.nPoints, self.zGrid.nCells.item(), mp.shape[-1]), name=mp.name, units=mp.units)
         marginalProbability[self.lineIndices[0], :, :] = mp
 
         print('Reading marginal probability', flush=True)
@@ -1013,7 +1013,7 @@ class Inference3D(myObject):
     @cached_property
     def opacity(self):
 
-        opacity = StatArray.StatArray((self.zGrid.nCells.value, self.nPoints), order = 'F')
+        opacity = StatArray.StatArray((self.zGrid.nCells.item(), self.nPoints), order = 'F')
 
         print("Reading opacity", flush=True)
         Bar = progressbar.ProgressBar()
@@ -1681,7 +1681,7 @@ class Inference3D(myObject):
 
         kwargs['block'] = kwargs.pop('block', True)
 
-        starts, chunks = loadBalance1D_shrinkingArrays(self.zGrid.nCells.value, self.world.size)
+        starts, chunks = loadBalance1D_shrinkingArrays(self.zGrid.nCells.item(), self.world.size)
         ends = starts + chunks
         tmp = self.depth_slice(depth=starts[self.rank], variable=variable, **kwargs)
         values, dum = self.interpolate(dx, dy, values=tmp, **kwargs)
@@ -1724,7 +1724,7 @@ class Inference3D(myObject):
         values.createHdf(f, 'marginal_probability', nRepeats=self.zGrid.nCells.value)
         values.writeHdf(f, 'marginal_probability', index=0)
 
-        r = self.loop_over(1, self.zGrid.nCells.value)
+        r = self.loop_over(1, self.zGrid.nCells.item())
 
         for i in r:
             values, _, _ = self.interpolate_marginal(dx, dy, depth=i, **kwargs)
@@ -1736,7 +1736,7 @@ class Inference3D(myObject):
 
         kwargs['block'] = kwargs.pop('block', True)
 
-        starts, chunks = loadBalance1D_shrinkingArrays(self.zGrid.nCells.value, self.world.size)
+        starts, chunks = loadBalance1D_shrinkingArrays(self.zGrid.nCells.item(), self.world.size)
         ends = starts + chunks
 
         values, _, _ = self.interpolate_marginal(dx, dy, depth=starts[self.rank], **kwargs)

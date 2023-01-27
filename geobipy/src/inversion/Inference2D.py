@@ -773,8 +773,8 @@ class Inference2D(myObject):
 
     def interface_probability(self, slic=None):
         """ Get the layer interfaces from the layer depth histograms """
-        values = self.interfacePosterior.pdf
-        return values if slic is None else values[slic]
+        return self.interfacePosterior.pdf
+
 
     @property
     def interfacePosterior(self):
@@ -967,6 +967,8 @@ class Inference2D(myObject):
         if out.mesh.z.name == "Depth":
             out.mesh.z.edges = StatArray.StatArray(-out.mesh.z.edges, name='elevation', units=out.mesh.z.units)
         out.mesh.z.relativeTo = np.repeat(self.data.elevation[:, None], out.mesh.shape[1], 1)
+
+        out.mesh.y.relativeTo = self.halfspace
 
         return out
 
@@ -1202,7 +1204,7 @@ class Inference2D(myObject):
 
         kwargs['cmap'] = kwargs.get('cmap', 'gray_r')
 
-        return self.plot_cross_section(values=self.interface_probability().values, **kwargs)
+        return self.interface_probability().pcolor(**kwargs)
 
     def plot_opacity(self, **kwargs):
         """ Plot the opacity """

@@ -4,6 +4,7 @@ Module describing a Mesh
 import numpy as np
 from ...classes.core.myObject import myObject
 from ...base.utilities import _log as log_
+from ...base.utilities import _power as power_
 from ..core import StatArray
 
 
@@ -74,23 +75,30 @@ class Mesh(myObject):
             tmp, _ = log_(tmp, log=self.axis(axis).log)
         return np.squeeze(np.abs(np.diff(tmp, axis=axis)))
 
-    def _mean(self, values, axis=0):
-    
-        a = self.axis(axis)
+    def _mean(self, counts, axis=0):
+
+        ax = self.axis(axis)
         s = tuple([np.s_[:] if i == axis else None for i in range(self.ndim)])
 
-        t = np.sum(a.centres_absolute[s] * values, axis = axis)
-        s = values.sum(axis = axis)
+        t = np.sum(ax.centres[s] * counts, axis = axis)
+        N = counts.sum(axis = axis)
 
         if t.size == 1:
-            out = t / s
+            out = t / N
         else:
-            i = np.where(s > 0.0)
+            i = np.where(N > 0.0)
             out = StatArray.StatArray(t.shape)
-            out[i] = t[i] / s[i]
+            out[i] = (t[i] / N[i])
 
-        out.name = a.name
-        out.units = a.units
+        if ax._relativeTo is not None:
+            if ax.relativeTo.size > 1:
+                out[i] += ax.relativeTo[i]
+            else:
+                out[i] += ax.relativeTo
+        out = power_(out, ax.log)
+
+        out.name = ax.name
+        out.units = ax.units
 
         return out
 
@@ -146,11 +154,18 @@ class Mesh(myObject):
         d = np.expand_dims(total, axis)
         tmp = np.zeros_like(cs, dtype=np.float64)
         np.divide(cs, d, out=tmp, where=d > 0.0)
+
         # Find the interval
         i = np.apply_along_axis(np.searchsorted, axis, tmp, percent)
         i[i == values.shape[axis]] = values.shape[axis]-1
+
         # Obtain the values at those locations
-        out = self.axis(axis).centres_absolute[i]
+        ax = self.axis(axis)
+        out = ax.centres[i]
+
+        if ax._relativeTo is not None:
+            out += ax.relativeTo
+        out = power_(out, ax.log)
 
         return out
 

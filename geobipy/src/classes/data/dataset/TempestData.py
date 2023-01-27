@@ -266,7 +266,7 @@ class TempestData(TdemData):
 
         return self
 
-    def plot(self, system=0, channels=None, xAxis='index', **kwargs):
+    def plot_data(self, system=0, channels=None, xAxis='index', **kwargs):
         """ Plots the data
 
         Parameters

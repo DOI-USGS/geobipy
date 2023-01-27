@@ -84,11 +84,11 @@ class RectilinearMesh2D(Mesh):
         self.x = kwargs if x is None else x
         self.y = kwargs if y is None else y
 
-        if self.x._relativeTo is not None:
-            assert np.any([s == self.shape[1] for s in self.x.relativeTo.shape]), "x axis relative to must have shape {}".format(self.shape[1])
+        # if self.x._relativeTo is not None:
+        #     assert np.any([s == self.shape[1] for s in self.x.relativeTo.shape]), "x axis relative to must have shape {}".format(self.shape[1])
 
-        if self.y._relativeTo is not None:
-            assert np.any([s == self.shape[0] for s in self.y.relativeTo.shape]), "y axis relative to must have shape {}".format(self.shape[0])
+        # if self.y._relativeTo is not None:
+        #     assert np.any([s == self.shape[0] for s in self.y.relativeTo.shape]), "y axis relative to must have shape {}".format(self.shape[0])
 
     def __getitem__(self, slic):
         """Allow slicing of the histogram.
@@ -240,9 +240,11 @@ class RectilinearMesh2D(Mesh):
                         centres=values.get('x_centres'),
                         edges=values.get('x_edges'),
                         log=values.get('x_log'),
-                        relativeTo=values.get('x_relative_to'))
+                        relativeTo=values.get('x_relative_to'),
+                        dimension=0)
 
         assert isinstance(values, RectilinearMesh1D), TypeError('x must be a RectilinearMesh1D')
+        assert values.dimension == 0
         self._x = values
 
     @property
@@ -257,7 +259,8 @@ class RectilinearMesh2D(Mesh):
                         centres=values.get('y_centres'),
                         edges=values.get('y_edges'),
                         log=values.get('y_log'),
-                        relativeTo=values.get('y_relative_to'))
+                        relativeTo=values.get('y_relative_to'),
+                        dimension=1)
         assert isinstance(values, RectilinearMesh1D), TypeError('y must be a RectilinearMesh1D')
         self._y = values
 
@@ -330,51 +333,6 @@ class RectilinearMesh2D(Mesh):
         probability = probability / np.expand_dims(np.sum(probability, axis), axis=axis)
 
         return StatArray.StatArray(probability, name='marginal_probability')
-
-    def _mean(self, values, axis=0):
-
-        a = self.axis(axis)
-        if a._relativeTo is None:
-            return super()._mean(values, axis)
-
-        s = tuple([np.s_[:] if i == axis else None for i in range(self.ndim)])
-
-        centres = self.x_centres if axis == 0 else self.y_centres
-
-        t = np.sum(centres * values, axis = axis)
-        s = values.sum(axis = axis)
-
-        if t.size == 1:
-            out = t / s
-        else:
-            i = np.where(s > 0.0)
-            out = StatArray.StatArray(t.shape)
-            out[i] = t[i] / s[i]
-
-        out.name = a.name
-        out.units = a.units
-
-        return out
-
-    def _median(self, values, axis=0):
-        """Gets the median for the specified axis.
-
-        Parameters
-        ----------
-        values : array_like
-            2D array to get the median.
-        log : 'e' or float, optional
-            Take the log of the median to a base. 'e' if log = 'e', or a number e.g. log = 10.
-        axis : int
-            Along which axis to obtain the median.
-
-        Returns
-        -------
-        med : array_like
-            Contains the medians along the specified axis. Has size equal to arr.shape[axis].
-
-        """
-        return self._percentile(values=values, percent=50.0, axis=axis)
 
     def __deepcopy__(self, memo={}):
         """ Define the deepcopy for the StatArray """
@@ -895,13 +853,9 @@ class RectilinearMesh2D(Mesh):
 
             x_mesh = self.x_edges
             y_mesh = self.y_edges
-            if y_mesh.shape[0] == x_mesh.shape[0]:
-                a = np.dstack([x_mesh, y_mesh])
-                b = np.dstack([x_mesh.T, y_mesh.T])
-            else:
-                a = np.dstack([x_mesh, y_mesh.T])
-                b = np.dstack([x_mesh.T, y_mesh])
 
+            a = np.dstack([x_mesh, y_mesh])
+            b = np.dstack([x_mesh.T, y_mesh.T])
 
             ls = LineCollection(a, color='k', linestyle='solid', **kwargs)
             ax.add_collection(ls)
@@ -916,7 +870,7 @@ class RectilinearMesh2D(Mesh):
 
             plt.xscale(xscale)
             plt.yscale(yscale)
-            cP.xlabel(x_mesh.label)
+            cP.xlabel(self.x._centres.label)
             cP.ylabel(self.y._centres.label)
 
             if flipX:
@@ -933,18 +887,31 @@ class RectilinearMesh2D(Mesh):
 
         return self.axis(axis).relativeTo.plot(x = self.other_axis(axis).centres, **kwargs)
 
-
-    # def plot_line(self, value, axis=0, **kwargs):
-
-    #     raise Exception('here')
-    #     if axis == 0:
-    #         cP.plot(value, self.y.centres, **kwargs)
-    #     else:
-    #         cP.plot(self.x.centres, value, **kwargs)
-
     def plot_line(self, values, **kwargs):
-        axis = kwargs.pop('axis', 1)
+        axis = kwargs.get('axis', 0)
+        ax = self.axis(1-axis)
+        if self.x.log is not None:
+            kwargs['xscale'] = 'log'
+        if self.y.log is not None:
+            kwargs['yscale'] = 'log'
+
+        if np.size(values) == ax.nCells:
+            self.plot_line_centres(values, **kwargs)
+        elif values.size == ax.nEdges:
+            self.plot_line_edges(values, **kwargs)
+        else:
+            assert False, ValueError('values need to have shape {} or {} but have shape {}'.format(ax.nCells, ax.nEdges, values.shape))
+
+    def plot_line_centres(self, values, **kwargs):
+        axis = kwargs.pop('axis', 0)
         if axis == 0:
+            cP.plot(values, self.y.centres_absolute, **kwargs)
+        else:
+            cP.plot(self.x.centres_absolute, values, **kwargs)
+
+    def plot_line_edges(self, values, **kwargs):
+        axis = kwargs.pop('axis', 0)
+        if axis == 1:
             cP.hlines(values, xmin=self.x.edges_absolute[:-1], xmax=self.x.edges_absolute[1:], **kwargs)
         else:
             cP.vlines(values, ymin=self.y.edges_absolute[:-1], ymax=self.y.edges_absolute[1:], **kwargs)
@@ -1027,9 +994,8 @@ class RectilinearMesh2D(Mesh):
             x = np.arange(add_axis, dtype=np.float64)
         else:
             x = add_axis
-        x = RectilinearMesh1D(centres=x)
-
-        # relativeTo = None if self._relativeTo is None else np.zeros((x.nCells, self.x.nCells))
+        if not isinstance(x, RectilinearMesh1D):
+            x = RectilinearMesh1D(centres=x, dimension=0)
 
         out = self.create_hdf_group(parent, name, hdf_name='RectilinearMesh3D')
 
@@ -1108,38 +1074,36 @@ class RectilinearMesh2D(Mesh):
             If xAxis is 'r', the horizontal xAxis uses cumulative distance along the line.
 
         """
-        if self.x._relativeTo is None:
-            out = np.repeat(self.x.centres_absolute[:, None], self.y.nCells, 1)
-        else:
-            if self.x.relativeTo.size == 1:
-                out = np.repeat(self.x.centres_absolute[:, None], self.y.nCells, 1)
-            else:
-                edges = self.x.relativeTo + self.x.centres[:, None]
-                out = utilities._power(edges, self.x.log)
+        return self.x.centres_absolute
+        # if self.x._relativeTo is None:
+        #     out = np.repeat(self.x.centres_absolute[:, None], self.y.nCells, 1)
+        # else:
+        #     if self.x.relativeTo.size == 1:
+        #         out = np.repeat(self.x.centres_absolute[:, None], self.y.nCells, 1)
+        #     else:
+        #         edges = self.x.relativeTo + self.x.centres[:, None]
+        #         out = utilities._power(edges, self.x.log)
 
-        return out
+        # return out
 
     @property
     def x_edges(self):
-        """Creates an array suitable for plt.pcolormesh for the abscissa.
+        """Creates an array suitable for plt.pcolormesh for the ordinate """
+        re_tmp = None
+        if self.x._relativeTo is not None:
+            nd = np.ndim(self.x.relativeTo)
+            if nd == 1:
+                if self.x.relativeTo.size > 1:
+                    re_tmp = deepcopy(self.x.relativeTo)
+                    self.x.relativeTo = self.y.interpolate_centres_to_nodes(self.x.relativeTo)
 
-        Parameters
-        ----------
-        xAxis : str
-            If xAxis is 'x', the horizontal xAxis uses self.x
-            If xAxis is 'y', the horizontal xAxis uses self.y
-            If xAxis is 'r', the horizontal xAxis uses cumulative distance along the line.
+        x_edges = self.x.edges_absolute
 
-        """
-        if self.x._relativeTo is None:
-            x_edges = np.repeat(self.x.edges_absolute[:, None], self.y.nEdges, 1)
-        else:
-            if self.x.relativeTo.size == 1:
-                x_edges = np.repeat(self.x.edges_absolute[:, None], self.y.nEdges, 1)
-            else:
-                re = self.y.interpolate_centres_to_nodes(self.x.relativeTo)
-                edges = np.repeat(re[None, :], self.x.nEdges, 0) + self.x.edges[:, None]
-                x_edges = utilities._power(edges, self.x.log)
+        if np.ndim(x_edges) == 1:
+            x_edges = np.repeat(x_edges[:, None], self.y.nEdges, 1)
+
+        if re_tmp is not None:
+            self.x.relativeTo = re_tmp
 
         return x_edges
 
@@ -1155,28 +1119,35 @@ class RectilinearMesh2D(Mesh):
             If xAxis is 'r', the horizontal xAxis uses cumulative distance along the line.
 
         """
-        if self.y._relativeTo is None:
-            out = np.repeat(self.y.centres_absolute[None, :], self.x.nCells, 0)
-        else:
-            if self.y.relativeTo.size == 1:
-                out = np.repeat(self.y.centres_absolute[None, :], self.x.nCells, 0)
-            else:
-                out = np.repeat(self.y.relativeTo[:, None], self.y.nCells, 1) + self.y.centres
-                out = utilities._power(out, self.y.log)
+        return self.y.centres_absolute
+        # if self.y._relativeTo is None:
+        #     out = np.repeat(self.y.centres_absolute[None, :], self.x.nCells, 0)
+        # else:
+        #     if self.y.relativeTo.size == 1:
+        #         out = np.repeat(self.y.centres_absolute[None, :], self.x.nCells, 0)
+        #     else:
+        #         out = np.repeat(self.y.relativeTo[:, None], self.y.nCells, 1) + self.y.centres
+        #         out = utilities._power(out, self.y.log)
 
-        return out
+        # return out
 
     @property
     def y_edges(self):
         """Creates an array suitable for plt.pcolormesh for the ordinate """
-        if self.y._relativeTo is None:
-            y_edges = np.repeat(self.y.edges_absolute[None, :], self.x.nEdges, 0)
-        else:
-            if self.y.relativeTo.size == 1:
-                y_edges = np.repeat(self.y.edges_absolute[None, :], self.x.nEdges, 0)
-            else:
-                re = self.x.interpolate_centres_to_nodes(self.y.relativeTo)
-                edges = np.repeat(re[:, None], self.y.nEdges, 1) + self.y.edges[None, :]
-                y_edges = utilities._power(edges, self.y.log)
+        re_tmp = None
+        if self.y._relativeTo is not None:
+            nd = np.ndim(self.y.relativeTo)
+            if nd == 1:
+                if self.y.relativeTo.size > 1:
+                    re_tmp = deepcopy(self.y.relativeTo)
+                    self.y.relativeTo = self.x.interpolate_centres_to_nodes(self.y.relativeTo)
+
+        y_edges = self.y.edges_absolute
+
+        if np.ndim(y_edges) == 1:
+            y_edges = np.repeat(y_edges[None, :], self.x.nEdges, 0)
+
+        if re_tmp is not None:
+            self.y.relativeTo = re_tmp
 
         return y_edges

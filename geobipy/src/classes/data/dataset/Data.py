@@ -115,7 +115,17 @@ class Data(PointCloud3D):
             Indices of non-NaN columns.
 
         """
-        return ~np.isnan(self.data)
+        out = ~np.isnan(self.data)
+        out.name = "Active"
+        out.units = None
+        return out
+
+    @property
+    def channel_saturation(self):
+        out = np.sum(self.active, axis=1) / self.nChannels
+        out.name = 'Percentage of active channels'
+        out.units = '%'
+        return out
 
     @property
     def active_channel(self):

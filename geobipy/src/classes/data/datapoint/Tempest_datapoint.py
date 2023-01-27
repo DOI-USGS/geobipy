@@ -372,7 +372,7 @@ class Tempest_datapoint(TdemDataPoint):
                 # point_kwargs['overlay'] = overlay
                 rel_error_kwargs['overlay'] = overlay.relative_error
                 add_error_kwargs['overlay'] = [overlay.additive_error[i] for i in self.component_indices]
-                add_error_kwargs['axis'] = 0
+                add_error_kwargs['axis'] = 1
 
         axes[0].clear()
         self.predictedData.plot_posteriors(ax = axes[0], colorbar=False, **data_kwargs)

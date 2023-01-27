@@ -272,8 +272,11 @@ class Histogram(Model):
             The means along the axis.
 
         """
+        values = self.mesh._mean(self.counts, axis=axis)
+        if self.ndim == 1:
+            return values
         out = self.mesh.remove_axis(axis)
-        return Model(mesh=out, values=self.mesh._mean(self.counts, axis=axis))
+        return Model(mesh=out, values=values)
 
     def median(self, log=None, axis=0):
         """Gets the median for the specified axis.
@@ -291,7 +294,11 @@ class Histogram(Model):
             The medians along the specified axis. Has size equal to arr.shape[axis].
 
         """
-        return self.mesh._median(values=self.counts, axis=axis)
+        values = self.mesh._median(self.counts, axis=axis)
+        if self.ndim == 1:
+            return values
+        out = self.mesh.remove_axis(axis)
+        return Model(mesh=out, values=values)
 
     def opacity(self, percent=95.0, log=None, axis=0):
         """Return an opacity between 0 and 1 based on the difference between credible invervals of the hitmap.
@@ -321,15 +328,14 @@ class Histogram(Model):
 
     def opacity_level(self, percent=95.0, log=None, axis=0):
         """ Get the index along axis 1 from the bottom up that corresponds to the percent opacity """
-
         p = 0.01 * percent
-        op = self.opacity(log=log, axis=axis)
+        op = self.transparency(log=log, axis=axis)
 
         nz = op.nCells - 1
         iC = nz
         while op.values[iC] > p and iC >= 0:
             iC -= 1
-        return self.y.centres[iC]
+        return self.y.centres_absolute[iC]
 
     def percentile(self, percent, log=None, reciprocate=False, axis=0):
         """Gets the median and the credible intervals for the specified axis.
@@ -389,21 +395,20 @@ class Histogram(Model):
             ax, pm, cb = self.mesh.pcolor(values=values, **kwargs)
 
             if overlay is not None:
-                kwargs['linecolor'] = linecolor
+                kwargs['color'] = linecolor
                 self.mesh.plot_line(overlay, **kwargs)
 
             if interval_kwargs is not None:
-
                 self.plotCredibleIntervals(**interval_kwargs)
 
             return ax, pm, cb
 
     def plotCredibleIntervals(self, percent=95.0, axis=0, **kwargs):
 
-        med, low, high = self.credible_intervals(percent=percent, axis=self.ndim-axis-1)
+        med, low, high = self.credible_intervals(percent=percent, axis=axis)
 
         kwargs['color'] = '#5046C8'
-        kwargs['linestyles'] = 'dashed'
+        kwargs['linestyle'] = 'dashed'
         kwargs['linewidth'] = 1
         kwargs['alpha'] = 0.6
 
@@ -417,13 +422,15 @@ class Histogram(Model):
 
         m = self.mean(axis=axis)
         kwargs['label'] = 'mean'
-        self.mesh.plot_line(m, axis=axis, **kwargs)
+        values = m.values if isinstance(m, Model) else m
+        self.mesh.plot_line(values, axis=axis, **kwargs)
 
     def plotMedian(self, log=None, axis=0, **kwargs):
 
         m = self.median(axis=axis)
         kwargs['label'] = 'median'
-        self.mesh.plot_line(m, axis=axis, **kwargs)
+        values = m.values if isinstance(m, Model) else m
+        self.mesh.plot_line(values, axis=axis, **kwargs)
 
     def reset(self):
         self.values[:] = 0

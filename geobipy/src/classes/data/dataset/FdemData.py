@@ -451,7 +451,7 @@ class FdemData(Data):
 
         """
 
-        ax, legend = super().plot(xAxis, channels=channels, **kwargs)
+        ax, legend = super().plot_data(xAxis=xAxis, channels=channels, **kwargs)
 
         if kwargs.get('legend', True):
             legend.set_title('Frequency (Hz)')

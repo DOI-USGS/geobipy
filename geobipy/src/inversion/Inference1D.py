@@ -322,12 +322,7 @@ class Inference1D(myObject):
             observation = None
 
         # print(observation.sensitivity_matrix.min(), observation.sensitivity_matrix.max())
-        try:
-            remapped_model, perturbed_model = self.model.perturb(observation)
-        except:
-            print("fiducial FAILED", observation.lineNumber, observation.fiducial, flush=True)
-            print("RANK", self.rank, flush=True)
-            raise Exception('bodsiadui')
+        remapped_model, perturbed_model = self.model.perturb(observation)
 
         # Propose a new data point, using assigned proposal distributions
         perturbed_datapoint.perturb()
@@ -586,7 +581,7 @@ class Inference1D(myObject):
                     'flipY': True,
                     'xscale': 'log',
                     'credible_interval_kwargs': {
-                        'axis': 1
+                        # 'axis': 1
                     }
                 },
                 overlay=overlay)

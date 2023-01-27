@@ -414,7 +414,6 @@ class StatArray(np.ndarray, myObject):
             Edges of the StatArray
 
         """
-
         if self.size == 1:
             d = np.squeeze(np.asarray([self - 1, self + 1]))
             return StatArray(d, self.name, self.units)
@@ -865,6 +864,10 @@ class StatArray(np.ndarray, myObject):
         self.posterior.plot(**kwargs)
         cP.title("Posterior")
         cP.xlabel(self.getNameUnits())
+
+    @property
+    def values(self):
+        return self.item()
 
     def verbose(self):
         """Explicit print of every element """

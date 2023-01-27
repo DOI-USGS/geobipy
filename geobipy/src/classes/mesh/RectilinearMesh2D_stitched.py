@@ -177,27 +177,25 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
         y_edges = utilities._power(y_edges, self.y_log)
 
         if np.any(y_edges == np.inf):
-            f = np.max
+            max_edge = 2.0 * np.max(y_edges[np.isfinite(y_edges)])
         elif np.any(y_edges == -np.inf):
-            f = np.min
-        max_edge = 2.0 * f(y_edges[np.isfinite(y_edges)])
+            max_edge = 2.0 * np.min(y_edges[np.isfinite(y_edges)])
+        else:
+            max_edge = np.max(y_edges[np.isfinite(y_edges)])
 
         i = 0
-        bottom = y_edges[:, i]
+
+        bottom = y_edges[:, i] #+ self.relativeTo
         while np.any(i < self.nCells):
             active = np.where(i < self.nCells)
-            bottom[active] = y_edges[active, i]
-            if self.relativeTo is not None:
-                bottom[active] += self.relativeTo[active]
 
-            top = y_edges[:, i+1].copy()
-            top[np.where(np.isinf(top))] = max_edge
-
+            top = y_edges[:, i+1] #+ self.relativeTo
 
             width = np.zeros(self.x.nCells)
-            width[active] = top[active] - y_edges[active, i]
+            width[active] = top[active] - bottom[active]
             pm = plt.bar(self.x.centres, width, self.x.widths, bottom=bottom, color=cmap(v[:, i]), **kwargs)
             i += 1
+            bottom = top
 
         plt.xscale(xscale)
         plt.yscale(yscale)
