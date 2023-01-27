@@ -19,7 +19,7 @@ data_directory = "..//..//supplementary//data"
 # The data_filename and system_filename options are single strings for single system dataset,
 # or a list of str for multi-system datasets like Skytem.
 # Data File Name. If there are multiple, encompass them with [ ].
-data_filename = data_directory
+data_filename = data_directory + "//resolve.csv"
 # System File Name. If there are multiple, encompass them with [ ].
 system_filename = data_directory + "//FdemSystem2.stm"
 
@@ -73,12 +73,12 @@ solve_calibration = False
 # Maximum number of layers in the 1D model
 maximum_number_of_layers = 30
 # Minimum layer depth in metres
-minimum_depth = 0.1
+minimum_depth = 1.0
 # Maximum layer depth in metres
-maximum_depth = 200.0
+maximum_depth = 150.0
 # Minimum layer thickness.
 # If minimumThickness: None, it will be autocalculated.
-minimum_thickness = 1.0
+minimum_thickness = None
 
 # Data prior details
 # ------------------

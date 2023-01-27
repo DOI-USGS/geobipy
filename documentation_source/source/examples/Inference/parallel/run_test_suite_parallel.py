@@ -5,13 +5,18 @@
 All plotting in GeoBIPy can be carried out using the 3D inference class
 
 """
+from geobipy import StatArray
+from create_synthetic_data import create_model, create_resolve, create_skytem, create_aerotem, create_tempest
 
-def parallel_mpi(parameter_file, output_directory, data_filename):
+def parallel_mpi(data_type, model_type, output_directory):
 
     import pathlib
     from mpi4py import MPI
     from geobipy.src.base import MPI as myMPI
     from datetime import timedelta
+
+    parameter_file = "{}_options".format(data_type)
+    data_filename = data_type + '_' + model_type
 
     world = MPI.COMM_WORLD
     rank = world.rank
@@ -34,16 +39,19 @@ def parallel_mpi(parameter_file, output_directory, data_filename):
     # Everyone needs the system classes read in early.
     dataset = kwargs['data_type'](system=kwargs['system_filename'])
 
-    # Get the number of points in the file.
+    # Make the data for the given test model
     if masterRank:
-    #     nPoints = dataset._csv_n_points(UP.dataFilename)
-    #     assert (nRanks > 1), Exception("You need to use at least 2 ranks for the mpi version.")
-    #     assert (nRanks <= nPoints+1), Exception('You requested more ranks than you have data points.  Please lower the number of ranks to a maximum of {}. '.format(nPoints+1))
+        wedge_model = create_model(model_type)
 
-    #     # Make sure the results folders exist
-    #     makedirs(output_directory, exist_ok=True)
-        # Copy the user_parameter file to the output directory
-        shutil.copy(inputFile, output_directory)
+        if data_type == 'resolve':
+            create_resolve(wedge_model, model_type)
+        elif data_type == 'skytem':
+            create_skytem(wedge_model, model_type)
+        elif data_type == 'aerotem':
+            create_aerotem(wedge_model, model_type)
+        elif data_type == 'tempest':
+            create_tempest(wedge_model, model_type)
+
 
     # Start keeping track of time.
     t0 = MPI.Wtime()
@@ -64,7 +72,7 @@ def checkCommandArguments():
 
     Parser = argparse.ArgumentParser(description="GeoBIPy",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    Parser.add_argument('--index', dest='index', type=int, default=None, help='job array index')
+    Parser.add_argument('index', type=int, help='job array index 0-18')
 
     args = Parser.parse_args()
 
@@ -72,10 +80,8 @@ def checkCommandArguments():
 
 if __name__ == '__main__':
     import os
-    import shutil
     import sys
     from pathlib import Path
-    import matplotlib.pyplot as plt
     from geobipy import Inference3D
     from geobipy import user_parameters
     import numpy as np
@@ -93,6 +99,7 @@ if __name__ == '__main__':
     keys = ['glacial', 'saline_clay', 'resistive_dolomites', 'resistive_basement', 'coastal_salt_water', 'ice_over_salt_water']
 
     tmp = np.unravel_index(index, (3, 6))
+
     data = datas[tmp[0]]
     key = keys[tmp[1]]
 
@@ -112,8 +119,7 @@ if __name__ == '__main__':
 
     ################################################################################
     # The parameter file defines the set of user parameters needed to run geobipy.
-    parameter_file = "{}_options".format(data)
+
     ################################################################################
 
-    data_filename = data + '_' + key
-    parallel_mpi(parameter_file, output_directory, data_filename)
+    parallel_mpi(data, key, output_directory)
