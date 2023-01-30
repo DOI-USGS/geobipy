@@ -176,26 +176,26 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
 
         y_edges = utilities._power(y_edges, self.y_log)
 
-        if np.any(y_edges == np.inf):
-            max_edge = 2.0 * np.max(y_edges[np.isfinite(y_edges)])
-        elif np.any(y_edges == -np.inf):
-            max_edge = 2.0 * np.min(y_edges[np.isfinite(y_edges)])
-        else:
-            max_edge = np.max(y_edges[np.isfinite(y_edges)])
+        if np.any(np.isinf(y_edges)):
+            if np.nanmin(y_edges) == -np.inf:
+                max_edge = 2.0 * np.min(y_edges[np.isfinite(y_edges)])
+            elif np.nanmax(y_edges) == np.inf:
+                max_edge = 2.0 * np.max(y_edges[np.isfinite(y_edges)])
+            else:
+                max_edge = np.max(y_edges[np.isfinite(y_edges)])
 
-        i = 0
+        relativeTo = 0.0 if self.relativeTo is None else self.relativeTo
+        for i in range(np.max(self.nCells)):
+            bottom = y_edges[:, i] + relativeTo
+            top = y_edges[:, i+1] + relativeTo
 
-        bottom = y_edges[:, i] #+ self.relativeTo
-        while np.any(i < self.nCells):
-            active = np.where(i < self.nCells)
-
-            top = y_edges[:, i+1] #+ self.relativeTo
+            active = np.where(self.nCells > i)
+            top[np.isinf(top)] = max_edge
 
             width = np.zeros(self.x.nCells)
             width[active] = top[active] - bottom[active]
+
             pm = plt.bar(self.x.centres, width, self.x.widths, bottom=bottom, color=cmap(v[:, i]), **kwargs)
-            i += 1
-            bottom = top
 
         plt.xscale(xscale)
         plt.yscale(yscale)
@@ -315,6 +315,7 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
         # create a new group inside h5obj
         grp = self.create_hdf_group(parent, name)
         self.x.createHdf(grp, 'x', withPosterior=withPosterior, fillvalue=fillvalue, upcast=upcast)
+
         self.y_edges.createHdf(grp, 'y/edges', withPosterior=withPosterior, fillvalue=fillvalue, upcast=upcast)
 
         if not self.relativeTo is None:

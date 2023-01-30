@@ -90,9 +90,16 @@ class Mesh(myObject):
             out = StatArray.StatArray(t.shape)
             out[i] = (t[i] / N[i])
 
+
         if ax._relativeTo is not None:
-            if ax.relativeTo.size > 1:
+            nd = np.ndim(ax.relativeTo)
+            if nd == 2:
                 out[i] += ax.relativeTo[i]
+            elif nd == 1:
+                if np.ndim(i) == 2:
+                    out[i] += ax.relativeTo[i[0]]
+                else:
+                    out[i] += ax.relativeTo[i]
             else:
                 out[i] += ax.relativeTo
         out = power_(out, ax.log)
@@ -164,7 +171,7 @@ class Mesh(myObject):
         out = ax.centres[i]
 
         if ax._relativeTo is not None:
-            out += ax.relativeTo
+            out += np.expand_dims(ax.relativeTo, list(np.arange(np.ndim(out)-1)+1))
         out = power_(out, ax.log)
 
         return out

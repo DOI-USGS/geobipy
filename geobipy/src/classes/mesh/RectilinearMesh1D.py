@@ -510,8 +510,6 @@ class RectilinearMesh1D(Mesh):
 
         edges = self.edges
 
-        # print(edges)
-
         # Remove values that are out of bounds
         if trim:
             values = values[(values >= edges[0]) &
@@ -1538,8 +1536,6 @@ class RectilinearMesh1D(Mesh):
             self.nCells.writeHdf(grp, 'nCells',  withPosterior=withPosterior, index=index)
 
         if self._relativeTo is not None:
-            # self.centres.writeHdf(grp, 'centres',  withPosterior=withPosterior, index=index)
-        # else:
             self.relativeTo.writeHdf(grp, 'relativeTo', index=index)
 
         # Edges can have a posterior
@@ -1558,8 +1554,6 @@ class RectilinearMesh1D(Mesh):
         if self._nCells is not None:
             self.nCells.writeHdf(grp, 'nCells',  withPosterior=withPosterior, index=index)
             ind = index
-        # else:
-        #     self.centres.writeHdf(grp, 'y/centres',  withPosterior=withPosterior, index=ind)
 
         # Edges can have a posterior
         self.edges.writeHdf(grp, 'y/edges',  withPosterior=withPosterior, index=ind)

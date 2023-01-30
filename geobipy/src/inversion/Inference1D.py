@@ -146,7 +146,7 @@ class Inference1D(myObject):
 
         # Logicals of whether to plot or save
         self.save_hdf5 = self.kwargs['save_hdf5']  # pop('save', True)
-        self.interactive_plot = self.kwargs['interactive_plot']  # .pop('plot', False)
+        self.interactive_plot = self.kwargs.get('interactive_plot', False)
         self.save_png = self.kwargs['save_png']  # .pop('savePNG', False)
 
         # Return none if important parameters are not used (used for hdf 5)
@@ -310,10 +310,6 @@ class Inference1D(myObject):
 
     def accept_reject(self):
         """ Propose a new random model and accept or reject it """
-        # print('Incoming')
-        # print(self.model.values)
-        # print(self.datapoint.relative_error, self.datapoint.additive_error)
-
         perturbed_datapoint = deepcopy(self.datapoint)
 
         # Perturb the current model
@@ -321,16 +317,10 @@ class Inference1D(myObject):
         if self.kwargs.get('ignore_likelihood', False):
             observation = None
 
-        # print(observation.sensitivity_matrix.min(), observation.sensitivity_matrix.max())
         remapped_model, perturbed_model = self.model.perturb(observation)
 
         # Propose a new data point, using assigned proposal distributions
         perturbed_datapoint.perturb()
-        # print(observation.sensitivity_matrix.min(), observation.sensitivity_matrix.max())
-
-        # print(perturbed_model.mesh._action)
-        # print(perturbed_model.values)
-        # print(perturbed_datapoint.relative_error, perturbed_datapoint.additive_error)
 
         # Forward model the data from the candidate model
         perturbed_datapoint.forward(perturbed_model)
@@ -368,8 +358,6 @@ class Inference1D(myObject):
 
         proposal_ratio = proposal - proposal1
 
-        # print(prior_ratio, likelihood_ratio, proposal_ratio)
-
         try:
             log_acceptance_ratio = np.float128(prior_ratio + likelihood_ratio + proposal_ratio)
             acceptance_probability = cF.expReal(log_acceptance_ratio)
@@ -390,9 +378,6 @@ class Inference1D(myObject):
             self.datapoint = perturbed_datapoint
             # Reset the sensitivity locally to the newly accepted model
             self.datapoint.sensitivity(self.model, modelChanged=False)
-
-        # print(accepted)
-        # input('fdsfds')
 
     def infer(self, hdf_file_handle):
         """ Markov Chain Monte Carlo approach for inversion of geophysical data
@@ -487,7 +472,7 @@ class Inference1D(myObject):
             if (not self.burned_in and not self.datapoint.relative_error.hasPrior):
                 self.multiplier *= self.kwargs['multiplier']
 
-        # if (self.burned_in):  # We need to update some plotting options
+        # if (self.burned_in):  # We need to update some plotting options.
         self.data_misfit_v.posterior.update(self.data_misfit, trim=True)
 
         # Added the layer depths to a list, we histogram this list every
@@ -542,7 +527,7 @@ class Inference1D(myObject):
         if self.interactive_plot:
             plt.show(block=False)
             plt.interactive(True)
-        # plt.draw()
+
 
     def plot(self, title="", increment=None):
         """ Updates the figures for MCMC Inversion """
@@ -556,12 +541,11 @@ class Inference1D(myObject):
         plt.figure(self.fig.number)
 
         plot = True
-        if not increment is None:
+        if increment is not None:
             if (np.mod(self.iteration, increment) != 0):
                 plot = False
 
         if plot:
-
             self._plotAcceptanceVsIteration()
 
             # Update the data misfit vs iteration
@@ -832,7 +816,7 @@ class Inference1D(myObject):
 
 
     @classmethod
-    def fromHdf(cls, hdfFile, system_file_path, index=None, fiducial=None):
+    def fromHdf(cls, hdfFile, index=None, fiducial=None):
 
         iNone = index is None
         fNone = fiducial is None
@@ -867,7 +851,7 @@ class Inference1D(myObject):
         # self.best_datapoint = hdfRead.readKeyFromFile(
         #     hdfFile, '', '/', 'bestd', index=index, system_file_path=system_file_path)
 
-        self.datapoint = hdfRead.readKeyFromFile(hdfFile, '', '/', 'data', index=index, system_file_path=system_file_path)
+        self.datapoint = hdfRead.readKeyFromFile(hdfFile, '', '/', 'data', index=index)
         self.best_datapoint = self.datapoint
 
         self.data_misfit_v = hdfRead.readKeyFromFile(hdfFile, '', '/', 'phids', index=s)
@@ -877,6 +861,8 @@ class Inference1D(myObject):
         self.best_model = self.model
 
         self.halfspace = hdfRead.readKeyFromFile(hdfFile, '', '/', 'halfspace', index=index)
+
+        # self.model.values.posterior.x.relativeTo = self.halfspace
 
         self.Hitmap = self.model.values.posterior
         # self.currentModel._max_edge = np.log(self.Hitmap.y.centres[-1])

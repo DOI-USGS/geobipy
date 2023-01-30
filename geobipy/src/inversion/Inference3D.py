@@ -90,7 +90,7 @@ class Inference3D(myObject):
         lineNumber = np.empty(self.nLines)
 
         for i, file in enumerate(self.h5files):
-            LR = Inference2D(file, system_file_path=system_file_path, mode=mode, world=world)
+            LR = Inference2D(file, mode=mode, world=world)
             lines.append(LR)
             lineNumber[i] = LR.line
 

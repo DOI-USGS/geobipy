@@ -729,7 +729,7 @@ class Model(myObject):
             x_log = None
             if 'log' in type(self.values.prior).__name__.lower():
                 x_log = 10
-            mesh = RectilinearMesh2D(x_edges=bins, y_edges=self.mesh.edges.posterior.mesh.edges, x_relative_To=relative_to, x_log=x_log)
+            mesh = RectilinearMesh2D(x_edges=bins, y_edges=self.mesh.edges.posterior.mesh.edges, x_relative_to=relative_to, x_log=x_log)
 
             # Set the posterior hitmap for conductivity vs depth
             self.values.posterior = Histogram(mesh=mesh)

@@ -813,8 +813,8 @@ class RectilinearMesh2D(Mesh):
                 if y.shape[0] != x.shape[0]:
                     x = x.T
 
-                # if np.all(values.shape == np.asarray(x.shape[::-1]) - 1):
-                #     values = values.T
+                if np.all(values.shape == np.asarray(x.shape[::-1]) - 1):
+                    values = values.T
 
                 ax, pm, cb = cP.pcolor(x=x, y=y, values=values, **kwargs)
 

@@ -40,18 +40,18 @@ _numba_settings = {'nopython': True, 'nogil': False, 'fastmath': True, 'cache': 
 
 class Inference2D(myObject):
     """ Class to define results from EMinv1D_MCMC for a line of data """
-    def __init__(self, hdf5_file_path=None, system_file_path=None, hdf5_file=None, mode='r+', world=None):
+    def __init__(self, hdf5_file_path=None, hdf5_file=None, mode='r+', world=None):
         """ Initialize the lineResults """
 
         self._world = world
         if (hdf5_file_path is None): return
 
-        assert not system_file_path is None, Exception("Please also specify the path to the system file")
+        # assert not system_file_path is None, Exception("Please also specify the path to the system file")
 
         self._burnedIn = None
         self._marginal_probability = None
         self.range = None
-        self.system_file_path = system_file_path
+        # self.system_file_path = system_file_path
         self._zPosterior = None
         self._mesh = None
 
@@ -186,7 +186,7 @@ class Inference2D(myObject):
         if "FdemDataPoint" in dtype:
             bestData = FdemData.fromHdf(self.hdfFile[attr[0]])
         elif "TdemDataPoint" in dtype:
-            bestData = TdemData.fromHdf(self.hdfFile[attr[0]], system_file_path = self.system_file_path)
+            bestData = TdemData.fromHdf(self.hdfFile[attr[0]])
         return bestData
 
     @cached_property
@@ -244,7 +244,7 @@ class Inference2D(myObject):
     @cached_property
     def data(self):
         """ Get the best data """
-        return hdfRead.read_item(self.hdfFile['data'], system_file_path = self.system_file_path)
+        return hdfRead.read_item(self.hdfFile['data'])
 
     # @cached_property
     @property
@@ -261,7 +261,6 @@ class Inference2D(myObject):
         assert 0.0 < percent < 100.0, ValueError("Must have 0.0 < percent < 100.0")
 
         nz = self.mesh.y.nCells
-        # doi = np.empty(self.nPoints)
 
         p = 0.01 * percent
 
@@ -282,7 +281,7 @@ class Inference2D(myObject):
                 out[i] = axis[i, j]
             return out
 
-        doi = loop(self.mesh.y.centres_absolute, self.opacity().values, p)
+        doi = loop(self.mesh.y_centres, self.opacity().values, p)
         doi = StatArray.StatArray(doi, 'Depth of investigation', 'm')
 
         if smooth is not None:
@@ -993,7 +992,7 @@ class Inference2D(myObject):
             # Get the point index
             index = self.fiducials.searchsorted(fiducial)
 
-        R = Inference1D.fromHdf(self.hdfFile, index=index, system_file_path=self.system_file_path)
+        R = Inference1D.fromHdf(self.hdfFile, index=index)
 
         return R
 
@@ -1124,7 +1123,7 @@ class Inference2D(myObject):
 
         post = self.model.nCells.posterior
         post.mesh.x.centres = self.longest_coordinate
-        post.plot(overlay=self.model.nCells, axis=0)
+        post.plot(overlay=self.model.nCells, axis=1)
         cP.title('P(# of Layers)')
 
 
@@ -1442,7 +1441,7 @@ class Inference2D(myObject):
             kwargs['alpha'] = self.opacity().values
 
         if kwargs.pop('mask_below_doi', False):
-            self.doi_mask(model, **kwargs)
+            kwargs['alpha'] = self.doi_mask(model, **kwargs)
 
         return model.pcolor(**kwargs)
 
@@ -1454,6 +1453,7 @@ class Inference2D(myObject):
             opacity = opacity.copy()
 
         indices = model.mesh.y.cellIndex(self.doi + model.mesh.y.relativeTo)
+
 
         for i in range(self.nPoints):
             opacity[i, indices[i]:] = 0.0
