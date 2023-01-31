@@ -6,7 +6,7 @@ from ...classes.core import StatArray
 try:
     from gatdaem1d import TDAEMSystem
 
-    class TdemSystem_GAAEM(TDAEMSystem):
+    class TdemSystem_GAAEM(myObject, TDAEMSystem):
         """ Initialize a Time domain system class
 
         TdemSystem(systemFileName)
@@ -33,6 +33,10 @@ try:
             self.off_time = self.windows.centre
             self.read_components(system_filename)
             self.filename = system_filename
+            self.string = open(system_filename, 'r').readlines()
+
+        def __deepcopy__(self, memo={}):
+            return None
 
         @property
         def isGA(self):
@@ -96,7 +100,22 @@ try:
                    "{}\n").format(self.fileName, self.times.summary)
             return msg
 
-except Exception as e: 
+        def toHdf(self, h5obj, name):
+            """ Write the object to a HDF file """
+            # Create a new group inside h5obj
+            grp = self.create_hdf_group(h5obj, name)
+            grp.attrs['data'] = self.string
+
+        @classmethod
+        def fromHdf(cls, grp):
+            """ Reads the object from a HDF file """
+            string = grp.attrs['data']
+            with open('tmp.stm', 'w') as f:
+                f.writelines(string)
+
+            return cls(system_filename='tmp.stm')
+
+except Exception as e:
     class TdemSystem_GAAEM(object):
 
         def __init__(self, *args, **kwargs):

@@ -585,7 +585,7 @@ class TdemDataPoint(EmDataPoint):
 
         grp.create_dataset('nSystems', data=self.nSystems)
         for i in range(self.nSystems):
-            grp.create_dataset('System{}'.format(i), data=np.string_(psplt(self.system[i].filename)[-1]))
+            self.system[i].toHdf(grp, 'System{}'.format(i))
 
         self.loop_pair.createHdf(grp, 'loop_pair', add_axis=add_axis, fillvalue=fillvalue)
 
@@ -626,14 +626,8 @@ class TdemDataPoint(EmDataPoint):
         systems = [None]*nSystems
         for i in range(nSystems):
             # Get the system file name. h5py has to encode strings using utf-8, so decode it!
-            txt = str(np.asarray(grp.get('System{}'.format(i))), 'utf-8')
-            if txt[-3:] == 'stm':
-                systems[i] = join(kwargs['system_file_path'], txt)
-            else:
-                with open('System{}'.format(i), 'w') as f:
-                    f.write(txt)
-                systems[i] = 'System{}'.format(i)
-        kwargs.pop('system_file_path', None)
+            systems[i] = TdemSystem.fromHdf(grp['System{}'.format(i)])
+
 
         self = super(TdemDataPoint, cls).fromHdf(grp, system=systems, **kwargs)
 
