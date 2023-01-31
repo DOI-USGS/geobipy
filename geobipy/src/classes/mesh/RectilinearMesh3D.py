@@ -894,8 +894,11 @@ class RectilinearMesh3D(RectilinearMesh2D):
 
         if index is None:
             x = RectilinearMesh1D.fromHdf(grp['x'], skip_posterior=skip_posterior)
+            x.dimension = 0
             y = RectilinearMesh1D.fromHdf(grp['y'], skip_posterior=skip_posterior)
+            y.dimension = 1
             z = RectilinearMesh1D.fromHdf(grp['z'], skip_posterior=skip_posterior)
+            z.dimension = 2
 
             if y._relativeTo is not None:
                 nd = np.ndim(y.relativeTo)

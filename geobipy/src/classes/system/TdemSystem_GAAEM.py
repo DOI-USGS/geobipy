@@ -25,8 +25,7 @@ try:
 
         def __init__(self, system_filename):
             """ Nothing needed """
-
-            # Check that the file exists, rBodies class does not handle errors
+            # Check that the file exists, rBrodies class does not handle errors
             assert fIO.fileExists(system_filename), 'Could not open file: ' + system_filename
 
             super().__init__(system_filename)
