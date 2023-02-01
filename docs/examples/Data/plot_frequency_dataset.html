@@ -19,7 +19,9 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -53,25 +55,27 @@
 <li class="toctree-l2"><a class="reference internal" href="../index.html#statistics">Statistics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#meshes">Meshes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../index.html#data">Data</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="plot_pointcloud3d.html">3D Point Cloud class</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Frequency domain dataset</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#defining-data-using-a-frequency-domain-system">Defining data using a frequency domain system</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#reading-in-the-data">Reading in the Data</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#obtain-a-line-from-the-data-set">Obtain a line from the data set</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#obtain-a-single-datapoint-from-the-data-set">Obtain a single datapoint from the data set</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#file-format-for-frequency-domain-data">File Format for frequency domain data</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#file-format-for-a-frequency-domain-system">File Format for a frequency domain system</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="plot_tempest_dataset.html">Tempest dataset</a></li>
-<li class="toctree-l3"><a class="reference internal" href="plot_skytem_dataset.html">Time domain dataset</a></li>
-<li class="toctree-l3"><a class="reference internal" href="plot_aerotem_dataset.html">Time domain dataset</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#data">Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#datapoints">Datapoints</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#inference">Inference</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../index.html#hdf-5">HDF 5</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#hdf-5">HDF 5</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../Distributions/index.html">Distribtions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Statistics/index.html">Statistics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Meshes/index.html">Meshes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Models/index.html">Models</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Data</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="plot_pointcloud3d.html">3D Point Cloud class</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Frequency domain dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_tempest_dataset.html">Tempest dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_skytem_dataset.html">Time domain dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aerotem_dataset.html">Time domain dataset</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Datapoints/index.html">Datapoints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Inference/index.html">Inference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../HDF5/index.html">HDF 5</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -89,9 +93,10 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../index.html">Examples</a> &raquo;</li>
-      <li>Frequency domain dataset</li>
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Examples</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Data</a></li>
+      <li class="breadcrumb-item active">Frequency domain dataset</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../_sources/examples/Data/plot_frequency_dataset.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -107,16 +112,17 @@
 to download the full example code</p>
 </div>
 <section class="sphx-glr-example-title" id="frequency-domain-dataset">
-<span id="sphx-glr-examples-data-plot-frequency-dataset-py"></span><h1>Frequency domain dataset<a class="headerlink" href="#frequency-domain-dataset" title="Permalink to this headline"></a></h1>
+<span id="sphx-glr-examples-data-plot-frequency-dataset-py"></span><h1>Frequency domain dataset<a class="headerlink" href="#frequency-domain-dataset" title="Permalink to this heading"></a></h1>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">CircularLoop</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">CircularLoops</span>
 <span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">FdemSystem</span>
 <span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">FdemData</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 </pre></div>
 </div>
 <section id="defining-data-using-a-frequency-domain-system">
-<h2>Defining data using a frequency domain system<a class="headerlink" href="#defining-data-using-a-frequency-domain-system" title="Permalink to this headline"></a></h2>
+<h2>Defining data using a frequency domain system<a class="headerlink" href="#defining-data-using-a-frequency-domain-system" title="Permalink to this heading"></a></h2>
 <p>We can start by defining the frequencies, transmitter loops, and receiver loops
 For each frequency we need to define a pair of loops</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">frequencies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="mf">395.0</span><span class="p">,</span> <span class="mf">822.0</span><span class="p">,</span> <span class="mf">3263.0</span><span class="p">,</span> <span class="mf">8199.0</span><span class="p">,</span> <span class="mf">38760.0</span><span class="p">,</span> <span class="mf">128755.0</span><span class="p">])</span>
@@ -124,21 +130,27 @@ For each frequency we need to define a pair of loops</p>
 </div>
 <p>Transmitter positions are defined relative to the observation locations in the data
 This is usually a constant offset for all data points.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">transmitters</span> <span class="o">=</span> <span class="p">[</span><span class="n">CircularLoop</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">moment</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>  <span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yaw</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>
-                <span class="n">CircularLoop</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">moment</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>  <span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yaw</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>
-                <span class="n">CircularLoop</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">moment</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yaw</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>
-                <span class="n">CircularLoop</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">moment</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>  <span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yaw</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>
-                <span class="n">CircularLoop</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">moment</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>  <span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yaw</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>
-                <span class="n">CircularLoop</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">moment</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>  <span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yaw</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">transmitters</span> <span class="o">=</span> <span class="n">CircularLoops</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">,</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">],</span>
+                             <span class="n">moment</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                             <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                             <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                             <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                             <span class="n">pitch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                             <span class="n">roll</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                             <span class="n">yaw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                             <span class="n">radius</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>Receiver positions are defined relative to the transmitter</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">receivers</span> <span class="o">=</span> <span class="p">[</span><span class="n">CircularLoop</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">moment</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">7.93</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yaw</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>
-             <span class="n">CircularLoop</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">moment</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">7.91</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yaw</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>
-             <span class="n">CircularLoop</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">moment</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">9.03</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yaw</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>
-             <span class="n">CircularLoop</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">moment</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">7.91</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yaw</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>
-             <span class="n">CircularLoop</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">moment</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">7.91</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yaw</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>
-             <span class="n">CircularLoop</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">moment</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">7.89</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yaw</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">receivers</span> <span class="o">=</span> <span class="n">CircularLoops</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">,</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">],</span>
+                             <span class="n">moment</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                             <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mf">7.91</span><span class="p">,</span> <span class="mf">7.91</span><span class="p">,</span> <span class="mf">9.03</span><span class="p">,</span> <span class="mf">7.91</span><span class="p">,</span> <span class="mf">7.91</span><span class="p">,</span> <span class="mf">7.89</span><span class="p">],</span>
+                             <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                             <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                             <span class="n">pitch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                             <span class="n">roll</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                             <span class="n">yaw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                             <span class="n">radius</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>Instantiate the system for the data</p>
@@ -155,9 +167,9 @@ This is usually a constant offset for all data points.</p>
 </div>
 </section>
 <section id="reading-in-the-data">
-<h2>Reading in the Data<a class="headerlink" href="#reading-in-the-data" title="Permalink to this headline"></a></h2>
+<h2>Reading in the Data<a class="headerlink" href="#reading-in-the-data" title="Permalink to this heading"></a></h2>
 <p>Of course measured field data is stored on disk. So instead we can read data from file.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dataFolder</span> <span class="o">=</span> <span class="s2">&quot;..//supplementary//Data//&quot;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dataFolder</span> <span class="o">=</span> <span class="s2">&quot;..//supplementary//data//&quot;</span>
 <span class="c1"># The data file name</span>
 <span class="n">dataFile</span> <span class="o">=</span> <span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;Resolve2.txt&#39;</span>
 <span class="c1"># The EM system file name</span>
@@ -198,7 +210,6 @@ This is usually a constant offset for all data points.</p>
 <span class="c1"># _ = FD1.plot(channels=[0,11,8], log=10, linewidth=0.5);</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>In_Phase 380.0
 In_Phase 1776.0
 In_Phase 3345.0
@@ -217,7 +228,6 @@ Quadrature 129550.0
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FD2</span> <span class="o">=</span> <span class="n">FdemData</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">dataFilename</span><span class="o">=</span><span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;Resolve1.txt&#39;</span><span class="p">,</span> <span class="n">systemFilename</span><span class="o">=</span><span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;FdemSystem1.stm&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Warning: Your data contains values that are &lt;= 0.0
 </pre></div>
 </div>
@@ -227,8 +237,12 @@ Quadrature 129550.0
 <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">);</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_frequency_dataset_001.png" srcset="../../_images/sphx_glr_plot_frequency_dataset_001.png" alt="plot frequency dataset" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(584494.28, 590194.28, 4639054.24, 4661854.24)
+<img src="../../_images/sphx_glr_plot_frequency_dataset_001.png" srcset="../../_images/sphx_glr_plot_frequency_dataset_001.png" alt="plot frequency dataset" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>surface [WARNING]: 66659 unusable points were supplied; these will be ignored.
+surface [WARNING]: You should have pre-processed the data with block-mean, -median, or -mode.
+surface [WARNING]: Check that previous processing steps write results with enough decimals.
+surface [WARNING]: Possibly some data were half-way between nodes and subject to IEEE 754 rounding.
+
+(584494.28, 590194.28, 4639054.24, 4661854.24)
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
@@ -236,8 +250,12 @@ Quadrature 129550.0
 <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">);</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_frequency_dataset_002.png" srcset="../../_images/sphx_glr_plot_frequency_dataset_002.png" alt="plot frequency dataset" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(662822.398, 668372.398, 4560028.655, 4600678.655)
+<img src="../../_images/sphx_glr_plot_frequency_dataset_002.png" srcset="../../_images/sphx_glr_plot_frequency_dataset_002.png" alt="plot frequency dataset" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>surface [WARNING]: 123487 unusable points were supplied; these will be ignored.
+surface [WARNING]: You should have pre-processed the data with block-mean, -median, or -mode.
+surface [WARNING]: Check that previous processing steps write results with enough decimals.
+surface [WARNING]: Possibly some data were half-way between nodes and subject to IEEE 754 rounding.
+
+(662822.398, 668372.398, 4560028.655, 4600678.655)
 </pre></div>
 </div>
 <p>Or, we can plot both data sets in one figure to see their positions relative
@@ -256,23 +274,29 @@ interpolate the specified channel number.</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">);</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_frequency_dataset_004.png" srcset="../../_images/sphx_glr_plot_frequency_dataset_004.png" alt="In_Phase 8171.0" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(584419.28, 590219.28, 4638979.24, 4661979.24)
+<img src="../../_images/sphx_glr_plot_frequency_dataset_004.png" srcset="../../_images/sphx_glr_plot_frequency_dataset_004.png" alt="In_Phase 8171.0" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>surface [WARNING]: 70336 unusable points were supplied; these will be ignored.
+surface [WARNING]: You should have pre-processed the data with block-mean, -median, or -mode.
+surface [WARNING]: Check that previous processing steps write results with enough decimals.
+surface [WARNING]: Possibly some data were half-way between nodes and subject to IEEE 754 rounding.
+
+(584419.28, 590219.28, 4638979.24, 4661979.24)
 </pre></div>
 </div>
 <p>Export the data to VTK</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># FD1.toVTK(&#39;FD_one&#39;)</span>
-<span class="c1"># FD2.toVTK(&#39;FD_two&#39;)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FD1</span><span class="o">.</span><span class="n">to_vtk</span><span class="p">(</span><span class="s1">&#39;FD_one.vtk&#39;</span><span class="p">)</span>
+<span class="c1"># FD2.to_vtk(&#39;FD_two.vtk&#39;)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Predicted Data (ppm)
 </pre></div>
 </div>
 </section>
 <section id="obtain-a-line-from-the-data-set">
-<h2>Obtain a line from the data set<a class="headerlink" href="#obtain-a-line-from-the-data-set" title="Permalink to this headline"></a></h2>
+<h2>Obtain a line from the data set<a class="headerlink" href="#obtain-a-line-from-the-data-set" title="Permalink to this heading"></a></h2>
 <p>Take a look at the line numbers in the dataset</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">FD1</span><span class="o">.</span><span class="n">lineNumber</span><span class="p">))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[30010 30020 30030 ... 30100 39010 39020]
 </pre></div>
 </div>
@@ -283,59 +307,66 @@ interpolate the specified channel number.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>3D Point Cloud:
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>FdemData:
 Number of Points: : 6710
- Name: Easting (m)
-    Shape: (6710,)
-    Values: [586852.29 586852.23 586852.17 ... 586123.57 586123.2  586122.82]
- Name: Northing (m)
-    Shape: (6710,)
-    Values: [4639119.38 4639122.68 4639125.98 ... 4661765.26 4661768.84 4661772.42]
- Name: Height (m)
-    Shape: (6710,)
-    Values: [36.115 36.498 36.835 ... 27.799 27.704 27.601]
- Name: Elevation (m)
-    Shape: (6710,)
-    Values: [1246.84 1246.71 1246.61 ... 1337.94 1337.96 1338.02]
+Name: Easting (m) 0x7ff5944a1ac0
+Shape: (6710,)
+Values: [586852.29 586852.23 586852.17 ... 586123.57 586123.2  586122.82]
+min: 586122.82
+max: 586852.29
+ Name: Northing (m) 0x7ff5944a1040
+Shape: (6710,)
+Values: [4639119.38 4639122.68 4639125.98 ... 4661765.26 4661768.84 4661772.42]
+min: 4639119.38
+max: 4661772.42
+ Name: Height (m) 0x7ff5944a38c0
+Shape: (6710,)
+Values: [36.115 36.498 36.835 ... 27.799 27.704 27.601]
+min: 23.830000000000002
+max: 50.567
+ Name: Elevation (m) 0x7ff592dfa0c0
+Shape: (6710,)
+Values: [1246.84 1246.71 1246.61 ... 1337.94 1337.96 1338.02]
+min: 1213.18
+max: 1338.02
 Data:          :
 # of Channels: 12
 # of Total Data: 80520
-Name:
-    Shape: (6710, 12)
-    Values: [[145.3 435.8 260.6 ... 516.5 405.7 255.7]
+Name:  0x7ff592dfa5c0
+Shape: (6710, 12)
+Values: [[145.3 435.8 260.6 ... 516.5 405.7 255.7]
  [145.7 436.5 257.9 ... 513.6 403.2 252. ]
  [146.4 437.4 255.8 ... 511.2 400.9 248.8]
  ...
  [ 70.7 314.1 220.2 ... 743.3 960.8 910.7]
  [ 71.3 315.3 220.5 ... 745.9 968.3 919.1]
  [ 72.1 316.6 220.7 ... 749.2 976.5 928.3]]
+min: 37.7
+max: 3726.9
 
- Name:
-    Shape: (6710, 12)
-    Values: [[145.30344112 435.80114731 260.60191864 ... 516.50096805 405.70123244
-  255.70195541]
- [145.70343167 436.50114547 257.90193873 ... 513.60097352 403.20124008
-  252.00198412]
- [146.40341526 437.40114312 255.80195464 ... 511.20097809 400.90124719
-  248.80200964]
+ Name:  0x7ff592dfa240
+Shape: (6710, 12)
+Values: [[1.76386196 4.47125978 2.79127856 ... 5.26091484 4.17842662 2.74558719]
+ [1.76715845 4.47808274 2.76608767 ... 5.23244646 4.15415744 2.71116211]
+ [1.77293429 4.48685591 2.74651852 ... 5.20889086 4.13183748 2.68144439]
  ...
- [ 70.70707178 314.10159185 220.20227065 ... 743.30067268 960.8005204
-  910.70054903]
- [ 71.30701228 315.30158579 220.50226756 ... 745.90067033 968.30051637
-  919.10054401]
- [ 72.10693448 316.60157928 220.70226551 ... 749.20066738 976.50051203
-  928.30053862]]
+ [1.22468322 3.29634358 2.41843007 ... 7.49996593 9.65989979 9.16173832]
+ [1.22815675 3.30778007 2.42116191 ... 7.52573458 9.73449994 9.24524099]
+ [1.23281832 3.32017409 2.42298349 ... 7.55844323 9.81606973 9.33670654]]
+min: 1.0687043557504572
+max: 37.28241356189269
 
- Name: Predicted Data (ppm)
-    Shape: (6710, 12)
-    Values: [[0. 0. 0. ... 0. 0. 0.]
+ Name: Predicted Data (ppm) 0x7ff592dfbac0
+Shape: (6710, 12)
+Values: [[0. 0. 0. ... 0. 0. 0.]
  [0. 0. 0. ... 0. 0. 0.]
  [0. 0. 0. ... 0. 0. 0.]
  ...
  [0. 0. 0. ... 0. 0. 0.]
  [0. 0. 0. ... 0. 0. 0.]
  [0. 0. 0. ... 0. 0. 0.]]
+min: 0.0
+max: 0.0
 </pre></div>
 </div>
 <p>And we can scatter2D the points in the line.</p>
@@ -346,12 +377,23 @@ Name:
 <img src="../../_images/sphx_glr_plot_frequency_dataset_005.png" srcset="../../_images/sphx_glr_plot_frequency_dataset_005.png" alt="plot frequency dataset" class = "sphx-glr-single-img"/><p>We can specify the axis along which to plot.
 xAxis can be index, x, y, z, r2d, r3d</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
-<span class="n">_</span> <span class="o">=</span> <span class="n">FD1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">channels</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">11</span><span class="p">,</span><span class="mi">8</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">);</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">FD1</span><span class="o">.</span><span class="n">plot_data</span><span class="p">(</span><span class="n">channels</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">);</span>
+
+
+<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;fdem.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">FD1</span><span class="o">.</span><span class="n">createHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;fdem&#39;</span><span class="p">)</span>
+    <span class="n">FD1</span><span class="o">.</span><span class="n">writeHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;fdem&#39;</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;fdem.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">FD3</span> <span class="o">=</span> <span class="n">FdemData</span><span class="o">.</span><span class="n">fromHdf</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;fdem&#39;</span><span class="p">])</span>
+
+<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;fdem.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">fdp</span> <span class="o">=</span> <span class="n">FdemData</span><span class="o">.</span><span class="n">fromHdf</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;fdem&#39;</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 </pre></div>
 </div>
 <img src="../../_images/sphx_glr_plot_frequency_dataset_006.png" srcset="../../_images/sphx_glr_plot_frequency_dataset_006.png" alt="plot frequency dataset" class = "sphx-glr-single-img"/></section>
 <section id="obtain-a-single-datapoint-from-the-data-set">
-<h2>Obtain a single datapoint from the data set<a class="headerlink" href="#obtain-a-single-datapoint-from-the-data-set" title="Permalink to this headline"></a></h2>
+<h2>Obtain a single datapoint from the data set<a class="headerlink" href="#obtain-a-single-datapoint-from-the-data-set" title="Permalink to this heading"></a></h2>
 <p>Checkout <a class="reference internal" href="../Datapoints/plot_resolve_datapoint.html#frequency-domain-datapoint"><span class="std std-ref">Frequency domain datapoint</span></a> for an example
 about how to use a datapoint once it is instantiated.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dp</span> <span class="o">=</span> <span class="n">FD1</span><span class="o">.</span><span class="n">datapoint</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -366,13 +408,13 @@ about how to use a datapoint once it is instantiated.</p>
 </div>
 </section>
 <section id="file-format-for-frequency-domain-data">
-<h2>File Format for frequency domain data<a class="headerlink" href="#file-format-for-frequency-domain-data" title="Permalink to this headline"></a></h2>
+<h2>File Format for frequency domain data<a class="headerlink" href="#file-format-for-frequency-domain-data" title="Permalink to this heading"></a></h2>
 <p>Here we describe the file format for frequency domain data.</p>
 <p>The data columns are read in according to the column names in the first line.</p>
 <p>In this description, the column name or its alternatives are given followed by what the name represents.
 Optional columns are also described.</p>
 <section id="required-columns">
-<h3>Required columns<a class="headerlink" href="#required-columns" title="Permalink to this headline"></a></h3>
+<h3>Required columns<a class="headerlink" href="#required-columns" title="Permalink to this heading"></a></h3>
 <dl class="simple">
 <dt>line</dt><dd><p>Line number for the data point</p>
 </dd>
@@ -393,7 +435,7 @@ Q is the imaginary quadrature measurement in (ppm)</p>
 </dl>
 </section>
 <section id="optional-columns">
-<h3>Optional columns<a class="headerlink" href="#optional-columns" title="Permalink to this headline"></a></h3>
+<h3>Optional columns<a class="headerlink" href="#optional-columns" title="Permalink to this heading"></a></h3>
 <dl class="simple">
 <dt>InphaseErr[0] QuadratureErr[0] … InphaseErr[nFrequencies] QuadratureErr[nFrequencies]</dt><dd><p>Estimates of standard deviation for each inphase and quadrature measurement.
 These must appear after the data colums.</p>
@@ -401,12 +443,12 @@ These must appear after the data colums.</p>
 </dl>
 </section>
 <section id="example-header">
-<h3>Example Header<a class="headerlink" href="#example-header" title="Permalink to this headline"></a></h3>
+<h3>Example Header<a class="headerlink" href="#example-header" title="Permalink to this heading"></a></h3>
 <p>Line fid easting northing elevation height I_380 Q_380 … … I_129550 Q_129550</p>
 </section>
 </section>
 <section id="file-format-for-a-frequency-domain-system">
-<h2>File Format for a frequency domain system<a class="headerlink" href="#file-format-for-a-frequency-domain-system" title="Permalink to this headline"></a></h2>
+<h2>File Format for a frequency domain system<a class="headerlink" href="#file-format-for-a-frequency-domain-system" title="Permalink to this heading"></a></h2>
 <p>The system file is structured using columns with the first line containing header information</p>
 <p>Each subsequent row contains the information for each measurement frequency</p>
 <dl class="simple">
@@ -428,8 +470,8 @@ These must appear after the data colums.</p>
 <p>Example system files are contained in
 <a class="reference external" href="https://github.com/usgs/geobipy/tree/master/documentation_source/source/examples/supplementary/Data">the supplementary folder</a> in this repository</p>
 <p>See the Resolve.stm files.</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  6.996 seconds)</p>
-<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-data-plot-frequency-dataset-py">
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  4.153 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-data-plot-frequency-dataset-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/8a8596f0390404145eca225a8f310218/plot_frequency_dataset.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_frequency_dataset.py</span></code></a></p>
 </div>

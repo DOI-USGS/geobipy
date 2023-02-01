@@ -8,7 +8,7 @@ data_directory = "..//..//supplementary//data"
 # The data_filename and system_filename options are single strings for single system dataset,
 # or a list of str for multi-system datasets like Skytem.
 # Data File Name.
-data_filename = join(data_directory,'Tempest.csv')
+data_filename = join(data_directory,'tempest_ice_over_salt_water.csv')
 # System File Name.
 system_filename = join(data_directory,'Tempest.stm')
 
@@ -24,7 +24,7 @@ n_markov_chains = 100000
 # Interactively plot a single data point as it progresses
 interactive_plot = True
 # How often to update the plot. (lower is slower)
-update_plot_every = 1000
+update_plot_every = 5000
 # Save a PNG of the final results for each data point.
 save_png = False
 # Save the results of the McMC inversion to HDF5 files. (Generally always True)
@@ -56,7 +56,7 @@ solve_relative_error = True
 # Assign an initial percentage relative Error
 # If the file contains no standard deviations, this will be used
 # to assign the initial data uncertainties.
-initial_relative_error = [0.05, 0.05]
+initial_relative_error = [0.02, 0.02]
 ## Relative Error Prior Details
 # Distribution('Uniform', min=[0.01, 0.01], max=[0.5, 0.5])
 # Minimum Relative Error
@@ -75,7 +75,7 @@ solve_additive_error = True
 # to assign the initial data uncertainties.
 # (0.03, 0.026, 0.024, 0.020, 0.018, 0.017, 0.016, 0.015, 0.014, 0.013, 0.012, 0.011, 0.010, 0.009, 0.008,
 #  0.015, 0.014, 0.013, 0.011, 0.009, 0.008, 0.0075, 0.007, 0.006, 0.0055, 0.005, 0.0045, 0.004, 0.0035, 0.003)
-initial_additive_error = np.r_[0.011474, 0.012810, 0.008507, 0.005154, 0.004742, 0.004477, 0.004168, 0.003539, 0.003352, 0.003213, 0.003161, 0.003122, 0.002587, 0.002038, 0.002201,
+initial_additive_error = 2*np.r_[0.011474, 0.012810, 0.008507, 0.005154, 0.004742, 0.004477, 0.004168, 0.003539, 0.003352, 0.003213, 0.003161, 0.003122, 0.002587, 0.002038, 0.002201,
                                0.007383, 0.005693, 0.005178, 0.003659, 0.003426, 0.003046, 0.003095, 0.003247, 0.002775, 0.002627, 0.002460, 0.002178, 0.001754, 0.001405, 0.001283]
 # Additive Error Prior Details
 # Distribution('Uniform', min=1.0, max=3.0)
@@ -94,19 +94,19 @@ solve_transmitter_x = False
 # Distribution('Uniform', min=VALUE-change, max=VALUE+change)
 maximum_transmitter_x_change = 5.0 # meters
 # Distribution('Normal', mean=VALUE, variance=0.0001)
-transmitter_x_proposal_variance = 0.01
+transmitter_x_proposal_variance = 0.05
 
 solve_transmitter_z = False
 # Distribution('Uniform', min=VALUE-change, max=VALUE+change)
 maximum_transmitter_z_change = 5.0 # meters
 # Distribution('Normal', mean=VALUE, variance=0.0001)
-transmitter_z_proposal_variance = 0.01
+transmitter_z_proposal_variance = 0.05
 
 solve_transmitter_pitch = False
 # Distribution('Uniform', min=VALUE-change, max=VALUE+change)
 maximum_transmitter_pitch_change = 5.0 # degrees
 # Distribution('Normal', mean=VALUE, variance=0.0001)
-transmitter_pitch_proposal_variance = 0.01
+transmitter_pitch_proposal_variance = 0.05
 
 # -------------------------------------------------------
 # -------------------------------------------------------
@@ -158,10 +158,10 @@ maximum_number_of_layers = 30
 # Minimum layer depth in metres
 minimum_depth = 1.0
 # Maximum layer depth in metres
-maximum_depth = 350.0
+maximum_depth = 550.0
 # Minimum layer thickness.
 # If minimumThickness: None, it will be autocalculated.
-minimum_thickness = None
+minimum_thickness = 5.0
 
 # Evolution Probabilities for earth model manipulation during the Markov chain.
 # These four values are internally scaled such that their sum is 1.0.

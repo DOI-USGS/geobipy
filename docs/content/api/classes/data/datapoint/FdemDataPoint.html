@@ -15,19 +15,21 @@
   <!--[if lt IE 9]>
     <script src="../../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-
+  
         <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
         <script src="../../../../../_static/jquery.js"></script>
         <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../../../_static/doctools.js"></script>
+        <script src="../../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" />
     <link rel="next" title="TdemDataPoint" href="TdemDataPoint.html" />
-    <link rel="prev" title="EmDataPoint" href="EmDataPoint.html" />
+    <link rel="prev" title="EmDataPoint" href="EmDataPoint.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
@@ -81,12 +83,12 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../../api.html">API</a> &raquo;</li>
-          <li><a href="../../classes.html">Classes used in GeoBIPy</a> &raquo;</li>
-          <li><a href="../data.html">Data classes</a> &raquo;</li>
-          <li><a href="datapointrst.html">Datapoint classes</a> &raquo;</li>
-      <li>FdemDataPoint</li>
+      <li><a href="../../../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../api.html">API</a></li>
+          <li class="breadcrumb-item"><a href="../../classes.html">Classes used in GeoBIPy</a></li>
+          <li class="breadcrumb-item"><a href="../data.html">Data classes</a></li>
+          <li class="breadcrumb-item"><a href="datapointrst.html">Datapoint classes</a></li>
+      <li class="breadcrumb-item active">FdemDataPoint</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../../../_sources/content/api/classes/data/datapoint/FdemDataPoint.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -95,31 +97,21 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-
+             
   <section id="fdemdatapoint">
-<h1>FdemDataPoint<a class="headerlink" href="#fdemdatapoint" title="Permalink to this headline"></a></h1>
-digraph inheritance205783337d {
-bgcolor=transparent;
-rankdir=LR;
-size=&quot;8.0, 12.0&quot;;
-  &quot;ABC&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Helper class that provides a standard way to create an ABC using&quot;];
-  &quot;DataPoint&quot; [URL=&quot;datapoint.html#geobipy.src.classes.data.datapoint.DataPoint.DataPoint&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defines a data point.&quot;];
-  &quot;Point&quot; -&gt; &quot;DataPoint&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;EmDataPoint&quot; [URL=&quot;EmDataPoint.html#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Abstract EmDataPoint Class&quot;];
-  &quot;DataPoint&quot; -&gt; &quot;EmDataPoint&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;FdemDataPoint&quot; [URL=&quot;#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defines a Frequency domain electromagnetic data point.&quot;];
-  &quot;EmDataPoint&quot; -&gt; &quot;FdemDataPoint&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;Point&quot; [URL=&quot;../../pointcloud/Point.html#geobipy.src.classes.pointcloud.Point.Point&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defining a point in 3D Euclidean space&quot;];
-  &quot;myObject&quot; -&gt; &quot;Point&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;ABC&quot; -&gt; &quot;Point&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;myObject&quot; [URL=&quot;../../core/myObject.html#geobipy.src.classes.core.myObject.myObject&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Abstract base class&quot;];
-  &quot;ABC&quot; -&gt; &quot;myObject&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-}
-<span class="target" id="module-geobipy.src.classes.data.datapoint.FdemDataPoint"></span><p>&#64;FdemDataPoint_Class
+<h1>FdemDataPoint<a class="headerlink" href="#fdemdatapoint" title="Permalink to this heading"></a></h1>
+<div class="graphviz"><img src="../../../../../_images/inheritance-49ece51a929db380552ab6bf73bb8bd767d3d2e3.png" alt="Inheritance diagram of geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint" usemap="#inheritance205783337d" class="inheritance graphviz" /></div>
+<map id="inheritance205783337d" name="inheritance205783337d">
+<area shape="rect" id="node6" href="../../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="125,5,204,31"/>
+<area shape="rect" id="node2" href="datapoint.html#geobipy.src.classes.data.datapoint.DataPoint.DataPoint" target="_top" title="Class defines a data point." alt="" coords="372,5,452,31"/>
+<area shape="rect" id="node4" href="EmDataPoint.html#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint" target="_top" title="Abstract EmDataPoint Class" alt="" coords="500,5,600,31"/>
+<area shape="rect" id="node3" href="../../pointcloud/Point.html#geobipy.src.classes.pointcloud.Point.Point" target="_top" title="3D Point Cloud with x,y,z co&#45;ordinates" alt="" coords="252,5,324,31"/>
+<area shape="rect" id="node5" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint" target="_top" title="Class defines a Frequency domain electromagnetic data point." alt="" coords="648,5,761,31"/>
+</map><span class="target" id="module-geobipy.src.classes.data.datapoint.FdemDataPoint"></span><p>&#64;FdemDataPoint_Class
 Module describing a frequency domain EMData Point that contains a single measurement.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.data.datapoint.FdemDataPoint.</span></span><span class="sig-name descname"><span class="pre">FdemDataPoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictedData</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lineNumber</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fiducial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.data.datapoint.FdemDataPoint.</span></span><span class="sig-name descname"><span class="pre">FdemDataPoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictedData</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lineNumber</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fiducial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint" title="Permalink to this definition"></a></dt>
 <dd><p>Class defines a Frequency domain electromagnetic data point.</p>
 <p>Contains an easting, northing, height, elevation, observed and predicted data, and uncertainty estimates for the data.</p>
 <p>FdemDataPoint(x, y, z, elevation, data, std, system, lineNumber, fiducial)</p>
@@ -143,28 +135,6 @@ Module describing a frequency domain EMData Point that contains a single measure
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.FindBestHalfSpace">
-<span class="sig-name descname"><span class="pre">FindBestHalfSpace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">minConductivity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxConductivity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percentThreshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxIterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.FindBestHalfSpace" title="Permalink to this definition"></a></dt>
-<dd><p>Uses the bisection approach to find a half space conductivity that best matches the EM data by minimizing the data misfit</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>minConductivity</strong> (<em>float</em>) – Minimum conductivity to start the search</p></li>
-<li><p><strong>maxConductivity</strong> (<em>float</em>) – Maximum conductivity to start the search</p></li>
-<li><p><strong>percentThreshold</strong> (<em>float</em><em>, </em><em>optional</em>) – Stopping criteria for the relative change in data fit</p></li>
-<li><p><strong>maxIterations</strong> (<em>int</em><em>, </em><em>optional</em>) – Stop after this number of iterations</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>out</strong> – Best fitting halfspace model</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>geobipy.Model1D</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.calibrate">
 <span class="sig-name descname"><span class="pre">calibrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Predicted</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.calibrate" title="Permalink to this definition"></a></dt>
 <dd><p>Apply calibration factors to the data point</p>
@@ -172,7 +142,7 @@ Module describing a frequency domain EMData Point that contains a single measure
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.createHdf">
-<span class="sig-name descname"><span class="pre">createHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withPosterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nRepeats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fillvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.createHdf" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">createHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withPosterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fillvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.createHdf" title="Permalink to this definition"></a></dt>
 <dd><p>Create the hdf group metadata in file
 parent: HDF object to create a group inside
 myName: Name of the group</p>
@@ -192,7 +162,7 @@ myName: Name of the group</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.fromHdf">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">fromHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.fromHdf" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.fromHdf" title="Permalink to this definition"></a></dt>
 <dd><p>Reads the object from a HDF group</p>
 </dd></dl>
 
@@ -297,39 +267,20 @@ myName: Name of the group</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.sensitivity">
-<span class="sig-name descname"><span class="pre">sensitivity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mod</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.sensitivity" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">sensitivity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mod</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.sensitivity" title="Permalink to this definition"></a></dt>
 <dd><p>Compute the sensitivty matrix for the given model</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.set_priors">
-<span class="sig-name descname"><span class="pre">set_priors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">height_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative_error_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additive_error_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.set_priors" title="Permalink to this definition"></a></dt>
-<dd><p>Set the priors on the datapoint’s perturbable parameters</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>heightPrior</strong> (<em>geobipy.baseDistribution</em><em>, </em><em>optional</em>) – The prior to attach to the height. Must be univariate</p></li>
-<li><p><strong>relativeErrorPrior</strong> (<em>geobipy.baseDistribution</em><em>, </em><em>optional</em>) – The prior to attach to the relative error.
-If the datapoint has only one system, relativeErrorPrior is univariate.
-If there are more than one system, relativeErrorPrior is multivariate.</p></li>
-<li><p><strong>additiveErrorPrior</strong> (<em>geobipy.baseDistribution</em><em>, </em><em>optional</em>) – The prior to attach to the relative error.
-If the datapoint has only one system, additiveErrorPrior is univariate.
-If there are more than one system, additiveErrorPrior is multivariate.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.updatePosteriors">
-<span class="sig-name descname"><span class="pre">updatePosteriors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.updatePosteriors" title="Permalink to this definition"></a></dt>
-<dd><p>Update any attached posteriors</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.updateSensitivity">
 <span class="sig-name descname"><span class="pre">updateSensitivity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.updateSensitivity" title="Permalink to this definition"></a></dt>
 <dd><p>Compute an updated sensitivity matrix based on the one already containined in the FdemDataPoint object</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.update_posteriors">
+<span class="sig-name descname"><span class="pre">update_posteriors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint.update_posteriors" title="Permalink to this definition"></a></dt>
+<dd><p>Update any attached posteriors</p>
 </dd></dl>
 
 </dd></dl>
@@ -353,7 +304,7 @@ If there are more than one system, additiveErrorPrior is multivariate.</p></li>
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-
+   
 
 </footer>
         </div>
@@ -364,7 +315,7 @@ If there are more than one system, additiveErrorPrior is multivariate.</p></li>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
+  </script> 
 
 </body>
 </html>

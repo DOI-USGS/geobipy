@@ -5,14 +5,12 @@
 
 Computation times
 =================
-**00:24.727** total execution time for **examples_Datapoints** files:
+**00:03.317** total execution time for **examples_Datapoints** files:
 
 +-----------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Datapoints_plot_resolve_datapoint.py` (``plot_resolve_datapoint.py``) | 00:19.417 | 0.0 MB |
+| :ref:`sphx_glr_examples_Datapoints_plot_skytem_datapoint.py` (``plot_skytem_datapoint.py``)   | 00:03.317 | 0.0 MB |
 +-----------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Datapoints_plot_aerotem_datapoint.py` (``plot_aerotem_datapoint.py``) | 00:02.246 | 0.0 MB |
+| :ref:`sphx_glr_examples_Datapoints_plot_resolve_datapoint.py` (``plot_resolve_datapoint.py``) | 00:00.000 | 0.0 MB |
 +-----------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Datapoints_plot_tempest_datapoint.py` (``plot_tempest_datapoint.py``) | 00:01.811 | 0.0 MB |
-+-----------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Datapoints_plot_skytem_datapoint.py` (``plot_skytem_datapoint.py``)   | 00:01.253 | 0.0 MB |
+| :ref:`sphx_glr_examples_Datapoints_plot_tempest_datapoint.py` (``plot_tempest_datapoint.py``) | 00:00.000 | 0.0 MB |
 +-----------------------------------------------------------------------------------------------+-----------+--------+

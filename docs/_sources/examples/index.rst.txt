@@ -1,23 +1,26 @@
 :orphan:
 
-
-
-.. _sphx_glr_examples:
-
 ########
 Examples
 ########
 
+
 .. raw:: html
 
-    <div class="sphx-glr-clear"></div>
+    <div class="sphx-glr-thumbnails">
 
 
+.. raw:: html
 
-.. _sphx_glr_examples_Distributions:
+    </div>
 
-Distribtions
-============
+Distributions
+=============
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
 
 
 .. raw:: html
@@ -26,30 +29,28 @@ Distribtions
 
 .. only:: html
 
- .. figure:: /examples/Distributions/images/thumb/sphx_glr_plot_distributions_thumb.png
-     :alt: Distribution Class
+  .. image:: /examples/Distributions/images/thumb/sphx_glr_plot_distributions_thumb.png
+    :alt: Distribution Class
 
-     :ref:`sphx_glr_examples_Distributions_plot_distributions.py`
+  :ref:`sphx_glr_examples_Distributions_plot_distributions.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Distribution Class</div>
+    </div>
+
 
 .. raw:: html
 
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/Distributions/plot_distributions
-.. raw:: html
-
-    <div class="sphx-glr-clear"></div>
-
-
-
-.. _sphx_glr_examples_Statistics:
-
 Statistics
 ==========
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
 
 
 .. raw:: html
@@ -58,20 +59,16 @@ Statistics
 
 .. only:: html
 
- .. figure:: /examples/Statistics/images/thumb/sphx_glr_plot_histogram_1d_thumb.png
-     :alt: Histogram 1D
+  .. image:: /examples/Statistics/images/thumb/sphx_glr_plot_histogram_1d_thumb.png
+    :alt: Histogram 1D
 
-     :ref:`sphx_glr_examples_Statistics_plot_histogram_1d.py`
+  :ref:`sphx_glr_examples_Statistics_plot_histogram_1d.py`
 
 .. raw:: html
 
+      <div class="sphx-glr-thumbnail-title">Histogram 1D</div>
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/Statistics/plot_histogram_1d
 
 .. raw:: html
 
@@ -79,20 +76,16 @@ Statistics
 
 .. only:: html
 
- .. figure:: /examples/Statistics/images/thumb/sphx_glr_plot_histogram_2d_thumb.png
-     :alt: Histogram 2D
+  .. image:: /examples/Statistics/images/thumb/sphx_glr_plot_histogram_2d_thumb.png
+    :alt: Histogram 2D
 
-     :ref:`sphx_glr_examples_Statistics_plot_histogram_2d.py`
+  :ref:`sphx_glr_examples_Statistics_plot_histogram_2d.py`
 
 .. raw:: html
 
+      <div class="sphx-glr-thumbnail-title">Histogram 2D</div>
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/Statistics/plot_histogram_2d
 
 .. raw:: html
 
@@ -100,20 +93,16 @@ Statistics
 
 .. only:: html
 
- .. figure:: /examples/Statistics/images/thumb/sphx_glr_plot_histogram_3d_thumb.png
-     :alt: Histogram 3D
+  .. image:: /examples/Statistics/images/thumb/sphx_glr_plot_histogram_3d_thumb.png
+    :alt: Histogram 3D
 
-     :ref:`sphx_glr_examples_Statistics_plot_histogram_3d.py`
+  :ref:`sphx_glr_examples_Statistics_plot_histogram_3d.py`
 
 .. raw:: html
 
+      <div class="sphx-glr-thumbnail-title">Histogram 3D</div>
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/Statistics/plot_histogram_3d
 
 .. raw:: html
 
@@ -121,30 +110,28 @@ Statistics
 
 .. only:: html
 
- .. figure:: /examples/Statistics/images/thumb/sphx_glr_plot_StatArray_thumb.png
-     :alt: StatArray Class
+  .. image:: /examples/Statistics/images/thumb/sphx_glr_plot_StatArray_thumb.png
+    :alt: StatArray Class
 
-     :ref:`sphx_glr_examples_Statistics_plot_StatArray.py`
+  :ref:`sphx_glr_examples_Statistics_plot_StatArray.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">StatArray Class</div>
+    </div>
+
 
 .. raw:: html
 
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/Statistics/plot_StatArray
-.. raw:: html
-
-    <div class="sphx-glr-clear"></div>
-
-
-
-.. _sphx_glr_examples_Meshes:
-
 Meshes
 ======
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
 
 
 .. raw:: html
@@ -153,20 +140,16 @@ Meshes
 
 .. only:: html
 
- .. figure:: /examples/Meshes/images/thumb/sphx_glr_plot_rectilinear_mesh_1d_thumb.png
-     :alt: 1D Rectilinear Mesh
+  .. image:: /examples/Meshes/images/thumb/sphx_glr_plot_rectilinear_mesh_1d_thumb.png
+    :alt: 1D Rectilinear Mesh
 
-     :ref:`sphx_glr_examples_Meshes_plot_rectilinear_mesh_1d.py`
+  :ref:`sphx_glr_examples_Meshes_plot_rectilinear_mesh_1d.py`
 
 .. raw:: html
 
+      <div class="sphx-glr-thumbnail-title">1D Rectilinear Mesh</div>
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/Meshes/plot_rectilinear_mesh_1d
 
 .. raw:: html
 
@@ -174,20 +157,16 @@ Meshes
 
 .. only:: html
 
- .. figure:: /examples/Meshes/images/thumb/sphx_glr_plot_rectilinear_mesh_2d_thumb.png
-     :alt: 2D Rectilinear Mesh
+  .. image:: /examples/Meshes/images/thumb/sphx_glr_plot_rectilinear_mesh_2d_thumb.png
+    :alt: 2D Rectilinear Mesh
 
-     :ref:`sphx_glr_examples_Meshes_plot_rectilinear_mesh_2d.py`
+  :ref:`sphx_glr_examples_Meshes_plot_rectilinear_mesh_2d.py`
 
 .. raw:: html
 
+      <div class="sphx-glr-thumbnail-title">2D Rectilinear Mesh</div>
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/Meshes/plot_rectilinear_mesh_2d
 
 .. raw:: html
 
@@ -195,51 +174,28 @@ Meshes
 
 .. only:: html
 
- .. figure:: /examples/Meshes/images/thumb/sphx_glr_plot_rectilinear_mesh_3d_thumb.png
-     :alt: 3D Rectilinear Mesh
+  .. image:: /examples/Meshes/images/thumb/sphx_glr_plot_rectilinear_mesh_3d_thumb.png
+    :alt: 3D Rectilinear Mesh
 
-     :ref:`sphx_glr_examples_Meshes_plot_rectilinear_mesh_3d.py`
+  :ref:`sphx_glr_examples_Meshes_plot_rectilinear_mesh_3d.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">3D Rectilinear Mesh</div>
+    </div>
+
 
 .. raw:: html
 
     </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/Meshes/plot_rectilinear_mesh_3d
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="Topo Rectilinear Mesh 2D">
-
-.. only:: html
-
- .. figure:: /examples/Meshes/images/thumb/sphx_glr_plot_topo_rectilinear_mesh_2d_thumb.png
-     :alt: Topo Rectilinear Mesh 2D
-
-     :ref:`sphx_glr_examples_Meshes_plot_topo_rectilinear_mesh_2d.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/Meshes/plot_topo_rectilinear_mesh_2d
-.. raw:: html
-
-    <div class="sphx-glr-clear"></div>
-
-
-
-.. _sphx_glr_examples_Models:
 
 Models
 ======
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
 
 
 .. raw:: html
@@ -248,20 +204,16 @@ Models
 
 .. only:: html
 
- .. figure:: /examples/Models/images/thumb/sphx_glr_plot_model_1d_thumb.png
-     :alt: 1D Model with an infinite halfspace
+  .. image:: /examples/Models/images/thumb/sphx_glr_plot_model_1d_thumb.png
+    :alt: 1D Model with an infinite halfspace
 
-     :ref:`sphx_glr_examples_Models_plot_model_1d.py`
+  :ref:`sphx_glr_examples_Models_plot_model_1d.py`
 
 .. raw:: html
 
+      <div class="sphx-glr-thumbnail-title">1D Model with an infinite halfspace</div>
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/Models/plot_model_1d
 
 .. raw:: html
 
@@ -269,20 +221,16 @@ Models
 
 .. only:: html
 
- .. figure:: /examples/Models/images/thumb/sphx_glr_plot_model_2d_thumb.png
-     :alt: 2D Rectilinear Model
+  .. image:: /examples/Models/images/thumb/sphx_glr_plot_model_2d_thumb.png
+    :alt: 2D Rectilinear Model
 
-     :ref:`sphx_glr_examples_Models_plot_model_2d.py`
+  :ref:`sphx_glr_examples_Models_plot_model_2d.py`
 
 .. raw:: html
 
+      <div class="sphx-glr-thumbnail-title">2D Rectilinear Model</div>
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/Models/plot_model_2d
 
 .. raw:: html
 
@@ -290,27 +238,20 @@ Models
 
 .. only:: html
 
- .. figure:: /examples/Models/images/thumb/sphx_glr_plot_model_3d_thumb.png
-     :alt: 3D Rectilinear Model
+  .. image:: /examples/Models/images/thumb/sphx_glr_plot_model_3d_thumb.png
+    :alt: 3D Rectilinear Model
 
-     :ref:`sphx_glr_examples_Models_plot_model_3d.py`
+  :ref:`sphx_glr_examples_Models_plot_model_3d.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">3D Rectilinear Model</div>
+    </div>
+
 
 .. raw:: html
 
     </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/Models/plot_model_3d
-.. raw:: html
-
-    <div class="sphx-glr-clear"></div>
-
-
-
-.. _sphx_glr_examples_Data:
 
 Data
 ====
@@ -318,24 +259,25 @@ Data
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="The 3D Point Cloud class extracts and utilizes the [Point](Point%20Class.ipynb) Class">
+    <div class="sphx-glr-thumbnails">
 
-.. only:: html
-
- .. figure:: /examples/Data/images/thumb/sphx_glr_plot_pointcloud3d_thumb.png
-     :alt: 3D Point Cloud class
-
-     :ref:`sphx_glr_examples_Data_plot_pointcloud3d.py`
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="3D Point Cloud class">
+
+.. only:: html
+
+  .. image:: /examples/Data/images/thumb/sphx_glr_plot_pointcloud3d_thumb.png
+    :alt: 3D Point Cloud class
+
+  :ref:`sphx_glr_examples_Data_plot_pointcloud3d.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">3D Point Cloud class</div>
     </div>
 
-
-.. toctree::
-   :hidden:
-
-   /examples/Data/plot_pointcloud3d
 
 .. raw:: html
 
@@ -343,20 +285,33 @@ Data
 
 .. only:: html
 
- .. figure:: /examples/Data/images/thumb/sphx_glr_plot_frequency_dataset_thumb.png
-     :alt: Frequency domain dataset
+  .. image:: /examples/Data/images/thumb/sphx_glr_plot_frequency_dataset_thumb.png
+    :alt: Frequency domain dataset
 
-     :ref:`sphx_glr_examples_Data_plot_frequency_dataset.py`
+  :ref:`sphx_glr_examples_Data_plot_frequency_dataset.py`
 
 .. raw:: html
 
+      <div class="sphx-glr-thumbnail-title">Frequency domain dataset</div>
     </div>
 
 
-.. toctree::
-   :hidden:
+.. raw:: html
 
-   /examples/Data/plot_frequency_dataset
+    <div class="sphx-glr-thumbcontainer" tooltip="Skytem dataset">
+
+.. only:: html
+
+  .. image:: /examples/Data/images/thumb/sphx_glr_plot_skytem_dataset_thumb.png
+    :alt: Skytem dataset
+
+  :ref:`sphx_glr_examples_Data_plot_skytem_dataset.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Skytem dataset</div>
+    </div>
+
 
 .. raw:: html
 
@@ -364,72 +319,28 @@ Data
 
 .. only:: html
 
- .. figure:: /examples/Data/images/thumb/sphx_glr_plot_tempest_dataset_thumb.png
-     :alt: Tempest dataset
+  .. image:: /examples/Data/images/thumb/sphx_glr_plot_tempest_dataset_thumb.png
+    :alt: Tempest dataset
 
-     :ref:`sphx_glr_examples_Data_plot_tempest_dataset.py`
+  :ref:`sphx_glr_examples_Data_plot_tempest_dataset.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Tempest dataset</div>
+    </div>
+
 
 .. raw:: html
 
     </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/Data/plot_tempest_dataset
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="Time domain dataset">
-
-.. only:: html
-
- .. figure:: /examples/Data/images/thumb/sphx_glr_plot_skytem_dataset_thumb.png
-     :alt: Time domain dataset
-
-     :ref:`sphx_glr_examples_Data_plot_skytem_dataset.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/Data/plot_skytem_dataset
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="Time domain dataset">
-
-.. only:: html
-
- .. figure:: /examples/Data/images/thumb/sphx_glr_plot_aerotem_dataset_thumb.png
-     :alt: Time domain dataset
-
-     :ref:`sphx_glr_examples_Data_plot_aerotem_dataset.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/Data/plot_aerotem_dataset
-.. raw:: html
-
-    <div class="sphx-glr-clear"></div>
-
-
-
-.. _sphx_glr_examples_Datapoints:
 
 Datapoints
 ==========
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
 
 
 .. raw:: html
@@ -438,20 +349,33 @@ Datapoints
 
 .. only:: html
 
- .. figure:: /examples/Datapoints/images/thumb/sphx_glr_plot_resolve_datapoint_thumb.png
-     :alt: Frequency domain datapoint
+  .. image:: /examples/Datapoints/images/thumb/sphx_glr_plot_resolve_datapoint_thumb.png
+    :alt: Frequency domain datapoint
 
-     :ref:`sphx_glr_examples_Datapoints_plot_resolve_datapoint.py`
+  :ref:`sphx_glr_examples_Datapoints_plot_resolve_datapoint.py`
 
 .. raw:: html
 
+      <div class="sphx-glr-thumbnail-title">Frequency domain datapoint</div>
     </div>
 
 
-.. toctree::
-   :hidden:
+.. raw:: html
 
-   /examples/Datapoints/plot_resolve_datapoint
+    <div class="sphx-glr-thumbcontainer" tooltip="Skytem Datapoint Class">
+
+.. only:: html
+
+  .. image:: /examples/Datapoints/images/thumb/sphx_glr_plot_skytem_datapoint_thumb.png
+    :alt: Skytem Datapoint Class
+
+  :ref:`sphx_glr_examples_Datapoints_plot_skytem_datapoint.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Skytem Datapoint Class</div>
+    </div>
+
 
 .. raw:: html
 
@@ -459,69 +383,20 @@ Datapoints
 
 .. only:: html
 
- .. figure:: /examples/Datapoints/images/thumb/sphx_glr_plot_tempest_datapoint_thumb.png
-     :alt: Tempest Datapoint Class
+  .. image:: /examples/Datapoints/images/thumb/sphx_glr_plot_tempest_datapoint_thumb.png
+    :alt: Tempest Datapoint Class
 
-     :ref:`sphx_glr_examples_Datapoints_plot_tempest_datapoint.py`
+  :ref:`sphx_glr_examples_Datapoints_plot_tempest_datapoint.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Tempest Datapoint Class</div>
+    </div>
+
 
 .. raw:: html
 
     </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/Datapoints/plot_tempest_datapoint
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="Time Domain Datapoint Class">
-
-.. only:: html
-
- .. figure:: /examples/Datapoints/images/thumb/sphx_glr_plot_skytem_datapoint_thumb.png
-     :alt: Time Domain Datapoint Class
-
-     :ref:`sphx_glr_examples_Datapoints_plot_skytem_datapoint.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/Datapoints/plot_skytem_datapoint
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="Time Domain Datapoint Class">
-
-.. only:: html
-
- .. figure:: /examples/Datapoints/images/thumb/sphx_glr_plot_aerotem_datapoint_thumb.png
-     :alt: Time Domain Datapoint Class
-
-     :ref:`sphx_glr_examples_Datapoints_plot_aerotem_datapoint.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/Datapoints/plot_aerotem_datapoint
-.. raw:: html
-
-    <div class="sphx-glr-clear"></div>
-
-
-
-.. _sphx_glr_examples_Inference:
 
 Inference
 =========
@@ -529,76 +404,20 @@ Inference
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="All plotting in GeoBIPy can be carried out using the 3D inference class">
+    <div class="sphx-glr-thumbnails">
 
-.. only:: html
-
- .. figure:: /examples/Inference/images/thumb/sphx_glr_plot_inference_1d_aerotem_thumb.png
-     :alt: 1D Inference of Aerotem Data
-
-     :ref:`sphx_glr_examples_Inference_plot_inference_1d_aerotem.py`
 
 .. raw:: html
 
     </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/Inference/plot_inference_1d_aerotem
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="All plotting in GeoBIPy can be carried out using the 3D inference class">
-
-.. only:: html
-
- .. figure:: /examples/Inference/images/thumb/sphx_glr_plot_inference_1d_resolve_thumb.png
-     :alt: 1D Inference of Resolve Data
-
-     :ref:`sphx_glr_examples_Inference_plot_inference_1d_resolve.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/Inference/plot_inference_1d_resolve
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="All plotting in GeoBIPy can be carried out using the 3D inference class">
-
-.. only:: html
-
- .. figure:: /examples/Inference/images/thumb/sphx_glr_plot_inference_1d_skytem_thumb.png
-     :alt: 1D Inference of Skytem Data
-
-     :ref:`sphx_glr_examples_Inference_plot_inference_1d_skytem.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /examples/Inference/plot_inference_1d_skytem
-.. raw:: html
-
-    <div class="sphx-glr-clear"></div>
-
-
-
-.. _sphx_glr_examples_HDF5:
 
 HDF 5
 =====
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
 
 
 .. raw:: html
@@ -607,10 +426,16 @@ HDF 5
 
 .. only:: html
 
- .. figure:: /examples/HDF5/images/thumb/sphx_glr_hdf5_thumb.png
-     :alt: Using HDF5 within GeoBIPy
+  .. image:: /examples/HDF5/images/thumb/sphx_glr_hdf5_thumb.png
+    :alt: Using HDF5 within GeoBIPy
 
-     :ref:`sphx_glr_examples_HDF5_hdf5.py`
+  :ref:`sphx_glr_examples_HDF5_hdf5.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Using HDF5 within GeoBIPy</div>
+    </div>
+
 
 .. raw:: html
 
@@ -619,29 +444,29 @@ HDF 5
 
 .. toctree::
    :hidden:
+   :includehidden:
 
-   /examples/HDF5/hdf5
-.. raw:: html
-
-    <div class="sphx-glr-clear"></div>
-
-
-
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-gallery
+   /examples/Distributions/index.rst
+   /examples/Statistics/index.rst
+   /examples/Meshes/index.rst
+   /examples/Models/index.rst
+   /examples/Data/index.rst
+   /examples/Datapoints/index.rst
+   /examples/Inference/index.rst
+   /examples/HDF5/index.rst
 
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+.. only:: html
 
-    :download:`Download all examples in Python source code: examples_python.zip </examples/examples_python.zip>`
+  .. container:: sphx-glr-footer sphx-glr-footer-gallery
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
+      :download:`Download all examples in Python source code: examples_python.zip </examples/examples_python.zip>`
 
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-    :download:`Download all examples in Jupyter notebooks: examples_jupyter.zip </examples/examples_jupyter.zip>`
+      :download:`Download all examples in Jupyter notebooks: examples_jupyter.zip </examples/examples_jupyter.zip>`
 
 
 .. only:: html

@@ -25,12 +25,12 @@ Tempest dataset
 
 .. code-block:: default
 
+    import h5py
     from geobipy import plotting as cP
     from os.path import join
     import matplotlib.pyplot as plt
     import numpy as np
-    from geobipy.src.classes.core.StatArray import StatArray
-    from geobipy.src.classes.data.dataset.TempestData import TempestData
+    from geobipy import TempestData
 
 
 
@@ -48,7 +48,7 @@ Reading in the Data
 
 .. code-block:: default
 
-    dataFolder = "..//supplementary//Data//"
+    dataFolder = "..//supplementary//data//"
 
     # # The data file name
     # dataFiles = dataFolder + 'Tempest.nc'
@@ -60,7 +60,7 @@ Reading in the Data
     # TD = TempestData.read_netcdf(dataFiles, systemFiles)
 
     # TD.write_csv(dataFolder + 'Tempest.csv')
-    TD = TempestData.read_csv(dataFolder + 'Tempest.csv', system_filename=dataFolder + 'Tempest.stm')
+    TD = TempestData.read_csv(dataFolder + 'tempest_saline_clay.csv', system_filename=dataFolder + 'Tempest.stm')
 
 
 
@@ -92,12 +92,8 @@ Plot the locations of the data points
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/base/utilities.py:865: RuntimeWarning: invalid value encountered in true_divide
-      equalized = (equalized - a1) / (a2 - a1)
 
     Text(0.5, 1.0, 'Scatter plot')
 
@@ -126,8 +122,6 @@ Plot all the data along the specified line
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
 
@@ -144,7 +138,7 @@ Or, plot specific channels in the data
 .. code-block:: default
 
     plt.figure(figsize=(8,6))
-    _ = TD.plot(system=0, channels=[0, 6, 18])
+    _ = TD.plot_data(system=0, channels=[0, 6, 18])
     plt.title("3 channels of data")
 
 
@@ -157,8 +151,6 @@ Or, plot specific channels in the data
 
 
 .. rst-class:: sphx-glr-script-out
-
- Out:
 
  .. code-block:: none
 
@@ -186,8 +178,6 @@ Or, plot specific channels in the data
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
 
@@ -195,7 +185,7 @@ Or, plot specific channels in the data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 56-61
+.. GENERATED FROM PYTHON SOURCE LINES 56-89
 
 .. code-block:: default
 
@@ -205,90 +195,39 @@ Or, plot specific channels in the data
     plt.title("scatter plot of specific channel")
 
 
+    # with h5py.File('tdem.h5', 'w') as f:
+    #     TD.createHdf(f, 'tdem')
+    #     TD.writeHdf(f, 'tdem')
+
+    # with h5py.File('tdem.h5', 'r') as f:
+    #     TD3 = TempestData.fromHdf(f['tdem'])
+
+    # with h5py.File('tdem.h5', 'r') as f:
+    #     tdp = TempestData.fromHdf(f['tdem'], index=0)
 
 
-.. image-sg:: /examples/Data/images/sphx_glr_plot_tempest_dataset_005.png
-   :alt: scatter plot of specific channel
-   :srcset: /examples/Data/images/sphx_glr_plot_tempest_dataset_005.png
-   :class: sphx-glr-single-img
+    # #%%
+    # # Obtain a line from the data set
+    # # +++++++++++++++++++++++++++++++
+    # line = TD.line(0.0)
 
+    # ################################################################################
+    # plt.figure()
+    # _ = line.scatter2D()
+    # plt.title('Channel')
 
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-
-    Text(0.5, 1.0, 'scatter plot of specific channel')
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 62-63
-
-TD.toVTK('TD1', format='binary')
-
-.. GENERATED FROM PYTHON SOURCE LINES 66-68
-
-Obtain a line from the data set
-+++++++++++++++++++++++++++++++
-
-.. GENERATED FROM PYTHON SOURCE LINES 68-70
-
-.. code-block:: default
-
-    line = TD.line(0.0)
-
-
-
-
-
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 71-75
-
-.. code-block:: default
-
-    plt.figure()
-    _ = line.scatter2D()
-    plt.title('Channel')
-
-
-
-
-.. image-sg:: /examples/Data/images/sphx_glr_plot_tempest_dataset_006.png
-   :alt: Channel
-   :srcset: /examples/Data/images/sphx_glr_plot_tempest_dataset_006.png
-   :class: sphx-glr-single-img
-
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-
-    Text(0.5, 1.0, 'Channel')
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 76-81
-
-.. code-block:: default
-
-    plt.figure()
-    _ = line.plot(xAxis='index', log=10)
-    plt.title("All data along line")
+    # ################################################################################
+    # plt.figure()
+    # _ = line.plot_data(xAxis='index', log=10)
+    # plt.title("All data along line")
 
     plt.show()
 
 
 
-.. image-sg:: /examples/Data/images/sphx_glr_plot_tempest_dataset_007.png
-   :alt: All data along line
-   :srcset: /examples/Data/images/sphx_glr_plot_tempest_dataset_007.png
+.. image-sg:: /examples/Data/images/sphx_glr_plot_tempest_dataset_005.png
+   :alt: scatter plot of specific channel
+   :srcset: /examples/Data/images/sphx_glr_plot_tempest_dataset_005.png
    :class: sphx-glr-single-img
 
 
@@ -298,28 +237,23 @@ Obtain a line from the data set
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.862 seconds)
+   **Total running time of the script:** ( 0 minutes  3.685 seconds)
 
 
 .. _sphx_glr_download_examples_Data_plot_tempest_dataset.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: plot_tempest_dataset.py <plot_tempest_dataset.py>`
 
-     :download:`Download Python source code: plot_tempest_dataset.py <plot_tempest_dataset.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: plot_tempest_dataset.ipynb <plot_tempest_dataset.ipynb>`
+      :download:`Download Jupyter notebook: plot_tempest_dataset.ipynb <plot_tempest_dataset.ipynb>`
 
 
 .. only:: html

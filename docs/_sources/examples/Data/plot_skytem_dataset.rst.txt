@@ -18,10 +18,10 @@
 .. _sphx_glr_examples_Data_plot_skytem_dataset.py:
 
 
-Time domain dataset
---------------------
+Skytem dataset
+--------------
 
-.. GENERATED FROM PYTHON SOURCE LINES 6-13
+.. GENERATED FROM PYTHON SOURCE LINES 6-14
 
 .. code-block:: default
 
@@ -29,8 +29,9 @@ Time domain dataset
     from os.path import join
     import matplotlib.pyplot as plt
     import numpy as np
-    from geobipy.src.classes.core.StatArray import StatArray
-    from geobipy.src.classes.data.dataset.TdemData import TdemData
+    from geobipy import StatArray
+    from geobipy import TdemData
+    import h5py
 
 
 
@@ -39,34 +40,134 @@ Time domain dataset
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 14-16
+.. GENERATED FROM PYTHON SOURCE LINES 15-17
 
 Reading in the Data
 +++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 18-25
+.. GENERATED FROM PYTHON SOURCE LINES 19-31
 
 .. code-block:: default
 
-    dataFolder = "..//supplementary//Data//"
+    dataFolder = "..//supplementary//data//"
     # The data file name
-    dataFiles=dataFolder + 'Skytem_small.csv'
+    dataFiles=dataFolder + 'skytem_saline_clay.csv'
     # dataFiles = dataFolder + 'Skytem.csv'
     # The EM system file name
     systemFiles=[dataFolder + 'SkytemHM-SLV.stm', dataFolder + 'SkytemLM-SLV.stm']
 
+    from pathlib import Path
+    for f in systemFiles[:1]:
+        txt = Path(f).read_text()
+        print(txt)
 
 
 
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    System Begin
+            Name = SkyTemHighMoment-SLV
+            Type = Time Domain
+
+            Transmitter Begin
+                    NumberOfTurns = 1
+                    PeakCurrent   = 1
+                    LoopArea      = 1
+                    BaseFrequency = 30
+                    WaveFormCurrent Begin
+                -8.0000e-03            0
+                -7.5000e-03   1.9260e-01
+                -7.0000e-03   3.4950e-01
+                -6.5000e-03   4.7732e-01
+                -6.0000e-03   5.8145e-01
+                -5.5000e-03   6.6627e-01
+                -5.0000e-03   7.3538e-01
+                -4.5000e-03   7.9167e-01
+                -4.0000e-03   8.3753e-01
+                -3.5000e-03   8.7490e-01
+                -3.0000e-03   9.0533e-01
+                -2.5000e-03   9.3013e-01
+                -2.0000e-03   9.5032e-01
+                -1.5000e-03   9.6678e-01
+                -1.0000e-03   9.8018e-01
+                -5.0000e-04   9.9110e-01
+                          0   1.0000e+00
+                 4.8500e-05   1.0813e-02
+                 4.9000e-05   5.2475e-03
+                 4.9500e-05   2.7532e-03
+                 5.0000e-05   1.4445e-03
+                 5.0500e-05   7.5787e-04
+                 5.1000e-05   3.9762e-04
+                 5.1500e-05   2.0862e-04
+                 5.2000e-05   1.0945e-04
+                 5.2500e-05            0
+                 8.6667e-03            0
+                    WaveFormCurrent End
+                    WaveformDigitisingFrequency = 250000
+            Transmitter End
+
+            Receiver Begin
+                    NumberOfWindows = 17
+                    WindowWeightingScheme = AreaUnderCurve
+
+                    WindowTimes Begin
+                            1.2729e-04 1.5890e-04
+                            1.5929e-04 2.0090e-04
+                            2.0129e-04 2.5190e-04
+                            2.5229e-04 3.1690e-04
+                            3.1729e-04 3.9890e-04
+                            3.9929e-04 5.0190e-04
+                            5.0229e-04 6.3190e-04
+                            6.3229e-04 7.9490e-04
+                            7.9529e-04 1.0009e-03
+                            1.0013e-03 1.2599e-03
+                            1.2603e-03 1.5859e-03
+                            1.5863e-03 1.9959e-03
+                            1.9963e-03 2.5129e-03
+                            2.5133e-03 3.1629e-03
+                            3.1633e-03 3.9819e-03
+                            3.9823e-03 5.0129e-03
+                            5.0133e-03 6.3109e-03
+                    WindowTimes End
+
+                    LowPassFilter Begin
+                            CutOffFrequency = 300000 450000
+                            Order           = 1       1
+                    LowPassFilter End
+
+            Receiver End
+
+            ForwardModelling Begin
+
+                    OutputType = dB/dt
+
+                    SaveDiagnosticFiles = no
+
+                    XOutputScaling = 0
+                    YOutputScaling = 0
+                    ZOutputScaling = 1
+                    SecondaryFieldNormalisation  =  none
+
+                    FrequenciesPerDecade = 5
+                    NumberOfAbsiccaInHankelTransformEvaluation = 21
+
+            ForwardModelling End
+
+    System End
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 26-27
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 32-33
 
 Read in the data from file
 
-.. GENERATED FROM PYTHON SOURCE LINES 27-29
+.. GENERATED FROM PYTHON SOURCE LINES 33-35
 
 .. code-block:: default
 
@@ -79,11 +180,11 @@ Read in the data from file
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 30-31
+.. GENERATED FROM PYTHON SOURCE LINES 36-37
 
 Plot the locations of the data points
 
-.. GENERATED FROM PYTHON SOURCE LINES 31-34
+.. GENERATED FROM PYTHON SOURCE LINES 37-40
 
 .. code-block:: default
 
@@ -102,16 +203,16 @@ Plot the locations of the data points
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 35-36
+.. GENERATED FROM PYTHON SOURCE LINES 41-42
 
 Plot all the data along the specified line
 
-.. GENERATED FROM PYTHON SOURCE LINES 36-39
+.. GENERATED FROM PYTHON SOURCE LINES 42-45
 
 .. code-block:: default
 
     plt.figure(2, figsize=(8,6))
-    _ = TD.plotLine(100101.0, log=10)
+    _ = TD.plotLine(0.0, log=10)
 
 
 
@@ -125,16 +226,16 @@ Plot all the data along the specified line
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 40-41
+.. GENERATED FROM PYTHON SOURCE LINES 46-47
 
 Or, plot specific channels in the data
 
-.. GENERATED FROM PYTHON SOURCE LINES 41-44
+.. GENERATED FROM PYTHON SOURCE LINES 47-50
 
 .. code-block:: default
 
     plt.figure(3, figsize=(8,6))
-    _ = TD.plot(system=0, channels=[1, 3, 5], log=10)
+    _ = TD.plot_data(system=0, channels=[1, 3, 5], log=10)
 
 
 
@@ -148,7 +249,7 @@ Or, plot specific channels in the data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 45-51
+.. GENERATED FROM PYTHON SOURCE LINES 51-57
 
 .. code-block:: default
 
@@ -170,7 +271,7 @@ Or, plot specific channels in the data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 52-60
+.. GENERATED FROM PYTHON SOURCE LINES 58-94
 
 .. code-block:: default
 
@@ -178,73 +279,30 @@ Or, plot specific channels in the data
     ax = TD.scatter2D(s=1.0, c=TD.secondary_field[:, TD.channel_index(system=0, channel=6)], equalize=True, log=10)
     plt.axis('equal')
 
+
+    # with h5py.File('tdem.h5', 'w') as f:
+    #     TD.createHdf(f, 'tdem')
+    #     TD.writeHdf(f, 'tdem')
+
+    # with h5py.File('tdem.h5', 'r') as f:
+    #     TD3 = TdemData.fromHdf(f['tdem'])
+
+    # with h5py.File('tdem.h5', 'r') as f:
+    #     tdp = TdemData.fromHdf(f['tdem'], index=0)
+
+
+    # #%%
+    # # Obtain a line from the data set
+    # # +++++++++++++++++++++++++++++++
+    # line = TD.line(0.0)
+
     # ################################################################################
-    # # TD.toVTK('TD1', format='binary')
+    # plt.figure(6)
+    # _ = line.scatter2D(c=line.secondary_field[:, line.channel_index(system=0, channel=6)], log=10)
 
-
-
-
-
-.. image-sg:: /examples/Data/images/sphx_glr_plot_skytem_dataset_005.png
-   :alt: plot skytem dataset
-   :srcset: /examples/Data/images/sphx_glr_plot_skytem_dataset_005.png
-   :class: sphx-glr-single-img
-
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-
-    (430834.48, 434167.12, 4194246.3, 4195448.7)
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 61-63
-
-Obtain a line from the data set
-+++++++++++++++++++++++++++++++
-
-.. GENERATED FROM PYTHON SOURCE LINES 63-65
-
-.. code-block:: default
-
-    line = TD.line(100101.0)
-
-
-
-
-
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 66-69
-
-.. code-block:: default
-
-    plt.figure(6)
-    _ = line.scatter2D(c=line.secondary_field[:, line.channel_index(system=0, channel=6)], log=10)
-
-
-
-
-.. image-sg:: /examples/Data/images/sphx_glr_plot_skytem_dataset_006.png
-   :alt: plot skytem dataset
-   :srcset: /examples/Data/images/sphx_glr_plot_skytem_dataset_006.png
-   :class: sphx-glr-single-img
-
-
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 70-80
-
-.. code-block:: default
-
-    plt.figure(7)
-    _ = line.plot(xAxis='index', log=10)
+    # ################################################################################
+    # plt.figure(7)
+    # _ = line.plot(xAxis='index', log=10)
 
     # Prepare the dataset so that we can read a point at a time.
     Dataset = TdemData._initialize_sequential_reading(dataFiles, systemFiles)
@@ -256,16 +314,16 @@ Obtain a line from the data set
 
 
 
-.. image-sg:: /examples/Data/images/sphx_glr_plot_skytem_dataset_007.png
+.. image-sg:: /examples/Data/images/sphx_glr_plot_skytem_dataset_005.png
    :alt: plot skytem dataset
-   :srcset: /examples/Data/images/sphx_glr_plot_skytem_dataset_007.png
+   :srcset: /examples/Data/images/sphx_glr_plot_skytem_dataset_005.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 81-132
+.. GENERATED FROM PYTHON SOURCE LINES 95-146
 
 File Format for time domain data
 ++++++++++++++++++++++++++++++++
@@ -319,7 +377,7 @@ Example Header
 ______________
 Line fid easting northing elevation height txrx_dx txrx_dy txrx_dz TxPitch TxRoll TxYaw RxPitch RxRoll RxYaw Off[0] Off[1]
 
-.. GENERATED FROM PYTHON SOURCE LINES 134-146
+.. GENERATED FROM PYTHON SOURCE LINES 148-160
 
 File Format for a time domain system
 ++++++++++++++++++++++++++++++++++++
@@ -337,28 +395,23 @@ Example system files are contained in
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.707 seconds)
+   **Total running time of the script:** ( 0 minutes  1.768 seconds)
 
 
 .. _sphx_glr_download_examples_Data_plot_skytem_dataset.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: plot_skytem_dataset.py <plot_skytem_dataset.py>`
 
-     :download:`Download Python source code: plot_skytem_dataset.py <plot_skytem_dataset.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: plot_skytem_dataset.ipynb <plot_skytem_dataset.ipynb>`
+      :download:`Download Jupyter notebook: plot_skytem_dataset.ipynb <plot_skytem_dataset.ipynb>`
 
 
 .. only:: html

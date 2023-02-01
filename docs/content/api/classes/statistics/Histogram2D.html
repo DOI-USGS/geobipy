@@ -19,7 +19,9 @@
         <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
         <script src="../../../../_static/jquery.js"></script>
         <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
@@ -90,11 +92,11 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../api.html">API</a> &raquo;</li>
-          <li><a href="../classes.html">Classes used in GeoBIPy</a> &raquo;</li>
-          <li><a href="statistics.html">Statistics classes</a> &raquo;</li>
-      <li>Histogram2D</li>
+      <li><a href="../../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../api.html">API</a></li>
+          <li class="breadcrumb-item"><a href="../classes.html">Classes used in GeoBIPy</a></li>
+          <li class="breadcrumb-item"><a href="statistics.html">Statistics classes</a></li>
+      <li class="breadcrumb-item active">Histogram2D</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../../_sources/content/api/classes/statistics/Histogram2D.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -105,29 +107,17 @@
            <div itemprop="articleBody">
              
   <section id="histogram2d">
-<h1>Histogram2D<a class="headerlink" href="#histogram2d" title="Permalink to this headline"></a></h1>
-digraph inheritancede093050cf {
-bgcolor=transparent;
-rankdir=LR;
-size=&quot;8.0, 12.0&quot;;
-  &quot;ABC&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Helper class that provides a standard way to create an ABC using&quot;];
-  &quot;Histogram&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;];
-  &quot;myObject&quot; -&gt; &quot;Histogram&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;Histogram2D&quot; [URL=&quot;#geobipy.src.classes.statistics.Histogram2D.Histogram2D&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;2D Histogram class that can update and plot efficiently.&quot;];
-  &quot;Histogram&quot; -&gt; &quot;Histogram2D&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;RectilinearMesh2D&quot; -&gt; &quot;Histogram2D&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;Mesh&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Abstract Base Class&quot;];
-  &quot;myObject&quot; -&gt; &quot;Mesh&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;RectilinearMesh2D&quot; [URL=&quot;../mesh/RectilinearMesh2D.html#geobipy.src.classes.mesh.RectilinearMesh2D.RectilinearMesh2D&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defining a 2D rectilinear mesh with cell centres and edges.&quot;];
-  &quot;Mesh&quot; -&gt; &quot;RectilinearMesh2D&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;myObject&quot; [URL=&quot;../core/myObject.html#geobipy.src.classes.core.myObject.myObject&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Abstract base class&quot;];
-  &quot;ABC&quot; -&gt; &quot;myObject&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-}
-<span class="target" id="module-geobipy.src.classes.statistics.Histogram2D"></span><p>&#64;Histogram_Class
+<h1>Histogram2D<a class="headerlink" href="#histogram2d" title="Permalink to this heading"></a></h1>
+<div class="graphviz"><img src="../../../../_images/inheritance-9ec68ccb4998858eb40384d5bddc912ee5105dfd.png" alt="Inheritance diagram of geobipy.src.classes.statistics.Histogram2D" usemap="#inheritancede093050cf" class="inheritance graphviz" /></div>
+<map id="inheritancede093050cf" name="inheritancede093050cf">
+<area shape="rect" id="node5" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="125,5,204,31"/>
+<area shape="rect" id="node2" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D" target="_top" title="2D Histogram class that can update and plot efficiently." alt="" coords="553,5,652,31"/>
+<area shape="rect" id="node3" href="../mesh/RectilinearMesh2D.html#geobipy.src.classes.mesh.RectilinearMesh2D.RectilinearMesh2D" target="_top" title="Class defining a 2D rectilinear mesh with cell centres and edges." alt="" coords="372,5,505,31"/>
+</map><span class="target" id="module-geobipy.src.classes.statistics.Histogram2D"></span><p>&#64;Histogram_Class
 Module describing an efficient histogram class</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="geobipy.src.classes.statistics.Histogram2D.Histogram2D">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.statistics.Histogram2D.</span></span><span class="sig-name descname"><span class="pre">Histogram2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.statistics.Histogram2D.</span></span><span class="sig-name descname"><span class="pre">Histogram2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D" title="Permalink to this definition"></a></dt>
 <dd><p>2D Histogram class that can update and plot efficiently.</p>
 <p>Class extension to the RectilinearMesh2D.  The mesh defines the x and y axes, while the Histogram2D manages the counts.</p>
 <p>Histogram2D(x, y, name, units)</p>
@@ -258,7 +248,7 @@ If ‘e’ or float: The range is the difference in log space, or ratio in linea
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.statistics.Histogram2D.Histogram2D.fromHdf">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">fromHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.fromHdf" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D.fromHdf" title="Permalink to this definition"></a></dt>
 <dd><p>Reads in the object from a HDF file</p>
 </dd></dl>
 

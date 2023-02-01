@@ -5,16 +5,14 @@
 
 Computation times
 =================
-**00:18.672** total execution time for **examples_Data** files:
+**00:08.405** total execution time for **examples_Data** files:
 
 +-----------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Data_plot_frequency_dataset.py` (``plot_frequency_dataset.py``) | 00:06.996 | 0.0 MB |
+| :ref:`sphx_glr_examples_Data_plot_pointcloud3d.py` (``plot_pointcloud3d.py``)           | 00:08.405 | 0.0 MB |
 +-----------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Data_plot_pointcloud3d.py` (``plot_pointcloud3d.py``)           | 00:04.019 | 0.0 MB |
+| :ref:`sphx_glr_examples_Data_plot_frequency_dataset.py` (``plot_frequency_dataset.py``) | 00:00.000 | 0.0 MB |
 +-----------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Data_plot_tempest_dataset.py` (``plot_tempest_dataset.py``)     | 00:03.862 | 0.0 MB |
+| :ref:`sphx_glr_examples_Data_plot_skytem_dataset.py` (``plot_skytem_dataset.py``)       | 00:00.000 | 0.0 MB |
 +-----------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Data_plot_aerotem_dataset.py` (``plot_aerotem_dataset.py``)     | 00:02.087 | 0.0 MB |
-+-----------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Data_plot_skytem_dataset.py` (``plot_skytem_dataset.py``)       | 00:01.707 | 0.0 MB |
+| :ref:`sphx_glr_examples_Data_plot_tempest_dataset.py` (``plot_tempest_dataset.py``)     | 00:00.000 | 0.0 MB |
 +-----------------------------------------------------------------------------------------+-----------+--------+

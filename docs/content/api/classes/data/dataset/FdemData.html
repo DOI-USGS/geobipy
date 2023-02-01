@@ -19,7 +19,9 @@
         <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
         <script src="../../../../../_static/jquery.js"></script>
         <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../../../_static/doctools.js"></script>
+        <script src="../../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" />
@@ -81,12 +83,12 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../../api.html">API</a> &raquo;</li>
-          <li><a href="../../classes.html">Classes used in GeoBIPy</a> &raquo;</li>
-          <li><a href="../data.html">Data classes</a> &raquo;</li>
-          <li><a href="dataset.html">Dataset classes</a> &raquo;</li>
-      <li>FdemData</li>
+      <li><a href="../../../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../api.html">API</a></li>
+          <li class="breadcrumb-item"><a href="../../classes.html">Classes used in GeoBIPy</a></li>
+          <li class="breadcrumb-item"><a href="../data.html">Data classes</a></li>
+          <li class="breadcrumb-item"><a href="dataset.html">Dataset classes</a></li>
+      <li class="breadcrumb-item active">FdemData</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../../../_sources/content/api/classes/data/dataset/FdemData.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -97,26 +99,18 @@
            <div itemprop="articleBody">
              
   <section id="fdemdata">
-<h1>FdemData<a class="headerlink" href="#fdemdata" title="Permalink to this headline"></a></h1>
-digraph inheritance66f423f7ef {
-bgcolor=transparent;
-rankdir=LR;
-size=&quot;8.0, 12.0&quot;;
-  &quot;ABC&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Helper class that provides a standard way to create an ABC using&quot;];
-  &quot;Data&quot; [URL=&quot;Data.html#geobipy.src.classes.data.dataset.Data.Data&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defining a set of Data.&quot;];
-  &quot;PointCloud3D&quot; -&gt; &quot;Data&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;FdemData&quot; [URL=&quot;#geobipy.src.classes.data.dataset.FdemData.FdemData&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class extension to geobipy.Data defining a Fourier domain electro magnetic data set&quot;];
-  &quot;Data&quot; -&gt; &quot;FdemData&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;PointCloud3D&quot; [URL=&quot;../../pointcloud/PointCloud3D.html#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;3D Point Cloud with x,y,z co-ordinates&quot;];
-  &quot;myObject&quot; -&gt; &quot;PointCloud3D&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;myObject&quot; [URL=&quot;../../core/myObject.html#geobipy.src.classes.core.myObject.myObject&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Abstract base class&quot;];
-  &quot;ABC&quot; -&gt; &quot;myObject&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-}
-<span class="target" id="module-geobipy.src.classes.data.dataset.FdemData"></span><p>&#64;FdemData_Class
+<h1>FdemData<a class="headerlink" href="#fdemdata" title="Permalink to this heading"></a></h1>
+<div class="graphviz"><img src="../../../../../_images/inheritance-86c3de71b1cdbdadf0763baf5b738e872b93d78b.png" alt="Inheritance diagram of geobipy.src.classes.data.dataset.FdemData" usemap="#inheritance66f423f7ef" class="inheritance graphviz" /></div>
+<map id="inheritance66f423f7ef" name="inheritance66f423f7ef">
+<area shape="rect" id="node5" href="../../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="125,5,204,31"/>
+<area shape="rect" id="node2" href="Data.html#geobipy.src.classes.data.dataset.Data.Data" target="_top" title="Class defining a set of Data." alt="" coords="403,5,475,31"/>
+<area shape="rect" id="node4" href="#geobipy.src.classes.data.dataset.FdemData.FdemData" target="_top" title="Class extension to geobipy.Data defining a Fourier domain electro magnetic data set" alt="" coords="523,5,605,31"/>
+<area shape="rect" id="node3" href="../../pointcloud/PointCloud3D.html#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D" target="_top" title="3D Point Cloud with x,y,z co&#45;ordinates" alt="" coords="252,5,355,31"/>
+</map><span class="target" id="module-geobipy.src.classes.data.dataset.FdemData"></span><p>&#64;FdemData_Class
 Module describing an EMData Set where channels are associated with an xyz co-ordinate</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.FdemData.FdemData">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.data.dataset.FdemData.</span></span><span class="sig-name descname"><span class="pre">FdemData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.FdemData.FdemData" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.data.dataset.FdemData.</span></span><span class="sig-name descname"><span class="pre">FdemData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.FdemData.FdemData" title="Permalink to this definition"></a></dt>
 <dd><p>Class extension to geobipy.Data defining a Fourier domain electro magnetic data set</p>
 <p>FdemData(nPoints, nFrequencies, system)</p>
 <dl class="field-list simple">
@@ -199,8 +193,8 @@ t/rx,y,z are the loop offsets from the observation locations in the data file.</
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>starts</strong> (<em>array of ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the starting index for a chunk to be sent to that core. e.g. starts[0] is the starting index for rank = 0.</p></li>
-<li><p><strong>chunks</strong> (<em>array of ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the size of a chunk to be sent to that core. e.g. chunks[0] is the chunk size for rank = 0.</p></li>
+<li><p><strong>starts</strong> (<em>array</em><em> of </em><em>ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the starting index for a chunk to be sent to that core. e.g. starts[0] is the starting index for rank = 0.</p></li>
+<li><p><strong>chunks</strong> (<em>array</em><em> of </em><em>ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the size of a chunk to be sent to that core. e.g. chunks[0] is the chunk size for rank = 0.</p></li>
 <li><p><strong>world</strong> (<em>mpi4py.MPI.COMM_WORLD</em>) – The MPI communicator</p></li>
 </ul>
 </dd>
@@ -252,6 +246,14 @@ t/rx,y,z are the loop offsets from the observation locations in the data file.</
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.FdemData.FdemData.createHdf">
+<span class="sig-name descname"><span class="pre">createHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">myName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withPosterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fillvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.createHdf" title="Permalink to this definition"></a></dt>
+<dd><p>Create the hdf group metadata in file
+parent: HDF object to create a group inside
+myName: Name of the group</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.FdemData.FdemData.datapoint">
 <span class="sig-name descname"><span class="pre">datapoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fiducial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.datapoint" title="Permalink to this definition"></a></dt>
 <dd><p>Get the ith data point from the data set</p>
@@ -282,7 +284,7 @@ t/rx,y,z are the loop offsets from the observation locations in the data file.</
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.FdemData.FdemData.fromHdf">
-<span class="sig-name descname"><span class="pre">fromHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grp</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.fromHdf" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grp</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.fromHdf" title="Permalink to this definition"></a></dt>
 <dd><p>Reads the object from a HDF group</p>
 </dd></dl>
 
@@ -328,7 +330,7 @@ t/rx,y,z are the loop offsets from the observation locations in the data file.</
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.FdemData.FdemData.nActiveData">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">nActiveData</span></span><a class="headerlink" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.nActiveData" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nActiveData</span></span><a class="headerlink" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.nActiveData" title="Permalink to this definition"></a></dt>
 <dd><p>Number of active data per data point.</p>
 <p>For each data point, counts the number of channels that are NOT nan.</p>
 <dl class="field-list simple">
@@ -342,8 +344,14 @@ t/rx,y,z are the loop offsets from the observation locations in the data file.</
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.FdemData.FdemData.plot">
-<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xAxis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'index'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.plot" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.FdemData.FdemData.plotLine">
+<span class="sig-name descname"><span class="pre">plotLine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xAxis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'index'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.plotLine" title="Permalink to this definition"></a></dt>
+<dd><p>Plot the specified line</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.FdemData.FdemData.plot_data">
+<span class="sig-name descname"><span class="pre">plot_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xAxis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'index'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.plot_data" title="Permalink to this definition"></a></dt>
 <dd><p>Plots the specifed channels as a line plot.</p>
 <p>Plots the channels along a specified co-ordinate e.g. ‘x’. A legend is auto generated.</p>
 <dl class="field-list simple">
@@ -377,12 +385,6 @@ If xAxis is ‘r3d’, returns cumulative distance along the line in 3D using x,
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.FdemData.FdemData.plotLine">
-<span class="sig-name descname"><span class="pre">plotLine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xAxis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'index'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.plotLine" title="Permalink to this definition"></a></dt>
-<dd><p>Plot the specified line</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.FdemData.FdemData.readAarhusFile">
 <span class="sig-name descname"><span class="pre">readAarhusFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataFilename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.readAarhusFile" title="Permalink to this definition"></a></dt>
 <dd><p>Read in frequency domain data from an Aarhus workbench file.</p>
@@ -395,7 +397,7 @@ If xAxis is ‘r3d’, returns cumulative distance along the line in 3D using x,
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.FdemData.FdemData.read_csv">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">read_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataFilename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">systemFilename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.read_csv" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataFilename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">systemFilename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.read_csv" title="Permalink to this definition"></a></dt>
 <dd><p>Read in both the Fdem data and FDEM system files</p>
 <p>The data file is structured using columns with the first line containing header information.
 The header should contain the following entries
@@ -411,6 +413,18 @@ Each subsequent row contains the information for each measurement frequency</p>
 <p>where tor and ror are the orientations of the transmitter/reciever loops [x or z].
 tmom and rmom are the moments of the loops.
 t/rx,y,z are the loop offsets from the observation locations in the data file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.FdemData.FdemData.single">
+<span class="sig-name descname"><span class="pre">single</span></span><a class="headerlink" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.single" title="Permalink to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="../datapoint/FdemDataPoint.html#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint" title="geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">FdemDataPoint</span></code></a></p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.FdemData.FdemData.std">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">std</span></span><a class="headerlink" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.std" title="Permalink to this definition"></a></dt>
+<dd><p>The data.</p>
 </dd></dl>
 
 </dd></dl>

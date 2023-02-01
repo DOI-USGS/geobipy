@@ -19,7 +19,9 @@
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -53,7 +55,16 @@
 <li class="toctree-l3"><a class="reference internal" href="plotting.html">plotting</a></li>
 <li class="toctree-l3"><a class="reference internal" href="fileIO.html">fileIO</a></li>
 <li class="toctree-l3"><a class="reference internal" href="interpolation.html">Interpolation</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Heirarchical Data Format (HDF)</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Heirarchical Data Format (HDF)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.HDF.hdfRead.find"><code class="docutils literal notranslate"><span class="pre">find()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.HDF.hdfRead.readKeyFromFile"><code class="docutils literal notranslate"><span class="pre">readKeyFromFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.HDF.hdfRead.readKeyFromFiles"><code class="docutils literal notranslate"><span class="pre">readKeyFromFiles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.HDF.hdfRead.read_all"><code class="docutils literal notranslate"><span class="pre">read_all()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.HDF.hdfRead.read_groups_with_tag"><code class="docutils literal notranslate"><span class="pre">read_groups_with_tag()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.HDF.hdfRead.read_item"><code class="docutils literal notranslate"><span class="pre">read_item()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.HDF.hdfWrite.write_nd"><code class="docutils literal notranslate"><span class="pre">write_nd()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="MPI.html">MPI wrapper functions</a></li>
 </ul>
 </li>
@@ -76,10 +87,10 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../api.html">API</a> &raquo;</li>
-          <li><a href="base.html">Core routines needed for GeoBIPy</a> &raquo;</li>
-      <li>Heirarchical Data Format (HDF)</li>
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API</a></li>
+          <li class="breadcrumb-item"><a href="base.html">Core routines needed for GeoBIPy</a></li>
+      <li class="breadcrumb-item active">Heirarchical Data Format (HDF)</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../_sources/content/api/base/HDF.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -90,7 +101,7 @@
            <div itemprop="articleBody">
              
   <section id="module-geobipy.src.base.HDF.hdfRead">
-<span id="heirarchical-data-format-hdf"></span><h1>Heirarchical Data Format (HDF)<a class="headerlink" href="#module-geobipy.src.base.HDF.hdfRead" title="Permalink to this headline"></a></h1>
+<span id="heirarchical-data-format-hdf"></span><h1>Heirarchical Data Format (HDF)<a class="headerlink" href="#module-geobipy.src.base.HDF.hdfRead" title="Permalink to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="geobipy.src.base.HDF.hdfRead.find">
 <span class="sig-prename descclassname"><span class="pre">geobipy.src.base.HDF.hdfRead.</span></span><span class="sig-name descname"><span class="pre">find</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.HDF.hdfRead.find" title="Permalink to this definition"></a></dt>
@@ -121,8 +132,8 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>h5obj</strong> (<em>h5py._hl.files.File</em><em> or </em><em>h5py._hl.group.Group</em>) – An opened hdf5 handle or a h5py group object</p></li>
 <li><p><strong>fName</strong> (<em>str</em>) – The path and/or file name to the file that was opened</p></li>
-<li><p><strong>groupName</strong> (<em>str</em><em> or </em><em>list of str</em>) – The group(s) path within the hdf5 file to read from. i.e. ‘/group1/group1a’</p></li>
-<li><p><strong>key</strong> (<em>str</em><em> or </em><em>list of str</em>) – The key(s) in the group to read</p></li>
+<li><p><strong>groupName</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – The group(s) path within the hdf5 file to read from. i.e. ‘/group1/group1a’</p></li>
+<li><p><strong>key</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – The key(s) in the group to read</p></li>
 <li><p><strong>index</strong> (<em>slice</em><em>, </em><em>optional</em>) – Specifies the index’th entry of the data to return. If the group was created using a createHDF procedure in parallel with the nRepeats option, index specifies the index’th entry from which to read the data.</p></li>
 <li><p><strong>necessary.</strong> (<em>Any other parameters in **kwargs are optional but may be necessary if an object's .fromHDF</em><em>(</em><em>) </em><em>procedure requires extra arguments. Refer to the object you wish to read in to determine whether extra arguments are</em>) – </p></li>
 </ul>
@@ -144,9 +155,9 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>fNames</strong> (<em>str</em><em> or </em><em>list of str</em>) – The path(s) and/or file name(s)</p></li>
-<li><p><strong>groupName</strong> (<em>str</em><em> or </em><em>list of str</em>) – The group(s) path within the hdf5 file(s) to read from. i.e. ‘/group1/group1a’</p></li>
-<li><p><strong>key</strong> (<em>str</em><em> or </em><em>list of str</em>) – The key(s) in the group to read</p></li>
+<li><p><strong>fNames</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – The path(s) and/or file name(s)</p></li>
+<li><p><strong>groupName</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – The group(s) path within the hdf5 file(s) to read from. i.e. ‘/group1/group1a’</p></li>
+<li><p><strong>key</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – The key(s) in the group to read</p></li>
 <li><p><strong>index</strong> (<em>slice</em><em>, </em><em>optional</em>) – Specifies the index’th entry of the data to return. If the group was created using a createHDF procedure in parallel with the nRepeats option, index specifies the index’th entry from which to read the data.</p></li>
 <li><p><strong>necessary.</strong> (<em>Any other parameters in **kwargs are optional but may be necessary if an object's .fromHDF</em><em>(</em><em>) </em><em>procedure requires extra arguments. Refer to the object you wish to read in to determine whether extra arguments are</em>) – </p></li>
 </ul>

@@ -633,7 +633,7 @@ Plot the posterior distributions
 .. code-block:: default
 
     plt.figure()
-    _ = tdp.z.plotPosteriors()
+    _ = tdp.z.plot_posteriors()
 
 
 

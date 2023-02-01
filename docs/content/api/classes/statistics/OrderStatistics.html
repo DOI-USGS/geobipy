@@ -19,7 +19,9 @@
         <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
         <script src="../../../../_static/jquery.js"></script>
         <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -89,11 +91,11 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../api.html">API</a> &raquo;</li>
-          <li><a href="../classes.html">Classes used in GeoBIPy</a> &raquo;</li>
-          <li><a href="statistics.html">Statistics classes</a> &raquo;</li>
-      <li>Order Statistics</li>
+      <li><a href="../../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../api.html">API</a></li>
+          <li class="breadcrumb-item"><a href="../classes.html">Classes used in GeoBIPy</a></li>
+          <li class="breadcrumb-item"><a href="statistics.html">Statistics classes</a></li>
+      <li class="breadcrumb-item active">Order Statistics</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../../_sources/content/api/classes/statistics/OrderStatistics.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -104,25 +106,18 @@
            <div itemprop="articleBody">
              
   <section id="order-statistics">
-<h1>Order Statistics<a class="headerlink" href="#order-statistics" title="Permalink to this headline"></a></h1>
-digraph inheritance76de29de59 {
-bgcolor=transparent;
-rankdir=LR;
-size=&quot;8.0, 12.0&quot;;
-  &quot;ABC&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Helper class that provides a standard way to create an ABC using&quot;];
-  &quot;Order&quot; [URL=&quot;#geobipy.src.classes.statistics.OrderStatistics.Order&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defining Order Statistics&quot;];
-  &quot;baseDistribution&quot; -&gt; &quot;Order&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;baseDistribution&quot; [URL=&quot;baseDistribution.html#geobipy.src.classes.statistics.baseDistribution.baseDistribution&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Define an abstract base distribution class&quot;];
-  &quot;myObject&quot; -&gt; &quot;baseDistribution&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;myObject&quot; [URL=&quot;../core/myObject.html#geobipy.src.classes.core.myObject.myObject&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Abstract base class&quot;];
-  &quot;ABC&quot; -&gt; &quot;myObject&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-}
-<span class="target" id="module-geobipy.src.classes.statistics.OrderStatistics"></span><p>&#64;OrderStatistics
+<h1>Order Statistics<a class="headerlink" href="#order-statistics" title="Permalink to this heading"></a></h1>
+<div class="graphviz"><img src="../../../../_images/inheritance-ff1c04e766bb20c1c1773c52a0337f2c4e6840bf.png" alt="Inheritance diagram of geobipy.src.classes.statistics.OrderStatistics" usemap="#inheritance76de29de59" class="inheritance graphviz" /></div>
+<map id="inheritance76de29de59" name="inheritance76de29de59">
+<area shape="rect" id="node4" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="125,5,204,31"/>
+<area shape="rect" id="node2" href="#geobipy.src.classes.statistics.OrderStatistics.Order" target="_top" title="Class defining Order Statistics" alt="" coords="416,5,488,31"/>
+<area shape="rect" id="node3" href="baseDistribution.html#geobipy.src.classes.statistics.baseDistribution.baseDistribution" target="_top" title="Define an abstract base distribution class" alt="" coords="252,5,368,31"/>
+</map><span class="target" id="module-geobipy.src.classes.statistics.OrderStatistics"></span><p>&#64;OrderStatistics
 Module defining modified order statistics as in Malinverno2002Parsimonious Bayesian Markov chain Monte Carlo inversion
 in a nonlinear geophysical problem,Geophysical Journal International</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="geobipy.src.classes.statistics.OrderStatistics.Order">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.statistics.OrderStatistics.</span></span><span class="sig-name descname"><span class="pre">Order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">denominator</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.OrderStatistics.Order" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.statistics.OrderStatistics.</span></span><span class="sig-name descname"><span class="pre">Order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">denominator</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.OrderStatistics.Order" title="Permalink to this definition"></a></dt>
 <dd><p>Class defining Order Statistics
 Specific application to Bayesian inversion of EM data</p>
 </dd></dl>

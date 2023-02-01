@@ -42,7 +42,7 @@ https://empymod.github.io/
 
 Thanks to Dieter for his help getting Empymod ready for incorporation into GeoBIPy
 
-.. GENERATED FROM PYTHON SOURCE LINES 27-45
+.. GENERATED FROM PYTHON SOURCE LINES 27-41
 
 .. code-block:: default
 
@@ -50,18 +50,14 @@ Thanks to Dieter for his help getting Empymod ready for incorporation into GeoBI
     import numpy as np
     import h5py
     import matplotlib.pyplot as plt
-    from geobipy import hdfRead
-    from geobipy import Waveform
-    from geobipy import SquareLoop, CircularLoop
-    from geobipy import butterworth
-    from geobipy import TdemSystem
     from geobipy import TempestData
     # from geobipy import TemDataPoint
-    from geobipy import Model1D
+    from geobipy import RectilinearMesh1D
+    from geobipy import Model
     from geobipy import StatArray
     from geobipy import Distribution
 
-    dataFolder = "..//supplementary//Data//"
+    dataFolder = "..//supplementary//data//"
     # dataFolder = "source//examples//supplementary//Data"
 
 
@@ -71,7 +67,7 @@ Thanks to Dieter for his help getting Empymod ready for incorporation into GeoBI
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 46-52
+.. GENERATED FROM PYTHON SOURCE LINES 42-48
 
 Obtaining a datapoint from a dataset
 ++++++++++++++++++++++++++++++++++++
@@ -80,22 +76,20 @@ We can read in a dataset and pull datapoints from it.
 
 For more information about the time domain data set, see :ref:`Time domain dataset`
 
-.. GENERATED FROM PYTHON SOURCE LINES 52-69
+.. GENERATED FROM PYTHON SOURCE LINES 48-63
 
 .. code-block:: default
 
 
     # The data file name
-    dataFile = dataFolder + 'Tempest.nc'
+    dataFile = dataFolder + 'tempest_saline_clay.csv'
     # The EM system file name
     systemFile = dataFolder + 'Tempest.stm'
-
 
     # Prepare the dataset so that we can read a point at a time.
     Dataset = TempestData._initialize_sequential_reading(dataFile, systemFile)
     # Get a datapoint from the file.
     tdp = Dataset._read_record(0)
-
 
     plt.figure()
     tdp.plot()
@@ -112,30 +106,28 @@ For more information about the time domain data set, see :ref:`Time domain datas
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
 
-    <AxesSubplot:title={'center':'Time Domain EM Data'}, xlabel='Time (s)', ylabel='Data (fT)'>
+    <AxesSubplot: title={'center': 'Time Domain EM Data'}, xlabel='Time (s)', ylabel='Data (fT)'>
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 70-72
+.. GENERATED FROM PYTHON SOURCE LINES 64-66
 
 Using a time domain datapoint
 +++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 74-75
+.. GENERATED FROM PYTHON SOURCE LINES 68-69
 
 We can define a 1D layered earth model, and use it to predict some data
 
-.. GENERATED FROM PYTHON SOURCE LINES 75-78
+.. GENERATED FROM PYTHON SOURCE LINES 69-72
 
 .. code-block:: default
 
     par = StatArray(np.r_[1/50.0, 1/100.0, 1/1000.0, 1/5.0, 1/1000.0, 1/800.0], "Conductivity", "$\frac{S}{m}$")
-    mod = Model1D(edges=np.r_[0, 20.0, 50.0, 100.0, 150.0, 250.0, np.inf], parameters=par)
+    mod = Model(mesh=RectilinearMesh1D(edges=np.r_[0, 20.0, 50.0, 100.0, 150.0, 250.0, np.inf]), values=par)
 
 
 
@@ -144,11 +136,11 @@ We can define a 1D layered earth model, and use it to predict some data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 79-80
+.. GENERATED FROM PYTHON SOURCE LINES 73-74
 
 Forward model the data
 
-.. GENERATED FROM PYTHON SOURCE LINES 80-82
+.. GENERATED FROM PYTHON SOURCE LINES 74-76
 
 .. code-block:: default
 
@@ -161,7 +153,7 @@ Forward model the data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 83-92
+.. GENERATED FROM PYTHON SOURCE LINES 77-86
 
 .. code-block:: default
 
@@ -185,8 +177,6 @@ Forward model the data
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
 
@@ -194,17 +184,17 @@ Forward model the data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 93-96
+.. GENERATED FROM PYTHON SOURCE LINES 87-90
 
 plt.figure()
 tdp.plotDataResidual(xscale='log')
 plt.title('data residual')
 
-.. GENERATED FROM PYTHON SOURCE LINES 98-99
+.. GENERATED FROM PYTHON SOURCE LINES 92-93
 
 Compute the sensitivity matrix for a given model
 
-.. GENERATED FROM PYTHON SOURCE LINES 99-103
+.. GENERATED FROM PYTHON SOURCE LINES 93-97
 
 .. code-block:: default
 
@@ -224,22 +214,22 @@ Compute the sensitivity matrix for a given model
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 104-108
+.. GENERATED FROM PYTHON SOURCE LINES 98-102
 
 Attaching statistical descriptors to the datapoint
 ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 Set relative errors for the primary fields, and secondary fields.
 
-.. GENERATED FROM PYTHON SOURCE LINES 108-116
+.. GENERATED FROM PYTHON SOURCE LINES 102-110
 
 .. code-block:: default
 
-    tdp.relErr = np.r_[0.01, 0.05]
+    tdp.relative_error = np.r_[0.01, 0.05]
 
     # Set the additive errors for
-    tdp.addErr = np.hstack([[0.011474, 0.012810, 0.008507, 0.005154, 0.004742, 0.004477, 0.004168, 0.003539, 0.003352, 0.003213, 0.003161, 0.003122, 0.002587, 0.002038, 0.002201],
-                           [0.007383, 0.005693, 0.005178, 0.003659, 0.003426, 0.003046, 0.003095, 0.003247, 0.002775, 0.002627, 0.002460, 0.002178, 0.001754, 0.001405, 0.001283]])
+    tdp.additive_error = np.hstack([[0.011474, 0.012810, 0.008507, 0.005154, 0.004742, 0.004477, 0.004168, 0.003539, 0.003352, 0.003213, 0.003161, 0.003122, 0.002587, 0.002038, 0.002201],
+                                    [0.007383, 0.005693, 0.005178, 0.003659, 0.003426, 0.003046, 0.003095, 0.003247, 0.002775, 0.002627, 0.002460, 0.002178, 0.001754, 0.001405, 0.001283]])
     # Define a multivariate log normal distribution as the prior on the predicted data.
     tdp.predictedData.prior = Distribution('MvLogNormal', tdp.data[tdp.active], tdp.std[tdp.active]**2.0)
 
@@ -250,11 +240,11 @@ Set relative errors for the primary fields, and secondary fields.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 117-118
+.. GENERATED FROM PYTHON SOURCE LINES 111-112
 
 This allows us to evaluate the likelihood of the predicted data
 
-.. GENERATED FROM PYTHON SOURCE LINES 118-122
+.. GENERATED FROM PYTHON SOURCE LINES 112-116
 
 .. code-block:: default
 
@@ -268,21 +258,19 @@ This allows us to evaluate the likelihood of the predicted data
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    -158.94319013150562
-    17.302474406320894
+    -60615.15730576242
+    121379.20759919994
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 123-124
+.. GENERATED FROM PYTHON SOURCE LINES 117-118
 
 Plot the misfits for a range of half space conductivities
 
-.. GENERATED FROM PYTHON SOURCE LINES 124-129
+.. GENERATED FROM PYTHON SOURCE LINES 118-123
 
 .. code-block:: default
 
@@ -302,8 +290,6 @@ Plot the misfits for a range of half space conductivities
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
 
@@ -311,16 +297,16 @@ Plot the misfits for a range of half space conductivities
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 130-131
+.. GENERATED FROM PYTHON SOURCE LINES 124-125
 
 We can perform a quick search for the best fitting half space
 
-.. GENERATED FROM PYTHON SOURCE LINES 131-152
+.. GENERATED FROM PYTHON SOURCE LINES 125-146
 
 .. code-block:: default
 
     halfspace = tdp.find_best_halfspace()
-    print('Best half space conductivity is {} $S/m$'.format(halfspace.par))
+    print('Best half space conductivity is {} $S/m$'.format(halfspace.values))
     plt.subplot(1, 2, 2)
     _ = tdp.plot()
     _ = tdp.plot_predicted()
@@ -334,11 +320,11 @@ We can perform a quick search for the best fitting half space
     # # the relative error multiplier, and the additive error noise floor
 
     # Define the distributions used as priors.
-    heightPrior = Distribution('Uniform', min=np.float64(tdp.z) - 1.0, max=np.float64(tdp.z) + 1.0)
-    relativePrior = Distribution('Uniform', min=np.r_[0.01, 0.01], max=np.r_[0.5, 0.5])
-    pitchPrior = Distribution('Uniform', min=tdp.transmitter.pitch - 5.0, max=tdp.transmitter.pitch + 5.0)
-    # additivePrior = Distribution('Uniform', min=np.r_[1e-12, 1e-13], max=np.r_[1e-10, 1e-11], log=True)
-    tdp.set_priors(height_prior=heightPrior, relative_error_prior=relativePrior, transmitter_pitch_prior=pitchPrior)#, additive_error_prior=additivePrior)
+    relative_prior = Distribution('Uniform', min=np.r_[0.01, 0.01], max=np.r_[0.5, 0.5])
+    receiver_x_prior = Distribution('Uniform', min=np.float64(tdp.receiver.x) - 1.0, max=np.float64(tdp.receiver.x) + 1.0)
+    receiver_z_prior = Distribution('Uniform', min=np.float64(tdp.receiver.z) - 1.0, max=np.float64(tdp.receiver.z) + 1.0)
+    receiver_pitch_prior = Distribution('Uniform', min=tdp.receiver.pitch - 5.0, max=tdp.receiver.pitch + 5.0)
+    tdp.set_priors(relative_error_prior=relative_prior, receiver_x_prior=receiver_x_prior, receiver_z_prior=receiver_z_prior, receiver_pitch_prior=receiver_pitch_prior)
 
 
 
@@ -363,28 +349,26 @@ We can perform a quick search for the best fitting half space
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    Best half space conductivity is [0.04641589] $S/m$
+    Best half space conductivity is [0.03853529] $S/m$
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 153-154
+.. GENERATED FROM PYTHON SOURCE LINES 147-148
 
 In order to perturb our solvable parameters, we need to attach proposal distributions
 
-.. GENERATED FROM PYTHON SOURCE LINES 154-160
+.. GENERATED FROM PYTHON SOURCE LINES 148-154
 
 .. code-block:: default
 
-    heightProposal = Distribution('Normal', mean=tdp.z, variance = 0.01)
-    relativeProposal = Distribution('MvNormal', mean=tdp.relErr, variance=2.5e-4)
-    transmitter_pitch_proposal = Distribution('Normal', mean=tdp.transmitter.pitch, variance = 0.01)
-    # additiveProposal = Distribution('MvLogNormal', mean=tdp.addErr, variance=2.5e-3, linearSpace=True)
-    tdp.set_proposals(heightProposal, relativeProposal, transmitter_pitch_proposal=transmitter_pitch_proposal)#, additiveProposal)
+    relative_proposal = Distribution('MvNormal', mean=tdp.relative_error, variance=2.5e-4)
+    receiver_x_proposal = Distribution('Normal', mean=tdp.receiver.x, variance = 0.01)
+    receiver_z_proposal = Distribution('Normal', mean=tdp.receiver.z, variance = 0.01)
+    receiver_pitch_proposal = Distribution('Normal', mean=tdp.receiver.pitch, variance = 0.01)
+    tdp.set_proposals(relative_error_proposal=relative_proposal, receiver_x_proposal=receiver_x_proposal, receiver_z_proposal=receiver_z_proposal, receiver_pitch_proposal=receiver_pitch_proposal)
 
 
 
@@ -393,11 +377,11 @@ In order to perturb our solvable parameters, we need to attach proposal distribu
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 161-162
+.. GENERATED FROM PYTHON SOURCE LINES 155-156
 
 With priorss set we can auto generate the posteriors
 
-.. GENERATED FROM PYTHON SOURCE LINES 162-164
+.. GENERATED FROM PYTHON SOURCE LINES 156-158
 
 .. code-block:: default
 
@@ -410,18 +394,18 @@ With priorss set we can auto generate the posteriors
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 165-167
+.. GENERATED FROM PYTHON SOURCE LINES 159-161
 
 Perturb the datapoint and record the perturbations
 Note we are not using the priors to accept or reject perturbations.
 
-.. GENERATED FROM PYTHON SOURCE LINES 167-171
+.. GENERATED FROM PYTHON SOURCE LINES 161-165
 
 .. code-block:: default
 
     for i in range(10):
         tdp.perturb()
-        tdp.updatePosteriors()
+        tdp.update_posteriors()
 
     plt.show()
 
@@ -433,28 +417,23 @@ Note we are not using the priors to accept or reject perturbations.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.811 seconds)
+   **Total running time of the script:** ( 0 minutes  1.619 seconds)
 
 
 .. _sphx_glr_download_examples_Datapoints_plot_tempest_datapoint.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: plot_tempest_datapoint.py <plot_tempest_datapoint.py>`
 
-     :download:`Download Python source code: plot_tempest_datapoint.py <plot_tempest_datapoint.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: plot_tempest_datapoint.ipynb <plot_tempest_datapoint.ipynb>`
+      :download:`Download Jupyter notebook: plot_tempest_datapoint.ipynb <plot_tempest_datapoint.ipynb>`
 
 
 .. only:: html

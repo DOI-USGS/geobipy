@@ -1,8 +1,6 @@
 """
 3D Point Cloud class
 --------------------
-
-The 3D Point Cloud class extracts and utilizes the [Point](Point%20Class.ipynb) Class
 """
 
 ################################################################################
@@ -11,6 +9,7 @@ from geobipy import PointCloud3D
 from os.path import join
 import numpy as np
 import matplotlib.pyplot as plt
+import h5py
 
 nPoints = 10000
 
@@ -40,7 +39,7 @@ print(PC3D.summary)
 ################################################################################
 # Get a single location from the point as a 3x1 vector
 
-Point=PC3D.getPoint(50)
+Point = PC3D[50]
 # Print the point to the screen
 print(Point)
 
@@ -59,10 +58,11 @@ ax = PC3D.scatter2D(s=100*np.abs(PC3D.z), edgecolor='k')
 
 ################################################################################
 # Interpolate the points to a 2D rectilinear mesh
-mesh, dum = PC3D.interpolate(0.01, 0.01, method='mc', mask=0.03)
+mesh, dum = PC3D.interpolate(0.01, 0.01, values=PC3D.z, method='mc', mask=0.03)
 
 # We can save that mesh to VTK
-mesh.to_vtk('pointcloud_interpolated.vtk')
+PC3D.to_vtk('pc3d.vtk')
+mesh.to_vtk('interpolated_pc3d.vtk')
 
 ################################################################################
 # Grid the points using a triangulated CloughTocher, or minimum curvature interpolation
@@ -91,8 +91,6 @@ PCsub.map(dx=0.01, dy=0.01, method='mc', mask=0.03)
 
 PC3D.setKdTree(nDims=2)
 p = PC3D.nearest((0.0,0.0), k=200, p=2, radius=0.3)
-print(p)
-
 
 ################################################################################
 # .nearest returns the distances and indices into the point cloud of the nearest points.
@@ -123,15 +121,14 @@ PC3D.read_csv(filename=dataFolder + 'Resolve1.txt')
 plt.figure()
 f = PC3D.scatter2D(s=10)
 
-################################################################################
-# Export the 3D Pointcloud to a VTK file.
-#
-# In this case, I pass the height as point data so that the points are coloured
-# when opened in Paraview (or other software)
+with h5py.File('test.h5', 'w') as f:
+    PC3D.createHdf(f, 'test')
+    PC3D.writeHdf(f, 'test')
 
-################################################################################
+with h5py.File('test.h5', 'r') as f:
+    PC3D1 = PointCloud3D.fromHdf(f['test'])
 
-
-# PC3D.toVTK('testPoints', format='binary')
+with h5py.File('test.h5', 'r') as f:
+    point = PointCloud3D.fromHdf(f['test'], index=0)
 
 plt.show()

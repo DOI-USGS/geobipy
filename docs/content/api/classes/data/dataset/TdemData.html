@@ -19,7 +19,9 @@
         <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
         <script src="../../../../../_static/jquery.js"></script>
         <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../../../_static/doctools.js"></script>
+        <script src="../../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" />
@@ -81,12 +83,12 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../../api.html">API</a> &raquo;</li>
-          <li><a href="../../classes.html">Classes used in GeoBIPy</a> &raquo;</li>
-          <li><a href="../data.html">Data classes</a> &raquo;</li>
-          <li><a href="dataset.html">Dataset classes</a> &raquo;</li>
-      <li>TemData</li>
+      <li><a href="../../../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../api.html">API</a></li>
+          <li class="breadcrumb-item"><a href="../../classes.html">Classes used in GeoBIPy</a></li>
+          <li class="breadcrumb-item"><a href="../data.html">Data classes</a></li>
+          <li class="breadcrumb-item"><a href="dataset.html">Dataset classes</a></li>
+      <li class="breadcrumb-item active">TemData</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../../../_sources/content/api/classes/data/dataset/TdemData.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -97,24 +99,16 @@
            <div itemprop="articleBody">
              
   <section id="temdata">
-<h1>TemData<a class="headerlink" href="#temdata" title="Permalink to this headline"></a></h1>
-digraph inheritanceeb2965ddb0 {
-bgcolor=transparent;
-rankdir=LR;
-size=&quot;8.0, 12.0&quot;;
-  &quot;ABC&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Helper class that provides a standard way to create an ABC using&quot;];
-  &quot;Data&quot; [URL=&quot;Data.html#geobipy.src.classes.data.dataset.Data.Data&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defining a set of Data.&quot;];
-  &quot;PointCloud3D&quot; -&gt; &quot;Data&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;PointCloud3D&quot; [URL=&quot;../../pointcloud/PointCloud3D.html#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;3D Point Cloud with x,y,z co-ordinates&quot;];
-  &quot;myObject&quot; -&gt; &quot;PointCloud3D&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;TdemData&quot; [URL=&quot;#geobipy.src.classes.data.dataset.TdemData.TdemData&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Time domain electro magnetic data set&quot;];
-  &quot;Data&quot; -&gt; &quot;TdemData&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;myObject&quot; [URL=&quot;../../core/myObject.html#geobipy.src.classes.core.myObject.myObject&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Abstract base class&quot;];
-  &quot;ABC&quot; -&gt; &quot;myObject&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-}
-<span class="target" id="module-geobipy.src.classes.data.dataset.TdemData"></span><span class="target" id="module-StatArray"></span><dl class="py class">
+<h1>TemData<a class="headerlink" href="#temdata" title="Permalink to this heading"></a></h1>
+<div class="graphviz"><img src="../../../../../_images/inheritance-523881ba01964a51927c765f1a653e7af4d38af6.png" alt="Inheritance diagram of geobipy.src.classes.data.dataset.TdemData" usemap="#inheritanceeb2965ddb0" class="inheritance graphviz" /></div>
+<map id="inheritanceeb2965ddb0" name="inheritanceeb2965ddb0">
+<area shape="rect" id="node4" href="../../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="125,5,204,31"/>
+<area shape="rect" id="node2" href="Data.html#geobipy.src.classes.data.dataset.Data.Data" target="_top" title="Class defining a set of Data." alt="" coords="403,5,475,31"/>
+<area shape="rect" id="node5" href="#geobipy.src.classes.data.dataset.TdemData.TdemData" target="_top" title="Time domain electro magnetic data set" alt="" coords="523,5,605,31"/>
+<area shape="rect" id="node3" href="../../pointcloud/PointCloud3D.html#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D" target="_top" title="3D Point Cloud with x,y,z co&#45;ordinates" alt="" coords="252,5,355,31"/>
+</map><span class="target" id="module-geobipy.src.classes.data.dataset.TdemData"></span><span class="target" id="module-StatArray"></span><dl class="py class">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TdemData.TdemData">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.data.dataset.TdemData.</span></span><span class="sig-name descname"><span class="pre">TdemData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.data.dataset.TdemData.</span></span><span class="sig-name descname"><span class="pre">TdemData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData" title="Permalink to this definition"></a></dt>
 <dd><p>Time domain electro magnetic data set</p>
 <p>A time domain data set with easting, northing, height, and elevation values. Each sounding in the data set can be given a receiver and transmitter loop.</p>
 <p>TdemData(nPoints=1, nTimes=[1], nSystems=1)</p>
@@ -122,7 +116,7 @@ size=&quot;8.0, 12.0&quot;;
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>nPoints</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of soundings in the data file</p></li>
-<li><p><strong>nTimes</strong> (<em>array of ints</em><em>, </em><em>optional</em>) – Array of size nSystemsx1 containing the number of time gates in each system</p></li>
+<li><p><strong>nTimes</strong> (<em>array</em><em> of </em><em>ints</em><em>, </em><em>optional</em>) – Array of size nSystemsx1 containing the number of time gates in each system</p></li>
 <li><p><strong>nSystem</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of measurement systems</p></li>
 </ul>
 </dd>
@@ -163,9 +157,17 @@ size=&quot;8.0, 12.0&quot;;
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TdemData.TdemData.createHdf">
+<span class="sig-name descname"><span class="pre">createHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">myName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withPosterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fillvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.createHdf" title="Permalink to this definition"></a></dt>
+<dd><p>Create the hdf group metadata in file
+parent: HDF object to create a group inside
+myName: Name of the group</p>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TdemData.TdemData.data">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.data" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.data" title="Permalink to this definition"></a></dt>
 <dd><p>The data.</p>
 </dd></dl>
 
@@ -200,7 +202,7 @@ size=&quot;8.0, 12.0&quot;;
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TdemData.TdemData.fileInformation">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">fileInformation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.fileInformation" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fileInformation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.fileInformation" title="Permalink to this definition"></a></dt>
 <dd><p>Description of PointCloud3D file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -214,7 +216,7 @@ size=&quot;8.0, 12.0&quot;;
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TdemData.TdemData.fromHdf">
-<span class="sig-name descname"><span class="pre">fromHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grp</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.fromHdf" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grp</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.fromHdf" title="Permalink to this definition"></a></dt>
 <dd><p>Reads the object from a HDF group</p>
 </dd></dl>
 
@@ -237,46 +239,83 @@ size=&quot;8.0, 12.0&quot;;
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TdemData.TdemData.plot">
-<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xAxis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'index'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.plot" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TdemData.TdemData.plot_data">
+<span class="sig-name descname"><span class="pre">plot_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.plot_data" title="Permalink to this definition"></a></dt>
 <dd><p>Plots the data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>system</strong> (<em>int</em>) – System to plot</p></li>
-<li><p><strong>channels</strong> (<em>sequence of ints</em>) – Channels to plot</p></li>
+<li><p><strong>channels</strong> (<em>sequence</em><em> of </em><em>ints</em>) – Channels to plot</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TdemData.TdemData.plot_predicted">
+<span class="sig-name descname"><span class="pre">plot_predicted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.plot_predicted" title="Permalink to this definition"></a></dt>
+<dd><p>Plots the specifed predicted data channels as a line plot.</p>
+<p>Plots the channels along a specified co-ordinate e.g. ‘x’. A legend is auto generated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xAxis</strong> (<em>str</em>) – If xAxis is ‘index’, returns numpy.arange(self.nPoints)
+If xAxis is ‘x’, returns self.x
+If xAxis is ‘y’, returns self.y
+If xAxis is ‘z’, returns self.z
+If xAxis is ‘r2d’, returns cumulative distance along the line in 2D using x and y.
+If xAxis is ‘r3d’, returns cumulative distance along the line in 3D using x, y, and z.</p></li>
+<li><p><strong>channels</strong> (<em>ints</em><em>, </em><em>optional</em>) – Indices of the channels to plot.  All are plotted if None
+* If system is None, 0 &lt;= channel &lt; self.nChannels else 0 &lt;= channel &lt; self.nChannelsPerSystem[system]</p></li>
+<li><p><strong>system</strong> (<em>int</em><em>, </em><em>optional</em>) – The system to obtain the channel from.</p></li>
+<li><p><strong>noLegend</strong> (<em>bool</em>) – Do not attach a legend to the plot.  Default is False, a legend is attached.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>ax</strong> (<em>matplotlib.axes</em>) – Plot axes handle</p></li>
+<li><p><strong>legend</strong> (<em>matplotlib.legend.Legend</em>) – The attached legend.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">geobipy.plotting.plot</span></code></dt><dd><p>For additional keyword arguments</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TdemData.TdemData.predicted_primary_field">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">predicted_primary_field</span></span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.predicted_primary_field" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">predicted_primary_field</span></span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.predicted_primary_field" title="Permalink to this definition"></a></dt>
 <dd><p>The data.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TdemData.TdemData.predicted_secondary_field">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">predicted_secondary_field</span></span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.predicted_secondary_field" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">predicted_secondary_field</span></span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.predicted_secondary_field" title="Permalink to this definition"></a></dt>
 <dd><p>The data.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TdemData.TdemData.primary_field">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">primary_field</span></span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.primary_field" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">primary_field</span></span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.primary_field" title="Permalink to this definition"></a></dt>
 <dd><p>The data.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TdemData.TdemData.read_csv">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">read_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.read_csv" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.read_csv" title="Permalink to this definition"></a></dt>
 <dd><p>Reads the data and system parameters from file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dataFilename</strong> (<em>str</em><em> or </em><em>list of str</em>) – Time domain data file names</p></li>
-<li><p><strong>systemFilename</strong> (<em>str</em><em> or </em><em>list of str</em>) – Time domain system file names</p></li>
+<li><p><strong>dataFilename</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – Time domain data file names</p></li>
+<li><p><strong>systemFilename</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – Time domain system file names</p></li>
 </ul>
 </dd>
 </dl>
@@ -326,20 +365,35 @@ size=&quot;8.0, 12.0&quot;;
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TdemData.TdemData.secondary_field">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">secondary_field</span></span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.secondary_field" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">secondary_field</span></span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.secondary_field" title="Permalink to this definition"></a></dt>
 <dd><p>The data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TdemData.TdemData.single">
+<span class="sig-name descname"><span class="pre">single</span></span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.single" title="Permalink to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="../datapoint/TdemDataPoint.html#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint" title="geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">TdemDataPoint</span></code></a></p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TdemData.TdemData.std">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">std</span></span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.std" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">std</span></span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.std" title="Permalink to this definition"></a></dt>
 <dd><p>The data.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TdemData.TdemData.summary">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">summary</span></span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.summary" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">summary</span></span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.summary" title="Permalink to this definition"></a></dt>
 <dd><p>Display a summary of the TdemData</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TdemData.TdemData.writeHdf">
+<span class="sig-name descname"><span class="pre">writeHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withPosterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TdemData.TdemData.writeHdf" title="Permalink to this definition"></a></dt>
+<dd><p>Write the StatArray to an HDF object
+parent: Upper hdf file or group
+myName: object hdf name. Assumes createHdf has already been called
+create: optionally create the data set as well before writing</p>
 </dd></dl>
 
 </dd></dl>

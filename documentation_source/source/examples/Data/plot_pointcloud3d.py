@@ -1,8 +1,6 @@
 """
 3D Point Cloud class
 --------------------
-
-The 3D Point Cloud class extracts and utilizes the [Point](Point%20Class.ipynb) Class
 """
 
 ################################################################################
@@ -41,7 +39,7 @@ print(PC3D.summary)
 ################################################################################
 # Get a single location from the point as a 3x1 vector
 
-Point=PC3D.getPoint(50)
+Point = PC3D[50]
 # Print the point to the screen
 print(Point)
 
@@ -63,7 +61,8 @@ ax = PC3D.scatter2D(s=100*np.abs(PC3D.z), edgecolor='k')
 mesh, dum = PC3D.interpolate(0.01, 0.01, values=PC3D.z, method='mc', mask=0.03)
 
 # We can save that mesh to VTK
-mesh.to_vtk('pointcloud_interpolated.vtk')
+PC3D.to_vtk('pc3d.vtk')
+mesh.to_vtk('interpolated_pc3d.vtk')
 
 ################################################################################
 # Grid the points using a triangulated CloughTocher, or minimum curvature interpolation
@@ -92,8 +91,6 @@ PCsub.map(dx=0.01, dy=0.01, method='mc', mask=0.03)
 
 PC3D.setKdTree(nDims=2)
 p = PC3D.nearest((0.0,0.0), k=200, p=2, radius=0.3)
-print(p)
-
 
 ################################################################################
 # .nearest returns the distances and indices into the point cloud of the nearest points.

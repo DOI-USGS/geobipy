@@ -28,7 +28,7 @@ pdf = D.probability(bins, log=False)
 # And we can plot that PDF
 # sphinx_gallery_thumbnail_number = 1
 plt.figure()
-_ = cP.plot(bins,pdf)
+plt.plot(bins, pdf)
 
 #%%
 # Multivariate Normal Distribution

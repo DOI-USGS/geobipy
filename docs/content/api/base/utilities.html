@@ -19,7 +19,9 @@
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -49,7 +51,35 @@
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started/getting_started.html">Getting Started</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="base.html">Core routines needed for GeoBIPy</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">utilities</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">utilities</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.Ax"><code class="docutils literal notranslate"><span class="pre">Ax()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.Det"><code class="docutils literal notranslate"><span class="pre">Det()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.Inv"><code class="docutils literal notranslate"><span class="pre">Inv()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.LogDet"><code class="docutils literal notranslate"><span class="pre">LogDet()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.cosSin1"><code class="docutils literal notranslate"><span class="pre">cosSin1()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.expReal"><code class="docutils literal notranslate"><span class="pre">expReal()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.findFirstLastNotValue"><code class="docutils literal notranslate"><span class="pre">findFirstLastNotValue()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.findFirstNonZeros"><code class="docutils literal notranslate"><span class="pre">findFirstNonZeros()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.findLastNonZeros"><code class="docutils literal notranslate"><span class="pre">findLastNonZeros()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.findNans"><code class="docutils literal notranslate"><span class="pre">findNans()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.findNotNans"><code class="docutils literal notranslate"><span class="pre">findNotNans()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.getName"><code class="docutils literal notranslate"><span class="pre">getName()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.getNameUnits"><code class="docutils literal notranslate"><span class="pre">getNameUnits()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.getUnits"><code class="docutils literal notranslate"><span class="pre">getUnits()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.histogramEqualize"><code class="docutils literal notranslate"><span class="pre">histogramEqualize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.interleave"><code class="docutils literal notranslate"><span class="pre">interleave()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.isInt"><code class="docutils literal notranslate"><span class="pre">isInt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.isIntorSlice"><code class="docutils literal notranslate"><span class="pre">isIntorSlice()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.isNumpy"><code class="docutils literal notranslate"><span class="pre">isNumpy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.mergeComplex"><code class="docutils literal notranslate"><span class="pre">mergeComplex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.rosenbrock"><code class="docutils literal notranslate"><span class="pre">rosenbrock()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.smooth"><code class="docutils literal notranslate"><span class="pre">smooth()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.splitComplex"><code class="docutils literal notranslate"><span class="pre">splitComplex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.str_to_raw"><code class="docutils literal notranslate"><span class="pre">str_to_raw()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.tanh"><code class="docutils literal notranslate"><span class="pre">tanh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.trim_by_percentile"><code class="docutils literal notranslate"><span class="pre">trim_by_percentile()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="plotting.html">plotting</a></li>
 <li class="toctree-l3"><a class="reference internal" href="fileIO.html">fileIO</a></li>
 <li class="toctree-l3"><a class="reference internal" href="interpolation.html">Interpolation</a></li>
@@ -76,10 +106,10 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../api.html">API</a> &raquo;</li>
-          <li><a href="base.html">Core routines needed for GeoBIPy</a> &raquo;</li>
-      <li>utilities</li>
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API</a></li>
+          <li class="breadcrumb-item"><a href="base.html">Core routines needed for GeoBIPy</a></li>
+      <li class="breadcrumb-item active">utilities</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../_sources/content/api/base/utilities.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -90,7 +120,7 @@
            <div itemprop="articleBody">
              
   <section id="module-geobipy.src.base.utilities">
-<span id="utilities"></span><h1>utilities<a class="headerlink" href="#module-geobipy.src.base.utilities" title="Permalink to this headline"></a></h1>
+<span id="utilities"></span><h1>utilities<a class="headerlink" href="#module-geobipy.src.base.utilities" title="Permalink to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="geobipy.src.base.utilities.Ax">
 <span class="sig-prename descclassname"><span class="pre">geobipy.src.base.utilities.</span></span><span class="sig-name descname"><span class="pre">Ax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.utilities.Ax" title="Permalink to this definition"></a></dt>
@@ -98,7 +128,7 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>A</strong> (<em>float</em><em> or </em><em>ndarray of floats</em>) – A scalar, 1D array, or 2D array.
+<li><p><strong>A</strong> (<em>float</em><em> or </em><em>ndarray</em><em> of </em><em>floats</em>) – A scalar, 1D array, or 2D array.
 If A is scalar, assume it represents a diagonal matrix with constant value.
 If A is 1D, assume it represents a diagonal matrix and do an element wise multiply.
 If A is 2D, take the dot product.</p></li>
@@ -121,7 +151,7 @@ If A is 2D, take the dot product.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>A</strong> (<em>float</em><em> or </em><em>ndarray of floats</em>) – If A is 2D: Use numpy.linalg.det obtain determinant. Uses LU factorization.
+<li><p><strong>A</strong> (<em>float</em><em> or </em><em>ndarray</em><em> of </em><em>floats</em>) – If A is 2D: Use numpy.linalg.det obtain determinant. Uses LU factorization.
 If A is 1D: Take the cumulative product of the numbers, assumes A represents a diagonal matrix.
 If A is scalar: Take the number to power N, assumes A represents a diagonal matrix with constant value.</p></li>
 <li><p><strong>N</strong> (<em>int</em><em>, </em><em>optional</em>) – If A is a scalar, N is the number of elements in the constant valued diagonal.</p></li>
@@ -142,7 +172,7 @@ If A is scalar: Take the number to power N, assumes A represents a diagonal matr
 <dd><p>Custom matrix inversion upto 2 dimensions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>A</strong> (<em>float</em><em> or </em><em>ndarray of floats</em>) – A scalar, 1D array, or 2D array.
+<dd class="field-odd"><p><strong>A</strong> (<em>float</em><em> or </em><em>ndarray</em><em> of </em><em>floats</em>) – A scalar, 1D array, or 2D array.
 If A is scalar, assume it represents a diagonal matrix with constant value and take the reciprocal.
 If A is 1D, assume it is the diagonal of a matrix: take reciprocal of entries.
 If A is 2D, invert using linalg.</p>
@@ -163,7 +193,7 @@ If A is 2D, invert using linalg.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>A</strong> (<em>float</em><em> or </em><em>numpy.ndarray of floats</em>) – If A is 2D: Use linalg.to obtain determinant. Uses LU factorization.
+<li><p><strong>A</strong> (<em>float</em><em> or </em><em>numpy.ndarray</em><em> of </em><em>floats</em>) – If A is 2D: Use linalg.to obtain determinant. Uses LU factorization.
 If A is 1D: Take the cumulative product of the numbers, assumes A represents a diagonal matrix.
 If A is scalar: Take the number to power N, assumes A represents a diagonal matrix with constant value.</p></li>
 <li><p><strong>N</strong> (<em>int</em><em>, </em><em>optional</em>) – If A is a scalar, N is the number of elements in the constant valued diagonal.</p></li>
@@ -203,7 +233,7 @@ If A is scalar: Take the number to power N, assumes A represents a diagonal matr
 
 <dl class="py function">
 <dt class="sig sig-object py" id="geobipy.src.base.utilities.findFirstLastNotValue">
-<span class="sig-prename descclassname"><span class="pre">geobipy.src.base.utilities.</span></span><span class="sig-name descname"><span class="pre">findFirstLastNotValue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">this</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invalid_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.utilities.findFirstLastNotValue" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">geobipy.src.base.utilities.</span></span><span class="sig-name descname"><span class="pre">findFirstLastNotValue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">this</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invalid_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.utilities.findFirstLastNotValue" title="Permalink to this definition"></a></dt>
 <dd><p>Find the indices to the first and last non zero values along each axis</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -220,7 +250,7 @@ If A is scalar: Take the number to power N, assumes A represents a diagonal matr
 
 <dl class="py function">
 <dt class="sig sig-object py" id="geobipy.src.base.utilities.findFirstNonZeros">
-<span class="sig-prename descclassname"><span class="pre">geobipy.src.base.utilities.</span></span><span class="sig-name descname"><span class="pre">findFirstNonZeros</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">this</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invalid_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.utilities.findFirstNonZeros" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">geobipy.src.base.utilities.</span></span><span class="sig-name descname"><span class="pre">findFirstNonZeros</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">this</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invalid_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.utilities.findFirstNonZeros" title="Permalink to this definition"></a></dt>
 <dd><p>Find the indices to the first non zero values</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -241,7 +271,7 @@ If A is scalar: Take the number to power N, assumes A represents a diagonal matr
 
 <dl class="py function">
 <dt class="sig sig-object py" id="geobipy.src.base.utilities.findLastNonZeros">
-<span class="sig-prename descclassname"><span class="pre">geobipy.src.base.utilities.</span></span><span class="sig-name descname"><span class="pre">findLastNonZeros</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">this</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invalid_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.utilities.findLastNonZeros" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">geobipy.src.base.utilities.</span></span><span class="sig-name descname"><span class="pre">findLastNonZeros</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">this</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invalid_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.utilities.findLastNonZeros" title="Permalink to this definition"></a></dt>
 <dd><p>Find the indices to the last non zero values</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -449,7 +479,7 @@ If this fails, the specified default will be returned.</p>
 <dd><p>Merge a 1D array containing a vertical concatenation of N real then N imaginary components   into an N/2 complex 1D array.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>this</strong> (<em>numpy.ndarray of float64</em>) – 1D array containing the vertical concatentation of real then imaginary values.</p>
+<dd class="field-odd"><p><strong>this</strong> (<em>numpy.ndarray</em><em> of </em><em>float64</em>) – 1D array containing the vertical concatentation of real then imaginary values.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><strong>out</strong> – The combined real and imaginary components into a complex 1D array.</p>
@@ -467,12 +497,32 @@ If this fails, the specified default will be returned.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="geobipy.src.base.utilities.smooth">
+<span class="sig-prename descclassname"><span class="pre">geobipy.src.base.utilities.</span></span><span class="sig-name descname"><span class="pre">smooth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.utilities.smooth" title="Permalink to this definition"></a></dt>
+<dd><p>Smooth x by an LTI gaussian filter, forwards and backwards pass.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>array_like</em>) – signal to process</p></li>
+<li><p><strong>a</strong> (<em>scalar between 0.0 and 1.0</em>) – Weight</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>out</strong> – Smoothed signal</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array_like</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="geobipy.src.base.utilities.splitComplex">
 <span class="sig-prename descclassname"><span class="pre">geobipy.src.base.utilities.</span></span><span class="sig-name descname"><span class="pre">splitComplex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">this</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.utilities.splitComplex" title="Permalink to this definition"></a></dt>
 <dd><p>Splits a vector of complex numbers into a vertical concatenation of the real and imaginary components.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>this</strong> (<em>numpy.ndarray of complex128</em>) – 1D array of complex numbers.</p>
+<dd class="field-odd"><p><strong>this</strong> (<em>numpy.ndarray</em><em> of </em><em>complex128</em>) – 1D array of complex numbers.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><strong>out</strong> – Vertically concatenated real then imaginary components of this.</p>

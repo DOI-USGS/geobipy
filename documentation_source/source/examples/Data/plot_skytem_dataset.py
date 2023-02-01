@@ -1,6 +1,6 @@
 """
-Time domain dataset
---------------------
+Skytem dataset
+--------------
 """
 #%%
 from geobipy import plotting as cP
@@ -16,9 +16,9 @@ import h5py
 # +++++++++++++++++++
 
 ################################################################################
-dataFolder = "..//supplementary//Data//"
+dataFolder = "..//supplementary//data//"
 # The data file name
-dataFiles=dataFolder + 'Skytem_small.csv'
+dataFiles=dataFolder + 'skytem_saline_clay.csv'
 # dataFiles = dataFolder + 'Skytem.csv'
 # The EM system file name
 systemFiles=[dataFolder + 'SkytemHM-SLV.stm', dataFolder + 'SkytemLM-SLV.stm']
@@ -40,12 +40,12 @@ _ = TD.scatter2D()
 ################################################################################
 # Plot all the data along the specified line
 plt.figure(2, figsize=(8,6))
-_ = TD.plotLine(100101.0, log=10)
+_ = TD.plotLine(0.0, log=10)
 
 ################################################################################
 # Or, plot specific channels in the data
 plt.figure(3, figsize=(8,6))
-_ = TD.plot(system=0, channels=[1, 3, 5], log=10)
+_ = TD.plot_data(system=0, channels=[1, 3, 5], log=10)
 
 ################################################################################
 plt.figure(4)
@@ -60,29 +60,29 @@ ax = TD.scatter2D(s=1.0, c=TD.secondary_field[:, TD.channel_index(system=0, chan
 plt.axis('equal')
 
 
-with h5py.File('tdem.h5', 'w') as f:
-    TD.createHdf(f, 'tdem')
-    TD.writeHdf(f, 'tdem')
+# with h5py.File('tdem.h5', 'w') as f:
+#     TD.createHdf(f, 'tdem')
+#     TD.writeHdf(f, 'tdem')
 
-with h5py.File('tdem.h5', 'r') as f:
-    TD3 = TdemData.fromHdf(f['tdem'])
+# with h5py.File('tdem.h5', 'r') as f:
+#     TD3 = TdemData.fromHdf(f['tdem'])
 
-with h5py.File('tdem.h5', 'r') as f:
-    tdp = TdemData.fromHdf(f['tdem'], index=0)
+# with h5py.File('tdem.h5', 'r') as f:
+#     tdp = TdemData.fromHdf(f['tdem'], index=0)
 
 
-#%%
-# Obtain a line from the data set
-# +++++++++++++++++++++++++++++++
-line = TD.line(100101.0)
+# #%%
+# # Obtain a line from the data set
+# # +++++++++++++++++++++++++++++++
+# line = TD.line(0.0)
 
-################################################################################
-plt.figure(6)
-_ = line.scatter2D(c=line.secondary_field[:, line.channel_index(system=0, channel=6)], log=10)
+# ################################################################################
+# plt.figure(6)
+# _ = line.scatter2D(c=line.secondary_field[:, line.channel_index(system=0, channel=6)], log=10)
 
-################################################################################
-plt.figure(7)
-_ = line.plot(xAxis='index', log=10)
+# ################################################################################
+# plt.figure(7)
+# _ = line.plot(xAxis='index', log=10)
 
 # Prepare the dataset so that we can read a point at a time.
 Dataset = TdemData._initialize_sequential_reading(dataFiles, systemFiles)

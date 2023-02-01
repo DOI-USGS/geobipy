@@ -19,7 +19,9 @@
         <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
         <script src="../../../../_static/jquery.js"></script>
         <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -89,11 +91,11 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../api.html">API</a> &raquo;</li>
-          <li><a href="../classes.html">Classes used in GeoBIPy</a> &raquo;</li>
-          <li><a href="statistics.html">Statistics classes</a> &raquo;</li>
-      <li>Histogram1D</li>
+      <li><a href="../../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../api.html">API</a></li>
+          <li class="breadcrumb-item"><a href="../classes.html">Classes used in GeoBIPy</a></li>
+          <li class="breadcrumb-item"><a href="statistics.html">Statistics classes</a></li>
+      <li class="breadcrumb-item active">Histogram1D</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../../_sources/content/api/classes/statistics/Histogram1D.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -104,29 +106,17 @@
            <div itemprop="articleBody">
              
   <section id="histogram1d">
-<h1>Histogram1D<a class="headerlink" href="#histogram1d" title="Permalink to this headline"></a></h1>
-digraph inheritancefb461bf5d3 {
-bgcolor=transparent;
-rankdir=LR;
-size=&quot;8.0, 12.0&quot;;
-  &quot;ABC&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Helper class that provides a standard way to create an ABC using&quot;];
-  &quot;Histogram&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;];
-  &quot;myObject&quot; -&gt; &quot;Histogram&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;Histogram1D&quot; [URL=&quot;#geobipy.src.classes.statistics.Histogram1D.Histogram1D&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;1D Histogram class that updates efficiently.&quot;];
-  &quot;Histogram&quot; -&gt; &quot;Histogram1D&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;RectilinearMesh1D&quot; -&gt; &quot;Histogram1D&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;Mesh&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Abstract Base Class&quot;];
-  &quot;myObject&quot; -&gt; &quot;Mesh&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;RectilinearMesh1D&quot; [URL=&quot;../mesh/RectilinearMesh1D.html#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defining a 1D rectilinear mesh with cell centres and edges.&quot;];
-  &quot;Mesh&quot; -&gt; &quot;RectilinearMesh1D&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;myObject&quot; [URL=&quot;../core/myObject.html#geobipy.src.classes.core.myObject.myObject&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Abstract base class&quot;];
-  &quot;ABC&quot; -&gt; &quot;myObject&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-}
-<span class="target" id="module-geobipy.src.classes.statistics.Histogram1D"></span><p>&#64;Histogram_Class
+<h1>Histogram1D<a class="headerlink" href="#histogram1d" title="Permalink to this heading"></a></h1>
+<div class="graphviz"><img src="../../../../_images/inheritance-c7c4b8442822ad2b9b63b8ae7affd53a11c24106.png" alt="Inheritance diagram of geobipy.src.classes.statistics.Histogram1D" usemap="#inheritancefb461bf5d3" class="inheritance graphviz" /></div>
+<map id="inheritancefb461bf5d3" name="inheritancefb461bf5d3">
+<area shape="rect" id="node5" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="125,5,204,31"/>
+<area shape="rect" id="node2" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D" target="_top" title="1D Histogram class that updates efficiently." alt="" coords="553,5,652,31"/>
+<area shape="rect" id="node3" href="../mesh/RectilinearMesh1D.html#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D" target="_top" title="Class defining a 1D rectilinear mesh with cell centres and edges." alt="" coords="372,5,505,31"/>
+</map><span class="target" id="module-geobipy.src.classes.statistics.Histogram1D"></span><p>&#64;Histogram_Class
 Module describing an efficient histogram class</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="geobipy.src.classes.statistics.Histogram1D.Histogram1D">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.statistics.Histogram1D.</span></span><span class="sig-name descname"><span class="pre">Histogram1D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">centres</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">widths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relativeTo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.statistics.Histogram1D.</span></span><span class="sig-name descname"><span class="pre">Histogram1D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">centres</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">widths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relativeTo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D" title="Permalink to this definition"></a></dt>
 <dd><p>1D Histogram class that updates efficiently.</p>
 <p>Fast updating relies on knowing the bins ahead of time.</p>
 <p>Histogram1D(values, bins, binCentres, log, relativeTo)</p>
@@ -235,13 +225,13 @@ myName: Name of the group</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.statistics.Histogram1D.Histogram1D.fromHdf">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">fromHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.fromHdf" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.fromHdf" title="Permalink to this definition"></a></dt>
 <dd><p>Reads in the object froma HDF file</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.statistics.Histogram1D.Histogram1D.hdf_name">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">hdf_name</span></span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.hdf_name" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hdf_name</span></span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.hdf_name" title="Permalink to this definition"></a></dt>
 <dd><p>Reprodicibility procedure</p>
 </dd></dl>
 
@@ -279,7 +269,7 @@ Values in c that are &lt;= 0 are masked.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.statistics.Histogram1D.Histogram1D.plot">
-<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rotate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flipX</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flipY</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.plot" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flipX</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flipY</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.plot" title="Permalink to this definition"></a></dt>
 <dd><p>Plots the histogram</p>
 </dd></dl>
 
@@ -304,8 +294,8 @@ The number of samples generated per bin is scaled by the count for that bin usin
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.statistics.Histogram1D.Histogram1D.summary">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">summary</span></span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.summary" title="Permalink to this definition"></a></dt>
-<dd><p>Print a summary of self</p>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">summary</span></span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram1D.Histogram1D.summary" title="Permalink to this definition"></a></dt>
+<dd><p>Summary of self</p>
 </dd></dl>
 
 <dl class="py method">

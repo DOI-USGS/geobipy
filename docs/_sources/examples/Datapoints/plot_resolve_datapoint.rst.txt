@@ -21,7 +21,7 @@
 Frequency domain datapoint
 --------------------------
 
-.. GENERATED FROM PYTHON SOURCE LINES 7-14
+.. GENERATED FROM PYTHON SOURCE LINES 6-13
 
 There are two ways in which to create a frequency domain datapoint,
 
@@ -31,7 +31,7 @@ There are two ways in which to create a frequency domain datapoint,
 
 Once instantiated, see :ref:`Using a frequency domain datapoint`
 
-.. GENERATED FROM PYTHON SOURCE LINES 16-29
+.. GENERATED FROM PYTHON SOURCE LINES 15-28
 
 .. code-block:: default
 
@@ -39,12 +39,12 @@ Once instantiated, see :ref:`Using a frequency domain datapoint`
     import numpy as np
     import h5py
     import matplotlib.pyplot as plt
-    from geobipy import hdfRead
-    from geobipy import CircularLoop
+    from geobipy import CircularLoops
     from geobipy import FdemSystem
     from geobipy import FdemData
     from geobipy import FdemDataPoint
-    from geobipy import Model1D
+    from geobipy import RectilinearMesh1D
+    from geobipy import Model
     from geobipy import StatArray
     from geobipy import Distribution
 
@@ -55,7 +55,7 @@ Once instantiated, see :ref:`Using a frequency domain datapoint`
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 30-38
+.. GENERATED FROM PYTHON SOURCE LINES 29-37
 
 Instantiating a frequency domain data point
 +++++++++++++++++++++++++++++++++++++++++++
@@ -66,20 +66,13 @@ characteristics of the acquisition system.
 We need to define the frequencies in Hz of the transmitter,
 and the geometery of the loops used for each frequency.
 
-.. GENERATED FROM PYTHON SOURCE LINES 38-49
+.. GENERATED FROM PYTHON SOURCE LINES 37-40
 
 .. code-block:: default
 
 
     frequencies = np.asarray([380.0, 1776.0, 3345.0, 8171.0, 41020.0, 129550.0])
 
-    transmitterLoops = [CircularLoop(orient='z'),     CircularLoop(orient='z'),
-                        CircularLoop('x', moment=-1), CircularLoop(orient='z'),
-                        CircularLoop(orient='z'),     CircularLoop(orient='z')]
-
-    receiverLoops    = [CircularLoop(orient='z', x=7.93),    CircularLoop(orient='z', x=7.91),
-                        CircularLoop('x', moment=1, x=9.03), CircularLoop(orient='z', x=7.91),
-                        CircularLoop(orient='z', x=7.91),    CircularLoop(orient='z', x=7.89)]
 
 
 
@@ -87,16 +80,24 @@ and the geometery of the loops used for each frequency.
 
 
 
+.. GENERATED FROM PYTHON SOURCE LINES 41-43
 
-.. GENERATED FROM PYTHON SOURCE LINES 50-51
+Transmitter positions are defined relative to the observation locations in the data
+This is usually a constant offset for all data points.
 
-Now we can instantiate the system.
-
-.. GENERATED FROM PYTHON SOURCE LINES 51-53
+.. GENERATED FROM PYTHON SOURCE LINES 43-53
 
 .. code-block:: default
 
-    fds = FdemSystem(frequencies, transmitterLoops, receiverLoops)
+    transmitters = CircularLoops(orientation=['z','z','x','z','z','z'],
+                                 moment=np.r_[1, 1, -1, 1, 1, 1],
+                                 x = np.r_[0,0,0,0,0,0],
+                                 y = np.r_[0,0,0,0,0,0],
+                                 z = np.r_[0,0,0,0,0,0],
+                                 pitch = np.r_[0,0,0,0,0,0],
+                                 roll = np.r_[0,0,0,0,0,0],
+                                 yaw = np.r_[0,0,0,0,0,0],
+                                 radius = np.r_[1,1,1,1,1,1])
 
 
 
@@ -105,7 +106,49 @@ Now we can instantiate the system.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 54-61
+.. GENERATED FROM PYTHON SOURCE LINES 54-55
+
+Receiver positions are defined relative to the transmitter
+
+.. GENERATED FROM PYTHON SOURCE LINES 55-65
+
+.. code-block:: default
+
+    receivers = CircularLoops(orientation=['z','z','x','z','z','z'],
+                                 moment=np.r_[1, 1, -1, 1, 1, 1],
+                                 x = np.r_[7.91, 7.91, 9.03, 7.91, 7.91, 7.89],
+                                 y = np.r_[0,0,0,0,0,0],
+                                 z = np.r_[0,0,0,0,0,0],
+                                 pitch = np.r_[0,0,0,0,0,0],
+                                 roll = np.r_[0,0,0,0,0,0],
+                                 yaw = np.r_[0,0,0,0,0,0],
+                                 radius = np.r_[1,1,1,1,1,1])
+
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 66-67
+
+Now we can instantiate the system.
+
+.. GENERATED FROM PYTHON SOURCE LINES 67-69
+
+.. code-block:: default
+
+    fds = FdemSystem(frequencies, transmitters, receivers)
+
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 70-77
 
 And use the system to instantiate a datapoint
 
@@ -115,7 +158,7 @@ deviations of those observed data.
 
 Define some in-phase then quadrature data for each frequency.
 
-.. GENERATED FROM PYTHON SOURCE LINES 61-72
+.. GENERATED FROM PYTHON SOURCE LINES 77-88
 
 .. code-block:: default
 
@@ -137,7 +180,7 @@ Define some in-phase then quadrature data for each frequency.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 73-80
+.. GENERATED FROM PYTHON SOURCE LINES 89-96
 
 Obtaining a datapoint from a dataset
 ++++++++++++++++++++++++++++++++++++
@@ -147,11 +190,11 @@ We can read in a dataset and pull datapoints from it.
 
 For more information about the frequency domain data set see :ref:`Frequency domain dataset`
 
-.. GENERATED FROM PYTHON SOURCE LINES 82-83
+.. GENERATED FROM PYTHON SOURCE LINES 98-99
 
 Set some paths and file names
 
-.. GENERATED FROM PYTHON SOURCE LINES 83-89
+.. GENERATED FROM PYTHON SOURCE LINES 99-105
 
 .. code-block:: default
 
@@ -168,18 +211,29 @@ Set some paths and file names
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 90-92
+.. GENERATED FROM PYTHON SOURCE LINES 106-109
 
-Initialize and read an EM data set
-Prepare the dataset so that we can read a point at a time.
+###############################################################################
+ Initialize and read an EM data set
+ Prepare the dataset so that we can read a point at a time.
 
-.. GENERATED FROM PYTHON SOURCE LINES 92-107
+.. GENERATED FROM PYTHON SOURCE LINES 109-112
 
 .. code-block:: default
 
     Dataset = FdemData._initialize_sequential_reading(dataFile, systemFile)
     # Get a datapoint from the file.
     fdp = Dataset._read_record()
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 113-124
+
+.. code-block:: default
 
 
     # ################################################################################
@@ -199,24 +253,24 @@ Prepare the dataset so that we can read a point at a time.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 108-110
+.. GENERATED FROM PYTHON SOURCE LINES 125-127
 
 Using a datapoint
 +++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 112-113
+.. GENERATED FROM PYTHON SOURCE LINES 129-130
 
 We can define a 1D layered earth model, and use it to predict some data
 
-.. GENERATED FROM PYTHON SOURCE LINES 113-119
+.. GENERATED FROM PYTHON SOURCE LINES 130-136
 
 .. code-block:: default
 
     nCells = 19
     par = StatArray(np.linspace(0.01, 0.1, nCells), "Conductivity", "$\frac{S}{m}$")
-    thk = StatArray(np.ones(nCells) * 10.0)
-    thk[-1] = np.inf
-    mod = Model1D(nCells = nCells, parameters=par, widths=thk)
+    depth = StatArray(np.arange(nCells+1) * 10.0, "Depth", 'm')
+    depth[-1] = np.inf
+    mod = Model(mesh=RectilinearMesh1D(edges=depth), values=par)
 
 
 
@@ -225,11 +279,11 @@ We can define a 1D layered earth model, and use it to predict some data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 120-121
+.. GENERATED FROM PYTHON SOURCE LINES 137-138
 
 Forward model the data
 
-.. GENERATED FROM PYTHON SOURCE LINES 121-123
+.. GENERATED FROM PYTHON SOURCE LINES 138-140
 
 .. code-block:: default
 
@@ -242,13 +296,13 @@ Forward model the data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 124-131
+.. GENERATED FROM PYTHON SOURCE LINES 141-148
 
 .. code-block:: default
 
     plt.figure()
     plt.subplot(121)
-    _ = mod.pcolor()
+    _ = mod.pcolor(transpose=True)
     plt.subplot(122)
     _ = fdp.plot_predicted()
     plt.tight_layout()
@@ -265,15 +319,16 @@ Forward model the data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 132-133
+.. GENERATED FROM PYTHON SOURCE LINES 149-150
 
 Compute the sensitivity matrix for a given model
 
-.. GENERATED FROM PYTHON SOURCE LINES 133-137
+.. GENERATED FROM PYTHON SOURCE LINES 150-155
 
 .. code-block:: default
 
     J = fdp.sensitivity(mod)
+
     plt.figure()
     _ = np.abs(J).pcolor(equalize=True, log=10, flipY=True)
 
@@ -289,19 +344,19 @@ Compute the sensitivity matrix for a given model
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 138-142
+.. GENERATED FROM PYTHON SOURCE LINES 156-160
 
 Attaching statistical descriptors to the datapoint
 ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 Set values of relative and additive error for both systems.
 
-.. GENERATED FROM PYTHON SOURCE LINES 142-147
+.. GENERATED FROM PYTHON SOURCE LINES 160-165
 
 .. code-block:: default
 
-    fdp.relErr = 0.05
-    fdp.addErr = 10.0
+    fdp.relative_error = 0.05
+    fdp.additive_error = 10.0
     # Define a multivariate log normal distribution as the prior on the predicted data.
     fdp.predictedData.prior = Distribution('MvLogNormal', fdp.data[fdp.active], fdp.std[fdp.active]**2.0)
 
@@ -312,11 +367,11 @@ Set values of relative and additive error for both systems.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 148-149
+.. GENERATED FROM PYTHON SOURCE LINES 166-167
 
 This allows us to evaluate the likelihood of the predicted data
 
-.. GENERATED FROM PYTHON SOURCE LINES 149-153
+.. GENERATED FROM PYTHON SOURCE LINES 167-171
 
 .. code-block:: default
 
@@ -330,21 +385,19 @@ This allows us to evaluate the likelihood of the predicted data
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     -733.5454886773897
-    36.98404330073879
+    1367.8194588709218
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 154-155
+.. GENERATED FROM PYTHON SOURCE LINES 172-173
 
 Plot the misfits for a range of half space conductivities
 
-.. GENERATED FROM PYTHON SOURCE LINES 155-160
+.. GENERATED FROM PYTHON SOURCE LINES 173-178
 
 .. code-block:: default
 
@@ -364,8 +417,6 @@ Plot the misfits for a range of half space conductivities
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
 
@@ -373,16 +424,16 @@ Plot the misfits for a range of half space conductivities
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 161-162
+.. GENERATED FROM PYTHON SOURCE LINES 179-180
 
 We can perform a quick search for the best fitting half space
 
-.. GENERATED FROM PYTHON SOURCE LINES 162-168
+.. GENERATED FROM PYTHON SOURCE LINES 180-186
 
 .. code-block:: default
 
-    halfspace = fdp.FindBestHalfSpace()
-    print('Best half space conductivity is {} $S/m$'.format(halfspace.par))
+    halfspace = fdp.find_best_halfspace()
+    print('Best half space conductivity is {} $S/m$'.format(halfspace.values))
     plt.figure()
     _ = fdp.plot()
     _ = fdp.plot_predicted()
@@ -398,20 +449,18 @@ We can perform a quick search for the best fitting half space
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    Best half space conductivity is [0.00964662] $S/m$
+    Best half space conductivity is [0.097701] $S/m$
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 169-170
+.. GENERATED FROM PYTHON SOURCE LINES 187-188
 
 Compute the misfit between observed and predicted data
 
-.. GENERATED FROM PYTHON SOURCE LINES 170-172
+.. GENERATED FROM PYTHON SOURCE LINES 188-190
 
 .. code-block:: default
 
@@ -423,31 +472,29 @@ Compute the misfit between observed and predicted data
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    42.54522345564669
+    45286.82862377462
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 173-175
+.. GENERATED FROM PYTHON SOURCE LINES 191-193
 
 We can attach priors to the height of the datapoint,
 the relative error multiplier, and the additive error noise floor
 
-.. GENERATED FROM PYTHON SOURCE LINES 175-183
+.. GENERATED FROM PYTHON SOURCE LINES 193-201
 
 .. code-block:: default
 
 
 
     # Define the distributions used as priors.
-    heightPrior = Distribution('Uniform', min=np.float64(fdp.z) - 2.0, max=np.float64(fdp.z) + 2.0)
+    zPrior = Distribution('Uniform', min=np.float64(fdp.z) - 2.0, max=np.float64(fdp.z) + 2.0)
     relativePrior = Distribution('Uniform', min=0.01, max=0.5)
     additivePrior = Distribution('Uniform', min=5, max=15)
-    fdp.set_priors(height_prior=heightPrior, relative_error_prior=relativePrior, additive_error_prior=additivePrior)
+    fdp.set_priors(z_prior=zPrior, relative_error_prior=relativePrior, additive_error_prior=additivePrior)
 
 
 
@@ -456,18 +503,18 @@ the relative error multiplier, and the additive error noise floor
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 184-185
+.. GENERATED FROM PYTHON SOURCE LINES 202-203
 
 In order to perturb our solvable parameters, we need to attach proposal distributions
 
-.. GENERATED FROM PYTHON SOURCE LINES 185-190
+.. GENERATED FROM PYTHON SOURCE LINES 203-208
 
 .. code-block:: default
 
-    heightProposal = Distribution('Normal', mean=fdp.z, variance = 0.01)
-    relativeProposal = Distribution('MvNormal', mean=fdp.relErr, variance=2.5e-7)
-    additiveProposal = Distribution('MvLogNormal', mean=fdp.addErr, variance=1e-4)
-    fdp.set_proposals(heightProposal, relativeProposal, additiveProposal)
+    z_proposal = Distribution('Normal', mean=fdp.z, variance = 0.01)
+    relativeProposal = Distribution('MvNormal', mean=fdp.relative_error, variance=2.5e-7)
+    additiveProposal = Distribution('MvLogNormal', mean=fdp.additive_error, variance=1e-4)
+    fdp.set_proposals(relativeProposal, additiveProposal, z_proposal=z_proposal)
 
 
 
@@ -476,20 +523,28 @@ In order to perturb our solvable parameters, we need to attach proposal distribu
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 191-192
+.. GENERATED FROM PYTHON SOURCE LINES 209-210
 
 With priors set we can auto generate the posteriors
 
-.. GENERATED FROM PYTHON SOURCE LINES 192-199
+.. GENERATED FROM PYTHON SOURCE LINES 210-225
 
 .. code-block:: default
 
     fdp.set_posteriors()
 
+
+    nCells = 19
+    par = StatArray(np.linspace(0.01, 0.1, nCells), "Conductivity", "$\frac{S}{m}$")
+    depth = StatArray(np.arange(nCells+1) * 10.0, "Depth", 'm')
+    depth[-1] = np.inf
+    mod = Model(mesh=RectilinearMesh1D(edges=depth), values=par)
+    fdp.forward(mod)
+
     # Perturb the datapoint and record the perturbations
-    for i in range(10000):
+    for i in range(1000):
         fdp.perturb()
-        fdp.updatePosteriors()
+        fdp.update_posteriors()
 
 
 
@@ -498,32 +553,43 @@ With priors set we can auto generate the posteriors
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 200-201
+.. GENERATED FROM PYTHON SOURCE LINES 226-228
 
 Plot the posterior distributions
+fig = plt.figure()
 
-.. GENERATED FROM PYTHON SOURCE LINES 201-218
+.. GENERATED FROM PYTHON SOURCE LINES 228-255
 
 .. code-block:: default
 
-    fig = plt.figure()
-    gs = fig.add_gridspec(nrows=1, ncols=1)
-    ax = fdp.init_posterior_plots(gs[0, 0])
-    fig.tight_layout()
+    fdp.plot_posteriors(overlay=fdp)
 
-    fdp.plot_posteriors(axes=ax, best=fdp)
+    import h5py
+    with h5py.File('fdp.h5', 'w') as f:
+        fdp.createHdf(f, 'fdp', withPosterior=True)
+        fdp.writeHdf(f, 'fdp', withPosterior=True)
 
-    # import h5py
-    # with h5py.File('fdp.h5', 'w') as f:
-    #     fdp.toHdf(f, 'fdp', withPosterior=True)
+    with h5py.File('fdp.h5', 'r') as f:
+        fdp1 = FdemDataPoint.fromHdf(f['fdp'])
 
-    # with h5py.File('fdp.h5', 'r') as f:
-    #     fdp1 = FdemDataPoint.fromHdf(f['fdp'])
+    fdp1.plot_posteriors(overlay=fdp1)
 
+    import h5py
+    with h5py.File('fdp.h5', 'w') as f:
+        fdp.createHdf(f, 'fdp', withPosterior=True, add_axis=np.arange(10.0))
 
+        for i in range(10):
+            fdp.writeHdf(f, 'fdp', withPosterior=True, index=i)
 
+    from geobipy import FdemData
+    with h5py.File('fdp.h5', 'r') as f:
+        fdp1 = FdemDataPoint.fromHdf(f['fdp'], index=0)
+        fdp2 = FdemData.fromHdf(f['fdp'])
+
+    fdp1.plot_posteriors(overlay=fdp1)
 
     plt.show()
+    # %%
 
 
 .. image-sg:: /examples/Datapoints/images/sphx_glr_plot_resolve_datapoint_005.png
@@ -538,28 +604,23 @@ Plot the posterior distributions
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  19.417 seconds)
+   **Total running time of the script:** ( 0 minutes  9.918 seconds)
 
 
 .. _sphx_glr_download_examples_Datapoints_plot_resolve_datapoint.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: plot_resolve_datapoint.py <plot_resolve_datapoint.py>`
 
-     :download:`Download Python source code: plot_resolve_datapoint.py <plot_resolve_datapoint.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: plot_resolve_datapoint.ipynb <plot_resolve_datapoint.ipynb>`
+      :download:`Download Jupyter notebook: plot_resolve_datapoint.ipynb <plot_resolve_datapoint.ipynb>`
 
 
 .. only:: html

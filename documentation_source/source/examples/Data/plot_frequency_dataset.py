@@ -4,7 +4,7 @@ Frequency domain dataset
 """
 #%%
 import matplotlib.pyplot as plt
-from geobipy import CircularLoop
+from geobipy import CircularLoops
 from geobipy import FdemSystem
 from geobipy import FdemData
 import h5py
@@ -23,21 +23,27 @@ frequencies = np.asarray([395.0, 822.0, 3263.0, 8199.0, 38760.0, 128755.0])
 ################################################################################
 # Transmitter positions are defined relative to the observation locations in the data
 # This is usually a constant offset for all data points.
-transmitters = [CircularLoop(orient="z", moment=1.0,  x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
-                CircularLoop(orient="z", moment=1.0,  x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
-                CircularLoop(orient="x", moment=-1.0, x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
-                CircularLoop(orient="z", moment=1.0,  x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
-                CircularLoop(orient="z", moment=1.0,  x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
-                CircularLoop(orient="z", moment=1.0,  x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0)]
+transmitters = CircularLoops(orientation=['z','z','x','z','z','z'],
+                             moment=np.r_[1, 1, -1, 1, 1, 1],
+                             x = np.r_[0,0,0,0,0,0],
+                             y = np.r_[0,0,0,0,0,0],
+                             z = np.r_[0,0,0,0,0,0],
+                             pitch = np.r_[0,0,0,0,0,0],
+                             roll = np.r_[0,0,0,0,0,0],
+                             yaw = np.r_[0,0,0,0,0,0],
+                             radius = np.r_[1,1,1,1,1,1])
 
 ################################################################################
 # Receiver positions are defined relative to the transmitter
-receivers = [CircularLoop(orient="z", moment=1.0, x=7.93, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
-             CircularLoop(orient="z", moment=1.0, x=7.91, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
-             CircularLoop(orient="x", moment=1.0, x=9.03, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
-             CircularLoop(orient="z", moment=1.0, x=7.91, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
-             CircularLoop(orient="z", moment=1.0, x=7.91, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
-             CircularLoop(orient="z", moment=1.0, x=7.89, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0)]
+receivers = CircularLoops(orientation=['z','z','x','z','z','z'],
+                             moment=np.r_[1, 1, -1, 1, 1, 1],
+                             x = np.r_[7.91, 7.91, 9.03, 7.91, 7.91, 7.89],
+                             y = np.r_[0,0,0,0,0,0],
+                             z = np.r_[0,0,0,0,0,0],
+                             pitch = np.r_[0,0,0,0,0,0],
+                             roll = np.r_[0,0,0,0,0,0],
+                             yaw = np.r_[0,0,0,0,0,0],
+                             radius = np.r_[1,1,1,1,1,1])
 
 ##############################################################################
 # Instantiate the system for the data
@@ -57,7 +63,7 @@ data = FdemData(x=x, y=-y, z=z, system = system)
 # Of course measured field data is stored on disk. So instead we can read data from file.
 
 ################################################################################
-dataFolder = "..//supplementary//Data//"
+dataFolder = "..//supplementary//data//"
 # The data file name
 dataFile = dataFolder + 'Resolve2.txt'
 # The EM system file name
@@ -134,9 +140,8 @@ plt.axis('equal');
 
 ################################################################################
 # Export the data to VTK
-
-# FD1.toVTK('FD_one')
-# FD2.toVTK('FD_two')
+FD1.to_vtk('FD_one.vtk')
+# FD2.to_vtk('FD_two.vtk')
 
 #%%
 # Obtain a line from the data set
@@ -164,7 +169,7 @@ _ = L.scatter2D();
 # We can specify the axis along which to plot.
 # xAxis can be index, x, y, z, r2d, r3d
 plt.figure(figsize=(8,6))
-_ = FD1.plot(channels=[0,11,8], log=10, linewidth=0.5);
+_ = FD1.plot_data(channels=np.r_[0, 11, 8], log=10, linewidth=0.5);
 
 
 with h5py.File('fdem.h5', 'w') as f:

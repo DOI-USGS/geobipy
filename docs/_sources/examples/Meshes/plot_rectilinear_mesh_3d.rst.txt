@@ -22,7 +22,7 @@
 -------------------
 This 3D rectilinear mesh defines a grid with straight cell boundaries.
 
-.. GENERATED FROM PYTHON SOURCE LINES 9-15
+.. GENERATED FROM PYTHON SOURCE LINES 9-16
 
 .. code-block:: default
 
@@ -30,6 +30,7 @@ This 3D rectilinear mesh defines a grid with straight cell boundaries.
     from geobipy import RectilinearMesh3D
     import matplotlib.pyplot as plt
     import numpy as np
+    import h5py
 
 
 
@@ -39,88 +40,120 @@ This 3D rectilinear mesh defines a grid with straight cell boundaries.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 16-17
+.. GENERATED FROM PYTHON SOURCE LINES 17-18
 
 Specify some cell centres in x and y
 
-.. GENERATED FROM PYTHON SOURCE LINES 17-54
+.. GENERATED FROM PYTHON SOURCE LINES 18-37
 
 .. code-block:: default
 
     x = StatArray(np.arange(10.0), 'Easting', 'm')
-    y = StatArray(np.arange(11.0), 'Northing', 'm')
-    z = StatArray(np.arange(12.0), 'Depth', 'm')
+    y = StatArray(np.arange(15.0), 'Northing', 'm')
+    z = StatArray(np.arange(20.0), 'Depth', 'm')
 
-    rm = RectilinearMesh3D(xEdges=x, yEdges=y, zEdges=z)
+    rm = RectilinearMesh3D(x_edges=x, y_edges=y, z_edges=z)
 
+    rm1 = rm[:5, :5, :5]
     rm2 = rm[:, :, 5]
     rm3 = rm[:, 5, :]
     rm4 = rm[5, :, :]
 
     plt.figure()
-    plt.subplot(131)
+    plt.subplot(231)
     rm2.plotGrid()
-    plt.subplot(132)
+    plt.subplot(232)
     rm3.plotGrid()
-    plt.subplot(133)
+    plt.subplot(233)
     rm4.plotGrid()
 
 
-    # ################################################################################
-    import h5py
+
+
+.. image-sg:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_3d_001.png
+   :alt: plot rectilinear mesh 3d
+   :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_3d_001.png
+   :class: sphx-glr-single-img
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 38-49
+
+.. code-block:: default
+
+    rm2 = rm[:, 5, 5]
+    rm3 = rm[5, :, 5]
+    rm4 = rm[5, 5, :]
+
+    plt.subplot(234)
+    rm2.plotGrid()
+    plt.subplot(235)
+    rm3.plotGrid()
+    plt.subplot(236)
+    rm4.plotGrid()
+
+
+
+
+.. image-sg:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_3d_002.png
+   :alt: plot rectilinear mesh 3d
+   :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_3d_002.png
+   :class: sphx-glr-single-img
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 50-77
+
+.. code-block:: default
+
     with h5py.File('rm3d.h5', 'w') as f:
-        rm.toHdf(f, 'test')
+        rm.createHdf(f, 'test')
+        rm.writeHdf(f, 'test')
 
     with h5py.File('rm3d.h5', 'r') as f:
         rm2 = RectilinearMesh3D.fromHdf(f['test'])
 
-    rm.pyvista_mesh().save('rm3d_a.vtk')
-    rm2.pyvista_mesh().save('rm3d_b.vtk')
+    rm.pyvista_mesh().save('rm3d.vtk')
 
-    xx, yy = np.meshgrid(rm.x.centres, rm.y.centres)
-    height = StatArray(np.sin(np.sqrt(xx ** 2.0 + yy ** 2.0)), "Height")
-    rm = RectilinearMesh3D(xEdges=x, yEdges=y, zEdges=z, height=height)
+
+    xx, yy = np.meshgrid(rm.y.centres, rm.x.centres)
+    z_re = StatArray(np.sin(np.sqrt(xx ** 2.0 + yy ** 2.0)), "z_re")
+    rm = RectilinearMesh3D(x_edges=x, y_edges=y, z_edges=z, z_relative_to=z_re)
+
+    rm1 = rm[:5, :5, :5]
+    rm2 = rm[:, :, 5]
+    rm3 = rm[:, 5, :]
+    rm4 = rm[5, :, :]
 
     plt.figure()
-    rm.height.pcolor()
+    plt.subplot(231)
+    rm2.plotGrid()
+    plt.subplot(232)
+    rm3.plotGrid()
+    plt.subplot(233)
+    rm4.plotGrid()
 
 
 
 
-.. rst-class:: sphx-glr-horizontal
-
-
-    *
-
-      .. image-sg:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_3d_001.png
-         :alt: plot rectilinear mesh 3d
-         :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_3d_001.png
-         :class: sphx-glr-multi-img
-
-    *
-
-      .. image-sg:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_3d_002.png
-         :alt: plot rectilinear mesh 3d
-         :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_3d_002.png
-         :class: sphx-glr-multi-img
-
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-
-    (<AxesSubplot:xlabel='Easting (m)', ylabel='Northing (m)'>, <matplotlib.collections.QuadMesh object at 0x7fe8807f1670>, <matplotlib.colorbar.Colorbar object at 0x7fe880766790>)
+.. image-sg:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_3d_003.png
+   :alt: plot rectilinear mesh 3d
+   :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_3d_003.png
+   :class: sphx-glr-single-img
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 55-56
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 78-79
 
 We can plot the mesh in 3D!
 
-.. GENERATED FROM PYTHON SOURCE LINES 56-58
+.. GENERATED FROM PYTHON SOURCE LINES 79-81
 
 .. code-block:: default
 
@@ -133,16 +166,138 @@ We can plot the mesh in 3D!
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 59-60
+.. GENERATED FROM PYTHON SOURCE LINES 82-83
 
 We can plot the mesh in 3D!
 
-.. GENERATED FROM PYTHON SOURCE LINES 60-76
+.. GENERATED FROM PYTHON SOURCE LINES 83-105
 
 .. code-block:: default
 
-    mesh = rm.pyvista_mesh()
-    mesh.save('rm3d.vtk')
+    mesh = rm.pyvista_mesh().save('rm3d_re1.vtk')
+
+
+    x_re = StatArray(np.sin(np.repeat(rm.y.centres[:, None], rm.z.nCells, 1)), "x_re")
+
+    xx, yy = np.meshgrid(rm.y.centres, rm.x.centres)
+    z_re = StatArray(np.sin(np.sqrt(xx ** 2.0 + yy ** 2.0)), "z_re")
+    rm = RectilinearMesh3D(x_edges=x, x_relative_to=x_re, y_edges=y, z_edges=z, z_relative_to=z_re)
+
+    rm1 = rm[:5, :5, :5]
+    rm2 = rm[:, :, 5]
+    rm3 = rm[:, 5, :]
+    rm4 = rm[5, :, :]
+
+    plt.figure()
+    plt.subplot(231)
+    rm2.plotGrid()
+    plt.subplot(232)
+    rm3.plotGrid()
+    plt.subplot(233)
+    rm4.plotGrid()
+
+
+
+
+.. image-sg:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_3d_004.png
+   :alt: plot rectilinear mesh 3d
+   :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_3d_004.png
+   :class: sphx-glr-single-img
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 106-107
+
+We can plot the mesh in 3D!
+
+.. GENERATED FROM PYTHON SOURCE LINES 107-109
+
+.. code-block:: default
+
+    pv = rm.pyvista_plotter()
+
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 110-111
+
+We can plot the mesh in 3D!
+
+.. GENERATED FROM PYTHON SOURCE LINES 111-137
+
+.. code-block:: default
+
+    mesh = rm.pyvista_mesh().save('rm3d_re2.vtk')
+
+
+    xx, yy = np.meshgrid(rm.z.centres, rm.y.centres)
+    x_re = StatArray(np.sin(np.sqrt(xx ** 2.0 + yy ** 2.0)), "x_re")
+
+    xx, yy = np.meshgrid(rm.z.centres, rm.x.centres)
+    y_re = StatArray(np.sin(np.sqrt(xx ** 2.0 + yy ** 2.0)), "y_re")
+
+    xx, yy = np.meshgrid(rm.y.centres, rm.x.centres)
+    z_re = StatArray(np.sin(np.sqrt(xx ** 2.0 + yy ** 2.0)), "z_re")
+    rm = RectilinearMesh3D(x_edges=x, x_relative_to=x_re, y_edges=y, y_relative_to=y_re, z_edges=z, z_relative_to=z_re)
+
+    rm1 = rm[:5, :5, :5]
+    rm2 = rm[:, :, 5]
+    rm3 = rm[:, 5, :]
+    rm4 = rm[5, :, :]
+
+    plt.figure()
+    plt.subplot(231)
+    rm2.plotGrid()
+    plt.subplot(232)
+    rm3.plotGrid()
+    plt.subplot(233)
+    rm4.plotGrid()
+
+
+
+
+.. image-sg:: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_3d_005.png
+   :alt: plot rectilinear mesh 3d
+   :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_3d_005.png
+   :class: sphx-glr-single-img
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 138-139
+
+We can plot the mesh in 3D!
+
+.. GENERATED FROM PYTHON SOURCE LINES 139-142
+
+.. code-block:: default
+
+    pv = rm.pyvista_plotter()
+    pv.show()
+
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 143-144
+
+We can plot the mesh in 3D!
+
+.. GENERATED FROM PYTHON SOURCE LINES 144-155
+
+.. code-block:: default
+
+    mesh = rm.pyvista_mesh().save('rm3d_re3.vtk')
 
     with h5py.File('rm3d.h5', 'w') as f:
         rm.toHdf(f, 'test')
@@ -150,8 +305,7 @@ We can plot the mesh in 3D!
     with h5py.File('rm3d.h5', 'r') as f:
         rm2 = RectilinearMesh3D.fromHdf(f['test'])
 
-    rm.pyvista_mesh().save('rm3d_c.vtk')
-    rm2.pyvista_mesh().save('rm3d_d.vtk')
+    rm2.pyvista_mesh().save('rm3d_read.vtk')
 
     plt.show()
 
@@ -162,33 +316,25 @@ We can plot the mesh in 3D!
 
 
 
-
-
-
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.676 seconds)
+   **Total running time of the script:** ( 2 minutes  36.755 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_3d.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: plot_rectilinear_mesh_3d.py <plot_rectilinear_mesh_3d.py>`
 
-     :download:`Download Python source code: plot_rectilinear_mesh_3d.py <plot_rectilinear_mesh_3d.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: plot_rectilinear_mesh_3d.ipynb <plot_rectilinear_mesh_3d.ipynb>`
+      :download:`Download Jupyter notebook: plot_rectilinear_mesh_3d.ipynb <plot_rectilinear_mesh_3d.ipynb>`
 
 
 .. only:: html

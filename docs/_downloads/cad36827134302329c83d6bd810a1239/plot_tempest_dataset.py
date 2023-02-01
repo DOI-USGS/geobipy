@@ -3,19 +3,19 @@ Tempest dataset
 --------------------
 """
 #%%
+import h5py
 from geobipy import plotting as cP
 from os.path import join
 import matplotlib.pyplot as plt
 import numpy as np
-from geobipy.src.classes.core.StatArray import StatArray
-from geobipy.src.classes.data.dataset.TempestData import TempestData
+from geobipy import TempestData
 
 #%%
 # Reading in the Data
 # +++++++++++++++++++
 
 ################################################################################
-dataFolder = "..//supplementary//Data//"
+dataFolder = "..//supplementary//data//"
 
 # # The data file name
 # dataFiles = dataFolder + 'Tempest.nc'
@@ -27,7 +27,7 @@ dataFolder = "..//supplementary//Data//"
 # TD = TempestData.read_netcdf(dataFiles, systemFiles)
 
 # TD.write_csv(dataFolder + 'Tempest.csv')
-TD = TempestData.read_csv(dataFolder + 'Tempest.csv', system_filename=dataFolder + 'Tempest.stm')
+TD = TempestData.read_csv(dataFolder + 'tempest_saline_clay.csv', system_filename=dataFolder + 'Tempest.stm')
 
 ################################################################################
 # Plot the locations of the data points
@@ -44,7 +44,7 @@ plt.title('Line {}'.format(225401.0))
 ################################################################################
 # Or, plot specific channels in the data
 plt.figure(figsize=(8,6))
-_ = TD.plot(system=0, channels=[0, 6, 18])
+_ = TD.plot_data(system=0, channels=[0, 6, 18])
 plt.title("3 channels of data")
 
 ################################################################################
@@ -58,23 +58,31 @@ ax = TD.scatter2D(s=1.0, c=TD.data[:, TD.channel_index(system=0, channel=10)], e
 plt.axis('equal')
 plt.title("scatter plot of specific channel")
 
-################################################################################
-# TD.toVTK('TD1', format='binary')
+
+# with h5py.File('tdem.h5', 'w') as f:
+#     TD.createHdf(f, 'tdem')
+#     TD.writeHdf(f, 'tdem')
+
+# with h5py.File('tdem.h5', 'r') as f:
+#     TD3 = TempestData.fromHdf(f['tdem'])
+
+# with h5py.File('tdem.h5', 'r') as f:
+#     tdp = TempestData.fromHdf(f['tdem'], index=0)
 
 
-#%%
-# Obtain a line from the data set
-# +++++++++++++++++++++++++++++++
-line = TD.line(0.0)
+# #%%
+# # Obtain a line from the data set
+# # +++++++++++++++++++++++++++++++
+# line = TD.line(0.0)
 
-################################################################################
-plt.figure()
-_ = line.scatter2D()
-plt.title('Channel')
+# ################################################################################
+# plt.figure()
+# _ = line.scatter2D()
+# plt.title('Channel')
 
-################################################################################
-plt.figure()
-_ = line.plot(xAxis='index', log=10)
-plt.title("All data along line")
+# ################################################################################
+# plt.figure()
+# _ = line.plot_data(xAxis='index', log=10)
+# plt.title("All data along line")
 
 plt.show()

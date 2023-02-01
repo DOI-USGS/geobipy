@@ -19,7 +19,9 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -52,16 +54,26 @@
 <li class="toctree-l2"><a class="reference internal" href="../index.html#distribtions">Distribtions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#statistics">Statistics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#meshes">Meshes</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../index.html#models">Models</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="plot_model_1d.html">1D Model with an infinite halfspace</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">2D Rectilinear Model</a></li>
-<li class="toctree-l3"><a class="reference internal" href="plot_model_3d.html">3D Rectilinear Model</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#data">Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#datapoints">Datapoints</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#inference">Inference</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../index.html#hdf-5">HDF 5</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#hdf-5">HDF 5</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../Distributions/index.html">Distribtions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Statistics/index.html">Statistics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Meshes/index.html">Meshes</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Models</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="plot_model_1d.html">1D Model with an infinite halfspace</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">2D Rectilinear Model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_model_3d.html">3D Rectilinear Model</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Data/index.html">Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Datapoints/index.html">Datapoints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Inference/index.html">Inference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../HDF5/index.html">HDF 5</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -79,9 +91,10 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../index.html">Examples</a> &raquo;</li>
-      <li>2D Rectilinear Model</li>
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Examples</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Models</a></li>
+      <li class="breadcrumb-item active">2D Rectilinear Model</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../_sources/examples/Models/plot_model_2d.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -97,7 +110,7 @@
 to download the full example code</p>
 </div>
 <section class="sphx-glr-example-title" id="d-rectilinear-model">
-<span id="sphx-glr-examples-models-plot-model-2d-py"></span><h1>2D Rectilinear Model<a class="headerlink" href="#d-rectilinear-model" title="Permalink to this headline"></a></h1>
+<span id="sphx-glr-examples-models-plot-model-2d-py"></span><h1>2D Rectilinear Model<a class="headerlink" href="#d-rectilinear-model" title="Permalink to this heading"></a></h1>
 <p>This 2D rectilinear model defines a grid with straight cell boundaries.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">StatArray</span>
 <span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">RectilinearMesh2D</span>
@@ -110,7 +123,7 @@ to download the full example code</p>
 <p>Specify some cell centres in x and y</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">11.0</span><span class="p">),</span> <span class="s1">&#39;Easting&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">)</span>
 <span class="n">y</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">11.0</span><span class="p">),</span> <span class="s1">&#39;Northing&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">)</span>
-<span class="n">mesh</span> <span class="o">=</span> <span class="n">RectilinearMesh2D</span><span class="p">(</span><span class="n">xEdges</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">yEdges</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+<span class="n">mesh</span> <span class="o">=</span> <span class="n">RectilinearMesh2D</span><span class="p">(</span><span class="n">x_edges</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y_edges</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
 
 <span class="n">xx</span><span class="p">,</span> <span class="n">yy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">centres</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">centres</span><span class="p">)</span>
 <span class="n">values</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">xx</span> <span class="o">**</span> <span class="mf">2.0</span> <span class="o">+</span> <span class="n">yy</span> <span class="o">**</span> <span class="mf">2.0</span><span class="p">)),</span> <span class="s2">&quot;Values&quot;</span><span class="p">)</span>
@@ -152,8 +165,8 @@ to download the full example code</p>
 <li><img src="../../_images/sphx_glr_plot_model_2d_001.png" srcset="../../_images/sphx_glr_plot_model_2d_001.png" alt="plot model 2d" class = "sphx-glr-multi-img"/></li>
 <li><img src="../../_images/sphx_glr_plot_model_2d_002.png" srcset="../../_images/sphx_glr_plot_model_2d_002.png" alt="plot model 2d" class = "sphx-glr-multi-img"/></li>
 </ul>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.299 seconds)</p>
-<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-models-plot-model-2d-py">
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.261 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-models-plot-model-2d-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/b65392b576618a906ad35b58f026489b/plot_model_2d.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_model_2d.py</span></code></a></p>
 </div>

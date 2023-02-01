@@ -19,7 +19,9 @@
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -54,7 +56,32 @@
 <li class="toctree-l3"><a class="reference internal" href="fileIO.html">fileIO</a></li>
 <li class="toctree-l3"><a class="reference internal" href="interpolation.html">Interpolation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="HDF.html">Heirarchical Data Format (HDF)</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">MPI wrapper functions</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">MPI wrapper functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.Bcast"><code class="docutils literal notranslate"><span class="pre">Bcast()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.Bcast_1int"><code class="docutils literal notranslate"><span class="pre">Bcast_1int()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.Bcast_list"><code class="docutils literal notranslate"><span class="pre">Bcast_list()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.Irecv"><code class="docutils literal notranslate"><span class="pre">Irecv()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.IrecvFromLeft"><code class="docutils literal notranslate"><span class="pre">IrecvFromLeft()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.IrecvFromRight"><code class="docutils literal notranslate"><span class="pre">IrecvFromRight()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.Irecv_1int"><code class="docutils literal notranslate"><span class="pre">Irecv_1int()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.Isend"><code class="docutils literal notranslate"><span class="pre">Isend()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.IsendToLeft"><code class="docutils literal notranslate"><span class="pre">IsendToLeft()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.IsendToRight"><code class="docutils literal notranslate"><span class="pre">IsendToRight()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.Isend_1int"><code class="docutils literal notranslate"><span class="pre">Isend_1int()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.Scatterv"><code class="docutils literal notranslate"><span class="pre">Scatterv()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.Scatterv_list"><code class="docutils literal notranslate"><span class="pre">Scatterv_list()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.Scatterv_numpy"><code class="docutils literal notranslate"><span class="pre">Scatterv_numpy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.banner"><code class="docutils literal notranslate"><span class="pre">banner()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.bcastType"><code class="docutils literal notranslate"><span class="pre">bcastType()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.getParallelPrng"><code class="docutils literal notranslate"><span class="pre">getParallelPrng()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.helloWorld"><code class="docutils literal notranslate"><span class="pre">helloWorld()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.loadBalance1D_shrinkingArrays"><code class="docutils literal notranslate"><span class="pre">loadBalance1D_shrinkingArrays()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.loadBalance3D_shrinkingArrays"><code class="docutils literal notranslate"><span class="pre">loadBalance3D_shrinkingArrays()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.orderedPrint"><code class="docutils literal notranslate"><span class="pre">orderedPrint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.print"><code class="docutils literal notranslate"><span class="pre">print()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.rankPrint"><code class="docutils literal notranslate"><span class="pre">rankPrint()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../classes/classes.html">Classes used in GeoBIPy</a></li>
@@ -76,10 +103,10 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../api.html">API</a> &raquo;</li>
-          <li><a href="base.html">Core routines needed for GeoBIPy</a> &raquo;</li>
-      <li>MPI wrapper functions</li>
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API</a></li>
+          <li class="breadcrumb-item"><a href="base.html">Core routines needed for GeoBIPy</a></li>
+      <li class="breadcrumb-item active">MPI wrapper functions</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../_sources/content/api/base/MPI.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -90,7 +117,7 @@
            <div itemprop="articleBody">
              
   <section id="module-geobipy.src.base.MPI">
-<span id="mpi-wrapper-functions"></span><h1>MPI wrapper functions<a class="headerlink" href="#module-geobipy.src.base.MPI" title="Permalink to this headline"></a></h1>
+<span id="mpi-wrapper-functions"></span><h1>MPI wrapper functions<a class="headerlink" href="#module-geobipy.src.base.MPI" title="Permalink to this heading"></a></h1>
 <p>Module containing custom MPI functions</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="geobipy.src.base.MPI.Bcast">
@@ -283,8 +310,8 @@ In order to call this function collectively, the variable ‘self’ must be ins
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>self</strong> (<em>numpy.ndarray</em>) – A numpy array to broadcast from root.</p></li>
-<li><p><strong>starts</strong> (<em>array of ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the starting index for a chunk to be sent to that core. e.g. starts[0] is the starting index for rank = 0.</p></li>
-<li><p><strong>chunks</strong> (<em>array of ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the size of a chunk to be sent to that core. e.g. chunks[0] is the chunk size for rank = 0.</p></li>
+<li><p><strong>starts</strong> (<em>array</em><em> of </em><em>ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the starting index for a chunk to be sent to that core. e.g. starts[0] is the starting index for rank = 0.</p></li>
+<li><p><strong>chunks</strong> (<em>array</em><em> of </em><em>ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the size of a chunk to be sent to that core. e.g. chunks[0] is the chunk size for rank = 0.</p></li>
 <li><p><strong>world</strong> (<em>mpi4py.MPI.Comm</em>) – MPI parallel communicator.</p></li>
 <li><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – Axis along which to Scatterv to the ranks if self is a 2D numpy array. Default is 0</p></li>
 <li><p><strong>root</strong> (<em>int</em><em>, </em><em>optional</em>) – The MPI rank to broadcast from. Default is 0.</p></li>
@@ -325,8 +352,8 @@ In order to call this function collectively, the variable ‘self’ must be ins
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>self</strong> (<em>list</em>) – A list to scatterv.</p></li>
-<li><p><strong>starts</strong> (<em>array of ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the starting index for a chunk to be sent to that core. e.g. starts[0] is the starting index for rank = 0.</p></li>
-<li><p><strong>chunks</strong> (<em>array of ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the size of a chunk to be sent to that core. e.g. chunks[0] is the chunk size for rank = 0.</p></li>
+<li><p><strong>starts</strong> (<em>array</em><em> of </em><em>ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the starting index for a chunk to be sent to that core. e.g. starts[0] is the starting index for rank = 0.</p></li>
+<li><p><strong>chunks</strong> (<em>array</em><em> of </em><em>ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the size of a chunk to be sent to that core. e.g. chunks[0] is the chunk size for rank = 0.</p></li>
 <li><p><strong>world</strong> (<em>mpi4py.MPI.Comm</em>) – MPI parallel communicator.</p></li>
 <li><p><strong>root</strong> (<em>int</em><em>, </em><em>optional</em>) – The MPI rank to broadcast from. Default is 0.</p></li>
 </ul>
@@ -349,8 +376,8 @@ In order to call this function collectively, the variable ‘self’ must be ins
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>self</strong> (<em>numpy.ndarray</em>) – A numpy array to broadcast from root.</p></li>
-<li><p><strong>starts</strong> (<em>array of ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the starting index for a chunk to be sent to that core. e.g. starts[0] is the starting index for rank = 0.</p></li>
-<li><p><strong>chunks</strong> (<em>array of ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the size of a chunk to be sent to that core. e.g. chunks[0] is the chunk size for rank = 0.</p></li>
+<li><p><strong>starts</strong> (<em>array</em><em> of </em><em>ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the starting index for a chunk to be sent to that core. e.g. starts[0] is the starting index for rank = 0.</p></li>
+<li><p><strong>chunks</strong> (<em>array</em><em> of </em><em>ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the size of a chunk to be sent to that core. e.g. chunks[0] is the chunk size for rank = 0.</p></li>
 <li><p><strong>dtype</strong> (<em>type</em>) – The type of the numpy array being scattered. Must exist on all ranks.</p></li>
 <li><p><strong>world</strong> (<em>mpi4py.MPI.Comm</em>) – MPI parallel communicator.</p></li>
 <li><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – Axis along which to Scatterv to the ranks if self is a 2D numpy array. Default is 0</p></li>

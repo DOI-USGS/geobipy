@@ -19,7 +19,9 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -82,9 +84,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="getting_started.html">Getting Started</a> &raquo;</li>
-      <li>Installing GeoBIPy</li>
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="getting_started.html">Getting Started</a></li>
+      <li class="breadcrumb-item active">Installing GeoBIPy</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../_sources/content/getting_started/installation.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -95,7 +97,7 @@
            <div itemprop="articleBody">
              
   <section id="installing-geobipy">
-<h1>Installing GeoBIPy<a class="headerlink" href="#installing-geobipy" title="Permalink to this headline"></a></h1>
+<h1>Installing GeoBIPy<a class="headerlink" href="#installing-geobipy" title="Permalink to this heading"></a></h1>
 <p>First things first, install a Python 3.5+ distribution.  This is the minimum version that we have tested with.
 You will also need to install Numpy and a Fortran compiler.</p>
 <p>This package has a few requirements depending on what you wish to do with it.</p>
@@ -105,25 +107,25 @@ You will also need to install Numpy and a Fortran compiler.</p>
 <p>If you need to install the parallel IO version of the code, we would recommend that you start with a clean install of Python. This makes it easier to determine whether you have installed and linked the correct version of the parallel HDF5 library.</p>
 <p>There are two versions when installing GeoBIPy, a serial version, and a parallel version. Since GeoBIPy uses a Fortran backend for forward modelling frequency domain data, you will need to have a Fortran compiler installed. Make sure that the compiler can handle derived data types since I make use of object oriented programming in Fortran.</p>
 <section id="installing-a-serial-version-of-geobipy">
-<h2>Installing a serial version of GeoBIPy<a class="headerlink" href="#installing-a-serial-version-of-geobipy" title="Permalink to this headline"></a></h2>
+<h2>Installing a serial version of GeoBIPy<a class="headerlink" href="#installing-a-serial-version-of-geobipy" title="Permalink to this heading"></a></h2>
 <p>This is the easiest installation and provides access to a serial implementation of the code.</p>
 <p>Simply clone the git repository, navigate to the package folder that contains the setup.py file, and type “pip install .”</p>
 <p>You should then be able to import modules from geobipy.  For this type of installation mpi will not need to be installed, and the serial version of h5py will suffice i.e. the standard “pip install h5py” is fine.  h5py will automatically be installed during the install of GeoBIPy since it is a dependency.</p>
 <p><strong>Side note:</strong>  Let’s say you ran a production run on a parallel machine with MPI and parallel HDF capabilities. You generated all the results, copied them back to your local machine, and wish to make plots and images.  You will only need to install the serial version of the code on your local machine to do this.</p>
 </section>
 <section id="installing-a-parallel-version-of-geobipy">
-<h2>Installing a parallel version of GeoBIPy<a class="headerlink" href="#installing-a-parallel-version-of-geobipy" title="Permalink to this headline"></a></h2>
+<h2>Installing a parallel version of GeoBIPy<a class="headerlink" href="#installing-a-parallel-version-of-geobipy" title="Permalink to this heading"></a></h2>
 <p>Installing the parallel version of the code is a little trickier due to the dependencies necessary between the OpenMPI and/or HDF libraries, and how Python’s mpi4py and h5py wrap around those.</p>
 <section id="installing-mpi-and-mpi4py">
-<h3>Installing MPI and mpi4py<a class="headerlink" href="#installing-mpi-and-mpi4py" title="Permalink to this headline"></a></h3>
+<h3>Installing MPI and mpi4py<a class="headerlink" href="#installing-mpi-and-mpi4py" title="Permalink to this heading"></a></h3>
 <p>To run this code in parallel you will need both an MPI library and the python wrapper, mpi4py.  You must install MPI first before mpi4py.</p>
 <section id="mpi">
-<h4>MPI<a class="headerlink" href="#mpi" title="Permalink to this headline"></a></h4>
+<h4>MPI<a class="headerlink" href="#mpi" title="Permalink to this heading"></a></h4>
 <p>If you are installing GeoBIPy on a parallel machine, I would think that you have access to prebuilt MPI libraries.
 If you are on a local laptop, you will need to install one.</p>
 </section>
 <section id="mpi4py">
-<h4>mpi4py<a class="headerlink" href="#mpi4py" title="Permalink to this headline"></a></h4>
+<h4>mpi4py<a class="headerlink" href="#mpi4py" title="Permalink to this heading"></a></h4>
 <p>At this point, if you have an mpi4py module already installed, please remove it (you can check with “pip list”).
 If you started with a clean installation you should not have to worry about this.
 To test whether a new install of mpi4py will see the mpi library you have, just type “which mpicc”.
@@ -137,14 +139,14 @@ I would try to avoid this because if you need to install the HDF5 library you wi
 </section>
 </section>
 <section id="installing-parallel-hdf5-and-h5py">
-<h3>Installing parallel HDF5 and h5py<a class="headerlink" href="#installing-parallel-hdf5-and-h5py" title="Permalink to this headline"></a></h3>
+<h3>Installing parallel HDF5 and h5py<a class="headerlink" href="#installing-parallel-hdf5-and-h5py" title="Permalink to this heading"></a></h3>
 <p>If a parallel HDF5 library is not available, you will need to install one. First make sure you follow <a class="reference internal" href="#installing-mpi-and-mpi4py">Installing MPI and mpi4py</a> so that an MPI library is available to you. You must install a HDF5 library first before h5py.</p>
 <section id="hdf5">
-<h4>HDF5<a class="headerlink" href="#hdf5" title="Permalink to this headline"></a></h4>
+<h4>HDF5<a class="headerlink" href="#hdf5" title="Permalink to this heading"></a></h4>
 <p>When you install HDF5, make sure that the correct MPI library can be seen by typing “which mpicc”.  When you configure the HDF5 library, be sure to use the –enable-parallel option.</p>
 </section>
 <section id="h5py">
-<h4>h5py<a class="headerlink" href="#h5py" title="Permalink to this headline"></a></h4>
+<h4>h5py<a class="headerlink" href="#h5py" title="Permalink to this heading"></a></h4>
 <p>Once the HDF5 library is installed you will need to install a parallel enabled <a class="reference external" href="https://github.com/h5py/h5py">h5py package</a></p>
 <p>Make sure you are about to install h5py to the correct python installation.  If you type ‘which python’ it should return the path to the correct python installation.</p>
 <p>First check the following</p>
@@ -161,14 +163,14 @@ I would try to avoid this because if you need to install the HDF5 library you wi
 </section>
 </section>
 <section id="installing-the-time-domain-forward-modeller">
-<span id="installing-time-domain-forward-modeller"></span><h2>Installing the time domain forward modeller<a class="headerlink" href="#installing-the-time-domain-forward-modeller" title="Permalink to this headline"></a></h2>
+<span id="installing-time-domain-forward-modeller"></span><h2>Installing the time domain forward modeller<a class="headerlink" href="#installing-the-time-domain-forward-modeller" title="Permalink to this heading"></a></h2>
 <p>Ross Brodie at Geoscience Australia has written a great forward modeller, gatdaem1D,  in C++ with a python interface.
 You can obtain that code here at the <a class="reference external" href="https://github.com/GeoscienceAustralia/ga-aem">GA repository</a></p>
 <p>Go ahead and “git clone” that repository.</p>
 <p>These instructions only describe how to install Ross’ forward modeller, but it is part of a larger code base for inversion.
 If you wish to install his entire package, please follow his instructions.</p>
 <section id="prerequisites">
-<h3>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline"></a></h3>
+<h3>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this heading"></a></h3>
 <p>To compile his forward modeller, you will need a c++ compiler, and <a class="reference external" href="http://www.fftw.org/">FFTW</a></p>
 <p>On a Mac, installing these two items is easy if you use a package manager such as <a class="reference external" href="https://brew.sh/">homebrew</a></p>
 <p>If you use brew, simply do the following</p>
@@ -191,7 +193,7 @@ make install
 <p>where, path-to-install-to is the location where you want fftw to be installed.</p>
 </section>
 <section id="compile-the-gatdaem1d-shared-library">
-<h3>Compile the gatdaem1d shared library<a class="headerlink" href="#compile-the-gatdaem1d-shared-library" title="Permalink to this headline"></a></h3>
+<h3>Compile the gatdaem1d shared library<a class="headerlink" href="#compile-the-gatdaem1d-shared-library" title="Permalink to this heading"></a></h3>
 <p>Next, within the gatdaem1d folder, navigate to the makefiles folder and modify the top part of the file “gatdaem1d_python.make” to the following</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">SHELL</span> <span class="o">=</span> /bin/sh
 .SUFFIXES:
@@ -223,7 +225,7 @@ make install
 </div>
 </section>
 <section id="installing-the-python-bindings">
-<h3>Installing the Python Bindings<a class="headerlink" href="#installing-the-python-bindings" title="Permalink to this headline"></a></h3>
+<h3>Installing the Python Bindings<a class="headerlink" href="#installing-the-python-bindings" title="Permalink to this heading"></a></h3>
 <p>Finally, to install the python wrapper to gatdaem1d, navigate to the python folder of the gatdaem1d repository.
 Type,</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install .

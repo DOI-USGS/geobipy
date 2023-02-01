@@ -8,7 +8,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
 #%%
 import matplotlib.pyplot as plt
 from geobipy import serial_geobipy
-from geobipy import Inference3D
+from geobipy import Inference2D
 import numpy as np
 import os
 import shutil
@@ -19,35 +19,35 @@ import shutil
 #
 # Define some directories and paths
 
-################################################################################
-# The directory where HDF files will be stored
-output_directory = "..//..//supplementary//time_domain_inversion//results"
-################################################################################
+# ################################################################################
+# # The directory where HDF files will be stored
+# output_directory = "..//..//supplementary//time_domain_inversion//results"
+# ################################################################################
 
-for filename in os.listdir(output_directory):
-    file_path = os.path.join(output_directory, filename)
-    try:
-        if os.path.isfile(file_path) or os.path.islink(file_path):
-            os.unlink(file_path)
-    except Exception as e:
-        print('Failed to delete %s. Reason: %s' % (file_path, e))
+# for filename in os.listdir(output_directory):
+#     file_path = os.path.join(output_directory, filename)
+#     try:
+#         if os.path.isfile(file_path) or os.path.islink(file_path):
+#             os.unlink(file_path)
+#     except Exception as e:
+#         print('Failed to delete %s. Reason: %s' % (file_path, e))
 
-################################################################################
-# The parameter file defines the set of user parameters needed to run geobipy.
-parameter_file = "skytem_options"
-################################################################################
+# ################################################################################
+# # The parameter file defines the set of user parameters needed to run geobipy.
+# parameter_file = "skytem_options"
+# ################################################################################
 
-# Here are the contents of the user parameter file.
-# with open(parameter_file, 'r') as f:
-#     print(f.read())
+# # Here are the contents of the user parameter file.
+# # with open(parameter_file, 'r') as f:
+# #     print(f.read())
 
-################################################################################
-# To run geobipy in serial, simply call that function.
-# Here we specify index 0 to only carry out a shortened inversion of a single
-# data point for time considerations.
-# You will notice however that the HDF files are created for multiple lines
-# inside the data file.
-serial_geobipy(parameter_file, './test', index=0, seed=10)
+# ################################################################################
+# # To run geobipy in serial, simply call that function.
+# # Here we specify index 0 to only carry out a shortened inversion of a single
+# # data point for time considerations.
+# # You will notice however that the HDF files are created for multiple lines
+# # inside the data file.
+# serial_geobipy(parameter_file, './test', index=0, seed=10)
 
 
 #%%
@@ -59,14 +59,13 @@ serial_geobipy(parameter_file, './test', index=0, seed=10)
 # and simply use them for plotting.
 
 ################################################################################
-results_3d = Inference3D(directory='./test', system_file_path="..//..//supplementary//Data")
+results_3d = Inference2D('./test/0.0.h5')
 
 ################################################################################
 # We can grab the results for a single index or fiducial
 results_1d = results_3d.inference_1d(index=0)
 
-print(results_1d.model.summary)
 ################################################################################
-# results_1d.plot()
+results_1d.plot()
 
-plt.show()
+plt.show(block=True)

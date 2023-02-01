@@ -9,7 +9,6 @@ saving as HDF5
 #%%
 from geobipy.src.classes.mesh.RectilinearMesh1D import RectilinearMesh1D
 import h5py
-from geobipy import hdfRead
 from geobipy import StatArray
 from geobipy import Histogram
 import numpy as np
@@ -43,11 +42,13 @@ H.cdf().bar()
 
 ################################################################################
 # Get the median, and 95% confidence values
-print(H.credibleIntervals(percent=95.0))
+print(H.credible_intervals(percent=95.0))
 
 plt.figure()
 H.plot()
 H.plotCredibleIntervals()
+H.plotMean()
+H.plotMedian()
 
 #%%
 # Histogram with irregular bins
@@ -81,6 +82,8 @@ _ = H.plot(normalize=True)
 plt.figure()
 H.plot()
 H.plotCredibleIntervals()
+H.plotMean()
+H.plotMedian()
 
 ################################################################################
 # We can plot the histogram as a pcolor plot

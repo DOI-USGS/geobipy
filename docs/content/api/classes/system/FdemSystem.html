@@ -19,7 +19,9 @@
         <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
         <script src="../../../../_static/jquery.js"></script>
         <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -83,11 +85,11 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../api.html">API</a> &raquo;</li>
-          <li><a href="../classes.html">Classes used in GeoBIPy</a> &raquo;</li>
-          <li><a href="system.html">System classes</a> &raquo;</li>
-      <li>Frequency domain system</li>
+      <li><a href="../../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../api.html">API</a></li>
+          <li class="breadcrumb-item"><a href="../classes.html">Classes used in GeoBIPy</a></li>
+          <li class="breadcrumb-item"><a href="system.html">System classes</a></li>
+      <li class="breadcrumb-item active">Frequency domain system</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../../_sources/content/api/classes/system/FdemSystem.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -98,27 +100,28 @@
            <div itemprop="articleBody">
              
   <section id="frequency-domain-system">
-<h1>Frequency domain system<a class="headerlink" href="#frequency-domain-system" title="Permalink to this headline"></a></h1>
-digraph inheritance3626e3b5d4 {
-bgcolor=transparent;
-rankdir=LR;
-size=&quot;8.0, 12.0&quot;;
-  &quot;ABC&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Helper class that provides a standard way to create an ABC using&quot;];
-  &quot;FdemSystem&quot; [URL=&quot;#geobipy.src.classes.system.FdemSystem.FdemSystem&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Defines a Frequency Domain ElectroMagnetic acquisition system&quot;];
-  &quot;myObject&quot; -&gt; &quot;FdemSystem&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;myObject&quot; [URL=&quot;../core/myObject.html#geobipy.src.classes.core.myObject.myObject&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Abstract base class&quot;];
-  &quot;ABC&quot; -&gt; &quot;myObject&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-}
-<span class="target" id="module-geobipy.src.classes.system.FdemSystem"></span><p>&#64;FdemSystem_Class
+<h1>Frequency domain system<a class="headerlink" href="#frequency-domain-system" title="Permalink to this heading"></a></h1>
+<div class="graphviz"><img src="../../../../_images/inheritance-88769e72329792d08f6dd6fa86ad6fb2c4967ad1.png" alt="Inheritance diagram of geobipy.src.classes.system.FdemSystem" usemap="#inheritance3626e3b5d4" class="inheritance graphviz" /></div>
+<map id="inheritance3626e3b5d4" name="inheritance3626e3b5d4">
+<area shape="rect" id="node3" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="125,5,204,31"/>
+<area shape="rect" id="node2" href="#geobipy.src.classes.system.FdemSystem.FdemSystem" target="_top" title="Defines a Frequency Domain ElectroMagnetic acquisition system" alt="" coords="252,5,352,31"/>
+</map><span class="target" id="module-geobipy.src.classes.system.FdemSystem"></span><p>&#64;FdemSystem_Class
 Module describing a frequency domain EM acquisition system</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="geobipy.src.classes.system.FdemSystem.FdemSystem">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.system.FdemSystem.</span></span><span class="sig-name descname"><span class="pre">FdemSystem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequencies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transmitter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">receiver</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_frequencies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.FdemSystem.FdemSystem" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.system.FdemSystem.</span></span><span class="sig-name descname"><span class="pre">FdemSystem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequencies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transmitter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">receiver</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_frequencies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.FdemSystem.FdemSystem" title="Permalink to this definition"></a></dt>
 <dd><p>Defines a Frequency Domain ElectroMagnetic acquisition system</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.system.FdemSystem.FdemSystem.Bcast">
 <span class="sig-name descname"><span class="pre">Bcast</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">world</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.FdemSystem.FdemSystem.Bcast" title="Permalink to this definition"></a></dt>
 <dd><p>Broadcast the FdemSystem using MPI</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geobipy.src.classes.system.FdemSystem.FdemSystem.component_id">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">component_id</span></span><a class="headerlink" href="#geobipy.src.classes.system.FdemSystem.FdemSystem.component_id" title="Permalink to this definition"></a></dt>
+<dd><p>For each coil orientation pair, adds the index of the frequency to the appropriate list
+e.g. two coils at the i$^{th}$ frequency with ‘x’ as their orientation cause i to be added to the ‘xx’ list.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -129,27 +132,13 @@ Module describing a frequency domain EM acquisition system</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.system.FdemSystem.FdemSystem.fromHdf">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">fromHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grp</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.FdemSystem.FdemSystem.fromHdf" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grp</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.FdemSystem.FdemSystem.fromHdf" title="Permalink to this definition"></a></dt>
 <dd><p>Reads the object from a HDF file</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="geobipy.src.classes.system.FdemSystem.FdemSystem.getComponentID">
-<span class="sig-name descname"><span class="pre">getComponentID</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.FdemSystem.FdemSystem.getComponentID" title="Permalink to this definition"></a></dt>
-<dd><p>For each coil orientation pair, adds the index of the frequency to the appropriate list
-e.g. two coils at the i$^{th}$ frequency with ‘x’ as their orientation cause i to be added to the ‘xx’ list.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geobipy.src.classes.system.FdemSystem.FdemSystem.getTensorID">
-<span class="sig-name descname"><span class="pre">getTensorID</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.FdemSystem.FdemSystem.getTensorID" title="Permalink to this definition"></a></dt>
-<dd><p>For each coil orientation pair, adds the index of the frequency to the appropriate list
-e.g. two coils at the i$^{th}$ frequency with ‘x’ as their orientation cause i to be added to the ‘xx’ list.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.system.FdemSystem.FdemSystem.read">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.FdemSystem.FdemSystem.read" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.FdemSystem.FdemSystem.read" title="Permalink to this definition"></a></dt>
 <dd><p>Read in a file containing the system information</p>
 <p>The system file is structured using columns with the first line containing header information
 Each subsequent row contains the information for each measurement frequency
@@ -164,8 +153,15 @@ t/rx,y,z are the loop offsets from the observation locations in the data file.</
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.system.FdemSystem.FdemSystem.summary">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">summary</span></span><a class="headerlink" href="#geobipy.src.classes.system.FdemSystem.FdemSystem.summary" title="Permalink to this definition"></a></dt>
-<dd><p>print a summary of the FdemSystem</p>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">summary</span></span><a class="headerlink" href="#geobipy.src.classes.system.FdemSystem.FdemSystem.summary" title="Permalink to this definition"></a></dt>
+<dd><p>Summary of the FdemSystem</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geobipy.src.classes.system.FdemSystem.FdemSystem.tensor_id">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tensor_id</span></span><a class="headerlink" href="#geobipy.src.classes.system.FdemSystem.FdemSystem.tensor_id" title="Permalink to this definition"></a></dt>
+<dd><p>For each coil orientation pair, adds the index of the frequency to the appropriate list
+e.g. two coils at the i$^{th}$ frequency with ‘x’ as their orientation cause i to be added to the ‘xx’ list.</p>
 </dd></dl>
 
 <dl class="py method">

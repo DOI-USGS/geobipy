@@ -19,7 +19,9 @@
         <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
         <script src="../../../../_static/jquery.js"></script>
         <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -83,11 +85,11 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../api.html">API</a> &raquo;</li>
-          <li><a href="../classes.html">Classes used in GeoBIPy</a> &raquo;</li>
-          <li><a href="system.html">System classes</a> &raquo;</li>
-      <li>Time domain system</li>
+      <li><a href="../../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../api.html">API</a></li>
+          <li class="breadcrumb-item"><a href="../classes.html">Classes used in GeoBIPy</a></li>
+          <li class="breadcrumb-item"><a href="system.html">System classes</a></li>
+      <li class="breadcrumb-item active">Time domain system</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../../_sources/content/api/classes/system/TdemSystem.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -98,20 +100,14 @@
            <div itemprop="articleBody">
              
   <section id="time-domain-system">
-<h1>Time domain system<a class="headerlink" href="#time-domain-system" title="Permalink to this headline"></a></h1>
-digraph inheritance997b7fa283 {
-bgcolor=transparent;
-rankdir=LR;
-size=&quot;8.0, 12.0&quot;;
-  &quot;TDAEMSystem&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;TDAEMSystem Class&quot;];
-  &quot;TdemSystem&quot; [URL=&quot;#geobipy.src.classes.system.TdemSystem.TdemSystem&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Initialize a Time domain system class&quot;];
-  &quot;TdemSystem_GAAEM&quot; -&gt; &quot;TdemSystem&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;TdemSystem_GAAEM&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Initialize a Time domain system class&quot;];
-  &quot;TDAEMSystem&quot; -&gt; &quot;TdemSystem_GAAEM&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-}
-<span class="target" id="module-geobipy.src.classes.system.TdemSystem"></span><dl class="py class">
+<h1>Time domain system<a class="headerlink" href="#time-domain-system" title="Permalink to this heading"></a></h1>
+<div class="graphviz"><img src="../../../../_images/inheritance-9e1f9315800ef0a679c52a1b58b2873b77f15ebf.png" alt="Inheritance diagram of geobipy.src.classes.system.TdemSystem" usemap="#inheritance997b7fa283" class="inheritance graphviz" /></div>
+<map id="inheritance997b7fa283" name="inheritance997b7fa283">
+<area shape="rect" id="node5" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="143,5,222,31"/>
+<area shape="rect" id="node3" href="#geobipy.src.classes.system.TdemSystem.TdemSystem" target="_top" title="Initialize a Time domain system class" alt="" coords="491,31,591,56"/>
+</map><span class="target" id="module-geobipy.src.classes.system.TdemSystem"></span><dl class="py class">
 <dt class="sig sig-object py" id="geobipy.src.classes.system.TdemSystem.TdemSystem">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.system.TdemSystem.</span></span><span class="sig-name descname"><span class="pre">TdemSystem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offTimes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transmitterLoop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">receiverLoop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loopOffset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waveform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offTimeFilters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">components</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['z']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.TdemSystem.TdemSystem" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.system.TdemSystem.</span></span><span class="sig-name descname"><span class="pre">TdemSystem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offTimes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transmitterLoop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">receiverLoop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loopOffset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waveform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offTimeFilters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">components</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['z']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.TdemSystem.TdemSystem" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize a Time domain system class</p>
 <p>TdemSystem(systemFileName)</p>
 <dl class="field-list simple">
@@ -127,7 +123,7 @@ size=&quot;8.0, 12.0&quot;;
 </dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.system.TdemSystem.TdemSystem.get_modellingTimes">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">get_modellingTimes</span></span><a class="headerlink" href="#geobipy.src.classes.system.TdemSystem.TdemSystem.get_modellingTimes" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_modellingTimes</span></span><a class="headerlink" href="#geobipy.src.classes.system.TdemSystem.TdemSystem.get_modellingTimes" title="Permalink to this definition"></a></dt>
 <dd><p>Generates regularly log spaced times that covers both the waveform and measurment times.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -147,7 +143,7 @@ size=&quot;8.0, 12.0&quot;;
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.system.TdemSystem.TdemSystem.off_time">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">off_time</span></span><a class="headerlink" href="#geobipy.src.classes.system.TdemSystem.TdemSystem.off_time" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">off_time</span></span><a class="headerlink" href="#geobipy.src.classes.system.TdemSystem.TdemSystem.off_time" title="Permalink to this definition"></a></dt>
 <dd><p>Time windows.</p>
 </dd></dl>
 

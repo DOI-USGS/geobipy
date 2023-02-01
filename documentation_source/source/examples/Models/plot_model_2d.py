@@ -18,7 +18,7 @@ import numpy as np
 # Specify some cell centres in x and y
 x = StatArray(np.arange(11.0), 'Easting', 'm')
 y = StatArray(np.arange(11.0), 'Northing', 'm')
-mesh = RectilinearMesh2D(xEdges=x, yEdges=y)
+mesh = RectilinearMesh2D(x_edges=x, y_edges=y)
 
 xx, yy = np.meshgrid(mesh.x.centres, mesh.y.centres)
 values = StatArray(np.sin(np.sqrt(xx ** 2.0 + yy ** 2.0)), "Values")

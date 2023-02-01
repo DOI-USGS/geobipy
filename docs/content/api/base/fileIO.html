@@ -19,7 +19,9 @@
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -51,7 +53,24 @@
 <li class="toctree-l2 current"><a class="reference internal" href="base.html">Core routines needed for GeoBIPy</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="utilities.html">utilities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="plotting.html">plotting</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">fileIO</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">fileIO</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.fileIO.bytes2readable"><code class="docutils literal notranslate"><span class="pre">bytes2readable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.fileIO.deleteFile"><code class="docutils literal notranslate"><span class="pre">deleteFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.fileIO.dirExists"><code class="docutils literal notranslate"><span class="pre">dirExists()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.fileIO.fileExists"><code class="docutils literal notranslate"><span class="pre">fileExists()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.fileIO.filesExist"><code class="docutils literal notranslate"><span class="pre">filesExist()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.fileIO.getFileExtension"><code class="docutils literal notranslate"><span class="pre">getFileExtension()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.fileIO.getFileSize"><code class="docutils literal notranslate"><span class="pre">getFileSize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.fileIO.getNcolumns"><code class="docutils literal notranslate"><span class="pre">getNcolumns()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.fileIO.getNlines"><code class="docutils literal notranslate"><span class="pre">getNlines()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.fileIO.get_column_name"><code class="docutils literal notranslate"><span class="pre">get_column_name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.fileIO.get_real_numbers_from_line"><code class="docutils literal notranslate"><span class="pre">get_real_numbers_from_line()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.fileIO.int2str"><code class="docutils literal notranslate"><span class="pre">int2str()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.fileIO.isFileExtension"><code class="docutils literal notranslate"><span class="pre">isFileExtension()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.fileIO.parseString"><code class="docutils literal notranslate"><span class="pre">parseString()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.fileIO.wccount"><code class="docutils literal notranslate"><span class="pre">wccount()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="interpolation.html">Interpolation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="HDF.html">Heirarchical Data Format (HDF)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="MPI.html">MPI wrapper functions</a></li>
@@ -76,10 +95,10 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../api.html">API</a> &raquo;</li>
-          <li><a href="base.html">Core routines needed for GeoBIPy</a> &raquo;</li>
-      <li>fileIO</li>
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API</a></li>
+          <li class="breadcrumb-item"><a href="base.html">Core routines needed for GeoBIPy</a></li>
+      <li class="breadcrumb-item active">fileIO</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../_sources/content/api/base/fileIO.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -90,7 +109,7 @@
            <div itemprop="articleBody">
              
   <section id="module-geobipy.src.base.fileIO">
-<span id="fileio"></span><h1>fileIO<a class="headerlink" href="#module-geobipy.src.base.fileIO" title="Permalink to this headline"></a></h1>
+<span id="fileio"></span><h1>fileIO<a class="headerlink" href="#module-geobipy.src.base.fileIO" title="Permalink to this heading"></a></h1>
 <p>&#64;fileIO
 Module with custom file handling operations</p>
 <dl class="py function">
@@ -161,7 +180,7 @@ Module with custom file handling operations</p>
 <dd><p>Check if all files in fNames exist on disk</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>fNames</strong> (<em>list of str</em>) – </p>
+<dd class="field-odd"><p><strong>fNames</strong> (<em>list</em><em> of </em><em>str</em>) – </p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><strong>out</strong> – Whether all files exist or not</p>
@@ -254,7 +273,7 @@ Module with custom file handling operations</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>fName</strong> (<em>str</em>) – A path and/or file name.</p></li>
-<li><p><strong>i</strong> (<em>in</em><em> or </em><em>list of ints</em><em>, </em><em>optional</em>) – The indices of the entries to read from the string.  By default, all entries are read in.</p></li>
+<li><p><strong>i</strong> (<em>in</em><em> or </em><em>list</em><em> of </em><em>ints</em><em>, </em><em>optional</em>) – The indices of the entries to read from the string.  By default, all entries are read in.</p></li>
 <li><p><strong>nHeaders</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of header lines to skip in the file.</p></li>
 </ul>
 </dd>
@@ -275,7 +294,7 @@ Module with custom file handling operations</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>line</strong> (<em>str</em>) – A string, or a line from a file.</p></li>
-<li><p><strong>i</strong> (<em>in</em><em> or </em><em>list of ints</em><em>, </em><em>optional</em>) – The indices of the entries to read from the string.  By default, all entries are read in.</p></li>
+<li><p><strong>i</strong> (<em>in</em><em> or </em><em>list</em><em> of </em><em>ints</em><em>, </em><em>optional</em>) – The indices of the entries to read from the string.  By default, all entries are read in.</p></li>
 <li><p><strong>delimiters</strong> (<em>str</em>) – Splits the line based on these delimiters.</p></li>
 </ul>
 </dd>

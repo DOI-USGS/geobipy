@@ -19,7 +19,9 @@
         <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
         <script src="../../../../_static/jquery.js"></script>
         <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -81,11 +83,11 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../api.html">API</a> &raquo;</li>
-          <li><a href="../classes.html">Classes used in GeoBIPy</a> &raquo;</li>
-          <li><a href="core.html">Core classes</a> &raquo;</li>
-      <li>StatArray</li>
+      <li><a href="../../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../api.html">API</a></li>
+          <li class="breadcrumb-item"><a href="../classes.html">Classes used in GeoBIPy</a></li>
+          <li class="breadcrumb-item"><a href="core.html">Core classes</a></li>
+      <li class="breadcrumb-item active">StatArray</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../../_sources/content/api/classes/core/StatArray.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -96,22 +98,14 @@
            <div itemprop="articleBody">
              
   <section id="statarray">
-<h1>StatArray<a class="headerlink" href="#statarray" title="Permalink to this headline"></a></h1>
-digraph inheritance217c5b1f1a {
-bgcolor=transparent;
-rankdir=LR;
-size=&quot;8.0, 12.0&quot;;
-  &quot;ABC&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Helper class that provides a standard way to create an ABC using&quot;];
-  &quot;StatArray&quot; [URL=&quot;#geobipy.src.classes.core.StatArray.StatArray&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class extension to numpy.ndarray&quot;];
-  &quot;ndarray&quot; -&gt; &quot;StatArray&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;myObject&quot; -&gt; &quot;StatArray&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;myObject&quot; [URL=&quot;myObject.html#geobipy.src.classes.core.myObject.myObject&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Abstract base class&quot;];
-  &quot;ABC&quot; -&gt; &quot;myObject&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;ndarray&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;ndarray(shape, dtype=float, buffer=None, offset=0,&quot;];
-}
-<span class="target" id="module-geobipy.src.classes.core.StatArray"></span><dl class="py class">
+<h1>StatArray<a class="headerlink" href="#statarray" title="Permalink to this heading"></a></h1>
+<div class="graphviz"><img src="../../../../_images/inheritance-334ad9c03e999848ced2cf730cee44b4de1318fc.png" alt="Inheritance diagram of geobipy.src.classes.core.StatArray.StatArray" usemap="#inheritance217c5b1f1a" class="inheritance graphviz" /></div>
+<map id="inheritance217c5b1f1a" name="inheritance217c5b1f1a">
+<area shape="rect" id="node4" href="myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="125,5,204,31"/>
+<area shape="rect" id="node2" href="#geobipy.src.classes.core.StatArray.StatArray" target="_top" title="Class extension to numpy.ndarray" alt="" coords="252,31,329,56"/>
+</map><span class="target" id="module-geobipy.src.classes.core.StatArray"></span><dl class="py class">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.core.StatArray.</span></span><span class="sig-name descname"><span class="pre">StatArray</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.core.StatArray.</span></span><span class="sig-name descname"><span class="pre">StatArray</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray" title="Permalink to this definition"></a></dt>
 <dd><p>Class extension to numpy.ndarray</p>
 <p>This subclass to a numpy array contains extra attributes that can describe the parameters it represents.
 One can also attach prior and proposal distributions so that it may be used in an MCMC algorithm easily.
@@ -121,7 +115,7 @@ in-place numpy function will return a StatArray.  See the example section for mo
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>shape</strong> (<em>int</em><em> or </em><em>sequence of ints</em><em> or </em><em>array_like</em><em> or </em><a class="reference internal" href="#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – <ul>
+<li><p><strong>shape</strong> (<em>int</em><em> or </em><em>sequence</em><em> of </em><em>ints</em><em> or </em><em>array_like</em><em> or </em><a class="reference internal" href="#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – <ul>
 <li><p>If shape is int or sequence of ints : give the shape of the new StatArray e.g., <code class="docutils literal notranslate"><span class="pre">2</span></code> or <code class="docutils literal notranslate"><span class="pre">(2,</span> <span class="pre">3)</span></code>. All other arguments that can be passed to functions like numpy.zeros or numpy.arange can be used, see Other Parameters.</p></li>
 <li><p>If shape is array_like : any object exposing the array interface, an object whose __array__ method returns an array, or any (nested) sequence. e.g., <code class="docutils literal notranslate"><span class="pre">StatArray(numpy.arange(10))</span></code> will cast the result into a StatArray and will maintain the properies passed through to that function. One could then attach the name, units, prior, and/or proposal through this interface too. e.g., <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">StatArray(numpy.arange(10,dtype=numpy.int),</span> <span class="pre">name='aTest',</span> <span class="pre">units='someUnits')</span></code></p></li>
 <li><p>If shape is StatArray : the returned object is a deepcopy of the input. If name and units are specified with this option they will replace those parameters in the copy. e.g., <code class="docutils literal notranslate"><span class="pre">y</span> <span class="pre">=</span> <span class="pre">StatArray(x,</span> <span class="pre">name='anotherTest')</span></code> will be a deepcopy copy of x, but with a different name.</p></li>
@@ -134,7 +128,7 @@ in-place numpy function will return a StatArray.  See the example section for mo
 The data type could also be a class.</p></li>
 <li><p><strong>buffer</strong> (<em>object exposing buffer interface</em><em>, </em><em>optional</em>) – Used to fill the array with data. Only used when shape is int or sequence of ints.</p></li>
 <li><p><strong>offset</strong> (<em>int</em><em>, </em><em>optional</em>) – Offset of array data in buffer. Only used when shape is int or sequence of ints.</p></li>
-<li><p><strong>strides</strong> (<em>tuple of ints</em><em>, </em><em>optional</em>) – Strides of data in memory. Only used when shape is int or sequence of ints.</p></li>
+<li><p><strong>strides</strong> (<em>tuple</em><em> of </em><em>ints</em><em>, </em><em>optional</em>) – Strides of data in memory. Only used when shape is int or sequence of ints.</p></li>
 <li><p><strong>order</strong> (<em>{'C'</em><em>, </em><em>'F'</em><em>, </em><em>'A'}</em><em>, </em><em>optional</em>) – Specify the order of the array.  If order is ‘C’, then the array
 will be in C-contiguous order (rightmost-index varies the fastest).
 If order is ‘F’, then the returned array will be in
@@ -206,7 +200,7 @@ unless a copy is required, in which case it will be C-contiguous. Only used when
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.Irecv">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">Irecv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">world</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ndim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.Irecv" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Irecv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">world</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ndim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.Irecv" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -246,8 +240,8 @@ unless a copy is required, in which case it will be C-contiguous. Only used when
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>starts</strong> (<em>array of ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the starting index for a chunk to be sent to that core. e.g. starts[0] is the starting index for rank = 0.</p></li>
-<li><p><strong>chunks</strong> (<em>array of ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the size of a chunk to be sent to that core. e.g. chunks[0] is the chunk size for rank = 0.</p></li>
+<li><p><strong>starts</strong> (<em>array</em><em> of </em><em>ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the starting index for a chunk to be sent to that core. e.g. starts[0] is the starting index for rank = 0.</p></li>
+<li><p><strong>chunks</strong> (<em>array</em><em> of </em><em>ints</em>) – 1D array of ints with size equal to the number of MPI ranks. Each element gives the size of a chunk to be sent to that core. e.g. chunks[0] is the chunk size for rank = 0.</p></li>
 <li><p><strong>world</strong> (<em>mpi4py.MPI.Comm</em>) – The MPI communicator over which to Scatterv.</p></li>
 <li><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – This axis is distributed amongst ranks.</p></li>
 <li><p><strong>root</strong> (<em>int</em><em>, </em><em>optional</em>) – The MPI rank to ScatterV from. Default is 0.</p></li>
@@ -321,7 +315,7 @@ with the dimension along <cite>axis</cite> removed.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a><em>, </em><em>optional</em>) – The horizontal locations of the bars</p></li>
-<li><p><strong>i</strong> (<em>sequence of ints</em><em>, </em><em>optional</em>) – Plot the ith indices of self, against the ith indices of x.</p></li>
+<li><p><strong>i</strong> (<em>sequence</em><em> of </em><em>ints</em><em>, </em><em>optional</em>) – Plot the ith indices of self, against the ith indices of x.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -338,6 +332,25 @@ with the dimension along <cite>axis</cite> removed.</p>
 </dd>
 </dl>
 </div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.bounds">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bounds</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.bounds" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.centred_grid_nodes">
+<span class="sig-name descname"><span class="pre">centred_grid_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spacing</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.centred_grid_nodes" title="Permalink to this definition"></a></dt>
+<dd><p>Generates grid nodes centred over bounds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bounds</strong> (<em>array_like</em>) – bounds of the dimension</p></li>
+<li><p><strong>spacing</strong> (<em>float</em>) – distance between nodes</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -411,7 +424,7 @@ and will not pass sub-classes through by default.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.createHdf">
-<span class="sig-name descname"><span class="pre">createHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">h5obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withPosterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nRepeats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fillvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.createHdf" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">createHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">h5obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withPosterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fillvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upcast</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.createHdf" title="Permalink to this definition"></a></dt>
 <dd><p>Create the Metadata for a StatArray in a HDF file</p>
 <p>Creates a new group in a HDF file under h5obj.
 A nested heirarchy will be created e.g., myNamedata, myNameprior, and myNameproposal.
@@ -473,13 +486,18 @@ cumbersome if done too many times.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.create_posterior_hdf">
+<span class="sig-name descname"><span class="pre">create_posterior_hdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fillvalue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upcast</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.create_posterior_hdf" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.delete">
 <span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.delete" title="Permalink to this definition"></a></dt>
 <dd><p>Delete elements</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>i</strong> (<em>slice</em><em>, </em><em>int</em><em> or </em><em>array of ints</em>) – Indicate which sub-arrays to remove.</p></li>
+<li><p><strong>i</strong> (<em>slice</em><em>, </em><em>int</em><em> or </em><em>array</em><em> of </em><em>ints</em>) – Indicate which sub-arrays to remove.</p></li>
 <li><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – The axis along which to delete the subarray defined by <cite>obj</cite>.
 If <cite>axis</cite> is None, <cite>obj</cite> is applied to the flattened array.</p></li>
 </ul>
@@ -495,12 +513,12 @@ If <cite>axis</cite> is None, <cite>obj</cite> is applied to the flattened array
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.diff">
-<span class="sig-name descname"><span class="pre">diff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.diff" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">diff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.diff" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.edges">
-<span class="sig-name descname"><span class="pre">edges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.edges" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">edges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.edges" title="Permalink to this definition"></a></dt>
 <dd><p>Get the midpoint values between elements in the StatArray</p>
 <p>Returns an size(self) + 1 length StatArray of the midpoints between each element.
 The first and last element are projected edges based on the difference between first two and last two elements in self.
@@ -526,7 +544,7 @@ If min and max are given, the edges are fixed and not calculated.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.firstNonZero">
-<span class="sig-name descname"><span class="pre">firstNonZero</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invalid_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.firstNonZero" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">firstNonZero</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invalid_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.firstNonZero" title="Permalink to this definition"></a></dt>
 <dd><p>Find the indices of the first non zero values along the axis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -565,7 +583,7 @@ If min and max are given, the edges are fixed and not calculated.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.fromHdf">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">fromHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.fromHdf" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_posterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">posterior_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.fromHdf" title="Permalink to this definition"></a></dt>
 <dd><p>Read the StatArray from a HDF group</p>
 <p>Given the HDF group object, read the contents into a StatArray.</p>
 <dl class="field-list simple">
@@ -607,7 +625,7 @@ clusterID is the initial assignment of the rows to their clusters</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.hasPosterior">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">hasPosterior</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.hasPosterior" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hasPosterior</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.hasPosterior" title="Permalink to this definition"></a></dt>
 <dd><p>Check that the StatArray has an attached posterior.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -621,7 +639,7 @@ clusterID is the initial assignment of the rows to their clusters</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.hasPrior">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">hasPrior</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.hasPrior" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hasPrior</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.hasPrior" title="Permalink to this definition"></a></dt>
 <dd><p>Check that the StatArray has an attached prior.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -635,7 +653,7 @@ clusterID is the initial assignment of the rows to their clusters</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.hasProposal">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">hasProposal</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.hasProposal" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hasProposal</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.hasProposal" title="Permalink to this definition"></a></dt>
 <dd><p>Check that the StatArray has an attached proposal.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -649,7 +667,7 @@ clusterID is the initial assignment of the rows to their clusters</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.hdf_name">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">hdf_name</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.hdf_name" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hdf_name</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.hdf_name" title="Permalink to this definition"></a></dt>
 <dd><p>Create a string that describes class instantiation</p>
 <p>Returns a string that should be used as an attr[‘repr’] in a HDF group.
 This allows reading of the attribute from the hdf file, evaluating it to return an object,
@@ -715,7 +733,7 @@ and then reading the hdf contents via the object’s methods.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>i</strong> (<em>int</em><em>, </em><em>slice</em><em> or </em><em>sequence of ints</em>) – Object that defines the index or indices before which <cite>values</cite> is inserted.</p></li>
+<li><p><strong>i</strong> (<em>int</em><em>, </em><em>slice</em><em> or </em><em>sequence</em><em> of </em><em>ints</em>) – Object that defines the index or indices before which <cite>values</cite> is inserted.</p></li>
 <li><p><strong>values</strong> (<em>array_like</em>) – Values to insert into <cite>arr</cite>. If the type of <cite>values</cite> is different from that of <cite>arr</cite>, <cite>values</cite> is converted to the type of <cite>arr</cite>. <cite>values</cite> should be shaped so that <code class="docutils literal notranslate"><span class="pre">arr[...,obj,...]</span> <span class="pre">=</span> <span class="pre">values</span></code> is legal.</p></li>
 <li><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – Axis along which to insert <cite>values</cite>.  If <cite>axis</cite> is None then <cite>arr</cite> is flattened first.</p></li>
 </ul>
@@ -748,7 +766,7 @@ and then reading the hdf contents via the object’s methods.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.internalEdges">
-<span class="sig-name descname"><span class="pre">internalEdges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.internalEdges" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">internalEdges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.internalEdges" title="Permalink to this definition"></a></dt>
 <dd><p>Get the midpoint values between elements in the StatArray</p>
 <p>Returns an size(self) + 1 length StatArray of the midpoints between each element</p>
 <dl class="field-list simple">
@@ -763,7 +781,7 @@ and then reading the hdf contents via the object’s methods.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.isRegular">
-<span class="sig-name descname"><span class="pre">isRegular</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.isRegular" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">isRegular</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.isRegular" title="Permalink to this definition"></a></dt>
 <dd><p>Checks that the values change regularly</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -783,12 +801,12 @@ and then reading the hdf contents via the object’s methods.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.label">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">label</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.label" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">label</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.label" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.lastNonZero">
-<span class="sig-name descname"><span class="pre">lastNonZero</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invalid_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.lastNonZero" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">lastNonZero</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invalid_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.lastNonZero" title="Permalink to this definition"></a></dt>
 <dd><p>Find the indices of the first non zero values along the axis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -809,13 +827,23 @@ and then reading the hdf contents via the object’s methods.</p>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.nPosteriors">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">nPosteriors</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.nPosteriors" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.n_posteriors">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_posteriors</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.n_posteriors" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.name">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.name" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.nanmax">
+<span class="sig-name descname"><span class="pre">nanmax</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.nanmax" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.nanmin">
+<span class="sig-name descname"><span class="pre">nanmin</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.nanmin" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -896,7 +924,7 @@ If classes is provided, alpha is ignored if provided.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>i</strong> (<em>slice</em><em> or </em><em>int</em><em> or </em><em>sequence of ints</em><em>, </em><em>optional</em>) – Index or indices of self that should be perturbed.</p></li>
+<li><p><strong>i</strong> (<em>slice</em><em> or </em><em>int</em><em> or </em><em>sequence</em><em> of </em><em>ints</em><em>, </em><em>optional</em>) – Index or indices of self that should be perturbed.</p></li>
 <li><p><strong>relative</strong> (<em>bool</em>) – Update the StatArray relative to the current values or assign the new samples to the StatArray.</p></li>
 </ul>
 </dd>
@@ -915,7 +943,7 @@ If classes is provided, alpha is ignored if provided.</p></li>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – The abcissa</p></li>
-<li><p><strong>i</strong> (<em>sequence of ints</em><em>, </em><em>optional</em>) – Plot the ith indices of self, against the ith indices of x.</p></li>
+<li><p><strong>i</strong> (<em>sequence</em><em> of </em><em>ints</em><em>, </em><em>optional</em>) – Plot the ith indices of self, against the ith indices of x.</p></li>
 <li><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – If self is 2D, plot values along this axis.</p></li>
 <li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Take the log of the colour to a base. ‘e’ if log = ‘e’, and a number e.g. log = 10.
 Values in c that are &lt;= 0 are masked.</p></li>
@@ -943,12 +971,12 @@ Values in c that are &lt;= 0 are masked.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.plotPosteriors">
-<span class="sig-name descname"><span class="pre">plotPosteriors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.plotPosteriors" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.plot_posteriors">
+<span class="sig-name descname"><span class="pre">plot_posteriors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.plot_posteriors" title="Permalink to this definition"></a></dt>
 <dd><p>Plot the posteriors of the StatArray.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>ax</strong> (<em>matplotlib axis</em><em> or </em><em>list of ax</em><em>, </em><em>optional</em>) – Must match the number of attached posteriors.
+<dd class="field-odd"><p><strong>ax</strong> (<em>matplotlib axis</em><em> or </em><em>list</em><em> of </em><em>ax</em><em>, </em><em>optional</em>) – Must match the number of attached posteriors.
 * If not specified, subplots are created vertically.</p>
 </dd>
 </dl>
@@ -956,9 +984,14 @@ Values in c that are &lt;= 0 are masked.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.posterior">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">posterior</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.posterior" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">posterior</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.posterior" title="Permalink to this definition"></a></dt>
 <dd><p>Returns the posterior if available.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.posteriors_from_hdf">
+<span class="sig-name descname"><span class="pre">posteriors_from_hdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.posteriors_from_hdf" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.prepend">
@@ -980,7 +1013,7 @@ Values in c that are &lt;= 0 are masked.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.prior">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">prior</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.prior" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">prior</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.prior" title="Permalink to this definition"></a></dt>
 <dd><p>Returns the prior if available.</p>
 </dd></dl>
 
@@ -1003,7 +1036,7 @@ Values in c that are &lt;= 0 are masked.</p></li>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>arg1</strong> (<em>array_like</em><em>, </em><em>optional</em>) – Will evaluate the probability of the numbers in the arg1 using the prior attached to self</p></li>
-<li><p><strong>i</strong> (<em>slice</em><em> or </em><em>int</em><em> or </em><em>sequence of ints</em><em>, </em><em>optional</em>) – Index or indices of self that should be evaluated.</p></li>
+<li><p><strong>i</strong> (<em>slice</em><em> or </em><em>int</em><em> or </em><em>sequence</em><em> of </em><em>ints</em><em>, </em><em>optional</em>) – Index or indices of self that should be evaluated.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -1020,7 +1053,7 @@ Values in c that are &lt;= 0 are masked.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.proposal">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">proposal</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.proposal" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">proposal</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.proposal" title="Permalink to this definition"></a></dt>
 <dd><p>Returns the prior if available.</p>
 </dd></dl>
 
@@ -1057,6 +1090,11 @@ Values in c that are &lt;= 0 are masked.</p></li>
 </dl>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.range">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">range</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.range" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.rescale">
 <span class="sig-name descname"><span class="pre">rescale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.rescale" title="Permalink to this definition"></a></dt>
@@ -1078,13 +1116,18 @@ Values in c that are &lt;= 0 are masked.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.reset_posteriors">
+<span class="sig-name descname"><span class="pre">reset_posteriors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.reset_posteriors" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.resize">
 <span class="sig-name descname"><span class="pre">resize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_shape</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.resize" title="Permalink to this definition"></a></dt>
 <dd><p>Resize a StatArray</p>
 <p>Resize a StatArray but copy over any attached attributes</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>new_shape</strong> (<em>int</em><em> or </em><em>tuple of ints</em>) – Shape of the resized array</p>
+<dd class="field-odd"><p><strong>new_shape</strong> (<em>int</em><em> or </em><em>tuple</em><em> of </em><em>ints</em>) – Shape of the resized array</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><strong>out</strong> – Resized array.</p>
@@ -1120,7 +1163,7 @@ Can take any other matplotlib arguments and keyword arguments e.g. markersize et
 <li><p><strong>x</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – Horizontal locations of the points to plot</p></li>
 <li><p><strong>c</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – Colour values of the points</p></li>
 <li><p><strong>y</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a><em>, </em><em>optional</em>) – Vertical locations of the points to plot, if y = None, then y = c.</p></li>
-<li><p><strong>i</strong> (<em>sequence of ints</em><em>, </em><em>optional</em>) – Plot a subset of x, y, c, using the indices in i.</p></li>
+<li><p><strong>i</strong> (<em>sequence</em><em> of </em><em>ints</em><em>, </em><em>optional</em>) – Plot a subset of x, y, c, using the indices in i.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1134,6 +1177,11 @@ Can take any other matplotlib arguments and keyword arguments e.g. markersize et
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.smooth">
+<span class="sig-name descname"><span class="pre">smooth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.smooth" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.stackedAreaPlot">
 <span class="sig-name descname"><span class="pre">stackedAreaPlot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.stackedAreaPlot" title="Permalink to this definition"></a></dt>
 <dd><p>Create stacked area plot where column elements are stacked on top of each other.</p>
@@ -1141,10 +1189,10 @@ Can take any other matplotlib arguments and keyword arguments e.g. markersize et
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – The abcissa.</p></li>
-<li><p><strong>i</strong> (<em>sequence of ints</em><em>, </em><em>optional</em>) – Plot a subset of x, y, c, using the indices in i.</p></li>
+<li><p><strong>i</strong> (<em>sequence</em><em> of </em><em>ints</em><em>, </em><em>optional</em>) – Plot a subset of x, y, c, using the indices in i.</p></li>
 <li><p><strong>axis</strong> (<em>int</em>) – Plot along this axis, stack along the other axis.</p></li>
-<li><p><strong>labels</strong> (<em>list of str</em><em>, </em><em>optional</em>) – The labels to assign to each column.</p></li>
-<li><p><strong>colors</strong> (<em>matplotlib.colors.LinearSegmentedColormap</em><em> or </em><em>list of colours</em>) – The colour used for each column.</p></li>
+<li><p><strong>labels</strong> (<em>list</em><em> of </em><em>str</em><em>, </em><em>optional</em>) – The labels to assign to each column.</p></li>
+<li><p><strong>colors</strong> (<em>matplotlib.colors.LinearSegmentedColormap</em><em> or </em><em>list</em><em> of </em><em>colours</em>) – The colour used for each column.</p></li>
 <li><p><strong>xscale</strong> (<em>str</em><em>, </em><em>optional</em>) – Scale the x axis? e.g. xscale = ‘linear’ or ‘log’.</p></li>
 <li><p><strong>yscale</strong> (<em>str</em><em>, </em><em>optional</em>) – Scale the y axis? e.g. yscale = ‘linear’ or ‘log’.</p></li>
 </ul>
@@ -1178,7 +1226,7 @@ Can take any other matplotlib arguments and keyword arguments e.g. markersize et
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.summary">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">summary</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.summary" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">summary</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.summary" title="Permalink to this definition"></a></dt>
 <dd><p>Write a summary of the StatArray</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1201,18 +1249,18 @@ Can take any other matplotlib arguments and keyword arguments e.g. markersize et
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.units">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.units" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.units" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.updatePosterior">
-<span class="sig-name descname"><span class="pre">updatePosterior</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.updatePosterior" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.update_posterior">
+<span class="sig-name descname"><span class="pre">update_posterior</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.update_posterior" title="Permalink to this definition"></a></dt>
 <dd><p>Adds the current values of the StatArray to the attached posterior.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.value">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.value" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.values">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">values</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.values" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1274,6 +1322,11 @@ so long as they do not try to write to the same index.</p>
 </pre></div>
 </div>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.write_posterior_hdf">
+<span class="sig-name descname"><span class="pre">write_posterior_hdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.write_posterior_hdf" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 

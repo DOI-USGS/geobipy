@@ -19,11 +19,13 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="1D Rectilinear Mesh" href="../Meshes/plot_rectilinear_mesh_1d.html" />
+    <link rel="next" title="Meshes" href="../Meshes/index.html" />
     <link rel="prev" title="Histogram 3D" href="plot_histogram_3d.html" /> 
 </head>
 
@@ -50,27 +52,29 @@
 <li class="toctree-l1"><a class="reference internal" href="../../content/api/api.html">API</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../index.html#distribtions">Distribtions</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../index.html#statistics">Statistics</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="plot_histogram_1d.html">Histogram 1D</a></li>
-<li class="toctree-l3"><a class="reference internal" href="plot_histogram_2d.html">Histogram 2D</a></li>
-<li class="toctree-l3"><a class="reference internal" href="plot_histogram_3d.html">Histogram 3D</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">StatArray Class</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#instantiating-a-new-statarray-class">Instantiating a new StatArray class</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#attaching-prior-and-proposal-distributions-to-a-statarray">Attaching Prior and Proposal Distributions to a StatArray</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#attaching-a-histogram-to-capture-the-posterior-distribution">Attaching a Histogram to capture the posterior distribution</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#attach-a-multivariate-normal-distribution-as-the-prior-and-proposal">Attach a multivariate normal distribution as the prior and proposal</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#basic-manipulation">Basic manipulation</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#plotting">Plotting</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#statistics">Statistics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#meshes">Meshes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#data">Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#datapoints">Datapoints</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#inference">Inference</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../index.html#hdf-5">HDF 5</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#hdf-5">HDF 5</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../Distributions/index.html">Distribtions</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Statistics</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="plot_histogram_1d.html">Histogram 1D</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_histogram_2d.html">Histogram 2D</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_histogram_3d.html">Histogram 3D</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">StatArray Class</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Meshes/index.html">Meshes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Models/index.html">Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Data/index.html">Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Datapoints/index.html">Datapoints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Inference/index.html">Inference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../HDF5/index.html">HDF 5</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -88,9 +92,10 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../index.html">Examples</a> &raquo;</li>
-      <li>StatArray Class</li>
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Examples</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Statistics</a></li>
+      <li class="breadcrumb-item active">StatArray Class</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../_sources/examples/Statistics/plot_StatArray.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -106,23 +111,27 @@
 to download the full example code</p>
 </div>
 <section class="sphx-glr-example-title" id="statarray-class">
-<span id="sphx-glr-examples-statistics-plot-statarray-py"></span><h1>StatArray Class<a class="headerlink" href="#statarray-class" title="Permalink to this headline"></a></h1>
+<span id="sphx-glr-examples-statistics-plot-statarray-py"></span><h1>StatArray Class<a class="headerlink" href="#statarray-class" title="Permalink to this heading"></a></h1>
 <p>Extends the numpy ndarray class to add extra attributes such as names, and
 units, and allows us to attach statistical descriptors of the array.
 The direct extension to numpy maintains speed and functionality of numpy arrays.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">StatArray</span>
-<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">Histogram1D</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">Histogram</span>
 <span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">Distribution</span>
+<span class="kn">from</span> <span class="nn">geobipy.src.classes.mesh.RectilinearMesh1D</span> <span class="kn">import</span> <span class="n">RectilinearMesh1D</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">h5py</span>
-<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">hdfRead</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;seaborn-pastel&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/documentation_source/source/examples/Statistics/plot_StatArray.py:19: MatplotlibDeprecationWarning: The seaborn styles shipped by Matplotlib are deprecated since 3.6, as they no longer correspond to the styles shipped by seaborn. However, they will remain available as &#39;seaborn-v0_8-&lt;style&gt;&#39;. Alternatively, directly use the seaborn API instead.
+  plt.style.use(&#39;seaborn-pastel&#39;)
+</pre></div>
+</div>
 <section id="instantiating-a-new-statarray-class">
-<h2>Instantiating a new StatArray class<a class="headerlink" href="#instantiating-a-new-statarray-class" title="Permalink to this headline"></a></h2>
+<h2>Instantiating a new StatArray class<a class="headerlink" href="#instantiating-a-new-statarray-class" title="Permalink to this heading"></a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Integer</span>
 <span class="n">test</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;1&#39;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
@@ -149,36 +158,47 @@ The direct extension to numpy maintains speed and functionality of numpy arrays.
 <span class="c1"># The name and units of the variable can be assigned to the StatArray.</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: 1
-    Shape: (1,)
-    Values: [0.]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: 1 0x7ff592dfaec0
+Shape: (1,)
+Values: [0.]
+min: 0.0
+max: 0.0
 
-Name: 10
-    Shape: (10,)
-    Values: [0. 0. 0. ... 0. 0. 0.]
+Name: 10 0x7ff592dfac40
+Shape: (10,)
+Values: [0. 0. 0. ... 0. 0. 0.]
+min: 0.0
+max: 0.0
 
-Name: (2, 10)
-    Shape: (2, 10)
-    Values: [[0. 0. 0. ... 0. 0. 0.]
+Name: (2, 10) 0x7ff592dfaec0
+Shape: (2, 10)
+Values: [[0. 0. 0. ... 0. 0. 0.]
  [0. 0. 0. ... 0. 0. 0.]]
+min: 0.0
+max: 0.0
 
-Name: 45.454
-    Shape: (1,)
-    Values: [45.454]
+Name: 45.454 0x7ff592dfac40
+Shape: (1,)
+Values: [45.454]
+min: 45.454
+max: 45.454
 
-Name: 45.454
-    Shape: (1,)
-    Values: [45.454]
+Name: 45.454 0x7ff592dfaec0
+Shape: (1,)
+Values: [45.454]
+min: 45.454
+max: 45.454
 
-Name: Density ($\frac{g}{cc}$)
-    Shape: (1,)
-    Values: [1.89390965]
+Name: Density ($\frac{g}{cc}$) 0x7ff592df92c0
+Shape: (1,)
+Values: [0.08834802]
+min: 0.08834801506485813
+max: 0.08834801506485813
 </pre></div>
 </div>
 </section>
 <section id="attaching-prior-and-proposal-distributions-to-a-statarray">
-<h2>Attaching Prior and Proposal Distributions to a StatArray<a class="headerlink" href="#attaching-prior-and-proposal-distributions-to-a-statarray" title="Permalink to this headline"></a></h2>
+<h2>Attaching Prior and Proposal Distributions to a StatArray<a class="headerlink" href="#attaching-prior-and-proposal-distributions-to-a-statarray" title="Permalink to this heading"></a></h2>
 <p>The StatArray class has been built so that we may easily
 attach not only names and units, but statistical distributions too.
 We won’t go into too much detail about the different distribution
@@ -214,18 +234,19 @@ sample when we wish to perturb the variable
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Class type of the proposal: &quot;</span><span class="p">,</span><span class="nb">type</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">proposal</span><span class="p">))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: Density ($\frac{g}{cc}$)
-    Shape: (1,)
-    Values: [1.89390965]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: Density ($\frac{g}{cc}$) 0x7ff592df92c0
+Shape: (1,)
+Values: [0.08834802]
+min: 0.08834801506485813
+max: 0.08834801506485813
 Prior:
-Uniform Distribution:
-  Min: :-2.0
-  Max: :2.0
+|   Uniform Distribution:
+|     Min: :-2.0
+|     Max: :2.0
 Proposal:
-Normal Distribution:
-    Mean: :0.0
-Variance: :1.0
+|   Normal
+|       Mean:0.0
+|   Variance:1.0
 
 Class type of the prior:  &lt;class &#39;geobipy.src.classes.statistics.UniformDistribution.Uniform&#39;&gt;
 Class type of the proposal:  &lt;class &#39;geobipy.src.classes.statistics.NormalDistribution.Normal&#39;&gt;
@@ -237,7 +258,6 @@ Therefore each element is evaluated to get 3 probabilities, one for each element
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">probability</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>0.25
 </pre></div>
 </div>
@@ -245,8 +265,7 @@ Therefore each element is evaluated to get 3 probabilities, one for each element
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">propose</span><span class="p">())</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>-0.8977410112465112
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>0.9522526515446472
 </pre></div>
 </div>
 <p>From a sampling stand point we can either sample using only the proposal
@@ -254,8 +273,7 @@ Or we can only generate samples that simultaneously satisfy the prior.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">propose</span><span class="p">(</span><span class="n">relative</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[2.39747661]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[-1.04811844]
 </pre></div>
 </div>
 <p>We can perturb the variable by drawing from the attached proposal distribution.</p>
@@ -263,23 +281,24 @@ Or we can only generate samples that simultaneously satisfy the prior.</p>
 <span class="nb">print</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: Density ($\frac{g}{cc}$)
-    Shape: (1,)
-    Values: [0.68339971]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: Density ($\frac{g}{cc}$) 0x7ff592df92c0
+Shape: (1,)
+Values: [-1.50540299]
+min: -1.505402988009392
+max: -1.505402988009392
 Prior:
-Uniform Distribution:
-  Min: :-2.0
-  Max: :2.0
+|   Uniform Distribution:
+|     Min: :-2.0
+|     Max: :2.0
 Proposal:
-Normal Distribution:
-    Mean: :0.0
-Variance: :1.0
+|   Normal
+|       Mean:0.0
+|   Variance:1.0
 </pre></div>
 </div>
 </section>
 <section id="attaching-a-histogram-to-capture-the-posterior-distribution">
-<h2>Attaching a Histogram to capture the posterior distribution<a class="headerlink" href="#attaching-a-histogram-to-capture-the-posterior-distribution" title="Permalink to this headline"></a></h2>
+<h2>Attaching a Histogram to capture the posterior distribution<a class="headerlink" href="#attaching-a-histogram-to-capture-the-posterior-distribution" title="Permalink to this heading"></a></h2>
 <p>The StatArray can perturb itself, evaluate its current probability given its priors
 and a histogram can be attached to capture its posterior distribution.
 As an example, lets create a Histogram class with bins generated from the prior.</p>
@@ -287,7 +306,7 @@ As an example, lets create a Histogram class with bins generated from the prior.
 </pre></div>
 </div>
 <p>Attach the histogram</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Density</span><span class="o">.</span><span class="n">posterior</span> <span class="o">=</span> <span class="n">Histogram1D</span><span class="p">(</span><span class="n">edges</span><span class="o">=</span><span class="n">bins</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Density</span><span class="o">.</span><span class="n">posterior</span> <span class="o">=</span> <span class="n">Histogram</span><span class="p">(</span><span class="n">mesh</span> <span class="o">=</span> <span class="n">RectilinearMesh1D</span><span class="p">(</span><span class="n">edges</span><span class="o">=</span><span class="n">bins</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>In an iterative sense, we can propose and evaluate new values, and update the posterior</p>
@@ -296,7 +315,7 @@ As an example, lets create a Histogram class with bins generated from the prior.
     <span class="n">p</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">probability</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">p</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span> <span class="c1"># This is a simple example!</span>
-        <span class="n">Density</span><span class="o">.</span><span class="n">updatePosterior</span><span class="p">()</span>
+        <span class="n">Density</span><span class="o">.</span><span class="n">update_posterior</span><span class="p">()</span>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
@@ -305,7 +324,7 @@ As an example, lets create a Histogram class with bins generated from the prior.
 </div>
 <img src="../../_images/sphx_glr_plot_StatArray_001.png" srcset="../../_images/sphx_glr_plot_StatArray_001.png" alt="Prior, Proposal, Posterior" class = "sphx-glr-single-img"/></section>
 <section id="attach-a-multivariate-normal-distribution-as-the-prior-and-proposal">
-<h2>Attach a multivariate normal distribution as the prior and proposal<a class="headerlink" href="#attach-a-multivariate-normal-distribution-as-the-prior-and-proposal" title="Permalink to this headline"></a></h2>
+<h2>Attach a multivariate normal distribution as the prior and proposal<a class="headerlink" href="#attach-a-multivariate-normal-distribution-as-the-prior-and-proposal" title="Permalink to this heading"></a></h2>
 <p>Attach the multivariate prior</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
 <span class="n">variance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
@@ -318,8 +337,7 @@ This produces a single probability.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">probability</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>0.2290813829641986
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>0.2563804488183801
 </pre></div>
 </div>
 <p>Attach the multivariate proposal</p>
@@ -331,114 +349,111 @@ This produces a single probability.</p>
 <p>Perturb the variables using the multivariate proposal.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Density</span><span class="o">.</span><span class="n">perturb</span><span class="p">()</span>
 <span class="n">Density</span><span class="o">.</span><span class="n">summary</span>
-</pre></div>
-</div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&quot;Name: Density ($\\frac{g}{cc}$)\n    Shape: (1,)\n    Values: [1.3128459]\nPrior:\nMV Normal Distribution:\nMean:\n[-0.1130617]\nVariance:\n[[1.]]\nProposal:\nMV Normal Distribution:\nMean:\n[0.23027651]\nVariance:\n[[1.]]\nPosterior:\n&lt;class &#39;geobipy.src.classes.statistics.Histogram1D.Histogram1D&#39;&gt;\nBins: \n&lt;property object at 0x7fe8d12de770&gt;Counts:\nName: Frequency\n    Shape: (100,)\n    Values: [4 1 2 ... 1 0 2]\nValues are logged to base None\nRelative to: [0.]&quot;
+
+<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;statarray.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">Density</span><span class="o">.</span><span class="n">createHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;statarray&#39;</span><span class="p">,</span> <span class="n">withPosterior</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">add_axis</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">Density</span><span class="o">.</span><span class="n">writeHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;statarray&#39;</span><span class="p">,</span> <span class="n">withPosterior</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;statarray.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">tmp</span> <span class="o">=</span> <span class="n">StatArray</span><span class="o">.</span><span class="n">fromHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;statarray&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">skip_posterior</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;statarray.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">tmp</span> <span class="o">=</span> <span class="n">StatArray</span><span class="o">.</span><span class="n">fromHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;statarray&#39;</span><span class="p">,</span> <span class="n">skip_posterior</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
 <section id="basic-manipulation">
-<h2>Basic manipulation<a class="headerlink" href="#basic-manipulation" title="Permalink to this headline"></a></h2>
+<h2>Basic manipulation<a class="headerlink" href="#basic-manipulation" title="Permalink to this heading"></a></h2>
 <p>The StatArray contains other functions to perform basic array manipulations</p>
 <p>These routines essentially wrap around numpy functions,
 but the result will have the same name and units,
 and if any prior or proposal are set, those will be carried through too.</p>
 <section id="d-example">
-<h3>1D example<a class="headerlink" href="#d-example" title="Permalink to this headline"></a></h3>
+<h3>1D example<a class="headerlink" href="#d-example" title="Permalink to this heading"></a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">10.0</span><span class="p">)))</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[ -0.  -1.  -3. ... -28. -36. -45.]
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="mf">999.0</span><span class="p">,</span> <span class="mf">999.0</span><span class="p">]))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[999.  -0.  -1. ... -36. 999. -45.]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;class &#39;list&#39;&gt;
+[999.  -0.  -1. ... -36. 999. -45.]
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">prepend</span><span class="p">(</span><span class="mf">999.0</span><span class="p">))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[999.  -0.  -1. ... -28. -36. -45.]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;class &#39;numpy.ndarray&#39;&gt;
+[999.  -0.  -1. ... -28. -36. -45.]
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">prepend</span><span class="p">([</span><span class="mf">998.0</span><span class="p">,</span> <span class="mf">999.0</span><span class="p">]))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[998. 999.  -0. ... -28. -36. -45.]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;class &#39;numpy.ndarray&#39;&gt;
+[998. 999.  -0. ... -28. -36. -45.]
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="mf">998.0</span><span class="p">,</span> <span class="mf">999.0</span><span class="p">]))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[ -0.  -1.  -3. ... -45. 998. 999.]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;class &#39;int&#39;&gt;
+[ -0.  -1.  -3. ... -45. 998. 999.]
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">14</span><span class="p">))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[-0. -1. -3. ... -1. -3. -6.]
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">delete</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span><span class="mi">8</span><span class="p">]))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[ -0.  -1.  -3. ... -21. -28. -45.]
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">edges</span><span class="p">())</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[  0.5  -0.5  -2.  ... -32.  -40.5 -49.5]
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">internalEdges</span><span class="p">())</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[ -0.5  -2.   -4.5 ... -24.5 -32.  -40.5]
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">firstNonZero</span><span class="p">())</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>1
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">lastNonZero</span><span class="p">())</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>10
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">abs</span><span class="p">())</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[ 0.  1.  3. ... 28. 36. 45.]
 </pre></div>
 </div>
 </section>
 <section id="id1">
-<h3>2D example<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h3>
+<h3>2D example<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]))</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[[ 0 -2  3]
  [ 3  0 -1]
  [ 1  2  0]]
@@ -447,8 +462,8 @@ and if any prior or proposal are set, those will be carried through too.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[[ 4  4  4]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;class &#39;int&#39;&gt;
+[[ 4  4  4]
  [ 0 -2  3]
  [ 3  0 -1]
  [ 1  2  0]]
@@ -457,8 +472,8 @@ and if any prior or proposal are set, those will be carried through too.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[[ 0 -2  5  3  5]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;class &#39;list&#39;&gt;
+[[ 0 -2  5  3  5]
  [ 3  0  5 -1  5]
  [ 1  2  5  0  5]]
 </pre></div>
@@ -466,8 +481,8 @@ and if any prior or proposal are set, those will be carried through too.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[[ 0 -2 10  3]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;class &#39;int&#39;&gt;
+[[ 0 -2 10  3]
  [ 3  0 11 -1]
  [ 1  2 12  0]]
 </pre></div>
@@ -475,8 +490,8 @@ and if any prior or proposal are set, those will be carried through too.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">prepend</span><span class="p">(</span><span class="mi">999</span><span class="p">))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[[999 999 999]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;class &#39;numpy.ndarray&#39;&gt;
+[[999 999 999]
  [  0  -2   3]
  [  3   0  -1]
  [  1   2   0]]
@@ -485,17 +500,17 @@ and if any prior or proposal are set, those will be carried through too.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">prepend</span><span class="p">([</span><span class="mi">999</span><span class="p">,</span> <span class="mi">998</span><span class="p">,</span> <span class="mi">997</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[[999   0  -2   3]
- [998   3   0  -1]
- [997   1   2   0]]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;class &#39;numpy.ndarray&#39;&gt;
+[[999 998 997   0  -2   3]
+ [999 998 997   3   0  -1]
+ [999 998 997   1   2   0]]
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">([[</span><span class="mi">999</span><span class="p">,</span> <span class="mi">998</span><span class="p">,</span> <span class="mi">997</span><span class="p">]]))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[[  0  -2   3]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;class &#39;int&#39;&gt;
+[[  0  -2   3]
  [  3   0  -1]
  [  1   2   0]
  [999 998 997]]
@@ -504,7 +519,6 @@ and if any prior or proposal are set, those will be carried through too.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">resize</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">]))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[[ 0 -2  3  3  0]
  [-1  1  2  0  0]
  [-2  3  3  0 -1]
@@ -515,14 +529,12 @@ and if any prior or proposal are set, those will be carried through too.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[ 0 -2  3 ...  1  2  0]
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[[ 0 -2  3]
  [ 3  0 -1]]
 </pre></div>
@@ -530,35 +542,30 @@ and if any prior or proposal are set, those will be carried through too.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">firstNonZero</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[1 0 0]
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">lastNonZero</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[3 3 2]
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">firstNonZero</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[1 0 0]
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">lastNonZero</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[3 3 2]
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">abs</span><span class="p">())</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[[0 2 3]
  [3 0 1]
  [1 2 0]]
@@ -567,7 +574,7 @@ and if any prior or proposal are set, those will be carried through too.</p>
 </section>
 </section>
 <section id="plotting">
-<h2>Plotting<a class="headerlink" href="#plotting" title="Permalink to this headline"></a></h2>
+<h2>Plotting<a class="headerlink" href="#plotting" title="Permalink to this heading"></a></h2>
 <p>We can easily plot the StatArray with its built in plotting functions.
 All plotting functions can take matplotlib keywords</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># The simplest is to just plot the array</span>
@@ -586,13 +593,13 @@ All plotting functions can take matplotlib keywords</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">bar</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_StatArray_003.png" srcset="../../_images/sphx_glr_plot_StatArray_003.png" alt="Density" class = "sphx-glr-single-img"/><p>We can scatter the contents of the StatArray if it is 1D</p>
+<img src="../../_images/sphx_glr_plot_StatArray_003.png" srcset="../../_images/sphx_glr_plot_StatArray_003.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>We can scatter the contents of the StatArray if it is 1D</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
 </pre></div>
 </div>
 <img src="../../_images/sphx_glr_plot_StatArray_004.png" srcset="../../_images/sphx_glr_plot_StatArray_004.png" alt="plot StatArray" class = "sphx-glr-single-img"/><section id="histogram-equalization">
-<h3>Histogram Equalization<a class="headerlink" href="#histogram-equalization" title="Permalink to this headline"></a></h3>
+<h3>Histogram Equalization<a class="headerlink" href="#histogram-equalization" title="Permalink to this heading"></a></h3>
 <p>A neat trick with colourmaps is histogram equalization.
 This approach forces all colours in the images to have an equal weight.
 This distorts the colour bar, but can really highlight the lower and higher
@@ -632,11 +639,11 @@ In the first subplot, the y axis is the same as the colourbar.</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
-<span class="n">Density</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">Time</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">Depth</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span><span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">sizeLegend</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">Density</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">Time</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">Depth</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span><span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">legend_size</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="n">ax1</span><span class="p">)</span>
 <span class="c1">#Density.scatter(x=Time, y=Depth, s=s, alpha=0.7,edgecolor=&#39;k&#39;, sizeLegend=[1.0, 100, 200, 300])</span>
 <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Density</span><span class="p">)</span><span class="o">+</span><span class="mf">1.0</span>
-<span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">Time</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">Depth</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span><span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">sizeLegend</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">300</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">Time</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">Depth</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span><span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">legend_size</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">300</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
 <img src="../../_images/sphx_glr_plot_StatArray_009.png" srcset="../../_images/sphx_glr_plot_StatArray_009.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>Of course we can still take the log, or equalize the colour histogram</p>
@@ -678,13 +685,12 @@ In the first subplot, the y axis is the same as the colourbar.</p>
 </div>
 <p>We can then read the StatArray from the file
 Here x is a new variable, that is read in from the hdf5 file we just wrote.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">hdfRead</span><span class="o">.</span><span class="n">readKeyFromFiles</span><span class="p">(</span><span class="s1">&#39;1Dtest.h5&#39;</span><span class="p">,</span><span class="s1">&#39;/&#39;</span><span class="p">,</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">StatArray</span><span class="o">.</span><span class="n">fromHdf</span><span class="p">(</span><span class="s1">&#39;1Dtest.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;test&#39;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;x has the same values as Density? &#39;</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">x</span> <span class="o">==</span> <span class="n">Density</span><span class="p">))</span>
 <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">5.0</span> <span class="c1"># Change one of the values in x</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;x has its own memory allocated (not a reference/pointer)? &#39;</span><span class="p">,</span> <span class="nb">id</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">id</span><span class="p">(</span><span class="n">Density</span><span class="p">))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>x has the same values as Density?  True
 x has its own memory allocated (not a reference/pointer)?  True
 </pre></div>
@@ -694,8 +700,7 @@ x has its own memory allocated (not a reference/pointer)?  True
 <span class="n">Density</span><span class="o">.</span><span class="n">summary</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&#39;Name: Density ($\\frac{g}{cc}$)\n    Shape: (50, 100)\n    Values: [[ 0.2578391   0.06423086  2.89067211 ...  1.38949627  1.00002246\n   0.42437745]\n [ 0.71865757 -1.44351093 -2.50074128 ... -0.55238025 -0.7257894\n  -0.77072145]\n [ 0.19307272  0.03664038  0.54741788 ...  0.91367198 -0.22983866\n  -1.3084926 ]\n ...\n [ 1.30411313 -1.58826262  2.2629556  ...  0.87880903 -2.19908292\n  -0.00368457]\n [-0.52868634 -0.54295258  1.43517379 ... -0.0489859  -0.38495306\n   2.17553058]\n [ 0.64759825  0.66592992  1.61048641 ... -1.48852135  1.47162409\n   0.06787013]]\n&#39;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&#39;Name: Density ($\\frac{g}{cc}$) 0x7ff5943e37c0\nShape: (50, 100)\nValues: [[-2.08786155  0.27155668  0.03927888 ...  2.54183531  1.69447203\n  -1.89190848]\n [ 0.85614344  0.32860765 -0.20147734 ... -0.82957808  1.21062439\n   0.1673818 ]\n [-0.63252696  0.22178405  1.87088588 ... -0.56340323 -0.03561543\n   0.86021205]\n ...\n [-0.56087003 -0.14362854  0.5289713  ... -0.55293387  0.09398317\n   1.89985743]\n [-0.7974982   0.85717802  0.78106984 ... -1.51512074  0.31074689\n  -0.83252381]\n [ 0.32736813 -0.04333445  0.41172788 ...  0.21826993 -1.0704939\n  -0.27108376]]\nmin: -3.6890137097705016\nmax: 3.889764884052127\n&#39;
 </pre></div>
 </div>
 <p>The StatArray Class’s functions work whether it is 1D or 2D</p>
@@ -743,9 +748,9 @@ ends of whatever you are plotting</p>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">131</span><span class="p">)</span>
-<span class="n">ax</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">flipY</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">noColorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">flipY</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">132</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="n">ax1</span><span class="p">)</span>
-<span class="n">ax</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">a</span><span class="p">,</span> <span class="n">flipY</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">noColorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">a</span><span class="p">,</span> <span class="n">flipY</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">133</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="n">ax1</span><span class="p">)</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">flipY</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
@@ -774,8 +779,8 @@ ends of whatever you are plotting</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_StatArray_022.png" srcset="../../_images/sphx_glr_plot_StatArray_022.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  5.661 seconds)</p>
-<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-statistics-plot-statarray-py">
+<img src="../../_images/sphx_glr_plot_StatArray_022.png" srcset="../../_images/sphx_glr_plot_StatArray_022.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  3.278 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-statistics-plot-statarray-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/53dc65a717762d4693b891c0caabbde0/plot_StatArray.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_StatArray.py</span></code></a></p>
 </div>
@@ -793,7 +798,7 @@ ends of whatever you are plotting</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="plot_histogram_3d.html" class="btn btn-neutral float-left" title="Histogram 3D" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../Meshes/plot_rectilinear_mesh_1d.html" class="btn btn-neutral float-right" title="1D Rectilinear Mesh" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../Meshes/index.html" class="btn btn-neutral float-right" title="Meshes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

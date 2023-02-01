@@ -51,7 +51,7 @@ Specify some cell centres in x and y
 
     x = StatArray(np.arange(11.0), 'Easting', 'm')
     y = StatArray(np.arange(11.0), 'Northing', 'm')
-    mesh = RectilinearMesh2D(xEdges=x, yEdges=y)
+    mesh = RectilinearMesh2D(x_edges=x, y_edges=y)
 
     xx, yy = np.meshgrid(mesh.x.centres, mesh.y.centres)
     values = StatArray(np.sin(np.sqrt(xx ** 2.0 + yy ** 2.0)), "Values")
@@ -113,28 +113,23 @@ Specify some cell centres in x and y
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.299 seconds)
+   **Total running time of the script:** ( 0 minutes  0.261 seconds)
 
 
 .. _sphx_glr_download_examples_Models_plot_model_2d.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: plot_model_2d.py <plot_model_2d.py>`
 
-     :download:`Download Python source code: plot_model_2d.py <plot_model_2d.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: plot_model_2d.ipynb <plot_model_2d.ipynb>`
+      :download:`Download Jupyter notebook: plot_model_2d.ipynb <plot_model_2d.ipynb>`
 
 
 .. only:: html

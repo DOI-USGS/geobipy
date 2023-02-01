@@ -8,13 +8,9 @@ from copy import deepcopy
 from geobipy import StatArray
 from geobipy import RectilinearMesh1D
 from geobipy import Model
-from geobipy import Model1D
 from geobipy import Distribution
-from geobipy import FdemData
 import matplotlib.pyplot as plt
 import numpy as np
-import h5py
-from geobipy import hdfRead
 
 # %%
 # Instantiate the 1D Model with a Half Space
@@ -43,19 +39,19 @@ mod.plotGrid(transpose=True, flip=True)
 # The halfSpaceValue is used as a reference value for the parameter prior.
 prng = np.random.RandomState(0)
 # Set the priors
-mod.set_priors(mean_value=0.01,
+mod.set_priors(value_mean=0.01,
               min_edge=1.0,
               max_edge=150.0,
               max_cells=30,
-              parameterPrior=True,
-              gradientPrior=True,
+              solve_value=True,
+              solve_gradient=True,
               prng=prng)
 
 ################################################################################
 # We can evaluate the prior of the model using depths only
-print('Log probability of the Model given its priors: ', mod.prior_probability(False, False, log=True))
+print('Log probability of the Model given its priors: ', mod.probability(False, False))
 # Or with priors on its parameters, and parameter gradient with depth.
-print('Log probability of the Model given its priors: ', mod.prior_probability(True, True, log=True))
+print('Log probability of the Model given its priors: ', mod.probability(True, True))
 
 ################################################################################
 # To propose new models, we specify the probabilities of creating, removing, perturbing, and not changing
@@ -76,9 +72,9 @@ perturbed.pcolor(transpose=True, flip=True, log=10)  # , grid=True)
 
 ################################################################################
 # We can evaluate the prior of the model using depths only
-print('Log probability of the Model given its priors: ',perturbed.prior_probability(False, False, log=True))
+print('Log probability of the Model given its priors: ',perturbed.probability(False, False))
 # Or with priors on its parameters, and parameter gradient with depth.
-print('Log probability of the Model given its priors: ',perturbed.prior_probability(True, True, log=True))
+print('Log probability of the Model given its priors: ',perturbed.probability(True, True))
 
 
 # %%
@@ -131,7 +127,7 @@ for i in range(1001):
 #                   "xscale": 'log',
 #                   "noColorbar": True,
 #                   "flipY": True,
-#                   'credible_interval_kwargs':{'axis': 1, 
+#                   'credible_interval_kwargs':{'axis': 1,
 #                                           'reciprocate': True,
 #                                           'xscale': 'log'}})
 # mod.par.posterior.plotCredibleIntervals(xscale='log', axis=1)
@@ -139,8 +135,7 @@ for i in range(1001):
 
 fig = plt.figure(figsize=(8, 6))
 # gs = fig.add_gridspec(nrows=1, ncols=1)
-ax = mod.init_posterior_plots(fig)
-mod.plot_posteriors(axes=ax,
+mod.plot_posteriors(axes=fig,
                     edges_kwargs = {
                         "transpose":True,
                         "flipY":True
@@ -152,7 +147,7 @@ mod.plot_posteriors(axes=ax,
                         "flipY": True,
                         'credible_interval_kwargs':{
                               'reciprocate':True,
-                              'axis': 1,
+                            #   'axis': 1,
                               'xscale': 'log'
                         }
                     },

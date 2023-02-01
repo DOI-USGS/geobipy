@@ -19,7 +19,9 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -53,21 +55,27 @@
 <li class="toctree-l2"><a class="reference internal" href="../index.html#statistics">Statistics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#meshes">Meshes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../index.html#data">Data</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="plot_pointcloud3d.html">3D Point Cloud class</a></li>
-<li class="toctree-l3"><a class="reference internal" href="plot_frequency_dataset.html">Frequency domain dataset</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Tempest dataset</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#reading-in-the-data">Reading in the Data</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#obtain-a-line-from-the-data-set">Obtain a line from the data set</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="plot_skytem_dataset.html">Time domain dataset</a></li>
-<li class="toctree-l3"><a class="reference internal" href="plot_aerotem_dataset.html">Time domain dataset</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#data">Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#datapoints">Datapoints</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#inference">Inference</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../index.html#hdf-5">HDF 5</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#hdf-5">HDF 5</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../Distributions/index.html">Distribtions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Statistics/index.html">Statistics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Meshes/index.html">Meshes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Models/index.html">Models</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Data</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="plot_pointcloud3d.html">3D Point Cloud class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_frequency_dataset.html">Frequency domain dataset</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Tempest dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_skytem_dataset.html">Time domain dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="aerotem_dataset.html">Time domain dataset</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Datapoints/index.html">Datapoints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Inference/index.html">Inference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../HDF5/index.html">HDF 5</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -85,9 +93,10 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../index.html">Examples</a> &raquo;</li>
-      <li>Tempest dataset</li>
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Examples</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Data</a></li>
+      <li class="breadcrumb-item active">Tempest dataset</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../_sources/examples/Data/plot_tempest_dataset.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -103,18 +112,18 @@
 to download the full example code</p>
 </div>
 <section class="sphx-glr-example-title" id="tempest-dataset">
-<span id="sphx-glr-examples-data-plot-tempest-dataset-py"></span><h1>Tempest dataset<a class="headerlink" href="#tempest-dataset" title="Permalink to this headline"></a></h1>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">plotting</span> <span class="k">as</span> <span class="n">cP</span>
+<span id="sphx-glr-examples-data-plot-tempest-dataset-py"></span><h1>Tempest dataset<a class="headerlink" href="#tempest-dataset" title="Permalink to this heading"></a></h1>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">plotting</span> <span class="k">as</span> <span class="n">cP</span>
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">geobipy.src.classes.core.StatArray</span> <span class="kn">import</span> <span class="n">StatArray</span>
-<span class="kn">from</span> <span class="nn">geobipy.src.classes.data.dataset.TempestData</span> <span class="kn">import</span> <span class="n">TempestData</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">TempestData</span>
 </pre></div>
 </div>
 <section id="reading-in-the-data">
-<h2>Reading in the Data<a class="headerlink" href="#reading-in-the-data" title="Permalink to this headline"></a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dataFolder</span> <span class="o">=</span> <span class="s2">&quot;..//supplementary//Data//&quot;</span>
+<h2>Reading in the Data<a class="headerlink" href="#reading-in-the-data" title="Permalink to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dataFolder</span> <span class="o">=</span> <span class="s2">&quot;..//supplementary//data//&quot;</span>
 
 <span class="c1"># # The data file name</span>
 <span class="c1"># dataFiles = dataFolder + &#39;Tempest.nc&#39;</span>
@@ -126,7 +135,7 @@ to download the full example code</p>
 <span class="c1"># TD = TempestData.read_netcdf(dataFiles, systemFiles)</span>
 
 <span class="c1"># TD.write_csv(dataFolder + &#39;Tempest.csv&#39;)</span>
-<span class="n">TD</span> <span class="o">=</span> <span class="n">TempestData</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;Tempest.csv&#39;</span><span class="p">,</span> <span class="n">system_filename</span><span class="o">=</span><span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;Tempest.stm&#39;</span><span class="p">)</span>
+<span class="n">TD</span> <span class="o">=</span> <span class="n">TempestData</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;tempest_saline_clay.csv&#39;</span><span class="p">,</span> <span class="n">system_filename</span><span class="o">=</span><span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;Tempest.stm&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Plot the locations of the data points</p>
@@ -135,11 +144,7 @@ to download the full example code</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Scatter plot&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_tempest_dataset_001.png" srcset="../../_images/sphx_glr_plot_tempest_dataset_001.png" alt="Scatter plot" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/base/utilities.py:865: RuntimeWarning: invalid value encountered in true_divide
-  equalized = (equalized - a1) / (a2 - a1)
-
-Text(0.5, 1.0, &#39;Scatter plot&#39;)
+<img src="../../_images/sphx_glr_plot_tempest_dataset_001.png" srcset="../../_images/sphx_glr_plot_tempest_dataset_001.png" alt="Scatter plot" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Text(0.5, 1.0, &#39;Scatter plot&#39;)
 </pre></div>
 </div>
 <p>Plot all the data along the specified line</p>
@@ -148,18 +153,16 @@ Text(0.5, 1.0, &#39;Scatter plot&#39;)
 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Line </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mf">225401.0</span><span class="p">))</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_tempest_dataset_002.png" srcset="../../_images/sphx_glr_plot_tempest_dataset_002.png" alt="Line 225401.0" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Text(0.5, 1.0, &#39;Line 225401.0&#39;)
+<img src="../../_images/sphx_glr_plot_tempest_dataset_002.png" srcset="../../_images/sphx_glr_plot_tempest_dataset_002.png" alt="Line 225401.0" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Text(0.5, 1.0, &#39;Line 225401.0&#39;)
 </pre></div>
 </div>
 <p>Or, plot specific channels in the data</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
-<span class="n">_</span> <span class="o">=</span> <span class="n">TD</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">system</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">18</span><span class="p">])</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">TD</span><span class="o">.</span><span class="n">plot_data</span><span class="p">(</span><span class="n">system</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">18</span><span class="p">])</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;3 channels of data&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_tempest_dataset_003.png" srcset="../../_images/sphx_glr_plot_tempest_dataset_003.png" alt="3 channels of data" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Text(0.5, 1.0, &#39;3 channels of data&#39;)
+<img src="../../_images/sphx_glr_plot_tempest_dataset_003.png" srcset="../../_images/sphx_glr_plot_tempest_dataset_003.png" alt="3 channels of data" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Text(0.5, 1.0, &#39;3 channels of data&#39;)
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
@@ -167,45 +170,46 @@ Text(0.5, 1.0, &#39;Scatter plot&#39;)
 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Data as an array&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_tempest_dataset_004.png" srcset="../../_images/sphx_glr_plot_tempest_dataset_004.png" alt="Data as an array" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Text(0.5, 1.0, &#39;Data as an array&#39;)
+<img src="../../_images/sphx_glr_plot_tempest_dataset_004.png" srcset="../../_images/sphx_glr_plot_tempest_dataset_004.png" alt="Data as an array" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Text(0.5, 1.0, &#39;Data as an array&#39;)
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">ax</span> <span class="o">=</span> <span class="n">TD</span><span class="o">.</span><span class="n">scatter2D</span><span class="p">(</span><span class="n">s</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">TD</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="n">TD</span><span class="o">.</span><span class="n">channel_index</span><span class="p">(</span><span class="n">system</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="mi">10</span><span class="p">)],</span> <span class="n">equalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;scatter plot of specific channel&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<img src="../../_images/sphx_glr_plot_tempest_dataset_005.png" srcset="../../_images/sphx_glr_plot_tempest_dataset_005.png" alt="scatter plot of specific channel" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Text(0.5, 1.0, &#39;scatter plot of specific channel&#39;)
-</pre></div>
-</div>
-<p>TD.toVTK(‘TD1’, format=’binary’)</p>
-</section>
-<section id="obtain-a-line-from-the-data-set">
-<h2>Obtain a line from the data set<a class="headerlink" href="#obtain-a-line-from-the-data-set" title="Permalink to this headline"></a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">line</span> <span class="o">=</span> <span class="n">TD</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">_</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">scatter2D</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Channel&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-<img src="../../_images/sphx_glr_plot_tempest_dataset_006.png" srcset="../../_images/sphx_glr_plot_tempest_dataset_006.png" alt="Channel" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Text(0.5, 1.0, &#39;Channel&#39;)
-</pre></div>
-</div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">_</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xAxis</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;All data along line&quot;</span><span class="p">)</span>
+
+
+<span class="c1"># with h5py.File(&#39;tdem.h5&#39;, &#39;w&#39;) as f:</span>
+<span class="c1">#     TD.createHdf(f, &#39;tdem&#39;)</span>
+<span class="c1">#     TD.writeHdf(f, &#39;tdem&#39;)</span>
+
+<span class="c1"># with h5py.File(&#39;tdem.h5&#39;, &#39;r&#39;) as f:</span>
+<span class="c1">#     TD3 = TempestData.fromHdf(f[&#39;tdem&#39;])</span>
+
+<span class="c1"># with h5py.File(&#39;tdem.h5&#39;, &#39;r&#39;) as f:</span>
+<span class="c1">#     tdp = TempestData.fromHdf(f[&#39;tdem&#39;], index=0)</span>
+
+
+<span class="c1"># #%%</span>
+<span class="c1"># # Obtain a line from the data set</span>
+<span class="c1"># # +++++++++++++++++++++++++++++++</span>
+<span class="c1"># line = TD.line(0.0)</span>
+
+<span class="c1"># ################################################################################</span>
+<span class="c1"># plt.figure()</span>
+<span class="c1"># _ = line.scatter2D()</span>
+<span class="c1"># plt.title(&#39;Channel&#39;)</span>
+
+<span class="c1"># ################################################################################</span>
+<span class="c1"># plt.figure()</span>
+<span class="c1"># _ = line.plot_data(xAxis=&#39;index&#39;, log=10)</span>
+<span class="c1"># plt.title(&quot;All data along line&quot;)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_tempest_dataset_007.png" srcset="../../_images/sphx_glr_plot_tempest_dataset_007.png" alt="All data along line" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  3.862 seconds)</p>
-<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-data-plot-tempest-dataset-py">
+<img src="../../_images/sphx_glr_plot_tempest_dataset_005.png" srcset="../../_images/sphx_glr_plot_tempest_dataset_005.png" alt="scatter plot of specific channel" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  3.685 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-data-plot-tempest-dataset-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/cad36827134302329c83d6bd810a1239/plot_tempest_dataset.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_tempest_dataset.py</span></code></a></p>
 </div>

@@ -19,7 +19,9 @@
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -50,7 +52,31 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="base.html">Core routines needed for GeoBIPy</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="utilities.html">utilities</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">plotting</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">plotting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.bar"><code class="docutils literal notranslate"><span class="pre">bar()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.clabel"><code class="docutils literal notranslate"><span class="pre">clabel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.generate_subplots"><code class="docutils literal notranslate"><span class="pre">generate_subplots()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.hillshade"><code class="docutils literal notranslate"><span class="pre">hillshade()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.hlines"><code class="docutils literal notranslate"><span class="pre">hlines()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.make_colourmap"><code class="docutils literal notranslate"><span class="pre">make_colourmap()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.pause"><code class="docutils literal notranslate"><span class="pre">pause()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.pcolor"><code class="docutils literal notranslate"><span class="pre">pcolor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.pcolor_1D"><code class="docutils literal notranslate"><span class="pre">pcolor_1D()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.pcolor_as_bar"><code class="docutils literal notranslate"><span class="pre">pcolor_as_bar()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.plot"><code class="docutils literal notranslate"><span class="pre">plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.pretty"><code class="docutils literal notranslate"><span class="pre">pretty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.scatter2D"><code class="docutils literal notranslate"><span class="pre">scatter2D()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.setAlphaPerPcolormeshPixel"><code class="docutils literal notranslate"><span class="pre">setAlphaPerPcolormeshPixel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.sizeLegend"><code class="docutils literal notranslate"><span class="pre">sizeLegend()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.stackplot2D"><code class="docutils literal notranslate"><span class="pre">stackplot2D()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.step"><code class="docutils literal notranslate"><span class="pre">step()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.suptitle"><code class="docutils literal notranslate"><span class="pre">suptitle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.title"><code class="docutils literal notranslate"><span class="pre">title()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.vlines"><code class="docutils literal notranslate"><span class="pre">vlines()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.xlabel"><code class="docutils literal notranslate"><span class="pre">xlabel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.ylabel"><code class="docutils literal notranslate"><span class="pre">ylabel()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="fileIO.html">fileIO</a></li>
 <li class="toctree-l3"><a class="reference internal" href="interpolation.html">Interpolation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="HDF.html">Heirarchical Data Format (HDF)</a></li>
@@ -76,10 +102,10 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../api.html">API</a> &raquo;</li>
-          <li><a href="base.html">Core routines needed for GeoBIPy</a> &raquo;</li>
-      <li>plotting</li>
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API</a></li>
+          <li class="breadcrumb-item"><a href="base.html">Core routines needed for GeoBIPy</a></li>
+      <li class="breadcrumb-item active">plotting</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../_sources/content/api/base/plotting.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -90,18 +116,16 @@
            <div itemprop="articleBody">
              
   <section id="module-geobipy.src.base.plotting">
-<span id="plotting"></span><h1>plotting<a class="headerlink" href="#module-geobipy.src.base.plotting" title="Permalink to this headline"></a></h1>
+<span id="plotting"></span><h1>plotting<a class="headerlink" href="#module-geobipy.src.base.plotting" title="Permalink to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="geobipy.src.base.plotting.bar">
-<span class="sig-prename descclassname"><span class="pre">geobipy.src.base.plotting.</span></span><span class="sig-name descname"><span class="pre">bar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.plotting.bar" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">geobipy.src.base.plotting.</span></span><span class="sig-name descname"><span class="pre">bar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.plotting.bar" title="Permalink to this definition"></a></dt>
 <dd><p>Plot a bar chart.</p>
-<p>Plots a bar chart and auto labels it if x and values have type geobipy.StatArray</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>values</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – The height of each bar.</p></li>
-<li><p><strong>x</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a><em>, </em><em>optional</em>) – The horizontal locations of the bars</p></li>
-<li><p><strong>i</strong> (<em>sequence of ints</em><em>, </em><em>optional</em>) – Plot the ith indices of values, against the ith indices of x.</p></li>
+<li><p><strong>values</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – Bar values</p></li>
+<li><p><strong>edges</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – edges of the bars</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -114,7 +138,7 @@
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.pyplot.bar</span></code></dt><dd><p>For additional keyword arguments you may use.</p>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.pyplot.hist</span></code></dt><dd><p>For additional keyword arguments you may use.</p>
 </dd>
 </dl>
 </div>
@@ -152,25 +176,48 @@ Defaults to None.</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="geobipy.src.base.plotting.hist">
-<span class="sig-prename descclassname"><span class="pre">geobipy.src.base.plotting.</span></span><span class="sig-name descname"><span class="pre">hist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">counts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flipX</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flipY</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.plotting.hist" title="Permalink to this definition"></a></dt>
-<dd><p>Plot a histogram.</p>
-<p>Plot of histogram of values, if density is 1, a normal is fit to the values.
-If values is an StatArray, the axes are automatically labelled.</p>
+<dt class="sig sig-object py" id="geobipy.src.base.plotting.hillshade">
+<span class="sig-prename descclassname"><span class="pre">geobipy.src.base.plotting.</span></span><span class="sig-name descname"><span class="pre">hillshade</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">azimuth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">altitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.plotting.hillshade" title="Permalink to this definition"></a></dt>
+<dd><p>Create hillshade from a numpy array containing elevation data.</p>
+<p>Taken from <a class="reference external" href="https://github.com/royalosyin/Work-with-DEM-data-using-Python-from-Simple-to-Complicated/blob/master/ex07-Hillshade%20from%20a%20Digital%20Elevation%20Model%20(DEM).ipynb">https://github.com/royalosyin/Work-with-DEM-data-using-Python-from-Simple-to-Complicated/blob/master/ex07-Hillshade%20from%20a%20Digital%20Elevation%20Model%20(DEM).ipynb</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>counts</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – Compute the histogram of these values</p></li>
-<li><p><strong>bins</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – Bins of the histogram</p></li>
-<li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Take the log of the colour to a base. ‘e’ if log = ‘e’, and a number e.g. log = 10.
-Values in c that are &lt;= 0 are masked.</p></li>
-<li><p><strong>logBins</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optiona</em>) – Take the log of the bins.</p></li>
-<li><p><strong>reciprocateX</strong> (<em>bool</em><em>, </em><em>optiona</em>) – Take the reciprocal of the x axis.</p></li>
-<li><p><strong>xscale</strong> (<em>str</em><em>, </em><em>optional</em>) – Scale the x axis? e.g. xscale = ‘linear’ or ‘log’.</p></li>
+<li><p><strong>arr</strong> (<em>numpy array</em><em> of </em><em>shape</em><em> (</em><em>rows</em><em>, </em><em>columns</em><em>)</em>) – Numpy array containing elevation values to be used to created hillshade.</p></li>
+<li><p><strong>azimuth</strong> (<em>float</em><em> (</em><em>default=30</em><em>)</em>) – The desired azimuth for the hillshade.</p></li>
+<li><p><strong>altitude</strong> (<em>float</em><em> (</em><em>default=30</em><em>)</em>) – The desired sun angle altitude for the hillshade.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>matplotlib .Axes</p>
+<dd class="field-even"><p>A numpy array containing hillshade values.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy array</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geobipy.src.base.plotting.hlines">
+<span class="sig-prename descclassname"><span class="pre">geobipy.src.base.plotting.</span></span><span class="sig-name descname"><span class="pre">hlines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.plotting.hlines" title="Permalink to this definition"></a></dt>
+<dd><p>Plot y against x</p>
+<p>If x and y are StatArrays, the axes are automatically labelled.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – The abcissa</p></li>
+<li><p><strong>y</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – The ordinate, can be upto 2 dimensions.</p></li>
+<li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Take the log of the colour to a base. ‘e’ if log = ‘e’, and a number e.g. log = 10.
+Values in c that are &lt;= 0 are masked.</p></li>
+<li><p><strong>xscale</strong> (<em>str</em><em>, </em><em>optional</em>) – Scale the x axis? e.g. xscale = ‘linear’ or ‘log’.</p></li>
+<li><p><strong>flipX</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flip the X axis</p></li>
+<li><p><strong>flipY</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flip the Y axis</p></li>
+<li><p><strong>labels</strong> (<em>bool</em><em>, </em><em>optional</em>) – Plot the labels? Default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>matplotlib.Axes</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>ax</p>
@@ -179,7 +226,7 @@ Values in c that are &lt;= 0 are masked.</p></li>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.pyplot.hist</span></code></dt><dd><p>For additional keyword arguments you may use.</p>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.pyplot.plot</span></code></dt><dd><p>For additional keyword arguments you may use.</p>
 </dd>
 </dl>
 </div>
@@ -193,7 +240,7 @@ Values in c that are &lt;= 0 are masked.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>seq</strong> (<em>array of hex colours.</em>) – e.g. [‘#000000’,’#00fcfd’,…]</p></li>
+<li><p><strong>seq</strong> (<em>array</em><em> of </em><em>hex colours.</em>) – e.g. [‘#000000’,’#00fcfd’,…]</p></li>
 <li><p><strong>cname</strong> (<em>str</em>) – Name of the colourmap.</p></li>
 </ul>
 </dd>
@@ -290,7 +337,57 @@ Values in c that are &lt;= 0 are masked.</p></li>
 <li><p><strong>clabel</strong> (<em>str</em><em>, </em><em>optional</em>) – colourbar label</p></li>
 <li><p><strong>grid</strong> (<em>bool</em><em>, </em><em>optional</em>) – Show the grid lines</p></li>
 <li><p><strong>transpose</strong> (<em>bool</em><em>, </em><em>optional</em>) – Transpose the image</p></li>
-<li><p><strong>noColorBar</strong> (<em>bool</em><em>, </em><em>optional</em>) – Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.</p></li>
+<li><p><strong>noColorbar</strong> (<em>bool</em><em>, </em><em>optional</em>) – Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>matplotlib .Axes</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ax</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.pyplot.pcolormesh</span></code></dt><dd><p>For additional keyword arguments you may use.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geobipy.src.base.plotting.pcolor_as_bar">
+<span class="sig-prename descclassname"><span class="pre">geobipy.src.base.plotting.</span></span><span class="sig-name descname"><span class="pre">pcolor_as_bar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.plotting.pcolor_as_bar" title="Permalink to this definition"></a></dt>
+<dd><p>Create a pseudocolour plot of a 2D array, Actually uses pcolormesh for speed.</p>
+<p>Create a colour plot of a 2D array.
+If the arrays x, y, and values are geobipy.StatArray classes, the axes can be automatically labelled.
+Can take any other matplotlib arguments and keyword arguments e.g. cmap etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – A 2D array of colour values.</p></li>
+<li><p><strong>X</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a><em>, </em><em>optional</em>) – Horizontal coordinates of the values edges.</p></li>
+<li><p><strong>Y</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a><em>, </em><em>optional</em>) – Vertical coordinates of the values edges.</p></li>
+<li><p><strong>alpha</strong> (<em>scalar</em><em> or </em><em>array_like</em><em>, </em><em>optional</em>) – If alpha is scalar, behaves like standard matplotlib alpha and opacity is applied to entire plot
+If array_like, each pixel is given an individual alpha value.</p></li>
+<li><p><strong>alphaColour</strong> (<em>'trans'</em><em> or </em><em>length 3 array</em>) – If ‘trans’, low alpha values are mapped to transparency
+If 3 array, each entry is the RGB value of a colour to map to, e.g. white = [1, 1, 1].</p></li>
+<li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Take the log of the colour to a base. ‘e’ if log = ‘e’, and a number e.g. log = 10.
+Values in c that are &lt;= 0 are masked.</p></li>
+<li><p><strong>equalize</strong> (<em>bool</em><em>, </em><em>optional</em>) – Equalize the histogram of the colourmap so that all colours have an equal amount.</p></li>
+<li><p><strong>nbins</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of bins to use for histogram equalization.</p></li>
+<li><p><strong>xscale</strong> (<em>str</em><em>, </em><em>optional</em>) – Scale the x axis? e.g. xscale = ‘linear’ or ‘log’</p></li>
+<li><p><strong>flipX</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flip the X axis</p></li>
+<li><p><strong>flipY</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flip the Y axis</p></li>
+<li><p><strong>grid</strong> (<em>bool</em><em>, </em><em>optional</em>) – Plot the grid</p></li>
+<li><p><strong>noColorbar</strong> (<em>bool</em><em>, </em><em>optional</em>) – Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.</p></li>
+<li><p><strong>trim</strong> (<em>array_like</em><em>, </em><em>optional</em>) – Set the x and y limits to the first and last locations that don’t equal the values in trim.</p></li>
+<li><p><strong>classes</strong> (<em>dict</em><em>, </em><em>optional</em>) – A dictionary containing three entries.
+classes[‘id’] : array_like of same shape as self containing the class id of each element in self.
+classes[‘cmaps’] : list of matplotlib colourmaps.  The number of colourmaps should equal the number of classes.
+classes[‘labels’] : list of str.  The length should equal the number of classes.
+If classes is provided, alpha is ignored if provided.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -368,7 +465,7 @@ Can take any other matplotlib arguments and keyword arguments e.g. markersize et
 <li><p><strong>x</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – Horizontal locations of the points to plot</p></li>
 <li><p><strong>c</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – Colour values of the points</p></li>
 <li><p><strong>y</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a><em>, </em><em>optional</em>) – Vertical locations of the points to plot, if y = None, then y = c.</p></li>
-<li><p><strong>i</strong> (<em>sequence of ints</em><em> or </em><em>numpy.slice</em><em>, </em><em>optional</em>) – Plot a subset of x, y, c, using the indices in i.</p></li>
+<li><p><strong>i</strong> (<em>sequence</em><em> of </em><em>ints</em><em> or </em><em>numpy.slice</em><em>, </em><em>optional</em>) – Plot a geobipy_kwargs of x, y, c, using the indices in i.</p></li>
 <li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Take the log of the colour to base ‘e’ if log = ‘e’, and a number e.g. log = 10.
 Values in c that are &lt;= 0 are masked.</p></li>
 <li><p><strong>equalize</strong> (<em>bool</em><em>, </em><em>optional</em>) – Equalize the histogram of the colourmap so that all colours have an equal amount.</p></li>
@@ -376,7 +473,7 @@ Values in c that are &lt;= 0 are masked.</p></li>
 <li><p><strong>xscale</strong> (<em>str</em><em>, </em><em>optional</em>) – Scale the x axis? e.g. xscale = ‘linear’ or ‘log’</p></li>
 <li><p><strong>flipX</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flip the X axis</p></li>
 <li><p><strong>flipY</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flip the Y axis</p></li>
-<li><p><strong>noColorBar</strong> (<em>bool</em><em>, </em><em>optional</em>) – Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.</p></li>
+<li><p><strong>noColorbar</strong> (<em>bool</em><em>, </em><em>optional</em>) – Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -434,8 +531,8 @@ Values in c that are &lt;= 0 are masked.</p></li>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – The abcissa.</p></li>
 <li><p><strong>y</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a><em>, </em><em>2D</em>) – The cumulative sum along the columns is taken and stacked on top of each other.</p></li>
-<li><p><strong>labels</strong> (<em>list of str</em><em>, </em><em>optional</em>) – The labels to assign to each column.</p></li>
-<li><p><strong>colors</strong> (<em>matplotlib.colors.LinearSegmentedColormap</em><em> or </em><em>list of colours</em>) – The colour used for each column.</p></li>
+<li><p><strong>labels</strong> (<em>list</em><em> of </em><em>str</em><em>, </em><em>optional</em>) – The labels to assign to each column.</p></li>
+<li><p><strong>colors</strong> (<em>matplotlib.colors.LinearSegmentedColormap</em><em> or </em><em>list</em><em> of </em><em>colours</em>) – The colour used for each column.</p></li>
 <li><p><strong>xscale</strong> (<em>str</em><em>, </em><em>optional</em>) – Scale the x axis? e.g. xscale = ‘linear’ or ‘log’.</p></li>
 </ul>
 </dd>
@@ -495,6 +592,40 @@ Values in c that are &lt;= 0 are masked.</p></li>
 <dd class="field-odd"><p><strong>label</strong> (<em>str</em>) – The title.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geobipy.src.base.plotting.vlines">
+<span class="sig-prename descclassname"><span class="pre">geobipy.src.base.plotting.</span></span><span class="sig-name descname"><span class="pre">vlines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.plotting.vlines" title="Permalink to this definition"></a></dt>
+<dd><p>Plot y against x</p>
+<p>If x and y are StatArrays, the axes are automatically labelled.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – The abcissa</p></li>
+<li><p><strong>y</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – The ordinate, can be upto 2 dimensions.</p></li>
+<li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Take the log of the colour to a base. ‘e’ if log = ‘e’, and a number e.g. log = 10.
+Values in c that are &lt;= 0 are masked.</p></li>
+<li><p><strong>xscale</strong> (<em>str</em><em>, </em><em>optional</em>) – Scale the x axis? e.g. xscale = ‘linear’ or ‘log’.</p></li>
+<li><p><strong>flipX</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flip the X axis</p></li>
+<li><p><strong>flipY</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flip the Y axis</p></li>
+<li><p><strong>labels</strong> (<em>bool</em><em>, </em><em>optional</em>) – Plot the labels? Default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>matplotlib.Axes</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ax</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.pyplot.plot</span></code></dt><dd><p>For additional keyword arguments you may use.</p>
+</dd>
+</dl>
+</div>
 </dd></dl>
 
 <dl class="py function">

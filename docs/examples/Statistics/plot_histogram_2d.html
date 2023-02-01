@@ -19,7 +19,9 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -50,19 +52,29 @@
 <li class="toctree-l1"><a class="reference internal" href="../../content/api/api.html">API</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../index.html#distribtions">Distribtions</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../index.html#statistics">Statistics</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="plot_histogram_1d.html">Histogram 1D</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Histogram 2D</a></li>
-<li class="toctree-l3"><a class="reference internal" href="plot_histogram_3d.html">Histogram 3D</a></li>
-<li class="toctree-l3"><a class="reference internal" href="plot_StatArray.html">StatArray Class</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#statistics">Statistics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#meshes">Meshes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#data">Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#datapoints">Datapoints</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#inference">Inference</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../index.html#hdf-5">HDF 5</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#hdf-5">HDF 5</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../Distributions/index.html">Distribtions</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Statistics</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="plot_histogram_1d.html">Histogram 1D</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Histogram 2D</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_histogram_3d.html">Histogram 3D</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_StatArray.html">StatArray Class</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../Meshes/index.html">Meshes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Models/index.html">Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Data/index.html">Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Datapoints/index.html">Datapoints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../Inference/index.html">Inference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../HDF5/index.html">HDF 5</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -80,9 +92,10 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../index.html">Examples</a> &raquo;</li>
-      <li>Histogram 2D</li>
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Examples</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Statistics</a></li>
+      <li class="breadcrumb-item active">Histogram 2D</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../_sources/examples/Statistics/plot_histogram_2d.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -98,41 +111,74 @@
 to download the full example code</p>
 </div>
 <section class="sphx-glr-example-title" id="histogram-2d">
-<span id="sphx-glr-examples-statistics-plot-histogram-2d-py"></span><h1>Histogram 2D<a class="headerlink" href="#histogram-2d" title="Permalink to this headline"></a></h1>
+<span id="sphx-glr-examples-statistics-plot-histogram-2d-py"></span><h1>Histogram 2D<a class="headerlink" href="#histogram-2d" title="Permalink to this heading"></a></h1>
 <p>This 2D histogram class allows efficient updating of histograms, plotting and
 saving as HDF5.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">geobipy</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">geobipy</span>
 <span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">StatArray</span>
-<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">Histogram2D</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">Histogram</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">matplotlib.gridspec</span> <span class="k">as</span> <span class="nn">gridspec</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">RectilinearMesh2D</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 </pre></div>
 </div>
 <p>Create some histogram bins in x and y</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="s1">&#39;Variable 1&#39;</span><span class="p">)</span>
 <span class="n">y</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">105</span><span class="p">),</span> <span class="s1">&#39;Variable 2&#39;</span><span class="p">)</span>
+
+<span class="n">mesh</span> <span class="o">=</span> <span class="n">RectilinearMesh2D</span><span class="p">(</span><span class="n">x_edges</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y_edges</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Instantiate</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">H</span> <span class="o">=</span> <span class="n">Histogram2D</span><span class="p">(</span><span class="n">xEdges</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">yEdges</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">H</span> <span class="o">=</span> <span class="n">Histogram</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Generate some random numbers</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1000000</span><span class="p">)</span>
 <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1000000</span><span class="p">)</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>Update the histogram counts</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">H</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">H</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">131</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;2D Histogram&quot;</span><span class="p">)</span>
-<span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">132</span><span class="p">)</span>
+<span class="n">H</span><span class="o">.</span><span class="n">pdf</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">133</span><span class="p">)</span>
+<span class="n">H</span><span class="o">.</span><span class="n">pmf</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">)</span>
+
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">131</span><span class="p">)</span>
+<span class="n">H</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">132</span><span class="p">)</span>
+<span class="n">H</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">133</span><span class="p">)</span>
+<span class="n">H</span><span class="o">.</span><span class="n">cdf</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_histogram_2d_001.png" srcset="../../_images/sphx_glr_plot_histogram_2d_001.png" alt="2D Histogram" class = "sphx-glr-single-img"/><p>Generate marginal histograms along an axis</p>
+<ul class="sphx-glr-horizontal">
+<li><img src="../../_images/sphx_glr_plot_histogram_2d_001.png" srcset="../../_images/sphx_glr_plot_histogram_2d_001.png" alt="2D Histogram" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../_images/sphx_glr_plot_histogram_2d_002.png" srcset="../../_images/sphx_glr_plot_histogram_2d_002.png" alt="plot histogram 2d" class = "sphx-glr-multi-img"/></li>
+</ul>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;AxesSubplot: xlabel=&#39;Variable 1&#39;, ylabel=&#39;Variable 2&#39;&gt;, &lt;matplotlib.collections.QuadMesh object at 0x7ff5b107b370&gt;, &lt;matplotlib.colorbar.Colorbar object at 0x7ff5b107a0e0&gt;)
+</pre></div>
+</div>
+<p>We can overlay the histogram with its credible intervals</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;90</span><span class="si">% c</span><span class="s2">redible intervals overlain&quot;</span><span class="p">)</span>
+<span class="n">H</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">)</span>
+<span class="n">H</span><span class="o">.</span><span class="n">plotCredibleIntervals</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">percent</span><span class="o">=</span><span class="mf">95.0</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">plotCredibleIntervals</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">percent</span><span class="o">=</span><span class="mf">95.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_histogram_2d_003.png" srcset="../../_images/sphx_glr_plot_histogram_2d_003.png" alt="90% credible intervals overlain" class = "sphx-glr-single-img"/><p>Generate marginal histograms along an axis</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">h1</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">marginalize</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">h2</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">marginalize</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
@@ -146,21 +192,28 @@ saving as HDF5.</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">h2</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_histogram_2d_002.png" srcset="../../_images/sphx_glr_plot_histogram_2d_002.png" alt="Marginals along each axis" class = "sphx-glr-single-img"/><p>Create a combination plot with marginal histograms.
+<img src="../../_images/sphx_glr_plot_histogram_2d_004.png" srcset="../../_images/sphx_glr_plot_histogram_2d_004.png" alt="Marginals along each axis" class = "sphx-glr-single-img"/><p>Create a combination plot with marginal histograms.
 sphinx_gallery_thumbnail_number = 3</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">comboPlot</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">)</span>
+<span class="n">gs</span> <span class="o">=</span> <span class="n">gridspec</span><span class="o">.</span><span class="n">GridSpec</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="n">gs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">wspace</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="p">[</span><span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="p">:</span><span class="mi">4</span><span class="p">])]</span>
+<span class="n">H</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">colorbar</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[:</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="mi">4</span><span class="p">]))</span>
+<span class="n">h</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">marginalize</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">([]);</span> <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">([])</span>
+<span class="n">ax</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">&quot;left&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">4</span><span class="p">:]))</span>
+<span class="n">h</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">marginalize</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">transpose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">([]);</span> <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">([])</span>
+<span class="n">ax</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">&quot;bottom&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_histogram_2d_003.png" srcset="../../_images/sphx_glr_plot_histogram_2d_003.png" alt="plot histogram 2d" class = "sphx-glr-single-img"/><p>We can overlay the histogram with its credible intervals</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;90</span><span class="si">% c</span><span class="s2">redible intervals overlain&quot;</span><span class="p">)</span>
-<span class="n">H</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">)</span>
-<span class="n">H</span><span class="o">.</span><span class="n">plotCredibleIntervals</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">percent</span><span class="o">=</span><span class="mf">95.0</span><span class="p">)</span>
-<span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">plotCredibleIntervals</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">percent</span><span class="o">=</span><span class="mf">95.0</span><span class="p">)</span>
-</pre></div>
-</div>
-<img src="../../_images/sphx_glr_plot_histogram_2d_004.png" srcset="../../_images/sphx_glr_plot_histogram_2d_004.png" alt="90% credible intervals overlain" class = "sphx-glr-single-img"/><p>Take the mean or median estimates from the histogram</p>
+<img src="../../_images/sphx_glr_plot_histogram_2d_005.png" srcset="../../_images/sphx_glr_plot_histogram_2d_005.png" alt="plot histogram 2d" class = "sphx-glr-single-img"/><p>Take the mean or median estimates from the histogram</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mean</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
 <span class="n">median</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
 </pre></div>
@@ -168,163 +221,232 @@ sphinx_gallery_thumbnail_number = 3</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">9.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Mean, median, and credible interval overlain&quot;</span><span class="p">)</span>
 <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">)</span>
-<span class="n">H</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">,</span> <span class="n">noColorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">H</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">H</span><span class="o">.</span><span class="n">plotCredibleIntervals</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">H</span><span class="o">.</span><span class="n">plotMedian</span><span class="p">()</span>
-<span class="n">H</span><span class="o">.</span><span class="n">plotMean</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+<span class="n">H</span><span class="o">.</span><span class="n">plotMedian</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">)</span>
+<span class="n">H</span><span class="o">.</span><span class="n">plotMean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
-<span class="n">H</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">,</span> <span class="n">noColorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">H</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">H</span><span class="o">.</span><span class="n">plotCredibleIntervals</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">H</span><span class="o">.</span><span class="n">plotMedian</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">H</span><span class="o">.</span><span class="n">plotMedian</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">)</span>
 <span class="n">H</span><span class="o">.</span><span class="n">plotMean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_histogram_2d_005.png" srcset="../../_images/sphx_glr_plot_histogram_2d_005.png" alt="Mean, median, and credible interval overlain" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend object at 0x7fe8c1b80bb0&gt;
+<img src="../../_images/sphx_glr_plot_histogram_2d_006.png" srcset="../../_images/sphx_glr_plot_histogram_2d_006.png" alt="Mean, median, and credible interval overlain" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend object at 0x7ff5a3467fd0&gt;
 </pre></div>
 </div>
 <p>Get the range between credible intervals</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">H</span><span class="o">.</span><span class="n">credibleRange</span><span class="p">(</span><span class="n">percent</span><span class="o">=</span><span class="mf">95.0</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">H</span><span class="o">.</span><span class="n">credible_range</span><span class="p">(</span><span class="n">percent</span><span class="o">=</span><span class="mf">95.0</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>StatArray([[-3.23232323],
-           [-3.47474747],
-           [-3.55555556],
-           [-3.55555556],
-           [-3.63636364],
-           [-2.58585859],
-           [-3.95959596],
-           [-3.95959596],
-           [-3.7979798 ],
-           [-3.95959596],
-           [-4.04040404],
-           [-4.36363636],
-           [-3.7979798 ],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.71717172],
-           [-3.87878788],
-           [-3.87878788],
-           [-4.04040404],
-           [-3.95959596],
-           [-3.87878788],
-           [-4.04040404],
-           [-4.04040404],
-           [-3.95959596],
-           [-3.87878788],
-           [-3.95959596],
-           [-3.87878788],
-           [-4.04040404],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.95959596],
-           [-3.95959596],
-           [-3.87878788],
-           [-3.95959596],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.95959596],
-           [-3.95959596],
-           [-3.87878788],
-           [-3.95959596],
-           [-3.95959596],
-           [-3.87878788],
-           [-3.95959596],
-           [-3.95959596],
-           [-3.87878788],
-           [-3.87878788],
-           [-4.04040404],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.95959596],
-           [-3.95959596],
-           [-3.95959596],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.95959596],
-           [-3.95959596],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.95959596],
-           [-3.95959596],
-           [-4.04040404],
-           [-3.87878788],
-           [-3.95959596],
-           [-4.04040404],
-           [-3.87878788],
-           [-4.04040404],
-           [-3.87878788],
-           [-3.7979798 ],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-4.04040404],
-           [-3.87878788],
-           [-3.87878788],
-           [-3.87878788],
-           [-4.12121212],
-           [-3.7979798 ],
-           [-3.47474747],
-           [-3.7979798 ],
-           [-3.63636364],
-           [-3.63636364],
-           [-4.2020202 ],
-           [-3.31313131],
-           [-4.04040404],
-           [-3.87878788],
-           [-4.12121212],
-           [-4.44444444],
-           [-3.7979798 ],
-           [-3.55555556],
-           [-4.44444444],
-           [-3.87878788]])
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>StatArray([3.71717172, 1.85858586, 3.31313131, ..., 3.7979798 ,
+           3.31313131, 3.95959596])
 </pre></div>
 </div>
 <p>We can map the credible range to an opacity or transparency</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">H</span><span class="o">.</span><span class="n">opacity</span><span class="p">()</span>
 <span class="n">H</span><span class="o">.</span><span class="n">transparency</span><span class="p">()</span>
 
+<span class="c1"># H.animate(0, &#39;test.mp4&#39;)</span>
 
 <span class="kn">import</span> <span class="nn">h5py</span>
 <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;h2d.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">H</span><span class="o">.</span><span class="n">toHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;h2d&#39;</span><span class="p">)</span>
 
 <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;h2d.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-    <span class="n">H1</span> <span class="o">=</span> <span class="n">Histogram2D</span><span class="o">.</span><span class="n">fromHdf</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;h2d&#39;</span><span class="p">])</span>
+    <span class="n">H1</span> <span class="o">=</span> <span class="n">Histogram</span><span class="o">.</span><span class="n">fromHdf</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;h2d&#39;</span><span class="p">])</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">)</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="mf">5.0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="s1">&#39;Variable 1&#39;</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="mf">10.0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">105</span><span class="p">),</span> <span class="s1">&#39;Variable 2&#39;</span><span class="p">)</span>
+
+<span class="n">mesh</span> <span class="o">=</span> <span class="n">RectilinearMesh2D</span><span class="p">(</span><span class="n">x_edges</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">x_relative_to</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">y_edges</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">y_relative_to</span><span class="o">=</span><span class="mf">10.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Instantiate</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">H</span> <span class="o">=</span> <span class="n">Histogram</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Generate some random numbers</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1000000</span><span class="p">)</span> <span class="o">+</span> <span class="mf">5.0</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1000000</span><span class="p">)</span> <span class="o">+</span> <span class="mf">10.0</span>
+</pre></div>
+</div>
+<p>Update the histogram counts</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">H</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">131</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;2D Histogram&quot;</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">132</span><span class="p">)</span>
+<span class="n">H</span><span class="o">.</span><span class="n">pdf</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">133</span><span class="p">)</span>
+<span class="n">H</span><span class="o">.</span><span class="n">pmf</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">131</span><span class="p">)</span>
+<span class="n">H</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">132</span><span class="p">)</span>
+<span class="n">H</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">133</span><span class="p">)</span>
+<span class="n">H</span><span class="o">.</span><span class="n">cdf</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><img src="../../_images/sphx_glr_plot_histogram_2d_007.png" srcset="../../_images/sphx_glr_plot_histogram_2d_007.png" alt="2D Histogram" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../_images/sphx_glr_plot_histogram_2d_008.png" srcset="../../_images/sphx_glr_plot_histogram_2d_008.png" alt="plot histogram 2d" class = "sphx-glr-multi-img"/></li>
+</ul>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;AxesSubplot: xlabel=&#39;Variable 1&#39;, ylabel=&#39;Variable 2&#39;&gt;, &lt;matplotlib.collections.QuadMesh object at 0x7ff593d72c50&gt;, &lt;matplotlib.colorbar.Colorbar object at 0x7ff593d73100&gt;)
+</pre></div>
+</div>
+<p>We can overlay the histogram with its credible intervals</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;90</span><span class="si">% c</span><span class="s2">redible intervals overlain&quot;</span><span class="p">)</span>
+<span class="n">H</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">)</span>
+<span class="n">H</span><span class="o">.</span><span class="n">plotCredibleIntervals</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">percent</span><span class="o">=</span><span class="mf">95.0</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">plotCredibleIntervals</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">percent</span><span class="o">=</span><span class="mf">95.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_histogram_2d_009.png" srcset="../../_images/sphx_glr_plot_histogram_2d_009.png" alt="90% credible intervals overlain" class = "sphx-glr-single-img"/><p>Generate marginal histograms along an axis</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">h1</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">marginalize</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">h2</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">marginalize</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note that the names of the variables are automatically displayed</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Marginals along each axis&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">)</span>
+<span class="n">h1</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">h2</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_histogram_2d_010.png" srcset="../../_images/sphx_glr_plot_histogram_2d_010.png" alt="Marginals along each axis" class = "sphx-glr-single-img"/><p>Create a combination plot with marginal histograms.
+sphinx_gallery_thumbnail_number = 3</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">gs</span> <span class="o">=</span> <span class="n">gridspec</span><span class="o">.</span><span class="n">GridSpec</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="n">gs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">wspace</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="p">[</span><span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="p">:</span><span class="mi">4</span><span class="p">])]</span>
+<span class="n">H</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">colorbar</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[:</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="mi">4</span><span class="p">]))</span>
+<span class="n">h</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">marginalize</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">([]);</span> <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">([])</span>
+<span class="n">ax</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">&quot;left&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">4</span><span class="p">:]))</span>
+<span class="n">h</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">marginalize</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">transpose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">([]);</span> <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">([])</span>
+<span class="n">ax</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">&quot;bottom&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_histogram_2d_011.png" srcset="../../_images/sphx_glr_plot_histogram_2d_011.png" alt="plot histogram 2d" class = "sphx-glr-single-img"/><p>Take the mean or median estimates from the histogram</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mean</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="n">median</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">9.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Mean, median, and credible interval overlain&quot;</span><span class="p">)</span>
 <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">)</span>
-<span class="n">H1</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">intervalStatistic</span><span class="p">([</span><span class="o">-</span><span class="mf">4.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">],</span> <span class="n">statistic</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">H1</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">,</span> <span class="n">equalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">noColorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">H1</span><span class="o">.</span><span class="n">plotCredibleIntervals</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">H</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">H</span><span class="o">.</span><span class="n">plotCredibleIntervals</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">H</span><span class="o">.</span><span class="n">plotMedian</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">)</span>
+<span class="n">H</span><span class="o">.</span><span class="n">plotMean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
-<span class="n">H1</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">intervalStatistic</span><span class="p">([</span><span class="o">-</span><span class="mf">4.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">],</span> <span class="n">statistic</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">H1</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">,</span> <span class="n">equalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">noColorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">H</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">H</span><span class="o">.</span><span class="n">plotCredibleIntervals</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">H</span><span class="o">.</span><span class="n">plotMedian</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">)</span>
+<span class="n">H</span><span class="o">.</span><span class="n">plotMean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_histogram_2d_012.png" srcset="../../_images/sphx_glr_plot_histogram_2d_012.png" alt="Mean, median, and credible interval overlain" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend object at 0x7ff5a32622c0&gt;
+</pre></div>
+</div>
+<p>Get the range between credible intervals</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">H</span><span class="o">.</span><span class="n">credible_range</span><span class="p">(</span><span class="n">percent</span><span class="o">=</span><span class="mf">95.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>StatArray([4.28282828, 2.82828283, 3.71717172, ..., 4.2020202 ,
+           3.55555556, 3.55555556])
+</pre></div>
+</div>
+<p>We can map the credible range to an opacity or transparency</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">H</span><span class="o">.</span><span class="n">opacity</span><span class="p">()</span>
+<span class="n">H</span><span class="o">.</span><span class="n">transparency</span><span class="p">()</span>
+
+<span class="c1"># # H.animate(0, &#39;test.mp4&#39;)</span>
+
+<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;h2d.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">H</span><span class="o">.</span><span class="n">toHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;h2d&#39;</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;h2d.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">H1</span> <span class="o">=</span> <span class="n">Histogram</span><span class="o">.</span><span class="n">fromHdf</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;h2d&#39;</span><span class="p">])</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">9.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Mean, median, and credible interval overlain&quot;</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">)</span>
+<span class="n">H1</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">H1</span><span class="o">.</span><span class="n">plotCredibleIntervals</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">H1</span><span class="o">.</span><span class="n">plotMedian</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">)</span>
+<span class="n">H1</span><span class="o">.</span><span class="n">plotMean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">H1</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">H1</span><span class="o">.</span><span class="n">plotCredibleIntervals</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">H1</span><span class="o">.</span><span class="n">plotMedian</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">)</span>
+<span class="n">H1</span><span class="o">.</span><span class="n">plotMean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;h2d.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">H</span><span class="o">.</span><span class="n">createHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;h2d&#39;</span><span class="p">,</span> <span class="n">add_axis</span><span class="o">=</span><span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">3.0</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Easting&#39;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;m&quot;</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+        <span class="n">H</span><span class="o">.</span><span class="n">writeHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;h2d&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;h2d.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">H1</span> <span class="o">=</span> <span class="n">Histogram</span><span class="o">.</span><span class="n">fromHdf</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;h2d&#39;</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">9.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Mean, median, and credible interval overlain&quot;</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">)</span>
+<span class="n">H1</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">H1</span><span class="o">.</span><span class="n">plotCredibleIntervals</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">H1</span><span class="o">.</span><span class="n">plotMedian</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">)</span>
+<span class="n">H1</span><span class="o">.</span><span class="n">plotMean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">H1</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">H1</span><span class="o">.</span><span class="n">plotCredibleIntervals</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">H1</span><span class="o">.</span><span class="n">plotMedian</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">)</span>
+<span class="n">H1</span><span class="o">.</span><span class="n">plotMean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;h2d.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">H1</span> <span class="o">=</span> <span class="n">Histogram</span><span class="o">.</span><span class="n">fromHdf</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;h2d&#39;</span><span class="p">])</span>
+
+<span class="n">H1</span><span class="o">.</span><span class="n">pyvista_mesh</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">&#39;h3d_read.vtk&#39;</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_histogram_2d_006.png" srcset="../../_images/sphx_glr_plot_histogram_2d_006.png" alt="plot histogram 2d" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  6.168 seconds)</p>
-<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-statistics-plot-histogram-2d-py">
+<ul class="sphx-glr-horizontal">
+<li><img src="../../_images/sphx_glr_plot_histogram_2d_013.png" srcset="../../_images/sphx_glr_plot_histogram_2d_013.png" alt="Mean, median, and credible interval overlain" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../_images/sphx_glr_plot_histogram_2d_014.png" srcset="../../_images/sphx_glr_plot_histogram_2d_014.png" alt="Mean, median, and credible interval overlain" class = "sphx-glr-multi-img"/></li>
+</ul>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  5.988 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-statistics-plot-histogram-2d-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/066a96b3e7333f9a789eb7e687c45875/plot_histogram_2d.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_histogram_2d.py</span></code></a></p>
 </div>

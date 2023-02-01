@@ -28,10 +28,10 @@ saving as HDF5
 
 .. code-block:: default
 
+    from geobipy.src.classes.mesh.RectilinearMesh1D import RectilinearMesh1D
     import h5py
-    from geobipy import hdfRead
     from geobipy import StatArray
-    from geobipy import Histogram1D
+    from geobipy import Histogram
     import numpy as np
     import matplotlib.pyplot as plt
 
@@ -53,7 +53,7 @@ Histogram with regular bins
 
 
     # Create regularly spaced bins
-    bins = StatArray(np.linspace(-3.0, 3.0, 101), 'Regular bins')
+    mesh = RectilinearMesh1D(edges=StatArray(np.linspace(-3.0, 3.0, 101), 'bins', 'm'))
 
 
 
@@ -62,33 +62,43 @@ Histogram with regular bins
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 25-29
+.. GENERATED FROM PYTHON SOURCE LINES 25-26
 
-.. code-block:: default
+Set the histogram using the bins, and update
 
-
-    # Set the histogram using the bins, and update
-    H = Histogram1D(edges = bins)
-
-
-
-
-
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 30-39
+.. GENERATED FROM PYTHON SOURCE LINES 26-28
 
 .. code-block:: default
 
+    H = Histogram(mesh=mesh)
 
-    # We can update the histogram with some new values
-    x = np.random.randn(1000)
-    H.update(x, clip=True, trim=True)
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 29-30
+
+We can update the histogram with some new values
+
+.. GENERATED FROM PYTHON SOURCE LINES 30-43
+
+.. code-block:: default
+
+    H.update(np.random.randn(1000), trim=True)
 
     # Plot the histogram
     plt.figure()
+    plt.subplot(221)
     _ = H.plot()
+    plt.subplot(222)
+    _ = H.pdf.bar()
+    plt.subplot(223)
+    H.pmf.bar()
+    plt.subplot(224)
+    H.cdf().bar()
 
 
 
@@ -99,41 +109,55 @@ Histogram with regular bins
    :class: sphx-glr-single-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+
+    <AxesSubplot: xlabel='bins (m)', ylabel='Cumulative Density Function'>
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 40-41
+.. GENERATED FROM PYTHON SOURCE LINES 44-45
 
 Get the median, and 95% confidence values
 
-.. GENERATED FROM PYTHON SOURCE LINES 41-44
+.. GENERATED FROM PYTHON SOURCE LINES 45-53
 
 .. code-block:: default
 
-    print(H.credibleIntervals(percent=95.0))
+    print(H.credible_intervals(percent=95.0))
+
+    plt.figure()
+    H.plot()
+    H.plotCredibleIntervals()
+    H.plotMean()
+    H.plotMedian()
 
 
 
 
+.. image-sg:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_002.png
+   :alt: plot histogram 1d
+   :srcset: /examples/Statistics/images/sphx_glr_plot_histogram_1d_002.png
+   :class: sphx-glr-single-img
 
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    (0.09000000000000008, -1.59, 1.5899999999999999)
+    (0.09000000000000008, -1.95, 1.71)
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 45-47
+.. GENERATED FROM PYTHON SOURCE LINES 54-56
 
 Histogram with irregular bins
 +++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 47-53
+.. GENERATED FROM PYTHON SOURCE LINES 56-61
 
 .. code-block:: default
 
@@ -149,16 +173,16 @@ Histogram with irregular bins
 
 
 
-
-.. GENERATED FROM PYTHON SOURCE LINES 54-55
+.. GENERATED FROM PYTHON SOURCE LINES 62-63
 
 Create a named StatArray
 
-.. GENERATED FROM PYTHON SOURCE LINES 55-58
+.. GENERATED FROM PYTHON SOURCE LINES 63-66
 
 .. code-block:: default
 
     edges = StatArray(irregularBins, 'irregular bins')
+    mesh = RectilinearMesh1D(edges = edges)
 
 
 
@@ -167,16 +191,15 @@ Create a named StatArray
 
 
 
-
-.. GENERATED FROM PYTHON SOURCE LINES 59-60
+.. GENERATED FROM PYTHON SOURCE LINES 67-68
 
 Instantiate the histogram with bin edges
 
-.. GENERATED FROM PYTHON SOURCE LINES 60-63
+.. GENERATED FROM PYTHON SOURCE LINES 68-70
 
 .. code-block:: default
 
-    H = Histogram1D(edges=edges)
+    H = Histogram(mesh=mesh)
 
 
 
@@ -185,34 +208,15 @@ Instantiate the histogram with bin edges
 
 
 
-
-.. GENERATED FROM PYTHON SOURCE LINES 64-65
-
-Generate random numbers
-
-.. GENERATED FROM PYTHON SOURCE LINES 65-68
-
-.. code-block:: default
-
-    x = (np.random.randn(10000)*20.0) - 10.0
-
-
-
-
-
-
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 69-70
+.. GENERATED FROM PYTHON SOURCE LINES 71-72
 
 Update the histogram
 
-.. GENERATED FROM PYTHON SOURCE LINES 70-73
+.. GENERATED FROM PYTHON SOURCE LINES 72-74
 
 .. code-block:: default
 
-    H.update(x)
+    H.update((np.random.randn(10000)*20.0) - 10.0)
 
 
 
@@ -221,33 +225,55 @@ Update the histogram
 
 
 
+.. GENERATED FROM PYTHON SOURCE LINES 75-76
 
-.. GENERATED FROM PYTHON SOURCE LINES 74-78
+Plot the histogram
+
+.. GENERATED FROM PYTHON SOURCE LINES 76-88
 
 .. code-block:: default
 
     plt.figure()
+    plt.subplot(211)
     _ = H.plot()
+    plt.subplot(212)
+    _ = H.plot(normalize=True)
+
+    plt.figure()
+    H.plot()
+    H.plotCredibleIntervals()
+    H.plotMean()
+    H.plotMedian()
+
+
+
+
+.. rst-class:: sphx-glr-horizontal
+
+
+    *
+
+      .. image-sg:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_003.png
+         :alt: plot histogram 1d
+         :srcset: /examples/Statistics/images/sphx_glr_plot_histogram_1d_003.png
+         :class: sphx-glr-multi-img
+
+    *
+
+      .. image-sg:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_004.png
+         :alt: plot histogram 1d
+         :srcset: /examples/Statistics/images/sphx_glr_plot_histogram_1d_004.png
+         :class: sphx-glr-multi-img
 
 
 
 
 
-.. image-sg:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_002.png
-   :alt: plot histogram 1d
-   :srcset: /examples/Statistics/images/sphx_glr_plot_histogram_1d_002.png
-   :class: sphx-glr-single-img
-
-
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 79-81
+.. GENERATED FROM PYTHON SOURCE LINES 89-90
 
 We can plot the histogram as a pcolor plot
-.
 
-.. GENERATED FROM PYTHON SOURCE LINES 81-85
+.. GENERATED FROM PYTHON SOURCE LINES 90-93
 
 .. code-block:: default
 
@@ -257,27 +283,26 @@ We can plot the histogram as a pcolor plot
 
 
 
-
-.. image-sg:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_003.png
+.. image-sg:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_005.png
    :alt: plot histogram 1d
-   :srcset: /examples/Statistics/images/sphx_glr_plot_histogram_1d_003.png
+   :srcset: /examples/Statistics/images/sphx_glr_plot_histogram_1d_005.png
    :class: sphx-glr-single-img
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 86-89
+.. GENERATED FROM PYTHON SOURCE LINES 94-97
 
 Histogram with linear space entries that are logged internally
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Create some bins spaced logarithmically
 
-.. GENERATED FROM PYTHON SOURCE LINES 89-91
+.. GENERATED FROM PYTHON SOURCE LINES 97-99
 
 .. code-block:: default
 
-    positiveBins = StatArray(np.logspace(-5, 3), 'positive bins')
+    mesh = RectilinearMesh1D(edges = StatArray(np.logspace(-5, 3), 'positive bins'), log=10)
 
 
 
@@ -286,48 +311,15 @@ Create some bins spaced logarithmically
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 92-94
-
-.. code-block:: default
-
-    print(positiveBins)
-
-
-
-
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-    [1.00000000e-05 1.45634848e-05 2.12095089e-05 3.08884360e-05
-     4.49843267e-05 6.55128557e-05 9.54095476e-05 1.38949549e-04
-     2.02358965e-04 2.94705170e-04 4.29193426e-04 6.25055193e-04
-     9.10298178e-04 1.32571137e-03 1.93069773e-03 2.81176870e-03
-     4.09491506e-03 5.96362332e-03 8.68511374e-03 1.26485522e-02
-     1.84206997e-02 2.68269580e-02 3.90693994e-02 5.68986603e-02
-     8.28642773e-02 1.20679264e-01 1.75751062e-01 2.55954792e-01
-     3.72759372e-01 5.42867544e-01 7.90604321e-01 1.15139540e+00
-     1.67683294e+00 2.44205309e+00 3.55648031e+00 5.17947468e+00
-     7.54312006e+00 1.09854114e+01 1.59985872e+01 2.32995181e+01
-     3.39322177e+01 4.94171336e+01 7.19685673e+01 1.04811313e+02
-     1.52641797e+02 2.22299648e+02 3.23745754e+02 4.71486636e+02
-     6.86648845e+02 1.00000000e+03]
-
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 95-96
+.. GENERATED FROM PYTHON SOURCE LINES 100-101
 
 Instantiate the Histogram with log=10
 
-.. GENERATED FROM PYTHON SOURCE LINES 96-98
+.. GENERATED FROM PYTHON SOURCE LINES 101-103
 
 .. code-block:: default
 
-    H = Histogram1D(edges=positiveBins, log=10)
+    H = Histogram(mesh)
 
 
 
@@ -336,32 +328,15 @@ Instantiate the Histogram with log=10
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 99-100
-
-Generate random 10**x numbers
-
-.. GENERATED FROM PYTHON SOURCE LINES 100-102
-
-.. code-block:: default
-
-    x = 10.0**(np.random.randn(1000)*2.0)
-
-
-
-
-
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 103-104
+.. GENERATED FROM PYTHON SOURCE LINES 104-105
 
 The update takes in the numbers in linear space and takes their log=10
 
-.. GENERATED FROM PYTHON SOURCE LINES 104-106
+.. GENERATED FROM PYTHON SOURCE LINES 105-107
 
 .. code-block:: default
 
-    H.update(x, trim=True)
+    H.update(10.0**(np.random.randn(1000)*2.0), trim=True)
 
 
 
@@ -370,7 +345,7 @@ The update takes in the numbers in linear space and takes their log=10
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 107-122
+.. GENERATED FROM PYTHON SOURCE LINES 108-123
 
 .. code-block:: default
 
@@ -378,24 +353,131 @@ The update takes in the numbers in linear space and takes their log=10
     plt.subplot(211)
     _ = H.plot()
 
-
     import h5py
     with h5py.File('h1d.h5', 'w') as f:
         H.toHdf(f, 'h1d')
 
     with h5py.File('h1d.h5', 'r') as f:
-        H1 = Histogram1D.fromHdf(f['h1d'])
+        H1 = Histogram.fromHdf(f['h1d'])
 
     plt.subplot(212)
     _ = H1.plot()
 
+
+
+
+
+.. image-sg:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_006.png
+   :alt: plot histogram 1d
+   :srcset: /examples/Statistics/images/sphx_glr_plot_histogram_1d_006.png
+   :class: sphx-glr-single-img
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 124-125
+
+.. code-block:: default
+
+    mesh = RectilinearMesh1D(edges=StatArray(np.linspace(-3.0, 3.0, 101), 'bins', 'm'))
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 126-127
+
+Set the histogram using the bins, and update
+
+.. GENERATED FROM PYTHON SOURCE LINES 127-129
+
+.. code-block:: default
+
+    H = Histogram(mesh=mesh)
+
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 130-131
+
+We can update the histogram with some new values
+
+.. GENERATED FROM PYTHON SOURCE LINES 131-157
+
+.. code-block:: default
+
+    H.update(np.random.randn(1000), trim=True)
+
+    import h5py
+    with h5py.File('h1d.h5', 'w') as f:
+        H.createHdf(f, 'h1d', add_axis=StatArray(np.arange(3.0), "Name", "Units"))
+        H.writeHdf(f, 'h1d', index=0)
+        H.update(np.random.randn(1000), trim=True)
+        H.writeHdf(f, 'h1d', index=1)
+        H.update(np.random.randn(1000), trim=True)
+        H.writeHdf(f, 'h1d', index=2)
+
+    with h5py.File('h1d.h5', 'r') as f:
+        H1 = Histogram.fromHdf(f['h1d'])
+        H2 = Histogram.fromHdf(f['h1d'], index=0)
+        H3 = Histogram.fromHdf(f['h1d'], index=1)
+        H4 = Histogram.fromHdf(f['h1d'], index=2)
+
+
+    print(H4.summary)
+
+    # plt.figure()
+    # plt.subplot(211)
+    # _ = H1.plot()
+    # plt.subplot(212)
+    # _ = H4.plot()
+
     plt.show()
 
 
-.. image-sg:: /examples/Statistics/images/sphx_glr_plot_histogram_1d_004.png
-   :alt: plot histogram 1d
-   :srcset: /examples/Statistics/images/sphx_glr_plot_histogram_1d_004.png
-   :class: sphx-glr-single-img
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    Histogram:
+    mesh:
+    |   RectilinearMesh1D
+    |   Number of Cells:
+    |   |   100
+    |   Cell Centres:
+    |   |   Name: bins (m) 0x7ff592df8940
+    |   |   Shape: (100,)
+    |   |   Values: [-2.97 -2.91 -2.85 ...  2.85  2.91  2.97]
+    |   |   min: -2.9699999999999998
+    |   |   max: 2.9699999999999998
+    |   Cell Edges:
+    |   |   Name: bins (m) 0x7ff592df8dc0
+    |   |    Shape: (101,)
+    |   |    Values: [-3.   -2.94 -2.88 ...  2.88  2.94  3.  ]
+    |   |    min: -3.0
+    |   |    max: 3.0
+    |   log:
+    |   |   None
+    |   relativeTo:
+    |   |   Name:  0x7ff592dad0c0
+    |   |    Shape: (1,)
+    |   |    Values: [0.]
+    |   |    min: 0.0
+    |   |    max: 0.0
+    |values:
+    |   Name: Frequency 0x7ff592df8b40
+    |   Shape: (100,)
+    |   Values: [1 0 1 ... 1 1 0]
+    |   min: 0
+    |   max: 82
 
 
 
@@ -404,28 +486,23 @@ The update takes in the numbers in linear space and takes their log=10
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.215 seconds)
+   **Total running time of the script:** ( 0 minutes  1.342 seconds)
 
 
 .. _sphx_glr_download_examples_Statistics_plot_histogram_1d.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: plot_histogram_1d.py <plot_histogram_1d.py>`
 
-     :download:`Download Python source code: plot_histogram_1d.py <plot_histogram_1d.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: plot_histogram_1d.ipynb <plot_histogram_1d.ipynb>`
+      :download:`Download Jupyter notebook: plot_histogram_1d.ipynb <plot_histogram_1d.ipynb>`
 
 
 .. only:: html

@@ -3,10 +3,13 @@
 -------------------
 """
 #%%
+from copy import deepcopy
 from geobipy import StatArray
-from geobipy import RectilinearMesh1D
+from geobipy import RectilinearMesh1D, RectilinearMesh2D, RectilinearMesh2D_stitched
+import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
+import h5py
 
 #%%
 # The basics
@@ -15,54 +18,56 @@ import numpy as np
 x = StatArray(np.cumsum(np.arange(0.0, 10.0)), 'Depth', 'm')
 
 ################################################################################
-# Cell widths
-rm = RectilinearMesh1D(widths=np.full(10, fill_value=50.0))
-
-################################################################################
-# Cell centres
-rm = RectilinearMesh1D(centres=x)
-
-################################################################################
 # Cell edges
-rm = RectilinearMesh1D(edges=x)
-
-################################################################################
-# Cell centres
-print(rm.centres)
-
-################################################################################
-# Cell edges
-print(rm.edges)
-
-################################################################################
-# Cell edges witout outermost edges
-print(rm.internaledges)
-
-################################################################################
-# Cell widths
-print(rm.widths)
-
-################################################################################
-# Get the cell indices
-print(rm.cellIndex(np.r_[1.0, 5.0, 20.0]))
+rm = RectilinearMesh1D(edges=x, centres=None, widths=None)
 
 ################################################################################
 # We can plot the grid of the mesh
-plt.figure()
-_ = rm.plotGrid(flip=True)
-
-################################################################################
 # Or Pcolor the mesh showing. An array of cell values is used as the colour.
-plt.figure()
-arr = StatArray(np.random.randn(rm.nCells.value), "Name", "Units")
-_ = rm.pcolor(arr, grid=True, flip=True)
+arr = StatArray(np.random.randn(*rm.shape), "Name", "Units")
+p=0; plt.figure(p)
+plt.subplot(121)
+_ = rm.plotGrid(transpose=True, flip=True)
+plt.subplot(122)
+_ = rm.pcolor(arr, grid=True, transpose=True, flip=True)
 
-################################################################################
+###############################################################################
 # Mask the mesh cells by a distance
 rm_masked, indices, arr2 = rm.mask_cells(2.0, values=arr)
-plt.figure()
-_ = rm_masked.pcolor(StatArray(arr2), grid=True, flip=True)
+p+=1; plt.figure(p)
+_ = rm_masked.pcolor(StatArray(arr2), grid=True, transpose=True, flip=True)
 
+# Writing and reading to/from HDF5
+# ++++++++++++++++++++++++++++++++
+with h5py.File('rm1d.h5', 'w') as f:
+    rm.toHdf(f, 'rm1d')
+
+with h5py.File('rm1d.h5', 'r') as f:
+    rm1 = RectilinearMesh1D.fromHdf(f['rm1d'])
+
+p+=1; plt.figure(p)
+plt.subplot(121)
+_ = rm.pcolor(StatArray(arr), grid=True, transpose=True, flip=True)
+plt.subplot(122)
+_ = rm1.pcolor(StatArray(arr), grid=True, transpose=True, flip=True)
+
+with h5py.File('rm1d.h5', 'w') as f:
+    rm.createHdf(f, 'rm1d', add_axis=10)
+    for i in range(10):
+        rm.writeHdf(f, 'rm1d', index=i)
+
+with h5py.File('rm1d.h5', 'r') as f:
+    rm1 = RectilinearMesh1D.fromHdf(f['rm1d'], index=0)
+with h5py.File('rm1d.h5', 'r') as f:
+    rm2 = RectilinearMesh2D.fromHdf(f['rm1d'])
+
+p+=1; plt.figure(p)
+plt.subplot(131)
+_ = rm.pcolor(StatArray(arr), grid=True, transpose=True, flip=True)
+plt.subplot(132)
+_ = rm1.pcolor(arr, grid=True, transpose=True, flip=True)
+plt.subplot(133)
+_ = rm2.pcolor(np.repeat(arr[None, :], 10, 0), grid=True, flipY=True)
 
 
 #%%
@@ -75,34 +80,108 @@ x = StatArray(np.logspace(-3, 3, 10), 'Depth', 'm')
 ################################################################################
 rm = RectilinearMesh1D(edges=x, log=10)
 
-################################################################################
+###############################################################################
 # We can plot the grid of the mesh
-plt.figure()
-_ = rm.plotGrid(flip=True)
-
-
-################################################################################
 # Or Pcolor the mesh showing. An array of cell values is used as the colour.
-plt.figure()
-arr = StatArray(np.random.randn(rm.nCells.value), "Name", "Units")
-_ = rm.pcolor(arr, grid=True, flip=True)
+p+=1; plt.figure(p)
+plt.subplot(121)
+_ = rm.plotGrid(transpose=True, flip=True)
+plt.subplot(122)
+arr = StatArray(np.random.randn(rm.nCells), "Name", "Units")
+_ = rm.pcolor(arr, grid=True, transpose=True, flip=True)
 
 # Writing and reading to/from HDF5
 # ++++++++++++++++++++++++++++++++
-
-import h5py
 with h5py.File('rm1d.h5', 'w') as f:
     rm.toHdf(f, 'rm1d')
 
 with h5py.File('rm1d.h5', 'r') as f:
     rm1 = RectilinearMesh1D.fromHdf(f['rm1d'])
 
+p+=1; plt.figure(p)
+plt.subplot(121)
+_ = rm.pcolor(StatArray(arr), grid=True, transpose=True, flip=True)
+plt.subplot(122)
+_ = rm1.pcolor(StatArray(arr), grid=True, transpose=True, flip=True)
+
+with h5py.File('rm1d.h5', 'w') as f:
+    rm.createHdf(f, 'rm1d', add_axis=10)
+    for i in range(10):
+        rm.writeHdf(f, 'rm1d', index=i)
+
+with h5py.File('rm1d.h5', 'r') as f:
+    rm1 = RectilinearMesh1D.fromHdf(f['rm1d'], index=0)
+with h5py.File('rm1d.h5', 'r') as f:
+    rm2 = RectilinearMesh2D.fromHdf(f['rm1d'])
+
+p+=1; plt.figure(p)
+plt.subplot(131)
+_ = rm.pcolor(StatArray(arr), grid=True, transpose=True, flip=True)
+plt.subplot(132)
+_ = rm1.pcolor(arr, grid=True, transpose=True, flip=True)
+plt.subplot(133)
+_ = rm2.pcolor(np.repeat(arr[None, :], 10, 0), grid=True, flipY=True)
+
+#%%
+# RelativeTo
+# ++++++++++
+# Instantiate a new 1D rectilinear mesh by specifying cell centres or edges.
+# Here we use edges
+x = StatArray(np.arange(11.0), 'Deviation', 'm')
+
+################################################################################
+rm = RectilinearMesh1D(edges=x, relativeTo=5.0)
+
+################################################################################
+# We can plot the grid of the mesh
+# Or Pcolor the mesh showing. An array of cell values is used as the colour.
+p+=1; plt.figure(p)
+plt.subplot(121)
+_ = rm.plotGrid(transpose=True, flip=True)
+plt.subplot(122)
+arr = StatArray(np.random.randn(rm.nCells), "Name", "Units")
+_ = rm.pcolor(arr, grid=True, transpose=True, flip=True)
+
+# Writing and reading to/from HDF5
+# ++++++++++++++++++++++++++++++++
+with h5py.File('rm1d.h5', 'w') as f:
+    rm.createHdf(f, 'rm1d')
+    rm.writeHdf(f, 'rm1d')
+
+with h5py.File('rm1d.h5', 'r') as f:
+    rm1 = RectilinearMesh1D.fromHdf(f['rm1d'])
+
+p+=1; plt.figure(p)
+plt.subplot(121)
+_ = rm.pcolor(StatArray(arr), grid=True, transpose=True, flip=True)
+plt.subplot(122)
+_ = rm1.pcolor(StatArray(arr), grid=True, transpose=True, flip=True)
+
+with h5py.File('rm1d.h5', 'w') as f:
+    rm.createHdf(f, 'rm1d', add_axis=3)
+    for i in range(3):
+        rm.relativeTo += 0.5
+        rm.writeHdf(f, 'rm1d', index=i)
+
+with h5py.File('rm1d.h5', 'r') as f:
+    rm1 = RectilinearMesh1D.fromHdf(f['rm1d'], index=0)
+with h5py.File('rm1d.h5', 'r') as f:
+    rm2 = RectilinearMesh2D.fromHdf(f['rm1d'])
+
+p+=1; plt.figure(p)
+plt.subplot(131)
+_ = rm.pcolor(StatArray(arr), grid=True, transpose=True, flip=True)
+plt.subplot(132)
+_ = rm1.pcolor(arr, grid=True, transpose=True, flip=True)
+plt.subplot(133)
+_ = rm2.pcolor(np.repeat(arr[None, :], 3, 0), grid=True, flipY=True)
+
 
 # Making a mesh perturbable
 # +++++++++++++++++++++++++
 n_cells = 2
 widths = StatArray(np.full(n_cells, fill_value=10.0), 'test')
-rm = RectilinearMesh1D(widths=widths)
+rm = RectilinearMesh1D(widths=widths, relativeTo=0.0)
 
 ################################################################################
 # Randomness and Model Perturbations
@@ -121,19 +200,16 @@ rm.set_priors(min_edge = 1.0,
 
 ################################################################################
 # We can evaluate the prior of the model using depths only
-print('Log probability of the Mesh given its priors: ', rm.priorProbability(log=True))
+print('Log probability of the Mesh given its priors: ', rm.probability)
 
 ################################################################################
 # To propose new meshes, we specify the probabilities of creating, removing, perturbing, and not changing
 # an edge interface
 # Here we force the creation of a layer.
 rm.set_proposals(probabilities = [0.25, 0.25, 0.25, 0.25], prng=prng)
-
 rm.set_posteriors()
 
-fig = plt.figure(figsize=(8,6))
-ax = plt.subplot(121)
-rm.plotGrid()
+rm0 = deepcopy(rm)
 
 ################################################################################
 # We can then perturb the layers of the model
@@ -142,21 +218,67 @@ for i in range(1000):
     rm.update_posteriors()
 
 ################################################################################
-ax = plt.subplot(122)
-rm.plotGrid()
+p+=1; fig = plt.figure(p)
+ax = rm._init_posterior_plots(fig)
 
-import matplotlib.gridspec as gridspec
-plt.figure()
-gs = gridspec.GridSpec(1, 1, figure=fig)
-ax = rm.init_posterior_plots(gs[0, 0])
 rm.plot_posteriors(axes=ax)
 
-import h5py
 with h5py.File('rm1d.h5', 'w') as f:
-    rm.toHdf(f, 'rm1d', withPosterior = True)
+    rm.createHdf(f, 'rm1d', withPosterior = True)
+    rm.writeHdf(f, 'rm1d', withPosterior = True)
 
 with h5py.File('rm1d.h5', 'r') as f:
     rm1 = RectilinearMesh1D.fromHdf(f['rm1d'])
 
+p+=1; plt.figure(p)
+plt.subplot(121)
+_ = rm.pcolor(StatArray(rm.shape), grid=True, transpose=True, flip=True)
+plt.subplot(122)
+_ = rm1.pcolor(StatArray(rm1.shape), grid=True, transpose=True, flip=True)
+
+p+=1; fig = plt.figure(p)
+ax = rm1._init_posterior_plots(fig)
+rm1.plot_posteriors(axes=ax)
+
+################################################################################
+# Expanded
+with h5py.File('rm1d.h5', 'w') as f:
+    tmp = rm.pad(rm.max_cells)
+    tmp.createHdf(f, 'rm1d', withPosterior=True, add_axis=StatArray(np.arange(3.0), name='Easting', units="m"))
+
+    rm.relativeTo = 5.0
+    rm.writeHdf(f, 'rm1d', withPosterior = True, index=0)
+
+    rm = deepcopy(rm0)
+    for i in range(1000):
+        rm = rm.perturb(); rm.update_posteriors()
+    rm.relativeTo = 10.0
+    rm.writeHdf(f, 'rm1d', withPosterior = True, index=1)
+
+    rm = deepcopy(rm0)
+    for i in range(1000):
+        rm = rm.perturb(); rm.update_posteriors()
+    rm.relativeTo = 25.0
+    rm.writeHdf(f, 'rm1d', withPosterior = True, index=2)
+
+with h5py.File('rm1d.h5', 'r') as f:
+    rm2 = RectilinearMesh2D.fromHdf(f['rm1d'])
+
+p+=1; plt.figure(p)
+plt.subplot(121)
+arr = np.random.randn(3, rm.max_cells) * 10
+_ = rm0.pcolor(arr[0, :rm0.nCells.item()], grid=True, transpose=True, flip=True)
+plt.subplot(122)
+_ = rm2.pcolor(arr, grid=True, flipY=True, equalize=True)
+
+from geobipy import RectilinearMesh2D
+with h5py.File('rm1d.h5', 'r') as f:
+    rm2 = RectilinearMesh2D.fromHdf(f['rm1d'], index=0)
+
+plt.figure()
+plt.subplot(121)
+rm2.plotGrid(transpose=True, flip=True)
+plt.subplot(122)
+rm2.edges.posterior.pcolor(transpose=True, flip=True)
 
 plt.show()

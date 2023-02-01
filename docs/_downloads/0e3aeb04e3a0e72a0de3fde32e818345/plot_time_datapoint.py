@@ -281,7 +281,7 @@ for i in range(1000):
 ################################################################################
 # Plot the posterior distributions
 plt.figure()
-_ = tdp.z.plotPosteriors()
+_ = tdp.z.plot_posteriors()
 
 ################################################################################
 # plt.figure()

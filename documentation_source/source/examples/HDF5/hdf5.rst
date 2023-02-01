@@ -164,23 +164,18 @@ Similarly, we can duplicate a 2D array with an extra 2D duplication
 
 .. _sphx_glr_download_examples_HDF5_hdf5.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: hdf5.py <hdf5.py>`
 
-     :download:`Download Python source code: hdf5.py <hdf5.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: hdf5.ipynb <hdf5.ipynb>`
+      :download:`Download Jupyter notebook: hdf5.ipynb <hdf5.ipynb>`
 
 
 .. only:: html

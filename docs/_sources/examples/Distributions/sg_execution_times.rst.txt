@@ -5,8 +5,8 @@
 
 Computation times
 =================
-**00:04.759** total execution time for **examples_Distributions** files:
+**00:02.987** total execution time for **examples_Distributions** files:
 
 +------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Distributions_plot_distributions.py` (``plot_distributions.py``) | 00:04.759 | 0.0 MB |
+| :ref:`sphx_glr_examples_Distributions_plot_distributions.py` (``plot_distributions.py``) | 00:02.987 | 0.0 MB |
 +------------------------------------------------------------------------------------------+-----------+--------+

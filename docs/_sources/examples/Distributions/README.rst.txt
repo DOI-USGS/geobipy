@@ -1,2 +1,2 @@
-Distribtions
-============
+Distributions
+=============

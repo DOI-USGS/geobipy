@@ -9,14 +9,12 @@ The direct extension to numpy maintains speed and functionality of numpy arrays.
 """
 #%%
 from geobipy import StatArray
-from geobipy import Histogram1D
 from geobipy import Histogram
 from geobipy import Distribution
 from geobipy.src.classes.mesh.RectilinearMesh1D import RectilinearMesh1D
 import numpy as np
 import matplotlib.pyplot as plt
 import h5py
-from geobipy import hdfRead
 
 plt.style.use('seaborn-pastel')
 
@@ -125,7 +123,7 @@ for i in range(1000):
     p = Density.probability(log=False)
 
     if p > 0.0: # This is a simple example!
-        Density.updatePosterior()
+        Density.update_posterior()
 
 ################################################################################
 plt.figure()
@@ -504,7 +502,7 @@ with h5py.File('1Dtest.h5','w') as f:
 # We can then read the StatArray from the file
 # Here x is a new variable, that is read in from the hdf5 file we just wrote.
 
-x = hdfRead.readKeyFromFiles('1Dtest.h5','/','test')
+x = StatArray.fromHdf('1Dtest.h5', 'test')
 print('x has the same values as Density? ',np.all(x == Density))
 x[2] = 5.0 # Change one of the values in x
 print('x has its own memory allocated (not a reference/pointer)? ', id(x) != id(Density))

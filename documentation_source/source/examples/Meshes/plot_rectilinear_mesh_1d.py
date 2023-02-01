@@ -69,6 +69,7 @@ _ = rm1.pcolor(arr, grid=True, transpose=True, flip=True)
 plt.subplot(133)
 _ = rm2.pcolor(np.repeat(arr[None, :], 10, 0), grid=True, flipY=True)
 
+
 #%%
 # Log-space rectilinear mesh
 # ++++++++++++++++++++++++++
@@ -107,7 +108,6 @@ with h5py.File('rm1d.h5', 'w') as f:
     rm.createHdf(f, 'rm1d', add_axis=10)
     for i in range(10):
         rm.writeHdf(f, 'rm1d', index=i)
-
 
 with h5py.File('rm1d.h5', 'r') as f:
     rm1 = RectilinearMesh1D.fromHdf(f['rm1d'], index=0)
@@ -158,8 +158,9 @@ plt.subplot(122)
 _ = rm1.pcolor(StatArray(arr), grid=True, transpose=True, flip=True)
 
 with h5py.File('rm1d.h5', 'w') as f:
-    rm.createHdf(f, 'rm1d', add_axis=10)
-    for i in range(10):
+    rm.createHdf(f, 'rm1d', add_axis=3)
+    for i in range(3):
+        rm.relativeTo += 0.5
         rm.writeHdf(f, 'rm1d', index=i)
 
 with h5py.File('rm1d.h5', 'r') as f:
@@ -173,7 +174,8 @@ _ = rm.pcolor(StatArray(arr), grid=True, transpose=True, flip=True)
 plt.subplot(132)
 _ = rm1.pcolor(arr, grid=True, transpose=True, flip=True)
 plt.subplot(133)
-_ = rm2.pcolor(np.repeat(arr[None, :], 10, 0), grid=True, flipY=True)
+_ = rm2.pcolor(np.repeat(arr[None, :], 3, 0), grid=True, flipY=True)
+
 
 # Making a mesh perturbable
 # +++++++++++++++++++++++++
@@ -198,7 +200,7 @@ rm.set_priors(min_edge = 1.0,
 
 ################################################################################
 # We can evaluate the prior of the model using depths only
-print('Log probability of the Mesh given its priors: ', rm.priorProbability(log=True))
+print('Log probability of the Mesh given its priors: ', rm.probability)
 
 ################################################################################
 # To propose new meshes, we specify the probabilities of creating, removing, perturbing, and not changing
@@ -217,7 +219,7 @@ for i in range(1000):
 
 ################################################################################
 p+=1; fig = plt.figure(p)
-ax = rm.init_posterior_plots(fig)
+ax = rm._init_posterior_plots(fig)
 
 rm.plot_posteriors(axes=ax)
 
@@ -225,7 +227,6 @@ with h5py.File('rm1d.h5', 'w') as f:
     rm.createHdf(f, 'rm1d', withPosterior = True)
     rm.writeHdf(f, 'rm1d', withPosterior = True)
 
-plt.close('all')
 with h5py.File('rm1d.h5', 'r') as f:
     rm1 = RectilinearMesh1D.fromHdf(f['rm1d'])
 
@@ -236,7 +237,7 @@ plt.subplot(122)
 _ = rm1.pcolor(StatArray(rm1.shape), grid=True, transpose=True, flip=True)
 
 p+=1; fig = plt.figure(p)
-ax = rm1.init_posterior_plots(fig)
+ax = rm1._init_posterior_plots(fig)
 rm1.plot_posteriors(axes=ax)
 
 ################################################################################
@@ -247,7 +248,7 @@ with h5py.File('rm1d.h5', 'w') as f:
 
     rm.relativeTo = 5.0
     rm.writeHdf(f, 'rm1d', withPosterior = True, index=0)
-    
+
     rm = deepcopy(rm0)
     for i in range(1000):
         rm = rm.perturb(); rm.update_posteriors()

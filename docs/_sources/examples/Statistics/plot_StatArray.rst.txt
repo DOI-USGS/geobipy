@@ -30,12 +30,12 @@ The direct extension to numpy maintains speed and functionality of numpy arrays.
 .. code-block:: default
 
     from geobipy import StatArray
-    from geobipy import Histogram1D
+    from geobipy import Histogram
     from geobipy import Distribution
+    from geobipy.src.classes.mesh.RectilinearMesh1D import RectilinearMesh1D
     import numpy as np
     import matplotlib.pyplot as plt
     import h5py
-    from geobipy import hdfRead
 
     plt.style.use('seaborn-pastel')
 
@@ -43,6 +43,13 @@ The direct extension to numpy maintains speed and functionality of numpy arrays.
 
 
 
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/documentation_source/source/examples/Statistics/plot_StatArray.py:19: MatplotlibDeprecationWarning: The seaborn styles shipped by Matplotlib are deprecated since 3.6, as they no longer correspond to the styles shipped by seaborn. However, they will remain available as 'seaborn-v0_8-<style>'. Alternatively, directly use the seaborn API instead.
+      plt.style.use('seaborn-pastel')
 
 
 
@@ -89,34 +96,44 @@ Instantiating a new StatArray class
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    Name: 1
-        Shape: (1,)
-        Values: [0.]
+    Name: 1 0x7ff592dfaec0
+    Shape: (1,)
+    Values: [0.]
+    min: 0.0
+    max: 0.0
 
-    Name: 10
-        Shape: (10,)
-        Values: [0. 0. 0. ... 0. 0. 0.]
+    Name: 10 0x7ff592dfac40
+    Shape: (10,)
+    Values: [0. 0. 0. ... 0. 0. 0.]
+    min: 0.0
+    max: 0.0
 
-    Name: (2, 10)
-        Shape: (2, 10)
-        Values: [[0. 0. 0. ... 0. 0. 0.]
+    Name: (2, 10) 0x7ff592dfaec0
+    Shape: (2, 10)
+    Values: [[0. 0. 0. ... 0. 0. 0.]
      [0. 0. 0. ... 0. 0. 0.]]
+    min: 0.0
+    max: 0.0
 
-    Name: 45.454
-        Shape: (1,)
-        Values: [45.454]
+    Name: 45.454 0x7ff592dfac40
+    Shape: (1,)
+    Values: [45.454]
+    min: 45.454
+    max: 45.454
 
-    Name: 45.454
-        Shape: (1,)
-        Values: [45.454]
+    Name: 45.454 0x7ff592dfaec0
+    Shape: (1,)
+    Values: [45.454]
+    min: 45.454
+    max: 45.454
 
-    Name: Density ($\frac{g}{cc}$)
-        Shape: (1,)
-        Values: [1.89390965]
+    Name: Density ($\frac{g}{cc}$) 0x7ff592df92c0
+    Shape: (1,)
+    Values: [0.08834802]
+    min: 0.08834801506485813
+    max: 0.08834801506485813
 
 
 
@@ -182,21 +199,21 @@ We can also attach a proposal distribution
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    Name: Density ($\frac{g}{cc}$)
-        Shape: (1,)
-        Values: [1.89390965]
+    Name: Density ($\frac{g}{cc}$) 0x7ff592df92c0
+    Shape: (1,)
+    Values: [0.08834802]
+    min: 0.08834801506485813
+    max: 0.08834801506485813
     Prior:
-    Uniform Distribution: 
-      Min: :-2.0
-      Max: :2.0
+    |   Uniform Distribution: 
+    |     Min: :-2.0
+    |     Max: :2.0
     Proposal:
-    Normal Distribution: 
-        Mean: :0.0
-    Variance: :1.0
+    |   Normal
+    |       Mean:0.0
+    |   Variance:1.0
 
     Class type of the prior:  <class 'geobipy.src.classes.statistics.UniformDistribution.Uniform'>
     Class type of the proposal:  <class 'geobipy.src.classes.statistics.NormalDistribution.Normal'>
@@ -222,8 +239,6 @@ Therefore each element is evaluated to get 3 probabilities, one for each element
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     0.25
@@ -247,11 +262,9 @@ The univariate proposal distribution can generate random samples from itself.
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    -0.8977410112465112
+    0.9522526515446472
 
 
 
@@ -273,11 +286,9 @@ Or we can only generate samples that simultaneously satisfy the prior.
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    [2.39747661]
+    [-1.04811844]
 
 
 
@@ -300,21 +311,21 @@ We can perturb the variable by drawing from the attached proposal distribution.
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    Name: Density ($\frac{g}{cc}$)
-        Shape: (1,)
-        Values: [0.68339971]
+    Name: Density ($\frac{g}{cc}$) 0x7ff592df92c0
+    Shape: (1,)
+    Values: [-1.50540299]
+    min: -1.505402988009392
+    max: -1.505402988009392
     Prior:
-    Uniform Distribution: 
-      Min: :-2.0
-      Max: :2.0
+    |   Uniform Distribution: 
+    |     Min: :-2.0
+    |     Max: :2.0
     Proposal:
-    Normal Distribution: 
-        Mean: :0.0
-    Variance: :1.0
+    |   Normal
+    |       Mean:0.0
+    |   Variance:1.0
 
 
 
@@ -348,7 +359,7 @@ Attach the histogram
 
 .. code-block:: default
 
-    Density.posterior = Histogram1D(edges=bins)
+    Density.posterior = Histogram(mesh = RectilinearMesh1D(edges=bins))
 
 
 
@@ -370,7 +381,7 @@ In an iterative sense, we can propose and evaluate new values, and update the po
         p = Density.probability(log=False)
 
         if p > 0.0: # This is a simple example!
-            Density.updatePosterior()
+            Density.update_posterior()
 
 
 
@@ -441,11 +452,9 @@ This produces a single probability.
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    0.2290813829641986
+    0.2563804488183801
 
 
 
@@ -475,7 +484,7 @@ Attach the multivariate proposal
 
 Perturb the variables using the multivariate proposal.
 
-.. GENERATED FROM PYTHON SOURCE LINES 160-165
+.. GENERATED FROM PYTHON SOURCE LINES 160-175
 
 .. code-block:: default
 
@@ -483,23 +492,25 @@ Perturb the variables using the multivariate proposal.
     Density.perturb()
     Density.summary
 
+    with h5py.File('statarray.h5', 'w') as f:
+        Density.createHdf(f, 'statarray', withPosterior=True, add_axis=3)
+        Density.writeHdf(f, 'statarray', withPosterior=True, index=0)
+
+    with h5py.File('statarray.h5', 'r') as f:
+        tmp = StatArray.fromHdf(f, 'statarray', index=0, skip_posterior=False)
+
+    with h5py.File('statarray.h5', 'r') as f:
+        tmp = StatArray.fromHdf(f, 'statarray', skip_posterior=False)
 
 
 
 
 
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-
-    "Name: Density ($\\frac{g}{cc}$)\n    Shape: (1,)\n    Values: [1.3128459]\nPrior:\nMV Normal Distribution:\nMean:\n[-0.1130617]\nVariance:\n[[1.]]\nProposal:\nMV Normal Distribution:\nMean:\n[0.23027651]\nVariance:\n[[1.]]\nPosterior:\n<class 'geobipy.src.classes.statistics.Histogram1D.Histogram1D'>\nBins: \n<property object at 0x7fe8d12de770>Counts:\nName: Frequency\n    Shape: (100,)\n    Values: [4 1 2 ... 1 0 2]\nValues are logged to base None\nRelative to: [0.]"
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 166-177
+
+.. GENERATED FROM PYTHON SOURCE LINES 176-187
 
 Basic manipulation
 ++++++++++++++++++
@@ -513,7 +524,7 @@ and if any prior or proposal are set, those will be carried through too.
 1D example
 __________
 
-.. GENERATED FROM PYTHON SOURCE LINES 177-181
+.. GENERATED FROM PYTHON SOURCE LINES 187-191
 
 .. code-block:: default
 
@@ -527,8 +538,6 @@ __________
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     [ -0.  -1.  -3. ... -28. -36. -45.]
@@ -536,7 +545,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 182-187
+.. GENERATED FROM PYTHON SOURCE LINES 192-197
 
 .. code-block:: default
 
@@ -551,16 +560,15 @@ __________
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
+    <class 'list'>
     [999.  -0.  -1. ... -36. 999. -45.]
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 188-193
+.. GENERATED FROM PYTHON SOURCE LINES 198-203
 
 .. code-block:: default
 
@@ -575,16 +583,15 @@ __________
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
+    <class 'numpy.ndarray'>
     [999.  -0.  -1. ... -28. -36. -45.]
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 194-199
+.. GENERATED FROM PYTHON SOURCE LINES 204-209
 
 .. code-block:: default
 
@@ -599,16 +606,15 @@ __________
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
+    <class 'numpy.ndarray'>
     [998. 999.  -0. ... -28. -36. -45.]
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 200-205
+.. GENERATED FROM PYTHON SOURCE LINES 210-215
 
 .. code-block:: default
 
@@ -623,16 +629,15 @@ __________
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
+    <class 'int'>
     [ -0.  -1.  -3. ... -45. 998. 999.]
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 206-211
+.. GENERATED FROM PYTHON SOURCE LINES 216-221
 
 .. code-block:: default
 
@@ -647,8 +652,6 @@ __________
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     [-0. -1. -3. ... -1. -3. -6.]
@@ -656,7 +659,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 212-217
+.. GENERATED FROM PYTHON SOURCE LINES 222-227
 
 .. code-block:: default
 
@@ -671,8 +674,6 @@ __________
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     [ -0.  -1.  -3. ... -21. -28. -45.]
@@ -680,7 +681,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 218-223
+.. GENERATED FROM PYTHON SOURCE LINES 228-233
 
 .. code-block:: default
 
@@ -695,8 +696,6 @@ __________
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     [  0.5  -0.5  -2.  ... -32.  -40.5 -49.5]
@@ -704,7 +703,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 224-229
+.. GENERATED FROM PYTHON SOURCE LINES 234-239
 
 .. code-block:: default
 
@@ -719,8 +718,6 @@ __________
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     [ -0.5  -2.   -4.5 ... -24.5 -32.  -40.5]
@@ -728,7 +725,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 230-235
+.. GENERATED FROM PYTHON SOURCE LINES 240-245
 
 .. code-block:: default
 
@@ -743,8 +740,6 @@ __________
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     1
@@ -752,7 +747,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 236-241
+.. GENERATED FROM PYTHON SOURCE LINES 246-251
 
 .. code-block:: default
 
@@ -767,8 +762,6 @@ __________
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     10
@@ -776,7 +769,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 242-247
+.. GENERATED FROM PYTHON SOURCE LINES 252-257
 
 .. code-block:: default
 
@@ -791,8 +784,6 @@ __________
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     [ 0.  1.  3. ... 28. 36. 45.]
@@ -800,12 +791,12 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 248-250
+.. GENERATED FROM PYTHON SOURCE LINES 258-260
 
 2D example
 __________
 
-.. GENERATED FROM PYTHON SOURCE LINES 250-255
+.. GENERATED FROM PYTHON SOURCE LINES 260-265
 
 .. code-block:: default
 
@@ -820,8 +811,6 @@ __________
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     [[ 0 -2  3]
@@ -831,7 +820,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 256-261
+.. GENERATED FROM PYTHON SOURCE LINES 266-271
 
 .. code-block:: default
 
@@ -846,10 +835,9 @@ __________
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
+    <class 'int'>
     [[ 4  4  4]
      [ 0 -2  3]
      [ 3  0 -1]
@@ -858,7 +846,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 262-267
+.. GENERATED FROM PYTHON SOURCE LINES 272-277
 
 .. code-block:: default
 
@@ -873,10 +861,9 @@ __________
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
+    <class 'list'>
     [[ 0 -2  5  3  5]
      [ 3  0  5 -1  5]
      [ 1  2  5  0  5]]
@@ -884,7 +871,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 268-273
+.. GENERATED FROM PYTHON SOURCE LINES 278-283
 
 .. code-block:: default
 
@@ -899,10 +886,9 @@ __________
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
+    <class 'int'>
     [[ 0 -2 10  3]
      [ 3  0 11 -1]
      [ 1  2 12  0]]
@@ -910,7 +896,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 274-279
+.. GENERATED FROM PYTHON SOURCE LINES 284-289
 
 .. code-block:: default
 
@@ -925,10 +911,9 @@ __________
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
+    <class 'numpy.ndarray'>
     [[999 999 999]
      [  0  -2   3]
      [  3   0  -1]
@@ -937,7 +922,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 280-285
+.. GENERATED FROM PYTHON SOURCE LINES 290-295
 
 .. code-block:: default
 
@@ -952,18 +937,17 @@ __________
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    [[999   0  -2   3]
-     [998   3   0  -1]
-     [997   1   2   0]]
+    <class 'numpy.ndarray'>
+    [[999 998 997   0  -2   3]
+     [999 998 997   3   0  -1]
+     [999 998 997   1   2   0]]
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 286-291
+.. GENERATED FROM PYTHON SOURCE LINES 296-301
 
 .. code-block:: default
 
@@ -978,10 +962,9 @@ __________
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
+    <class 'int'>
     [[  0  -2   3]
      [  3   0  -1]
      [  1   2   0]
@@ -990,7 +973,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 292-297
+.. GENERATED FROM PYTHON SOURCE LINES 302-307
 
 .. code-block:: default
 
@@ -1005,8 +988,6 @@ __________
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     [[ 0 -2  3  3  0]
@@ -1018,7 +999,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 298-303
+.. GENERATED FROM PYTHON SOURCE LINES 308-313
 
 .. code-block:: default
 
@@ -1033,8 +1014,6 @@ __________
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     [ 0 -2  3 ...  1  2  0]
@@ -1042,7 +1021,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 304-309
+.. GENERATED FROM PYTHON SOURCE LINES 314-319
 
 .. code-block:: default
 
@@ -1057,8 +1036,6 @@ __________
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     [[ 0 -2  3]
@@ -1067,7 +1044,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 310-315
+.. GENERATED FROM PYTHON SOURCE LINES 320-325
 
 .. code-block:: default
 
@@ -1082,8 +1059,6 @@ __________
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     [1 0 0]
@@ -1091,7 +1066,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 316-321
+.. GENERATED FROM PYTHON SOURCE LINES 326-331
 
 .. code-block:: default
 
@@ -1106,8 +1081,6 @@ __________
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     [3 3 2]
@@ -1115,7 +1088,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 322-327
+.. GENERATED FROM PYTHON SOURCE LINES 332-337
 
 .. code-block:: default
 
@@ -1130,8 +1103,6 @@ __________
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     [1 0 0]
@@ -1139,7 +1110,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 328-333
+.. GENERATED FROM PYTHON SOURCE LINES 338-343
 
 .. code-block:: default
 
@@ -1154,8 +1125,6 @@ __________
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     [3 3 2]
@@ -1163,7 +1132,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 334-339
+.. GENERATED FROM PYTHON SOURCE LINES 344-349
 
 .. code-block:: default
 
@@ -1178,8 +1147,6 @@ __________
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     [[0 2 3]
@@ -1189,7 +1156,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 340-345
+.. GENERATED FROM PYTHON SOURCE LINES 350-355
 
 Plotting
 ++++++++
@@ -1197,7 +1164,7 @@ Plotting
 We can easily plot the StatArray with its built in plotting functions.
 All plotting functions can take matplotlib keywords
 
-.. GENERATED FROM PYTHON SOURCE LINES 345-353
+.. GENERATED FROM PYTHON SOURCE LINES 355-363
 
 .. code-block:: default
 
@@ -1216,7 +1183,7 @@ All plotting functions can take matplotlib keywords
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 354-359
+.. GENERATED FROM PYTHON SOURCE LINES 364-369
 
 .. code-block:: default
 
@@ -1237,11 +1204,11 @@ All plotting functions can take matplotlib keywords
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 360-361
+.. GENERATED FROM PYTHON SOURCE LINES 370-371
 
 We can quickly plot a bar graph.
 
-.. GENERATED FROM PYTHON SOURCE LINES 361-366
+.. GENERATED FROM PYTHON SOURCE LINES 371-376
 
 .. code-block:: default
 
@@ -1254,7 +1221,7 @@ We can quickly plot a bar graph.
 
 
 .. image-sg:: /examples/Statistics/images/sphx_glr_plot_StatArray_003.png
-   :alt: Density
+   :alt: plot StatArray
    :srcset: /examples/Statistics/images/sphx_glr_plot_StatArray_003.png
    :class: sphx-glr-single-img
 
@@ -1262,11 +1229,11 @@ We can quickly plot a bar graph.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 367-368
+.. GENERATED FROM PYTHON SOURCE LINES 377-378
 
 We can scatter the contents of the StatArray if it is 1D
 
-.. GENERATED FROM PYTHON SOURCE LINES 368-373
+.. GENERATED FROM PYTHON SOURCE LINES 378-383
 
 .. code-block:: default
 
@@ -1287,7 +1254,7 @@ We can scatter the contents of the StatArray if it is 1D
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 374-381
+.. GENERATED FROM PYTHON SOURCE LINES 384-391
 
 Histogram Equalization
 ______________________
@@ -1297,7 +1264,7 @@ This approach forces all colours in the images to have an equal weight.
 This distorts the colour bar, but can really highlight the lower and higher
 ends of whatever you are plotting. Just add the equalize keyword!
 
-.. GENERATED FROM PYTHON SOURCE LINES 381-386
+.. GENERATED FROM PYTHON SOURCE LINES 391-396
 
 .. code-block:: default
 
@@ -1318,13 +1285,13 @@ ends of whatever you are plotting. Just add the equalize keyword!
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 387-390
+.. GENERATED FROM PYTHON SOURCE LINES 397-400
 
 Take the log base(x) of the data
 
 We can also take the data to a log, log10, log2, or a custom number!
 
-.. GENERATED FROM PYTHON SOURCE LINES 390-394
+.. GENERATED FROM PYTHON SOURCE LINES 400-404
 
 .. code-block:: default
 
@@ -1344,13 +1311,13 @@ We can also take the data to a log, log10, log2, or a custom number!
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 395-398
+.. GENERATED FROM PYTHON SOURCE LINES 405-408
 
 X and Y axes
 
 We can specify the x axis of the scatter plot.
 
-.. GENERATED FROM PYTHON SOURCE LINES 398-404
+.. GENERATED FROM PYTHON SOURCE LINES 408-414
 
 .. code-block:: default
 
@@ -1372,7 +1339,7 @@ We can specify the x axis of the scatter plot.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 405-412
+.. GENERATED FROM PYTHON SOURCE LINES 415-422
 
 Notice that I never specified the y axis, so the y axis defaulted to the values in the StatArray.
 In this case, any operations applied to the colours, are also applied to the y axis, e.g. log=10.
@@ -1382,7 +1349,7 @@ I can however force the y co-ordinates by specifying it as input.
 In the second subplot I explicitly plot distance on the y axis.
 In the first subplot, the y axis is the same as the colourbar.
 
-.. GENERATED FROM PYTHON SOURCE LINES 412-421
+.. GENERATED FROM PYTHON SOURCE LINES 422-431
 
 .. code-block:: default
 
@@ -1407,13 +1374,13 @@ In the first subplot, the y axis is the same as the colourbar.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 422-425
+.. GENERATED FROM PYTHON SOURCE LINES 432-435
 
 Point sizes
 
 Since the plotting functions take matplotlib keywords, I can also specify the size of each points.
 
-.. GENERATED FROM PYTHON SOURCE LINES 427-442
+.. GENERATED FROM PYTHON SOURCE LINES 437-452
 
 .. code-block:: default
 
@@ -1423,11 +1390,11 @@ Since the plotting functions take matplotlib keywords, I can also specify the si
     plt.figure()
     plt.tight_layout()
     ax1 = plt.subplot(211)
-    Density.scatter(x=Time, y=Depth, s=s, alpha=0.7,edgecolor='k', sizeLegend=2)
+    Density.scatter(x=Time, y=Depth, s=s, alpha=0.7,edgecolor='k', legend_size=2)
     plt.subplot(212, sharex=ax1)
     #Density.scatter(x=Time, y=Depth, s=s, alpha=0.7,edgecolor='k', sizeLegend=[1.0, 100, 200, 300])
     v = np.abs(Density)+1.0
-    _ = Density.scatter(x=Time, y=Depth, s=s, alpha=0.7,edgecolor='k', sizeLegend=[1.0, 100, 200, 300], log=10)
+    _ = Density.scatter(x=Time, y=Depth, s=s, alpha=0.7,edgecolor='k', legend_size=[1.0, 100, 200, 300], log=10)
 
 
 
@@ -1444,11 +1411,11 @@ Since the plotting functions take matplotlib keywords, I can also specify the si
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 443-444
+.. GENERATED FROM PYTHON SOURCE LINES 453-454
 
 Of course we can still take the log, or equalize the colour histogram
 
-.. GENERATED FROM PYTHON SOURCE LINES 444-449
+.. GENERATED FROM PYTHON SOURCE LINES 454-459
 
 .. code-block:: default
 
@@ -1469,11 +1436,11 @@ Of course we can still take the log, or equalize the colour histogram
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 450-451
+.. GENERATED FROM PYTHON SOURCE LINES 460-461
 
 Typically pcolor only works with 2D arrays. The StatArray has a pcolor method that will pcolor a 1D array
 
-.. GENERATED FROM PYTHON SOURCE LINES 451-463
+.. GENERATED FROM PYTHON SOURCE LINES 461-473
 
 .. code-block:: default
 
@@ -1501,13 +1468,13 @@ Typically pcolor only works with 2D arrays. The StatArray has a pcolor method th
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 464-467
+.. GENERATED FROM PYTHON SOURCE LINES 474-477
 
 We can add grid lines, and add opacity to each element in the pcolor image
 
 This is useful if the colour values need to be scaled by another variable e.g. variance.
 
-.. GENERATED FROM PYTHON SOURCE LINES 467-477
+.. GENERATED FROM PYTHON SOURCE LINES 477-487
 
 .. code-block:: default
 
@@ -1533,11 +1500,11 @@ This is useful if the colour values need to be scaled by another variable e.g. v
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 478-479
+.. GENERATED FROM PYTHON SOURCE LINES 488-489
 
 We can plot a histogram of the StatArray
 
-.. GENERATED FROM PYTHON SOURCE LINES 479-484
+.. GENERATED FROM PYTHON SOURCE LINES 489-494
 
 .. code-block:: default
 
@@ -1558,11 +1525,11 @@ We can plot a histogram of the StatArray
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 485-486
+.. GENERATED FROM PYTHON SOURCE LINES 495-496
 
 We can write the StatArray to a HDF5 file.  HDF5 files are binary files that can include compression.  They allow quick and easy access to parts of the file, and can also be written to and read from in parallel!
 
-.. GENERATED FROM PYTHON SOURCE LINES 486-491
+.. GENERATED FROM PYTHON SOURCE LINES 496-501
 
 .. code-block:: default
 
@@ -1578,17 +1545,17 @@ We can write the StatArray to a HDF5 file.  HDF5 files are binary files that can
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 492-494
+.. GENERATED FROM PYTHON SOURCE LINES 502-504
 
 We can then read the StatArray from the file
 Here x is a new variable, that is read in from the hdf5 file we just wrote.
 
-.. GENERATED FROM PYTHON SOURCE LINES 494-501
+.. GENERATED FROM PYTHON SOURCE LINES 504-511
 
 .. code-block:: default
 
 
-    x = hdfRead.readKeyFromFiles('1Dtest.h5','/','test')
+    x = StatArray.fromHdf('1Dtest.h5', 'test')
     print('x has the same values as Density? ',np.all(x == Density))
     x[2] = 5.0 # Change one of the values in x
     print('x has its own memory allocated (not a reference/pointer)? ', id(x) != id(Density))
@@ -1600,8 +1567,6 @@ Here x is a new variable, that is read in from the hdf5 file we just wrote.
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     x has the same values as Density?  True
@@ -1610,11 +1575,11 @@ Here x is a new variable, that is read in from the hdf5 file we just wrote.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 502-503
+.. GENERATED FROM PYTHON SOURCE LINES 512-513
 
 We can also define a 2D array
 
-.. GENERATED FROM PYTHON SOURCE LINES 503-508
+.. GENERATED FROM PYTHON SOURCE LINES 513-518
 
 .. code-block:: default
 
@@ -1629,22 +1594,20 @@ We can also define a 2D array
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
 
-    'Name: Density ($\\frac{g}{cc}$)\n    Shape: (50, 100)\n    Values: [[ 0.2578391   0.06423086  2.89067211 ...  1.38949627  1.00002246\n   0.42437745]\n [ 0.71865757 -1.44351093 -2.50074128 ... -0.55238025 -0.7257894\n  -0.77072145]\n [ 0.19307272  0.03664038  0.54741788 ...  0.91367198 -0.22983866\n  -1.3084926 ]\n ...\n [ 1.30411313 -1.58826262  2.2629556  ...  0.87880903 -2.19908292\n  -0.00368457]\n [-0.52868634 -0.54295258  1.43517379 ... -0.0489859  -0.38495306\n   2.17553058]\n [ 0.64759825  0.66592992  1.61048641 ... -1.48852135  1.47162409\n   0.06787013]]\n'
+    'Name: Density ($\\frac{g}{cc}$) 0x7ff5943e37c0\nShape: (50, 100)\nValues: [[-2.08786155  0.27155668  0.03927888 ...  2.54183531  1.69447203\n  -1.89190848]\n [ 0.85614344  0.32860765 -0.20147734 ... -0.82957808  1.21062439\n   0.1673818 ]\n [-0.63252696  0.22178405  1.87088588 ... -0.56340323 -0.03561543\n   0.86021205]\n ...\n [-0.56087003 -0.14362854  0.5289713  ... -0.55293387  0.09398317\n   1.89985743]\n [-0.7974982   0.85717802  0.78106984 ... -1.51512074  0.31074689\n  -0.83252381]\n [ 0.32736813 -0.04333445  0.41172788 ...  0.21826993 -1.0704939\n  -0.27108376]]\nmin: -3.6890137097705016\nmax: 3.889764884052127\n'
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 509-512
+.. GENERATED FROM PYTHON SOURCE LINES 519-522
 
 The StatArray Class's functions work whether it is 1D or 2D
 
 We can still do a histogram
 
-.. GENERATED FROM PYTHON SOURCE LINES 512-517
+.. GENERATED FROM PYTHON SOURCE LINES 522-527
 
 .. code-block:: default
 
@@ -1665,11 +1628,11 @@ We can still do a histogram
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 518-519
+.. GENERATED FROM PYTHON SOURCE LINES 528-529
 
 And we can use pcolor to plot the 2D array
 
-.. GENERATED FROM PYTHON SOURCE LINES 519-524
+.. GENERATED FROM PYTHON SOURCE LINES 529-534
 
 .. code-block:: default
 
@@ -1690,13 +1653,13 @@ And we can use pcolor to plot the 2D array
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 525-528
+.. GENERATED FROM PYTHON SOURCE LINES 535-538
 
 The StatArray comes with extra plotting options
 
 Here we specify the x and y axes for the 2D array using two other 1D StatArrays
 
-.. GENERATED FROM PYTHON SOURCE LINES 528-535
+.. GENERATED FROM PYTHON SOURCE LINES 538-545
 
 .. code-block:: default
 
@@ -1719,13 +1682,13 @@ Here we specify the x and y axes for the 2D array using two other 1D StatArrays
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 536-539
+.. GENERATED FROM PYTHON SOURCE LINES 546-549
 
 We can plot using a log10 scale, in this case, we have values that are less
 than or equal to 0.0.  Plotting with the log option will by default mask any
 of those values, and will let you know that it has done so!
 
-.. GENERATED FROM PYTHON SOURCE LINES 539-544
+.. GENERATED FROM PYTHON SOURCE LINES 549-554
 
 .. code-block:: default
 
@@ -1746,14 +1709,14 @@ of those values, and will let you know that it has done so!
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 545-549
+.. GENERATED FROM PYTHON SOURCE LINES 555-559
 
 A neat trick with colourmaps is histogram equalization.
 This approach forces all colours in the image to have an equal amount.
 This distorts the colours, but can really highlight the lower and higher
 ends of whatever you are plotting
 
-.. GENERATED FROM PYTHON SOURCE LINES 549-554
+.. GENERATED FROM PYTHON SOURCE LINES 559-564
 
 .. code-block:: default
 
@@ -1774,11 +1737,11 @@ ends of whatever you are plotting
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 555-556
+.. GENERATED FROM PYTHON SOURCE LINES 565-566
 
 We can equalize the log10 plot too :)
 
-.. GENERATED FROM PYTHON SOURCE LINES 556-561
+.. GENERATED FROM PYTHON SOURCE LINES 566-571
 
 .. code-block:: default
 
@@ -1799,11 +1762,11 @@ We can equalize the log10 plot too :)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 562-563
+.. GENERATED FROM PYTHON SOURCE LINES 572-573
 
 We can add opacity to each pixel in the image
 
-.. GENERATED FROM PYTHON SOURCE LINES 563-567
+.. GENERATED FROM PYTHON SOURCE LINES 573-577
 
 .. code-block:: default
 
@@ -1818,7 +1781,7 @@ We can add opacity to each pixel in the image
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 568-579
+.. GENERATED FROM PYTHON SOURCE LINES 578-589
 
 .. code-block:: default
 
@@ -1826,9 +1789,9 @@ We can add opacity to each pixel in the image
 
     plt.figure()
     ax1 = plt.subplot(131)
-    ax = Density.pcolor(x=x, y=y, flipY=True, linewidth=0.1, noColorbar=True)
+    ax = Density.pcolor(x=x, y=y, flipY=True, linewidth=0.1, colorbar=False)
     plt.subplot(132, sharex=ax1, sharey=ax1)
-    ax = Density.pcolor(x=x, y=y, alpha=a, flipY=True, linewidth=0.1, noColorbar=True)
+    ax = Density.pcolor(x=x, y=y, alpha=a, flipY=True, linewidth=0.1, colorbar=False)
     plt.subplot(133, sharex=ax1, sharey=ax1)
     _ = a.pcolor(x=x, y=y, flipY=True)
 
@@ -1845,11 +1808,11 @@ We can add opacity to each pixel in the image
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 580-581
+.. GENERATED FROM PYTHON SOURCE LINES 590-591
 
 If the array potentially has a lot of white space around the edges, we can trim the image
 
-.. GENERATED FROM PYTHON SOURCE LINES 581-593
+.. GENERATED FROM PYTHON SOURCE LINES 591-603
 
 .. code-block:: default
 
@@ -1877,11 +1840,11 @@ If the array potentially has a lot of white space around the edges, we can trim 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 594-595
+.. GENERATED FROM PYTHON SOURCE LINES 604-605
 
 Create a stacked area plot of a 2D StatArray
 
-.. GENERATED FROM PYTHON SOURCE LINES 595-605
+.. GENERATED FROM PYTHON SOURCE LINES 605-615
 
 .. code-block:: default
 
@@ -1910,28 +1873,23 @@ Create a stacked area plot of a 2D StatArray
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  5.661 seconds)
+   **Total running time of the script:** ( 0 minutes  3.278 seconds)
 
 
 .. _sphx_glr_download_examples_Statistics_plot_StatArray.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: plot_StatArray.py <plot_StatArray.py>`
 
-     :download:`Download Python source code: plot_StatArray.py <plot_StatArray.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: plot_StatArray.ipynb <plot_StatArray.ipynb>`
+      :download:`Download Jupyter notebook: plot_StatArray.ipynb <plot_StatArray.ipynb>`
 
 
 .. only:: html

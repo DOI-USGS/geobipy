@@ -19,7 +19,9 @@
         <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
         <script src="../../../../_static/jquery.js"></script>
         <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -89,11 +91,11 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../api.html">API</a> &raquo;</li>
-          <li><a href="../classes.html">Classes used in GeoBIPy</a> &raquo;</li>
-          <li><a href="statistics.html">Statistics classes</a> &raquo;</li>
-      <li>baseDistribution</li>
+      <li><a href="../../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../api.html">API</a></li>
+          <li class="breadcrumb-item"><a href="../classes.html">Classes used in GeoBIPy</a></li>
+          <li class="breadcrumb-item"><a href="statistics.html">Statistics classes</a></li>
+      <li class="breadcrumb-item active">baseDistribution</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../../_sources/content/api/classes/statistics/baseDistribution.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -104,20 +106,14 @@
            <div itemprop="articleBody">
              
   <section id="basedistribution">
-<h1>baseDistribution<a class="headerlink" href="#basedistribution" title="Permalink to this headline"></a></h1>
-digraph inheritance78d6cc9397 {
-bgcolor=transparent;
-rankdir=LR;
-size=&quot;8.0, 12.0&quot;;
-  &quot;ABC&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Helper class that provides a standard way to create an ABC using&quot;];
-  &quot;baseDistribution&quot; [URL=&quot;#geobipy.src.classes.statistics.baseDistribution.baseDistribution&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Define an abstract base distribution class&quot;];
-  &quot;myObject&quot; -&gt; &quot;baseDistribution&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;myObject&quot; [URL=&quot;../core/myObject.html#geobipy.src.classes.core.myObject.myObject&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Abstract base class&quot;];
-  &quot;ABC&quot; -&gt; &quot;myObject&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-}
-<span class="target" id="module-geobipy.src.classes.statistics.baseDistribution"></span><dl class="py class">
+<h1>baseDistribution<a class="headerlink" href="#basedistribution" title="Permalink to this heading"></a></h1>
+<div class="graphviz"><img src="../../../../_images/inheritance-394d3dfeac5c4efd4eee39eef9611d12f390e24b.png" alt="Inheritance diagram of geobipy.src.classes.statistics.baseDistribution" usemap="#inheritance78d6cc9397" class="inheritance graphviz" /></div>
+<map id="inheritance78d6cc9397" name="inheritance78d6cc9397">
+<area shape="rect" id="node3" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="125,5,204,31"/>
+<area shape="rect" id="node2" href="#geobipy.src.classes.statistics.baseDistribution.baseDistribution" target="_top" title="Define an abstract base distribution class" alt="" coords="252,5,368,31"/>
+</map><span class="target" id="module-geobipy.src.classes.statistics.baseDistribution"></span><dl class="py class">
 <dt class="sig sig-object py" id="geobipy.src.classes.statistics.baseDistribution.baseDistribution">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.statistics.baseDistribution.</span></span><span class="sig-name descname"><span class="pre">baseDistribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prng</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.baseDistribution.baseDistribution" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.statistics.baseDistribution.</span></span><span class="sig-name descname"><span class="pre">baseDistribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prng</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.baseDistribution.baseDistribution" title="Permalink to this definition"></a></dt>
 <dd><p>Define an abstract base distribution class</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.statistics.baseDistribution.baseDistribution.bins">
@@ -133,7 +129,7 @@ size=&quot;8.0, 12.0&quot;;
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.statistics.baseDistribution.baseDistribution.ndim">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">ndim</span></span><a class="headerlink" href="#geobipy.src.classes.statistics.baseDistribution.baseDistribution.ndim" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ndim</span></span><a class="headerlink" href="#geobipy.src.classes.statistics.baseDistribution.baseDistribution.ndim" title="Permalink to this definition"></a></dt>
 <dd><p>Place Holder for children</p>
 </dd></dl>
 

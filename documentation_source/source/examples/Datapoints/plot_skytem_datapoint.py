@@ -1,6 +1,6 @@
 """
-Time Domain Datapoint Class
----------------------------
+Skytem Datapoint Class
+----------------------
 """
 
 #%%
@@ -28,7 +28,6 @@ from os.path import join
 import numpy as np
 import h5py
 import matplotlib.pyplot as plt
-from geobipy import hdfRead
 from geobipy import Waveform
 from geobipy import SquareLoop, CircularLoop
 from geobipy import butterworth
@@ -51,7 +50,7 @@ dataFolder = "..//supplementary//Data//"
 # For more information about the time domain data set, see :ref:`Time domain dataset`
 
 # The data file name
-dataFile=dataFolder + 'Skytem.csv'
+dataFile=dataFolder + 'skytem_saline_clay.csv'
 # The EM system file name
 systemFile=[dataFolder + 'SkytemHM-SLV.stm', dataFolder + 'SkytemLM-SLV.stm']
 
@@ -61,9 +60,6 @@ systemFile=[dataFolder + 'SkytemHM-SLV.stm', dataFolder + 'SkytemLM-SLV.stm']
 Dataset = TdemData._initialize_sequential_reading(dataFile, systemFile)
 # Get a datapoint from the file.
 tdp = Dataset._read_record()
-
-print(tdp.secondary_field)
-print(tdp.primary_field)
 
 Dataset._file.close()
 
@@ -105,8 +101,8 @@ _ = np.abs(J).pcolor(equalize=True, log=10, flipY=True)
 # ++++++++++++++++++++++++++++++++++++++++++++++++++
 #
 # Set values of relative and additive error for both systems.
-tdp.relErr = [0.05, 0.05]
-tdp.addErr = [1e-11, 1e-12]
+tdp.relative_error = np.r_[0.05, 0.05]
+tdp.additive_error = np.r_[1e-14, 1e-13]
 # Define a multivariate log normal distribution as the prior on the predicted data.
 tdp.predictedData.prior = Distribution('MvLogNormal', tdp.data[tdp.active], tdp.std[tdp.active]**2.0)
 
@@ -140,17 +136,17 @@ print(tdp.dataMisfit())
 # the relative error multiplier, and the additive error noise floor
 
 # Define the distributions used as priors.
-heightPrior = Distribution('Uniform', min=np.float64(tdp.z) - 2.0, max=np.float64(tdp.z) + 2.0)
+z_prior = Distribution('Uniform', min=np.float64(tdp.z) - 2.0, max=np.float64(tdp.z) + 2.0)
 relativePrior = Distribution('Uniform', min=np.r_[0.01, 0.01], max=np.r_[0.5, 0.5])
-additivePrior = Distribution('Uniform', min=np.r_[1e-12, 1e-13], max=np.r_[1e-10, 1e-11], log=True)
-tdp.set_priors(height_prior=heightPrior, relative_error_prior=relativePrior, additive_error_prior=additivePrior)
+additivePrior = Distribution('Uniform', min=np.r_[1e-16, 1e-16], max=np.r_[1e-10, 1e-10], log=True)
+tdp.set_priors(relative_error_prior=relativePrior, additive_error_prior=additivePrior, z_prior=z_prior)
 
 ################################################################################
 # In order to perturb our solvable parameters, we need to attach proposal distributions
-heightProposal = Distribution('Normal', mean=tdp.z, variance = 0.01)
-relativeProposal = Distribution('MvNormal', mean=tdp.relErr, variance=2.5e-4)
-additiveProposal = Distribution('MvLogNormal', mean=tdp.addErr, variance=2.5e-3, linearSpace=True)
-tdp.set_proposals(heightProposal, relativeProposal, additiveProposal)
+z_proposal = Distribution('Normal', mean=tdp.z, variance = 0.01)
+relativeProposal = Distribution('MvNormal', mean=tdp.relative_error, variance=2.5e-7)
+additiveProposal = Distribution('MvLogNormal', mean=tdp.additive_error, variance=2.5e-3, linearSpace=True)
+tdp.set_proposals(relativeProposal, additiveProposal, z_proposal=z_proposal)
 
 ################################################################################
 # With priorss set we can auto generate the posteriors
@@ -166,13 +162,7 @@ for i in range(10):
 
 ################################################################################
 # Plot the posterior distributions
-fig = plt.figure()
-ax = tdp.init_posterior_plots(fig)
-fig.tight_layout()
-fig.tight_layout()
-
-tdp.plot_posteriors(axes=ax, best=tdp)
-
+tdp.plot_posteriors(overlay=tdp)
 
 plt.show()
 

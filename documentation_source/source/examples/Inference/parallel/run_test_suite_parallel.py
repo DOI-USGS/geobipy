@@ -92,10 +92,12 @@ if __name__ == '__main__':
     #
     # Define some directories and paths
 
+    np.random.seed(0)
+
     index = checkCommandArguments()
     sys.path.append(os.getcwd())
 
-    datas = ['resolve', 'skytem', 'tempest']
+    datas = ['tempest', 'skytem', 'resolve']
     keys = ['glacial', 'saline_clay', 'resistive_dolomites', 'resistive_basement', 'coastal_salt_water', 'ice_over_salt_water']
 
     tmp = np.unravel_index(index, (3, 6))

@@ -21,19 +21,17 @@
 1D Model with an infinite halfspace
 -----------------------------------
 
-.. GENERATED FROM PYTHON SOURCE LINES 7-17
+.. GENERATED FROM PYTHON SOURCE LINES 7-15
 
 .. code-block:: default
 
     from copy import deepcopy
     from geobipy import StatArray
-    from geobipy import Model1D
+    from geobipy import RectilinearMesh1D
+    from geobipy import Model
     from geobipy import Distribution
-    from geobipy import FdemData
     import matplotlib.pyplot as plt
     import numpy as np
-    import h5py
-    from geobipy import hdfRead
 
 
 
@@ -42,29 +40,36 @@
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 18-20
+.. GENERATED FROM PYTHON SOURCE LINES 16-18
 
 Instantiate the 1D Model with a Half Space
 ++++++++++++++++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 20-32
+.. GENERATED FROM PYTHON SOURCE LINES 18-32
 
 .. code-block:: default
 
 
     # Make a test model with 10 layers, and increasing parameter values
     nLayers = 2
-    par = StatArray(np.linspace(0.001, 0.02, nLayers),
-                    "Conductivity", "$\\frac{S}{m}$")
+    par = StatArray(np.linspace(0.001, 0.02, nLayers), "Conductivity", "$\\frac{S}{m}$")
     thk = StatArray(np.full(nLayers, fill_value=10.0))
     thk[-1] = np.inf
-    mod = Model1D(parameters=par, widths=thk)
+    mesh = RectilinearMesh1D(widths = thk)
 
-    # plt.figure()
-    # mod.plotGrid(transpose=True, flip=True)
+    mod = Model(mesh = mesh, values=par)
+    # mod = Model1D(parameters=par, widths=thk)
+
+    plt.figure()
+    mod.plotGrid(transpose=True, flip=True)
 
 
 
+
+.. image-sg:: /examples/Models/images/sphx_glr_plot_model_1d_001.png
+   :alt: plot model 1d
+   :srcset: /examples/Models/images/sphx_glr_plot_model_1d_001.png
+   :class: sphx-glr-single-img
 
 
 
@@ -80,22 +85,20 @@ the number of cells in the model, a new depth interface, new parameter values
 and the vertical gradient of those parameters.
 The halfSpaceValue is used as a reference value for the parameter prior.
 
-.. GENERATED FROM PYTHON SOURCE LINES 40-53
+.. GENERATED FROM PYTHON SOURCE LINES 40-50
 
 .. code-block:: default
 
     prng = np.random.RandomState(0)
     # Set the priors
-    mod.set_priors(halfSpaceValue=0.01,
+    mod.set_priors(value_mean=0.01,
                   min_edge=1.0,
                   max_edge=150.0,
                   max_cells=30,
-                  parameterPrior=True,
-                  gradientPrior=True,
+                  solve_value=True,
+                  solve_gradient=True,
                   prng=prng)
 
-    # plt.figure()
-    # mod.plot(flipY=True)
 
 
 
@@ -103,28 +106,23 @@ The halfSpaceValue is used as a reference value for the parameter prior.
 
 
 
-
-.. GENERATED FROM PYTHON SOURCE LINES 54-55
+.. GENERATED FROM PYTHON SOURCE LINES 51-52
 
 We can evaluate the prior of the model using depths only
 
-.. GENERATED FROM PYTHON SOURCE LINES 55-61
+.. GENERATED FROM PYTHON SOURCE LINES 52-56
 
 .. code-block:: default
 
-    print('Log probability of the Model given its priors: ',
-          mod.priorProbability(False, False, log=True))
+    print('Log probability of the Model given its priors: ', mod.probability(False, False))
     # Or with priors on its parameters, and parameter gradient with depth.
-    print('Log probability of the Model given its priors: ',
-          mod.priorProbability(True, True, log=True))
+    print('Log probability of the Model given its priors: ', mod.probability(True, True))
 
 
 
 
 
 .. rst-class:: sphx-glr-script-out
-
- Out:
 
  .. code-block:: none
 
@@ -134,19 +132,17 @@ We can evaluate the prior of the model using depths only
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 62-64
+.. GENERATED FROM PYTHON SOURCE LINES 57-59
 
 To propose new models, we specify the probabilities of creating, removing, perturbing, and not changing
 a layer interface
 
-.. GENERATED FROM PYTHON SOURCE LINES 64-69
+.. GENERATED FROM PYTHON SOURCE LINES 59-62
 
 .. code-block:: default
 
-    pProposal = Distribution('LogNormal', 0.01, np.log(2.0)**2.0,
-                             linearSpace=True, prng=prng)
-    mod.setProposals(probabilities=[0.25, 0.25, 0.5, 0.25],
-                     parameterProposal=pProposal, prng=prng)
+    pProposal = Distribution('LogNormal', 0.01, np.log(2.0)**2.0, linearSpace=True, prng=prng)
+    mod.set_proposals(probabilities=[0.25, 0.25, 0.5, 0.25], proposal=pProposal, prng=prng)
 
 
 
@@ -155,22 +151,16 @@ a layer interface
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 70-71
+.. GENERATED FROM PYTHON SOURCE LINES 63-64
 
 We can then perturb the layers of the model
 
-.. GENERATED FROM PYTHON SOURCE LINES 71-80
+.. GENERATED FROM PYTHON SOURCE LINES 64-66
 
 .. code-block:: default
 
     remapped, perturbed = mod.perturb()
 
-    # ################################################################################
-    # fig = plt.figure(figsize=(8, 6))
-    # ax = plt.subplot(121)
-    # mod.pcolor(transpose=True, flip=True)  # , grid=True)
-    # ax = plt.subplot(122)
-    # perturbed.pcolor(transpose=True, flip=True)  # , grid=True)
 
 
 
@@ -178,20 +168,45 @@ We can then perturb the layers of the model
 
 
 
-
-.. GENERATED FROM PYTHON SOURCE LINES 81-82
-
-We can evaluate the prior of the model using depths only
-
-.. GENERATED FROM PYTHON SOURCE LINES 82-89
+.. GENERATED FROM PYTHON SOURCE LINES 67-73
 
 .. code-block:: default
 
-    print('Log probability of the Model given its priors: ',
-          perturbed.priorProbability(False, False, log=True))
+    fig = plt.figure(figsize=(8, 6))
+    ax = plt.subplot(121)
+    mod.pcolor(transpose=True, flip=True, log=10)  # , grid=True)
+    ax = plt.subplot(122)
+    perturbed.pcolor(transpose=True, flip=True, log=10)  # , grid=True)
+
+
+
+
+.. image-sg:: /examples/Models/images/sphx_glr_plot_model_1d_002.png
+   :alt: plot model 1d
+   :srcset: /examples/Models/images/sphx_glr_plot_model_1d_002.png
+   :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+
+    <AxesSubplot: >
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 74-75
+
+We can evaluate the prior of the model using depths only
+
+.. GENERATED FROM PYTHON SOURCE LINES 75-80
+
+.. code-block:: default
+
+    print('Log probability of the Model given its priors: ',perturbed.probability(False, False))
     # Or with priors on its parameters, and parameter gradient with depth.
-    print('Log probability of the Model given its priors: ',
-          perturbed.priorProbability(True, True, log=True))
+    print('Log probability of the Model given its priors: ',perturbed.probability(True, True))
 
 
 
@@ -199,8 +214,6 @@ We can evaluate the prior of the model using depths only
 
 
 .. rst-class:: sphx-glr-script-out
-
- Out:
 
  .. code-block:: none
 
@@ -210,7 +223,7 @@ We can evaluate the prior of the model using depths only
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 90-104
+.. GENERATED FROM PYTHON SOURCE LINES 81-95
 
 Perturbing a model multiple times
 +++++++++++++++++++++++++++++++++
@@ -227,12 +240,12 @@ and a 1D histogram for the locations of interfaces.
 Since we have already set the priors on the Model, we can set the posteriors
 based on bins from from the priors.
 
-.. GENERATED FROM PYTHON SOURCE LINES 104-109
+.. GENERATED FROM PYTHON SOURCE LINES 95-100
 
 .. code-block:: default
 
 
-    mod.setPosteriors()
+    mod.set_posteriors()
 
     mod0 = deepcopy(mod)
 
@@ -243,109 +256,1340 @@ based on bins from from the priors.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 110-111
+.. GENERATED FROM PYTHON SOURCE LINES 101-102
 
 Now we randomly perturb the model, and update its posteriors.
 
-.. GENERATED FROM PYTHON SOURCE LINES 111-122
+.. GENERATED FROM PYTHON SOURCE LINES 102-111
 
 .. code-block:: default
 
-    mod.updatePosteriors()
+    mod.update_posteriors()
     for i in range(1001):
         remapped, perturbed = mod.perturb()
 
         # And update the model posteriors
-        perturbed.updatePosteriors()
+        perturbed.update_posteriors()
 
         mod = perturbed
 
-    # mod.par.posterior._counts[:, :] = np.random.randn(*mod.par.posterior.shape)
 
 
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
+    <class 'numpy.ndarray'>
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 123-127
+.. GENERATED FROM PYTHON SOURCE LINES 112-117
 
 We can now plot the posteriors of the model.
 
 Remember in this case, we are simply perturbing the model structure and parameter values
 The proposal for the parameter values is fixed and centred around a single value.
+fig = plt.figure(figsize=(8, 6))
 
-.. GENERATED FROM PYTHON SOURCE LINES 127-155
+.. GENERATED FROM PYTHON SOURCE LINES 117-158
 
 .. code-block:: default
 
-    fig = plt.figure(figsize=(8, 6))
 
-    plt.subplot(131)
-    mod.nCells.posterior.plot()
-    ax = plt.subplot(132)
-    mod.par.posterior.pcolor(cmap='gray_r', xscale='log', noColorbar=True, flipY=True)
-    plt.subplot(133, sharey=ax)
-    mod.edges.posterior.plot(rotate=True, flipY=True)
+    # plt.subplot(131)
+    # mod.nCells.posterior.plot()
+    # ax = plt.subplot(132)
+    # mod.values.posterior.pcolor(cmap='gray_r', colorbar=False, flipY=True, logX=10)
+    # plt.subplot(133, sharey=ax)
+    # mod.mesh.edges.posterior.plot(transpose=True, flipY=True)
+
+    # plt.figure()
+    # mod.plot_posteriors(**{"cmap": 'gray_r',
+    #                   "xscale": 'log',
+    #                   "noColorbar": True,
+    #                   "flipY": True,
+    #                   'credible_interval_kwargs':{'axis': 1,
+    #                                           'reciprocate': True,
+    #                                           'xscale': 'log'}})
+    # mod.par.posterior.plotCredibleIntervals(xscale='log', axis=1)
+
 
     fig = plt.figure(figsize=(8, 6))
-    gs = fig.add_gridspec(nrows=1, ncols=1)
-    ax = mod.init_posterior_plots(gs[0, 0])
-    mod.plot_posteriors(axes=ax,
+    # gs = fig.add_gridspec(nrows=1, ncols=1)
+    mod.plot_posteriors(axes=fig,
                         edges_kwargs = {
-                            "rotate":True,
+                            "transpose":True,
                             "flipY":True
                         },
                         parameter_kwargs = {
                             "cmap": 'gray_r',
                             "xscale": 'log',
-                            "noColorbar": True,
+                            "colorbar": False,
                             "flipY": True,
                             'credible_interval_kwargs':{
-                                  'reciprocate':True
+                                  'reciprocate':True,
+                                #   'axis': 1,
+                                  'xscale': 'log'
                             }
                         },
                         best = mod)
 
 
-
-
-.. rst-class:: sphx-glr-horizontal
-
-
-    *
-
-      .. image-sg:: /examples/Models/images/sphx_glr_plot_model_1d_001.png
-         :alt: plot model 1d
-         :srcset: /examples/Models/images/sphx_glr_plot_model_1d_001.png
-         :class: sphx-glr-multi-img
-
-    *
-
-      .. image-sg:: /examples/Models/images/sphx_glr_plot_model_1d_002.png
-         :alt: plot model 1d
-         :srcset: /examples/Models/images/sphx_glr_plot_model_1d_002.png
-         :class: sphx-glr-multi-img
-
-
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 156-157
-
-We can interpolate the Model to another mesh.
-
-.. GENERATED FROM PYTHON SOURCE LINES 157-161
-
-.. code-block:: default
-
-    mesh = mod.par.posterior
-    x = mod.piecewise_constant_interpolate(mod.par, mesh, axis=1)
-
     plt.show()
 
 
+
+.. image-sg:: /examples/Models/images/sphx_glr_plot_model_1d_003.png
+   :alt: plot model 1d
+   :srcset: /examples/Models/images/sphx_glr_plot_model_1d_003.png
+   :class: sphx-glr-single-img
 
 
 
@@ -354,28 +1598,23 @@ We can interpolate the Model to another mesh.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.126 seconds)
+   **Total running time of the script:** ( 0 minutes  3.295 seconds)
 
 
 .. _sphx_glr_download_examples_Models_plot_model_1d.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: plot_model_1d.py <plot_model_1d.py>`
 
-     :download:`Download Python source code: plot_model_1d.py <plot_model_1d.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: plot_model_1d.ipynb <plot_model_1d.ipynb>`
+      :download:`Download Jupyter notebook: plot_model_1d.ipynb <plot_model_1d.ipynb>`
 
 
 .. only:: html

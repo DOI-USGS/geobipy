@@ -18,7 +18,7 @@ do not follow a line that is parallel to either the "x" or "y" axis.
 #%%
 import h5py
 from geobipy import StatArray
-from geobipy import RectilinearMesh2D
+from geobipy import RectilinearMesh1D, RectilinearMesh2D, RectilinearMesh3D
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -27,11 +27,12 @@ import numpy as np
 # Specify some cell centres in x and y
 x = StatArray(np.arange(10.0), 'Easting', 'm')
 y = StatArray(np.arange(20.0), 'Depth', 'm')
-rm = RectilinearMesh2D(xCentres=x, yCentres=y)
+rm = RectilinearMesh2D(x_centres=x, y_centres=y)
 
 ################################################################################
 # We can plot the grid lines of the mesh.
-p=0; plt.figure(p)
+p=0;
+plt.figure(p)
 _  = rm.plotGrid(flipY=True, linewidth=0.5)
 
 ###############################################################################
@@ -50,8 +51,8 @@ arr = StatArray(np.sin(np.sqrt(xx ** 2.0 + yy ** 2.0)), "Values")
 p += 1; plt.figure(p)
 _ = rm.pcolor(arr, grid=True, flipY=True, linewidth=0.5)
 
-xG = rm.xGradientMatrix()
-zG = rm.yGradientMatrix()
+# xG = rm.xGradientMatrix()
+# zG = rm.yGradientMatrix()
 
 # dax = StatArray((xG * arr.flatten()).reshape((arr.shape[0], arr.shape[1]-1)))
 # rm2 = rm[:, :9]
@@ -84,7 +85,7 @@ _ = rm_masked.pcolor(StatArray(arr2), grid=True, flipY=True)
 
 x = StatArray(np.arange(10.0), 'Easting', 'm')
 y = StatArray(np.cumsum(np.arange(15.0)), 'Depth', 'm')
-rm = RectilinearMesh2D(xCentres=x, yCentres=y)
+rm = RectilinearMesh2D(x_centres=x, y_centres=y)
 
 ################################################################################
 # We can perform some interval statistics on the cell values of the mesh
@@ -136,7 +137,7 @@ rm2.pcolor(values2)
 # +++++++++++++++++
 x = StatArray(np.logspace(-1, 4, 10), 'x')
 y = StatArray(np.logspace(0, 3, 10), 'y')
-rm = RectilinearMesh2D(xEdges=x, xlog=10, yEdges=y, ylog=10)
+rm = RectilinearMesh2D(x_edges=x, x_log=10, y_edges=y, y_log=10)
 
 #################################################################
 # We can plot the grid lines of the mesh.
@@ -158,21 +159,22 @@ plt.subplot(212)
 rm2.pcolor(arr)
 
 ################################################################################
-
+#%%
+# RelativeTo
+# ++++++++++
 x = StatArray(np.arange(10.0), 'Northing', 'm')
 y = StatArray(np.arange(20.0), 'Depth', 'm')
 
-rm = RectilinearMesh2D(xCentres=x, yCentres=y)
+rm = RectilinearMesh2D(x_centres=x, y_centres=y)
 
 p += 1; plt.figure(p)
 plt.subplot(121)
 _  = rm.plotGrid(linewidth=0.5, flipY=True)
-rm = RectilinearMesh2D(xCentres=x, yCentres=y, relativeTo=np.random.randn(x.size))
+rm = RectilinearMesh2D(x_centres=x, x_relative_to=0.2*np.random.randn(y.size), y_centres=y, y_relative_to=0.2*np.random.randn(x.size))
 plt.subplot(122)
 _  = rm.plotGrid(linewidth=0.5, flipY=True)
 
 # RelativeTo single
-
 with h5py.File('rm2d.h5', 'w') as f:
     rm.toHdf(f, 'test')
 
@@ -188,15 +190,17 @@ rm2.pcolor(arr, flipY=True)
 
 # RelativeTo expanded
 with h5py.File('rm2d.h5', 'w') as f:
-    rm.createHdf(f, 'test', add_axis=StatArray(np.arange(3.0), name='Easting', units="m"))
+    rm.createHdf(f, 'test', add_axis=RectilinearMesh1D(centres=StatArray(np.arange(3.0), name='Easting', units="m"), relativeTo = 0.2*np.random.randn(x.size, y.size)))
     for i in range(3):
+        rm.x.relativeTo += 0.5
+        rm.y.relativeTo += 0.5
         rm.writeHdf(f, 'test', index=i)
 
 with h5py.File('rm2d.h5', 'r') as f:
     rm2 = RectilinearMesh2D.fromHdf(f['test'], index=0)
 
 with h5py.File('rm2d.h5', 'r') as f:
-    rm3 = RectilinearMesh2D.fromHdf(f['test'])
+    rm3 = RectilinearMesh3D.fromHdf(f['test'])
 
 p += 1; plt.figure(p)
 plt.subplot(311)

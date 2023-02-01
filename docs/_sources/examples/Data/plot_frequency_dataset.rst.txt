@@ -21,14 +21,15 @@
 Frequency domain dataset
 ------------------------
 
-.. GENERATED FROM PYTHON SOURCE LINES 6-13
+.. GENERATED FROM PYTHON SOURCE LINES 6-14
 
 .. code-block:: default
 
     import matplotlib.pyplot as plt
-    from geobipy import CircularLoop
+    from geobipy import CircularLoops
     from geobipy import FdemSystem
     from geobipy import FdemData
+    import h5py
     import numpy as np
 
 
@@ -39,17 +40,17 @@ Frequency domain dataset
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 14-16
+.. GENERATED FROM PYTHON SOURCE LINES 15-17
 
 Defining data using a frequency domain system
 +++++++++++++++++++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 18-20
+.. GENERATED FROM PYTHON SOURCE LINES 19-21
 
 We can start by defining the frequencies, transmitter loops, and receiver loops
 For each frequency we need to define a pair of loops
 
-.. GENERATED FROM PYTHON SOURCE LINES 20-22
+.. GENERATED FROM PYTHON SOURCE LINES 21-23
 
 .. code-block:: default
 
@@ -62,21 +63,24 @@ For each frequency we need to define a pair of loops
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 23-25
+.. GENERATED FROM PYTHON SOURCE LINES 24-26
 
 Transmitter positions are defined relative to the observation locations in the data
 This is usually a constant offset for all data points.
 
-.. GENERATED FROM PYTHON SOURCE LINES 25-32
+.. GENERATED FROM PYTHON SOURCE LINES 26-36
 
 .. code-block:: default
 
-    transmitters = [CircularLoop(orient="z", moment=1.0,  x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
-                    CircularLoop(orient="z", moment=1.0,  x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
-                    CircularLoop(orient="x", moment=-1.0, x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
-                    CircularLoop(orient="z", moment=1.0,  x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
-                    CircularLoop(orient="z", moment=1.0,  x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
-                    CircularLoop(orient="z", moment=1.0,  x=0.0, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0)]
+    transmitters = CircularLoops(orientation=['z','z','x','z','z','z'],
+                                 moment=np.r_[1, 1, -1, 1, 1, 1],
+                                 x = np.r_[0,0,0,0,0,0],
+                                 y = np.r_[0,0,0,0,0,0],
+                                 z = np.r_[0,0,0,0,0,0],
+                                 pitch = np.r_[0,0,0,0,0,0],
+                                 roll = np.r_[0,0,0,0,0,0],
+                                 yaw = np.r_[0,0,0,0,0,0],
+                                 radius = np.r_[1,1,1,1,1,1])
 
 
 
@@ -85,20 +89,23 @@ This is usually a constant offset for all data points.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 33-34
+.. GENERATED FROM PYTHON SOURCE LINES 37-38
 
 Receiver positions are defined relative to the transmitter
 
-.. GENERATED FROM PYTHON SOURCE LINES 34-41
+.. GENERATED FROM PYTHON SOURCE LINES 38-48
 
 .. code-block:: default
 
-    receivers = [CircularLoop(orient="z", moment=1.0, x=7.93, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
-                 CircularLoop(orient="z", moment=1.0, x=7.91, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
-                 CircularLoop(orient="x", moment=1.0, x=9.03, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
-                 CircularLoop(orient="z", moment=1.0, x=7.91, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
-                 CircularLoop(orient="z", moment=1.0, x=7.91, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0),
-                 CircularLoop(orient="z", moment=1.0, x=7.89, y=0.0, z=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0)]
+    receivers = CircularLoops(orientation=['z','z','x','z','z','z'],
+                                 moment=np.r_[1, 1, -1, 1, 1, 1],
+                                 x = np.r_[7.91, 7.91, 9.03, 7.91, 7.91, 7.89],
+                                 y = np.r_[0,0,0,0,0,0],
+                                 z = np.r_[0,0,0,0,0,0],
+                                 pitch = np.r_[0,0,0,0,0,0],
+                                 roll = np.r_[0,0,0,0,0,0],
+                                 yaw = np.r_[0,0,0,0,0,0],
+                                 radius = np.r_[1,1,1,1,1,1])
 
 
 
@@ -107,11 +114,11 @@ Receiver positions are defined relative to the transmitter
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 42-43
+.. GENERATED FROM PYTHON SOURCE LINES 49-50
 
 Instantiate the system for the data
 
-.. GENERATED FROM PYTHON SOURCE LINES 43-45
+.. GENERATED FROM PYTHON SOURCE LINES 50-52
 
 .. code-block:: default
 
@@ -124,11 +131,11 @@ Instantiate the system for the data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 46-47
+.. GENERATED FROM PYTHON SOURCE LINES 53-54
 
 Create some data with random co-ordinates
 
-.. GENERATED FROM PYTHON SOURCE LINES 47-53
+.. GENERATED FROM PYTHON SOURCE LINES 54-60
 
 .. code-block:: default
 
@@ -145,17 +152,17 @@ Create some data with random co-ordinates
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 54-57
+.. GENERATED FROM PYTHON SOURCE LINES 61-64
 
 Reading in the Data
 +++++++++++++++++++
 Of course measured field data is stored on disk. So instead we can read data from file.
 
-.. GENERATED FROM PYTHON SOURCE LINES 59-65
+.. GENERATED FROM PYTHON SOURCE LINES 66-72
 
 .. code-block:: default
 
-    dataFolder = "..//supplementary//Data//"
+    dataFolder = "..//supplementary//data//"
     # The data file name
     dataFile = dataFolder + 'Resolve2.txt'
     # The EM system file name
@@ -168,11 +175,11 @@ Of course measured field data is stored on disk. So instead we can read data fro
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 66-67
+.. GENERATED FROM PYTHON SOURCE LINES 73-74
 
 Read in a data set from file.
 
-.. GENERATED FROM PYTHON SOURCE LINES 67-69
+.. GENERATED FROM PYTHON SOURCE LINES 74-76
 
 .. code-block:: default
 
@@ -185,11 +192,11 @@ Read in a data set from file.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 70-71
+.. GENERATED FROM PYTHON SOURCE LINES 77-78
 
 Take a look at the channel names
 
-.. GENERATED FROM PYTHON SOURCE LINES 71-99
+.. GENERATED FROM PYTHON SOURCE LINES 78-106
 
 .. code-block:: default
 
@@ -227,8 +234,6 @@ Take a look at the channel names
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     In_Phase 380.0
@@ -247,11 +252,11 @@ Take a look at the channel names
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 100-101
+.. GENERATED FROM PYTHON SOURCE LINES 107-108
 
 Read in a second data set
 
-.. GENERATED FROM PYTHON SOURCE LINES 101-103
+.. GENERATED FROM PYTHON SOURCE LINES 108-110
 
 .. code-block:: default
 
@@ -263,8 +268,6 @@ Read in a second data set
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     Warning: Your data contains values that are <= 0.0
@@ -272,11 +275,11 @@ Read in a second data set
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 104-105
+.. GENERATED FROM PYTHON SOURCE LINES 111-112
 
 We can create maps of the elevations in two separate figures
 
-.. GENERATED FROM PYTHON SOURCE LINES 105-109
+.. GENERATED FROM PYTHON SOURCE LINES 112-116
 
 .. code-block:: default
 
@@ -295,16 +298,18 @@ We can create maps of the elevations in two separate figures
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
+    surface [WARNING]: 66659 unusable points were supplied; these will be ignored.
+    surface [WARNING]: You should have pre-processed the data with block-mean, -median, or -mode.
+    surface [WARNING]: Check that previous processing steps write results with enough decimals.
+    surface [WARNING]: Possibly some data were half-way between nodes and subject to IEEE 754 rounding.
 
     (584494.28, 590194.28, 4639054.24, 4661854.24)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 110-115
+.. GENERATED FROM PYTHON SOURCE LINES 117-122
 
 .. code-block:: default
 
@@ -324,16 +329,18 @@ We can create maps of the elevations in two separate figures
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
+    surface [WARNING]: 123487 unusable points were supplied; these will be ignored.
+    surface [WARNING]: You should have pre-processed the data with block-mean, -median, or -mode.
+    surface [WARNING]: Check that previous processing steps write results with enough decimals.
+    surface [WARNING]: Possibly some data were half-way between nodes and subject to IEEE 754 rounding.
 
     (662822.398, 668372.398, 4560028.655, 4600678.655)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 116-121
+.. GENERATED FROM PYTHON SOURCE LINES 123-128
 
 Or, we can plot both data sets in one figure to see their positions relative
 to each other.
@@ -341,7 +348,7 @@ to each other.
 In this case, I use a 2D scatter plot of the data point co-ordinates, and pass
 one of the channels as the colour.
 
-.. GENERATED FROM PYTHON SOURCE LINES 121-126
+.. GENERATED FROM PYTHON SOURCE LINES 128-133
 
 .. code-block:: default
 
@@ -362,12 +369,12 @@ one of the channels as the colour.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 127-129
+.. GENERATED FROM PYTHON SOURCE LINES 134-136
 
 Or, interpolate the values to create a gridded "map". mapChannel will
 interpolate the specified channel number.
 
-.. GENERATED FROM PYTHON SOURCE LINES 129-134
+.. GENERATED FROM PYTHON SOURCE LINES 136-141
 
 .. code-block:: default
 
@@ -387,44 +394,51 @@ interpolate the specified channel number.
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
+    surface [WARNING]: 70336 unusable points were supplied; these will be ignored.
+    surface [WARNING]: You should have pre-processed the data with block-mean, -median, or -mode.
+    surface [WARNING]: Check that previous processing steps write results with enough decimals.
+    surface [WARNING]: Possibly some data were half-way between nodes and subject to IEEE 754 rounding.
 
     (584419.28, 590219.28, 4638979.24, 4661979.24)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 135-136
+.. GENERATED FROM PYTHON SOURCE LINES 142-143
 
 Export the data to VTK
 
-.. GENERATED FROM PYTHON SOURCE LINES 136-140
+.. GENERATED FROM PYTHON SOURCE LINES 143-146
 
 .. code-block:: default
 
-
-    # FD1.toVTK('FD_one')
-    # FD2.toVTK('FD_two')
-
+    FD1.to_vtk('FD_one.vtk')
+    # FD2.to_vtk('FD_two.vtk')
 
 
 
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+     Predicted Data (ppm) 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 141-143
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 147-149
 
 Obtain a line from the data set
 +++++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 145-146
+.. GENERATED FROM PYTHON SOURCE LINES 151-152
 
 Take a look at the line numbers in the dataset
 
-.. GENERATED FROM PYTHON SOURCE LINES 146-148
+.. GENERATED FROM PYTHON SOURCE LINES 152-154
 
 .. code-block:: default
 
@@ -436,8 +450,6 @@ Take a look at the line numbers in the dataset
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
     [30010 30020 30030 ... 30100 39010 39020]
@@ -445,7 +457,7 @@ Take a look at the line numbers in the dataset
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 149-151
+.. GENERATED FROM PYTHON SOURCE LINES 155-157
 
 .. code-block:: default
 
@@ -458,11 +470,11 @@ Take a look at the line numbers in the dataset
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 152-153
+.. GENERATED FROM PYTHON SOURCE LINES 158-159
 
 A summary will now show the properties of the line.
 
-.. GENERATED FROM PYTHON SOURCE LINES 153-156
+.. GENERATED FROM PYTHON SOURCE LINES 159-162
 
 .. code-block:: default
 
@@ -475,73 +487,79 @@ A summary will now show the properties of the line.
 
 .. rst-class:: sphx-glr-script-out
 
- Out:
-
  .. code-block:: none
 
-    3D Point Cloud: 
+    FdemData: 
     Number of Points: : 6710 
-     Name: Easting (m)
-        Shape: (6710,)
-        Values: [586852.29 586852.23 586852.17 ... 586123.57 586123.2  586122.82]
-     Name: Northing (m)
-        Shape: (6710,)
-        Values: [4639119.38 4639122.68 4639125.98 ... 4661765.26 4661768.84 4661772.42]
-     Name: Height (m)
-        Shape: (6710,)
-        Values: [36.115 36.498 36.835 ... 27.799 27.704 27.601]
-     Name: Elevation (m)
-        Shape: (6710,)
-        Values: [1246.84 1246.71 1246.61 ... 1337.94 1337.96 1338.02]
+    Name: Easting (m) 0x7ff5944a1ac0
+    Shape: (6710,)
+    Values: [586852.29 586852.23 586852.17 ... 586123.57 586123.2  586122.82]
+    min: 586122.82
+    max: 586852.29
+     Name: Northing (m) 0x7ff5944a1040
+    Shape: (6710,)
+    Values: [4639119.38 4639122.68 4639125.98 ... 4661765.26 4661768.84 4661772.42]
+    min: 4639119.38
+    max: 4661772.42
+     Name: Height (m) 0x7ff5944a38c0
+    Shape: (6710,)
+    Values: [36.115 36.498 36.835 ... 27.799 27.704 27.601]
+    min: 23.830000000000002
+    max: 50.567
+     Name: Elevation (m) 0x7ff592dfa0c0
+    Shape: (6710,)
+    Values: [1246.84 1246.71 1246.61 ... 1337.94 1337.96 1338.02]
+    min: 1213.18
+    max: 1338.02
     Data:          : 
     # of Channels: 12 
     # of Total Data: 80520 
-    Name: 
-        Shape: (6710, 12)
-        Values: [[145.3 435.8 260.6 ... 516.5 405.7 255.7]
+    Name:  0x7ff592dfa5c0
+    Shape: (6710, 12)
+    Values: [[145.3 435.8 260.6 ... 516.5 405.7 255.7]
      [145.7 436.5 257.9 ... 513.6 403.2 252. ]
      [146.4 437.4 255.8 ... 511.2 400.9 248.8]
      ...
      [ 70.7 314.1 220.2 ... 743.3 960.8 910.7]
      [ 71.3 315.3 220.5 ... 745.9 968.3 919.1]
      [ 72.1 316.6 220.7 ... 749.2 976.5 928.3]]
+    min: 37.7
+    max: 3726.9
 
-     Name: 
-        Shape: (6710, 12)
-        Values: [[145.30344112 435.80114731 260.60191864 ... 516.50096805 405.70123244
-      255.70195541]
-     [145.70343167 436.50114547 257.90193873 ... 513.60097352 403.20124008
-      252.00198412]
-     [146.40341526 437.40114312 255.80195464 ... 511.20097809 400.90124719
-      248.80200964]
+     Name:  0x7ff592dfa240
+    Shape: (6710, 12)
+    Values: [[1.76386196 4.47125978 2.79127856 ... 5.26091484 4.17842662 2.74558719]
+     [1.76715845 4.47808274 2.76608767 ... 5.23244646 4.15415744 2.71116211]
+     [1.77293429 4.48685591 2.74651852 ... 5.20889086 4.13183748 2.68144439]
      ...
-     [ 70.70707178 314.10159185 220.20227065 ... 743.30067268 960.8005204
-      910.70054903]
-     [ 71.30701228 315.30158579 220.50226756 ... 745.90067033 968.30051637
-      919.10054401]
-     [ 72.10693448 316.60157928 220.70226551 ... 749.20066738 976.50051203
-      928.30053862]]
+     [1.22468322 3.29634358 2.41843007 ... 7.49996593 9.65989979 9.16173832]
+     [1.22815675 3.30778007 2.42116191 ... 7.52573458 9.73449994 9.24524099]
+     [1.23281832 3.32017409 2.42298349 ... 7.55844323 9.81606973 9.33670654]]
+    min: 1.0687043557504572
+    max: 37.28241356189269
 
-     Name: Predicted Data (ppm)
-        Shape: (6710, 12)
-        Values: [[0. 0. 0. ... 0. 0. 0.]
+     Name: Predicted Data (ppm) 0x7ff592dfbac0
+    Shape: (6710, 12)
+    Values: [[0. 0. 0. ... 0. 0. 0.]
      [0. 0. 0. ... 0. 0. 0.]
      [0. 0. 0. ... 0. 0. 0.]
      ...
      [0. 0. 0. ... 0. 0. 0.]
      [0. 0. 0. ... 0. 0. 0.]
      [0. 0. 0. ... 0. 0. 0.]]
+    min: 0.0
+    max: 0.0
 
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 157-158
+.. GENERATED FROM PYTHON SOURCE LINES 163-164
 
 And we can scatter2D the points in the line.
 
-.. GENERATED FROM PYTHON SOURCE LINES 158-162
+.. GENERATED FROM PYTHON SOURCE LINES 164-168
 
 .. code-block:: default
 
@@ -561,17 +579,29 @@ And we can scatter2D the points in the line.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 163-165
+.. GENERATED FROM PYTHON SOURCE LINES 169-171
 
 We can specify the axis along which to plot.
 xAxis can be index, x, y, z, r2d, r3d
 
-.. GENERATED FROM PYTHON SOURCE LINES 165-168
+.. GENERATED FROM PYTHON SOURCE LINES 171-186
 
 .. code-block:: default
 
     plt.figure(figsize=(8,6))
-    _ = FD1.plot(channels=[0,11,8], log=10, linewidth=0.5);
+    _ = FD1.plot_data(channels=np.r_[0, 11, 8], log=10, linewidth=0.5);
+
+
+    with h5py.File('fdem.h5', 'w') as f:
+        FD1.createHdf(f, 'fdem')
+        FD1.writeHdf(f, 'fdem')
+
+    with h5py.File('fdem.h5', 'r') as f:
+        FD3 = FdemData.fromHdf(f['fdem'])
+
+    with h5py.File('fdem.h5', 'r') as f:
+        fdp = FdemData.fromHdf(f['fdem'], index=0)
+
 
 
 
@@ -585,7 +615,7 @@ xAxis can be index, x, y, z, r2d, r3d
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 169-174
+.. GENERATED FROM PYTHON SOURCE LINES 187-192
 
 Obtain a single datapoint from the data set
 +++++++++++++++++++++++++++++++++++++++++++
@@ -593,7 +623,7 @@ Obtain a single datapoint from the data set
 Checkout :ref:`Frequency domain datapoint` for an example
 about how to use a datapoint once it is instantiated.
 
-.. GENERATED FROM PYTHON SOURCE LINES 174-183
+.. GENERATED FROM PYTHON SOURCE LINES 192-201
 
 .. code-block:: default
 
@@ -613,7 +643,7 @@ about how to use a datapoint once it is instantiated.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 184-220
+.. GENERATED FROM PYTHON SOURCE LINES 202-238
 
 File Format for frequency domain data
 +++++++++++++++++++++++++++++++++++++
@@ -652,7 +682,7 @@ Example Header
 ______________
 Line fid easting northing elevation height I_380 Q_380 ... ... I_129550 Q_129550
 
-.. GENERATED FROM PYTHON SOURCE LINES 222-251
+.. GENERATED FROM PYTHON SOURCE LINES 240-269
 
 File Format for a frequency domain system
 +++++++++++++++++++++++++++++++++++++++++
@@ -688,28 +718,23 @@ See the Resolve.stm files.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  6.996 seconds)
+   **Total running time of the script:** ( 0 minutes  4.153 seconds)
 
 
 .. _sphx_glr_download_examples_Data_plot_frequency_dataset.py:
 
+.. only:: html
 
-.. only :: html
-
- .. container:: sphx-glr-footer
-    :class: sphx-glr-footer-example
+  .. container:: sphx-glr-footer sphx-glr-footer-example
 
 
+    .. container:: sphx-glr-download sphx-glr-download-python
 
-  .. container:: sphx-glr-download sphx-glr-download-python
+      :download:`Download Python source code: plot_frequency_dataset.py <plot_frequency_dataset.py>`
 
-     :download:`Download Python source code: plot_frequency_dataset.py <plot_frequency_dataset.py>`
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
-
-  .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-     :download:`Download Jupyter notebook: plot_frequency_dataset.ipynb <plot_frequency_dataset.ipynb>`
+      :download:`Download Jupyter notebook: plot_frequency_dataset.ipynb <plot_frequency_dataset.ipynb>`
 
 
 .. only:: html
