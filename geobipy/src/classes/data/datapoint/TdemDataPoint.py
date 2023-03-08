@@ -99,6 +99,10 @@ class TdemDataPoint(EmDataPoint):
 
         self.channelNames = None
 
+    @property
+    def active_system_indices(self):
+        return np.squeeze(np.argwhere([np.any(self.active[i]) for i in self.component_indices]))
+
     @EmDataPoint.additive_error.setter
     def additive_error(self, values):
         if values is None:

@@ -222,12 +222,12 @@ class EmDataPoint(DataPoint):
         super().update_posteriors()
 
         if self.relative_error.hasPosterior:
-            self.relative_error.update_posterior()
+            self.relative_error.update_posterior(active=self.active_system_indices)
 
         self.update_additive_error_posterior()
 
     def update_relative_error_posterior(self):
-        self.relative_error.update_posterior()
+        self.relative_error.update_posterior(active=self.active_system_indices)
 
     def update_additive_error_posterior(self):
-        self.additive_error.update_posterior()
+        self.additive_error.update_posterior(active=self.active_system_indices)

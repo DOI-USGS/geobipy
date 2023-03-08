@@ -91,6 +91,11 @@ class DataPoint(Point):
         """
         return ~np.isnan(self.data)
 
+    @cached_property
+    def active_system_indices(self):
+        out =  np.squeeze(np.argwhere([np.any(self.active[i]) for i in self.system_indices]))
+        return out
+
     @property
     def additive_error(self):
         return self._additive_error
@@ -364,10 +369,10 @@ class DataPoint(Point):
         probability = super().probability
 
         if self.relative_error.hasPrior:  # Relative Errors
-            probability += self.relative_error.probability(log=True)
+            probability += self.relative_error.probability(log=True, active=self.active_system_indices)
 
         if self.additive_error.hasPrior:  # Additive Errors
-            probability += self.additive_error.probability(log=True)
+            probability += self.additive_error.probability(log=True, active=self.active_system_indices)
 
         # P_calibration = np.float64(0.0)
         # if calibration:  # Calibration parameters
@@ -437,6 +442,10 @@ class DataPoint(Point):
         self.relative_error.plot_posteriors(ax=axes[2], **rel_error_kwargs)
         self.additive_error.plot_posteriors(ax=axes[3], **add_error_kwargs)
 
+    @property
+    def system_indices(self):
+        return tuple([np.s_[self.systemOffset[system]:self.systemOffset[system+1]] for system in np.arange(self.nSystems)])
+
     def _systemIndices(self, system=0):
         """The slice indices for the requested system.
 
@@ -453,7 +462,7 @@ class DataPoint(Point):
         """
 
         assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-        return np.s_[self.systemOffset[system]:self.systemOffset[system+1]]
+        return self.system_indices[system]
 
 
     def likelihood(self, log):
@@ -530,13 +539,13 @@ class DataPoint(Point):
 
         if self.relative_error.hasProposal:
             # Generate a new error
-            self.relative_error.perturb(imposePrior=True, log=True)
+            self.relative_error.perturb(imposePrior=True, log=True, i=self.active_system_indices)
             # Update the mean of the proposed errors
             self.relative_error.proposal.mean = self.relative_error
 
         if self.additive_error.hasProposal:
             # Generate a new error
-            self.additive_error.perturb(imposePrior=True, log=True)
+            self.additive_error.perturb(imposePrior=True, log=True, i=self.active_system_indices)
             # Update the mean of the proposed errors
             self.additive_error.proposal.mean = self.additive_error
 
