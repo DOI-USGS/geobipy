@@ -140,6 +140,10 @@ class Inference2D(myObject):
     #     cP.ylabel(self.additiveError.getNameUnits())
 
     @cached_property
+    def acceptance(self):
+        return StatArray.StatArray.fromHdf(self.hdfFile['rate'])
+
+    @cached_property
     def additiveError(self):
         """ Get the Additive error of the best data points """
         return StatArray.StatArray.fromHdf(self.hdfFile['data/additive_error'])
@@ -297,11 +301,11 @@ class Inference2D(myObject):
 
     @property
     def easting(self):
-        return self.mesh.x.centres
+        return StatArray.StatArray.fromHdf(self.hdfFile['data/x'])
 
     @property
     def northing(self):
-        return self.mesh.y.centres
+        return StatArray.StatArray.fromHdf(self.hdfFile['data/y'])
 
     @property
     def depth(self):
@@ -821,8 +825,8 @@ class Inference2D(myObject):
 
     @property
     def longest_coordinate(self):
-        if 0.8 < self.data.x.range / self.data.y.range < 1.2:
-            return np.sqrt(self.data.x**2.0 + self.data.y**2.0)
+        # if 0.8 < self.data.x.range / self.data.y.range < 1.2:
+        #     return np.sqrt(self.data.x**2.0 + self.data.y**2.0)
         return self.data.x if self.data.x.range > self.data.y.range else self.data.y
 
     @property
@@ -954,7 +958,7 @@ class Inference2D(myObject):
         """ Get the Relative error of the best data points """
         return self.data.relative_error.posterior
 
-    def parameter_posterior(self, index=None, fiducial=None):
+    def parameter_posterior(self, index=None, fiducial=None, **kwargs):
 
         if fiducial is not None:
             assert fiducial in self.fiducials, ValueError("This fiducial {} is not available from this HDF5 file. The min max fids are {} to {}.".format(fiducial, self.fiducials.min(), self.fiducials.max()))
@@ -962,6 +966,8 @@ class Inference2D(myObject):
             index = self.fiducials.searchsorted(fiducial)
 
         out = Histogram.fromHdf(self.hdfFile['/model/values/posterior'], index=index)
+
+        out.x.centres = self.data.axis(kwargs.get('x', 'x'))
 
         if out.mesh.z.name == "Depth":
             out.mesh.z.edges = StatArray.StatArray(-out.mesh.z.edges, name='elevation', units=out.mesh.z.units)
@@ -1080,7 +1086,7 @@ class Inference2D(myObject):
     def plot_data_elevation(self, **kwargs):
         """ Adds the data elevations to a plot """
 
-        # axis = kwargs.pop('axis', 'x')
+        kwargs['x'] = kwargs.pop('x', 'x')
         labels = kwargs.pop('labels', True)
         kwargs['color'] = kwargs.pop('color', 'k')
         kwargs['linewidth'] = kwargs.pop('linewidth', 0.5)
@@ -1102,14 +1108,16 @@ class Inference2D(myObject):
 
     def plot_doi(self, **kwargs):
 
+        kwargs['x'] = kwargs.pop('x', 'x')
         labels = kwargs.pop('labels', True)
         kwargs['color'] = kwargs.pop('color', 'k')
         kwargs['linewidth'] = kwargs.pop('linewidth', 0.5)
 
-        self.mesh.plot_line(self.doi, axis=1, **kwargs)
+        self.data.plot(values=self.doi, axis=1, **kwargs)
 
     def plot_elevation(self, **kwargs):
 
+        kwargs['x'] = kwargs.pop('x', 'x')
         labels = kwargs.pop('labels', True)
         kwargs['color'] = kwargs.pop('color','k')
         kwargs['linewidth'] = kwargs.pop('linewidth',0.5)
@@ -1119,17 +1127,15 @@ class Inference2D(myObject):
 
     def plot_k_layers(self, **kwargs):
         """ Plot the number of layers in the best model for each data point """
-        xAxis = kwargs.pop('xAxis', 'x')
-
         post = self.model.nCells.posterior
-        post.mesh.x.centres = self.longest_coordinate
+        post.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
         post.plot(overlay=self.model.nCells, axis=1)
         cP.title('P(# of Layers)')
 
 
     def plot_additive_error(self, **kwargs):
         """ Plot the additive errors of the data """
-        xAxis = kwargs.pop('xAxis', 'x')
+        xAxis = kwargs.pop('x', 'x')
         kwargs['marker'] = kwargs.pop('marker','o')
         kwargs['markersize'] = kwargs.pop('markersize',5)
         kwargs['markerfacecolor'] = kwargs.pop('markerfacecolor',None)
@@ -1138,20 +1144,19 @@ class Inference2D(myObject):
         kwargs['linestyle'] = kwargs.pop('linestyle','-')
         kwargs['linewidth'] = kwargs.pop('linewidth',1.0)
 
-        xtmp = self.x_axis(xAxis, centres=True)
 
         if (self.nSystems > 1):
             r = range(self.nSystems)
             for i in r:
                 fc = cP.wellSeparated[i+2]
-                self.mesh.plot_line(self.additiveError[:, i], axis=1,
+                self.data.plot(values=self.additiveError[:, i],
                 c=fc,
                 alpha = 0.7,label='System ' + str(i + 1),
                 **kwargs)
             plt.legend()
         else:
             fc = cP.wellSeparated[2]
-            self.mesh.ploy_line(self.additiveError, axis=1,
+            self.data.plot(values=self.additiveError,
                     c=fc,
                     alpha = 0.7,label='System ' + str(1), **kwargs)
 
@@ -1171,8 +1176,10 @@ class Inference2D(myObject):
         """ Plot the opacity """
         kwargs['cmap'] = kwargs.get('cmap', 'plasma')
 
-        # ax, pm, cb = self.plot_cross_section(values = self.opacity(), ticks=[0.0, 0.5, 1.0], **kwargs)
-        ax, pm, cb = self.opacity().pcolor(ticks=[0.0, 0.5, 1.0], **kwargs)
+        opacity = self.opacity()
+        opacity.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+
+        ax, pm, cb = opacity.pcolor(ticks=[0.0, 0.5, 1.0], **kwargs)
 
         if cb is not None:
             labels = ['Less', '', 'More']
@@ -1183,7 +1190,9 @@ class Inference2D(myObject):
     def plot_entropy(self, **kwargs):
         kwargs['cmap'] = kwargs.get('cmap', 'hot')
 
-        self.entropy.pcolor(**kwargs)
+        entropy = self.entropy
+        entropy.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        entropy.pcolor(**kwargs)
 
     # def plotError2DJointProbabilityDistribution(self, index, system=0, **kwargs):
     #     """ For a given index, obtains the posterior distributions of relative and additive error and creates the 2D joint probability distribution """
@@ -1203,11 +1212,10 @@ class Inference2D(myObject):
 
         kwargs['cmap'] = kwargs.get('cmap', 'gray_r')
 
-        return self.interface_probability().pcolor(**kwargs)
+        interfaces = self.interface_probability()
+        interfaces.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        interfaces.pcolor(**kwargs)
 
-    def plot_opacity(self, **kwargs):
-        """ Plot the opacity """
-        return self.plot_cross_section(values = self.opacity, **kwargs)
 
     def plot_relative_error_posterior(self, system=0, **kwargs):
         """ Plot the distributions of relative errors as an image for all data points in the line """
@@ -1218,6 +1226,7 @@ class Inference2D(myObject):
             post = self.relativeErrorPosteriors
 
         kwargs['trim'] = kwargs.get('trim', 0.0)
+        post.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
 
         post.pcolor(**kwargs)
 
@@ -1226,7 +1235,6 @@ class Inference2D(myObject):
     def plot_relative_error(self, **kwargs):
         """ Plot the relative errors of the data """
 
-        xAxis = kwargs.pop('xAxis', 'x')
         kwargs['marker'] = kwargs.pop('marker','o')
         kwargs['markersize'] = kwargs.pop('markersize',5)
         kwargs['markerfacecolor'] = kwargs.pop('markerfacecolor',None)
@@ -1239,12 +1247,12 @@ class Inference2D(myObject):
             r = range(self.nSystems)
             for i in r:
                 kwargs['c'] = cP.wellSeparated[i+2]
-                self.mesh.plot_line(self.relativeError[:, i], axis=1,
+                self.data.plot(values=self.relativeError[:, i],
                 alpha = 0.7, label='System {}'.format(i + 1), **kwargs)
             plt.legend()
         else:
             kwargs['c'] = cP.wellSeparated[2]
-            self.mesh.plot_line(self.relativeError[:, i], axis=1,
+            self.data.plot(values=self.relativeError[:, i],
                 alpha = 0.7, label='System {}'.format(1), **kwargs)
 
     def scatter2D(self, **kwargs):
@@ -1252,8 +1260,6 @@ class Inference2D(myObject):
 
     def plot_total_error(self, channel, **kwargs):
         """ Plot the relative errors of the data """
-        xAxis = kwargs.pop('xAxis', 'x')
-
         kwargs['marker'] = kwargs.pop('marker','o')
         kwargs['markersize'] = kwargs.pop('markersize',5)
         kwargs['markerfacecolor'] = kwargs.pop('markerfacecolor',None)
@@ -1264,7 +1270,7 @@ class Inference2D(myObject):
 
 
         fc = cP.wellSeparated[2]
-        self.mesh.plot_line(self.totalError[:, channel], alpha = 0.7, label='Channel ' + str(channel), **kwargs)
+        self.data.plot(values=self.totalError[:, channel], alpha = 0.7, label='Channel ' + str(channel), **kwargs)
 
     def plotTotalErrorDistributions(self, channel=0, nBins=100, **kwargs):
         """ Plot the distributions of relative errors as an image for all data points in the line """
@@ -1365,32 +1371,33 @@ class Inference2D(myObject):
         return out
 
     def plot_best_model(self, **kwargs):
+        self.model.x.centres = self.data.axis(kwargs.get('x', 'x'))
         return self.model.pcolor(**kwargs);
 
-    def plot_cross_section(self, values, **kwargs):
-        """ Plot a cross-section of the parameters """
-        mesh = self.mesh
-        if 'x_axis' in kwargs:
-            mesh = self.change_mesh_axis(kwargs.pop('x_axis'))
+    # def plot_cross_section(self, values, **kwargs):
+    #     """ Plot a cross-section of the parameters """
+    #     mesh = self.mesh
+    #     if 'x_axis' in kwargs:
+    #         mesh = self.change_mesh_axis(kwargs.pop('x_axis'))
 
-        if kwargs.pop('useVariance', False):
-            opacity = deepcopy(self.opacity())
-            # opacity = deepcopy(self.entropy)
-            # opacity = 1.0 - opacity.normalize()
-            kwargs['alpha'] = opacity
+    #     if kwargs.pop('useVariance', False):
+    #         opacity = deepcopy(self.opacity())
+    #         # opacity = deepcopy(self.entropy)
+    #         # opacity = 1.0 - opacity.normalize()
+    #         kwargs['alpha'] = opacity
 
-        if kwargs.pop('mask_below_doi', False):
-            opacity = kwargs.get('alpha')
-            if kwargs.get('alpha') is None:
-                opacity = np.ones(mesh.shape)
+    #     if kwargs.pop('mask_below_doi', False):
+    #         opacity = kwargs.get('alpha')
+    #         if kwargs.get('alpha') is None:
+    #             opacity = np.ones(mesh.shape)
 
-            indices = mesh.y.cellIndex(self.doi + mesh.y.relativeTo)
+    #         indices = mesh.y.cellIndex(self.doi + mesh.y.relativeTo)
 
-            for i in range(self.nPoints):
-                opacity[i, indices[i]:] = 0.0
-            kwargs['alpha'] = opacity
+    #         for i in range(self.nPoints):
+    #             opacity[i, indices[i]:] = 0.0
+    #         kwargs['alpha'] = opacity
 
-        return mesh.pcolor(values = values, **kwargs)
+    #     return mesh.pcolor(values = values, **kwargs)
 
     def plotHighestMarginal(self, useVariance=True, **kwargs):
 
@@ -1437,6 +1444,8 @@ class Inference2D(myObject):
 
         model = self.mean_parameters()
 
+        model.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+
         if kwargs.pop('use_variance', False):
             kwargs['alpha'] = self.opacity().values
 
@@ -1460,18 +1469,21 @@ class Inference2D(myObject):
 
         return opacity
 
-    def plotModeModel(self, **kwargs):
+    # def plotModeModel(self, **kwargs):
 
-        values = self.modeParameter()
-        if (kwargs.pop('reciprocateParameter', False)):
-            values = 1.0 / values
-            values.name = 'Resistivity'
-            values.units = '$Omega m$'
+    #     values = self.modeParameter()
+    #     if (kwargs.pop('reciprocateParameter', False)):
+    #         values = 1.0 / values
+    #         values.name = 'Resistivity'
+    #         values.units = '$Omega m$'
 
-        return self.plot_cross_section(values = values.T, **kwargs)
+    #     return self.plot_cross_section(values = values.T, **kwargs)
 
     def plot_percentile(self, percent, **kwargs):
         posterior = self.parameter_posterior()
+
+        posterior.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+
         percentile = posterior.percentile(percent, axis=1)
 
         return percentile.pcolor(**kwargs)
@@ -1662,11 +1674,11 @@ class Inference2D(myObject):
 
         return out
 
-    def plot_inference_1d(self, fiducial):
+    def plot_inference_1d(self, fiducial, **kwargs):
         """ Plot the geobipy results for the given data point """
         R = self.inference_1d(fiducial=fiducial)
-        R.initFigure()
-        R.plot()
+        # R.initFigure()
+        R.plot_posteriors(**kwargs)
 
     def toVtk(self, fileName, format='binary'):
         """Write the parameter cross-section to an unstructured grid vtk file
