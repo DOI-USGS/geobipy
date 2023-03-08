@@ -52,6 +52,7 @@ class PointCloud3D(myObject):
         The 3D point cloud
 
     """
+    single = Point
 
     def __init__(self, x=None, y=None, z=None, elevation=None):
         """ Initialize the class """
@@ -106,10 +107,6 @@ class PointCloud3D(myObject):
                 self.z.name.replace(' ', '_'): self.z,
                 self.elevation.name.replace(' ', '_'): self.elevation}, \
                 [self.x.name.replace(' ', '_'), self.y.name.replace(' ', '_'), self.z.name.replace(' ', '_'), self.elevation.name.replace(' ', '_')]
-
-    @property
-    def single(self):
-        return Point
 
     @property
     def x(self):
@@ -238,7 +235,7 @@ class PointCloud3D(myObject):
     @property
     def bounds(self):
         """Gets the bounding box of the data set """
-        return np.asarray([np.nanmin(self.x), np.nanmax(self.x), np.nanmin(self.y), np.nanmax(self.y)])
+        return np.asarray(self.x.bounds, self.y.bounds)
 
     def block_indices(self, dx=None, dy=None, x_grid=None, y_grid=None):
         """Returns the indices of the points lying in blocks across the domain..
@@ -258,9 +255,9 @@ class PointCloud3D(myObject):
         ints : Index into self whose points are the median location within blocks across the domain.
         """
         if x_grid is None:
-            x_grid = self.centred_grid_nodes(self.bounds[:2], dx)
+            x_grid = self.x.centred_grid_nodes(dx)
         if y_grid is None:
-            y_grid = self.centred_grid_nodes(self.bounds[2:], dy)
+            y_grid = self.y.centred_grid_nodes(dy)
 
         ax = RectilinearMesh1D(edges=x_grid)
         ix = ax.cellIndex(self.x)
@@ -357,84 +354,45 @@ class PointCloud3D(myObject):
 
     def centred_mesh(self, dx, dy):
 
-        x_grid = self.centred_grid_nodes(self.bounds[:2], dx)
-        y_grid = self.centred_grid_nodes(self.bounds[2:], dy)
+        x_grid = self.x.centred_grid_nodes(dx)
+        y_grid = self.y.centred_grid_nodes(dy)
         return RectilinearMesh2D(x_edges=x_grid, y_edges=y_grid)
 
-
-    def centred_grid_nodes(self, bounds, spacing):
-        """Generates grid nodes centred over bounds
-
-        Parameters
-        ----------
-        bounds : array_like
-            bounds of the dimension
-        spacing : float
-            distance between nodes
-
-        """
-        # Get the discretization
-        assert spacing > 0.0, ValueError("spacing must be positive!")
-        sp = 0.5 * spacing
-        return np.arange(bounds[0] - sp, bounds[1] + (2*sp), spacing)
-
-    def getPoint(self, i):
-        """Get a point from the 3D Point Cloud
+    def axis(self, axis='x'):
+        """Obtain the axis against which to plot values.
 
         Parameters
         ----------
-        i : int
-            The index of the point to return
-
-        Returns
-        -------
-        out : geobipy.Point
-            A point
-
-        Raises
-        ------
-        ValueError : If i is not a single int
-
-        """
-        assert np.size(i) == 1, ValueError("i must be a single integer")
-        assert 0 <= i <= self.nPoints, ValueError("Must have 0 <= i <= {}".format(self.nPoints))
-        return Point(self.x[i], self.y[i], self.z[i], self.elevation[i])
-
-    def getXAxis(self, xAxis='x'):
-        """Obtain the xAxis against which to plot values.
-
-        Parameters
-        ----------
-        xAxis : str
-            If xAxis is 'index', returns numpy.arange(self.nPoints)
-            If xAxis is 'x', returns self.x
-            If xAxis is 'y', returns self.y
-            If xAxis is 'z', returns self.z
-            If xAxis is 'r2d', returns cumulative distance along the line in 2D using x and y.
-            If xAxis is 'r3d', returns cumulative distance along the line in 3D using x, y, and z.
+        axis : str
+            If axis is 'index', returns numpy.arange(self.nPoints)
+            If axis is 'x', returns self.x
+            If axis is 'y', returns self.y
+            If axis is 'z', returns self.z
+            If axis is 'r2d', returns cumulative distance along the line in 2D using x and y.
+            If axis is 'r3d', returns cumulative distance along the line in 3D using x, y, and z.
 
         Returns
         -------
         out : array_like
-            The requested xAxis.
+            The requested axis.
 
         """
-        assert xAxis in ['index', 'x', 'y', 'z', 'r2d', 'r3d'], Exception("xAxis must be either 'index', x', 'y', 'z', 'r2d', or 'r3d'")
-        if xAxis == 'index':
+        assert axis in ['index', 'x', 'y', 'z', 'r2d', 'r3d'], Exception("axis must be either 'index', x', 'y', 'z', 'r2d', or 'r3d'")
+        if axis == 'index':
             return StatArray.StatArray(np.arange(self.x.size), name="Index")
-        elif xAxis == 'x':
+        elif axis == 'x':
             return self.x
-        elif xAxis == 'y':
+        elif axis == 'y':
             return self.y
-        elif xAxis == 'z':
+        elif axis == 'z':
             return self.z
-        elif xAxis == 'r2d':
+        elif axis == 'r2d':
             r = np.diff(self.x)**2.0
             r += np.diff(self.y)**2.0
             distance = StatArray.StatArray(np.zeros(self.x.size), 'Distance', self.x.units)
             distance[1:] = np.cumsum(np.sqrt(r))
             return distance
-        elif xAxis == 'r3d':
+        elif axis == 'r3d':
             r = np.diff(self.x)**2.0
             r += np.diff(self.y)**2.0
             r += np.diff(self.z)**2.0
@@ -521,7 +479,7 @@ class PointCloud3D(myObject):
         # Create the CT function for interpolation
         f = CloughTocher2DInterpolator(XY, vTmp)
 
-        query = np.hstack([mesh.centres(axis=0).flatten(), mesh.centres(axis=1).flatten()])
+        query = np.hstack([mesh.x_centres.flatten(), mesh.y_centres.flatten()])
 
         # Interpolate to the grid
         vals = f(query).reshape(*mesh.shape)

@@ -572,7 +572,7 @@ class Data(PointCloud3D):
     def __getitem__(self, i):
         """ Define item getter for Data """
         i = np.unique(i)
-        out = Data(nChannelsPerSystem=self.nChannelsPerSystem,
+        out = type(self)(nChannelsPerSystem=self.nChannelsPerSystem,
                    x=self.x[i], y=self.y[i], z=self.z[i], elevation=self.elevation[i],
                    data=self.data[i, :], std=self.std[i, :],
                    predictedData=self.predictedData[i, :],
