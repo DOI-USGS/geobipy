@@ -274,6 +274,21 @@ class StatArray(np.ndarray, myObject):
     def hasLabels(self):
         return not self.getNameUnits() == ""
 
+    @property
+    def addressof(self):
+        msg = 'StatArray: {} {}\n'.format(self.getNameUnits(), hex(id(self)))
+        if self.hasPrior:
+            msg += "Prior:\n{}".format(("|   "+self.prior.addressof.replace("\n", "\n|   "))[:-4])
+        if self.hasProposal:
+            msg += "Proposal:\n{}".format(("|   "+self.proposal.addressof.replace("\n", "\n|   "))[:-4])
+        if self.hasPosterior:
+            if self.n_posteriors > 1:
+                for posterior in self.posterior:
+                    msg += "Posterior:\n{}".format(("|   "+posterior.addressof.replace("\n", "\n|   "))[:-4])
+            else:
+                msg += "Posterior:\n{}".format(("|   "+self.posterior.addressof.replace("\n", "\n|   "))[:-4])
+        return msg
+
     def abs(self):
         """Take the absolute value.  In-place operation.
 

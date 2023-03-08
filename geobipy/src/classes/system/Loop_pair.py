@@ -26,6 +26,12 @@ class Loop_pair(Point, PointCloud3D):
         self.transmitter = transmitter
         self.receiver = receiver
 
+    @property
+    def addressof(self):
+        msg = super().addressof
+        msg += "transmitter:\n{}".format(("|   "+self.transmitter.addressof.replace("\n", "\n|   "))[:-4])
+        msg += "receiver:\n{}".format(("|   "+self.receiver.addressof.replace("\n", "\n|   "))[:-4])
+        return msg
 
     @property
     def Geometry(self):

@@ -197,6 +197,11 @@ class RectilinearMesh3D(RectilinearMesh2D):
     #         return self.y_centres
     #     else:
     #         return self.z_centres
+    @property
+    def addressof(self):
+        msg = super().addressof
+        msg += "z:\n{}".format(("|   "+self.z.addressof.replace("\n", "\n|   "))[:-4])
+        return msg
 
     # def edges(self, axis):
     #     if axis == 0:

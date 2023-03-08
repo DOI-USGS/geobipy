@@ -111,6 +111,10 @@ class TdemDataPoint(EmDataPoint):
 
         self._additive_error = StatArray.StatArray(values, '$\epsilon_{Additive}$', self.units)
 
+    @property
+    def addressof(self):
+        return super().addressof + self.loop_pair.addressof
+
     @EmDataPoint.channelNames.setter
     def channelNames(self, values):
         if values is None:

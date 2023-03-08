@@ -148,6 +148,15 @@ class RectilinearMesh1D(Mesh):
         return self._action
 
     @property
+    def addressof(self):
+        msg =  '{}: {}\n'.format(type(self).__name__, hex(id(self)))
+        msg += "Edges:\n{}".format(("|   "+self.edges.addressof.replace("\n", "\n|   "))[:-4])
+        msg += "Centres:\n{}".format(("|   "+self.centres.addressof.replace("\n", "\n|   "))[:-4])
+        msg += "Widths:\n{}".format(("|   "+self.widths.addressof.replace("\n", "\n|   "))[:-4])
+        msg += "Relative to:\n{}".format(("|   "+self.relativeTo.addressof.replace("\n", "\n|   "))[:-4])
+        return msg
+
+    @property
     def area(self):
         return self.widths
 

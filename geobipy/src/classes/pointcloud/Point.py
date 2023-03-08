@@ -129,6 +129,15 @@ class Point(myObject):
                 [self.x.name.replace(' ', '_'), self.y.name.replace(' ', '_'), self.z.name.replace(' ', '_'), self.elevation.name.replace(' ', '_')]
 
     @property
+    def addressof(self):
+        msg =  '{}: {}\n'.format(type(self).__name__, hex(id(self)))
+        msg += "x:\n{}".format(("|   "+self.x.addressof.replace("\n", "\n|   "))[:-4])
+        msg += "y:\n{}".format(("|   "+self.y.addressof.replace("\n", "\n|   "))[:-4])
+        msg += "z:\n{}".format(("|   "+self.z.addressof.replace("\n", "\n|   "))[:-4])
+        msg += "elevation:\n{}".format(("|   "+self.elevation.addressof.replace("\n", "\n|   "))[:-4])
+        return msg
+
+    @property
     def hasPosteriors(self):
         return (self.x.hasPosterior + self.y.hasPosterior + self.z.hasPosterior) > 0
 

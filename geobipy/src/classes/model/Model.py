@@ -55,6 +55,13 @@ class Model(myObject):
         return out
 
     @property
+    def addressof(self):
+        msg =  '{}: {}\n'.format(type(self).__name__, hex(id(self)))
+        msg += "Mesh:\n{}".format(("|   "+self.mesh.addressof.replace("\n", "\n|   "))[:-4])
+        msg += "Values:\n{}".format(("|   "+self.values.addressof.replace("\n", "\n|   "))[:-4])
+        return msg
+
+    @property
     def gradient(self):
         """Compute the gradient
 

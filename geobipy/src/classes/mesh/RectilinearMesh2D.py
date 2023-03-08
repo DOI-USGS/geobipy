@@ -120,6 +120,13 @@ class RectilinearMesh2D(Mesh):
         return out
 
     @property
+    def addressof(self):
+        msg =  '{}: {}\n'.format(type(self).__name__, hex(id(self)))
+        msg += "x:\n{}".format(("|   "+self.x.addressof.replace("\n", "\n|   "))[:-4])
+        msg += "y:\n{}".format(("|   "+self.y.addressof.replace("\n", "\n|   "))[:-4])
+        return msg
+
+    @property
     def area(self):
         return np.outer(self.x.widths, self.y.widths)
 

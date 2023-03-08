@@ -108,6 +108,20 @@ class DataPoint(Point):
         self._additive_error = StatArray.StatArray(values, '$\epsilon_{Additive}$', self.units)
 
     @property
+    def addressof(self):
+        """ Print a summary of the EMdataPoint """
+        msg = super().addressof
+        msg += "data:\n{}".format("|   "+(self.data.addressof.replace("\n", "\n|   "))[:-4])
+        msg += "predicted data:\n{}".format("|   "+(self.predictedData.addressof.replace("\n", "\n|   "))[:-4])
+        msg += "std:\n{}".format("|   "+(self.std.addressof.replace("\n", "\n|   "))[:-4])
+        msg += "line number:\n{}".format("|   "+(self.lineNumber.addressof.replace("\n", "\n|   "))[:-4])
+        msg += "fiducial:\n{}".format("|   "+(self.fiducial.addressof.replace("\n", "\n|   "))[:-4])
+        msg += "relative error:\n{}".format("|   "+(self.relative_error.addressof.replace("\n", "\n|   "))[:-4])
+        msg += "additive error:\n{}".format("|   "+(self.additive_error.addressof.replace("\n", "\n|   "))[:-4])
+
+        return msg
+
+    @property
     def channelNames(self):
         return self._channelNames
 

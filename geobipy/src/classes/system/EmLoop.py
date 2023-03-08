@@ -35,6 +35,14 @@ class EmLoop(Point, ABC):
         self.yaw = yaw
 
     @property
+    def addressof(self):
+        msg = super().addressof
+        msg += "pitch:\n{}".format(("|   "+self.pitch.addressof.replace("\n", "\n|   "))[:-4])
+        msg += "roll:\n{}".format(("|   "+self.roll.addressof.replace("\n", "\n|   "))[:-4])
+        msg += "yaw:\n{}".format(("|   "+self.yaw.addressof.replace("\n", "\n|   "))[:-4])
+        return msg
+
+    @property
     def hasPosteriors(self):
         return self.n_posteriors > 0
 
