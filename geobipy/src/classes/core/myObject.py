@@ -55,6 +55,24 @@ class myObject(ABC):
         grp.attrs["repr"] = hdf_name
         return grp
 
+    def pyvista_plotter(self, plotter=None, **kwargs):
+
+        import pyvista as pv
+
+        if plotter is None:
+            plotter = pv.Plotter()
+        plotter.add_mesh(self.pyvista_mesh(), show_edges=True)
+
+        labels = dict(xlabel=self.x.label, ylabel=self.y.label, zlabel=self.z.label)
+        plotter.show_grid()
+        plotter.add_axes(**labels)
+
+        return plotter
+
+    def to_vtk(self, filename):
+        mesh = self.pyvista_mesh()
+        mesh.save(filename)
+
     def toHdf(self, h5obj, name, withPosterior=False):
         """Create and write to HDF.
 
