@@ -138,10 +138,7 @@ class RectilinearMesh2D(Mesh):
             ravelled cell centre locations.
 
         """
-        if axis == 0:
-            return self.x_centres
-        return self.y_centres
-
+        return self.x_centres if axis == 0 else self.y_centres
 
     @property
     def distance(self):
@@ -972,7 +969,7 @@ class RectilinearMesh2D(Mesh):
         # Create the spatial reference
         import pyvista as pv
 
-        z = 0.05 * np.minimum(self.x.range, self.y.range)
+        z = np.minimum(0.001 * np.minimum(self.x.range, self.y.range), 1.0)
         x, y, z = np.meshgrid(self.x.edges, self.y.edges, np.r_[0.0, z])
 
         return pv.StructuredGrid(x, y, z)
@@ -1080,17 +1077,16 @@ class RectilinearMesh2D(Mesh):
             If xAxis is 'r', the horizontal xAxis uses cumulative distance along the line.
 
         """
-        return self.x.centres_absolute
-        # if self.x._relativeTo is None:
-        #     out = np.repeat(self.x.centres_absolute[:, None], self.y.nCells, 1)
-        # else:
-        #     if self.x.relativeTo.size == 1:
-        #         out = np.repeat(self.x.centres_absolute[:, None], self.y.nCells, 1)
-        #     else:
-        #         edges = self.x.relativeTo + self.x.centres[:, None]
-        #         out = utilities._power(edges, self.x.log)
+        if self.x._relativeTo is None:
+            out = np.repeat(self.x.centres_absolute[:, None], self.y.nCells, 1)
+        else:
+            if self.x.relativeTo.size == 1:
+                out = np.repeat(self.x.centres_absolute[:, None], self.y.nCells, 1)
+            else:
+                edges = self.x.relativeTo + self.x.centres[:, None]
+                out = utilities._power(edges, self.x.log)
 
-        # return out
+        return out
 
     @property
     def x_edges(self):
@@ -1125,17 +1121,16 @@ class RectilinearMesh2D(Mesh):
             If xAxis is 'r', the horizontal xAxis uses cumulative distance along the line.
 
         """
-        return self.y.centres_absolute
-        # if self.y._relativeTo is None:
-        #     out = np.repeat(self.y.centres_absolute[None, :], self.x.nCells, 0)
-        # else:
-        #     if self.y.relativeTo.size == 1:
-        #         out = np.repeat(self.y.centres_absolute[None, :], self.x.nCells, 0)
-        #     else:
-        #         out = np.repeat(self.y.relativeTo[:, None], self.y.nCells, 1) + self.y.centres
-        #         out = utilities._power(out, self.y.log)
+        if self.y._relativeTo is None:
+            out = np.repeat(self.y.centres_absolute[None, :], self.x.nCells, 0)
+        else:
+            if self.y.relativeTo.size == 1:
+                out = np.repeat(self.y.centres_absolute[None, :], self.x.nCells, 0)
+            else:
+                out = np.repeat(self.y.relativeTo[:, None], self.y.nCells, 1) + self.y.centres
+                out = utilities._power(out, self.y.log)
 
-        # return out
+        return out
 
     @property
     def y_edges(self):

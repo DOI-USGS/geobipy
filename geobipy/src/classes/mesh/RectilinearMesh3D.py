@@ -190,18 +190,19 @@ class RectilinearMesh3D(RectilinearMesh2D):
 
         return out
 
-    # def centres(self, axis):
-    #     if axis == 0:
-    #         return self.x_centres
-    #     elif axis == 1:
-    #         return self.y_centres
-    #     else:
-    #         return self.z_centres
     @property
     def addressof(self):
         msg = super().addressof
         msg += "z:\n{}".format(("|   "+self.z.addressof.replace("\n", "\n|   "))[:-4])
         return msg
+
+    def centres(self, axis):
+        if axis == 0:
+            return self.x_centres
+        elif axis == 1:
+            return self.y_centres
+        else:
+            return self.z_centres
 
     # def edges(self, axis):
     #     if axis == 0:
@@ -851,7 +852,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
         #     msg += self.relativeTo.summary
         return msg
 
-    def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
+    def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None, upcast=None):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group

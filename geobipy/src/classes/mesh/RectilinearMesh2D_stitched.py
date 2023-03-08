@@ -176,13 +176,12 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
 
         y_edges = utilities._power(y_edges, self.y_log)
 
+        max_edge = np.max(y_edges[np.isfinite(y_edges)])
         if np.any(np.isinf(y_edges)):
             if np.nanmin(y_edges) == -np.inf:
                 max_edge = 2.0 * np.min(y_edges[np.isfinite(y_edges)])
             elif np.nanmax(y_edges) == np.inf:
                 max_edge = 2.0 * np.max(y_edges[np.isfinite(y_edges)])
-            else:
-                max_edge = np.max(y_edges[np.isfinite(y_edges)])
 
         relativeTo = 0.0 if self.relativeTo is None else self.relativeTo
         for i in range(np.max(self.nCells)):
