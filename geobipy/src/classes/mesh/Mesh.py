@@ -76,7 +76,6 @@ class Mesh(myObject):
         return np.squeeze(np.abs(np.diff(tmp, axis=axis)))
 
     def _mean(self, counts, axis=0):
-
         ax = self.axis(axis)
         s = tuple([np.s_[:] if i == axis else None for i in range(self.ndim)])
 
@@ -93,13 +92,17 @@ class Mesh(myObject):
 
         if ax._relativeTo is not None:
             nd = np.ndim(ax.relativeTo)
+            ns = ax.relativeTo.size
             if nd == 2:
                 out[i] += ax.relativeTo[i]
             elif nd == 1:
-                if np.ndim(i) == 2:
-                    out[i] += ax.relativeTo[i[0]]
+                if ns == 1:
+                    out[i] += ax.relativeTo
                 else:
-                    out[i] += ax.relativeTo[i]
+                    if np.ndim(i) == 2:
+                        out[i] += ax.relativeTo[i[0]]
+                    else:
+                        out[i] += ax.relativeTo[i]
             else:
                 out[i] += ax.relativeTo
         out = power_(out, ax.log)
@@ -167,14 +170,15 @@ class Mesh(myObject):
         i[i == values.shape[axis]] = values.shape[axis]-1
 
         # Obtain the values at those locations
-        ax = self.axis(axis)
-        out = ax.centres[i]
+        # ax = self.axis(axis)
+        if self.ndim == 1:
+            return self.centres_absolute[i]
+        else:
+            if np.size(percent) == 1:
+                i = np.expand_dims(i, axis)
+            return np.squeeze(np.take_along_axis(self.centres(axis), i, axis=axis))
+            # return np.squeeze(ax.centres_absolute[i])
 
-        if ax._relativeTo is not None:
-            out += np.expand_dims(ax.relativeTo, list(np.arange(np.ndim(out)-1)+1))
-        out = power_(out, ax.log)
-
-        return out
 
     def remove_axis(self, axis):
         tmp = [np.s_[:] for i in range(self.ndim)]
