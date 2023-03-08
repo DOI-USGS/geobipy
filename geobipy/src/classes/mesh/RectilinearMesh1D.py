@@ -57,6 +57,7 @@ class RectilinearMesh1D(Mesh):
         self._centres = None
         self._edges = None
         self._widths = None
+        assert not ((centres is None) & (edges is None) & (widths is None)), ValueError("Must specify either centres, edges, or widths")
         self.dimension = dimension
 
         self.log = log
@@ -390,10 +391,9 @@ class RectilinearMesh1D(Mesh):
 
     @widths.setter
     def widths(self, values):
-        assert np.all(values > 0.0), ValueError(
-            "widths must be entirely positive")
+        assert np.all(values > 0.0), ValueError("widths must be entirely positive")
 
-        self._widths = values
+        # self._widths = values
         self.edges =  StatArray.StatArray(np.hstack([0.0, np.cumsum(values)]), utilities.getName(values), utilities.getUnits(values))
 
     def axis(self, axis):
@@ -498,7 +498,7 @@ class RectilinearMesh1D(Mesh):
 
     #     return out
 
-    def cellIndex(self, values, clip=False, trim=False):
+    def cellIndex(self, values, clip=False, trim=False, **kwargs):
         """ Get the index to the cell that each value in values falls in.
 
         Parameters
@@ -663,16 +663,57 @@ class RectilinearMesh1D(Mesh):
         if self.nCells.item() > 1:
             return (np.diff(np.log(values))) / (np.log(self.widths[:-1]) - np.log(self.min_width))
 
-    # @property
-    # def gradient_operator(self):
-    #     # centres = np.asarray(self.centres)
-    #     # centres[-1] = centres[-2] + self.widths[-1]
-    #     # print(centres)
-    #     tmp = 1.0/(np.log(self.widths[:-1]) - np.log(self.min_width))
-    #     Wz = np.asarray((diags([tmp, -tmp], [0, 1], shape=(self.nCells.item()-1, self.nCells.item()))).todense())
-    #     # tmp = 1.0/np.sqrt(self.centreTocentre)
-    #     # return diags([tmp, -tmp], [0, 1], shape=(self.nCells.item()-1, self.nCells.item()))
-    #     return Wz
+    @property
+    def cell_weights(self):
+
+        if self.nCells == 1:
+            return np.ones((1, 1))
+
+        x = self.widths.copy()
+
+        # Sort out infinity here
+        f = 1.0
+        if self.open_left:
+            if self.nCells == 2:
+                x[0] = f * x[-1]
+            else:
+                x[0] = f * (x[1]**2.0 / x[2])
+
+        if self.open_right:
+            if self.nCells == 2:
+                x[-1] = f * x[0]
+            else:
+                x[-1] = f * (x[-2]**2.0 / x[-3])
+
+        return np.diag(x/(self.nCells * np.mean(x)))
+
+    @property
+    def gradient_operator(self):
+
+        if self.nCells == 1:
+            return np.ones((1, 1))
+
+        x = self.widths.copy()
+
+        # Sort out infinity here
+        if self.open_left:
+            if self.nCells == 2:
+                x[0] = x[-1]
+            else:
+                x[0] = x[1]**2.0 / x[2]
+
+        if self.open_right:
+            if self.nCells == 2:
+                x[-1] = x[0]
+            else:
+                x[-1] = x[-2]**2.0 / x[-3]
+
+        s = np.sqrt(x / np.mean(x))
+
+        centre_to_centre = 0.5*(x[:-1] + x[1:])
+
+        tmp = s[1:] / (centre_to_centre * self.nCells - 1)
+        return diags([-tmp, tmp], [0, 1], shape=(self.nCells.item()-1, self.nCells.item())).toarray()
 
     def in_bounds(self, values):
         """Return whether values are inside the cell edges
@@ -1263,7 +1304,7 @@ class RectilinearMesh1D(Mesh):
         return probability
 
     def remainingSpace(self, n_cells):
-        return (self.max_edge - self.min_edge) - n_cells * self.min_width
+        return (self.max_edge - self.min_edge) - (n_cells * self.min_width)
 
     def resample(self, dx, values, kind='cubic'):
         x = np.arange(self.edges[0], self.edges[-1]+dx, dx)
@@ -1408,7 +1449,7 @@ class RectilinearMesh1D(Mesh):
         geobipy.Model1D.perturb : For a description of the perturbation cycle.
 
         """
-        probabilities = np.asarray(probabilities)
+        probabilities = np.asarray(probabilities).copy()
         self._event_proposal = Distribution('Categorical',
                                             probabilities,
                                             ['insert', 'delete', 'perturb', 'none'],
