@@ -760,7 +760,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
         return np.unravel_index(index, self.shape, order=order)
 
 
-    # def pcolor(self, values, xAxis='x', **kwargs):
+    # def pcolor(self, values, x='x', **kwargs):
     #     """Create a pseudocolour plot.
 
     #     Can take any other matplotlib arguments and keyword arguments e.g. cmap etc.
@@ -812,7 +812,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
 
     #     assert np.all(values.shape == self.shape), ValueError("values must have shape {}".format(self.shape))
 
-    #     xtmp = self.getXAxis(xAxis)
+    #     xtmp = self.axis(x)
 
     #     ax, pm, cb = cP.pcolor(values, x = xtmp, y = self.z.edges, **kwargs)
 
@@ -841,19 +841,6 @@ class RectilinearMesh3D(RectilinearMesh2D):
     def _reorder_for_pyvista(self, values):
         return utilities.reorder_3d_for_pyvista(values)
 
-    def pyvista_plotter(self, plotter=None, **kwargs):
-
-        import pyvista as pv
-
-        if plotter is None:
-            plotter = pv.Plotter()
-        plotter.add_mesh(self.pyvista_mesh(), show_edges=True)
-
-        labels = dict(xlabel=self.x.label, ylabel=self.y.label, zlabel=self.z.label)
-        plotter.show_grid()
-        plotter.add_axes(**labels)
-
-        return plotter
 
     @property
     def summary(self):

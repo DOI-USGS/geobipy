@@ -670,20 +670,20 @@ class PointCloud3D(myObject):
     def plot_data_elevation(self, **kwargs):
         self.plot(values = self.z + self.elevation, **kwargs)
 
-    def plot(self, values, xAxis='index', **kwargs):
+    def plot(self, values, x='index', **kwargs):
         """Line plot of values against a co-ordinate.
 
         Parameters
         ----------
         values : array_like
             Values to plot against a co-ordinate
-        xAxis : str
-            If xAxis is 'index', returns numpy.arange(self.nPoints)
-            If xAxis is 'x', returns self.x
-            If xAxis is 'y', returns self.y
-            If xAxis is 'z', returns self.z
-            If xAxis is 'r2d', returns cumulative distance along the line in 2D using x and y.
-            If xAxis is 'r3d', returns cumulative distance along the line in 3D using x, y, and z.
+        axis : str
+            If axis is 'index', returns numpy.arange(self.nPoints)
+            If axis is 'x', returns self.x
+            If axis is 'y', returns self.y
+            If axis is 'z', returns self.z
+            If axis is 'r2d', returns cumulative distance along the line in 2D using x and y.
+            If axis is 'r3d', returns cumulative distance along the line in 3D using x, y, and z.
 
         Returns
         -------
@@ -695,10 +695,11 @@ class PointCloud3D(myObject):
         geobipy.plotting.plot : For additional keyword arguments
 
         """
-        x = self.getXAxis(xAxis)
+        x = self.axis(x)
         ax = cP.plot(x, values, **kwargs)
         return ax
 
+    # @property
     def pyvista_mesh(self):
         import pyvista as pv
 
@@ -708,20 +709,18 @@ class PointCloud3D(myObject):
 
         return out
 
-    def pyvista_plotter(self, plotter=None, **kwargs):
+    # def pyvista_plotter(self, plotter=None, **kwargs):
 
-        import pyvista as pv
+    #     import pyvista as pv
 
-        if plotter is None:
-            plotter = pv.Plotter()
-        plotter.add_mesh(self.pyvista_mesh())
+    #     if plotter is None:
+    #         plotter = pv.Plotter()
+    #     plotter.add_mesh(self.pyvista_mesh())
 
-        labels = dict(xlabel=self.x.label, ylabel=self.y.label, zlabel=self.z.label)
-        plotter.add_axes(**labels)
+    #     labels = dict(xlabel=self.x.label, ylabel=self.y.label, zlabel=self.z.label)
+    #     plotter.add_axes(**labels)
 
-        return plotter
-
-
+    #     return plotter
 
     def _readNpoints(self, filename):
         """Read the number of points in a data file

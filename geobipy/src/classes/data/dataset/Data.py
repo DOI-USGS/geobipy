@@ -818,7 +818,7 @@ class Data(PointCloud3D):
         cP.title(self.channelNames[channel])
 
 
-    def plot_data(self, xAxis='index', channels=None, system=None, **kwargs):
+    def plot_data(self, x='index', channels=None, system=None, **kwargs):
         """Plots the specifed channels as a line plot.
 
         Plots the channels along a specified co-ordinate e.g. 'x'. A legend is auto generated.
@@ -864,7 +864,9 @@ class Data(PointCloud3D):
             assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
             rTmp = self._systemIndices(system) if channels is None else channels + self._systemIndices(system).start
 
-        ax = super().plot(values=self.data[:, rTmp], xAxis=xAxis, label=self.channelNames[rTmp], **kwargs)
+        rTmp = np.asarray(rTmp, dtype=np.int32)
+
+        ax = super().plot(values=self.data[:, rTmp], x=x, label=[self.channelNames[r] for r in rTmp], **kwargs)
 
         if legend:
             # Put a legend to the right of the current axis
@@ -1061,30 +1063,17 @@ class Data(PointCloud3D):
         return self
 
 
-    def toVTK(self, fileName, prop=['data', 'predicted', 'std'], system=None, format='binary'):
-        """Save to a VTK file.
+    def pyvista_mesh(self):
+        import pyvista as pv
 
-        Parameters
-        ----------
-        fileName : str
-            Filename to save to.
-        prop : str or list of str, optional
-            List of the members to add to a VTK handle, either "data", "predicted", or "std".
-        # channels : ints, optional
-        #     Indices of the channels to plot.  All are plotted if None
-        #     * If system is None, 0 <= channel < self.nChannels else 0 <= channel < self.nChannelsPerSystem[system]
-        system : int, optional
-            The system to obtain the channel from.
-        format : str, optional
-            "ascii" or "binary" format. Ascii is readable, binary is not but results in smaller files.
+        out = super().pyvista_mesh()
 
-        """
+        out[self.data.label] = self.data
+        out[self.predictedData.label] = self.predictedData
+        out[self.std.label] = self.std
 
-        vtk = super().vtkStructure()
-
-        self.addToVTK(vtk, prop, system=system)
-
-        vtk.tofile(fileName, format=format)
+        print(self.data.label, self.predictedData.label, self.std.label)
+        return out
 
 
     def createHdf(self, parent, myName, withPosterior=True, fillvalue=None):

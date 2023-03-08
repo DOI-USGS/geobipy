@@ -98,7 +98,7 @@ class ChiSquared(baseDistribution):
         values = np.squeeze(self.prng.chisquare(size=size, df=self.df))
         return np.exp(values) if self.log else values
 
-    def plotPDF(self, log=False, **kwargs):
+    def plot_pdf(self, log=False, **kwargs):
         bins = self.bins()
         t = r"$\tilde{\Chi}^{2}(k="+str(self.df)+")$"
 

@@ -254,14 +254,14 @@ class Tempest_datapoint(TdemDataPoint):
             gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
 
         n_rows = 1
-        if (self.relative_error.hasPosterior & self.additive_error.hasPosterior) or any([self.transmitter.hasPosteriors, self.receiver.hasPosteriors]):
+        if (self.relative_error.hasPosterior & self.additive_error_multiplier.hasPosterior) or any([self.transmitter.hasPosteriors, self.receiver.hasPosteriors]):
             n_rows = 2
 
         splt = gs.subgridspec(n_rows, 1, wspace=0.3)
 
         n_cols = 1
         width_ratios = None
-        if self.relative_error.hasPosterior or self.additive_error.hasPosterior:
+        if self.relative_error.hasPosterior or self.additive_error_multiplier.hasPosterior:
             n_cols = 2
             width_ratios = (1, 2)
 
@@ -278,22 +278,22 @@ class Tempest_datapoint(TdemDataPoint):
             tmp = self.relative_error._init_posterior_plots(splt_top[0])
         ax.append(tmp)
 
-        if not self.relative_error.hasPosterior & self.additive_error.hasPosterior:
+        if not self.relative_error.hasPosterior & self.additive_error_multiplier.hasPosterior:
 
-            tmp = self.additive_error._init_posterior_plots(splt_top[0])
+            tmp = self.additive_error_multiplier._init_posterior_plots(splt_top[0])
             ax.append(tmp)
 
         ## Bottom row of plot
-        n_cols = np.sum([self.relative_error.hasPosterior & self.additive_error.hasPosterior, self.transmitter.hasPosteriors, self.loop_pair.hasPosteriors, self.receiver.hasPosteriors])
+        n_cols = np.sum([self.relative_error.hasPosterior & self.additive_error_multiplier.hasPosterior, self.transmitter.hasPosteriors, self.loop_pair.hasPosteriors, self.receiver.hasPosteriors])
 
         if n_cols > 0:
             splt_bottom = splt[1].subgridspec(1, n_cols)
 
             i = 0
             # Additive Error axes
-            if self.relative_error.hasPosterior & self.additive_error.hasPosterior:
+            if self.relative_error.hasPosterior & self.additive_error_multiplier.hasPosterior:
                 tmp = []
-                tmp = self.additive_error._init_posterior_plots(splt_bottom[i])
+                tmp = self.additive_error_multiplier._init_posterior_plots(splt_bottom[i])
                 if tmp is not None:
                     i += 1
                     for j in range(self.nSystems):
@@ -371,8 +371,10 @@ class Tempest_datapoint(TdemDataPoint):
         if not overlay is None:
                 # point_kwargs['overlay'] = overlay
                 rel_error_kwargs['overlay'] = overlay.relative_error
-                add_error_kwargs['overlay'] = [overlay.additive_error[i] for i in self.component_indices]
-                add_error_kwargs['axis'] = 1
+                # add_error_kwargs['overlay'] = [overlay.additive_error[i] for i in self.component_indices]
+                # add_error_kwargs['axis'] = 1
+                add_error_kwargs['overlay'] = overlay.additive_error_multiplier
+
 
         axes[0].clear()
         self.predictedData.plot_posteriors(ax = axes[0], colorbar=False, **data_kwargs)
@@ -384,7 +386,7 @@ class Tempest_datapoint(TdemDataPoint):
         self.relative_error.plot_posteriors(ax=axes[1], **rel_error_kwargs)
 
         add_error_kwargs['colorbar'] = False
-        self.additive_error.plot_posteriors(ax=axes[2], **add_error_kwargs)
+        self.additive_error_multiplier.plot_posteriors(ax=axes[2], **add_error_kwargs)
 
         self.loop_pair.plot_posteriors(axes = axes[3], **kwargs)
 
@@ -401,14 +403,10 @@ class Tempest_datapoint(TdemDataPoint):
 
         kwargs['marker'] = kwargs.pop('marker', 'v')
         kwargs['markersize'] = kwargs.pop('markersize', 7)
-        c = kwargs.pop('color', [cP.wellSeparated[i+1]
-                       for i in range(self.nSystems)])
-        mfc = kwargs.pop('markerfacecolor', [
-                         cP.wellSeparated[i+1] for i in range(self.nSystems)])
-        assert len(c) == self.nSystems, ValueError(
-            "color must be a list of length {}".format(self.nSystems))
-        assert len(mfc) == self.nSystems, ValueError(
-            "markerfacecolor must be a list of length {}".format(self.nSystems))
+        c = kwargs.pop('color', [cP.wellSeparated[i+1] for i in range(self.nSystems)])
+        mfc = kwargs.pop('markerfacecolor', [cP.wellSeparated[i+1] for i in range(self.nSystems)])
+        assert len(c) == self.nSystems, ValueError("color must be a list of length {}".format(self.nSystems))
+        assert len(mfc) == self.nSystems, ValueError("markerfacecolor must be a list of length {}".format(self.nSystems))
         kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor', 'k')
         kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth', 1.0)
         kwargs['alpha'] = kwargs.pop('alpha', 0.8)

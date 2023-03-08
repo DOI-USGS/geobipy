@@ -388,7 +388,7 @@ class Inference1D(myObject):
         """
 
         if self.interactive_plot:
-            self.initFigure()
+            self._init_posterior_plots()
             plt.show(block=False)
 
         self.clk.start()
@@ -396,14 +396,16 @@ class Inference1D(myObject):
         Go = True
         failed = False
         while (Go):
-
             # Accept or reject the new model
             self.accept_reject()
 
             self.update()
 
             if self.interactive_plot:
-                self.plot("Fiducial {}".format(self.datapoint.fiducial), increment=self.kwargs['update_plot_every'])
+                self.plot_posteriors(axes=self.ax,
+                                     fig=self.fig,
+                                     title="Fiducial {}".format(self.datapoint.fiducial),
+                                     increment=self.kwargs['update_plot_every'])
 
             Go = self.iteration <= self.n_markov_chains + self.burned_in_iteration
 
@@ -422,7 +424,7 @@ class Inference1D(myObject):
         # Does the user want to save the plot as a png?
         if (self.kwargs['save_png']):# and not failed):
             # To save any thing the Results must be plot
-            self.plot()
+            self.plot_posteriors(axes = self.ax, fig=self.fig)
             self.toPNG('.', self.datapoint.fiducial)
 
         return failed
@@ -487,58 +489,55 @@ class Inference1D(myObject):
             self.acceptance_rate[np.int32(self.iteration / self.update_plot_every)-1] = acceptance_percent
             self.accepted = 0
 
-    def initFigure(self, fig=None):
+    def _init_posterior_plots(self, gs=None, **kwargs):
         """ Initialize the plotting region """
         # Setup the figure region. The figure window is split into a 4x3
         # region. Columns are able to span multiple rows
 
-        # plt.ion()
+        fig  = kwargs.get('fig', plt.gcf())
+        if gs is None:
+            fig = kwargs.pop('fig', plt.figure(facecolor='white', figsize=(10, 7)))
+            gs = fig
 
-        if fig is None:
-            self.fig = plt.figure(facecolor='white', figsize=(10, 7))
-        else:
-            self.fig = plt.figure(fig.number)
+        if isinstance(gs, Figure):
+            gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
 
-        mngr = plt.get_current_fig_manager()
-        try:
-            mngr.frame.Maximize(True)
-        except:
-            try:
-                mngr.window.showMaximized()
-            except:
-                try:
-                    mngr.window.state('zoomed')
-                except:
-                    pass
+        gs = gs.subgridspec(2, 2, height_ratios=(1, 6))
 
-        gs = self.fig.add_gridspec(2, 2, height_ratios=(1, 6))
-        self.ax = [None] * 4
+        ax = [None] * 4
 
-        self.ax[0] = cP.pretty(plt.subplot(gs[0, 0]))  # Acceptance Rate 0
+        ax[0] = cP.pretty(plt.subplot(gs[0, 0]))  # Acceptance Rate 0
 
         splt = gs[0, 1].subgridspec(1, 2, width_ratios=[4, 1])
-        ax = [plt.subplot(splt[0, 0])]
-        ax.append(plt.subplot(splt[0, 1]))#, sharey=ax[0]))
-        self.ax[1] = ax  # Data misfit vs iteration 1 and posterior
+        tmp = [plt.subplot(splt[0, 0])]
+        tmp.append(plt.subplot(splt[0, 1]))#, sharey=ax[0]))
+        ax[1] = tmp  # Data misfit vs iteration 1 and posterior
 
-        self.ax[2] = self.model._init_posterior_plots(gs[1, 0])
-        self.ax[3] = self.datapoint._init_posterior_plots(gs[1, 1])
+        ax[2] = self.model._init_posterior_plots(gs[1, 0])
+        ax[3] = self.datapoint._init_posterior_plots(gs[1, 1])
 
         if self.interactive_plot:
             plt.show(block=False)
             plt.interactive(True)
 
+        self.fig, self.ax = fig, ax
 
-    def plot(self, title="", increment=None):
+        return fig, ax
+
+    def plot_posteriors(self, axes=None, title="", increment=None, **kwargs):
         """ Updates the figures for MCMC Inversion """
         # Plots that change with every iteration
         if self.iteration == 0:
             return
 
-        if (self.fig is None):
-            self.initFigure()
+        if axes is None:
+            fig = kwargs.pop('fig', None)
+            axes = fig
+            if fig is None:
+                fig, axes = self._init_posterior_plots()
 
-        plt.figure(self.fig.number)
+        if not isinstance(axes, list):
+            axes = self._init_posterior_plots(axes)
 
         plot = True
         if increment is not None:
@@ -586,8 +585,9 @@ class Inference1D(myObject):
             cP.suptitle(title)
 
             # self.fig.tight_layout()
-            self.fig.canvas.draw()
-            self.fig.canvas.flush_events()
+            if self.fig is not None:
+                self.fig.canvas.draw()
+                self.fig.canvas.flush_events()
 
             cP.pause(1e-9)
 
@@ -600,7 +600,7 @@ class Inference1D(myObject):
         i_positive = np.argwhere(acceptance_rate > 0.0)
         i_zero = np.argwhere(acceptance_rate == 0.0)
 
-        kwargs['ax'] = self.ax[0]
+        kwargs['ax'] = kwargs.get('ax', self.ax[0])
         kwargs['marker'] = kwargs.get('marker', 'o')
         kwargs['alpha'] = kwargs.get('alpha', 0.7)
         kwargs['linestyle'] = kwargs.get('linestyle', 'none')
@@ -614,37 +614,50 @@ class Inference1D(myObject):
     def _plotMisfitVsIteration(self, **kwargs):
         """ Plot the data misfit against iteration. """
 
-        kwargs['ax'] = self.ax[1][0]
+        ax = kwargs.get('ax', self.ax[1])
         m = kwargs.pop('marker', '.')
-        ms = kwargs.pop('markersize', 2)
+        # ms = kwargs.pop('markersize', 1)
         a = kwargs.pop('alpha', 0.7)
         ls = kwargs.pop('linestyle', 'none')
         c = kwargs.pop('color', 'k')
-        lw = kwargs.pop('linewidth', 3)
+        # lw = kwargs.pop('linewidth', 1)
 
-        ax = self.data_misfit_v.plot(self.iRange, i=np.s_[:self.iteration], marker=m, alpha=a, markersize=ms, linestyle=ls, color=c, **kwargs)
+        kwargs['ax'] = ax[0]
+
+        tmp_ax = self.data_misfit_v.plot(self.iRange, i=np.s_[:self.iteration], marker=m, alpha=a, linestyle=ls, color=c, **kwargs)
         plt.ylabel('Data Misfit')
 
-        dum = self.multiplier * np.sum(self.datapoint.active)
-        plt.axhline(dum, color='#C92641', linestyle='dashed', linewidth=lw)
+        dum = self.multiplier * self.data_misfit_v.prior.df
+        plt.axhline(dum, color='#C92641', linestyle='dashed')
         if (self.burned_in):
             plt.axvline(self.burned_in_iteration, color='#C92641',
-                        linestyle='dashed', linewidth=lw)
+                        linestyle='dashed')
             # plt.axvline(self.best_iteration, color=cP.wellSeparated[3])
         plt.yscale('log')
-        ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
+        tmp_ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 
         plt.xlim([0, self.iRange[self.iteration]])
 
-        kwargs = {'ax' : self.ax[1][1],
-                  'normalize' : True}
-        self.ax[1][1].cla()
-        ax = self.data_misfit_v.posterior.plot(transpose=True, **kwargs)
-        ylim = ax.get_ylim()
-        ax = self.data_misfit_v.prior.plotPDF(ax=self.ax[1][1], transpose=True, c='#C92641', linestyle='dashed')
+        if not self.burned_in:
+            self.data_misfit_v.reset_posteriors()
 
-        plt.hlines(np.sum(self.datapoint.active), xmin=0.0, xmax=0.5*ax.get_xlim()[1], color='#C92641', linestyle='dashed')
-        ax.set_ylim(ylim)
+        self.data_misfit_v.posterior.update(self.data_misfit_v[np.maximum(0, self.iteration-self.update_plot_every):self.iteration], trim=True)
+
+        kwargs = {'ax' : ax[1],
+                  'normalize' : True}
+        kwargs['ax'].cla()
+        tmp_ax = self.data_misfit_v.posterior.plot(transpose=True, **kwargs)
+        ylim = tmp_ax.get_ylim()
+        tmp_ax = self.data_misfit_v.prior.plot_pdf(ax=kwargs['ax'], transpose=True, c='#C92641', linestyle='dashed')
+
+        centres = self.data_misfit_v.posterior.mesh.centres
+        h_pdf = self.data_misfit_v.posterior.pdf.values
+        pdf = self.data_misfit_v.prior.probability(self.data_misfit_v.posterior.mesh.centres, log=False)
+
+        self.relative_chi_squared_fit = np.linalg.norm(h_pdf - pdf)/np.linalg.norm(pdf)
+
+        plt.hlines(np.sum(self.datapoint.active), xmin=0.0, xmax=0.5*tmp_ax.get_xlim()[1], color='#C92641', linestyle='dashed')
+        tmp_ax.set_ylim(ylim)
 
 
     # def _plotObservedPredictedData(self, **kwargs):

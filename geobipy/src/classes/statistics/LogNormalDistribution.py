@@ -103,7 +103,7 @@ class LogNormal(Normal):
         return np.exp(values) if self.linearSpace else values
 
 
-    def plotPDF(self, log=False, **kwargs):
+    def plot_pdf(self, log=False, **kwargs):
 
 
         bins = self.bins()

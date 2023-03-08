@@ -86,7 +86,7 @@ class Uniform(baseDistribution):
             return uniform.cdf(x, self._min, self.scale)
 
 
-    def plotPDF(self, log=False, **kwargs):
+    def plot_pdf(self, log=False, **kwargs):
         bins = self.bins()
         t = r"$\tilde{U}("+str(self.min)+","+str(self.max)+")$"
         cP.plot(bins, self.probability(bins, log=log), label=t, **kwargs)

@@ -410,7 +410,7 @@ class DataPoint(Point):
 
         return ax
 
-    def plot_posteriors(self, axes=None, height_kwargs={}, data_kwargs={}, rel_error_kwargs={}, add_error_kwargs={}, **kwargs):
+    def plot_posteriors(self, axes=None, data_kwargs={}, rel_error_kwargs={}, add_error_kwargs={}, **kwargs):
 
         if axes is None:
             axes = kwargs.pop('fig', plt.gcf())
@@ -418,15 +418,15 @@ class DataPoint(Point):
         if not isinstance(axes, list):
             axes = self._init_posterior_plots(axes)
 
+
         assert len(axes) == 4, ValueError("Must have length 3 list of axes for the posteriors. self.init_posterior_plots can generate them")
 
         overlay = kwargs.pop('overlay', None)
         if not overlay is None:
-            height_kwargs['overlay'] = overlay.z
             rel_error_kwargs['overlay'] = overlay.relative_error
             add_error_kwargs['overlay'] = overlay.additive_error
 
-        super().plot_posteriors(ax=axes[0], **kwargs)
+        super().plot_posteriors(axes=axes[0], **kwargs)
 
         axes[1].cla()
         self.predictedData.plot_posteriors(ax = axes[1], colorbar=False, **data_kwargs)

@@ -668,7 +668,7 @@ class TdemDataPoint(EmDataPoint):
             gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
 
         n_rows = 1
-        if any([self.relative_error.hasPosterior & self.additive_error.hasPosterior, self.transmitter.hasPosteriors, self.receiver.hasPosteriors]):
+        if any([self.relative_error.hasPosterior or self.additive_error.hasPosterior, self.transmitter.hasPosteriors, self.receiver.hasPosteriors]):
             n_rows = 2
 
         splt = gs.subgridspec(n_rows, 1, wspace=0.3)
@@ -703,6 +703,7 @@ class TdemDataPoint(EmDataPoint):
             width_ratios = (1, 2)
             if (self.relative_error.hasPosterior & self.additive_error.hasPosterior) + self.transmitter.hasPosteriors + self.receiver.hasPosteriors == 3:
                 width_ratios = (1, 2)
+
             splt_bottom = splt[1].subgridspec(1, n_cols, width_ratios=width_ratios)
         else:
             splt_bottom = []
@@ -779,7 +780,7 @@ class TdemDataPoint(EmDataPoint):
         ax = plt.gca() if ax is None else plt.sca(ax)
 
         markers = kwargs.pop('marker', ['o', 'x', 'v'])
-        kwargs['markersize'] = kwargs.pop('markersize', 5)
+        kwargs['markersize'] = kwargs.pop('markersize', 1)
         c = kwargs.pop('color', [cp.wellSeparated[i+1] for i in range(self.nSystems)])
         mfc = kwargs.pop('markerfacecolor', [cp.wellSeparated[i+1] for i in range(self.nSystems)])
         assert len(c) == self.nSystems, ValueError("color must be a list of length {}".format(self.nSystems))
@@ -788,7 +789,7 @@ class TdemDataPoint(EmDataPoint):
         kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth', 1.0)
         kwargs['alpha'] = kwargs.pop('alpha', 0.8)
         kwargs['linestyle'] = kwargs.pop('linestyle', 'none')
-        kwargs['linewidth'] = kwargs.pop('linewidth', 2)
+        kwargs['linewidth'] = kwargs.pop('linewidth', 1)
 
         xscale = kwargs.pop('xscale', 'log')
         yscale = kwargs.pop('yscale', 'log')
@@ -843,7 +844,7 @@ class TdemDataPoint(EmDataPoint):
             cp.title(title)
 
         kwargs['color'] = kwargs.pop('color', cp.wellSeparated[3])
-        kwargs['linewidth'] = kwargs.pop('linewidth', 2)
+        kwargs['linewidth'] = kwargs.pop('linewidth', 1)
         kwargs['alpha'] = kwargs.pop('alpha', 0.7)
         xscale = kwargs.pop('xscale', 'log')
         yscale = kwargs.pop('yscale', 'log')

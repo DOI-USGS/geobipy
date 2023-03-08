@@ -1226,7 +1226,7 @@ class RectilinearMesh1D(Mesh):
                         color=cp.wellSeparated[3])
 
                 doi = values.posterior.opacity_level(percent=67.0, log=values_kwargs.get('logX', None), axis=values_kwargs.get('axis', 0))
-                plt.axhline(doi, color = '#5046C8', linestyle = 'dashed', linewidth = 1, alpha = 0.6)
+                plt.axhline(doi, color = '#5046C8', linestyle = 'dashed', alpha = 0.6)
         return axes
 
     @property

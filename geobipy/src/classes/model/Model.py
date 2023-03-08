@@ -846,10 +846,6 @@ class Model(myObject):
         s[axis] = i
         return self[tuple(s)]
 
-    def to_vtk(self, filename):
-        mesh = self.pyvista_mesh()
-        mesh.save(filename)
-
     def update_posteriors(self, ratio=0.5):
         """Update any attached posterior distributions.
 

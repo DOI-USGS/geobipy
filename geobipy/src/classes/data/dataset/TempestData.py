@@ -266,7 +266,7 @@ class TempestData(TdemData):
 
         return self
 
-    def plot_data(self, system=0, channels=None, xAxis='index', **kwargs):
+    def plot_data(self, system=0, channels=None, x='index', **kwargs):
         """ Plots the data
 
         Parameters
@@ -281,7 +281,7 @@ class TempestData(TdemData):
         legend = kwargs.pop('legend', True)
         kwargs['yscale'] = kwargs.get('yscale', 'linear')
 
-        x = self.getXAxis(xAxis)
+        x = self.axis(x)
 
         if channels is None:
             i = self._systemIndices(system)

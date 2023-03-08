@@ -7,7 +7,6 @@ from .Mesh import Mesh
 from ...classes.core import StatArray
 from .RectilinearMesh1D import RectilinearMesh1D
 import numpy as np
-import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.collections import LineCollection
 from matplotlib.figure import Figure
