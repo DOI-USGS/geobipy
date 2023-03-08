@@ -31,11 +31,6 @@ class Model(myObject):
     def __getitem__(self, slic):
         mesh = self.mesh[slic]
         out = type(self)(mesh, values = self.values[slic])
-        # out._gradient = self.gradient[reslice(slic, stop = -1)]
-
-        # if len(self.__values) > 1:
-        #     for k, v in zip(self.__values, self.cell_values[1:]):
-        #         out.setattr(k, v[slic])
         return out
 
     def __deepcopy__(self, memo={}):
@@ -306,7 +301,7 @@ class Model(myObject):
         """
         assert self.values.hasPrior or self.gradient.hasPrior, Exception("Model must have either a parameter prior or gradient prior, use self.set_priors()")
 
-        hessian = self.prior_derivative(order=2)
+        hessian = self.values.priorDerivative(order=2)
 
         if not observation is None:
             vals = observation.prior_derivative(order=2)
@@ -405,6 +400,7 @@ class Model(myObject):
         # This is Wm'Wm(sigma - sigma_ref)
         # Need to have the gradient be a part of this too.
         gradient = remapped_model.values.priorDerivative(order=1)
+        # gradient = np.dot(remapped_model.prior_derivative(), remapped_model.values.prior.deviation(remapped_model.values))
 
         if not observation is None:
             # The gradient is now J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref)
@@ -416,8 +412,6 @@ class Model(myObject):
         # delta sigma = 0.5 * inv(J'Wd'WdJ + Wm'Wm)(J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref))
         # This could be replaced with a CG solver for bigger problems like deterministic algorithms.
         dSigma = 0.5 * np.dot(inverse_hessian, gradient)
-        mask = np.abs(dSigma) > 6.0
-        dSigma[mask] = np.sign(dSigma)[mask] * 6.0
 
         mean = np.log(remapped_model.values) - dSigma
 
@@ -447,6 +441,11 @@ class Model(myObject):
         if self.value_bounds is not None:
             remapped_model.value_bounds = self.value_bounds
         if remapped_model.values.hasPrior:
+            # remapped_model.values.prior = type(remapped_model.values.prior)(
+            #                                    mean=np.full(remapped_mesh.nCells, fill_value=remapped_model.values.prior.mean[0]),
+            #                                    variance=remapped_mesh.cell_weights / np.log(11.0)**2.0)
+            # remapped_model.values.prior._mean =
+            # remapped_model.values.prior._variance =
             remapped_model.values.prior.ndim = remapped_model.nCells.item()
         if remapped_model.gradient.hasPrior:
             remapped_model.gradient.prior.ndim = np.maximum(1, remapped_model.nCells-1)
@@ -514,8 +513,21 @@ class Model(myObject):
         """
         return self.mesh.pcolor(values=self.values, **kwargs)
 
-    def prior_derivative(self, order):
-        return self.values.priorDerivative(order=order)
+    def prior_derivative(self):
+        value_precision = self.values.priorDerivative(order=2)
+        hessian = None
+        if self.values.hasPrior:
+            hessian = self.mesh.cell_weights * value_precision  # Ws'Ws
+
+        if self.gradient.hasPrior:
+            Wd = self.mesh.gradient_operator
+            WdTWd = np.dot(Wd.T, Wd)
+            if hessian is None:
+                hessian = WdTWd
+            else:
+                hessian += WdTWd
+
+        return hessian
 
     def probability(self, solve_value, solve_gradient):
         """Evaluate the prior probability for the 1D Model.
@@ -663,15 +675,16 @@ class Model(myObject):
             The reverse proposal probability
 
         """
-
         # Evaluate the Reversible Jump Step.
-        # For the reversible jump, we need to compute the gradient from the perturbed parameter values.
+        # For the reversible jump, we need to compute the gradient from the perturbed parameter values
+        # that were generated using pertured data, using the unperturbed data.
         # We therefore scale the sensitivity matrix by the proposed errors in the data, and our gradient uses
         # the data residual using the perturbed parameter values.
 
         # Compute the gradient according to the perturbed parameters and data residual
         # This is Wm'Wm(sigma - sigma_ref)
-        gradient = self.prior_derivative(order=1)
+        # gradient = self.prior_derivative(order=1)
+        gradient = self.values.priorDerivative(order=1)
 
         # todo:
         # replace the par.priorDerivative with appropriate gradient
@@ -693,6 +706,8 @@ class Model(myObject):
         # Probability of jumping from our perturbed parameter values to the unperturbed values.
         proposal = tmp.probability(x=remappedModel.values, log=True)
 
+        # This is the forward proposal. Evaluate the new proposed values given a mean of the old values
+        # and variance using perturbed data
         tmp = Distribution('MvLogNormal', remappedModel.values, self.values.proposal.variance, linearSpace=True, prng=prng)
         proposal1 = tmp.probability(x=self.values, log=True)
 
@@ -784,16 +799,15 @@ class Model(myObject):
             if kwargs.get('solve_value', False):
                 assert 'value_mean' in kwargs, ValueError("No value_prior given, must specify keywords 'value_mean'")
                 # Assign the initial prior to the parameters
+                variance = np.log(11.0)**2.0 #self.mesh.cell_weights /
                 values_prior = Distribution('MvLogNormal', mean=kwargs['value_mean'],
-                                                variance=np.log(1.0+kwargs.get('factor', 10.0))**2.0,
+                                                variance=variance, #np.log(1.0+kwargs.get('factor', 10.0))**2.0,
                                                 ndim=self.mesh.nCells,
                                                 linearSpace=True,
                                                 prng=kwargs.get('prng'))
 
         if gradient_prior is None:
             if kwargs.get('solve_gradient', False):
-                # Wz = self.mesh.gradient_matrix()
-
                 self.gradient.prior = Distribution('MvNormal', mean=0.0,
                                             variance=kwargs.get('gradient_variance', 1.5),
                                             ndim=np.maximum(1, self.mesh.nCells-1),
