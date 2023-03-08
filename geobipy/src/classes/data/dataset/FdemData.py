@@ -75,7 +75,7 @@ class FdemData(Data):
         kwargs['components'] = kwargs.get('components', self.components)
         kwargs['channels_per_system'] = kwargs.get('channels_per_system', 2*self.nFrequencies)
         # kwargs['components_per_channel'] = kwargs.get('components_per_channel', self.system[0].components)
-        kwargs['units'] = "ppm"
+        kwargs['units'] = kwargs.get('units', "ppm")
 
         # Data Class containing xyz and channel values
         super().__init__(**kwargs)

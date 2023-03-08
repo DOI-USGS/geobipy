@@ -80,10 +80,11 @@ class TdemData(Data):
         self.predicted_primary_field = kwargs.get('predicted_primary_field')
         self.predicted_secondary_field = kwargs.get('predicted_secondary_field')
 
-        # StatArray of Transmitter loops
-        self.transmitter = kwargs.get('transmitter')
-        # StatArray of Receiever loops
-        self.receiver = kwargs.get('receiver')
+        self.loop_pair = Loop_pair(kwargs.get('transmitter'), kwargs.get('receiver'))
+        # # StatArray of Transmitter loops
+        # self.transmitter = kwargs.get('transmitter')
+        # # StatArray of Receiever loops
+        # self.receiver = kwargs.get('receiver')
         # # Loop Offsets
         # self.loopOffset = kwargs.get('loopOffset', None)
 
@@ -262,7 +263,7 @@ class TdemData(Data):
         if self.relative_error.max() > 0.0:
             for i in range(self.nSystems):
                 j = self._systemIndices(i)
-                self._std[:, j] = np.sqrt((self.relative_error[:, i][:, None] * self.secondary_field[:, j])**2 + (self.additive_error[:, i]**2.0)[:, None])
+                self._std[:, j] = np.sqrt((self.relative_error[:, i][:, None] * self.data[:, j])**2 + (self.additive_error[:, i]**2.0)[:, None])
 
         return self._std
 
@@ -995,8 +996,8 @@ class TdemData(Data):
 
         grp.create_dataset('nSystems', data=self.nSystems)
         for i in range(self.nSystems):
-            txt = np.string_(Path(self.system[i].filename).read_text())
-            grp.create_dataset('System{}'.format(i), data=txt)
+            self.system[i].toHdf(grp, 'System{}'.format(i))
+
 
         self.transmitter.createHdf(grp, 'T', withPosterior=withPosterior, fillvalue=fillvalue)
         self.receiver.createHdf(grp, 'R', withPosterior=withPosterior, fillvalue=fillvalue)
@@ -1041,9 +1042,6 @@ class TdemData(Data):
             systems[i] = TdemSystem.fromHdf(grp['System{}'.format(i)])
 
         self = super(TdemData, cls).fromHdf(grp, system=systems)
-
-        # sz = StatArray.StatArray.fromHdf(grp['predicted_secondary_field'])
-        # print(sz.min(), sz.max())
 
         self.primary_field = None#StatArray.StatArray.fromHdf(grp['primary_field'])
         self.secondary_field = StatArray.StatArray.fromHdf(grp['secondary_field'])

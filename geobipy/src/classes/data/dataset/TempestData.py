@@ -81,26 +81,6 @@ class TempestData(TdemData):
     def file(self):
         return self._file
 
-    # @property
-    # def primary_field(self):
-    #     """The data. """
-    #     if np.size(self._primary_field, 0) == 0:
-    #         self._primary_field = StatArray.StatArray((self.nPoints, self.n_components * self.nSystems), "Primary field", self.units)
-    #     return self._primary_field
-
-    # @primary_field.setter
-    # def primary_field(self, values):
-    #     shp = (self.nPoints, self.n_components * self.nSystems)
-    #     if values is None:
-    #         self._primary_field = StatArray.StatArray(shp, "Primary field", self.units)
-    #     else:
-    #         if self.nPoints == 0:
-    #             self.nPoints = np.size(values, 0)
-    #         # if self.nChannels == 0:
-    #         #     self.channels_per_system = np.size(values, 1)
-    #         shp = (self.nPoints, self.n_components * self.nSystems)
-    #         assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("primary_field must have shape {}".format(shp))
-    #         self._primary_field = StatArray.StatArray(values)
 
     @property
     def relative_error(self):
