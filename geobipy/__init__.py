@@ -85,7 +85,7 @@ def checkCommandArguments():
     Parser.add_argument('--fiducial', dest='fiducial', type=float, default=None, help='Invert this fiducial only. Only used in serial mode.')
     Parser.add_argument('--line', dest='line_number', type=float, default=None, help='Invert the fiducial on this line. Only used in serial mode.')
     Parser.add_argument('--verbose', dest='verbose', default=False, help='Throw warnings as errors.')
-
+    Parser.add_argument('--mpi', dest='mpi', default=False, help='Run geobipy with MPI libraries.')
 
     args = Parser.parse_args()
 
@@ -93,7 +93,7 @@ def checkCommandArguments():
         import warnings
         warnings.filterwarnings("error")
 
-    return args.inputFile, args.output_directory, args.skipHDF5, args.seed, args.index, args.fiducial, args.line_number
+    return args.inputFile, args.output_directory, args.skipHDF5, args.seed, args.index, args.fiducial, args.line_number, args.mpi
 
 
 def serial_geobipy(inputFile, output_directory, seed=None, index=None, fiducial=None, line_number=None):
@@ -201,16 +201,11 @@ def parallel_mpi(inputFile, output_directory, skipHDF5):
 def geobipy():
     """Run the serial implementation of GeoBIPy. """
 
-    inputFile, output_directory, _, seed, index, fiducial, line_number = checkCommandArguments()
+    inputFile, output_directory, skipHDF5, seed, index, fiducial, line_number, mpi_enabled = checkCommandArguments()
     sys.path.append(getcwd())
 
-    serial_geobipy(inputFile, output_directory, seed, index, fiducial, line_number)
 
-
-def geobipy_mpi():
-    """Run the parallel implementation of GeoBIPy. """
-
-    inputFile, output_directory, skipHDF5, _, _, _, _ = checkCommandArguments()
-    sys.path.append(getcwd())
-
-    parallel_geobipy(inputFile, output_directory, skipHDF5)
+    if mpi_enabled:
+        parallel_geobipy(inputFile, output_directory, skipHDF5)
+    else:
+        serial_geobipy(inputFile, output_directory, seed, index, fiducial, line_number)

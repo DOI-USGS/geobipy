@@ -60,7 +60,7 @@ setup(name='geobipy',
     entry_points = {
         'console_scripts':[
             'geobipy=geobipy:geobipy',
-            'geobipy_mpi=geobipy:geobipy_mpi',
+            # 'geobipy_mpi=geobipy:geobipy_mpi',
         ],
     }
 )
