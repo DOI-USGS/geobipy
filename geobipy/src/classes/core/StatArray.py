@@ -180,6 +180,10 @@ class StatArray(np.ndarray, myObject):
     # Properties
 
     @property
+    def bounds(self):
+        return np.r_[np.nanmin(self), np.nanmax(self)]
+
+    @property
     def name(self):
         return "" if self._name is None else self._name
 
@@ -325,6 +329,22 @@ class StatArray(np.ndarray, myObject):
         mx[x > 1.0] = np.nan
 
         return mx
+
+    def centred_grid_nodes(self, spacing):
+        """Generates grid nodes centred over bounds
+
+        Parameters
+        ----------
+        bounds : array_like
+            bounds of the dimension
+        spacing : float
+            distance between nodes
+
+        """
+        # Get the discretization
+        assert spacing > 0.0, ValueError("spacing must be positive!")
+        sp = 0.5 * spacing
+        return StatArray(np.arange(self.bounds[0] - sp, self.bounds[1] + (2*sp), spacing), self.name, self.units)
 
     def confidence_interval(self, interval):
         values = self.flatten()
@@ -522,8 +542,8 @@ class StatArray(np.ndarray, myObject):
             StatArray after inserting a value.
 
         """
-
-        tmp = np.insert(self, i, values, axis)
+        tmp = np.insert(arr=self, obj=i, values=values, axis=axis)
+        # tmp = np.insert(self, i, values, axis)
         out = self.resize(tmp.shape)  # Keeps the prior and proposal if set.
         out[:] = tmp[:]
 
@@ -651,13 +671,13 @@ class StatArray(np.ndarray, myObject):
             1 or 2 for first or second order derivative
 
         """
-        assert self.hasPrior, TypeError(
-            'No prior defined on variable {}. Use StatArray.set_prior()'.format(self.name))
+        assert self.hasPrior, TypeError('No prior defined on variable {}. Use StatArray.set_prior()'.format(self.name))
         if i is None:
             i = np.s_[:]
-        return self.prior.derivative(self[i], order)
+        out = self.prior.derivative(self[i], order)
+        return out
 
-    def proposalDerivative(self, order, i=None):
+    def proposal_derivative(self, order, i=None):
         """ Get the derivative of the proposal.
 
         Parameters
@@ -666,8 +686,7 @@ class StatArray(np.ndarray, myObject):
             1 or 2 for first or second order derivative
 
         """
-        assert self.hasProposal, TypeError(
-            'No proposal defined on variable {}. Use StatArray.setProposal()'.format(self.name))
+        assert self.hasProposal, TypeError('No proposal defined on variable {}. Use StatArray.setProposal()'.format(self.name))
         if i is None:
             i = np.s_[:]
         return self.proposal.derivative(self[i], order)
@@ -725,11 +744,7 @@ class StatArray(np.ndarray, myObject):
             StatArray with prepended values.
 
         """
-
-        try:
-            i = np.zeros(np.size(values))
-        except:
-            i = 0
+        i = np.zeros(np.size(values), dtype=np.int32)
         return self.insert(i, values, axis=axis)
 
     @property
@@ -851,12 +866,12 @@ class StatArray(np.ndarray, myObject):
             nrows=2, ncols=1, left=0.085, right=0.40, wspace=0.06, hspace=0.5)
 
         ax = plt.subplot(gs2[0, 0])
-        self.prior.plotPDF()
+        self.prior.plot_pdf()
         cP.xlabel(self.getNameUnits())
         cP.title('Prior')
 
         plt.subplot(gs2[1, 0], sharex=ax, sharey=ax)
-        self.proposal.plotPDF()
+        self.proposal.plot_pdf()
         cP.title('Proposal')
         cP.xlabel(self.getNameUnits())
 
@@ -967,7 +982,7 @@ class StatArray(np.ndarray, myObject):
         """
         self[i] = self.propose(i, relative, imposePrior, log)
 
-    def probability(self, log, x=None, i=None):
+    def probability(self, log, x=None, i=None, active=None):
         """Evaluate the probability of the values in self using the attached prior distribution
 
         Parameters
@@ -999,7 +1014,7 @@ class StatArray(np.ndarray, myObject):
         if not i is None:
             samples = samples[i]
 
-        return self.prior.probability(x=samples, log=log)
+        return self.prior.probability(x=samples, log=log, i=active)
 
     def propose(self, i=np.s_[:], relative=False, imposePrior=False, log=False):
         """Propose new values using the attached proposal distribution
@@ -1045,7 +1060,7 @@ class StatArray(np.ndarray, myObject):
 
         assert self.hasPrior, TypeError('No prior defined on variable {}. Use StatArray.set_prior()'.format(self.name))
 
-        p = self.probability(x=proposed, log=log)
+        p = self.probability(x=proposed, log=log, active=i)
 
         num = -np.inf if log else 0.0
         tries = 0
@@ -1055,7 +1070,7 @@ class StatArray(np.ndarray, myObject):
             if relative:
                 proposed = self + proposed
 
-            p = self.probability(x=proposed, log=log)
+            p = self.probability(x=proposed, log=log, active=i)
             tries += 1
             if tries == 10:
                 # print("Could not propose values for {}. Continually produced P(X)={}".format(self.summary, num), flush=True)
@@ -1072,12 +1087,9 @@ class StatArray(np.ndarray, myObject):
         if not self.hasPosterior:
             return
 
-        # assert (self.hasPosterior), TypeError(
-        #     'No posterior defined on variable {}. Use StatArray.setPosterior()'.format(self.name))
-
         if self.n_posteriors > 1:
-            for i in range(self.n_posteriors):
-
+            active = np.atleast_1d(kwargs.get('active', range(self.n_posteriors)))
+            for i in active:
                 self._posterior[i].update(self.take(indices=i, axis=0), **kwargs)
 
         else:
