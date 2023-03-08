@@ -60,12 +60,12 @@ initial_relative_error = [0.02, 0.02]
 ## Relative Error Prior Details
 # Distribution('Uniform', min=[0.01, 0.01], max=[0.5, 0.5])
 # Minimum Relative Error
-minimum_relative_error = [0.001, 0.001]
+minimum_relative_error = [0.00001, 0.000001]
 # Maximum Relative Error
-maximum_relative_error = [0.5, 0.5]
+maximum_relative_error = [0.1, 0.1]
 ## Proposal variance for the relative error
 # Distribution('Normal', mean=[0.0, 0.0], variance=[2.5e-7, 2.5e-7])
-relative_error_proposal_variance = [2.5e-7, 2.5e-7]
+relative_error_proposal_variance = [1e-4, 1e-4]
 # -------------------------------------------------------
 # -------------------------------------------------------
 # Use the prior on the additive data errors
@@ -75,17 +75,24 @@ solve_additive_error = True
 # to assign the initial data uncertainties.
 # (0.03, 0.026, 0.024, 0.020, 0.018, 0.017, 0.016, 0.015, 0.014, 0.013, 0.012, 0.011, 0.010, 0.009, 0.008,
 #  0.015, 0.014, 0.013, 0.011, 0.009, 0.008, 0.0075, 0.007, 0.006, 0.0055, 0.005, 0.0045, 0.004, 0.0035, 0.003)
-initial_additive_error = 2*np.r_[0.011474, 0.012810, 0.008507, 0.005154, 0.004742, 0.004477, 0.004168, 0.003539, 0.003352, 0.003213, 0.003161, 0.003122, 0.002587, 0.002038, 0.002201,
+initial_additive_error = np.r_[0.011474, 0.012810, 0.008507, 0.005154, 0.004742, 0.004477, 0.004168, 0.003539, 0.003352, 0.003213, 0.003161, 0.003122, 0.002587, 0.002038, 0.002201,
                                0.007383, 0.005693, 0.005178, 0.003659, 0.003426, 0.003046, 0.003095, 0.003247, 0.002775, 0.002627, 0.002460, 0.002178, 0.001754, 0.001405, 0.001283]
+# # Additive Error Prior Details
+# # Distribution('Uniform', min=1.0, max=3.0)
+# # Minimum Additive Error
+# minimum_additive_error = np.full(30, fill_value=0.0001)
+# # Maximum Relative Error
+# maximum_additive_error = np.full(30, fill_value=1000.0)
+# Proposal variance for the additive error
+# Distribution('Normal', mean=VALUE, variance=0.0025)
+additive_error_proposal_variance = 1e-2
+
 # Additive Error Prior Details
 # Distribution('Uniform', min=1.0, max=3.0)
 # Minimum Additive Error
-minimum_additive_error = np.full(30, fill_value=0.001)
+minimum_additive_error = np.r_[0.001, 0.001]
 # Maximum Relative Error
-maximum_additive_error = np.full(30, fill_value=1.0)
-# Proposal variance for the additive error
-# Distribution('Normal', mean=VALUE, variance=0.0025)
-additive_error_proposal_variance = 0.0025
+maximum_additive_error = np.r_[100.0, 100.0]
 # -------------------------------------------------------
 # -------------------------------------------------------
 # Transmitter loop parameters.
@@ -106,7 +113,7 @@ solve_transmitter_pitch = False
 # Distribution('Uniform', min=VALUE-change, max=VALUE+change)
 maximum_transmitter_pitch_change = 5.0 # degrees
 # Distribution('Normal', mean=VALUE, variance=0.0001)
-transmitter_pitch_proposal_variance = 0.05
+transmitter_pitch_proposal_variance = 0.1
 
 # -------------------------------------------------------
 # -------------------------------------------------------
@@ -116,19 +123,19 @@ solve_receiver_x = True
 # Distribution('Uniform', min=VALUE-change, max=VALUE+change)
 maximum_receiver_x_change = 5.0 # meters
 # Distribution('Normal', mean=VALUE, variance=0.0001)
-receiver_x_proposal_variance = 0.1
+receiver_x_proposal_variance = 0.025
 
 solve_receiver_z = True
 # Distribution('Uniform', min=VALUE-change, max=VALUE+change)
 maximum_receiver_z_change = 5.0 # meters
 # Distribution('Normal', mean=VALUE, variance=0.0001)
-receiver_z_proposal_variance = 0.1
+receiver_z_proposal_variance = 0.025
 
 solve_receiver_pitch = True
 # Distribution('Uniform', min=VALUE-change, max=VALUE+change)
 maximum_receiver_pitch_change = 5.0 # degrees
 # Distribution('Normal', mean=VALUE, variance=0.0001)
-receiver_pitch_proposal_variance = 0.1
+receiver_pitch_proposal_variance = 0.01
 # -------------------------------------------------------
 # -------------------------------------------------------
 

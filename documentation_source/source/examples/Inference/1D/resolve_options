@@ -122,7 +122,7 @@ maximum_height_change = 1.0
 # normal distributions with a mean equal to its value in the current model (of the Markov chain)
 # These variances are used when we randomly choose a new value for that given variable.
 # Proposal variance for the relative error
-relative_error_proposal_variance = 2.5e-7
+relative_error_proposal_variance = 2.5e-3
 # Proposal variance for the additive error
 additive_error_proposal_variance = 1.0e-4
 # Proposal variance of the elevation
