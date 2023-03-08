@@ -1,5 +1,4 @@
-import numpy as np
-
+from numpy import ndim, size, integer
 def write_nd(arr, h5obj, myName, index=None):
     """Writes a numpy array to a preallocated dataset in a h5py group object
 
@@ -23,7 +22,7 @@ def write_nd(arr, h5obj, myName, index=None):
 
 def write_nd_nonindexed(arr, h5obj, myName):
 
-    nd = np.ndim(arr)
+    nd = ndim(arr)
     assert nd <= 6, ValueError('The number of dimensions to write must be <= 6')
 
     # Pull the group
@@ -64,9 +63,9 @@ def write_nd_indexed(arr, h5obj, myName, index):
     ds = h5obj[myName]
 
     # assert np.size(ds.shape) == nd, ValueError("arr is being written to a dataset of different shape")
-    ndi = np.size(index)
+    ndi = size(index)
     s = arr.size
-    nda = np.ndim(arr)
+    nda = ndim(arr)
     if nda >= 2:
         s = arr.shape
 
@@ -103,10 +102,10 @@ def write_nd_indexed(arr, h5obj, myName, index):
             ds[i, :s[0], :s[1], :s[2], :s[3], :s[4], :s[5]] = arr
 
     elif ndi == 1:
-        if not isinstance(i, (int, np.integer)):
+        if not isinstance(i, (int, integer)):
             i = i[0]
         if (nda == 1):
-            if np.ndim(ds) == 1:
+            if ndim(ds) == 1:
                 ds[i] = arr
             else:
                 ds[i, :s] = arr
@@ -165,4 +164,3 @@ def write_nd_indexed(arr, h5obj, myName, index):
 
         elif(nda == 6):
             ds[i[0], i[1], i[2], :s[0], :s[1], :s[2], :s[3], :s[4], :s[5]] = arr
-

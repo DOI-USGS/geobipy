@@ -1,5 +1,6 @@
-import h5py
-import numpy as np
+# import h5py
+from numpy import array
+from h5py import File, Group
 from ...base import utilities as cf
 #from .. import Error as Err
 
@@ -28,14 +29,14 @@ def find(filename, tag):
                 if tag in path: # test for dataset
                     yield item, path
                 else:
-                    if isinstance(item, h5py.Group): # test for group (go down)
+                    if isinstance(item, Group): # test for group (go down)
                         yield from h5py_iterator(item, tag, path)
 
         for _, path in h5py_iterator(f, tag):
             yield path
 
     locs = []
-    with h5py.File(filename, 'r') as f:
+    with File(filename, 'r') as f:
         for path in find_inner(f, tag):
             locs.append(path)
     return locs
@@ -59,7 +60,7 @@ def read_groups_with_tag(filename, tag, index=None, **kwargs):
     """
     locs = find(filename, tag)
     classes = []
-    with h5py.File(filename, 'r') as f:
+    with File(filename, 'r') as f:
         for loc in locs:
             classes.append(read_item(f[loc], index=index, **kwargs))
     return classes
@@ -81,7 +82,7 @@ def read_all(fName):
 
     """
     items = {}  # Empty list of items
-    with h5py.File(fName, 'r') as hf:
+    with File(fName, 'r') as hf:
         for key in list(hf.keys()):
             grp = hf.get(key)  # Get the name of the item
             tmp = read_item(grp)
@@ -118,7 +119,7 @@ def readKeyFromFiles(fNames, groupName, key, index=None, **kwargs):
     if isinstance(fNames, str):
         fNames = [fNames]
     for f in fNames:
-        with h5py.File(f, 'r') as hf:
+        with File(f, 'r') as hf:
             items.append(readKeyFromFile(hf, f, groupName, key, index=index, **kwargs))
     if (len(items) == 1): items = items[0] # Return unlisted item if single
     return items
@@ -228,14 +229,9 @@ def read_item(h5obj, index=None, **kwargs):
         return tmp
     try:
         if (index is None):
-            return np.array(h5obj)
+            return array(h5obj)
         else:
-            return np.array(h5obj)[index]
+            return array(h5obj)[index]
     except:
         raise ValueError("Could not read group "+str(h5obj)+" from hdf file. \n Check whether an index must be specified in the read hdf function you are using")
     return None
-
-
-
-
-
