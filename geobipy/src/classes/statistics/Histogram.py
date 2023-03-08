@@ -1,3 +1,4 @@
+from copy import deepcopy
 import numpy as np
 import matplotlib as mpl
 
@@ -359,7 +360,14 @@ class Histogram(Model):
             Contains the upper interval along the specified axis. Has size equal to arr.shape[axis].
 
         """
-        return Model(self.mesh.remove_axis(axis), values=self.mesh._percentile(values=self.pmf.values, percent=percent, axis=axis))
+        percentile = self.mesh._percentile(values=self.pmf.values, percent=percent, axis=axis)
+
+        if np.size(percent) == 1:
+            return Model(self.mesh.remove_axis(axis), values=percentile)
+        else:
+            mesh = deepcopy(self.mesh)
+            mesh.axis(axis).centres = StatArray(percent, 'percent', '%')
+            return Model(mesh, values=percentile)
 
     def pcolor(self, **kwargs):
         kwargs['cmap'] = kwargs.get('cmap', 'gray_r')
