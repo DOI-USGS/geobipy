@@ -58,7 +58,7 @@ class EmDataPoint(DataPoint):
         if values is None:
             values = np.zeros(1, dtype=np.int32)
         else:
-            values = np.atleast_1d(np.asarray(values, dtype=np.int32))
+            values = np.atleast_1d(np.asarray(values, dtype=np.int32)).copy()
 
         self._channels_per_system = values
 
