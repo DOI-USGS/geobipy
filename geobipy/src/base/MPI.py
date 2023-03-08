@@ -1,6 +1,8 @@
 """ Module containing custom MPI functions """
-import numpy as np
+from numpy.linalg import norm
+from numpy import asarray, prod, unravel_index, s_
 import sys
+import numpy as np
 from os import getpid
 from time import time
 #from ...base.Error import Error as Err
@@ -12,18 +14,18 @@ class world3D(object):
 
         assert world.size >= 8, ValueError("Must have at least 8 chunks for 3D load balancing.")
 
-        target = shape / np.linalg.norm(shape)
+        target = shape / norm(shape)
         best = None
         bestFit = 1e20
         for i in range(2, int(world.size/2)+1):
             for j in range(2, int(world.size/i)):
                 k = int(world.size/(i*j))
-                nBlocks = np.asarray([i, j, k])
-                total = np.prod(nBlocks)
+                nBlocks = asarray([i, j, k])
+                total = prod(nBlocks)
 
                 if total == world.size:
-                    fraction = nBlocks / np.linalg.norm(nBlocks)
-                    fit = np.linalg.norm(fraction - target)
+                    fraction = nBlocks / norm(nBlocks)
+                    fit = norm(fraction - target)
                     if fit < bestFit:
                         best = nBlocks
                         bestFit = fit
@@ -35,8 +37,8 @@ class world3D(object):
         self.yStarts, self.ychunkSizes = loadBalance1D_shrinkingArrays(shape[1], best[1])
         self.zStarts, self.zChunkSizes = loadBalance1D_shrinkingArrays(shape[2], best[2])
 
-        self.chunkShape = np.asarray([self.zChunks.size, self.yChunks.size, self.xChunks.size])
-        self.chunkIndex = np.unravel_index(self.rank, self.chunkShape)
+        self.chunkShape = asarray([self.zChunks.size, self.yChunks.size, self.xChunks.size])
+        self.chunkIndex = unravel_index(self.rank, self.chunkShape)
 
         self.world = world
 
@@ -46,7 +48,7 @@ class world3D(object):
         index = self.chunksIndex[2]
         i0 = self.xStarts[index]
         i1 = i0 + self.xChunkSizes[index]
-        return np.s_[i0:i1]
+        return s_[i0:i1]
 
 
     @property
