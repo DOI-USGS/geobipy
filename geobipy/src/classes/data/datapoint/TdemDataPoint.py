@@ -895,7 +895,6 @@ class TdemDataPoint(EmDataPoint):
 
     def set_posteriors(self, log=10):
         super().set_posteriors(log=log)
-
         self.loop_pair.set_posteriors()
 
     def reset_posteriors(self):
@@ -906,7 +905,7 @@ class TdemDataPoint(EmDataPoint):
 
         if additive_error_prior is None:
             if kwargs.get('solve_additive_error', False):
-                additive_error_prior = Distribution('Uniform', kwargs['minimum_additive_error'], kwargs['maximum_additive_error'], log=10, prng=kwargs['prng'])
+                additive_error_prior = Distribution('Uniform', kwargs['minimum_additive_error'], kwargs['maximum_additive_error'], log=True, prng=kwargs['prng'])
 
         if data_prior is None:
             data_prior = Distribution('MvNormal', self.data[self.active], self.std[self.active]**2.0, prng=kwargs.get('prng'))
@@ -914,7 +913,6 @@ class TdemDataPoint(EmDataPoint):
         super().set_priors(relative_error_prior, additive_error_prior, data_prior, **kwargs)
 
         self.loop_pair.set_priors(**kwargs)
-
 
     def set_additive_error_proposal(self, proposal, **kwargs):
         if proposal is None:

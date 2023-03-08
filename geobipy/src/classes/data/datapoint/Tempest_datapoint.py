@@ -1,3 +1,4 @@
+from copy import deepcopy
 from matplotlib.figure import Figure
 from matplotlib.pyplot import figure, subplot, gcf, gca, sca, cla, plot, margins
 import numpy as np
@@ -5,6 +6,7 @@ import numpy as np
 from ....classes.core import StatArray
 from .TdemDataPoint import TdemDataPoint
 from ...forwardmodelling.Electromagnetic.TD.tdem1d import (tdem1dfwd, tdem1dsen)
+from ...statistics.Distribution import Distribution
 from ...statistics.Histogram import Histogram
 from ...model.Model import Model
 from ...mesh.RectilinearMesh1D import RectilinearMesh1D
@@ -60,30 +62,41 @@ class Tempest_datapoint(TdemDataPoint):
 
     """
 
+    def __deepcopy__(self, memo={}):
+        out = super().__deepcopy__(memo)
+        out._additive_error_multiplier = deepcopy(self.additive_error_multiplier)
+        return out
+
     @TdemDataPoint.additive_error.setter
     def additive_error(self, values):
         if values is None:
             values = self.nChannels
         else:
             assert np.size(values) == self.nChannels, ValueError(("Tempest data must a have additive error values for all time gates and all components. \n"
-                                                              "additive_error must have size {}").format(self.nChannels))
+                                                                  "additive_error must have size {}").format(self.nChannels))
 
         self._additive_error = StatArray.StatArray(values, '$\epsilon_{additive}$', self.units)
+        self._additive_error_multiplier = StatArray.StatArray(np.ones(self.nSystems * self.n_components), 'Multiplier')
+
+    @property
+    def additive_error_multiplier(self):
+        return self._additive_error_multiplier
 
     @TdemDataPoint.data.getter
     def data(self):
-        for j in range(self.nSystems):
-            for i in range(self.n_components):
-                ic = self._component_indices(i, j)
-                self._data[ic] = self.primary_field[i] + self.secondary_field[ic]
+        # for j in range(self.nSystems):
+        for i in range(self.n_components):
+            ic = self._component_indices(i, 0)
+            self._data[ic] = self.secondary_field[ic] + self.primary_field[i]
+
         return self._data
 
     @TdemDataPoint.predictedData.getter
     def predictedData(self):
-        for j in range(self.nSystems):
-            for i in range(self.n_components):
-                ic = self._component_indices(i, j)
-                self._predictedData[ic] = self.predicted_primary_field[i] + self.predicted_secondary_field[ic]
+        # for j in range(self.nSystems):
+        for i in range(self.n_components):
+            ic = self._component_indices(i, 0)
+            self._predictedData[ic] = self.predicted_secondary_field[ic] + self.predicted_primary_field[i]
         return self._predictedData
 
     @TdemDataPoint.relative_error.setter
@@ -92,7 +105,7 @@ class Tempest_datapoint(TdemDataPoint):
             values = np.full(self.n_components * self.nSystems, fill_value=0.01)
         else:
             assert np.size(values) == self.n_components * self.nSystems, ValueError(("Tempest data must a have relative error for the primary and secondary fields, for each system. \n"
-                            "relative_error must have size {}").format(self.n_components * self.nSystems))
+                               "relative_error must have size {}").format(self.n_components * self.nSystems))
 
         assert np.all(values > 0.0), ValueError("Relative error {} must be > 0.0".format(values))
 
@@ -127,13 +140,13 @@ class Tempest_datapoint(TdemDataPoint):
         assert np.all(self.relative_error > 0.0), ValueError('relative_error must be > 0.0')
 
         # For each system assign error levels using the user inputs
-        for i in range(self.nSystems):
-            for j in range(self.n_components):
-                ic = self._component_indices(j, i)
-                relative_error = self.relative_error[(i*self.n_components)+j] * self.secondary_field[ic]
-                variance = relative_error**2.0 + self.additive_error[ic]**2.0
-                self._std[ic] = np.sqrt(variance)
-
+        # for i in range(self.nSystems):
+        for j in range(self.n_components):
+            ic = self._component_indices(j, 0)
+            # relative_error = self.relative_error[j] * self.secondary_field[ic]
+            relative_error = self.relative_error[j] * self.data[ic]
+            variance = relative_error**2.0 + (self._additive_error_multiplier[j] * self.additive_error[ic])**2.0
+            self._std[ic] = np.sqrt(variance)
 
         # Update the variance of the predicted data prior
         if self.predictedData.hasPrior:
@@ -306,37 +319,9 @@ class Tempest_datapoint(TdemDataPoint):
 
         return ax
 
-    # def perturb(self):
-    #     """Propose a new EM data point given the specified attached propsal distributions
-
-    #     Parameters
-    #     ----------
-    #     height : bool
-    #         Propose a new observation height.
-    #     relative_error : bool
-    #         Propose a new relative error.
-    #     additive_error : bool
-    #         Propose a new additive error.
-    #     pitch : bool
-    #         Propose new pitch.
-
-    #     Returns
-    #     -------
-    #     out : subclass of EmDataPoint
-    #         The proposed data point
-
-    #     Notes
-    #     -----
-    #     For each boolean, the associated proposal must have been set.
-
-    #     Raises
-    #     ------
-    #     TypeError
-    #         If a proposal has not been set on a requested parameter
-
-    #     """
-
-    #     super().perturb()
+    def perturb(self):
+        super().perturb()
+        self.additive_error_multiplier.perturb()
 
     def plotWaveform(self,**kwargs):
         for i in range(self.nSystems):
@@ -445,19 +430,38 @@ class Tempest_datapoint(TdemDataPoint):
         logx = kwargs.pop('logX', None)
         logy = kwargs.pop('logY', None)
 
-        for i in range(self.nSystems):
-            system_times, _ = cf._log(self.off_time(i), logx)
-            for j in range(self.n_components):
-                ic = self._component_indices(j, i)
-                self.predicted_secondary_field[ic].plot(x=system_times, **kwargs)
+        # for i in range(self.nSystems):
+        system_times, _ = cf._log(self.off_time(0), logx)
+        for j in range(self.n_components):
+            ic = self._component_indices(j, 0)
+            self.predicted_secondary_field[ic].plot(x=system_times, **kwargs)
+
+    def prior_derivative(self, order):
+
+        J = self.sensitivity_matrix[self.active, :]
+
+        if order == 1:
+            return np.dot(J.T, self.predictedData.priorDerivative(order=1, i=self.active))
+
+        elif order == 2:
+            WdT_Wd = self.predictedData.priorDerivative(order=2)
+            return np.dot(J.T, np.dot(WdT_Wd, J))
+
+    @property
+    def probability(self):
+        return super().probability + self.predicted_primary_field.probability(log=True)
 
     def set_priors(self, relative_error_prior=None, additive_error_prior=None, data_prior=None, **kwargs):
 
-        # if additive_error_prior is None:
-        #     if kwargs.get('solve_additive_error', False):
-        #         additive_error_prior = Distribution('Uniform', kwargs['minimum_additive_error'], kwargs['maximum_additive_error'], prng=kwargs['prng'])
+        if additive_error_prior is None:
+            if kwargs.get('solve_additive_error', False):
+                additive_error_prior = Distribution('Uniform', kwargs['minimum_additive_error'], kwargs['maximum_additive_error'], log=10, prng=kwargs['prng'])
 
-        super().set_priors(relative_error_prior, additive_error_prior, data_prior, **kwargs)
+        self.additive_error_multiplier.prior = additive_error_prior
+
+        kwargs['solve_additive_error'] = False
+        super().set_priors(relative_error_prior, None, data_prior, **kwargs)
+
 
     def set_relative_error_prior(self, prior):
         if not prior is None:
@@ -469,6 +473,17 @@ class Tempest_datapoint(TdemDataPoint):
             assert prior.ndim == self.nChannels, ValueError("additive_error_prior must have {} dimensions".format(self.nChannels))
             self.additive_error.prior = prior
 
+    def set_proposals(self, relative_error_proposal=None, additive_error_proposal=None, **kwargs):
+
+        super().set_proposals(relative_error_proposal, additive_error_proposal, **kwargs)
+
+    def set_additive_error_proposal(self, proposal, **kwargs):
+        if proposal is None:
+            if kwargs.get('solve_additive_error', False):
+                proposal = Distribution('MvLogNormal', self.additive_error_multiplier, kwargs['additive_error_proposal_variance'], linearSpace=True, prng=kwargs['prng'])
+
+        self.additive_error_multiplier.proposal = proposal
+
     def set_posteriors(self, log=None):
         super().set_posteriors(log=log)
 
@@ -477,33 +492,49 @@ class Tempest_datapoint(TdemDataPoint):
         if self.relative_error.hasPrior:
             bins = StatArray.StatArray(np.atleast_2d(self.relative_error.prior.bins()), name=self.relative_error.name, units=self.relative_error.units)
             posterior = []
-            for i in range(self.nSystems*self.n_components):
+            for i in range(self.n_components):
                 b = bins[i, :]
-                mesh = RectilinearMesh1D(edges = b, relativeTo=0.5*(b.max()-b.min()))
+                mesh = RectilinearMesh1D(edges = b, relativeTo=0.5*(b.max()-b.min()), log=10)
                 posterior.append(Histogram(mesh=mesh))
             self.relative_error.posterior = posterior
 
+    # def set_additive_error_posterior(self, log=None):
+    #     if self.additive_error.hasPrior:
+    #         bins = RectilinearMesh1D(edges=StatArray.StatArray(self.additive_error.prior.bins()[0, :], name=self.additive_error.name, units=self.data.units), log=10)
+    #         posterior = []
+    #         # for j in range(self.nSystems):
+    #         system_times = RectilinearMesh1D(centres=self.off_time(0), log=10)
+    #         for k in range(self.n_components):
+    #             mesh = RectilinearMesh2D(x=system_times, y=bins)
+    #             posterior.append(Histogram(mesh=mesh))
+    #         self.additive_error.posterior = posterior
+
     def set_additive_error_posterior(self, log=None):
-        if self.additive_error.hasPrior:
-            bins = RectilinearMesh1D(edges=StatArray.StatArray(self.additive_error.prior.bins()[0, :], name=self.additive_error.name, units=self.data.units), log=10)
+        """
+
+        """
+        if self.additive_error_multiplier.hasPrior:
+            bins = StatArray.StatArray(np.atleast_2d(self.additive_error_multiplier.prior.bins()), name=self.additive_error_multiplier.name)
+
             posterior = []
-            for j in range(self.nSystems):
-                system_times = RectilinearMesh1D(centres=self.off_time(j), log=10)
-                for k in range(self.n_components):
-                    # icomp = self._component_indices(k, j)
-                    mesh = RectilinearMesh2D(x=system_times, y=bins)
-                    posterior.append(Histogram(mesh=mesh))
-            self.additive_error.posterior = posterior
+            for i in range(self.n_components):
+                b = bins[i, :]
+                mesh = RectilinearMesh1D(edges = b, log=log, relativeTo=0.5*(b.max()-b.min()))
+                posterior.append(Histogram(mesh=mesh))
+            self.additive_error_multiplier.posterior = posterior
+
+    # def update_additive_error_posterior(self):
+    #     if self.additive_error.hasPosterior:
+    #         i = 0
+    #         # for j in range(self.nSystems):
+    #         system_times = self.off_time(0)
+    #         for k in range(self.n_components):
+    #             icomp = self._component_indices(k, 0)
+    #             self.additive_error.posterior[i].update(x=system_times, y=self.additive_error[icomp])
+    #             i += 1
 
     def update_additive_error_posterior(self):
-        if self.additive_error.hasPosterior:
-            i = 0
-            for j in range(self.nSystems):
-                system_times = self.off_time(j)
-                for k in range(self.n_components):
-                    icomp = self._component_indices(k, j)
-                    self.additive_error.posterior[i].update(x=system_times, y=self.additive_error[icomp])
-                    i += 1
+        self.additive_error_multiplier.update_posterior(active=self.active_system_indices)
 
     def _empymodForward(self, mod):
 
@@ -513,7 +544,26 @@ class Tempest_datapoint(TdemDataPoint):
 
         grp = super().createHdf(parent, name, withPosterior, add_axis, fillvalue)
 
+        self.additive_error_multiplier.createHdf(grp, 'additive_error_multiplier', add_axis=add_axis, fillvalue=fillvalue)
+
         if add_axis is not None:
             grp.attrs['repr'] = 'TempestData'
 
         return grp
+
+    def writeHdf(self, parent, name, withPosterior=True, index=None):
+        """ Write the StatArray to an HDF object
+        parent: Upper hdf file or group
+        myName: object hdf name. Assumes createHdf has already been called
+        create: optionally create the data set as well before writing
+        """
+        super().writeHdf(parent, name, withPosterior, index)
+        grp = parent[name]
+        self.additive_error_multiplier.writeHdf(grp, 'additive_error_multiplier', index=index)
+
+    @classmethod
+    def fromHdf(cls, grp, **kwargs):
+        """ Reads the object from a HDF group """
+        self = super(Tempest_datapoint, cls).fromHdf(grp, **kwargs)
+        self.additive_error_multiplier = StatArray.StatArray.fromHdf(grp['additive_error_multiplier'], **kwargs)
+        return self

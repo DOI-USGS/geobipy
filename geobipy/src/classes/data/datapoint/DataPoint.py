@@ -556,13 +556,13 @@ class DataPoint(Point):
         # Define prior, proposal, posterior for relative error
         if relative_error_prior is None:
             if kwargs.get('solve_relative_error', False):
-                relative_error_prior = Distribution('Uniform', kwargs['minimum_relative_error'], kwargs['maximum_relative_error'], prng=kwargs.get('prng'))
+                relative_error_prior = Distribution('Uniform', kwargs['minimum_relative_error'], kwargs['maximum_relative_error'], log=True, prng=kwargs.get('prng'))
 
         # Define prior, proposal, posterior for additive error
         if additive_error_prior is None:
             if kwargs.get('solve_additive_error', False):
                 # log = Trisinstance(self, TdemDataPoint)
-                additive_error_prior = Distribution('Uniform', kwargs['minimum_additive_error'], kwargs['maximum_additive_error'], log=False, prng=kwargs.get('prng'))
+                additive_error_prior = Distribution('Uniform', kwargs['minimum_additive_error'], kwargs['maximum_additive_error'], log=True, prng=kwargs.get('prng'))
 
         if data_prior is None:
             data_prior = Distribution('MvNormal', self.data[self.active], self.std[self.active]**2.0, prng=kwargs.get('prng'))
@@ -609,13 +609,13 @@ class DataPoint(Point):
     def set_relative_error_proposal(self, proposal, **kwargs):
         if proposal is None:
             if kwargs.get('solve_relative_error', False):
-                proposal = Distribution('MvNormal', self.relative_error, kwargs['relative_error_proposal_variance'], prng=kwargs['prng'])
+                proposal = Distribution('MvLogNormal', self.relative_error, kwargs['relative_error_proposal_variance'], linearSpace=True, prng=kwargs['prng'])
         self.relative_error.proposal = proposal
 
     def set_additive_error_proposal(self, proposal, **kwargs):
         if proposal is None:
             if kwargs.get('solve_additive_error', False):
-                proposal = Distribution('MvNormal', self.additive_error, kwargs['additive_error_proposal_variance'], linearSpace=False, prng=kwargs['prng'])
+                proposal = Distribution('MvLogNormal', self.additive_error, kwargs['additive_error_proposal_variance'], linearSpace=True, prng=kwargs['prng'])
 
         self.additive_error.proposal = proposal
 
@@ -650,7 +650,7 @@ class DataPoint(Point):
             posterior = []
             for i in range(self.nSystems):
                 b = bins[i, :]
-                mesh = RectilinearMesh1D(edges = b, relativeTo=0.5*(b.max()-b.min()))
+                mesh = RectilinearMesh1D(edges = b, relativeTo=0.5*(b.max()-b.min()), log=10)
                 posterior.append(Histogram(mesh=mesh))
             self.relative_error.posterior = posterior
 
