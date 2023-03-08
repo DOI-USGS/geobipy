@@ -31,6 +31,12 @@ class Uniform(baseDistribution):
         # Variance
         self._variance = (1.0 / 12.0) * self.scale**2.0
 
+    @property
+    def addressof(self):
+        msg =  "{} {}\n".format(type(self).__name__, hex(id(self)))
+        msg += 'Min:{}\n'.format(hex(id(self._min)))
+        msg += 'Max:{}\n'.format(hex(id(self._max)))
+        return msg
 
     @property
     def ndim(self):

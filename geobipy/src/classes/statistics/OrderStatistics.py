@@ -26,6 +26,11 @@ class Order(baseDistribution):
         tmp = np.cumprod(denominator)
         self.pdf = factorial(i) / tmp
 
+    @property
+    def addressof(self):
+        msg =  "{} {}\n".format(type(self).__name__, hex(id(self)))
+        msg += 'Denominator:{}\n'.format(hex(id(self.denominator)))
+        return msg
 
     @property
     def multivariate(self):

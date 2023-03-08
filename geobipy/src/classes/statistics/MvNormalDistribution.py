@@ -83,6 +83,13 @@ class MvNormal(baseDistribution):
             self._variance = np.diag(np.full(ndim, fill_value=variance))
 
     @property
+    def addressof(self):
+        msg =  "{} {}\n".format(type(self).__name__, hex(id(self)))
+        msg += '    Mean:{}\n'.format(hex(id(self._mean)))
+        msg += 'Variance:{}\n'.format(hex(id(self._variance)))
+        return msg
+
+    @property
     def mean(self):
         return self._mean
 
