@@ -98,17 +98,20 @@ class Uniform(baseDistribution):
         cP.plot(bins, self.probability(bins, log=log), label=t, **kwargs)
 
 
-    def probability(self, x, log):
+    def probability(self, x, log, i=np.s_[:]):
 
         if self.log:
             x = np.log(x)
 
         if log:
             out = np.squeeze(uniform.logpdf(x, self._min, self.scale))
-            return np.sum(out) if self.multivariate else out
+            probability = np.sum(out[i]) if self.multivariate else out
+
         else:
             out = np.squeeze(uniform.pdf(x, self._min, self.scale))
-            return np.prod(out) if self.multivariate else out
+            probability =  np.prod(out[i]) if self.multivariate else out
+
+        return probability
 
 
     def rng(self, size=1):
@@ -119,6 +122,7 @@ class Uniform(baseDistribution):
     @property
     def summary(self):
         msg = 'Uniform Distribution: \n'
+
         msg += '  Min: :' + str(self.min) + '\n'
         msg += '  Max: :' + str(self.max) + '\n'
         return msg

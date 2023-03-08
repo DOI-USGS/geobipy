@@ -26,8 +26,8 @@ class Normal(baseDistribution):
         # assert np.size(mean) == 1, 'Univariate Normal mean must have size = 1'
         # assert np.size(variance) == 1, 'Univariate Normal variance must have size = 1'
         super().__init__(prng)
-        self._mean = np.log(mean) if log else np.asarray(mean)
-        self._variance = np.asarray(variance)
+        self._mean = np.log(mean) if log else np.asarray(mean).copy()
+        self._variance = np.asarray(variance).copy()
         self.log = log
 
     @property
@@ -76,7 +76,6 @@ class Normal(baseDistribution):
             Normal
 
         """
-        # return deepcopy(self)
         return Normal(self.mean, self.variance, self.log, self.prng)
 
 
@@ -109,7 +108,7 @@ class Normal(baseDistribution):
         values = np.squeeze(self.prng.normal(size=size, loc=self._mean, scale=self.variance))
         return np.exp(values) if self.log else values
 
-    def plotPDF(self, log=False, **kwargs):
+    def plot_pdf(self, log=False, **kwargs):
 
 
         bins = self.bins()

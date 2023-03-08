@@ -51,7 +51,6 @@ class ChiSquared(baseDistribution):
     def variance(self):
         return 2 * self.df
 
-
     def cdf(self, x):
         """ For a realization x, compute the probability """
         return StatArray.StatArray(chi2.cdf(x=x, df=self.df), "Cumulative Density")
@@ -77,7 +76,6 @@ class ChiSquared(baseDistribution):
             return ((x - self._mean) / self.variance) * self.probability(x)
         else:
             return (0.5 / self.variance**2.0) * ((x - self._mean)**2.0 - self.variance) * self.probability(x)
-
 
 
     def rng(self, size=1):

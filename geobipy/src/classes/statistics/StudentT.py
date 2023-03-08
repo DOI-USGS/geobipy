@@ -1,7 +1,7 @@
 """ @NormalDistribution
 Module defining a normal distribution with statistical procedures
 """
-#from copy import deepcopy
+from copy import deepcopy
 import numpy as np
 from .baseDistribution import baseDistribution
 from scipy.stats import t
@@ -28,9 +28,9 @@ class StudentT(baseDistribution):
         # assert np.size(mean) == 1, 'Univariate Normal mean must have size = 1'
         # assert np.size(variance) == 1, 'Univariate Normal variance must have size = 1'
         super().__init__(prng)
-        self._mean = np.asarray(mean)
-        self._variance = np.asarray(variance)
-        self._degrees = np.asarray(degrees)
+        self._mean = np.asarray(mean).copy()
+        self._variance = np.asarray(variance).copy()
+        self._degrees = np.asarray(degrees).copy()
 
 
     @property

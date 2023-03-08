@@ -69,11 +69,15 @@ class MvLogNormal(MvNormal):
             x = np.log(x)
         return super().derivative(x, order)
 
+    def deviation(self, x):
+        if self.linearSpace:
+            x = np.log(x)
+        return super().deviation(x)
 
     def rng(self, size = 1):
         return np.exp(super().rng(size)) if self.linearSpace else super().rng(size)
 
-    def probability(self, x, log, axis=None):
+    def probability(self, x, log, axis=None, **kwargs):
         if self.linearSpace:
             x = np.log(x)
 

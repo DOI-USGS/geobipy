@@ -42,16 +42,9 @@ class Order(baseDistribution):
         return Order(self.denominator)
 
 
-    def probability(self, x, log):
+    def probability(self, x, log, **kwargs):
         tmp = np.squeeze(self.pdf[np.int32(x)])
-
         return np.log(tmp) if log else tmp
-        # print('tmp {}'.format(tmp))
-        # if log:
-        #     return StatArray.StatArray(np.log(tmp), "Log Probability Density")
-        # else:
-        #     return StatArray.StatArray(tmp, "Probability Density")
-
 
     @property
     def summary(self):

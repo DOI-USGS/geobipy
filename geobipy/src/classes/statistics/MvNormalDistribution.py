@@ -50,13 +50,12 @@ class MvNormal(baseDistribution):
         baseDistribution.__init__(self, prng)
 
         if ndim is None:
-            self._mean = deepcopy(mean)
+            self._mean = deepcopy(np.atleast_1d(mean))
 
             # Variance
             ndim = np.ndim(variance)
             if ndim == 0:
-                self._variance = np.diag(
-                    np.full(np.size(mean), fill_value=variance))
+                self._variance = np.diag(np.full(np.size(mean), fill_value=variance))
 
             elif ndim == 1:
                 assert np.size(variance) == np.size(mean), Exception(
@@ -64,9 +63,9 @@ class MvNormal(baseDistribution):
                 self._variance = np.diag(variance)
 
             elif ndim == 2:
-                assert np.all(np.equal(variance.shape,  np.size(mean))), ValueError(
-                    'Covariance must have same dimensions as the mean')
-                self._variance = np.asarray(variance)
+                # assert np.all(np.equal(variance.shape,  np.size(mean))), ValueError(
+                #     'Covariance must have same dimensions as the mean')
+                self._variance = deepcopy(variance)
 
             self._constant = False
 
@@ -161,6 +160,9 @@ class MvNormal(baseDistribution):
         elif order == 2:
             return self.precision
 
+    def deviation(self, x):
+        return x - self._mean
+
     # def derivative(self, x, order):
 
     #     assert order in [1, 2], ValueError("Order must be 1 or 2.")
@@ -177,12 +179,11 @@ class MvNormal(baseDistribution):
         """  """
         return np.atleast_1d(np.squeeze(self.prng.multivariate_normal(self._mean, self.variance, size)))
 
-    def probability(self, x, log, axis=None):
+    def probability(self, x, log, axis=None, **kwargs):
         """ For a realization x, compute the probability """
 
-        if not axis is None:
-            d = Normal(mean=self._mean[axis],
-                       variance=self.variance[axis, axis])
+        if axis is not None:
+            d = Normal(mean=self._mean[axis], variance=self.variance[axis, axis])
             return d.probability(x, log)
 
         N = np.size(x)

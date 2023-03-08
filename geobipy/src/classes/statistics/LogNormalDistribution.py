@@ -66,8 +66,7 @@ class LogNormal(Normal):
             Normal
 
         """
-        # return deepcopy(self)
-        return Normal(self.mean, self.variance, self.linearSpace, self.prng)
+        return LogNormal(self.mean, self.variance, self.linearSpace, self.prng)
 
 
     def derivative(self, x, moment):

@@ -5,11 +5,16 @@ class baseDistribution(myObject):
     """ Define an abstract base distribution class """
 
     def __init__(self, prng=None):
-        
+
         if (prng is None):
             self.prng = rng.__self__
         else:
             self.prng = prng
+
+    @property
+    def moment(self):
+        """ Place Holder for children """
+        assert False, 'Should not calling '+__name__+'.moment'
 
     @property
     def ndim(self):
