@@ -4,6 +4,7 @@ Class to store inversion results. Contains plotting and writing to file procedur
 from copy import deepcopy
 from os.path import join
 import matplotlib.pyplot as plt
+from matplotlib.pyplot import Figure
 
 from ..base import plotting as cP
 from ..base import utilities as cF
@@ -137,6 +138,8 @@ class Inference1D(myObject):
 
         self.data_misfit_v.prior = Distribution('chi2', df=target)
 
+        self.relative_chi_squared_fit = 100.0
+
         edges = StatArray.StatArray(np.linspace(1, 2*target))
         self.data_misfit_v.posterior = Histogram(mesh = RectilinearMesh1D(edges=edges))
 
@@ -179,11 +182,10 @@ class Inference1D(myObject):
 
         n = 2 * np.int32(self.n_markov_chains / self._update_plot_every)
         self.acceptance_x = StatArray.StatArray(np.arange(1, n + 1) * self._update_plot_every, name='Iteration #')
-        self.acceptance_rate = StatArray.StatArray(n, name='% Acceptance')
+        self.acceptance_rate = StatArray.StatArray(np.full(n, fill_value=np.nan), name='% Acceptance')
 
 
-        self.iRange = StatArray.StatArray(
-            np.arange(2 * self.n_markov_chains), name="Iteration #", dtype=np.int64)
+        self.iRange = StatArray.StatArray(np.arange(2 * self.n_markov_chains), name="Iteration #", dtype=np.int64)
 
         # Initialize the index for the best model
         # self.iBestV = StatArray.StatArray(2*self.n_markov_chains, name='Iteration of best model')
@@ -414,6 +416,8 @@ class Inference1D(myObject):
                 if not Go:
                     failed = True
 
+
+
         self.clk.stop()
         # self.invTime = np.float64(self.clk.timeinSeconds())
         # Does the user want to save the HDF5 results?
@@ -448,7 +452,8 @@ class Inference1D(myObject):
             target_misfit = np.sum(self.datapoint.active)
 
             # if self.data_misfit < target_misfit:
-            if np.isclose(self.data_misfit, self.multiplier*target_misfit, rtol=1e-1, atol=1e-2):
+            # if (self.iteration > 1000) and (np.isclose(self.data_misfit, self.multiplier*target_misfit, rtol=1e-1, atol=1e-2)):
+            if self.relative_chi_squared_fit < 1.0:
                 self.burned_in = True  # Let the results know they are burned in
                 self.burned_in_iteration = self.iteration       # Save the burn in iteration to the results
                 self.best_iteration = self.iteration
@@ -459,6 +464,7 @@ class Inference1D(myObject):
                 self.data_misfit_v.reset_posteriors()
                 self.model.reset_posteriors()
                 self.datapoint.reset_posteriors()
+
         if (self.posterior > self.best_posterior):
             self.best_iteration = self.iteration
             self.best_model = deepcopy(self.model)
@@ -473,9 +479,6 @@ class Inference1D(myObject):
 
             if (not self.burned_in and not self.datapoint.relative_error.hasPrior):
                 self.multiplier *= self.kwargs['multiplier']
-
-        # if (self.burned_in):  # We need to update some plotting options.
-        self.data_misfit_v.posterior.update(self.data_misfit, trim=True)
 
         # Added the layer depths to a list, we histogram this list every
         # iPlot iterations
