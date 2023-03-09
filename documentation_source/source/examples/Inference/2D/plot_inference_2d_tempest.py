@@ -164,7 +164,7 @@ def create_plots(model_type):
    #    results_2d.plot_inference_1d(fiducial=fid)
 
    # plt.show(block=True)
-   plt.savefig('tempest_{}.png'.format(model_type))
+   plt.savefig('tempest_{}.png'.format(model_type), dpi=600)
 
 
 if __name__ == '__main__':

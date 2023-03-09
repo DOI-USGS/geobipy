@@ -57,7 +57,7 @@ def create_plots(model_type):
    # I precompute expensive properties and store them in the HDF5 files for later use.
 
    ################################################################################
-   results_2d = Inference2D(hdf5_file_path='../parallel/skytem/{}/0.0.h5'.format(model_type))
+   results_2d = Inference2D(hdf5_file_path='../parallel/resolve/{}/0.0.h5'.format(model_type))
 
    ################################################################################
    # Plot a location map of the data point locations along the line
@@ -79,7 +79,7 @@ def create_plots(model_type):
    # We can show a basic cross-section of the parameter inverted for
    plt.figure(figsize=(16, 4))
    plt.suptitle(model_type)
-   plt.subplot(3, 4, 1)
+   plt.subplot(4, 4, 1)
    true_model = create_model(model_type)
    kwargs['vmin'] = np.log10(np.min(true_model.values))
    kwargs['vmax'] = np.log10(np.max(true_model.values))
@@ -87,16 +87,16 @@ def create_plots(model_type):
    true_model.pcolor(**kwargs)
    results_2d.plot_data_elevation(linewidth=0.3);
    results_2d.plot_elevation(linewidth=0.3);
-   plt.ylim([-550, 60])
+   plt.ylim([-240, 60])
 
-   plt.subplot(3, 4, 5)
+   plt.subplot(4, 4, 5)
    results_2d.plot_mean_model(**kwargs);
    results_2d.plot_data_elevation(linewidth=0.3);
    results_2d.plot_elevation(linewidth=0.3);
 
 
    # By adding the useVariance keyword, we can make regions of lower confidence more transparent
-   plt.subplot(3, 4, 9)
+   plt.subplot(4, 4, 9)
    results_2d.plot_mean_model(use_variance=True, **kwargs);
    results_2d.plot_data_elevation(linewidth=0.3);
    results_2d.plot_elevation(linewidth=0.3);
@@ -110,10 +110,10 @@ def create_plots(model_type):
 
    ################################################################################
    # We can plot the parameter values that produced the highest posterior
-   ax = plt.subplot(3, 4, 2)
+   ax = plt.subplot(4, 4, 2)
    results_2d.plot_k_layers()
 
-   ax = plt.subplot(3, 4, 6, sharex=ax)
+   ax = plt.subplot(4, 4, 6, sharex=ax)
    results_2d.plot_best_model(**kwargs);
    results_2d.plot_data_elevation(linewidth=0.3);
    results_2d.plot_elevation(linewidth=0.3);
@@ -122,13 +122,13 @@ def create_plots(model_type):
    del kwargs['vmin']
    del kwargs['vmax']
 
-   plt.subplot(3, 4, 3)
+   plt.subplot(4, 4, 3)
    plt.title('5%')
    results_2d.plot_percentile(percent=0.05, **kwargs)
-   plt.subplot(3, 4, 7)
+   plt.subplot(4, 4, 7)
    plt.title('50%')
    results_2d.plot_percentile(percent=0.5, **kwargs)
-   plt.subplot(3, 4, 11)
+   plt.subplot(4, 4, 11)
    plt.title('95%')
    results_2d.plot_percentile(percent=0.95, **kwargs)
 
@@ -137,7 +137,7 @@ def create_plots(model_type):
    ################################################################################
    # Now we can start plotting some more interesting posterior properties.
    # How about the confidence?
-   plt.subplot(3, 4, 4)
+   plt.subplot(4, 4, 4)
    results_2d.plot_confidence();
    results_2d.plot_data_elevation(linewidth=0.3);
    results_2d.plot_elevation(linewidth=0.3);
@@ -147,24 +147,26 @@ def create_plots(model_type):
    # and display an interface probability cross section
    # This posterior can be washed out, so the clim_scaling keyword lets me saturate
    # the top and bottom 0.5% of the colour range
-   plt.subplot(3, 4, 8)
+   plt.subplot(4, 4, 8)
    plt.title('P(Interface)')
    results_2d.plot_interfaces(cmap='Greys', clim_scaling=0.5);
    results_2d.plot_data_elevation(linewidth=0.3);
    results_2d.plot_elevation(linewidth=0.3);
 
-   plt.subplot(3, 4, 12)
+   plt.subplot(4, 4, 12)
    results_2d.plot_entropy(cmap='Greys', clim_scaling=0.5);
    results_2d.plot_data_elevation(linewidth=0.3);
    results_2d.plot_elevation(linewidth=0.3);
 
-   # # ################################################################################
-   # # # Pull the McMC results for a single datapoint
-   # for fid in np.arange(0.0, 100.0, 15.0):
-   #    results_2d.plot_inference_1d(fiducial=fid)
+   # ################################################################################
+   # # Pull the McMC results for a single datapoint
+   for fid in np.arange(0.0, 120.0, 25.0):
+      inference = results_2d.inference_1d(fiducial=fid)
+      ax = plt.subplot(4, 4, 13)
+      inference.initFigure(ax)
 
    # plt.show(block=True)
-   plt.savefig('skytem_{}.png'.format(model_type), dpi=600)
+   plt.savefig('resolve_{}.png'.format(model_type), dpi=600)
 
 
 if __name__ == '__main__':
