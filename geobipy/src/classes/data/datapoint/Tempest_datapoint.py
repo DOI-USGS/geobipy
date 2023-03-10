@@ -449,7 +449,7 @@ class Tempest_datapoint(TdemDataPoint):
 
     @property
     def probability(self):
-        return super().probability + self.predicted_primary_field.probability(log=True)
+        return super().probability
 
     def set_priors(self, relative_error_prior=None, additive_error_prior=None, data_prior=None, **kwargs):
 
