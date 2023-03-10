@@ -864,9 +864,7 @@ class Data(PointCloud3D):
             assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
             rTmp = self._systemIndices(system) if channels is None else channels + self._systemIndices(system).start
 
-        rTmp = np.asarray(rTmp, dtype=np.int32)
-
-        ax = super().plot(values=self.data[:, rTmp], x=x, label=[self.channelNames[r] for r in rTmp], **kwargs)
+        ax = super().plot(values=self.data[:, rTmp], x=x, label=self.channelNames[rTmp], **kwargs)
 
         if legend:
             # Put a legend to the right of the current axis
