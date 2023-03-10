@@ -914,18 +914,18 @@ class TdemDataPoint(EmDataPoint):
 
         self.loop_pair.set_priors(**kwargs)
 
+    def set_proposals(self, relative_error_proposal=None, additive_error_proposal=None, **kwargs):
+
+        super().set_proposals(relative_error_proposal, additive_error_proposal, **kwargs)
+
+        self.loop_pair.set_proposals(**kwargs)
+
     def set_additive_error_proposal(self, proposal, **kwargs):
         if proposal is None:
             if kwargs.get('solve_additive_error', False):
                 proposal = Distribution('MvLogNormal', self.additive_error, kwargs['additive_error_proposal_variance'], linearSpace=True, prng=kwargs['prng'])
 
         self.additive_error.proposal = proposal
-
-    def set_proposals(self, relative_error_proposal=None, additive_error_proposal=None, **kwargs):
-
-        super().set_proposals(relative_error_proposal, additive_error_proposal, **kwargs)
-
-        self.loop_pair.set_proposals(**kwargs)
 
     # def set_predicted_data_posterior(self):
     #     if self.predictedData.hasPrior:
