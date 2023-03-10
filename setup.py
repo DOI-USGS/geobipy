@@ -49,7 +49,8 @@ setup(name='geobipy',
         'cached-property',
         'empymod <= 2.0.5',
         'smm',
-        'lmfit'
+        'lmfit',
+        'scikit-learn'
     ],
     # ext_modules=[Extension(name='geobipy.src.classes.forwardmodelling.ipforward1d_fortran',
     #             extra_f90_compile_args = ['-ffree-line-length-none','-O3', '-finline-functions', '-funroll-all-loops'],
