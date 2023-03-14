@@ -101,8 +101,7 @@ def create_skytem(model, output_suffix):
 
     title = 'skytem_' + output_suffix
 
-    ds = TdemData(system=[data_path+'//SkytemHM-SLV.stm',
-                        data_path+'//SkytemLM-SLV.stm'])
+    ds = TdemData(system=[data_path+'//SkytemHM-SLV.stm', data_path+'//SkytemLM-SLV.stm'])
 
     ds.x = np.arange(model.x.nCells, dtype=np.float64)
     ds.y = np.zeros(model.x.nCells)
@@ -120,7 +119,7 @@ def create_skytem(model, output_suffix):
                     radius=np.full(model.x.nCells, ds.system[0].loopRadius()))
 
     ds.relative_error = np.full((model.x.nCells, 2), fill_value = 0.03)
-    ds.additive_error = np.full((model.x.nCells, 2), fill_value = 1e-14)
+    ds.additive_error = np.full((model.x.nCells, 2), fill_value = 1e-15)
     ds.additive_error[:, 1] = 1e-13
 
     dp = ds.datapoint(0)
@@ -200,17 +199,17 @@ def create_tempest(model, output_suffix):
     ds.fiducial = np.arange(model.x.nCells)
 
     ds.transmitter = CircularLoops(x=ds.x, y=ds.y, z=ds.z,
-                    pitch = np.random.uniform(low=-10.0, high=10.0, size=model.x.nCells),
-                    roll = np.random.uniform(low=-25.0, high=25.0, size=model.x.nCells),
-                    yaw = np.random.uniform(low=-15.0, high=15.0, size=model.x.nCells),
+                    pitch = np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
+                    roll = np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
+                    yaw = np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
                     radius=np.full(model.x.nCells, fill_value=ds.system[0].loopRadius()))
 
     ds.receiver = CircularLoops(x=ds.transmitter.x - 107.0,
                     y=ds.transmitter.y + 0.0,
                     z=ds.transmitter.z - 45.0,
-                    pitch = np.random.uniform(low=-5.0, high=5.0, size=model.x.nCells),
-                    roll = np.random.uniform(low=-10.0, high=10.0, size=model.x.nCells),
-                    yaw = np.random.uniform(low=-5.0, high=5.0, size=model.x.nCells),
+                    pitch = np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
+                    roll = np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
+                    yaw = np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
                     radius=np.full(model.x.nCells, fill_value=ds.system[0].loopRadius()))
 
     ds.relative_error = np.repeat(np.r_[0.005, 0.005][None, :], model.x.nCells, 0)
@@ -236,9 +235,9 @@ def create_tempest(model, output_suffix):
     # Add noise to various solvable parameters
 
     # ds.z += np.random.uniform(low=-5.0, high=5.0, size=model.x.nCells)
-    ds.receiver.x += np.random.normal(loc=0.0, scale=0.5**2.0, size=model.x.nCells)
-    ds.receiver.z += np.random.normal(loc = 0.0, scale = 0.5**2.0, size=model.x.nCells)
-    ds.receiver.pitch += np.random.normal(loc = 0.0, scale = 0.5**2.0, size=model.x.nCells)
+    ds.receiver.x += np.random.normal(loc=0.0, scale=0.25**2.0, size=model.x.nCells)
+    ds.receiver.z += np.random.normal(loc = 0.0, scale = 0.25**2.0, size=model.x.nCells)
+    ds.receiver.pitch += np.random.normal(loc = 0.0, scale = 0.25**2.0, size=model.x.nCells)
     # ds.receiver.roll += np.random.normal(loc = 0.0, scale = 0.5**2.0, size=model.x.nCells)
     # ds.receiver.yaw += np.random.normal(loc = 0.0, scale = 0.5**2.0, size=model.x.nCells)
 
