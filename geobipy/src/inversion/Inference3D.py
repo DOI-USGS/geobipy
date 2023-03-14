@@ -529,7 +529,7 @@ class Inference3D(myObject):
 
             if failed:
                 myMPI.print("datapoint {} {} failed to converge".format(datapoint.lineNumber, datapoint.fiducial))
-                np.save('Converge_fail_seed_{}_{}'.format(datapoint.lineNumber, datapoint.fiducial), inference.seed)
+                # np.save('Converge_fail_seed_{}_{}'.format(datapoint.lineNumber, datapoint.fiducial), inference.seed)
 
             # Ping the Master to request a new index
             world.send('requesting', dest=0)
