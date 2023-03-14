@@ -370,11 +370,15 @@ class Inference3D(myObject):
         t0 = time.time()
         dataset = dataset._initialize_sequential_reading(options['data_filename'], options['system_filename'])
 
-        prng = np.random.RandomState(seed)
-
-        # np.save('test_seed', prng.get_state())
-        # prng.set_state(tuple(np.load('test_seed.npy', allow_pickle=True)))
-        # prng.set_state(tuple(np.load('seed.npy', allow_pickle=True)))
+        if seed is not None:
+            if isinstance(seed, str):
+                prng = np.random.RandomState()
+                prng.set_state(tuple(np.load(seed, allow_pickle=True)))
+            else:
+                prng = np.random.RandomState(seed)
+        else:
+            prng = np.random.RandomState()
+            np.save('seed', prng.get_state())
 
         if index is None:
 

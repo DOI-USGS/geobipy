@@ -52,29 +52,14 @@ class MvNormal(baseDistribution):
         if ndim is None:
             self._mean = deepcopy(np.atleast_1d(mean))
 
-            # Variance
-            ndim = np.ndim(variance)
-            if ndim == 0:
-                self._variance = np.diag(np.full(np.size(mean), fill_value=variance))
-
-            elif ndim == 1:
-                assert np.size(variance) == np.size(mean), Exception(
-                    'Mismatch in size of mean and variance')
-                self._variance = np.diag(variance)
-
-            elif ndim == 2:
-                # assert np.all(np.equal(variance.shape,  np.size(mean))), ValueError(
-                #     'Covariance must have same dimensions as the mean')
-                self._variance = deepcopy(variance)
+            self.variance = variance
 
             self._constant = False
 
         else:
 
-            assert np.size(mean) == 1, ValueError(
-                "When specifying ndim, mean must be a scalar.")
-            assert np.size(variance) == 1, ValueError(
-                "When specifying ndim, variance must be a scalar.")
+            assert np.size(mean) == 1, ValueError("When specifying ndim, mean must be a scalar.")
+            assert np.size(variance) == 1, ValueError("When specifying ndim, variance must be a scalar.")
 
             ndim = np.int32(np.maximum(1, ndim))
             self._constant = True
@@ -134,11 +119,19 @@ class MvNormal(baseDistribution):
 
     @variance.setter
     def variance(self, values):
-        if np.ndim(values) == 1:
-            assert np.size(values) == self.ndim, ValueError("variance must have length {} when specifying 1D".format(self.ndim))
-            values = np.diag(values)
+        # Variance
+        ndim = np.ndim(values)
+        if ndim == 0:
+            self._variance = np.diag(np.full(self.ndim, fill_value=values))
 
-        self._variance[:, :] = values
+        elif ndim == 1:
+            assert np.size(values) == self.ndim, Exception('Mismatch in size of mean and variance')
+            self._variance = np.diag(values)
+
+        elif ndim == 2:
+            # assert np.all(np.equal(variance.shape,  np.size(mean))), ValueError(
+            #     'Covariance must have same dimensions as the mean')
+            self._variance = deepcopy(values)
 
     @property
     def precision(self):

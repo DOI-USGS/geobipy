@@ -5,6 +5,7 @@ import numpy as np
 from copy import deepcopy
 
 from ...base.utilities import reslice
+from ...base import plotting
 from ..core.myObject import myObject
 from ...base.HDF import hdfRead
 from ..core import StatArray
@@ -478,7 +479,15 @@ class Model(myObject):
         self.values.reset_posteriors()
 
     def plot_posteriors(self, axes=None, values_kwargs={}, axis=0, **kwargs):
-        return self.mesh.plot_posteriors(axes, axis=axis, values=self.values, values_kwargs=values_kwargs, **kwargs)
+        self.mesh.plot_posteriors(axes, axis=axis, values=self.values, values_kwargs=values_kwargs, **kwargs)
+
+        self.values.posterior.mean(axis=axis).plot(xscale=values_kwargs.get('xscale', 'linear'),
+            flipY=False,
+            reciprocateX=values_kwargs.get('reciprocateX', None),
+            labels=False,
+            linewidth=1,
+            color='#5046C8',
+            axes=axes[-1])
 
     def pcolor(self, **kwargs):
         """Plot like an image
@@ -801,7 +810,7 @@ class Model(myObject):
                 # Assign the initial prior to the parameters
                 variance = np.log(11.0)**2.0 #self.mesh.cell_weights /
                 values_prior = Distribution('MvLogNormal', mean=kwargs['value_mean'],
-                                                variance=variance, #np.log(1.0+kwargs.get('factor', 10.0))**2.0,
+                                                variance=variance,
                                                 ndim=self.mesh.nCells,
                                                 linearSpace=True,
                                                 prng=kwargs.get('prng'))

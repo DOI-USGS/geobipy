@@ -7,6 +7,7 @@ import argparse
 import sys
 import shutil
 from datetime import timedelta
+from numpy import int32
 
 # from .src.base import utilities
 # from .src.base import plotting
@@ -80,7 +81,7 @@ def checkCommandArguments():
     Parser.add_argument('inputFile', help='User input file')
     Parser.add_argument('output_directory', help='Output directory for results')
     Parser.add_argument('--skipHDF5', dest='skipHDF5', default=False, help='Skip the creation of the HDF5 files.  Only do this if you know they have been created.')
-    Parser.add_argument('--seed', dest='seed', type=int, default=None, help='Specify a single integer to fix the seed of the random number generator. Only used in serial mode.')
+    Parser.add_argument('--seed', dest='seed', default=None, help='Specify a single integer to fix the seed of the random number generator. Only used in serial mode.')
     Parser.add_argument('--index', dest='index', type=int, default=None, help='Invert this data point only. Only used in serial mode.')
     Parser.add_argument('--fiducial', dest='fiducial', type=float, default=None, help='Invert this fiducial only. Only used in serial mode.')
     Parser.add_argument('--line', dest='line_number', type=float, default=None, help='Invert the fiducial on this line. Only used in serial mode.')
@@ -89,12 +90,16 @@ def checkCommandArguments():
 
     args = Parser.parse_args()
 
+    if args.seed is not None:
+        if isinstance(args.seed, str):
+            if not '.' in args.seed:
+                args.seed = int32(args.seed)
+
     if args.verbose:
         import warnings
         warnings.filterwarnings("error")
 
     return args.inputFile, args.output_directory, args.skipHDF5, args.seed, args.index, args.fiducial, args.line_number, args.mpi
-
 
 def serial_geobipy(inputFile, output_directory, seed=None, index=None, fiducial=None, line_number=None):
 
