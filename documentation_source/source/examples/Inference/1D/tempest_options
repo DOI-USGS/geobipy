@@ -8,7 +8,7 @@ data_directory = "..//..//supplementary//data"
 # The data_filename and system_filename options are single strings for single system dataset,
 # or a list of str for multi-system datasets like Skytem.
 # Data File Name.
-data_filename = join(data_directory,'tempest_ice_over_salt_water.csv')
+data_filename = join(data_directory,'tempest_resistive_dolomites.csv')
 # System File Name.
 system_filename = join(data_directory,'Tempest.stm')
 
@@ -24,7 +24,7 @@ n_markov_chains = 100000
 # Interactively plot a single data point as it progresses
 interactive_plot = True
 # How often to update the plot. (lower is slower)
-update_plot_every = 5000
+update_plot_every = 1000
 # Save a PNG of the final results for each data point.
 save_png = False
 # Save the results of the McMC inversion to HDF5 files. (Generally always True)
@@ -56,7 +56,7 @@ solve_relative_error = True
 # Assign an initial percentage relative Error
 # If the file contains no standard deviations, this will be used
 # to assign the initial data uncertainties.
-initial_relative_error = [0.02, 0.02]
+initial_relative_error = [0.04, 0.04]
 ## Relative Error Prior Details
 # Distribution('Uniform', min=[0.01, 0.01], max=[0.5, 0.5])
 # Minimum Relative Error
@@ -168,7 +168,7 @@ minimum_depth = 1.0
 maximum_depth = 550.0
 # Minimum layer thickness.
 # If minimumThickness: None, it will be autocalculated.
-minimum_thickness = 5.0
+minimum_thickness = None
 
 # Evolution Probabilities for earth model manipulation during the Markov chain.
 # These four values are internally scaled such that their sum is 1.0.

@@ -36,7 +36,7 @@ System Begin
             4.7000e-06            0
             1.2834e-03            0
         WaveFormCurrent End
-		WaveformDigitisingFrequency = 2000000
+		WaveformDigitisingFrequency = 3932160
 	Transmitter End
 
 	Receiver Begin
