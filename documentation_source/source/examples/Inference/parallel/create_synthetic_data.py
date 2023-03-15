@@ -80,9 +80,10 @@ def create_resolve(model, output_suffix):
 
     dp = ds.datapoint(0)
 
+    model.mesh.y_edges = 0.5 * model.mesh.y_edges
+
     for k in range(model.x.nCells):
         mod = model[k]
-
         dp.forward(mod)
         ds.data[k, :] = dp.predictedData
 
@@ -212,7 +213,7 @@ def create_tempest(model, output_suffix):
                     yaw = np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
                     radius=np.full(model.x.nCells, fill_value=ds.system[0].loopRadius()))
 
-    ds.relative_error = np.repeat(np.r_[0.0005, 0.0005][None, :], model.x.nCells, 0)
+    ds.relative_error = np.repeat(np.r_[0.005, 0.005][None, :], model.x.nCells, 0)
     add_error = np.r_[0.011474, 0.012810, 0.008507, 0.005154, 0.004742, 0.004477, 0.004168, 0.003539, 0.003352, 0.003213, 0.003161, 0.003122, 0.002587, 0.002038, 0.002201,
                     0.007383, 0.005693, 0.005178, 0.003659, 0.003426, 0.003046, 0.003095, 0.003247, 0.002775, 0.002627, 0.002460, 0.002178, 0.001754, 0.001405, 0.001283]
     ds.additive_error = np.repeat(add_error[None, :], model.x.nCells, 0)
@@ -259,7 +260,7 @@ if __name__ == '__main__':
     for k in keys:
         wedge_model = create_model(k)
 
-        # create_resolve(wedge_model, k)
+        create_resolve(wedge_model, k)
         # create_skytem(wedge_model, k)
         # create_aerotem(wedge_model, k)
-        create_tempest(wedge_model, k)
+        # create_tempest(wedge_model, k)

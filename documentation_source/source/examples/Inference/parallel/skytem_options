@@ -83,7 +83,7 @@ minimum_thickness = None
 
 # Data prior details
 # ------------------
-# The data priors are imposed on three different aspects of the data.
+# The data priors are impose0d on three different aspects of the data.
 # The relative and additive error and the elevation of the data point.
 # Data uncertainty priors are used if solveRelativeError or solveAdditiveError are True.
 # If the data file contains columns of the estimated standard deviations, they are used as the initial values

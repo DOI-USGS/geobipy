@@ -124,7 +124,7 @@ maximum_height_change = 1.0
 # Proposal variance for the relative error
 relative_error_proposal_variance = 2.5e-7
 # Proposal variance for the additive error
-additive_error_proposal_variance = 1.0e-4
+additive_error_proposal_variance = 1.0e-5
 # Proposal variance of the elevation
 height_proposal_variance = 0.01
 
