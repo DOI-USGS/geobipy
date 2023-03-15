@@ -56,11 +56,11 @@ solve_relative_error = True
 # Assign an initial percentage relative Error
 # If the file contains no standard deviations, this will be used
 # to assign the initial data uncertainties.
-initial_relative_error = [0.04, 0.04]
+initial_relative_error = [0.005, 0.005]
 ## Relative Error Prior Details
 # Distribution('Uniform', min=[0.01, 0.01], max=[0.5, 0.5])
 # Minimum Relative Error
-minimum_relative_error = [0.00001, 0.000001]
+minimum_relative_error = [0.001, 0.001]
 # Maximum Relative Error
 maximum_relative_error = [0.1, 0.1]
 ## Proposal variance for the relative error
