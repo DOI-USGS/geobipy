@@ -60,7 +60,7 @@ initial_relative_error = [0.04, 0.04]
 ## Relative Error Prior Details
 # Distribution('Uniform', min=[0.01, 0.01], max=[0.5, 0.5])
 # Minimum Relative Error
-minimum_relative_error = [0.001, 0.001]
+minimum_relative_error = [0.00001, 0.00001]
 # Maximum Relative Error
 maximum_relative_error = [0.5, 0.5]
 ## Proposal variance for the relative error
@@ -166,7 +166,7 @@ minimum_depth = 1.0
 maximum_depth = 550.0
 # Minimum layer thickness.
 # If minimumThickness: None, it will be autocalculated.
-minimum_thickness = 5.0
+minimum_thickness = None
 
 # Evolution Probabilities for earth model manipulation during the Markov chain.
 # These four values are internally scaled such that their sum is 1.0.
