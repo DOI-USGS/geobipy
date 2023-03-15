@@ -624,7 +624,7 @@ class DataPoint(Point):
         self.relative_error.reset_posteriors()
         self.additive_error.reset_posteriors()
 
-    def set_posteriors(self, log=None):
+    def set_posteriors(self, log=10):
         """ Set the posteriors based on the attached priors
 
         Parameters
@@ -654,7 +654,7 @@ class DataPoint(Point):
                 posterior.append(Histogram(mesh=mesh))
             self.relative_error.posterior = posterior
 
-    def set_additive_error_posterior(self, log=None):
+    def set_additive_error_posterior(self, log=10):
         """
 
         """

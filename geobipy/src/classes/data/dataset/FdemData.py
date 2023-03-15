@@ -140,7 +140,7 @@ class FdemData(Data):
             self._std = StatArray.StatArray((self.nPoints, self.nChannels), "Standard deviation", self.units)
 
         if self.relative_error.max() > 0.0:
-            self._std[:, :] = np.sqrt((self.relative_error* self.data)**2 + (self.additive_error**2.0))
+            self._std[:, :] = np.sqrt((self.relative_error * self.data)**2 + (self.additive_error**2.0))
 
         return self._std
 
@@ -419,7 +419,7 @@ class FdemData(Data):
     #     # cP.title(self._channelNames[channel])
 
 
-    def plot_data(self, xAxis='index', channels=None, **kwargs):
+    def plot_data(self, x='index', channels=None, **kwargs):
         """Plots the specifed channels as a line plot.
 
         Plots the channels along a specified co-ordinate e.g. 'x'. A legend is auto generated.
@@ -451,7 +451,7 @@ class FdemData(Data):
 
         """
 
-        ax, legend = super().plot_data(xAxis=xAxis, channels=channels, **kwargs)
+        ax, legend = super().plot_data(x=x, channels=channels, **kwargs)
 
         if kwargs.get('legend', True):
             legend.set_title('Frequency (Hz)')
