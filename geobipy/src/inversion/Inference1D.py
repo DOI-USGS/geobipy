@@ -379,7 +379,7 @@ class Inference1D(myObject):
             self.model = perturbed_model
             self.datapoint = perturbed_datapoint
             # Reset the sensitivity locally to the newly accepted model
-            self.datapoint.sensitivity(self.model, modelChanged=False)
+            # self.datapoint.sensitivity(self.model, modelChanged=False)
 
     def infer(self, hdf_file_handle):
         """ Markov Chain Monte Carlo approach for inversion of geophysical data

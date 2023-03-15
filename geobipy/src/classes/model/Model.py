@@ -302,7 +302,7 @@ class Model(myObject):
         """
         assert self.values.hasPrior or self.gradient.hasPrior, Exception("Model must have either a parameter prior or gradient prior, use self.set_priors()")
 
-        hessian = self.values.priorDerivative(order=2)
+        hessian = self.prior_derivative(order=2)
 
         if not observation is None:
             vals = observation.prior_derivative(order=2)
@@ -390,8 +390,8 @@ class Model(myObject):
         remapped_model = self.perturb_structure()
 
         if observation is not None:
-            if remapped_model.mesh.action[0] != 'none':
-                observation.sensitivity(remapped_model)
+            # if remapped_model.mesh.action[0] != 'none':
+            observation.sensitivity(remapped_model)
 
         # Update the local Hessian around the current model.
         # inv(J'Wd'WdJ + Wm'Wm)
@@ -400,8 +400,7 @@ class Model(myObject):
         # Proposing new parameter values
         # This is Wm'Wm(sigma - sigma_ref)
         # Need to have the gradient be a part of this too.
-        gradient = remapped_model.values.priorDerivative(order=1)
-        # gradient = np.dot(remapped_model.prior_derivative(), remapped_model.values.prior.deviation(remapped_model.values))
+        gradient = remapped_model.prior_derivative(order=1)
 
         if not observation is None:
             # The gradient is now J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref)
@@ -430,6 +429,21 @@ class Model(myObject):
         perturbed_model.values.perturb()#imposePrior=True)
 
         return remapped_model, perturbed_model
+
+    def prior_derivative(self, order):
+
+        if order == 1:
+            gradient = self.values.priorDerivative(order=1)
+            if self.gradient.hasPrior:
+                Wz = self.mesh.gradient_operator
+                gradient +=  np.dot(np.dot(Wz.T, Wz), self.values.prior.deviation(self.values))
+        elif order == 2:
+            gradient = self.values.priorDerivative(order=2)
+            if self.gradient.hasPrior:
+                Wz = self.mesh.gradient_operator
+                gradient += np.dot(Wz.T, Wz)
+
+        return gradient
 
     def perturb_structure(self, update_priors=True):
 
@@ -521,22 +535,6 @@ class Model(myObject):
 
         """
         return self.mesh.pcolor(values=self.values, **kwargs)
-
-    def prior_derivative(self):
-        value_precision = self.values.priorDerivative(order=2)
-        hessian = None
-        if self.values.hasPrior:
-            hessian = self.mesh.cell_weights * value_precision  # Ws'Ws
-
-        if self.gradient.hasPrior:
-            Wd = self.mesh.gradient_operator
-            WdTWd = np.dot(Wd.T, Wd)
-            if hessian is None:
-                hessian = WdTWd
-            else:
-                hessian += WdTWd
-
-        return hessian
 
     def probability(self, solve_value, solve_gradient):
         """Evaluate the prior probability for the 1D Model.
