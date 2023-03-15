@@ -459,13 +459,13 @@ class FdemData(Data):
         return ax, legend
 
 
-    def plotLine(self, line, system=0, xAxis='index', **kwargs):
+    def plotLine(self, line, system=0, x='index', **kwargs):
         """ Plot the specified line """
 
         l = self.line(line)
         kwargs['log'] = kwargs.pop('log', None)
 
-        x = self.getXAxis(xAxis)
+        x = self.axis(x)
 
         ax = plt.gca()
         ax1 = plt.subplot(211)
