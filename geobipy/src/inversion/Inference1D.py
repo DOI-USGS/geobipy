@@ -135,6 +135,7 @@ class Inference1D(myObject):
         self.data_misfit_v[0] = self.data_misfit
 
         target = np.sum(self.datapoint.active)
+        self._n_target_hits = 0
 
         self.data_misfit_v.prior = Distribution('chi2', df=target)
 
@@ -452,8 +453,10 @@ class Inference1D(myObject):
             target_misfit = np.sum(self.datapoint.active)
 
             # if self.data_misfit < target_misfit:
-            # if (self.iteration > 1000) and (np.isclose(self.data_misfit, self.multiplier*target_misfit, rtol=1e-1, atol=1e-2)):
-            if (self.iteration > 1000) and (self.relative_chi_squared_fit < 1.0):
+            if (self.iteration > 1000) and (np.isclose(self.data_misfit, self.multiplier*target_misfit, rtol=1e-1, atol=1e-2)):
+                self._n_target_hits += 1
+
+            if ((self.iteration > 1000) and (self.relative_chi_squared_fit < 1.0)) or ((self.iteration > 10000) and (self._n_target_hits > 1000)):
                 self.burned_in = True  # Let the results know they are burned in
                 self.burned_in_iteration = self.iteration       # Save the burn in iteration to the results
                 self.best_iteration = self.iteration
