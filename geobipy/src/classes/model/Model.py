@@ -456,11 +456,6 @@ class Model(myObject):
         if self.value_bounds is not None:
             remapped_model.value_bounds = self.value_bounds
         if remapped_model.values.hasPrior:
-            # remapped_model.values.prior = type(remapped_model.values.prior)(
-            #                                    mean=np.full(remapped_mesh.nCells, fill_value=remapped_model.values.prior.mean[0]),
-            #                                    variance=remapped_mesh.cell_weights / np.log(11.0)**2.0)
-            # remapped_model.values.prior._mean =
-            # remapped_model.values.prior._variance =
             remapped_model.values.prior.ndim = remapped_model.nCells.item()
         if remapped_model.gradient.hasPrior:
             remapped_model.gradient.prior.ndim = np.maximum(1, remapped_model.nCells-1)

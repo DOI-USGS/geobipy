@@ -121,7 +121,7 @@ def create_skytem(model, output_suffix):
 
     ds.relative_error = np.full((model.x.nCells, 2), fill_value = 0.03)
     ds.additive_error = np.full((model.x.nCells, 2), fill_value = 1e-15)
-    ds.additive_error[:, 1] = 1e-13
+    ds.additive_error[:, 1] = 1e-14
 
     dp = ds.datapoint(0)
 
@@ -260,7 +260,7 @@ if __name__ == '__main__':
     for k in keys:
         wedge_model = create_model(k)
 
-        create_resolve(wedge_model, k)
-        # create_skytem(wedge_model, k)
+        # create_resolve(wedge_model, k)
+        create_skytem(wedge_model, k)
         # create_aerotem(wedge_model, k)
         # create_tempest(wedge_model, k)
