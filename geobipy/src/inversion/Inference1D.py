@@ -380,7 +380,7 @@ class Inference1D(myObject):
             self.model = perturbed_model
             self.datapoint = perturbed_datapoint
             # Reset the sensitivity locally to the newly accepted model
-            # self.datapoint.sensitivity(self.model, modelChanged=False)
+            self.datapoint.sensitivity(self.model, modelChanged=False)
 
     def infer(self, hdf_file_handle):
         """ Markov Chain Monte Carlo approach for inversion of geophysical data
@@ -469,14 +469,23 @@ class Inference1D(myObject):
                 self.datapoint.reset_posteriors()
 
         if (self.posterior > self.best_posterior):
+
+            # print(np.abs(self.best_posterior - self.posterior))
+            # print(np.abs(self.best_posterior - self.posterior) / self.best_posterior)
+
             self.best_iteration = self.iteration
             self.best_model = deepcopy(self.model)
             self.best_datapoint = deepcopy(self.datapoint)
             self.best_posterior = self.posterior
 
+        if ((self.iteration > 0) and (np.mod(self.iteration, self.update_plot_every) == 0)):
+            acceptance_percent = 100.0 * np.float64(self.accepted) / np.float64(self.update_plot_every)
+            self.acceptance_rate[np.int32(self.iteration / self.update_plot_every)-1] = acceptance_percent
+            self.accepted = 0
+
         if (np.mod(self.iteration, self.update_plot_every) == 0):
             time_per_model = self.clk.lap() / self.update_plot_every
-            tmp = "i=%i, k=%i, %4.3f s/Model, %0.3f s Elapsed\n" % (self.iteration, np.float64(self.model.nCells[0]), time_per_model, self.clk.timeinSeconds())
+            tmp = "i=%i, k=%i, acc=%4.3f, %4.3f s/Model, %0.3f s Elapsed\n" % (self.iteration, np.float64(self.model.nCells[0]), acceptance_percent, time_per_model, self.clk.timeinSeconds())
             if (self.rank == 1):
                 print(tmp, flush=True)
 
@@ -489,11 +498,6 @@ class Inference1D(myObject):
 
         # Update the height posterior
         self.datapoint.update_posteriors()
-
-        if ((self.iteration > 0) and (np.mod(self.iteration, self.update_plot_every) == 0)):
-            acceptance_percent = 100.0 * np.float64(self.accepted) / np.float64(self.update_plot_every)
-            self.acceptance_rate[np.int32(self.iteration / self.update_plot_every)-1] = acceptance_percent
-            self.accepted = 0
 
     def _init_posterior_plots(self, gs=None, **kwargs):
         """ Initialize the plotting region """

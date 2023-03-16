@@ -390,8 +390,8 @@ class Model(myObject):
         remapped_model = self.perturb_structure()
 
         if observation is not None:
-            # if remapped_model.mesh.action[0] != 'none':
-            observation.sensitivity(remapped_model)
+            if remapped_model.mesh.action[0] != 'none':
+                observation.sensitivity(remapped_model)
 
         # Update the local Hessian around the current model.
         # inv(J'Wd'WdJ + Wm'Wm)
@@ -432,13 +432,16 @@ class Model(myObject):
 
     def prior_derivative(self, order):
 
+        # print(self.mesh.cell_weights)
+        # print(self.values.priorDerivative(order=1))
+
         if order == 1:
-            gradient = self.values.priorDerivative(order=1)
+            gradient = np.dot(self.mesh.cell_weights, self.values.prior.deviation(self.values)) + self.values.priorDerivative(order=1)
             if self.gradient.hasPrior:
                 Wz = self.mesh.gradient_operator
                 gradient +=  np.dot(np.dot(Wz.T, Wz), self.values.prior.deviation(self.values))
         elif order == 2:
-            gradient = self.values.priorDerivative(order=2)
+            gradient = self.mesh.cell_weights + self.values.priorDerivative(order=2)
             if self.gradient.hasPrior:
                 Wz = self.mesh.gradient_operator
                 gradient += np.dot(Wz.T, Wz)
