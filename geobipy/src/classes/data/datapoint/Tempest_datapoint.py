@@ -565,5 +565,5 @@ class Tempest_datapoint(TdemDataPoint):
     def fromHdf(cls, grp, **kwargs):
         """ Reads the object from a HDF group """
         self = super(Tempest_datapoint, cls).fromHdf(grp, **kwargs)
-        self.additive_error_multiplier = StatArray.StatArray.fromHdf(grp['additive_error_multiplier'], **kwargs)
+        self._additive_error_multiplier = StatArray.StatArray.fromHdf(grp['additive_error_multiplier'], **kwargs)
         return self
