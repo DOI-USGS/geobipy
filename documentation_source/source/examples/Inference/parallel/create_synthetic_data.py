@@ -97,12 +97,12 @@ def create_resolve(model, output_suffix):
 
     # ds = FdemData.read_csv('data/{}.csv'.format(title), '../../documentation_source/source/examples/supplementary/data/FdemSystem2.stm')
 
-def create_skytem(model, output_suffix):
+def create_skytem(model, output_suffix, system):
     from geobipy import TdemData, CircularLoops
 
-    title = 'skytem_' + output_suffix
+    title = 'skytem_{}_'.format(system) + output_suffix
 
-    ds = TdemData(system=[data_path+'//SkytemHM-SLV.stm', data_path+'//SkytemLM-SLV.stm'])
+    ds = TdemData(system=[data_path+'//SkytemHM_{}.stm'.format(system), data_path+'//SkytemLM_{}.stm'.format(system)])
 
     ds.x = np.arange(model.x.nCells, dtype=np.float64)
     ds.y = np.zeros(model.x.nCells)
@@ -261,6 +261,7 @@ if __name__ == '__main__':
         wedge_model = create_model(k)
 
         # create_resolve(wedge_model, k)
-        create_skytem(wedge_model, k)
+        create_skytem(wedge_model, k, 512)
+        create_skytem(wedge_model, k, 304)
         # create_aerotem(wedge_model, k)
         # create_tempest(wedge_model, k)

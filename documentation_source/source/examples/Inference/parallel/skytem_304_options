@@ -22,7 +22,7 @@ data_directory = "..//..//supplementary//data"
 # Data File Name.
 data_filename = data_directory
 # System File Name.
-system_filename = [join(data_directory,'SkytemHM-SLV.stm'), join(data_directory,'SkytemLM-SLV.stm')]
+system_filename = [join(data_directory,'SkytemHM_304.stm'), join(data_directory,'SkytemLM_304.stm')]
 
 # Define the data type to invert
 data_type = TdemData
@@ -79,11 +79,11 @@ minimum_depth = 1.0
 maximum_depth = 550.0
 # Minimum layer thickness.
 # If minimumThickness: None, it will be autocalculated.
-minimum_thickness = 5.0
+minimum_thickness = None
 
 # Data prior details
 # ------------------
-# The data priors are imposed on three different aspects of the data.
+# The data priors are impose0d on three different aspects of the data.
 # The relative and additive error and the elevation of the data point.
 # Data uncertainty priors are used if solveRelativeError or solveAdditiveError are True.
 # If the data file contains columns of the estimated standard deviations, they are used as the initial values
@@ -97,7 +97,7 @@ minimum_thickness = 5.0
 # Assign an initial percentage relative Error
 # If the file contains no standard deviations, this will be used
 # to assign the initial data uncertainties.
-initial_relative_error = [0.03, 0.03]
+initial_relative_error = [0.05, 0.05]
 ## Relative Error Prior Details
 # Minimum Relative Error
 minimum_relative_error = [0.005, 0.005]
@@ -127,7 +127,7 @@ maximum_height_change = 1.0
 # normal distributions with a mean equal to its value in the current model (of the Markov chain)
 # These variances are used when we randomly choose a new value for that given variable.
 # Proposal variance for the relative error
-relative_error_proposal_variance = [2.5e-7, 2.5e-7]
+relative_error_proposal_variance = [2.5e-4, 2.5e-4]
 # Proposal variance for the additive error
 additive_error_proposal_variance = [0.0025, 0.0025]
 # Proposal variance of the elevation

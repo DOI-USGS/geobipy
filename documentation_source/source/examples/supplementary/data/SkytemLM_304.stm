@@ -1,0 +1,82 @@
+System Begin
+	Name = SkyTemLowMoment-DRB
+	Type = Time Domain
+
+	Transmitter Begin
+		NumberOfTurns = 1
+		PeakCurrent   = 1
+		LoopArea      = 1
+		BaseFrequency = 210
+		WaveFormCurrent Begin
+           -8.0000e-04            0
+           -7.7208E-04      5.8419E-02
+           -7.1101E-04      1.5908E-01
+           -5.9490E-04      3.1322E-01
+            0.0000E+00      1.0000E+00
+            2.1748E-07      9.6075E-01
+            3.8711E-07      9.0929E-01
+            5.8870E-07      8.4520E-01
+            2.1662E-06      2.1936E-01
+            2.5342E-06      1.0746E-01
+            2.7982E-06      4.8061E-02
+            3.1102E-06      5.4997E-03
+            3.6222E-06     -2.2318E-02
+            3.9742E-06     -2.4245E-02
+            5.3582E-06      0.0000E+00
+	        1.5810E-03      0.0000E+00
+        WaveFormCurrent End
+		WaveformDigitisingFrequency = 3440640
+	Transmitter End
+
+	Receiver Begin
+		NumberOfWindows = 21
+		WindowWeightingScheme = AreaUnderCurve
+
+		WindowTimes Begin
+		1.1440E-05	1.4010E-05
+		1.4440E-05	1.8010E-05
+		1.8440E-05	2.3010E-05
+		2.3440E-05	2.9010E-05
+		2.9440E-05	3.7010E-05
+		3.7440E-05	4.7010E-05
+		4.7440E-05	6.0010E-05
+		6.0440E-05	7.6010E-05
+		7.6440E-05	9.6010E-05
+		9.6440E-05	1.2101E-04
+		1.2141E-04	1.5201E-04
+		1.5241E-04	1.9201E-04
+		1.9241E-04	2.4301E-04
+		2.4341E-04	3.0601E-04
+		3.0641E-04	3.8701E-04
+		3.8741E-04	4.8801E-04
+		4.8841E-04	6.1501E-04
+		6.1541E-04	7.7601E-04
+		7.7641E-04	9.7801E-04
+		9.7841E-04	1.2330E-03
+		1.2330E-03	1.5550E-03
+		WindowTimes End
+
+		LowPassFilter Begin
+			CutOffFrequency = 300000 204000
+			Order           = 1 2
+		LowPassFilter End
+
+	Receiver End
+
+	ForwardModelling Begin
+        ModellingLoopRadius = 10.433694507453072
+		OutputType = dB/dt
+
+		SaveDiagnosticFiles = no
+
+		XOutputScaling = 0
+		YOutputScaling = 0
+		ZOutputScaling = 1
+		SecondaryFieldNormalisation  =  none
+
+		FrequenciesPerDecade = 5
+		NumberOfAbsiccaInHankelTransformEvaluation = 21
+
+	ForwardModelling End
+
+System End

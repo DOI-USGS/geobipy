@@ -1,0 +1,92 @@
+System Begin
+	Name = SkyTemHighMoment-DRB
+	Type = Time Domain
+
+	Transmitter Begin
+		NumberOfTurns = 1
+		PeakCurrent   = 1
+		LoopArea      = 1
+		BaseFrequency = 30
+		WaveFormCurrent Begin
+            -4.0000E-03      0.0000E+00
+            -3.9899E-03      8.1666E-02
+            -3.9585E-03      8.3317E-01
+            -3.9541E-03      8.9809E-01
+            -3.9521E-03      9.0976E-01
+            -3.9183E-03      9.1115E-01
+            -3.7027E-03      9.2190E-01
+            -2.0600E-03      9.6814E-01
+	         0.0000E+00      1.0000E+00
+             1.9184E-05      5.2404E-01
+             4.0928E-05     -5.0243E-03
+             4.1472E-05     -1.3561E-02
+             4.1984E-05     -1.5761E-02
+             4.4272E-05     -6.0245E-03
+             4.8632E-05      0.0000E+00
+	     1.2667E-02      0.0000E+00
+
+		WaveFormCurrent End
+		WaveformDigitisingFrequency = 491520
+	Transmitter End
+
+	Receiver Begin
+		NumberOfWindows = 30
+		WindowWeightingScheme = AreaUnderCurve
+
+		WindowTimes Begin
+		7.163E-05	7.420E-05
+		7.463E-05	7.820E-05
+		7.863E-05	8.320E-05
+		8.363E-05	8.920E-05
+		8.963E-05	9.720E-05
+		9.763E-05	1.072E-04
+		1.076E-04	1.202E-04
+		1.206E-04	1.362E-04
+		1.366E-04	1.562E-04
+		1.566E-04	1.812E-04
+		1.816E-04	2.122E-04
+		2.126E-04	2.522E-04
+		2.526E-04	3.032E-04
+		3.036E-04	3.662E-04
+		3.666E-04	4.472E-04
+		4.476E-04	5.482E-04
+		5.486E-04	6.752E-04
+		6.756E-04	8.362E-04
+		8.366E-04	1.038E-03
+		1.039E-03	1.293E-03
+		1.293E-03	1.615E-03
+		1.615E-03	2.021E-03
+		2.021E-03	2.532E-03
+		2.532E-03	3.178E-03
+		3.178E-03	3.970E-03
+		3.970E-03	4.938E-03
+		4.938E-03	6.123E-03
+		6.123E-03	7.575E-03
+		7.575E-03	9.351E-03
+		9.351E-03	1.153E-02
+		WindowTimes End
+
+		LowPassFilter Begin
+			CutOffFrequency = 300000  204000
+			Order           = 1  2
+		LowPassFilter End
+
+	Receiver End
+
+	ForwardModelling Begin
+        ModellingLoopRadius = 10.433694507453072
+		OutputType = dB/dt
+
+		SaveDiagnosticFiles = no
+
+		XOutputScaling = 0
+		YOutputScaling = 0
+		ZOutputScaling = 1
+		SecondaryFieldNormalisation  =  none
+
+		FrequenciesPerDecade = 5
+		NumberOfAbsiccaInHankelTransformEvaluation = 21
+
+	ForwardModelling End
+
+System End
