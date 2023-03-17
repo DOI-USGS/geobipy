@@ -80,7 +80,7 @@ def create_resolve(model, output_suffix):
 
     dp = ds.datapoint(0)
 
-    model.mesh.y_edges = 0.5 * model.mesh.y_edges
+    model.mesh.y_edges = model.mesh.y_edges / 4.1
 
     for k in range(model.x.nCells):
         mod = model[k]
