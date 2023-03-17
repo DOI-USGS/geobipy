@@ -431,10 +431,6 @@ class Model(myObject):
         return remapped_model, perturbed_model
 
     def prior_derivative(self, order):
-
-        # print(self.mesh.cell_weights)
-        # print(self.values.priorDerivative(order=1))
-
         if order == 1:
             gradient = np.dot(self.mesh.cell_weights, self.values.prior.deviation(self.values)) + self.values.priorDerivative(order=1)
             if self.gradient.hasPrior:
@@ -689,7 +685,7 @@ class Model(myObject):
         # Compute the gradient according to the perturbed parameters and data residual
         # This is Wm'Wm(sigma - sigma_ref)
         # gradient = self.prior_derivative(order=1)
-        gradient = self.values.priorDerivative(order=1)
+        gradient = self.prior_derivative(order=1)
 
         # todo:
         # replace the par.priorDerivative with appropriate gradient
