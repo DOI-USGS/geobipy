@@ -546,13 +546,12 @@ class TempestData(TdemData):
 
         assert record is not None, ValueError("Need to provide a record index for netcdf files")
 
-        gdf = self._file['linedata']
+        gdf = self._file['survey/tabular/0']
         x = np.float64(gdf['Easting'][record])
         y = np.float64(gdf['Northing'][record])
         z = np.float64(gdf['Tx_Height'][record])
         primary_field = np.asarray([np.float64(gdf['X_PrimaryField'][record]), np.float64(gdf['Z_PrimaryField'][record])])
-        secondary_field = np.hstack([gdf['EMX_NonHPRG'][:, record], gdf['EMZ_NonHPRG'][:, record]])
-        std = 0.1 * secondary_field
+        secondary_field = np.hstack([gdf['EMX_NonHPRG'][record, :], gdf['EMZ_NonHPRG'][record, :]])
 
         transmitter_loop = CircularLoop(x=x, y=y, z=z,
                                         pitch=np.float64(gdf['Tx_Pitch'][record]),
@@ -577,14 +576,10 @@ class TempestData(TdemData):
                 y = y,
                 z = z,
                 elevation = np.float64(gdf['DTM'][record]),
-                # Assign the orientations of the acquisistion loops
                 transmitter_loop = transmitter_loop,
-
                 receiver_loop = receiver_loop,
-                # loopOffset = np.hstack([np.float64(gdf['HSep_GPS'][record]), np.float64(gdf['TSep_GPS'][record]), np.float64(gdf['VSep_GPS'][record])]),
                 primary_field = primary_field,
                 secondary_field = secondary_field,
-                std = std,
                 system = self.system)
 
         return out
@@ -596,7 +591,7 @@ class TempestData(TdemData):
         self.lineNumber, self.fiducial = self._read_variable(['Line', 'Fiducial'])
 
     def _read_variable(self, variable):
-        gdf = self._file['linedata']
+        gdf = self._file['survey/tabular/0']
 
         if isinstance(variable, str):
             variable = [variable]

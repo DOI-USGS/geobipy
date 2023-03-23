@@ -371,10 +371,10 @@ class EmLoop(Point, ABC):
 
         out = super(EmLoop, cls).fromHdf(grp, index)
 
-        out.pitch = StatArray.StatArray.fromHdf(grp['pitch'], index=index)
-        out.roll = StatArray.StatArray.fromHdf(grp['roll'], index=index)
-        out.yaw = StatArray.StatArray.fromHdf(grp['yaw'], index=index)
-        out.moment = StatArray.StatArray.fromHdf(grp['moment'], index=index)
+        out._pitch = StatArray.StatArray.fromHdf(grp['pitch'], index=index)
+        out._roll = StatArray.StatArray.fromHdf(grp['roll'], index=index)
+        out._yaw = StatArray.StatArray.fromHdf(grp['yaw'], index=index)
+        out._moment = StatArray.StatArray.fromHdf(grp['moment'], index=index)
         out._orientation = StatArray.StatArray.fromHdf(grp['orientation'], index=index)
 
         return out

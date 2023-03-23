@@ -40,16 +40,15 @@ class Loop_pair(Point, PointCloud3D):
         except Exception as e:
             raise Exception("{}\n gatdaem1d is not installed. Please see instructions".format(e))
 
-        toRadians = np.pi / 180.0
         # Generate the Brodie Geometry class
-        return Geometry(self.transmitter.z.item(),
-                        toRadians * self.transmitter.roll.item(),
-                        -toRadians * self.transmitter.pitch.item(),
-                        -toRadians * self.transmitter.yaw.item(),
-                        self.x.item(), self.y.item(), self.z.item(),
-                        toRadians * self.receiver.roll.item(),
-                        -toRadians * self.receiver.pitch.item(),
-                        -toRadians * self.receiver.yaw.item())
+        return Geometry( self.transmitter.z.item(),
+                         self.transmitter.roll.item(),
+                        -self.transmitter.pitch.item(),
+                        -self.transmitter.yaw.item(),
+                         self.x.item(), self.y.item(), self.z.item(),
+                         self.receiver.roll.item(),
+                        -self.receiver.pitch.item(),
+                        -self.receiver.yaw.item())
 
     @property
     def transmitter(self):
@@ -221,11 +220,10 @@ class Loop_pair(Point, PointCloud3D):
 
     @classmethod
     def fromHdf(cls, grp, index=None):
-
         self = super(Loop_pair, cls).fromHdf(grp, index)
 
-        self.transmitter = read_item(grp['transmitter'], index=index)
-        self.receiver = read_item(grp['receiver'], index=index)
+        self._transmitter = read_item(grp['transmitter'], index=index)
+        self._receiver = read_item(grp['receiver'], index=index)
         return self
 
     def Isend(self, dest, world):
@@ -236,6 +234,6 @@ class Loop_pair(Point, PointCloud3D):
     @classmethod
     def Irecv(cls, source, world):
         self = super(Loop_pair, cls).Irecv(source, world)
-        self.transmitter = CircularLoop.Irecv(source, world)
-        self.receiver = CircularLoop.Irecv(source, world)
+        self._transmitter = CircularLoop.Irecv(source, world)
+        self._receiver = CircularLoop.Irecv(source, world)
         return self

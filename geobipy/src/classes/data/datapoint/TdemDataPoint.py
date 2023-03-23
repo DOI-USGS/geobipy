@@ -4,7 +4,7 @@ from copy import deepcopy
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
-
+from matplotlib.pyplot import figure, subplot, gcf, gca, sca, cla, plot, margins
 
 from ....classes.core import StatArray
 from ...model.Model import Model
@@ -662,18 +662,19 @@ class TdemDataPoint(EmDataPoint):
 
         """
         if gs is None:
-            gs = plt.figure()
+            gs = figure()
 
         if isinstance(gs, Figure):
             gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
 
         n_rows = 1
-        if any([self.relative_error.hasPosterior or self.additive_error.hasPosterior, self.transmitter.hasPosteriors, self.receiver.hasPosteriors]):
+        if (self.relative_error.hasPosterior & self.additive_error.hasPosterior) or any([self.transmitter.hasPosteriors, self.receiver.hasPosteriors]):
             n_rows = 2
 
         splt = gs.subgridspec(n_rows, 1, wspace=0.3)
 
         n_cols = 1
+        width_ratios = None
         if self.relative_error.hasPosterior or self.additive_error.hasPosterior:
             n_cols = 2
             width_ratios = (1, 2)
@@ -683,7 +684,7 @@ class TdemDataPoint(EmDataPoint):
 
         ax = []
         # Data axis
-        ax.append(plt.subplot(splt_top[-1]))
+        ax.append(subplot(splt_top[-1]))
 
         tmp = []
         if self.relative_error.hasPosterior:
@@ -697,57 +698,127 @@ class TdemDataPoint(EmDataPoint):
             ax.append(tmp)
 
         ## Bottom row of plot
-        n_cols += (self.transmitter.hasPosteriors or self.receiver.hasPosteriors)
+        n_cols = np.sum([self.relative_error.hasPosterior & self.additive_error.hasPosterior, self.transmitter.hasPosteriors, self.loop_pair.hasPosteriors, self.receiver.hasPosteriors])
 
         if n_cols > 0:
-            width_ratios = (1, 2)
-            if (self.relative_error.hasPosterior & self.additive_error.hasPosterior) + self.transmitter.hasPosteriors + self.receiver.hasPosteriors == 3:
-                width_ratios = (1, 2)
+            splt_bottom = splt[1].subgridspec(1, n_cols)
 
-            splt_bottom = splt[1].subgridspec(1, n_cols, width_ratios=width_ratios)
-        else:
-            splt_bottom = []
+            i = 0
+            # Additive Error axes
+            if self.relative_error.hasPosterior & self.additive_error.hasPosterior:
+                tmp = []
+                tmp = self.additive_error._init_posterior_plots(splt_bottom[i])
+                if tmp is not None:
+                    i += 1
+                    for j in range(self.nSystems):
+                        others = np.s_[(j * self.n_components):(j * self.n_components)+self.n_components]
+                        tmp[1].get_shared_y_axes().join(tmp[1], *tmp[others])
+                ax.append(tmp)
 
-        i = 0
-        # Additive Error axes
-        if self.relative_error.hasPosterior & self.additive_error.hasPosterior:
-            tmp = self.additive_error._init_posterior_plots(splt_bottom[i])
-
-            if tmp is not None:
-                i += 1
-            #     for j in range(self.nSystems):
-            #         others = np.s_[(j * self.n_components):(j * self.n_components)+self.n_components]
-            #         tmp[1].get_shared_y_axes().join(tmp[1], *tmp[others])
-            ax.append(tmp)
-
-        # Loop pair
-        tmp = []
-        if self.transmitter.hasPosteriors or self.receiver.hasPosteriors:
-            tmp = self.loop_pair._init_posterior_plots(splt_bottom[i])
-        ax.append(tmp)
+            # Loop pair
+            ax.append(self.loop_pair._init_posterior_plots(splt_bottom[i:]))
 
         return ax
+
+    # def _init_posterior_plots(self, gs=None):
+    #     """Initialize axes for posterior plots
+
+    #     Parameters
+    #     ----------
+    #     gs : matplotlib.gridspec.Gridspec
+    #         Gridspec to split
+
+    #     """
+    #     if gs is None:
+    #         gs = plt.figure()
+
+    #     if isinstance(gs, Figure):
+    #         gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
+
+    #     n_rows = 1
+    #     if any([self.relative_error.hasPosterior or self.additive_error.hasPosterior, self.transmitter.hasPosteriors, self.receiver.hasPosteriors]):
+    #         n_rows = 2
+
+    #     splt = gs.subgridspec(n_rows, 1, wspace=0.3)
+
+    #     n_cols = 1
+    #     if self.relative_error.hasPosterior or self.additive_error.hasPosterior:
+    #         n_cols = 2
+    #         width_ratios = (1, 2)
+
+    #     ## Top row of plot
+    #     splt_top = splt[0].subgridspec(1, n_cols, width_ratios=width_ratios)
+
+    #     ax = []
+    #     # Data axis
+    #     ax.append(plt.subplot(splt_top[-1]))
+
+    #     tmp = []
+    #     if self.relative_error.hasPosterior:
+    #         # Relative error axes
+    #         tmp = self.relative_error._init_posterior_plots(splt_top[0])
+    #     ax.append(tmp)
+
+    #     if not self.relative_error.hasPosterior & self.additive_error.hasPosterior:
+
+    #         tmp = self.additive_error._init_posterior_plots(splt_top[0])
+    #         ax.append(tmp)
+
+    #     ## Bottom row of plot
+    #     n_cols += (self.transmitter.hasPosteriors or self.receiver.hasPosteriors)
+
+    #     if n_cols > 0:
+    #         width_ratios = (1, 2)
+    #         if (self.relative_error.hasPosterior & self.additive_error.hasPosterior) + self.transmitter.hasPosteriors + self.receiver.hasPosteriors == 3:
+    #             width_ratios = (1, 2)
+
+    #         splt_bottom = splt[1].subgridspec(1, n_cols, width_ratios=width_ratios)
+    #     else:
+    #         splt_bottom = []
+
+    #     i = 0
+    #     # Additive Error axes
+    #     if self.relative_error.hasPosterior & self.additive_error.hasPosterior:
+    #         tmp = self.additive_error._init_posterior_plots(splt_bottom[i])
+
+    #         if tmp is not None:
+    #             i += 1
+    #         #     for j in range(self.nSystems):
+    #         #         others = np.s_[(j * self.n_components):(j * self.n_components)+self.n_components]
+    #         #         tmp[1].get_shared_y_axes().join(tmp[1], *tmp[others])
+    #         ax.append(tmp)
+
+    #     # Loop pair
+    #     tmp = []
+    #     if self.transmitter.hasPosteriors or self.receiver.hasPosteriors:
+    #         tmp = self.loop_pair._init_posterior_plots(splt_bottom[i])
+    #     ax.append(tmp)
+
+    #     return ax
 
     def plot_posteriors(self, axes=None, **kwargs):
 
         if axes is None:
-            axes = kwargs.pop('fig', plt.gcf())
+            axes = kwargs.pop('fig', gcf())
 
         if not isinstance(axes, list):
             axes = self._init_posterior_plots(axes)
 
-        assert len(axes) == 4, ValueError("length {} axes must have length 4 list for the posteriors. self.init_posterior_plots can generate them".format(len(axes)))
+        assert len(axes) == 4, ValueError("Must have length 4 list of axes for the posteriors. self.init_posterior_plots can generate them")
 
         # point_kwargs = kwargs.pop('point_kwargs', {})
         data_kwargs = kwargs.pop('data_kwargs', {})
         rel_error_kwargs = kwargs.pop('rel_error_kwargs', {})
         add_error_kwargs = kwargs.pop('add_error_kwargs', {})
 
-        overlay = kwargs.get('overlay')
+        overlay = kwargs.get('overlay', None)
         if not overlay is None:
                 # point_kwargs['overlay'] = overlay
                 rel_error_kwargs['overlay'] = overlay.relative_error
+                # add_error_kwargs['overlay'] = [overlay.additive_error[i] for i in self.component_indices]
+                # add_error_kwargs['axis'] = 1
                 add_error_kwargs['overlay'] = overlay.additive_error
+
 
         axes[0].clear()
         self.predictedData.plot_posteriors(ax = axes[0], colorbar=False, **data_kwargs)
@@ -758,7 +829,7 @@ class TdemDataPoint(EmDataPoint):
 
         self.relative_error.plot_posteriors(ax=axes[1], **rel_error_kwargs)
 
-        add_error_kwargs['colorbar'] = False
+        # add_error_kwargs['colorbar'] = False
         self.additive_error.plot_posteriors(ax=axes[2], **add_error_kwargs)
 
         self.loop_pair.plot_posteriors(axes = axes[3], **kwargs)
