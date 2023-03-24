@@ -829,7 +829,7 @@ class TdemDataPoint(EmDataPoint):
 
         self.relative_error.plot_posteriors(ax=axes[1], **rel_error_kwargs)
 
-        # add_error_kwargs['colorbar'] = False
+        add_error_kwargs['colorbar'] = False
         self.additive_error.plot_posteriors(ax=axes[2], **add_error_kwargs)
 
         self.loop_pair.plot_posteriors(axes = axes[3], **kwargs)

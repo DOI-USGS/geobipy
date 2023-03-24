@@ -115,13 +115,13 @@ class Loop_pair(Point, PointCloud3D):
 
     def set_posteriors(self):
         super().set_posteriors()
-        self.receiver.set_posteriors()
         self.transmitter.set_posteriors()
+        self.receiver.set_posteriors()
 
     def reset_posteriors(self):
         super().reset_posteriors()
-        self.receiver.reset_posteriors()
         self.transmitter.reset_posteriors()
+        self.receiver.reset_posteriors()
 
     @property
     def summary(self):
