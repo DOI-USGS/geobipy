@@ -97,6 +97,10 @@ class DataPoint(Point):
         return out
 
     @property
+    def line_number(self):
+        return self._lineNumber
+
+    @property
     def additive_error(self):
         return self._additive_error
 
