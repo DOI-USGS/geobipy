@@ -320,7 +320,11 @@ class Inference1D(myObject):
         if self.kwargs.get('ignore_likelihood', False):
             observation = None
 
-        remapped_model, perturbed_model = self.model.perturb(observation)
+        try:
+            remapped_model, perturbed_model = self.model.perturb(observation)
+        except:
+            print('singularity line {} fid {}'.format(observation.line_number, observation.fiducial))
+            return True
 
         # Propose a new data point, using assigned proposal distributions
         perturbed_datapoint.perturb()
@@ -382,6 +386,8 @@ class Inference1D(myObject):
             # Reset the sensitivity locally to the newly accepted model
             self.datapoint.sensitivity(self.model, modelChanged=False)
 
+        return False
+
     def infer(self, hdf_file_handle):
         """ Markov Chain Monte Carlo approach for inversion of geophysical data
         userParameters: User input parameters object
@@ -400,7 +406,7 @@ class Inference1D(myObject):
         failed = False
         while (Go):
             # Accept or reject the new model
-            self.accept_reject()
+            failed = self.accept_reject()
 
             self.update()
 
@@ -410,14 +416,12 @@ class Inference1D(myObject):
                                      title="Fiducial {}".format(self.datapoint.fiducial),
                                      increment=self.kwargs['update_plot_every'])
 
-            Go = self.iteration <= self.n_markov_chains + self.burned_in_iteration
+            Go = not failed and (self.iteration <= self.n_markov_chains + self.burned_in_iteration)
 
-            if not self.burned_in:
+            if (not failed) and (not self.burned_in):
                 Go = self.iteration < self.n_markov_chains
                 if not Go:
                     failed = True
-
-
 
         self.clk.stop()
         # self.invTime = np.float64(self.clk.timeinSeconds())
@@ -503,7 +507,6 @@ class Inference1D(myObject):
         """ Initialize the plotting region """
         # Setup the figure region. The figure window is split into a 4x3
         # region. Columns are able to span multiple rows
-
         fig  = kwargs.get('fig', plt.gcf())
         if gs is None:
             fig = kwargs.pop('fig', plt.figure(facecolor='white', figsize=(10, 7)))
