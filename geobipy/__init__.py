@@ -86,7 +86,7 @@ def checkCommandArguments():
     Parser.add_argument('--fiducial', dest='fiducial', type=float, default=None, help='Invert this fiducial only. Only used in serial mode.')
     Parser.add_argument('--line', dest='line_number', type=float, default=None, help='Invert the fiducial on this line. Only used in serial mode.')
     Parser.add_argument('--verbose', dest='verbose', default=False, help='Throw warnings as errors.')
-    Parser.add_argument('--mpi', dest='mpi', default=False, help='Run geobipy with MPI libraries.')
+    Parser.add_argument('--mpi', dest='mpi', action='store_true', help='Run geobipy with MPI libraries.')
 
     args = Parser.parse_args()
 

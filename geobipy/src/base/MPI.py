@@ -1,7 +1,8 @@
 """ Module containing custom MPI functions """
 from numpy.linalg import norm
 from numpy import abs, arange, asarray, cumsum, empty, float32, float64, full
-from numpy import int, int32, int64, ndim, prod, reshape, unravel_index, s_, size
+from numpy import int, int32, int64, prod, reshape, unravel_index, s_, size
+from numpy import ndim as npndim
 from numpy.random import RandomState
 import sys
 import numpy as np
@@ -351,7 +352,7 @@ def Isend(self, dest, world, dtype=None, ndim=None, shape=None):
 
     # Broadcast the number of dimensions
     if ndim is None:
-        ndim = Isend_1int(ndim(self), dest=dest, world=world)
+        ndim = Isend_1int(npndim(self), dest=dest, world=world)
 
     if (ndim == 0):  # For a single number
         this = full(1, self, dtype=dtype)  # Initialize on each worker
@@ -561,7 +562,7 @@ def Bcast(self, world, root=0, dtype=None, ndim=None, shape=None):
 
     # Broadcast the number of dimensions
     if ndim is None:
-        ndim = Bcast_1int(ndim(self), world, root=root)
+        ndim = Bcast_1int(npndim(self), world, root=root)
 
     if (ndim == 0):  # For a single number
         this = empty(1, dtype=dtype)  # Initialize on each worker
@@ -814,7 +815,7 @@ def Scatterv_numpy(self, starts, chunks, dtype, world, axis=0, root=0):
 
     """
     # Broadcast the number of dimensions
-    ndim = Bcast_1int(ndim(self), world, root=root)
+    ndim = Bcast_1int(npndim(self), world, root=root)
 
     if (ndim == 1):  # For a 1D Array
         this = empty(chunks[world.rank], dtype=dtype)
