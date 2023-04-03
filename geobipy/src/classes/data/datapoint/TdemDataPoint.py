@@ -346,18 +346,20 @@ class TdemDataPoint(EmDataPoint):
 
         # For each system assign error levels using the user inputs
         for i in range(self.nSystems):
+            off_times = self.off_time(i)
             for j in range(self.n_components):
                 ic = self._component_indices(j, i)
                 relative_error = self.relative_error[(i*self.n_components)+j] * self.secondary_field[ic]
-                variance = relative_error**2.0 + self.additive_error[i]**2.0
-                self._std[ic] = np.sqrt(variance)
+                additive_error = exp(log(self.additive_error[i]) - 0.5 * (log(off_times) - log(1e-3)))
+                variance = relative_error**2.0 + additive_error**2.0
+                self._std[ic] = sqrt(variance)
 
             # # Compute the relative error
             # rErr = self.relative_error[i] * self.secondary_field[iSys]
-            # # aErr = np.exp(np.log(self.additive_error[i]) - 0.5 * np.log(self.off_time(i)) + t0)
-            # # self._std[iSys] = np.sqrt((rErr**2.0) + (aErr[i]**2.0))
+            # # aErr = exp(log(self.additive_error[i]) - 0.5 * log(self.off_time(i)) + t0)
+            # # self._std[iSys] = sqrt((rErr**2.0) + (aErr[i]**2.0))
 
-            # self._std[iSys] = np.sqrt((rErr**2.0) + (self.additive_error[i]**2.0))
+            # self._std[iSys] = sqrt((rErr**2.0) + (self.additive_error[i]**2.0))
 
 
         # Update the variance of the predicted data prior
